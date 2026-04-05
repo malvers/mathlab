@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steigungs-Labor: m & n verstehen</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #fff; }
+        canvas { display: block; cursor: crosshair; }
+        #controls {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px; border-radius: 8px; border: 2px solid #ccc;
+            pointer-events: none; font-size: 14px; line-height: 1.6;
+            display: none; /* Standardmäßig ausgeblendet */
+            z-index: 100;
+        }
+        #help-hint {
+            position: absolute; bottom: 10px; left: 10px;
+            color: #888; font-size: 12px; font-style: italic;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <b style="font-size: 16px;">Steuerung:</b><br>
+    • Gerade ziehen: <b style="color: #B40000;">n</b> ändern<br>
+    • Goldener Punkt: <b style="color: #0064FA;">m</b> ändern<br>
+    • Pfeiltasten: Dreieck bewegen/Größe<br>
+    • Taste 'H': Diese Hilfe an/aus
+</div>
+
+<div id="help-hint">Drücke 'H' für Hilfe</div>
+
+<canvas id="plotCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('plotCanvas');
+    const ctx = canvas.getContext('2d');
+    const controls = document.getElementById('controls');
+
+    let m = 1.0, n = 2.0;
+    let triX = 1.0, triSize = 2.0;
+    let scale = 50.0;
+    let dragMode = 0; // 1: n, 2: m
+    let showHelp = false; // Hilfe-Status
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+    }
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('load', resize);
+
+    function toMath(px, py) {
+        return {
+            x: (px - canvas.width / 2) / scale,
+            y: (canvas.height / 2 - py) / scale
+        };
+    }
+
+    function toScreen(x, y) {
+        return {
+            px: canvas.width / 2 + x * scale,
+            py: canvas.height / 2 - y * scale
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const math = toMath(e.clientX, e.clientY);
+        const handle = toScreen(5.0, m * 5.0 + n);
+        const dist = Math.sqrt((e.clientX - handle.px)**2 + (e.clientY - handle.py)**2);
+
+        if (dist < 15) {
+            dragMode = 2;
+        } else {
+            const lineY = m * math.x + n;
+            if (Math.abs(math.y - lineY) < 0.4) dragMode = 1;
+        }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (dragMode === 0) return;
+        const math = toMath(e.clientX, e.clientY);
+        if (dragMode === 1) n = math.y - m * math.x;
+        else if (dragMode === 2) m = (math.y - n) / 5.0;
+        draw();
+    });
+
+    window.addEventListener('mouseup', () => dragMode = 0);
+
+    window.addEventListener('keydown', (e) => {
+        // H-Taste zum Toggeln der Hilfe
+        if (e.key.toLowerCase() === 'h') {
+            showHelp = !showHelp;
+            controls.style.display = showHelp ? 'block' : 'none';
+        }
+
+        // Pfeiltasten
+        if (e.key === "ArrowUp") triSize += 0.1;
+        if (e.key === "ArrowDown" && triSize > 0.2) triSize -= 0.1;
+        if (e.key === "ArrowLeft") triX -= 0.1;
+        if (e.key === "ArrowRight") triX += 0.1;
+        draw();
+    });
+
+    function drawRoundedBox(x, y, bw, bh, text, color, label = "", subscript = false) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = color; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 12); ctx.fill(); ctx.stroke();
+
+        ctx.font = "bold 20px sans-serif";
+        ctx.fillStyle = color;
+        let curX = x + 15;
+        if (label) {
+            ctx.fillText(label, curX, y + 32);
+            if (subscript) {
+                ctx.font = "bold 12px sans-serif"; ctx.fillText("0", curX + 12, y + 37);
+                curX += 22;
+            } else { curX += 15; }
+        }
+        ctx.font = "bold 20px sans-serif"; ctx.fillText(text, curX, y + 32);
+    }
+
+    function drawFunctionBox(x, y, bw, bh, m, n) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 12); ctx.fill(); ctx.stroke();
+
+        ctx.font = "bold 22px sans-serif";
+        let curX = x + 25; ctx.fillStyle = "#000"; ctx.fillText("y = ", curX, y + 33); curX += 40;
+        ctx.fillStyle = "#0064FA"; ctx.fillText(m.toFixed(2), curX, y + 33); curX += ctx.measureText(m.toFixed(2)).width + 5;
+        ctx.fillStyle = "#000";
+        const sign = n >= 0 ? "+" : "-";
+        ctx.fillText("x " + sign + " ", curX, y + 33); curX += ctx.measureText("x " + sign + " ").width;
+        ctx.fillStyle = "#B40000"; ctx.fillText(Math.abs(n).toFixed(2), curX, y + 33);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const midX = canvas.width / 2; const midY = canvas.height / 2;
+
+        // Gitter
+        ctx.strokeStyle = "#ebebeb"; ctx.lineWidth = 1;
+        for (let i = -30; i <= 30; i++) {
+            ctx.beginPath(); ctx.moveTo(0, midY - i * scale); ctx.lineTo(canvas.width, midY - i * scale); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(midX + i * scale, 0); ctx.lineTo(midX + i * scale, canvas.height); ctx.stroke();
+        }
+
+        // Achsen
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(canvas.width, midY); ctx.moveTo(midX, 0); ctx.lineTo(midX, canvas.height); ctx.stroke();
+
+        // Gerade
+        const xL = -midX / scale, xR = midX / scale;
+        const pL = toScreen(xL, m * xL + n); const pR = toScreen(xR, m * xR + n);
+        ctx.strokeStyle = "#0064FA"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(pL.px, pL.py); ctx.lineTo(pR.px, pR.py); ctx.stroke();
+
+        // Steigungsdreieck
+        const pA = toScreen(triX, m * triX + n); const pB = toScreen(triX + triSize, m * triX + n); const pC = toScreen(triX + triSize, m * (triX + triSize) + n);
+        ctx.fillStyle = "rgba(255, 120, 0, 0.2)"; ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.closePath(); ctx.fill();
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = "#FF6400";
+        ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.stroke(); ctx.setLineDash([]);
+
+        ctx.font = "bold 14px sans-serif"; ctx.fillStyle = "#FF6400";
+        ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.px + (pB.px - pA.px)/2 - 25, pA.py + 20);
+        ctx.fillText(`Δy = ${(m * triSize).toFixed(1)}`, pB.px + 10, pA.py + (pC.py - pA.py)/2);
+
+        // n-Label
+        const nPix = toScreen(0, n);
+        ctx.fillStyle = "#B40000"; ctx.beginPath(); ctx.arc(nPix.px, nPix.py, 5, 0, Math.PI*2); ctx.fill();
+        ctx.font = "bold 16px sans-serif"; ctx.shadowBlur = 4; ctx.shadowColor = "white";
+        ctx.fillText(`n = ${n.toFixed(2)}`, nPix.px - 70, nPix.py - 10); ctx.shadowBlur = 0;
+
+        // Nullstelle
+        const x0 = Math.abs(m) > 0.001 ? -n/m : null;
+        if (x0 !== null) {
+            const x0Pix = toScreen(x0, 0);
+            ctx.fillStyle = "#008200"; ctx.beginPath(); ctx.arc(x0Pix.px, x0Pix.py, 5, 0, Math.PI*2); ctx.fill();
+            ctx.fillText(`x₀ = ${x0.toFixed(2)}`, x0Pix.px - 25, x0Pix.py + 25);
+        }
+
+        // Griff m
+        const mHandle = toScreen(5.0, m * 5.0 + n);
+        ctx.fillStyle = "#DAA520"; ctx.beginPath(); ctx.arc(mHandle.px, mHandle.py, 8, 0, Math.PI*2); ctx.fill();
+
+        // UI Boxes
+        drawRoundedBox(50, 50, 160, 50, " = " + m.toFixed(2), "#0064FA", "m");
+        drawRoundedBox(220, 50, 160, 50, " = " + n.toFixed(2), "#B40000", "n");
+        drawRoundedBox(390, 50, 170, 50, " = " + (x0 ? x0.toFixed(2) : "---"), "#008200", "x", true);
+        drawFunctionBox(575, 50, 320, 50, m, n);
+    }
+</script>
+
+</body>
+</html>

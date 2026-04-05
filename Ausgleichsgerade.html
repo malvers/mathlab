@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Statistik-Labor</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #d63031;
+            --bg: #f0f2f5;
+            --glass: rgba(45, 52, 54, 0.9);
+        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* UI Elemente */
+        #ui-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .glass-panel {
+            background: var(--glass);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            pointer-events: auto;
+        }
+        .r-box {
+            background: var(--accent);
+            text-align: center;
+            min-width: 180px;
+        }
+        .r-box h2 { margin: 0; font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
+        .r-val { font-family: 'Courier New', monospace; font-size: 2.5rem; font-weight: bold; }
+
+        .stats-list { font-family: 'Courier New', monospace; font-size: 1.1rem; line-height: 1.4; }
+        .stats-list span { color: #81ecec; }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+        button.secondary { background: #b2bec3; color: #2d3436; }
+        button.help-btn { background: #fdcb6e; color: #2d3436; }
+
+        /* Hilfe Overlay */
+        #help-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            display: none; /* Initial versteckt */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px);
+        }
+        .help-content {
+            max-width: 500px;
+            text-align: left;
+            background: #2d3436;
+            padding: 30px;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+        }
+        .help-item { display: flex; align-items: center; margin-bottom: 20px; gap: 15px; }
+        .help-icon { font-size: 2rem; min-width: 45px; text-align: center; }
+        .help-text b { color: #81ecec; }
+
+        canvas { display: block; background: white; cursor: crosshair; }
+    </style>
+</head>
+<body>
+
+<div id="ui-top">
+    <div class="glass-panel r-box">
+        <h2>Korrelation (r)</h2>
+        <div id="r-display" class="r-val">+0.0000</div>
+    </div>
+    <div class="glass-panel">
+        <div class="stats-list">
+            m  = <span id="m-val">0.0000</span><br>
+            n  = <span id="n-val">0.0000</span><br>
+            SD = <span id="sd-val">0.0000</span>
+        </div>
+    </div>
+</div>
+
+<div id="controls">
+    <button onclick="toggleHelp()" class="help-btn"> Hilfe ? </button>
+    <button onclick="generateChaos()">Chaos (R)</button>
+    <button onclick="toggleSD()" class="secondary">SD</button>
+    <button onclick="clearPoints()" class="secondary">Reset</button>
+    <button onclick="location.href='index.html'" style="background:#2d3436">Menü</button>
+</div>
+
+<div id="help-overlay" onclick="toggleHelp()">
+    <div class="help-content" onclick="event.stopPropagation()">
+        <h2 style="margin-top:0; color: var(--primary);">Anleitung</h2>
+
+        <div class="help-item">
+            <div class="help-icon">👆</div>
+            <div class="help-text"><b>Tippen:</b> Erstellt einen neuen Datenpunkt auf dem Feld.</div>
+        </div>
+
+        <div class="help-item">
+            <div class="help-icon">🖐️</div>
+            <div class="help-text"><b>Ziehen:</b> Bewege Punkte, um zu sehen, wie sich die <b>Regressionsgerade</b> und <b>r</b> verändern.</div>
+        </div>
+
+        <div class="help-item">
+            <div class="help-icon">📉</div>
+            <div class="help-text"><b>SD-Schatten:</b> Der blaue Bereich zeigt die Standardabweichung. Je enger die Punkte an der Linie, desto kleiner die SD.</div>
+        </div>
+
+        <div class="help-item">
+            <div class="help-icon">🎯</div>
+            <div class="help-text"><b>Ziel:</b> Versuche durch Verschieben der Punkte genau <b>r = 1.0</b> oder <b>r = 0.0</b> zu erreichen!</div>
+        </div>
+
+        <button onclick="toggleHelp()" style="width: 100%; margin-top: 10px; font-size: 1.2rem; padding: 15px;">Alles klar!</button>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let points = [];
+    let selectedPoint = null;
+    let showSD = true;
+
+    const OFF_X = 80;
+    const OFF_Y = 100;
+    const SCALE = 45;
+
+    let r = 0, m = 0, n_val = 0, sd_res = 0;
+
+    function init() {
+        resize();
+        generateChaos();
+        window.addEventListener('resize', resize);
+
+        canvas.addEventListener('mousedown', startAction);
+        window.addEventListener('mousemove', moveAction);
+        window.addEventListener('mouseup', endAction);
+
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            startAction(touch);
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            moveAction(touch);
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', endAction);
+    }
+
+    function toggleHelp() {
+        const overlay = document.getElementById('help-overlay');
+        overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+    }
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left - OFF_X) / SCALE;
+        const y = (canvas.height - OFF_Y - (e.clientY - rect.top)) / SCALE;
+        return { x, y };
+    }
+
+    function startAction(e) {
+        const { x, y } = getCoords(e);
+        selectedPoint = null;
+
+        for (let p of points) {
+            const dist = Math.sqrt((p.x - x)**2 + (p.y - y)**2);
+            if (dist < 0.6) {
+                selectedPoint = p;
+                break;
+            }
+        }
+
+        if (!selectedPoint) {
+            selectedPoint = { x, y };
+            points.push(selectedPoint);
+        }
+        update();
+    }
+
+    function moveAction(e) {
+        if (selectedPoint) {
+            const { x, y } = getCoords(e);
+            selectedPoint.x = x;
+            selectedPoint.y = y;
+            update();
+        }
+    }
+
+    function endAction() { selectedPoint = null; }
+
+    function clearPoints() { points = []; update(); }
+
+    function generateChaos() {
+        points = [];
+        const count = 25;
+        const baseM = (Math.random() - 0.5) * 1.5;
+        const baseN = 5 + Math.random() * 5;
+        for (let i = 0; i < count; i++) {
+            const x = Math.random() * (canvas.width / SCALE - 3);
+            const y = baseM * x + baseN + (normalRandom() * 1.5);
+            points.push({ x, y: Math.max(0, y) });
+        }
+        update();
+    }
+
+    function normalRandom() {
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random();
+        while(v === 0) v = Math.random();
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function toggleSD() { showSD = !showSD; draw(); }
+
+    function update() {
+        calculateStats();
+        draw();
+        document.getElementById('r-display').innerText = (r >= 0 ? "+" : "") + r.toFixed(4);
+        document.getElementById('m-val').innerText = m.toFixed(4);
+        document.getElementById('n-val').innerText = n_val.toFixed(4);
+        document.getElementById('sd-val').innerText = sd_res.toFixed(4);
+    }
+
+    function calculateStats() {
+        const n = points.length;
+        if (n < 2) { r = m = n_val = sd_res = 0; return; }
+        let sX=0, sY=0, sXY=0, sX2=0, sY2=0;
+        for (let p of points) {
+            sX+=p.x; sY+=p.y; sXY+=p.x*p.y;
+            sX2+=p.x*p.x; sY2+=p.y*p.y;
+        }
+        const numR = n * sXY - sX * sY;
+        const denR = Math.sqrt((n * sX2 - sX * sX) * (n * sY2 - sY * sY));
+        r = denR !== 0 ? numR / denR : 0;
+        const denM = (n * sX2 - sX * sX);
+        m = denM !== 0 ? numR / denM : 0;
+        n_val = (sY / n) - m * (sX / n);
+        let sumSqRes = 0;
+        for (let p of points) sumSqRes += Math.pow(p.y - (m * p.x + n_val), 2);
+        sd_res = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const w = canvas.width, h = canvas.height;
+
+        ctx.strokeStyle = "#f0f0f0";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += SCALE) {
+            ctx.beginPath(); ctx.moveTo(OFF_X + x, 0); ctx.lineTo(OFF_X + x, h - OFF_Y); ctx.stroke();
+        }
+        for (let y = 0; y < h; y += SCALE) {
+            ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y - y); ctx.lineTo(w, h - OFF_Y - y); ctx.stroke();
+        }
+
+        ctx.strokeStyle = "#2d3436";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(w - 20, h - OFF_Y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(OFF_X, 20); ctx.stroke();
+
+        if (showSD && points.length >= 3 && sd_res > 0) {
+            const xMax = (w - OFF_X) / SCALE;
+            ctx.fillStyle = "rgba(108, 92, 231, 0.15)";
+            ctx.beginPath();
+            ctx.moveTo(OFF_X, h - OFF_Y - (m * 0 + n_val + sd_res) * SCALE);
+            ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val + sd_res) * SCALE);
+            ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val - sd_res) * SCALE);
+            ctx.lineTo(OFF_X, h - OFF_Y - (m * 0 + n_val - sd_res) * SCALE);
+            ctx.closePath(); ctx.fill();
+        }
+
+        if (points.length >= 2) {
+            const xMax = (w - OFF_X) / SCALE;
+            ctx.strokeStyle = "#d63031";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(OFF_X, h - OFF_Y - (n_val) * SCALE);
+            ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val) * SCALE);
+            ctx.stroke();
+        }
+
+        points.forEach(p => {
+            const px = OFF_X + p.x * SCALE;
+            const py = h - OFF_Y - p.y * SCALE;
+            ctx.fillStyle = (p === selectedPoint) ? "#ff7675" : "#0984e3";
+            ctx.beginPath(); ctx.arc(px, py, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
