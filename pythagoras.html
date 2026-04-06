@@ -2,112 +2,181 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>docalvers | Pythagoras-Labor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>docalvers | Der allgemeine Pythagoras</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 10px; cursor: crosshair; margin-top: 20px; }
-        #ui { padding: 20px; text-align: center; background: white; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .info { font-size: 1.8rem; margin: 15px; color: #2d3436; font-weight: bold; }
-        .formula-box { background: #f8f9fa; padding: 15px; border-radius: 10px; display: inline-block; border: 1px solid #ddd; }
-        button { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; background: #6c5ce7; color: white; font-weight: bold; }
+        :root {
+            --primary: #6c5ce7;
+            --kathete-a: #d63031;
+            --kathete-b: #0984e3;
+            --bg: #f0f2f5;
+        }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        #ui { padding: 25px; text-align: center; background: white; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        canvas { background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 15px; cursor: crosshair; margin: 30px 20px; }
+        .formula-container { display: flex; justify-content: center; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .formula-box { background: #f8f9fa; padding: 15px; border-radius: 12px; border: 2px solid #eee; min-width: 260px; }
+        .check-box { background: #f0f0ff; border: 2px solid var(--primary); }
+        .info { font-size: 1.2rem; color: #2d3436; font-weight: 700; line-height: 1.5; }
+        .val-a { color: var(--kathete-a); }
+        .val-b { color: var(--kathete-b); }
+        .val-c { color: var(--primary); }
+        .controls { margin: 15px; }
+        select, button { padding: 10px 20px; font-size: 1rem; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-weight: bold; }
+        button { background: var(--primary); color: white; border: none; margin-left: 10px; }
     </style>
 </head>
 <body>
+
 <div id="ui">
-    <h2>📐 Satz des Pythagoras</h2>
-    <div class="formula-box">
-        <div id="formula" class="info">a² + b² = c²</div>
+    <h2>📐 Allgemeiner Satz des Pythagoras</h2>
+    <div class="controls">
+        Anbaufiguren:
+        <select id="mode" onchange="draw()">
+            <option value="quadrat">Quadrate</option>
+            <option value="halbkreis">Halbkreise</option>
+            <option value="dreieck">Gleichseitige Dreiecke</option>
+            <option value="stern">Crazy Star 🌟</option>
+            <option value="pacman">Pac-Man Mode 🕹️</option>
+        </select>
+        <button onclick="location.href='index.html'">Menü</button>
     </div>
-    <br><br>
-    <button onclick="location.href='index.html'">Zurück zum Labor</button>
+    <div class="formula-container">
+        <div class="formula-box">
+            <div class="info"><span class="val-a">A₁</span> + <span class="val-b">A₂</span> = <span class="val-c">A₃</span></div>
+            <div id="result-text" class="info">...</div>
+        </div>
+        <div class="formula-box check-box">
+            <div class="info" style="color: var(--primary)">Check: Große Fläche A₃</div>
+            <div id="check-text" class="info">...</div>
+        </div>
+    </div>
 </div>
+
 <canvas id="canvas"></canvas>
 
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let a = 120, b = 160;
+    const modeSelect = document.getElementById('mode');
+
+    let a_px = 120, b_px = 180;
     let draggingA = false, draggingB = false;
 
+    function drawShape(pStart, pEnd, type, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+
+        let dx = pEnd.x - pStart.x;
+        let dy = pEnd.y - pStart.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        let nx = -dy / dist; // Normalenvektor nach außen
+        let ny = dx / dist;
+
+        if (type === 'quadrat') {
+            ctx.moveTo(pStart.x, pStart.y);
+            ctx.lineTo(pEnd.x, pEnd.y);
+            ctx.lineTo(pEnd.x + nx * dist, pEnd.y + ny * dist);
+            ctx.lineTo(pStart.x + nx * dist, pStart.y + ny * dist);
+        } else if (type === 'halbkreis') {
+            let centerX = (pStart.x + pEnd.x) / 2;
+            let centerY = (pStart.y + pEnd.y) / 2;
+            let angle = Math.atan2(dy, dx);
+            // Basislinie
+            ctx.moveTo(pStart.x, pStart.y);
+            ctx.lineTo(pEnd.x, pEnd.y);
+            // Bogen (false = außen)
+            ctx.arc(centerX, centerY, dist/2, angle, angle + Math.PI, false);
+        } else if (type === 'dreieck') {
+            let h = (dist * Math.sqrt(3)) / 2;
+            ctx.moveTo(pStart.x, pStart.y);
+            ctx.lineTo(pEnd.x, pEnd.y);
+            ctx.lineTo((pStart.x + pEnd.x)/2 + nx * h, (pStart.y + pEnd.y)/2 + ny * h);
+        } else if (type === 'stern') {
+            // Zackenstern mit bündiger Basis
+            let steps = 10;
+            ctx.moveTo(pStart.x, pStart.y);
+            for(let i = 1; i < steps; i++) {
+                let t = i / steps;
+                let currX = pStart.x + t * dx;
+                let currY = pStart.y + t * dy;
+                // Zacken-Höhe variiert, aber Basis i=0 und i=steps sind 0
+                let h = (i % 2 === 0) ? (dist * 0.2) : (dist * 0.7);
+                if (i === 5) h *= 1.2;
+                ctx.lineTo(currX + nx * h, currY + ny * h);
+            }
+            ctx.lineTo(pEnd.x, pEnd.y);
+        } else if (type === 'pacman') {
+            let centerX = (pStart.x + pEnd.x) / 2;
+            let centerY = (pStart.y + pEnd.y) / 2;
+            let angle = Math.atan2(dy, dx);
+            // Basislinie
+            ctx.moveTo(pStart.x, pStart.y);
+            ctx.lineTo(pEnd.x, pEnd.y);
+            // Form mit Mund
+            ctx.arc(centerX + nx*dist*0.1, centerY + ny*dist*0.1, dist/2, angle + 0.3, angle + Math.PI - 0.3, false);
+            ctx.lineTo(centerX + nx*dist*0.1, centerY + ny*dist*0.1);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+
     function draw() {
-        canvas.width = 800; canvas.height = 800;
-        const ox = 300, oy = 500;
-        ctx.clearRect(0,0,canvas.width, canvas.height);
+        canvas.width = 850; canvas.height = 800;
+        const ox = 350, oy = 450;
+        const mode = modeSelect.value;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let valA = Math.round(a/10);
-        let valB = Math.round(b/10);
-        let valC2 = (valA * valA) + (valB * valB);
-        let distC = Math.sqrt(a*a + b*b);
-        let angle = Math.atan2(a, b);
+        const A = { x: ox, y: oy - a_px };
+        const B = { x: ox + b_px, y: oy };
+        const C = { x: ox, y: oy };
 
-        // 1. Katheten-Quadrate (a² und b²)
         ctx.globalAlpha = 0.3;
-        ctx.fillStyle = "#d63031"; ctx.fillRect(ox - a, oy - a, a, a);
-        ctx.fillStyle = "#0984e3"; ctx.fillRect(ox, oy, b, b);
-
-        // 2. Hypotenusen-Quadrat (c²) - Jetzt bombenfest an der Linie
-        ctx.fillStyle = "#6c5ce7";
-        ctx.save();
-        ctx.translate(ox, oy - a); // Start am oberen Punkt der Hypotenuse
-        ctx.rotate(-angle);
-        ctx.fillRect(0, -distC, distC, distC);
-        ctx.restore();
+        // Punkte-Reihenfolge so, dass nx nach außen zeigt
+        drawShape(A, C, mode, "#d63031"); // Kathete a
+        drawShape(C, B, mode, "#0984e3"); // Kathete b
+        drawShape(B, A, mode, "#6c5ce7"); // Hypotenuse c
         ctx.globalAlpha = 1.0;
 
-        // 3. Das Dreieck
+        // Dreieck Mitte
         ctx.beginPath();
-        ctx.moveTo(ox, oy); ctx.lineTo(ox + b, oy); ctx.lineTo(ox, oy - a); ctx.closePath();
-        ctx.fillStyle = "#dfe6e9"; ctx.fill();
-        ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
+        ctx.fillStyle = "white"; ctx.fill();
+        ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 3; ctx.stroke();
+        ctx.strokeRect(ox, oy - 15, 15, 15);
 
-        // 4. Beschriftung a und b
-        ctx.fillStyle = "#2d3436"; ctx.font = "bold 18px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(`a = ${valA}`, ox - 40, oy - a/2);
-        ctx.fillText(`b = ${valB}`, ox + b/2, oy + 25);
+        // Flächen-Mathematik
+        let valA = Math.round(a_px/10), valB = Math.round(b_px/10);
+        let factor = 1;
+        if(mode === 'halbkreis') factor = Math.PI / 8;
+        if(mode === 'dreieck') factor = Math.sqrt(3) / 4;
+        if(mode === 'stern') factor = 0.45;
+        if(mode === 'pacman') factor = 0.34;
 
-        // 5. Die Beschriftung für c - Immer im Zentrum des Quadrats
-        let labelC = Number.isInteger(Math.sqrt(valC2)) ? `c = ${Math.sqrt(valC2)}` : `c ≈ ${Math.sqrt(valC2).toFixed(2)}`;
+        let areaA = factor * Math.pow(valA, 2);
+        let areaB = factor * Math.pow(valB, 2);
+        let areaSum = areaA + areaB;
 
-        ctx.save();
-        // Mittelpunkt der Hypotenuse
-        let mx = ox + b/2;
-        let my = oy - a/2;
-        // Verschiebe den Text in das Zentrum des Quadrats (halbe Diagonale nach außen)
-        let textX = mx + Math.sin(angle) * (distC / 2);
-        let textY = my - Math.cos(angle) * (distC / 2);
+        document.getElementById('result-text').innerHTML =
+            `<span class="val-a">${areaA.toFixed(1)}</span> + <span class="val-b">${areaB.toFixed(1)}</span> = <span class="val-c">${areaSum.toFixed(1)}</span>`;
 
-        ctx.translate(textX, textY);
-        // Text-Rotation: Immer lesbar halten
-        let textRot = -angle;
-        if (textRot < -Math.PI/2 || textRot > Math.PI/2) textRot += Math.PI;
-        ctx.rotate(textRot);
+        document.getElementById('check-text').innerHTML =
+            `<span class="val-c">A₃ = ${areaSum.toFixed(1)}</span>`;
 
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(labelC, 0, 0);
-        ctx.restore();
-
-        // Formel oben aktualisieren
-        document.getElementById('formula').innerHTML =
-            `${valA}² + ${valB}² = c² <br>` +
-            `<span style="color:#d63031">${valA*valA}</span> + <span style="color:#0984e3">${valB*valB}</span> = <span style="color:#6c5ce7">${valC2}</span>`;
-
-        // Ziehpunkte
-        ctx.fillStyle = "#0984e3"; ctx.beginPath(); ctx.arc(ox + b, oy, 12, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#d63031"; ctx.beginPath(); ctx.arc(ox, oy - a, 12, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#0984e3"; ctx.beginPath(); ctx.arc(B.x, B.y, 12, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#d63031"; ctx.beginPath(); ctx.arc(A.x, A.y, 12, 0, Math.PI*2); ctx.fill();
     }
 
     canvas.onmousedown = (e) => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-        if (Math.hypot(mx - (300 + b), my - 500) < 30) draggingB = true;
-        if (Math.hypot(mx - 300, my - (500 - a)) < 30) draggingA = true;
+        if (Math.hypot(mx - (350 + b_px), my - 450) < 30) draggingB = true;
+        if (Math.hypot(mx - 350, my - (450 - a_px)) < 30) draggingA = true;
     };
     window.onmousemove = (e) => {
         const rect = canvas.getBoundingClientRect();
-        if (draggingA) a = Math.max(20, Math.min(350, 500 - (e.clientY - rect.top)));
-        if (draggingB) b = Math.max(20, Math.min(450, (e.clientX - rect.left) - 300));
+        if (draggingA) a_px = Math.max(30, Math.min(300, 450 - (e.clientY - rect.top)));
+        if (draggingB) b_px = Math.max(30, Math.min(350, (e.clientX - rect.left) - 350));
         if (draggingA || draggingB) draw();
     };
     window.onmouseup = () => { draggingA = draggingB = false; };
