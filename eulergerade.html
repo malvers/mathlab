@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
+  <style>
+    :root { --primary: #6c5ce7; --euler: #ff8c00; --bg: #f0f2f5; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+    #ui { padding: 15px; text-align: center; background: white; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10; }
+    .controls-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .control-group { background: #f8f9fa; padding: 8px 12px; border-radius: 8px; border: 1px solid #eee; display: flex; gap: 10px; align-items: center; font-size: 0.85rem; }
+    canvas { background: white; cursor: crosshair; touch-action: none; flex-grow: 1; width: 100%; height: 100%; }
+    .val-table { position: absolute; top: 180px; right: 20px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Courier New', monospace; font-size: 0.85rem; pointer-events: none; }
+    button { padding: 6px 12px; cursor: pointer; border-radius: 6px; border: none; background: var(--primary); color: white; font-weight: bold; }
+    .legend { position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 10px; font-size: 0.8rem; border: 1px solid #ddd; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<div id="ui">
+  <h2 style="margin: 0;">📐 Geometrie-Labor: Euler, Fermat & Linien</h2>
+  <div class="controls-grid">
+    <div class="control-group">
+      <label><input type="checkbox" id="cbEuler" checked> Euler</label>
+      <label><input type="checkbox" id="cbUmkreis"> Umkreis</label>
+      <label><input type="checkbox" id="cbInkreis"> Inkreis</label>
+      <label><input type="checkbox" id="cbFeuerbach"> Feuerbach</label>
+    </div>
+    <div class="control-group">
+      <label title="Höhen"><input type="checkbox" id="hH"> Höhen (H)</label>
+      <label title="Seitenhalbierende"><input type="checkbox" id="hS"> Seitenhalb. (S)</label>
+      <label title="Winkelhalbierende"><input type="checkbox" id="hI"> Winkelhalb. (I)</label>
+      <label><input type="checkbox" id="cbFermat"> Fermat/Napoleon</label>
+    </div>
+    <div class="control-group">
+      <button onclick="resetTriangle()">Reset</button>
+      <button onclick="location.href='index.html'" style="background:#636e72">Menü</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+<div class="val-table" id="stats"></div>
+<div class="legend">
+  <span style="color:red">● H</span> | <span style="color:green">● U</span> | <span style="color:black">● S</span> | <span style="color:#b300b3">● I</span> | <span style="color:#ff8c00">― Euler</span>
+</div>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let points = [];
+  let dragIdx = -1;
+
+  const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const mid = (p1, p2) => ({x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2});
+  const getS = (A, B, C) => ({x: (A.x+B.x+C.x)/3, y: (A.y+B.y+C.y)/3});
+
+  function getU(A, B, C) {
+      const x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y, x3 = C.x, y3 = C.y;
+      const d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+      if (Math.abs(d) < 1) return {x: (x1+x2+x3)/3, y: (y1+y2+y3)/3};
+      return {
+          x: ((x1*x1 + y1*y1)*(y2 - y3) + (x2*x2 + y2*y2)*(y3 - y1) + (x3*x3 + y3*y3)*(y1 - y2)) / d,
+          y: ((x1*x1 + y1*y1)*(x3 - x2) + (x2*x2 + y2*y2)*(x1 - x3) + (x3*x3 + y3*y3)*(x2 - x1)) / d
+      };
+  }
+
+  function getI(A, B, C) {
+      const a = dist(B, C), b = dist(A, C), c = dist(A, B);
+      const p = a + b + c;
+      if (p < 0.1) return A;
+      return {x: (a*A.x + b*B.x + c*C.x)/p, y: (a*A.y + b*B.y + c*C.y)/p};
+  }
+
+  function getFoot(P, A, B) {
+      const dx = B.x - A.x, dy = B.y - A.y;
+      const m = dx*dx + dy*dy;
+      if (m < 0.1) return A;
+      const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / m;
+      return {x: A.x + t * dx, y: A.y + t * dy};
+  }
+
+  function getEqui(p1, p2, ref) {
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      const h = Math.sqrt(3)/2;
+      const r1 = { x: p1.x + 0.5*dx - h*dy, y: p1.y + 0.5*dy + h*dx };
+      const r2 = { x: p1.x + 0.5*dx + h*dy, y: p1.y + 0.5*dy - h*dx };
+      return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
+  }
+
+  function drawPt(pt, label, color) {
+      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#333"; ctx.font = "bold 12px sans-serif"; ctx.fillText(label, pt.x + 10, pt.y - 10);
+  }
+
+  function draw() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      if (points.length < 3) return;
+      const [A, B, C] = points;
+      const conf = (id) => document.getElementById(id).checked;
+
+      const S = getS(A, B, C), U = getU(A, B, C), I = getI(A, B, C);
+      const H = { x: 3*S.x - 2*U.x, y: 3*S.y - 2*U.y }, F = mid(H, U);
+      const rUm = dist(U, A), rIn = dist(I, getFoot(I, A, B));
+
+      // 1. Fermat/Napoleon
+      if (conf('cbFermat')) {
+          const pAB = getEqui(A,B,C), pBC = getEqui(B,C,A), pCA = getEqui(C,A,B);
+          ctx.fillStyle = "rgba(255, 165, 0, 0.1)";
+          [[A,B,pAB],[B,C,pBC],[C,A,pCA]].forEach(t => {
+              ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y); ctx.lineTo(t[1].x, t[1].y); ctx.lineTo(t[2].x, t[2].y); ctx.closePath(); ctx.fill();
+              ctx.strokeStyle = "rgba(255, 100, 0, 0.4)"; ctx.lineWidth = 1; ctx.stroke();
+          });
+          ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(255, 140, 0, 0.6)";
+          [[C,pAB],[A,pBC],[B,pCA]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+          ctx.setLineDash([]);
+      }
+
+      // 2. Euler
+      if (conf('cbEuler')) {
+          ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"; ctx.lineWidth = 3;
+          let dx = U.x - H.x, dy = U.y - H.y, d = Math.sqrt(dx*dx + dy*dy);
+          ctx.beginPath();
+          if (d < 0.5) { ctx.moveTo(S.x, 0); ctx.lineTo(S.x, rect.height); }
+          else { ctx.moveTo(H.x - (dx/d)*5000, H.y - (dy/d)*5000); ctx.lineTo(U.x + (dx/d)*5000, U.y + (dy/d)*5000); }
+          ctx.stroke();
+      }
+
+      // 3. Hilfslinien
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+      if (conf('hH')) { // Höhen
+          ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
+          [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+      }
+      if (conf('hS')) { // Seitenhalbierende
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+          [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+      }
+      if (conf('hI')) { // Winkelhalbierende
+          ctx.strokeStyle = "rgba(180, 0, 180, 0.4)";
+          [A,B,C].forEach(p => { ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(I.x,I.y); ctx.stroke(); });
+      }
+      ctx.setLineDash([]);
+
+      // 4. Kreise
+      if (conf('cbUmkreis')) { ctx.strokeStyle = "rgba(0,128,0,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(U.x, U.y, rUm, 0, Math.PI*2); ctx.stroke(); }
+      if (conf('cbInkreis')) { ctx.strokeStyle = "rgba(255,0,255,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(I.x, I.y, rIn, 0, Math.PI*2); ctx.stroke(); }
+      if (conf('cbFeuerbach')) { ctx.strokeStyle = "rgba(0,100,255,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(F.x, F.y, rUm/2, 0, Math.PI*2); ctx.stroke(); drawPt(F, "F", "#0064ff"); }
+
+      // 5. Dreieck & Punkte
+      ctx.strokeStyle = "blue"; ctx.lineWidth = 3; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
+      points.forEach(p => { ctx.fillStyle = "blue"; ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke(); });
+
+      // Beschriftung
+      if (conf('cbEuler')) { drawPt(H, "H", "red"); drawPt(U, "U", "green"); drawPt(S, "S", "black"); }
+      if (conf('cbInkreis')) drawPt(I, "I", "#b300b3");
+
+      document.getElementById('stats').innerHTML = `Ratio HS/SU: <b>${(dist(H,S)/dist(S,U)).toFixed(3)}</b><br>Inkreis-R: ${rIn.toFixed(1)}px`;
+  }
+
+  function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      if (points.length === 0) resetTriangle();
+      draw();
+  }
+
+  function resetTriangle() {
+      const w = canvas.getBoundingClientRect().width, h = canvas.getBoundingClientRect().height;
+      const s = Math.min(w, h) * 0.25, cx = w/2, cy = h/2, th = (Math.sqrt(3)/2) * (s*2);
+      points = [{x: cx - s, y: cy + th/3}, {x: cx + s, y: cy + th/3}, {x: cx, y: cy - 2*th/3}];
+      draw();
+  }
+
+  canvas.onmousedown = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      dragIdx = points.findIndex(p => Math.hypot(p.x - (e.clientX - rect.left), p.y - (e.clientY - rect.top)) < 25);
+  };
+  window.onmousemove = (e) => {
+      if (dragIdx === -1) return;
+      const rect = canvas.getBoundingClientRect();
+      points[dragIdx] = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+      draw();
+  };
+  window.onmouseup = () => dragIdx = -1;
+  document.querySelectorAll('input').forEach(i => i.onchange = draw);
+  window.addEventListener('resize', resize);
+  resize();
+</script>
+</body>
+</html>
