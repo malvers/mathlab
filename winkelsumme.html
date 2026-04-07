@@ -10,7 +10,7 @@
       --accent: #007aff;
       --bg: #ffffff;
       --text: #1d1d1f;
-      --ui-bg: rgba(245, 245, 247, 0.8);
+      --ui-bg: rgba(245, 245, 247, 0.9);
     }
     body {
       margin: 0;
@@ -19,90 +19,157 @@
       color: var(--text);
       display: flex;
       flex-direction: column;
-      align-items: center;
       height: 100vh;
       overflow: hidden;
-      touch-action: none; /* Verhindert das Scrollen der Seite beim Ziehen */
+      touch-action: none;
     }
+
+    /* Header Fix für Mobile */
     #ui {
-      padding: 15px;
+      padding: 10px;
       text-align: center;
       background: var(--ui-bg);
-      width: 100%;
-      backdrop-filter: blur(10px);
       border-bottom: 1px solid #ddd;
       z-index: 10;
+      position: relative;
     }
-    .controls { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    canvas { background: white; cursor: crosshair; flex-grow: 1; width: 100%; }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      flex-grow: 1;
+    }
+
+    .controls { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+
+    canvas { background: white; flex-grow: 1; width: 100%; }
 
     .info-box {
       position: absolute;
       top: 130px;
-      right: 20px;
+      right: 15px;
       background: white;
-      padding: 12px;
+      padding: 10px;
       border-radius: 12px;
       border: 1px solid #ddd;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       font-family: 'Orbitron', sans-serif;
       text-align: right;
+      pointer-events: none;
     }
 
     button {
-      padding: 8px 14px;
+      padding: 6px 10px;
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       background: white;
-      color: #333;
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
-      transition: 0.2s;
+      font-size: 0.6rem;
     }
     button.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-    .back-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
+    .back-btn, .help-btn {
       text-decoration: none;
       color: var(--accent);
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: bold;
       font-family: 'Orbitron', sans-serif;
-      z-index: 20;
+      padding: 5px;
+    }
+
+    /* Help Modal */
+    #helpModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 85%;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .modal-content h3 { margin-top: 0; font-family: 'Orbitron'; color: var(--accent); }
+    .close-modal {
+      margin-top: 15px;
+      display: block;
+      text-align: center;
+      color: var(--accent);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    @media (max-width: 400px) {
+      h2 { font-size: 0.85rem; }
+      .back-btn, .help-btn { font-size: 0.6rem; }
     }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">← ZENTRALE</a>
-
 <div id="ui">
-  <h2 style="margin: 0; font-family: 'Orbitron'; font-size: 1.1rem; letter-spacing: 1px;">POLYGON-WINKELSUMME</h2>
+  <div class="header-top">
+    <a href="index.html" class="back-btn">← EXIT</a>
+    <h2>POLYGON-LABOR</h2>
+    <div class="help-btn" onclick="toggleHelp()">INFO ?</div>
+  </div>
   <div class="controls" id="btnContainer"></div>
 </div>
 
 <canvas id="canvas"></canvas>
 <div class="info-box" id="stats"></div>
 
+<div id="helpModal" onclick="toggleHelp()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3>Missions-Briefing</h3>
+    <ul style="padding-left: 20px; line-height: 1.6;">
+      <li><b>Ecken wählen:</b> Tippe oben auf 3E bis 9E.</li>
+      <li><b>Punkte bewegen:</b> Ziehe die blauen Kreise mit dem Finger oder der Maus.</li>
+      <li><b>Winkelsumme:</b> Beobachte die Anzeige rechts. Sie folgt der Formel $(n-2) \times 180^\circ$.</li>
+      <li><b>Beweis:</b> Bei 3E & 4E werden die Winkel unten auf einer Linie addiert.</li>
+    </ul>
+    <span class="close-modal">VERSTANDEN</span>
+  </div>
+</div>
+
 <script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   const stats = document.getElementById('stats');
+  const helpModal = document.getElementById('helpModal');
 
   let points = [];
   let dragIdx = -1;
   let nEcken = 3;
   const BOGEN_RAD = 45;
-  // Kräftigere Farben für weißen Hintergrund
   const farben = [
       'rgba(235, 64, 52, 0.75)', 'rgba(46, 204, 113, 0.75)',
       'rgba(52, 152, 219, 0.75)', 'rgba(241, 196, 15, 0.75)',
       'rgba(26, 188, 156, 0.75)', 'rgba(155, 89, 182, 0.75)',
       'rgba(230, 126, 34, 0.75)', 'rgba(52, 73, 94, 0.75)', 'rgba(149, 165, 166, 0.75)'
   ];
+
+  function toggleHelp() {
+    helpModal.style.display = helpModal.style.display === 'flex' ? 'none' : 'flex';
+  }
 
   function initPolygon(n) {
       nEcken = n;
@@ -129,7 +196,6 @@
       let winkelWerte = [];
       let summeRad = 0;
 
-      // 1. Polygon Linien (Dunkel für Weiß-Modus)
       ctx.beginPath();
       ctx.lineWidth = 2.5;
       ctx.strokeStyle = "#333";
@@ -142,7 +208,6 @@
       for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
       const isCW = area < 0;
 
-      // 2. Winkel zeichnen
       for (let i = 0; i < n; i++) {
           const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
           const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
@@ -160,36 +225,30 @@
           summeRad += Math.abs(diff);
       }
 
-      // 3. Punkte (Blau für iPad-Vibe)
       points.forEach(p => {
           ctx.fillStyle = "#007aff";
           ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
           ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
       });
 
-      // 4. UNTERE ANZEIGE
       if (n <= 4) {
-          const gY = rect.height * 0.70;
+          const gY = rect.height * 0.75;
           const gX = rect.width / 2;
           const drawRadius = BOGEN_RAD * 1.5;
-
           ctx.strokeStyle = "#ccc";
-          ctx.beginPath(); ctx.moveTo(gX - 180, gY); ctx.lineTo(gX + 180, gY); ctx.stroke();
-
+          ctx.beginPath(); ctx.moveTo(gX - 120, gY); ctx.lineTo(gX + 120, gY); ctx.stroke();
           let currentStart = Math.PI;
           winkelWerte.forEach((w, i) => {
               ctx.fillStyle = farben[i % farben.length];
-              ctx.beginPath();
-              ctx.moveTo(gX, gY);
+              ctx.beginPath(); ctx.moveTo(gX, gY);
               ctx.arc(gX, gY, drawRadius, currentStart, currentStart - w, true);
               ctx.fill();
               currentStart -= w;
           });
       }
 
-      stats.innerHTML = `<span style="font-size:0.8rem;color:#666">POLYGON (n=${n})</span><br>
-                         <span style="color:#007aff;font-size:1.4rem">${Math.round(summeRad * 180/Math.PI)}°</span><br>
-                         <span style="font-size:0.7rem;color:#999">(n-2) × 180°</span>`;
+      stats.innerHTML = `<span style="font-size:0.7rem;color:#666">POLYGON (n=${n})</span><br>
+                         <span style="color:#007aff;font-size:1.2rem">${Math.round(summeRad * 180/Math.PI)}°</span>`;
   }
 
   function updateButtons() {
@@ -201,10 +260,9 @@
           if (i === nEcken) btn.className = 'active';
           btn.onclick = () => initPolygon(i);
           container.appendChild(btn);
-        }
-    }
+      }
+  }
 
-  // --- TOUCH & MOUSE LOGIK ---
   function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -214,7 +272,7 @@
 
   function startDrag(e) {
       const pos = getPos(e);
-      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 35); // Radius vergrößert für Finger-Touch
+      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40);
       if(dragIdx !== -1) e.preventDefault();
   }
 
@@ -228,17 +286,14 @@
 
   function stopDrag() { dragIdx = -1; }
 
-  // Mouse Events
   canvas.addEventListener('mousedown', startDrag);
   window.addEventListener('mousemove', moveDrag);
   window.addEventListener('mouseup', stopDrag);
-
-  // Touch Events (iPad)
   canvas.addEventListener('touchstart', startDrag, {passive: false});
   window.addEventListener('touchmove', moveDrag, {passive: false});
   window.addEventListener('touchend', stopDrag);
-
   window.addEventListener('resize', () => initPolygon(nEcken));
+
   initPolygon(3);
 </script>
 </body>
