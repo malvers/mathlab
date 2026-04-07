@@ -2,28 +2,88 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Der allgemeine Pythagoras</title>
     <style>
         :root {
-            --primary: #6c5ce7;
-            --kathete-a: #d63031;
-            --kathete-b: #0984e3;
-            --bg: #f0f2f5;
+            /* Deine exakten Farben aus dem Polygon-Labor */
+            --primary: rgb(255, 177, 0);   /* Gelb (Hypotenuse) */
+            --kathete-a: rgb(198, 33, 40); /* Rot (Kathete A) */
+            --kathete-b: rgb(119, 181, 33); /* Grün (Kathete B) */
+            --bg: #f5f5f7;
         }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        #ui { padding: 25px; text-align: center; background: white; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        canvas { background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 15px; cursor: crosshair; margin: 30px 20px; }
-        .formula-container { display: flex; justify-content: center; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
-        .formula-box { background: #f8f9fa; padding: 15px; border-radius: 12px; border: 2px solid #eee; min-width: 260px; }
-        .check-box { background: #f0f0ff; border: 2px solid var(--primary); }
-        .info { font-size: 1.2rem; color: #2d3436; font-weight: 700; line-height: 1.5; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+        #ui {
+            padding: 15px 20px;
+            text-align: center;
+            background: white;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            z-index: 10;
+            box-sizing: border-box;
+        }
+        h2 { margin: 0 0 10px 0; font-size: 1.3rem; color: #1d1d1f; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        select, button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-weight: 600;
+            background: white;
+            color: #333;
+        }
+        /* Dunkle Textfarbe für den gelben Button für besseren Kontrast */
+        button { background: var(--primary); color: #1d1d1f; border: none; }
+
+        .formula-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .formula-box {
+            background: #fafafa;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid #eee;
+            min-width: 220px;
+        }
+        .check-box { background: #fffcf0; border: 2px solid var(--primary); }
+        .info { font-size: 1.1rem; color: #2d3436; font-weight: 700; line-height: 1.4; }
         .val-a { color: var(--kathete-a); }
         .val-b { color: var(--kathete-b); }
-        .val-c { color: var(--primary); }
-        .controls { margin: 15px; }
-        select, button { padding: 10px 20px; font-size: 1rem; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-weight: bold; }
-        button { background: var(--primary); color: white; border: none; margin-left: 10px; }
+        .val-c { color: var(--primary); text-shadow: 0px 0px 1px rgba(0,0,0,0.2); } /* Leichter Schatten für Lesbarkeit bei Gelb */
+
+        canvas {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-radius: 15px;
+            cursor: crosshair;
+            margin: 20px;
+            flex-grow: 1;
+            width: calc(100% - 40px);
+            touch-action: none;
+        }
     </style>
 </head>
 <body>
@@ -31,7 +91,6 @@
 <div id="ui">
     <h2>📐 Allgemeiner Satz des Pythagoras</h2>
     <div class="controls">
-        Anbaufiguren:
         <select id="mode" onchange="draw()">
             <option value="quadrat">Quadrate</option>
             <option value="halbkreis">Halbkreise</option>
@@ -39,7 +98,7 @@
             <option value="stern">Crazy Star 🌟</option>
             <option value="pacman">Pac-Man Mode 🕹️</option>
         </select>
-        <button onclick="location.href='index.html'">Menü</button>
+        <button onclick="location.href='index.html'">← ZENTRALE</button>
     </div>
     <div class="formula-container">
         <div class="formula-box">
@@ -47,7 +106,7 @@
             <div id="result-text" class="info">...</div>
         </div>
         <div class="formula-box check-box">
-            <div class="info" style="color: var(--primary)">Check: Große Fläche A₃</div>
+            <div class="info" style="color: var(--primary); text-shadow: 0px 0px 1px rgba(0,0,0,0.2);">Große Fläche A₃</div>
             <div id="check-text" class="info">...</div>
         </div>
     </div>
@@ -62,6 +121,12 @@
 
     let a_px = 120, b_px = 180;
     let draggingA = false, draggingB = false;
+    let ox = 0, oy = 0;
+
+    // Helper, um die CSS-Variablen sicher an den Canvas zu übergeben
+    const colorA = "rgb(198, 33, 40)";
+    const colorB = "rgb(119, 181, 33)";
+    const colorC = "rgb(255, 177, 0)";
 
     function drawShape(pStart, pEnd, type, color) {
         ctx.fillStyle = color;
@@ -70,7 +135,7 @@
         let dx = pEnd.x - pStart.x;
         let dy = pEnd.y - pStart.y;
         let dist = Math.sqrt(dx*dx + dy*dy);
-        let nx = -dy / dist; // Normalenvektor nach außen
+        let nx = -dy / dist;
         let ny = dx / dist;
 
         if (type === 'quadrat') {
@@ -82,10 +147,8 @@
             let centerX = (pStart.x + pEnd.x) / 2;
             let centerY = (pStart.y + pEnd.y) / 2;
             let angle = Math.atan2(dy, dx);
-            // Basislinie
             ctx.moveTo(pStart.x, pStart.y);
             ctx.lineTo(pEnd.x, pEnd.y);
-            // Bogen (false = außen)
             ctx.arc(centerX, centerY, dist/2, angle, angle + Math.PI, false);
         } else if (type === 'dreieck') {
             let h = (dist * Math.sqrt(3)) / 2;
@@ -93,14 +156,12 @@
             ctx.lineTo(pEnd.x, pEnd.y);
             ctx.lineTo((pStart.x + pEnd.x)/2 + nx * h, (pStart.y + pEnd.y)/2 + ny * h);
         } else if (type === 'stern') {
-            // Zackenstern mit bündiger Basis
             let steps = 10;
             ctx.moveTo(pStart.x, pStart.y);
             for(let i = 1; i < steps; i++) {
                 let t = i / steps;
                 let currX = pStart.x + t * dx;
                 let currY = pStart.y + t * dy;
-                // Zacken-Höhe variiert, aber Basis i=0 und i=steps sind 0
                 let h = (i % 2 === 0) ? (dist * 0.2) : (dist * 0.7);
                 if (i === 5) h *= 1.2;
                 ctx.lineTo(currX + nx * h, currY + ny * h);
@@ -110,10 +171,8 @@
             let centerX = (pStart.x + pEnd.x) / 2;
             let centerY = (pStart.y + pEnd.y) / 2;
             let angle = Math.atan2(dy, dx);
-            // Basislinie
             ctx.moveTo(pStart.x, pStart.y);
             ctx.lineTo(pEnd.x, pEnd.y);
-            // Form mit Mund
             ctx.arc(centerX + nx*dist*0.1, centerY + ny*dist*0.1, dist/2, angle + 0.3, angle + Math.PI - 0.3, false);
             ctx.lineTo(centerX + nx*dist*0.1, centerY + ny*dist*0.1);
         }
@@ -122,20 +181,24 @@
     }
 
     function draw() {
-        canvas.width = 850; canvas.height = 800;
-        const ox = 350, oy = 450;
-        const mode = modeSelect.value;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        ox = rect.width * 0.35;
+        oy = rect.height * 0.60;
 
         const A = { x: ox, y: oy - a_px };
         const B = { x: ox + b_px, y: oy };
         const C = { x: ox, y: oy };
 
-        ctx.globalAlpha = 0.3;
-        // Punkte-Reihenfolge so, dass nx nach außen zeigt
-        drawShape(A, C, mode, "#d63031"); // Kathete a
-        drawShape(C, B, mode, "#0984e3"); // Kathete b
-        drawShape(B, A, mode, "#6c5ce7"); // Hypotenuse c
+        ctx.globalAlpha = 0.55; // Etwas deckender für die neuen satten Farben
+        drawShape(A, C, modeSelect.value, colorA);
+        drawShape(C, B, modeSelect.value, colorB);
+        drawShape(B, A, modeSelect.value, colorC);
         ctx.globalAlpha = 1.0;
 
         // Dreieck Mitte
@@ -143,15 +206,17 @@
         ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
         ctx.fillStyle = "white"; ctx.fill();
         ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 3; ctx.stroke();
+
+        // Rechter Winkel
         ctx.strokeRect(ox, oy - 15, 15, 15);
 
-        // Flächen-Mathematik
-        let valA = Math.round(a_px/10), valB = Math.round(b_px/10);
+        // Mathematik
+        let valA = a_px/10, valB = b_px/10;
         let factor = 1;
-        if(mode === 'halbkreis') factor = Math.PI / 8;
-        if(mode === 'dreieck') factor = Math.sqrt(3) / 4;
-        if(mode === 'stern') factor = 0.45;
-        if(mode === 'pacman') factor = 0.34;
+        if(modeSelect.value === 'halbkreis') factor = Math.PI / 8;
+        if(modeSelect.value === 'dreieck') factor = Math.sqrt(3) / 4;
+        if(modeSelect.value === 'stern') factor = 0.45;
+        if(modeSelect.value === 'pacman') factor = 0.34;
 
         let areaA = factor * Math.pow(valA, 2);
         let areaB = factor * Math.pow(valB, 2);
@@ -163,24 +228,51 @@
         document.getElementById('check-text').innerHTML =
             `<span class="val-c">A₃ = ${areaSum.toFixed(1)}</span>`;
 
-        ctx.fillStyle = "#0984e3"; ctx.beginPath(); ctx.arc(B.x, B.y, 12, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#d63031"; ctx.beginPath(); ctx.arc(A.x, A.y, 12, 0, Math.PI*2); ctx.fill();
+        // Anfasser (Punkte)
+        ctx.fillStyle = colorB; ctx.beginPath(); ctx.arc(B.x, B.y, 12, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = colorA; ctx.beginPath(); ctx.arc(A.x, A.y, 12, 0, Math.PI*2); ctx.fill();
     }
 
-    canvas.onmousedown = (e) => {
+    // --- TOUCH & MOUSE ENGINE ---
+    function getPos(e) {
         const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-        if (Math.hypot(mx - (350 + b_px), my - 450) < 30) draggingB = true;
-        if (Math.hypot(mx - 350, my - (450 - a_px)) < 30) draggingA = true;
-    };
-    window.onmousemove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDrag(e) {
+        const pos = getPos(e);
+        if (Math.hypot(pos.x - (ox + b_px), pos.y - oy) < 40) draggingB = true;
+        if (Math.hypot(pos.x - ox, pos.y - (oy - a_px)) < 40) draggingA = true;
+        if (draggingA || draggingB) e.preventDefault();
+    }
+
+    function moveDrag(e) {
+        if (!draggingA && !draggingB) return;
+        const pos = getPos(e);
         const rect = canvas.getBoundingClientRect();
-        if (draggingA) a_px = Math.max(30, Math.min(300, 450 - (e.clientY - rect.top)));
-        if (draggingB) b_px = Math.max(30, Math.min(350, (e.clientX - rect.left) - 350));
-        if (draggingA || draggingB) draw();
-    };
-    window.onmouseup = () => { draggingA = draggingB = false; };
-    draw();
+
+        if (draggingA) a_px = Math.max(40, Math.min(rect.height * 0.5, oy - pos.y));
+        if (draggingB) b_px = Math.max(40, Math.min(rect.width * 0.5, pos.x - ox));
+
+        draw();
+        e.preventDefault();
+    }
+
+    function stopDrag() { draggingA = draggingB = false; }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', stopDrag);
+
+    canvas.addEventListener('touchstart', startDrag, {passive: false});
+    window.addEventListener('touchmove', moveDrag, {passive: false});
+    window.addEventListener('touchend', stopDrag);
+
+    window.addEventListener('resize', draw);
+
+    setTimeout(draw, 50);
 </script>
 </body>
 </html>
