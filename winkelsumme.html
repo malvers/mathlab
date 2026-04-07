@@ -2,28 +2,85 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>docalvers | Polygon-Labor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Polygon-Labor | Doc Alvers</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root { --neon: #00d2ff; --bg: #050b18; }
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
-    #ui { padding: 10px; text-align: center; background: rgba(0,0,0,0.6); width: 100%; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; }
-    .controls { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
-    canvas { background: transparent; cursor: crosshair; touch-action: none; flex-grow: 1; width: 100%; }
-    .info-box { position: absolute; top: 110px; right: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); font-family: 'Orbitron', sans-serif; text-align: right; }
-    button { padding: 5px 10px; cursor: pointer; border-radius: 20px; border: 1px solid var(--neon); background: transparent; color: var(--neon); font-family: 'Orbitron'; font-size: 0.65rem; transition: 0.3s; }
-    button:hover { background: var(--neon); color: black; box-shadow: 0 0 10px var(--neon); }
-    .active { background: var(--neon); color: black; }
-    .back-btn { position: absolute; top: 15px; left: 15px; text-decoration: none; color: white; font-size: 0.7rem; opacity: 0.6; font-family: 'Orbitron'; z-index: 20; }
+    :root {
+      --accent: #007aff;
+      --bg: #ffffff;
+      --text: #1d1d1f;
+      --ui-bg: rgba(245, 245, 247, 0.8);
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none; /* Verhindert das Scrollen der Seite beim Ziehen */
+    }
+    #ui {
+      padding: 15px;
+      text-align: center;
+      background: var(--ui-bg);
+      width: 100%;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #ddd;
+      z-index: 10;
+    }
+    .controls { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    canvas { background: white; cursor: crosshair; flex-grow: 1; width: 100%; }
+
+    .info-box {
+      position: absolute;
+      top: 130px;
+      right: 20px;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      font-family: 'Orbitron', sans-serif;
+      text-align: right;
+    }
+
+    button {
+      padding: 8px 14px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: white;
+      color: #333;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      transition: 0.2s;
+    }
+    button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      text-decoration: none;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+      z-index: 20;
+    }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">← ZURÜCK</a>
+<a href="index.html" class="back-btn">← ZENTRALE</a>
 
 <div id="ui">
-  <h2 style="margin: 0; font-family: 'Orbitron'; font-size: 1.2rem; letter-spacing: 2px; color: var(--neon);">POLYGON-WINKELSUMME</h2>
+  <h2 style="margin: 0; font-family: 'Orbitron'; font-size: 1.1rem; letter-spacing: 1px;">POLYGON-WINKELSUMME</h2>
   <div class="controls" id="btnContainer"></div>
 </div>
 
@@ -39,11 +96,12 @@
   let dragIdx = -1;
   let nEcken = 3;
   const BOGEN_RAD = 45;
+  // Kräftigere Farben für weißen Hintergrund
   const farben = [
-      'rgba(255, 60, 60, 0.8)', 'rgba(60, 255, 60, 0.8)',
-      'rgba(60, 130, 255, 0.8)', 'rgba(255, 220, 0, 0.8)',
-      'rgba(0, 255, 255, 0.8)', 'rgba(255, 0, 255, 0.8)',
-      'rgba(255, 150, 0, 0.8)', 'rgba(150, 255, 0, 0.8)', 'rgba(220, 220, 220, 0.8)'
+      'rgba(235, 64, 52, 0.75)', 'rgba(46, 204, 113, 0.75)',
+      'rgba(52, 152, 219, 0.75)', 'rgba(241, 196, 15, 0.75)',
+      'rgba(26, 188, 156, 0.75)', 'rgba(155, 89, 182, 0.75)',
+      'rgba(230, 126, 34, 0.75)', 'rgba(52, 73, 94, 0.75)', 'rgba(149, 165, 166, 0.75)'
   ];
 
   function initPolygon(n) {
@@ -51,7 +109,7 @@
       points = [];
       const rect = canvas.getBoundingClientRect();
       const cx = rect.width / 2, cy = rect.height * 0.35;
-      const radius = Math.min(rect.width, rect.height) * 0.18;
+      const radius = Math.min(rect.width, rect.height) * 0.22;
       for (let i = 0; i < n; i++) {
           const a = (2 * Math.PI * i) / n - Math.PI / 2;
           points.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) });
@@ -71,10 +129,10 @@
       let winkelWerte = [];
       let summeRad = 0;
 
-      // 1. Polygon Linien
+      // 1. Polygon Linien (Dunkel für Weiß-Modus)
       ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = "#333";
       ctx.moveTo(points[0].x, points[0].y);
       for(let i=1; i<n; i++) ctx.lineTo(points[i].x, points[i].y);
       ctx.closePath();
@@ -84,7 +142,7 @@
       for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
       const isCW = area < 0;
 
-      // 2. Winkel oben zeichnen
+      // 2. Winkel zeichnen
       for (let i = 0; i < n; i++) {
           const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
           const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
@@ -102,37 +160,36 @@
           summeRad += Math.abs(diff);
       }
 
+      // 3. Punkte (Blau für iPad-Vibe)
       points.forEach(p => {
-          ctx.fillStyle = "#00d2ff";
-          ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
-          ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
+          ctx.fillStyle = "#007aff";
+          ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
       });
 
-      // 3. UNTERE ANZEIGE (Nur für 3 und 4 Ecken)
+      // 4. UNTERE ANZEIGE
       if (n <= 4) {
           const gY = rect.height * 0.70;
           const gX = rect.width / 2;
           const drawRadius = BOGEN_RAD * 1.5;
 
-          // Grundlinie
-          ctx.strokeStyle = "rgba(255,255,255,0.4)";
+          ctx.strokeStyle = "#ccc";
           ctx.beginPath(); ctx.moveTo(gX - 180, gY); ctx.lineTo(gX + 180, gY); ctx.stroke();
 
-          let currentStart = Math.PI; // Start bei 180° (Links)
+          let currentStart = Math.PI;
           winkelWerte.forEach((w, i) => {
               ctx.fillStyle = farben[i % farben.length];
               ctx.beginPath();
               ctx.moveTo(gX, gY);
-              // Zeichne gegen den Uhrzeigersinn (true) nach OBEN
               ctx.arc(gX, gY, drawRadius, currentStart, currentStart - w, true);
               ctx.fill();
               currentStart -= w;
           });
       }
 
-      stats.innerHTML = `<span style="font-size:0.75rem;opacity:0.6">POLYGON (n=${n})</span><br>
-                         <span style="color:#00d2ff;font-size:1.3rem">${Math.round(summeRad * 180/Math.PI)}°</span><br>
-                         <span style="font-size:0.65rem">(n-2) × 180°</span>`;
+      stats.innerHTML = `<span style="font-size:0.8rem;color:#666">POLYGON (n=${n})</span><br>
+                         <span style="color:#007aff;font-size:1.4rem">${Math.round(summeRad * 180/Math.PI)}°</span><br>
+                         <span style="font-size:0.7rem;color:#999">(n-2) × 180°</span>`;
   }
 
   function updateButtons() {
@@ -144,22 +201,44 @@
           if (i === nEcken) btn.className = 'active';
           btn.onclick = () => initPolygon(i);
           container.appendChild(btn);
-      }
+        }
+    }
+
+  // --- TOUCH & MOUSE LOGIK ---
+  function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  canvas.onmousedown = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      dragIdx = points.findIndex(p => Math.hypot(p.x - mx, p.y - my) < 30);
-  };
-  window.onmousemove = (e) => {
+  function startDrag(e) {
+      const pos = getPos(e);
+      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 35); // Radius vergrößert für Finger-Touch
+      if(dragIdx !== -1) e.preventDefault();
+  }
+
+  function moveDrag(e) {
       if (dragIdx === -1) return;
-      const rect = canvas.getBoundingClientRect();
-      points[dragIdx] = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const pos = getPos(e);
+      points[dragIdx] = { x: pos.x, y: pos.y };
       draw();
-  };
-  window.onmouseup = () => dragIdx = -1;
-  window.onresize = () => initPolygon(nEcken);
+      e.preventDefault();
+  }
+
+  function stopDrag() { dragIdx = -1; }
+
+  // Mouse Events
+  canvas.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', stopDrag);
+
+  // Touch Events (iPad)
+  canvas.addEventListener('touchstart', startDrag, {passive: false});
+  window.addEventListener('touchmove', moveDrag, {passive: false});
+  window.addEventListener('touchend', stopDrag);
+
+  window.addEventListener('resize', () => initPolygon(nEcken));
   initPolygon(3);
 </script>
 </body>
