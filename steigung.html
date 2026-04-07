@@ -2,158 +2,372 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steigungs-Labor: m & n verstehen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Steigungs-Labor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #fff; }
-        canvas { display: block; cursor: crosshair; }
-        #controls {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px; border-radius: 8px; border: 2px solid #ccc;
-            pointer-events: none; font-size: 14px; line-height: 1.6;
-            display: none; /* Standardmäßig ausgeblendet */
-            z-index: 100;
+        :root {
+            --accent: #007aff;
+            --bg: #ffffff;
+            --text: #1d1d1f;
+            --ui-bg: rgba(245, 245, 247, 0.98);
         }
-        #help-hint {
-            position: absolute; bottom: 10px; left: 10px;
-            color: #888; font-size: 12px; font-style: italic;
-            pointer-events: none;
+        body {
+            margin: 0;
+            font-family: -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Das neue, mitwachsende Top-Panel */
+        #top-panel {
+            background: var(--ui-bg);
+            border-bottom: 1px solid #ddd;
+            z-index: 10;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            flex-shrink: 0; /* Verhindert, dass das Panel gequetscht wird */
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h2 {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .back-btn, .help-btn {
+            text-decoration: none;
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        /* Responsive Werte-Anzeige */
+        #values-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .val-box {
+            background: white;
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .func-box {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            border-color: #333;
+        }
+
+        /* Neues Slider-Cockpit */
+        #slider-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding-top: 5px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .slider-group label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #333;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        input[type=range] {
+            width: 100px;
+            accent-color: #0064FA;
+        }
+
+        canvas {
+            background: white;
+            cursor: crosshair;
+            flex-grow: 1; /* Nimmt automatisch den Rest des Bildschirms ein */
+            width: 100%;
+            touch-action: none;
+        }
+
+        /* Help Modal */
+        #helpModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 85%;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { margin-top: 0; font-family: 'Orbitron'; color: var(--accent); }
+        .modal-content ul { list-style: none; padding: 0; line-height: 1.6; margin-bottom: 20px; }
+        .modal-content ul li { display: grid; grid-template-columns: auto 1fr; gap: 15px; margin-bottom: 10px; }
+        .modal-content ul li b { text-align: left; white-space: nowrap; }
+        .close-modal { display: block; text-align: center; color: var(--accent); font-weight: bold; cursor: pointer; padding-top: 10px; border-top: 1px solid #eee; }
+
+        @media (max-width: 600px) {
+            h2 { font-size: 0.85rem; }
+            .val-box { font-size: 0.85rem; padding: 4px 8px; }
+            .func-box { font-size: 0.9rem; width: 100%; justify-content: center; }
+            .slider-group label { min-width: 65px; font-size: 0.65rem; }
+            input[type=range] { width: 80px; }
         }
     </style>
 </head>
 <body>
 
-<div id="controls">
-    <b style="font-size: 16px;">Steuerung:</b><br>
-    • Gerade ziehen: <b style="color: #B40000;">n</b> ändern<br>
-    • Goldener Punkt: <b style="color: #0064FA;">m</b> ändern<br>
-    • Pfeiltasten: Dreieck bewegen/Größe<br>
-    • Taste 'H': Diese Hilfe an/aus
+<div id="top-panel">
+    <div class="header-top">
+        <a href="index.html" class="back-btn">← ZENTRALE</a>
+        <h2>STEIGUNGS-LABOR</h2>
+        <div class="help-btn" onclick="toggleHelp()">INFO ?</div>
+    </div>
+
+    <div id="values-container">
+        <div class="val-box" style="border-color: #0064FA; color: #0064FA;">m = <span id="val-m">1.00</span></div>
+        <div class="val-box" style="border-color: #B40000; color: #B40000;">n = <span id="val-n">2.00</span></div>
+        <div class="val-box" style="border-color: #008200; color: #008200;">x₀ = <span id="val-x0">-2.00</span></div>
+        <div class="val-box func-box" style="color: #333;">
+            y = <span id="func-m" style="color: #0064FA; margin: 0 5px;">1.00</span> x <span id="func-sign" style="margin: 0 5px;">+</span> <span id="func-n" style="color: #B40000;">2.00</span>
+        </div>
+    </div>
+
+    <div id="slider-container">
+        <div class="slider-group">
+            <label for="m-slider" style="color: #0064FA;">Steigung (m)</label>
+            <input type="range" id="m-slider" min="-5" max="5" step="0.05" value="1">
+        </div>
+        <div class="slider-group">
+            <label for="x-slider" style="color: #FF6400;">Position (x)</label>
+            <input type="range" id="x-slider" min="-10" max="10" step="0.5" value="1">
+        </div>
+        <div class="slider-group">
+            <label for="size-slider" style="color: #FF6400;">Größe (Δx)</label>
+            <input type="range" id="size-slider" min="0.5" max="10" step="0.5" value="2">
+        </div>
+    </div>
 </div>
 
-<div id="help-hint">Drücke 'H' für Hilfe</div>
-
 <canvas id="plotCanvas"></canvas>
+
+<div id="helpModal" onclick="toggleHelp()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Missions-Briefing</h3>
+        <ul>
+            <li><b>y-Achsenabschnitt (n):</b><span>Ziehe die blaue Gerade mit dem Finger oder der Maus nach oben oder unten.</span></li>
+            <li><b>Steigung (m):</b><span>Nutze den Slider oben oder ziehe den goldenen Punkt direkt auf der Geraden.</span></li>
+            <li><b>Steigungsdreieck:</b><span>Ändere Position und Größe mit den orangefarbenen Slidern im Cockpit.</span></li>
+            <li><b>Nullstelle (x₀):</b><span>Der grüne Punkt markiert den Schnittpunkt mit der x-Achse.</span></li>
+        </ul>
+        <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
+    </div>
+</div>
 
 <script>
     const canvas = document.getElementById('plotCanvas');
     const ctx = canvas.getContext('2d');
-    const controls = document.getElementById('controls');
+    const mSlider = document.getElementById('m-slider');
+    const xSlider = document.getElementById('x-slider');
+    const sizeSlider = document.getElementById('size-slider');
+    const topPanel = document.getElementById('top-panel');
 
     let m = 1.0, n = 2.0;
     let triX = 1.0, triSize = 2.0;
     let scale = 50.0;
     let dragMode = 0; // 1: n, 2: m
-    let showHelp = false; // Hilfe-Status
+
+    function toggleHelp() {
+        const modal = document.getElementById('helpModal');
+        modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
 
     function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        // Die Höhe berechnet sich automatisch durch Flexbox, wir müssen nur die physikalischen Pixel für den Canvas setzen
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Dynamischer Maßstab basierend auf der tatsächlichen Pixelbreite (für Handys anpassen)
+        scale = rect.width < 500 ? 30.0 : 50.0;
         draw();
     }
 
     window.addEventListener('resize', resize);
     window.addEventListener('load', resize);
 
+    // --- Slider Events ---
+    mSlider.addEventListener('input', (e) => { m = parseFloat(e.target.value); draw(); });
+    xSlider.addEventListener('input', (e) => { triX = parseFloat(e.target.value); draw(); });
+    sizeSlider.addEventListener('input', (e) => { triSize = parseFloat(e.target.value); draw(); });
+
+    // --- Koordinatensystem Umrechnung ---
     function toMath(px, py) {
+        const rect = canvas.getBoundingClientRect();
         return {
-            x: (px - canvas.width / 2) / scale,
-            y: (canvas.height / 2 - py) / scale
+            x: (px - rect.width / 2) / scale,
+            y: (rect.height / 2 - py) / scale
         };
     }
 
     function toScreen(x, y) {
+        const rect = canvas.getBoundingClientRect();
         return {
-            px: canvas.width / 2 + x * scale,
-            py: canvas.height / 2 - y * scale
+            px: rect.width / 2 + x * scale,
+            py: rect.height / 2 - y * scale
         };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
-        const math = toMath(e.clientX, e.clientY);
-        const handle = toScreen(5.0, m * 5.0 + n);
-        const dist = Math.sqrt((e.clientX - handle.px)**2 + (e.clientY - handle.py)**2);
-
-        if (dist < 15) {
-            dragMode = 2;
-        } else {
-            const lineY = m * math.x + n;
-            if (Math.abs(math.y - lineY) < 0.4) dragMode = 1;
-        }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if (dragMode === 0) return;
-        const math = toMath(e.clientX, e.clientY);
-        if (dragMode === 1) n = math.y - m * math.x;
-        else if (dragMode === 2) m = (math.y - n) / 5.0;
-        draw();
-    });
-
-    window.addEventListener('mouseup', () => dragMode = 0);
-
-    window.addEventListener('keydown', (e) => {
-        // H-Taste zum Toggeln der Hilfe
-        if (e.key.toLowerCase() === 'h') {
-            showHelp = !showHelp;
-            controls.style.display = showHelp ? 'block' : 'none';
-        }
-
-        // Pfeiltasten
-        if (e.key === "ArrowUp") triSize += 0.1;
-        if (e.key === "ArrowDown" && triSize > 0.2) triSize -= 0.1;
-        if (e.key === "ArrowLeft") triX -= 0.1;
-        if (e.key === "ArrowRight") triX += 0.1;
-        draw();
-    });
-
-    function drawRoundedBox(x, y, bw, bh, text, color, label = "", subscript = false) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.strokeStyle = color; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 12); ctx.fill(); ctx.stroke();
-
-        ctx.font = "bold 20px sans-serif";
-        ctx.fillStyle = color;
-        let curX = x + 15;
-        if (label) {
-            ctx.fillText(label, curX, y + 32);
-            if (subscript) {
-                ctx.font = "bold 12px sans-serif"; ctx.fillText("0", curX + 12, y + 37);
-                curX += 22;
-            } else { curX += 15; }
-        }
-        ctx.font = "bold 20px sans-serif"; ctx.fillText(text, curX, y + 32);
+    // --- Touch & Mouse Logic ---
+    function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function drawFunctionBox(x, y, bw, bh, m, n) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 12); ctx.fill(); ctx.stroke();
+    function startDrag(e) {
+        const pos = getMousePos(e);
+        const math = toMath(pos.x, pos.y);
+        const handle = toScreen(5.0, m * 5.0 + n);
 
-        ctx.font = "bold 22px sans-serif";
-        let curX = x + 25; ctx.fillStyle = "#000"; ctx.fillText("y = ", curX, y + 33); curX += 40;
-        ctx.fillStyle = "#0064FA"; ctx.fillText(m.toFixed(2), curX, y + 33); curX += ctx.measureText(m.toFixed(2)).width + 5;
-        ctx.fillStyle = "#000";
-        const sign = n >= 0 ? "+" : "-";
-        ctx.fillText("x " + sign + " ", curX, y + 33); curX += ctx.measureText("x " + sign + " ").width;
-        ctx.fillStyle = "#B40000"; ctx.fillText(Math.abs(n).toFixed(2), curX, y + 33);
+        const distToHandle = Math.hypot(pos.x - handle.px, pos.y - handle.py);
+
+        if (distToHandle < 40) { // Große Hitbox für Touch
+            dragMode = 2; // m ändern
+            e.preventDefault();
+        } else {
+            const lineY = m * math.x + n;
+            if (Math.abs(math.y - lineY) < 1.0) { // Toleranz für dicke Finger
+                dragMode = 1; // n ändern
+                e.preventDefault();
+            }
+        }
+    }
+
+    function moveDrag(e) {
+        if (dragMode === 0) return;
+        const pos = getMousePos(e);
+        const math = toMath(pos.x, pos.y);
+
+        if (dragMode === 1) {
+            n = math.y - m * math.x;
+        } else if (dragMode === 2) {
+            m = (math.y - n) / 5.0;
+            if(m >= -5 && m <= 5) mSlider.value = m; // Sync Slider
+        }
+        draw();
+        e.preventDefault();
+    }
+
+    function stopDrag() { dragMode = 0; }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', stopDrag);
+    canvas.addEventListener('touchstart', startDrag, {passive: false});
+    window.addEventListener('touchmove', moveDrag, {passive: false});
+    window.addEventListener('touchend', stopDrag);
+
+    // Tastatur (Synchronisiert jetzt auch die Slider!)
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowUp") { triSize = Math.min(10, triSize + 0.5); sizeSlider.value = triSize; }
+        if (e.key === "ArrowDown") { triSize = Math.max(0.5, triSize - 0.5); sizeSlider.value = triSize; }
+        if (e.key === "ArrowLeft") { triX = Math.max(-10, triX - 0.5); xSlider.value = triX; }
+        if (e.key === "ArrowRight") { triX = Math.min(10, triX + 0.5); xSlider.value = triX; }
+        draw();
+    });
+
+    function updateDOM() {
+        document.getElementById('val-m').textContent = m.toFixed(2);
+        document.getElementById('val-n').textContent = n.toFixed(2);
+
+        const x0 = Math.abs(m) > 0.001 ? -n/m : null;
+        document.getElementById('val-x0').textContent = x0 !== null ? x0.toFixed(2) : "---";
+
+        document.getElementById('func-m').textContent = m.toFixed(2);
+        document.getElementById('func-sign').textContent = n >= 0 ? "+" : "-";
+        document.getElementById('func-n').textContent = Math.abs(n).toFixed(2);
+
+        if (dragMode === 2 && m >= -5 && m <= 5) {
+             mSlider.value = m;
+        }
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const midX = canvas.width / 2; const midY = canvas.height / 2;
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        const midX = rect.width / 2;
+        const midY = rect.height / 2;
 
         // Gitter
         ctx.strokeStyle = "#ebebeb"; ctx.lineWidth = 1;
-        for (let i = -30; i <= 30; i++) {
-            ctx.beginPath(); ctx.moveTo(0, midY - i * scale); ctx.lineTo(canvas.width, midY - i * scale); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(midX + i * scale, 0); ctx.lineTo(midX + i * scale, canvas.height); ctx.stroke();
+        const numLinesX = Math.ceil(midX / scale);
+        const numLinesY = Math.ceil(midY / scale);
+
+        for (let i = -numLinesY; i <= numLinesY; i++) {
+            ctx.beginPath(); ctx.moveTo(0, midY - i * scale); ctx.lineTo(rect.width, midY - i * scale); ctx.stroke();
+        }
+        for (let i = -numLinesX; i <= numLinesX; i++) {
+            ctx.beginPath(); ctx.moveTo(midX + i * scale, 0); ctx.lineTo(midX + i * scale, rect.height); ctx.stroke();
         }
 
         // Achsen
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(canvas.width, midY); ctx.moveTo(midX, 0); ctx.lineTo(midX, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(rect.width, midY); ctx.moveTo(midX, 0); ctx.lineTo(midX, rect.height); ctx.stroke();
 
         // Gerade
         const xL = -midX / scale, xR = midX / scale;
@@ -162,38 +376,45 @@
         ctx.beginPath(); ctx.moveTo(pL.px, pL.py); ctx.lineTo(pR.px, pR.py); ctx.stroke();
 
         // Steigungsdreieck
-        const pA = toScreen(triX, m * triX + n); const pB = toScreen(triX + triSize, m * triX + n); const pC = toScreen(triX + triSize, m * (triX + triSize) + n);
-        ctx.fillStyle = "rgba(255, 120, 0, 0.2)"; ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.closePath(); ctx.fill();
+        const pA = toScreen(triX, m * triX + n);
+        const pB = toScreen(triX + triSize, m * triX + n);
+        const pC = toScreen(triX + triSize, m * (triX + triSize) + n);
+
+        ctx.fillStyle = "rgba(255, 120, 0, 0.2)";
+        ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.closePath(); ctx.fill();
+
         ctx.setLineDash([5, 5]); ctx.strokeStyle = "#FF6400";
         ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.stroke(); ctx.setLineDash([]);
 
         ctx.font = "bold 14px sans-serif"; ctx.fillStyle = "#FF6400";
-        ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.px + (pB.px - pA.px)/2 - 25, pA.py + 20);
-        ctx.fillText(`Δy = ${(m * triSize).toFixed(1)}`, pB.px + 10, pA.py + (pC.py - pA.py)/2);
+        if (pA.px > -50 && pA.py > -50 && pA.px < rect.width + 50 && pA.py < rect.height + 50) {
+            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.px + (pB.px - pA.px)/2 - 25, pA.py + 20);
+            ctx.fillText(`Δy = ${(m * triSize).toFixed(1)}`, pB.px + 10, pA.py + (pC.py - pA.py)/2);
+        }
 
         // n-Label
         const nPix = toScreen(0, n);
-        ctx.fillStyle = "#B40000"; ctx.beginPath(); ctx.arc(nPix.px, nPix.py, 5, 0, Math.PI*2); ctx.fill();
-        ctx.font = "bold 16px sans-serif"; ctx.shadowBlur = 4; ctx.shadowColor = "white";
-        ctx.fillText(`n = ${n.toFixed(2)}`, nPix.px - 70, nPix.py - 10); ctx.shadowBlur = 0;
+        if (nPix.py > -20 && nPix.py < rect.height + 20) {
+            ctx.fillStyle = "#B40000"; ctx.beginPath(); ctx.arc(nPix.px, nPix.py, 6, 0, Math.PI*2); ctx.fill();
+        }
 
         // Nullstelle
         const x0 = Math.abs(m) > 0.001 ? -n/m : null;
         if (x0 !== null) {
             const x0Pix = toScreen(x0, 0);
-            ctx.fillStyle = "#008200"; ctx.beginPath(); ctx.arc(x0Pix.px, x0Pix.py, 5, 0, Math.PI*2); ctx.fill();
-            ctx.fillText(`x₀ = ${x0.toFixed(2)}`, x0Pix.px - 25, x0Pix.py + 25);
+            if(x0Pix.px > -20 && x0Pix.px < rect.width + 20) {
+                ctx.fillStyle = "#008200"; ctx.beginPath(); ctx.arc(x0Pix.px, x0Pix.py, 6, 0, Math.PI*2); ctx.fill();
+            }
         }
 
-        // Griff m
+        // Griff m (Goldener Punkt)
         const mHandle = toScreen(5.0, m * 5.0 + n);
-        ctx.fillStyle = "#DAA520"; ctx.beginPath(); ctx.arc(mHandle.px, mHandle.py, 8, 0, Math.PI*2); ctx.fill();
+        if (mHandle.px > -20 && mHandle.px < rect.width + 20 && mHandle.py > -20 && mHandle.py < rect.height + 20) {
+            ctx.fillStyle = "#DAA520"; ctx.beginPath(); ctx.arc(mHandle.px, mHandle.py, 10, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+        }
 
-        // UI Boxes
-        drawRoundedBox(50, 50, 160, 50, " = " + m.toFixed(2), "#0064FA", "m");
-        drawRoundedBox(220, 50, 160, 50, " = " + n.toFixed(2), "#B40000", "n");
-        drawRoundedBox(390, 50, 170, 50, " = " + (x0 ? x0.toFixed(2) : "---"), "#008200", "x", true);
-        drawFunctionBox(575, 50, 320, 50, m, n);
+        updateDOM();
     }
 </script>
 
