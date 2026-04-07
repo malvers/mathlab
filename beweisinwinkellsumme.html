@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>docalvers | Beweis der Innenwinkelsumme</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #007aff;
+      --bg: #ffffff;
+      --text: #1d1d1f;
+      --ui-bg: rgba(245, 245, 247, 0.98);
+
+      /* Deine exakten Labor-Farben */
+      --color-alpha: rgb(255, 177, 0);   /* Gelb */
+      --color-beta: rgb(119, 181, 33);   /* Grün */
+      --color-gamma: rgb(198, 33, 40);   /* Rot */
+      --line-blue: #294372;              /* Dunkelblau für Dreieck */
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #top-panel {
+      background: var(--ui-bg);
+      border-bottom: 1px solid #ddd;
+      z-index: 10;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .back-btn, .help-btn {
+      text-decoration: none;
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 8px;
+      background: rgba(0, 122, 255, 0.1);
+      border: none;
+    }
+
+    canvas {
+      background: white;
+      cursor: crosshair;
+      touch-action: none;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    /* --- BEWEIS BOX --- */
+    #proof-box {
+      position: absolute;
+      top: 90px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      font-family: 'Courier New', Courier, monospace; /* Monospace für saubere Rechnungen */
+      font-size: 1.2rem;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .proof-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .proof-text {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 600;
+      margin: 15px 0 5px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Farbige Variablen-Boxen */
+    .box-a { background: var(--color-alpha); color: #1d1d1f; padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 45px; text-align: center; }
+    .box-b { background: var(--color-beta); color: white; padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 45px; text-align: center; }
+    .box-c { background: var(--color-gamma); color: white; padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 45px; text-align: center; }
+
+    /* --- HELP MODAL --- */
+    #helpModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 85%;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .modal-content h3 { margin-top: 0; font-family: 'Orbitron'; color: var(--accent); }
+    .modal-content ul { list-style: none; padding: 0; line-height: 1.6; margin-bottom: 20px; }
+    .modal-content ul li { display: grid; grid-template-columns: auto 1fr; gap: 15px; margin-bottom: 10px; }
+    .modal-content ul li b { text-align: left; white-space: nowrap; }
+    .close-modal { display: block; text-align: center; color: var(--accent); font-weight: bold; cursor: pointer; padding-top: 10px; border-top: 1px solid #eee; }
+
+    @media (max-width: 768px) {
+      h2 { font-size: 0.85rem; }
+      #proof-box { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); font-size: 1rem; width: 85%; padding: 15px; }
+      .proof-row { justify-content: center; }
+      .proof-text { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="top-panel">
+  <div class="header-top">
+    <a href="index.html" class="back-btn">← ZENTRALE</a>
+    <h2>INNENWINKELSUMME BEWEIS</h2>
+    <button class="help-btn" onclick="toggleHelp()">INFO ?</button>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="proof-box">
+  <div class="proof-text" style="margin-top: 0;">Oben an der Parallelen:</div>
+  <div class="proof-row">
+    <span class="box-a" id="val-lambda"></span> + <span class="box-c" id="val-gamma1"></span> + <span class="box-b" id="val-phi"></span> = 180&deg;
+  </div>
+  <div class="proof-text">Innenwinkel im Dreieck:</div>
+  <div class="proof-row">
+    <span class="box-a" id="val-alpha"></span> + <span class="box-c" id="val-gamma2"></span> + <span class="box-b" id="val-beta"></span> = 180&deg;
+  </div>
+</div>
+
+<div id="helpModal" onclick="toggleHelp()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3>Missions-Briefing</h3>
+    <ul>
+      <li><b>Interaktion:</b><span>Ziehe die drei blauen Eckpunkte des Dreiecks mit dem Finger oder der Maus, um die Form zu ändern.</span></li>
+      <li><b>Wechselwinkel:</b><span>Die seitlichen Winkel an der oberen Geraden sind immer identisch zu den Basiswinkeln unten.</span></li>
+      <li><b>Der Beweis:</b><span>Da die drei Winkel oben zusammen eine gerade Linie (einen gestreckten Winkel von 180&deg;) bilden, müssen auch die Winkel im Dreieck zusammen 180&deg; ergeben.</span></li>
+    </ul>
+    <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  let points = [];
+  let dragIdx = -1;
+  const BOGEN_RAD = 65; // Radius vergrößert für Zahlen
+
+  function initTriangle() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    points = [
+      { x: w * 0.2, y: h * 0.7 }, // A
+      { x: w * 0.7, y: h * 0.7 }, // B
+      { x: w * 0.5, y: h * 0.25 } // C
+    ];
+    draw();
+  }
+
+  function toggleHelp() {
+    const modal = document.getElementById('helpModal');
+    modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  // Berechnet den Innenwinkel zwischen zwei Vektoren sicher in Grad (0 bis 180)
+  function getAngleDeg(v1, v2) {
+    let mag1 = Math.hypot(v1.x, v1.y);
+    let mag2 = Math.hypot(v2.x, v2.y);
+    let dot = v1.x * v2.x + v1.y * v2.y;
+    // Math.max/min verhindert NaN bei kleinen Rundungsfehlern (z.B. dot/mag = 1.0000001)
+    let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2))));
+    return angle * 180 / Math.PI;
+  }
+
+  // Hilfsfunktion: Zeichnet den Winkelbogen und schreibt den Text rein
+  function drawAngle(p, v1, v2, r, color, text) {
+    let a1 = Math.atan2(v1.y, v1.x);
+    let a2 = Math.atan2(v2.y, v2.x);
+    let diff = a2 - a1;
+
+    while(diff < 0) diff += 2 * Math.PI;
+    let ccw = diff > Math.PI;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.arc(p.x, p.y, r, a1, a2, ccw);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    let bisect = a1 + diff/2;
+    if(ccw) bisect += Math.PI;
+
+    // Positionierung der Schrift
+    let lx = p.x + (r * 0.65) * Math.cos(bisect);
+    let ly = p.y + (r * 0.65) * Math.sin(bisect) + 5;
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 15px 'Segoe UI', sans-serif";
+
+    // Schwarze Schrift für Gelb wegen Lesbarkeit
+    if (color === "rgba(255, 177, 0, 1)") ctx.fillStyle = "#1d1d1f";
+
+    ctx.textAlign = "center";
+    ctx.fillText(text, lx, ly);
+  }
+
+  function draw() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const A = points[0], B = points[1], C = points[2];
+
+    const vAB = { x: B.x - A.x, y: B.y - A.y };
+    const vAC = { x: C.x - A.x, y: C.y - A.y };
+    const vBA = { x: -vAB.x, y: -vAB.y };
+    const vBC = { x: C.x - B.x, y: C.y - B.y };
+    const vCA = { x: -vAC.x, y: -vAC.y };
+    const vCB = { x: -vBC.x, y: -vBC.y };
+
+    const vRight = vAB;
+    const vLeft = vBA;
+
+    // --- MATHE & RUNDUNGSKORREKTUR ---
+    let aDeg = Math.round(getAngleDeg(vAB, vAC));
+    let bDeg = Math.round(getAngleDeg(vBA, vBC));
+    let cDeg = Math.round(getAngleDeg(vCA, vCB));
+
+    // Sicherstellen, dass die Summe exakt 180° ergibt (wg. runden)
+    let diffSum = 180 - (aDeg + bDeg + cDeg);
+    if (diffSum !== 0) {
+        if (aDeg >= bDeg && aDeg >= cDeg) aDeg += diffSum;
+        else if (bDeg >= aDeg && bDeg >= cDeg) bDeg += diffSum;
+        else cDeg += diffSum;
+    }
+
+    // --- DOM UPDATE FÜR DIE BEWEIS-BOX ---
+    document.getElementById('val-lambda').innerHTML = aDeg + "&deg;";
+    document.getElementById('val-gamma1').innerHTML = cDeg + "&deg;";
+    document.getElementById('val-phi').innerHTML    = bDeg + "&deg;";
+
+    document.getElementById('val-alpha').innerHTML  = aDeg + "&deg;";
+    document.getElementById('val-gamma2').innerHTML = cDeg + "&deg;";
+    document.getElementById('val-beta').innerHTML   = bDeg + "&deg;";
+
+    // 1. WINKEL ZEICHNEN
+    drawAngle(A, vAB, vAC, BOGEN_RAD, "rgba(255, 177, 0, 1)", aDeg + "°");
+    drawAngle(B, vBA, vBC, BOGEN_RAD, "rgba(119, 181, 33, 1)", bDeg + "°");
+    drawAngle(C, vCA, vCB, BOGEN_RAD, "rgba(198, 33, 40, 1)", cDeg + "°");
+
+    drawAngle(C, vLeft, vCA, BOGEN_RAD, "rgba(255, 177, 0, 1)", aDeg + "°");
+    drawAngle(C, vRight, vCB, BOGEN_RAD, "rgba(119, 181, 33, 1)", bDeg + "°");
+
+    // 2. PARALLELE GERADEN ZEICHNEN
+    const lineLen = 2000;
+    const lenAB = Math.hypot(vAB.x, vAB.y);
+    const nx = vAB.x / lenAB, ny = vAB.y / lenAB;
+
+    ctx.strokeStyle = "rgba(198, 33, 40, 1)"; // Rot
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(A.x - nx * lineLen, A.y - ny * lineLen);
+    ctx.lineTo(A.x + nx * lineLen, A.y + ny * lineLen);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(C.x - nx * lineLen, C.y - ny * lineLen);
+    ctx.lineTo(C.x + nx * lineLen, C.y + ny * lineLen);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(198, 33, 40, 1)";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("g", B.x + 80, B.y - 15);
+    ctx.fillText("h", C.x + 120, C.y - 15);
+
+    // 3. DREIECK-KANTEN (Painter's Algorithm)
+    ctx.strokeStyle = "#294372";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(A.x, A.y);
+    ctx.lineTo(C.x, C.y);
+    ctx.lineTo(B.x, B.y);
+    ctx.stroke();
+
+    // 4. TOUCH-PUNKTE
+    points.forEach(p => {
+      ctx.fillStyle = "#007aff";
+      ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+    });
+  }
+
+  // --- TOUCH & MOUSE ENGINE ---
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function startDrag(e) {
+    const pos = getPos(e);
+    dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40);
+    if(dragIdx !== -1) e.preventDefault();
+  }
+
+  function moveDrag(e) {
+    if (dragIdx === -1) return;
+    const pos = getPos(e);
+    points[dragIdx] = { x: pos.x, y: pos.y };
+    draw();
+    e.preventDefault();
+  }
+
+  function stopDrag() { dragIdx = -1; }
+
+  canvas.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', stopDrag);
+
+  canvas.addEventListener('touchstart', startDrag, {passive: false});
+  window.addEventListener('touchmove', moveDrag, {passive: false});
+  window.addEventListener('touchend', stopDrag);
+
+  window.addEventListener('resize', () => {
+    // Falls das Fenster zu schmal wird, resetten wir kurz, damit das Dreieck nicht verschwindet
+    if (window.innerWidth < 400 && points[1].x > window.innerWidth) initTriangle();
+    draw();
+  });
+
+  // Start
+  initTriangle();
+</script>
+</body>
+</html>
