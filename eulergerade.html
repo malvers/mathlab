@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
   <style>
     :root { --primary: #6c5ce7; --euler: #ff8c00; --bg: #f0f2f5; }
@@ -179,17 +179,40 @@
       draw();
   }
 
-  canvas.onmousedown = (e) => {
+  // --- NEU: TOUCH & MOUSE LOGIK ---
+  function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      dragIdx = points.findIndex(p => Math.hypot(p.x - (e.clientX - rect.left), p.y - (e.clientY - rect.top)) < 25);
-  };
-  window.onmousemove = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function startDrag(e) {
+      const pos = getPos(e);
+      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40); // 40px Hitbox für Touch!
+      if(dragIdx !== -1) e.preventDefault();
+  }
+
+  function moveDrag(e) {
       if (dragIdx === -1) return;
-      const rect = canvas.getBoundingClientRect();
-      points[dragIdx] = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+      const pos = getPos(e);
+      points[dragIdx] = { x: pos.x, y: pos.y };
       draw();
-  };
-  window.onmouseup = () => dragIdx = -1;
+      e.preventDefault();
+  }
+
+  function stopDrag() { dragIdx = -1; }
+
+  // Mouse Events
+  canvas.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', stopDrag);
+
+  // Touch Events (iPad/iPhone)
+  canvas.addEventListener('touchstart', startDrag, {passive: false});
+  window.addEventListener('touchmove', moveDrag, {passive: false});
+  window.addEventListener('touchend', stopDrag);
+
   document.querySelectorAll('input').forEach(i => i.onchange = draw);
   window.addEventListener('resize', resize);
   resize();
