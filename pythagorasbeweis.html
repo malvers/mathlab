@@ -51,6 +51,9 @@
         button { padding: 12px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
         button:hover { background: #444; }
 
+        /* Spezielles Styling für den Toggle-Button */
+        #btn-toggle-tria.off { background: #1e293b; color: #64748b; border: 1px solid #334155; }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--panel); }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -65,6 +68,7 @@
     <div class="stats-card"><span class="label">ZIELFLÄCHE (ABCD)</span><span id="target-area" class="val" style="color: #ff9800;">0,00 cm²</span></div>
     <div class="stats-card"><span class="label">SUMME DREIECKE</span><span id="blue-sum" class="val" style="color: yellow;">0,00 cm²</span></div>
     <button onclick="resetLab()">RESET POSITION</button>
+    <button id="btn-toggle-tria" onclick="toggleTria()">TRIANGULIERUNG AN</button>
 </div>
 
 <div id="canvas-wrapper">
@@ -86,6 +90,20 @@
     let dragging = false, rotating = false, lastMouse = {x:0, y:0}, anyCollision = false;
 
     const showCornerDots = true;
+    let showTria = true;
+
+    function toggleTria() {
+        showTria = !showTria;
+        const btn = document.getElementById('btn-toggle-tria');
+        if (showTria) {
+            btn.innerText = "TRIANGULIERUNG AN";
+            btn.classList.remove('off');
+        } else {
+            btn.innerText = "TRIANGULIERUNG AUS";
+            btn.classList.add('off');
+        }
+        draw();
+    }
 
     function resetLab() {
         const dpr = window.devicePixelRatio || 1;
@@ -129,20 +147,19 @@
             if (isOutOfBounds) break;
         }
 
-        if (!anyCollision && !isOutOfBounds) {
+        if (showTria && !anyCollision && !isOutOfBounds) {
             let vertices = [];
             let holeIndices = [];
 
             vertices.push(ox, oy, ox+sWidth, oy, ox+sWidth, oy+sWidth, ox, oy+sWidth);
 
-            // MIKRO-SPALT TRICK FÜR EARCUT
             triangles.forEach(t => {
                 holeIndices.push(vertices.length / 2);
 
                 const cx = (t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3;
                 const cy = (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3;
 
-                const f = 0.9999; // Schrumpft das Loch um 0.05%, verhindert Kurzschlüsse bei Snapping
+                const f = 0.9999;
 
                 vertices.push(cx + (t.pts[0].x - cx) * f, cy + (t.pts[0].y - cy) * f);
                 vertices.push(cx + (t.pts[1].x - cx) * f, cy + (t.pts[1].y - cy) * f);
@@ -175,22 +192,46 @@
                     triCount++;
                 }
             }
+        } else if (!showTria) {
+            logHtml = `<div style="color: #64748b; font-size: 0.8rem; text-align: center; margin-top: 20px;">TRIANGULIERUNG DEAKTIVIERT</div>`;
         } else if (isOutOfBounds) {
             logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">DREIECK AUßERHALB DES RAHMENS</div>`;
         } else if (anyCollision) {
             logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">KOLLISION ERKANNT</div>`;
         }
 
-        document.getElementById('blue-sum').innerText = yellowTotal.toFixed(2).replace('.',',') + " cm²";
+        const sumElement = document.getElementById('blue-sum');
+        sumElement.innerText = yellowTotal.toFixed(2).replace('.',',') + " cm²";
+        sumElement.style.color = showTria ? "yellow" : "#64748b";
+
         document.getElementById('math-log').innerHTML = logHtml;
 
         triangles.forEach((t) => {
             ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
-
             ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? "rgba(255,152,0,0.6)" : "rgba(198,33,40,0.6)");
             ctx.fill();
 
             ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.stroke();
+
+            // KANTENBESCHRIFTUNGEN - a=kurz, b=lang, c=Hypotenuse
+            const edgeLabels = ["a", "b", "c"];
+            for (let i = 0; i < 3; i++) {
+                let p1 = t.pts[i];
+                let p2 = t.pts[(i + 1) % 3];
+                let midX = (p1.x + p2.x) / 2;
+                let midY = (p1.y + p2.y) / 2;
+
+                ctx.font = "bold 14px Inter";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "rgba(15, 23, 42, 0.8)";
+                ctx.strokeText(edgeLabels[i], midX, midY);
+
+                ctx.fillStyle = "white";
+                ctx.fillText(edgeLabels[i], midX, midY);
+            }
 
             if (showCornerDots) {
                 t.pts.forEach((p) => {
@@ -287,7 +328,7 @@
                 let edgeAngle = Math.atan2(selectedTri.pts[1].y - selectedTri.pts[0].y, selectedTri.pts[1].x - selectedTri.pts[0].x);
                 let snapAngle = Math.round(edgeAngle / (Math.PI/2)) * (Math.PI/2);
 
-                if (Math.abs(edgeAngle - snapAngle) < 0.3) {
+                if (Math.abs(edgeAngle - snapAngle) < 0.1) {
                     let correction = snapAngle - edgeAngle;
                     selectedTri.pts.forEach(p => {
                         const dx = p.x - cX, dy = p.y - cY;
@@ -297,7 +338,7 @@
                 }
             }
             else if (dragging) {
-                let snapDist = 20;
+                let snapDist = 10;
                 let snapOffset = {x: 0, y: 0};
                 let snapped = false;
 
