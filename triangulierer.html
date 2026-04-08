@@ -10,6 +10,7 @@
         --accent-blue: #2196f3;
         --accent-orange: #ff9800;
         --accent-green: #39FF14;
+        --accent-red: #ef4444;
         --bg: #0f172a;
         --panel: #111827;
         --card: #1e293b;
@@ -39,7 +40,16 @@
     #canvas-container { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: flex-start; overflow: hidden; }
     canvas { display: block; cursor: crosshair; touch-action: none; }
 
-    button { padding: 14px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.9rem; }
+    button { padding: 14px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    button:hover { background: #444; }
+
+    #btn-delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--accent-red);
+        border: 1px solid var(--accent-red);
+        display: none;
+    }
+    #btn-delete:hover { background: var(--accent-red); color: white; }
 
     .proof-text {
         font-size: 1rem; color: var(--accent-green); font-weight: bold;
@@ -64,7 +74,9 @@
     <span id="val-area" class="val current-val">0,00 cm²</span>
   </div>
 
+  <button id="btn-delete" onclick="deleteSelected()">AUSWAHL LÖSCHEN</button>
   <button onclick="resetPoints()">NEUE PUNKTE</button>
+
   <p class="proof-text">✓ BEWEIS DURCH DELAUNAY</p>
 </div>
 
@@ -116,7 +128,7 @@
   }
 
   const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-  let points = [], draggedIdx = -1, ox, oy, sWidth;
+  let points = [], selectedIndices = new Set(), draggedIdx = -1, ox, oy, sWidth;
   const units = 10;
 
   function formatGerman(num) {
@@ -135,21 +147,31 @@
       ctx.resetTransform();
       ctx.scale(dpr, dpr);
 
-      // RESPONSIVE SIZE: Nutzt 85% der Höhe oder Breite (was kleiner ist)
       sWidth = Math.min(rect.height * 0.85, rect.width * 0.6);
       ox = 40;
       oy = (rect.height - sWidth) / 2;
 
       points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
-      for (let i = 0; i < 12; i++) {
+      selectedIndices.clear();
+      for (let i = 0; i < 8; i++) {
           points.push([ox + 50 + Math.random() * (sWidth - 100), oy + 50 + Math.random() * (sWidth - 100)]);
       }
+      update();
+  }
+
+  function deleteSelected() {
+      // Behalte Eckpunkte und Punkte, die nicht im Set sind
+      let newPoints = points.filter((_, i) => i < 4 || !selectedIndices.has(i));
+      points = newPoints;
+      selectedIndices.clear();
       update();
   }
 
   function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const pxToCmFactor = units / sWidth;
+
+      document.getElementById('btn-delete').style.display = selectedIndices.size > 0 ? 'block' : 'none';
 
       // Raster
       ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
@@ -173,21 +195,33 @@
           ctx.fillStyle = "rgba(33, 150, 243, 0.25)"; ctx.fill();
           ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 0.5; ctx.stroke();
 
-          // Nummernschleife (skaliert mit Figur)
           const fontSize = Math.max(9, sWidth/60);
           ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = `bold ${fontSize}px Inter`; ctx.textAlign = "center";
           ctx.fillText((idx+1).toString().padStart(2, '0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + fontSize/2.5);
       });
 
+      // Punkte Zeichnen
       points.forEach((p, i) => {
-          ctx.beginPath(); ctx.arc(p[0], p[1], i < 4 ? 4 : sWidth/60, 0, Math.PI * 2);
-          ctx.fillStyle = i < 4 ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3"); ctx.fill();
+          const isSelected = selectedIndices.has(i);
+          const isEdge = i < 4;
+
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], isEdge ? 4 : (isSelected ? 7 : sWidth/60), 0, Math.PI * 2);
+
+          if (isSelected) {
+              ctx.fillStyle = "#ffffff";
+              ctx.shadowBlur = 10; ctx.shadowColor = "#2196f3";
+          } else {
+              ctx.fillStyle = isEdge ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3");
+              ctx.shadowBlur = 0;
+          }
+          ctx.fill();
+          ctx.shadowBlur = 0;
       });
 
       const totalCmArea = totalPixelArea * Math.pow(pxToCmFactor, 2);
       document.getElementById('val-area').innerText = formatGerman(totalCmArea) + ' cm²';
 
-      // TABELLE POSITIONIERT SICH DYNAMISCH
       const listX = ox + sWidth + 40;
       let currentY = oy + 20;
       const listFontSize = Math.max(12, sWidth/42);
@@ -213,23 +247,50 @@
   canvas.onpointerdown = e => {
       const rect = canvas.getBoundingClientRect();
       const dX = e.clientX - rect.left, dY = e.clientY - rect.top;
-      let closestDist = 40; draggedIdx = -1;
+      let hitIdx = -1;
+      let closestDist = 25;
+
       for (let i = 4; i < points.length; i++) {
           const d = Math.hypot(points[i][0] - dX, points[i][1] - dY);
-          if (d < closestDist) { closestDist = d; draggedIdx = i; }
+          if (d < closestDist) { closestDist = d; hitIdx = i; }
       }
-      if (draggedIdx !== -1) { canvas.setPointerCapture(e.pointerId); update(); }
+
+      if (hitIdx !== -1) {
+          if (!e.shiftKey && !selectedIndices.has(hitIdx)) {
+              selectedIndices.clear();
+          }
+          selectedIndices.add(hitIdx);
+          draggedIdx = hitIdx;
+      } else {
+          selectedIndices.clear();
+          if (dX >= ox && dX <= ox + sWidth && dY >= oy && dY <= oy + sWidth) {
+              points.push([dX, dY]);
+              draggedIdx = points.length - 1;
+          }
+      }
+      if (draggedIdx !== -1) canvas.setPointerCapture(e.pointerId);
+      update();
   };
+
   window.onpointermove = e => {
       if (draggedIdx !== -1) {
           const rect = canvas.getBoundingClientRect();
-          points[draggedIdx] = [Math.max(ox, Math.min(ox + sWidth, e.clientX - rect.left)), Math.max(oy, Math.min(oy + sWidth, e.clientY - rect.top))];
+          points[draggedIdx] = [
+              Math.max(ox, Math.min(ox + sWidth, e.clientX - rect.left)),
+              Math.max(oy, Math.min(oy + sWidth, e.clientY - rect.top))
+          ];
           update();
       }
   };
-  window.onpointerup = e => { if (draggedIdx !== -1) { canvas.releasePointerCapture(e.pointerId); draggedIdx = -1; update(); } };
 
-  // Resize Listener für iPad Rotation
+  window.onpointerup = e => {
+      if (draggedIdx !== -1) {
+          canvas.releasePointerCapture(e.pointerId);
+          draggedIdx = -1;
+          update();
+      }
+  };
+
   window.addEventListener('resize', resetPoints);
   window.onload = resetPoints;
 </script>

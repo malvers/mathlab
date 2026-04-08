@@ -3,237 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Pythagoras Pure Lab</title>
+    <title>Pythagoras | Schritt 8: Yellow Mesh Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --labor-red: rgb(198, 33, 40);
-            --labor-blue-dark: rgb(0, 0, 60);
-            --labor-blue-light: rgba(100, 150, 255, 0.4);
+            --bg: #0f172a; --panel: #111827; --card: #1e293b;
+            --accent-orange: #ff9800;
         }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif; background: #fff;
-            display: flex; height: 100vh; overflow: hidden; touch-action: none;
-        }
-
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
         #side-panel {
-            width: 420px; min-width: 420px;
-            border-right: 2px solid #ddd;
-            padding: 10px 25px;
-            background: #fdfdfd;
-            display: flex; flex-direction: column; gap: 8px;
-            overflow: hidden; z-index: 10;
+            width: 380px; min-width: 380px; border-right: 1px solid #334155;
+            padding: 20px 25px; display: flex; flex-direction: column; gap: 12px;
+            background: var(--panel); z-index: 10;
         }
-
-        h2 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; margin: 0; color: var(--labor-red); border-bottom: 3px solid var(--labor-red); padding-bottom: 5px; }
-
-        .math-table { font-family: 'Courier New', monospace; font-size: 1.05rem; width: 100%; border-collapse: collapse; }
-        .math-table td { padding: 3px 0; border-bottom: 1px solid #eee; }
-        .math-table .val { text-align: right; font-weight: bold; color: var(--labor-blue-dark); }
-
-        .sum-section { border-top: 3px solid #333; margin-top: 5px; padding-top: 8px; }
-        .sum-row { font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; }
-        .target-row { font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; color: #444; margin-top: 2px; }
-
-        .proof-text {
-            margin-top: 8px; color: #2e7d32; font-size: 0.9rem; font-weight: bold;
-            text-align: center; display: none; line-height: 1.2;
-        }
-
-        canvas { flex-grow: 1; cursor: grab; background: #fff; }
-
-        .rot-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-ui {
-            padding: 12px 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
-            background: #f0f0f0; border: 2px solid #bbb; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.2s; user-select: none; font-family: 'Inter';
-        }
-        .btn-ui span { font-size: 0.75rem; font-family: 'Orbitron'; margin-top: 2px; color: #666; }
-        .btn-ui:active { background: #ccc; transform: scale(0.95); }
-        .btn-ui.active { background: #e3f2fd; border-color: #2196f3; }
-
-        .btn-reset { margin-top: auto; margin-bottom: 10px; padding: 10px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; }
+        h2 { font-family: 'Orbitron'; font-size: 1.1rem; margin: 0; color: var(--labor-red); border-bottom: 3px solid var(--labor-red); padding-bottom: 5px; }
+        .stats-card { background: var(--card); padding: 12px; border-radius: 10px; border: 1px solid #334155; }
+        .val { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: bold; display: block; margin-top: 5px; }
+        .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+        #math-log { flex-grow: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .log-entry { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding: 4px 0; }
+        canvas { flex-grow: 1; cursor: crosshair; }
+        button { padding: 10px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="side-panel">
-    <a href="index.html" style="text-decoration: none; font-size: 0.8rem; color: #888; font-weight: bold;">&larr; ZENTRALE</a>
     <h2>PYTHAGORAS LABOR</h2>
-
-    <div id="tri-gedoens-ui">
-        <table class="math-table" id="tri-table"></table>
-
-        <div class="sum-section">
-            <div class="sum-row"><span>Summe (8):</span> <span id="val-sum8">0.00</span></div>
-            <div class="target-row"><span>Fläche ABCD:</span> <span id="val-target-abcd">260000.00</span></div>
-            <div id="proof-msg" class="proof-text">
-                Bewiesen: die Summe der Teildreiecke ist gleich der Fläche ABCD
-            </div>
-        </div>
-    </div>
-
-    <div style="margin-top: 5px;">
-        <div style="font-weight: bold; font-size: 0.85rem; color: #666; margin-bottom: 5px;">STEUERUNG:</div>
-        <div class="rot-controls">
-            <div class="btn-ui" onclick="rotateFixed(-10)">⟲ LEFT<span>-10°</span></div>
-            <div class="btn-ui" onclick="rotateFixed(10)">↻ RIGHT<span>+10°</span></div>
-            <div id="toggle-btn" class="btn-ui active" onclick="toggleGedoens()" style="grid-column: span 2;">
-                DREIECKSGEDÖNS<span>AN / AUS</span>
-            </div>
-        </div>
-    </div>
-
-    <button class="btn-reset" onclick="resetLab()">SYSTEM RESET</button>
+    <div class="stats-card"><span class="label">ZIELFLÄCHE (ABCD)</span><span id="target-area" class="val" style="color: #ff9800;">0,00 cm²</span></div>
+    <div class="stats-card"><span class="label">SUMME GELB (TRIA)</span><span id="blue-sum" class="val" style="color: yellow;">0,00 cm²</span></div>
+    <div class="label">Addition der Flächen</div>
+    <div id="math-log"></div>
+    <button onclick="resetLab()">RESET POSITION</button>
 </div>
 
 <canvas id="canvas"></canvas>
 
 <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+    const sWidth = 600, units = 10;
+    const pxToCmFactor = units / sWidth;
+    let ox, oy, triangles = [], anchors = [], selectedTri = null;
+    let dragging = false, rotating = false, lastMouse = {x:0, y:0}, anyCollision = false;
 
-    const aLen = 100.0, sWidth = 600.0;
-    let ox = 0, oy = 0, A, B, C, D, b_point, triangles = [], selectedTri = null;
-    let dragging = false, lastMouse = {x: 0, y: 0};
-    let gedoensVisible = true;
-
-    class Triangle {
-        constructor(x1, y1, x2, y2, x3, y3) {
-            this.pts = [{x: x1, y: y1}, {x: x2, y: y2}, {x: x3, y: y3}];
-        }
-        getCenter() {
-            return { x: (this.pts[0].x + this.pts[1].x + this.pts[2].x)/3, y: (this.pts[0].y + this.pts[1].y + this.pts[2].y)/3 };
-        }
-        translate(dx, dy) { this.pts.forEach(p => { p.x += dx; p.y += dy; }); }
-        rotate(deg) {
-            const rad = deg * Math.PI / 180, cos = Math.cos(rad), sin = Math.sin(rad), c = this.getCenter();
-            this.pts.forEach(p => {
-                const dx = p.x - c.x, dy = p.y - c.y;
-                p.x = c.x + dx * cos - dy * sin; p.y = c.y + dx * sin + dy * cos;
+    // Robuste Delaunay Engine
+    function triangulate(points) {
+        if (points.length < 3) return [];
+        const big = 20000;
+        const bigTri = [[-big, -big], [big, -big], [0, big]];
+        let triangles = [{p: bigTri}];
+        points.forEach(pt => {
+            let edges = [];
+            triangles = triangles.filter(tri => {
+                const c = getCircumcenter(tri.p);
+                if (Math.hypot(c.x - pt[0], c.y - pt[1]) < c.r - 0.001) {
+                    edges.push([tri.p[0], tri.p[1]], [tri.p[1], tri.p[2]], [tri.p[2], tri.p[0]]);
+                    return false;
+                }
+                return true;
             });
-        }
-        contains(x, y) {
-            const [p0, p1, p2] = this.pts;
-            const area = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
-            const s = 1/(2*area) * (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * x + (p0.x - p2.x) * y);
-            const t = 1/(2*area) * (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * x + (p1.x - p0.x) * y);
-            return s >= 0 && t >= 0 && (s + t) <= 1;
-        }
-        getArea() {
-            const [p1, p2, p3] = this.pts;
-            return Math.abs((p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y))/2.0);
-        }
+            const uniqueEdges = [];
+            for (let i = 0; i < edges.length; i++) {
+                let isDup = false;
+                for (let j = 0; j < edges.length; j++) {
+                    if (i === j) continue;
+                    if ((distP(edges[i][0], edges[j][0]) < 0.1 && distP(edges[i][1], edges[j][1]) < 0.1) ||
+                        (distP(edges[i][0], edges[j][1]) < 0.1 && distP(edges[i][1], edges[j][0]) < 0.1)) {
+                        isDup = true; break;
+                    }
+                }
+                if (!isDup) uniqueEdges.push(edges[i]);
+            }
+            uniqueEdges.forEach(e => triangles.push({p: [e[0], e[1], pt]}));
+        });
+        return triangles.filter(t => !t.p.some(p => bigTri.includes(p)));
     }
 
-    function toggleGedoens() {
-        gedoensVisible = !gedoensVisible;
-        const ui = document.getElementById('tri-gedoens-ui');
-        const btn = document.getElementById('toggle-btn');
-        ui.style.visibility = gedoensVisible ? 'visible' : 'hidden';
-        btn.classList.toggle('active');
-        draw();
+    const distP = (p1, p2) => Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+    function getCircumcenter(p) {
+        const [p1, p2, p3] = p;
+        const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
+        const D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+        const ux = ((x1**2+y1**2)*(y2-y3)+(x2**2+y2**2)*(y3-y1)+(x3**2+y3**2)*(y1-y2))/D;
+        const uy = ((x1**2+y1**2)*(x3-x2)+(x2**2+y2**2)*(x1-x3)+(x3**2+y3**2)*(x2-x1))/D;
+        return {x: ux, y: uy, r: Math.hypot(x1 - ux, y1 - uy)};
     }
 
     function resetLab() {
-        const w = canvas.width / window.devicePixelRatio;
-        const h = canvas.height / window.devicePixelRatio;
-        ox = 60; oy = (h - sWidth) / 2;
-
-        A = { x: ox + sWidth, y: oy + aLen }; B = { x: ox + sWidth - aLen, y: oy + sWidth };
-        C = { x: ox, y: oy + sWidth - aLen }; D = { x: ox + aLen, y: oy };
-        b_point = { x: ox + sWidth, y: oy };
-
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ox = 60; oy = (canvas.height/dpr - sWidth) / 2;
+        const a = 150;
+        anchors = [{id:'D',x:ox+a,y:oy},{id:'A',x:ox+sWidth,y:oy+a},{id:'B',x:ox+sWidth-a,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-a}];
         triangles = [
-            new Triangle(ox+aLen, oy, ox+sWidth, oy, ox+sWidth, oy+aLen),
-            new Triangle(ox+sWidth, oy+aLen, ox+sWidth, oy+sWidth, ox+sWidth-aLen, oy+sWidth),
-            new Triangle(ox+sWidth-aLen, oy+sWidth, ox, oy+sWidth, ox, oy+sWidth-aLen),
-            new Triangle(ox, oy+sWidth-aLen, ox, oy, ox+aLen, oy)
+            { pts: [{x:ox+a, y:oy}, {x:ox, y:oy}, {x:ox, y:oy+sWidth-a}] },
+            { pts: [{x:ox+sWidth, y:oy+a}, {x:ox+sWidth, y:oy}, {x:ox+a, y:oy}] },
+            { pts: [{x:ox+sWidth-a, y:oy+sWidth}, {x:ox+sWidth, y:oy+sWidth}, {x:ox+sWidth, y:oy+a}] },
+            { pts: [{x:ox, y:oy+sWidth-a}, {x:ox, y:oy+sWidth}, {x:ox+sWidth-a, y:oy+sWidth}] }
         ];
-        selectedTri = null; draw();
+        draw();
+    }
+
+    // Präziser Check: Liegt der Punkt INSIDE eines roten Dreiecks?
+    function isStrictlyInside(p, p1, p2, p3) {
+        const area = 0.5 *(-p2.y*p3.x + p1.y*(-p2.x + p3.x) + p1.x*(p2.y - p3.y) + p2.x*p3.y);
+        const s = 1/(2*area)*(p1.y*p3.x - p1.x*p3.y + (p3.y - p1.y)*p.x + (p1.x - p3.x)*p.y);
+        const t = 1/(2*area)*(p1.x*p2.y - p1.y*p2.x + (p1.y - p2.y)*p.x + (p2.x - p1.x)*p.y);
+        // Wir nutzen einen negativen Puffer (0.005), damit Randfälle NICHT als "Inside" zählen
+        return s > 0.005 && t > 0.005 && (s + t) < 0.995;
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const t0 = triangles[0];
-        const subs = [
-            new Triangle(C.x, C.y, t0.pts[0].x, t0.pts[0].y, D.x, D.y),
-            new Triangle(D.x, D.y, t0.pts[0].x, t0.pts[0].y, A.x, A.y),
-            new Triangle(t0.pts[0].x, t0.pts[0].y, A.x, A.y, t0.pts[1].x, t0.pts[1].y),
-            new Triangle(A.x, A.y, t0.pts[1].x, t0.pts[1].y, B.x, B.y),
-            new Triangle(t0.pts[1].x, t0.pts[1].y, B.x, B.y, t0.pts[2].x, t0.pts[2].y),
-            new Triangle(B.x, B.y, C.x, C.y, t0.pts[2].x, t0.pts[2].y),
-            new Triangle(C.x, C.y, t0.pts[2].x, t0.pts[2].y, t0.pts[0].x, t0.pts[0].y),
-            new Triangle(D.x, D.y, A.x, A.y, b_point.x, b_point.y)
-        ];
+        let yellowTotal = 0, logHtml = "";
 
-        ctx.fillStyle = 'blue'; ctx.fillRect(ox, oy, sWidth, sWidth);
+        if (!anyCollision) {
+            let pts = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
+            anchors.forEach(a => pts.push([a.x, a.y]));
+            triangles.forEach(t => t.pts.forEach(p => pts.push([p.x, p.y])));
+            const mesh = triangulate(pts);
+            let triCount = 1;
 
-        if (gedoensVisible) {
-            subs.forEach(sub => {
-                ctx.fillStyle = 'rgba(100, 150, 255, 0.4)'; ctx.beginPath();
-                ctx.moveTo(sub.pts[0].x, sub.pts[0].y); ctx.lineTo(sub.pts[1].x, sub.pts[1].y); ctx.lineTo(sub.pts[2].x, sub.pts[2].y);
-                ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgb(0,0,60)'; ctx.lineWidth = 1; ctx.stroke();
+            mesh.forEach(tri => {
+                const mid = { x: (tri.p[0][0]+tri.p[1][0]+tri.p[2][0])/3, y: (tri.p[0][1]+tri.p[1][1]+tri.p[2][1])/3 };
+
+                // Prüfen, ob Schwerpunkt in IRGENDEINEM roten Dreieck liegt (mit Puffer!)
+                let insideRed = triangles.some(rt => isStrictlyInside(mid, rt.pts[0], rt.pts[1], rt.pts[2]));
+
+                // Liegt der Schwerpunkt im Hauptrahmen?
+                let inFrame = mid.x >= ox && mid.x <= ox+sWidth && mid.y >= oy && mid.y <= oy+sWidth;
+
+                if (!insideRed && inFrame) {
+                    ctx.strokeStyle = "yellow"; ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(tri.p[0][0], tri.p[0][1]); ctx.lineTo(tri.p[1][0], tri.p[1][1]); ctx.lineTo(tri.p[2][0], tri.p[2][1]); ctx.closePath();
+                    ctx.stroke();
+
+                    const areaCm = (Math.abs(tri.p[0][0]*(tri.p[1][1]-tri.p[2][1]) + tri.p[1][0]*(tri.p[2][1]-tri.p[0][1]) + tri.p[2][0]*(tri.p[0][1]-tri.p[1][1])) / 2) * (pxToCmFactor**2);
+                    if(areaCm > 0.01) {
+                        yellowTotal += areaCm;
+                        ctx.fillStyle = "yellow"; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
+                        ctx.fillText(triCount.toString().padStart(2,'0'), mid.x, mid.y+4);
+                        logHtml += `<div class="log-entry"><span>Δ ${triCount.toString().padStart(2,'0')}</span><span>${areaCm.toFixed(2)} cm²</span></div>`;
+                        triCount++;
+                    }
+                }
             });
         }
+        document.getElementById('blue-sum').innerText = yellowTotal.toFixed(2).replace('.',',') + " cm²";
+        document.getElementById('math-log').innerHTML = logHtml;
 
-        triangles.forEach(tri => {
-            ctx.fillStyle = (tri === selectedTri) ? 'orange' : 'rgb(198, 33, 40)';
-            ctx.beginPath(); ctx.moveTo(tri.pts[0].x, tri.pts[0].y);
-            ctx.lineTo(tri.pts[1].x, tri.pts[1].y); ctx.lineTo(tri.pts[2].x, tri.pts[2].y);
-            ctx.closePath(); ctx.fill();
-
-            if (tri === selectedTri && gedoensVisible) {
-                ctx.fillStyle = "black"; ctx.font = "bold 16px Arial";
-                ctx.fillText("1", tri.pts[0].x - 12, tri.pts[0].y - 8);
-                ctx.fillText("2", tri.pts[1].x + 8, tri.pts[1].y - 8);
-                ctx.fillText("3", tri.pts[2].x + 8, tri.pts[2].y + 16);
-            }
+        // Rote Dreiecke
+        triangles.forEach((t, triIdx) => {
+            ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
+            ctx.fillStyle = t.collision ? "rgba(255,0,0,0.4)" : (t === selectedTri ? "rgba(255,152,0,0.5)" : "rgba(198,33,40,0.5)");
+            ctx.fill();
+            const lbls = ["c","a","b"], subs = ["₁","₂","₃","₄"];
+            t.pts.forEach((p, i) => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI*2); ctx.fillStyle = "#666"; ctx.fill();
+                ctx.fillStyle = "white"; ctx.font = "bold 10px Inter"; ctx.textAlign = "center"; ctx.fillText(lbls[i]+subs[triIdx], p.x, p.y+4);
+            });
         });
 
-        ctx.fillStyle = "black"; ctx.font = "bold 20px Arial";
-        [{p:A,t:"A"},{p:B,t:"B"},{p:C,t:"C"},{p:D,t:"D"}].forEach(l => ctx.fillText(l.t, l.p.x+10, l.p.y+10));
-
-        let sum8 = 0, html = "", labels = ["C1D", "D1A", "1A2", "A2B", "2B3", "BC3", "C31", "DAb"];
-        subs.forEach((s, i) => {
-            const a = s.getArea();
-            sum8 += a;
-            html += `<tr><td>${labels[i]}</td><td class="val">${a.toFixed(2)}</td></tr>`;
+        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, sWidth, sWidth);
+        anchors.forEach(a => {
+            ctx.fillStyle = "rgb(100,0,0)"; ctx.beginPath(); ctx.arc(a.x, a.y, 6, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
+            ctx.fillText(a.id, a.x + (a.id === 'A' || a.id === 'B' ? 25 : -25), a.id === 'C' || a.id === 'B' ? a.y + 30 : a.y - 15);
         });
-        document.getElementById('tri-table').innerHTML = html;
-        document.getElementById('val-sum8').innerText = sum8.toFixed(2);
-
-        const targetArea = 260000.00;
-        if(Math.abs(sum8 - targetArea) < 1.0) document.getElementById('proof-msg').style.display = 'block';
-        else document.getElementById('proof-msg').style.display = 'none';
+        const tArea = Math.pow(Math.hypot(anchors[0].x - anchors[1].x, anchors[0].y - anchors[1].y), 2) * (pxToCmFactor**2);
+        document.getElementById('target-area').innerText = tArea.toFixed(2).replace('.',',') + " cm²";
     }
 
-    function rotateFixed(deg) {
-        if(!selectedTri) return;
-        selectedTri.rotate(deg);
-        draw();
+    // Interaktion & SAT-Collision
+    function checkCollisions() {
+        anyCollision = false; triangles.forEach(t => t.collision = false);
+        for (let i=0; i<triangles.length; i++) {
+            for (let j=i+1; j<triangles.length; j++) {
+                if (triIntersect(triangles[i].pts, triangles[j].pts)) {
+                    triangles[i].collision = true; triangles[j].collision = true; anyCollision = true;
+                }
+            }
+        }
+    }
+    function triIntersect(t1, t2) { return checkSAT(t1, t2) && checkSAT(t2, t1); }
+    function checkSAT(t1, t2) {
+        for (let i=0; i<3; i++) {
+            const p1=t1[i], p2=t1[(i+1)%3], n={x:p2.y-p1.y, y:p1.x-p2.x};
+            let min1=Infinity, max1=-Infinity, min2=Infinity, max2=-Infinity;
+            t1.forEach(p=>{const pr=p.x*n.x+p.y*n.y; min1=Math.min(min1,pr); max1=Math.max(max1,pr);});
+            t2.forEach(p=>{const pr=p.x*n.x+p.y*n.y; min2=Math.min(min2,pr); max2=Math.max(max2,pr);});
+            if (max1 < min2+0.1 || max2 < min1+0.1) return false;
+        }
+        return true;
     }
 
     canvas.onpointerdown = e => {
-        const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left), y = (e.clientY - r.top);
-        selectedTri = triangles.find(t => t.contains(x, y)) || null;
-        if(selectedTri) { dragging = true; lastMouse = {x, y}; }
-        draw();
+        const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
+        let found = false; rotating = false; dragging = false;
+        for (let t of triangles) { for (let p of t.pts) { if (Math.hypot(p.x-x, p.y-y) < 15) { selectedTri = t; rotating = true; found = true; break; } } if (found) break; }
+        // Fallback: Check if point is inside a triangle
+        if (!found) { for (let t of triangles) {
+            const p = t.pts;
+            const area = 0.5 *(-p[1].y*p[2].x + p[0].y*(-p[1].x + p[2].x) + p[0].x*(p[1].y - p[2].y) + p[1].x*p[2].y);
+            const s = 1/(2*area)*(p[0].y*p[2].x - p[0].x*p[2].y + (p[2].y - p[0].y)*x + (p[0].x - p[2].x)*y);
+            const t_ = 1/(2*area)*(p[0].x*p[1].y - p[0].y*p[1].x + (p[0].y - p[1].y)*x + (p[1].x - p[0].x)*y);
+            if (s >= 0 && t_ >= 0 && (s + t_) <= 1) { selectedTri = t; dragging = true; found = true; break; }
+        }}
+        if (!found) selectedTri = null;
+        lastMouse = {x, y}; draw();
     };
     window.onpointermove = e => {
-        if(!dragging || !selectedTri) return;
-        const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left), y = (e.clientY - r.top);
-        selectedTri.translate(x - lastMouse.x, y - lastMouse.y); lastMouse = {x, y}; draw();
+        if(!selectedTri) return;
+        const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
+        const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3, cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
+        if (dragging) { const dx = x - lastMouse.x, dy = y - lastMouse.y; selectedTri.pts.forEach(p => { p.x += dx; p.y += dy; }); }
+        else if (rotating) {
+            const angle = Math.atan2(y - cY, x - cX) - Math.atan2(lastMouse.y - cY, lastMouse.x - cX);
+            selectedTri.pts.forEach(p => { const dx = p.x - cX, dy = p.y - cY; p.x = cX + dx * Math.cos(angle) - dy * Math.sin(angle); p.y = cY + dx * Math.sin(angle) + dy * Math.cos(angle); });
+        }
+        checkCollisions(); lastMouse = {x, y}; draw();
     };
-    window.onpointerup = () => dragging = false;
-
-    function init() {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
-        ctx.scale(dpr, dpr); resetLab();
-    }
-    window.onresize = init; init();
+    window.onpointerup = () => { dragging = rotating = false; draw(); };
+    window.onresize = resetLab; resetLab();
 </script>
 </body>
 </html>
