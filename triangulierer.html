@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pythagoras | Floating Sum Lab</title>
+  <title>Pythagoras | Delaunay Masters Lab Final</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
         --accent-blue: #2196f3;
         --accent-orange: #ff9800;
+        --accent-green: #39FF14;
         --bg: #0f172a;
         --panel: #111827;
         --card: #1e293b;
@@ -28,46 +29,50 @@
     }
 
     h2 { font-family: 'Orbitron'; margin: 0; font-size: 1.3rem; color: var(--text-main); border-bottom: 2px solid #334155; padding-bottom: 10px; }
-
     .stats-card { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #334155; }
     .val { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: bold; display: block; margin-top: 5px; }
-
     .target-val { color: var(--accent-orange); }
     .current-val { color: var(--accent-blue); }
-
     canvas { flex-grow: 1; cursor: crosshair; touch-action: none; background: var(--bg); }
+    button { padding: 16px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1rem; }
 
-    button {
-        padding: 16px; background: #333; color: white; border: none;
-        border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1rem;
+    .proof-text {
+        font-size: 1.25rem;
+        color: var(--accent-green);
+        font-weight: bold;
+        margin-top: auto;
+        text-align: center;
+        font-family: 'Orbitron';
+        padding: 15px;
+        background: rgba(57, 255, 20, 0.05);
+        border-radius: 10px;
+        border: 2px solid rgba(57, 255, 20, 0.2);
+        text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
     }
-    .proof-text { font-size: 0.8rem; color: #4ade80; font-weight: bold; margin-top: auto; text-align: center; font-family: 'Orbitron'; }
-    .unit { font-size: 0.9rem; color: var(--text-muted); margin-left: 5px; }
   </style>
 </head>
 <body>
 
 <div id="side-panel">
-  <h2>10 x 10 LABOR (cm)</h2>
+  <h2>10 x 10 DELAUNAY LABOR</h2>
 
   <div class="stats-card">
-    ZIELFLÄCHE ($10 \times 10$):
-    <span class="val target-val">100,00 <span class="unit">cm²</span></span>
+    ZIELFLÄCHE:
+    <span class="val target-val">100,00 cm²</span>
   </div>
 
   <div class="stats-card">
-    AKTUELL BERECHNET:
-    <span id="val-area" class="val current-val">0,00 <span class="unit">cm²</span></span>
+    SUMME BLAU:
+    <span id="val-area" class="val current-val">0,00 cm²</span>
   </div>
 
-  <button onclick="resetPoints()">PUNKTE NEU STREUEN</button>
-  <p class="proof-text">✓ FLÄCHE BLEIBT KONSTANT</p>
+  <button onclick="resetPoints()">NEUE PUNKTE STREUEN</button>
+  <p class="proof-text">✓ BEWEIS DURCH DELAUNAY</p>
 </div>
 
 <canvas id="canvas"></canvas>
 
 <script>
-  // --- DELAUNAY ALGORITHM ---
   class Delaunay {
       static from(points) {
           if (points.length < 3) return [];
@@ -112,8 +117,7 @@
 
   const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
   let points = [], draggedIdx = -1, ox, oy;
-  const sWidth = 600;
-  const units = 10;
+  const sWidth = 750, units = 10;
   const pxToCmFactor = units / sWidth;
 
   function formatGerman(num) {
@@ -124,95 +128,75 @@
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-      ctx.resetTransform();
-      ctx.scale(dpr, dpr);
-
-      ox = 40;
-      oy = (rect.height - sWidth) / 2;
-
+      ctx.resetTransform(); ctx.scale(dpr, dpr);
+      ox = 40; oy = (rect.height - sWidth) / 2;
       points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
-      for (let i = 0; i < 12; i++) {
-          points.push([ox + 50 + Math.random() * (sWidth - 100), oy + 50 + Math.random() * (sWidth - 100)]);
-      }
+      for (let i = 0; i < 12; i++) points.push([ox + 50 + Math.random() * (sWidth - 100), oy + 50 + Math.random() * (sWidth - 100)]);
       update();
   }
 
   function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Raster
       ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
       for(let i=0; i<=units; i++) {
           let pos = i * (sWidth / units);
           ctx.beginPath(); ctx.moveTo(ox + pos, oy); ctx.lineTo(ox + pos, oy + sWidth); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(ox, oy + pos); ctx.lineTo(ox + sWidth, oy + pos); ctx.stroke();
       }
-
       const triangles = Delaunay.from(points);
-      ctx.strokeStyle = "#334155"; ctx.lineWidth = 3; ctx.strokeRect(ox, oy, sWidth, sWidth);
-
-      let totalPixelArea = 0;
-
-      triangles.forEach(tri => {
+      ctx.strokeStyle = "#334155"; ctx.lineWidth = 4; ctx.strokeRect(ox, oy, sWidth, sWidth);
+      let totalPixelArea = 0, triangleAreas = [];
+      triangles.forEach((tri, idx) => {
           const p = tri.p;
-          const area = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2);
-          totalPixelArea += area;
-
+          const areaPx = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2);
+          totalPixelArea += areaPx; triangleAreas.push(areaPx * Math.pow(pxToCmFactor, 2));
           ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
-          ctx.fillStyle = "rgba(33, 150, 243, 0.2)"; ctx.fill();
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.stroke();
+          ctx.fillStyle = "rgba(33, 150, 243, 0.25)"; ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.15)"; ctx.stroke();
+          ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "bold 13px Inter"; ctx.textAlign = "center";
+          ctx.fillText((idx+1).toString().padStart(2, '0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + 5);
       });
-
       points.forEach((p, i) => {
           ctx.beginPath(); ctx.arc(p[0], p[1], i < 4 ? 6 : 10, 0, Math.PI * 2);
-          ctx.fillStyle = i < 4 ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3");
-          ctx.fill();
+          ctx.fillStyle = i < 4 ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3"); ctx.fill();
       });
-
       const totalCmArea = totalPixelArea * Math.pow(pxToCmFactor, 2);
-      const areaStr = formatGerman(totalCmArea);
-      document.getElementById('val-area').innerHTML = areaStr + ' <span class="unit">cm²</span>';
-
-      // FLOATING SUM NEBEN DER FIGUR
-      ctx.fillStyle = "rgba(33, 150, 243, 0.9)";
-      ctx.font = "bold 24px Orbitron";
-      ctx.textAlign = "left";
-      // Position rechts neben dem Quadrat
-      ctx.fillText(`SUMME: ${areaStr} cm²`, ox + sWidth + 30, oy + sWidth/2);
-
-      ctx.font = "14px Inter";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.fillText("Fläche aller Dreiecke", ox + sWidth + 30, oy + sWidth/2 + 25);
+      document.getElementById('val-area').innerText = formatGerman(totalCmArea) + ' cm²';
+      const listX = ox + sWidth + 60; let currentY = oy + 30;
+      ctx.textAlign = "left"; ctx.font = "bold 16px Orbitron"; ctx.fillStyle = "var(--text-muted)";
+      ctx.fillText("ADDITION DER FLÄCHEN (cm²) [Δ]:", listX, currentY); currentY += 45;
+      ctx.font = "bold 18px Orbitron"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      triangleAreas.forEach((a, i) => {
+          if (currentY < oy + sWidth - 50) {
+              ctx.fillText((i+1).toString().padStart(2, '0'), listX, currentY);
+              ctx.textAlign = "right"; ctx.fillText(formatGerman(a), listX + 175, currentY);
+              ctx.textAlign = "left"; currentY += 25;
+          }
+      });
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(listX, currentY + 5); ctx.lineTo(listX + 220, currentY + 5); ctx.stroke();
+      ctx.font = "bold 24px Orbitron"; ctx.fillStyle = "var(--accent-blue)";
+      ctx.fillText(`Σ = ${formatGerman(totalCmArea)}`, listX, currentY + 50);
   }
 
   canvas.onpointerdown = e => {
       const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      let closestDist = 35;
-      draggedIdx = -1;
+      let closestDist = 35; draggedIdx = -1;
       for (let i = 4; i < points.length; i++) {
-          const d = Math.hypot(points[i][0] - mouseX, points[i][1] - mouseY);
+          const d = Math.hypot(points[i][0] - (e.clientX - rect.left), points[i][1] - (e.clientY - rect.top));
           if (d < closestDist) { closestDist = d; draggedIdx = i; }
       }
       if (draggedIdx !== -1) { canvas.setPointerCapture(e.pointerId); update(); }
   };
-
   window.onpointermove = e => {
       if (draggedIdx !== -1) {
           const rect = canvas.getBoundingClientRect();
-          points[draggedIdx] = [
-              Math.max(ox, Math.min(ox + sWidth, e.clientX - rect.left)),
-              Math.max(oy, Math.min(oy + sWidth, e.clientY - rect.top))
-          ];
+          points[draggedIdx] = [Math.max(ox, Math.min(ox + sWidth, e.clientX - rect.left)), Math.max(oy, Math.min(oy + sWidth, e.clientY - rect.top))];
           update();
       }
   };
-
   window.onpointerup = e => { if (draggedIdx !== -1) { canvas.releasePointerCapture(e.pointerId); draggedIdx = -1; update(); } };
-  window.onresize = resetPoints;
-  window.onload = resetPoints;
+  window.onresize = resetPoints; window.onload = resetPoints;
 </script>
 </body>
 </html>
