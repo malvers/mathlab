@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pythagoras | Delaunay Masters Lab Final</title>
+  <title>Pythagoras | Delaunay Masters Final</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -31,16 +31,23 @@
     h2 { font-family: 'Orbitron'; margin: 0; font-size: 1.3rem; color: var(--text-main); border-bottom: 2px solid #334155; padding-bottom: 10px; }
     .stats-card { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #334155; }
     .val { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: bold; display: block; margin-top: 5px; }
+    .stats-card-title { font-weight: 600; font-size: 0.95rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
+
     .target-val { color: var(--accent-orange); }
     .current-val { color: var(--accent-blue); }
-    canvas { flex-grow: 1; cursor: crosshair; touch-action: none; background: var(--bg); }
-    button { padding: 16px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1rem; }
 
+    canvas { flex-grow: 1; cursor: crosshair; touch-action: none; background: var(--bg); }
+
+    button { padding: 16px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+    button:active { transform: scale(0.98); background: #444; }
+
+    /* Die grüne Beweis-Box: Jetzt höher positioniert */
     .proof-text {
         font-size: 1.25rem;
         color: var(--accent-green);
         font-weight: bold;
         margin-top: auto;
+        margin-bottom: 40px; /* Schiebt die Box auf Höhe der Unterkante */
         text-align: center;
         font-family: 'Orbitron';
         padding: 15px;
@@ -54,16 +61,15 @@
 <body>
 
 <div id="side-panel">
-  <h2>10 x 10 DELAUNAY LABOR</h2>
+  <h2>x 10 DELAUNAY LABOR</h2>
 
   <div class="stats-card">
-    ZIELFLÄCHE:
+    <span class="stats-card-title">ZIELFLÄCHE</span>
     <span class="val target-val">100,00 cm²</span>
   </div>
 
   <div class="stats-card">
-    SUMME BLAU:
-    <span id="val-area" class="val current-val">0,00 cm²</span>
+    <span class="stats-card-title">SUMME DREIECKE</span> <span id="val-area" class="val current-val">0,00 cm²</span>
   </div>
 
   <button onclick="resetPoints()">NEUE PUNKTE STREUEN</button>
@@ -137,34 +143,46 @@
 
   function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+
+      // Raster: Noch feiner (0.03 Deckkraft)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+      ctx.lineWidth = 1;
       for(let i=0; i<=units; i++) {
           let pos = i * (sWidth / units);
           ctx.beginPath(); ctx.moveTo(ox + pos, oy); ctx.lineTo(ox + pos, oy + sWidth); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(ox, oy + pos); ctx.lineTo(ox + sWidth, oy + pos); ctx.stroke();
       }
+
       const triangles = Delaunay.from(points);
       ctx.strokeStyle = "#334155"; ctx.lineWidth = 4; ctx.strokeRect(ox, oy, sWidth, sWidth);
+
       let totalPixelArea = 0, triangleAreas = [];
       triangles.forEach((tri, idx) => {
           const p = tri.p;
           const areaPx = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2);
           totalPixelArea += areaPx; triangleAreas.push(areaPx * Math.pow(pxToCmFactor, 2));
+
           ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
           ctx.fillStyle = "rgba(33, 150, 243, 0.25)"; ctx.fill();
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.15)"; ctx.stroke();
+          // Dreieckslinien: Noch feiner
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 0.5; ctx.stroke();
+
           ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "bold 13px Inter"; ctx.textAlign = "center";
           ctx.fillText((idx+1).toString().padStart(2, '0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + 5);
       });
+
       points.forEach((p, i) => {
           ctx.beginPath(); ctx.arc(p[0], p[1], i < 4 ? 6 : 10, 0, Math.PI * 2);
           ctx.fillStyle = i < 4 ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3"); ctx.fill();
       });
+
       const totalCmArea = totalPixelArea * Math.pow(pxToCmFactor, 2);
       document.getElementById('val-area').innerText = formatGerman(totalCmArea) + ' cm²';
+
       const listX = ox + sWidth + 60; let currentY = oy + 30;
       ctx.textAlign = "left"; ctx.font = "bold 16px Orbitron"; ctx.fillStyle = "var(--text-muted)";
-      ctx.fillText("ADDITION DER FLÄCHEN (cm²) [Δ]:", listX, currentY); currentY += 45;
+      ctx.fillText("ADDITION DER FLÄCHEN (cm²) [Δ]", listX, currentY); currentY += 45;
+
       ctx.font = "bold 18px Orbitron"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
       triangleAreas.forEach((a, i) => {
           if (currentY < oy + sWidth - 50) {
@@ -173,6 +191,7 @@
               ctx.textAlign = "left"; currentY += 25;
           }
       });
+
       ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(listX, currentY + 5); ctx.lineTo(listX + 220, currentY + 5); ctx.stroke();
       ctx.font = "bold 24px Orbitron"; ctx.fillStyle = "var(--accent-blue)";
