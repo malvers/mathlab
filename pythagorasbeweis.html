@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pythagoras | Schritt 8: Earcut Spezialwerkzeug</title>
+    <title>Pythagoras | Earcut (Responsive + Bounds Check)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,55 +11,106 @@
             --bg: #0f172a; --panel: #111827; --card: #1e293b;
             --accent-orange: #ff9800;
         }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
-        #side-panel {
-            width: 380px; min-width: 380px; border-right: 1px solid #334155;
-            padding: 20px 25px; display: flex; flex-direction: column; gap: 12px;
-            background: var(--panel); z-index: 10;
+        body {
+            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white;
+            display: flex; flex-direction: row; justify-content: space-between; height: 100vh; width: 100vw; overflow: hidden; touch-action: none;
         }
+
+        #left-panel {
+            width: 320px; min-width: 320px; border-right: 1px solid #334155;
+            padding: 20px 25px; display: flex; flex-direction: column; gap: 15px;
+            background: var(--panel); z-index: 10; box-sizing: border-box;
+        }
+
+        #canvas-wrapper {
+            flex: 1;
+            position: relative;
+            background: var(--bg);
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: block; cursor: crosshair;
+        }
+
+        #right-panel {
+            width: 280px; min-width: 280px; border-left: 1px solid #334155;
+            padding: 20px 25px; display: flex; flex-direction: column; gap: 10px;
+            background: var(--panel); z-index: 10; box-sizing: border-box;
+        }
+
         h2 { font-family: 'Orbitron'; font-size: 1.1rem; margin: 0; color: var(--labor-red); border-bottom: 3px solid var(--labor-red); padding-bottom: 5px; }
-        .stats-card { background: var(--card); padding: 12px; border-radius: 10px; border: 1px solid #334155; }
-        .val { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: bold; display: block; margin-top: 5px; }
-        .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-        #math-log { flex-grow: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; font-family: 'Orbitron'; font-size: 0.8rem; }
-        .log-entry { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding: 4px 0; }
-        canvas { flex-grow: 1; cursor: crosshair; }
-        button { padding: 10px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; }
+        .stats-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+        .val { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: bold; display: block; margin-top: 5px; }
+        .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+
+        #math-log { flex-grow: 1; overflow-y: auto; font-family: 'Orbitron'; font-size: 0.9rem; padding-right: 5px; }
+        .log-entry { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding: 6px 0; color: #cbd5e1; }
+        .log-entry span:first-child { color: #94a3b8; font-weight: bold; }
+
+        button { padding: 12px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+        button:hover { background: #444; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--panel); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
     <script src="https://unpkg.com/earcut@2.2.4/dist/earcut.min.js"></script>
 </head>
 <body>
 
-<div id="side-panel">
+<div id="left-panel">
     <h2>PYTHAGORAS LABOR</h2>
     <div class="stats-card"><span class="label">ZIELFLÄCHE (ABCD)</span><span id="target-area" class="val" style="color: #ff9800;">0,00 cm²</span></div>
-    <div class="stats-card"><span class="label">SUMME GELB (TRIA)</span><span id="blue-sum" class="val" style="color: yellow;">0,00 cm²</span></div>
-    <div class="label">Addition der Flächen</div>
-    <div id="math-log"></div>
+    <div class="stats-card"><span class="label">SUMME DREIECKE</span><span id="blue-sum" class="val" style="color: yellow;">0,00 cm²</span></div>
     <button onclick="resetLab()">RESET POSITION</button>
 </div>
 
-<canvas id="canvas"></canvas>
+<div id="canvas-wrapper">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="right-panel">
+    <div class="label" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 5px;">ADDITION DREIECKE [cm²]</div>
+    <div id="math-log"></div>
+</div>
 
 <script>
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-    const sWidth = 600, units = 10;
-    const pxToCmFactor = units / sWidth;
+    const wrapper = document.getElementById('canvas-wrapper');
+    const units = 10;
+
+    let sWidth, pxToCmFactor;
     let ox, oy, triangles = [], anchors = [], selectedTri = null;
     let dragging = false, rotating = false, lastMouse = {x:0, y:0}, anyCollision = false;
 
+    // SCHALTER: Graue Ecken ohne Text
+    const showCornerDots = true;
+
     function resetLab() {
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+        canvas.width = wrapper.clientWidth * dpr;
+        canvas.height = wrapper.clientHeight * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ox = 60; oy = (canvas.height/dpr - sWidth) / 2;
-        const a = 150;
-        anchors = [{id:'D',x:ox+a,y:oy},{id:'A',x:ox+sWidth,y:oy+a},{id:'B',x:ox+sWidth-a,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-a}];
+
+        const canvasW = wrapper.clientWidth;
+        const canvasH = wrapper.clientHeight;
+
+        sWidth = Math.min(600, canvasW * 0.8, canvasH * 0.8);
+        pxToCmFactor = units / sWidth;
+
+        ox = (canvasW - sWidth) / 2;
+        oy = (canvasH - sWidth) / 2;
+
+        const aPx = sWidth * (150 / 600);
+
+        anchors = [{id:'D',x:ox+aPx,y:oy},{id:'A',x:ox+sWidth,y:oy+aPx},{id:'B',x:ox+sWidth-aPx,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-aPx}];
         triangles = [
-            { pts: [{x:ox+a, y:oy}, {x:ox, y:oy}, {x:ox, y:oy+sWidth-a}] },
-            { pts: [{x:ox+sWidth, y:oy+a}, {x:ox+sWidth, y:oy}, {x:ox+a, y:oy}] },
-            { pts: [{x:ox+sWidth-a, y:oy+sWidth}, {x:ox+sWidth, y:oy+sWidth}, {x:ox+sWidth, y:oy+a}] },
-            { pts: [{x:ox, y:oy+sWidth-a}, {x:ox, y:oy+sWidth}, {x:ox+sWidth-a, y:oy+sWidth}] }
+            { pts: [{x:ox+aPx, y:oy}, {x:ox, y:oy}, {x:ox, y:oy+sWidth-aPx}] },
+            { pts: [{x:ox+sWidth, y:oy+aPx}, {x:ox+sWidth, y:oy}, {x:ox+aPx, y:oy}] },
+            { pts: [{x:ox+sWidth-aPx, y:oy+sWidth}, {x:ox+sWidth, y:oy+sWidth}, {x:ox+sWidth, y:oy+aPx}] },
+            { pts: [{x:ox, y:oy+sWidth-aPx}, {x:ox, y:oy+sWidth}, {x:ox+sWidth-aPx, y:oy+sWidth}] }
         ];
         draw();
     }
@@ -68,27 +119,37 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let yellowTotal = 0, logHtml = "";
 
-        if (!anyCollision) {
-            // Earcut Setup
+        // OUT OF BOUNDS SENSOR:
+        // Prüft, ob irgendein Punkt der Dreiecke den Zielrahmen (ox, oy, sWidth) verlässt.
+        // Puffer von 0.5 Pixeln, damit das Snapping am Rand nicht sofort triggert.
+        let isOutOfBounds = false;
+        for (let t of triangles) {
+            for (let p of t.pts) {
+                if (p.x < ox - 0.5 || p.x > ox + sWidth + 0.5 || p.y < oy - 0.5 || p.y > oy + sWidth + 0.5) {
+                    isOutOfBounds = true;
+                    break;
+                }
+            }
+            if (isOutOfBounds) break;
+        }
+
+        // TRIA nur ausführen, wenn keine Kollision UND alles im Rahmen ist
+        if (!anyCollision && !isOutOfBounds) {
             let vertices = [];
             let holeIndices = [];
 
-            // 1. Der äußere Rahmen (unser Ziel-Quadrat-Bereich)
             vertices.push(ox, oy, ox+sWidth, oy, ox+sWidth, oy+sWidth, ox, oy+sWidth);
 
-            // 2. Die 4 roten Dreiecke als "Löcher" stanzen
             triangles.forEach(t => {
-                holeIndices.push(vertices.length / 2); // Startindex des Lochs merken
+                holeIndices.push(vertices.length / 2);
                 vertices.push(t.pts[0].x, t.pts[0].y);
                 vertices.push(t.pts[1].x, t.pts[1].y);
                 vertices.push(t.pts[2].x, t.pts[2].y);
             });
 
-            // 3. Earcut die Magie machen lassen
             const mesh = earcut(vertices, holeIndices);
             let triCount = 1;
 
-            // 4. Dreiecke zeichnen
             for (let i = 0; i < mesh.length; i += 3) {
                 const i1 = mesh[i] * 2, i2 = mesh[i+1] * 2, i3 = mesh[i+2] * 2;
                 const p1 = {x: vertices[i1], y: vertices[i1+1]};
@@ -102,30 +163,39 @@
                 const areaPx = Math.abs(p1.x*(p2.y - p3.y) + p2.x*(p3.y - p1.y) + p3.x*(p1.y - p2.y)) / 2;
                 const areaCm = areaPx * (pxToCmFactor**2);
 
-                if (areaCm > 0.01) { // Nur lesbare Dreiecke nummerieren
+                if (areaCm > 0.01) {
                     yellowTotal += areaCm;
                     const midX = (p1.x + p2.x + p3.x) / 3, midY = (p1.y + p2.y + p3.y) / 3;
+
                     ctx.fillStyle = "yellow"; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
                     ctx.fillText(triCount.toString().padStart(2,'0'), midX, midY+4);
-                    logHtml += `<div class="log-entry"><span>Δ ${triCount.toString().padStart(2,'0')}</span><span>${areaCm.toFixed(2)} cm²</span></div>`;
+                    logHtml += `<div class="log-entry"><span>${triCount.toString().padStart(2,'0')}</span><span>${areaCm.toFixed(2)}</span></div>`;
                     triCount++;
                 }
             }
+        } else if (isOutOfBounds) {
+            // Optionaler Hinweis in der UI, dass das Dreieck draußen ist
+            logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">DREIECK AUßERHALB DES RAHMENS</div>`;
+        } else if (anyCollision) {
+            logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">KOLLISION ERKANNT</div>`;
         }
 
         document.getElementById('blue-sum').innerText = yellowTotal.toFixed(2).replace('.',',') + " cm²";
         document.getElementById('math-log').innerHTML = logHtml;
 
-        // Rote Dreiecke
-        triangles.forEach((t, triIdx) => {
+        // Rote Dreiecke zeichnen
+        triangles.forEach((t) => {
             ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
-            ctx.fillStyle = t.collision ? "rgba(255,0,0,0.4)" : (t === selectedTri ? "rgba(255,152,0,0.5)" : "rgba(198,33,40,0.5)");
+            ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? "rgba(255,152,0,0.6)" : "rgba(198,33,40,0.6)");
             ctx.fill();
-            const lbls = ["c","a","b"], subs = ["₁","₂","₃","₄"];
-            t.pts.forEach((p, i) => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI*2); ctx.fillStyle = "#666"; ctx.fill();
-                ctx.fillStyle = "white"; ctx.font = "bold 10px Inter"; ctx.textAlign = "center"; ctx.fillText(lbls[i]+subs[triIdx], p.x, p.y+4);
-            });
+
+            if (showCornerDots) {
+                t.pts.forEach((p) => {
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+                    ctx.fillStyle = "#666"; ctx.fill();
+                    ctx.lineWidth = 2; ctx.strokeStyle = "white"; ctx.stroke();
+                });
+            }
         });
 
         // ABCD Rahmen
@@ -140,7 +210,6 @@
         document.getElementById('target-area').innerText = tArea.toFixed(2).replace('.',',') + " cm²";
     }
 
-    // SAT Check
     function checkCollisions() {
         anyCollision = false; triangles.forEach(t => t.collision = false);
         for (let i=0; i<triangles.length; i++) {
@@ -166,14 +235,23 @@
     canvas.onpointerdown = e => {
         const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
         let found = false; rotating = false; dragging = false;
-        for (let t of triangles) { for (let p of t.pts) { if (Math.hypot(p.x-x, p.y-y) < 15) { selectedTri = t; rotating = true; found = true; break; } } if (found) break; }
-        if (!found) { for (let t of triangles) {
-            const p = t.pts;
-            const area = 0.5 *(-p[1].y*p[2].x + p[0].y*(-p[1].x + p[2].x) + p[0].x*(p[1].y - p[2].y) + p[1].x*p[2].y);
-            const s = 1/(2*area)*(p[0].y*p[2].x - p[0].x*p[2].y + (p[2].y - p[0].y)*x + (p[0].x - p[2].x)*y);
-            const t_ = 1/(2*area)*(p[0].x*p[1].y - p[0].y*p[1].x + (p[0].y - p[1].y)*x + (p[1].x - p[0].x)*y);
-            if (s >= 0 && t_ >= 0 && (s + t_) <= 1) { selectedTri = t; dragging = true; found = true; break; }
-        }}
+
+        for (let t of triangles) {
+            for (let p of t.pts) {
+                if (Math.hypot(p.x-x, p.y-y) < 15) { selectedTri = t; rotating = true; found = true; break; }
+            }
+            if (found) break;
+        }
+
+        if (!found) {
+            for (let t of triangles) {
+                const p = t.pts;
+                const area = 0.5 *(-p[1].y*p[2].x + p[0].y*(-p[1].x + p[2].x) + p[0].x*(p[1].y - p[2].y) + p[1].x*p[2].y);
+                const s = 1/(2*area)*(p[0].y*p[2].x - p[0].x*p[2].y + (p[2].y - p[0].y)*x + (p[0].x - p[2].x)*y);
+                const t_ = 1/(2*area)*(p[0].x*p[1].y - p[0].y*p[1].x + (p[0].y - p[1].y)*x + (p[1].x - p[0].x)*y);
+                if (s >= 0 && t_ >= 0 && (s + t_) <= 1) { selectedTri = t; dragging = true; found = true; break; }
+            }
+        }
         if (!found) selectedTri = null;
         lastMouse = {x, y}; draw();
     };
@@ -182,10 +260,18 @@
         if(!selectedTri) return;
         const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
         const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3, cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
-        if (dragging) { const dx = x - lastMouse.x, dy = y - lastMouse.y; selectedTri.pts.forEach(p => { p.x += dx; p.y += dy; }); }
+
+        if (dragging) {
+            const dx = x - lastMouse.x, dy = y - lastMouse.y;
+            selectedTri.pts.forEach(p => { p.x += dx; p.y += dy; });
+        }
         else if (rotating) {
             const angle = Math.atan2(y - cY, x - cX) - Math.atan2(lastMouse.y - cY, lastMouse.x - cX);
-            selectedTri.pts.forEach(p => { const dx = p.x - cX, dy = p.y - cY; p.x = cX + dx * Math.cos(angle) - dy * Math.sin(angle); p.y = cY + dx * Math.sin(angle) + dy * Math.cos(angle); });
+            selectedTri.pts.forEach(p => {
+                const dx = p.x - cX, dy = p.y - cY;
+                p.x = cX + dx * Math.cos(angle) - dy * Math.sin(angle);
+                p.y = cY + dx * Math.sin(angle) + dy * Math.cos(angle);
+            });
         }
         checkCollisions(); lastMouse = {x, y}; draw();
     };
