@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pythagoras | Earcut (Responsive + Bounds Check)</title>
+    <title>Pythagoras | Das finale Labor</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -85,7 +85,6 @@
     let ox, oy, triangles = [], anchors = [], selectedTri = null;
     let dragging = false, rotating = false, lastMouse = {x:0, y:0}, anyCollision = false;
 
-    // SCHALTER: Graue Ecken ohne Text
     const showCornerDots = true;
 
     function resetLab() {
@@ -106,6 +105,7 @@
         const aPx = sWidth * (150 / 600);
 
         anchors = [{id:'D',x:ox+aPx,y:oy},{id:'A',x:ox+sWidth,y:oy+aPx},{id:'B',x:ox+sWidth-aPx,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-aPx}];
+
         triangles = [
             { pts: [{x:ox+aPx, y:oy}, {x:ox, y:oy}, {x:ox, y:oy+sWidth-aPx}] },
             { pts: [{x:ox+sWidth, y:oy+aPx}, {x:ox+sWidth, y:oy}, {x:ox+aPx, y:oy}] },
@@ -119,32 +119,34 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let yellowTotal = 0, logHtml = "";
 
-        // OUT OF BOUNDS SENSOR:
-        // Prüft, ob irgendein Punkt der Dreiecke den Zielrahmen (ox, oy, sWidth) verlässt.
-        // Puffer von 0.5 Pixeln, damit das Snapping am Rand nicht sofort triggert.
         let isOutOfBounds = false;
         for (let t of triangles) {
             for (let p of t.pts) {
-                if (p.x < ox - 0.5 || p.x > ox + sWidth + 0.5 || p.y < oy - 0.5 || p.y > oy + sWidth + 0.5) {
-                    isOutOfBounds = true;
-                    break;
+                if (p.x < ox - 1.0 || p.x > ox + sWidth + 1.0 || p.y < oy - 1.0 || p.y > oy + sWidth + 1.0) {
+                    isOutOfBounds = true; break;
                 }
             }
             if (isOutOfBounds) break;
         }
 
-        // TRIA nur ausführen, wenn keine Kollision UND alles im Rahmen ist
         if (!anyCollision && !isOutOfBounds) {
             let vertices = [];
             let holeIndices = [];
 
             vertices.push(ox, oy, ox+sWidth, oy, ox+sWidth, oy+sWidth, ox, oy+sWidth);
 
+            // MIKRO-SPALT TRICK FÜR EARCUT
             triangles.forEach(t => {
                 holeIndices.push(vertices.length / 2);
-                vertices.push(t.pts[0].x, t.pts[0].y);
-                vertices.push(t.pts[1].x, t.pts[1].y);
-                vertices.push(t.pts[2].x, t.pts[2].y);
+
+                const cx = (t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3;
+                const cy = (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3;
+
+                const f = 0.9999; // Schrumpft das Loch um 0.05%, verhindert Kurzschlüsse bei Snapping
+
+                vertices.push(cx + (t.pts[0].x - cx) * f, cy + (t.pts[0].y - cy) * f);
+                vertices.push(cx + (t.pts[1].x - cx) * f, cy + (t.pts[1].y - cy) * f);
+                vertices.push(cx + (t.pts[2].x - cx) * f, cy + (t.pts[2].y - cy) * f);
             });
 
             const mesh = earcut(vertices, holeIndices);
@@ -174,7 +176,6 @@
                 }
             }
         } else if (isOutOfBounds) {
-            // Optionaler Hinweis in der UI, dass das Dreieck draußen ist
             logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">DREIECK AUßERHALB DES RAHMENS</div>`;
         } else if (anyCollision) {
             logHtml = `<div style="color: var(--labor-red); font-size: 0.8rem; text-align: center; margin-top: 20px;">KOLLISION ERKANNT</div>`;
@@ -183,11 +184,13 @@
         document.getElementById('blue-sum').innerText = yellowTotal.toFixed(2).replace('.',',') + " cm²";
         document.getElementById('math-log').innerHTML = logHtml;
 
-        // Rote Dreiecke zeichnen
         triangles.forEach((t) => {
             ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
+
             ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? "rgba(255,152,0,0.6)" : "rgba(198,33,40,0.6)");
             ctx.fill();
+
+            ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.stroke();
 
             if (showCornerDots) {
                 t.pts.forEach((p) => {
@@ -198,7 +201,6 @@
             }
         });
 
-        // ABCD Rahmen
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, sWidth, sWidth);
         anchors.forEach(a => {
             ctx.fillStyle = "rgb(100,0,0)"; ctx.beginPath(); ctx.arc(a.x, a.y, 6, 0, Math.PI*2); ctx.fill();
@@ -256,7 +258,7 @@
         lastMouse = {x, y}; draw();
     };
 
-    window.onpointermove = e => {
+    canvas.onpointermove = e => {
         if(!selectedTri) return;
         const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
         const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3, cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
@@ -276,7 +278,61 @@
         checkCollisions(); lastMouse = {x, y}; draw();
     };
 
-    window.onpointerup = () => { dragging = rotating = false; draw(); };
+    window.onpointerup = () => {
+        if (selectedTri) {
+            const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3;
+            const cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
+
+            if (rotating) {
+                let edgeAngle = Math.atan2(selectedTri.pts[1].y - selectedTri.pts[0].y, selectedTri.pts[1].x - selectedTri.pts[0].x);
+                let snapAngle = Math.round(edgeAngle / (Math.PI/2)) * (Math.PI/2);
+
+                if (Math.abs(edgeAngle - snapAngle) < 0.3) {
+                    let correction = snapAngle - edgeAngle;
+                    selectedTri.pts.forEach(p => {
+                        const dx = p.x - cX, dy = p.y - cY;
+                        p.x = cX + dx * Math.cos(correction) - dy * Math.sin(correction);
+                        p.y = cY + dx * Math.sin(correction) + dy * Math.cos(correction);
+                    });
+                }
+            }
+            else if (dragging) {
+                let snapDist = 20;
+                let snapOffset = {x: 0, y: 0};
+                let snapped = false;
+
+                let targets = [ {x: ox, y: oy}, {x: ox+sWidth, y: oy}, {x: ox, y: oy+sWidth}, {x: ox+sWidth, y: oy+sWidth} ];
+                triangles.forEach(t => { if (t !== selectedTri) targets.push(...t.pts); });
+
+                for (let p of selectedTri.pts) {
+                    for (let tp of targets) {
+                        if (Math.hypot(p.x - tp.x, p.y - tp.y) < snapDist) {
+                            snapOffset.x = tp.x - p.x; snapOffset.y = tp.y - p.y;
+                            snapped = true; break;
+                        }
+                    }
+                    if (snapped) break;
+                }
+
+                if (!snapped) {
+                    for (let p of selectedTri.pts) {
+                        if (Math.abs(p.x - ox) < snapDist) { snapOffset.x = ox - p.x; snapped = true; }
+                        else if (Math.abs(p.x - (ox+sWidth)) < snapDist) { snapOffset.x = (ox+sWidth) - p.x; snapped = true; }
+                        if (Math.abs(p.y - oy) < snapDist) { snapOffset.y = oy - p.y; snapped = true; }
+                        else if (Math.abs(p.y - (oy+sWidth)) < snapDist) { snapOffset.y = (oy+sWidth) - p.y; snapped = true; }
+                        if(snapped) break;
+                    }
+                }
+                if (snapped) {
+                    selectedTri.pts.forEach(p => { p.x += snapOffset.x; p.y += snapOffset.y; });
+                }
+            }
+        }
+
+        dragging = rotating = false;
+        checkCollisions(); draw();
+    };
+
     window.onresize = resetLab; resetLab();
 </script>
 </body>
