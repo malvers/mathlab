@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Pythagoras - Gezielte Triangulierung</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --labor-red: rgb(198, 33, 40);
+            --labor-blue-fill: rgba(0, 150, 255, 0.3);
+            --labor-blue-line: rgb(0, 150, 255);
+            --labor-yellow: #ffb100;
+            --text-dark: #1d1d1f;
+        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; touch-action: none; }
+        #top-panel { padding: 15px; border-bottom: 2px solid #eee; display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; }
+        .btn-style { padding: 8px 15px; border-radius: 8px; background: #2d3436; color: white; border: none; font-family: 'Orbitron'; cursor: pointer; text-decoration: none; font-size: 0.8rem; }
+        canvas { flex-grow: 1; width: 100%; }
+        #stats-panel { position: absolute; top: 100px; right: 20px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px; border: 2px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-width: 280px; pointer-events: none; }
+        .math-row { font-family: 'Courier New', monospace; font-size: 1.1rem; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: bold; }
+        .slider-container { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: white; padding: 15px 30px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #ddd; display: flex; align-items: center; gap: 20px; }
+        input[type=range] { width: 220px; accent-color: rgb(0, 150, 255); }
+    </style>
+</head>
+<body>
+
+<div id="top-panel">
+    <a href="index.html" class="btn-style">← ZENTRALE</a>
+    <h2 style="margin:0; font-family:'Orbitron'; font-size:0.9rem;">PYTHAGORAS: TRIANGULIERUNG E-P₄L-H</h2>
+    <div style="width:100px;"></div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="stats-panel">
+    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#666; margin-bottom:12px;">DYNAMISCHE BLAU-FLÄCHE</div>
+    <div class="math-row" style="color:var(--labor-blue-line); font-size:1.2rem;">
+        <span>Fläche E-P₄L-H:</span> <span id="val-area-tri"></span>
+    </div>
+</div>
+
+<div class="slider-container">
+    <label style="font-family:'Orbitron'; font-size:0.65rem;">VERSCHIEBEN</label>
+    <input type="range" id="t-slider" min="0" max="1" step="0.01" value="0">
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const tSlider = document.getElementById('t-slider');
+
+    const S = 10;
+    const a = 6, b = 4; // Katheten
+
+    // Gaußsche Trapezformel zur Flächenberechnung eines Polygons
+    function calcArea(pts, scale) {
+        let area = 0;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            area += (pts[j].x + pts[i].x) * (pts[j].y - pts[i].y);
+        }
+        // In mathematische Einheiten umrechnen (Fläche / Scale²)
+        return Math.abs(area / 2) / (scale * scale);
+    }
+
+    function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const t = parseFloat(tSlider.value);
+        const scale = (rect.width < 768) ? (rect.width * 0.8) / S : (Math.min(rect.width, rect.height) * 0.6) / S;
+        const ox = rect.width/2 - (S * scale)/2;
+        const oy = rect.height/2 - (S * scale)/2;
+
+        const toScr = (mx, my) => ({ x: ox + mx * scale, y: oy + my * scale });
+
+        // Fixe Punkte definieren
+        const E = toScr(0,b), H = toScr(b,S);
+
+        // --- DYNAMISCHES DREIECK 4 (Translations-Koordinaten) ---
+        // Start (t=0): (a,b), (S,a), (b,S) -> Hypotenuse c liegt "unten links"
+        // Ende (t=1): (b,S), (S,S), (S,a) -> Hypotenuse c liegt "oben rechts"
+        const startP1 = toScr(a,b), startP2 = toScr(S,a), startP3 = toScr(b,S);
+        const endP1 = toScr(b,S), endP2 = toScr(S,S), endP3 = toScr(S,a);
+
+        const dx = (endP1.x - startP1.x) * t;
+        const dy = (endP1.y - startP1.y) * t;
+
+        // Die Eckpunkte von T4 (verschoben)
+        const d1 = {x: startP1.x + dx, y: startP1.y + dy}; // P₄-Rechts (Kopplung an G/B²)
+        const d2 = {x: startP2.x + dx, y: startP2.y + dy}; // P₄-Oben (Kopplung an G/B²)
+        const d3 = {x: startP3.x + dx, y: startP3.y + dy}; // P₄-Links -> DAS IST UNSER ZIELPUNKT P₄L
+
+        // 1. Blaue Dynamische Triangulierung (Dreieck E-P₄L-H)
+        // Wir füllen diese Fläche im Hintergrund
+        const ptsArea = [E, d3, H];
+        ctx.fillStyle = "var(--labor-blue-fill)";
+        ctx.beginPath(); ctx.moveTo(ptsArea[0].x, ptsArea[0].y); ctx.lineTo(ptsArea[1].x, ptsArea[1].y); ctx.lineTo(ptsArea[2].x, ptsArea[2].y); ctx.closePath(); ctx.fill();
+
+        // Linien ziehen (Gestrichelt und Gelb)
+        ctx.strokeStyle = "var(--labor-yellow)"; ctx.lineWidth = 3; ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(d3.x, d3.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(d3.x, d3.y); ctx.lineTo(H.x, H.y); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 2. Rote Dreiecke zeichnen (Inklusive weißem Rand)
+        const drawTri = (p1, p2, p3, label, isDynamisch) => {
+            ctx.fillStyle = "rgb(198, 33, 40)";
+            ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = "white"; ctx.lineWidth = (isDynamisch)? 3 : 2; ctx.stroke();
+            if(label) {
+                ctx.fillStyle = "white"; ctx.font = "bold 14px Orbitron"; ctx.textAlign="center";
+                ctx.fillText(label, (p1.x+p2.x+p3.x)/3, (p1.y+p2.y+p3.y)/3);
+            }
+        };
+
+        // Statische Dreiecke (Fix in den Ecken wie in Screenshots)
+        drawTri(toScr(0,0), toScr(a,0), toScr(0,b), "1", false);
+        drawTri(toScr(a,0), toScr(S,0), toScr(S,a), "2", false);
+        drawTri(toScr(0,b), toScr(0,S), toScr(b,S), "3", false);
+
+        // Dynamisches Dreieck 4 (Translations-Koordinaten)
+        drawTri(d1, d2, d3, "4", true);
+
+        // 3. Eckpunkt-Beschriftung
+        ctx.fillStyle = "#1d1d1f"; ctx.font = "bold 13px Inter";
+        const labels = [
+            {t:"A", p:toScr(0,0), ox:-12, oy:-12}, {t:"B", p:toScr(S,0), ox:12, oy:-12},
+            {t:"C", p:toScr(S,S), ox:12, oy:12},   {t:"D", p:toScr(0,S), ox:-12, oy:12},
+            {t:"E", p:toScr(0,b), ox:-12, oy:0},   {t:"F", p:toScr(a,0), ox:0, oy:-12},
+            {t:"G", p:toScr(S,a), ox:12, oy:0},    {t:"H", p:toScr(b,S), ox:0, oy:12},
+            {t:"P₄L", p:d3, ox:-15, oy:15} // Die dynamische linke Ecke
+        ];
+        labels.forEach(l => ctx.fillText(l.t, l.p.x + l.ox, l.p.y + l.oy));
+
+        // 4. Flächenberechnung & Panel Update
+        const areaTri = calcArea(ptsArea, scale);
+        document.getElementById('val-area-tri').innerText = areaTri.toFixed(1);
+    }
+
+    tSlider.oninput = draw;
+    window.onresize = draw;
+    draw();
+</script>
+</body>
+</html>

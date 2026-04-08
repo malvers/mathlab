@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pythagoras | Floating Sum Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+        --accent-blue: #2196f3;
+        --accent-orange: #ff9800;
+        --bg: #0f172a;
+        --panel: #111827;
+        --card: #1e293b;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+    }
+    body {
+        margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main);
+        display: flex; height: 100vh; overflow: hidden; touch-action: none;
+    }
+
+    #side-panel {
+        width: 380px; min-width: 380px; border-right: 1px solid #334155;
+        padding: 25px; display: flex; flex-direction: column; gap: 20px;
+        background: var(--panel); box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+        user-select: none; z-index: 10;
+    }
+
+    h2 { font-family: 'Orbitron'; margin: 0; font-size: 1.3rem; color: var(--text-main); border-bottom: 2px solid #334155; padding-bottom: 10px; }
+
+    .stats-card { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #334155; }
+    .val { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: bold; display: block; margin-top: 5px; }
+
+    .target-val { color: var(--accent-orange); }
+    .current-val { color: var(--accent-blue); }
+
+    canvas { flex-grow: 1; cursor: crosshair; touch-action: none; background: var(--bg); }
+
+    button {
+        padding: 16px; background: #333; color: white; border: none;
+        border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 1rem;
+    }
+    .proof-text { font-size: 0.8rem; color: #4ade80; font-weight: bold; margin-top: auto; text-align: center; font-family: 'Orbitron'; }
+    .unit { font-size: 0.9rem; color: var(--text-muted); margin-left: 5px; }
+  </style>
+</head>
+<body>
+
+<div id="side-panel">
+  <h2>10 x 10 LABOR (cm)</h2>
+
+  <div class="stats-card">
+    ZIELFLÄCHE ($10 \times 10$):
+    <span class="val target-val">100,00 <span class="unit">cm²</span></span>
+  </div>
+
+  <div class="stats-card">
+    AKTUELL BERECHNET:
+    <span id="val-area" class="val current-val">0,00 <span class="unit">cm²</span></span>
+  </div>
+
+  <button onclick="resetPoints()">PUNKTE NEU STREUEN</button>
+  <p class="proof-text">✓ FLÄCHE BLEIBT KONSTANT</p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+  // --- DELAUNAY ALGORITHM ---
+  class Delaunay {
+      static from(points) {
+          if (points.length < 3) return [];
+          const minX = Math.min(...points.map(p => p[0])), minY = Math.min(...points.map(p => p[1]));
+          const maxX = Math.max(...points.map(p => p[0])), maxY = Math.max(...points.map(p => p[1]));
+          const dx = maxX - minX, dy = maxY - minY, dmax = Math.max(dx, dy);
+          const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+          const st = [[midX - 20 * dmax, midY - dmax], [midX + 20 * dmax, midY - dmax], [midX, midY + 20 * dmax]];
+          let triangles = [{p: [st[0], st[1], st[2]], circum: this.getCircum(st[0], st[1], st[2])}];
+          for (let i = 0; i < points.length; i++) {
+              const p = points[i];
+              let badTris = [], polygon = [];
+              for (let j = 0; j < triangles.length; j++) {
+                  const tri = triangles[j], d = Math.hypot(tri.circum.x - p[0], tri.circum.y - p[1]);
+                  if (d < tri.circum.r - 0.0001) badTris.push(j);
+              }
+              for (let j of badTris) {
+                  const edges = [[triangles[j].p[0], triangles[j].p[1]], [triangles[j].p[1], triangles[j].p[2]], [triangles[j].p[2], triangles[j].p[0]]];
+                  for (let e of edges) {
+                      let shared = badTris.some(o => o !== j && triangles[o].p.some(p1 => this.pEq(p1, e[0])) && triangles[o].p.some(p2 => this.pEq(p2, e[1])));
+                      if (!shared) polygon.push(e);
+                  }
+              }
+              badTris.sort((a, b) => b - a).forEach(idx => triangles.splice(idx, 1));
+              polygon.forEach(e => {
+                  const circum = this.getCircum(e[0], e[1], p);
+                  if (circum) triangles.push({p: [e[0], e[1], p], circum: circum});
+              });
+          }
+          return triangles.filter(t => !t.p.some(tp => st.some(sp => this.pEq(tp, sp))));
+      }
+      static pEq(p1, p2) { return p1[0] === p2[0] && p1[1] === p2[1]; }
+      static getCircum(p1, p2, p3) {
+          const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
+          const D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+          if (Math.abs(D) < 0.1) return null;
+          const cx = ((x1*x1+y1*y1)*(y2-y3) + (x2*x2+y2*y2)*(y3-y1) + (x3*x3+y3*y3)*(y1-y2)) / D;
+          const cy = ((x1*x1+y1*y1)*(x3-x2) + (x2*x2+y2*y2)*(x1-x3) + (x3*x3+y3*y3)*(x2-x1)) / D;
+          return {x: cx, y: cy, r: Math.hypot(x1 - cx, y1 - cy)};
+      }
+  }
+
+  const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+  let points = [], draggedIdx = -1, ox, oy;
+  const sWidth = 600;
+  const units = 10;
+  const pxToCmFactor = units / sWidth;
+
+  function formatGerman(num) {
+      return num.toFixed(2).replace('.', ',');
+  }
+
+  function resetPoints() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+
+      ox = 40;
+      oy = (rect.height - sWidth) / 2;
+
+      points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
+      for (let i = 0; i < 12; i++) {
+          points.push([ox + 50 + Math.random() * (sWidth - 100), oy + 50 + Math.random() * (sWidth - 100)]);
+      }
+      update();
+  }
+
+  function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Raster
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+      for(let i=0; i<=units; i++) {
+          let pos = i * (sWidth / units);
+          ctx.beginPath(); ctx.moveTo(ox + pos, oy); ctx.lineTo(ox + pos, oy + sWidth); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(ox, oy + pos); ctx.lineTo(ox + sWidth, oy + pos); ctx.stroke();
+      }
+
+      const triangles = Delaunay.from(points);
+      ctx.strokeStyle = "#334155"; ctx.lineWidth = 3; ctx.strokeRect(ox, oy, sWidth, sWidth);
+
+      let totalPixelArea = 0;
+
+      triangles.forEach(tri => {
+          const p = tri.p;
+          const area = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2);
+          totalPixelArea += area;
+
+          ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
+          ctx.fillStyle = "rgba(33, 150, 243, 0.2)"; ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.stroke();
+      });
+
+      points.forEach((p, i) => {
+          ctx.beginPath(); ctx.arc(p[0], p[1], i < 4 ? 6 : 10, 0, Math.PI * 2);
+          ctx.fillStyle = i < 4 ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3");
+          ctx.fill();
+      });
+
+      const totalCmArea = totalPixelArea * Math.pow(pxToCmFactor, 2);
+      const areaStr = formatGerman(totalCmArea);
+      document.getElementById('val-area').innerHTML = areaStr + ' <span class="unit">cm²</span>';
+
+      // FLOATING SUM NEBEN DER FIGUR
+      ctx.fillStyle = "rgba(33, 150, 243, 0.9)";
+      ctx.font = "bold 24px Orbitron";
+      ctx.textAlign = "left";
+      // Position rechts neben dem Quadrat
+      ctx.fillText(`SUMME: ${areaStr} cm²`, ox + sWidth + 30, oy + sWidth/2);
+
+      ctx.font = "14px Inter";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.fillText("Fläche aller Dreiecke", ox + sWidth + 30, oy + sWidth/2 + 25);
+  }
+
+  canvas.onpointerdown = e => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      let closestDist = 35;
+      draggedIdx = -1;
+      for (let i = 4; i < points.length; i++) {
+          const d = Math.hypot(points[i][0] - mouseX, points[i][1] - mouseY);
+          if (d < closestDist) { closestDist = d; draggedIdx = i; }
+      }
+      if (draggedIdx !== -1) { canvas.setPointerCapture(e.pointerId); update(); }
+  };
+
+  window.onpointermove = e => {
+      if (draggedIdx !== -1) {
+          const rect = canvas.getBoundingClientRect();
+          points[draggedIdx] = [
+              Math.max(ox, Math.min(ox + sWidth, e.clientX - rect.left)),
+              Math.max(oy, Math.min(oy + sWidth, e.clientY - rect.top))
+          ];
+          update();
+      }
+  };
+
+  window.onpointerup = e => { if (draggedIdx !== -1) { canvas.releasePointerCapture(e.pointerId); draggedIdx = -1; update(); } };
+  window.onresize = resetPoints;
+  window.onload = resetPoints;
+</script>
+</body>
+</html>
