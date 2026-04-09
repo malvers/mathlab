@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Langley Neustart | Schritt 7: Punkte P & F</title>
+  <title>Langley Neustart | Schritt 6: Schnittpunkt F</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -21,8 +21,6 @@
     .calc-box { background: #1e293b; padding: 12px; border-radius: 8px; border-left: 4px solid #334155; }
     .calc-line { margin: 5px 0; font-size: 0.9rem; line-height: 1.4; }
     .math { font-weight: bold; font-family: 'Orbitron'; font-size: 0.85rem; }
-    .label-D { color: #ff9800; }
-    .label-C { color: #00f2ff; }
     .result { color: #39FF14; }
     canvas { display: block; }
   </style>
@@ -41,13 +39,13 @@
   </div>
 
   <div class="calc-box" style="border-left-color: #ffffff;">
-    <div class="calc-line">Diagonalen-Schnitt: <span class="math">F</span></div>
-    <div class="calc-line">Winkel-Schnitt: <span class="math">P</span></div>
+    <div class="calc-line">Spitze <span class="math">E</span>: <span class="math result">20°</span></div>
+    <div class="calc-line">Mittellinie teilt in <span class="math result">10° | 10°</span></div>
   </div>
 
   <div class="calc-box" style="border-left-color: #39FF14;">
-    <div class="calc-line">Neu: Linie <span class="math">EP</span>:</div>
-    <div class="calc-line">Teilt ∠AEB (20°) in <span class="math result">10° | 10°</span></div>
+    <div class="calc-line">Neu: Schnittpunkt <span class="math">F</span>:</div>
+    <div class="calc-line">Schnitt von <span class="math">E-Mitte</span> mit <span class="math">BD</span></div>
   </div>
 </div>
 
@@ -120,11 +118,8 @@
 
       const M = { x: (A.x + B.x) / 2, y: A.y };
 
-      // NEU: Punkt P als Schnittpunkt der Symmetrieachse (E-M) mit der Diagonalen B-D
-      const P = getIntersection(E, M, B, D);
-
-      // NEU: Punkt F als Schnittpunkt der beiden Diagonalen A-C und B-D
-      const F = getIntersection(A, C, B, D);
+      // NEU: Punkt F als Schnittpunkt der Linie E-M mit der Linie B-D
+      const F = getIntersection(E, M, B, D);
 
       ctx.lineCap = "round"; ctx.lineJoin = "round";
 
@@ -132,21 +127,25 @@
       ctx.lineWidth = 5; ctx.strokeStyle = colorBasis;
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
 
-      // AE und BE (Die Schenkel)
+      // AE und BE
       ctx.lineWidth = 2; ctx.strokeStyle = colorD;
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(E.x, E.y); ctx.stroke();
       ctx.lineWidth = 2; ctx.strokeStyle = colorC;
       ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(E.x, E.y); ctx.stroke();
 
-      // NEU: Linie EP (Symmetrieachse), durchgehend, weiß
-      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,0.7)";
-      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke();
+      // Symmetrieachse E-M (bis zum Punkt F)
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(F.x, F.y); ctx.stroke();
+      // Weiterführung zur Mitte gestrichelt
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(F.x, F.y); ctx.lineTo(M.x, M.y); ctx.stroke();
+      ctx.setLineDash([]);
 
-      // Diagonale BD Hilfslinie
+      // BD Hilfslinie
       ctx.lineWidth = 1.5; ctx.strokeStyle = colorWhite;
       ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke();
 
-      // Diagonale AC Hilfslinie (Original)
+      // Hilfslinie AC
       ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,0.2)";
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.stroke();
 
@@ -162,7 +161,7 @@
       drawArcB(B, 0, 80, 50, "80°", colorC);
       drawArcB(B, 60, 80, 80, "20°", colorWhite);
 
-      // Labels der Punkte
+      // Labels
       ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
       ctx.fillText("A", A.x - 20, A.y + 10);
       ctx.fillText("B", B.x + 20, B.y + 10);
@@ -170,11 +169,8 @@
       ctx.fillText("C", C.x + 15, C.y);
       ctx.fillText("E", E.x, E.y - 15);
 
-      // NEU: Label P (Schnittpunkt Symmetrie)
-      ctx.fillText("P", P.x - 15, P.y + 5);
-
-      // NEU: Label F (Schnittpunkt Diagonalen)
-      ctx.fillText("F", F.x + 18, F.y - 10);
+      // NEU: Label F
+      ctx.fillText("F", F.x - 15, F.y + 5);
   }
 
   window.addEventListener('resize', draw);
