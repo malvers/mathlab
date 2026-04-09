@@ -35,7 +35,6 @@
     }
     #variant-select option { background: #0b1120; color: white; }
 
-    /* Angepasste Navigation Buttons für exakt gleiche Größe */
     .nav-btn {
         background: #334155; color: white; border: none; border-radius: 4px;
         font-family: 'Orbitron'; cursor: pointer; font-size: 0.8rem; margin-left: 4px;
@@ -45,6 +44,39 @@
     }
     .nav-btn:hover:not(:disabled) { background: #475569; }
     .nav-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
+
+    /* --- NEU: ERKLÄRUNGSPANEL RECHTS --- */
+    #explanation-box {
+        position: absolute;
+        right: 50px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 380px;
+        background: rgba(17, 24, 39, 0.95);
+        border: 1px solid #334155;
+        border-left: 4px solid #eab308; /* Passend zur Phase 5 (Gold) */
+        border-radius: 8px;
+        padding: 25px;
+        color: white;
+        display: none; /* Ist am Anfang versteckt */
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        z-index: 20;
+    }
+    .exp-title {
+        font-family: 'Orbitron';
+        color: #eab308;
+        font-size: 1.1rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    .exp-text {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #cbd5e1;
+    }
+    .exp-text b { color: #00f2ff; }
 
     canvas { display: block; }
   </style>
@@ -121,6 +153,12 @@
 
 <div id="canvas-container">
   <canvas id="canvas"></canvas>
+
+  <div id="explanation-box">
+    <div class="exp-title" id="exp-title">SCHRITT X</div>
+    <div class="exp-text" id="exp-text">Hier kommt der Erklärtext hin...</div>
+  </div>
+
 </div>
 
 <script>
@@ -156,11 +194,44 @@
       applyStep();
   });
 
+  // --- NEU: Logik für die Erklär-Texte ---
+  function updateExplanation() {
+      const box = document.getElementById('explanation-box');
+      const title = document.getElementById('exp-title');
+      const text = document.getElementById('exp-text');
+
+      if (currentStep < 13) { // Schritte 1 bis 16 (Index 0-12)
+          box.style.display = 'none';
+          return;
+      }
+
+      box.style.display = 'flex';
+
+      if (currentStep === 13) {
+          title.innerText = "SCHRITT 17: Das große Dreieck";
+          text.innerHTML = "Wir verlängern die äußeren Schenkel <b>AD</b> und <b>BC</b>. Da die beiden Basiswinkel unten im System jeweils <b>80°</b> betragen, treffen sich die Linien an einer gemeinsamen Spitze <b>E</b>.<br><br>Es entsteht ein riesiges, perfekt gleichschenkliges Dreieck ABE.";
+      } else if (currentStep === 14) {
+          title.innerText = "SCHRITT 18: Der Spitzenwinkel";
+          text.innerHTML = "Die Innenwinkelsumme im neuen, großen Dreieck ABE beträgt 180°.<br><br>Da die Basiswinkel links und rechts 80° groß sind, bleibt für den Winkel an der Spitze E exakt <b>20°</b> (180° - 80° - 80°).";
+      } else if (currentStep === 15) {
+          title.innerText = "SCHRITT 19: Die Symmetrieachse";
+          text.innerHTML = "Um die Eigenschaften des Dreiecks zu nutzen, zeichnen wir die vertikale <b>Symmetrieachse</b> ein. Sie verläuft von der Spitze E kerzengerade hinab zur Mitte der Basislinie AB.";
+      } else if (currentStep === 16) {
+          title.innerText = "SCHRITT 20: Schnittpunkt P";
+          text.innerHTML = "Dort, wo unsere neue Symmetrieachse die bereits vorhandene Diagonale BD kreuzt, markieren wir den Punkt <b>P</b>.<br><br>Dieser Punkt ist der magische Schlüssel, um kongruente (deckungsgleiche) und gleichseitige Dreiecke im Inneren zu beweisen!";
+      } else if (currentStep >= 17) {
+          title.innerText = "SCHRITT 21 & 22: Halbierung";
+          text.innerHTML = "Da das große Dreieck ABE symmetrisch ist, schneidet unsere Hilfslinie den 20°-Winkel an der Spitze exakt in zwei identische <b>10°-Winkel</b>.<br><br><i>Ausgehend von diesen neuen Werten lässt sich nun der gesuchte Winkel DCA streng mathematisch ableiten. Das Rätsel ist geknackt!</i>";
+      }
+  }
+
   function updateUI() {
       document.getElementById('btn_prev').disabled = (currentStep === 0);
       document.getElementById('btn_next').disabled = (currentStep === storyline.length);
       document.getElementById('step-counter').innerText = `${currentStep}/${storyline.length}`;
       document.getElementById('cb_all').checked = (currentStep === storyline.length);
+
+      updateExplanation(); // Text-Box updaten
   }
 
   function applyStep() {
@@ -245,7 +316,6 @@
       const colorWhite = "#ffffff";
       const cBAD = "#ff9800", cBAC = "#00f2ff", cACB = "#a855f7", cABD = "#22c55e";
 
-      // --- NEU: Figur 1.5 * AB nach links verschoben ---
       const baseWidth = 280;
       const shiftX = baseWidth * 1.5;
       const centerX = w/2 - shiftX;
@@ -338,13 +408,13 @@
           ctx.textBaseline = "alphabetic";
       }
 
-      // --- SPITZE E: Beschriftungen sauber separiert ---
+      // SPITZE E
       if (document.getElementById('cb_AEB').checked) {
           const angEA = Math.atan2(A.y - E.y, A.x - E.x), angEB = Math.atan2(B.y - E.y, B.x - E.x);
           ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
           ctx.arc(E.x, E.y, 50, angEB, angEA, false); ctx.stroke();
           ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
-          ctx.fillText("20°", E.x, E.y + 85); // Tiefer gesetzt
+          ctx.fillText("20°", E.x, E.y + 85);
       }
 
       if (document.getElementById('cb_AEP').checked) {
@@ -352,7 +422,7 @@
           ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
           ctx.arc(E.x, E.y, 60, angEP, angEA, false); ctx.stroke();
           ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "right";
-          ctx.fillText("10°", E.x - 25, E.y + 65); // Sauber links außen
+          ctx.fillText("10°", E.x - 25, E.y + 65);
       }
 
       if (document.getElementById('cb_BEP').checked) {
@@ -360,7 +430,7 @@
           ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
           ctx.arc(E.x, E.y, 60, angEB, angEP, false); ctx.stroke();
           ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "left";
-          ctx.fillText("10°", E.x + 25, E.y + 65); // Sauber rechts außen
+          ctx.fillText("10°", E.x + 25, E.y + 65);
       }
 
       // CORNERSTONES
