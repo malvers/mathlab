@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Langley Neustart | Schritt 6: Schnittpunkt F</title>
+  <title>Langley Neustart | Winkel ADB & ACB Final</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -39,13 +39,8 @@
   </div>
 
   <div class="calc-box" style="border-left-color: #ffffff;">
-    <div class="calc-line">Spitze <span class="math">E</span>: <span class="math result">20°</span></div>
-    <div class="calc-line">Mittellinie teilt in <span class="math result">10° | 10°</span></div>
-  </div>
-
-  <div class="calc-box" style="border-left-color: #39FF14;">
-    <div class="calc-line">Neu: Schnittpunkt <span class="math">F</span>:</div>
-    <div class="calc-line">Schnitt von <span class="math">E-Mitte</span> mit <span class="math">BD</span></div>
+    <div class="calc-line">Diagonalen-Schnitt: <span class="math">F</span></div>
+    <div class="calc-line">Symmetrie-Schnitt: <span class="math">P</span></div>
   </div>
 </div>
 
@@ -65,7 +60,6 @@
       return { x: baseA.x + dx, y: baseA.y - h };
   }
 
-  // Schnittpunkt zweier Geraden berechnen
   function getIntersection(p1, p2, p3, p4) {
       const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
       const x3 = p3.x, y3 = p3.y, x4 = p4.x, y4 = p4.y;
@@ -115,51 +109,75 @@
       const D = getPoint(A, B, 80, 60);
       const C = getPoint(A, B, 70, 80);
       const E = getPoint(A, B, 80, 80);
-
       const M = { x: (A.x + B.x) / 2, y: A.y };
 
-      // NEU: Punkt F als Schnittpunkt der Linie E-M mit der Linie B-D
-      const F = getIntersection(E, M, B, D);
+      const P = getIntersection(E, M, B, D);
+      const F = getIntersection(A, C, B, D);
 
       ctx.lineCap = "round"; ctx.lineJoin = "round";
 
-      // Basislinie AB
+      // Basis
       ctx.lineWidth = 5; ctx.strokeStyle = colorBasis;
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
 
-      // AE und BE
+      // Schenkel AE und BE
       ctx.lineWidth = 2; ctx.strokeStyle = colorD;
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(E.x, E.y); ctx.stroke();
       ctx.lineWidth = 2; ctx.strokeStyle = colorC;
       ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(E.x, E.y); ctx.stroke();
 
-      // Symmetrieachse E-M (bis zum Punkt F)
+      // Symmetrieachse E-P
       ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,0.6)";
-      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(F.x, F.y); ctx.stroke();
-      // Weiterführung zur Mitte gestrichelt
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath(); ctx.moveTo(F.x, F.y); ctx.lineTo(M.x, M.y); ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke();
 
-      // BD Hilfslinie
-      ctx.lineWidth = 1.5; ctx.strokeStyle = colorWhite;
-      ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke();
-
-      // Hilfslinie AC
-      ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      // Diagonale AC (Cyan)
+      ctx.lineWidth = 1.8; ctx.strokeStyle = colorC;
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.stroke();
+
+      // Diagonale BD (Weiß)
+      ctx.lineWidth = 1.8; ctx.strokeStyle = colorWhite;
+      ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke();
 
       // Ziel-Linie CD
       ctx.lineWidth = 4; ctx.strokeStyle = colorZiel;
       ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.stroke();
 
-      // Bögen
+      // Bögen unten
       drawArcA(A, 0, 80, 25, "80°", colorD);
       drawArcA(A, 0, 70, 50, "70°", colorC);
       drawArcA(A, 70, 80, 80, "10°", colorWhite);
       drawArcB(B, 0, 60, 25, "60°", colorD);
       drawArcB(B, 0, 80, 50, "80°", colorC);
       drawArcB(B, 60, 80, 80, "20°", colorWhite);
+
+      // --- Winkel ADB (40°) bei D ---
+      const angDA = Math.atan2(A.y - D.y, A.x - D.x);
+      const angDB = Math.atan2(B.y - D.y, B.x - D.x);
+      ctx.beginPath();
+      ctx.strokeStyle = colorWhite;
+      ctx.lineWidth = 1.5;
+      ctx.arc(D.x, D.y, 40, angDA, angDB, true);
+      ctx.stroke();
+      const midADB = (angDA + angDB) / 2;
+      ctx.fillStyle = colorWhite;
+      ctx.font = "bold 12px Orbitron";
+      ctx.textAlign = "center";
+      ctx.fillText("40°", D.x + Math.cos(midADB) * 55, D.y + Math.sin(midADB) * 55);
+
+      // --- KORREKTUR: Winkel ACB (30°) bei C ---
+      const angCA = Math.atan2(A.y - C.y, A.x - C.x);
+      const angCB = Math.atan2(B.y - C.y, B.x - C.x);
+      ctx.beginPath();
+      ctx.strokeStyle = colorWhite;
+      ctx.lineWidth = 1.5;
+      // Mit "true" zeichnen, damit der Bogen im Inneren landet
+      ctx.arc(C.x, C.y, 40, angCA, angCB, true);
+      ctx.stroke();
+      const midACB = (angCA + angCB) / 2;
+      ctx.fillStyle = colorWhite;
+      ctx.font = "bold 12px Orbitron";
+      ctx.textAlign = "center";
+      ctx.fillText("30°", C.x + Math.cos(midACB) * 55, C.y + Math.sin(midACB) * 55);
 
       // Labels
       ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
@@ -169,8 +187,8 @@
       ctx.fillText("C", C.x + 15, C.y);
       ctx.fillText("E", E.x, E.y - 15);
 
-      // NEU: Label F
-      ctx.fillText("F", F.x - 15, F.y + 5);
+      ctx.fillText("P", P.x + 15, P.y + 10);
+      ctx.fillText("F", F.x - 25, F.y - 5);
   }
 
   window.addEventListener('resize', draw);

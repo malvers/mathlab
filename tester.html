@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Langley Neustart | Schritt 7: Punkte P & F</title>
+  <title>Langley | Finale Winkel & Farben Interaktiv</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -12,18 +12,19 @@
         overflow: hidden;
     }
     #info-panel {
-        width: 360px; padding: 30px; border-right: 1px solid #334155;
+        width: 380px; padding: 30px; border-right: 1px solid #334155;
         background: #111827; box-sizing: border-box; display: flex;
-        flex-direction: column; gap: 15px; z-index: 10;
+        flex-direction: column; gap: 10px; z-index: 10;
+        overflow-y: auto;
     }
     #canvas-container { flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; }
     h2 { font-family: 'Orbitron'; color: #00f2ff; font-size: 1.1rem; margin: 0 0 10px 0; letter-spacing: 1px; }
-    .calc-box { background: #1e293b; padding: 12px; border-radius: 8px; border-left: 4px solid #334155; }
-    .calc-line { margin: 5px 0; font-size: 0.9rem; line-height: 1.4; }
-    .math { font-weight: bold; font-family: 'Orbitron'; font-size: 0.85rem; }
-    .label-D { color: #ff9800; }
-    .label-C { color: #00f2ff; }
+    .calc-box { background: #1e293b; padding: 10px; border-radius: 8px; border-left: 4px solid #334155; margin-bottom: 5px;}
+    .calc-line { margin: 3px 0; font-size: 0.85rem; line-height: 1.4; display: flex; align-items: center; gap: 6px; }
+    .math { font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem; }
     .result { color: #39FF14; }
+    input[type="checkbox"] { margin: 0; cursor: pointer; }
+    .master-switch { margin-bottom: 10px; padding-left: 5px; }
     canvas { display: block; }
   </style>
 </head>
@@ -32,22 +33,45 @@
 <div id="info-panel">
   <h2>WINKEL ANALYSE</h2>
 
+  <div class="calc-line master-switch">
+    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem;">
+      <input type="checkbox" id="cb_all"> Alle an/aus
+    </label>
+  </div>
+
   <div class="calc-box" style="border-left-color: #ff9800;">
-    <div class="calc-line">∠ADB = <span class="math result">40°</span></div>
+    <div class="calc-line">An Ecke A:</div>
+    <div class="calc-line"><input type="checkbox" id="cb_BAD"> ∠BAD = <span class="math" style="color: #ff9800;">80°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_BAC"> ∠BAC = <span class="math" style="color: #00f2ff;">70°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_DAC"> ∠DAC = <span class="math" style="color: #ffffff;">10°</span></div>
   </div>
 
   <div class="calc-box" style="border-left-color: #00f2ff;">
-    <div class="calc-line">∠ACB = <span class="math result">30°</span></div>
+    <div class="calc-line">An Ecke B:</div>
+    <div class="calc-line"><input type="checkbox" id="cb_ABC"> ∠ABC = <span class="math" style="color: #a855f7;">80°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_ABD"> ∠ABD = <span class="math" style="color: #22c55e;">60°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_DBC"> ∠DBC = <span class="math" style="color: #ffffff;">20°</span></div>
   </div>
 
   <div class="calc-box" style="border-left-color: #ffffff;">
-    <div class="calc-line">Diagonalen-Schnitt: <span class="math">F</span></div>
-    <div class="calc-line">Winkel-Schnitt: <span class="math">P</span></div>
+    <div class="calc-line">An den Spitzen C, D & E:</div>
+    <div class="calc-line"><input type="checkbox" id="cb_ADB"> ∠ADB = <span class="math result">40°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_ACB"> ∠ACB = <span class="math result">30°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_AEB"> ∠AEB = <span class="math result">20°</span></div>
   </div>
 
   <div class="calc-box" style="border-left-color: #39FF14;">
-    <div class="calc-line">Neu: Linie <span class="math">EP</span>:</div>
-    <div class="calc-line">Teilt ∠AEB (20°) in <span class="math result">10° | 10°</span></div>
+    <div class="calc-line">An Spitze E:</div>
+    <div class="calc-line"><input type="checkbox" id="cb_AEP"> ∠AEP = <span class="math result">10°</span></div>
+    <div class="calc-line"><input type="checkbox" id="cb_BEP"> ∠BEP = <span class="math result">10°</span></div>
+  </div>
+
+  <div class="calc-box" style="border-left-color: #ef4444;">
+    <div class="calc-line">Linien & Verbindungen:</div>
+    <div class="calc-line"><input type="checkbox" id="cb_F"> <span class="math">F</span> = Diagonalen AC & BD</div>
+    <div class="calc-line"><input type="checkbox" id="cb_P"> <span class="math">P</span> = Symmetrie EP</div>
+    <div class="calc-line"><input type="checkbox" id="cb_DE"> Verlängerung zu E</div>
+    <div class="calc-line"><input type="checkbox" id="cb_CD"> Linie CD</div>
   </div>
 </div>
 
@@ -67,7 +91,6 @@
       return { x: baseA.x + dx, y: baseA.y - h };
   }
 
-  // Schnittpunkt zweier Geraden berechnen
   function getIntersection(p1, p2, p3, p4) {
       const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
       const x3 = p3.x, y3 = p3.y, x4 = p4.x, y4 = p4.y;
@@ -108,7 +131,11 @@
       const w = rect.width, h = rect.height;
       ctx.clearRect(0, 0, w, h);
 
-      const colorC = "#00f2ff", colorD = "#ff9800", colorBasis = "#39FF14", colorZiel = "#ef4444", colorWhite = "#ffffff";
+      const colorWhite = "#ffffff";
+      const cBAD = "#ff9800"; // Orange
+      const cBAC = "#00f2ff"; // Cyan
+      const cABC = "#a855f7"; // Lila
+      const cABD = "#22c55e"; // Grün
 
       const baseWidth = 280;
       const A = { x: w/2 - baseWidth/2, y: h * 0.95 };
@@ -117,65 +144,110 @@
       const D = getPoint(A, B, 80, 60);
       const C = getPoint(A, B, 70, 80);
       const E = getPoint(A, B, 80, 80);
-
       const M = { x: (A.x + B.x) / 2, y: A.y };
 
-      // NEU: Punkt P als Schnittpunkt der Symmetrieachse (E-M) mit der Diagonalen B-D
       const P = getIntersection(E, M, B, D);
-
-      // NEU: Punkt F als Schnittpunkt der beiden Diagonalen A-C und B-D
       const F = getIntersection(A, C, B, D);
 
       ctx.lineCap = "round"; ctx.lineJoin = "round";
 
-      // Basislinie AB
-      ctx.lineWidth = 5; ctx.strokeStyle = colorBasis;
-      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+      // --- GRUNDGERÜST (Immer sichtbar) ---
+      ctx.lineWidth = 1.8; ctx.strokeStyle = colorWhite;
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); // Basis AB
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(D.x, D.y); ctx.stroke(); // Grundschenkel AD
+      ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.stroke(); // Grundschenkel BC
 
-      // AE und BE (Die Schenkel)
-      ctx.lineWidth = 2; ctx.strokeStyle = colorD;
-      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(E.x, E.y); ctx.stroke();
-      ctx.lineWidth = 2; ctx.strokeStyle = colorC;
-      ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(E.x, E.y); ctx.stroke();
+      // --- ZUSATZLINIEN (Über Checkboxen gesteuert) ---
+      if (document.getElementById('cb_DE').checked) {
+          ctx.beginPath(); ctx.moveTo(D.x, D.y); ctx.lineTo(E.x, E.y); ctx.stroke(); // Verlängerung DE
+          ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(E.x, E.y); ctx.stroke(); // Verlängerung CE
+      }
 
-      // NEU: Linie EP (Symmetrieachse), durchgehend, weiß
-      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,0.7)";
-      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke();
+      if (document.getElementById('cb_P').checked) {
+          ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke(); // Symmetrieachse EP
+          ctx.fillStyle = colorWhite; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("P", P.x + 15, P.y + 10);
+      }
 
-      // Diagonale BD Hilfslinie
-      ctx.lineWidth = 1.5; ctx.strokeStyle = colorWhite;
-      ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke();
+      if (document.getElementById('cb_F').checked) {
+          ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.stroke(); // Diagonale AC
+          ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke(); // Diagonale BD
+          ctx.fillStyle = colorWhite; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("F", F.x - 25, F.y - 5);
+      }
 
-      // Diagonale AC Hilfslinie (Original)
-      ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,0.2)";
-      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.stroke();
+      if (document.getElementById('cb_CD').checked) {
+          ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.stroke(); // Ziel-Linie CD
+      }
 
-      // Ziel-Linie CD
-      ctx.lineWidth = 4; ctx.strokeStyle = colorZiel;
-      ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.stroke();
+      // --- BÖGEN UNTEN ---
+      if (document.getElementById('cb_BAD').checked) drawArcA(A, 0, 80, 25, "80°", cBAD);
+      if (document.getElementById('cb_BAC').checked) drawArcA(A, 0, 70, 50, "70°", cBAC);
+      if (document.getElementById('cb_DAC').checked) drawArcA(A, 70, 80, 80, "10°", colorWhite);
 
-      // Bögen
-      drawArcA(A, 0, 80, 25, "80°", colorD);
-      drawArcA(A, 0, 70, 50, "70°", colorC);
-      drawArcA(A, 70, 80, 80, "10°", colorWhite);
-      drawArcB(B, 0, 60, 25, "60°", colorD);
-      drawArcB(B, 0, 80, 50, "80°", colorC);
-      drawArcB(B, 60, 80, 80, "20°", colorWhite);
+      if (document.getElementById('cb_ABD').checked) drawArcB(B, 0, 60, 25, "60°", cABD);
+      if (document.getElementById('cb_ABC').checked) drawArcB(B, 0, 80, 50, "80°", cABC);
+      if (document.getElementById('cb_DBC').checked) drawArcB(B, 60, 80, 80, "20°", colorWhite);
 
-      // Labels der Punkte
+      // --- WINKEL BÖGEN SPITZEN ---
+      if (document.getElementById('cb_ADB').checked) {
+          const angDA = Math.atan2(A.y - D.y, A.x - D.x), angDB = Math.atan2(B.y - D.y, B.x - D.x);
+          ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
+          ctx.arc(D.x, D.y, 40, angDA, angDB, true); ctx.stroke();
+          ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("40°", D.x + Math.cos((angDA + angDB) / 2) * 55, D.y + Math.sin((angDA + angDB) / 2) * 55);
+      }
+
+      if (document.getElementById('cb_ACB').checked) {
+          const angCA = Math.atan2(A.y - C.y, A.x - C.x), angCB = Math.atan2(B.y - C.y, B.x - C.x);
+          ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
+          ctx.arc(C.x, C.y, 40, angCA, angCB, true); ctx.stroke();
+          ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("30°", C.x + Math.cos((angCA + angCB) / 2) * 55, C.y + Math.sin((angCA + angCB) / 2) * 55);
+      }
+
+      if (document.getElementById('cb_AEB').checked) {
+          const angEA = Math.atan2(A.y - E.y, A.x - E.x), angEB = Math.atan2(B.y - E.y, B.x - E.x);
+          ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
+          ctx.arc(E.x, E.y, 50, angEB, angEA, false); ctx.stroke();
+          ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("20°", E.x, E.y + 65);
+      }
+
+      if (document.getElementById('cb_AEP').checked) {
+          const angEA = Math.atan2(A.y - E.y, A.x - E.x), angEP = Math.atan2(P.y - E.y, P.x - E.x);
+          ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
+          ctx.arc(E.x, E.y, 60, angEP, angEA, false); ctx.stroke();
+          ctx.fillStyle = colorWhite; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("10°", E.x - 15, E.y + 75);
+      }
+
+      if (document.getElementById('cb_BEP').checked) {
+          const angEB = Math.atan2(B.y - E.y, B.x - E.x), angEP = Math.atan2(P.y - E.y, P.x - E.x);
+          ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
+          ctx.arc(E.x, E.y, 60, angEB, angEP, false); ctx.stroke();
+          ctx.fillStyle = colorWhite; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
+          ctx.fillText("10°", E.x + 15, E.y + 75);
+      }
+
+      // Main Points (A, B, C, D, E) sind immer sichtbar
       ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
-      ctx.fillText("A", A.x - 20, A.y + 10);
-      ctx.fillText("B", B.x + 20, B.y + 10);
-      ctx.fillText("D", D.x - 15, D.y);
-      ctx.fillText("C", C.x + 15, C.y);
-      ctx.fillText("E", E.x, E.y - 15);
-
-      // NEU: Label P (Schnittpunkt Symmetrie)
-      ctx.fillText("P", P.x - 15, P.y + 5);
-
-      // NEU: Label F (Schnittpunkt Diagonalen)
-      ctx.fillText("F", F.x + 18, F.y - 10);
+      ctx.fillText("A", A.x - 20, A.y + 10); ctx.fillText("B", B.x + 20, B.y + 10);
+      ctx.fillText("D", D.x - 15, D.y); ctx.fillText("C", C.x + 15, C.y); ctx.fillText("E", E.x, E.y - 15);
   }
+
+  // --- Event Listener ---
+  document.getElementById('cb_all').addEventListener('change', function(e) {
+      const isChecked = e.target.checked;
+      document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => {
+          cb.checked = isChecked;
+      });
+      draw();
+  });
+
+  document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', draw);
+  });
 
   window.addEventListener('resize', draw);
   draw();
