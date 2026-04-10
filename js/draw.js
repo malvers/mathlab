@@ -4,9 +4,15 @@ const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
 
 function draw() {
     const dpr = window.devicePixelRatio || 1;
+
+    canvas.style.display = 'none';
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+    canvas.style.display = 'block';
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const w = rect.width, h = rect.height;
@@ -18,14 +24,25 @@ function draw() {
 
     const angABC = 180 - v.BAC - v.ACB;
 
-    // --- Dynamische Anpassung an die Bildschirmgröße ---
-    const baseWidth = Math.min(280, w * 0.45);
-    // Wenn das Fenster sehr breit ist, schieben wir die Figur weiter nach links (Platz für die Box)
-    const shiftX = w > 600 ? 220 : 0;
-    const centerX = w/2 - shiftX;
+    const isMobile = window.innerWidth <= 1100;
 
-    const A = { x: centerX - baseWidth/2, y: h * 0.95 };
-    const B = { x: centerX + baseWidth/2, y: h * 0.95 };
+    // NEU: Mehr Platz unten (170px statt 150px), damit A und B Luft zur Box haben
+    const bottomPadding = isMobile ? 170 : 60;
+
+    // NEU: Mehr Platz oben (40px statt 20px), damit das E nicht abgeschnitten wird
+    const availableHeight = h - bottomPadding - 40;
+
+    const heightRatio = (currentVariant === 0) ? 2.85 : 1.2;
+    const maxSafeWidth = availableHeight / heightRatio;
+
+    const baseWidth = Math.min(280, w * 0.8, maxSafeWidth);
+
+    let centerX = isMobile ? (w / 2) : ((w - 380) / 2);
+    centerX = Math.max(centerX, baseWidth / 2 + 20);
+
+    const A = { x: centerX - baseWidth/2, y: h - bottomPadding };
+    const B = { x: centerX + baseWidth/2, y: h - bottomPadding };
+
     const D = getPoint(A, B, v.BAD, v.ABD);
     const C = getPoint(A, B, v.BAC, angABC);
     const E = getPoint(A, B, 80, 80);
@@ -38,18 +55,9 @@ function draw() {
     const showTriABC = document.getElementById('cb_tri_ABC') ? document.getElementById('cb_tri_ABC').checked : false;
     const showTriBCD = document.getElementById('cb_tri_BCD') ? document.getElementById('cb_tri_BCD').checked : false;
 
-    if (showTriABD) {
-        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.closePath();
-        ctx.fillStyle = "rgba(34, 197, 94, 0.2)"; ctx.fill();
-    }
-    if (showTriABC) {
-        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath();
-        ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill();
-    }
-    if (showTriBCD) {
-        ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.closePath();
-        ctx.fillStyle = "rgba(168, 85, 247, 0.25)"; ctx.fill();
-    }
+    if (showTriABD) { ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.closePath(); ctx.fillStyle = "rgba(34, 197, 94, 0.2)"; ctx.fill(); }
+    if (showTriABC) { ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill(); }
+    if (showTriBCD) { ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.closePath(); ctx.fillStyle = "rgba(168, 85, 247, 0.25)"; ctx.fill(); }
 
     ctx.lineCap = "round"; ctx.lineJoin = "round";
 
@@ -63,7 +71,6 @@ function draw() {
     const showBAD = showAD;
     const showF = showBD;
     const showDAC = document.getElementById('cb_ADB') ? document.getElementById('cb_ADB').checked : false;
-
     const showDE = document.getElementById('cb_DE') ? document.getElementById('cb_DE').checked : false;
     const showEP = document.getElementById('cb_EP') ? document.getElementById('cb_EP').checked : false;
 
@@ -73,85 +80,53 @@ function draw() {
     if (showBC) { ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.stroke(); }
     if (showAC) { ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.stroke(); }
     if (showBD) { ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(D.x, D.y); ctx.stroke(); }
-    if (showDE) {
-        ctx.beginPath(); ctx.moveTo(D.x, D.y); ctx.lineTo(E.x, E.y); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(E.x, E.y); ctx.stroke();
-    }
-    if (showEP) {
-        ctx.lineWidth = 1.0; ctx.setLineDash([5, 5]);
-        ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke();
-        ctx.setLineDash([]); ctx.lineWidth = 1.8;
-    }
+    if (showDE) { ctx.beginPath(); ctx.moveTo(D.x, D.y); ctx.lineTo(E.x, E.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(E.x, E.y); ctx.stroke(); }
+    if (showEP) { ctx.lineWidth = 1.0; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(P.x, P.y); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1.8; }
     if (showCD) { ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.stroke(); }
 
     if (showBAD) drawArcA(A, 0, v.BAD, 45, v.BAD+"°", cBAD);
     if (document.getElementById('cb_BAC').checked) drawArcA(A, 0, v.BAC, 25, v.BAC+"°", cBAC);
     if (showDAC) drawArcA(A, v.BAC, v.BAD, 75, (v.BAD - v.BAC)+"°", colorWhite);
-
     if (document.getElementById('cb_ABD').checked) drawArcB(B, 0, v.ABD, 45, v.ABD+"°", cABD);
     if (document.getElementById('cb_ABC') && document.getElementById('cb_ABC').checked) drawArcB(B, 0, angABC, 25, angABC+"°", colorWhite);
     if (document.getElementById('cb_DBC') && document.getElementById('cb_DBC').checked) drawArcB(B, v.ABD, angABC, 75, (angABC - v.ABD)+"°", colorWhite);
 
     if (document.getElementById('cb_ADB') && document.getElementById('cb_ADB').checked) {
-        let a1 = Math.atan2(A.y - D.y, A.x - D.x);
-        let a2 = Math.atan2(B.y - D.y, B.x - D.x);
-        let diff = a2 - a1;
-        while (diff < -Math.PI) diff += 2 * Math.PI;
-        while (diff > Math.PI) diff -= 2 * Math.PI;
-
-        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
-        ctx.arc(D.x, D.y, 40, a1, a1 + diff, diff < 0); ctx.stroke();
-        let mid = a1 + diff / 2;
-        ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+        let a1 = Math.atan2(A.y - D.y, A.x - D.x), a2 = Math.atan2(B.y - D.y, B.x - D.x), diff = a2 - a1;
+        while (diff < -Math.PI) diff += 2 * Math.PI; while (diff > Math.PI) diff -= 2 * Math.PI;
+        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5; ctx.arc(D.x, D.y, 40, a1, a1 + diff, diff < 0); ctx.stroke();
+        let mid = a1 + diff / 2; ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
         ctx.fillText((180 - v.BAD - v.ABD)+"°", D.x + Math.cos(mid) * 55, D.y + Math.sin(mid) * 55);
     }
-
     if (document.getElementById('cb_ACB') && document.getElementById('cb_ACB').checked) {
         const angCA = Math.atan2(A.y - C.y, A.x - C.x), angCB = Math.atan2(B.y - C.y, B.x - C.x);
-        ctx.beginPath(); ctx.strokeStyle = cACB; ctx.lineWidth = 1.5;
-        ctx.arc(C.x, C.y, 40, angCA, angCB, true); ctx.stroke();
+        ctx.beginPath(); ctx.strokeStyle = cACB; ctx.lineWidth = 1.5; ctx.arc(C.x, C.y, 40, angCA, angCB, true); ctx.stroke();
         ctx.fillStyle = cACB; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
         ctx.fillText(v.ACB+"°", C.x + Math.cos((angCA + angCB) / 2) * 55, C.y + Math.sin((angCA + angCB) / 2) * 55);
     }
-
     if (document.getElementById('cb_DCA').checked) {
-        let a1 = Math.atan2(A.y - C.y, A.x - C.x);
-        let a2 = Math.atan2(D.y - C.y, D.x - C.x);
-        let diff = a2 - a1;
-        while (diff < -Math.PI) diff += 2 * Math.PI;
-        while (diff > Math.PI) diff -= 2 * Math.PI;
-
+        let a1 = Math.atan2(A.y - C.y, A.x - C.x), a2 = Math.atan2(D.y - C.y, D.x - C.x), diff = a2 - a1;
+        while (diff < -Math.PI) diff += 2 * Math.PI; while (diff > Math.PI) diff -= 2 * Math.PI;
         ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.arc(C.x, C.y, 40, a1, a1 + diff, diff < 0); ctx.closePath();
-        ctx.fillStyle = "#ff9800"; ctx.fill();
-        ctx.strokeStyle = "#ff9800"; ctx.lineWidth = 1.5; ctx.stroke();
-
-        let mid = a1 + diff / 2;
-        ctx.fillStyle = "#ef4444"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ff9800"; ctx.fill(); ctx.strokeStyle = "#ff9800"; ctx.lineWidth = 1.5; ctx.stroke();
+        let mid = a1 + diff / 2; ctx.fillStyle = "#ef4444"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText("?", C.x + Math.cos(mid) * 55, C.y + Math.sin(mid) * 55); ctx.textBaseline = "alphabetic";
     }
 
     if (document.getElementById('cb_AEB') && document.getElementById('cb_AEB').checked) {
         const angEA = Math.atan2(A.y - E.y, A.x - E.x), angEB = Math.atan2(B.y - E.y, B.x - E.x);
-        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5;
-        ctx.arc(E.x, E.y, 50, angEB, angEA, false); ctx.stroke();
-        ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
-        ctx.fillText("20°", E.x, E.y + 85);
+        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.5; ctx.arc(E.x, E.y, 50, angEB, angEA, false); ctx.stroke();
+        ctx.fillStyle = colorWhite; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center"; ctx.fillText("20°", E.x, E.y + 85);
     }
-
     if (document.getElementById('cb_AEP') && document.getElementById('cb_AEP').checked) {
         const angEA = Math.atan2(A.y - E.y, A.x - E.x), angEP = Math.atan2(P.y - E.y, P.x - E.x);
-        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
-        ctx.arc(E.x, E.y, 60, angEP, angEA, false); ctx.stroke();
-        ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "right";
-        ctx.fillText("10°", E.x - 25, E.y + 65);
+        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2; ctx.arc(E.x, E.y, 60, angEP, angEA, false); ctx.stroke();
+        ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "right"; ctx.fillText("10°", E.x - 25, E.y + 65);
     }
-
     if (document.getElementById('cb_BEP') && document.getElementById('cb_BEP').checked) {
         const angEB = Math.atan2(B.y - E.y, B.x - E.x), angEP = Math.atan2(P.y - E.y, P.x - E.x);
-        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2;
-        ctx.arc(E.x, E.y, 60, angEB, angEP, false); ctx.stroke();
-        ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "left";
-        ctx.fillText("10°", E.x + 25, E.y + 65);
+        ctx.beginPath(); ctx.strokeStyle = colorWhite; ctx.lineWidth = 1.2; ctx.arc(E.x, E.y, 60, angEB, angEP, false); ctx.stroke();
+        ctx.fillStyle = colorWhite; ctx.font = "bold 11px Orbitron"; ctx.textAlign = "left"; ctx.fillText("10°", E.x + 25, E.y + 65);
     }
 
     ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
