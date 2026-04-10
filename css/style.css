@@ -3,12 +3,17 @@ body {
     display: flex; height: 100vh; font-family: 'Inter', sans-serif;
     overflow: hidden;
 }
+
 #info-panel {
-    width: 360px; padding: 15px 20px; border-right: 1px solid #334155;
+    width: 360px;
+    min-width: 360px; /* Verhindert das Quetschen! */
+    flex-shrink: 0;   /* Das Menü darf NIEMALS schrumpfen */
+    padding: 15px 20px; border-right: 1px solid #334155;
     background: #111827; box-sizing: border-box; display: flex;
     flex-direction: column; gap: 5px; z-index: 10;
     overflow-y: auto;
 }
+
 #canvas-container { flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; }
 .calc-box { background: #1e293b; padding: 6px 10px; border-radius: 6px; border-left: 4px solid #334155; margin-bottom: 2px;}
 .calc-line { margin: 2px 0; font-size: 0.8rem; line-height: 1.3; display: flex; align-items: center; gap: 6px; }
@@ -37,10 +42,10 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
 .nav-btn:hover:not(:disabled) { background: #475569; }
 .nav-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
 
-/* ERKLÄRUNGSPANEL (20% größer & weiter links) */
+/* ERKLÄRUNGSPANEL */
 #explanation-box {
     position: absolute;
-    right: 280px;
+    right: 30px; /* Klebt jetzt sauber am rechten Rand! */
     top: 50%;
     transform: translateY(-50%);
     width: 460px;
@@ -71,3 +76,35 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
 .exp-text b { color: #00f2ff; }
 
 canvas { display: block; }
+
+/* --- RESPONSIVE DESIGN (iPad & Mobile) --- */
+@media (max-width: 1100px) {
+    body {
+        flex-direction: column;
+    }
+
+    #info-panel {
+        width: 100%;
+        min-width: 100%;
+        height: 40vh;
+        border-right: none;
+        border-top: 2px solid #334155;
+        order: 2;
+    }
+
+    #canvas-container {
+        width: 100%;
+        height: 60vh;
+        order: 1;
+    }
+
+    #explanation-box {
+        /* NEU: Rechts anheften, Zentrierung aufheben und schmaler machen */
+        right: 15px;
+        top: 15px;
+        transform: none;
+        width: 320px; /* Deutlich schmaler als auf dem Desktop */
+        padding: 15px;
+        font-size: 0.85rem; /* Schrift minimal kleiner, damit die Formeln gut reinpassen */
+    }
+}

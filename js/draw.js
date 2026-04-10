@@ -18,8 +18,10 @@ function draw() {
 
     const angABC = 180 - v.BAC - v.ACB;
 
-    const baseWidth = 280;
-    const shiftX = baseWidth * 1.5;
+    // --- Dynamische Anpassung an die Bildschirmgröße ---
+    const baseWidth = Math.min(280, w * 0.45);
+    // Wenn das Fenster sehr breit ist, schieben wir die Figur weiter nach links (Platz für die Box)
+    const shiftX = w > 600 ? 220 : 0;
     const centerX = w/2 - shiftX;
 
     const A = { x: centerX - baseWidth/2, y: h * 0.95 };
