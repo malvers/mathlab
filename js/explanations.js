@@ -1,26 +1,21 @@
-// js/explanations.js
-
 function updateExplanation() {
     const box = document.getElementById('explanation-box');
     const title = document.getElementById('exp-title');
     const text = document.getElementById('exp-text');
     const v = variants[currentVariant];
 
-    // Nichts anzeigen bei Schritt 0
     if (currentStep === 0) {
         box.style.display = 'none';
         return;
     }
-
     box.style.display = 'flex';
 
-    // Phase 1: Rechtes Dreieck
     if (currentStep === 1) {
         title.innerText = "SCHRITT 1: Die Basis";
         text.innerHTML = "Wir beginnen unsere Konstruktion mit einer horizontalen Basislinie <b>AB</b>.";
     } else if (currentStep === 2) {
         title.innerText = "SCHRITT 2: Der erste Winkel";
-        text.innerHTML = `Vom Punkt A aus tragen wir den ersten vorgegebenen Winkel ab: <br><br> $$ \\angle BAC = ${v.BAC}^\\circ $$`;
+        text.innerHTML = `Vom Punkt A aus tragen wir den ersten vorgegebenen Winkel ab:<br><br> $$ \\angle BAC = ${v.BAC}^\\circ $$`;
     } else if (currentStep === 3) {
         title.innerText = "SCHRITT 3: Die Diagonale";
         text.innerHTML = "Wir ziehen die Diagonale von A aus. Irgendwo auf dieser Linie wird später unser Punkt C liegen.";
@@ -33,16 +28,12 @@ function updateExplanation() {
     } else if (currentStep === 6) {
         title.innerText = "SCHRITT 6: Der linke Schenkel";
         text.innerHTML = `Der gesamte Basiswinkel links ist mit \\( ${v.BAD}^\\circ \\) vorgegeben. Wir ziehen den linken Schenkel <b>AD</b>.`;
-
-    // Phase 2: Linkes Dreieck
     } else if (currentStep === 7) {
         title.innerText = "SCHRITT 7: Der innere Winkel bei B";
         text.innerHTML = `Von der rechten Seite aus tragen wir den nächsten vorgegebenen Winkel ab:<br><br> $$ \\angle ABD = ${v.ABD}^\\circ $$`;
     } else if (currentStep === 8) {
         title.innerText = "SCHRITT 8: Die zweite Diagonale";
         text.innerHTML = "Wir ziehen die Linie BD. Dort, wo sie den Schenkel AD trifft, entsteht unsere letzte Ecke: Der Punkt <b>D</b>. Die beiden Diagonalen kreuzen sich im Punkt <b>F</b>.";
-
-    // Phase 3 & 4
     } else if (currentStep === 9) {
         const angABC = 180 - v.BAC - v.ACB;
         title.innerText = "SCHRITT 9: Der Restwinkel bei B";
@@ -57,10 +48,8 @@ function updateExplanation() {
     } else if (currentStep === 12) {
         title.innerText = "SCHRITT 12: Das Rätsel";
         text.innerHTML = "Hier ist die große Frage dieser Aufgabe: Wie groß ist der orange markierte Winkel <b>DCA</b>?<br><br><i>Mit der einfachen Innenwinkelsumme kommen wir hier nicht weiter. Wir brauchen eine clevere Strategie!</i>";
-
-    // Phase 5: Lösung
     } else if (currentStep > 12) {
-        if (currentVariant === 0) { // Geometrisch
+        if (currentVariant === 0) {
             if (currentStep === 13) {
                 title.innerText = "SCHRITT 13: Das große Dreieck";
                 text.innerHTML = "Wir verlängern AD und BC zur Spitze <b>E</b>. Es entsteht ein riesiges, gleichschenkliges Dreieck.";
@@ -75,9 +64,9 @@ function updateExplanation() {
                 text.innerHTML = "Der Schnittpunkt <b>P</b> mit der Diagonale BD ist der geometrische Schlüssel zum Finden kongruenter Dreiecke.";
             } else if (currentStep >= 17) {
                 title.innerText = "SCHRITT 17 & 18: Die Lösung";
-                text.innerHTML = "Die Achse halbiert die Spitze in zwei exakte \\( 10^\\circ \\)-Winkel.<br><br>Durch eine Kette von Kongruenzbeweisen (Gleichseitige Dreiecke um Punkt P) lässt sich zeigen, dass CD parallel zu AB verlaufen muss. Daraus folgt zwingend:<br><br> $$ \\angle DCA = \\mathbf{20^\\circ} $$";
+                text.innerHTML = "Die Achse halbiert die Spitze in zwei exakte \\( 10^\\circ \\)-Winkel.<br><br>Durch eine Kette von Kongruenzbeweisen lässt sich zeigen, dass CD parallel zu AB verlaufen muss. Daraus folgt zwingend:<br><br> $$ \\angle DCA = \\mathbf{20^\\circ} $$";
             }
-        } else { // Trigonometrisch
+        } else {
             const angADB = 180 - v.BAD - v.ABD;
             if (currentStep === 13) {
                 title.innerText = "SCHRITT 13: Sinussatz im \\( \\Delta ABD \\)";
@@ -87,12 +76,11 @@ function updateExplanation() {
                 text.innerHTML = `Im blauen Dreieck ABC gilt analog:<br><br> $$ \\frac{BC}{\\sin(${v.BAC}^\\circ)} = \\frac{AB}{\\sin(${v.ACB}^\\circ)} $$ <br>Daraus folgt für BC:<br> $$ BC = AB \\cdot \\frac{\\sin(${v.BAC}^\\circ)}{\\sin(${v.ACB}^\\circ)} $$`;
             } else if (currentStep >= 15) {
                 title.innerText = "SCHRITT 15: Das Finale im \\( \\Delta BCD \\)";
-                text.innerHTML = `Im lila Dreieck BCD kennen wir nun das Längenverhältnis von BC zu BD (die Seite AB kürzt sich heraus).<br><br>Wendet man den Sinussatz ein drittes Mal im \\( \\Delta BCD \\) an und löst nach dem gesuchten Winkel auf, erhalten wir mathematisch exakt:<br><br> $$ \\angle DCA = \\mathbf{${v.target}^\\circ} $$`;
+                text.innerHTML = `Im lila Dreieck BCD kennen wir nun das Längenverhältnis von BC zu BD. Wendet man den Sinussatz ein drittes Mal im \\( \\Delta BCD \\) an, erhalten wir mathematisch exakt:<br><br> $$ \\angle DCA = \\mathbf{${v.target}^\\circ} $$`;
             }
         }
     }
 
-    // LaTeX Renderer anstoßen
     if (window.MathJax) {
         MathJax.typesetPromise([document.getElementById('explanation-box')]).catch((err) => console.log(err));
     }
