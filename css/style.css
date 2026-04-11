@@ -20,14 +20,23 @@ body {
 }
 #main-splitter:hover, #main-splitter.active { background: #64748b; }
 
-/* FIX: min-height: 0 ist extrem wichtig für Canvas in Flexbox! */
+/* --- HIER IST DIE ABSOLUTE GARANTIE --- */
+/* min-height: 50vh zwingt den Container dazu, IMMER mindestens die halbe Bildschirmhöhe einzunehmen! */
 #canvas-container {
     flex: 1 1 0%;
-    min-height: 0;
     position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    min-height: 50vh;
+}
+
+canvas {
+    display: block;
+    flex: 1 1 0%;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
 }
 
 .calc-box { background: #1e293b; padding: 6px 10px; border-radius: 6px; border-left: 4px solid #334155; margin-bottom: 2px;}
@@ -47,12 +56,14 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
 }
 #variant-select option { background: #0b1120; color: white; }
 
+/* EIGENE SCROLLBARS */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #0b1120; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 * { scrollbar-width: thin; scrollbar-color: #334155 #0b1120; }
 
+/* ERKLÄRUNGSPANEL - Desktop Version */
 #explanation-box {
     position: absolute;
     right: 20px;
@@ -78,19 +89,9 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
 .exp-text { font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; }
 .exp-text b { color: #00f2ff; }
 
-canvas { display: block; }
-
 /* --- RESPONSIVE DESIGN (iPad & Mobile) --- */
 @media (max-width: 1100px) {
     body { flex-direction: column; }
-
-    #canvas-container {
-        width: 100%;
-        flex: 1 1 0%;
-        order: 1;
-        display: flex;
-        flex-direction: column;
-    }
 
     #main-splitter { width: 100%; height: 6px; cursor: row-resize; order: 2; flex-shrink: 0; }
 
@@ -98,7 +99,8 @@ canvas { display: block; }
         width: 100%; min-width: 100%; height: 35vh;
         border-right: none; border-top: 2px solid #334155; order: 3;
         flex-shrink: 1;
-        max-height: 55vh;
+        /* Das Menü darf niemals das Canvas zerdrücken */
+        max-height: 45vh !important;
     }
 
     #explanation-box {
@@ -115,6 +117,14 @@ canvas { display: block; }
         flex-shrink: 0;
         overflow-y: auto;
     }
+    #canvas-container {
+            width: 100%;
+            min-height: 50vh !important; /* Zwingt das Canvas auf 50% Höhe */
+            flex: 1 1 auto;
+            order: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
     .exp-title { font-size: 1rem; margin-bottom: 0; }
     .exp-text { line-height: 1.4; }
