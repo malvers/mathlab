@@ -42,7 +42,7 @@ document.getElementById('cb_calc_all').addEventListener('change', function(e) {
     ['cb_DAC', 'cb_ABC', 'cb_DBC', 'cb_ADB', 'cb_AEB', 'cb_AEP', 'cb_BEP'].forEach(id => {
         if(document.getElementById(id)) document.getElementById(id).checked = isChecked;
     });
-    draw(); // Wird aus draw.js geholt
+    draw();
 });
 
 document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => { cb.addEventListener('change', draw); });
@@ -52,24 +52,20 @@ function updateUI() {
     document.getElementById('btn_next').disabled = (currentStep === storyline.length);
     document.getElementById('step-counter').innerText = `${currentStep}/${storyline.length}`;
     document.getElementById('cb_all').checked = (currentStep === storyline.length);
-    updateExplanation(); // Wird aus explanations.js geholt
+    updateExplanation();
 }
 
 function applyStep() {
-    // 1. Sichtbare Checkboxen zurücksetzen
     document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => cb.checked = false);
 
-    // 2. NEU: Versteckte Logik-Checkboxen zwingend zurücksetzen!
     ['cb_BAD', 'cb_F', 'cb_DAC', 'cb_BC'].forEach(id => {
         if(document.getElementById(id)) document.getElementById(id).checked = false;
     });
 
-    // 3. Storyline (Schritte) anwenden
     storyline.forEach((id, index) => {
         if (index < currentStep && document.getElementById(id)) document.getElementById(id).checked = true;
     });
 
-    // 4. Abhängigkeiten setzen (Wenn Winkel da, dann auch Linie)
     if (document.getElementById('cb_ABC').checked) document.getElementById('cb_BC').checked = true;
     if (document.getElementById('cb_AD').checked) document.getElementById('cb_BAD').checked = true;
     if (document.getElementById('cb_BD').checked) document.getElementById('cb_F').checked = true;
@@ -79,12 +75,11 @@ function applyStep() {
     draw();
 }
 
-// Initialer Start-Befehl
 window.addEventListener('resize', draw);
 updateUI();
 draw();
 
-// --- NEU: SPLITTER LOGIK ---
+// --- SPLITTER LOGIK ---
 const splitter = document.getElementById('main-splitter');
 const infoPanel = document.getElementById('info-panel');
 let isSplitting = false;
@@ -93,7 +88,7 @@ if (splitter) {
     splitter.addEventListener('pointerdown', (e) => {
         isSplitting = true;
         splitter.classList.add('active');
-        document.body.style.userSelect = 'none'; // Verhindert Markieren von Text
+        document.body.style.userSelect = 'none';
     });
 
     document.addEventListener('pointermove', (e) => {
@@ -102,11 +97,11 @@ if (splitter) {
         const isMobile = window.innerWidth <= 1100;
 
         if (isMobile) {
-            // Mobile: Wir verändern die Höhe des unteren Menüs (order: 3)
+            // Mobile: Wir verändern die Höhe des unteren Menüs
             const newHeight = window.innerHeight - e.clientY;
             const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.5));
             infoPanel.style.height = `${clampedHeight}px`;
-            infoPanel.style.flex = 'none';
+            // Blockiert nicht mehr das Flex-Shrinking!
         } else {
             // Desktop: Wir verändern die Breite des linken Menüs
             const newWidth = e.clientX;
@@ -115,7 +110,7 @@ if (splitter) {
             infoPanel.style.minWidth = `${clampedWidth}px`;
         }
 
-        draw(); // Figur live skalieren
+        draw();
     });
 
     document.addEventListener('pointerup', () => {

@@ -14,7 +14,7 @@ body {
     overflow-y: auto;
 }
 
-/* --- NEU: SPLITTER --- */
+/* --- SPLITTER --- */
 #main-splitter {
     width: 6px; background: #334155; cursor: col-resize;
     flex-shrink: 0; z-index: 30; transition: background 0.2s;
@@ -65,6 +65,8 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
     gap: 12px;
     box-shadow: -5px 15px 30px rgba(0,0,0,0.5);
     z-index: 20;
+    max-height: 85vh; /* NEU: Verhindert, dass die Box in kleinen Desktop-Fenstern das Canvas überlagert */
+    overflow-y: auto;
 }
 .exp-title { font-family: 'Orbitron'; color: #eab308; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; }
 .exp-text { font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; }
@@ -76,27 +78,29 @@ canvas { display: block; }
 @media (max-width: 1100px) {
     body { flex-direction: column; }
 
-    /* Canvas füllt den Rest, Splitter in der Mitte, Menü unten */
-    #canvas-container { width: 100%; height: auto; flex-grow: 1; order: 1; }
+    #canvas-container {
+        order: 1; flex-grow: 1; height: auto; width: 100%;
+        display: flex; flex-direction: column;
+        flex-shrink: 0; /* NEU: Canvas weigert sich extrem klein zu werden */
+        min-height: 40vh; /* NEU: Es beansprucht mindestens 40% des Bildschirms */
+    }
 
     #main-splitter { width: 100%; height: 6px; cursor: row-resize; order: 2; flex-shrink: 0; }
 
-    #info-panel { width: 100%; min-width: 100%; height: 35vh; border-right: none; border-top: none; order: 3; }
+    #info-panel {
+        width: 100%; min-width: 100%; height: 35vh;
+        border-right: none; border-top: none; order: 3;
+        flex-shrink: 1; /* NEU: Das Menü MUSS schrumpfen, wenn Y kleiner wird */
+        min-height: 100px;
+    }
 
     #explanation-box {
-        top: auto; bottom: 0; right: 0; left: 0;
-        transform: none;
-        width: 100%; max-width: 100%;
-        border-radius: 0; border-left: none; border-top: 3px solid #eab308;
-        padding: 10px 15px;
-        font-size: 0.8rem;
-        gap: 6px;
-        box-sizing: border-box;
-        background: rgba(17, 24, 39, 0.98);
-
-        /* Fixe Höhe */
+        position: relative; top: auto; right: auto; transform: none; width: 100%;
+        border-radius: 0; border-top: 3px solid #eab308; border-left: none;
+        background: #111827; padding: 15px; overflow-y: auto;
         height: 140px;
-        overflow-y: auto;
+        flex-shrink: 1; /* NEU: Die Box schrumpft ebenfalls mit */
+        min-height: 80px;
     }
 
     .exp-title { font-size: 1rem; margin-bottom: 0; }

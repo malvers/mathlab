@@ -4,18 +4,30 @@ const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
 
 function draw() {
     const dpr = window.devicePixelRatio || 1;
+    const isMobile = window.innerWidth <= 1100;
 
+    // 1. Platz exakt vermessen
     canvas.style.display = 'none';
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.style.display = 'block';
+    const containerRect = canvas.parentElement.getBoundingClientRect();
+    const expBox = document.getElementById('explanation-box');
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
+    let canvasW = containerRect.width;
+    let canvasH = containerRect.height;
+
+    // Auf Mobile ziehen wir die echte Höhe der Box ab, damit das Canvas perfekt reinpasst
+    if (isMobile && expBox) {
+        canvasH = containerRect.height - expBox.offsetHeight;
+    }
+    canvasH = Math.max(canvasH, 150);
+
+    canvas.style.display = 'block';
+    canvas.width = canvasW * dpr;
+    canvas.height = canvasH * dpr;
+    canvas.style.width = canvasW + 'px';
+    canvas.style.height = canvasH + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const w = rect.width, h = rect.height;
+    const w = canvasW, h = canvasH;
     ctx.clearRect(0, 0, w, h);
 
     const v = variants[currentVariant];
@@ -24,9 +36,8 @@ function draw() {
 
     const angABC = 180 - v.BAC - v.ACB;
 
-    const isMobile = window.innerWidth <= 1100;
-
-    const bottomPadding = isMobile ? 170 : 60;
+    // 2. HIER IST DER FIX: Kein 170px Riesen-Abstand mehr nötig!
+    const bottomPadding = isMobile ? 50 : 60;
     const availableHeight = h - bottomPadding - 40;
 
     const heightRatio = (currentVariant === 0) ? 2.85 : 1.2;
@@ -34,18 +45,15 @@ function draw() {
 
     const baseWidth = Math.min(280, w * 0.8, maxSafeWidth);
 
-    // --- NEU: Dynamische Skalierung für Schriften und Abstände ---
-    const scale = baseWidth / 280; // Maßstab (1.0 bei maximaler Größe)
+    // 3. Dynamische Skalierung für Schriften und Abstände
+    const scale = baseWidth / 280;
 
-    // Flexible Schriftgrößen
-    const fL = Math.max(12, Math.round(18 * scale)); // Labels A, B, C und das '?'
-    const fM = Math.max(9, Math.round(12 * scale));  // Standard-Winkel (z.B. 30°, 20°)
-    const fS = Math.max(8, Math.round(11 * scale));  // Kleine Winkel (z.B. 10°)
+    const fL = Math.max(12, Math.round(18 * scale));
+    const fM = Math.max(9, Math.round(12 * scale));
+    const fS = Math.max(8, Math.round(11 * scale));
 
-    // Flexible Radien und Abstände für die Bögen
     const r25 = 25 * scale, r40 = 40 * scale, r45 = 45 * scale, r50 = 50 * scale, r60 = 60 * scale, r75 = 75 * scale;
     const o25 = 25 * scale, o55 = 55 * scale, o65 = 65 * scale, o85 = 85 * scale;
-    // -------------------------------------------------------------
 
     let centerX = isMobile ? (w / 2) : ((w - 380) / 2);
     centerX = Math.max(centerX, baseWidth / 2 + 20);
