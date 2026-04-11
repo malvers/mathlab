@@ -104,7 +104,7 @@ if (splitter) {
         if (isMobile) {
             // Mobile: Wir verändern die Höhe des unteren Menüs (order: 3)
             const newHeight = window.innerHeight - e.clientY;
-            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.8));
+            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.5));
             infoPanel.style.height = `${clampedHeight}px`;
             infoPanel.style.flex = 'none';
         } else {
