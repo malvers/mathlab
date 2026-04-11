@@ -33,3 +33,23 @@ function drawArcB(p, startDeg, endDeg, radius, label, color) {
     ctx.fillStyle = color; ctx.font = "bold 13px Orbitron"; ctx.textAlign = "center";
     ctx.fillText(label, p.x + Math.cos(midRad) * (radius + 12), p.y + Math.sin(midRad) * (radius + 12));
 }
+
+function drawLine(ctx, p1, p2, width = 1.8, dash = []) {
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function fillTriangle(ctx, p1, p2, p3, color) {
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+}

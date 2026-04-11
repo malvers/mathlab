@@ -2,39 +2,13 @@
 
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
 
-// --- HILFSFUNKTIONEN ---
-function isChecked(id) {
-    const el = document.getElementById(id);
-    return el ? el.checked : false;
-}
-
-function drawLine(p1, p2, width = 1.8, dash = []) {
-    ctx.lineWidth = width;
-    ctx.setLineDash(dash);
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-function fillTriangle(p1, p2, p3, color) {
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.lineTo(p3.x, p3.y);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-}
-// -----------------------------------------------------------
-
 function draw() {
     const dpr = window.devicePixelRatio || 1;
     const isMobile = window.innerWidth <= 1100;
 
     // 1. CANVAS SETUP & PLATZBERECHNUNG
-    canvas.style.display = 'none'; // Kurzes Ausblenden für exakte Messung
+    canvas.style.width = '0px';
+    canvas.style.height = '0px';
 
     const containerRect = canvas.parentElement.getBoundingClientRect();
     const expBox = document.getElementById('explanation-box');
@@ -42,13 +16,11 @@ function draw() {
     let canvasW = containerRect.width;
     let canvasH = containerRect.height;
 
-    // Zieht die Erklärbox auf dem Tablet vom Platz ab
     if (isMobile && expBox) {
         canvasH = containerRect.height - expBox.offsetHeight;
     }
     canvasH = Math.max(canvasH, 150);
 
-    canvas.style.display = 'block'; // Canvas wieder einblenden
     canvas.width = canvasW * dpr;
     canvas.height = canvasH * dpr;
     canvas.style.width = canvasW + 'px';
@@ -63,7 +35,7 @@ function draw() {
     const angABC = 180 - v.BAC - v.ACB;
 
     // 3. RESPONSIVE SKALIERUNG
-    const bottomPadding = isMobile ? 50 : 60; // Sauberer Puffer nach unten
+    const bottomPadding = isMobile ? 50 : 60;
     const availableHeight = canvasH - bottomPadding - 40;
 
     const heightRatio = (currentVariant === 0) ? 2.85 : 1.2;
@@ -92,9 +64,9 @@ function draw() {
     const F = getIntersection(A, C, B, D);
 
     // 5. FARBIGE DREIECKE
-    if (isChecked('cb_tri_ABD')) fillTriangle(A, B, D, "rgba(34, 197, 94, 0.2)");
-    if (isChecked('cb_tri_ABC')) fillTriangle(A, B, C, "rgba(0, 242, 255, 0.15)");
-    if (isChecked('cb_tri_BCD')) fillTriangle(B, C, D, "rgba(168, 85, 247, 0.25)");
+    if (isChecked('cb_tri_ABD')) fillTriangle(ctx, A, B, D, "rgba(34, 197, 94, 0.2)");
+    if (isChecked('cb_tri_ABC')) fillTriangle(ctx, A, B, C, "rgba(0, 242, 255, 0.15)");
+    if (isChecked('cb_tri_BCD')) fillTriangle(ctx, B, C, D, "rgba(168, 85, 247, 0.25)");
 
     // 6. LINIEN ZEICHNEN
     ctx.lineCap = "round";
@@ -113,15 +85,15 @@ function draw() {
     const showDE = isChecked('cb_DE');
     const showEP = isChecked('cb_EP');
 
-    if (showAB) drawLine(A, B);
-    if (showAD) drawLine(A, D);
-    if (showBC) drawLine(B, C);
-    if (showAC) drawLine(A, C);
-    if (showBD) drawLine(B, D);
-    if (showCD) drawLine(C, D);
+    if (showAB) drawLine(ctx, A, B);
+    if (showAD) drawLine(ctx, A, D);
+    if (showBC) drawLine(ctx, B, C);
+    if (showAC) drawLine(ctx, A, C);
+    if (showBD) drawLine(ctx, B, D);
+    if (showCD) drawLine(ctx, C, D);
 
-    if (showDE) { drawLine(D, E); drawLine(C, E); }
-    if (showEP) { drawLine(E, P, 1.0, [5, 5]); }
+    if (showDE) { drawLine(ctx, D, E); drawLine(ctx, C, E); }
+    if (showEP) { drawLine(ctx, E, P, 1.0, [5, 5]); }
 
     // 7. WINKEL & BÖGEN ZEICHNEN
     if (showBAD) drawArcA(A, 0, v.BAD, r45, v.BAD+"°", cBAD);
