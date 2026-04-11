@@ -1,5 +1,10 @@
 // js/main.js
 
+function isChecked(id) {
+    const el = document.getElementById(id);
+    return el ? el.checked : false;
+}
+
 document.getElementById('variant-select').addEventListener('change', function(e) {
     currentVariant = parseInt(e.target.value);
     const v = variants[currentVariant];
@@ -79,7 +84,7 @@ window.addEventListener('resize', draw);
 updateUI();
 draw();
 
-// --- HIER FEHLTE DIE SPLITTER LOGIK KOMPLETT ---
+// --- SPLITTER LOGIK ---
 const splitter = document.getElementById('main-splitter');
 const infoPanel = document.getElementById('info-panel');
 let isSplitting = false;
@@ -98,7 +103,6 @@ if (splitter) {
 
         if (isMobile) {
             const newHeight = window.innerHeight - e.clientY;
-            // Limitierung auf 40% (0.4), damit die Figur auf dem Handy riesig bleibt
             const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.4));
             infoPanel.style.height = `${clampedHeight}px`;
         } else {
