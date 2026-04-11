@@ -83,3 +83,47 @@ function applyStep() {
 window.addEventListener('resize', draw);
 updateUI();
 draw();
+
+// --- NEU: SPLITTER LOGIK ---
+const splitter = document.getElementById('main-splitter');
+const infoPanel = document.getElementById('info-panel');
+let isSplitting = false;
+
+if (splitter) {
+    splitter.addEventListener('pointerdown', (e) => {
+        isSplitting = true;
+        splitter.classList.add('active');
+        document.body.style.userSelect = 'none'; // Verhindert Markieren von Text
+    });
+
+    document.addEventListener('pointermove', (e) => {
+        if (!isSplitting) return;
+
+        const isMobile = window.innerWidth <= 1100;
+
+        if (isMobile) {
+            // Mobile: Wir verändern die Höhe des unteren Menüs (order: 3)
+            const newHeight = window.innerHeight - e.clientY;
+            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.8));
+            infoPanel.style.height = `${clampedHeight}px`;
+            infoPanel.style.flex = 'none';
+        } else {
+            // Desktop: Wir verändern die Breite des linken Menüs
+            const newWidth = e.clientX;
+            const clampedWidth = Math.max(250, Math.min(newWidth, window.innerWidth * 0.5));
+            infoPanel.style.width = `${clampedWidth}px`;
+            infoPanel.style.minWidth = `${clampedWidth}px`;
+        }
+
+        draw(); // Figur live skalieren
+    });
+
+    document.addEventListener('pointerup', () => {
+        if (isSplitting) {
+            isSplitting = false;
+            splitter.classList.remove('active');
+            document.body.style.userSelect = '';
+            draw();
+        }
+    });
+}
