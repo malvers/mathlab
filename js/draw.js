@@ -7,24 +7,23 @@ function draw() {
     const isMobile = window.innerWidth <= 1100;
 
     // 1. CANVAS SETUP & PLATZBERECHNUNG
-    canvas.style.width = '0px';
-    canvas.style.height = '0px';
-
+    // Wir fragen direkt den Container, wie groß das CSS ihn gemacht hat!
     const containerRect = canvas.parentElement.getBoundingClientRect();
     const expBox = document.getElementById('explanation-box');
 
     let canvasW = containerRect.width;
     let canvasH = containerRect.height;
 
-    if (isMobile && expBox) {
-        canvasH = containerRect.height - expBox.offsetHeight;
+    // Zieht die Erklärbox auf dem Tablet/Handy vom Zeichenplatz ab
+    if (isMobile && expBox && expBox.style.display !== 'none') {
+        canvasH -= expBox.offsetHeight;
     }
-    canvasH = Math.max(canvasH, 150);
 
+    // Setzt die innere Schärfe (Retina) und die äußere Höhe
     canvas.width = canvasW * dpr;
     canvas.height = canvasH * dpr;
-    canvas.style.width = canvasW + 'px';
     canvas.style.height = canvasH + 'px';
+
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, canvasW, canvasH);
 
@@ -36,13 +35,14 @@ function draw() {
 
     // 3. RESPONSIVE SKALIERUNG
     const bottomPadding = isMobile ? 50 : 60;
-    const availableHeight = canvasH - bottomPadding - 40;
+    let availableHeight = canvasH - bottomPadding - 40;
+    availableHeight = Math.max(10, availableHeight); // Crash-Schutz!
 
     const heightRatio = (currentVariant === 0) ? 2.85 : 1.2;
     const maxSafeWidth = availableHeight / heightRatio;
     const baseWidth = Math.min(280, canvasW * 0.8, maxSafeWidth);
 
-    const scale = baseWidth / 280;
+    const scale = Math.max(0.05, baseWidth / 280); // Radien dürfen nie negativ werden
     const fL = Math.max(12, Math.round(18 * scale));
     const fM = Math.max(9, Math.round(12 * scale));
     const fS = Math.max(8, Math.round(11 * scale));

@@ -5,18 +5,16 @@ body {
 }
 
 #info-panel {
-    width: 360px;
-    min-width: 360px;
-    flex-shrink: 0;
+    width: 360px; min-width: 360px; flex-shrink: 0;
     padding: 15px 20px; border-right: 1px solid #334155;
     background: #111827; box-sizing: border-box; display: flex;
-    flex-direction: column; gap: 5px; z-index: 10;
-    overflow-y: auto;
+    flex-direction: column; gap: 5px; z-index: 10; overflow-y: auto;
 }
 
 #main-splitter {
     width: 6px; background: #334155; cursor: col-resize;
     flex-shrink: 0; z-index: 30; transition: background 0.2s;
+    touch-action: none;
 }
 #main-splitter:hover, #main-splitter.active { background: #64748b; }
 
@@ -38,34 +36,18 @@ input[type="checkbox"] { margin: 0; cursor: pointer; }
 }
 #variant-select option { background: #0b1120; color: white; }
 
-/* EIGENE SCROLLBARS */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #0b1120; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 * { scrollbar-width: thin; scrollbar-color: #334155 #0b1120; }
 
-/* ERKLÄRUNGSPANEL - Desktop Version */
 #explanation-box {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 340px;
-    box-sizing: border-box;
-    background: rgba(17, 24, 39, 0.95);
-    border: 1px solid #334155;
-    border-left: 4px solid #eab308;
-    border-radius: 8px;
-    padding: 20px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: -5px 15px 30px rgba(0,0,0,0.5);
-    z-index: 20;
-    max-height: 85vh;
-    overflow-y: auto;
+    position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+    width: 340px; box-sizing: border-box; background: rgba(17, 24, 39, 0.95);
+    border: 1px solid #334155; border-left: 4px solid #eab308; border-radius: 8px;
+    padding: 20px; color: white; display: flex; flex-direction: column; gap: 12px;
+    box-shadow: -5px 15px 30px rgba(0,0,0,0.5); z-index: 20; max-height: 85vh; overflow-y: auto;
 }
 .exp-title { font-family: 'Orbitron'; color: #eab308; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; }
 .exp-text { font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; }
@@ -77,29 +59,39 @@ canvas { display: block; }
 @media (max-width: 1100px) {
     body { flex-direction: column; }
 
+    /* HIER SIND DIE 50% GARANTIERT */
     #canvas-container {
-        width: 100%; height: auto; flex-grow: 1; flex-shrink: 1; order: 1;
-        display: flex; flex-direction: column;
+        width: 100%;
+        height: 50vh;
+        min-height: 50vh;
+        position: relative; /* Wichtig für das Canvas! */
+        order: 1;
+        flex-shrink: 0;
     }
 
-    #main-splitter { width: 100%; height: 6px; cursor: row-resize; order: 2; flex-shrink: 0; }
-    #info-panel { width: 100%; min-width: 100%; height: 35vh; border-right: none; border-top: 2px solid #334155; order: 3; flex-shrink: 0; }
+    /* Canvas ist absolut und stört das Layout nicht mehr! */
+    canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+    }
+
+    #main-splitter { width: 100%; height: 6px; cursor: row-resize; order: 2; flex-shrink: 0; z-index: 30;}
+
+    #info-panel {
+        width: 100%; min-width: 100%; height: auto;
+        border-right: none; border-top: 2px solid #334155; order: 3;
+        flex: 1 1 0%; /* Nimmt den restlichen Platz ein */
+    }
 
     #explanation-box {
-        position: relative; top: auto; bottom: auto; right: auto; left: auto;
-        transform: none;
-        width: 100%; max-width: 100%;
+        position: absolute; bottom: 0; right: 0; left: 0; top: auto;
+        transform: none; width: 100%; max-width: 100%;
         border-radius: 0; border-left: none; border-top: 3px solid #eab308;
-        padding: 10px 15px;
-        font-size: 0.8rem;
-        gap: 6px;
-        box-sizing: border-box;
-        background: rgba(17, 24, 39, 0.98);
-        height: 140px;
-        flex-shrink: 0;
-        overflow-y: auto;
+        padding: 10px 15px; font-size: 0.8rem; gap: 6px;
+        box-sizing: border-box; background: rgba(17, 24, 39, 0.98);
+        height: auto; max-height: 45%; flex-shrink: 0; overflow-y: auto; z-index: 20;
     }
-
     .exp-title { font-size: 1rem; margin-bottom: 0; }
     .exp-text { line-height: 1.4; }
 }
