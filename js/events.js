@@ -47,7 +47,14 @@ document.getElementById('cb_calc_all').addEventListener('change', function(e) {
 
 document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => { cb.addEventListener('change', draw); });
 
-window.addEventListener('resize', draw);
+window.addEventListener('resize', () => {
+    // Löscht die festen Pixelwerte vom Splitter-Ziehen,
+    // damit das CSS bei neuen Fenstergrößen wieder flexibel übernehmen kann
+    infoPanel.style.width = '';
+    infoPanel.style.minWidth = '';
+    infoPanel.style.height = '';
+    draw();
+});
 
 // --- SPLITTER LOGIK ---
 const splitter = document.getElementById('main-splitter');
