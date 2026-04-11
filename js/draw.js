@@ -7,8 +7,8 @@ function draw() {
     const isMobile = window.innerWidth <= 1100;
 
     // 1. CANVAS SETUP & PLATZBERECHNUNG
-    canvas.style.width = '0px';
-    canvas.style.height = '0px';
+    // Wir verstecken das Canvas komplett, um die ECHTE Größe des Containers zu messen
+    canvas.style.display = 'none';
 
     const containerRect = canvas.parentElement.getBoundingClientRect();
     const expBox = document.getElementById('explanation-box');
@@ -16,15 +16,20 @@ function draw() {
     let canvasW = containerRect.width;
     let canvasH = containerRect.height;
 
+    // Auf dem Tablet zieht die Erklärbox Platz vom Container ab
     if (isMobile && expBox) {
         canvasH = containerRect.height - expBox.offsetHeight;
     }
-    canvasH = Math.max(canvasH, 150);
 
+    canvasH = Math.max(canvasH, 150); // Notbremse
+
+    // Canvas wieder einblenden und exakt auf die errechneten Pixel zwingen
+    canvas.style.display = 'block';
     canvas.width = canvasW * dpr;
     canvas.height = canvasH * dpr;
     canvas.style.width = canvasW + 'px';
     canvas.style.height = canvasH + 'px';
+
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, canvasW, canvasH);
 
