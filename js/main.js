@@ -79,7 +79,7 @@ window.addEventListener('resize', draw);
 updateUI();
 draw();
 
-// --- SPLITTER LOGIK ---
+// --- HIER FEHLTE DIE SPLITTER LOGIK KOMPLETT ---
 const splitter = document.getElementById('main-splitter');
 const infoPanel = document.getElementById('info-panel');
 let isSplitting = false;
@@ -97,19 +97,16 @@ if (splitter) {
         const isMobile = window.innerWidth <= 1100;
 
         if (isMobile) {
-            // Mobile: Wir verändern die Höhe des unteren Menüs
             const newHeight = window.innerHeight - e.clientY;
-            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.5));
+            // Limitierung auf 40% (0.4), damit die Figur auf dem Handy riesig bleibt
+            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.4));
             infoPanel.style.height = `${clampedHeight}px`;
-            // Blockiert nicht mehr das Flex-Shrinking!
         } else {
-            // Desktop: Wir verändern die Breite des linken Menüs
             const newWidth = e.clientX;
             const clampedWidth = Math.max(250, Math.min(newWidth, window.innerWidth * 0.5));
             infoPanel.style.width = `${clampedWidth}px`;
             infoPanel.style.minWidth = `${clampedWidth}px`;
         }
-
         draw();
     });
 
