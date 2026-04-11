@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Langley | Geometrie & Trigonometrie</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=2">
 
     <script>
         MathJax = {
-          tex: {
-            inlineMath: [['\\(', '\\)']],
-            displayMath: [['$$', '$$']]
-          }
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            }
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -19,99 +22,134 @@
 
 <body>
 
-<div id="info-panel">
+    <div id="info-panel">
 
-    <select id="variant-select">
-        <option value="0">1. Klassisch (BAC=70°, ABD=60°)</option>
-        <option value="1">2. Variante (BAC=60°, ABD=50°)</option>
-        <option value="2">3. Variante (BAC=50°, ABD=60°)</option>
-    </select>
+        <select id="variant-select">
+            <option value="0">1. Klassisch (BAC=70°, ABD=60°)</option>
+            <option value="1">2. Variante (BAC=60°, ABD=50°)</option>
+            <option value="2">3. Variante (BAC=50°, ABD=60°)</option>
+        </select>
 
-    <div class="calc-line master-switch">
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem;">
-            <input type="checkbox" id="cb_all"> Alle an/aus
-        </label>
-        <div style="display: flex; align-items: center;">
-            <span style="font-family: 'Orbitron'; font-size: 0.85rem; color: #00f2ff; margin-right: 10px;" id="step-counter">0/18</span>
-            <button id="btn_prev" class="nav-btn" disabled>◀</button>
-            <button id="btn_next" class="nav-btn">▶</button>
+        <div class="calc-line master-switch">
+            <label
+                style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem;">
+                <input type="checkbox" id="cb_all"> Alle an/aus
+            </label>
+            <div style="display: flex; align-items: center;">
+                <span style="font-family: 'Orbitron'; font-size: 0.85rem; color: #00f2ff; margin-right: 10px;"
+                    id="step-counter">0/18</span>
+                <button id="btn_prev" class="nav-btn" disabled>◀</button>
+                <button id="btn_next" class="nav-btn">▶</button>
+            </div>
+        </div>
+
+        <div class="calc-line sub-switch">
+            <label
+                style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem;">
+                <input type="checkbox" id="cb_calc_all"> Berechnete Winkel an/aus
+            </label>
+        </div>
+
+        <div class="calc-box" style="border-left-color: #00f2ff;">
+            <div class="calc-title">Phase 1: Rechtes Dreieck</div>
+            <div class="calc-line"><span class="step-num">1.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_AB"> Basis AB</label></div>
+            <div class="calc-line"><span class="step-num">2.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_BAC"> ∠BAC = <span class="math" style="color: #00f2ff;"
+                        id="txt_BAC">70°</span> (Vorgabe)</label></div>
+            <div class="calc-line"><span class="step-num">3.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_AC"> Diagonale AC</label></div>
+            <div class="calc-line"><span class="step-num">4.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_ACB"> ∠ACB = <span class="math" style="color: #a855f7;"
+                        id="txt_ACB">30°</span> (Vorgabe)</label></div>
+            <div class="calc-line"><span class="step-num">5.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_ABC" class="calc-angle"> ∠ABC = <span class="math"
+                        id="txt_ABC">80°</span> (Berechnet)</label></div>
+        </div>
+
+        <div class="calc-box" style="border-left-color: #22c55e;">
+            <div class="calc-title">Phase 2: Linkes Dreieck</div>
+            <div class="calc-line"><span class="step-num">6.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_AD"> Schenkel AD</label></div>
+            <div class="calc-line"><span class="step-num">7.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_ABD"> ∠ABD = <span class="math" style="color: #22c55e;"
+                        id="txt_ABD">60°</span> (Vorgabe)</label></div>
+            <div class="calc-line"><span class="step-num">8.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_BD"> Diagonale BD</label></div>
+        </div>
+
+        <div class="calc-box" style="border-left-color: #ffffff;">
+            <div class="calc-title">Phase 3: Innere Winkel</div>
+            <div class="calc-line"><span class="step-num">9.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_DBC" class="calc-angle"> ∠DBC = <span class="math"
+                        id="txt_DBC">20°</span> (Berechnet)</label></div>
+            <div class="calc-line"><span class="step-num">10.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_ADB" class="calc-angle"> ∠ADB = <span class="math"
+                        id="txt_ADB">40°</span> (Berechnet)</label></div>
+        </div>
+
+        <div class="calc-box" style="border-left-color: #ef4444;">
+            <div class="calc-title">Phase 4: Das Rätsel</div>
+            <div class="calc-line"><span class="step-num">11.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_CD"> Linie CD</label></div>
+            <div class="calc-line"><span class="step-num">12.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_DCA"> ∠DCA = <span class="math" style="color: #ef4444;">?</span>
+                    (Gesucht)</label></div>
+        </div>
+
+        <div id="phase5-geo" class="calc-box" style="border-left-color: #eab308;">
+            <div class="calc-title">Phase 5: Geometrische Lösung</div>
+            <div class="calc-line"><span class="step-num">13.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_DE"> Verlängerung zu E</label></div>
+            <div class="calc-line"><span class="step-num">14.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_AEB" class="calc-angle"> ∠AEB = <span class="math">20°</span></label>
+            </div>
+            <div class="calc-line"><span class="step-num">15.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_EP"> Symmetrieachse EP</label></div>
+            <div class="calc-line"><span class="step-num">16.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_P"> Punkt P</label></div>
+            <div class="calc-line"><span class="step-num">17.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_AEP" class="calc-angle"> ∠AEP = <span class="math">10°</span></label>
+            </div>
+            <div class="calc-line"><span class="step-num">18.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_BEP" class="calc-angle"> ∠BEP = <span class="math">10°</span></label>
+            </div>
+        </div>
+
+        <div id="phase5-tri" class="calc-box" style="border-left-color: #eab308; display: none;">
+            <div class="calc-title">Phase 5: Trigonometrische Lösung</div>
+            <div class="calc-line"><span class="step-num">13.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_tri_ABD"> ΔABD (Sinussatz)</label></div>
+            <div class="calc-line"><span class="step-num">14.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_tri_ABC"> ΔABC (Sinussatz)</label></div>
+            <div class="calc-line"><span class="step-num">15.</span> <label style="cursor: pointer;"><input
+                        type="checkbox" id="cb_tri_BCD"> ΔBCD & Lösung</label></div>
+        </div>
+
+        <div style="display:none">
+            <input type="checkbox" id="cb_BAD" aria-label="hidden">
+            <input type="checkbox" id="cb_F" aria-label="hidden">
+            <input type="checkbox" id="cb_DAC" aria-label="hidden">
+            <input type="checkbox" id="cb_BC" aria-label="hidden">
         </div>
     </div>
 
-    <div class="calc-line sub-switch">
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem;">
-            <input type="checkbox" id="cb_calc_all"> Berechnete Winkel an/aus
-        </label>
+    <div id="main-splitter"></div>
+
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+        <div id="explanation-box">
+            <div class="exp-title" id="exp-title">SCHRITT X</div>
+            <div class="exp-text" id="exp-text">Hier kommt der Erklärtext hin...</div>
+        </div>
     </div>
 
-    <div class="calc-box" style="border-left-color: #00f2ff;">
-        <div class="calc-title">Phase 1: Rechtes Dreieck</div>
-        <div class="calc-line"><span class="step-num">1.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_AB"> Basis AB</label></div>
-        <div class="calc-line"><span class="step-num">2.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_BAC"> ∠BAC = <span class="math" style="color: #00f2ff;" id="txt_BAC">70°</span> (Vorgabe)</label></div>
-        <div class="calc-line"><span class="step-num">3.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_AC"> Diagonale AC</label></div>
-        <div class="calc-line"><span class="step-num">4.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_ACB"> ∠ACB = <span class="math" style="color: #a855f7;" id="txt_ACB">30°</span> (Vorgabe)</label></div>
-        <div class="calc-line"><span class="step-num">5.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_ABC" class="calc-angle"> ∠ABC = <span class="math" id="txt_ABC">80°</span> (Berechnet)</label></div>
-    </div>
-
-    <div class="calc-box" style="border-left-color: #22c55e;">
-        <div class="calc-title">Phase 2: Linkes Dreieck</div>
-        <div class="calc-line"><span class="step-num">6.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_AD"> Schenkel AD</label></div>
-        <div class="calc-line"><span class="step-num">7.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_ABD"> ∠ABD = <span class="math" style="color: #22c55e;" id="txt_ABD">60°</span> (Vorgabe)</label></div>
-        <div class="calc-line"><span class="step-num">8.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_BD"> Diagonale BD</label></div>
-    </div>
-
-    <div class="calc-box" style="border-left-color: #ffffff;">
-        <div class="calc-title">Phase 3: Innere Winkel</div>
-        <div class="calc-line"><span class="step-num">9.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_DBC" class="calc-angle"> ∠DBC = <span class="math" id="txt_DBC">20°</span> (Berechnet)</label></div>
-        <div class="calc-line"><span class="step-num">10.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_ADB" class="calc-angle"> ∠ADB = <span class="math" id="txt_ADB">40°</span> (Berechnet)</label></div>
-    </div>
-
-    <div class="calc-box" style="border-left-color: #ef4444;">
-        <div class="calc-title">Phase 4: Das Rätsel</div>
-        <div class="calc-line"><span class="step-num">11.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_CD"> Linie CD</label></div>
-        <div class="calc-line"><span class="step-num">12.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_DCA"> ∠DCA = <span class="math" style="color: #ef4444;">?</span> (Gesucht)</label></div>
-    </div>
-
-    <div id="phase5-geo" class="calc-box" style="border-left-color: #eab308;">
-        <div class="calc-title">Phase 5: Geometrische Lösung</div>
-        <div class="calc-line"><span class="step-num">13.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_DE"> Verlängerung zu E</label></div>
-        <div class="calc-line"><span class="step-num">14.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_AEB" class="calc-angle"> ∠AEB = <span class="math">20°</span></label></div>
-        <div class="calc-line"><span class="step-num">15.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_EP"> Symmetrieachse EP</label></div>
-        <div class="calc-line"><span class="step-num">16.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_P"> Punkt P</label></div>
-        <div class="calc-line"><span class="step-num">17.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_AEP" class="calc-angle"> ∠AEP = <span class="math">10°</span></label></div>
-        <div class="calc-line"><span class="step-num">18.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_BEP" class="calc-angle"> ∠BEP = <span class="math">10°</span></label></div>
-    </div>
-
-    <div id="phase5-tri" class="calc-box" style="border-left-color: #eab308; display: none;">
-        <div class="calc-title">Phase 5: Trigonometrische Lösung</div>
-        <div class="calc-line"><span class="step-num">13.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_tri_ABD"> ΔABD (Sinussatz)</label></div>
-        <div class="calc-line"><span class="step-num">14.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_tri_ABC"> ΔABC (Sinussatz)</label></div>
-        <div class="calc-line"><span class="step-num">15.</span> <label style="cursor: pointer;"><input type="checkbox" id="cb_tri_BCD"> ΔBCD & Lösung</label></div>
-    </div>
-
-    <div style="display:none">
-        <input type="checkbox" id="cb_BAD" aria-label="hidden">
-        <input type="checkbox" id="cb_F" aria-label="hidden">
-        <input type="checkbox" id="cb_DAC" aria-label="hidden">
-        <input type="checkbox" id="cb_BC" aria-label="hidden">
-    </div>
-</div>
-
-<div id="main-splitter"></div>
-
-<div id="canvas-container">
-    <canvas id="canvas"></canvas>
-    <div id="explanation-box">
-        <div class="exp-title" id="exp-title">SCHRITT X</div>
-        <div class="exp-text" id="exp-text">Hier kommt der Erklärtext hin...</div>
-    </div>
-</div>
-
-<script src="js/config.js"></script>
-<script src="js/geometry.js"></script>
-<script src="js/explanations.js"></script>
-<script src="js/draw.js"></script>
-<script src="js/main.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/geometry.js"></script>
+    <script src="js/explanations.js"></script>
+    <script src="js/draw.js?v=3"></script>
+    <script src="js/main.js?v=3"></script>
 
 </body>
+
 </html>

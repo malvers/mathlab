@@ -80,7 +80,14 @@ function applyStep() {
     draw();
 }
 
-window.addEventListener('resize', draw);
+window.addEventListener('resize', () => {
+    infoPanel.style.width = '';
+    infoPanel.style.minWidth = '';
+    infoPanel.style.height = '';
+    infoPanel.style.flex = '';
+    document.getElementById('canvas-container').style.height = '';
+    draw();
+});
 updateUI();
 draw();
 
@@ -94,6 +101,7 @@ if (splitter) {
         isSplitting = true;
         splitter.classList.add('active');
         document.body.style.userSelect = 'none';
+        e.preventDefault();
     });
 
     document.addEventListener('pointermove', (e) => {
@@ -102,9 +110,11 @@ if (splitter) {
         const isMobile = window.innerWidth <= 1100;
 
         if (isMobile) {
-            const newHeight = window.innerHeight - e.clientY;
-            const clampedHeight = Math.max(150, Math.min(newHeight, window.innerHeight * 0.4));
-            infoPanel.style.height = `${clampedHeight}px`;
+            let newPercentage = (e.clientY / window.innerHeight) * 100;
+            newPercentage = Math.max(50, Math.min(newPercentage, 90));
+            document.getElementById('canvas-container').style.height = `${newPercentage}vh`;
+            infoPanel.style.height = `auto`; // rely on flex
+            infoPanel.style.flex = `1 1 0%`; // let CSS do the layout
         } else {
             const newWidth = e.clientX;
             const clampedWidth = Math.max(250, Math.min(newWidth, window.innerWidth * 0.5));
