@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Butterfly Curve Evolution</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0b1120; color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        #canvas-container { flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        #controls {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            padding: 16px 24px; display: flex; gap: 16px; align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7); z-index: 10; flex-wrap: wrap; justify-content: center; 
+            width: 95%; max-width: 1050px; box-sizing: border-box;
+        }
+        
+        .control-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 90px; }
+        .control-group label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; display: flex; justify-content: space-between;}
+        
+        input[type=range] { cursor: pointer; width: 100%; height: 6px; border-radius: 3px; outline: none; }
+        
+        /* Custom Tracking Colors mapped exactly to Equation Terms */
+        .c-exp { color: #f472b6 !important; accent-color: #f472b6; }  /* Pink */
+        .c-cos { color: #4ade80 !important; accent-color: #4ade80; }  /* Green */
+        .c-sin { color: #fbbf24 !important; accent-color: #fbbf24; }  /* Amber */
+        .c-gen { color: #00f2ff !important; accent-color: #00f2ff; }  /* Cyan */
+
+        .btn-group { display: flex; gap: 8px; justify-content: center;}
+        button { background: #00f2ff; color: #0b1120; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 800; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; box-shadow: 0 4px 12px rgba(0, 242, 255, 0.3);}
+        button:hover { background: #00c3cc; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 242, 255, 0.5);}
+        button.secondary { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: none;}
+        button.secondary:hover { background: rgba(255, 255, 255, 0.2); box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);}
+        
+        #equation {
+            position: absolute; top: 25px; left: 25px; font-size: 1.25rem; color: rgba(255,255,255,0.8);
+            font-family: 'Times New Roman', serif; font-style: italic; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+            padding: 12px 24px; border-radius: 12px; z-index: 10;
+            border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid #fff;
+        }
+        .param { font-weight: bold; }
+        .divider { width: 1px; height: 35px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+        
+        @media (max-width: 900px) { 
+            #controls { padding: 16px; gap: 12px; border-radius: 16px;} 
+            #equation { font-size: 0.95rem; top: 15px; left: 15px; padding: 10px 16px;} 
+            .divider { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container">
+    <div id="equation">
+        r = 
+        <span id="eq-eA" class="param c-exp">1</span><span class="c-exp">e<sup>sin(θ)</sup></span> - 
+        <span id="eq-cA" class="param c-cos">2</span><span class="c-cos">cos(</span><span id="eq-cF" class="param c-cos">4</span><span class="c-cos">θ)</span> + 
+        <span id="eq-sA" class="param c-sin">1</span><span class="c-sin">sin<sup>5</sup>((2θ - π) / </span><span id="eq-sP" class="param c-sin">24</span><span class="c-sin">)</span>
+    </div>
+    <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+        <div class="control-group" style="flex: 0 0 auto;">
+            <div class="btn-group">
+                <button id="btn-toggle">Pause</button>
+                <button id="btn-reset" class="secondary">Restart</button>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        
+        <div class="control-group">
+            <label class="c-gen">Ev. Speed <span id="val-speed" class="val-display c-gen">3.5</span></label>
+            <input type="range" id="speed" class="c-gen" min="0.5" max="15" step="0.5" value="3.5">
+        </div>
+        <div class="control-group">
+            <label class="c-gen">Glow Color <span id="val-color" class="val-display c-gen">180</span></label>
+            <input type="range" id="color" class="c-gen" min="0" max="360" step="1" value="180">
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="control-group">
+            <label class="c-exp">Exp Amp <span id="val-eA" class="val-display c-exp">1.0</span></label>
+            <input type="range" id="p-eA" class="c-exp" min="0" max="4" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label class="c-cos">Cos Amp <span id="val-cA" class="val-display c-cos">2.0</span></label>
+            <input type="range" id="p-cA" class="c-cos" min="0" max="6" step="0.1" value="2">
+        </div>
+        <div class="control-group">
+            <label class="c-cos">Cos Freq <span id="val-cF" class="val-display c-cos">4</span></label>
+            <input type="range" id="p-cF" class="c-cos" min="1" max="12" step="1" value="4">
+        </div>
+        <div class="control-group">
+            <label class="c-sin">Sin Amp <span id="val-sA" class="val-display c-sin">1.0</span></label>
+            <input type="range" id="p-sA" class="c-sin" min="0" max="4" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label class="c-sin">Sin Div <span id="val-sP" class="val-display c-sin">24</span></label>
+            <input type="range" id="p-sP" class="c-sin" min="1" max="48" step="1" value="24">
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width, height, cx, cy;
+    let expAmp = 1, cosAmp = 2, cosFreq = 4, sinAmp = 1, sinPeriod = 24;
+    
+    function getScale() {
+        const maxR = expAmp * Math.E + cosAmp + sinAmp;
+        const minDim = Math.min(width, height);
+        // Adaptive zoom fitting to screen bounds dynamically with 15% padding
+        return (minDim / 2) / (maxR * 1.15); 
+    }
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        cx = width / 2;
+        cy = height / 2;
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    
+    let currentTheta = 0;
+    let isPlaying = true;
+    
+    const ui = {
+        speed: { el: document.getElementById('speed'), val: document.getElementById('val-speed') },
+        color: { el: document.getElementById('color'), val: document.getElementById('val-color') },
+        eA: { el: document.getElementById('p-eA'), val: document.getElementById('val-eA'), eq: document.getElementById('eq-eA') },
+        cA: { el: document.getElementById('p-cA'), val: document.getElementById('val-cA'), eq: document.getElementById('eq-cA') },
+        cF: { el: document.getElementById('p-cF'), val: document.getElementById('val-cF'), eq: document.getElementById('eq-cF') },
+        sA: { el: document.getElementById('p-sA'), val: document.getElementById('val-sA'), eq: document.getElementById('eq-sA') },
+        sP: { el: document.getElementById('p-sP'), val: document.getElementById('val-sP'), eq: document.getElementById('eq-sP') },
+        toggleBtn: document.getElementById('btn-toggle'),
+        resetBtn: document.getElementById('btn-reset'),
+    };
+
+    function updateParams() {
+        expAmp = parseFloat(ui.eA.el.value);
+        cosAmp = parseFloat(ui.cA.el.value);
+        cosFreq = parseFloat(ui.cF.el.value);
+        sinAmp = parseFloat(ui.sA.el.value);
+        sinPeriod = parseFloat(ui.sP.el.value);
+        
+        ui.eA.val.innerText = expAmp.toFixed(1); ui.eA.eq.innerText = expAmp === 1 ? "" : expAmp;
+        ui.cA.val.innerText = cosAmp.toFixed(1); ui.cA.eq.innerText = cosAmp;
+        ui.cF.val.innerText = cosFreq;           ui.cF.eq.innerText = cosFreq;
+        ui.sA.val.innerText = sinAmp.toFixed(1); ui.sA.eq.innerText = sinAmp === 1 ? "" : sinAmp;
+        ui.sP.val.innerText = sinPeriod;         ui.sP.eq.innerText = sinPeriod;
+        
+        ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
+        ui.color.val.innerText = ui.color.el.value;
+    }
+
+    // Attach listeners to instantly respond to parameter modifications
+    [ui.speed.el, ui.color.el, ui.eA.el, ui.cA.el, ui.cF.el, ui.sA.el, ui.sP.el].forEach(el => {
+        el.addEventListener('input', updateParams);
+    });
+    updateParams();
+
+    ui.toggleBtn.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        ui.toggleBtn.textContent = isPlaying ? "Pause" : "Play";
+    });
+    
+    ui.resetBtn.addEventListener('click', () => {
+        currentTheta = 0;
+        if (!isPlaying) {
+            isPlaying = true;
+            ui.toggleBtn.textContent = "Pause";
+        }
+    });
+
+    function getButterflyXY(theta, currentScale) {
+        const sinT = Math.sin(theta);
+        const cos4T = Math.cos(cosFreq * theta);
+        const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / sinPeriod), 5);
+        
+        const r = expAmp * Math.exp(sinT) - cosAmp * cos4T + sinAmp * term3;
+        
+        // Rotated 90 degrees left from upright
+        const mapX = -r * Math.cos(theta);
+        const mapY = -r * Math.sin(theta);
+        
+        return { 
+            x: cx + mapX * currentScale, 
+            y: cy + mapY * currentScale 
+        };
+    }
+
+    let lastTime = performance.now();
+
+    function draw() {
+        const now = performance.now();
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+        
+        const speedMult = parseFloat(ui.speed.el.value);
+        const hueBase = parseInt(ui.color.el.value);
+        
+        const dynamicScale = getScale();
+
+        if (isPlaying) {
+            currentTheta += speedMult * dt;
+        }
+
+        ctx.fillStyle = '#0b1120';
+        ctx.fillRect(0, 0, width, height);
+        
+        if (currentTheta <= 0) {
+            requestAnimationFrame(draw);
+            return;
+        }
+
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        
+        let first = true;
+        const step = 0.02; 
+        
+        const maxExpectedTheta = sinPeriod * Math.PI; 
+        const endT = Math.min(currentTheta, maxExpectedTheta);
+        
+        const dynamicHue = (hueBase + currentTheta * 8) % 360;
+        
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `hsl(${dynamicHue}, 100%, 50%)`;
+        ctx.strokeStyle = `hsl(${dynamicHue}, 100%, 75%)`;
+
+        for (let t = 0; t <= endT; t += step) {
+            const pt = getButterflyXY(t, dynamicScale);
+            if (first) {
+                ctx.moveTo(pt.x, pt.y);
+                first = false;
+            } else {
+                ctx.lineTo(pt.x, pt.y);
+            }
+        }
+        
+        ctx.stroke();
+        requestAnimationFrame(draw);
+    }
+    
+    requestAnimationFrame(draw);
+</script>
+</body>
+</html>
