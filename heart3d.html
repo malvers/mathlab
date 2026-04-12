@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Heart Surface - Mathe-Labor</title>
+    <title>docalvers | 3D Heart Surface</title>
+    <!-- KaTeX CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
         rel="stylesheet">
     <style>
@@ -69,10 +73,10 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 20px;
             padding: 20px 30px;
-            z-index: 10;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             width: 95vw;
-            max-width: 1800px;
+            max-width: 500px;
+            container-type: inline-size;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -81,11 +85,12 @@
         .panel-header {
             text-align: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: min(1.2rem, 4.5vw);
             margin-bottom: 5px;
             color: var(--neon-pink);
             text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .control-group {
@@ -161,21 +166,17 @@
         }
 
         .equation-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Times New Roman', Times, serif;
-            font-style: italic;
-            font-size: 4.5vw;
-            color: #ddd;
-            padding: 30px 80px;
+            text-align: center;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            white-space: nowrap;
+            overflow-x: auto;
+            padding: 15px 10px;
+            color: white;
+            font-size: 1.2rem;
         }
 
         @media (max-width: 768px) {
@@ -193,10 +194,8 @@
             }
 
             .equation-display {
-                font-size: 5vw;
+                font-size: 4vw;
                 padding: 15px 10px;
-                justify-content: space-between;
-                white-space: nowrap;
             }
         }
     </style>
@@ -210,14 +209,8 @@
     <div class="glass-panel">
         <div class="panel-header">TAUBIN'S HEART EQUATION</div>
 
-        <div class="equation-display">
-            <span>(x² + <span style="color:var(--neon-blue)" id="eq-a">5.00</span> y² + z² - 1)³</span>
-            <span>−</span>
-            <span>x²z³</span>
-            <span>−</span>
-            <span><span style="color:var(--neon-orange)" id="eq-b">0.025</span> y²z³</span>
-            <span>=</span>
-            <span>0</span>
+        <div class="equation-display" id="equation-container">
+            <!-- KaTeX rendered equation will appear here -->
         </div>
 
         <div class="control-group">
@@ -266,7 +259,6 @@
             varying vec2 vUv;
             void main() {
                 vUv = uv;
-                // Rendering a Fullscreen Quad directly in clip space
                 gl_Position = vec4(position, 1.0);
             }
         `;
@@ -278,17 +270,15 @@
             uniform float u_B;
             varying vec2 vUv;
 
-            // Heart Surface Function
             float heartSDF(vec3 p) {
                 float x = p.x;
-                float y = p.z; // Depth mapped to math Y
-                float z = p.y; // Up mapped to math Z
+                float y = p.z; 
+                float z = p.y; 
                 
                 float term = x*x + u_A*y*y + z*z - 1.0;
                 return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
             }
 
-            // Normal by central differences
             vec3 calcNormal(vec3 p) {
                 vec2 e = vec2(0.001, 0.0);
                 return normalize(vec3(
@@ -298,7 +288,6 @@
                 ));
             }
 
-            // Sphere intersection for bounding volume
             vec2 sphIntersect(vec3 ro, vec3 rd, float r) {
                 float b = dot(ro, rd);
                 float c = dot(ro, ro) - r*r;
@@ -309,7 +298,6 @@
             }
 
             void main() {
-                // Determine ray origin and direction from current camera matrices
                 vec2 ndc = vUv * 2.0 - 1.0;
                 vec4 clipPos = vec4(ndc, 1.0, 1.0);
                 vec4 viewPos = cameraProjectionMatrixInverse * clipPos;
@@ -318,10 +306,9 @@
                 vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
                 vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
                 
-                // Intersect the 3D bounding bubble
                 vec2 bound = sphIntersect(ro, rd, 1.8);
                 if (bound.y < 0.0) {
-                    gl_FragColor = vec4(0.0); // Transparent background
+                    gl_FragColor = vec4(0.0);
                     return;
                 }
                 
@@ -333,7 +320,6 @@
                 vec3 p = ro + rd * t;
                 float prevF = heartSDF(p);
                 
-                // Raymarching Loop
                 for (int i = 0; i < 200; i++) {
                     if (t > tMax) break;
                     
@@ -341,20 +327,15 @@
                     p = ro + rd * t;
                     float f = heartSDF(p);
                     
-                    // We crossed the boundary from outside to inside
                     if (f <= 0.0 && prevF > 0.0) {
                         float tLow = t - stepSize;
                         float tHigh = t;
-                        
-                        // Bisection refinement for mathematical perfection
-                        // 10 iterations gives extremely high sub-pixel precision
                         for (int j = 0; j < 10; j++) {
                             float tMid = mix(tLow, tHigh, 0.5);
                             float fMid = heartSDF(ro + rd * tMid);
                             if (fMid <= 0.0) tHigh = tMid;
                             else tLow = tMid;
                         }
-                        
                         t = mix(tLow, tHigh, 0.5);
                         p = ro + rd * t;
                         hit = true;
@@ -368,12 +349,9 @@
                     return;
                 }
                 
-                // --- SHADING (Shiny Plastic/Glass PBR style) ---
                 vec3 n = calcNormal(p);
-                
-                vec3 colTop = vec3(1.0, 0.0, 0.33); // Pink
-                vec3 colBot = vec3(0.0, 0.82, 1.0); // Blue
-                
+                vec3 colTop = vec3(1.0, 0.0, 0.33);
+                vec3 colBot = vec3(0.0, 0.82, 1.0);
                 float rawY = p.y; 
                 float colorScale = clamp((rawY + 1.0) / 2.0, 0.0, 1.0);
                 vec3 baseAlbedo = mix(colBot, colTop, colorScale);
@@ -382,17 +360,14 @@
                 vec3 lightDir2 = normalize(vec3(-2.0, -1.0, -1.0));
                 vec3 viewDir = normalize(ro - p);
                 
-                // Main Specular
                 vec3 halfDir = normalize(lightDir + viewDir);
                 float diff = max(dot(n, lightDir), 0.0);
                 float spec = pow(max(dot(n, halfDir), 0.0), 128.0) * 1.5;
                 
-                // Backlight
                 vec3 halfDir2 = normalize(lightDir2 + viewDir);
                 float diff2 = max(dot(n, lightDir2), 0.0);
                 float spec2 = pow(max(dot(n, halfDir2), 0.0), 64.0) * 0.5;
 
-                // Fresnel (Edge Glow)
                 float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
                 vec3 rimColor = vec3(1.0, 0.5, 0.8) * fresnel * 0.8;
                 
@@ -416,42 +391,46 @@
             }
         });
 
-        // The quad covers the entire screen, giving our shader full control over every pixel
         const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), raymarchMaterial);
         quad.frustumCulled = false;
         scene.add(quad);
 
-        // Animation Loop
+        function updateEquation() {
+            const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
+            const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
+            const tex = `(x^2 + \\color{#00d2ff}{${a}}y^2 + z^2 - 1)^3 - x^2z^3 - \\color{#ff8800}{${b}}y^2z^3 = 0`;
+            katex.render(tex, document.getElementById('equation-container'), {
+                throwOnError: false
+            });
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-
-            // Feed camera matrices dynamically into the shader
             raymarchMaterial.uniforms.cameraWorldMatrix.value.copy(camera.matrixWorld);
             raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
-
             renderer.render(scene, camera);
         }
         animate();
-
-        // UI Event Listeners
+        // Initialize equation once KaTeX is ready
+        window.addEventListener('load', () => {
+            updateEquation();
+        });
+        
         document.getElementById('slider-a').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             raymarchMaterial.uniforms.u_A.value = val;
-
             document.getElementById('val-a').innerText = val.toFixed(2);
-            document.getElementById('eq-a').innerText = val.toFixed(2);
+            updateEquation();
         });
 
         document.getElementById('slider-b').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             raymarchMaterial.uniforms.u_B.value = val;
-
             document.getElementById('val-b').innerText = val.toFixed(3);
-            document.getElementById('eq-b').innerText = val.toFixed(3);
+            updateEquation();
         });
 
-        // Window resize handling
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
