@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Heart Surface - Mathe-Labor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --space-bg: #050b18;
+            --neon-pink: #ff0055;
+            --neon-blue: #00d2ff;
+            --neon-orange: #ff8800;
+            --text-main: #ffffff;
+            --panel-bg: rgba(10, 15, 30, 0.6);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--space-bg);
+            color: var(--text-main);
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            z-index: 10;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        .glass-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 20px 30px;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 95vw;
+            max-width: 1800px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-header {
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #aaa;
+            letter-spacing: 0.5px;
+        }
+
+        .val-display {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        #slider-a::-webkit-slider-thumb {
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        #slider-a::-webkit-slider-runnable-track {
+            background: rgba(0, 210, 255, 0.2);
+        }
+
+        #slider-b::-webkit-slider-thumb {
+            background: var(--neon-orange);
+            box-shadow: 0 0 10px var(--neon-orange);
+        }
+
+        #slider-b::-webkit-slider-runnable-track {
+            background: rgba(255, 136, 0, 0.2);
+        }
+
+        .equation-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 4.5vw;
+            color: #ddd;
+            padding: 30px 80px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .glass-panel {
+                width: 95%;
+                bottom: 15px;
+                padding: 15px 15px;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+
+            .equation-display {
+                font-size: 5vw;
+                padding: 15px 10px;
+                justify-content: space-between;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="index.html" class="back-btn">⬅ ZURÜCK ZUM LABOR</a>
+    <div id="canvas-container"></div>
+
+    <div class="glass-panel">
+        <div class="panel-header">TAUBIN'S HEART EQUATION</div>
+
+        <div class="equation-display">
+            <span>(x² + <span style="color:var(--neon-blue)" id="eq-a">5.00</span> y² + z² - 1)³</span>
+            <span>−</span>
+            <span>x²z³</span>
+            <span>−</span>
+            <span><span style="color:var(--neon-orange)" id="eq-b">0.025</span> y²z³</span>
+            <span>=</span>
+            <span>0</span>
+        </div>
+
+        <div class="control-group">
+            <div class="control-header">
+                <span>Z-Stauchung (A)</span>
+                <span class="val-display" id="val-a">5.0</span>
+            </div>
+            <input type="range" id="slider-a" min="0.5" max="10.0" step="0.05" value="5.0">
+        </div>
+
+        <div class="control-group">
+            <div class="control-header">
+                <span>Spaltungstiefe (B)</span>
+                <span class="val-display" id="val-b">0.025</span>
+            </div>
+            <input type="range" id="slider-b" min="0.0" max="0.5" step="0.005" value="0.025">
+        </div>
+    </div>
+
+    <!-- Include Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 1.0, 5.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.0;
+        controls.enablePan = false;
+
+        // --- GPU RAYMARCHING SHADER ---
+
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                // Rendering a Fullscreen Quad directly in clip space
+                gl_Position = vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            uniform mat4 cameraWorldMatrix;
+            uniform mat4 cameraProjectionMatrixInverse;
+            uniform float u_A;
+            uniform float u_B;
+            varying vec2 vUv;
+
+            // Heart Surface Function
+            float heartSDF(vec3 p) {
+                float x = p.x;
+                float y = p.z; // Depth mapped to math Y
+                float z = p.y; // Up mapped to math Z
+                
+                float term = x*x + u_A*y*y + z*z - 1.0;
+                return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
+            }
+
+            // Normal by central differences
+            vec3 calcNormal(vec3 p) {
+                vec2 e = vec2(0.001, 0.0);
+                return normalize(vec3(
+                    heartSDF(p + e.xyy) - heartSDF(p - e.xyy),
+                    heartSDF(p + e.yxy) - heartSDF(p - e.yxy),
+                    heartSDF(p + e.yyx) - heartSDF(p - e.yyx)
+                ));
+            }
+
+            // Sphere intersection for bounding volume
+            vec2 sphIntersect(vec3 ro, vec3 rd, float r) {
+                float b = dot(ro, rd);
+                float c = dot(ro, ro) - r*r;
+                float h = b*b - c;
+                if(h < 0.0) return vec2(-1.0);
+                h = sqrt(h);
+                return vec2(-b - h, -b + h);
+            }
+
+            void main() {
+                // Determine ray origin and direction from current camera matrices
+                vec2 ndc = vUv * 2.0 - 1.0;
+                vec4 clipPos = vec4(ndc, 1.0, 1.0);
+                vec4 viewPos = cameraProjectionMatrixInverse * clipPos;
+                viewPos /= viewPos.w;
+                
+                vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+                vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
+                
+                // Intersect the 3D bounding bubble
+                vec2 bound = sphIntersect(ro, rd, 1.8);
+                if (bound.y < 0.0) {
+                    gl_FragColor = vec4(0.0); // Transparent background
+                    return;
+                }
+                
+                float t = max(bound.x, 0.0);
+                float tMax = bound.y;
+                float stepSize = 0.02;
+                bool hit = false;
+                
+                vec3 p = ro + rd * t;
+                float prevF = heartSDF(p);
+                
+                // Raymarching Loop
+                for (int i = 0; i < 200; i++) {
+                    if (t > tMax) break;
+                    
+                    t += stepSize;
+                    p = ro + rd * t;
+                    float f = heartSDF(p);
+                    
+                    // We crossed the boundary from outside to inside
+                    if (f <= 0.0 && prevF > 0.0) {
+                        float tLow = t - stepSize;
+                        float tHigh = t;
+                        
+                        // Bisection refinement for mathematical perfection
+                        // 10 iterations gives extremely high sub-pixel precision
+                        for (int j = 0; j < 10; j++) {
+                            float tMid = mix(tLow, tHigh, 0.5);
+                            float fMid = heartSDF(ro + rd * tMid);
+                            if (fMid <= 0.0) tHigh = tMid;
+                            else tLow = tMid;
+                        }
+                        
+                        t = mix(tLow, tHigh, 0.5);
+                        p = ro + rd * t;
+                        hit = true;
+                        break;
+                    }
+                    prevF = f;
+                }
+                
+                if (!hit) {
+                    gl_FragColor = vec4(0.0);
+                    return;
+                }
+                
+                // --- SHADING (Shiny Plastic/Glass PBR style) ---
+                vec3 n = calcNormal(p);
+                
+                vec3 colTop = vec3(1.0, 0.0, 0.33); // Pink
+                vec3 colBot = vec3(0.0, 0.82, 1.0); // Blue
+                
+                float rawY = p.y; 
+                float colorScale = clamp((rawY + 1.0) / 2.0, 0.0, 1.0);
+                vec3 baseAlbedo = mix(colBot, colTop, colorScale);
+                
+                vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
+                vec3 lightDir2 = normalize(vec3(-2.0, -1.0, -1.0));
+                vec3 viewDir = normalize(ro - p);
+                
+                // Main Specular
+                vec3 halfDir = normalize(lightDir + viewDir);
+                float diff = max(dot(n, lightDir), 0.0);
+                float spec = pow(max(dot(n, halfDir), 0.0), 128.0) * 1.5;
+                
+                // Backlight
+                vec3 halfDir2 = normalize(lightDir2 + viewDir);
+                float diff2 = max(dot(n, lightDir2), 0.0);
+                float spec2 = pow(max(dot(n, halfDir2), 0.0), 64.0) * 0.5;
+
+                // Fresnel (Edge Glow)
+                float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
+                vec3 rimColor = vec3(1.0, 0.5, 0.8) * fresnel * 0.8;
+                
+                vec3 finalColor = baseAlbedo * ((diff * 0.7) + (diff2 * 0.3) + 0.3) + spec + spec2 + rimColor;
+                
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        const raymarchMaterial = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false,
+            uniforms: {
+                u_A: { value: 5.0 },
+                u_B: { value: 0.025 },
+                cameraWorldMatrix: { value: new THREE.Matrix4() },
+                cameraProjectionMatrixInverse: { value: new THREE.Matrix4() }
+            }
+        });
+
+        // The quad covers the entire screen, giving our shader full control over every pixel
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), raymarchMaterial);
+        quad.frustumCulled = false;
+        scene.add(quad);
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Feed camera matrices dynamically into the shader
+            raymarchMaterial.uniforms.cameraWorldMatrix.value.copy(camera.matrixWorld);
+            raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // UI Event Listeners
+        document.getElementById('slider-a').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            raymarchMaterial.uniforms.u_A.value = val;
+
+            document.getElementById('val-a').innerText = val.toFixed(2);
+            document.getElementById('eq-a').innerText = val.toFixed(2);
+        });
+
+        document.getElementById('slider-b').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            raymarchMaterial.uniforms.u_B.value = val;
+
+            document.getElementById('val-b').innerText = val.toFixed(3);
+            document.getElementById('eq-b').innerText = val.toFixed(3);
+        });
+
+        // Window resize handling
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+
+</html>
