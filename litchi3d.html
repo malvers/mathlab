@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>docalvers | 3D Heart Surface</title>
+    <title>docalvers | 3D Litchi Labor</title>
     <!-- KaTeX CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -14,8 +14,8 @@
     <style>
         :root {
             --space-bg: #050b18;
+            --neon-red: #ff3333;
             --neon-pink: #ff0055;
-            --neon-blue: #00d2ff;
             --neon-orange: #ff8800;
             --text-main: #ffffff;
             --panel-bg: rgba(10, 15, 30, 0.6);
@@ -58,9 +58,9 @@
 
         .back-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: var(--neon-pink);
-            color: var(--neon-pink);
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
         }
 
         .glass-panel {
@@ -88,8 +88,8 @@
             font-family: 'Orbitron', sans-serif;
             font-size: min(1.2rem, 4.5vw);
             margin-bottom: 5px;
-            color: var(--neon-pink);
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+            color: var(--neon-red);
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
             letter-spacing: 1px;
             white-space: nowrap;
         }
@@ -106,16 +106,20 @@
             font-size: 0.85rem;
             color: #aaa;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .val-display {
             font-family: 'Orbitron', sans-serif;
             color: #fff;
             background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
-            min-width: 45px;
+            min-width: 50px;
             text-align: center;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         input[type="range"] {
@@ -126,45 +130,26 @@
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
+            height: 18px;
+            width: 18px;
             border-radius: 50%;
             background: #fff;
             cursor: pointer;
             margin-top: -6px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            transition: transform 0.1s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+            transition: all 0.2s;
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
         }
 
-        #slider-a::-webkit-slider-thumb {
-            background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        #slider-a::-webkit-slider-runnable-track {
-            background: rgba(0, 210, 255, 0.2);
-        }
-
-        #slider-b::-webkit-slider-thumb {
-            background: var(--neon-orange);
-            box-shadow: 0 0 10px var(--neon-orange);
-        }
-
-        #slider-b::-webkit-slider-runnable-track {
-            background: rgba(255, 136, 0, 0.2);
-        }
+        #slider-reife::-webkit-slider-thumb { background: var(--neon-red); }
+        #slider-bumps::-webkit-slider-thumb { background: var(--neon-orange); }
+        #slider-shape::-webkit-slider-thumb { background: var(--neon-pink); }
 
         .equation-display {
             text-align: center;
@@ -172,32 +157,20 @@
             border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.05);
             overflow-x: auto;
             padding: 15px 10px;
             color: white;
-            font-size: 1.2rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         @media (max-width: 768px) {
-            .glass-panel {
-                width: 95%;
-                bottom: 15px;
-                padding: 15px 15px;
-            }
-
-            .back-btn {
-                top: 10px;
-                left: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-
-            .equation-display {
-                font-size: 4vw;
-                padding: 15px 10px;
-            }
+            .glass-panel { width: 90%; padding: 15px 20px; }
+            .back-btn { top: 10px; left: 10px; font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -208,39 +181,45 @@
     <div id="canvas-container"></div>
 
     <div class="glass-panel">
-        <div class="panel-header">TAUBIN'S HEART EQUATION</div>
+        <div class="panel-header">3D LITCHI - OBERFLÄCHE</div>
 
         <div class="equation-display" id="equation-container">
-            <!-- KaTeX rendered equation will appear here -->
+            <!-- KaTeX rendered equation -->
         </div>
 
         <div class="control-group">
             <div class="control-header">
-                <span>Z-Stauchung (A)</span>
-                <span class="val-display" id="val-a">5.0</span>
+                <span>Reifegrad (Color)</span>
+                <span class="val-display" id="val-reife">1.0</span>
             </div>
-            <input type="range" id="slider-a" min="0.5" max="10.0" step="0.05" value="5.0">
+            <input type="range" id="slider-reife" min="0.5" max="2.0" step="0.01" value="1.0">
         </div>
 
         <div class="control-group">
             <div class="control-header">
-                <span>Spaltungstiefe (B)</span>
-                <span class="val-display" id="val-b">0.025</span>
+                <span>Stachel-Intensität</span>
+                <span class="val-display" id="val-bumps">0.05</span>
             </div>
-            <input type="range" id="slider-b" min="0.0" max="0.5" step="0.005" value="0.025">
+            <input type="range" id="slider-bumps" min="0.0" max="0.15" step="0.001" value="0.05">
+        </div>
+
+        <div class="control-group">
+            <div class="control-header">
+                <span>Frucht-Form</span>
+                <span class="val-display" id="val-shape">1.2</span>
+            </div>
+            <input type="range" id="slider-shape" min="0.8" max="1.6" step="0.01" value="1.2">
         </div>
     </div>
 
-    <!-- Include Three.js and OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
         const container = document.getElementById('canvas-container');
-
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 1.0, 5.5);
+        camera.position.set(0, 0, 4.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -249,10 +228,8 @@
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 2.0;
-        controls.enablePan = false;
+        controls.autoRotateSpeed = 1.5;
 
         // --- GPU RAYMARCHING SHADER ---
 
@@ -267,25 +244,27 @@
         const fragmentShader = `
             uniform mat4 cameraWorldMatrix;
             uniform mat4 cameraProjectionMatrixInverse;
-            uniform float u_A;
-            uniform float u_B;
+            uniform float u_Reife;
+            uniform float u_Bumps;
+            uniform float u_Shape;
             varying vec2 vUv;
 
-            float heartSDF(vec3 p) {
-                float x = p.x;
-                float y = p.z; 
-                float z = p.y; 
+            float litchiSDF(vec3 p) {
+                // Ellipsoid base
+                vec3 q = p / vec3(1.0, u_Shape, 1.0);
+                float d = length(q) - 1.0;
                 
-                float term = x*x + u_A*y*y + z*z - 1.0;
-                return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
+                // Procedural "Scales" / Bumps using periodic functions
+                float bumps = abs(sin(18.0 * p.x) * sin(18.0 * p.y) * sin(18.0 * p.z));
+                return d - bumps * u_Bumps;
             }
 
             vec3 calcNormal(vec3 p) {
                 vec2 e = vec2(0.001, 0.0);
                 return normalize(vec3(
-                    heartSDF(p + e.xyy) - heartSDF(p - e.xyy),
-                    heartSDF(p + e.yxy) - heartSDF(p - e.yxy),
-                    heartSDF(p + e.yyx) - heartSDF(p - e.yyx)
+                    litchiSDF(p + e.xyy) - litchiSDF(p - e.xyy),
+                    litchiSDF(p + e.yxy) - litchiSDF(p - e.yxy),
+                    litchiSDF(p + e.yyx) - litchiSDF(p - e.yyx)
                 ));
             }
 
@@ -307,7 +286,7 @@
                 vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
                 vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
                 
-                vec2 bound = sphIntersect(ro, rd, 1.8);
+                vec2 bound = sphIntersect(ro, rd, 2.2);
                 if (bound.y < 0.0) {
                     gl_FragColor = vec4(0.0);
                     return;
@@ -318,31 +297,12 @@
                 float stepSize = 0.02;
                 bool hit = false;
                 
-                vec3 p = ro + rd * t;
-                float prevF = heartSDF(p);
-                
-                for (int i = 0; i < 200; i++) {
+                for (int i = 0; i < 160; i++) {
+                    vec3 p = ro + rd * t;
+                    float f = litchiSDF(p);
+                    if (f < 0.001) { hit = true; break; }
+                    t += max(f, 0.015);
                     if (t > tMax) break;
-                    
-                    t += stepSize;
-                    p = ro + rd * t;
-                    float f = heartSDF(p);
-                    
-                    if (f <= 0.0 && prevF > 0.0) {
-                        float tLow = t - stepSize;
-                        float tHigh = t;
-                        for (int j = 0; j < 10; j++) {
-                            float tMid = mix(tLow, tHigh, 0.5);
-                            float fMid = heartSDF(ro + rd * tMid);
-                            if (fMid <= 0.0) tHigh = tMid;
-                            else tLow = tMid;
-                        }
-                        t = mix(tLow, tHigh, 0.5);
-                        p = ro + rd * t;
-                        hit = true;
-                        break;
-                    }
-                    prevF = f;
                 }
                 
                 if (!hit) {
@@ -350,29 +310,20 @@
                     return;
                 }
                 
+                vec3 p = ro + rd * t;
                 vec3 n = calcNormal(p);
-                vec3 colTop = vec3(1.0, 0.0, 0.33);
-                vec3 colBot = vec3(0.0, 0.82, 1.0);
-                float rawY = p.y; 
-                float colorScale = clamp((rawY + 1.0) / 2.0, 0.0, 1.0);
-                vec3 baseAlbedo = mix(colBot, colTop, colorScale);
                 
-                vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
-                vec3 lightDir2 = normalize(vec3(-2.0, -1.0, -1.0));
-                vec3 viewDir = normalize(ro - p);
+                // Lychee Color Logic
+                vec3 colRed = vec3(0.8, 0.1, 0.1);
+                vec3 colPink = vec3(1.0, 0.2, 0.5);
+                vec3 baseColor = mix(colRed, colPink, (p.y + 1.0) * 0.5) * u_Reife;
                 
-                vec3 halfDir = normalize(lightDir + viewDir);
-                float diff = max(dot(n, lightDir), 0.0);
-                float spec = pow(max(dot(n, halfDir), 0.0), 128.0) * 1.5;
+                vec3 lightDir = normalize(vec3(1.0, 2.0, 1.5));
+                float diff = max(dot(n, lightDir), 0.1);
+                float spec = pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 32.0) * 0.5;
                 
-                vec3 halfDir2 = normalize(lightDir2 + viewDir);
-                float diff2 = max(dot(n, lightDir2), 0.0);
-                float spec2 = pow(max(dot(n, halfDir2), 0.0), 64.0) * 0.5;
-
-                float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
-                vec3 rimColor = vec3(1.0, 0.5, 0.8) * fresnel * 0.8;
-                
-                vec3 finalColor = baseAlbedo * ((diff * 0.7) + (diff2 * 0.3) + 0.3) + spec + spec2 + rimColor;
+                float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 4.0);
+                vec3 finalColor = baseColor * diff + spec + fresnel * vec3(1.0, 0.5, 0.5) * 0.4;
                 
                 gl_FragColor = vec4(finalColor, 1.0);
             }
@@ -382,11 +333,10 @@
             vertexShader,
             fragmentShader,
             transparent: true,
-            depthWrite: false,
-            depthTest: false,
             uniforms: {
-                u_A: { value: 5.0 },
-                u_B: { value: 0.025 },
+                u_Reife: { value: 1.0 },
+                u_Bumps: { value: 0.05 },
+                u_Shape: { value: 1.2 },
                 cameraWorldMatrix: { value: new THREE.Matrix4() },
                 cameraProjectionMatrixInverse: { value: new THREE.Matrix4() }
             }
@@ -397,12 +347,12 @@
         scene.add(quad);
 
         function updateEquation() {
-            const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
-            const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
-            const tex = `(x^2 + \\color{#00d2ff}{${a}}y^2 + z^2 - 1)^3 - x^2z^3 - \\color{#ff8800}{${b}}y^2z^3 = 0`;
-            katex.render(tex, document.getElementById('equation-container'), {
-                throwOnError: false
-            });
+            if (typeof katex === 'undefined') return;
+            const reife = raymarchMaterial.uniforms.u_Reife.value.toFixed(2);
+            const bumps = raymarchMaterial.uniforms.u_Bumps.value.toFixed(3);
+            const shape = raymarchMaterial.uniforms.u_Shape.value.toFixed(2);
+            const tex = `d(p) = \\sqrt{x^2 + (y/${shape})^2 + z^2} - 1.0 - (${bumps} \\cdot \\text{bumps})`;
+            katex.render(tex, document.getElementById('equation-container'), { throwOnError: false, displayMode: true });
         }
 
         function animate() {
@@ -412,28 +362,33 @@
             raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
             renderer.render(scene, camera);
         }
+        
         animate();
-        // Robust initialization for KaTeX
+        
         function initEquation() {
-            if (typeof katex !== 'undefined') {
-                updateEquation();
-            } else {
-                setTimeout(initEquation, 100);
-            }
+            if (typeof katex !== 'undefined') updateEquation();
+            else setTimeout(initEquation, 100);
         }
         initEquation();
 
-        document.getElementById('slider-a').addEventListener('input', (e) => {
+        document.getElementById('slider-reife').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_A.value = val;
-            document.getElementById('val-a').innerText = val.toFixed(2);
+            raymarchMaterial.uniforms.u_Reife.value = val;
+            document.getElementById('val-reife').innerText = val.toFixed(2);
             updateEquation();
         });
 
-        document.getElementById('slider-b').addEventListener('input', (e) => {
+        document.getElementById('slider-bumps').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_B.value = val;
-            document.getElementById('val-b').innerText = val.toFixed(3);
+            raymarchMaterial.uniforms.u_Bumps.value = val;
+            document.getElementById('val-bumps').innerText = val.toFixed(3);
+            updateEquation();
+        });
+
+        document.getElementById('slider-shape').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            raymarchMaterial.uniforms.u_Shape.value = val;
+            document.getElementById('val-shape').innerText = val.toFixed(2);
             updateEquation();
         });
 
@@ -442,8 +397,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
     </script>
 </body>
-
 </html>
