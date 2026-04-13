@@ -412,11 +412,16 @@
             renderer.render(scene, camera);
         }
         animate();
-        // Initialize equation once KaTeX is ready
-        window.addEventListener('load', () => {
-            updateEquation();
-        });
-        
+        // Robust initialization for KaTeX
+        function initEquation() {
+            if (typeof katex !== 'undefined') {
+                updateEquation();
+            } else {
+                setTimeout(initEquation, 100);
+            }
+        }
+        initEquation();
+
         document.getElementById('slider-a').addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             raymarchMaterial.uniforms.u_A.value = val;
