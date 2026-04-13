@@ -1,581 +1,267 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>docalvers | 3D Winkelsumme-Beweis</title>
+    <title>docalvers | 3D Winkelsumme v1.9.5-FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
         rel="stylesheet">
     <style>
         :root {
             --space-bg: #050b18;
-            --neon-pink: #ff0055;
             --neon-blue: #00d2ff;
-            --neon-orange: #ff8800;
+            --panel-bg: rgba(10, 15, 30, 0.75);
             --text-main: #ffffff;
-            --panel-bg: rgba(10, 15, 30, 0.6);
         }
-
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
+        body { 
+            margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; color: var(--text-main);
             background-color: var(--space-bg);
-            color: var(--text-main);
+            background-image: url('https://images.unsplash.com/photo-1506318137071-a8e063b4b477?q=80&w=2070');
+            background-size: cover;
+            background-position: center;
         }
 
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
+        /* --- SPACE BACKGROUND (STARS) --- */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                radial-gradient(white, rgba(255, 255, 255, .3) 1px, transparent 20px),
+                radial-gradient(white, rgba(255, 255, 255, .2) 1px, transparent 30px);
+            background-size: 400px 400px, 250px 250px;
+            background-position: 0 0, 40px 60px;
+            animation: starsMove 150s linear infinite;
+            z-index: -1; opacity: 0.8; pointer-events: none;
         }
+        @keyframes starsMove { from { transform: translateY(0); } to { transform: translateY(-1000px); } }
 
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top:0; left:0; z-index: 1; }
+        
         .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: var(--text-main);
-            text-decoration: none;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            z-index: 10;
-            padding: 10px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            position: absolute; top: 20px; left: 20px;
+            color: white; text-decoration: none; font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem; padding: 10px 20px; border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 10;
         }
 
         .glass-panel {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--panel-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 20px 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 90vw;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--panel-bg); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 20px 30px; width: 90vw; max-width: 450px; z-index: 10;
+            display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .panel-header {
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-            letter-spacing: 1px;
-        }
+        h1 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--neon-blue); letter-spacing: 2px; text-transform: uppercase; }
 
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
-        }
-
-        button:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--neon-blue);
-        }
-
-        button.active {
-            background: var(--neon-blue);
-            color: black;
-            border-color: var(--neon-blue);
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        .label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; }
+        
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
-            border-radius: 50%;
-            background: var(--neon-blue);
-            cursor: pointer;
-            margin-top: -6px;
-            box-shadow: 0 0 10px var(--neon-blue);
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: var(--neon-blue); cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px var(--neon-blue);
         }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            user-select: none;
-            color: #888;
-            margin-top: 5px;
+        .btn-group { display: flex; gap: 10px; margin-top: 5px; }
+        button {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 8px 16px; border-radius: 8px; font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem; cursor: pointer; transition: all 0.3s; flex: 1;
         }
-
-        .checkbox-container input {
-            cursor: pointer;
-        }
-
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        #dot-alpha { background: #ffb100; }
-        #dot-beta { background: #77b521; }
-        #dot-gamma { background: #c62128; }
+        button:hover { background: rgba(255,255,255,0.15); border-color: var(--neon-blue); }
+        button.active { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
 
         .legend {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: #fff;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        .legend-val { font-weight: bold; min-width: 45px; text-align: center; }
-        .legend-operand { color: #888; font-weight: 300; }
-
-        .control-header {
-            font-size: 0.65rem;
-            color: #888;
-            margin-top: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--neon-blue);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .version-badge {
-            font-size: 0.5rem;
-            background: rgba(0, 243, 255, 0.1);
-            color: var(--neon-blue);
-            padding: 2px 6px;
-            border: 1px solid var(--neon-blue);
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-
-        @media (max-width: 768px) {
-            .glass-panel { bottom: 15px; padding: 15px 20px; }
-            .back-btn { top: 10px; left: 10px; font-size: 0.7rem; }
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            font-family: 'Orbitron', sans-serif; font-size: 1.2rem; background: rgba(255,255,255,0.05);
+            padding: 10px; border-radius: 10px;
         }
     </style>
 </head>
-
 <body>
-
     <a href="index.html" class="back-btn">⬅ ZENTRALE</a>
     <div id="canvas-container"></div>
 
     <div class="glass-panel">
-        <h1>
-            3D Winkelsumme 
-            <span class="version-badge">v1.9.0-ELITE</span>
-        </h1>
+        <h1>3D Winkelsumme <span style="font-size: 0.5rem; border: 1px solid var(--neon-blue); padding: 2px 5px; border-radius: 4px; margin-left:10px;">v1.9.5-FINAL</span></h1>
         
-        <div class="controls">
-            <div class="control-header">Faltungs-Fortschritt</div>
+        <div class="control-group">
+            <div class="label">Faltung</div>
             <input type="range" id="fold-slider" min="0" max="3" step="0.01" value="0">
-            
-            <div class="control-header">Horizontaler Versatz</div>
-            <input type="range" id="skew-slider" min="-2.0" max="2.0" step="0.01" value="0">
+        </div>
 
-            <label class="checkbox-container">
-                <input type="checkbox" id="check-rotation"> Auto-Rotation
-            </label>
+        <div class="control-group">
+            <div class="label">Horizontaler Versatz</div>
+            <input type="range" id="skew-slider" min="-1.5" max="1.5" step="0.01" value="0.5">
+        </div>
 
-            <div class="btn-group">
-                <button id="btn-reset">RESET</button>
-                <button id="btn-fold-all">FALTEN</button>
-            </div>
+        <div class="btn-group">
+            <button id="btn-auto-fold">FALTEN</button>
+            <button id="btn-auto-rotate">ROTATION</button>
+            <button id="btn-reset">RESET</button>
         </div>
 
         <div class="legend">
-            <span class="legend-val" id="val-alpha" style="color:#ffb100">60°</span>
-            <span class="legend-operand">+</span>
-            <span class="legend-val" id="val-beta" style="color:#77b521">60°</span>
-            <span class="legend-operand">+</span>
-            <span class="legend-val" id="val-gamma" style="color:#c62128">60°</span>
-            <span class="legend-operand">=</span>
-            <span class="legend-val" style="color:var(--neon-blue)">180°</span>
+            <span id="vA" style="color:#ffb100">60°</span>
+            <span style="color:#666">+</span>
+            <span id="vB" style="color:#77b521">60°</span>
+            <span style="color:#666">+</span>
+            <span id="vC" style="color:#c62128">60°</span>
+            <span style="color:#666">=</span>
+            <span style="color:var(--neon-blue)">180°</span>
         </div>
     </div>
 
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
         // --- 1. SETUP ---
-        const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // scene.background should remain null for transparency to show CSS background
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
         camera.position.set(0, 2, 12);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, precision: 'highp' });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.autoRotate = false;
-        controls.autoRotateSpeed = 2.0;
         
-        // --- 2. COLORS & LIGHTS ---
-        const colors = {
-            alpha: 0xffb100, // yellow
-            beta: 0x77b521,  // green
-            gamma: 0xc62128, // red
-            paper: 0xffffff,
-            outline: 0x444444
-        };
-
-        // --- 2. ADVANCED STUDIO LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-
-        // Key Light (Main highlight)
+        // --- 2. LIGHTS ---
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
         const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
         keyLight.position.set(5, 10, 5);
         scene.add(keyLight);
-
-        // Fill Light (Soft shadows)
-        const fillLight = new THREE.DirectionalLight(0x00d2ff, 0.3);
-        fillLight.position.set(-5, 5, -5);
-        scene.add(fillLight);
-
-        // Rim Light (Sharp edge highlights)
         const rimLight = new THREE.PointLight(0xffffff, 1.2);
         rimLight.position.set(0, 0, -10);
         scene.add(rimLight);
 
-        // Background Decoration
-        const bgGeo = new THREE.PlaneGeometry(100, 100);
-        const bgMat = new THREE.ShaderMaterial({
-            uniforms: {
-                u_color1: { value: new THREE.Color(0x050b18) },
-                u_color2: { value: new THREE.Color(0x0a1530) }
-            },
-            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 1.0); }`,
-            fragmentShader: `varying vec2 vUv; uniform vec3 u_color1; uniform vec3 u_color2; void main() { float d = length(vUv - 0.5); gl_FragColor = vec4(mix(u_color1, u_color2, d), 1.0); }`,
-            side: THREE.BackSide,
-            depthWrite: false
-        });
-        const background = new THREE.Mesh(bgGeo, bgMat);
-        background.renderOrder = -1;
-        scene.add(background);
-
-        // --- 3. DYNAMIC GEOMETRY ---
-        let A, B, C, M_AC, M_BC, H1, H2, F;
-        
+        // --- 3. MATERIALS ---
         const paperMat = new THREE.MeshPhysicalMaterial({ 
-            color: 0xffffff, 
-            side: THREE.DoubleSide, 
-            transparent: false,
-            roughness: 0.1,
-            metalness: 0.0,
-            reflectivity: 1.0,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.05,
-            specularIntensity: 1.0,
-            emissive: 0x222222
+            color: 0xffffff, side: THREE.DoubleSide, roughness: 0.1, metalness: 0.05,
+            clearcoat: 1.0, emissive: 0x111111
         });
         const tubeMat = new THREE.MeshPhysicalMaterial({
-            color: 0x444444,
-            metalness: 0.9,
-            roughness: 0.2,
-            emissive: 0x111111
+            color: 0x505050, metalness: 0.9, roughness: 0.2
         });
+        const colors = { alpha: 0xffb100, beta: 0x77b521, gamma: 0xc62128 };
 
-        const centerGroup = new THREE.Group();
-        scene.add(centerGroup);
-        const topGroup = new THREE.Group();
-        scene.add(topGroup);
-        const leftGroup = new THREE.Group();
-        scene.add(leftGroup);
-        const rightGroup = new THREE.Group();
-        scene.add(rightGroup);
+        // --- 4. GEOMETRY ---
+        const groups = { center: new THREE.Group(), top: new THREE.Group(), left: new THREE.Group(), right: new THREE.Group() };
+        Object.values(groups).forEach(g => scene.add(g));
 
-        function rebuildGeometry(cX) {
-            A = new THREE.Vector3(-2.5, 0, 0);
-            B = new THREE.Vector3(2.5, 0, 0);
-            C = new THREE.Vector3(cX, 4.0, 0);
-            F = new THREE.Vector3(cX, 0, 0);
-
-            // 1. Calculate All Vectors & Angles FIRST
-            const vAB = new THREE.Vector3().subVectors(B, A).normalize();
-            const vAC = new THREE.Vector3().subVectors(C, A).normalize();
-            const angleA = Math.acos(Math.max(-1, Math.min(1, vAB.dot(vAC))));
-            const startA = Math.atan2(vAB.y, vAB.x);
-
-            const vBA = new THREE.Vector3().subVectors(A, B).normalize();
-            const vBC = new THREE.Vector3().subVectors(C, B).normalize();
-            const angleB = Math.acos(Math.max(-1, Math.min(1, vBA.dot(vBC))));
-            const startB = Math.atan2(vBC.y, vBC.x);
-
-            const vCA = new THREE.Vector3().subVectors(A, C).normalize();
-            const vCB = new THREE.Vector3().subVectors(B, C).normalize();
-            const angleG = Math.acos(Math.max(-1, Math.min(1, vCA.dot(vCB))));
-            const startG = Math.atan2(vCA.y, vCA.x);
-
-            // Degree calculation with 180 restriction
-            const degA = Math.round(angleA * 180 / Math.PI);
-            const degB = Math.round(angleB * 180 / Math.PI);
-            const degG = 180 - degA - degB;
-
-            // 2. Clear Old Scene Groups
-            [centerGroup, topGroup, leftGroup, rightGroup].forEach(g => {
-                while(g.children.length > 0) g.remove(g.children[0]);
-            });
-
-            // 3. Hinges & Midpoints
-            M_AC = new THREE.Vector3().addVectors(A, C).multiplyScalar(0.5);
-            M_BC = new THREE.Vector3().addVectors(B, C).multiplyScalar(0.5);
-            H1 = new THREE.Vector3((A.x + F.x)/2, 0, 0);
-            H2 = new THREE.Vector3((B.x + F.x)/2, 0, 0);
-
-            // 4. Create             // Center
-            const centerShape = createShape([H1, H2, M_BC, M_AC]);
-            centerGroup.add(new THREE.Mesh(new THREE.ShapeGeometry(centerShape), paperMat));
-            centerGroup.add(createEdgeTubes([H1, H2, M_BC, M_AC], tubeMat));
- 
-            // Top
-            topGroup.position.set(0, 2, 0);
-            const topTriShape = createShape([
-                new THREE.Vector3(M_AC.x, 0, 0),
-                new THREE.Vector3(M_BC.x, 0, 0),
-                new THREE.Vector3(C.x, C.y - 2, 0)
-            ]);
-            topGroup.add(new THREE.Mesh(new THREE.ShapeGeometry(topTriShape), paperMat));
-            topGroup.add(createEdgeTubes([
-                new THREE.Vector3(M_AC.x, 0, 0),
-                new THREE.Vector3(M_BC.x, 0, 0),
-                new THREE.Vector3(C.x, C.y - 2, 0)
-            ], tubeMat));
-            const arcG = createAngleArc(new THREE.Vector3(C.x, C.y - 2, 0), startG, angleG, colors.gamma, 0.25);
-            topGroup.add(arcG);
-            document.getElementById('val-gamma').innerText = degG + "°";
-
-            // Left
-            leftGroup.position.set(H1.x, 0, 0);
-            const leftTriShape = createShape([
-                new THREE.Vector3(A.x - H1.x, 0, 0),
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(0, 2, 0)
-            ]);
-            leftGroup.add(new THREE.Mesh(new THREE.ShapeGeometry(leftTriShape), paperMat));
-            leftGroup.add(createEdgeTubes([
-                new THREE.Vector3(A.x - H1.x, 0, 0),
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(0, 2, 0)
-            ], tubeMat));
-            const arcA = createAngleArc(new THREE.Vector3(A.x - H1.x, 0, 0), startA, angleA, colors.alpha, 0.25);
-            leftGroup.add(arcA);
-            document.getElementById('val-alpha').innerText = degA + "°";
-
-            // Right
-            rightGroup.position.set(H2.x, 0, 0);
-            const rightTriShape = createShape([
-                new THREE.Vector3(0,0,0),
-                new THREE.Vector3(B.x - H2.x, 0, 0),
-                new THREE.Vector3(0, 2, 0)
-            ]);
-            rightGroup.add(new THREE.Mesh(new THREE.ShapeGeometry(rightTriShape), paperMat));
-            rightGroup.add(createEdgeTubes([
-                new THREE.Vector3(0,0,0),
-                new THREE.Vector3(B.x - H2.x, 0, 0),
-                new THREE.Vector3(0, 2, 0)
-            ], tubeMat));
-            const arcB = createAngleArc(new THREE.Vector3(B.x - H2.x, 0, 0), startB, angleB, colors.beta, 0.25);
-            rightGroup.add(arcB);
-            document.getElementById('val-beta').innerText = degB + "°";
-        }
- 
-        // helper to create a triangle shape
-        function createShape(points) {
-            const shape = new THREE.Shape();
-            shape.moveTo(points[0].x, points[0].y);
-            for(let i=1; i<points.length; i++) shape.lineTo(points[i].x, points[i].y);
-            shape.closePath();
-            return shape;
-        }
-
-        // Helper to create 3D tubes along edges
-        function createEdgeTubes(points, material, radius = 0.012) {
+        function createTubes(points, material, radius = 0.015) {
             const group = new THREE.Group();
             for(let i=0; i<points.length; i++) {
-                const p1 = points[i];
-                const p2 = points[(i + 1) % points.length];
-                
-                const dist = p1.distanceTo(p2);
-                const geo = new THREE.CylinderGeometry(radius, radius, dist, 8);
-                const tube = new THREE.Mesh(geo, material);
-                
-                // Position and orient tube
-                const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-                tube.position.copy(mid);
-                
-                const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
-                const axis = new THREE.Vector3(0, 1, 0);
-                tube.quaternion.setFromUnitVectors(axis, dir);
-                
+                const p1 = points[i], p2 = points[(i+1)%points.length];
+                const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, p1.distanceTo(p2), 8), material);
+                tube.position.copy(p1.clone().add(p2).multiplyScalar(0.5));
+                tube.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), p2.clone().sub(p1).normalize());
                 group.add(tube);
             }
             return group;
-        }        }
+        }
 
-        function createAngleArc(origin, start, span, color, radius = 0.5) {
+        function createArc(origin, start, span, color) {
+            const geo = new THREE.CircleGeometry(0.25, 32, start, span);
+            const mat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent:true, opacity: 0.9 });
             const group = new THREE.Group();
-            const geo = new THREE.CircleGeometry(radius, 32, start, span);
-            const mat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent:true, opacity: 0.95 });
             
-            const meshFront = new THREE.Mesh(geo, mat); meshFront.position.z = 0.002; group.add(meshFront);
-            const meshBack = new THREE.Mesh(geo, mat); meshBack.position.z = -0.002; group.add(meshBack);
+            const meshFront = new THREE.Mesh(geo, mat);
+            meshFront.position.z = 0.005;
+            group.add(meshFront);
+            
+            const meshBack = new THREE.Mesh(geo, mat);
+            meshBack.position.z = -0.005;
+            group.add(meshBack);
+            
             group.position.copy(origin);
-            group.renderOrder = 2;
+            group.renderOrder = 2; // Ensure arcs stay on top
             return group;
         }
 
-        // Removed createLabel function
+        function rebuild(cX) {
+            Object.values(groups).forEach(g => { while(g.children.length > 0) g.remove(g.children[0]); });
+            const A = new THREE.Vector3(-2.5, 0, 0), B = new THREE.Vector3(2.5, 0, 0), C = new THREE.Vector3(cX, 4, 0), F = new THREE.Vector3(cX, 0, 0);
+            
+            const angA = Math.acos(B.clone().sub(A).normalize().dot(C.clone().sub(A).normalize()));
+            const angB = Math.acos(A.clone().sub(B).normalize().dot(C.clone().sub(B).normalize()));
+            const angG = Math.acos(A.clone().sub(C).normalize().dot(B.clone().sub(C).normalize()));
 
-        // --- 5. ANIMATION & CONTROLS ---
-        const slider = document.getElementById('fold-slider');
-        
-        function updateFold(val) {
-            // val 0-1: top fold
-            // val 1-2: left fold
-            // val 2-3: right fold
-            
-            const tTop = Math.max(0, Math.min(1, val));
-            topGroup.rotation.x = Math.PI * tTop;
-            
-            const tLeft = Math.max(0, Math.min(1, val - 1));
-            leftGroup.rotation.y = Math.PI * tLeft;
-            
-            const tRight = Math.max(0, Math.min(1, val - 2));
-            rightGroup.rotation.y = -Math.PI * tRight;
+            document.getElementById('vA').innerText = Math.round(angA*180/Math.PI) + "°";
+            document.getElementById('vB').innerText = Math.round(angB*180/Math.PI) + "°";
+            document.getElementById('vC').innerText = (180-Math.round(angA*180/Math.PI)-Math.round(angB*180/Math.PI)) + "°";
+
+            const M_AC = A.clone().add(C).multiplyScalar(0.5), M_BC = B.clone().add(C).multiplyScalar(0.5);
+            const H1 = new THREE.Vector3((A.x+F.x)/2, 0, 0), H2 = new THREE.Vector3((B.x+F.x)/2, 0, 0);
+
+            const addPart = (g, pts) => {
+                const shape = new THREE.Shape(); shape.moveTo(pts[0].x, pts[0].y);
+                for(let i=1; i<pts.length; i++) shape.lineTo(pts[i].x, pts[i].y);
+                g.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), paperMat));
+                g.add(createTubes(pts, tubeMat));
+            };
+
+            addPart(groups.center, [H1, H2, M_BC, M_AC]);
+            groups.top.position.set(0, 2, 0);
+            addPart(groups.top, [M_AC.clone().sub(new THREE.Vector3(0,2,0)), M_BC.clone().sub(new THREE.Vector3(0,2,0)), C.clone().sub(new THREE.Vector3(0,2,0))]);
+            groups.top.add(createArc(C.clone().sub(new THREE.Vector3(0,2,0)), Math.atan2(-2, M_AC.x-C.x), angG, colors.gamma));
+
+            groups.left.position.set(H1.x, 0, 0);
+            addPart(groups.left, [A.clone().sub(H1), new THREE.Vector3(0,0,0), new THREE.Vector3(0,2,0)]);
+            groups.left.add(createArc(A.clone().sub(H1), 0, angA, colors.alpha));
+
+            groups.right.position.set(H2.x, 0, 0);
+            addPart(groups.right, [new THREE.Vector3(0,0,0), B.clone().sub(H2), new THREE.Vector3(0,2,0)]);
+            groups.right.add(createArc(B.clone().sub(H2), Math.PI - angB, angB, colors.beta));
         }
 
-        slider.addEventListener('input', (e) => {
-            updateFold(parseFloat(e.target.value));
-        });
+        const slider = document.getElementById('fold-slider');
+        function updateFold(val) {
+            groups.top.rotation.x = Math.PI * Math.max(0, Math.min(1, val));
+            groups.left.rotation.y = Math.PI * Math.max(0, Math.min(1, val-1));
+            groups.right.rotation.y = -Math.PI * Math.max(0, Math.min(1, val-2));
+            groups.top.position.z = 0.005 * Math.max(0, Math.min(1, val));
+            groups.left.position.z = 0.01 * Math.max(0, Math.min(1, val-1));
+            groups.right.position.z = 0.015 * Math.max(0, Math.min(1, val-2));
+        }
 
-        const skewSlider = document.getElementById('skew-slider');
-        
-        skewSlider.addEventListener('input', (e) => {
-            rebuildGeometry(parseFloat(e.target.value));
-        });
-
-        const checkRotation = document.getElementById('check-rotation');
-        checkRotation.addEventListener('change', (e) => {
-            controls.autoRotate = e.target.checked;
-        });
-
+        document.getElementById('btn-auto-fold').onclick = function() {
+            this.classList.toggle('active');
+            isAutoFolding = this.classList.contains('active');
+        };
+        document.getElementById('btn-auto-rotate').onclick = function() {
+            this.classList.toggle('active');
+            controls.autoRotate = this.classList.contains('active');
+        };
         document.getElementById('btn-reset').onclick = () => {
-            slider.value = 0;
-            updateFold(0);
-            
-            // Reset camera & controls (physical rotation)
-            camera.position.set(0, 2, 12);
-            controls.target.set(0, 0, 0);
-            controls.autoRotate = checkRotation.checked;
-            controls.update();
-        };
-        
-        let animating = false;
-        document.getElementById('btn-fold-all').onclick = () => {
-            if(animating) return;
-            animating = true;
-            let start = parseFloat(slider.value);
-            let target = start === 3 ? 0 : 3;
-            let startT = performance.now();
-            let duration = 5000;
-            
-            function step(now) {
-                let p = (now - startT) / duration;
-                if(p >= 1) { 
-                    slider.value = target; 
-                    updateFold(target);
-                    animating = false; 
-                    return; 
-                }
-                let current = start + (target - start) * p;
-                slider.value = current;
-                updateFold(current);
-                requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
+            rebuild(0.5); updateFold(0); slider.value = 0; document.getElementById('skew-slider').value = 0.5;
+            isAutoFolding = false; controls.autoRotate = false;
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            camera.position.set(0,2,12); controls.target.set(0,0,0);
         };
 
-        // --- 6. RENDER LOOP ---
+        let isAutoFolding = false, foldDir = 1;
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
+            if(isAutoFolding) {
+                let cur = parseFloat(slider.value);
+                if(cur >= 3) foldDir = -1; if(cur <= 0) foldDir = 1;
+                slider.value = cur + (0.02 * foldDir);
+                updateFold(parseFloat(slider.value));
+            }
             renderer.render(scene, camera);
         }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Initialize
-        rebuildGeometry(0.5);
-        updateFold(0);
+        
+        slider.oninput = (e) => updateFold(parseFloat(e.target.value));
+        document.getElementById('skew-slider').oninput = (e) => rebuild(parseFloat(e.target.value));
+        window.onresize = () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
+        
+        rebuild(0.5); animate();
     </script>
 </body>
 </html>
