@@ -247,22 +247,6 @@
             border-radius: 10px;
             margin-top: 20px;
         }
-
-        @media (max-width: 600px) {
-            h2 {
-                font-size: 1rem;
-            }
-
-            .val-box {
-                font-size: 1rem;
-                padding: 10px;
-                min-width: 120px;
-            }
-
-            .slider-group label {
-                display: none;
-            }
-        }
     </style>
 </head>
 
@@ -281,7 +265,9 @@
         </div>
 
         <div id="values-row">
+            <div class="val-box" style="color: #fff; border-color: rgba(255,255,255,0.3);">8,00</div>
             <div class="val-box" style="color: var(--neon-purple); border-color: var(--neon-purple);"><span id="val-b">2.00</span></div>
+            <div class="val-box" style="color: var(--neon-blue); border-color: var(--neon-blue);"><span id="val-s">3.00</span></div>
         </div>
 
         <div id="slider-row">
@@ -332,12 +318,15 @@
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            scale = Math.min(rect.width / 10, rect.height / 7);
+            scale = Math.min(rect.width / 12, rect.height / 8); 
             draw();
         }
 
         window.addEventListener('resize', resize);
-        window.addEventListener('load', resize);
+        window.addEventListener('load', () => {
+            resize();
+            updateDOM();
+        });
 
         bSlider.addEventListener('input', (e) => {
             b = parseFloat(e.target.value);
@@ -358,10 +347,11 @@
 
         function updateDOM() {
             document.getElementById('val-b').textContent = b.toFixed(2).replace('.', ',');
+            document.getElementById('val-s').textContent = s.toFixed(2).replace('.', ',');
             
             if (b >= 4.0 || b <= 0.1) {
                 warningBox.style.display = 'flex';
-                warningBox.innerHTML = `⚠️ ACHTUNG: BASIS ${b.toFixed(2).replace('.', ',')} (KEIN DE)`;
+                warningBox.innerHTML = `⚠️ ACHTUNG: ${b.toFixed(2).replace('.', ',')} + 2 × ${s.toFixed(2).replace('.', ',')} = 8,00 (KEIN DE)`;
             } else {
                 warningBox.style.display = 'none';
             }
@@ -372,7 +362,7 @@
             ctx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
-            const cy = rect.height / 2 + 200;
+            const cy = rect.height / 2 + 100;
 
             let h = 0;
             if (s > b / 2) {
@@ -390,7 +380,6 @@
 
             if (b < 4.0) {
                 // --- VALID TRIANGLE MODE ---
-                // 1. Base
                 ctx.strokeStyle = '#9d50bb';
                 ctx.shadowColor = '#9d50bb';
                 ctx.beginPath();
@@ -398,7 +387,6 @@
                 ctx.lineTo(pRechts.x, pRechts.y);
                 ctx.stroke();
 
-                // 2. Legs (Drawn over)
                 ctx.strokeStyle = '#00d2ff';
                 ctx.shadowColor = '#00d2ff';
                 ctx.beginPath();
@@ -409,8 +397,6 @@
             } else {
                 // --- INVALID "FOLDED WIRE" MODE ---
                 const yLen = s * scale;
-                
-                // 1. Inner Base part (Red, in the middle)
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = '#ff3c3c';
                 ctx.shadowColor = '#ff3c3c';
@@ -419,44 +405,31 @@
                 ctx.lineTo(pRechts.x - yLen, pRechts.y);
                 ctx.stroke();
 
-                // 2. Folded Legs (Solid Blue, at the ends, SAME HEIGHT)
                 ctx.lineWidth = 5;
                 ctx.strokeStyle = '#00d2ff';
                 ctx.shadowColor = '#00d2ff';
-                ctx.setLineDash([]); // Solid lines
-
-                // Left folded leg
-                ctx.beginPath();
-                ctx.moveTo(pLinks.x, pLinks.y);
-                ctx.lineTo(pLinks.x + yLen, pLinks.y);
-                ctx.stroke();
-                
-                // Right folded leg
-                ctx.beginPath();
-                ctx.moveTo(pRechts.x, pRechts.y);
-                ctx.lineTo(pRechts.x - yLen, pRechts.y);
-                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.beginPath(); ctx.moveTo(pLinks.x, pLinks.y); ctx.lineTo(pLinks.x + yLen, pLinks.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pRechts.x, pRechts.y); ctx.lineTo(pRechts.x - yLen, pRechts.y); ctx.stroke();
             }
 
             ctx.shadowBlur = 0;
 
             // --- LABELS ---
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px Orbitron';
+            ctx.font = 'bold 20px Orbitron';
             ctx.textAlign = 'center';
 
-            // Perimeter label at top (Commented out)
-            // ctx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 30);
+            // 1. Perimeter
+            ctx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 25);
 
-            // Base label
-            ctx.font = 'bold 22px Orbitron';
+            // 2. Base label
             ctx.fillStyle = (b >= 4.0) ? '#ff3c3c' : '#ffffff';
-            ctx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 45);
+            ctx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 35);
 
-            // Leg labels (Commented out)
-            /*
+            // 3. Leg labels
+            ctx.fillStyle = '#ffffff';
             if (b < 4.0) {
-                ctx.font = 'bold 24px Orbitron';
                 // Left Leg
                 ctx.save();
                 const midLX = (pLinks.x + pSpitze.x) / 2;
@@ -464,7 +437,7 @@
                 const angleL = Math.atan2(pSpitze.y - pLinks.y, pSpitze.x - pLinks.x);
                 ctx.translate(midLX, midLY);
                 ctx.rotate(angleL);
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -25);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
                 ctx.restore();
 
                 // Right Leg
@@ -474,16 +447,13 @@
                 const angleR = Math.atan2(pRechts.y - pSpitze.y, pRechts.x - pSpitze.x);
                 ctx.translate(midRX, midRY);
                 ctx.rotate(angleR);
-                // Negative Y to go OUTSIDE on the right leg when rotating peak-to-base
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -25);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
                 ctx.restore();
             } else {
                 // Folded labels
-                ctx.font = 'bold 20px Orbitron';
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 25);
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 25);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 20);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 20);
             }
-            */
         }
     </script>
 </body>
