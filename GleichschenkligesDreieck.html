@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Gleichschenkliges Dreieck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --space-bg: #050b18;
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-red: #ff3c3c;
+            --text-main: #ffffff;
+            --ui-bg: rgba(5, 11, 24, 0.95);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--space-bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Workspace */
+        #workspace {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* Warning Box */
+        #warning-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid var(--neon-red);
+            padding: 8px 20px;
+            border-radius: 10px;
+            color: var(--neon-red);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 20px var(--neon-red);
+            z-index: 20;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Compact Floating Control Panel */
+        #control-panel {
+            background: var(--ui-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            padding: 12px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            margin: 0 auto 20px auto;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 850px;
+            flex-shrink: 0;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        h2 {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-btn,
+        .help-btn {
+            text-decoration: none;
+            color: var(--neon-blue);
+            font-size: 0.65rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover,
+        .help-btn:hover {
+            box-shadow: 0 0 10px var(--neon-blue);
+            background: rgba(0, 210, 255, 0.2);
+        }
+
+        #values-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .val-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+        }
+
+        #slider-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            width: 100%;
+        }
+
+        .slider-group label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+            white-space: nowrap;
+        }
+
+        input[type=range] {
+            flex-grow: 1;
+            accent-color: var(--neon-blue);
+            cursor: pointer;
+        }
+
+        /* Slider Row with Arrows */
+        .slider-with-arrows {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .arrow-btn {
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            color: #00d2ff;
+            border-radius: 5px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-family: 'Orbitron', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .arrow-btn:hover {
+            background: #00d2ff;
+            color: #000;
+            box-shadow: 0 0 15px #00d2ff;
+        }
+
+        .arrow-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Modal styling */
+        #helpModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: var(--space-bg);
+            padding: 40px;
+            border-radius: 25px;
+            max-width: 80%;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+
+        .modal-content h3 {
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+            margin-top: 0;
+        }
+
+        .close-modal {
+            display: block;
+            text-align: center;
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+            cursor: pointer;
+            border: 1px solid var(--neon-blue);
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 1rem;
+            }
+
+            .val-box {
+                font-size: 1rem;
+                padding: 10px;
+                min-width: 120px;
+            }
+
+            .slider-group label {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="workspace">
+        <div id="warning-box">⚠️ ACHTUNG: KEIN DREIECK MEHR!</div>
+        <canvas id="triCanvas"></canvas>
+    </div>
+
+    <div id="control-panel">
+        <div class="header-controls">
+            <a href="index.html" class="back-btn">← ZENTRALE</a>
+            <h2>GLEICHSCHENKLIGES DREIECK</h2>
+            <div class="help-btn" onclick="toggleHelp()">INFO ?</div>
+        </div>
+
+        <div id="values-row">
+            <div class="val-box" style="color: var(--neon-purple); border-color: var(--neon-purple);"><span id="val-b">2.00</span></div>
+        </div>
+
+        <div id="slider-row">
+            <div class="slider-group">
+                <label for="b-slider">BASIS</label>
+                <div class="slider-with-arrows">
+                    <button class="arrow-btn" onclick="adjustSlider(-0.01)">◀</button>
+                    <input type="range" id="b-slider" min="0.0" max="8.0" step="0.01" value="2.0">
+                    <button class="arrow-btn" onclick="adjustSlider(0.01)">▶</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpModal" onclick="toggleHelp()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>Analyse-Parameter</h3>
+            <p>Ein gleichschenkliges Dreieck mit konstantem Umfang (DR Draht-Simulation):</p>
+            <ul>
+                <li>Gesamtlänge des Drahtes: 8,00 cm.</li>
+                <li>Gleichung: x + 2y = 8,00.</li>
+                <li>Ab x &ge; 4,00 cm wird y &le; 2,00 cm, wodurch die Dreiecksungleichung verletzt wird.</li>
+                <li>Bei x = 0,00 cm wird y = 4,00 cm (Doppel-Linie).</li>
+            </ul>
+            <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('triCanvas');
+        const ctx = canvas.getContext('2d');
+        const bSlider = document.getElementById('b-slider');
+        const warningBox = document.getElementById('warning-box');
+
+        let u = 8.0;
+        let b = 2.0;
+        let s = (u - b) / 2;
+        let scale = 100.0;
+
+        function toggleHelp() {
+            const modal = document.getElementById('helpModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            scale = Math.min(rect.width / 10, rect.height / 7);
+            draw();
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('load', resize);
+
+        bSlider.addEventListener('input', (e) => {
+            b = parseFloat(e.target.value);
+            s = (u - b) / 2;
+            updateDOM();
+            draw();
+        });
+
+        function adjustSlider(delta) {
+            let newVal = parseFloat(bSlider.value) + delta;
+            newVal = Math.max(0.0, Math.min(8.0, newVal));
+            bSlider.value = newVal;
+            b = newVal;
+            s = (u - b) / 2;
+            updateDOM();
+            draw();
+        }
+
+        function updateDOM() {
+            document.getElementById('val-b').textContent = b.toFixed(2).replace('.', ',');
+            
+            if (b >= 4.0 || b <= 0.1) {
+                warningBox.style.display = 'flex';
+                warningBox.innerHTML = `⚠️ ACHTUNG: BASIS ${b.toFixed(2).replace('.', ',')} (KEIN DE)`;
+            } else {
+                warningBox.style.display = 'none';
+            }
+        }
+
+        function draw() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            const cx = rect.width / 2;
+            const cy = rect.height / 2 + 200;
+
+            let h = 0;
+            if (s > b / 2) {
+                h = Math.sqrt(s * s - (b / 2) * (b / 2));
+            }
+
+            const pSpitze = { x: cx, y: cy - h * scale };
+            const pLinks = { x: cx - (b / 2) * scale, y: cy };
+            const pRechts = { x: cx + (b / 2) * scale, y: cy };
+
+            // Drawing Settings
+            ctx.shadowBlur = 15;
+            ctx.lineWidth = 3.5;
+            ctx.lineJoin = 'round';
+
+            if (b < 4.0) {
+                // --- VALID TRIANGLE MODE ---
+                // 1. Base
+                ctx.strokeStyle = '#9d50bb';
+                ctx.shadowColor = '#9d50bb';
+                ctx.beginPath();
+                ctx.moveTo(pLinks.x, pLinks.y);
+                ctx.lineTo(pRechts.x, pRechts.y);
+                ctx.stroke();
+
+                // 2. Legs (Drawn over)
+                ctx.strokeStyle = '#00d2ff';
+                ctx.shadowColor = '#00d2ff';
+                ctx.beginPath();
+                ctx.moveTo(pLinks.x, pLinks.y);
+                ctx.lineTo(pSpitze.x, pSpitze.y);
+                ctx.lineTo(pRechts.x, pRechts.y);
+                ctx.stroke();
+            } else {
+                // --- INVALID "FOLDED WIRE" MODE ---
+                const yLen = s * scale;
+                
+                // 1. Inner Base part (Red, in the middle)
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#ff3c3c';
+                ctx.shadowColor = '#ff3c3c';
+                ctx.beginPath();
+                ctx.moveTo(pLinks.x + yLen, pLinks.y);
+                ctx.lineTo(pRechts.x - yLen, pRechts.y);
+                ctx.stroke();
+
+                // 2. Folded Legs (Solid Blue, at the ends, SAME HEIGHT)
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#00d2ff';
+                ctx.shadowColor = '#00d2ff';
+                ctx.setLineDash([]); // Solid lines
+
+                // Left folded leg
+                ctx.beginPath();
+                ctx.moveTo(pLinks.x, pLinks.y);
+                ctx.lineTo(pLinks.x + yLen, pLinks.y);
+                ctx.stroke();
+                
+                // Right folded leg
+                ctx.beginPath();
+                ctx.moveTo(pRechts.x, pRechts.y);
+                ctx.lineTo(pRechts.x - yLen, pRechts.y);
+                ctx.stroke();
+            }
+
+            ctx.shadowBlur = 0;
+
+            // --- LABELS ---
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Orbitron';
+            ctx.textAlign = 'center';
+
+            // Perimeter label at top (Commented out)
+            // ctx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 30);
+
+            // Base label
+            ctx.font = 'bold 22px Orbitron';
+            ctx.fillStyle = (b >= 4.0) ? '#ff3c3c' : '#ffffff';
+            ctx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 45);
+
+            // Leg labels (Commented out)
+            /*
+            if (b < 4.0) {
+                ctx.font = 'bold 24px Orbitron';
+                // Left Leg
+                ctx.save();
+                const midLX = (pLinks.x + pSpitze.x) / 2;
+                const midLY = (pLinks.y + pSpitze.y) / 2;
+                const angleL = Math.atan2(pSpitze.y - pLinks.y, pSpitze.x - pLinks.x);
+                ctx.translate(midLX, midLY);
+                ctx.rotate(angleL);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -25);
+                ctx.restore();
+
+                // Right Leg
+                ctx.save();
+                const midRX = (pRechts.x + pSpitze.x) / 2;
+                const midRY = (pRechts.y + pSpitze.y) / 2;
+                const angleR = Math.atan2(pRechts.y - pSpitze.y, pRechts.x - pSpitze.x);
+                ctx.translate(midRX, midRY);
+                ctx.rotate(angleR);
+                // Negative Y to go OUTSIDE on the right leg when rotating peak-to-base
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -25);
+                ctx.restore();
+            } else {
+                // Folded labels
+                ctx.font = 'bold 20px Orbitron';
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 25);
+                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 25);
+            }
+            */
+        }
+    </script>
+</body>
+
+</html>
