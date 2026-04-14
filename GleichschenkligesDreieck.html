@@ -34,8 +34,34 @@
             flex-grow: 1;
             position: relative;
             display: flex;
+            flex-direction: row; /* Split screen */
+            align-items: stretch;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .viewport {
+            flex: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+        }
+
+        .viewport-label {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            pointer-events: none;
         }
 
         canvas {
@@ -254,7 +280,16 @@
 
     <div id="workspace">
         <div id="warning-box">⚠️ ACHTUNG: KEIN DREIECK MEHR!</div>
-        <canvas id="triCanvas"></canvas>
+        
+        <div class="viewport" id="tri-viewport">
+            <div class="viewport-label">VISUALISIERUNG</div>
+            <canvas id="triCanvas"></canvas>
+        </div>
+
+        <div class="viewport" id="graph-viewport">
+            <div class="viewport-label">ANALYSE (y = 4 - 0,5x)</div>
+            <canvas id="graphCanvas"></canvas>
+        </div>
     </div>
 
     <div id="control-panel">
@@ -307,8 +342,10 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('triCanvas');
-        const ctx = canvas.getContext('2d');
+        const triCanvas = document.getElementById('triCanvas');
+        const triCtx = triCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas.getContext('2d');
         const bSlider = document.getElementById('b-slider');
         const warningBox = document.getElementById('warning-box');
 
@@ -324,11 +361,20 @@
 
         function resize() {
             const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            scale = Math.min(rect.width / 12, rect.height / 8); 
+            
+            // Resize Triangle Canvas
+            const triRect = triCanvas.getBoundingClientRect();
+            triCanvas.width = triRect.width * dpr;
+            triCanvas.height = triRect.height * dpr;
+            triCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            
+            // Resize Graph Canvas
+            const graphRect = graphCanvas.getBoundingClientRect();
+            graphCanvas.width = graphRect.width * dpr;
+            graphCanvas.height = graphRect.height * dpr;
+            graphCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            scale = Math.min(triRect.width / 10, triRect.height / 7); 
             draw();
         }
 
@@ -386,8 +432,13 @@
         }
 
         function draw() {
-            const rect = canvas.getBoundingClientRect();
-            ctx.clearRect(0, 0, rect.width, rect.height);
+            drawTriangle();
+            drawGraph();
+        }
+
+        function drawTriangle() {
+            const rect = triCanvas.getBoundingClientRect();
+            triCtx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
             const cy = rect.height / 2 + 100;
@@ -402,86 +453,203 @@
             const pRechts = { x: cx + (b / 2) * scale, y: cy };
 
             // Drawing Settings
-            ctx.shadowBlur = 15;
-            ctx.lineWidth = 3.5;
-            ctx.lineJoin = 'round';
+            triCtx.shadowBlur = 15;
+            triCtx.lineWidth = 3.5;
+            triCtx.lineJoin = 'round';
 
             if (b < 4.0) {
                 // --- VALID TRIANGLE MODE ---
-                ctx.strokeStyle = '#9d50bb';
-                ctx.shadowColor = '#9d50bb';
-                ctx.beginPath();
-                ctx.moveTo(pLinks.x, pLinks.y);
-                ctx.lineTo(pRechts.x, pRechts.y);
-                ctx.stroke();
+                triCtx.strokeStyle = '#9d50bb';
+                triCtx.shadowColor = '#9d50bb';
+                triCtx.beginPath();
+                triCtx.moveTo(pLinks.x, pLinks.y);
+                triCtx.lineTo(pRechts.x, pRechts.y);
+                triCtx.stroke();
 
-                ctx.strokeStyle = '#00d2ff';
-                ctx.shadowColor = '#00d2ff';
-                ctx.beginPath();
-                ctx.moveTo(pLinks.x, pLinks.y);
-                ctx.lineTo(pSpitze.x, pSpitze.y);
-                ctx.lineTo(pRechts.x, pRechts.y);
-                ctx.stroke();
+                triCtx.strokeStyle = '#00d2ff';
+                triCtx.shadowColor = '#00d2ff';
+                triCtx.beginPath();
+                triCtx.moveTo(pLinks.x, pLinks.y);
+                triCtx.lineTo(pSpitze.x, pSpitze.y);
+                triCtx.lineTo(pRechts.x, pRechts.y);
+                triCtx.stroke();
             } else {
                 // --- INVALID "FOLDED WIRE" MODE ---
                 const yLen = s * scale;
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = '#ff3c3c';
-                ctx.shadowColor = '#ff3c3c';
-                ctx.beginPath();
-                ctx.moveTo(pLinks.x + yLen, pLinks.y);
-                ctx.lineTo(pRechts.x - yLen, pRechts.y);
-                ctx.stroke();
+                triCtx.lineWidth = 4;
+                triCtx.strokeStyle = '#ff3c3c';
+                triCtx.shadowColor = '#ff3c3c';
+                triCtx.beginPath();
+                triCtx.moveTo(pLinks.x + yLen, pLinks.y);
+                triCtx.lineTo(pRechts.x - yLen, pRechts.y);
+                triCtx.stroke();
 
-                ctx.lineWidth = 5;
-                ctx.strokeStyle = '#00d2ff';
-                ctx.shadowColor = '#00d2ff';
-                ctx.setLineDash([]);
-                ctx.beginPath(); ctx.moveTo(pLinks.x, pLinks.y); ctx.lineTo(pLinks.x + yLen, pLinks.y); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(pRechts.x, pRechts.y); ctx.lineTo(pRechts.x - yLen, pRechts.y); ctx.stroke();
+                triCtx.lineWidth = 5;
+                triCtx.strokeStyle = '#00d2ff';
+                triCtx.shadowColor = '#00d2ff';
+                triCtx.setLineDash([]);
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + yLen, pLinks.y); triCtx.stroke();
+                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - yLen, pRechts.y); triCtx.stroke();
             }
 
-            ctx.shadowBlur = 0;
+            triCtx.shadowBlur = 0;
 
             // --- LABELS ---
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 20px Orbitron';
-            ctx.textAlign = 'center';
+            triCtx.fillStyle = '#ffffff';
+            triCtx.font = 'bold 20px Orbitron';
+            triCtx.textAlign = 'center';
 
             // 1. Perimeter
-            ctx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 25);
+            triCtx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 25);
 
             // 2. Base label
-            ctx.fillStyle = (b >= 4.0) ? '#ff3c3c' : '#ffffff';
-            ctx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 35);
+            triCtx.fillStyle = (b >= 4.0) ? '#ff3c3c' : '#ffffff';
+            triCtx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 35);
 
             // 3. Leg labels
-            ctx.fillStyle = '#ffffff';
+            triCtx.fillStyle = '#ffffff';
             if (b < 4.0) {
                 // Left Leg
-                ctx.save();
+                triCtx.save();
                 const midLX = (pLinks.x + pSpitze.x) / 2;
                 const midLY = (pLinks.y + pSpitze.y) / 2;
                 const angleL = Math.atan2(pSpitze.y - pLinks.y, pSpitze.x - pLinks.x);
-                ctx.translate(midLX, midLY);
-                ctx.rotate(angleL);
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
-                ctx.restore();
+                triCtx.translate(midLX, midLY);
+                triCtx.rotate(angleL);
+                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
+                triCtx.restore();
 
-                // Right     Leg
-                ctx.save();
+                // Right Leg
+                triCtx.save();
                 const midRX = (pRechts.x + pSpitze.x) / 2;
                 const midRY = (pRechts.y + pSpitze.y) / 2;
                 const angleR = Math.atan2(pRechts.y - pSpitze.y, pRechts.x - pSpitze.x);
-                ctx.translate(midRX, midRY);
-                ctx.rotate(angleR);
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
-                ctx.restore();
+                triCtx.translate(midRX, midRY);
+                triCtx.rotate(angleR);
+                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
+                triCtx.restore();
             } else {
                 // Folded labels
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 20);
-                ctx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 20);
+                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 20);
+                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 20);
             }
+        }
+
+        function drawGraph() {
+            const rect = graphCanvas.getBoundingClientRect();
+            graphCtx.clearRect(0, 0, rect.width, rect.height);
+
+            const padding = 50;
+            const graphWidth = rect.width - padding * 2;
+            const graphHeight = rect.height - padding * 2;
+
+            // Transformation Helpers
+            const toX = (val) => padding + (val / 8.5) * graphWidth;
+            const toY = (val) => rect.height - padding - (val / 4.5) * graphHeight;
+
+            // 1. Grid
+            graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            graphCtx.lineWidth = 1;
+            for (let i = 0; i <= 8; i++) {
+                graphCtx.beginPath();
+                graphCtx.moveTo(toX(i), toY(0));
+                graphCtx.lineTo(toX(i), toY(4.5));
+                graphCtx.stroke();
+            }
+            for (let i = 0; i <= 4; i++) {
+                graphCtx.beginPath();
+                graphCtx.moveTo(toX(0), toY(i));
+                graphCtx.lineTo(toX(8.5), toY(i));
+                graphCtx.stroke();
+            }
+
+            // 2. Axes
+            graphCtx.lineWidth = 2;
+            // Y-Axis (Schenkel)
+            graphCtx.strokeStyle = varColor('--neon-blue');
+            graphCtx.shadowColor = varColor('--neon-blue');
+            graphCtx.shadowBlur = 5;
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(0), toY(-0.2));
+            graphCtx.lineTo(toX(0), toY(4.2));
+            graphCtx.stroke();
+            
+            // X-Axis (Basis)
+            graphCtx.strokeStyle = varColor('--neon-purple');
+            graphCtx.shadowColor = varColor('--neon-purple');
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(-0.2), toY(0));
+            graphCtx.lineTo(toX(8.2), toY(0));
+            graphCtx.stroke();
+            graphCtx.shadowBlur = 0;
+
+            // 3. Labels (Numbers)
+            graphCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            graphCtx.font = '12px Orbitron';
+            graphCtx.textAlign = 'center';
+            for (let i = 0; i <= 8; i++) {
+                graphCtx.fillText(i, toX(i), toY(-0.3));
+            }
+            graphCtx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                graphCtx.fillText(i, toX(-0.3), toY(i) + 4);
+            }
+
+            // Axis Names
+            graphCtx.font = 'bold 14px Orbitron';
+            graphCtx.textAlign = 'right';
+            graphCtx.fillStyle = varColor('--neon-purple');
+            graphCtx.fillText('x Basis', toX(8.2), toY(-0.7));
+            graphCtx.textAlign = 'left';
+            graphCtx.fillStyle = varColor('--neon-blue');
+            graphCtx.fillText('Schenkel', toX(0.2), toY(4.2));
+
+            // 4. Function Line (y = 4 - 0.5x)
+            // Valid Part (0 to 4)
+            graphCtx.shadowBlur = 10;
+            graphCtx.lineWidth = 3;
+            graphCtx.strokeStyle = varColor('--neon-red');
+            graphCtx.shadowColor = varColor('--neon-red');
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(0), toY(4));
+            graphCtx.lineTo(toX(4), toY(2));
+            graphCtx.stroke();
+
+            // Invalid Part (4 to 8)
+            graphCtx.strokeStyle = '#666';
+            graphCtx.shadowBlur = 0;
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(4), toY(2));
+            graphCtx.lineTo(toX(8), toY(0));
+            graphCtx.stroke();
+
+            // 5. Current Point Tracking
+            const curX = b;
+            const curY = s;
+
+            // Dashed projections
+            graphCtx.setLineDash([5, 5]);
+            graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            graphCtx.lineWidth = 1;
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(curX), toY(0));
+            graphCtx.lineTo(toX(curX), toY(curY));
+            graphCtx.lineTo(toX(0), toY(curY));
+            graphCtx.stroke();
+            graphCtx.setLineDash([]);
+
+            // The Punkt
+            graphCtx.fillStyle = '#fff';
+            graphCtx.shadowBlur = 15;
+            graphCtx.shadowColor = '#fff';
+            graphCtx.beginPath();
+            graphCtx.arc(toX(curX), toY(curY), 5, 0, Math.PI * 2);
+            graphCtx.fill();
+            graphCtx.shadowBlur = 0;
+        }
+
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
     </script>
 </body>
