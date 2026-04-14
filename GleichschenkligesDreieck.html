@@ -13,6 +13,8 @@
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
             --neon-red: #ff3c3c;
+            --neon-green: #39ff14;
+            --neon-yellow: #fff01f;
             --text-main: #ffffff;
             --ui-bg: rgba(5, 11, 24, 0.95);
         }
@@ -287,7 +289,7 @@
         </div>
 
         <div class="viewport" id="graph-viewport">
-            <div class="viewport-label">ANALYSE (y = 4 - 0,5x)</div>
+            <div class="viewport-label">ANALYSE (Schenkel = 4 - 0,5 · Basis)</div>
             <canvas id="graphCanvas"></canvas>
         </div>
     </div>
@@ -333,9 +335,9 @@
             <p>Ein gleichschenkliges Dreieck mit konstantem Umfang (DR Draht-Simulation):</p>
             <ul>
                 <li>Gesamtlänge des Drahtes: 8,00 cm.</li>
-                <li>Gleichung: x + 2y = 8,00.</li>
-                <li>Ab x &ge; 4,00 cm wird y &le; 2,00 cm, wodurch die Dreiecksungleichung verletzt wird.</li>
-                <li>Bei x = 0,00 cm wird y = 4,00 cm (Doppel-Linie).</li>
+                <li>Gleichung: Basis + 2 × Schenkel = 8,00.</li>
+                <li>Wird die Basis &ge; 4,00 cm, wird der Schenkel &le; 2,00 cm (ungültig).</li>
+                <li>Basis = 0,00 cm bedeutet Schenkel = 4,00 cm (Doppellinie).</li>
             </ul>
             <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
         </div>
@@ -596,47 +598,53 @@
             }
 
             // Axis Names
-            graphCtx.font = 'bold 14px Orbitron';
-            graphCtx.textAlign = 'right';
+            graphCtx.font = 'bold 16px Orbitron';
             graphCtx.fillStyle = varColor('--neon-purple');
-            graphCtx.fillText('x Basis', toX(8.2), toY(-0.7));
-            graphCtx.textAlign = 'left';
+            graphCtx.textAlign = 'right';
+            graphCtx.fillText('Basis', toX(8.9), toY(0.1));
+            
             graphCtx.fillStyle = varColor('--neon-blue');
+            graphCtx.textAlign = 'left';
             graphCtx.fillText('Schenkel', toX(0.2), toY(4.2));
 
             // 4. Function Line (y = 4 - 0.5x)
-            // Valid Part (0 to 4)
+            // Valid Part (0 to 4) -> GRÜN
             graphCtx.shadowBlur = 10;
             graphCtx.lineWidth = 3;
-            graphCtx.strokeStyle = varColor('--neon-red');
-            graphCtx.shadowColor = varColor('--neon-red');
+            graphCtx.strokeStyle = varColor('--neon-green');
+            graphCtx.shadowColor = varColor('--neon-green');
             graphCtx.beginPath();
             graphCtx.moveTo(toX(0), toY(4));
             graphCtx.lineTo(toX(4), toY(2));
             graphCtx.stroke();
 
-            // Invalid Part (4 to 8)
-            graphCtx.strokeStyle = '#666';
-            graphCtx.shadowBlur = 0;
+            // Invalid Part (4 to 8) -> ROT
+            graphCtx.strokeStyle = varColor('--neon-red');
+            graphCtx.shadowColor = varColor('--neon-red');
+            graphCtx.shadowBlur = 15;
             graphCtx.beginPath();
             graphCtx.moveTo(toX(4), toY(2));
             graphCtx.lineTo(toX(8), toY(0));
             graphCtx.stroke();
+            graphCtx.shadowBlur = 0;
 
             // 5. Current Point Tracking
             const curX = b;
             const curY = s;
 
-            // Dashed projections
+            // Dashed projections -> NEON GELB
             graphCtx.setLineDash([5, 5]);
-            graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            graphCtx.lineWidth = 1;
+            graphCtx.strokeStyle = varColor('--neon-yellow');
+            graphCtx.shadowColor = varColor('--neon-yellow');
+            graphCtx.shadowBlur = 8;
+            graphCtx.lineWidth = 1.5;
             graphCtx.beginPath();
             graphCtx.moveTo(toX(curX), toY(0));
             graphCtx.lineTo(toX(curX), toY(curY));
             graphCtx.lineTo(toX(0), toY(curY));
             graphCtx.stroke();
             graphCtx.setLineDash([]);
+            graphCtx.shadowBlur = 0;
 
             // The Punkt
             graphCtx.fillStyle = '#fff';
