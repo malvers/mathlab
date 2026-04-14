@@ -11,6 +11,7 @@
         :root {
             --space-bg: #050b18;
             --neon-blue: #00d2ff;
+            --neon-orange: #ff9d00;
             --neon-purple: #9d50bb;
             --text-main: #ffffff;
         }
@@ -185,76 +186,108 @@
         /* --- CONTAINER OPTIMIERUNG --- */
         .container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 320px)); /* Feste, einheitliche Breite */
-            justify-content: center; /* Zentriert die Kacheln */
-            gap: 25px;
-            max-width: 1400px;
+            grid-template-columns: repeat(auto-fill, minmax(315px, 1fr));
+            justify-content: center;
+            gap: 30px;
+            max-width: 1123px; /* Exakt 4-Kachel Breite */
             width: 95%;
-            margin: 0 auto; /* Zentrierung des Containers */
-            padding: 10px 0 50px 0;
+            margin: 0 auto;
+            padding: 20px 0 60px 0;
         }
 
-        /* --- CARD OPTIMIERUNG --- */
+        /* --- CARD UPGRADE: CYBER-PORTAL --- */
         .card {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 15px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             text-decoration: none;
             color: white;
-            transition: all 0.4s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 15px;
-            /* Weniger Padding */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 25px 20px;
+            min-height: 175px; /* 10% flacher */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
         }
 
         .card:hover {
-            transform: translateY(-5px) scale(1.02);
-            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-10px) scale(1.03);
+            background: rgba(15, 23, 42, 0.6);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.25);
+            box-shadow: 0 0 35px rgba(0, 210, 255, 0.3), inset 0 0 15px rgba(0, 210, 255, 0.1);
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card-icon {
-            font-size: 38px;
-            /* Kleiner Icons */
-            margin-bottom: 8px;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+            font-size: 55px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 80px;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1);
         }
 
         .card h3 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            /* Kleinerer Titel */
-            letter-spacing: 1px;
-            margin: 8px 0;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
             text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .card:hover h3 {
+            color: white;
+            text-shadow: 0 0 10px var(--neon-blue);
         }
 
         .btn {
-            margin: 10px 0 5px 0;
-            padding: 6px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
+            margin-top: 15px;
+            padding: 8px 25px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 30px;
             font-size: 0.7rem;
-            /* Kleinerer Button Text */
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             transition: 0.3s;
-            background: transparent;
+            background: rgba(0, 210, 255, 0.05);
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
         }
 
         .card:hover .btn {
-            background: white;
+            background: var(--neon-blue);
             color: black;
             font-weight: bold;
-            box-shadow: 0 0 8px white;
+            box-shadow: 0 0 20px var(--neon-blue);
+            border-color: white;
         }
 
         footer {
@@ -281,31 +314,30 @@
 
         /* --- SECTION HEADERS --- */
         .view-section {
-            width: 90%;
-            max-width: 1200px;
-            margin-top: 40px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid rgba(0, 210, 255, 0.2);
-            padding-bottom: 10px;
+            width: 95%;
+            max-width: 1123px; /* Harmonisiert mit 4-Kachel Grid */
+            margin: 60px auto 10px auto;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            box-sizing: border-box;
         }
 
         .view-section h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            letter-spacing: 3px;
+            font-size: 1.5rem; /* Signifikant größer */
+            letter-spacing: 5px; /* Spaciger */
             margin: 0;
             color: var(--neon-blue);
             text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            white-space: nowrap;
         }
 
         .view-section .line {
             flex-grow: 1;
-            height: 1px;
-            background: linear-gradient(to right, rgba(0, 210, 255, 0.5), transparent);
+            height: 2px;
+            background: linear-gradient(to right, var(--neon-blue), rgba(255, 255, 255, 0.2), transparent);
         }
 
         #grade-view,
@@ -326,66 +358,170 @@
         /* --- GRADE & THEME CARDS --- */
         .grade-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 280px)); /* Gleiche Logik für Jahrgänge */
+            grid-template-columns: repeat(auto-fill, minmax(218px, 262px));
             justify-content: center;
             gap: 25px;
-            max-width: 1400px;
+            max-width: 1123px; /* Forceert die 4er Reihe für das Alignment */
             width: 95%;
             margin: 0 auto;
             padding: 20px 0;
         }
 
         .card.grade-card {
-            padding: 20px;
-            min-height: 160px;
+            min-height: 131px; /* 10% flacher */
             justify-content: center;
-            border-width: 1px;
-        }
-
-        .card.grade-card .card-icon svg {
-            width: 70px;
-            height: 70px;
-            filter: drop-shadow(0 0 15px var(--neon-blue));
-        }
-
-        .card.grade-card h3 {
-            font-size: 1rem;
-            margin-top: 10px;
-            color: #fff;
-            opacity: 0.9;
+            border: none;
+            background: linear-gradient(135deg, var(--c1, var(--neon-blue)), var(--c2, var(--neon-blue)));
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .card.grade-card.active {
-            border-color: var(--neon-blue);
-            background: rgba(0, 210, 255, 0.08);
-        }
-
-        /* Category Color Accents */
-        .card.category-card {
-            border-color: rgba(157, 80, 187, 0.3);
-        }
-
-        .card.category-card:hover {
-            border-color: var(--neon-purple);
-            box-shadow: 0 0 20px rgba(157, 80, 187, 0.4);
-        }
-
-        .card.category-card .card-icon {
-            font-size: 45px;
+            opacity: 1;
+            box-shadow: 0 0 35px var(--c1);
         }
 
         .card.grade-card.active:hover {
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 0 60px var(--c1), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            filter: brightness(1.15);
+            z-index: 10;
         }
 
-        .card.grade-card.locked {
+        /* Glanz-Effekt für die soliden Kacheln */
+        .card.grade-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.6s;
+            pointer-events: none;
+        }
+
+        .card.grade-card:hover::after {
+            left: 100%;
+        }
+
+        /* JG CYBER-RAINBOW SPECTRUM (8 Steps for Grades 5-12) */
+        /* High-vibrancy spectrum flow across the cards */
+        #jahrgang-grid .card:nth-child(1) {
+            --c1: #ff0055;
+            --c2: #ff8c00;
+        }
+
+        /* Red-Orange */
+        #jahrgang-grid .card:nth-child(2) {
+            --c1: #ff8c00;
+            --c2: #ffd700;
+        }
+
+        /* Orange-Gold */
+        #jahrgang-grid .card:nth-child(3) {
+            --c1: #ffd700;
+            --c2: #adff2f;
+        }
+
+        /* Gold-Lime */
+        #jahrgang-grid .card:nth-child(4) {
+            --c1: #adff2f;
+            --c2: #00ffff;
+        }
+
+        /* Lime-Cyan */
+        #jahrgang-grid .card:nth-child(5) {
+            --c1: #00ffff;
+            --c2: #0077ff;
+        }
+
+        /* Cyan-Blue */
+        #jahrgang-grid .card:nth-child(6) {
+            --c1: #0077ff;
+            --c2: #8a2be2;
+        }
+
+        /* Blue-Indigo */
+        #jahrgang-grid .card:nth-child(7) {
+            --c1: #8a2be2;
+            --c2: #ff00ff;
+        }
+
+        /* Indigo-Pink */
+        #jahrgang-grid .card:nth-child(8) {
+            --c1: #ff00ff;
+            --c2: #ff0055;
+        }
+
+        /* Pink-Return to Red */
+
+        .card.grade-card .card-icon {
+            margin-bottom: 0;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card.grade-card .card-icon svg {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 15px var(--c1));
+        }
+
+        .card.grade-card svg text {
+            fill: white;
+            text-shadow: 0 0 25px var(--c1);
+            dominant-baseline: central;
+            font-weight: bold;
+        }
+
+        .card.grade-card.active {
+            opacity: 1;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Category Color Accents (NUR THEMEN - Leuchtender Blue-Look) */
+        .grade-grid:last-of-type .card.category-card {
+            border: 2px solid var(--neon-blue);
+            background: rgba(0, 210, 255, 0.05); /* Hauch von Blau im Glas */
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .grade-grid:last-of-type .card.category-card:hover {
+            background: rgba(0, 210, 255, 0.1);
+            box-shadow: 0 0 35px rgba(0, 210, 255, 0.5), inset 0 0 15px rgba(0, 210, 255, 0.2);
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .grade-grid:last-of-type .card.category-card h3 {
+            color: white;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Locked Logik für JG-Kacheln (Deutlich inaktiv) */
+        #jahrgang-grid .card.grade-card.locked {
+            filter: grayscale(1) brightness(0.6);
             opacity: 0.4;
             cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .grade-grid:last-of-type .card.grade-card.locked {
+            opacity: 0.25;
             filter: grayscale(1);
         }
 
-        .card.grade-card.locked .btn {
-            display: none;
+        .grade-grid:last-of-type .card.grade-card.locked {
+            opacity: 0.25;
+            filter: grayscale(1);
         }
 
         /* --- BACK BUTTON --- */
@@ -393,7 +529,7 @@
             width: 90%;
             max-width: 1100px;
             margin-top: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: flex-start;
         }
@@ -419,6 +555,72 @@
             border-color: var(--neon-blue);
             box-shadow: 0 0 15px var(--neon-blue);
         }
+
+        /* --- SEARCH BAR --- */
+        .search-bar-container {
+            width: 95%;
+            max-width: 1123px; /* Harmonisiert mit 4-Kachel Grid */
+            margin: 20px auto;
+            position: relative;
+            z-index: 100;
+        }
+
+        .search-bar-inner {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 40px;
+            padding: 5px 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar-inner:focus-within {
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+
+        .search-bar-inner svg {
+            color: var(--neon-blue);
+            margin-right: 15px;
+            opacity: 0.7;
+        }
+
+        #search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+        }
+
+        #search-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .clear-search {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 2.5rem; /* Markant größer */
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .clear-search:hover {
+            color: var(--neon-blue);
+            transform: scale(1.2);
+        }
+
     </style>
 </head>
 
@@ -451,66 +653,92 @@
         </div>
     </header>
 
+    <!-- Sleek Persistent Search Bar -->
+    <div class="search-bar-container">
+        <div class="search-bar-inner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" placeholder="Suche nach Laboren oder Themen..." autocomplete="off">
+            <button class="clear-search" onclick="clearSearch()" title="Suche leeren">&times;</button>
+        </div>
+    </div>
+
     <div id="grade-view">
-        <div class="view-section">
+        <div class="view-section" style="margin-top: 60px;">
             <h2>Jahrgang</h2>
             <div class="line"></div>
         </div>
-        <div class="grade-grid">
-            <div class="card grade-card locked">
+        <div class="grade-grid" id="jahrgang-grid">
+            <a href="javascript:void(0)" class="card grade-card locked">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="75" font-family="'Orbitron'" font-size="70" fill="none" stroke="currentColor"
-                            stroke-width="2" text-anchor="middle">5</text>
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
+                            text-anchor="middle">5</text>
                     </svg>
                 </div>
-                <h3>5</h3>
-            </div>
+            </a>
             <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="75" font-family="'Orbitron'" font-size="70" fill="none"
-                            stroke="var(--neon-blue)" stroke-width="2" text-anchor="middle">6</text>
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
+                            text-anchor="middle">6</text>
                     </svg>
                 </div>
-                <h3>6</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="75" font-family="'Orbitron'" font-size="70" fill="none"
-                            stroke="var(--neon-blue)" stroke-width="2" text-anchor="middle">7</text>
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
+                            text-anchor="middle">7</text>
                     </svg>
                 </div>
-                <h3>7</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active"
                 id="grade-8-card">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="75" font-family="'Orbitron'" font-size="70" fill="none"
-                            stroke="var(--neon-blue)" stroke-width="3" text-anchor="middle">8</text>
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="var(--neon-blue)" stroke-width="1"
-                            stroke-dasharray="5,5">
-                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50"
-                                dur="10s" repeatCount="indefinite" />
-                        </circle>
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
+                            text-anchor="middle">8</text>
                     </svg>
                 </div>
-                <h3>8</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="75" font-family="'Orbitron'" font-size="70" fill="none" 
-                            stroke="var(--neon-blue)" stroke-width="2" text-anchor="middle">9</text>
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
+                            text-anchor="middle">9</text>
                     </svg>
                 </div>
-                <h3>9</h3>
+            </a>
+            <a href="javascript:void(0)" class="card grade-card locked">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
+                            text-anchor="middle">10</text>
+                    </svg>
+                </div>
+            </a>
+            <a href="javascript:void(0)" class="card grade-card locked">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
+                            text-anchor="middle">11</text>
+                    </svg>
+                </div>
+            </a>
+            <a href="javascript:void(0)" class="card grade-card locked">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
+                            text-anchor="middle">12</text>
+                    </svg>
+                </div>
             </a>
         </div>
 
-        <div class="view-section" style="margin-top: 20px;">
+        <div class="view-section" style="margin-top: 40px;">
             <h2>Themen</h2>
             <div class="line"></div>
         </div>
@@ -767,6 +995,41 @@
             }
         });
 
+        // --- SEARCH LOGIC ---
+        const searchInput = document.getElementById('search-input');
+
+        function clearSearch() {
+            searchInput.value = '';
+            performSearch('');
+            searchInput.focus();
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        function performSearch(query) {
+            const tools = document.querySelectorAll('#tool-container .card');
+            const q = query.toLowerCase().trim();
+            
+            tools.forEach(tool => {
+                const title = tool.querySelector('h3').innerText.toLowerCase();
+                const categories = tool.getAttribute('data-category').toLowerCase();
+                
+                if (title.includes(q) || categories.includes(q)) {
+                    tool.style.display = 'flex';
+                } else {
+                    tool.style.display = 'none';
+                }
+            });
+
+            // If it's a search, we ensure we show the tool-view
+            if (q.length > 0) {
+                document.getElementById('grade-view').classList.add('hidden');
+                document.getElementById('tool-view').classList.remove('hidden');
+            }
+        }
+
         function showFilter(filter) {
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
@@ -792,7 +1055,5 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
-
 </body>
-
 </html>
