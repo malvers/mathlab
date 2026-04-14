@@ -274,9 +274,19 @@
             <div class="slider-group">
                 <label for="b-slider">BASIS</label>
                 <div class="slider-with-arrows">
-                    <button class="arrow-btn" onclick="adjustSlider(-0.01)">◀</button>
+                    <button class="arrow-btn" 
+                        onmousedown="startAutoAdjust(-0.01)" 
+                        onmouseup="stopAutoAdjust()" 
+                        onmouseleave="stopAutoAdjust()"
+                        ontouchstart="startAutoAdjust(-0.01)" 
+                        ontouchend="stopAutoAdjust()">◀</button>
                     <input type="range" id="b-slider" min="0.0" max="8.0" step="0.01" value="2.0">
-                    <button class="arrow-btn" onclick="adjustSlider(0.01)">▶</button>
+                    <button class="arrow-btn" 
+                        onmousedown="startAutoAdjust(0.01)" 
+                        onmouseup="stopAutoAdjust()" 
+                        onmouseleave="stopAutoAdjust()"
+                        ontouchstart="startAutoAdjust(0.01)" 
+                        ontouchend="stopAutoAdjust()">▶</button>
                 </div>
             </div>
         </div>
@@ -334,6 +344,24 @@
             updateDOM();
             draw();
         });
+
+        // Auto-repeat logic for buttons
+        let repeatInterval = null;
+
+        function startAutoAdjust(delta) {
+            if (repeatInterval) return;
+            adjustSlider(delta); // Run once immediately
+            repeatInterval = setInterval(() => {
+                adjustSlider(delta);
+            }, 60); // 60ms for smooth but controlled speed
+        }
+
+        function stopAutoAdjust() {
+            if (repeatInterval) {
+                clearInterval(repeatInterval);
+                repeatInterval = null;
+            }
+        }
 
         function adjustSlider(delta) {
             let newVal = parseFloat(bSlider.value) + delta;
