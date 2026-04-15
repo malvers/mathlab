@@ -9,18 +9,19 @@
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
+            --neon-pink: #ff0055;
             --neon-green: #39FF14;
-            --neon-red: #ff3333;
             --neon-yellow: #faff00;
-            --bg: #050b18;
-            --panel: rgba(15, 23, 42, 0.9);
-            --card: rgba(30, 41, 59, 0.8);
+            --neon-orange: #ff8800;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.7);
+            --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
             color: white;
             display: flex;
             height: 100vh;
@@ -30,28 +31,88 @@
         }
 
         #side-panel {
-            width: 360px;
-            min-width: 360px;
-            background: var(--panel);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(0, 210, 255, 0.3);
-            padding: 25px 35px 25px 25px;
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             z-index: 10;
             box-sizing: border-box;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
         }
 
         #canvas-container {
             flex-grow: 1;
             position: relative;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+        }
+
+        /* --- DASHBOARD BUTTON --- */
+        .dashboard-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 1.5px;
+            backdrop-filter: blur(5px);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
+        .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+        /* --- CANVAS BRANDING --- */
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
+            text-transform: uppercase;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--neon-blue);
+            margin-top: 8px;
+            opacity: 0.7;
+            text-transform: uppercase;
         }
 
         canvas {
@@ -73,19 +134,21 @@
         }
 
         .stats-card {
-            background: var(--card);
-            padding: 15px 25px 15px 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass-bright);
+            padding: 12px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .stats-title {
             font-family: 'Orbitron';
             font-size: 0.7rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
             display: block;
         }
 
@@ -93,80 +156,48 @@
             font-family: 'Orbitron', sans-serif !important;
             font-size: 1.8rem;
             font-weight: bold;
-            color: var(--neon-yellow);
-            text-shadow: 0 0 15px var(--neon-yellow);
         }
 
-        .angle-val span {
-            font-family: 'Orbitron', sans-serif !important;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .control-group { display: flex; flex-direction: column; gap: 12px; }
 
         button {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-family: 'Orbitron';
+            padding: 15px 20px;
+            font-size: 0.85rem;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--glass-bright);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.75rem;
             transition: all 0.3s;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            width: 100%;
         }
 
         button:hover {
             background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
         }
 
         button.active {
-            background: var(--neon-blue);
-            color: #000;
-            font-weight: bold;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-
-        .back-btn {
-            display: inline-block;
-            color: #94a3b8;
-            text-decoration: none;
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            transition: 0.3s;
-            text-align: center;
-        }
-
-        .back-btn:hover {
+            background: rgba(0, 210, 255, 0.15);
+            color: var(--neon-blue);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
         }
-
-        .highlight-white { color: white; font-weight: bold; }
-        .highlight-blue { color: var(--neon-blue); font-weight: bold; }
-        .highlight-yellow { color: var(--neon-yellow); font-weight: bold; }
-        .highlight-purple { color: var(--neon-purple); font-weight: bold; }
 
         #help-box {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            padding: 15px 25px 15px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255,255,255,0.02);
-            border-radius: 8px;
-            line-height: 1.8;
+            border-radius: 18px;
+            line-height: 1.6;
+            letter-spacing: 1px;
         }
 
         .legend-item {
@@ -222,47 +253,57 @@
 <body>
 
     <div id="side-panel">
-        <a href="index.html" class="back-btn">← DASHBOARD</a>
-        <h2>Winkel-Labor</h2>
+        <header style="border: none; padding-bottom: 5px;">
+            <a href="index.html" class="dashboard-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>DASHBOARD</span>
+            </a>
+        </header>
         
         <div class="control-group">
             <button id="btn-parallel" class="active" onclick="toggleParallel()">Parallelen: AN</button>
-            <button id="btn-reset" onclick="resetView()">Zentrieren</button>
+            <button id="btn-reset" onclick="resetView()">Labor Reset</button>
         </div>
 
         <div id="help-box">
             <div class="legend-item"><div class="color-box" style="background: var(--neon-blue);"></div> <span>&alpha;, &gamma;, &alpha;', &gamma;</span></div>
             <div class="legend-item"><div class="color-box" style="background: var(--neon-yellow);"></div> <span>&beta;, &delta;, &beta;', &delta;</span></div>
-            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">
-            <b>Winkeltypen</b><br>
-            <span class="highlight-blue">Scheitelwinkel</span> (gleich)<br>
-            <span class="highlight-blue">Stufenwinkel</span> (gleich)<br>
-            <span class="highlight-yellow">Wechselwinkel</span> (gleich)<br>
-            <span class="highlight-white">Nebenwinkel</span> (Summe 180°)
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:10px 0;">
+            <b style="color: rgba(255,255,255,0.8); letter-spacing: 2px; text-transform: uppercase; font-size: 0.6rem;">Winkeltypen</b><br>
+            <span style="color: var(--neon-blue);">Scheitel- / Stufenwinkel</span> (gleich)<br>
+            <span style="color: var(--neon-yellow);">Wechselwinkel</span> (gleich)<br>
+            <span style="color: white; opacity: 0.8;">Nebenwinkel</span> (Summe 180°)
         </div>
 
         <div class="stats-card">
-            <span class="stats-title">Winkel &alpha;</span>
-            <span id="txt-alpha" class="angle-val" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">0.0°</span>
+            <span class="stats-title">&alpha; (Alpha)</span>
+            <span id="txt-alpha" class="angle-val" style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
         </div>
 
         <div class="stats-card">
-            <span class="stats-title">Winkel &beta;</span>
-            <span id="txt-beta" class="angle-val" style="color: var(--neon-yellow); text-shadow: 0 0 10px var(--neon-yellow);">0.0°</span>
+            <span class="stats-title">&beta; (Beta)</span>
+            <span id="txt-beta" class="angle-val" style="color: var(--neon-yellow); text-shadow: 0 0 15px var(--neon-yellow);">0.0°</span>
         </div>
 
         <div class="stats-card">
             <span class="stats-title">Nebenwinkel-Summe</span>
-            <span id="txt-sum" class="angle-val" style="color: white; text-shadow: 0 0 10px white; font-size: 1rem; display: flex; align-items: center; justify-content: flex-start; gap: 5px;">
+            <span id="txt-sum" class="angle-val" style="color: white; text-shadow: 0 0 10px white; font-size: 1.1rem; display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
                 <span id="sum-a" style="color: var(--neon-blue);">0.0°</span> 
                 <span>+</span> 
                 <span id="sum-b" style="color: var(--neon-yellow);">0.0°</span> 
-                <span>= 180.0°</span>
+                <span style="opacity: 0.6;">= 180.0°</span>
             </span>
         </div>
     </div>
 
     <div id="canvas-container">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">WINKEL-LABOR</div>
+        </div>
         <canvas id="canvas"></canvas>
     </div>
 
@@ -399,9 +440,9 @@
                 }
             }
             const drawHandle = (p, color) => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, 16 * scale, 0, Math.PI*2); ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fill();
-                ctx.strokeStyle = color; ctx.lineWidth = 3 * scale; ctx.stroke();
-                ctx.beginPath(); ctx.arc(p.x, p.y, 6 * scale, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+                ctx.shadowBlur = 0;
             };
             [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => drawHandle(p, p === g1.p1 || p === g1.p2 ? COLORS.TRANS : COLORS.BASE));
             if (isParallel) {
