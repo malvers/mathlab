@@ -152,12 +152,9 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            background: rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(20px);
+            background: transparent; /* Box removed */
+            backdrop-filter: none;
             padding: 12px 35px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
             width: fit-content;
             max-width: 85%;
             text-align: center;
@@ -167,7 +164,7 @@
             pointer-events: none;
             transition: all 0.5s ease;
         }
-        .katex-display { margin: 0 !important; font-size: 1.8vw !important; font-weight: bold; letter-spacing: 1px; }
+        .katex-display { margin: 0 !important; font-size: 1.2rem !important; font-weight: bold; letter-spacing: 1px; }
 
         /* --- MAIN VIEWPORT --- */
         #canvas-container {
@@ -177,37 +174,10 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            padding: 40px; /* Restored padding to prevent overflow */
         }
         canvas { display: block; }
 
-        .canvas-branding {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            text-align: right;
-            pointer-events: none;
-            z-index: 10000;
-        }
-        .canvas-branding h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            margin: 0;
-            letter-spacing: 4px;
-            background: linear-gradient(to right, var(--neon-blue), #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px var(--neon-blue));
-            text-transform: uppercase;
-        }
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            margin-top: 8px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
 
         .footer-credit {
             margin-top: auto;
@@ -279,17 +249,20 @@
     </aside>
 
     <main id="canvas-container">
-        <div class="canvas-branding">
-            <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle">Butterfly Curve Evolution</div>
-        </div>
 
         <div id="equation-panel"></div>
 
         <canvas id="canvas"></canvas>
     </main>
 
+    <script src="branding.js"></script>
     <script>
+        // Initialize Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Schmetterlings-Labor"
+        });
+
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const sidePanel = document.getElementById('side-panel');
@@ -312,7 +285,7 @@
         function getScale() {
             const maxR = expAmp * Math.E + cosAmp + sinAmp;
             const minDim = Math.min(width, height);
-            return (minDim / 2) / (maxR * 1.25); 
+            return (minDim / 2) / (maxR * 1.8); /* Corrected factor to 1.8 for balanced size */
         }
 
         function resize() {
@@ -324,10 +297,11 @@
             width = container.clientWidth;
             height = container.clientHeight;
 
-            // Match formula panel width to visualization presence
+            // Match formula panel width and scale down font
             const formulaPanel = document.getElementById('equation-panel');
-            const visualWidth = Math.min(width, height) * 0.8;
-            formulaPanel.style.width = Math.min(visualWidth, width * 0.7) + "px";
+            const visualWidth = Math.min(width, height) * 0.7;
+            formulaPanel.style.width = Math.min(visualWidth, width * 0.6) + "px";
+            formulaPanel.style.fontSize = "1.0rem"; // Increased by 10%
 
             cx = width / 2;
             cy = height / 2;

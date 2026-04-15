@@ -341,7 +341,7 @@
         // Initialize Branding
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "1. Binomische Formel"
+            subtitle: "Beweis 1. Binomische Formel"
         });
 
         const S = 10.0; // Fixed total side length
@@ -455,8 +455,8 @@
             // Brackets & Annotations
             drawAnnotations(offsetX, offsetY, px, qx);
 
-            // Drag Cursor (Intersection Point)
-            drawHandle(offsetX + px, offsetY + px);
+            // Drag Cursor (Intersection Point) with Pulse Effect
+            drawHandle(offsetX + px, offsetY + px, isDragging);
 
             // Synchronization with LaTeX Overlays
             updateLabels(px, qx);
@@ -474,16 +474,25 @@
             ctx.restore();
         }
 
-        function drawHandle(x, y) {
+        function drawHandle(x, y, active) {
             ctx.save();
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = "white";
+            ctx.shadowBlur = active ? 30 : 20;
+            ctx.shadowColor = active ? "var(--neon-blue)" : "white";
             ctx.fillStyle = "white";
             ctx.beginPath();
-            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.arc(x, y, active ? 8 : 6, 0, Math.PI * 2);
             ctx.fill();
+            
+            if (active) {
+                // Pulse ring
+                ctx.beginPath();
+                ctx.arc(x, y, 15, 0, Math.PI * 2);
+                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.stroke();
+            }
+
             // Crosshairs
-            ctx.strokeStyle = "white";
+            ctx.strokeStyle = active ? "var(--neon-blue)" : "white";
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(x - 15, y); ctx.lineTo(x + 15, y);
@@ -528,19 +537,20 @@
         }
 
         canvas.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); // Block browser gestures
             const rect = canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
-            const unit = totalSize / S;
-            const hx = offsetX + p * unit;
-            const hy = offsetY + p * unit;
-
-            // Larger hit area for touch (40px)
-            if (Math.sqrt((mx - hx) ** 2 + (my - hy) ** 2) < 40) {
-                isDragging = true;
-                canvas.setPointerCapture(e.pointerId);
-                canvas.style.cursor = "grabbing";
-            }
+            
+            // Interaction Start: Snap to touch or grab center
+            isDragging = true;
+            canvas.setPointerCapture(e.pointerId);
+            canvas.style.cursor = "grabbing";
+            
+            // Haptic vibration (if support)
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
+            
+            handleMove(mx, my);
         });
 
         window.addEventListener('pointerup', (e) => {
@@ -549,19 +559,23 @@
         });
 
         canvas.addEventListener('pointermove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-
-            if (isDragging) {
-                handleMove(mx, my);
-            } else {
+            if (!isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
                 const unit = totalSize / S;
                 const hx = offsetX + p * unit;
                 const hy = offsetY + p * unit;
                 const dist = Math.sqrt((mx - hx) ** 2 + (my - hy) ** 2);
                 canvas.style.cursor = dist < 25 ? "grab" : "crosshair";
+                return;
             }
+            
+            e.preventDefault(); 
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            handleMove(mx, my);
         });
 
         pSlider.addEventListener('input', (e) => { p = parseFloat(e.target.value); updateUI(); draw(); });
