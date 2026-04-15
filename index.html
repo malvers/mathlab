@@ -712,7 +712,7 @@
                     </svg>
                 </div>
             </a>
-            <a href="javascript:void(0)" class="card grade-card locked">
+            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
@@ -764,6 +764,10 @@
                 <div class="card-icon">🎮</div>
                 <h3>Fun</h3>
             </a>
+            <a href="javascript:void(0)" onclick="showFilter('funktionen')" class="card grade-card category-card active">
+                <div class="card-icon">📈</div>
+                <h3>Funktionen</h3>
+            </a>
         </div>
     </div>
 
@@ -772,6 +776,11 @@
             <button class="btn-back" onclick="showGrades()">⬅ ZURÜCK ZUR AUSWAHL</button>
         </div>
         <div class="container" id="tool-container">
+            <a href="potenzlabor.html" class="card" data-category="funktionen grade9 grade10 hot">
+                <div class="card-icon">📈</div>
+                <h3>Potenz-Labor</h3>
+                <div class="btn">Mission Start</div>
+            </a>
             <a href="steigung.html" class="card" data-category="hot grade8">
                 <div class="card-icon">🚀</div>
                 <h3>Steigungs-Labor</h3>
@@ -956,7 +965,7 @@
                 <h3>3D Heart Surface</h3>
                 <div class="btn">Mission Start</div>
             </a>
-            <a href="parabellabor.html" class="card" data-category="hot grade9 fun">
+            <a href="parabellabor.html" class="card" data-category="hot grade9 fun funktionen">
                 <div class="card-icon">
                     <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <path d="M 20,20 Q 50,80 80,20" fill="none" stroke="var(--neon-purple)" stroke-width="4" />
@@ -1042,7 +1051,7 @@
             }
         }
 
-        function showFilter(filter) {
+        function showFilter(filter, updateHash = true) {
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
 
@@ -1059,13 +1068,33 @@
             document.getElementById('grade-view').classList.add('hidden');
             document.getElementById('tool-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if(updateHash) {
+                window.location.hash = filter;
+            }
         }
 
-        function showGrades() {
+        function showGrades(updateHash = true) {
             document.getElementById('tool-view').classList.add('hidden');
             document.getElementById('grade-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if(updateHash) {
+                window.location.hash = '';
+            }
         }
+
+        function handleHash() {
+            const hash = window.location.hash.substring(1);
+            if(hash) {
+                showFilter(hash, false);
+            } else {
+                showGrades(false);
+            }
+        }
+
+        window.addEventListener('load', handleHash);
+        window.addEventListener('hashchange', handleHash);
     </script>
 </body>
 </html>

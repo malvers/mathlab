@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Winkel-Labor | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -76,6 +78,7 @@
             width: 100%;
             box-sizing: border-box;
         }
+
         .dashboard-btn:hover {
             color: white;
             background: rgba(0, 210, 255, 0.1);
@@ -83,7 +86,12 @@
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
             transform: translateX(5px);
         }
-        .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+        .dashboard-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+        }
 
 
         canvas {
@@ -129,7 +137,11 @@
             font-weight: bold;
         }
 
-        .control-group { display: flex; flex-direction: column; gap: 12px; }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
         button {
             padding: 15px 20px;
@@ -165,7 +177,7 @@
             color: rgba(255, 255, 255, 0.5);
             padding: 15px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 18px;
             line-height: 1.6;
             letter-spacing: 1px;
@@ -214,36 +226,57 @@
                 order: 1;
             }
 
-            h2 { font-size: 1.2rem; }
-            .angle-val { font-size: 1.5rem; }
-            .stats-card { padding: 12px; }
-            #help-box { padding: 12px; line-height: 1.6; }
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .angle-val {
+                font-size: 1.5rem;
+            }
+
+            .stats-card {
+                padding: 12px;
+            }
+
+            #help-box {
+                padding: 12px;
+                line-height: 1.6;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div id="side-panel">
         <header style="border: none; padding-bottom: 5px;">
             <a href="index.html" class="dashboard-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
                 <span>DASHBOARD</span>
             </a>
         </header>
-        
+
         <div class="control-group">
             <button id="btn-parallel" class="active" onclick="toggleParallel()">Parallelen: AN</button>
             <button id="btn-reset" onclick="resetView()">Labor Reset</button>
         </div>
 
         <div id="help-box">
-            <div class="legend-item"><div class="color-box" style="background: var(--neon-blue);"></div> <span>&alpha;, &gamma;, &alpha;', &gamma;</span></div>
-            <div class="legend-item"><div class="color-box" style="background: var(--neon-yellow);"></div> <span>&beta;, &delta;, &beta;', &delta;</span></div>
+            <div class="legend-item">
+                <div class="color-box" style="background: var(--neon-blue);"></div> <span>&alpha;, &gamma;, &alpha;',
+                    &gamma;</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box" style="background: var(--neon-yellow);"></div> <span>&beta;, &delta;, &beta;',
+                    &delta;</span>
+            </div>
             <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:10px 0;">
-            <b style="color: rgba(255,255,255,0.8); letter-spacing: 2px; text-transform: uppercase; font-size: 0.6rem;">Winkeltypen</b><br>
+            <b
+                style="color: rgba(255,255,255,0.8); letter-spacing: 2px; text-transform: uppercase; font-size: 0.6rem;">Winkeltypen</b><br>
             <span style="color: var(--neon-blue);">Scheitel- / Stufenwinkel</span> (gleich)<br>
             <span style="color: var(--neon-yellow);">Wechselwinkel</span> (gleich)<br>
             <span style="color: white; opacity: 0.8;">Nebenwinkel</span> (Summe 180°)
@@ -251,20 +284,23 @@
 
         <div class="stats-card">
             <span class="stats-title">&alpha; (Alpha)</span>
-            <span id="txt-alpha" class="angle-val" style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
+            <span id="txt-alpha" class="angle-val"
+                style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
         </div>
 
         <div class="stats-card">
             <span class="stats-title">&beta; (Beta)</span>
-            <span id="txt-beta" class="angle-val" style="color: var(--neon-yellow); text-shadow: 0 0 15px var(--neon-yellow);">0.0°</span>
+            <span id="txt-beta" class="angle-val"
+                style="color: var(--neon-yellow); text-shadow: 0 0 15px var(--neon-yellow);">0.0°</span>
         </div>
 
         <div class="stats-card">
             <span class="stats-title">Nebenwinkel-Summe</span>
-            <span id="txt-sum" class="angle-val" style="color: white; text-shadow: 0 0 10px white; font-size: 1.1rem; display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
-                <span id="sum-a" style="color: var(--neon-blue);">0.0°</span> 
-                <span>+</span> 
-                <span id="sum-b" style="color: var(--neon-yellow);">0.0°</span> 
+            <span id="txt-sum" class="angle-val"
+                style="color: white; text-shadow: 0 0 10px white; font-size: 1.1rem; display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
+                <span id="sum-a" style="color: var(--neon-blue);">0.0°</span>
+                <span>+</span>
+                <span id="sum-b" style="color: var(--neon-yellow);">0.0°</span>
                 <span style="opacity: 0.6;">= 180.0°</span>
             </span>
         </div>
@@ -295,8 +331,8 @@
             TRANS: "rgba(157, 80, 187, 1.0)", BASE: "rgba(0, 210, 255, 1.0)"
         };
 
-        let g1 = { p1: {rx: 0.2, ry: 0.2, x: 0, y: 0}, p2: {rx: 0.8, ry: 0.8, x: 0, y: 0} };
-        let g2 = { p1: {rx: 0.1, ry: 0.4, x: 0, y: 0}, p2: {rx: 0.9, ry: 0.4, x: 0, y: 0} };
+        let g1 = { p1: { rx: 0.2, ry: 0.2, x: 0, y: 0 }, p2: { rx: 0.8, ry: 0.8, x: 0, y: 0 } };
+        let g2 = { p1: { rx: 0.1, ry: 0.4, x: 0, y: 0 }, p2: { rx: 0.9, ry: 0.4, x: 0, y: 0 } };
         let parallelOffsetRel = 0.2;
 
         function init() {
@@ -358,13 +394,13 @@
             ctx.fillStyle = "white"; ctx.font = `bold ${fontSize}px 'Orbitron'`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
             ctx.shadowBlur = 10; ctx.shadowColor = "black";
             const parts = label.split("=");
-            if(parts.length === 2) {
+            if (parts.length === 2) {
                 const sym = parts[0].trim(); const eq = "="; const val = parts[1].trim();
                 const symWidth = ctx.measureText(sym).width; const eqWidth = ctx.measureText(eq).width; const valWidth = ctx.measureText(val).width;
                 const totalWidth = symWidth + eqWidth + valWidth + (gap * 2);
-                ctx.save(); ctx.translate(lx - totalWidth/2, ly);
-                ctx.fillStyle = color; ctx.fillText(sym, symWidth/2, 0);
-                ctx.fillStyle = "white"; ctx.fillText(eq, symWidth + gap + eqWidth/2, 0); ctx.fillText(val, symWidth + gap + eqWidth + gap + valWidth/2, 0);
+                ctx.save(); ctx.translate(lx - totalWidth / 2, ly);
+                ctx.fillStyle = color; ctx.fillText(sym, symWidth / 2, 0);
+                ctx.fillStyle = "white"; ctx.fillText(eq, symWidth + gap + eqWidth / 2, 0); ctx.fillText(val, symWidth + gap + eqWidth + gap + valWidth / 2, 0);
                 ctx.restore();
             } else { ctx.fillText(label, lx, ly); }
             ctx.restore();
@@ -373,13 +409,13 @@
         function draw() {
             ctx.clearRect(0, 0, width, height);
             ctx.strokeStyle = "rgba(255,255,255,0.03)";
-            for(let i=0; i<Math.max(width, height); i+=50) {
-                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke();
+            for (let i = 0; i < Math.max(width, height); i += 50) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke();
             }
             drawLine(g2.p1, g2.p2, COLORS.BASE);
             const po = parallelOffsetRel * height;
-            const g3 = { p1: {x: g2.p1.x, y: g2.p1.y + po}, p2: {x: g2.p2.x, y: g2.p2.y + po} };
+            const g3 = { p1: { x: g2.p1.x, y: g2.p1.y + po }, p2: { x: g2.p2.x, y: g2.p2.y + po } };
             if (isParallel) drawLine(g3.p1, g3.p2, COLORS.BASE.replace('1.0', '0.8'), false);
             drawLine(g1.p1, g1.p2, COLORS.TRANS);
             const inter1 = getIntersection(g1.p1, g1.p2, g2.p1, g2.p2);
@@ -397,12 +433,12 @@
                     const vec2 = Math.atan2(g2.p2.y - g2.p1.y, g2.p2.x - g2.p1.x);
                     const vec3 = vec1 + Math.PI; const vec4 = vec2 + Math.PI;
                     const angles = [vec1, vec2, vec3, vec4].sort((a, b) => {
-                        let d = a - b; while(d < -Math.PI) d += Math.PI * 2; while(d > Math.PI) d -= Math.PI * 2; return d;
+                        let d = a - b; while (d < -Math.PI) d += Math.PI * 2; while (d > Math.PI) d -= Math.PI * 2; return d;
                     });
                     const labels = isMain ? ["α", "β", "γ", "δ"] : ["α'", "β'", "γ'", "δ'"];
-                    for(let i=0; i<4; i++) {
-                        const start = angles[i]; const end = angles[(i+1)%4];
-                        let diff = end - start; while(diff < 0) diff += Math.PI * 2;
+                    for (let i = 0; i < 4; i++) {
+                        const start = angles[i]; const end = angles[(i + 1) % 4];
+                        let diff = end - start; while (diff < 0) diff += Math.PI * 2;
                         const isGroupA = Math.abs(diff * 180 / Math.PI - alphaDeg) < 1;
                         drawColoredAngle(p, start, end, isGroupA ? COLORS.A : COLORS.B, `${labels[i]} = ${(diff * 180 / Math.PI).toFixed(1)}°`);
                     }
@@ -415,13 +451,13 @@
             }
             const drawHandle = (p, color) => {
                 ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
                 ctx.shadowBlur = 0;
             };
             [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => drawHandle(p, p === g1.p1 || p === g1.p2 ? COLORS.TRANS : COLORS.BASE));
             if (isParallel) {
                 const po_height = parallelOffsetRel * height;
-                drawHandle({x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 + po_height}, COLORS.BASE.replace('1.0', '0.6'));
+                drawHandle({ x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 + po_height }, COLORS.BASE.replace('1.0', '0.6'));
             }
         }
 
@@ -440,8 +476,8 @@
             const rect = canvas.getBoundingClientRect();
             const x = Math.max(0, Math.min(width, e.clientX - rect.left));
             const y = Math.max(0, Math.min(height, e.clientY - rect.top));
-            if (draggedPoint === "offset") parallelOffsetRel = (y - (g2.p1.y + g2.p2.y)/2) / height;
-            else { 
+            if (draggedPoint === "offset") parallelOffsetRel = (y - (g2.p1.y + g2.p2.y) / 2) / height;
+            else {
                 draggedPoint.x = x; draggedPoint.y = y; draggedPoint.rx = x / width; draggedPoint.ry = y / height;
             }
             draw();
@@ -452,4 +488,5 @@
         document.fonts.ready.then(init);
     </script>
 </body>
+
 </html>
