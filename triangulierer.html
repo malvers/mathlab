@@ -7,90 +7,227 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-        --accent-blue: #2196f3; --accent-orange: #ff9800; --accent-green: #39FF14;
-        --accent-red: #ef4444; --bg: #0f172a; --panel: #111827;
-        --card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8;
+        --neon-blue: #00d2ff;
+        --neon-purple: #9d50bb;
+        --neon-pink: #ff0055;
+        --neon-green: #39FF14;
+        --neon-orange: #ff8800;
+        --bg-dark: #050b18;
+        --glass: rgba(15, 23, 42, 0.7);
+        --glass-bright: rgba(255, 255, 255, 0.05);
     }
+
     body {
-        margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main);
-        display: flex; height: 100vh; width: 100vw; overflow: hidden; touch-action: none;
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+        color: white;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        touch-action: none;
     }
+
     #side-panel {
-        width: 20%; min-width: 260px; max-width: 340px; border-right: 1px solid #334155;
-        padding: 25px 20px; display: flex; flex-direction: column; gap: 15px;
-        background: var(--panel); z-index: 10; box-sizing: border-box;
+        width: 380px;
+        min-width: 380px;
+        background: var(--glass);
+        backdrop-filter: blur(25px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 10;
+        box-sizing: border-box;
+        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+        overflow-y: auto;
     }
-    @media (max-width: 1100px) {
-        body { flex-direction: column; overflow-y: auto; height: auto; }
-        #side-panel { width: 100%; max-width: 100%; border-right: none; border-bottom: 1px solid #334155; height: auto; }
-        #canvas-container { height: 70vh; min-height: 450px; order: -1; }
+
+    #canvas-container {
+        flex-grow: 1;
+        position: relative;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
     }
-    .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
-    h2 { font-family: 'Orbitron'; margin: 0; font-size: 1rem; color: var(--text-main); letter-spacing: 1px; }
-    .stats-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #334155; }
-    .stats-card-title { font-family: 'Orbitron'; font-weight: 600; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
-    .val { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: bold; display: block; margin-top: 5px; }
-    .target-val { color: var(--accent-orange); }
-    .current-val { color: var(--accent-blue); }
-    #canvas-container { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: flex-start; overflow: hidden; }
+
+    /* --- DASHBOARD BUTTON --- */
+    .dashboard-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        letter-spacing: 1.5px;
+        backdrop-filter: blur(5px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dashboard-btn:hover {
+        color: white;
+        background: rgba(0, 210, 255, 0.1);
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        transform: translateX(5px);
+    }
+    .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+    /* --- CANVAS BRANDING --- */
+    .canvas-branding {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        text-align: right;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .canvas-branding h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.2rem;
+        margin: 0;
+        letter-spacing: 3px;
+        background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 8px var(--neon-blue));
+        text-transform: uppercase;
+    }
+    .canvas-subtitle {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 6px;
+        color: var(--neon-blue);
+        margin-top: 8px;
+        opacity: 0.7;
+        text-transform: uppercase;
+    }
     canvas { display: block; cursor: crosshair; touch-action: none; }
-    .controls { display: flex; flex-direction: column; gap: 10px; }
-    button { padding: 12px; background: #334155; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
-    button:hover { background: #475569; }
-    #btn-multi.active { background: var(--accent-blue); color: white; border: 1px solid white; box-shadow: 0 0 15px rgba(33, 150, 243, 0.4); }
-    #btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); border: 1px solid var(--accent-red); display: none; }
-    #btn-delete:hover { background: var(--accent-red); color: white; }
-    .proof-box { margin-top: auto; padding: 12px; background: rgba(57, 255, 20, 0.03); border-radius: 10px; border: 1px solid rgba(57, 255, 20, 0.15); text-align: center; }
-    .proof-text { font-size: 0.8rem; color: var(--accent-green); font-weight: bold; font-family: 'Orbitron'; margin: 0; }
-    
+    .stats-card {
+        background: var(--glass-bright);
+        padding: 12px 20px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .stats-title {
+        font-family: 'Orbitron';
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 1.5px;
+        margin-bottom: 5px;
+        display: block;
+        text-transform: uppercase;
+    }
+
+    .val {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.6rem;
+        font-weight: bold;
+    }
+
+    .target-val { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
+    .current-val { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+    .controls { display: flex; flex-direction: column; gap: 12px; }
+
+    button {
+        padding: 15px 20px;
+        font-size: 0.85rem;
+        font-family: 'Orbitron', sans-serif;
+        background: var(--glass-bright);
+        color: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        width: 100%;
+    }
+    button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+
+    #btn-multi.active {
+        background: rgba(0, 210, 255, 0.15);
+        color: var(--neon-blue);
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
+    }
+
+    #btn-delete {
+        background: rgba(255, 0, 85, 0.1);
+        color: var(--neon-pink);
+        border: 1px solid var(--neon-pink);
+    }
+    #btn-delete:hover { background: var(--neon-pink); color: white; }
+
     .footer-credit {
         margin-top: auto;
         padding-top: 15px;
         text-align: center;
         font-family: 'Orbitron', sans-serif;
         font-size: 0.55rem;
-        color: var(--text-muted);
+        color: rgba(255,255,255,0.3);
         letter-spacing: 1px;
-        opacity: 0.6;
-    }
-    .footer-credit a {
-        color: var(--accent-blue);
-        text-decoration: none;
     }
   </style>
 </head>
 <body>
 
 <div id="side-panel">
-  <div class="logo-area">
-    <svg width="30" height="30" viewBox="0 0 100 100">
-      <path d="M20 25 L55 15 L85 40 L65 85 L25 75 Z" fill="rgba(33, 150, 243, 0.1)" stroke="white" stroke-width="2"/>
-      <circle cx="50" cy="55" r="5" fill="#ff9800" stroke="white" stroke-width="1.5"/>
-    </svg>
-    <h2>DELAUNAY LABOR</h2>
-  </div>
+  <header style="border: none; padding-bottom: 5px;">
+    <a href="index.html" class="dashboard-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>DASHBOARD</span>
+    </a>
+  </header>
+
   <div class="stats-card">
-    <span class="stats-card-title">Zielbereich</span>
+    <span class="stats-title">Zielbereich</span>
     <span class="val target-val">100,00 cm²</span>
   </div>
   <div class="stats-card">
-    <span class="stats-card-title">Summe Dreiecke</span>
+    <span class="stats-title">Summe Dreiecke</span>
     <span id="val-area" class="val current-val">0,00 cm²</span>
   </div>
+
   <div class="controls">
-    <button id="btn-multi" onclick="toggleMultiMode()">MEHRFACH-MODUS: AUS</button>
-    <button id="btn-delete" onclick="deleteSelected()">AUSWAHL LÖSCHEN</button>
-    <button onclick="resetPoints()">NEUE PUNKTE</button>
+    <button id="btn-multi" onclick="toggleMultiMode()">Mehrfach-Modus: AUS</button>
+    <button id="btn-delete" style="display: none;" onclick="deleteSelected()">Auswahl löschen</button>
+    <button onclick="resetPoints()">Labor Reset</button>
   </div>
-  <div class="proof-box"><p class="proof-text">✓ BEWEIS ERBRACHT</p></div>
+
   <div class="footer-credit">
-    &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
+    &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
     <br><br>
-    <a href="impressum.html" style="color:#666; font-size: 0.5rem;">IMPRESSUM</a>
+    <a href="impressum.html" style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
   </div>
 </div>
 
-<div id="canvas-container"><canvas id="canvas"></canvas></div>
+<div id="canvas-container">
+  <div class="canvas-branding">
+      <h1>Doc Alvers Mathe-Labor</h1>
+      <div class="canvas-subtitle">DELAUNAY-LABOR</div>
+  </div>
+  <canvas id="canvas"></canvas>
+</div>
 
 <script>
   class Delaunay {
@@ -185,27 +322,31 @@
 
       points.forEach((p, i) => {
           const isSel = selectedIndices.has(i), isEdge = i < 4;
+          ctx.shadowBlur = isSel ? 15 : 0; ctx.shadowColor = "var(--neon-blue)";
           ctx.beginPath(); ctx.arc(p[0], p[1], isEdge ? 4 : (isSel ? 7 : 5), 0, Math.PI*2);
-          if (isSel) { ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 10; ctx.shadowColor = "#2196f3"; }
-          else { ctx.fillStyle = isEdge ? "#64748b" : (i === draggedIdx ? "#ffffff" : "#2196f3"); ctx.shadowBlur = 0; }
+          if (isSel) { ctx.fillStyle = "#ffffff"; }
+          else { ctx.fillStyle = isEdge ? "rgba(255,255,255,0.2)" : (i === draggedIdx ? "#ffffff" : "var(--neon-blue)"); }
           ctx.fill(); ctx.shadowBlur = 0;
       });
 
       document.getElementById('val-area').innerText = totalArea.toFixed(2).replace('.',',') + ' cm²';
 
-      const listX = ox + sWidth + 40; let currentY = oy + 20;
-      ctx.textAlign = "left"; ctx.font = "bold 12px Orbitron"; ctx.fillStyle = "var(--text-muted)";
-      ctx.fillText("ADDITION (cm²) [Δ]", listX, currentY); currentY += 30;
-      ctx.font = "bold 13px Orbitron"; ctx.fillStyle = "white";
+      const listX = ox + sWidth + 60; let currentY = oy + 20;
+      ctx.textAlign = "left"; ctx.font = "bold 13px Orbitron"; ctx.fillStyle = "rgba(255,255,255,0.3)";
+      ctx.fillText("ADDITION (cm²) [Δ]", listX, currentY); currentY += 40;
+      ctx.font = "bold 14px Orbitron"; 
       triangleData.forEach((a, i) => {
-          if (currentY < oy + sWidth - 20) {
+          if (currentY < oy + sWidth - 40) {
+              ctx.fillStyle = "rgba(0, 210, 255, 0.4)";
               ctx.fillText((i+1).toString().padStart(2,'0'), listX, currentY);
-              ctx.textAlign = "right"; ctx.fillText(a.toFixed(2).replace('.',','), listX + 110, currentY);
-              ctx.textAlign = "left"; currentY += 18;
+              ctx.textAlign = "right"; ctx.fillStyle = "white";
+              ctx.fillText(a.toFixed(2).replace('.',','), listX + 130, currentY);
+              ctx.textAlign = "left"; currentY += 22;
           }
       });
-      ctx.font = "bold 16px Orbitron"; ctx.fillStyle = "var(--accent-blue)";
-      ctx.fillText(`Σ = ${totalArea.toFixed(2).replace('.',',')}`, listX, currentY + 30);
+      ctx.fillStyle = "var(--neon-blue)";
+      ctx.font = "bold 20px Orbitron";
+      ctx.fillText(`Σ = ${totalArea.toFixed(2).replace('.',',')}`, listX, currentY + 40);
   }
 
   canvas.onpointerdown = e => {
