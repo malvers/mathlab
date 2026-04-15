@@ -1,447 +1,501 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
-  <style>
-    :root {
-        --neon-blue: #00d2ff;
-        --neon-purple: #9d50bb;
-        --neon-pink: #ff0055;
-        --neon-green: #39FF14;
-        --neon-orange: #ff8800;
-        --euler-color: #ff8c00;
-        --bg-dark: #050b18;
-        --glass: rgba(15, 23, 42, 0.7);
-        --glass-bright: rgba(255, 255, 255, 0.05);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-pink: #ff0055;
+            --neon-green: #39FF14;
+            --neon-orange: #ff8800;
+            --euler-color: #ff8c00;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.7);
+            --glass-bright: rgba(255, 255, 255, 0.05);
+        }
 
-    body {
-        margin: 0;
-        font-family: 'Outfit', sans-serif;
-        background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-        color: white;
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden;
-        touch-action: none;
-    }
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
 
-    #side-panel {
-        width: 380px;
-        min-width: 380px;
-        background: var(--glass);
-        backdrop-filter: blur(25px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        z-index: 10;
-        box-sizing: border-box;
-        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-        overflow-y: auto;
-    }
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+        }
 
-    #canvas-container {
-        flex-grow: 1;
-        position: relative;
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-    canvas { display: block; cursor: crosshair; touch-action: none; flex-grow: 1; width: 100%; height: 100%; }
+        canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+        }
 
-    /* --- DASHBOARD BUTTON --- */
-    .dashboard-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-decoration: none;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        letter-spacing: 1.5px;
-        backdrop-filter: blur(5px);
-        width: 100%;
-        box-sizing: border-box;
-    }
-    .dashboard-btn:hover {
-        color: white;
-        background: rgba(0, 210, 255, 0.1);
-        border-color: var(--neon-blue);
-        box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-        transform: translateX(5px);
-    }
-    .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+        /* --- DASHBOARD BUTTON --- */
+        .dashboard-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 1.5px;
+            backdrop-filter: blur(5px);
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-    /* --- CANVAS BRANDING --- */
-    .canvas-branding {
-        position: absolute;
-        top: 40px;
-        right: 40px;
-        text-align: right;
-        pointer-events: none;
-        z-index: 5;
-    }
-    .canvas-branding h1 {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 2.2rem;
-        margin: 0;
-        letter-spacing: 3px;
-        background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 0 8px var(--neon-blue));
-        text-transform: uppercase;
-    }
-    .canvas-subtitle {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.7rem;
-        letter-spacing: 6px;
-        color: var(--neon-blue);
-        margin-top: 8px;
-        opacity: 0.7;
-        text-transform: uppercase;
-    }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
 
-    /* --- INSTRUMENT CARDS --- */
-    .instrument-card {
-        background: var(--glass-bright);
-        padding: 15px;
-        border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+        .dashboard-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+        }
 
-    .instrument-title {
-        font-family: 'Orbitron';
-        font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.4);
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding-bottom: 8px;
-        margin-bottom: 5px;
-    }
+        /* --- CANVAS BRANDING --- */
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
 
-    .option-group { display: flex; flex-direction: column; gap: 8px; }
-    .option-group label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        color: rgba(255, 255, 255, 0.8);
-        transition: 0.2s;
-    }
-    .option-group label:hover { color: var(--neon-blue); }
-    .option-group input[type="checkbox"] { accent-color: var(--neon-blue); width: 16px; height: 16px; cursor: pointer; }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
+            text-transform: uppercase;
+        }
 
-    .stats-card {
-        background: rgba(0, 210, 255, 0.03);
-        padding: 12px 15px;
-        border-radius: 12px;
-        border-left: 3px solid var(--neon-blue);
-    }
-    .stats-label { font-family: 'Orbitron'; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
-    .stats-val { font-family: 'Orbitron'; font-size: 1.1rem; color: #fff; margin-top: 5px; display: block; }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--neon-blue);
+            margin-top: 8px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
 
-    button {
-        padding: 12px 20px;
-        font-size: 0.75rem;
-        font-family: 'Orbitron', sans-serif;
-        background: var(--glass-bright);
-        color: rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        width: 100%;
-    }
-    button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
-    
-    footer {
-        padding: 10px 0;
-        text-align: center;
-        font-size: 0.7rem;
-        color: #86868b;
-        background: transparent;
-        width: 100%;
-        margin-top: 10px;
-        z-index: 5;
-    }
-    footer a {
-        color: var(--primary);
-        text-decoration: none;
-        margin-left: 10px;
-    }
-  </style>
+        /* --- INSTRUMENT CARDS --- */
+        .instrument-card {
+            background: var(--glass-bright);
+            padding: 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .instrument-title {
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            transition: 0.2s;
+        }
+
+        .option-group label:hover {
+            color: var(--neon-blue);
+        }
+
+        .option-group input[type="checkbox"] {
+            accent-color: var(--neon-blue);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .stats-card {
+            background: rgba(0, 210, 255, 0.03);
+            padding: 12px 15px;
+            border-radius: 12px;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .stats-label {
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stats-val {
+            font-family: 'Orbitron';
+            font-size: 1.1rem;
+            color: #fff;
+            margin-top: 5px;
+            display: block;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--glass-bright);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+
+        footer {
+            padding: 10px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #86868b;
+            background: transparent;
+            width: 100%;
+            margin-top: 10px;
+            z-index: 5;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
 </head>
+
 <body>
 
-<div id="side-panel">
-  <header style="border: none; padding-bottom: 5px;">
-    <a href="index.html" class="dashboard-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-      <span>DASHBOARD</span>
-    </a>
-  </header>
+    <div id="side-panel">
+        <header style="border: none; padding-bottom: 5px;">
+            <a href="index.html" class="dashboard-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>DASHBOARD</span>
+            </a>
+        </header>
 
-  <div class="instrument-card">
-    <div class="instrument-title">Konstruktion [Basis]</div>
-    <div class="option-group">
-      <label><input type="checkbox" id="cbEuler" checked> Eulergerade</label>
-      <label><input type="checkbox" id="cbFeuerbach"> Feuerbach-Kreis</label>
-      <label><input type="checkbox" id="cbUmkreis"> Umkreis</label>
-      <label><input type="checkbox" id="cbInkreis"> Inkreis</label>
+        <div class="instrument-card">
+            <div class="instrument-title">Konstruktion [Basis]</div>
+            <div class="option-group">
+                <label><input type="checkbox" id="cbEuler" checked> Eulergerade</label>
+                <label><input type="checkbox" id="cbFeuerbach"> Feuerbach-Kreis</label>
+                <label><input type="checkbox" id="cbUmkreis"> Umkreis</label>
+                <label><input type="checkbox" id="cbInkreis"> Inkreis</label>
+            </div>
+        </div>
+
+        <div class="instrument-card">
+            <div class="instrument-title">Hilfslinien [Details]</div>
+            <div class="option-group">
+                <label title="Höhenschnittpunkt"><input type="checkbox" id="hH"> Höhen (H)</label>
+                <label title="Schwerpunkt"><input type="checkbox" id="hS"> Seitenhalb. (S)</label>
+                <label title="Inkreismittelpunkt"><input type="checkbox" id="hI"> Winkelhalb. (I)</label>
+                <label><input type="checkbox" id="cbFermat"> Fermat / Napoleon</label>
+            </div>
+        </div>
+
+        <div class="instrument-card">
+            <div class="instrument-title">Echtzeit-Analyse</div>
+            <div id="stats">
+                <div class="stats-card">
+                    <span class="stats-label">Ratio HS / SU</span>
+                    <span id="txt-ratio" class="stats-val">0.00</span>
+                </div>
+                <div class="stats-card" style="margin-top: 8px;">
+                    <span class="stats-label">Inkreis-R</span>
+                    <span id="txt-rIn" class="stats-val">0 px</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+            <button onclick="resetTriangle()">Labor Reset</button>
+            <footer style="margin: 0; padding-top: 10px;">
+                &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+                <br>
+                <a href="impressum.html"
+                    style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
+            </footer>
+        </div>
     </div>
-  </div>
 
-  <div class="instrument-card">
-    <div class="instrument-title">Hilfslinien [Details]</div>
-    <div class="option-group">
-      <label title="Höhenschnittpunkt"><input type="checkbox" id="hH"> Höhen (H)</label>
-      <label title="Schwerpunkt"><input type="checkbox" id="hS"> Seitenhalb. (S)</label>
-      <label title="Inkreismittelpunkt"><input type="checkbox" id="hI"> Winkelhalb. (I)</label>
-      <label><input type="checkbox" id="cbFermat"> Fermat / Napoleon</label>
+    <div id="canvas-container">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">EULER-LABOR</div>
+        </div>
+        <canvas id="canvas"></canvas>
     </div>
-  </div>
 
-  <div class="instrument-card">
-    <div class="instrument-title">Echtzeit-Analyse</div>
-    <div id="stats">
-      <div class="stats-card">
-        <span class="stats-label">Ratio HS / SU</span>
-        <span id="txt-ratio" class="stats-val">0.00</span>
-      </div>
-      <div class="stats-card" style="margin-top: 8px;">
-        <span class="stats-label">Inkreis-R</span>
-        <span id="txt-rIn" class="stats-val">0 px</span>
-      </div>
-    </div>
-  </div>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+        let dragIdx = -1;
 
-  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
-    <button onclick="resetTriangle()">Labor Reset</button>
-    <footer style="margin: 0; padding-top: 10px;">
-        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        <br>
-        <a href="impressum.html" style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
-    </footer>
-  </div>
-</div>
+        const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        const mid = (p1, p2) => ({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
+        const getS = (A, B, C) => ({ x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 });
 
-<div id="canvas-container">
-    <div class="canvas-branding">
-        <h1>Doc Alvers Mathe-Labor</h1>
-        <div class="canvas-subtitle">EULER-LABOR</div>
-    </div>
-    <canvas id="canvas"></canvas>
-</div>
+        function getU(A, B, C) {
+            const x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y, x3 = C.x, y3 = C.y;
+            const d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+            if (Math.abs(d) < 1) return { x: (x1 + x2 + x3) / 3, y: (y1 + y2 + y3) / 3 };
+            return {
+                x: ((x1 * x1 + y1 * y1) * (y2 - y3) + (x2 * x2 + y2 * y2) * (y3 - y1) + (x3 * x3 + y3 * y3) * (y1 - y2)) / d,
+                y: ((x1 * x1 + y1 * y1) * (x3 - x2) + (x2 * x2 + y2 * y2) * (x1 - x3) + (x3 * x3 + y3 * y3) * (x2 - x1)) / d
+            };
+        }
 
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  let points = [];
-  let dragIdx = -1;
+        function getI(A, B, C) {
+            const a = dist(B, C), b = dist(A, C), c = dist(A, B);
+            const p = a + b + c;
+            if (p < 0.1) return A;
+            return { x: (a * A.x + b * B.x + c * C.x) / p, y: (a * A.y + b * B.y + c * C.y) / p };
+        }
 
-  const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
-  const mid = (p1, p2) => ({x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2});
-  const getS = (A, B, C) => ({x: (A.x+B.x+C.x)/3, y: (A.y+B.y+C.y)/3});
+        function getFoot(P, A, B) {
+            const dx = B.x - A.x, dy = B.y - A.y;
+            const m = dx * dx + dy * dy;
+            if (m < 0.1) return A;
+            const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / m;
+            return { x: A.x + t * dx, y: A.y + t * dy };
+        }
 
-  function getU(A, B, C) {
-      const x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y, x3 = C.x, y3 = C.y;
-      const d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
-      if (Math.abs(d) < 1) return {x: (x1+x2+x3)/3, y: (y1+y2+y3)/3};
-      return {
-          x: ((x1*x1 + y1*y1)*(y2 - y3) + (x2*x2 + y2*y2)*(y3 - y1) + (x3*x3 + y3*y3)*(y1 - y2)) / d,
-          y: ((x1*x1 + y1*y1)*(x3 - x2) + (x2*x2 + y2*y2)*(x1 - x3) + (x3*x3 + y3*y3)*(x2 - x1)) / d
-      };
-  }
+        function getEqui(p1, p2, ref) {
+            const dx = p2.x - p1.x, dy = p2.y - p1.y;
+            const h = Math.sqrt(3) / 2;
+            const r1 = { x: p1.x + 0.5 * dx - h * dy, y: p1.y + 0.5 * dy + h * dx };
+            const r2 = { x: p1.x + 0.5 * dx + h * dy, y: p1.y + 0.5 * dy - h * dx };
+            return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
+        }
 
-  function getI(A, B, C) {
-      const a = dist(B, C), b = dist(A, C), c = dist(A, B);
-      const p = a + b + c;
-      if (p < 0.1) return A;
-      return {x: (a*A.x + b*B.x + c*C.x)/p, y: (a*A.y + b*B.y + c*C.y)/p};
-  }
+        function drawPt(pt, label, color) {
+            ctx.shadowBlur = 10; ctx.shadowColor = color;
+            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "white"; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+            ctx.fillText(label, pt.x, pt.y - 12);
+        }
 
-  function getFoot(P, A, B) {
-      const dx = B.x - A.x, dy = B.y - A.y;
-      const m = dx*dx + dy*dy;
-      if (m < 0.1) return A;
-      const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / m;
-      return {x: A.x + t * dx, y: A.y + t * dy};
-  }
+        function draw() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            if (points.length < 3) return;
+            const [A, B, C] = points;
+            const conf = (id) => document.getElementById(id).checked;
 
-  function getEqui(p1, p2, ref) {
-      const dx = p2.x - p1.x, dy = p2.y - p1.y;
-      const h = Math.sqrt(3)/2;
-      const r1 = { x: p1.x + 0.5*dx - h*dy, y: p1.y + 0.5*dy + h*dx };
-      const r2 = { x: p1.x + 0.5*dx + h*dy, y: p1.y + 0.5*dy - h*dx };
-      return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
-  }
+            const S = getS(A, B, C), U = getU(A, B, C), I = getI(A, B, C);
+            const H = { x: 3 * S.x - 2 * U.x, y: 3 * S.y - 2 * U.y }, F = mid(H, U);
+            const rUm = dist(U, A), rIn = dist(I, getFoot(I, A, B));
 
-  function drawPt(pt, label, color) {
-      ctx.shadowBlur = 10; ctx.shadowColor = color;
-      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI*2); ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "white"; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
-      ctx.fillText(label, pt.x, pt.y - 12);
-  }
+            // 1. Fermat/Napoleon
+            if (conf('cbFermat')) {
+                const pAB = getEqui(A, B, C), pBC = getEqui(B, C, A), pCA = getEqui(C, A, B);
+                ctx.fillStyle = "rgba(255, 165, 0, 0.1)";
+                [[A, B, pAB], [B, C, pBC], [C, A, pCA]].forEach(t => {
+                    ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y); ctx.lineTo(t[1].x, t[1].y); ctx.lineTo(t[2].x, t[2].y); ctx.closePath(); ctx.fill();
+                    ctx.strokeStyle = "rgba(255, 100, 0, 0.4)"; ctx.lineWidth = 1; ctx.stroke();
+                });
+                ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(255, 140, 0, 0.6)";
+                [[C, pAB], [A, pBC], [B, pCA]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+                ctx.setLineDash([]);
+            }
 
-  function draw() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, rect.width, rect.height);
-      if (points.length < 3) return;
-      const [A, B, C] = points;
-      const conf = (id) => document.getElementById(id).checked;
+            // 2. Euler
+            if (conf('cbEuler')) {
+                ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"; ctx.lineWidth = 3;
+                let dx = U.x - H.x, dy = U.y - H.y, d = Math.sqrt(dx * dx + dy * dy);
+                ctx.beginPath();
+                if (d < 0.5) { ctx.moveTo(S.x, 0); ctx.lineTo(S.x, rect.height); }
+                else { ctx.moveTo(H.x - (dx / d) * 5000, H.y - (dy / d) * 5000); ctx.lineTo(U.x + (dx / d) * 5000, U.y + (dy / d) * 5000); }
+                ctx.stroke();
+            }
 
-      const S = getS(A, B, C), U = getU(A, B, C), I = getI(A, B, C);
-      const H = { x: 3*S.x - 2*U.x, y: 3*S.y - 2*U.y }, F = mid(H, U);
-      const rUm = dist(U, A), rIn = dist(I, getFoot(I, A, B));
+            // 3. Hilfslinien
+            ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+            if (conf('hH')) { // Höhen
+                ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
+                [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+            }
+            if (conf('hS')) { // Seitenhalbierende
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+                [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
+            }
+            if (conf('hI')) { // Winkelhalbierende
+                ctx.strokeStyle = "rgba(180, 0, 180, 0.4)";
+                [A, B, C].forEach(p => { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(I.x, I.y); ctx.stroke(); });
+            }
+            ctx.setLineDash([]);
 
-      // 1. Fermat/Napoleon
-      if (conf('cbFermat')) {
-          const pAB = getEqui(A,B,C), pBC = getEqui(B,C,A), pCA = getEqui(C,A,B);
-          ctx.fillStyle = "rgba(255, 165, 0, 0.1)";
-          [[A,B,pAB],[B,C,pBC],[C,A,pCA]].forEach(t => {
-              ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y); ctx.lineTo(t[1].x, t[1].y); ctx.lineTo(t[2].x, t[2].y); ctx.closePath(); ctx.fill();
-              ctx.strokeStyle = "rgba(255, 100, 0, 0.4)"; ctx.lineWidth = 1; ctx.stroke();
-          });
-          ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(255, 140, 0, 0.6)";
-          [[C,pAB],[A,pBC],[B,pCA]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-          ctx.setLineDash([]);
-      }
+            // 4. Kreise
+            if (conf('cbUmkreis')) { ctx.strokeStyle = "rgba(0,128,0,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(U.x, U.y, rUm, 0, Math.PI * 2); ctx.stroke(); }
+            if (conf('cbInkreis')) { ctx.strokeStyle = "rgba(255,0,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(I.x, I.y, rIn, 0, Math.PI * 2); ctx.stroke(); }
+            if (conf('cbFeuerbach')) { ctx.strokeStyle = "rgba(0,100,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(F.x, F.y, rUm / 2, 0, Math.PI * 2); ctx.stroke(); drawPt(F, "F", "#0064ff"); }
 
-      // 2. Euler
-      if (conf('cbEuler')) {
-          ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"; ctx.lineWidth = 3;
-          let dx = U.x - H.x, dy = U.y - H.y, d = Math.sqrt(dx*dx + dy*dy);
-          ctx.beginPath();
-          if (d < 0.5) { ctx.moveTo(S.x, 0); ctx.lineTo(S.x, rect.height); }
-          else { ctx.moveTo(H.x - (dx/d)*5000, H.y - (dy/d)*5000); ctx.lineTo(U.x + (dx/d)*5000, U.y + (dy/d)*5000); }
-          ctx.stroke();
-      }
+            // 5. Dreieck & Punkte
+            ctx.strokeStyle = "var(--neon-blue)"; ctx.lineWidth = 2.5; ctx.setLineDash([]);
+            ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
 
-      // 3. Hilfslinien
-      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
-      if (conf('hH')) { // Höhen
-          ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
-          [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-      }
-      if (conf('hS')) { // Seitenhalbierende
-          ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
-          [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-      }
-      if (conf('hI')) { // Winkelhalbierende
-          ctx.strokeStyle = "rgba(180, 0, 180, 0.4)";
-          [A,B,C].forEach(p => { ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(I.x,I.y); ctx.stroke(); });
-      }
-      ctx.setLineDash([]);
+            points.forEach((p, i) => {
+                ctx.shadowBlur = 15; ctx.shadowColor = "var(--neon-blue)";
+                ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.font = "bold 14px Orbitron"; ctx.fillStyle = "var(--neon-blue)";
+                ctx.fillText(String.fromCharCode(65 + i), p.x, p.y - 15);
+            });
 
-      // 4. Kreise
-      if (conf('cbUmkreis')) { ctx.strokeStyle = "rgba(0,128,0,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(U.x, U.y, rUm, 0, Math.PI*2); ctx.stroke(); }
-      if (conf('cbInkreis')) { ctx.strokeStyle = "rgba(255,0,255,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(I.x, I.y, rIn, 0, Math.PI*2); ctx.stroke(); }
-      if (conf('cbFeuerbach')) { ctx.strokeStyle = "rgba(0,100,255,0.25)"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(F.x, F.y, rUm/2, 0, Math.PI*2); ctx.stroke(); drawPt(F, "F", "#0064ff"); }
+            // Beschriftung
+            if (conf('cbEuler')) {
+                drawPt(H, "H", "var(--neon-pink)");
+                drawPt(U, "U", "var(--neon-green)");
+                drawPt(S, "S", "white");
+            }
+            if (conf('cbInkreis')) drawPt(I, "I", "var(--neon-purple)");
 
-      // 5. Dreieck & Punkte
-      ctx.strokeStyle = "var(--neon-blue)"; ctx.lineWidth = 2.5; ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
-      
-      points.forEach((p, i) => {
-          ctx.shadowBlur = 15; ctx.shadowColor = "var(--neon-blue)";
-          ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
-          ctx.shadowBlur = 0;
-          ctx.font = "bold 14px Orbitron"; ctx.fillStyle = "var(--neon-blue)";
-          ctx.fillText(String.fromCharCode(65 + i), p.x, p.y - 15);
-      });
+            document.getElementById('txt-ratio').innerText = (dist(H, S) / dist(S, U)).toFixed(2);
+            document.getElementById('txt-rIn').innerText = rIn.toFixed(1) + " px";
+        }
 
-      // Beschriftung
-      if (conf('cbEuler')) { 
-          drawPt(H, "H", "var(--neon-pink)"); 
-          drawPt(U, "U", "var(--neon-green)"); 
-          drawPt(S, "S", "white"); 
-      }
-      if (conf('cbInkreis')) drawPt(I, "I", "var(--neon-purple)");
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+            if (points.length === 0) resetTriangle();
+            draw();
+        }
 
-      document.getElementById('txt-ratio').innerText = (dist(H,S)/dist(S,U)).toFixed(2);
-      document.getElementById('txt-rIn').innerText = rIn.toFixed(1) + " px";
-  }
+        function resetTriangle() {
+            const w = canvas.getBoundingClientRect().width, h = canvas.getBoundingClientRect().height;
+            const s = Math.min(w, h) * 0.25, cx = w / 2, cy = h / 2, th = (Math.sqrt(3) / 2) * (s * 2);
+            points = [{ x: cx - s, y: cy + th / 3 }, { x: cx + s, y: cy + th / 3 }, { x: cx, y: cy - 2 * th / 3 }];
+            draw();
+        }
 
-  function resize() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-      if (points.length === 0) resetTriangle();
-      draw();
-  }
+        // --- NEU: TOUCH & MOUSE LOGIK ---
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
 
-  function resetTriangle() {
-      const w = canvas.getBoundingClientRect().width, h = canvas.getBoundingClientRect().height;
-      const s = Math.min(w, h) * 0.25, cx = w/2, cy = h/2, th = (Math.sqrt(3)/2) * (s*2);
-      points = [{x: cx - s, y: cy + th/3}, {x: cx + s, y: cy + th/3}, {x: cx, y: cy - 2*th/3}];
-      draw();
-  }
+        function startDrag(e) {
+            const pos = getPos(e);
+            dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40); // 40px Hitbox für Touch!
+            if (dragIdx !== -1) e.preventDefault();
+        }
 
-  // --- NEU: TOUCH & MOUSE LOGIK ---
-  function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
-  }
+        function moveDrag(e) {
+            if (dragIdx === -1) return;
+            const pos = getPos(e);
+            points[dragIdx] = { x: pos.x, y: pos.y };
+            draw();
+            e.preventDefault();
+        }
 
-  function startDrag(e) {
-      const pos = getPos(e);
-      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40); // 40px Hitbox für Touch!
-      if(dragIdx !== -1) e.preventDefault();
-  }
+        function stopDrag() { dragIdx = -1; }
 
-  function moveDrag(e) {
-      if (dragIdx === -1) return;
-      const pos = getPos(e);
-      points[dragIdx] = { x: pos.x, y: pos.y };
-      draw();
-      e.preventDefault();
-  }
+        // Mouse Events
+        canvas.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('mouseup', stopDrag);
 
-  function stopDrag() { dragIdx = -1; }
+        // Touch Events (iPad/iPhone)
+        canvas.addEventListener('touchstart', startDrag, { passive: false });
+        window.addEventListener('touchmove', moveDrag, { passive: false });
+        window.addEventListener('touchend', stopDrag);
 
-  // Mouse Events
-  canvas.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', stopDrag);
-
-  // Touch Events (iPad/iPhone)
-  canvas.addEventListener('touchstart', startDrag, {passive: false});
-  window.addEventListener('touchmove', moveDrag, {passive: false});
-  window.addEventListener('touchend', stopDrag);
-
-  document.querySelectorAll('input').forEach(i => i.onchange = draw);
-  window.addEventListener('resize', resize);
-  resize();
-</script>
+        document.querySelectorAll('input').forEach(i => i.onchange = draw);
+        window.addEventListener('resize', resize);
+        resize();
+    </script>
 </body>
+
 </html>
