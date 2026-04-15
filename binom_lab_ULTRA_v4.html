@@ -99,11 +99,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
+            font-size: 1.1rem;
             color: rgba(255, 255, 255, 0.7);
             font-family: 'Orbitron';
         }
-        .val-display { font-weight: bold; font-size: 1.1rem; }
+        .val-display { font-weight: bold; }
 
         input[type="range"] {
             -webkit-appearance: none;
@@ -131,8 +131,12 @@
         .area-item {
             display: flex;
             justify-content: space-between;
-            font-size: 1.2rem;
+            align-items: center;
+            font-size: 1.1rem;
             font-family: 'Orbitron';
+        }
+        .stat-val { 
+            font-weight: bold; 
         }
 
         /* --- MAIN VIEWPORT --- */
@@ -149,37 +153,72 @@
 
         #canvas-container {
             position: relative;
-            background: var(--glass-bright);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 100px rgba(0, 0, 0, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
             height: 100%;
             cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* --- GEOMETRY WRAPPER (Syncs Canvas & Overlays) --- */
+        #geometry-wrapper {
+            position: relative;
+            pointer-events: none;
+        }
+
+        #binomCanvas {
+            pointer-events: auto;
+            cursor: grab;
+        }
+
+        /* --- LaTeX OVERLAY LABELS --- */
+        #label-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .math-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            color: white;
+            white-space: nowrap;
+            font-size: 1.4rem;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        .side-label {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .area-label {
+            font-size: 1.4rem;
+            font-weight: bold;
         }
 
         #formula-glow-v3 {
             position: absolute;
-            bottom: 100px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(15, 23, 42, 0.3);
-            backdrop-filter: blur(20px);
-            padding: 10px 0;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            padding: 15px 45px;
+            width: fit-content;
+            max-width: 90%;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
             pointer-events: none;
         }
-        .katex-display { margin: 0 !important; font-size: 1.6vw !important; font-weight: bold; }
+        .katex-display { 
+            margin: 0 !important; 
+            font-weight: bold; 
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.1); 
+        }
 
         .canvas-branding {
             position: absolute;
@@ -232,33 +271,34 @@
         </a>
 
         <section class="stats-card">
-            <span class="stats-title">Haptische Steuerung</span>
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-gold);">AUFTEILUNG (p : q)<span class="val-display" id="val-p">7.0</span></div>
+                <div class="control-header" style="color:var(--neon-gold);">
+                    <span>AUFTEILUNG</span>
+                    <span class="val-display stat-val" id="val-p" style="color:var(--neon-gold); font-family: 'Orbitron';"></span>
+                </div>
                 <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:var(--neon-gold);">
             </div>
             <p style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 5px;">Tipp: Ziehe den Mittelpunkt im Quadrat!</p>
         </section>
 
         <section class="stats-card">
-            <span class="stats-title">Analyse (p + q = 10)</span>
             <div class="area-list">
                 <div class="area-item" style="color:var(--neon-gold);">
-                    <span>p² :</span>
-                    <span id="stat-p2">49.00</span>
+                    <span id="lbl-side-p2"></span>
+                    <span id="stat-p2-lt" class="stat-val"></span>
                 </div>
                 <div class="area-item" style="color:var(--neon-green);">
-                    <span>2 · p · q :</span>
-                    <span id="stat-2pq">42.00</span>
+                    <span id="lbl-side-2pq"></span>
+                    <span id="stat-2pq-lt" class="stat-val"></span>
                 </div>
                 <div class="area-item" style="color:var(--neon-cyan);">
-                    <span>q² :</span>
-                    <span id="stat-q2">9.00</span>
+                    <span id="lbl-side-q2"></span>
+                    <span id="stat-q2-lt" class="stat-val"></span>
                 </div>
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
                 <div class="area-item" style="color:white; font-size:1.1rem;">
-                    <span>GESAMT :</span>
-                    <span>100.00</span>
+                    <span>GESAMT</span>
+                    <span id="stat-total" class="stat-val"></span>
                 </div>
             </div>
         </section>
@@ -269,11 +309,25 @@
     <main id="workspace">
         <div class="canvas-branding">
             <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle" style="color:#ff0000; font-size:1.5rem; font-weight:bold;">VERSION 4.0 | LARGE SCALE | RESET PROOF</div>
+            <div class="canvas-subtitle">1. Binomische Formel</div>
         </div>
 
         <div id="canvas-container">
-            <canvas id="binomCanvas"></canvas>
+            <div id="geometry-wrapper">
+                <canvas id="binomCanvas"></canvas>
+                <div id="label-overlay">
+                    <!-- Inner Area Labels -->
+                    <div id="lbl-p2" class="math-label area-label"></div>
+                    <div id="lbl-pq1" class="math-label area-label"></div>
+                    <div id="lbl-pq2" class="math-label area-label"></div>
+                    <div id="lbl-q2" class="math-label area-label"></div>
+                    <!-- Outer Side Labels -->
+                    <div id="lbl-p-top" class="math-label side-label"></div>
+                    <div id="lbl-q-top" class="math-label side-label"></div>
+                    <div id="lbl-p-left" class="math-label side-label"></div>
+                    <div id="lbl-q-left" class="math-label side-label"></div>
+                </div>
+            </div>
         </div>
 
         <div id="formula-glow-v3"></div>
@@ -294,33 +348,83 @@
 
         function updateUI() {
             q = S - p;
-            document.getElementById('val-p').innerText = p.toFixed(2);
-            document.getElementById('stat-p2').innerText = (p*p).toFixed(2);
-            document.getElementById('stat-2pq').innerText = (2*p*q).toFixed(2);
-            document.getElementById('stat-q2').innerText = (q*q).toFixed(2);
-
+            
             if (window.katex) {
-                const latex = `\\color{white}{(p+q)^2 =} \\color{#ffcc00}{p^2} + \\color{#39FF14}{2pq} + \\color{#00f2ff}{q^2}`;
-                katex.render(latex, board, { displayMode: true });
+                // Main Formula at the bottom: ( ) = white, p=gold, q=cyan, 2=white
+                const latex = `\\color{white}{(}\\color{#ffcc00}{p}+\\color{#00f2ff}{q}\\color{white}{)}^2 = \\color{#ffcc00}{p^2} + \\color{white}{2}\\color{#ffcc00}{p}\\color{#00f2ff}{q} + \\color{#00f2ff}{q^2}`;
+                katex.render(latex, board, { displayMode: true, throwOnError: false });
+                
+                // Analytics Section Symbols in LaTeX (Consistent colors, NO colons)
+                katex.render('\\color{#ffcc00}{p^2}', document.getElementById('lbl-side-p2'), { throwOnError: false });
+                katex.render('\\color{white}{2}\\color{#ffcc00}{p}\\color{#00f2ff}{q}', document.getElementById('lbl-side-2pq'), { throwOnError: false });
+                katex.render('\\color{#00f2ff}{q^2}', document.getElementById('lbl-side-q2'), { throwOnError: false });
+                
+                katex.render((p*p).toFixed(2), document.getElementById('stat-p2-lt'), { throwOnError: false });
+                katex.render((2*p*q).toFixed(2), document.getElementById('stat-2pq-lt'), { throwOnError: false });
+                katex.render((q*q).toFixed(2), document.getElementById('stat-q2-lt'), { throwOnError: false });
+                
+                // Total and Haptic Value back to Orbitron
+                document.getElementById('stat-total').innerText = (100).toFixed(2);
+                document.getElementById('val-p').innerText = p.toFixed(2);
             }
         }
 
         function resize() {
             const container = document.getElementById('canvas-container');
-            const rect = container.getBoundingClientRect();
+            const wrapper = document.getElementById('geometry-wrapper');
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            
+            // Scaled size - increased to 0.6 for monumental feel
+            totalSize = Math.min(container.clientWidth, container.clientHeight) * 0.6;
+            
+            // Canvas matching
+            canvas.width = totalSize * dpr;
+            canvas.height = totalSize * dpr;
+            canvas.style.width = totalSize + "px";
+            canvas.style.height = totalSize + "px";
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            // Wrapper matching
+            wrapper.style.width = totalSize + "px";
+            wrapper.style.height = totalSize + "px";
             
-            totalSize = Math.min(rect.width, rect.height) * 0.45;
-            offsetX = (rect.width - totalSize) / 2;
-            offsetY = (rect.height - totalSize) / 2;
+            // Dynamic Formula Scaling - maintain width relative to square
+            // Approx factor 0.08 of totalSize for exact width match
+            board.style.fontSize = (totalSize * 0.08) + "px";
             
-            // Match formula panel width to square width
-            board.style.width = totalSize + "px";
+            // In the wrapper-based system, offsetX/Y within the wrapper are always 0
+            offsetX = 0;
+            offsetY = 0;
             
             draw();
+        }
+
+        function updateLabels(px, qx) {
+            if (!window.katex) return;
+
+            // Reference coordinates are now local to the geometry-wrapper (0,0 is top-left of square)
+            const labels = {
+                'lbl-p2': { x: px/2, y: px/2, tex: '\\color{#ffcc00}{p^2}' },
+                'lbl-pq1': { x: px + qx/2, y: px/2, tex: '\\color{#ffcc00}{p}\\color{#00f2ff}{q}' },
+                'lbl-pq2': { x: px/2, y: px + qx/2, tex: '\\color{#ffcc00}{p}\\color{#00f2ff}{q}' },
+                'lbl-q2': { x: px + qx/2, y: px + qx/2, tex: '\\color{#00f2ff}{q^2}' },
+                'lbl-p-top': { x: px/2, y: -28, tex: '\\color{#ffcc00}{p}' },
+                'lbl-q-top': { x: px + qx/2, y: -28, tex: '\\color{#00f2ff}{q}' },
+                'lbl-p-left': { x: -28, y: px/2, tex: '\\color{#ffcc00}{p}' },
+                'lbl-q-left': { x: -28, y: px + qx/2, tex: '\\color{#00f2ff}{q}' }
+            };
+
+            for (const [id, cfg] of Object.entries(labels)) {
+                const el = document.getElementById(id);
+                el.style.left = cfg.x + 'px';
+                el.style.top = cfg.y + 'px';
+                
+                // Redraw if data varies or initial render
+                if (!el.dataset.rendered || (isDragging && id.includes('lbl-'))) {
+                     katex.render(cfg.tex, el, { throwOnError: false });
+                     el.dataset.rendered = "true";
+                }
+            }
         }
 
         function draw() {
@@ -328,9 +432,9 @@
             const h = canvas.height / (window.devicePixelRatio || 1);
             ctx.clearRect(0, 0, w, h);
 
-            const unit = totalSize / S;
-            const px = p * unit;
-            const qx = q * unit;
+            const scaleFactor = totalSize / S;
+            const px = p * scaleFactor;
+            const qx = q * scaleFactor;
 
             // Outer Frame (p+q)^2
             ctx.strokeStyle = "rgba(255,255,255,0.1)";
@@ -338,19 +442,22 @@
             ctx.strokeRect(offsetX, offsetY, totalSize, totalSize);
 
             // Areas
-            drawRect(offsetX, offsetY, px, px, "#ffcc00", "p²");
-            drawRect(offsetX + px, offsetY, qx, px, "#39FF14", "pq");
-            drawRect(offsetX, offsetY + px, px, qx, "#39FF14", "pq");
-            drawRect(offsetX + px, offsetY + px, qx, qx, "#00f2ff", "q²");
+            drawRect(offsetX, offsetY, px, px, "#ffcc00");
+            drawRect(offsetX + px, offsetY, qx, px, "#39FF14");
+            drawRect(offsetX, offsetY + px, px, qx, "#39FF14");
+            drawRect(offsetX + px, offsetY + px, qx, qx, "#00f2ff");
 
             // Brackets & Annotations
-            drawAnnotations(offsetX, offsetY, px, qx, totalSize);
+            drawAnnotations(offsetX, offsetY, px, qx);
 
             // Drag Cursor (Intersection Point)
             drawHandle(offsetX + px, offsetY + px);
+
+            // Synchronization with LaTeX Overlays
+            updateLabels(px, qx);
         }
 
-        function drawRect(x, y, w, h, color, label) {
+        function drawRect(x, y, w, h, color) {
             ctx.save();
             ctx.shadowBlur = 10;
             ctx.shadowColor = color;
@@ -360,15 +467,6 @@
             ctx.fillRect(x, y, w, h);
             ctx.strokeRect(x, y, w, h);
             ctx.restore();
-
-            // Dynamic Font size
-            ctx.fillStyle = "rgba(255,255,255,0.8)";
-            ctx.font = "bold " + Math.max(10, Math.min(20, w/3)) + "px Orbitron";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            if (w > 30 && h > 30) {
-                ctx.fillText(label, x + w / 2, y + h / 2);
-            }
         }
 
         function drawHandle(x, y) {
@@ -389,36 +487,27 @@
             ctx.restore();
         }
 
-        function drawAnnotations(x, y, px, qx, total) {
+        function drawAnnotations(x, y, px, qx) {
             ctx.strokeStyle = "rgba(255,255,255,0.3)";
             ctx.lineWidth = 1;
-            ctx.font = "14px Orbitron";
-            ctx.fillStyle = "rgba(255,255,255,0.5)";
-
-            // Top
-            drawB(x, y - 15, px, "p");
-            drawB(x + px, y - 15, qx, "q");
-            // Left
-            drawBv(x - 15, y, px, "p");
-            drawBv(x - 15, y + px, qx, "q");
+            // Lines for brackets
+            drawL(x, y - 10, px);
+            drawL(x + px, y - 10, qx);
+            drawLv(x - 10, y, px);
+            drawLv(x - 10, y + px, qx);
         }
 
-        function drawB(x, y, len, label) {
-            if (len < 10) return;
+        function drawL(x, y, len) {
+            if (len < 5) return;
             ctx.beginPath();
             ctx.moveTo(x+2, y); ctx.lineTo(x+len-2, y);
             ctx.stroke();
-            ctx.textAlign = "center";
-            ctx.fillText(label, x + len/2, y - 10);
         }
-        function drawBv(x, y, len, label) {
-            if (len < 10) return;
+        function drawLv(x, y, len) {
+            if (len < 5) return;
             ctx.beginPath();
             ctx.moveTo(x, y+2); ctx.lineTo(x, y+len-2);
             ctx.stroke();
-            ctx.textAlign = "right";
-            ctx.textBaseline = "middle";
-            ctx.fillText(label, x - 15, y + len/2);
         }
 
         // --- Interaction Logic (Pointer Events for iPad/Mobile support) ---
