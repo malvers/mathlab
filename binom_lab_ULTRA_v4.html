@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1. Binomische Formel | haptisch | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        :root {
+            --neon-gold: #ffcc00;
+            --neon-green: #39FF14;
+            --neon-cyan: #00f2ff;
+            --neon-blue: #00d2ff;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.75);
+            --glass-bright: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* --- SIDEBAR --- */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .dashboard-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        /* --- STATS & CONTROLS --- */
+        .stats-card {
+            background: var(--glass-bright);
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stats-title {
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Orbitron';
+        }
+        .val-display { font-weight: bold; font-size: 1.1rem; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px white;
+        }
+
+        .area-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .area-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-family: 'Orbitron';
+        }
+
+        /* --- MAIN VIEWPORT --- */
+        #workspace {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 40px;
+        }
+
+        #canvas-container {
+            position: relative;
+            background: var(--glass-bright);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #formula-glow-v3 {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 10px 0;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .katex-display { margin: 0 !important; font-size: 1.6vw !important; font-weight: bold; }
+
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, var(--neon-blue), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
+            text-transform: uppercase;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--neon-blue);
+            margin-top: 8px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .footer-credit {
+            margin-top: auto;
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="side-panel">
+        <a href="index.html" class="dashboard-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            DASHBOARD
+        </a>
+
+        <section class="stats-card">
+            <span class="stats-title">Haptische Steuerung</span>
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-gold);">AUFTEILUNG (p : q)<span class="val-display" id="val-p">7.0</span></div>
+                <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:var(--neon-gold);">
+            </div>
+            <p style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 5px;">Tipp: Ziehe den Mittelpunkt im Quadrat!</p>
+        </section>
+
+        <section class="stats-card">
+            <span class="stats-title">Analyse (p + q = 10)</span>
+            <div class="area-list">
+                <div class="area-item" style="color:var(--neon-gold);">
+                    <span>p² :</span>
+                    <span id="stat-p2">49.00</span>
+                </div>
+                <div class="area-item" style="color:var(--neon-green);">
+                    <span>2 · p · q :</span>
+                    <span id="stat-2pq">42.00</span>
+                </div>
+                <div class="area-item" style="color:var(--neon-cyan);">
+                    <span>q² :</span>
+                    <span id="stat-q2">9.00</span>
+                </div>
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
+                <div class="area-item" style="color:white; font-size:1.1rem;">
+                    <span>GESAMT :</span>
+                    <span>100.00</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+    </aside>
+
+    <main id="workspace">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">1. Binomische Formel</div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="binomCanvas"></canvas>
+        </div>
+
+        <div id="formula-glow-v3"></div>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('binomCanvas');
+        const ctx = canvas.getContext('2d');
+        const pSlider = document.getElementById('p-slider');
+        const board = document.getElementById('formula-glow-v3');
+
+        const S = 10.0; // Fixed total side length
+        let p = 7.0;
+        let q = S - p;
+
+        let isDragging = false;
+        let offsetX, offsetY, totalSize;
+
+        function updateUI() {
+            q = S - p;
+            document.getElementById('val-p').innerText = p.toFixed(2);
+            document.getElementById('stat-p2').innerText = (p*p).toFixed(2);
+            document.getElementById('stat-2pq').innerText = (2*p*q).toFixed(2);
+            document.getElementById('stat-q2').innerText = (q*q).toFixed(2);
+
+            if (window.katex) {
+                const latex = `\\color{white}{(p+q)^2 =} \\color{#ffcc00}{p^2} + \\color{#39FF14}{2pq} + \\color{#00f2ff}{q^2}`;
+                katex.render(latex, board, { displayMode: true });
+            }
+        }
+
+        function resize() {
+            const container = document.getElementById('canvas-container');
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            
+            totalSize = Math.min(rect.width, rect.height) * 0.45;
+            offsetX = (rect.width - totalSize) / 2;
+            offsetY = (rect.height - totalSize) / 2;
+            
+            // Match formula panel width to square width
+            board.style.width = totalSize + "px";
+            
+            draw();
+        }
+
+        function draw() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+
+            const unit = totalSize / S;
+            const px = p * unit;
+            const qx = q * unit;
+
+            // Outer Frame (p+q)^2
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(offsetX, offsetY, totalSize, totalSize);
+
+            // Areas
+            drawRect(offsetX, offsetY, px, px, "#ffcc00", "p²");
+            drawRect(offsetX + px, offsetY, qx, px, "#39FF14", "pq");
+            drawRect(offsetX, offsetY + px, px, qx, "#39FF14", "pq");
+            drawRect(offsetX + px, offsetY + px, qx, qx, "#00f2ff", "q²");
+
+            // Brackets & Annotations
+            drawAnnotations(offsetX, offsetY, px, qx, totalSize);
+
+            // Drag Cursor (Intersection Point)
+            drawHandle(offsetX + px, offsetY + px);
+        }
+
+        function drawRect(x, y, w, h, color, label) {
+            ctx.save();
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
+            ctx.fillStyle = color + "26"; // 15% opacity
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+            ctx.restore();
+
+            // Dynamic Font size
+            ctx.fillStyle = "rgba(255,255,255,0.8)";
+            ctx.font = "bold " + Math.max(10, Math.min(20, w/3)) + "px Orbitron";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            if (w > 30 && h > 30) {
+                ctx.fillText(label, x + w / 2, y + h / 2);
+            }
+        }
+
+        function drawHandle(x, y) {
+            ctx.save();
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "white";
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            // Crosshairs
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x - 15, y); ctx.lineTo(x + 15, y);
+            ctx.moveTo(x, y - 15); ctx.lineTo(x, y + 15);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawAnnotations(x, y, px, qx, total) {
+            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+            ctx.lineWidth = 1;
+            ctx.font = "14px Orbitron";
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+
+            // Top
+            drawB(x, y - 15, px, "p");
+            drawB(x + px, y - 15, qx, "q");
+            // Left
+            drawBv(x - 15, y, px, "p");
+            drawBv(x - 15, y + px, qx, "q");
+        }
+
+        function drawB(x, y, len, label) {
+            if (len < 10) return;
+            ctx.beginPath();
+            ctx.moveTo(x+2, y); ctx.lineTo(x+len-2, y);
+            ctx.stroke();
+            ctx.textAlign = "center";
+            ctx.fillText(label, x + len/2, y - 10);
+        }
+        function drawBv(x, y, len, label) {
+            if (len < 10) return;
+            ctx.beginPath();
+            ctx.moveTo(x, y+2); ctx.lineTo(x, y+len-2);
+            ctx.stroke();
+            ctx.textAlign = "right";
+            ctx.textBaseline = "middle";
+            ctx.fillText(label, x - 15, y + len/2);
+        }
+
+        // --- Interaction Logic (Pointer Events for iPad/Mobile support) ---
+        function handleMove(mx, my) {
+            const unit = totalSize / S;
+            const targetP = (mx - offsetX) / unit;
+            if (targetP >= 0.1 && targetP <= 9.9) {
+                p = targetP;
+                pSlider.value = p;
+                updateUI();
+                draw();
+            }
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const unit = totalSize / S;
+            const hx = offsetX + p * unit;
+            const hy = offsetY + p * unit;
+            
+            // Larger hit area for touch (40px)
+            if (Math.sqrt((mx-hx)**2 + (my-hy)**2) < 40) {
+                isDragging = true;
+                canvas.setPointerCapture(e.pointerId);
+                canvas.style.cursor = "grabbing";
+            }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            canvas.style.cursor = "crosshair";
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            if (isDragging) {
+                handleMove(mx, my);
+            } else {
+                const unit = totalSize / S;
+                const hx = offsetX + p * unit;
+                const hy = offsetY + p * unit;
+                const dist = Math.sqrt((mx-hx)**2 + (my-hy)**2);
+                canvas.style.cursor = dist < 25 ? "grab" : "crosshair";
+            }
+        });
+
+        pSlider.addEventListener('input', (e) => { p = parseFloat(e.target.value); updateUI(); draw(); });
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('load', () => { updateUI(); resize(); });
+    </script>
+</body>
+</html>
