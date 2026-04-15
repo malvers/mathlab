@@ -32,12 +32,12 @@
         }
 
         #side-panel {
-            width: 380px;
-            min-width: 380px;
+            width: 300px;
+            min-width: 300px;
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px 25px 25px 25px; /* Reduced top space */
+            padding: 20px 20px 25px 20px; /* Tighter padding */
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -49,12 +49,12 @@
         /* --- INSTRUMENT CARDS --- */
         .instrument-card {
             background: var(--glass-bright);
-            padding: 18px;
+            padding: 12px 18px; /* Flat low-profile */
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 5px; /* Tighter gap */
         }
 
         .card-title {
@@ -118,20 +118,21 @@
         /* --- FLOATING LABELS --- */
         .formula-tag {
             position: absolute;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 0.9rem;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 1.15rem; /* Enormous! */
             pointer-events: none;
             z-index: 200;
             display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             white-space: nowrap;
+            transition: transform 0.1s ease;
         }
-        #tag-pow { border-color: var(--neon-blue); color: var(--neon-blue); }
-        #tag-root { border-color: var(--neon-orange); color: var(--neon-orange); }
+        #tag-pow { border-color: var(--neon-blue); color: var(--neon-blue); z-index: 210; }
+        #tag-root { border-color: var(--neon-orange); color: var(--neon-orange); z-index: 205; }
 
         canvas { 
             width: 100%; 
@@ -162,30 +163,13 @@
         <section class="instrument-card">
             <div class="val-row">
                 <span class="val-label">Exponent (n)</span>
-                <span class="val-display" id="val-n">2</span>
             </div>
             <input type="range" id="n-slider" min="1" max="10" step="1" value="2">
             
             <div class="val-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                 <span class="val-label">X-Position</span>
-                <span class="val-display" id="display-x-slider" style="color:white">0,500</span>
             </div>
             <input type="range" id="x-slider" min="0" max="1" step="0.001" value="0.5">
-        </section>
-
-        <section class="instrument-card">
-            <div class="val-row">
-                <span class="val-label" style="color:rgba(255,255,255,0.4)">X-POSITION</span>
-                <span class="val-display" id="val-x" style="color:white">0,500</span>
-            </div>
-            <div class="val-row">
-                <span class="val-label" id="formula-root" style="color:var(--neon-orange)"></span>
-                <span class="val-display" id="val-root" style="color:var(--neon-orange)">0,707</span>
-            </div>
-            <div class="val-row">
-                <span class="val-label" id="formula-pow" style="color:var(--neon-blue)"></span>
-                <span class="val-display" id="val-pow">0,250</span>
-            </div>
         </section>
 
         <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
@@ -208,11 +192,10 @@
         });
 
         const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
         const nSlider = document.getElementById('n-slider');
         const xSlider = document.getElementById('x-slider');
         const valN = document.getElementById('val-n');
-        const valXSlider = document.getElementById('display-x-slider');
         const valX = document.getElementById('val-x');
         const valPow = document.getElementById('val-pow');
         const valRoot = document.getElementById('val-root');
@@ -246,12 +229,13 @@
             const rootTex = `y = \\sqrt[${n}]{x}`;
             const powTex = `y = x^{${n}}`;
             
-            katex.render(rootTex, document.getElementById('formula-root'), { throwOnError: false });
-            katex.render(powTex, document.getElementById('formula-pow'), { throwOnError: false });
+            const fRoot = document.getElementById('formula-root');
+            const fPow = document.getElementById('formula-pow');
             
-            // Also update floating tags
-            katex.render(powTex, tagPow, { throwOnError: false });
-            katex.render(rootTex, tagRoot, { throwOnError: false });
+            if(fRoot) katex.render(rootTex, fRoot, { throwOnError: false });
+            if(fPow) katex.render(powTex, fPow, { throwOnError: false });
+            
+            // Floating tags now get full equations with values in draw()
         }
 
         nSlider.addEventListener('input', (e) => {
@@ -304,10 +288,18 @@
             const p = Math.pow(mouseX, n);
             const r = Math.pow(mouseX, 1/n);
             const formattedX = mouseX.toFixed(3).replace('.', ',');
-            valX.innerText = formattedX;
-            valXSlider.innerText = formattedX;
-            valPow.innerText = p.toFixed(3).replace('.', ',');
-            valRoot.innerText = r.toFixed(3).replace('.', ',');
+            const formattedP = p.toFixed(3).replace('.', ',');
+            const formattedR = r.toFixed(3).replace('.', ',');
+
+            if(valX) valX.innerText = formattedX;
+            if(valPow) valPow.innerText = formattedP;
+            if(valRoot) valRoot.innerText = formattedR;
+
+            // Update floating tags with values
+            if (typeof katex !== 'undefined') {
+                if(tagPow) katex.render(`y = x^{${n}} = ${formattedP}`, tagPow, { throwOnError: false });
+                if(tagRoot && n !== 1) katex.render(`y = \\sqrt[${n}]{x} = ${formattedR}`, tagRoot, { throwOnError: false });
+            }
 
             // Draw Grid
             ctx.strokeStyle = 'rgba(255,255,255,0.12)';
@@ -325,11 +317,11 @@
             
             // X-Axis
             ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + size + 15, oy); ctx.stroke();
-            this.drawArrowhead(ctx, ox + size + 15, oy, 0); // Arrow at end of X
+            drawArrowhead(ctx, ox + size + 15, oy, 0); // Arrow at end of X
             
             // Y-Axis
             ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy - size - 15); ctx.stroke();
-            this.drawArrowhead(ctx, ox, oy - size - 15, -Math.PI/2); // Arrow at end of Y
+            drawArrowhead(ctx, ox, oy - size - 15, -Math.PI/2); // Arrow at end of Y
 
             // Labels
             ctx.fillStyle = 'rgba(255,255,255,0.4)';
@@ -340,12 +332,12 @@
             ctx.textAlign = 'right';
             ctx.fillText('1', ox - 15, oy - size);
 
-            // Draw all curves
-            for(let i=1; i<=10; i++) {
+            // Draw background curves (skip 1)
+            for(let i=2; i<=10; i++) {
                 const isPowerCurrent = (i === n);
-                const isRootCurrent = (i === n); // We show root of target n
+                const isRootCurrent = (i === n);
                 
-                // Potenz-Kurven (Blue)
+                // Power curves (Blue)
                 ctx.lineWidth = isPowerCurrent ? 3.5 : 1.4;
                 ctx.strokeStyle = varColor('--neon-blue');
                 ctx.globalAlpha = isPowerCurrent ? 1.0 : 0.12;
@@ -353,16 +345,23 @@
                 drawCurve(ctx, i, toX, toY);
                 ctx.shadowBlur = 0;
 
-                // Wurzel-Kurven (Orange)
+                // Root curves (Orange)
                 ctx.lineWidth = isRootCurrent ? 3.5 : 1.4;
                 ctx.strokeStyle = varColor('--neon-orange');
                 ctx.globalAlpha = isRootCurrent ? 1.0 : 0.12;
                 if(isRootCurrent) { ctx.shadowBlur = 12; ctx.shadowColor = varColor('--neon-orange'); }
                 drawCurve(ctx, 1/i, toX, toY);
                 ctx.shadowBlur = 0;
-                
-                ctx.globalAlpha = 1.0;
             }
+
+            // Draw n=1 (Identity) ONTOP
+            const isN1 = (n === 1);
+            ctx.lineWidth = isN1 ? 4.0 : 1.6;
+            ctx.strokeStyle = isN1 ? varColor('--neon-blue') : 'rgba(255,255,255,0.25)';
+            ctx.globalAlpha = 1.0;
+            if(isN1) { ctx.shadowBlur = 15; ctx.shadowColor = varColor('--neon-blue'); }
+            drawCurve(ctx, 1, toX, toY);
+            ctx.shadowBlur = 0;
 
             // Interactive Point & Floating Tags
             if(isHovering) {
@@ -378,9 +377,14 @@
                 tagPow.style.left = (px + 15) + 'px';
                 tagPow.style.top = (py_pow - 45) + 'px';
 
-                tagRoot.style.display = 'block';
-                tagRoot.style.left = (px + 15) + 'px';
-                tagRoot.style.top = (py_root - 45) + 'px';
+                // Hide root tag if n=1 (redundant), otherwise show it
+                if(n === 1) {
+                    tagRoot.style.display = 'none';
+                } else {
+                    tagRoot.style.display = 'block';
+                    tagRoot.style.left = (px + 15) + 'px';
+                    tagRoot.style.top = (py_root - 45) + 'px';
+                }
             } else {
                 tagPow.style.display = 'none';
                 tagRoot.style.display = 'none';
