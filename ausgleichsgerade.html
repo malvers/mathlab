@@ -41,7 +41,7 @@
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -123,6 +123,7 @@
         }
         .stat-value.highlight-pink { color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); }
         .stat-value.highlight-blue { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
+        .stat-value.highlight-purple { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
 
         .m-n-grid {
             display: flex;
@@ -139,17 +140,18 @@
         }
 
         button {
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 20px;
+            font-size: 0.85rem;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--glass);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            font-family: 'Orbitron';
-            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.3s;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
+            width: 100%;
         }
         button:hover {
             background: rgba(0, 210, 255, 0.15);
@@ -178,40 +180,41 @@
             display: none;
         }
 
-        /* --- HELP OVERLAY --- */
-        #help-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 11, 24, 0.85);
-            display: none;
+        /* --- HELP OVERLAY (REMOVED) --- */
+
+        .dashboard-btn {
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(15px);
-        }
-        .help-content {
-            max-width: 550px;
-            background: rgba(15, 23, 42, 0.8);
-            padding: 40px;
-            border-radius: 30px;
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
-        }
-        .help-item { display: flex; align-items: flex-start; margin-bottom: 22px; gap: 20px; }
-        .help-icon { font-size: 1.8rem; min-width: 40px; }
-        .help-text b { color: var(--neon-orange); }
-
-        .back-btn {
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: none;
-            margin-bottom: 10px;
-            display: inline-block;
-            transition: 0.3s;
-            letter-spacing: 1px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 1.5px;
+            backdrop-filter: blur(5px);
+            width: 100%;
+            box-sizing: border-box;
         }
-        .back-btn:hover { color: var(--neon-blue); }
+
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .dashboard-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+        }
 
         footer {
             margin-top: auto;
@@ -235,13 +238,19 @@
     <!-- Background Video Removed -->
     
     <div id="side-panel">
-        <header style="border: none; padding-bottom: 20px;">
-            <a href="index.html" class="back-btn">← DASHBOARD</a>
+        <header style="border: none; padding-bottom: 5px;">
+            <a href="index.html" class="dashboard-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>DASHBOARD</span>
+            </a>
         </header>
 
         <div class="stat-card">
             <span class="stat-label">Korrelation (r)</span>
-            <div id="r-display" class="stat-value highlight-pink">+0.0000</div>
+            <div id="r-display" class="stat-value highlight-purple">+0.00</div>
         </div>
 
         <div class="m-n-grid">
@@ -262,15 +271,9 @@
 
         <div class="control-group">
             <button onclick="generateChaos()">Zufall</button>
-            <button onclick="toggleSD()">Toggle SD-Schatten</button>
+            <button onclick="shiftResiduals(0.9)">Punkte näher ran</button>
+            <button onclick="shiftResiduals(1.1)">Punkte weiter weg</button>
             <button onclick="clearPoints()">Reset Labor</button>
-            <button onclick="toggleHelp()">Hilfe ?</button>
-        </div>
-
-        <div class="stat-label" style="margin-top: 10px; text-align: center; opacity: 0.6;">Präzision</div>
-        <div class="control-group" style="flex-direction: row; gap: 10px;">
-            <button onclick="shiftResiduals(0.85)" style="flex: 1; font-size: 1.2rem;">+</button>
-            <button onclick="shiftResiduals(1.15)" style="flex: 1; font-size: 1.2rem;">-</button>
         </div>
 
         <footer>
@@ -286,24 +289,7 @@
         <canvas id="canvas"></canvas>
     </div>
 
-    <div id="help-overlay">
-        <div class="help-content">
-            <h2 style="font-family: Orbitron; color: var(--neon-blue); margin-top: 0;">MISSION BRIEFING</h2>
-            <div class="help-item">
-                <div class="help-icon">👆</div>
-                <div class="help-text"><b>Tippen:</b> Erstellt einen neuen Datenpunkt auf dem Feld.</div>
-            </div>
-            <div class="help-item">
-                <div class="help-icon">🖐️</div>
-                <div class="help-text"><b>Ziehen:</b> Bewege Punkte, um zu sehen, wie sich die <b>Regression</b> verändert.</div>
-            </div>
-            <div class="help-item">
-                <div class="help-icon">📉</div>
-                <div class="help-text"><b>SD-Schatten:</b> Der lila Bereich zeigt die Standardabweichung.</div>
-            </div>
-            <button onclick="toggleHelp()" style="width: 100%; border-color: var(--neon-blue);">Start Labor</button>
-        </div>
-    </div>
+    <!-- Overlays Removed (Clean UI) -->
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -354,8 +340,7 @@
         }
 
         function toggleHelp() {
-            const overlay = document.getElementById('help-overlay');
-            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+            // Removed for minimalism
         }
 
         function resize() {
@@ -408,6 +393,7 @@
         function clearPoints() { points = []; update(); }
 
         function shiftResiduals(factor) {
+            // Logic preserved but UI removed
             if (points.length < 2) return;
             const stats = calculateStats();
             points.forEach(p => {
@@ -445,10 +431,10 @@
             const stats = calculateStats();
             draw(stats);
             
-            document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(4);
+            document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(2);
             document.getElementById('m-val').innerText = stats.m.toFixed(2);
             document.getElementById('n-val').innerText = stats.n.toFixed(2);
-            document.getElementById('sd-val').innerText = stats.sd.toFixed(4);
+            document.getElementById('sd-val').innerText = stats.sd.toFixed(2);
         }
 
         function calculateStats() {
@@ -523,8 +509,8 @@
             points.forEach(p => {
                 const px = OFF_X + p.x * SCALE;
                 const py = h - OFF_Y - p.y * SCALE;
-                ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#ff8800";
-                ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#ff8800";
+                ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#9d50bb";
+                ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#9d50bb";
                 ctx.shadowBlur = 12;
                 ctx.beginPath();
                 ctx.arc(px, py, 5, 0, Math.PI * 2);
