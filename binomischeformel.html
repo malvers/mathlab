@@ -163,20 +163,22 @@
 
         #formula-glow-v3 {
             position: absolute;
-            bottom: 100px;
+            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            background: rgba(15, 23, 42, 0.3);
+            background: rgba(15, 23, 42, 0.35);
             backdrop-filter: blur(20px);
-            padding: 10px 0;
-            border-radius: 20px;
+            padding: 20px 60px;
+            border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8);
+            width: fit-content;
+            max-width: 90%;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
             pointer-events: none;
         }
         .katex-display { margin: 0 !important; font-size: 1.6vw !important; font-weight: bold; }
@@ -290,7 +292,7 @@
         let q = S - p;
 
         let isDragging = false;
-        let offsetX, offsetY, totalSize;
+        let offsetX, offsetY, scale;
 
         function updateUI() {
             q = S - p;
@@ -307,18 +309,18 @@
 
         function resize() {
             const container = document.getElementById('canvas-container');
-            const rect = container.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            let width = container.clientWidth;
+            let height = container.clientHeight;
+
+            // Adjust scale to make the square ('Q') less overwhelming
+            scale = Math.min(width, height) / 550; 
             
-            totalSize = Math.min(rect.width, rect.height) * 0.45;
-            offsetX = (rect.width - totalSize) / 2;
-            offsetY = (rect.height - totalSize) / 2;
-            
-            // Match formula panel width to square width
-            board.style.width = totalSize + "px";
+            offsetX = (width - S * scale) / 2;
+            offsetY = (height - S * scale) / 2;
             
             draw();
         }
@@ -328,14 +330,13 @@
             const h = canvas.height / (window.devicePixelRatio || 1);
             ctx.clearRect(0, 0, w, h);
 
-            const unit = totalSize / S;
-            const px = p * unit;
-            const qx = q * unit;
+            const px = p * scale;
+            const qx = q * scale;
 
             // Outer Frame (p+q)^2
             ctx.strokeStyle = "rgba(255,255,255,0.1)";
             ctx.lineWidth = 1;
-            ctx.strokeRect(offsetX, offsetY, totalSize, totalSize);
+            ctx.strokeRect(offsetX, offsetY, S * scale, S * scale);
 
             // Areas
             drawRect(offsetX, offsetY, px, px, "#ffcc00", "p²");
@@ -344,7 +345,7 @@
             drawRect(offsetX + px, offsetY + px, qx, qx, "#00f2ff", "q²");
 
             // Brackets & Annotations
-            drawAnnotations(offsetX, offsetY, px, qx, totalSize);
+            drawAnnotations(offsetX, offsetY, px, qx);
 
             // Drag Cursor (Intersection Point)
             drawHandle(offsetX + px, offsetY + px);
@@ -389,7 +390,7 @@
             ctx.restore();
         }
 
-        function drawAnnotations(x, y, px, qx, total) {
+        function drawAnnotations(x, y, px, qx) {
             ctx.strokeStyle = "rgba(255,255,255,0.3)";
             ctx.lineWidth = 1;
             ctx.font = "14px Orbitron";
@@ -421,10 +422,9 @@
             ctx.fillText(label, x - 15, y + len/2);
         }
 
-        // --- Interaction Logic (Pointer Events for iPad/Mobile support) ---
+        // --- Interaction Logic ---
         function handleMove(mx, my) {
-            const unit = totalSize / S;
-            const targetP = (mx - offsetX) / unit;
+            const targetP = (mx - offsetX) / scale;
             if (targetP >= 0.1 && targetP <= 9.9) {
                 p = targetP;
                 pSlider.value = p;
@@ -433,21 +433,25 @@
             }
         }
 
-        canvas.addEventListener('pointerdown', (e) => {
+        function handleStart(e) {
+            e.preventDefault();
             const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            const unit = totalSize / S;
-            const hx = offsetX + p * unit;
-            const hy = offsetY + p * unit;
-            
-            // Larger hit area for touch (40px)
-            if (Math.sqrt((mx-hx)**2 + (my-hy)**2) < 40) {
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const px = offsetX + p * scale;
+            const py = offsetY + p * scale;
+            const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+
+            // Larger hit area for iPad (45px)
+            if (dist < 45) {
                 isDragging = true;
                 canvas.setPointerCapture(e.pointerId);
                 canvas.style.cursor = "grabbing";
             }
-        });
+        }
+
+        canvas.addEventListener('pointerdown', handleStart);
 
         window.addEventListener('pointerup', (e) => {
             isDragging = false;
