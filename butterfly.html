@@ -3,284 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Butterfly Curve Evolution</title>
+    <title>Butterfly Curve | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #0b1120; color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; }
-        #canvas-container { flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        
-        #controls {
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
-            padding: 16px 24px; display: flex; gap: 16px; align-items: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7); z-index: 10; flex-wrap: wrap; justify-content: center; 
-            width: 95%; max-width: 1050px; box-sizing: border-box;
-        }
-        
-        .control-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 90px; }
-        .control-group label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; display: flex; justify-content: space-between;}
-        
-        input[type=range] { cursor: pointer; width: 100%; height: 6px; border-radius: 3px; outline: none; }
-        
-        /* Custom Tracking Colors mapped exactly to Equation Terms */
-        .c-exp { color: #f472b6 !important; accent-color: #f472b6; }  /* Pink */
-        .c-cos { color: #4ade80 !important; accent-color: #4ade80; }  /* Green */
-        .c-sin { color: #fbbf24 !important; accent-color: #fbbf24; }  /* Amber */
-        .c-gen { color: #00f2ff !important; accent-color: #00f2ff; }  /* Cyan */
-
-        .btn-group { display: flex; gap: 8px; justify-content: center;}
-        button { background: #00f2ff; color: #0b1120; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 800; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; box-shadow: 0 4px 12px rgba(0, 242, 255, 0.3);}
-        button:hover { background: #00c3cc; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 242, 255, 0.5);}
-        button.secondary { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: none;}
-        button.secondary:hover { background: rgba(255, 255, 255, 0.2); box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);}
-        
-        #equation {
-            position: absolute; top: 25px; left: 25px; font-size: 1.25rem; color: rgba(255,255,255,0.8);
-            font-family: 'Times New Roman', serif; font-style: italic; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
-            padding: 12px 24px; border-radius: 12px; z-index: 10;
-            border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid #fff;
-        }
-        .param { font-weight: bold; }
-        .divider { width: 1px; height: 35px; background: rgba(255,255,255,0.15); margin: 0 4px; }
-        
-        @media (max-width: 900px) { 
-            #controls { padding: 16px; gap: 12px; border-radius: 16px;} 
-            #equation { font-size: 0.95rem; top: 15px; left: 15px; padding: 10px 16px;} 
-            .divider { display: none; }
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-pink: #f472b6;
+            --neon-green: #4ade80;
+            --neon-amber: #fbbf24;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.75);
+            --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
-        footer {
-            position: absolute;
-            bottom: 5px;
-            width: 100%;
-            text-align: center;
-            font-family: 'Inter', sans-serif;
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* --- SIDEBAR --- */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .dashboard-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        /* --- STATS & CONTROLS --- */
+        .stats-card {
+            background: var(--glass-bright);
+            padding: 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stats-title {
+            font-family: 'Orbitron';
             font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 5;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Orbitron';
+        }
+        .val-display { color: var(--neon-blue); font-weight: bold; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        button {
+            background: var(--glass-bright);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
             letter-spacing: 1px;
         }
+        button:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
+        button.secondary { opacity: 0.6; }
 
-        footer a {
-            color: #00f2ff;
-            text-decoration: none;
-            opacity: 0.7;
+        #equation-panel {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: transparent;
+            width: 95%;
+            text-align: center;
+            pointer-events: none;
+            border: none;
+        }
+        .katex-display { margin: 0 !important; font-size: 8vw !important; font-weight: bold; filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)); }
+
+        /* --- MAIN VIEWPORT --- */
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas { display: block; }
+
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, var(--neon-blue), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
+            text-transform: uppercase;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--neon-blue);
+            margin-top: 8px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .footer-credit {
+            margin-top: auto;
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
         }
     </style>
 </head>
 <body>
 
-<div id="canvas-container">
-    <div id="equation">
-        r = 
-        <span id="eq-eA" class="param c-exp">1</span><span class="c-exp">e<sup>sin(θ)</sup></span> - 
-        <span id="eq-cA" class="param c-cos">2</span><span class="c-cos">cos(</span><span id="eq-cF" class="param c-cos">4</span><span class="c-cos">θ)</span> + 
-        <span id="eq-sA" class="param c-sin">1</span><span class="c-sin">sin<sup>5</sup>((2θ - π) / </span><span id="eq-sP" class="param c-sin">24</span><span class="c-sin">)</span>
-    </div>
-    <canvas id="canvas"></canvas>
+    <aside id="side-panel">
+        <a href="index.html" class="dashboard-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            DASHBOARD
+        </a>
 
-    <footer>
-        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
-        &bull; <a href="impressum.html">IMPRESSUM</a>
-    </footer>
-    
-    <div id="controls">
-        <div class="control-group" style="flex: 0 0 auto;">
-            <div class="btn-group">
-                <button id="btn-toggle">Pause</button>
-                <button id="btn-reset" class="secondary">Restart</button>
+        <section class="stats-card">
+            <span class="stats-title">Animation</span>
+            <div class="control-group">
+                <div class="control-header">Speed <span class="val-display" id="val-speed">3.5</span></div>
+                <input type="range" id="speed" min="0.5" max="15" step="0.5" value="3.5">
             </div>
+            <div class="control-group">
+                <div class="control-header">Color Hue <span class="val-display" id="val-color">180</span></div>
+                <input type="range" id="color" min="0" max="360" step="1" value="180">
+            </div>
+            <div class="btn-group">
+                <button id="btn-toggle">PAUSE</button>
+                <button id="btn-reset" class="secondary">RESET</button>
+            </div>
+        </section>
+
+        <section class="stats-card">
+            <span class="stats-title">Parameter-Optimierung</span>
+            
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-pink);">Exp Amp <span id="val-eA" class="val-display" style="color:var(--neon-pink);">1.0</span></div>
+                <input type="range" id="p-eA" min="0" max="4" step="0.1" value="1" style="accent-color:var(--neon-pink);">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-green);">Cos Amp <span id="val-cA" class="val-display" style="color:var(--neon-green);">2.0</span></div>
+                <input type="range" id="p-cA" min="0" max="6" step="0.1" value="2" style="accent-color:var(--neon-green);">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-green);">Cos Freq <span id="val-cF" class="val-display" style="color:var(--neon-green);">4</span></div>
+                <input type="range" id="p-cF" min="1" max="12" step="1" value="4" style="accent-color:var(--neon-green);">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-amber);">Sin Amp <span id="val-sA" class="val-display" style="color:var(--neon-amber);">1.0</span></div>
+                <input type="range" id="p-sA" min="0" max="4" step="0.1" value="1" style="accent-color:var(--neon-amber);">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header" style="color:var(--neon-amber);">Sin Div <span id="val-sP" class="val-display" style="color:var(--neon-amber);">24</span></div>
+                <input type="range" id="p-sP" min="1" max="48" step="1" value="24" style="accent-color:var(--neon-amber);">
+            </div>
+        </section>
+
+        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+    </aside>
+
+    <main id="canvas-container">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">Butterfly Curve Evolution</div>
         </div>
 
-        <div class="divider"></div>
+        <div id="equation-panel">
+            r = <span id="eq-eA" class="param-live" style="color:var(--neon-pink);">1.0</span><span style="color:var(--neon-pink);">e<sup>sin(θ)</sup></span> 
+            - <span id="eq-cA" class="param-live" style="color:var(--neon-green);">2.0</span><span style="color:var(--neon-green);">cos(<span id="eq-cF" class="param-live">4</span>θ)</span> 
+            + <span id="eq-sA" class="param-live" style="color:var(--neon-amber);">1.0</span><span style="color:var(--neon-amber);">sin<sup>5</sup>((2θ-π)/<span id="eq-sP" class="param-live">24</span>)</span>
+        </div>
+
+        <canvas id="canvas"></canvas>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sidePanel = document.getElementById('side-panel');
         
-        <div class="control-group">
-            <label class="c-gen">Ev. Speed <span id="val-speed" class="val-display c-gen">3.5</span></label>
-            <input type="range" id="speed" class="c-gen" min="0.5" max="15" step="0.5" value="3.5">
-        </div>
-        <div class="control-group">
-            <label class="c-gen">Glow Color <span id="val-color" class="val-display c-gen">180</span></label>
-            <input type="range" id="color" class="c-gen" min="0" max="360" step="1" value="180">
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="control-group">
-            <label class="c-exp">Exp Amp <span id="val-eA" class="val-display c-exp">1.0</span></label>
-            <input type="range" id="p-eA" class="c-exp" min="0" max="4" step="0.1" value="1">
-        </div>
-        <div class="control-group">
-            <label class="c-cos">Cos Amp <span id="val-cA" class="val-display c-cos">2.0</span></label>
-            <input type="range" id="p-cA" class="c-cos" min="0" max="6" step="0.1" value="2">
-        </div>
-        <div class="control-group">
-            <label class="c-cos">Cos Freq <span id="val-cF" class="val-display c-cos">4</span></label>
-            <input type="range" id="p-cF" class="c-cos" min="1" max="12" step="1" value="4">
-        </div>
-        <div class="control-group">
-            <label class="c-sin">Sin Amp <span id="val-sA" class="val-display c-sin">1.0</span></label>
-            <input type="range" id="p-sA" class="c-sin" min="0" max="4" step="0.1" value="1">
-        </div>
-        <div class="control-group">
-            <label class="c-sin">Sin Div <span id="val-sP" class="val-display c-sin">24</span></label>
-            <input type="range" id="p-sP" class="c-sin" min="1" max="48" step="1" value="24">
-        </div>
-    </div>
-</div>
-
-<script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    let width, height, cx, cy;
-    let expAmp = 1, cosAmp = 2, cosFreq = 4, sinAmp = 1, sinPeriod = 24;
-    
-    function getScale() {
-        const maxR = expAmp * Math.E + cosAmp + sinAmp;
-        const minDim = Math.min(width, height);
-        // Adaptive zoom fitting to screen bounds dynamically with 15% padding
-        return (minDim / 2) / (maxR * 1.15); 
-    }
-
-    function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width * window.devicePixelRatio;
-        canvas.height = height * window.devicePixelRatio;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        cx = width / 2;
-        cy = height / 2;
-    }
-    
-    window.addEventListener('resize', resize);
-    resize();
-    
-    let currentTheta = 0;
-    let isPlaying = true;
-    
-    const ui = {
-        speed: { el: document.getElementById('speed'), val: document.getElementById('val-speed') },
-        color: { el: document.getElementById('color'), val: document.getElementById('val-color') },
-        eA: { el: document.getElementById('p-eA'), val: document.getElementById('val-eA'), eq: document.getElementById('eq-eA') },
-        cA: { el: document.getElementById('p-cA'), val: document.getElementById('val-cA'), eq: document.getElementById('eq-cA') },
-        cF: { el: document.getElementById('p-cF'), val: document.getElementById('val-cF'), eq: document.getElementById('eq-cF') },
-        sA: { el: document.getElementById('p-sA'), val: document.getElementById('val-sA'), eq: document.getElementById('eq-sA') },
-        sP: { el: document.getElementById('p-sP'), val: document.getElementById('val-sP'), eq: document.getElementById('eq-sP') },
-        toggleBtn: document.getElementById('btn-toggle'),
-        resetBtn: document.getElementById('btn-reset'),
-    };
-
-    function updateParams() {
-        expAmp = parseFloat(ui.eA.el.value);
-        cosAmp = parseFloat(ui.cA.el.value);
-        cosFreq = parseFloat(ui.cF.el.value);
-        sinAmp = parseFloat(ui.sA.el.value);
-        sinPeriod = parseFloat(ui.sP.el.value);
+        let width, height, cx, cy;
+        let expAmp = 1, cosAmp = 2, cosFreq = 4, sinAmp = 1, sinPeriod = 24;
         
-        ui.eA.val.innerText = expAmp.toFixed(1); ui.eA.eq.innerText = expAmp === 1 ? "" : expAmp;
-        ui.cA.val.innerText = cosAmp.toFixed(1); ui.cA.eq.innerText = cosAmp;
-        ui.cF.val.innerText = cosFreq;           ui.cF.eq.innerText = cosFreq;
-        ui.sA.val.innerText = sinAmp.toFixed(1); ui.sA.eq.innerText = sinAmp === 1 ? "" : sinAmp;
-        ui.sP.val.innerText = sinPeriod;         ui.sP.eq.innerText = sinPeriod;
-        
-        ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
-        ui.color.val.innerText = ui.color.el.value;
-    }
-
-    // Attach listeners to instantly respond to parameter modifications
-    [ui.speed.el, ui.color.el, ui.eA.el, ui.cA.el, ui.cF.el, ui.sA.el, ui.sP.el].forEach(el => {
-        el.addEventListener('input', updateParams);
-    });
-    updateParams();
-
-    ui.toggleBtn.addEventListener('click', () => {
-        isPlaying = !isPlaying;
-        ui.toggleBtn.textContent = isPlaying ? "Pause" : "Play";
-    });
-    
-    ui.resetBtn.addEventListener('click', () => {
-        currentTheta = 0;
-        if (!isPlaying) {
-            isPlaying = true;
-            ui.toggleBtn.textContent = "Pause";
-        }
-    });
-
-    function getButterflyXY(theta, currentScale) {
-        const sinT = Math.sin(theta);
-        const cos4T = Math.cos(cosFreq * theta);
-        const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / sinPeriod), 5);
-        
-        const r = expAmp * Math.exp(sinT) - cosAmp * cos4T + sinAmp * term3;
-        
-        // Rotated 90 degrees left from upright
-        const mapX = -r * Math.cos(theta);
-        const mapY = -r * Math.sin(theta);
-        
-        return { 
-            x: cx + mapX * currentScale, 
-            y: cy + mapY * currentScale 
+        const ui = {
+            speed: { el: document.getElementById('speed'), val: document.getElementById('val-speed') },
+            color: { el: document.getElementById('color'), val: document.getElementById('val-color') },
+            eA: { el: document.getElementById('p-eA'), val: document.getElementById('val-eA') },
+            cA: { el: document.getElementById('p-cA'), val: document.getElementById('val-cA') },
+            cF: { el: document.getElementById('p-cF'), val: document.getElementById('val-cF') },
+            sA: { el: document.getElementById('p-sA'), val: document.getElementById('val-sA') },
+            sP: { el: document.getElementById('p-sP'), val: document.getElementById('val-sP') },
+            toggleBtn: document.getElementById('btn-toggle'),
+            resetBtn: document.getElementById('btn-reset'),
         };
-    }
 
-    let lastTime = performance.now();
-
-    function draw() {
-        const now = performance.now();
-        const dt = (now - lastTime) / 1000;
-        lastTime = now;
-        
-        const speedMult = parseFloat(ui.speed.el.value);
-        const hueBase = parseInt(ui.color.el.value);
-        
-        const dynamicScale = getScale();
-
-        if (isPlaying) {
-            currentTheta += speedMult * dt;
+        function getScale() {
+            const maxR = expAmp * Math.E + cosAmp + sinAmp;
+            const minDim = Math.min(width, height);
+            return (minDim / 2) / (maxR * 1.25); 
         }
 
-        ctx.fillStyle = '#0b1120';
-        ctx.fillRect(0, 0, width, height);
-        
-        if (currentTheta <= 0) {
-            requestAnimationFrame(draw);
-            return;
+        function resize() {
+            const container = document.getElementById('canvas-container');
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            cx = width / 2;
+            cy = height / 2;
         }
+        
+        window.addEventListener('resize', resize);
+        window.addEventListener('load', resize);
+        
+        let currentTheta = 0;
+        let isPlaying = true;
+        
+        function updateParams() {
+            expAmp = parseFloat(ui.eA.el.value);
+            cosAmp = parseFloat(ui.cA.el.value);
+            cosFreq = parseFloat(ui.cF.el.value);
+            sinAmp = parseFloat(ui.sA.el.value);
+            sinPeriod = parseFloat(ui.sP.el.value);
+            
+            ui.eA.val.innerText = expAmp.toFixed(1);
+            ui.cA.val.innerText = cosAmp.toFixed(1);
+            ui.cF.val.innerText = cosFreq;
+            ui.sA.val.innerText = sinAmp.toFixed(1);
+            ui.sP.val.innerText = sinPeriod;
 
-        ctx.lineWidth = 1.5;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.beginPath();
-        
-        let first = true;
-        const step = 0.02; 
-        
-        const maxExpectedTheta = sinPeriod * Math.PI; 
-        const endT = Math.min(currentTheta, maxExpectedTheta);
-        
-        const dynamicHue = (hueBase + currentTheta * 8) % 360;
-        
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = `hsl(${dynamicHue}, 100%, 50%)`;
-        ctx.strokeStyle = `hsl(${dynamicHue}, 100%, 75%)`;
+            ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
+            ui.color.val.innerText = ui.color.el.value;
 
-        for (let t = 0; t <= endT; t += step) {
-            const pt = getButterflyXY(t, dynamicScale);
-            if (first) {
-                ctx.moveTo(pt.x, pt.y);
-                first = false;
-            } else {
-                ctx.lineTo(pt.x, pt.y);
+            // Render LaTeX Equation
+            if (window.katex) {
+                const latex = `r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{\\sin(\\theta)}} - \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} + \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
+                katex.render(latex, document.getElementById('equation-panel'), {
+                    throwOnError: false,
+                    displayMode: true
+                });
             }
         }
+
+        [ui.speed.el, ui.color.el, ui.eA.el, ui.cA.el, ui.cF.el, ui.sA.el, ui.sP.el].forEach(el => {
+            el.addEventListener('input', updateParams);
+        });
+
+        ui.toggleBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            ui.toggleBtn.textContent = isPlaying ? "PAUSE" : "PLAY";
+        });
         
-        ctx.stroke();
+        ui.resetBtn.addEventListener('click', () => {
+            currentTheta = 0;
+        });
+
+        function getButterflyXY(theta, currentScale) {
+            const sinT = Math.sin(theta);
+            const cos4T = Math.cos(cosFreq * theta);
+            const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / sinPeriod), 5);
+            const r = expAmp * Math.exp(sinT) - cosAmp * cos4T + sinAmp * term3;
+            return { 
+                x: cx - (r * Math.cos(theta)) * currentScale, 
+                y: cy - (r * Math.sin(theta)) * currentScale 
+            };
+        }
+
+        let lastTime = performance.now();
+        function draw() {
+            const now = performance.now();
+            const dt = (now - lastTime) / 1000;
+            lastTime = now;
+            
+            const speedMult = parseFloat(ui.speed.el.value);
+            const hueBase = parseInt(ui.color.el.value);
+            const dynamicScale = getScale();
+
+            if (isPlaying) currentTheta += speedMult * dt;
+
+            // Transluscent clear for trail effect? No, user wants clean evolution.
+            ctx.clearRect(0, 0, width, height);
+            
+            if (currentTheta > 0) {
+                ctx.lineWidth = 1.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                const step = 0.02; 
+                const maxExpectedTheta = sinPeriod * Math.PI; 
+                const endT = Math.min(currentTheta, maxExpectedTheta);
+                const dynamicHue = (hueBase + currentTheta * 8) % 360;
+                
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `hsl(${dynamicHue}, 100%, 50%)`;
+                ctx.strokeStyle = `hsl(${dynamicHue}, 100%, 75%)`;
+
+                ctx.beginPath();
+                let first = true;
+                for (let t = 0; t <= endT; t += step) {
+                    const pt = getButterflyXY(t, dynamicScale);
+                    if (first) { ctx.moveTo(pt.x, pt.y); first = false; }
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        updateParams();
         requestAnimationFrame(draw);
-    }
-    
-    requestAnimationFrame(draw);
-</script>
+    </script>
 </body>
 </html>
