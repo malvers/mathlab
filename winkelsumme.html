@@ -1,376 +1,445 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Polygon-Labor | Doc Alvers</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #007aff;
-      --bg: #ffffff;
-      --text: #1d1d1f;
-      --ui-bg: rgba(245, 245, 247, 0.9);
-    }
-    body {
-      margin: 0;
-      font-family: -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      touch-action: none;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Winkelsumme-Labor | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-pink: #ff0055;
+            --neon-green: #39FF14;
+            --neon-orange: #ff8800;
+            --neon-yellow: #faff00;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.75);
+            --glass-bright: rgba(255, 255, 255, 0.05);
+            --labor-red: #ff4757;
+        }
 
-    #ui {
-      padding: 10px;
-      text-align: center;
-      background: var(--ui-bg);
-      border-bottom: 1px solid #ddd;
-      z-index: 10;
-      position: relative;
-    }
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
 
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 10px;
-      margin-bottom: 5px;
-    }
+        /* --- SIDEBAR --- */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
 
-    h2 {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1rem;
-      letter-spacing: 1px;
-      flex-grow: 1;
-    }
+        .dashboard-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
 
-    .controls { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+        h2 {
+            font-family: 'Orbitron';
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding-bottom: 5px;
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
 
-    canvas { background: white; flex-grow: 1; width: 100%; }
+        /* --- STATS CARDS --- */
+        .stats-card {
+            background: var(--glass-bright);
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-    .info-box {
-      position: absolute;
-      top: 130px;
-      right: 15px;
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: right;
-      pointer-events: none;
-      min-width: 90px;
-    }
+        .stats-title {
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
-    /* Addition-Styles */
-    .math-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
-      color: #666;
-      margin-bottom: 8px;
-    }
-    .math-row {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 1.1rem;
-      font-weight: bold;
-      line-height: 1.2;
-      display: flex;
-      justify-content: flex-end;
-      gap: 5px;
-    }
-    .math-sum-line {
-      border-top: 2px solid #333;
-      margin-top: 4px;
-      padding-top: 4px;
-      color: var(--accent);
-    }
+        .stats-val {
+            font-family: 'Orbitron';
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fff;
+        }
 
-    button {
-      padding: 6px 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background: white;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.6rem;
-    }
-    button.active { background: var(--accent); color: white; border-color: var(--accent); }
+        #math-log {
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            padding-right: 8px;
+            margin-top: 10px;
+        }
+        #math-log::-webkit-scrollbar { width: 4px; }
+        #math-log::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+        #math-log::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        #math-log::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
 
-    .back-btn, .help-btn {
-      text-decoration: none;
-      color: var(--accent);
-      font-size: 0.7rem;
-      font-weight: bold;
-      font-family: 'Orbitron', sans-serif;
-      padding: 5px;
-      cursor: pointer;
-    }
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-    /* Help Modal */
-    #helpModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(4px);
-    }
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 20px;
-      max-width: 85%;
-      font-size: 0.9rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .modal-content h3 { margin-top: 0; font-family: 'Orbitron'; color: var(--accent); }
+        /* --- CONTROLS --- */
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
 
-    .modal-content ul {
-      list-style: none;
-      padding: 0;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
+        button {
+            padding: 10px;
+            font-size: 0.7rem;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--glass-bright);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        button:hover {
+            border-color: var(--neon-blue);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+        button.active {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        }
 
-    /* FIX: Links UND Rechts perfekt bündig */
-    .modal-content ul li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 15px;
-      margin-bottom: 10px;
-    }
-    .modal-content ul li b {
-      text-align: left; /* Hier ist die Magie! Alles startet links bündig */
-      white-space: nowrap;
-    }
-    .modal-content ul li span {
-      text-align: left;
-    }
+        .btn-large {
+            grid-column: span 4;
+            padding: 15px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
 
-    .close-modal {
-      display: block;
-      text-align: center;
-      color: var(--accent);
-      font-weight: bold;
-      cursor: pointer;
-      padding-top: 10px;
-      border-top: 1px solid #eee;
-    }
+        /* --- CANVAS --- */
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            overflow: hidden;
+        }
 
-    @media (max-width: 400px) {
-      h2 { font-size: 0.85rem; }
-      .back-btn, .help-btn { font-size: 0.6rem; }
-      .modal-content { padding: 15px; font-size: 0.8rem; }
-      .modal-content ul li { gap: 10px; }
-      .math-row { font-size: 0.9rem; }
-    }
-  </style>
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, var(--neon-blue), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--neon-blue));
+            text-transform: uppercase;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            color: var(--neon-blue);
+            margin-top: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .footer-credit {
+            margin-top: auto;
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
+            padding-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<div id="ui">
-  <div class="header-top">
-    <a href="index.html" class="back-btn">← ZENTRALE</a>
-    <h2>POLYGON-LABOR</h2>
-    <div class="help-btn" onclick="toggleHelp()">INFO ?</div>
-  </div>
-  <div class="controls" id="btnContainer"></div>
-</div>
+    <aside id="side-panel">
+        <a href="index.html" class="dashboard-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            DASHBOARD
+        </a>
 
-<canvas id="canvas"></canvas>
-<div class="info-box" id="stats"></div>
+        <section class="stats-card">
+            <div class="control-group" id="btn-container">
+                <!-- Eckenzahl Buttons werden per JS generiert -->
+            </div>
+            <button class="btn-large" onclick="initPolygon(nEcken)">LABOR RESET</button>
+        </section>
 
-<div id="helpModal" onclick="toggleHelp()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h3>Missions-Briefing</h3>
-    <ul>
-      <li><b>Ecken wählen:</b><span>Tippe oben auf 3E bis 9E.</span></li>
-      <li><b>Punkte bewegen:</b><span>Ziehe die blauen Kreise mit dem Finger oder der Maus.</span></li>
-      <li><b>Winkelsumme:</b><span>Beobachte die Addition rechts. Sie entspricht der Formel <b>(n - 2) &times; 180&deg;</b>.</span></li>
-      <li><b>Beweis:</b><span>Bei 3E & 4E werden die Winkel unten auf einer Linie abgetragen.</span></li>
-    </ul>
-    <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
-  </div>
-</div>
+        <section class="stats-card">
+            <span class="stats-title">Innenwinkelsumme</span>
+            <span id="sum-val" class="stats-val">0°</span>
+            <div id="math-log"></div>
+        </section>
 
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const stats = document.getElementById('stats');
-  const helpModal = document.getElementById('helpModal');
+        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+    </aside>
 
-  let points = [];
-  let dragIdx = -1;
-  let nEcken = 3;
-  const BOGEN_RAD = 45;
+    <main id="canvas-container">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">Polygon-Winkelsumme</div>
+        </div>
+        <canvas id="canvas"></canvas>
+    </main>
 
-  const farben = [
-      'rgba(198, 33, 40, 1.0)', // SATTE ROT
-      'rgba(46, 114, 198, 1.0)', // SATTE BLAU
-      'rgba(119, 181, 33, 1.0)', // SATTE GRÜN
-      'rgba(255, 177, 0, 1.0)', // SATTE GELB
-      'rgba(26, 188, 156, 1.0)', // TÜRKIS
-      'rgba(155, 89, 182, 1.0)', // VIOLETT
-      'rgba(230, 126, 34, 1.0)', // ORANGE
-      'rgba(52, 73, 94, 1.0)', // DUNKELBLAU/GRAU
-      'rgba(149, 165, 166, 1.0)' // HELLGRAU
-  ];
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/earcut/dist/earcut.min.js"></script>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        const sumValEl = document.getElementById('sum-val');
+        const mathLogEl = document.getElementById('math-log');
 
-  function toggleHelp() {
-    helpModal.style.display = helpModal.style.display === 'flex' ? 'none' : 'flex';
-  }
+        const neonBlue   = "#00d2ff";
+        const neonPurple = "#9d50bb";
+        const neonPink   = "#ff0055";
+        const neonGreen  = "#39FF14";
+        const neonOrange = "#ff8800";
+        const neonYellow = "#faff00";
+        const laborColors = [neonBlue, neonGreen, neonOrange, neonPurple, neonPink, neonYellow, "#00ffa2", "#ff0080", "#00ffff"];
 
-  function initPolygon(n) {
-      nEcken = n;
-      points = [];
-      const rect = canvas.getBoundingClientRect();
-      const cx = rect.width / 2, cy = rect.height * 0.35;
-      const radius = Math.min(rect.width, rect.height) * 0.22;
-      for (let i = 0; i < n; i++) {
-          const a = (2 * Math.PI * i) / n - Math.PI / 2;
-          points.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) });
-      }
-      updateButtons();
-      draw();
-  }
+        let width, height, dpr;
+        let points = [];
+        let nEcken = 3;
+        let dragIdx = -1;
+        const BOGEN_RAD = 50;
 
-  function draw() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, rect.width, rect.height);
+        function init() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            updateButtons();
+            initPolygon(nEcken);
+        }
 
-      const n = points.length;
-      let winkelWerte = [];
-      let summeRad = 0;
+        function updateButtons() {
+            const btnContainer = document.getElementById('btn-container');
+            btnContainer.innerHTML = '';
+            for (let i = 3; i <= 9; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i + "E";
+                if (i === nEcken) btn.classList.add('active');
+                btn.onclick = () => { nEcken = i; updateButtons(); initPolygon(i); };
+                btnContainer.appendChild(btn);
+            }
+        }
 
-      let area = 0;
-      for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
-      const isCW = area < 0;
+        function initPolygon(n) {
+            points = [];
+            const cx = width / 2;
+            const cy = height * 0.4;
+            const radius = Math.min(width, height) * 0.22;
+            for (let i = 0; i < n; i++) {
+                const a = (2 * Math.PI * i) / n - Math.PI / 2;
+                points.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) });
+            }
+            draw();
+        }
 
-      for (let i = 0; i < n; i++) {
-          const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
-          const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
-          const a2 = Math.atan2(next.y - P.y, next.x - P.x);
-          let diff = a2 - a1;
-          if (isCW) { while (diff < 0) diff += Math.PI * 2; }
-          else { while (diff > 0) diff -= Math.PI * 2; }
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Raster
+            ctx.strokeStyle = "rgba(255,255,255,0.03)";
+            ctx.lineWidth = 1;
+            for(let x=0; x<width; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,height); ctx.stroke(); }
+            for(let y=0; y<height; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(width,y); ctx.stroke(); }
 
-          ctx.fillStyle = farben[i % farben.length];
-          ctx.beginPath();
-          ctx.moveTo(P.x, P.y);
-          ctx.arc(P.x, P.y, BOGEN_RAD, a1, a1 + diff, !isCW);
-          ctx.fill();
-          winkelWerte.push(Math.abs(diff));
-          summeRad += Math.abs(diff);
-      }
+            const n = points.length;
+            let logHtml = "";
+            let totalDeg = 0;
+            let winkelWerte = [];
 
-      ctx.beginPath();
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = "#333";
-      ctx.moveTo(points[0].x, points[0].y);
-      for(let i=1; i<n; i++) ctx.lineTo(points[i].x, points[i].y);
-      ctx.closePath();
-      ctx.stroke();
+            // Orientierung für Innenwinkel
+            let area = 0;
+            for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
+            const isCW = area < 0;
 
-      points.forEach(p => {
-          ctx.fillStyle = "#2E72C6";
-          ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
-          ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
-      });
+            // Winkel Zeichnen & Berechnen
+            for (let i = 0; i < n; i++) {
+                const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
+                const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
+                const a2 = Math.atan2(next.y - P.y, next.x - P.x);
+                let diff = a2 - a1;
+                if (isCW) { while (diff < 0) diff += Math.PI * 2; }
+                else { while (diff > 0) diff -= Math.PI * 2; }
 
-      if (n <= 4) {
-          const gY = rect.height * 0.75;
-          const gX = rect.width / 2;
-          const drawRadius = BOGEN_RAD * 1.5;
-          ctx.strokeStyle = "#ccc";
-          ctx.beginPath(); ctx.moveTo(gX - 120, gY); ctx.lineTo(gX + 120, gY); ctx.stroke();
-          let currentStart = Math.PI;
-          winkelWerte.forEach((w, i) => {
-              ctx.fillStyle = farben[i % farben.length];
-              ctx.beginPath(); ctx.moveTo(gX, gY);
-              ctx.arc(gX, gY, drawRadius, currentStart, currentStart - w, true);
-              ctx.fill();
-              currentStart -= w;
-          });
-      }
+                const deg = Math.abs(diff) * 180 / Math.PI;
+                winkelWerte.push(Math.abs(diff));
+                totalDeg += deg;
 
-      let gradWerte = winkelWerte.map(w => Math.round(w * 180 / Math.PI));
-      let targetSum = (n - 2) * 180;
+                // Neon-Bogen
+                const color = laborColors[i % laborColors.length];
+                ctx.shadowBlur = 20; ctx.shadowColor = color;
+                ctx.fillStyle = color + "40";
+                ctx.beginPath();
+                ctx.moveTo(P.x, P.y);
+                ctx.arc(P.x, P.y, BOGEN_RAD, a1, a1 + diff, !isCW);
+                ctx.closePath(); ctx.fill();
+                
+                ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+                ctx.shadowBlur = 0;
 
-      let currentSum = gradWerte.reduce((a, b) => a + b, 0);
-      let diff = targetSum - currentSum;
-      if (diff !== 0 && gradWerte.length > 0) {
-          let maxIdx = gradWerte.indexOf(Math.max(...gradWerte));
-          gradWerte[maxIdx] += diff;
-      }
+                logHtml += `<div class="log-entry"><span style="color:${color}">Winkel ${i+1}</span><span>${deg.toFixed(1)}°</span></div>`;
+            }
 
-      let html = `<div class="math-title">POLYGON (n=${n})</div>`;
+            // Polygon-Umriss (Filigran Weiß, No-Fancy)
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for(let i=1; i<n; i++) ctx.lineTo(points[i].x, points[i].y);
+            ctx.closePath();
+            ctx.stroke();
 
-      gradWerte.forEach((wert, idx) => {
-          let prefix = (idx === gradWerte.length - 1) ? "+" : "&nbsp;";
-          let color = farben[idx % farben.length];
-          html += `<div class="math-row" style="color: ${color}"><span>${prefix}</span><span>${wert}&deg;</span></div>`;
-      });
+            // Handles (Dunkelgrau mit Aura)
+            points.forEach((p, idx) => {
+                const color = laborColors[idx % laborColors.length];
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 0.8; ctx.stroke();
+                ctx.shadowBlur = 0;
+            });
 
-      html += `<div class="math-row math-sum-line"><span>&nbsp;</span><span>${targetSum}&deg;</span></div>`;
+            // Visual Proof (Addition an der Gerade) - NUR FÜR 3E und 4E
+            if (n <= 4) {
+                const gY = height * 0.8;
+                const gX = width / 2;
+                const lineLen = 250;
+                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.8;
+                ctx.beginPath(); ctx.moveTo(gX - lineLen, gY); ctx.lineTo(gX + lineLen, gY); ctx.stroke();
 
-      stats.innerHTML = html;
-  }
+                let currentStart = Math.PI;
+                winkelWerte.forEach((w, i) => {
+                    const color = laborColors[i % laborColors.length];
+                    ctx.shadowBlur = 15; ctx.shadowColor = color;
+                    ctx.fillStyle = color + "80"; // Etwas satter für die Addition
+                    ctx.beginPath(); ctx.moveTo(gX, gY);
+                    ctx.arc(gX, gY, BOGEN_RAD * 1.5, currentStart, currentStart - w, true);
+                    ctx.closePath(); ctx.fill();
+                    
+                    // Diskrete Trennline zwischen den Winkeln im Beweis
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 0.5;
+                    ctx.beginPath(); ctx.moveTo(gX, gY);
+                    ctx.lineTo(gX + Math.cos(currentStart) * BOGEN_RAD * 1.5, gY + Math.sin(currentStart) * BOGEN_RAD * 1.5);
+                    ctx.stroke();
 
-  function updateButtons() {
-      const container = document.getElementById('btnContainer');
-      container.innerHTML = '';
-      for (let i = 3; i <= 9; i++) {
-          const btn = document.createElement('button');
-          btn.innerText = i + " E";
-          if (i === nEcken) btn.className = 'active';
-          btn.onclick = () => initPolygon(i);
-          container.appendChild(btn);
-      }
-  }
+                    currentStart -= w;
+                });
+                ctx.shadowBlur = 0;
+            }
 
-  function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
-  }
+            // Sidebar Update
+            sumValEl.innerText = Math.round(totalDeg) + "°";
+            mathLogEl.innerHTML = logHtml;
+        }
 
-  function startDrag(e) {
-      const pos = getPos(e);
-      dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40);
-      if(dragIdx !== -1) e.preventDefault();
-  }
+        // Interaktion
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
 
-  function moveDrag(e) {
-      if (dragIdx === -1) return;
-      const pos = getPos(e);
-      points[dragIdx] = { x: pos.x, y: pos.y };
-      draw();
-      e.preventDefault();
-  }
+        canvas.onpointerdown = e => {
+            const pos = getPos(e);
+            dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 30);
+        };
 
-  function stopDrag() { dragIdx = -1; }
+        window.onpointermove = e => {
+            if (dragIdx === -1) return;
+            const pos = getPos(e);
+            points[dragIdx] = { x: pos.x, y: pos.y };
+            draw();
+        };
 
-  canvas.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', stopDrag);
-  canvas.addEventListener('touchstart', startDrag, {passive: false});
-  window.addEventListener('touchmove', moveDrag, {passive: false});
-  window.addEventListener('touchend', stopDrag);
-  window.addEventListener('resize', () => initPolygon(nEcken));
+        window.onpointerup = () => dragIdx = -1;
+        window.onresize = init;
+        document.fonts.ready.then(init);
 
-  initPolygon(3);
-</script>
+    </script>
 </body>
 </html>
