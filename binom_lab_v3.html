@@ -103,7 +103,7 @@
             color: rgba(255, 255, 255, 0.7);
             font-family: 'Orbitron';
         }
-        .val-display { font-weight: bold; }
+        .val-display { font-weight: bold; font-size: 1.1rem; }
 
         input[type="range"] {
             -webkit-appearance: none;
@@ -131,7 +131,7 @@
         .area-item {
             display: flex;
             justify-content: space-between;
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             font-family: 'Orbitron';
         }
 
@@ -161,24 +161,25 @@
             cursor: crosshair;
         }
 
-        #equation-panel {
+        #formula-glow-v3 {
             position: absolute;
-            bottom: 40px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
             background: rgba(15, 23, 42, 0.3);
             backdrop-filter: blur(20px);
-            padding: 20px 50px;
-            border-radius: 30px;
+            padding: 10px 0;
+            border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
-            width: fit-content;
-            max-width: 95%;
-            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
             pointer-events: none;
         }
-        .katex-display { margin: 0 !important; font-size: 3.2vw !important; font-weight: bold; }
+        .katex-display { margin: 0 !important; font-size: 1.6vw !important; font-weight: bold; }
 
         .canvas-branding {
             position: absolute;
@@ -275,14 +276,14 @@
             <canvas id="binomCanvas"></canvas>
         </div>
 
-        <div id="equation-panel"></div>
+        <div id="formula-glow-v3"></div>
     </main>
 
     <script>
         const canvas = document.getElementById('binomCanvas');
         const ctx = canvas.getContext('2d');
         const pSlider = document.getElementById('p-slider');
-        const board = document.getElementById('equation-panel');
+        const board = document.getElementById('formula-glow-v3');
 
         const S = 10.0; // Fixed total side length
         let p = 7.0;
@@ -312,9 +313,12 @@
             canvas.height = rect.height * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             
-            totalSize = Math.min(rect.width, rect.height) * 0.55;
+            totalSize = Math.min(rect.width, rect.height) * 0.45;
             offsetX = (rect.width - totalSize) / 2;
             offsetY = (rect.height - totalSize) / 2;
+            
+            // Match formula panel width to square width
+            board.style.width = totalSize + "px";
             
             draw();
         }
@@ -417,7 +421,7 @@
             ctx.fillText(label, x - 15, y + len/2);
         }
 
-        // --- Interaction Logic ---
+        // --- Interaction Logic (Pointer Events for iPad/Mobile support) ---
         function handleMove(mx, my) {
             const unit = totalSize / S;
             const targetP = (mx - offsetX) / unit;
@@ -429,36 +433,42 @@
             }
         }
 
-        canvas.addEventListener('mousedown', (e) => { isDragging = true; });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDragging) {
-                // Check if near handle for cursor
-                const dpr = window.devicePixelRatio || 1;
-                const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
+        canvas.addEventListener('pointerdown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const unit = totalSize / S;
+            const hx = offsetX + p * unit;
+            const hy = offsetY + p * unit;
+            
+            // Larger hit area for touch (40px)
+            if (Math.sqrt((mx-hx)**2 + (my-hy)**2) < 40) {
+                isDragging = true;
+                canvas.setPointerCapture(e.pointerId);
+                canvas.style.cursor = "grabbing";
+            }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            canvas.style.cursor = "crosshair";
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            if (isDragging) {
+                handleMove(mx, my);
+            } else {
                 const unit = totalSize / S;
                 const hx = offsetX + p * unit;
                 const hy = offsetY + p * unit;
                 const dist = Math.sqrt((mx-hx)**2 + (my-hy)**2);
-                canvas.style.cursor = dist < 20 ? "grabbing" : "crosshair";
-                return;
+                canvas.style.cursor = dist < 25 ? "grab" : "crosshair";
             }
-            const rect = canvas.getBoundingClientRect();
-            handleMove(e.clientX - rect.left, e.clientY - rect.top);
         });
-
-        // Touch support
-        canvas.addEventListener('touchstart', (e) => { isDragging = true; e.preventDefault(); }, {passive: false});
-        canvas.addEventListener('touchend', () => { isDragging = false; });
-        canvas.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            handleMove(touch.clientX - rect.left, touch.clientY - rect.top);
-            e.preventDefault();
-        }, {passive: false});
 
         pSlider.addEventListener('input', (e) => { p = parseFloat(e.target.value); updateUI(); draw(); });
 
