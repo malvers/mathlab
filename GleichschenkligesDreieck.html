@@ -1,376 +1,308 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Gleichschenkliges Dreieck</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
-        rel="stylesheet">
+    <title>Gleichschenkliges Dreieck | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --space-bg: #050b18;
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
-            --neon-red: #ff3c3c;
-            --neon-green: #39ff14;
-            --neon-yellow: #fff01f;
-            --text-main: #ffffff;
-            --ui-bg: rgba(5, 11, 24, 0.95);
+            --neon-orange: #ff8800;
+            --neon-green: #39FF14;
+            --neon-red: #ff3333;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.75);
+            --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--space-bg);
-            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
             display: flex;
-            flex-direction: column;
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
             touch-action: none;
         }
 
-        /* Workspace */
-        #workspace {
-            flex-grow: 1;
-            position: relative;
+        /* --- SIDEBAR --- */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
             display: flex;
-            flex-direction: row; /* Split screen */
-            align-items: stretch;
+            flex-direction: column;
             gap: 20px;
-            padding: 20px;
-            overflow: hidden;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
         }
 
-        .viewport {
-            flex: 1;
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .dashboard-btn {
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-        }
-
-        .viewport-label {
-            position: absolute;
-            top: 15px;
-            left: 20px;
+            gap: 12px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            transition: all 0.3s ease;
             letter-spacing: 2px;
-            pointer-events: none;
+        }
+        .dashboard-btn:hover {
+            color: white;
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
         }
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
-
-        /* Warning Box */
-        #warning-box {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 0, 0, 0.2);
-            border: 2px solid var(--neon-red);
-            padding: 8px 20px;
-            border-radius: 10px;
-            color: var(--neon-red);
-            font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
-            font-size: 1rem;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 0 20px var(--neon-red);
-            z-index: 20;
-            backdrop-filter: blur(5px);
-        }
-
-        /* Compact Floating Control Panel */
-        #control-panel {
-            background: var(--ui-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 10;
-            padding: 12px 25px;
+        /* --- STATS CARDS --- */
+        .stats-card {
+            background: var(--glass-bright);
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-            margin: 0 auto 20px auto;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 850px;
-            flex-shrink: 0;
+            gap: 12px;
         }
 
-        .header-controls {
+        .stats-title {
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .val-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
         }
+        .val-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+        .val-display { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: bold; }
 
-        h2 {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            letter-spacing: 1.5px;
-            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* --- WARNING CARD --- */
+        #warning-card {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid var(--neon-red);
+            padding: 15px;
+            border-radius: 15px;
+            display: none;
+            animation: pulse-red 2s infinite;
         }
-
-        .back-btn,
-        .help-btn {
-            text-decoration: none;
-            color: var(--neon-blue);
-            font-size: 0.65rem;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            padding: 6px 12px;
-            cursor: pointer;
-            border-radius: 5px;
-            background: rgba(0, 210, 255, 0.1);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            transition: all 0.3s;
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(255, 51, 51, 0.5); }
+            100% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); }
         }
-
-        .back-btn:hover,
-        .help-btn:hover {
-            box-shadow: 0 0 10px var(--neon-blue);
-            background: rgba(0, 210, 255, 0.2);
-        }
-
-        #values-row {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .val-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            padding: 8px 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 110px;
-        }
-
-        #slider-row {
-            display: flex;
-            justify-content: center;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            width: 100%;
-        }
-
-        .slider-group label {
-            font-family: 'Orbitron', sans-serif;
+        .warning-text {
+            color: var(--neon-red);
+            font-family: 'Orbitron';
             font-size: 0.7rem;
-            color: var(--neon-blue);
-            white-space: nowrap;
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.4;
         }
 
-        input[type=range] {
-            flex-grow: 1;
-            accent-color: var(--neon-blue);
-            cursor: pointer;
+        /* --- CONTROLS --- */
+        .slider-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-
-        /* Slider Row with Arrows */
-        .slider-with-arrows {
+        .slider-controls-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            width: 100%;
+            gap: 15px;
         }
-
         .arrow-btn {
-            background: rgba(0, 210, 255, 0.05);
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            color: #00d2ff;
-            border-radius: 5px;
-            width: 32px;
-            height: 32px;
+            background: var(--glass-bright);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--neon-blue);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            font-family: 'Orbitron';
+            font-size: 1.1rem;
             cursor: pointer;
-            font-size: 18px;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            user-select: none;
-            font-family: 'Orbitron', sans-serif;
             flex-shrink: 0;
         }
+        .arrow-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
 
-        .arrow-btn:hover {
-            background: #00d2ff;
-            color: #000;
-            box-shadow: 0 0 15px #00d2ff;
+        input[type="range"] {
+            -webkit-appearance: none;
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
         }
-
-        .arrow-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* Modal styling */
-        #helpModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-content {
-            background: var(--space-bg);
-            padding: 40px;
-            border-radius: 25px;
-            max-width: 80%;
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 40px var(--neon-blue);
-        }
-
-        .modal-content h3 {
-            color: var(--neon-blue);
-            font-family: 'Orbitron';
-            margin-top: 0;
-        }
-
-        .close-modal {
-            display: block;
-            text-align: center;
-            color: var(--neon-blue);
-            font-family: 'Orbitron';
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--neon-blue);
+            border-radius: 50%;
             cursor: pointer;
-            border: 1px solid var(--neon-blue);
-            padding: 12px;
-            border-radius: 10px;
-            margin-top: 20px;
+            box-shadow: 0 0 10px var(--neon-blue);
         }
 
-        footer {
-            padding: 15px 0;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
+        /* --- MAIN VIEWPORT --- */
+        #workspace {
+            flex-grow: 1;
+            display: flex;
+            padding: 30px;
+            gap: 25px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: var(--glass-bright);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-label {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            font-family: 'Orbitron';
             font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        canvas { width: 100%; height: 100%; }
+
+        .canvas-branding {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
             z-index: 5;
-            letter-spacing: 1px;
         }
-
-        footer a {
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin: 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, var(--neon-blue), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
+            text-transform: uppercase;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 6px;
             color: var(--neon-blue);
-            text-decoration: none;
-            margin-left: 15px;
-            transition: all 0.3s;
-            opacity: 0.7;
+            margin-top: 5px;
+            opacity: 0.8;
+            text-transform: uppercase;
         }
-
-        footer a:hover {
-            opacity: 1;
-            text-shadow: 0 0 10px var(--neon-blue);
+        
+        .footer-credit {
+            margin-top: auto;
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
+            padding-top: 15px;
         }
     </style>
 </head>
-
 <body>
 
-    <div id="workspace">
-        <div id="warning-box">⚠️ ACHTUNG: KEIN DREIECK MEHR!</div>
-        
-        <div class="viewport" id="tri-viewport">
-            <div class="viewport-label">VISUALISIERUNG</div>
+    <aside id="side-panel">
+        <a href="index.html" class="dashboard-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            DASHBOARD
+        </a>
+
+        <section class="stats-card">
+            <span class="stats-title">Parameter-Steuerung</span>
+            <div class="slider-box">
+                <span class="val-label">BASIS (B)</span>
+                <div class="slider-controls-row">
+                    <button class="arrow-btn" id="btn-minus">◀</button>
+                    <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2">
+                    <button class="arrow-btn" id="btn-plus">▶</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-card">
+            <span class="stats-title">Echtzeit-Analyse</span>
+            <div class="val-row">
+                <span class="val-label">UMFANG (U)</span>
+                <span class="val-display" style="color:white;">8,00</span>
+            </div>
+            <div class="val-row">
+                <span class="val-label">BASIS (B)</span>
+                <span class="val-display" id="disp-b" style="color:var(--neon-purple);">2,00</span>
+            </div>
+            <div class="val-row">
+                <span class="val-label">SCHENKEL (S)</span>
+                <span class="val-display" id="disp-s" style="color:var(--neon-blue);">3,00</span>
+            </div>
+        </section>
+
+        <div id="warning-card">
+            <div class="warning-text">⚠️ ACHTUNG<br>KEIN DREIECK MEHR MÖGLICH</div>
+        </div>
+
+        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+    </aside>
+
+    <main id="workspace">
+        <div class="canvas-container">
+            <div class="canvas-label">Visualisierung</div>
+            <div class="canvas-branding">
+                <h1>Doc Alvers Mathe-Labor</h1>
+                <div class="canvas-subtitle">Gleichschenkliges Dreieck</div>
+            </div>
             <canvas id="triCanvas"></canvas>
         </div>
 
-        <div class="viewport" id="graph-viewport">
-            <div class="viewport-label">ANALYSE (Schenkel = 4 - 0,5 · Basis)</div>
+        <div class="canvas-container">
+            <div class="canvas-label">Analyse (S = 4 - 0.5B)</div>
             <canvas id="graphCanvas"></canvas>
         </div>
-    </div>
-
-    <div id="control-panel">
-        <div class="header-controls">
-            <a href="index.html" class="back-btn">← ZENTRALE</a>
-            <h2>GLEICHSCHENKLIGES DREIECK</h2>
-            <div class="help-btn" onclick="toggleHelp()">INFO ?</div>
-        </div>
-
-        <div id="values-row">
-            <div class="val-box" style="color: #fff; border-color: rgba(255,255,255,0.3);">8,00</div>
-            <div class="val-box" style="color: var(--neon-purple); border-color: var(--neon-purple);"><span id="val-b">2.00</span></div>
-            <div class="val-box" style="color: var(--neon-blue); border-color: var(--neon-blue);"><span id="val-s">3.00</span></div>
-        </div>
-
-        <div id="slider-row">
-            <div class="slider-group">
-                <label for="b-slider">BASIS</label>
-                <div class="slider-with-arrows">
-                    <button class="arrow-btn" 
-                        onmousedown="startAutoAdjust(-0.01)" 
-                        onmouseup="stopAutoAdjust()" 
-                        onmouseleave="stopAutoAdjust()"
-                        ontouchstart="startAutoAdjust(-0.01)" 
-                        ontouchend="stopAutoAdjust()">◀</button>
-                    <input type="range" id="b-slider" min="0.0" max="8.0" step="0.01" value="2.0">
-                    <button class="arrow-btn" 
-                        onmousedown="startAutoAdjust(0.01)" 
-                        onmouseup="stopAutoAdjust()" 
-                        onmouseleave="stopAutoAdjust()"
-                        ontouchstart="startAutoAdjust(0.01)" 
-                        ontouchend="stopAutoAdjust()">▶</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer>
-        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
-        <a href="impressum.html">IMPRESSUM</a>
-    </footer>
-
-    <div id="helpModal" onclick="toggleHelp()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h3>Analyse-Parameter</h3>
-            <p>Ein gleichschenkliges Dreieck mit konstantem Umfang (DR Draht-Simulation):</p>
-            <ul>
-                <li>Gesamtlänge des Drahtes: 8,00 cm.</li>
-                <li>Gleichung: Basis + 2 × Schenkel = 8,00.</li>
-                <li>Wird die Basis &ge; 4,00 cm, wird der Schenkel &le; 2,00 cm (ungültig).</li>
-                <li>Basis = 0,00 cm bedeutet Schenkel = 4,00 cm (Doppellinie).</li>
-            </ul>
-            <span class="close-modal" onclick="toggleHelp()">VERSTANDEN</span>
-        </div>
-    </div>
+    </main>
 
     <script>
         const triCanvas = document.getElementById('triCanvas');
@@ -378,88 +310,62 @@
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas.getContext('2d');
         const bSlider = document.getElementById('b-slider');
-        const warningBox = document.getElementById('warning-box');
+        const warningCard = document.getElementById('warning-card');
+        
+        const dispB = document.getElementById('disp-b');
+        const dispS = document.getElementById('disp-s');
 
         let u = 8.0;
         let b = 2.0;
         let s = (u - b) / 2;
         let scale = 100.0;
 
-        function toggleHelp() {
-            const modal = document.getElementById('helpModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-        }
-
         function resize() {
             const dpr = window.devicePixelRatio || 1;
             
-            // Resize Triangle Canvas
-            const triRect = triCanvas.getBoundingClientRect();
-            triCanvas.width = triRect.width * dpr;
-            triCanvas.height = triRect.height * dpr;
-            triCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            
-            // Resize Graph Canvas
-            const graphRect = graphCanvas.getBoundingClientRect();
-            graphCanvas.width = graphRect.width * dpr;
-            graphCanvas.height = graphRect.height * dpr;
-            graphCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-            scale = Math.min(triRect.width / 10, triRect.height / 7); 
+            [triCanvas, graphCanvas].forEach(canvas => {
+                const rect = canvas.parentNode.getBoundingClientRect();
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+            });
             draw();
         }
 
         window.addEventListener('resize', resize);
-        window.addEventListener('load', () => {
-            resize();
-            updateDOM();
-        });
+        window.addEventListener('load', resize);
 
         bSlider.addEventListener('input', (e) => {
             b = parseFloat(e.target.value);
             s = (u - b) / 2;
-            updateDOM();
+            updateUI();
             draw();
         });
 
-        // Auto-repeat logic for buttons
+        // Auto-Adjust Buttons
         let repeatInterval = null;
-
-        function startAutoAdjust(delta) {
+        function startAdjust(delta) {
             if (repeatInterval) return;
-            adjustSlider(delta); // Run once immediately
-            repeatInterval = setInterval(() => {
-                adjustSlider(delta);
-            }, 60); // 60ms for smooth but controlled speed
+            adjust(delta);
+            repeatInterval = setInterval(() => adjust(delta), 60);
         }
-
-        function stopAutoAdjust() {
-            if (repeatInterval) {
-                clearInterval(repeatInterval);
-                repeatInterval = null;
-            }
-        }
-
-        function adjustSlider(delta) {
-            let newVal = parseFloat(bSlider.value) + delta;
-            newVal = Math.max(0.0, Math.min(8.0, newVal));
+        function stopAdjust() { clearInterval(repeatInterval); repeatInterval = null; }
+        function adjust(delta) {
+            let newVal = Math.max(0, Math.min(8, parseFloat(bSlider.value) + delta));
             bSlider.value = newVal;
             b = newVal;
             s = (u - b) / 2;
-            updateDOM();
-            draw();
+            updateUI(); draw();
         }
 
-        function updateDOM() {
-            document.getElementById('val-b').textContent = b.toFixed(2).replace('.', ',');
-            document.getElementById('val-s').textContent = s.toFixed(2).replace('.', ',');
-            
-            if (b >= 4.0 || b <= 0.1) {
-                warningBox.style.display = 'flex';
-                warningBox.innerHTML = `⚠️ ACHTUNG: ${b.toFixed(2).replace('.', ',')} + 2 × ${s.toFixed(2).replace('.', ',')} = 8,00 (KEIN DE)`;
-            } else {
-                warningBox.style.display = 'none';
-            }
+        document.getElementById('btn-minus').onmousedown = () => startAdjust(-0.01);
+        document.getElementById('btn-plus').onmousedown = () => startAdjust(0.01);
+        window.onmouseup = stopAdjust;
+
+        function updateUI() {
+            dispB.innerText = b.toFixed(2).replace('.', ',');
+            dispS.innerText = s.toFixed(2).replace('.', ',');
+            warningCard.style.display = (b >= 4.0 || b <= 0.05) ? 'block' : 'none';
         }
 
         function draw() {
@@ -472,223 +378,109 @@
             triCtx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
-            const cy = rect.height / 2 + 100;
+            const cy = rect.height / 2 + 80;
+            const pxScale = Math.min(rect.width / 10, rect.height / 7);
 
             let h = 0;
-            if (s > b / 2) {
-                h = Math.sqrt(s * s - (b / 2) * (b / 2));
-            }
+            if (s > b / 2) h = Math.sqrt(s * s - (b / 2) * (b / 2));
 
-            const pSpitze = { x: cx, y: cy - h * scale };
-            const pLinks = { x: cx - (b / 2) * scale, y: cy };
-            const pRechts = { x: cx + (b / 2) * scale, y: cy };
+            const pSpitze = { x: cx, y: cy - h * pxScale };
+            const pLinks = { x: cx - (b / 2) * pxScale, y: cy };
+            const pRechts = { x: cx + (b / 2) * pxScale, y: cy };
 
-            // Drawing Settings
-            triCtx.shadowBlur = 15;
-            triCtx.lineWidth = 3.5;
-            triCtx.lineJoin = 'round';
+            // Base Line
+            triCtx.lineWidth = 0.8;
+            triCtx.strokeStyle = "rgba(255,255,255,0.8)";
+            triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
 
+            // Triangle Edges
             if (b < 4.0) {
-                // --- VALID TRIANGLE MODE ---
-                triCtx.strokeStyle = '#9d50bb';
-                triCtx.shadowColor = '#9d50bb';
-                triCtx.beginPath();
-                triCtx.moveTo(pLinks.x, pLinks.y);
-                triCtx.lineTo(pRechts.x, pRechts.y);
-                triCtx.stroke();
-
-                triCtx.strokeStyle = '#00d2ff';
-                triCtx.shadowColor = '#00d2ff';
-                triCtx.beginPath();
-                triCtx.moveTo(pLinks.x, pLinks.y);
-                triCtx.lineTo(pSpitze.x, pSpitze.y);
-                triCtx.lineTo(pRechts.x, pRechts.y);
-                triCtx.stroke();
+                // Leg 1 (Neon Blue)
+                triCtx.strokeStyle = varColor('--neon-blue');
+                triCtx.shadowBlur = 15; triCtx.shadowColor = varColor('--neon-blue');
+                triCtx.lineWidth = 1.2;
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pSpitze.x, pSpitze.y); triCtx.stroke();
+                
+                // Leg 2 (Neon Blue)
+                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pSpitze.x, pSpitze.y); triCtx.stroke();
+                
+                // Base (Neon Purple)
+                triCtx.strokeStyle = varColor('--neon-purple');
+                triCtx.shadowColor = varColor('--neon-purple');
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
             } else {
-                // --- INVALID "FOLDED WIRE" MODE ---
-                const yLen = s * scale;
-                triCtx.lineWidth = 4;
-                triCtx.strokeStyle = '#ff3c3c';
-                triCtx.shadowColor = '#ff3c3c';
-                triCtx.beginPath();
-                triCtx.moveTo(pLinks.x + yLen, pLinks.y);
-                triCtx.lineTo(pRechts.x - yLen, pRechts.y);
-                triCtx.stroke();
-
-                triCtx.lineWidth = 5;
-                triCtx.strokeStyle = '#00d2ff';
-                triCtx.shadowColor = '#00d2ff';
-                triCtx.setLineDash([]);
-                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + yLen, pLinks.y); triCtx.stroke();
-                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - yLen, pRechts.y); triCtx.stroke();
+                // Invalid State - Red Line
+                const yLen = s * pxScale;
+                triCtx.strokeStyle = varColor('--neon-red');
+                triCtx.shadowBlur = 20; triCtx.shadowColor = varColor('--neon-red');
+                triCtx.lineWidth = 2;
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x + yLen, pLinks.y); triCtx.lineTo(pRechts.x - yLen, pRechts.y); triCtx.stroke();
             }
-
             triCtx.shadowBlur = 0;
 
-            // --- LABELS ---
-            triCtx.fillStyle = '#ffffff';
-            triCtx.font = 'bold 20px Orbitron';
-            triCtx.textAlign = 'center';
-
-            // 1. Perimeter
-            triCtx.fillText(`${u.toFixed(2).replace('.', ',')}`, pSpitze.x, pSpitze.y - 25);
-
-            // 2. Base label
-            triCtx.fillStyle = (b >= 4.0) ? '#ff3c3c' : '#ffffff';
-            triCtx.fillText(`${b.toFixed(2).replace('.', ',')}`, cx, cy + 35);
-
-            // 3. Leg labels
-            triCtx.fillStyle = '#ffffff';
+            // Values
+            triCtx.fillStyle = "white";
+            triCtx.font = "14px Orbitron";
+            triCtx.textAlign = "center";
             if (b < 4.0) {
-                // Left Leg
-                triCtx.save();
-                const midLX = (pLinks.x + pSpitze.x) / 2;
-                const midLY = (pLinks.y + pSpitze.y) / 2;
-                const angleL = Math.atan2(pSpitze.y - pLinks.y, pSpitze.x - pLinks.x);
-                triCtx.translate(midLX, midLY);
-                triCtx.rotate(angleL);
-                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
-                triCtx.restore();
-
-                // Right Leg
-                triCtx.save();
-                const midRX = (pRechts.x + pSpitze.x) / 2;
-                const midRY = (pRechts.y + pSpitze.y) / 2;
-                const angleR = Math.atan2(pRechts.y - pSpitze.y, pRechts.x - pSpitze.x);
-                triCtx.translate(midRX, midRY);
-                triCtx.rotate(angleR);
-                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, 0, -20);
-                triCtx.restore();
-            } else {
-                // Folded labels
-                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, pLinks.x + (s/2)*scale, cy - 20);
-                triCtx.fillText(`${s.toFixed(2).replace('.', ',')}`, pRechts.x - (s/2)*scale, cy - 20);
+                triCtx.fillText(s.toFixed(2).replace('.', ','), (pLinks.x + pSpitze.x)/2 - 20, (pLinks.y + pSpitze.y)/2);
+                triCtx.fillText(s.toFixed(2).replace('.', ','), (pRechts.x + pSpitze.x)/2 + 20, (pRechts.y + pSpitze.y)/2);
             }
+            triCtx.fillText(b.toFixed(2).replace('.', ','), cx, cy + 30);
         }
 
         function drawGraph() {
             const rect = graphCanvas.getBoundingClientRect();
             graphCtx.clearRect(0, 0, rect.width, rect.height);
 
-            const padding = 50;
-            const graphWidth = rect.width - padding * 2;
-            const graphHeight = rect.height - padding * 2;
+            const pad = 60;
+            const gw = rect.width - pad * 2;
+            const gh = rect.height - pad * 2;
 
-            // Transformation Helpers
-            const toX = (val) => padding + (val / 8.5) * graphWidth;
-            const toY = (val) => rect.height - padding - (val / 4.5) * graphHeight;
+            const toX = (val) => pad + (val / 8.5) * gw;
+            const toY = (val) => rect.height - pad - (val / 4.5) * gh;
 
-            // 1. Grid
-            graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            // Grid
+            graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
+            graphCtx.lineWidth = 0.5;
+            for(let i=0; i<=8; i++) {
+                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(4.5)); graphCtx.stroke();
+            }
+            for(let i=0; i<=4; i++) {
+                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
+            }
+
+            // Axes
+            graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
             graphCtx.lineWidth = 1;
-            for (let i = 0; i <= 8; i++) {
-                graphCtx.beginPath();
-                graphCtx.moveTo(toX(i), toY(0));
-                graphCtx.lineTo(toX(i), toY(4.5));
-                graphCtx.stroke();
-            }
-            for (let i = 0; i <= 4; i++) {
-                graphCtx.beginPath();
-                graphCtx.moveTo(toX(0), toY(i));
-                graphCtx.lineTo(toX(8.5), toY(i));
-                graphCtx.stroke();
-            }
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.5), toY(0)); graphCtx.stroke();
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.5)); graphCtx.stroke();
 
-            // 2. Axes
+            // Function Line
             graphCtx.lineWidth = 2;
-            // Y-Axis (Schenkel)
-            graphCtx.strokeStyle = varColor('--neon-blue');
-            graphCtx.shadowColor = varColor('--neon-blue');
-            graphCtx.shadowBlur = 5;
-            graphCtx.beginPath();
-            graphCtx.moveTo(toX(0), toY(-0.2));
-            graphCtx.lineTo(toX(0), toY(4.2));
-            graphCtx.stroke();
-            
-            // X-Axis (Basis)
-            graphCtx.strokeStyle = varColor('--neon-purple');
-            graphCtx.shadowColor = varColor('--neon-purple');
-            graphCtx.beginPath();
-            graphCtx.moveTo(toX(-0.2), toY(0));
-            graphCtx.lineTo(toX(8.2), toY(0));
-            graphCtx.stroke();
-            graphCtx.shadowBlur = 0;
-
-            // 3. Labels (Numbers)
-            graphCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            graphCtx.font = '12px Orbitron';
-            graphCtx.textAlign = 'center';
-            for (let i = 0; i <= 8; i++) {
-                graphCtx.fillText(i, toX(i), toY(-0.3));
-            }
-            graphCtx.textAlign = 'right';
-            for (let i = 0; i <= 4; i++) {
-                graphCtx.fillText(i, toX(-0.3), toY(i) + 4);
-            }
-
-            // Axis Names
-            graphCtx.font = 'bold 16px Orbitron';
-            graphCtx.fillStyle = varColor('--neon-purple');
-            graphCtx.textAlign = 'right';
-            graphCtx.fillText('Basis', toX(8.9), toY(0.1));
-            
-            graphCtx.fillStyle = varColor('--neon-blue');
-            graphCtx.textAlign = 'left';
-            graphCtx.fillText('Schenkel', toX(0.2), toY(4.2));
-
-            // 4. Function Line (y = 4 - 0.5x)
-            // Valid Part (0 to 4) -> GRÜN
             graphCtx.shadowBlur = 10;
-            graphCtx.lineWidth = 3;
-            graphCtx.strokeStyle = varColor('--neon-green');
-            graphCtx.shadowColor = varColor('--neon-green');
-            graphCtx.beginPath();
-            graphCtx.moveTo(toX(0), toY(4));
-            graphCtx.lineTo(toX(4), toY(2));
-            graphCtx.stroke();
-
-            // Invalid Part (4 to 8) -> ROT
-            graphCtx.strokeStyle = varColor('--neon-red');
-            graphCtx.shadowColor = varColor('--neon-red');
-            graphCtx.shadowBlur = 15;
-            graphCtx.beginPath();
-            graphCtx.moveTo(toX(4), toY(2));
-            graphCtx.lineTo(toX(8), toY(0));
-            graphCtx.stroke();
+            // Valid (Green)
+            graphCtx.strokeStyle = varColor('--neon-green'); graphCtx.shadowColor = varColor('--neon-green');
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0.1), toY(3.95)); graphCtx.lineTo(toX(4), toY(2)); graphCtx.stroke();
+            // Invalid (Red)
+            graphCtx.strokeStyle = varColor('--neon-red'); graphCtx.shadowColor = varColor('--neon-red');
+            graphCtx.beginPath(); graphCtx.moveTo(toX(4), toY(2)); graphCtx.lineTo(toX(7.9), toY(0.05)); graphCtx.stroke();
             graphCtx.shadowBlur = 0;
 
-            // 5. Current Point Tracking
-            const curX = b;
-            const curY = s;
-
-            // Dashed projections -> NEON GELB
-            graphCtx.setLineDash([5, 5]);
-            graphCtx.strokeStyle = varColor('--neon-yellow');
-            graphCtx.shadowColor = varColor('--neon-yellow');
-            graphCtx.shadowBlur = 8;
-            graphCtx.lineWidth = 1.5;
-            graphCtx.beginPath();
-            graphCtx.moveTo(toX(curX), toY(0));
-            graphCtx.lineTo(toX(curX), toY(curY));
-            graphCtx.lineTo(toX(0), toY(curY));
-            graphCtx.stroke();
-            graphCtx.setLineDash([]);
+            // Current Point
+            graphCtx.fillStyle = "white";
+            graphCtx.shadowBlur = 15; graphCtx.shadowColor = "white";
+            graphCtx.beginPath(); graphCtx.arc(toX(b), toY(s), 5, 0, Math.PI*2); graphCtx.fill();
             graphCtx.shadowBlur = 0;
-
-            // The Punkt
-            graphCtx.fillStyle = '#fff';
-            graphCtx.shadowBlur = 15;
-            graphCtx.shadowColor = '#fff';
-            graphCtx.beginPath();
-            graphCtx.arc(toX(curX), toY(curY), 5, 0, Math.PI * 2);
-            graphCtx.fill();
-            graphCtx.shadowBlur = 0;
+            
+            // Labels
+            graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+            graphCtx.font = "10px Orbitron";
+            graphCtx.textAlign = "center";
+            for(let i=0; i<=8; i+=2) graphCtx.fillText(i, toX(i), toY(-0.3));
         }
 
-        function varColor(name) {
-            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-        }
+        function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
     </script>
 </body>
-
 </html>
