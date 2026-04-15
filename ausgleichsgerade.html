@@ -5,302 +5,310 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Statistik-Labor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Inter:wght@300;400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
         :root {
-            --space-bg: #050b18;
-            --neon-pink: #ff0055;
             --neon-blue: #00d2ff;
-            --neon-orange: #ff8800;
+            --neon-pink: #ff0055;
             --neon-purple: #9d50bb;
-            --text-main: #ffffff;
-            --glass: rgba(10, 15, 30, 0.6);
+            --neon-orange: #ff8800;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.4);
+            --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--space-bg);
-            background-image:
-                linear-gradient(rgba(5, 11, 24, 0.6), rgba(5, 11, 24, 0.8)),
-                url('https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
             overflow: hidden;
             touch-action: none;
-            color: var(--text-main);
+        }
+
+        /* --- BACKGROUND IMMERSION (REMOVED) --- */
+
+        /* --- SIDE PANEL --- */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-        }
-
-        footer {
-            padding: 10px 0;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            background: transparent;
-            z-index: 5;
-            letter-spacing: 1px;
-            width: 100%;
-        }
-
-        footer a {
-            color: var(--neon-blue);
-            text-decoration: none;
-            margin-left: 15px;
-            transition: all 0.3s;
-            opacity: 0.7;
-        }
-
-        footer a:hover {
-            opacity: 1;
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        /* UI Elemente */
-        #ui-top {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
+            gap: 12px;
             z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
         }
 
-        .glass-panel {
-            background: var(--glass);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            pointer-events: auto;
+        header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
         }
 
-        .r-box {
-            text-align: center;
-            min-width: 180px;
-            border-bottom: 3px solid var(--neon-pink);
-        }
-
-        .r-box h2 {
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
             margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.0rem;
-            color: var(--neon-pink);
-            text-transform: uppercase;
             letter-spacing: 1.5px;
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+            text-transform: uppercase;
         }
 
-        .r-val {
-            font-family: 'Orbitron', monospace;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 5px;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-        }
-
-        .stats-list {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.1rem;
-            line-height: 1.5;
-        }
-
-        .stats-list span {
-            color: var(--neon-blue);
-            text-shadow: 0 0 8px var(--neon-blue);
-        }
-
-        #controls {
+        /* --- CANVAS HEADER (NEW) --- */
+        .canvas-branding {
             position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .canvas-branding h1 {
+            font-size: 2.2rem;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            color: var(--neon-blue);
+            margin-top: 8px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        /* --- STAT CARDS --- */
+        .stat-card {
+            background: var(--glass-bright);
+            padding: 12px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(0, 210, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .stat-label {
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .stat-value.highlight-pink { color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); }
+        .stat-value.highlight-blue { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
+
+        .m-n-grid {
             display: flex;
-            gap: 15px;
-            background: var(--glass);
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            z-index: 10;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* --- CONTROLS --- */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
         }
 
         button {
-            padding: 12px 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            background: rgba(0, 0, 0, 0.4);
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-
         button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            border-color: white;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button.help-btn {
-            border-color: var(--neon-orange);
-            color: var(--neon-orange);
-        }
-
-        button.help-btn:hover {
-            box-shadow: 0 0 15px rgba(255, 136, 0, 0.4);
-            background: rgba(255, 136, 0, 0.1);
-        }
-
-        button.secondary {
+            background: rgba(0, 210, 255, 0.15);
             border-color: var(--neon-blue);
-            color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: translateY(-2px);
         }
+        button.primary { background: var(--neon-blue); color: #000; font-weight: bold; border-color: white; }
+        button.secondary { border-color: var(--neon-pink); color: var(--neon-pink); }
+        button.secondary:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.3); }
 
-        button.secondary:hover {
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-            background: rgba(0, 210, 255, 0.1);
-        }
-
-        /* Hilfe Overlay */
-        #help-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 11, 24, 0.85);
-            color: white;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
-        }
-
-        .help-content {
-            max-width: 500px;
-            text-align: left;
-            background: var(--glass);
-            padding: 30px;
-            border-radius: 30px;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .help-item {
+        /* --- CANVAS AREA --- */
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
+            justify-content: center;
+            overflow: hidden;
+        }
+        canvas { display: block; cursor: crosshair; }
+
+        /* --- SOUND TOGGLE --- */
+        .sound-toggle {
+            display: none;
         }
 
-        .help-icon {
-            font-size: 2rem;
-            min-width: 45px;
+        /* --- HELP OVERLAY --- */
+        #help-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 11, 24, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+        }
+        .help-content {
+            max-width: 550px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+        }
+        .help-item { display: flex; align-items: flex-start; margin-bottom: 22px; gap: 20px; }
+        .help-icon { font-size: 1.8rem; min-width: 40px; }
+        .help-text b { color: var(--neon-orange); }
+
+        .back-btn {
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+        .back-btn:hover { color: var(--neon-blue); }
+
+        footer {
+            margin-top: auto;
+            padding-top: 30px;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
             text-align: center;
+            letter-spacing: 1px;
         }
 
-        .help-text b {
-            color: var(--neon-orange);
-        }
-
-        canvas {
-            display: block;
-            background: transparent;
-            cursor: crosshair;
+        /* Mobile Adjustments */
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            #side-panel { width: 100%; min-width: 100%; order: 2; border-right: none; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+            #canvas-container { height: 60vh; min-height: 400px; order: 1; }
         }
     </style>
 </head>
 
 <body>
+    <!-- Background Video Removed -->
+    
+    <div id="side-panel">
+        <header style="border: none; padding-bottom: 20px;">
+            <a href="index.html" class="back-btn">← DASHBOARD</a>
+        </header>
 
-    <div id="ui-top">
-        <div class="glass-panel r-box">
-            <h2>Korrelation (r)</h2>
-            <div id="r-display" class="r-val">+0.0000</div>
+        <div class="stat-card">
+            <span class="stat-label">Korrelation (r)</span>
+            <div id="r-display" class="stat-value highlight-pink">+0.0000</div>
         </div>
-        <div class="glass-panel">
-            <div class="stats-list">
-                m = <span id="m-val">0.0000</span><br>
-                n = <span id="n-val">0.0000</span><br>
-                SD = <span id="sd-val">0.0000</span>
+
+        <div class="m-n-grid">
+            <div class="stat-card">
+                <span class="stat-label">m (Steigung)</span>
+                <div id="m-val" class="stat-value highlight-blue">0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">n (y-Abschn.)</span>
+                <div id="n-val" class="stat-value highlight-blue">0.00</div>
             </div>
         </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Standardabweichung (SD)</span>
+            <div id="sd-val" class="stat-value">0.0000</div>
+        </div>
+
+        <div class="control-group">
+            <button onclick="generateChaos()">Zufall</button>
+            <button onclick="toggleSD()">Toggle SD-Schatten</button>
+            <button onclick="clearPoints()">Reset Labor</button>
+            <button onclick="toggleHelp()">Hilfe ?</button>
+        </div>
+
+        <div class="stat-label" style="margin-top: 10px; text-align: center; opacity: 0.6;">Präzision</div>
+        <div class="control-group" style="flex-direction: row; gap: 10px;">
+            <button onclick="shiftResiduals(0.85)" style="flex: 1; font-size: 1.2rem;">+</button>
+            <button onclick="shiftResiduals(1.15)" style="flex: 1; font-size: 1.2rem;">-</button>
+        </div>
+
+        <footer>
+            &copy; 2026 DR. MICHAEL R. ALVERS &bull; <a href="impressum.html" style="color: inherit;">IMPRESSUM</a>
+        </footer>
     </div>
 
-    <div id="controls">
-        <button onclick="toggleHelp()" class="help-btn"> Hilfe ? </button>
-        <button onclick="generateChaos()">Chaos (R)</button>
-        <button onclick="toggleSD()" class="secondary">SD</button>
-        <button onclick="clearPoints()" class="secondary">Reset</button>
-        <button onclick="location.href='index.html'" style="background: rgba(255,255,255,0.1)">Menü</button>
+    <div id="canvas-container">
+        <div class="canvas-branding">
+            <h1>Doc Alvers Mathe-Labor</h1>
+            <div class="canvas-subtitle">STATISTIK-LABOR</div>
+        </div>
+        <canvas id="canvas"></canvas>
     </div>
 
-    <div id="help-overlay" onclick="toggleHelp()">
-        <div class="help-content" onclick="event.stopPropagation()">
-            <h2
-                style="margin-top:0; font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-shadow: 0 0 10px rgba(0,210,255,0.5);">
-                Anleitung</h2>
-
+    <div id="help-overlay">
+        <div class="help-content">
+            <h2 style="font-family: Orbitron; color: var(--neon-blue); margin-top: 0;">MISSION BRIEFING</h2>
             <div class="help-item">
                 <div class="help-icon">👆</div>
                 <div class="help-text"><b>Tippen:</b> Erstellt einen neuen Datenpunkt auf dem Feld.</div>
             </div>
-
             <div class="help-item">
                 <div class="help-icon">🖐️</div>
-                <div class="help-text"><b>Ziehen:</b> Bewege Punkte, um zu sehen, wie sich die <b>Regressionsgerade</b>
-                    und <b>r</b> verändern.</div>
+                <div class="help-text"><b>Ziehen:</b> Bewege Punkte, um zu sehen, wie sich die <b>Regression</b> verändert.</div>
             </div>
-
             <div class="help-item">
                 <div class="help-icon">📉</div>
-                <div class="help-text"><b>SD-Schatten:</b> Der leuchtend lila Bereich zeigt die Standardabweichung. Je
-                    enger die Punkte an der Linie, desto kleiner die SD.</div>
+                <div class="help-text"><b>SD-Schatten:</b> Der lila Bereich zeigt die Standardabweichung.</div>
             </div>
-
-            <div class="help-item">
-                <div class="help-icon">🎯</div>
-                <div class="help-text"><b>Ziel:</b> Versuche durch Verschieben der Punkte genau <b>r = 1.0</b> oder <b>r
-                        = 0.0</b> zu erreichen!</div>
-            </div>
-
-            <button onclick="toggleHelp()"
-                style="width: 100%; margin-top: 10px; font-size: 1.2rem; padding: 15px; border-color: var(--neon-blue);">Alles
-                klar!</button>
+            <button onclick="toggleHelp()" style="width: 100%; border-color: var(--neon-blue);">Start Labor</button>
         </div>
     </div>
-
-    <canvas id="canvas"></canvas>
-
-    <footer>
-        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
-        <a href="impressum.html">IMPRESSUM</a>
-    </footer>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
 
         let points = [];
         let selectedPoint = null;
@@ -309,8 +317,6 @@
         const OFF_X = 80;
         const OFF_Y = 100;
         const SCALE = 45;
-
-        let r = 0, m = 0, n_val = 0, sd_res = 0;
 
         function init() {
             resize();
@@ -334,6 +340,17 @@
             }, { passive: false });
 
             window.addEventListener('touchend', endAction);
+            
+            // Keyboard Listeners
+            window.addEventListener('keydown', (e) => {
+                if (e.key === "ArrowUp") {
+                    shiftResiduals(0.9);
+                    e.preventDefault();
+                } else if (e.key === "ArrowDown") {
+                    shiftResiduals(1.1);
+                    e.preventDefault();
+                }
+            });
         }
 
         function toggleHelp() {
@@ -342,15 +359,20 @@
         }
 
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.scale(dpr, dpr);
             draw();
         }
 
         function getCoords(e) {
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX - rect.left - OFF_X) / SCALE;
-            const y = (canvas.height - OFF_Y - (e.clientY - rect.top)) / SCALE;
+            const y = (rect.height - OFF_Y - (e.clientY - rect.top)) / SCALE;
             return { x, y };
         }
 
@@ -383,16 +405,27 @@
         }
 
         function endAction() { selectedPoint = null; }
-
         function clearPoints() { points = []; update(); }
+
+        function shiftResiduals(factor) {
+            if (points.length < 2) return;
+            const stats = calculateStats();
+            points.forEach(p => {
+                const yPred = stats.m * p.x + stats.n;
+                const residual = p.y - yPred;
+                p.y = yPred + (residual * factor);
+            });
+            update();
+        }
 
         function generateChaos() {
             points = [];
-            const count = 25;
+            const rect = container.getBoundingClientRect();
+            const count = 20;
             const baseM = (Math.random() - 0.5) * 1.5;
-            const baseN = 5 + Math.random() * 5;
+            const baseN = 4 + Math.random() * 4;
             for (let i = 0; i < count; i++) {
-                const x = Math.random() * (canvas.width / SCALE - 3);
+                const x = Math.random() * (rect.width / SCALE - 3);
                 const y = baseM * x + baseN + (normalRandom() * 1.5);
                 points.push({ x, y: Math.max(0, y) });
             }
@@ -409,17 +442,18 @@
         function toggleSD() { showSD = !showSD; draw(); }
 
         function update() {
-            calculateStats();
-            draw();
-            document.getElementById('r-display').innerText = (r >= 0 ? "+" : "") + r.toFixed(4);
-            document.getElementById('m-val').innerText = m.toFixed(4);
-            document.getElementById('n-val').innerText = n_val.toFixed(4);
-            document.getElementById('sd-val').innerText = sd_res.toFixed(4);
+            const stats = calculateStats();
+            draw(stats);
+            
+            document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(4);
+            document.getElementById('m-val').innerText = stats.m.toFixed(2);
+            document.getElementById('n-val').innerText = stats.n.toFixed(2);
+            document.getElementById('sd-val').innerText = stats.sd.toFixed(4);
         }
 
         function calculateStats() {
             const n = points.length;
-            if (n < 2) { r = m = n_val = sd_res = 0; return; }
+            if (n < 2) return { r: 0, m: 0, n: 0, sd: 0 };
             let sX = 0, sY = 0, sXY = 0, sX2 = 0, sY2 = 0;
             for (let p of points) {
                 sX += p.x; sY += p.y; sXY += p.x * p.y;
@@ -427,24 +461,23 @@
             }
             const numR = n * sXY - sX * sY;
             const denR = Math.sqrt((n * sX2 - sX * sX) * (n * sY2 - sY * sY));
-            r = denR !== 0 ? numR / denR : 0;
+            const r = denR !== 0 ? numR / denR : 0;
             const denM = (n * sX2 - sX * sX);
-            m = denM !== 0 ? numR / denM : 0;
-            n_val = (sY / n) - m * (sX / n);
+            const m = denM !== 0 ? numR / denM : 0;
+            const n_val = (sY / n) - m * (sX / n);
             let sumSqRes = 0;
             for (let p of points) sumSqRes += Math.pow(p.y - (m * p.x + n_val), 2);
-            sd_res = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
+            const sd = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
+            return { r, m, n: n_val, sd };
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const w = canvas.width, h = canvas.height;
+        function draw(stats = calculateStats()) {
+            const rect = container.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            const w = rect.width, h = rect.height;
 
-            // Reset Glow
-            ctx.shadowBlur = 0;
-
-            // Grid (Subtles Neon Cyan)
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.15)";
+            // Grid
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.1)";
             ctx.lineWidth = 1;
             for (let x = 0; x < w; x += SCALE) {
                 ctx.beginPath(); ctx.moveTo(OFF_X + x, 0); ctx.lineTo(OFF_X + x, h - OFF_Y); ctx.stroke();
@@ -453,70 +486,54 @@
                 ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y - y); ctx.lineTo(w, h - OFF_Y - y); ctx.stroke();
             }
 
-            // Axes (Neon Cyan)
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
+            // Axes
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.5)";
             ctx.lineWidth = 2;
-            ctx.shadowColor = "rgba(0, 210, 255, 0.8)";
-            ctx.shadowBlur = 10;
             ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(w - 20, h - OFF_Y); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(OFF_X, 20); ctx.stroke();
-            ctx.shadowBlur = 0; // reset
 
-            // SD Shadow (Mystic Purple Overlay)
-            if (showSD && points.length >= 3 && sd_res > 0) {
+            // SD Shadow (Light Blue Overlay)
+            if (showSD && points.length >= 3 && stats.sd > 0) {
                 const xMax = (w - OFF_X) / SCALE;
-                const grad = ctx.createLinearGradient(0, h - OFF_Y - (n_val + sd_res) * SCALE, 0, h - OFF_Y - (n_val - sd_res) * SCALE);
-                grad.addColorStop(0, "rgba(157, 80, 187, 0.1)");
-                grad.addColorStop(0.5, "rgba(157, 80, 187, 0.3)");
-                grad.addColorStop(1, "rgba(157, 80, 187, 0.1)");
-
-                ctx.fillStyle = grad;
+                ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
                 ctx.beginPath();
-                ctx.moveTo(OFF_X, h - OFF_Y - (m * 0 + n_val + sd_res) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val + sd_res) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val - sd_res) * SCALE);
-                ctx.lineTo(OFF_X, h - OFF_Y - (m * 0 + n_val - sd_res) * SCALE);
+                ctx.moveTo(OFF_X, h - OFF_Y - (stats.m * 0 + stats.n + stats.sd) * SCALE);
+                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n + stats.sd) * SCALE);
+                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n - stats.sd) * SCALE);
+                ctx.lineTo(OFF_X, h - OFF_Y - (stats.m * 0 + stats.n - stats.sd) * SCALE);
                 ctx.closePath();
                 ctx.fill();
             }
 
-            // Regression Line (Neon Pink Glow)
+            // Regression Line
             if (points.length >= 2) {
                 const xMax = (w - OFF_X) / SCALE;
                 ctx.strokeStyle = "#ff0055";
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 4;
                 ctx.shadowColor = "#ff0055";
                 ctx.shadowBlur = 15;
                 ctx.beginPath();
-                ctx.moveTo(OFF_X, h - OFF_Y - (n_val) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (m * xMax + n_val) * SCALE);
+                ctx.moveTo(OFF_X, h - OFF_Y - (stats.n) * SCALE);
+                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n) * SCALE);
                 ctx.stroke();
                 ctx.shadowBlur = 0;
             }
 
-            // Scatter Points (Neon Orange)
+            // Scatter Points
             points.forEach(p => {
                 const px = OFF_X + p.x * SCALE;
                 const py = h - OFF_Y - p.y * SCALE;
-
-                // Core
-                ctx.fillStyle = (p === selectedPoint) ? "#ffffff" : "#ff8800";
-                ctx.shadowColor = (p === selectedPoint) ? "#ffffff" : "#ff8800";
-                ctx.shadowBlur = 15;
+                ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#ff8800";
+                ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#ff8800";
+                ctx.shadowBlur = 12;
                 ctx.beginPath();
-                ctx.arc(px, py, 7, 0, Math.PI * 2);
+                ctx.arc(px, py, 5, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Ring
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
             });
         }
 
         init();
     </script>
 </body>
-
 </html>
