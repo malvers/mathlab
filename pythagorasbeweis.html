@@ -6,103 +6,259 @@
     <title>Pythagoras | Das finale Labor</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --labor-red: rgb(198, 33, 40);
-            --bg: #0f172a; --panel: #111827; --card: #1e293b;
-            --accent-orange: #ff9800;
-        }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white;
-            display: flex; flex-direction: row; justify-content: space-between; height: 100vh; width: 100vw; overflow: hidden; touch-action: none;
-        }
+    :root {
+        --neon-blue: #00d2ff;
+        --neon-purple: #9d50bb;
+        --neon-pink: #ff0055;
+        --neon-green: #39FF14;
+        --neon-orange: #ff8800;
+        --bg-dark: #050b18;
+        --glass: rgba(15, 23, 42, 0.7);
+        --glass-bright: rgba(255, 255, 255, 0.05);
+    }
 
-        #left-panel {
-            width: 320px; min-width: 320px; border-right: 1px solid #334155;
-            padding: 20px 25px; display: flex; flex-direction: column; gap: 15px;
-            background: var(--panel); z-index: 10; box-sizing: border-box;
-        }
+    body {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+        color: white;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        touch-action: none;
+    }
 
-        #canvas-wrapper {
-            flex: 1;
-            position: relative;
-            background: var(--bg);
-            overflow: hidden;
-        }
-        canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: block; cursor: crosshair;
-        }
+    #side-panel {
+        width: 380px;
+        min-width: 380px;
+        background: var(--glass);
+        backdrop-filter: blur(25px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 10;
+        box-sizing: border-box;
+        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+        overflow-y: auto;
+    }
 
-        #right-panel {
-            width: 280px; min-width: 280px; border-left: 1px solid #334155;
-            padding: 20px 25px; display: flex; flex-direction: column; gap: 10px;
-            background: var(--panel); z-index: 10; box-sizing: border-box;
-        }
+    #canvas-container {
+        flex-grow: 1;
+        position: relative;
+        background: transparent;
+        overflow: hidden;
+    }
 
-        h2 { font-family: 'Orbitron'; font-size: 1.1rem; margin: 0; color: var(--labor-red); border-bottom: 3px solid var(--labor-red); padding-bottom: 5px; }
-        .stats-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid #334155; }
-        .val { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: bold; display: block; margin-top: 5px; }
-        .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: crosshair;
+    }
 
-        #math-log { flex-grow: 1; overflow-y: auto; font-family: 'Orbitron'; font-size: 0.9rem; padding-right: 5px; }
-        .log-entry { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding: 6px 0; color: #cbd5e1; }
-        .log-entry span:first-child { color: #94a3b8; font-weight: bold; }
+    /* --- DASHBOARD BUTTON --- */
+    .dashboard-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        letter-spacing: 1.5px;
+        backdrop-filter: blur(5px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dashboard-btn:hover {
+        color: white;
+        background: rgba(0, 210, 255, 0.1);
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        transform: translateX(5px);
+    }
+    .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
 
-        button { padding: 12px; background: #333; color: white; border: none; border-radius: 8px; font-family: 'Orbitron'; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
-        button:hover { background: #444; }
+    /* --- CANVAS BRANDING --- */
+    .canvas-branding {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        text-align: right;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .canvas-branding h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.2rem;
+        margin: 0;
+        letter-spacing: 3px;
+        background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 8px var(--neon-blue));
+        text-transform: uppercase;
+    }
+    .canvas-subtitle {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 6px;
+        color: var(--neon-blue);
+        margin-top: 8px;
+        opacity: 0.7;
+        text-transform: uppercase;
+    }
 
-        /* Spezielles Styling für den Toggle-Button */
-        #btn-toggle-tria.off { background: #1e293b; color: #64748b; border: 1px solid #334155; }
+    .instrument-card {
+        background: var(--glass-bright);
+        padding: 15px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--panel); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .instrument-title {
+        font-family: 'Orbitron';
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 8px;
+        margin-bottom: 5px;
+    }
 
-        .footer-credit {
-            margin-top: auto;
-            padding-top: 15px;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.55rem;
-            color: #94a3b8;
-            letter-spacing: 1px;
-            opacity: 0.6;
-        }
-        .footer-credit a {
-            color: var(--accent-orange);
-            text-decoration: none;
-        }
+    .stats-card {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px 15px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        border-left: 3px solid var(--neon-orange);
+    }
+    .stats-label { font-family: 'Orbitron'; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+    .stats-val { font-family: 'Orbitron'; font-size: 1.15rem; font-weight: bold; }
+
+    #math-log {
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: 'Orbitron';
+        font-size: 0.8rem;
+        padding-right: 5px;
+    }
+    .log-entry {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 8px 0;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .log-entry span:first-child { color: var(--neon-blue); font-weight: bold; }
+
+    button {
+        padding: 15px 20px;
+        font-size: 0.8rem;
+        font-family: 'Orbitron', sans-serif;
+        background: var(--glass-bright);
+        color: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+    
+    #btn-toggle-tria.off { opacity: 0.5; border-style: dashed; }
+
+    .footer-credit {
+        margin-top: auto;
+        padding-top: 15px;
+        text-align: center;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.55rem;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 1px;
+    }
     </style>
     <script src="https://unpkg.com/earcut@2.2.4/dist/earcut.min.js"></script>
 </head>
 <body>
 
-<div id="left-panel">
-    <h2>PYTHAGORAS LABOR</h2>
-    <div class="stats-card"><span class="label">ZIELFLÄCHE (ABCD)</span><span id="target-area" class="val" style="color: #ff9800;">0,00 cm²</span></div>
-    <div class="stats-card"><span class="label">SUMME DREIECKE</span><span id="blue-sum" class="val" style="color: yellow;">0,00 cm²</span></div>
-    <button id="btn-toggle-tria" onclick="toggleTria()">TRIANGULIERUNG AN</button>
-    <div class="footer-credit">
-        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; <br> AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
-        <br><br>
-        <a href="impressum.html" style="color:#444; text-decoration:none; font-size:0.5rem;">IMPRESSUM</a>
+<div id="side-panel">
+  <header style="border: none; padding-bottom: 5px;">
+    <a href="index.html" class="dashboard-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>DASHBOARD</span>
+    </a>
+  </header>
+
+  <div class="instrument-card">
+    <div class="instrument-title">Labor-Status</div>
+    <div class="stats-card">
+        <span class="stats-label">Zielfläche [ABCD]</span>
+        <span id="target-area" class="stats-val" style="color: var(--neon-orange);">0,00 cm²</span>
     </div>
-</div>
+    <div class="stats-card" style="border-left-color: var(--neon-purple);">
+        <span class="stats-label">Summe Dreiecke</span>
+        <span id="blue-sum" class="stats-val" style="color: var(--neon-purple);">0,00 cm²</span>
+    </div>
+  </div>
 
-<div id="canvas-wrapper">
-    <canvas id="canvas"></canvas>
-</div>
-
-<div id="right-panel">
-    <div class="label" style="border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 5px;">ADDITION DREIECKE [cm²]</div>
+  <div class="instrument-card">
+    <div class="instrument-title">Protokoll [cm²]</div>
     <div id="math-log"></div>
+  </div>
+
+  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+    <button id="btn-reset" onclick="resetLab()">BEWEIS RESET</button>
+    <button id="btn-toggle-tria" onclick="toggleTria()">TRIANGULIERUNG AN</button>
+    <footer class="footer-credit">
+        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        <br>
+        <a href="impressum.html" style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
+    </footer>
+  </div>
+</div>
+
+<div id="canvas-container">
+    <div class="canvas-branding">
+        <h1>Doc Alvers Mathe-Labor</h1>
+        <div class="canvas-subtitle">PYTHAGORAS-BEWEIS</div>
+    </div>
+    <canvas id="canvas"></canvas>
 </div>
 
 <script>
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-    const wrapper = document.getElementById('canvas-wrapper');
-    const units = 10;
+    const wrapper = document.getElementById('canvas-container');
+    const units = 7;
+
+    // Cyber Color Palette (Hardcoded für Canvas-Stabilität)
+    const neonPurple = "#9d50bb";
+    const neonBlue   = "#00d2ff";
+    const neonPink   = "#ff0055";
+    const neonOrange = "#ff8800";
+    const neonGreen  = "#39FF14";
 
     let sWidth, pxToCmFactor;
     let ox, oy, triangles = [], anchors = [], selectedTri = null;
@@ -139,7 +295,7 @@
         ox = (canvasW - sWidth) / 2;
         oy = (canvasH - sWidth) / 2;
 
-        const aPx = sWidth * (150 / 600);
+        const aPx = sWidth * (3 / 7);
 
         anchors = [{id:'D',x:ox+aPx,y:oy},{id:'A',x:ox+sWidth,y:oy+aPx},{id:'B',x:ox+sWidth-aPx,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-aPx}];
 
@@ -194,7 +350,7 @@
                 const p2 = {x: vertices[i2], y: vertices[i2+1]};
                 const p3 = {x: vertices[i3], y: vertices[i3+1]};
 
-                ctx.strokeStyle = "yellow"; ctx.lineWidth = 1.5;
+                ctx.strokeStyle = neonPurple; ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.closePath();
                 ctx.stroke();
 
@@ -205,8 +361,7 @@
                     yellowTotal += areaCm;
                     const midX = (p1.x + p2.x + p3.x) / 3, midY = (p1.y + p2.y + p3.y) / 3;
 
-                    ctx.fillStyle = "yellow"; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
-                    ctx.fillText(triCount.toString().padStart(2,'0'), midX, midY+4);
+                    // KEINE ZAHLEN MEHR AUF DEM CANVAS
                     logHtml += `<div class="log-entry"><span>${triCount.toString().padStart(2,'0')}</span><span>${areaCm.toFixed(2)}</span></div>`;
                     triCount++;
                 }
@@ -227,45 +382,65 @@
 
         triangles.forEach((t) => {
             ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
-            ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? "rgba(255,152,0,0.6)" : "rgba(198,33,40,0.6)");
+            
+            ctx.shadowBlur = 30; 
+            ctx.shadowColor = t.collision ? "red" : (t === selectedTri ? neonBlue : neonPurple);
+            
+            ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? neonBlue + "E6" : neonPurple + "E6");
             ctx.fill();
 
-            ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.stroke();
-
-            // KANTENBESCHRIFTUNGEN - a=kurz, b=lang, c=Hypotenuse
-            const edgeLabels = ["a", "b", "c"];
-            for (let i = 0; i < 3; i++) {
-                let p1 = t.pts[i];
-                let p2 = t.pts[(i + 1) % 3];
-                let midX = (p1.x + p2.x) / 2;
-                let midY = (p1.y + p2.y) / 2;
-
-                ctx.font = "bold 14px Inter";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = "rgba(15, 23, 42, 0.8)";
-                ctx.strokeText(edgeLabels[i], midX, midY);
-
-                ctx.fillStyle = "white";
-                ctx.fillText(edgeLabels[i], midX, midY);
-            }
+            ctx.shadowBlur = 0;
 
             if (showCornerDots) {
                 t.pts.forEach((p) => {
-                    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
-                    ctx.fillStyle = "#666"; ctx.fill();
-                    ctx.lineWidth = 2; ctx.strokeStyle = "white"; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+                    ctx.fillStyle = "#1e293b"; ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1; ctx.stroke();
                 });
             }
+
+            // RECHTER WINKEL (KLASSISCHE ECKE)
+            const p0 = t.pts[0], p1 = t.pts[1], p2 = t.pts[2];
+            const size = 12;
+            const d1x = (p0.x - p1.x) / Math.hypot(p0.x - p1.x, p0.y - p1.y);
+            const d1y = (p0.y - p1.y) / Math.hypot(p0.x - p1.x, p0.y - p1.y);
+            const d2x = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            const d2y = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+
+            ctx.lineWidth = 0.8; ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.beginPath();
+            ctx.moveTo(p1.x + d1x * size, p1.y + d1y * size);
+            ctx.lineTo(p1.x + d1x * size + d2x * size, p1.y + d1y * size + d2y * size);
+            ctx.lineTo(p1.x + d2x * size, p1.y + d2y * size);
+            ctx.stroke();
         });
 
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, sWidth, sWidth);
+        // KANTENBESCHRIFTUNGEN - TOP LAYER
+        ctx.font = "bold 13px Orbitron";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.shadowBlur = 10; ctx.shadowColor = "white";
+        ctx.fillStyle = "white";
+
+        triangles.forEach(t => {
+            const valA = aPx * pxToCmFactor;
+            const valB = (sWidth - aPx) * pxToCmFactor;
+            const valC = Math.hypot(valA, valB);
+            const edgeVals = [valA.toFixed(2), valB.toFixed(2), valC.toFixed(2)];
+
+            for (let i = 0; i < 3; i++) {
+                let p1 = t.pts[i], p2 = t.pts[(i + 1) % 3];
+                let midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
+                ctx.fillText(edgeVals[i], midX, midY);
+            }
+        });
+        ctx.shadowBlur = 0;
+
+        ctx.shadowBlur = 25; ctx.shadowColor = neonOrange;
+        ctx.strokeStyle = neonOrange; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, sWidth, sWidth);
+        ctx.shadowBlur = 0;
         anchors.forEach(a => {
-            ctx.fillStyle = "rgb(100,0,0)"; ctx.beginPath(); ctx.arc(a.x, a.y, 6, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "white"; ctx.font = "bold 18px Orbitron"; ctx.textAlign = "center";
-            ctx.fillText(a.id, a.x + (a.id === 'A' || a.id === 'B' ? 25 : -25), a.id === 'C' || a.id === 'B' ? a.y + 30 : a.y - 15);
+            ctx.fillStyle = "rgba(30, 41, 59, 0.4)"; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; ctx.lineWidth = 1; ctx.stroke();
         });
 
         const tArea = Math.pow(Math.hypot(anchors[0].x - anchors[1].x, anchors[0].y - anchors[1].y), 2) * (pxToCmFactor**2);

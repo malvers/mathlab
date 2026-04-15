@@ -5,148 +5,272 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Der allgemeine Pythagoras</title>
     <style>
-        :root {
-            /* Deine exakten Farben aus dem Polygon-Labor */
-            --primary: rgb(255, 177, 0);   /* Gelb (Hypotenuse) */
-            --kathete-a: rgb(198, 33, 40); /* Rot (Kathete A) */
-            --kathete-b: rgb(119, 181, 33); /* Grün (Kathete B) */
-            --bg: #f5f5f7;
-        }
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            touch-action: none;
-        }
-        #ui {
-            padding: 15px 20px;
-            text-align: center;
-            background: white;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            z-index: 10;
-            box-sizing: border-box;
-        }
-        h2 { margin: 0 0 10px 0; font-size: 1.3rem; color: #1d1d1f; }
+    :root {
+        --neon-blue: #00d2ff;
+        --neon-purple: #9d50bb;
+        --neon-pink: #ff0055;
+        --neon-green: #39FF14;
+        --neon-orange: #ff8800;
+        --bg-dark: #050b18;
+        --glass: rgba(15, 23, 42, 0.7);
+        --glass-bright: rgba(255, 255, 255, 0.05);
+        
+        --kathete-a: var(--neon-blue);
+        --kathete-b: var(--neon-green);
+        --hypotenuse: var(--neon-orange);
+    }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        select, button {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            font-weight: 600;
-            background: white;
-            color: #333;
-        }
-        /* Dunkle Textfarbe für den gelben Button für besseren Kontrast */
-        button { background: var(--primary); color: #1d1d1f; border: none; }
+    body {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+        color: white;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        touch-action: none;
+    }
 
-        .formula-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .formula-box {
-            background: #fafafa;
-            padding: 10px 20px;
-            border-radius: 12px;
-            border: 2px solid #eee;
-            min-width: 220px;
-        }
-        .check-box { background: #fffcf0; border: 2px solid var(--primary); }
-        .info { font-size: 1.1rem; color: #2d3436; font-weight: 700; line-height: 1.4; }
-        .val-a { color: var(--kathete-a); }
-        .val-b { color: var(--kathete-b); }
-        .val-c { color: var(--primary); text-shadow: 0px 0px 1px rgba(0,0,0,0.2); } /* Leichter Schatten für Lesbarkeit bei Gelb */
+    #side-panel {
+        width: 380px;
+        min-width: 380px;
+        background: var(--glass);
+        backdrop-filter: blur(25px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 10;
+        box-sizing: border-box;
+        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+        overflow-y: auto;
+    }
 
-        canvas {
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border-radius: 15px;
-            cursor: crosshair;
-            margin: 20px;
-            flex-grow: 1;
-            width: calc(100% - 40px);
-            touch-action: none;
-        }
+    #canvas-container {
+        flex-grow: 1;
+        position: relative;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
 
-        footer {
-            padding: 15px 0;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #86868b;
-            background: transparent;
-            width: 100%;
-        }
+    canvas {
+        display: block;
+        cursor: crosshair;
+        touch-action: none;
+        flex-grow: 1;
+        width: 100%;
+        height: 100%;
+    }
 
-        footer a {
-            color: #0071e3;
-            text-decoration: none;
-            margin-left: 10px;
-        }
+    /* --- DASHBOARD BUTTON --- */
+    .dashboard-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        letter-spacing: 1.5px;
+        backdrop-filter: blur(5px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dashboard-btn:hover {
+        color: white;
+        background: rgba(0, 210, 255, 0.1);
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        transform: translateX(5px);
+    }
+    .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+    /* --- CANVAS BRANDING --- */
+    .canvas-branding {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        text-align: right;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .canvas-branding h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.2rem;
+        margin: 0;
+        letter-spacing: 3px;
+        background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 8px var(--neon-blue));
+        text-transform: uppercase;
+    }
+    .canvas-subtitle {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 6px;
+        color: var(--neon-blue);
+        margin-top: 8px;
+        opacity: 0.7;
+        text-transform: uppercase;
+    }
+
+    /* --- INSTRUMENT CARDS --- */
+    .instrument-card {
+        background: var(--glass-bright);
+        padding: 15px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .instrument-title {
+        font-family: 'Orbitron';
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 8px;
+        margin-bottom: 5px;
+    }
+
+    select {
+        padding: 12px;
+        background: rgba(15, 23, 42, 0.8);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        font-family: 'Orbitron';
+        font-size: 0.8rem;
+        cursor: pointer;
+        width: 100%;
+        outline: none;
+    }
+
+    .stats-card {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px 15px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .stats-label { font-family: 'Orbitron'; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+    .stats-val { font-family: 'Orbitron'; font-size: 1.15rem; font-weight: bold; }
+
+    .val-a { color: var(--kathete-a); text-shadow: 0 0 10px var(--kathete-a); }
+    .val-b { color: var(--kathete-b); text-shadow: 0 0 10px var(--kathete-b); }
+    .val-c { color: var(--hypotenuse); text-shadow: 0 0 12px var(--hypotenuse); }
+
+    button {
+        padding: 15px 20px;
+        font-size: 0.85rem;
+        font-family: 'Orbitron', sans-serif;
+        background: var(--glass-bright);
+        color: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        width: 100%;
+    }
+    button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+
+    .footer-credit {
+        margin-top: auto;
+        padding-top: 15px;
+        text-align: center;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.55rem;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 1px;
+    }
     </style>
 </head>
 <body>
 
-<div id="ui">
-    <h2>📐 Allgemeiner Satz des Pythagoras</h2>
-    <div class="controls">
-        <select id="mode" onchange="draw()">
-            <option value="quadrat">Quadrate</option>
-            <option value="halbkreis">Halbkreise</option>
-            <option value="dreieck">Gleichseitige Dreiecke</option>
-            <option value="stern">Crazy Star 🌟</option>
-            <option value="pacman">Pac-Man Mode 🕹️</option>
-        </select>
-        <button onclick="location.href='index.html'">← ZENTRALE</button>
+<div id="side-panel">
+  <header style="border: none; padding-bottom: 5px;">
+    <a href="index.html" class="dashboard-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>DASHBOARD</span>
+    </a>
+  </header>
+
+  <div class="instrument-card">
+    <div class="instrument-title">Konstruktions-Modus</div>
+    <select id="mode" onchange="draw()">
+      <option value="quadrat">Quadrate</option>
+      <option value="halbkreis">Halbkreise</option>
+      <option value="dreieck">Gleichseitige Dreiecke</option>
+      <option value="stern">Crazy Star 🌟</option>
+      <option value="pacman">Pac-Man Mode 🕹️</option>
+    </select>
+  </div>
+
+  <div class="instrument-card">
+    <div class="instrument-title">Satz des Pythagoras</div>
+    <div class="stats-card">
+        <span class="stats-label">Flächen-Summe [A₁+A₂]</span>
+        <span id="result-text" class="stats-val">0.00</span>
     </div>
-    <div class="formula-container">
-        <div class="formula-box">
-            <div class="info"><span class="val-a">A₁</span> + <span class="val-b">A₂</span> = <span class="val-c">A₃</span></div>
-            <div id="result-text" class="info">...</div>
-        </div>
-        <div class="formula-box check-box">
-            <div class="info" style="color: var(--primary); text-shadow: 0px 0px 1px rgba(0,0,0,0.2);">Große Fläche A₃</div>
-            <div id="check-text" class="info">...</div>
-        </div>
+    <div class="stats-card">
+        <span class="stats-label">Große Fläche [A₃]</span>
+        <span id="check-text" class="stats-val">0.00</span>
     </div>
+  </div>
+
+  <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+    <button id="btn-reset" onclick="resetLab()">LABOR RESET</button>
+    <footer class="footer-credit">
+        &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        <br>
+        <a href="impressum.html" style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
+    </footer>
+  </div>
 </div>
 
-<canvas id="canvas"></canvas>
-
-<footer>
-    &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank">GEMINI</a>
-    <a href="impressum.html">IMPRESSUM</a>
-</footer>
+<div id="canvas-container">
+    <div class="canvas-branding">
+        <h1>Doc Alvers Mathe-Labor</h1>
+        <div class="canvas-subtitle">PYTHAGORAS-LABOR</div>
+    </div>
+    <canvas id="canvas"></canvas>
+</div>
 
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const modeSelect = document.getElementById('mode');
 
-    let a_px = 120, b_px = 180;
+    let a_px = 120, b_px = 160;
     let draggingA = false, draggingB = false;
     let ox = 0, oy = 0;
 
-    // Helper, um die CSS-Variablen sicher an den Canvas zu übergeben
-    const colorA = "rgb(198, 33, 40)";
-    const colorB = "rgb(119, 181, 33)";
-    const colorC = "rgb(255, 177, 0)";
+    // Cyber-Labor Farbschema (Maximale Vibrancy)
+    const neonPink = "#ff0055";
+    const neonGreen = "#39FF14";
+    const neonOrange = "#ff8800";
+    const neonBlue = "#00d2ff";
 
     function drawShape(pStart, pEnd, type, color) {
         ctx.fillStyle = color;
@@ -215,23 +339,34 @@
         const B = { x: ox + b_px, y: oy };
         const C = { x: ox, y: oy };
 
-        ctx.globalAlpha = 0.55; // Etwas deckender für die neuen satten Farben
-        drawShape(A, C, modeSelect.value, colorA);
-        drawShape(C, B, modeSelect.value, colorB);
-        drawShape(B, A, modeSelect.value, colorC);
+        ctx.globalAlpha = 0.85; 
+        
+        ctx.shadowBlur = 30; ctx.shadowColor = neonBlue;
+        drawShape(A, C, modeSelect.value, neonBlue);
+        
+        ctx.shadowBlur = 30; ctx.shadowColor = neonGreen;
+        drawShape(C, B, modeSelect.value, neonGreen);
+        
+        ctx.shadowBlur = 30; ctx.shadowColor = neonOrange;
+        drawShape(B, A, modeSelect.value, neonOrange);
+        
+        ctx.shadowBlur = 0;
         ctx.globalAlpha = 1.0;
 
         // Dreieck Mitte
         ctx.beginPath();
         ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
         ctx.fillStyle = "white"; ctx.fill();
-        ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 3; ctx.stroke();
+        ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 1.5; ctx.stroke();
 
-        // Rechter Winkel
+        // Rechter Winkel (Klassische Ecke)
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.4)"; ctx.lineWidth = 1.5;
         ctx.strokeRect(ox, oy - 15, 15, 15);
 
-        // Mathematik
-        let valA = a_px/10, valB = b_px/10;
+        // Mathematik (Skalierung auf cm)
+        let cmFactor = 40; 
+        let valA = a_px / cmFactor, valB = b_px / cmFactor;
+        
         let factor = 1;
         if(modeSelect.value === 'halbkreis') factor = Math.PI / 8;
         if(modeSelect.value === 'dreieck') factor = Math.sqrt(3) / 4;
@@ -243,14 +378,39 @@
         let areaSum = areaA + areaB;
 
         document.getElementById('result-text').innerHTML =
-            `<span class="val-a">${areaA.toFixed(1)}</span> + <span class="val-b">${areaB.toFixed(1)}</span> = <span class="val-c">${areaSum.toFixed(1)}</span>`;
+            `<span class="val-a">${areaA.toFixed(2)}</span> + <span class="val-b">${areaB.toFixed(2)}</span> = <span class="val-c">${areaSum.toFixed(2)}</span>`;
 
         document.getElementById('check-text').innerHTML =
-            `<span class="val-c">A₃ = ${areaSum.toFixed(1)}</span>`;
+            `<span class="val-c">A₃ = ${areaSum.toFixed(2)}</span>`;
+
+        // Kantenbeschriftungen am Canvas (Zentrales Dreieck) - TOP LAYER
+        ctx.font = "bold 15px Orbitron";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowBlur = 10; ctx.shadowColor = "white";
+        ctx.fillStyle = "white";
+        
+        // Kathete A (Links)
+        ctx.fillText(valA.toFixed(2), ox - 35, oy - a_px/2);
+        
+        // Kathete B (Unten)
+        ctx.fillText(valB.toFixed(2), ox + b_px/2, oy + 30);
+        
+        // Hypotenuse C (Schräg)
+        let mX = ox + b_px/2, mY = oy - a_px/2;
+        ctx.fillText(Math.hypot(valA, valB).toFixed(2), mX + 25, mY - 25);
+        ctx.shadowBlur = 0;
 
         // Anfasser (Punkte)
-        ctx.fillStyle = colorB; ctx.beginPath(); ctx.arc(B.x, B.y, 12, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = colorA; ctx.beginPath(); ctx.arc(A.x, A.y, 12, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 15; ctx.shadowColor = neonGreen;
+        ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(B.x, B.y, 7, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 15; ctx.shadowColor = neonBlue;
+        ctx.beginPath(); ctx.arc(A.x, A.y, 7, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
+    function resetLab() {
+        a_px = 120; b_px = 160; draw();
     }
 
     // --- TOUCH & MOUSE ENGINE ---
