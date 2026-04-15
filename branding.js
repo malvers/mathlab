@@ -1,5 +1,5 @@
 /**
- * Cyber-Labor Branding Engine v5.1 (Active Navigation)
+ * Cyber-Labor Branding Engine v5.2 (Layout-Aware Navigation)
  * Centralized branding and navigation component for Doc Alvers Laboratories.
  */
 const CyberBranding = {
@@ -7,7 +7,7 @@ const CyberBranding = {
         const title = config.title || "Cyber Laboratory";
         const subtitle = config.subtitle || "MATHEMATICAL VISUALIZATION";
         
-        console.log("CyberBranding v5.1 (Active Navigation) Initialized");
+        console.log("CyberBranding v5.2 (Layout-Aware) Initialized");
         
         this.injectStyles();
         this.injectHTML(title, subtitle);
@@ -63,15 +63,26 @@ const CyberBranding = {
                 text-shadow: 0 0 5px var(--branding-blue);
             }
 
-            /* Central Navigation (Top Left) */
+            /* Central Navigation */
             .cyber-nav {
-                position: fixed;
-                top: 20px;
-                left: 20px;
                 display: flex;
                 gap: 12px;
                 z-index: 2000;
                 animation: branding-fade-in 1.2s ease-out forwards;
+            }
+
+            /* Floating Fallback if no sidebar */
+            .cyber-nav.floating {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+            }
+
+            /* Integrated Style if inside sidebar */
+            .cyber-nav.integrated {
+                margin-bottom: 20px;
+                width: 100%;
+                justify-content: flex-start;
             }
 
             .nav-btn {
@@ -102,11 +113,6 @@ const CyberBranding = {
             .nav-btn svg {
                 width: 22px;
                 height: 22px;
-                transition: transform 0.3s ease;
-            }
-
-            .nav-btn:hover svg {
-                filter: drop-shadow(0 0 5px var(--branding-blue));
             }
 
             @keyframes branding-fade-in {
@@ -133,7 +139,7 @@ const CyberBranding = {
         const nav = document.createElement('div');
         nav.className = 'cyber-nav';
         
-        // Home Button (Dashboard)
+        // Home Button
         const homeBtn = document.createElement('a');
         homeBtn.className = 'nav-btn';
         homeBtn.href = 'index.html';
@@ -159,7 +165,17 @@ const CyberBranding = {
 
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
-        document.body.appendChild(nav);
+
+        // Sidebar detection
+        const sidebar = document.getElementById('side-panel') || document.querySelector('.sidebar') || document.querySelector('aside');
+        
+        if (sidebar) {
+            nav.classList.add('integrated');
+            sidebar.prepend(nav);
+        } else {
+            nav.classList.add('floating');
+            document.body.appendChild(nav);
+        }
     },
 
     setupActiveScaling() {
