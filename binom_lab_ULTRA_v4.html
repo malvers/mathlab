@@ -441,11 +441,11 @@
             ctx.lineWidth = 1;
             ctx.strokeRect(offsetX, offsetY, totalSize, totalSize);
 
-            // Areas
-            drawRect(offsetX, offsetY, px, px, "#ffcc00");
-            drawRect(offsetX + px, offsetY, qx, px, "#39FF14");
-            drawRect(offsetX, offsetY + px, px, qx, "#39FF14");
-            drawRect(offsetX + px, offsetY + px, qx, qx, "#00f2ff");
+            // Areas with 60% opacity (40% Transparency - "Weniger Trans")
+            drawRect(offsetX + 0, offsetY + 0, px, px, 'rgba(255, 204, 0, 0.6)');      // p^2
+            drawRect(offsetX + px, offsetY + 0, qx, px, 'rgba(57, 255, 20, 0.6)');    // pq1
+            drawRect(offsetX + 0, offsetY + px, px, qx, 'rgba(57, 255, 20, 0.6)');    // pq2
+            drawRect(offsetX + px, offsetY + px, qx, qx, 'rgba(0, 242, 255, 0.6)');     // q^2
 
             // Brackets & Annotations
             drawAnnotations(offsetX, offsetY, px, qx);
@@ -461,9 +461,9 @@
             ctx.save();
             ctx.shadowBlur = 10;
             ctx.shadowColor = color;
-            ctx.fillStyle = color + "26"; // 15% opacity
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
+            ctx.fillStyle = color; // Solid color as requested
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.lineWidth = 2;
             ctx.fillRect(x, y, w, h);
             ctx.strokeRect(x, y, w, h);
             ctx.restore();
