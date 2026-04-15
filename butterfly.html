@@ -148,18 +148,18 @@
 
         #equation-panel {
             position: absolute;
-            bottom: 110px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(30px);
-            padding: 30px 100px;
-            border-radius: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.9);
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(20px);
+            padding: 12px 35px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
             width: fit-content;
-            max-width: 95%;
+            max-width: 85%;
             text-align: center;
             display: flex;
             justify-content: center;
@@ -167,7 +167,7 @@
             pointer-events: none;
             transition: all 0.5s ease;
         }
-        .katex-display { margin: 0 !important; font-size: 8vw !important; font-weight: bold; letter-spacing: 5px; }
+        .katex-display { margin: 0 !important; font-size: 1.8vw !important; font-weight: bold; letter-spacing: 1px; }
 
         /* --- MAIN VIEWPORT --- */
         #canvas-container {
@@ -178,7 +178,7 @@
             align-items: center;
             overflow: hidden;
         }
-        canvas { display: block; position: absolute; z-index: 1; pointer-events: auto; }
+        canvas { display: block; }
 
         .canvas-branding {
             position: absolute;
@@ -281,7 +281,7 @@
     <main id="canvas-container">
         <div class="canvas-branding">
             <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle" style="color:#ff0000; font-size:1.5rem; font-weight:bold;">VERSION 3.0 | ACTIVATED</div>
+            <div class="canvas-subtitle">Butterfly Curve Evolution</div>
         </div>
 
         <div id="equation-panel"></div>
@@ -355,10 +355,10 @@
             ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
             ui.color.val.innerText = ui.color.el.value;
 
-            // Render Monumental LaTeX Equation with retry logic
+            // Render Polished LaTeX Equation
             function render() {
                 if (window.katex) {
-                    const latex = `\\Huge r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{ \\sin(\\theta) }} \\qquad - \\quad \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} \\qquad + \\quad \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
+                    const latex = `r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{ \\sin(\\theta) }} - \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} + \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
                     katex.render(latex, document.getElementById('equation-panel'), {
                         throwOnError: false,
                         displayMode: true
