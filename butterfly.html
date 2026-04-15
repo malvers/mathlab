@@ -6,7 +6,7 @@
     <title>Butterfly Curve | docalvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -148,16 +148,16 @@
 
         #equation-panel {
             position: absolute;
-            bottom: 100px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
-            background: rgba(15, 23, 42, 0.3);
-            backdrop-filter: blur(20px);
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(30px);
             padding: 30px 100px;
             border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 80px rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 100px rgba(0, 0, 0, 0.9);
             width: fit-content;
             max-width: 95%;
             text-align: center;
@@ -165,6 +165,7 @@
             justify-content: center;
             align-items: center;
             pointer-events: none;
+            transition: all 0.5s ease;
         }
         .katex-display { margin: 0 !important; font-size: 8vw !important; font-weight: bold; letter-spacing: 5px; }
 
@@ -177,7 +178,7 @@
             align-items: center;
             overflow: hidden;
         }
-        canvas { display: block; }
+        canvas { display: block; position: absolute; z-index: 1; pointer-events: auto; }
 
         .canvas-branding {
             position: absolute;
@@ -185,7 +186,7 @@
             right: 40px;
             text-align: right;
             pointer-events: none;
-            z-index: 5;
+            z-index: 10000;
         }
         .canvas-branding h1 {
             font-family: 'Orbitron', sans-serif;
@@ -354,14 +355,19 @@
             ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
             ui.color.val.innerText = ui.color.el.value;
 
-            // Render Monumental LaTeX Equation with massive spacing (\qquad)
-            if (window.katex) {
-                const latex = `\\Huge r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{\\sin(\\theta)}} \\qquad - \\qquad \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} \\qquad + \\qquad \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
-                katex.render(latex, document.getElementById('equation-panel'), {
-                    throwOnError: false,
-                    displayMode: true
-                });
+            // Render Monumental LaTeX Equation with retry logic
+            function render() {
+                if (window.katex) {
+                    const latex = `\\Huge r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{ \\sin(\\theta) }} \\qquad - \\quad \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} \\qquad + \\quad \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
+                    katex.render(latex, document.getElementById('equation-panel'), {
+                        throwOnError: false,
+                        displayMode: true
+                    });
+                } else {
+                    setTimeout(render, 100);
+                }
             }
+            render();
         }
 
         [ui.speed.el, ui.color.el, ui.eA.el, ui.cA.el, ui.cF.el, ui.sA.el, ui.sP.el].forEach(el => {
