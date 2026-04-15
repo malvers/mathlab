@@ -195,34 +195,6 @@
             overflow: hidden;
         }
 
-        .canvas-branding {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            text-align: right;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .canvas-branding h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            margin: 0;
-            letter-spacing: 4px;
-            background: linear-gradient(to right, var(--neon-blue), #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px var(--neon-blue));
-            text-transform: uppercase;
-        }
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 8px;
-            color: var(--neon-blue);
-            margin-top: 10px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
 
         .footer-credit {
             margin-top: auto;
@@ -284,17 +256,19 @@
     </aside>
 
     <main id="canvas-container">
-        <div class="canvas-branding">
-            <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle">Innenwinkelsatz 3D</div>
-        </div>
     </main>
 
     <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
+    <script src="branding.js"></script>
     <script>
+        // Initialize Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Innenwinkelsatz 3D"
+        });
+
         // --- 1. SETUP ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();

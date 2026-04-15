@@ -86,35 +86,6 @@
         }
         .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
 
-        /* --- CANVAS BRANDING --- */
-        .canvas-branding {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            text-align: right;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .canvas-branding h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            margin: 0;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px var(--neon-blue));
-            text-transform: uppercase;
-        }
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            margin-top: 8px;
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
 
         .equation-box {
             background: var(--glass-bright);
@@ -250,14 +221,17 @@
     </div>
 
     <div id="canvas-container">
-        <div class="canvas-branding">
-            <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle">STEIGUNGS-LABOR</div>
-        </div>
         <canvas id="canvas"></canvas>
     </div>
 
+    <script src="branding.js"></script>
     <script>
+        // Initialize Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Steigungs-Labor"
+        });
+
         // --- Helper: LabUtils (Self-Contained) ---
         const LabUtils = {
             varColor: function(name) {
