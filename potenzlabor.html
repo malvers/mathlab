@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potenz-Labor | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-orange: #ff8800;
+            --neon-green: #39FF14;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.75);
+            --glass-bright: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 25px 25px 25px; /* Reduced top space */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        /* --- INSTRUMENT CARDS --- */
+        .instrument-card {
+            background: var(--glass-bright);
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .val-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 45px; /* Added height for larger formulas */
+        }
+        .val-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+        .val-display { font-family: 'Orbitron'; font-size: 1.1rem; font-weight: bold; color: var(--neon-blue); }
+
+        #formula-root, #formula-pow {
+            font-size: 1.25rem; /* Significant increase */
+        }
+
+        /* --- CONTROLS --- */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            margin: 15px 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--neon-blue);
+            border: 2px solid white;
+        }
+
+        #workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 25px 30px 25px; /* Reduced top space */
+            gap: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- FLOATING LABELS --- */
+        .formula-tag {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }
+        #tag-pow { border-color: var(--neon-blue); color: var(--neon-blue); }
+        #tag-root { border-color: var(--neon-orange); color: var(--neon-orange); }
+
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block;
+            touch-action: none;
+            border-radius: 25px;
+        }
+
+        .footer-credit {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="side-panel">
+
+        <section class="instrument-card">
+            <div class="val-row">
+                <span class="val-label">Exponent (n)</span>
+                <span class="val-display" id="val-n">2</span>
+            </div>
+            <input type="range" id="n-slider" min="1" max="10" step="1" value="2">
+            
+            <div class="val-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <span class="val-label">X-Position</span>
+                <span class="val-display" id="display-x-slider" style="color:white">0,500</span>
+            </div>
+            <input type="range" id="x-slider" min="0" max="1" step="0.001" value="0.5">
+        </section>
+
+        <section class="instrument-card">
+            <div class="val-row">
+                <span class="val-label" style="color:rgba(255,255,255,0.4)">X-POSITION</span>
+                <span class="val-display" id="val-x" style="color:white">0,500</span>
+            </div>
+            <div class="val-row">
+                <span class="val-label" id="formula-root" style="color:var(--neon-orange)"></span>
+                <span class="val-display" id="val-root" style="color:var(--neon-orange)">0,707</span>
+            </div>
+            <div class="val-row">
+                <span class="val-label" id="formula-pow" style="color:var(--neon-blue)"></span>
+                <span class="val-display" id="val-pow">0,250</span>
+            </div>
+        </section>
+
+        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+    </aside>
+
+    <main id="workspace">
+        <div class="canvas-container">
+            <canvas id="mainCanvas"></canvas>
+            <div id="tag-pow" class="formula-tag"></div>
+            <div id="tag-root" class="formula-tag"></div>
+        </div>
+    </main>
+
+    <script src="branding.js"></script>
+    <script>
+        // Init Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Potenz- & Wurzelfunktionen"
+        });
+
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const nSlider = document.getElementById('n-slider');
+        const xSlider = document.getElementById('x-slider');
+        const valN = document.getElementById('val-n');
+        const valXSlider = document.getElementById('display-x-slider');
+        const valX = document.getElementById('val-x');
+        const valPow = document.getElementById('val-pow');
+        const valRoot = document.getElementById('val-root');
+        const tagPow = document.getElementById('tag-pow');
+        const tagRoot = document.getElementById('tag-root');
+
+        let n = 2;
+        let mouseX = 0.5;
+        let isHovering = true; // Stay visible now that we use the slider
+
+        // Color palette for curves
+        const colors = [
+            '#ff3333', '#ff8800', '#ffdd00', '#33ff33', '#00ffdd', 
+            '#00d2ff', '#3388ff', '#9d50bb', '#ff33bb', '#ff0055'
+        ];
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentNode.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            draw();
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('load', resize);
+
+        function updateFormulas() {
+            if (typeof katex === 'undefined') return;
+            const rootTex = `y = \\sqrt[${n}]{x}`;
+            const powTex = `y = x^{${n}}`;
+            
+            katex.render(rootTex, document.getElementById('formula-root'), { throwOnError: false });
+            katex.render(powTex, document.getElementById('formula-pow'), { throwOnError: false });
+            
+            // Also update floating tags
+            katex.render(powTex, tagPow, { throwOnError: false });
+            katex.render(rootTex, tagRoot, { throwOnError: false });
+        }
+
+        nSlider.addEventListener('input', (e) => {
+            n = parseInt(e.target.value);
+            valN.innerText = n;
+            updateFormulas();
+            draw();
+        });
+
+        xSlider.addEventListener('input', (e) => {
+            mouseX = parseFloat(e.target.value);
+            isHovering = true;
+            draw();
+        });
+
+        // Trigger initial formulas
+        window.addEventListener('load', () => { setTimeout(updateFormulas, 100); });
+
+        // Mouse/Touch interaction removed per user request
+
+        /*
+        function handlePointer(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const pad = 80;
+            const size = Math.min(rect.width-pad*2, rect.height-pad*2);
+            const startX = (rect.width - size) / 2;
+            
+            let normX = (x - startX) / size;
+            mouseX = Math.max(0, Math.min(1, normX));
+            xSlider.value = mouseX;
+            isHovering = true;
+            draw();
+        }
+        */
+
+        function draw() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            const pad = 80;
+            const size = Math.min(rect.width-pad*2, rect.height-pad*2);
+            const ox = (rect.width - size) / 2;
+            const oy = (rect.height - size) / 2 + size;
+
+            const toX = (val) => ox + val * size;
+            const toY = (val) => oy - val * size;
+
+            // Update UI Stats
+            const p = Math.pow(mouseX, n);
+            const r = Math.pow(mouseX, 1/n);
+            const formattedX = mouseX.toFixed(3).replace('.', ',');
+            valX.innerText = formattedX;
+            valXSlider.innerText = formattedX;
+            valPow.innerText = p.toFixed(3).replace('.', ',');
+            valRoot.innerText = r.toFixed(3).replace('.', ',');
+
+            // Draw Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<=10; i++) {
+                const step = i/10;
+                ctx.beginPath(); ctx.moveTo(toX(step), oy); ctx.lineTo(toX(step), oy - size); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(ox, toY(step)); ctx.lineTo(ox + size, toY(step)); ctx.stroke();
+            }
+
+            // Draw Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.lineWidth = 2;
+            
+            // X-Axis
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + size + 15, oy); ctx.stroke();
+            this.drawArrowhead(ctx, ox + size + 15, oy, 0); // Arrow at end of X
+            
+            // Y-Axis
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy - size - 15); ctx.stroke();
+            this.drawArrowhead(ctx, ox, oy - size - 15, -Math.PI/2); // Arrow at end of Y
+
+            // Labels
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '14px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('0', ox - 15, oy + 15);
+            ctx.fillText('1', ox + size, oy + 25);
+            ctx.textAlign = 'right';
+            ctx.fillText('1', ox - 15, oy - size);
+
+            // Draw all curves
+            for(let i=1; i<=10; i++) {
+                const isPowerCurrent = (i === n);
+                const isRootCurrent = (i === n); // We show root of target n
+                
+                // Potenz-Kurven (Blue)
+                ctx.lineWidth = isPowerCurrent ? 3.5 : 1.4;
+                ctx.strokeStyle = varColor('--neon-blue');
+                ctx.globalAlpha = isPowerCurrent ? 1.0 : 0.12;
+                if(isPowerCurrent) { ctx.shadowBlur = 12; ctx.shadowColor = varColor('--neon-blue'); }
+                drawCurve(ctx, i, toX, toY);
+                ctx.shadowBlur = 0;
+
+                // Wurzel-Kurven (Orange)
+                ctx.lineWidth = isRootCurrent ? 3.5 : 1.4;
+                ctx.strokeStyle = varColor('--neon-orange');
+                ctx.globalAlpha = isRootCurrent ? 1.0 : 0.12;
+                if(isRootCurrent) { ctx.shadowBlur = 12; ctx.shadowColor = varColor('--neon-orange'); }
+                drawCurve(ctx, 1/i, toX, toY);
+                ctx.shadowBlur = 0;
+                
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Interactive Point & Floating Tags
+            if(isHovering) {
+                const px = toX(mouseX);
+                const py_pow = toY(p);
+                const py_root = toY(r);
+
+                drawPoint(ctx, px, py_pow, varColor('--neon-blue'));
+                drawPoint(ctx, px, py_root, varColor('--neon-orange'));
+
+                // Position floating tags
+                tagPow.style.display = 'block';
+                tagPow.style.left = (px + 15) + 'px';
+                tagPow.style.top = (py_pow - 45) + 'px';
+
+                tagRoot.style.display = 'block';
+                tagRoot.style.left = (px + 15) + 'px';
+                tagRoot.style.top = (py_root - 45) + 'px';
+            } else {
+                tagPow.style.display = 'none';
+                tagRoot.style.display = 'none';
+            }
+        }
+
+        function drawCurve(c, exp, tx, ty) {
+            c.beginPath();
+            for(let x=0; x<=1.01; x+=0.01) {
+                const y = Math.pow(x, exp);
+                if(x===0) c.moveTo(tx(x), ty(y));
+                else c.lineTo(tx(x), ty(y));
+            }
+            c.stroke();
+        }
+
+        function drawPoint(c, x, y, color) {
+            c.fillStyle = color;
+            c.shadowBlur = 12; c.shadowColor = color;
+            c.beginPath(); c.arc(x, y, 4.5, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'white'; c.lineWidth = 1.5; c.stroke();
+            c.shadowBlur = 0;
+        }
+
+        function drawArrowhead(ctx, x, y, angle) {
+            const size = 10;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size, -size/2);
+            ctx.lineTo(-size, size/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+    </script>
+</body>
+</html>

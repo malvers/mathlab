@@ -1,29 +1,37 @@
 /**
- * Cyber-Labor Branding Engine v4.0
- * Centralized branding component for Doc Alvers Laboratories.
+ * Cyber-Labor Branding Engine v5.1 (Active Navigation)
+ * Centralized branding and navigation component for Doc Alvers Laboratories.
  */
 const CyberBranding = {
     init(config = {}) {
         const title = config.title || "Cyber Laboratory";
         const subtitle = config.subtitle || "MATHEMATICAL VISUALIZATION";
         
+        console.log("CyberBranding v5.1 (Active Navigation) Initialized");
+        
         this.injectStyles();
         this.injectHTML(title, subtitle);
+        this.injectNavigation();
+        this.setupActiveScaling();
+        this.updateScale();
     },
 
     injectStyles() {
         const style = document.createElement('style');
+        style.id = 'cyber-branding-styles';
         style.textContent = `
             :root {
                 --branding-blue: #00d2ff;
                 --branding-purple: #9d50bb;
                 --branding-white: #ffffff;
+                --header-scale: 1;
             }
 
+            /* Branding Logo (Top Right) */
             .canvas-branding {
                 position: absolute;
-                top: 40px;
-                right: 40px;
+                top: calc(10px + 30px * var(--header-scale));
+                right: calc(10px + 30px * var(--header-scale));
                 text-align: right;
                 pointer-events: none;
                 z-index: 1000;
@@ -32,9 +40,9 @@ const CyberBranding = {
 
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
-                font-size: 1.8rem;
+                font-size: calc(12px + 20px * var(--header-scale));
                 margin: 0;
-                letter-spacing: 4px;
+                letter-spacing: calc(1px + 3px * var(--header-scale));
                 background: linear-gradient(to right, var(--branding-blue), var(--branding-white), var(--branding-purple));
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
@@ -46,38 +54,71 @@ const CyberBranding = {
 
             .canvas-subtitle {
                 font-family: 'Orbitron', sans-serif;
-                font-size: 0.8rem;
-                letter-spacing: 6px;
+                font-size: calc(8px + 6px * var(--header-scale));
+                letter-spacing: calc(2px + 4px * var(--header-scale));
                 color: var(--branding-blue);
-                margin-top: 8px;
+                margin-top: 4px;
                 opacity: 0.9;
                 text-transform: uppercase;
                 text-shadow: 0 0 5px var(--branding-blue);
+            }
+
+            /* Central Navigation (Top Left) */
+            .cyber-nav {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                display: flex;
+                gap: 12px;
+                z-index: 2000;
+                animation: branding-fade-in 1.2s ease-out forwards;
+            }
+
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                color: white;
+                text-decoration: none;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+
+            .nav-btn:hover {
+                transform: translateY(-3px) scale(1.05);
+                border-color: var(--branding-blue);
+                background: rgba(0, 210, 255, 0.15);
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+                color: var(--branding-blue);
+            }
+
+            .nav-btn svg {
+                width: 22px;
+                height: 22px;
+                transition: transform 0.3s ease;
+            }
+
+            .nav-btn:hover svg {
+                filter: drop-shadow(0 0 5px var(--branding-blue));
             }
 
             @keyframes branding-fade-in {
                 from { opacity: 0; transform: translateY(-10px); }
                 to { opacity: 1; transform: translateY(0); }
             }
-
-            /* Tablet / iPad Portrait Optimization */
-            @media (max-width: 1024px) and (orientation: portrait) {
-                .canvas-branding {
-                    top: 20px;
-                    right: 20px;
-                }
-                .canvas-subtitle {
-                    letter-spacing: 3px;
-                }
-                .canvas-branding h1 {
-                    font-size: 1.2rem;
-                }
-            }
         `;
         document.head.appendChild(style);
     },
 
     injectHTML(title, subtitle) {
+        if(document.querySelector('.canvas-branding')) return;
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.innerHTML = `
@@ -85,5 +126,50 @@ const CyberBranding = {
             <div class="canvas-subtitle">${subtitle}</div>
         `;
         document.body.appendChild(container);
+    },
+
+    injectNavigation() {
+        if(document.querySelector('.cyber-nav')) return;
+        const nav = document.createElement('div');
+        nav.className = 'cyber-nav';
+        
+        // Home Button (Dashboard)
+        const homeBtn = document.createElement('a');
+        homeBtn.className = 'nav-btn';
+        homeBtn.href = 'index.html';
+        homeBtn.title = 'Dashboard öffnen';
+        homeBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+        `;
+
+        // Back Button
+        const backBtn = document.createElement('div');
+        backBtn.className = 'nav-btn';
+        backBtn.title = 'Zurück zum Dashboard';
+        backBtn.onclick = () => window.history.back();
+        backBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        `;
+
+        nav.appendChild(homeBtn);
+        nav.appendChild(backBtn);
+        document.body.appendChild(nav);
+    },
+
+    setupActiveScaling() {
+        window.addEventListener('resize', () => this.updateScale());
+    },
+
+    updateScale() {
+        const w = window.innerWidth;
+        let scale = (w - 400) / (1400 - 400);
+        scale = Math.max(0, Math.min(1, scale));
+        document.documentElement.style.setProperty('--header-scale', scale);
     }
 };

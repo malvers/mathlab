@@ -36,10 +36,10 @@
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
+            padding: 110px 25px 25px 25px; /* Added room for branding */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             z-index: 10;
             box-sizing: border-box;
             box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
@@ -73,12 +73,12 @@
         /* --- STATS CARDS --- */
         .stats-card {
             background: var(--glass-bright);
-            padding: 18px;
-            border-radius: 20px;
+            padding: 12px 15px; /* Flatter padding */
+            border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px; /* Compact gap */
         }
 
         .stats-title {
@@ -124,7 +124,7 @@
         .slider-box {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
         .slider-controls-row {
             display: flex;
@@ -171,8 +171,9 @@
         #workspace {
             flex-grow: 1;
             display: flex;
-            padding: 30px;
-            gap: 25px;
+            flex-direction: column; /* Stacked boxes */
+            padding: 110px 25px 30px 25px;
+            gap: 20px;
             box-sizing: border-box;
             position: relative;
         }
@@ -188,48 +189,13 @@
             flex-direction: column;
         }
 
-        .canvas-label {
-            position: absolute;
-            top: 20px;
-            left: 25px;
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            pointer-events: none;
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block; 
+            border-radius: 25px;
         }
 
-        canvas { width: 100%; height: 100%; }
-
-        .canvas-branding {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            text-align: right;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .canvas-branding h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            margin: 0;
-            letter-spacing: 4px;
-            background: linear-gradient(to right, var(--neon-blue), #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px var(--neon-blue));
-            text-transform: uppercase;
-        }
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            margin-top: 5px;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
         
         .footer-credit {
             margin-top: auto;
@@ -290,21 +256,22 @@
 
     <main id="workspace">
         <div class="canvas-container">
-            <div class="canvas-label">Visualisierung</div>
-            <div class="canvas-branding">
-                <h1>Doc Alvers Mathe-Labor</h1>
-                <div class="canvas-subtitle">Gleichschenkliges Dreieck</div>
-            </div>
             <canvas id="triCanvas"></canvas>
         </div>
 
         <div class="canvas-container">
-            <div class="canvas-label">Analyse (S = 4 - 0.5B)</div>
             <canvas id="graphCanvas"></canvas>
         </div>
     </main>
 
+    <script src="branding.js"></script>
     <script>
+        // Initialize Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Gleichschenkliges Dreieck"
+        });
+
         const triCanvas = document.getElementById('triCanvas');
         const triCtx = triCanvas.getContext('2d');
         const graphCanvas = document.getElementById('graphCanvas');
@@ -378,7 +345,7 @@
             triCtx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
-            const cy = rect.height / 2 + 80;
+            const cy = rect.height / 2 + 30; // Reduced offset for 'flatter' boxes
             const pxScale = Math.min(rect.width / 10, rect.height / 7);
 
             let h = 0;
@@ -409,12 +376,27 @@
                 triCtx.shadowColor = varColor('--neon-purple');
                 triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
             } else {
-                // Invalid State - Red Line
-                const yLen = s * pxScale;
+                // Invalid State - Sophisticated visual feedback
+                const legLen = s * pxScale;
+                
+                // 1. Draw the collapsing legs (Blue - because they are the same legs)
+                triCtx.lineWidth = 3;
+                triCtx.strokeStyle = varColor('--neon-blue');
+                triCtx.shadowBlur = 15; triCtx.shadowColor = varColor('--neon-blue');
+                
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + legLen, pLinks.y); triCtx.stroke();
+                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - legLen, pRechts.y); triCtx.stroke();
+                
+                // 2. Draw the GAP in the middle (Red - indicating the failure/missing part)
                 triCtx.strokeStyle = varColor('--neon-red');
-                triCtx.shadowBlur = 20; triCtx.shadowColor = varColor('--neon-red');
-                triCtx.lineWidth = 2;
-                triCtx.beginPath(); triCtx.moveTo(pLinks.x + yLen, pLinks.y); triCtx.lineTo(pRechts.x - yLen, pRechts.y); triCtx.stroke();
+                triCtx.shadowColor = varColor('--neon-red');
+                triCtx.shadowBlur = 25;
+                triCtx.lineWidth = 4;
+                
+                triCtx.beginPath(); 
+                triCtx.moveTo(pLinks.x + legLen, pLinks.y); 
+                triCtx.lineTo(pRechts.x - legLen, pRechts.y); 
+                triCtx.stroke();
             }
             triCtx.shadowBlur = 0;
 
@@ -422,10 +404,12 @@
             triCtx.fillStyle = "white";
             triCtx.font = "14px Orbitron";
             triCtx.textAlign = "center";
-            if (b < 4.0) {
-                triCtx.fillText(s.toFixed(2).replace('.', ','), (pLinks.x + pSpitze.x)/2 - 20, (pLinks.y + pSpitze.y)/2);
-                triCtx.fillText(s.toFixed(2).replace('.', ','), (pRechts.x + pSpitze.x)/2 + 20, (pRechts.y + pSpitze.y)/2);
-            }
+            
+            // Labels for s (always visible now)
+            const labelH = (b < 4.0) ? (pLinks.y + pSpitze.y)/2 : (pLinks.y - 20);
+            triCtx.fillText(s.toFixed(2).replace('.', ','), (pLinks.x + (b < 4.0 ? pSpitze.x : pLinks.x + s*pxScale))/2 - 10, labelH);
+            triCtx.fillText(s.toFixed(2).replace('.', ','), (pRechts.x + (b < 4.0 ? pSpitze.x : pRechts.x - s*pxScale))/2 + 10, labelH);
+            
             triCtx.fillText(b.toFixed(2).replace('.', ','), cx, cy + 30);
         }
 
@@ -433,7 +417,7 @@
             const rect = graphCanvas.getBoundingClientRect();
             graphCtx.clearRect(0, 0, rect.width, rect.height);
 
-            const pad = 60;
+            const pad = 65; // Improved padding to prevent arrow clipping
             const gw = rect.width - pad * 2;
             const gh = rect.height - pad * 2;
 
@@ -450,21 +434,53 @@
                 graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
             }
 
-            // Axes
-            graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
-            graphCtx.lineWidth = 1;
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.5), toY(0)); graphCtx.stroke();
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.5)); graphCtx.stroke();
-
-            // Function Line
+            // Axes with Arrows
             graphCtx.lineWidth = 2;
+            
+            // X-Axis (Purple - BASIS)
+            graphCtx.strokeStyle = varColor('--neon-purple');
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.8), toY(0)); graphCtx.stroke();
+            // Arrow X
+            graphCtx.beginPath(); graphCtx.moveTo(toX(8.8)-10, toY(0)-5); graphCtx.lineTo(toX(8.8), toY(0)); graphCtx.lineTo(toX(8.8)-10, toY(0)+5); graphCtx.stroke();
+            
+            // Y-Axis (Blue - SCHENKEL)
+            graphCtx.strokeStyle = varColor('--neon-blue');
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.8)); graphCtx.stroke();
+            // Arrow Y
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0)-5, toY(4.8)+10); graphCtx.lineTo(toX(0), toY(4.8)); graphCtx.lineTo(toX(0)+5, toY(4.8)+10); graphCtx.stroke();
+
+            // Labels for Axes
+            graphCtx.font = "bold 11px Orbitron";
+            graphCtx.textAlign = "right";
+            graphCtx.fillStyle = varColor('--neon-purple'); // Wort BASIS purple
+            graphCtx.fillText("BASIS (b)", toX(8.5), toY(0) + 35);
+            graphCtx.textAlign = "left";
+            graphCtx.fillStyle = varColor('--neon-blue'); // Wort SCHENKEL blau
+            graphCtx.fillText("SCHENKEL (s)", toX(0) + 15, toY(4.8));
+
+            // Axis Numbering
+            graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+            graphCtx.font = "10px Orbitron";
+            
+            // X-Numbers (Every number)
+            graphCtx.textAlign = "center";
+            for(let i=0; i<=8; i++) graphCtx.fillText(i, toX(i), toY(0) + 18);
+            
+            // Y-Numbers
+            graphCtx.textAlign = "right";
+            for(let i=1; i<=4; i++) graphCtx.fillText(i, toX(0) - 12, toY(i) + 4);
+
+            // Function Line (S = 4 - 0.5B)
+            graphCtx.lineWidth = 3;
             graphCtx.shadowBlur = 10;
-            // Valid (Green)
+            
+            // Valid Part (Green - as requested)
             graphCtx.strokeStyle = varColor('--neon-green'); graphCtx.shadowColor = varColor('--neon-green');
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0.1), toY(3.95)); graphCtx.lineTo(toX(4), toY(2)); graphCtx.stroke();
-            // Invalid (Red)
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(4)); graphCtx.lineTo(toX(4), toY(2)); graphCtx.stroke();
+            
+            // Invalid Part (Red - failure zone)
             graphCtx.strokeStyle = varColor('--neon-red'); graphCtx.shadowColor = varColor('--neon-red');
-            graphCtx.beginPath(); graphCtx.moveTo(toX(4), toY(2)); graphCtx.lineTo(toX(7.9), toY(0.05)); graphCtx.stroke();
+            graphCtx.beginPath(); graphCtx.moveTo(toX(4), toY(2)); graphCtx.lineTo(toX(8), toY(0)); graphCtx.stroke();
             graphCtx.shadowBlur = 0;
 
             // Current Point
@@ -472,12 +488,6 @@
             graphCtx.shadowBlur = 15; graphCtx.shadowColor = "white";
             graphCtx.beginPath(); graphCtx.arc(toX(b), toY(s), 5, 0, Math.PI*2); graphCtx.fill();
             graphCtx.shadowBlur = 0;
-            
-            // Labels
-            graphCtx.fillStyle = "rgba(255,255,255,0.5)";
-            graphCtx.font = "10px Orbitron";
-            graphCtx.textAlign = "center";
-            for(let i=0; i<=8; i+=2) graphCtx.fillText(i, toX(i), toY(-0.3));
         }
 
         function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
