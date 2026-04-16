@@ -681,6 +681,68 @@
             transform: scale(1.2);
         }
 
+        /* --- ADMIN MODE STYLES --- */
+        body.admin-mode .card h3[contenteditable="true"],
+        body.admin-mode .card .card-desc[contenteditable="true"] {
+            border: 1px dashed rgba(0, 210, 255, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(0, 210, 255, 0.05);
+            outline: none;
+            cursor: text;
+        }
+
+        body.admin-mode .card h3[contenteditable="true"]:focus,
+        body.admin-mode .card .card-desc[contenteditable="true"]:focus {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .admin-controls {
+            display: none;
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 1000;
+            background: rgba(5, 11, 24, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--neon-orange);
+            box-shadow: 0 0 20px rgba(255, 157, 0, 0.3);
+            backdrop-filter: blur(10px);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body.admin-mode .admin-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-admin {
+            background: var(--neon-orange);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .admin-toggle-link {
+            opacity: 0.5;
+            cursor: pointer;
+            margin-left: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .admin-toggle-link:hover {
+            opacity: 1;
+            color: var(--neon-orange);
+        }
     </style>
 </head>
 
@@ -709,7 +771,7 @@
     <header>
         <div class="header-content">
             <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="subtitle">INTERAKTIVE MATHEMATIK</div>
+            <div class="subtitle" id="dynamic-subtitle">INTERAKTIVE MATHEMATIK</div>
         </div>
     </header>
 
@@ -731,7 +793,7 @@
             <div class="line"></div>
         </div>
         <div class="grade-grid" id="jahrgang-grid">
-            <a href="javascript:void(0)" class="card grade-card locked">
+            <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active">
                 <div class="card-icon">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
@@ -1048,6 +1110,12 @@
                 <p class="card-desc">Manipulation quadratischer Funktionen. Verstehe den Einfluss von Parametern auf die Parabelform.</p>
                 <div class="btn">Mission Start</div>
             </a>
+            <a href="uhrzeitwinkel.html" class="card" data-category="geometrie grade5 grade6 grade7 hot" data-keywords="geometrie winkel uhrzeit zeiger berechnung">
+                <div class="card-icon">🕒</div>
+                <h3>Winkel-Uhr Labor</h3>
+                <p class="card-desc">Untersuche den Winkel zwischen Stunden- und Minutenzeiger zu jeder Tageszeit. Verstehe die kontinuierliche Bewegung der Zeiger.</p>
+                <div class="btn">Mission Start</div>
+            </a>
             <a href="litchi3d.html" class="card" data-category="fun grade8" data-keywords="3d oberfläche litschi litchi visualisierung">
                 <div class="card-icon"
                     style="font-size: 40px; display: flex; align-items: center; justify-content: center;">🍒</div>
@@ -1062,7 +1130,14 @@
         &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank"
             style="color: var(--neon-blue); text-decoration: none; opacity: 0.7;">GEMINI</a>
         <a href="impressum.html">IMPRESSUM</a>
+        <span class="admin-toggle-link" onclick="toggleAdminMode()" title="Redaktions-Modus aktivieren">🔐 ADMIN</span>
     </footer>
+
+    <div class="admin-controls" id="admin-panel">
+        <div style="color: var(--neon-orange); font-size: 0.8rem; margin-bottom: 5px;">REDAKTIONS-MODUS AKTIV</div>
+        <button class="btn-admin" onclick="exportChanges()">Änderungen Exportieren</button>
+        <button class="btn-admin" style="background: #333; color: #999;" onclick="toggleAdminMode()">Beenden</button>
+    </div>
 
     <!-- JavaScript für Sound-Toggle und Autoplay-Fallback -->
     <script>
@@ -1170,8 +1245,81 @@
             }
         }
 
+        function updateToolCount() {
+            const count = document.querySelectorAll('#tool-container .card').length;
+            const subtitle = document.getElementById('dynamic-subtitle');
+            if (subtitle) {
+                subtitle.innerHTML = `<span style="color: #fff; text-shadow: 0 0 10px var(--neon-blue); font-weight: bold;">${count}</span> INTERAKTIVE MATHEMATIK-WERKZEUGE`;
+            }
+        }
+
+        // --- LIVE EDITION LOGIC ---
+        let adminActive = false;
+
+        function toggleAdminMode() {
+            adminActive = !adminActive;
+            document.body.classList.toggle('admin-mode', adminActive);
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3');
+                const desc = card.querySelector('.card-desc');
+                
+                if (title) title.contentEditable = adminActive;
+                if (desc) desc.contentEditable = adminActive;
+                
+                // Prevent navigation when editing
+                if (adminActive) {
+                    card.setAttribute('data-old-href', card.getAttribute('href'));
+                    card.removeAttribute('href');
+                    card.style.cursor = 'default';
+                } else {
+                    if (card.getAttribute('data-old-href')) {
+                        card.setAttribute('href', card.getAttribute('data-old-href'));
+                    }
+                    card.style.cursor = 'pointer';
+                }
+            });
+            
+            const adminLink = document.querySelector('.admin-toggle-link');
+            adminLink.innerHTML = adminActive ? "🔓 ADMIN AKTIV" : "🔐 ADMIN";
+        }
+
+        function exportChanges() {
+            const changes = [];
+            const cards = document.querySelectorAll('#tool-container .card');
+            
+            cards.forEach(card => {
+                const href = card.getAttribute('data-old-href') || card.getAttribute('href');
+                const title = card.querySelector('h3').innerText;
+                const desc = card.querySelector('.card-desc') ? card.querySelector('.card-desc').innerText : "";
+                
+                changes.push({
+                    file: href,
+                    title: title,
+                    desc: desc
+                });
+            });
+            
+            const json = JSON.stringify(changes, null, 2);
+            const blob = new Blob([json], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            
+            // For now, let's log it and offer a simple prompt
+            console.log("AKTUALISIERTE DATEN:", json);
+            const msg = "Änderungen wurden erfasst! Kopiere den folgenden Code und sende ihn mir, damit ich die Datei dauerhaft patchen kann:\n\n" + json.substring(0, 500) + "... (siehe Konsole für Volltext)";
+            alert(msg);
+            
+            // Also trigger download for convenience
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "cyber_labor_updates.json";
+            a.click();
+        }
+
         // Immediate execution to prevent flicker (FOUC)
         handleHash();
+        updateToolCount();
         
         window.addEventListener('hashchange', handleHash);
     </script>
