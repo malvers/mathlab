@@ -93,7 +93,7 @@ const CyberBranding = {
             }
 
             .cyber-nav.integrated {
-                margin-bottom: 25px;
+                margin-bottom: 15px;
                 width: 100%;
                 justify-content: flex-start;
                 position: relative;
