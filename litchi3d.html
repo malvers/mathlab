@@ -1,214 +1,179 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>docalvers | 3D Litchi Labor</title>
-    <!-- KaTeX CSS & JS -->
+    <title>Cyber-Labor | 3D Litchi Labor</title>
+    
+    <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
-        rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --space-bg: #050b18;
-            --neon-red: #ff3333;
             --neon-pink: #ff0055;
+            --neon-red: #ff3333;
             --neon-orange: #ff8800;
-            --text-main: #ffffff;
-            --panel-bg: rgba(10, 15, 30, 0.6);
+            --glass: rgba(15, 23, 42, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --sidebar-width: 380px;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            padding: 0;
             background-color: var(--space-bg);
-            color: var(--text-main);
-        }
-
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
             height: 100vh;
-            z-index: 1;
+            overflow: hidden;
         }
 
-
-        .glass-panel {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--panel-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 20px 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 95vw;
-            max-width: 500px;
-            container-type: inline-size;
+        /* --- SIDEBAR --- */
+        #side-panel {
+            width: var(--sidebar-width);
+            height: 100%;
+            background: rgba(10, 15, 30, 0.95);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            z-index: 10;
+            padding: 30px;
+            z-index: 100;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .panel-header {
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: min(1.2rem, 4.5vw);
-            margin-bottom: 5px;
-            color: var(--neon-red);
-            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
-            letter-spacing: 1px;
-            white-space: nowrap;
-        }
+        #sidebar-header { margin-bottom: 30px; }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 12px;
         }
 
-        .control-header {
+        .slider-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .label-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            color: #aaa;
-            letter-spacing: 0.5px;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            color: #aaa;
         }
 
         .val-display {
             font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 8px;
-            border-radius: 4px;
-            min-width: 50px;
-            text-align: center;
-            font-size: 0.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--neon-pink);
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
         }
 
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            background: transparent;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
+            width: 20px;
+            height: 20px;
+            background: white;
             border-radius: 50%;
-            background: #fff;
             cursor: pointer;
-            margin-top: -6px;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
-            transition: all 0.2s;
+            box-shadow: 0 0 15px var(--neon-red);
+            transition: transform 0.2s;
         }
 
-        input[type="range"]::-webkit-slider-runnable-track {
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* --- WORKSPACE --- */
+        #workspace {
+            flex-grow: 1;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at center, #0a1226 0%, #050b18 100%);
+        }
+
+        #canvas-container {
             width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            height: 100%;
         }
 
-        #slider-reife::-webkit-slider-thumb { background: var(--neon-red); }
-        #slider-bumps::-webkit-slider-thumb { background: var(--neon-orange); }
-        #slider-shape::-webkit-slider-thumb { background: var(--neon-pink); }
-
-        .equation-display {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow-x: auto;
-            padding: 15px 10px;
-            color: white;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 768px) {
-            .glass-panel { width: 90%; padding: 15px 20px; }
-            .back-btn { top: 10px; left: 10px; font-size: 0.7rem; }
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            #side-panel { width: 100%; height: auto; padding: 20px; border-right: none; border-bottom: 1px solid var(--border); }
+            #workspace { height: 60vh; width: 100%; flex-grow: 0; min-height: 400px; }
         }
     </style>
 </head>
 
 <body>
+    <aside id="side-panel">
+        <div id="sidebar-header"></div>
+        <div id="ui-container"></div>
 
-    <div id="canvas-container"></div>
-
-    <div class="glass-panel">
-        <div class="panel-header">3D LITCHI - OBERFLÄCHE</div>
-
-        <div class="equation-display" id="equation-container">
-            <!-- KaTeX rendered equation -->
+        <div style="font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.2); text-align:center; padding-top:10px; opacity:0.6; margin-top:auto;">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: GEMINI
         </div>
+    </aside>
 
-        <div class="control-group">
-            <div class="control-header">
-                <span>Reifegrad (Color)</span>
-                <span class="val-display" id="val-reife">1.0</span>
-            </div>
-            <input type="range" id="slider-reife" min="0.5" max="2.0" step="0.01" value="1.0">
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span>Stachel-Intensität</span>
-                <span class="val-display" id="val-bumps">0.05</span>
-            </div>
-            <input type="range" id="slider-bumps" min="0.0" max="0.15" step="0.001" value="0.05">
-        </div>
-
-        <div class="control-group">
-            <input type="range" id="slider-shape" min="0.8" max="1.6" step="0.01" value="1.2">
-        </div>
-
-        <div style="font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.3); text-align:center; padding-top:10px; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank" style="color:var(--neon-red); text-shadow:0 0 5px var(--neon-red); text-decoration:none; opacity:0.8;">GEMINI</a>
-            &bull; <a href="impressum.html" style="color:#666; text-decoration:none;">IMPRESSUM</a>
-        </div>
+    <div id="workspace">
+        <div id="canvas-container"></div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/formula.js"></script>
+    <script src="js/ui.js"></script>
 
     <script>
+        // Init Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "3D LITCHI | PROZEDURALE GEOMETRIE"
+        });
+
+        // Init Formula Engine
+        CyberFormula.init({ anchorId: 'workspace' });
+
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
         camera.position.set(0, 0, 4.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 1.5;
+        controls.autoRotateSpeed = 1.2;
 
-        // --- GPU RAYMARCHING SHADER ---
-
+        // --- SHADER LOGIC ---
         const vertexShader = `
             varying vec2 vUv;
             void main() {
@@ -226,13 +191,13 @@
             varying vec2 vUv;
 
             float litchiSDF(vec3 p) {
-                // Ellipsoid base
+                // Base Ellipsoid
                 vec3 q = p / vec3(1.0, u_Shape, 1.0);
                 float d = length(q) - 1.0;
                 
-                // Procedural "Scales" / Bumps using periodic functions
-                float bumps = abs(sin(18.0 * p.x) * sin(18.0 * p.y) * sin(18.0 * p.z));
-                return d - bumps * u_Bumps;
+                // Procedural Spikes (Sine-based)
+                float spikes = abs(sin(18.0 * p.x) * sin(18.0 * p.y) * sin(18.0 * p.z));
+                return d - spikes * u_Bumps;
             }
 
             vec3 calcNormal(vec3 p) {
@@ -262,45 +227,54 @@
                 vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
                 vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
                 
-                vec2 bound = sphIntersect(ro, rd, 2.2);
-                if (bound.y < 0.0) {
-                    gl_FragColor = vec4(0.0);
-                    return;
-                }
+                vec2 bound = sphIntersect(ro, rd, 2.0);
+                if (bound.y < 0.0) { discard; }
                 
                 float t = max(bound.x, 0.0);
                 float tMax = bound.y;
-                float stepSize = 0.02;
+                float stepSize = 0.015;
                 bool hit = false;
-                
-                for (int i = 0; i < 160; i++) {
-                    vec3 p = ro + rd * t;
-                    float f = litchiSDF(p);
-                    if (f < 0.001) { hit = true; break; }
-                    t += max(f, 0.015);
+                vec3 p;
+                float prevF = litchiSDF(ro + rd * t);
+
+                for (int i = 0; i < 200; i++) {
+                    t += stepSize;
                     if (t > tMax) break;
+                    
+                    p = ro + rd * t;
+                    float f = litchiSDF(p);
+                    
+                    if (f <= 0.0 && prevF > 0.0) {
+                        float tLow = t - stepSize;
+                        float tHigh = t;
+                        for (int j = 0; j < 8; j++) {
+                            float tMid = (tLow + tHigh) * 0.5;
+                            if (litchiSDF(ro + rd * tMid) <= 0.0) tHigh = tMid;
+                            else tLow = tMid;
+                        }
+                        t = (tLow + tHigh) * 0.5;
+                        p = ro + rd * t;
+                        hit = true;
+                        break;
+                    }
+                    prevF = f;
                 }
                 
-                if (!hit) {
-                    gl_FragColor = vec4(0.0);
-                    return;
-                }
+                if (!hit) { discard; }
                 
-                vec3 p = ro + rd * t;
                 vec3 n = calcNormal(p);
                 
-                // Lychee Color Logic
-                vec3 colRed = vec3(0.8, 0.1, 0.1);
-                vec3 colPink = vec3(1.0, 0.2, 0.5);
-                vec3 baseColor = mix(colRed, colPink, (p.y + 1.0) * 0.5) * u_Reife;
+                // Color Logic
+                vec3 colRed = vec3(0.8, 0.05, 0.1);
+                vec3 colPink = vec3(1.0, 0.1, 0.4);
+                vec3 baseColor = mix(colRed, colPink, (p.y + 1.2) * 0.4) * u_Reife;
                 
-                vec3 lightDir = normalize(vec3(1.0, 2.0, 1.5));
-                float diff = max(dot(n, lightDir), 0.1);
-                float spec = pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 32.0) * 0.5;
+                vec3 lightDir = normalize(vec3(1.5, 2.5, 2.0));
+                float diff = max(dot(n, lightDir), 0.15);
+                float spec = pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 24.0) * 0.4;
+                float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * 0.3;
                 
-                float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 4.0);
-                vec3 finalColor = baseColor * diff + spec + fresnel * vec3(1.0, 0.5, 0.5) * 0.4;
-                
+                vec3 finalColor = baseColor * diff + spec + fresnel * vec3(1.0, 0.6, 0.6);
                 gl_FragColor = vec4(finalColor, 1.0);
             }
         `;
@@ -318,17 +292,17 @@
             }
         });
 
-        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), raymarchMaterial);
+        const quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), raymarchMaterial);
         quad.frustumCulled = false;
         scene.add(quad);
 
         function updateEquation() {
-            if (typeof katex === 'undefined') return;
             const reife = raymarchMaterial.uniforms.u_Reife.value.toFixed(2);
             const bumps = raymarchMaterial.uniforms.u_Bumps.value.toFixed(3);
             const shape = raymarchMaterial.uniforms.u_Shape.value.toFixed(2);
-            const tex = `d(p) = \\sqrt{x^2 + (y/${shape})^2 + z^2} - 1.0 - (${bumps} \\cdot \\text{bumps})`;
-            katex.render(tex, document.getElementById('equation-container'), { throwOnError: false, displayMode: true });
+            
+            const tex = `d(p) = \\sqrt{x^2 + (y/{\\color{#ff3333}${shape}})^2 + z^2} - 1.0 - ({\\color{#ff8800}${bumps}} \\cdot \\text{spikes})`;
+            CyberFormula.set(tex);
         }
 
         function animate() {
@@ -340,45 +314,70 @@
         }
         
         animate();
-        
-        function initEquation() {
-            if (typeof katex !== 'undefined') updateEquation();
-            else setTimeout(initEquation, 100);
-        }
-        initEquation();
+        CyberFormula.init({ anchorId: 'workspace' });
+        setTimeout(updateEquation, 100);
 
-        document.getElementById('slider-reife').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_Reife.value = val;
-            document.getElementById('val-reife').innerText = val.toFixed(2);
-            updateEquation();
-        });
+        // UI Setup
+        CyberUI.injectBriefing('ui-container', 
+            'Willkommen im prozeduralen Biometrie-Labor. Untersuchen Sie die prozedurale Struktur der <b>Litchi-Gleichung</b>. SDF-Manipulation ermöglicht die Simulation von organischen Oberflächen in Echtzeit. 🛰️🛡️', 
+            'var(--neon-red)');
 
-        document.getElementById('slider-bumps').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_Bumps.value = val;
-            document.getElementById('val-bumps').innerText = val.toFixed(3);
-            updateEquation();
-        });
+        CyberUI.createCard('ui-container', 'Litchi Parameter', `
+            <div class="control-group">
+                <div class="slider-box">
+                    <div class="label-row">
+                        <span>Frucht-Reife (Farbe)</span>
+                        <span class="val-display" id="val-reife">1.00</span>
+                    </div>
+                    <input type="range" id="slider-reife" min="0.5" max="2.0" step="0.01" value="1.00">
+                </div>
+                
+                <div class="slider-box">
+                    <div class="label-row">
+                        <span>Stachel-Intensität</span>
+                        <span class="val-display" id="val-bumps">0.05</span>
+                    </div>
+                    <input type="range" id="slider-bumps" min="0.0" max="0.15" step="0.001" value="0.05">
+                </div>
 
-        document.getElementById('slider-shape').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_Shape.value = val;
-            document.getElementById('val-shape').innerText = val.toFixed(2);
-            updateEquation();
-        });
+                <div class="slider-box">
+                    <div class="label-row">
+                        <span>Form-Faktor (Y)</span>
+                        <span class="val-display" id="val-shape">1.20</span>
+                    </div>
+                    <input type="range" id="slider-shape" min="0.8" max="1.8" step="0.01" value="1.20">
+                </div>
+            </div>
+        `, 'var(--neon-red)');
+
+        // Event Listeners for dynamic inputs
+        setTimeout(() => {
+            document.getElementById('slider-reife').addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                raymarchMaterial.uniforms.u_Reife.value = val;
+                document.getElementById('val-reife').innerText = val.toFixed(2);
+                updateEquation();
+            });
+
+            document.getElementById('slider-bumps').addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                raymarchMaterial.uniforms.u_Bumps.value = val;
+                document.getElementById('val-bumps').innerText = val.toFixed(3);
+                updateEquation();
+            });
+
+            document.getElementById('slider-shape').addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                raymarchMaterial.uniforms.u_Shape.value = val;
+                document.getElementById('val-shape').innerText = val.toFixed(2);
+                updateEquation();
+            });
+        }, 200);
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    <script src="branding.js"></script>
-    <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "3D LITCHI - OBERFLÄCHE"
+            renderer.setSize(container.clientWidth, container.clientHeight);
         });
     </script>
 </body>
