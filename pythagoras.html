@@ -68,72 +68,6 @@
             height: 100%;
         }
 
-        /* --- DASHBOARD BUTTON --- */
-        .dashboard-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            letter-spacing: 1.5px;
-            backdrop-filter: blur(5px);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .dashboard-btn:hover {
-            color: white;
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        .dashboard-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke-width: 2.5;
-        }
-
-        /* --- CANVAS BRANDING --- */
-        .canvas-branding {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            text-align: right;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .canvas-branding h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            margin: 0;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px var(--neon-blue));
-            text-transform: uppercase;
-        }
-
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            margin-top: 8px;
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
 
         /* --- INSTRUMENT CARDS --- */
         .instrument-card {
@@ -244,16 +178,8 @@
 <body>
 
     <div id="side-panel">
-        <header style="border: none; padding-bottom: 5px;">
-            <a href="index.html" class="dashboard-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>DASHBOARD</span>
-            </a>
-        </header>
+        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
+        <div id="sidebar-header" style="min-height: 60px;"></div>
 
         <div class="instrument-card">
             <div class="instrument-title">Konstruktions-Modus</div>
@@ -290,14 +216,16 @@
     </div>
 
     <div id="canvas-container">
-        <div class="canvas-branding">
-            <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="canvas-subtitle">PYTHAGORAS-LABOR</div>
-        </div>
         <canvas id="canvas"></canvas>
     </div>
 
+    <script src="branding.js"></script>
     <script>
+        // Initialize Branding
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Der allgemeine Pythagoras"
+        });
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const modeSelect = document.getElementById('mode');

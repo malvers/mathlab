@@ -2,151 +2,130 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Winkel-Uhr Labor | Cyber-Labor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Winkel-Uhr Labor</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <style>
         :root {
-            --space-bg: #050b18;
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
-            --neon-orange: #ff9d00;
-            --text-main: #ffffff;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.7);
             --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background-color: var(--space-bg);
-            color: var(--text-main);
-            overflow: hidden;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
             display: flex;
             height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            transition: flex-direction 0.4s ease;
         }
 
-        /* --- BACKGROUND PARTICLES --- */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 15px);
-            background-size: 300px 300px;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        /* --- SIDEBAR LAYOUT --- */
-        #sidebar {
-            width: 320px;
-            min-width: 320px;
-            background: rgba(10, 15, 30, 0.7);
+        /* Vorbild: Pythagoras.html Sidebar Structure */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
             backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
             z-index: 100;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
             overflow-y: auto;
+            transition: all 0.4s ease;
         }
 
         #workspace {
             flex-grow: 1;
+            position: relative;
+            background: transparent;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
             padding: 20px;
-            position: relative;
         }
 
-        /* --- INSTRUMENT CARDS --- */
+        /* --- RESPONSIVE MOBILE LAYOUT --- */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            #side-panel {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                min-height: fit-content;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+
+            #workspace {
+                width: 100%;
+                height: 65vh; /* Gib der Uhr genug Platz */
+                min-height: 400px;
+                flex-grow: 0;
+            }
+
+            #floating-tag {
+                top: 40px !important; /* Etwas tiefer im mobilen Workspace */
+                font-size: 1.2rem;
+                padding: 8px 18px;
+            }
+
+            svg#clock {
+                width: 95%;
+                max-width: 380px;
+                transform: translateY(20px);
+            }
+        }
+
+        /* Instrument Cards wie im Original */
         .instrument-card {
             background: var(--glass-bright);
-            padding: 12px 18px;
-            border-radius: 20px;
+            padding: 15px;
+            border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 10px;
         }
 
-        .card-title {
+        .instrument-title {
             font-family: 'Orbitron';
             font-size: 0.65rem;
             color: rgba(255, 255, 255, 0.4);
             letter-spacing: 2px;
             text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
         }
 
-        .val-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 40px;
-        }
-        .val-display { font-family: 'Orbitron'; font-size: 1.3rem; font-weight: bold; color: var(--neon-blue); }
-
-        /* --- FLOATING LABEL --- */
-        #floating-tag {
-            position: absolute;
-            top: 15%; /* Über der Uhr */
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(15px);
-            border: 2px solid var(--neon-blue);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 1.4rem;
-            color: var(--neon-blue);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            z-index: 200;
-            pointer-events: none;
+        .val-display {
             font-family: 'Orbitron';
-            white-space: nowrap;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        /* --- CLOCK SVG --- */
-        svg#clock {
-            width: 80%;
-            max-width: 500px;
-            height: auto;
-            filter: drop-shadow(0 0 30px rgba(0, 210, 255, 0.15));
-        }
-
-        .clock-face {
-            fill: rgba(0, 0, 0, 0.3);
-            stroke: rgba(255, 255, 255, 0.05);
-            stroke-width: 1;
-        }
-
-        #hour-hand {
-            stroke: var(--neon-blue);
-            stroke-width: 8;
-            stroke-linecap: round;
-            filter: drop-shadow(0 0 10px var(--neon-blue));
-        }
-
-        #minute-hand {
-            stroke: var(--neon-purple);
-            stroke-width: 5;
-            stroke-linecap: round;
-            filter: drop-shadow(0 0 10px var(--neon-purple));
-        }
-
-        .angle-arc {
-            fill: rgba(0, 210, 255, 0.15);
-            stroke: var(--neon-blue);
-            stroke-width: 2;
-            opacity: 0.7;
-        }
-
-        /* --- SLIDER STYLING --- */
+        /* Slider Styling */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -154,8 +133,8 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             outline: none;
-            margin: 15px 0;
         }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 22px;
@@ -167,44 +146,70 @@
             box-shadow: 0 0 15px var(--neon-blue);
         }
 
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 10px;
-            box-shadow: 0 0 8px currentColor;
+        /* SVG Clock Styling */
+        svg#clock {
+            width: 85%;
+            max-width: 550px;
+            height: auto;
+            filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.2));
+            transform: translateY(50px);
         }
+
+        .clock-face { fill: rgba(0, 0, 0, 0.4); stroke: rgba(255, 255, 255, 0.08); stroke-width: 1.5; }
+        #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 12px var(--neon-blue)); }
+        #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 12px var(--neon-purple)); }
+        .angle-arc { fill: rgba(0, 210, 255, 0.15); stroke: var(--neon-blue); stroke-width: 2.5; }
+
+        #floating-tag {
+            position: absolute;
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--neon-blue);
+            padding: 12px 25px;
+            border-radius: 20px;
+            font-size: 1.6rem;
+            color: var(--neon-blue);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            pointer-events: none;
+            font-family: 'Orbitron';
+        }
+
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    <aside id="sidebar">
+    <div id="side-panel">
         <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
         <div id="sidebar-header" style="min-height: 60px;"></div>
 
         <div class="instrument-card">
-            <span class="card-title">Zeitsteuerung</span>
-            <div class="val-row">
+            <div class="instrument-title">Zeitsteuerung</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span id="digital-time" class="val-display">12:00</span>
             </div>
             <input type="range" id="time-slider" min="0" max="719" value="0">
         </div>
 
         <div class="instrument-card">
-            <span class="card-title">Legende</span>
-            <div class="val-row" style="margin-top: 5px;">
-                <span style="font-size: 0.8rem; opacity: 0.8;"><span class="legend-dot" style="color: var(--neon-blue); background: var(--neon-blue);"></span> Stundenzeiger</span>
-            </div>
-            <div class="val-row">
-                <span style="font-size: 0.8rem; opacity: 0.8;"><span class="legend-dot" style="color: var(--neon-purple); background: var(--neon-purple);"></span> Minutenzeiger</span>
+            <div class="instrument-title">Analyse-Daten</div>
+            <div style="font-size: 0.85rem; opacity: 0.8; display: flex; flex-direction: column; gap: 8px;">
+                <span><span class="legend-dot" style="background: var(--neon-blue);"></span> Stundenzeiger (α₁)</span>
+                <span><span class="legend-dot" style="background: var(--neon-purple);"></span> Minutenzeiger (α₂)</span>
             </div>
         </div>
-    </aside>
 
-    <main id="workspace">
+        <div style="margin-top: auto; padding-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </div>
+
+    <div id="workspace">
         <div id="floating-tag">α = 0°</div>
-
         <svg id="clock" viewBox="0 0 200 200">
             <circle cx="100" cy="100" r="95" class="clock-face" />
             <g id="ticks"></g>
@@ -213,10 +218,16 @@
             <line id="minute-hand" x1="100" y1="100" x2="100" y2="45" />
             <circle cx="100" cy="100" r="4" fill="white" />
         </svg>
-    </main>
+    </div>
 
     <script src="branding.js"></script>
     <script>
+        // Exact same Init call as in Pythagoras.html
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Winkel-Uhr Labor"
+        });
+
         const slider = document.getElementById('time-slider');
         const digitalTime = document.getElementById('digital-time');
         const floatingTag = document.getElementById('floating-tag');
@@ -225,7 +236,7 @@
         const angleArc = document.getElementById('angle-arc');
         const ticksContainer = document.getElementById('ticks');
 
-        // Create ticks
+        // Create Ticks
         for (let i = 0; i < 12; i++) {
             const angle = i * 30;
             const x1 = 100 + 85 * Math.sin(angle * Math.PI / 180);
@@ -233,74 +244,31 @@
             const x2 = 100 + 92 * Math.sin(angle * Math.PI / 180);
             const y2 = 100 - 92 * Math.cos(angle * Math.PI / 180);
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", x1);
-            line.setAttribute("y1", y1);
-            line.setAttribute("x2", x2);
-            line.setAttribute("y2", y2);
-            line.setAttribute("stroke", "rgba(255,255,255,0.2)");
-            line.setAttribute("stroke-width", "1.5");
+            line.setAttribute("x1", x1); line.setAttribute("y1", y1); line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+            line.setAttribute("stroke", "rgba(255,255,255,0.15)"); line.setAttribute("stroke-width", "1.5");
             ticksContainer.appendChild(line);
         }
 
         function update() {
-            const minutesTotal = parseInt(slider.value);
-            const h = Math.floor(minutesTotal / 60);
-            const m = minutesTotal % 60;
-
-            const hDisplay = h === 0 ? 12 : h;
-            digitalTime.innerText = `${hDisplay.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-
-            const hAngle = (h * 30) + (m * 0.5);
-            const mAngle = m * 6;
-
-            hourHand.setAttribute('transform', `rotate(${hAngle}, 100, 100)`);
-            minuteHand.setAttribute('transform', `rotate(${mAngle}, 100, 100)`);
-
-            let diff = Math.abs(hAngle - mAngle);
-            if (diff > 180) diff = 360 - diff;
-            
-            if (window.katex) {
-                katex.render(`\\alpha = ${diff.toFixed(1)}^\\circ`, floatingTag, { throwOnError: false });
-            } else {
-                floatingTag.innerText = `α = ${diff.toFixed(1)}°`;
-            }
-
-            updateArc(hAngle, mAngle);
+            const val = parseInt(slider.value);
+            const h = Math.floor(val / 60); const m = val % 60;
+            const dispH = h === 0 ? 12 : h;
+            digitalTime.innerText = `${dispH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+            const hA = (h * 30) + (m * 0.5); const mA = m * 6;
+            hourHand.setAttribute('transform', `rotate(${hA}, 100, 100)`);
+            minuteHand.setAttribute('transform', `rotate(${mA}, 100, 100)`);
+            let d = Math.abs(hA - mA); if (d > 180) d = 360 - d;
+            if (window.katex) { katex.render(`\\alpha = ${d.toFixed(1)}^\\circ`, floatingTag); }
+            else { floatingTag.innerText = `α = ${d.toFixed(1)}°`; }
+            const r = 40; let s = hA, e = mA;
+            let df = (e - s) % 360; if (df < 0) df += 360;
+            if (df > 180) { [s, e] = [e, s]; df = 360 - df; }
+            const x1 = 100 + r * Math.sin(s * Math.PI / 180); const y1 = 100 - r * Math.cos(s * Math.PI / 180);
+            const x2 = 100 + r * Math.sin(e * Math.PI / 180); const y2 = 100 - r * Math.cos(e * Math.PI / 180);
+            angleArc.setAttribute('d', `M 100 100 L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
         }
-
-        function updateArc(hAngle, mAngle) {
-            const r = 35;
-            let start = hAngle;
-            let end = mAngle;
-            
-            let diff = (end - start) % 360;
-            if (diff < 0) diff += 360;
-            
-            if (diff > 180) {
-                [start, end] = [end, start];
-                diff = 360 - diff;
-            }
-
-            const x1 = 100 + r * Math.sin(start * Math.PI / 180);
-            const y1 = 100 - r * Math.cos(start * Math.PI / 180);
-            const x2 = 100 + r * Math.sin(end * Math.PI / 180);
-            const y2 = 100 - r * Math.cos(end * Math.PI / 180);
-
-            const d = `M 100 100 L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
-            angleArc.setAttribute('d', d);
-        }
-
         slider.addEventListener('input', update);
-        
-        window.addEventListener('load', () => {
-            if (window.CyberBranding) {
-                CyberBranding.init({
-                    title: "Winkel-Uhr Labor",
-                    subtitle: "ANALOG-DIGITAL ANALYSE"
-                });
-            }
-            update();
-        });
+        update();
     </script>
 </body>
 </html>

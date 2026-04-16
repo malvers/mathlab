@@ -36,10 +36,10 @@
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 110px 25px 25px 25px; /* Added room for branding */
+            padding: 15px 25px 20px 25px; /* Ultra-tight top padding */
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px; /* Reduced gap */
             z-index: 10;
             box-sizing: border-box;
             box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
@@ -172,7 +172,7 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column; /* Stacked boxes */
-            padding: 110px 25px 30px 25px;
+            padding: 20px 25px 30px 25px; /* Standardized padding */
             gap: 20px;
             box-sizing: border-box;
             position: relative;
@@ -187,6 +187,23 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Container specific IDs for targeting */
+        #tri-container { flex: 1; }
+        #graph-container { flex: 1; }
+
+        /* Collapse States */
+        #graph-container.collapsed {
+            flex: 0 0 50px;
+            min-height: 50px;
+            max-height: 50px;
+        }
+        
+        #graph-container.collapsed canvas {
+            opacity: 0;
+            pointer-events: none;
         }
 
         canvas { 
@@ -194,6 +211,43 @@
             height: 100%; 
             display: block; 
             border-radius: 25px;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Toggle Button */
+        .panel-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            color: var(--neon-blue);
+        }
+
+        .panel-toggle:hover {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .panel-toggle svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.4s ease;
+        }
+
+        #graph-container.collapsed .panel-toggle svg {
+            transform: rotate(180deg);
         }
 
         
@@ -211,18 +265,11 @@
 <body>
 
     <aside id="side-panel">
-        <a href="index.html" class="dashboard-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            DASHBOARD
-        </a>
+        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
+        <div id="sidebar-header" style="min-height: 45px;"></div>
 
         <section class="stats-card">
-            <span class="stats-title">Parameter-Steuerung</span>
             <div class="slider-box">
-                <span class="val-label">BASIS (B)</span>
                 <div class="slider-controls-row">
                     <button class="arrow-btn" id="btn-minus">◀</button>
                     <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2">
@@ -232,17 +279,16 @@
         </section>
 
         <section class="stats-card">
-            <span class="stats-title">Echtzeit-Analyse</span>
             <div class="val-row">
-                <span class="val-label">UMFANG (U)</span>
+                <span class="val-label">UMFANG</span>
                 <span class="val-display" style="color:white;">8,00</span>
             </div>
             <div class="val-row">
-                <span class="val-label">BASIS (B)</span>
+                <span class="val-label">BASIS</span>
                 <span class="val-display" id="disp-b" style="color:var(--neon-purple);">2,00</span>
             </div>
             <div class="val-row">
-                <span class="val-label">SCHENKEL (S)</span>
+                <span class="val-label">SCHENKEL</span>
                 <span class="val-display" id="disp-s" style="color:var(--neon-blue);">3,00</span>
             </div>
         </section>
@@ -255,11 +301,16 @@
     </aside>
 
     <main id="workspace">
-        <div class="canvas-container">
+        <div id="tri-container" class="canvas-container">
             <canvas id="triCanvas"></canvas>
         </div>
 
-        <div class="canvas-container">
+        <div id="graph-container" class="canvas-container">
+            <div class="panel-toggle" onclick="toggleGraph()" title="Graph umschalten">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
             <canvas id="graphCanvas"></canvas>
         </div>
     </main>
@@ -271,6 +322,14 @@
             title: "Doc Alvers Mathe-Labor",
             subtitle: "Gleichschenkliges Dreieck"
         });
+        
+        function toggleGraph() {
+            const container = document.getElementById('graph-container');
+            container.classList.toggle('collapsed');
+            
+            // Trigger resize after animation finishes
+            setTimeout(resize, 600);
+        }
 
         const triCanvas = document.getElementById('triCanvas');
         const triCtx = triCanvas.getContext('2d');
@@ -302,12 +361,14 @@
         window.addEventListener('resize', resize);
         window.addEventListener('load', resize);
 
-        bSlider.addEventListener('input', (e) => {
-            b = parseFloat(e.target.value);
-            s = (u - b) / 2;
-            updateUI();
-            draw();
-        });
+        if (bSlider) {
+            bSlider.addEventListener('input', (e) => {
+                b = parseFloat(e.target.value);
+                s = (u - b) / 2;
+                updateUI();
+                draw();
+            });
+        }
 
         // Auto-Adjust Buttons
         let repeatInterval = null;
@@ -325,14 +386,16 @@
             updateUI(); draw();
         }
 
-        document.getElementById('btn-minus').onmousedown = () => startAdjust(-0.01);
-        document.getElementById('btn-plus').onmousedown = () => startAdjust(0.01);
-        window.onmouseup = stopAdjust;
+        if (document.getElementById('btn-minus')) {
+            document.getElementById('btn-minus').onmousedown = () => startAdjust(-0.01);
+            document.getElementById('btn-plus').onmousedown = () => startAdjust(0.01);
+            window.onmouseup = stopAdjust;
+        }
 
         function updateUI() {
-            dispB.innerText = b.toFixed(2).replace('.', ',');
-            dispS.innerText = s.toFixed(2).replace('.', ',');
-            warningCard.style.display = (b >= 4.0 || b <= 0.05) ? 'block' : 'none';
+            if (dispB) dispB.innerText = b.toFixed(2).replace('.', ',');
+            if (dispS) dispS.innerText = s.toFixed(2).replace('.', ',');
+            if (warningCard) warningCard.style.display = (b >= 4.0 || b <= 0.05) ? 'block' : 'none';
         }
 
         function draw() {
@@ -345,11 +408,11 @@
             triCtx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
-            const cy = rect.height / 2 + 30; // Reduced offset for 'flatter' boxes
-            const pxScale = Math.min(rect.width / 10, rect.height / 7);
-
             let h = 0;
             if (s > b / 2) h = Math.sqrt(s * s - (b / 2) * (b / 2));
+            
+            const pxScale = Math.min(rect.width / 10, rect.height / 7);
+            const cy = rect.height / 2 + (h * pxScale) / 2; // Adjusted to center the whole figure
 
             const pSpitze = { x: cx, y: cy - h * pxScale };
             const pLinks = { x: cx - (b / 2) * pxScale, y: cy };
