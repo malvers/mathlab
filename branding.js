@@ -27,11 +27,11 @@ const CyberBranding = {
                 --header-scale: 1;
             }
 
-            /* Branding Logo (Top Right) */
+            /* Branding Logo (Right-pinned for Workspace focus) */
             .canvas-branding {
                 position: absolute;
-                top: calc(10px + 30px * var(--header-scale));
-                right: calc(10px + 30px * var(--header-scale));
+                top: 40px;
+                right: 40px; 
                 text-align: right;
                 pointer-events: none;
                 z-index: 1000;
@@ -40,9 +40,9 @@ const CyberBranding = {
 
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(12px + 20px * var(--header-scale));
+                font-size: calc(14px + 14px * var(--header-scale)); /* Smaller */
                 margin: 0;
-                letter-spacing: calc(1px + 3px * var(--header-scale));
+                letter-spacing: calc(2px + 2px * var(--header-scale));
                 background: linear-gradient(to right, var(--branding-blue), var(--branding-white), var(--branding-purple));
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
@@ -54,11 +54,11 @@ const CyberBranding = {
 
             .canvas-subtitle {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(8px + 6px * var(--header-scale));
-                letter-spacing: calc(2px + 4px * var(--header-scale));
+                font-size: calc(6px + 4px * var(--header-scale)); /* Smaller */
+                letter-spacing: calc(4px + 4px * var(--header-scale));
                 color: var(--branding-blue);
-                margin-top: 4px;
-                opacity: 0.9;
+                margin-top: 6px;
+                opacity: 0.8;
                 text-transform: uppercase;
                 text-shadow: 0 0 5px var(--branding-blue);
             }
@@ -105,9 +105,9 @@ const CyberBranding = {
             .nav-btn:hover {
                 transform: translateY(-3px) scale(1.05);
                 border-color: var(--branding-blue);
-                background: rgba(0, 210, 255, 0.15);
-                box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-                color: var(--branding-blue);
+                background: rgba(0, 210, 255, 0.25);
+                box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+                color: #fff;
             }
 
             .nav-btn svg {
@@ -131,7 +131,12 @@ const CyberBranding = {
             <h1>${title}</h1>
             <div class="canvas-subtitle">${subtitle}</div>
         `;
-        document.body.appendChild(container);
+        
+        // Logical injection: Preferred workspace, fallback to body
+        const target = document.getElementById('workspace') || 
+                       document.getElementById('canvas-container') || 
+                       document.body;
+        target.appendChild(container);
     },
 
     injectNavigation() {
@@ -166,12 +171,20 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
 
-        // Sidebar detection
-        const sidebar = document.getElementById('side-panel') || document.querySelector('.sidebar') || document.querySelector('aside');
+        // Sidebar detection: check #sidebar-header first (targeted), then fallbacks
+        const sidebarHeader = document.getElementById('sidebar-header');
+        const sidebar = sidebarHeader || 
+                        document.getElementById('side-panel') || 
+                        document.querySelector('.sidebar') || 
+                        document.querySelector('aside');
         
         if (sidebar) {
             nav.classList.add('integrated');
-            sidebar.prepend(nav);
+            if (sidebarHeader) {
+                sidebarHeader.appendChild(nav);
+            } else {
+                sidebar.prepend(nav);
+            }
         } else {
             nav.classList.add('floating');
             document.body.appendChild(nav);
