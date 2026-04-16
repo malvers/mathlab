@@ -1,252 +1,153 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | 3D Heart Surface</title>
     <!-- KaTeX CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --space-bg: #050b18;
             --neon-pink: #ff0055;
             --neon-blue: #00d2ff;
             --neon-orange: #ff8800;
-            --text-main: #ffffff;
-            --panel-bg: rgba(10, 15, 30, 0.6);
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.7);
+            --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
-            overflow: hidden;
             font-family: 'Inter', sans-serif;
-            background-color: var(--space-bg);
-            color: var(--text-main);
-        }
-
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
             height: 100vh;
-            z-index: 1;
+            width: 100vw;
+            overflow: hidden;
+            transition: flex-direction 0.4s ease;
         }
 
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: var(--text-main);
-            text-decoration: none;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            z-index: 10;
-            padding: 10px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--neon-pink);
-            color: var(--neon-pink);
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
-        }
-
-        .glass-panel {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--panel-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 20px 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 95vw;
-            max-width: 500px;
-            container-type: inline-size;
+        /* Standard Sidebar Layout */
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            z-index: 10;
+            z-index: 100;
+            box-sizing: border-box;
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            transition: all 0.4s ease;
         }
 
-        .panel-header {
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: min(1.2rem, 4.5vw);
-            margin-bottom: 5px;
-            color: var(--neon-pink);
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
-            letter-spacing: 1px;
-            white-space: nowrap;
+        #workspace {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 12px;
         }
 
-        .control-header {
+        .control-label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            color: #aaa;
-            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Orbitron';
         }
 
         .val-display {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            min-width: 45px;
-            text-align: center;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
         }
 
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            margin: 10px 0;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 16px;
             width: 16px;
+            height: 16px;
+            background: white;
             border-radius: 50%;
-            background: #fff;
             cursor: pointer;
-            margin-top: -6px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            transition: transform 0.1s;
         }
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-        }
-
-        #slider-a::-webkit-slider-thumb {
-            background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        #slider-a::-webkit-slider-runnable-track {
-            background: rgba(0, 210, 255, 0.2);
-        }
-
-        #slider-b::-webkit-slider-thumb {
-            background: var(--neon-orange);
-            box-shadow: 0 0 10px var(--neon-orange);
-        }
-
-        #slider-b::-webkit-slider-runnable-track {
-            background: rgba(255, 136, 0, 0.2);
-        }
-
-        .equation-display {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow-x: auto;
-            padding: 15px 10px;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        @media (max-width: 768px) {
-            .glass-panel {
-                width: 95%;
-                bottom: 15px;
-                padding: 15px 15px;
-            }
-
-            .back-btn {
-                top: 10px;
-                left: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-
-            .equation-display {
-                font-size: 4vw;
-                padding: 15px 10px;
-            }
+        /* Responsive Mobile Layout */
+        @media (max-width: 900px) {
+            body { flex-direction: column; overflow-y: auto; }
+            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+            #workspace { width: 100%; height: 60vh; min-height: 400px; }
         }
     </style>
 </head>
-
 <body>
 
-    <a href="index.html" class="back-btn">⬅ ZURÜCK ZUM LABOR</a>
-    <div id="canvas-container"></div>
+    <aside id="side-panel">
+        <div id="sidebar-header"></div>
+        <div id="ui-container"></div>
+        
+        <div id="parameter-container"></div>
 
-    <div class="glass-panel">
-        <div class="panel-header">TAUBIN'S HEART EQUATION</div>
+        <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
 
-        <div class="equation-display" id="equation-container">
-            <!-- KaTeX rendered equation will appear here -->
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span>Z-Stauchung (A)</span>
-                <span class="val-display" id="val-a">5.0</span>
-            </div>
-            <input type="range" id="slider-a" min="0.5" max="10.0" step="0.05" value="5.0">
-        </div>
-
-        <div class="control-group">
-            <input type="range" id="slider-b" min="0.0" max="0.5" step="0.005" value="0.025">
-        </div>
-        <div
-            style="font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.3); text-align:center; padding-top:10px; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com"
-                target="_blank"
-                style="color:var(--neon-pink); text-shadow:0 0 5px var(--neon-pink); text-decoration:none; opacity:0.8;">GEMINI</a>
-            &bull; <a href="impressum.html" style="color:#666; text-decoration:none;">IMPRESSUM</a>
-        </div>
+    <div id="workspace">
+        <div id="canvas-container"></div>
     </div>
 
-    <!-- Include Three.js and OrbitControls -->
+    <!-- Three.js & OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/formula.js"></script>
+    <script src="js/ui.js"></script>
 
     <script>
-        const container = document.getElementById('canvas-container');
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "3D HEART SURFACE | TAUBIN-GLEICHUNG"
+        });
 
+        const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
         camera.position.set(0, 1.0, 5.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
@@ -255,9 +156,6 @@
         controls.dampingFactor = 0.05;
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2.0;
-        controls.enablePan = false;
-
-        // --- GPU RAYMARCHING SHADER ---
 
         const vertexShader = `
             varying vec2 vUv;
@@ -278,7 +176,6 @@
                 float x = p.x;
                 float y = p.z; 
                 float z = p.y; 
-                
                 float term = x*x + u_A*y*y + z*z - 1.0;
                 return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
             }
@@ -306,41 +203,36 @@
                 vec4 clipPos = vec4(ndc, 1.0, 1.0);
                 vec4 viewPos = cameraProjectionMatrixInverse * clipPos;
                 viewPos /= viewPos.w;
-                
                 vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
                 vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
                 
                 vec2 bound = sphIntersect(ro, rd, 1.8);
-                if (bound.y < 0.0) {
-                    gl_FragColor = vec4(0.0);
-                    return;
-                }
+                if (bound.y < 0.0) { discard; }
                 
                 float t = max(bound.x, 0.0);
                 float tMax = bound.y;
-                float stepSize = 0.02;
+                float stepSize = 0.015; // Finer steps
                 bool hit = false;
-                
-                vec3 p = ro + rd * t;
-                float prevF = heartSDF(p);
+                vec3 p;
+                float prevF = heartSDF(ro + rd * t);
                 
                 for (int i = 0; i < 200; i++) {
+                    t += stepSize;
                     if (t > tMax) break;
                     
-                    t += stepSize;
                     p = ro + rd * t;
                     float f = heartSDF(p);
                     
                     if (f <= 0.0 && prevF > 0.0) {
+                        // High-Precision Refinement (Binary Search)
                         float tLow = t - stepSize;
                         float tHigh = t;
                         for (int j = 0; j < 10; j++) {
-                            float tMid = mix(tLow, tHigh, 0.5);
-                            float fMid = heartSDF(ro + rd * tMid);
-                            if (fMid <= 0.0) tHigh = tMid;
+                            float tMid = (tLow + tHigh) * 0.5;
+                            if (heartSDF(ro + rd * tMid) <= 0.0) tHigh = tMid;
                             else tLow = tMid;
                         }
-                        t = mix(tLow, tHigh, 0.5);
+                        t = (tLow + tHigh) * 0.5;
                         p = ro + rd * t;
                         hit = true;
                         break;
@@ -348,36 +240,20 @@
                     prevF = f;
                 }
                 
-                if (!hit) {
-                    gl_FragColor = vec4(0.0);
-                    return;
-                }
+                if (!hit) { discard; }
                 
                 vec3 n = calcNormal(p);
-                vec3 colTop = vec3(1.0, 0.0, 0.33);
-                vec3 colBot = vec3(0.0, 0.82, 1.0);
-                float rawY = p.y; 
-                float colorScale = clamp((rawY + 1.0) / 2.0, 0.0, 1.0);
-                vec3 baseAlbedo = mix(colBot, colTop, colorScale);
+                vec3 colTop = vec3(1.0, 0.0, 0.33); // Neon Pink
+                vec3 colBot = vec3(0.0, 0.82, 1.0); // Neon Blue
+                vec3 baseAlbedo = mix(colBot, colTop, clamp((p.y + 1.0) / 2.0, 0.0, 1.0));
                 
                 vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
-                vec3 lightDir2 = normalize(vec3(-2.0, -1.0, -1.0));
                 vec3 viewDir = normalize(ro - p);
-                
-                vec3 halfDir = normalize(lightDir + viewDir);
                 float diff = max(dot(n, lightDir), 0.0);
-                float spec = pow(max(dot(n, halfDir), 0.0), 128.0) * 1.5;
+                float spec = pow(max(dot(n, normalize(lightDir + viewDir)), 0.0), 128.0) * 1.5;
+                float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0) * 0.8;
                 
-                vec3 halfDir2 = normalize(lightDir2 + viewDir);
-                float diff2 = max(dot(n, lightDir2), 0.0);
-                float spec2 = pow(max(dot(n, halfDir2), 0.0), 64.0) * 0.5;
-
-                float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
-                vec3 rimColor = vec3(1.0, 0.5, 0.8) * fresnel * 0.8;
-                
-                vec3 finalColor = baseAlbedo * ((diff * 0.7) + (diff2 * 0.3) + 0.3) + spec + spec2 + rimColor;
-                
-                gl_FragColor = vec4(finalColor, 1.0);
+                gl_FragColor = vec4(baseAlbedo * (diff + 0.3) + spec + vec3(1.0, 0.5, 0.8) * rim, 1.0);
             }
         `;
 
@@ -385,8 +261,6 @@
             vertexShader,
             fragmentShader,
             transparent: true,
-            depthWrite: false,
-            depthTest: false,
             uniforms: {
                 u_A: { value: 5.0 },
                 u_B: { value: 0.025 },
@@ -402,10 +276,8 @@
         function updateEquation() {
             const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
             const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
-            const tex = `(x^2 + \\color{#00d2ff}{${a}}y^2 + z^2 - 1)^3 - x^2z^3 - \\color{#ff8800}{${b}}y^2z^3 = 0`;
-            katex.render(tex, document.getElementById('equation-container'), {
-                throwOnError: false
-            });
+            const tex = `(x^{2} + {\\color{#00d2ff}${a}} \\, y^{2} + z^{2} - 1)^{3} - x^{2}z^{3} - {\\color{#ff8800}${b}} \\, y^{2}z^{3} = 0`;
+            CyberFormula.set(tex);
         }
 
         function animate() {
@@ -416,37 +288,53 @@
             renderer.render(scene, camera);
         }
         animate();
-        // Robust initialization for KaTeX
-        function initEquation() {
-            if (typeof katex !== 'undefined') {
+        
+        // UI Setup
+        CyberUI.injectBriefing('ui-container', 
+            'Willkommen im holografischen Mathe-Labor. Hier untersuchen wir die <b>Taubin-Herz-Gleichung</b>. Nutzen Sie die SDF-Parameter, um die Form und das Volumen des Herzens zu manipulieren. 🛰️🛡️', 
+            'var(--neon-pink)');
+
+        CyberUI.createCard('parameter-container', 'SDF Parameter', `
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Stauchungs-Faktor (A)</span>
+                    <span class="val-display" id="val-a">1.00</span>
+                </div>
+                <input type="range" id="slider-a" min="0.1" max="10.0" step="0.1" value="1.00">
+
+                <div class="control-label">
+                    <span>Oberflächen-Modulation (B)</span>
+                    <span class="val-display" id="val-b">0.05</span>
+                </div>
+                <input type="range" id="slider-b" min="0.0" max="0.3" step="0.005" value="0.05">
+            </div>
+        `, 'var(--neon-pink)');
+
+        CyberFormula.init({ anchorId: 'workspace' });
+        setTimeout(updateEquation, 100);
+
+        // Event Listeners for newly created inputs
+        setTimeout(() => {
+            document.getElementById('slider-a').addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                raymarchMaterial.uniforms.u_A.value = val;
+                document.getElementById('val-a').innerText = val.toFixed(2);
                 updateEquation();
-            } else {
-                setTimeout(initEquation, 100);
-            }
-        }
-        initEquation();
+            });
 
-        document.getElementById('slider-a').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_A.value = val;
-            document.getElementById('val-a').innerText = val.toFixed(2);
-            updateEquation();
-        });
-
-        document.getElementById('slider-b').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            raymarchMaterial.uniforms.u_B.value = val;
-            document.getElementById('val-b').innerText = val.toFixed(3);
-            updateEquation();
-        });
+            document.getElementById('slider-b').addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                raymarchMaterial.uniforms.u_B.value = val;
+                document.getElementById('val-b').innerText = val.toFixed(3);
+                updateEquation();
+            });
+        }, 200);
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         });
-
     </script>
 </body>
-
 </html>
