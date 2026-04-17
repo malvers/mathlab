@@ -767,6 +767,92 @@
             opacity: 1;
             color: var(--neon-orange);
         }
+        /* --- ADMIN GATE MODAL --- */
+        #admin-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 11, 24, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #admin-gate.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .admin-gate-box {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--neon-blue);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .admin-gate-box h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .admin-gate-box input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .admin-gate-box input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+
+        .admin-gate-box .btn-access {
+            background: var(--neon-blue);
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .admin-gate-box .btn-access:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .admin-gate-box .btn-cancel {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 
@@ -787,6 +873,17 @@
         <source src="ambient.wav" type="audio/wav">
     </audio>
 
+    <!-- Admin Gate Modal (Custom Prompt) -->
+    <div id="admin-gate">
+        <div class="admin-gate-box">
+            <h3>BERECHTIGUNG PRÜFEN</h3>
+            <input type="password" id="gate-pwd" placeholder="Passwort" onkeydown="if(event.key==='Enter') verifyGate()">
+            <button class="btn-access" onclick="verifyGate()">ACCESS</button>
+            <br>
+            <button class="btn-cancel" onclick="closeGate()">ABBRECHEN</button>
+        </div>
+    </div>
+
     <!-- Sound Controller floating rechts unten -->
     <div id="sound-toggle" class="sound-toggle" title="Play Ambient Sound">
         <span>🔇</span> MUSIC OFF
@@ -794,7 +891,7 @@
 
     <header>
         <div class="header-content">
-            <h1>Doc Alvers Mathe-Labor</h1>
+            <h1>Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers Mathe-Labor</h1>
             <div class="subtitle" id="dynamic-subtitle">INTERAKTIVE MATHEMATIK</div>
         </div>
     </header>
@@ -937,7 +1034,6 @@
         &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull; AI CO-PILOT: <a href="https://gemini.google.com" target="_blank"
             style="color: var(--neon-blue); text-decoration: none; opacity: 0.7;">GEMINI</a>
         <a href="impressum.html">IMPRESSUM</a>
-        <span class="admin-toggle-link" onclick="toggleAdminMode()" title="Redaktions-Modus aktivieren">🔐 ADMIN</span>
     </footer>
 
     <div class="admin-controls" id="admin-panel">
@@ -1083,13 +1179,61 @@
             }
         }
 
-        // --- LIVE EDITION LOGIC ---
+        // --- ADMIN ACCESS LOGIC ---
         let adminActive = false;
 
-        function toggleAdminMode() {
-            adminActive = !adminActive;
-            document.body.classList.toggle('admin-mode', adminActive);
-            
+        function toggleAdminMode(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            if (!adminActive) {
+                openGate();
+            } else {
+                deactivateAdmin();
+            }
+        }
+
+        function openGate() {
+            const gate = document.getElementById('admin-gate');
+            const input = document.getElementById('gate-pwd');
+            gate.classList.add('visible');
+            input.value = "";
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeGate() {
+            document.getElementById('admin-gate').classList.remove('visible');
+        }
+
+        function verifyGate() {
+            const pwd = document.getElementById('gate-pwd').value;
+            if (pwd === "doc2026") {
+                closeGate();
+                activateAdmin();
+            } else {
+                alert("ZUGRIFF VERWEIGERT.");
+                document.getElementById('gate-pwd').value = "";
+                document.getElementById('gate-pwd').focus();
+            }
+        }
+
+        function activateAdmin() {
+            adminActive = true;
+            document.body.classList.add('admin-mode');
+            updateAdminUI();
+            console.log("REDAKTIONS-MODUS AKTIV");
+        }
+
+        function deactivateAdmin() {
+            adminActive = false;
+            document.body.classList.remove('admin-mode');
+            updateAdminUI();
+            console.log("REDAKTIONS-MODUS BEENDET");
+        }
+
+        function updateAdminUI() {
             const cards = document.querySelectorAll('.card');
             cards.forEach(card => {
                 const title = card.querySelector('h3');
@@ -1100,28 +1244,26 @@
                 
                 // Prevent navigation when editing
                 if (adminActive) {
-                    card.setAttribute('data-old-href', card.getAttribute('href'));
+                    if (!card.hasAttribute('data-old-href')) {
+                        card.setAttribute('data-old-href', card.getAttribute('href') || "");
+                    }
                     card.removeAttribute('href');
                     card.style.cursor = 'default';
                 } else {
-                    if (card.getAttribute('data-old-href')) {
+                    if (card.hasAttribute('data-old-href')) {
                         card.setAttribute('href', card.getAttribute('data-old-href'));
                     }
                     card.style.cursor = 'pointer';
                 }
             });
-            
-            const adminLink = document.querySelector('.admin-toggle-link');
-            adminLink.innerHTML = adminActive ? "🔓 ADMIN AKTIV" : "🔐 ADMIN";
         }
 
         function exportChanges() {
-            const changes = [];
             const cards = document.querySelectorAll('#tool-container .card');
             
             // Generate a fresh LABS_DATA output based on UI edits
             const updatedData = LABS_DATA.map(lab => {
-                const card = document.querySelector(`.card[href="${lab.href}"], .card[data-old-href="${lab.href}"]`);
+                const card = document.querySelector(`.card[data-old-href="${lab.href}"], .card[href="${lab.href}"]`);
                 if (card) {
                     return {
                         ...lab,
@@ -1149,10 +1291,6 @@
         // Initialization
         renderCards();
         handleHash();
-        updateToolCount();
-        
-        window.addEventListener('hashchange', handleHash);
-;
         updateToolCount();
         
         window.addEventListener('hashchange', handleHash);
