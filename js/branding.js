@@ -568,8 +568,8 @@ const CyberBranding = {
         const text = document.getElementById('report-text').value;
         if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
 
-        const subject = encodeURIComponent(`Cyber-Labor Bug: ${filename}`);
-        const body = encodeURIComponent(`FEEDBACK:\n${text}\n\n---\nSYSTEM-DATA:\n${meta}`);
+        const subject = encodeURIComponent(`Support-Anfrage: ${filename}`);
+        const body = encodeURIComponent(`Hallo Doc Alvers,\n\nAnfrage und/oder Feedback:\n${text}\n\nDiagnose (Details):\n${meta}\n\nGesendet von docalvers.de.`);
         window.location.href = `mailto:michael.r.alvers@gmail.com?subject=${subject}&body=${body}`;
     },
 
