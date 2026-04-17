@@ -25,7 +25,138 @@ const CyberBranding = {
                 --branding-blue: #00d2ff;
                 --branding-purple: #9d50bb;
                 --branding-white: #ffffff;
+                --branding-orange: #ff9d00;
                 --header-scale: 1;
+            }
+
+            /* Report Terminal Modal */
+            .report-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(5, 11, 24, 0.85);
+                backdrop-filter: blur(15px);
+                z-index: 300000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s ease;
+            }
+
+            .report-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .report-container {
+                background: rgba(15, 23, 42, 0.95);
+                padding: 35px;
+                border-radius: 24px;
+                border: 1px solid rgba(255, 157, 0, 0.4);
+                box-shadow: 0 0 50px rgba(255, 157, 0, 0.2);
+                width: 90%;
+                max-width: 500px;
+                transform: scale(0.9);
+                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                text-align: center;
+            }
+
+            .report-overlay.visible .report-container {
+                transform: scale(1);
+            }
+
+            .report-title {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.1rem;
+                color: var(--branding-orange);
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .report-textarea {
+                width: 100%;
+                height: 150px;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                color: white;
+                padding: 15px;
+                font-family: 'Inter', sans-serif;
+                font-size: 0.95rem;
+                resize: none;
+                margin-bottom: 20px;
+                outline: none;
+                box-sizing: border-box;
+                text-align: left;
+            }
+
+            .report-textarea:focus {
+                border-color: var(--branding-orange);
+                box-shadow: 0 0 15px rgba(255, 157, 0, 0.2);
+            }
+
+            .report-meta {
+                font-size: 0.7rem;
+                color: rgba(255, 255, 255, 0.4);
+                margin-bottom: 25px;
+                background: rgba(255, 255, 255, 0.03);
+                padding: 10px;
+                border-radius: 8px;
+                font-family: monospace;
+                text-align: left;
+                line-height: 1.4;
+            }
+
+            .report-actions {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .report-btn {
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-family: 'Orbitron';
+                font-size: 0.7rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+                text-transform: uppercase;
+                border: none;
+            }
+
+            .report-btn.primary {
+                background: var(--branding-orange);
+                color: black;
+            }
+
+            .report-btn.secondary {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+            .report-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .report-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                color: rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                font-size: 1.2rem;
             }
 
             /* Branding Logo (Right-pinned Master Header) */
@@ -289,6 +420,26 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
 
+        // Bug Report Button (NEU)
+        const bugBtn = document.createElement('div');
+        bugBtn.className = 'nav-btn';
+        bugBtn.title = 'Fehler oder Feedback melden';
+        bugBtn.style.color = 'var(--branding-orange)';
+        bugBtn.onclick = () => this.showBugReport();
+        bugBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20V10"></path>
+                <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
+                <path d="M12 10V4"></path>
+                <path d="M6 12H2"></path>
+                <path d="M22 12h-4"></path>
+                <path d="M15 4l-3 3-3-3"></path>
+                <path d="M18 17h4"></path>
+                <path d="M2 17h4"></path>
+            </svg>
+        `;
+        nav.appendChild(bugBtn);
+
         // QR Button
         const qrBtn = document.createElement('div');
         qrBtn.className = 'nav-btn';
@@ -374,5 +525,74 @@ const CyberBranding = {
         `;
 
         setTimeout(() => overlay.classList.add('visible'), 10);
+    },
+
+    showBugReport() {
+        let overlay = document.getElementById('cyber-report-overlay');
+        const filename = window.location.pathname.split('/').pop() || 'index.html';
+        const systemInfo = `Module: ${filename} | OS: ${navigator.platform} | Agent: ${navigator.userAgent.substring(0, 50)}... | Res: ${window.innerWidth}x${window.innerHeight}`;
+
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cyber-report-overlay';
+            overlay.className = 'report-overlay';
+            overlay.onclick = (e) => {
+                if(e.target === overlay) overlay.classList.remove('visible');
+            };
+            document.body.appendChild(overlay);
+        }
+
+        overlay.innerHTML = `
+            <div class="report-container">
+                <div class="report-close" onclick="document.getElementById('cyber-report-overlay').classList.remove('visible')">×</div>
+                <div class="report-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10"></path><path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
+                    </svg>
+                    Bug-Report / Feedback
+                </div>
+                <textarea id="report-text" class="report-textarea" placeholder="Beschreibe kurz den Fehler oder dein Feedback..."></textarea>
+                <div class="report-meta">SYSTEM-STATUS: ${systemInfo}</div>
+                <div class="report-actions">
+                    <button class="report-btn primary" onclick="CyberBranding.sendReportEmail('${filename}', '${systemInfo}')">Bericht senden</button>
+                    <button class="report-btn secondary" onclick="CyberBranding.copyReportToClipboard('${filename}', '${systemInfo}')">Code kopieren</button>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => overlay.classList.add('visible'), 10);
+        setTimeout(() => document.getElementById('report-text').focus(), 300);
+    },
+
+    sendReportEmail(filename, meta) {
+        const text = document.getElementById('report-text').value;
+        if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
+        
+        const subject = encodeURIComponent(`Cyber-Labor Bug: ${filename}`);
+        const body = encodeURIComponent(`FEEDBACK:\n${text}\n\n---\nSYSTEM-DATA:\n${meta}`);
+        window.location.href = `mailto:michael@docalvers.de?subject=${subject}&body=${body}`;
+    },
+
+    async copyReportToClipboard(filename, meta) {
+        const text = document.getElementById('report-text').value;
+        if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
+
+        const report = `[CYBER-REPORT]\nLAB: ${filename}\nMESSAGE: ${text}\nSTATUS: ${meta}`;
+        
+        try {
+            await navigator.clipboard.writeText(report);
+            const btn = document.querySelector('.report-btn.secondary');
+            const oldText = btn.innerText;
+            btn.innerText = "KOPIERT! ✅";
+            btn.style.background = "#adff2f";
+            btn.style.color = "#000";
+            setTimeout(() => {
+                btn.innerText = oldText;
+                btn.style.background = "";
+                btn.style.color = "";
+            }, 2000);
+        } catch (err) {
+            alert("Kopieren fehlgeschlagen. Bitte manuell kopieren.");
+        }
     }
 };
