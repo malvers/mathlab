@@ -266,12 +266,12 @@ const CyberBranding = {
             }
 
             .nav-btn {
-                width: 45px;
-                height: 45px;
+                width: 36px;
+                height: 36px;
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2) !important;
-                border-radius: 12px;
+                border-radius: 10px;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
@@ -289,7 +289,7 @@ const CyberBranding = {
                 box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
             }
 
-            .nav-btn svg { width: 22px; height: 22px; stroke-width: 2.5; display: block; }
+            .nav-btn svg { width: 18px; height: 18px; stroke-width: 2.5; display: block; }
 
             @keyframes branding-fade-in {
                 from { opacity: 0; transform: translateY(-10px); }
