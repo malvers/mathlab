@@ -32,7 +32,7 @@ const LABS_DATA = [
         "title": "3D Winkelsumme",
         "description": "Erlebe die Winkelsumme im 3-dimensionalen Raum. Dynamische Visualisierung der inneren Winkel eines Dreiecks.",
         "tagline": "Räumliche Visualisierung / Animation",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M 20,80 L 80,80 L 50,20 Z" fill="rgba(0, 210, 255, 0.1)" stroke="white" stroke-width="2" />
             <path d="M 50,20 L 50,80" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.5" stroke-dasharray="4,2" />
             <path d="M 20,80 L 50,80 L 35,40 Z" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)" stroke-width="2">
@@ -90,7 +90,7 @@ const LABS_DATA = [
         "title": "Delaunay",
         "description": "Algorithmen der Triangulierung. Erzeuge optimale Dreiecksnetze nach der Delaunay-Methode.",
         "tagline": "Delaunay / Voronoi / Algorithmen",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 25 L55 15 L85 40 L65 85 L25 75 Z" fill="rgba(198, 33, 40, 0.2)" stroke="white" stroke-width="2" />
             <line x1="20" y1="25" x2="50" y2="55" stroke="white" stroke-width="1.5" />
             <line x1="55" y1="15" x2="50" y2="55" stroke="white" stroke-width="1.5" />
@@ -136,7 +136,7 @@ const LABS_DATA = [
         "title": "Geometrie Knobelei",
         "description": "Ein anspruchsvolles geometrisches Rätsel. Kannst du den fehlenden Winkel nur durch Logik bestimmen?",
         "tagline": "Logik-Rätsel / Langley / Problemlösung",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <polygon points="20,85 80,85 50,20" fill="rgba(198, 33, 40, 0.8)" stroke="white" stroke-width="4" stroke-linejoin="round" />
             <line x1="20" y1="85" x2="62" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
             <line x1="80" y1="85" x2="38" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
@@ -166,9 +166,10 @@ const LABS_DATA = [
         "title": "Parabel-Lab",
         "description": "Manipulation quadratischer Funktionen. Verstehe den Einfluss von Parametern auf die Parabelform.",
         "tagline": "Quadratische Funktionen / Parameter-Studie",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 20,20 Q 50,80 80,20" fill="none" stroke="var(--neon-purple)" stroke-width="4" />
-            <circle cx="50" cy="80" r="4" fill="var(--neon-blue)" />
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20,10 Q 50,100 80,10" fill="none" stroke="var(--neon-purple)" stroke-width="5" />
+            <circle cx="50" cy="55" r="5" fill="var(--neon-blue)" />
+            <circle cx="65" cy="43.75" r="4.5" fill="#ffd700" />
         </svg>`,
         "category": "hot grade9 fun funktionen",
         "keywords": "parabel quadratisch gleichung scheitelpunkt stauchung streckung",
@@ -180,7 +181,7 @@ const LABS_DATA = [
         "title": "Polygon-Labor",
         "description": "Berechne die Winkelsumme in beliebigen n-Ecken. Entdecke die Formel für die Innenwinkel von Polygonen.",
         "tagline": "Winkelsumme in n-Ecken / Vielecke",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <polygon points="25,25 75,25 85,50 75,75 25,75 15,50" fill="rgba(0, 210, 255, 0.2)" stroke="white" stroke-width="2" />
             <circle cx="25" cy="25" r="4" fill="var(--neon-blue)" />
             <circle cx="75" cy="25" r="4" fill="var(--neon-blue)" />
@@ -210,7 +211,7 @@ const LABS_DATA = [
         "title": "Pythagoras Beweis",
         "description": "Geometrischer Beweis des Satzes von Pythagoras. Schiebe Flächen umher, um den Zusammenhang zu visualisieren.",
         "tagline": "Quadrate / Beweis durch Zerlegung",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <polygon points="20,80 80,80 20,20" fill="rgba(198, 33, 40, 0.8)" stroke="white" stroke-width="4" stroke-linejoin="round" />
             <polyline points="20,65 35,65 35,80" fill="none" stroke="white" stroke-width="3" />
             <circle cx="80" cy="80" r="7" fill="#666" stroke="white" stroke-width="2" />
@@ -249,7 +250,7 @@ const LABS_DATA = [
         "title": "Winkel-Labor",
         "description": "Interaktive Untersuchung von Winkelsummen und Dreieckstypen in der Ebene.",
         "tagline": "Stufenwinkel / Wechselwinkel / Scheitelwinkel",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <line x1="10" y1="80" x2="90" y2="80" stroke="var(--neon-blue)" stroke-width="4" />
             <line x1="20" y1="90" x2="70" y2="10" stroke="var(--neon-purple)" stroke-width="4" />
             <path d="M 50,80 A 25,25 0 0,0 65,65" fill="none" stroke="var(--neon-yellow)" stroke-width="3" />
@@ -299,7 +300,7 @@ const LABS_DATA = [
         "title": "Integral-Reaktor",
         "description": "Die Energie der Fläche. Visualisiere bestimmte Integrale, Riemann-Summen und Näherungsverfahren in einer interaktiven Reaktorkammer.",
         "tagline": "Integralrechnung / Riemann-Summen / Flächen",
-        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="40" fill="rgba(0, 210, 255, 0.05)" stroke="var(--neon-blue)" stroke-width="2" stroke-dasharray="10,5" />
             <path d="M 40,35 L 40,65 M 40,35 C 55,35 55,65 70,65 M 70,35 L 70,65" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" />
             <text x="50" y="65" font-family="'Orbitron'" font-size="30" fill="var(--neon-blue)" text-anchor="middle" style="filter: drop-shadow(0 0 10px var(--neon-blue));">∫</text>
