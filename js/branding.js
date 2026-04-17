@@ -17,7 +17,7 @@ const CyberBranding = {
     },
 
     injectStyles() {
-        if(document.getElementById('cyber-branding-styles')) return;
+        if (document.getElementById('cyber-branding-styles')) return;
         const style = document.createElement('style');
         style.id = 'cyber-branding-styles';
         style.textContent = `
@@ -378,7 +378,7 @@ const CyberBranding = {
     },
 
     injectHTML(title, subtitle) {
-        if(document.querySelector('.canvas-branding')) return;
+        if (document.querySelector('.canvas-branding')) return;
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.innerHTML = `
@@ -389,7 +389,7 @@ const CyberBranding = {
     },
 
     injectNavigation() {
-        if(document.querySelector('.cyber-nav')) return;
+        if (document.querySelector('.cyber-nav')) return;
         const nav = document.createElement('div');
         nav.className = 'cyber-nav';
 
@@ -460,11 +460,11 @@ const CyberBranding = {
         nav.appendChild(qrBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
-        const sidebar = sidebarHeader || 
-                        document.getElementById('side-panel') || 
-                        document.getElementById('sidebar') || 
-                        document.querySelector('aside') ||
-                        document.querySelector('.sidebar');
+        const sidebar = sidebarHeader ||
+            document.getElementById('side-panel') ||
+            document.getElementById('sidebar') ||
+            document.querySelector('aside') ||
+            document.querySelector('.sidebar');
 
         if (sidebar) {
             nav.classList.add('integrated');
@@ -494,7 +494,7 @@ const CyberBranding = {
 
     showQR() {
         let overlay = document.getElementById('cyber-qr-overlay');
-        
+
         // Build the public URL (map local to docalvers.de)
         const pathParts = window.location.pathname.split('/');
         const filename = pathParts[pathParts.length - 1] || 'index.html';
@@ -504,9 +504,9 @@ const CyberBranding = {
             overlay = document.createElement('div');
             overlay.id = 'cyber-qr-overlay';
             overlay.className = 'qr-overlay';
-            
+
             overlay.onclick = (e) => {
-                if(e.target === overlay) overlay.classList.remove('visible');
+                if (e.target === overlay) overlay.classList.remove('visible');
             };
 
             document.body.appendChild(overlay);
@@ -537,7 +537,7 @@ const CyberBranding = {
             overlay.id = 'cyber-report-overlay';
             overlay.className = 'report-overlay';
             overlay.onclick = (e) => {
-                if(e.target === overlay) overlay.classList.remove('visible');
+                if (e.target === overlay) overlay.classList.remove('visible');
             };
             document.body.appendChild(overlay);
         }
@@ -567,7 +567,7 @@ const CyberBranding = {
     sendReportEmail(filename, meta) {
         const text = document.getElementById('report-text').value;
         if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
-        
+
         const subject = encodeURIComponent(`Cyber-Labor Bug: ${filename}`);
         const body = encodeURIComponent(`FEEDBACK:\n${text}\n\n---\nSYSTEM-DATA:\n${meta}`);
         window.location.href = `mailto:michael.r.alvers@gmail.com?subject=${subject}&body=${body}`;
@@ -578,7 +578,7 @@ const CyberBranding = {
         if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
 
         const report = `[CYBER-REPORT]\nLAB: ${filename}\nMESSAGE: ${text}\nSTATUS: ${meta}`;
-        
+
         try {
             await navigator.clipboard.writeText(report);
             const btn = document.querySelector('.report-btn.secondary');

@@ -296,7 +296,7 @@ const LABS_DATA = [
     {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
-        "title": "Integral-Simulation",
+        "title": "Integral-Reaktor",
         "description": "Die Energie der Fläche. Visualisiere bestimmte Integrale, Riemann-Summen und Näherungsverfahren in einer interaktiven Reaktorkammer.",
         "tagline": "Integralrechnung / Riemann-Summen / Flächen",
         "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
