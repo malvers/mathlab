@@ -292,5 +292,24 @@ const LABS_DATA = [
         "category": "dreiecke grade8",
         "keywords": "geometrie winkel winkelsumme beweis beweisen",
         "color": "orange"
+    },
+    {
+        "id": "integralreaktor",
+        "href": "integralreaktor.html",
+        "title": "Integral-Reaktor",
+        "description": "Die Energie der Fläche. Visualisiere bestimmte Integrale, Riemann-Summen und Näherungsverfahren in einer interaktiven Reaktorkammer.",
+        "tagline": "Integralrechnung / Riemann-Summen / Flächen",
+        "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="40" fill="rgba(0, 210, 255, 0.05)" stroke="var(--neon-blue)" stroke-width="2" stroke-dasharray="10,5" />
+            <path d="M 40,35 L 40,65 M 40,35 C 55,35 55,65 70,65 M 70,35 L 70,65" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" />
+            <text x="50" y="65" font-family="'Orbitron'" font-size="30" fill="var(--neon-blue)" text-anchor="middle" style="filter: drop-shadow(0 0 10px var(--neon-blue));">∫</text>
+            <circle cx="50" cy="50" r="15" fill="none" stroke="var(--neon-purple)" stroke-width="1">
+                <animate attributeName="r" values="10;25;10" dur="3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
+            </circle>
+        </svg>`,
+        "category": "hot grade11 grade12 oberstufe analysis funktionen",
+        "keywords": "integral analysis fläche summe riemann reaktor",
+        "color": "blue"
     }
 ];
