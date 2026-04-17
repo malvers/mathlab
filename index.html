@@ -1207,15 +1207,28 @@
             document.getElementById('admin-gate').classList.remove('visible');
         }
 
-        function verifyGate() {
-            const pwd = document.getElementById('gate-pwd').value;
-            if (pwd === "doc2026") {
+        // --- CRYPTO SECURITY (SHA-256) ---
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function verifyGate() {
+            const pwdInput = document.getElementById('gate-pwd');
+            const pwd = pwdInput.value;
+            const hash = await sha256(pwd);
+            
+            const targetHash = "3b421a36c686d295d84c48f434faa21430d55ef34b8a0c9ec39ca2f84b5d2a66";
+            
+            if (hash === targetHash) {
                 closeGate();
                 activateAdmin();
             } else {
                 alert("ZUGRIFF VERWEIGERT.");
-                document.getElementById('gate-pwd').value = "";
-                document.getElementById('gate-pwd').focus();
+                pwdInput.value = "";
+                pwdInput.focus();
             }
         }
 

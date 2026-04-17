@@ -1,6 +1,6 @@
 /**
- * CYBER-LABORATORIES CONFIGURATION
- * Central Source of Truth for all Lab Modules
+ * Cyber-Labor Laboratory Configuration v2.1
+ * Centralized registry for all interactive mathematics modules.
  */
 
 const LABS_DATA = [
@@ -290,13 +290,13 @@ const LABS_DATA = [
             <polygon points="20,80 80,80 50,20" fill="none" stroke="#00d2ff" stroke-width="4" stroke-linejoin="round" />
         </svg>`,
         "category": "dreiecke grade8",
-        "keywords": "geometrie winkel winkelsumme beweis beweisen",
+        "keywords": "geometrie dreieck problem knobeln problemloesen",
         "color": "orange"
     },
     {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
-        "title": "Integral-Reaktor",
+        "title": "Integral-Simulation",
         "description": "Die Energie der Fläche. Visualisiere bestimmte Integrale, Riemann-Summen und Näherungsverfahren in einer interaktiven Reaktorkammer.",
         "tagline": "Integralrechnung / Riemann-Summen / Flächen",
         "icon": `<svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
