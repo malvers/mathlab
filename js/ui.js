@@ -22,7 +22,8 @@ const CyberUI = {
                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
                 backdrop-filter: blur(20px);
                 animation: ui-card-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                overflow: hidden;
+                overflow: visible;
+                position: relative;
             }
 
             .instrument-title {
@@ -69,7 +70,7 @@ const CyberUI = {
 
             .card-content {
                 padding: 0 20px 18px 20px;
-                overflow: hidden;
+                overflow: visible;
                 transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
                 max-height: 1000px; /* Large enough for content */
                 opacity: 1;
@@ -130,7 +131,7 @@ const CyberUI = {
                 background: #0f172a; /* Solid dark background to prevent bleed-through */
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 border-radius: 12px;
-                z-index: 10000;
+                z-index: 110000;
                 overflow: hidden;
                 box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
                 opacity: 0;
