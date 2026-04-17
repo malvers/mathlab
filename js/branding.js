@@ -159,6 +159,32 @@ const CyberBranding = {
                 font-size: 1.2rem;
             }
 
+            /* --- EDIT MODE SYSTEM --- */
+            body.cyber-edit-active {
+                cursor: crosshair;
+            }
+
+            body.cyber-edit-active .stat-value,
+            body.cyber-edit-active .stat-label,
+            body.cyber-edit-active .label-row span:first-child {
+                outline: 1px dashed var(--branding-orange);
+                outline-offset: 4px;
+                position: relative;
+                cursor: text;
+                transition: all 0.2s ease;
+            }
+
+            body.cyber-edit-active .stat-value:hover,
+            body.cyber-edit-active .stat-label:hover {
+                background: rgba(255, 165, 0, 0.1);
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
+            }
+
+            body.cyber-edit-active .stat-box {
+                border-style: dashed;
+                border-color: var(--branding-orange);
+            }
+
             /* Branding Logo (Right-pinned Master Header) */
             .canvas-branding {
                 position: fixed;
@@ -185,18 +211,21 @@ const CyberBranding = {
                 line-height: 1.1;
                 font-weight: 700;
                 transition: font-size 0.2s ease;
+                margin-bottom: 2px;
             }
 
             .canvas-subtitle {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(7px + 3px * var(--header-scale));
-                letter-spacing: calc(2px + 6px * var(--header-scale));
+                font-size: calc(7.9px + 3.5px * var(--header-scale)); /* +20% again */
+                letter-spacing: calc(1px + 3.5px * var(--header-scale));
                 color: var(--branding-blue);
-                margin-top: 6px;
-                opacity: 0.8;
+                margin-top: 3px;
+                opacity: 0.9;
                 text-transform: uppercase;
-                text-shadow: 0 0 5px var(--branding-blue);
+                text-shadow: 0 0 7px var(--branding-blue);
                 transition: font-size 0.2s ease;
+                line-height: 1.1;
+                font-weight: 400;
             }
 
             @media (max-width: 1024px) {
@@ -205,14 +234,14 @@ const CyberBranding = {
 
             @media (max-width: 768px) {
                 .canvas-branding { top: 20px; right: 15px; max-width: 80%; }
-                .canvas-branding h1 { letter-spacing: 1px; font-size: calc(12px + 10px * var(--header-scale)); }
-                .canvas-subtitle { letter-spacing: 2px; margin-top: 2px; font-size: calc(7px + 2px * var(--header-scale)); }
+                .canvas-branding h1 { letter-spacing: 2px; margin-top: 2px; font-size: calc(10px + 3px * var(--header-scale)); }
+                .canvas-subtitle { letter-spacing: 1px; font-size: calc(12px + 10px * var(--header-scale)); }
             }
 
             @media (max-width: 500px) {
                 .canvas-branding { top: 20px; right: 10px; max-width: 90%; }
-                .canvas-branding h1 { font-size: calc(11px + 7px * var(--header-scale)); letter-spacing: 0.5px; }
-                .canvas-subtitle { display: none !important; } /* Hard hide for mobile clarity */
+                .canvas-branding h1 { display: none !important; }
+                .canvas-subtitle { font-size: calc(11px + 7px * var(--header-scale)); letter-spacing: 0.5px; }
             }
 
             /* Central Navigation */
@@ -377,13 +406,23 @@ const CyberBranding = {
         document.head.appendChild(style);
     },
 
-    injectHTML(title, subtitle) {
+    injectHTML(arg1, arg2) {
         if (document.querySelector('.canvas-branding')) return;
+        
+        // Smart-Swap: Ensure "DOC ALVERS" is always 'topLine'
+        let topLine = arg1;
+        let bottomLine = arg2;
+        
+        if (arg2 && arg2.toUpperCase().includes("ALVERS")) {
+            topLine = arg2;
+            bottomLine = arg1;
+        }
+
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.innerHTML = `
-            <h1>${title}</h1>
-            <div class="canvas-subtitle">${subtitle}</div>
+            <h1>${topLine}</h1>
+            <div class="canvas-subtitle">${bottomLine}</div>
         `;
         document.body.appendChild(container);
     },
@@ -435,6 +474,18 @@ const CyberBranding = {
             </svg>
         `;
 
+        // Edit Button (NEU)
+        const editBtn = document.createElement('div');
+        editBtn.className = 'nav-btn';
+        editBtn.title = 'Edit-Modus umschalten';
+        editBtn.onclick = () => this.toggleEditMode();
+        editBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+        `;
+
         // Bug Report Button (NEU & Am Ende)
         const bugBtn = document.createElement('div');
         bugBtn.className = 'nav-btn';
@@ -457,6 +508,7 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
+        nav.appendChild(editBtn); // NEU
         nav.appendChild(bugBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
@@ -594,5 +646,77 @@ const CyberBranding = {
         } catch (err) {
             alert("Kopieren fehlgeschlagen. Bitte manuell kopieren.");
         }
+    },
+    /**
+     * Centralized KaTeX renderer for laboratory modules.
+     * Safely renders LaTeX to a given element.
+     */
+    renderMath: function(elementId, latex, options = {}) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        
+        // Force font color to brand blue/white for visibility
+        el.style.color = "#ffffff";
+        el.style.fontSize = "1.2rem";
+        if (!el.innerHTML) el.innerHTML = "<span style='opacity:0.5; font-size:0.8rem;'>⚛️ LOADING FORMULA...</span>";
+
+        const attemptRender = () => {
+            if (window.katex) {
+                el.innerHTML = "";
+                window.katex.render(latex, el, Object.assign({ throwOnError: false, displayMode: false }, options));
+            } else {
+                setTimeout(attemptRender, 100);
+            }
+        };
+        attemptRender();
+    },
+
+    /**
+     * Toggles the experimental Edit Mode.
+     * Can be extended for laboratory-specific editing logic.
+     */
+    toggleEditMode: function() {
+        this.isEditMode = !this.isEditMode;
+        document.body.classList.toggle('cyber-edit-active', this.isEditMode);
+        
+        // Toggle interactivity
+        const editableSelectors = '.stat-value, .stat-label, .stat-meta, .label-row span:first-child';
+        document.querySelectorAll(editableSelectors).forEach(el => {
+            el.contentEditable = this.isEditMode;
+        });
+
+        console.log(`[CYBER-ENGINE] Edit Mode ${this.isEditMode ? "ENABLED" : "DISABLED"}`);
+        
+        // Visual feedback for the button
+        const btns = document.querySelectorAll('.nav-btn');
+        const editBtn = Array.from(btns).find(b => b.title.includes('Edit'));
+        
+        if (editBtn) {
+            editBtn.style.color = this.isEditMode ? 'var(--branding-orange)' : 'white';
+            editBtn.style.borderColor = this.isEditMode ? 'var(--branding-orange)' : '';
+            editBtn.style.boxShadow = this.isEditMode ? '0 0 15px var(--branding-orange)' : '';
+        }
+
+        // Optional: Hint to user
+        if (this.isEditMode) {
+            this.showNotification("Edit-Modus Aktiv: Elemente zum Bearbeiten wählen");
+        }
+
+        // Module-specific dispatch
+        window.dispatchEvent(new CustomEvent('cyber-edit-toggle', { detail: { active: this.isEditMode } }));
+    },
+
+    showNotification: function(msg) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--branding-orange); color: black; padding: 10px 20px;
+            border-radius: 5px; font-family: Orbitron; font-size: 0.8rem;
+            z-index: 10000; box-shadow: 0 0 20px rgba(255,165,0,0.5);
+            animation: fadeIn 0.3s ease;
+        `;
+        toast.innerText = `⚛️ ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 };

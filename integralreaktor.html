@@ -1,288 +1,162 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyber-Labor | Integral-Reaktor</title>
+
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
     <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <!-- Branding Engine -->
+
+    <!-- Branding & UI Engines -->
     <script src="js/branding.js"></script>
     <script src="js/math-library.js"></script>
     <script src="js/ui.js"></script>
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --space-bg: #050b18;
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --glass: rgba(15, 23, 42, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--space-bg);
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden;
-            display: flex;
-            height: 100vh;
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 320px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: visible; /* Allow dropdowns to pop out */
-        }
-
-        #sidebar-header {
-            margin-bottom: 30px;
-        }
-
-        .control-group {
-            margin-bottom: 25px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        label {
-            display: block;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-            color: var(--neon-blue);
-            text-transform: uppercase;
-        }
-
-        select {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-family: 'Outfit', sans-serif;
-            outline: none;
-        }
-
-        input[type="range"] {
-            width: 95%;
-            margin: 10px auto;
-            display: block;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.1);
-            height: 4px;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
-            border: 2px solid #fff;
-        }
-
-        .value-display {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            text-align: right;
-            margin-top: 5px;
-            color: white;
-        }
-
-        /* --- REACTOR CHAMBER --- */
-        .reactor-chamber {
-            flex-grow: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
-
-        /* --- RADIATION DASHBOARD --- */
-        .dashboard {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            right: 30px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            backdrop-filter: blur(15px);
-            border-bottom: 4px solid var(--neon-blue);
-        }
-
-        .stat-box {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 2px;
-            opacity: 0.6;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
-        }
-
-        .integral-formula {
-            font-size: 1.1rem;
-            color: white;
-        }
-
-        /* --- MODE TOGGLES --- */
-        .mode-toggles {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
+        /* Essential structure only; all branding/padding comes from cyber-layout.css */
+        #reactor-canvas { width: 100%; height: 100%; background: transparent; }
+        .dashboard-grid { display: flex; flex-direction: column; gap: 10px; }
+        .dashboard-stat { padding-bottom: 5px; }
+        .dashboard-stat:last-child { border-bottom: none; }
+        #formula-display { font-size: 2.2rem; min-height: 55px; display: flex; align-items: center; }
+        #integral-value, #error-display { font-size: 1.25rem; }
+        #error-display { color: #ffcc00; }
+        .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
         .mode-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
-            padding: 8px;
-            border-radius: 6px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .mode-btn.active {
-            background: rgba(0, 210, 255, 0.2);
+            background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
             color: white;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
-        }
-
-        @media screen and (max-width: 900px) {
-            .sidebar { width: 0; padding: 0; overflow: hidden; display: none; }
-            .dashboard { bottom: 10px; left: 10px; right: 10px; flex-wrap: wrap; }
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
         }
     </style>
 </head>
+
 <body>
-    <aside class="sidebar" style="overflow-y: visible;">
-        <div id="sidebar-header"></div>
+    <aside id="side-panel">
+        <div id="sidebar-header" style="min-height: 60px;"></div>
+        
+        <div id="briefing-container"></div>
 
-        <div id="function-config-container" style="position: relative; z-index: 150000;">
-            <!-- LaTeX Dropdown and function params will be injected here -->
+        <div class="instrument-card">
+            <div class="dashboard-grid">
+                <div class="dashboard-stat">
+                    <div class="stat-meta">AKTIVE INTEGRAL-FORMEL</div>
+                    <div id="formula-display">Warte auf Daten...</div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="stat-meta">FLÄCHE UNTER DER KURVE</div>
+                    <div id="integral-value" class="cyber-number" style="color: var(--neon-blue);">0.000</div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="stat-meta">FEHLER</div>
+                    <div id="error-display" class="cyber-number">0.0%</div>
+                </div>
+            </div>
         </div>
 
-        <div class="control-group">
-
-        <div class="control-group">
-            <label>Integrations-Grenzen</label>
-            <div style="margin-bottom: 15px;">
-                <span class="stat-label">a (Untergrenze)</span>
-                <input type="range" id="param-a" min="-5" max="5" step="0.1" value="-2" oninput="updateEngine()">
-                <div id="val-a" class="value-display">-2.0</div>
-            </div>
-            <div>
-                <span class="stat-label">b (Obergrenze)</span>
-                <input type="range" id="param-b" min="-5" max="5" step="0.1" value="2" oninput="updateEngine()">
-                <div id="val-b" class="value-display">2.0</div>
-            </div>
+        <div id="parameters-container">
+            <!-- Cards will be injected here via JS -->
         </div>
 
-        <div class="control-group">
-            <label>Reaktor-Präzision (n)</label>
-            <input type="range" id="param-n" min="1" max="100" step="1" value="10" oninput="updateEngine()">
-            <div id="val-n" class="value-display">10</div>
-        </div>
-
-        <div class="control-group">
-            <label>Visualisierungs-Modus</label>
-            <div class="mode-toggles">
-                <button class="mode-btn active" onclick="setMode('exact')">EXAKT</button>
-                <button class="mode-btn" onclick="setMode('left')">LINKS</button>
-                <button class="mode-btn" onclick="setMode('right')">RECHTS</button>
-                <button class="mode-btn" onclick="setMode('trapez')">TRAPEZ</button>
-            </div>
+        <div style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
 
-    <main class="reactor-chamber">
+    <div id="workspace">
         <canvas id="reactor-canvas"></canvas>
-        
-        <div class="dashboard">
-            <div class="stat-box">
-                <div class="stat-label">INTEGRAL-FORMEL</div>
-                <div class="stat-value integral-formula" id="formula-display">∫ f(x) dx</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">ENERGIE-ZUSTAND</div>
-                <div class="stat-value" id="integral-value">0.000</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">FEHLER-MARGIN</div>
-                <div id="error-display" class="stat-value" style="font-size: 1rem; color: #ff0055;">0.0%</div>
-            </div>
-        </div>
-    </main>
+    </div>
 
-    <!-- Engine -->
+    <!-- Logic -->
     <script src="js/integral-engine.js"></script>
     <script>
-        // Globaler Start
         window.addEventListener('load', () => {
+            // 1. Initialize Branding
             CyberBranding.init({
                 title: "INTEGRAL-REAKTOR",
-                subtitle: "DOC ALVERS MATHE-LABOR | ENERGIE DER FLÄCHE"
+                subtitle: "DOC ALVERS MATHE-LABOR"
             });
-            
-            // Initialize UI Components
-            CyberUI.init();
-            
-            CyberUI.createCard('function-config-container', 'Fokus-Funktion', `
-                <div class="control-group" style="background:transparent; border:none; padding:0;">
-                    <label>Mathematisches Modell</label>
-                    <div id="latex-dropdown-container"></div>
-                </div>
-            `, 'var(--neon-blue)');
 
+            // 2. Initialize UI Components
+            CyberUI.init();
+
+            // 3. Create Parameter Controls
+            CyberUI.createCard('parameters-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div id="func-select-container" style="margin-bottom: 5px; padding-bottom: 5px;"></div>
+                    
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-a">Grenze a</span>
+                            <span id="val-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">-2.0</span>
+                        </div>
+                        <input type="range" id="param-a" min="-5" max="5" step="0.1" value="-2" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-b">Grenze b</span>
+                            <span id="val-b" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">2.0</span>
+                        </div>
+                        <input type="range" id="param-b" min="-5" max="5" step="0.1" value="2" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-n">Präzision n</span>
+                            <span id="val-n" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">10</span>
+                        </div>
+                        <input type="range" id="param-n" min="4" max="100" step="1" value="10" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" onclick="setMode('exact')">ANALYTISCH</button>
+                            <button class="mode-btn" onclick="setMode('balken')">BALKEN</button>
+                        </div>
+                    </div>
+                </div>
+            `, 'var(--neon-blue)', { collapsible: false });
+
+            // 4. Create Mission Briefing
+            CyberUI.injectBriefing('briefing-container', `
+                <b>System-Status</b>: Reaktor online. Alle Parameter wurden in das zentrale Side-Panel fusioniert.
+                Ändern Sie die Grenzen, um den Energiefluss (Fläche) in Echtzeit zu beobachten.
+            `);
+
+            // 5. Initialize Engine
             initEngine();
 
-            // Initialize Dropdown with MathLibrary
-            CyberUI.createDropdown('latex-dropdown-container', MathLibrary.getAll(), (id) => {
+            CyberUI.createDropdown('func-select-container', MathLibrary.getAll(), (id) => {
                 state.func = id;
                 updateEngine();
-            }, 'parabel'); // Default to a standard parabola
+            }, 'parabel');
+
+            setTimeout(() => {
+                updateEngine();
+                CyberBranding.renderMath("label-param-a", "a");
+                CyberBranding.renderMath("label-param-b", "b");
+                CyberBranding.renderMath("label-param-n", "n");
+            }, 100);
         });
     </script>
 </body>

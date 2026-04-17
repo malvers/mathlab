@@ -7,146 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            transition: flex-direction 0.4s ease;
-        }
-
-        /* Vorbild: Pythagoras.html Sidebar Structure */
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 100;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-            transition: all 0.4s ease;
-        }
-
-        #workspace {
-            flex-grow: 1;
-            position: relative;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        /* --- RESPONSIVE MOBILE LAYOUT --- */
-        @media (max-width: 900px) {
-            body {
-                flex-direction: column;
-                overflow-y: auto;
-            }
-
-            #side-panel {
-                width: 100%;
-                min-width: 100%;
-                height: auto;
-                min-height: fit-content;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 15px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            }
-
-            #workspace {
-                width: 100%;
-                height: 65vh; /* Gib der Uhr genug Platz */
-                min-height: 400px;
-                flex-grow: 0;
-            }
-
-            #floating-tag {
-                top: 40px !important; /* Etwas tiefer im mobilen Workspace */
-                font-size: 1.2rem;
-                padding: 8px 18px;
-            }
-
-            svg#clock {
-                width: 95%;
-                max-width: 380px;
-                transform: translateY(20px);
-            }
-        }
-
-        /* Instrument Cards wie im Original */
-        .instrument-card {
-            background: var(--glass-bright);
-            padding: 15px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .instrument-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
-            margin-bottom: 5px;
-        }
-
-        .val-display {
-            font-family: 'Orbitron';
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        /* Slider Styling */
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            background: #fff;
-            border: 4px solid var(--neon-blue);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--neon-blue);
-        }
-
-        /* SVG Clock Styling */
+        /* SVG Clock Specific Styling */
         svg#clock {
             width: 85%;
             max-width: 550px;
@@ -190,7 +53,7 @@
         <div class="instrument-card">
             <div class="instrument-title">Zeitsteuerung</div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="digital-time" class="val-display">12:00</span>
+                <span id="digital-time" class="val-display cyber-number">12:00</span>
             </div>
             <input type="range" id="time-slider" min="0" max="719" value="0">
         </div>
