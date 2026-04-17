@@ -417,29 +417,6 @@ const CyberBranding = {
             </svg>
         `;
 
-        nav.appendChild(homeBtn);
-        nav.appendChild(backBtn);
-
-        // Bug Report Button (NEU)
-        const bugBtn = document.createElement('div');
-        bugBtn.className = 'nav-btn';
-        bugBtn.title = 'Fehler oder Feedback melden';
-        bugBtn.style.color = 'var(--branding-orange)';
-        bugBtn.onclick = () => this.showBugReport();
-        bugBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20V10"></path>
-                <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
-                <path d="M12 10V4"></path>
-                <path d="M6 12H2"></path>
-                <path d="M22 12h-4"></path>
-                <path d="M15 4l-3 3-3-3"></path>
-                <path d="M18 17h4"></path>
-                <path d="M2 17h4"></path>
-            </svg>
-        `;
-        nav.appendChild(bugBtn);
-
         // QR Button
         const qrBtn = document.createElement('div');
         qrBtn.className = 'nav-btn';
@@ -457,7 +434,30 @@ const CyberBranding = {
                 <path d="M7 17h.01"></path>
             </svg>
         `;
+
+        // Bug Report Button (NEU & Am Ende)
+        const bugBtn = document.createElement('div');
+        bugBtn.className = 'nav-btn';
+        bugBtn.title = 'Fehler oder Feedback melden';
+        bugBtn.style.color = 'var(--branding-orange)';
+        bugBtn.onclick = () => this.showBugReport();
+        bugBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20V10"></path>
+                <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
+                <path d="M12 10V4"></path>
+                <path d="M6 12H2"></path>
+                <path d="M22 12h-4"></path>
+                <path d="M15 4l-3 3-3-3"></path>
+                <path d="M18 17h4"></path>
+                <path d="M2 17h4"></path>
+            </svg>
+        `;
+
+        nav.appendChild(homeBtn);
+        nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
+        nav.appendChild(bugBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
         const sidebar = sidebarHeader ||
