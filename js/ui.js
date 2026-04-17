@@ -31,7 +31,7 @@ const CyberUI = {
                 font-size: 0.85rem;
                 text-transform: uppercase;
                 letter-spacing: 2.5px;
-                padding: 16px 20px;
+                padding: 16px 0; /* Horizontal padding removed to use central standard */
                 margin: 0;
                 display: flex;
                 align-items: center;
@@ -49,14 +49,6 @@ const CyberUI = {
                 background: rgba(255, 255, 255, 0.05);
             }
 
-            .instrument-title::after {
-                content: "";
-                flex-grow: 1;
-                height: 1px;
-                background: linear-gradient(to right, currentColor, transparent);
-                opacity: 0.4;
-            }
-
             /* Toggle Icon */
             .toggle-icon {
                 font-size: 0.7rem;
@@ -69,7 +61,7 @@ const CyberUI = {
             }
 
             .card-content {
-                padding: 0 20px 18px 20px;
+                padding: 0 0 18px 0; /* Horizontal padding removed */
                 overflow: visible;
                 transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
                 max-height: 1000px; /* Large enough for content */
@@ -147,14 +139,13 @@ const CyberUI = {
             }
 
             .dropdown-option {
-                padding: 12px 18px;
+                padding: 14px 18px;
                 display: flex;
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
                 cursor: pointer;
                 transition: all 0.2s;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
                 color: #ffffff;
                 gap: 15px;
             }
@@ -317,12 +308,14 @@ const CyberUI = {
         card.className = classes.join(' ');
         
         const toggleHtml = options.collapsible ? '<span class="toggle-icon">▶</span>' : '';
-        
-        card.innerHTML = `
+        const titleHtml = (title || options.collapsible) ? `
             <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${accentColor}66;">
                 ${toggleHtml}
                 ${title}
-            </div>
+            </div>` : '';
+        
+        card.innerHTML = `
+            ${titleHtml}
             <div class="card-content">
                 ${contentHTML}
             </div>
