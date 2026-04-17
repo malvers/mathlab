@@ -1,118 +1,107 @@
 /**
- * Cyber-Labor UI Engine v1.1.0 (Smart Component Upgrade)
- * Modular components for sidebar instrumentation with collapsible support.
- * Consistent premium design with glassmorphism and neon accents.
+ * Cyber-UI Engine v5.3.8
+ * Central component engine for the Cyber-Labor ecosystem.
  */
-const CyberUI = {
-    init() {
+class CyberUI {
+    static init() {
+        console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
         this.injectStyles();
-    },
+    }
 
-    injectStyles() {
-        if(document.getElementById('cyber-ui-styles')) return;
+    static injectStyles() {
+        const styleId = 'cyber-ui-dynamic-styles';
+        if (document.getElementById(styleId)) return;
+
         const style = document.createElement('style');
-        style.id = 'cyber-ui-styles';
-        style.textContent = `
+        style.id = styleId;
+        style.innerHTML = `
+            :root {
+                --glass-bright: rgba(255, 255, 255, 0.05);
+                --neon-blue: #00d2ff;
+                --border: rgba(255, 255, 255, 0.1);
+            }
+
             .instrument-card {
-                background: var(--glass, rgba(15, 23, 42, 0.8));
-                border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-                border-radius: 16px;
-                padding: 0; /* Changed to handle padding in content for collapsible */
-                margin-bottom: 12px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-                backdrop-filter: blur(20px);
-                animation: ui-card-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                overflow: visible;
+                background: var(--glass-bright);
+                padding: 12px 15px;
+                border-radius: 18px;
+                border: 1px solid rgba(0, 210, 255, 0.25);
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
                 position: relative;
+                overflow: visible; /* To allow dropdown panels to bleed out */
+                backdrop-filter: blur(25px);
+                animation: ui-card-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                margin-bottom: 5px;
             }
 
             .instrument-title {
                 font-family: 'Orbitron', sans-serif;
-                font-size: 0.85rem;
+                font-size: 0.65rem;
+                letter-spacing: 2px;
+                color: rgba(255, 255, 255, 0.4);
                 text-transform: uppercase;
-                letter-spacing: 2.5px;
-                padding: 16px 0; /* Horizontal padding removed to use central standard */
-                margin: 0;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-weight: 700;
-                position: relative;
+                margin-bottom: 5px;
+                padding-bottom: 5px;
             }
 
+            /* Collapsible Logic */
             .instrument-card.collapsible .instrument-title {
                 cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 10px;
                 user-select: none;
             }
 
-            .instrument-card.collapsible .instrument-title:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            /* Toggle Icon */
-            .toggle-icon {
+            .instrument-card.collapsible .toggle-icon {
                 font-size: 0.7rem;
                 transition: transform 0.3s ease;
-                opacity: 0.6;
+                display: inline-block;
             }
-            .instrument-card.open .toggle-icon {
+
+            .instrument-card.collapsed .toggle-icon {
+                transform: rotate(0deg);
+            }
+
+            .instrument-card:not(.collapsed) .toggle-icon {
                 transform: rotate(90deg);
-                opacity: 1;
             }
 
             .card-content {
-                padding: 0 0 18px 0; /* Horizontal padding removed */
-                overflow: visible;
-                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-                max-height: 1000px; /* Large enough for content */
-                opacity: 1;
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                overflow: hidden;
             }
 
             .instrument-card.collapsed .card-content {
                 max-height: 0;
-                padding-top: 0;
-                padding-bottom: 0;
                 opacity: 0;
-                pointer-events: none;
+                margin: 0;
             }
 
-            /* Cyber-LaTeX-Dropdown Component */
+            /* CYBER DROPDOWN SYSTEM */
             .cyber-dropdown {
                 position: relative;
                 width: 100%;
-                font-family: 'Inter', sans-serif;
-                user-select: none;
-                margin-top: 10px;
-                background: rgba(15, 23, 42, 0.4);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                font-family: 'Outfit', sans-serif;
+            }
+
+            .dropdown-trigger {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--neon-blue);
+                padding: 12px 15px;
                 border-radius: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
                 transition: all 0.3s ease;
             }
 
-            .dropdown-header {
-                padding: 12px 18px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                cursor: pointer;
-                min-height: 50px;
-            }
-
-            .dropdown-header .katex {
-                font-size: 1.25rem !important;
-                color: #ffffff !important;
-            }
-
-            .dropdown-arrow {
-                font-size: 0.6rem;
-                color: #ffffff;
-                opacity: 0.5;
-                transition: transform 0.3s ease;
-            }
-
-            .cyber-dropdown.active .dropdown-arrow {
-                transform: rotate(180deg);
-                opacity: 1;
+            .dropdown-trigger:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: var(--neon-blue);
             }
 
             .dropdown-panel {
@@ -120,217 +109,174 @@ const CyberUI = {
                 top: calc(100% + 8px);
                 left: 0;
                 width: 100%;
-                background: #0f172a; /* Solid dark background to prevent bleed-through */
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                background: rgba(10, 15, 25, 0.95);
+                border: 2px solid var(--neon-blue);
                 border-radius: 12px;
-                z-index: 110000;
-                overflow: hidden;
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-                opacity: 0;
-                transform: translateY(-10px);
-                pointer-events: none;
-                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            }
-
-            .cyber-dropdown.active .dropdown-panel {
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: all;
+                z-index: 1000;
+                display: none;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.1);
             }
 
             .dropdown-option {
-                padding: 14px 18px;
+                padding: 12px 15px;
+                cursor: pointer;
+                transition: all 0.2s ease;
                 display: flex;
-                flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
-                cursor: pointer;
-                transition: all 0.2s;
-                color: #ffffff;
-                gap: 15px;
             }
-
-            .dropdown-option:last-child { border-bottom: none; }
 
             .dropdown-option:hover {
                 background: rgba(0, 210, 255, 0.15);
+                color: var(--neon-blue);
+                padding-left: 20px;
             }
 
-            .dropdown-option.selected {
-                background: rgba(0, 210, 255, 0.2);
-                border-left: 4px solid var(--neon-blue, #00d2ff);
+            .math-part {
+                font-size: 1.1rem;
+                flex-grow: 1;
             }
 
-            .dropdown-option .option-label {
+            .desc-part {
                 font-family: 'Orbitron', sans-serif;
-                font-size: 0.65rem;
-                color: rgba(255, 255, 255, 0.4);
-                text-transform: uppercase;
+                font-size: 0.6rem;
                 letter-spacing: 1px;
+                opacity: 0.5;
+                text-transform: uppercase;
+                margin-left: 15px;
                 white-space: nowrap;
-                opacity: 0.8;
             }
 
-            .dropdown-option .katex {
-                font-size: 1.25rem !important;
-                color: #ffffff !important;
+            .label-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+                font-size: 0.85rem;
+                color: rgba(255, 255, 255, 0.7);
             }
 
-            .briefing-text {
-                font-size: 0.9rem;
-                line-height: 1.7;
-                color: rgba(255, 255, 255, 0.75);
-                font-weight: 300;
-            }
-
-            .briefing-text b {
-                color: white;
-                font-weight: 600;
-            }
-
-            @keyframes ui-card-fade {
-                from { opacity: 0; transform: translateY(15px); }
-                to { opacity: 1; transform: translateY(0); }
+            /* MISSION BRIEFING BOX */
+            .briefing-box {
+                font-size: 0.85rem;
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.8);
+                border-left: 3px solid var(--neon-blue);
+                padding-left: 15px;
             }
         `;
         document.head.appendChild(style);
-    },
+    }
 
-    /**
-     * Injects a standard Missions-Briefing card (Collapsible by default).
-     */
-    injectBriefing(containerId, text, accentColor = '#00d2ff', options = {}) {
-        const content = `<div class="briefing-text">${text}</div>`;
-        const mergedOptions = Object.assign({ collapsible: true, collapsed: true, prepend: true }, options);
-        this.createCard(containerId, 'Missions-Briefing', content, accentColor, mergedOptions);
-    },
-
-    /**
-     * Toggles the collapsed state of a card.
-     */
-    toggleCard(card) {
-        if (!card) return;
-        card.classList.toggle('collapsed');
-        card.classList.toggle('open');
-    },
-
-    /**
-     * Creates an interactive LaTeX Dropdown.
-     */
-    createDropdown(containerId, items, onSelect, activeId = null) {
+    static createCard(containerId, title, contentHTML, accentColor = '#00d2ff', options = { collapsible: false }) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
-        const dd = document.createElement('div');
-        dd.className = 'cyber-dropdown';
-        
-        const currentItem = items.find(i => i.id === activeId) || items[0];
-
-        dd.innerHTML = `
-            <div class="dropdown-header">
-                <div class="header-formula"></div>
-                <span class="dropdown-arrow">▼</span>
-            </div>
-            <div class="dropdown-panel"></div>
-        `;
-
-        const panel = dd.querySelector('.dropdown-panel');
-        const header = dd.querySelector('.dropdown-header');
-        const headerFormula = header.querySelector('.header-formula');
-
-        items.forEach(item => {
-            const opt = document.createElement('div');
-            opt.className = `dropdown-option ${item.id === activeId ? 'selected' : ''}`;
-            opt.innerHTML = `
-                <div class="opt-formula"></div>
-                <div class="option-label">${item.name}</div>
-            `;
-            
-            const optFormulaDiv = opt.querySelector('.opt-formula');
-
-            opt.onclick = (e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-                dd.classList.remove('active');
-                this.renderFormula(item, headerFormula);
-            };
-            panel.appendChild(opt);
-
-            // Render LaTeX for options directly
-            this.renderFormula(item, optFormulaDiv);
-        });
-
-        header.onclick = (e) => {
-            e.stopPropagation();
-            dd.classList.toggle('active');
-        };
-
-        // Close on outside click
-        const closeHandler = (e) => {
-            if (!dd.contains(e.target)) {
-                dd.classList.remove('active');
-            }
-        };
-        document.addEventListener('click', closeHandler);
-
-        container.innerHTML = '';
-        container.appendChild(dd);
-
-        // Render current selection in header
-        this.renderFormula(currentItem, headerFormula);
-    },
-
-    renderFormula(item, target) {
-        if (!target) return;
-        const render = () => {
-            if (window.katex) {
-                window.katex.render(item.tex_short || item.tex, target, { throwOnError: false });
-            } else {
-                setTimeout(render, 100);
-            }
-        };
-        render();
-    },
-
-    /**
-     * Creates a generic instrument card with optional collapsible behavior.
-     */
-    createCard(containerId, title, contentHTML, accentColor = '#00d2ff', options = {}) {
-        this.init();
-        const parent = document.getElementById(containerId) || document.body;
-        const card = document.createElement('div');
-        
-        let classes = ['instrument-card'];
-        if (options.collapsible) classes.push('collapsible');
-        if (options.collapsed) classes.push('collapsed');
-        else classes.push('open');
-        
-        card.className = classes.join(' ');
-        
+        const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
         const toggleHtml = options.collapsible ? '<span class="toggle-icon">▶</span>' : '';
-        const titleHtml = (title || options.collapsible) ? `
-            <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${accentColor}66;">
-                ${toggleHtml}
-                ${title}
-            </div>` : '';
         
-        card.innerHTML = `
-            ${titleHtml}
-            <div class="card-content">
-                ${contentHTML}
+        const cardHTML = `
+            <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''}">
+                <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${accentColor}66;">
+                    ${toggleHtml}
+                    ${title}
+                </div>
+                <div class="card-content">
+                    ${contentHTML}
+                </div>
             </div>
         `;
-        
-        if (options.collapsible) {
-            card.querySelector('.instrument-title').onclick = () => this.toggleCard(card);
-        }
 
-        // If prepend is needed, we could add that, but usually append is fine.
-        // For briefing, we often want it at the top.
-        if (options.prepend && parent.firstChild) {
-            parent.insertBefore(card, parent.firstChild);
-        } else {
-            parent.appendChild(card);
+        container.insertAdjacentHTML('beforeend', cardHTML);
+
+        if (options.collapsible) {
+            const card = document.getElementById(cardId);
+            const titleEl = card.querySelector('.instrument-title');
+            titleEl.addEventListener('click', () => {
+                card.classList.toggle('collapsed');
+            });
         }
     }
-};
+
+    static injectBriefing(containerId, text) {
+        this.createCard(containerId, 'Missions-Briefing', `
+            <div class="briefing-box">
+                ${text}
+            </div>
+        `, '#00d2ff', { collapsible: true });
+    }
+
+    static createDropdown(containerId, options, onSelect, defaultId = null) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const dropdownId = `dropdown-${Math.random().toString(36).substr(2, 9)}`;
+        const defaultOption = options.find(o => o.id === defaultId) || options[0];
+
+        const html = `
+            <div id="${dropdownId}" class="cyber-dropdown">
+                <div class="dropdown-trigger">
+                    <span class="selected-val">${defaultOption.label}</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-panel">
+                    ${options.map(opt => `<div class="dropdown-option" data-id="${opt.id}">${opt.label}</div>`).join('')}
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        const dropdown = document.getElementById(dropdownId);
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const panel = dropdown.querySelector('.dropdown-panel');
+
+        trigger.addEventListener('click', () => {
+            const isOpen = panel.style.display === 'block';
+            panel.style.display = isOpen ? 'none' : 'block';
+            
+            // Render Math in options if open
+            if (!isOpen && window.katex) {
+                dropdown.querySelectorAll('.math-part').forEach(mp => {
+                    window.katex.render(mp.dataset.tex, mp, { throwOnError: false });
+                });
+            }
+        });
+
+        panel.addEventListener('click', (e) => {
+            const opt = e.target.closest('.dropdown-option');
+            if (opt) {
+                const id = opt.dataset.id;
+                const selectedVal = dropdown.querySelector('.selected-val');
+                selectedVal.innerHTML = opt.innerHTML; // Copy the structured HTML
+                panel.style.display = 'none';
+                
+                // Render Math in the selected trigger (selective)
+                if (window.katex) {
+                    const mp = selectedVal.querySelector('.math-part');
+                    if (mp) {
+                        window.katex.render(mp.dataset.tex, mp, { throwOnError: false });
+                    }
+                }
+                
+                onSelect(id);
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                panel.style.display = 'none';
+            }
+        });
+
+        // Initial Math Render for the trigger
+        if (window.katex) {
+            const initialMp = dropdown.querySelector('.dropdown-trigger .math-part');
+            if (initialMp) {
+                window.katex.render(initialMp.dataset.tex, initialMp, { throwOnError: false });
+            }
+        }
+    }
+}

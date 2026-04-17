@@ -66,6 +66,9 @@ const MathLibrary = {
     },
 
     getAll() {
-        return Object.values(this.functions);
+        return Object.values(this.functions).map(f => ({
+            ...f,
+            label: `<span class="math-part" data-tex="${f.tex_short}">${f.tex_short}</span> <span class="desc-part">${f.name}</span>`
+        }));
     }
 };
