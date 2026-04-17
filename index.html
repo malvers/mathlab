@@ -1275,17 +1275,35 @@
             });
             
             const json = JSON.stringify(updatedData, null, 4);
-            const blob = new Blob([json], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
             
-            console.log("AKTUALISIERTE KONFIGURATION:", json);
-            const msg = "Cyber-Konfiguration generiert! Kopiere den Code aus der Konsole oder schick mir die heruntergeladene Datei, damit ich die 'labs-config.js' für dich patchen kann.";
-            alert(msg);
+            // Show in a modal for easy copy-paste
+            const gate = document.getElementById('admin-gate');
+            const box = gate.querySelector('.admin-gate-box');
             
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "labs-config-update.json";
-            a.click();
+            box.innerHTML = `
+                <h3>EXPORT KONFIGURATION</h3>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 15px;">
+                    Kopiere diesen Code und füge ihn im Chat ein.
+                </p>
+                <textarea id="export-area" readonly style="width:100%; height:250px; background:rgba(0,0,0,0.5); color:#00d2ff; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; font-family:monospace; font-size:0.8rem; margin-bottom:15px; resize:none;">${json}</textarea>
+                <button class="btn-access" onclick="copyExport()">CODE KOPIEREN</button>
+                <br>
+                <button class="btn-cancel" onclick="location.reload()">FERTIG</button>
+            `;
+            gate.classList.add('visible');
+        }
+
+        function copyExport() {
+            const area = document.getElementById('export-area');
+            area.select();
+            document.execCommand('copy');
+            const btn = document.querySelector('.btn-access');
+            btn.innerHTML = "KOPIERT! ✅";
+            btn.style.background = "#adff2f";
+            setTimeout(() => {
+                btn.innerHTML = "CODE KOPIEREN";
+                btn.style.background = "var(--neon-blue)";
+            }, 2000);
         }
 
         // Initialization
