@@ -142,6 +142,106 @@ const CyberBranding = {
                 display: block;
                 height: 60px;
             }
+
+            /* QR Overlay Styles */
+            .qr-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(5, 11, 24, 0.85);
+                backdrop-filter: blur(10px);
+                z-index: 200000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s ease;
+            }
+
+            .qr-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .qr-container {
+                background: rgba(15, 23, 42, 0.95);
+                padding: 30px;
+                border-radius: 24px;
+                border: 1px solid rgba(0, 210, 255, 0.3);
+                box-shadow: 0 0 40px rgba(0, 210, 255, 0.2);
+                text-align: center;
+                transform: scale(0.8);
+                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .qr-overlay.visible .qr-container {
+                transform: scale(1);
+            }
+
+            .qr-container img {
+                width: 250px;
+                height: 250px;
+                border: 10px solid white;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .qr-title {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.9rem;
+                color: var(--branding-blue);
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                margin-bottom: 5px;
+            }
+
+            .qr-url {
+                font-family: 'monospace';
+                font-size: 0.85rem;
+                color: var(--branding-blue);
+                margin: 10px 0 15px 0;
+                word-break: break-all;
+                padding: 0 20px;
+                text-decoration: none;
+                transition: opacity 0.3s;
+                display: block;
+            }
+
+            .qr-url:hover {
+                opacity: 0.7;
+                text-decoration: underline;
+            }
+
+            .qr-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                width: 30px;
+                height: 30px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: white;
+                font-size: 1.2rem;
+                transition: all 0.3s;
+            }
+
+            .qr-close:hover {
+                background: rgba(255, 0, 0, 0.3);
+                transform: rotate(90deg);
+            }
+
+            .qr-hint {
+                font-size: 0.75rem;
+                color: rgba(255, 255, 255, 0.5);
+                margin-top: 10px;
+            }
         `;
         document.head.appendChild(style);
     },
@@ -189,6 +289,25 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
 
+        // QR Button
+        const qrBtn = document.createElement('div');
+        qrBtn.className = 'nav-btn';
+        qrBtn.title = 'QR-Code für diese Seite';
+        qrBtn.onclick = () => this.showQR();
+        qrBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+                <path d="M7 7h.01"></path>
+                <path d="M17 7h.01"></path>
+                <path d="M17 17h.01"></path>
+                <path d="M7 17h.01"></path>
+            </svg>
+        `;
+        nav.appendChild(qrBtn);
+
         const sidebarHeader = document.getElementById('sidebar-header');
         const sidebar = sidebarHeader || 
                         document.getElementById('side-panel') || 
@@ -220,5 +339,40 @@ const CyberBranding = {
         let scale = (w - 320) / (1400 - 320);
         scale = Math.max(0, Math.min(1, scale));
         document.documentElement.style.setProperty('--header-scale', scale);
+    },
+
+    showQR() {
+        let overlay = document.getElementById('cyber-qr-overlay');
+        
+        // Build the public URL (map local to docalvers.de)
+        const pathParts = window.location.pathname.split('/');
+        const filename = pathParts[pathParts.length - 1] || 'index.html';
+        const publicURL = `https://docalvers.de/${filename}`;
+
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cyber-qr-overlay';
+            overlay.className = 'qr-overlay';
+            
+            overlay.onclick = (e) => {
+                if(e.target === overlay) overlay.classList.remove('visible');
+            };
+
+            document.body.appendChild(overlay);
+        }
+
+        const apiURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicURL)}`;
+
+        overlay.innerHTML = `
+            <div class="qr-container">
+                <div class="qr-close" onclick="document.getElementById('cyber-qr-overlay').classList.remove('visible')">×</div>
+                <div class="qr-title">Page Share</div>
+                <img src="${apiURL}" alt="QR Code">
+                <a href="${publicURL}" target="_blank" class="qr-url">${publicURL}</a>
+                <div class="qr-hint">Scan to open on mobile</div>
+            </div>
+        `;
+
+        setTimeout(() => overlay.classList.add('visible'), 10);
     }
 };
