@@ -11,65 +11,57 @@
     <style>
         /* SVG Clock Specific Styling */
         svg#clock {
-            width: 85%;
-            max-width: 550px;
+            width: 95%;
+            max-width: 500px;
             height: auto;
-            filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.2));
-            transform: translateY(50px);
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2));
+            /* Absolute centration */
+            display: block;
         }
 
-        .clock-face { fill: rgba(0, 0, 0, 0.4); stroke: rgba(255, 255, 255, 0.08); stroke-width: 1.5; }
-        #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 12px var(--neon-blue)); }
-        #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 12px var(--neon-purple)); }
-        .angle-arc { fill: rgba(0, 210, 255, 0.15); stroke: var(--neon-blue); stroke-width: 2.5; }
+        .clock-face { fill: rgba(0, 0, 0, 0.45); stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; }
+        #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-blue)); }
+        #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-purple)); }
+        .angle-arc { fill: rgba(0, 210, 255, 0.2); stroke: var(--neon-blue); stroke-width: 3; }
+
+        #workspace {
+            flex-grow: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+        }
 
         #floating-tag {
             position: absolute;
-            top: 18%;
+            top: 13%; /* Fine-tuned position for optimal balance */
             left: 50%;
             transform: translateX(-50%);
             background: var(--glass);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
             border: 2px solid var(--neon-blue);
-            padding: 12px 25px;
+            padding: 12px 30px; 
             border-radius: 20px;
-            font-size: 1.6rem;
+            font-size: 2.0rem; 
             color: var(--neon-blue);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
             z-index: 20;
             pointer-events: none;
             font-family: 'Orbitron';
         }
-
-        .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 60px;"></div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Zeitsteuerung</div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="digital-time" class="val-display cyber-number">12:00</span>
-            </div>
-            <input type="range" id="time-slider" min="0" max="719" value="0">
-        </div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Analyse-Daten</div>
-            <div style="font-size: 0.85rem; opacity: 0.8; display: flex; flex-direction: column; gap: 8px;">
-                <span><span class="legend-dot" style="background: var(--neon-blue);"></span> Stundenzeiger</span>
-                <span><span class="legend-dot" style="background: var(--neon-purple);"></span> Minutenzeiger</span>
-            </div>
-        </div>
-
-        <div style="margin-top: auto; padding-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        </div>
-    </div>
+    <aside id="side-panel">
+        <div id="sidebar-header"></div>
+        <div id="controls-container"></div>
+        <div id="analysis-container"></div>
+    </aside>
 
     <div id="workspace">
         <div id="floating-tag">α = 0°</div>
@@ -84,54 +76,108 @@
     </div>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
-        // Exact same Init call as in Pythagoras.html
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
             subtitle: "Winkel-Uhr Labor"
         });
+        CyberUI.init();
 
-        const slider = document.getElementById('time-slider');
-        const digitalTime = document.getElementById('digital-time');
+        function initUI() {
+            CyberBranding.setBriefing(`
+                <b>System-Status</b>: Chronometrische Analyse aktiv. Berechne den Innenwinkel zwischen Stunden- und Minutenzeiger.
+                Nutze den Slider, um die Zeit zu manipulieren.
+            `);
+
+            CyberUI.createCard('controls-container', 'Zeitsteuerung', `
+                <div style="display: flex; flex-direction: column; gap: 18px; padding: 5px 0;">
+                    <div class="label-row" style="margin-bottom: 0;">
+                        <span style="opacity: 0.8; font-size: 0.85rem;">Aktuelle Uhrzeit</span>
+                        <span id="digital-time" class="cyber-number" style="color:var(--neon-blue); font-weight:bold; font-size:1.4rem; text-shadow: 0 0 10px rgba(0,210,255,0.3);">12:00</span>
+                    </div>
+                    <div style="width: 100%; display: flex; align-items: center;">
+                        <input type="range" id="time-slider" min="0" max="719" value="0" style="width: 100%; cursor: pointer;">
+                    </div>
+                </div>
+            `);
+
+            CyberUI.createCard('analysis-container', 'Analyse-Daten', `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:12px; height:12px; border-radius:50%; background:var(--neon-blue); box-shadow:0 0 8px var(--neon-blue);"></div>
+                        <span style="font-size:0.85rem; opacity:0.8;">Stundenzeiger</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:12px; height:12px; border-radius:50%; background:var(--neon-purple); box-shadow:0 0 8px var(--neon-purple);"></div>
+                        <span style="font-size:0.85rem; opacity:0.8;">Minutenzeiger</span>
+                    </div>
+                </div>
+            `);
+
+            const slider = document.getElementById('time-slider');
+            slider.addEventListener('input', () => {
+                updateClock(parseInt(slider.value));
+            });
+            updateClock(0);
+        }
+
         const floatingTag = document.getElementById('floating-tag');
         const hourHand = document.getElementById('hour-hand');
         const minuteHand = document.getElementById('minute-hand');
         const angleArc = document.getElementById('angle-arc');
         const ticksContainer = document.getElementById('ticks');
 
-        // Create Ticks
-        for (let i = 0; i < 12; i++) {
-            const angle = i * 30;
-            const x1 = 100 + 85 * Math.sin(angle * Math.PI / 180);
-            const y1 = 100 - 85 * Math.cos(angle * Math.PI / 180);
-            const x2 = 100 + 92 * Math.sin(angle * Math.PI / 180);
-            const y2 = 100 - 92 * Math.cos(angle * Math.PI / 180);
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", x1); line.setAttribute("y1", y1); line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-            line.setAttribute("stroke", "rgba(255,255,255,0.15)"); line.setAttribute("stroke-width", "1.5");
-            ticksContainer.appendChild(line);
+        function createTicks() {
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * 30) * (Math.PI / 180);
+                const x1 = 100 + 85 * Math.sin(angle);
+                const y1 = 100 - 85 * Math.cos(angle);
+                const x2 = 100 + 92 * Math.sin(angle);
+                const y2 = 100 - 92 * Math.cos(angle);
+                const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                tick.setAttribute("x1", x1);
+                tick.setAttribute("y1", y1);
+                tick.setAttribute("x2", x2);
+                tick.setAttribute("y2", y2);
+                tick.setAttribute("stroke", "rgba(255,255,255,0.2)");
+                tick.setAttribute("stroke-width", "1");
+                ticksContainer.appendChild(tick);
+            }
         }
 
-        function update() {
-            const val = parseInt(slider.value);
-            const h = Math.floor(val / 60); const m = val % 60;
-            const dispH = h === 0 ? 12 : h;
-            digitalTime.innerText = `${dispH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-            const hA = (h * 30) + (m * 0.5); const mA = m * 6;
-            hourHand.setAttribute('transform', `rotate(${hA}, 100, 100)`);
-            minuteHand.setAttribute('transform', `rotate(${mA}, 100, 100)`);
-            let d = Math.abs(hA - mA); if (d > 180) d = 360 - d;
-            if (window.katex) { katex.render(`\\alpha = ${d.toFixed(1)}^\\circ`, floatingTag); }
-            else { floatingTag.innerText = `α = ${d.toFixed(1)}°`; }
-            const r = 40; let s = hA, e = mA;
-            let df = (e - s) % 360; if (df < 0) df += 360;
-            if (df > 180) { [s, e] = [e, s]; df = 360 - df; }
-            const x1 = 100 + r * Math.sin(s * Math.PI / 180); const y1 = 100 - r * Math.cos(s * Math.PI / 180);
-            const x2 = 100 + r * Math.sin(e * Math.PI / 180); const y2 = 100 - r * Math.cos(e * Math.PI / 180);
-            angleArc.setAttribute('d', `M 100 100 L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
+        function updateClock(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const hourDisplay = hours === 0 ? 12 : hours;
+            const dt = document.getElementById('digital-time');
+            if (dt) dt.innerText = `${hourDisplay}:${minutes < 10 ? '0' : ''}${minutes}`;
+
+            const minuteAngle = minutes * 6;
+            const hourAngle = (hours % 12) * 30 + (minutes * 0.5);
+
+            minuteHand.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
+            hourHand.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
+
+            let diff = Math.abs(hourAngle - minuteAngle);
+            if (diff > 180) diff = 360 - diff;
+            floatingTag.innerText = `α = ${diff.toFixed(1)}°`;
+
+            const r = 25;
+            const startAngle = (hourAngle - 90) * (Math.PI / 180);
+            const endAngle = (minuteAngle - 90) * (Math.PI / 180);
+            const x1 = 100 + r * Math.cos(startAngle);
+            const y1 = 100 + r * Math.sin(startAngle);
+            const x2 = 100 + r * Math.cos(endAngle);
+            const y2 = 100 + r * Math.sin(endAngle);
+            const largeArc = diff > 180 ? 1 : 0;
+            const clockWise = (minuteAngle - hourAngle + 360) % 360 < 180 ? 1 : 0;
+            const d = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${clockWise} ${x2} ${y2} L 100 100 Z`;
+            angleArc.setAttribute("d", d);
         }
-        slider.addEventListener('input', update);
-        update();
+
+        createTicks();
+        window.addEventListener('load', initUI);
     </script>
 </body>
 </html>

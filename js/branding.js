@@ -14,6 +14,7 @@ const CyberBranding = {
         this.injectNavigation();
         this.setupActiveScaling();
         this.updateScale();
+        this.briefingContent = ""; // Default empty
     },
 
     injectStyles() {
@@ -150,13 +151,57 @@ const CyberBranding = {
                 box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             }
 
-            .report-close {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                color: rgba(255, 255, 255, 0.3);
-                cursor: pointer;
-                font-size: 1.2rem;
+            .report-close:hover {
+                background: rgba(255, 0, 0, 0.3);
+                transform: rotate(90deg);
+            }
+
+            /* --- SYNC OVERLAY (TRANSMIT) --- */
+            .sync-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 210, 255, 0.05);
+                backdrop-filter: blur(20px);
+                z-index: 500000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s ease;
+            }
+
+            .sync-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .sync-modal {
+                background: rgba(15, 23, 42, 0.98);
+                border: 2px solid var(--branding-blue);
+                padding: 40px;
+                border-radius: 24px;
+                max-width: 600px;
+                width: 90%;
+                color: white;
+                box-shadow: 0 0 60px rgba(0, 210, 255, 0.3);
+                text-align: center;
+            }
+
+            .sync-report-area {
+                width: 100%;
+                height: 200px;
+                background: rgba(0,0,0,0.5);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 12px;
+                margin: 20px 0;
+                padding: 15px;
+                font-family: monospace;
+                font-size: 0.8rem;
+                color: var(--branding-blue);
+                overflow-y: auto;
+                text-align: left;
+                white-space: pre-wrap;
             }
 
             /* --- EDIT MODE SYSTEM --- */
@@ -166,16 +211,21 @@ const CyberBranding = {
 
             body.cyber-edit-active .stat-value,
             body.cyber-edit-active .stat-label,
+            body.cyber-edit-active .instrument-title,
+            body.cyber-edit-active .canvas-branding h1,
+            body.cyber-edit-active .canvas-subtitle,
+            body.cyber-edit-active .briefing-text,
             body.cyber-edit-active .label-row span:first-child {
-                outline: 1px dashed var(--branding-orange);
+                outline: 2px dashed var(--branding-orange);
                 outline-offset: 4px;
                 position: relative;
                 cursor: text;
                 transition: all 0.2s ease;
+                border-radius: 4px;
             }
 
             body.cyber-edit-active .stat-value:hover,
-            body.cyber-edit-active .stat-label:hover {
+            body.cyber-edit-active .instrument-title:hover {
                 background: rgba(255, 165, 0, 0.1);
                 box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
             }
@@ -402,6 +452,64 @@ const CyberBranding = {
                 color: rgba(255, 255, 255, 0.5);
                 margin-top: 10px;
             }
+
+            /* --- BRIEFING MODAL --- */
+            .briefing-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(5, 11, 24, 0.9);
+                backdrop-filter: blur(20px);
+                z-index: 400000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s ease;
+            }
+
+            .briefing-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .briefing-modal {
+                background: var(--glass);
+                border: 1px solid var(--branding-blue);
+                padding: 40px;
+                border-radius: 24px;
+                max-width: 600px;
+                width: 90%;
+                color: white;
+                box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+                transform: translateY(20px);
+                transition: transform 0.4s ease;
+            }
+
+            .briefing-overlay.visible .briefing-modal {
+                transform: translateY(0);
+            }
+
+            .briefing-header {
+                font-family: 'Orbitron';
+                color: var(--branding-blue);
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .briefing-text {
+                font-family: 'Inter';
+                line-height: 1.8;
+                font-size: 1rem;
+                color: rgba(255,255,255,0.9);
+            }
+
+            .briefing-text b { color: var(--branding-blue); }
         `;
         document.head.appendChild(style);
     },
@@ -505,10 +613,42 @@ const CyberBranding = {
             </svg>
         `;
 
+        // Sync/Transmit Button (NEU - initial hidden)
+        const syncBtn = document.createElement('div');
+        syncBtn.id = 'nav-sync-btn';
+        syncBtn.className = 'nav-btn';
+        syncBtn.title = 'Änderungen an Antigravity senden';
+        syncBtn.style.color = 'var(--branding-blue)';
+        syncBtn.style.display = 'none'; // Hidden by default
+        syncBtn.onclick = () => this.transmitEdits();
+        syncBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                <polyline points="12 11 12 16"></polyline>
+                <polyline points="9 14 12 11 15 14"></polyline>
+            </svg>
+        `;
+
+        // Briefing Button (NEU)
+        const briefingBtn = document.createElement('div');
+        briefingBtn.className = 'nav-btn';
+        briefingBtn.title = 'Missions-Briefing anzeigen';
+        briefingBtn.onclick = () => this.showBriefing();
+        briefingBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        `;
+
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
+        nav.appendChild(briefingBtn); // Jetzt an 3. Stelle
         nav.appendChild(qrBtn);
-        nav.appendChild(editBtn); // NEU
+        nav.appendChild(editBtn); 
         nav.appendChild(bugBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
@@ -680,13 +820,19 @@ const CyberBranding = {
         document.body.classList.toggle('cyber-edit-active', this.isEditMode);
         
         // Toggle interactivity
-        const editableSelectors = '.stat-value, .stat-label, .stat-meta, .label-row span:first-child';
+        const editableSelectors = '.stat-value, .stat-label, .stat-meta, .label-row span:first-child, .instrument-title, .canvas-branding h1, .canvas-subtitle, .briefing-text';
         document.querySelectorAll(editableSelectors).forEach(el => {
             el.contentEditable = this.isEditMode;
         });
 
         console.log(`[CYBER-ENGINE] Edit Mode ${this.isEditMode ? "ENABLED" : "DISABLED"}`);
         
+        // Toggle Sync Button Visibility
+        const syncBtn = document.getElementById('nav-sync-btn');
+        if (syncBtn) {
+            syncBtn.style.display = this.isEditMode ? 'flex' : 'none';
+        }
+
         // Visual feedback for the button
         const btns = document.querySelectorAll('.nav-btn');
         const editBtn = Array.from(btns).find(b => b.title.includes('Edit'));
@@ -718,5 +864,117 @@ const CyberBranding = {
         toast.innerText = `⚛️ ${msg}`;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    },
+
+    setBriefing: function(html) {
+        this.briefingContent = html;
+    },
+
+    showBriefing: function() {
+        if (!this.briefingContent) return this.showNotification("Kein Briefing für dieses Modul vorhanden.");
+
+        let overlay = document.getElementById('cyber-briefing-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cyber-briefing-overlay';
+            overlay.className = 'briefing-overlay';
+            overlay.onclick = (e) => {
+                if (e.target === overlay) overlay.classList.remove('visible');
+            };
+            document.body.appendChild(overlay);
+        }
+
+        const copyBtnHTML = this.isEditMode ? `
+            <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important; border-color: var(--branding-orange) !important;" 
+                onclick="CyberBranding.copyLocalBriefing()">
+                Text kopieren
+            </button>
+        ` : '';
+
+        overlay.innerHTML = `
+            <div class="briefing-modal">
+                <div class="briefing-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Missions-Briefing
+                </div>
+                <div class="briefing-text" ${this.isEditMode ? 'contenteditable="true"' : ''}>${this.briefingContent}</div>
+                <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    ${copyBtnHTML}
+                    <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => overlay.classList.add('visible'), 10);
+    },
+
+    copyLocalBriefing: function() {
+        const text = document.querySelector('.briefing-text').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            this.showNotification("Briefing-Text kopiert!");
+        });
+    },
+
+    transmitEdits: function() {
+        const labName = window.location.pathname.split('/').pop() || 'index.html';
+        const selectors = '.stat-value, .stat-label, .instrument-title, .canvas-branding h1, .canvas-subtitle, .briefing-text, .label-row span:first-child';
+        const edits = [];
+
+        document.querySelectorAll(selectors).forEach(el => {
+            edits.push({
+                selector: el.className.split(' ')[0], // Base class as hint
+                id: el.id || 'none',
+                text: el.innerText.trim(),
+                context: el.closest('.instrument-card')?.querySelector('.instrument-title')?.innerText || 'Global'
+            });
+        });
+
+        const syncReport = {
+            lab: labName,
+            timestamp: new Date().toISOString(),
+            edits: edits
+        };
+
+        const reportJSON = JSON.stringify(syncReport, null, 2);
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(reportJSON).then(() => {
+            this.showSyncModal(reportJSON);
+        }).catch(err => {
+            alert("Fehler beim Kopieren. Hier ist dein Report:\n" + reportJSON);
+        });
+    },
+
+    showSyncModal: function(json) {
+        let overlay = document.getElementById('cyber-sync-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cyber-sync-overlay';
+            overlay.className = 'sync-overlay';
+            overlay.onclick = (e) => {
+                if (e.target === overlay) overlay.classList.remove('visible');
+            };
+            document.body.appendChild(overlay);
+        }
+
+        overlay.innerHTML = `
+            <div class="sync-modal">
+                <div class="briefing-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                    </svg>
+                    Sync-Paket geschnürt
+                </div>
+                <div style="font-size: 0.9rem; margin-bottom: 15px;">Alle Änderungen wurden erfasst und in die <b>Zwischenablage kopiert</b>.</div>
+                <div class="sync-report-area">${json}</div>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 25px;">Kopiere diesen Text einfach zurück in den Chat mit Antigravity.</div>
+                <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important;" onclick="document.getElementById('cyber-sync-overlay').classList.remove('visible')">Verstanden</button>
+            </div>
+        `;
+
+        setTimeout(() => overlay.classList.add('visible'), 10);
     }
 };
