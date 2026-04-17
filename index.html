@@ -376,7 +376,7 @@
         .view-section {
             width: 95%;
             max-width: 1123px; /* Harmonisiert mit 4-Kachel Grid */
-            margin: 60px auto 10px auto;
+            margin: 30px auto 10px auto;
             display: flex;
             align-items: center;
             gap: 20px;
@@ -584,36 +584,60 @@
             filter: grayscale(1);
         }
 
-        /* --- BACK BUTTON --- */
+        /* --- BACK BUTTON (Inspired by Branding Buttons) --- */
         .back-nav {
-            width: 90%;
-            max-width: 1100px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            width: 95%;
+            max-width: 1123px;
+            margin: 40px auto 20px auto;
             display: flex;
             justify-content: flex-start;
         }
 
         .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-back::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
         }
 
         .btn-back:hover {
-            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            color: var(--neon-blue);
+        }
+
+        .btn-back:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-back span {
+            font-size: 1.5rem;
+            line-height: 1;
         }
 
         /* --- SEARCH BAR --- */
@@ -788,7 +812,7 @@
     </div>
 
     <div id="grade-view">
-        <div class="view-section" style="margin-top: 60px;">
+        <div class="view-section">
             <h2>Jahrgang</h2>
             <div class="line"></div>
         </div>
@@ -900,240 +924,12 @@
 
     <div id="tool-view" class="hidden">
         <div class="back-nav">
-            <button class="btn-back" onclick="showGrades()">⬅ ZURÜCK ZUR AUSWAHL</button>
+            <button class="btn-back" onclick="showGrades()" title="Zurück zur Auswahl">
+                <span>‹</span>
+            </button>
         </div>
         <div class="container" id="tool-container">
-            <a href="potenzlabor.html" class="card" data-category="fun grade8 grade9 hot" data-keywords="exponent wurzel wachstum kurvendiskussion funktion">
-                <div class="card-icon">📈</div>
-                <h3>Potenz-Labor</h3>
-                <p class="card-desc">Erforsche das Verhalten von Potenz- und Wurzelfunktionen. Verstehe Exponenten durch interaktive Kurvenmanipulation.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="differentiallabor.html" class="card" data-category="hot grade11" data-keywords="differential ableitung tangente analysis funktion kurvendiskussion">
-                <div class="card-icon">⚡</div>
-                <h3>Differential-Labor</h3>
-                <p class="card-desc">Meistere die Differentialrechnung. Erkunde den Zusammenhang zwischen einer Funktion und ihrer Ableitung durch die Tangente.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="steigung.html" class="card" data-category="hot grade8" data-keywords="steigung ableitung differentialrechnung tangente">
-                <div class="card-icon">🚀</div>
-                <h3>Steigungs-Labor</h3>
-                <p class="card-desc">Verstehe die Steigung an jedem Punkt einer Kurve. Die Basis für die Differentialrechnung.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="ausgleichsgerade.html" class="card" data-category="hot grade8" data-keywords="statistik regression korrelation funktion daten">
-                <div class="card-icon">🛰️</div>
-                <h3>Ausgleichsgerade</h3>
-                <p class="card-desc">Finde die beste Gerade durch eine Punktwolke. Verstehe die Minimierung der Fehlerquadrate (Regression).</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="pythagoras.html" class="card" data-category="pythagoras grade8" data-keywords="geometrie rechtwinklig dreieck fläche beweis">
-                <div class="card-icon">🛸</div>
-                <h3>Pythagoras</h3>
-                <p class="card-desc">Entdecke den Satz des Pythagoras durch interaktive Flächenvergleiche und Beweis-Animationen.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="gleichschenkligesDreieck.html" class="card" data-category="lgs grade8" data-keywords="geometrie dreieck gleichschenklig winkel lgs">
-                <div class="card-icon">📐</div>
-                <h3>Gleichschenkliges Dreieck</h3>
-                <p class="card-desc">Spezielle Dreiecke und ihre Eigenschaften. Berechne Basiswinkel und Seitenlängen interaktiv.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="eulergerade.html" class="card" data-category="dreiecke grade8 feuerbachkreis feuerbach neunpunktekreis" data-keywords="geometrie euler feuerbach kreis dreieck schwerpunkt">
-                <div class="card-icon">🪐</div>
-                <h3>Euler-Gerade & Feuerbach</h3>
-                <p class="card-desc">Die faszinierende Geometrie des Dreiecks. Entdecke Neunpunktekreis und die Euler'sche Verbindungsgerade.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="winkelsumme3d.html" class="card" data-category="dreiecke hot grade8" data-keywords="3d geometrie winkelsumme dreieck animation">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 20,80 L 80,80 L 50,20 Z" fill="rgba(0, 210, 255, 0.1)" stroke="white"
-                            stroke-width="2" />
-                        <path d="M 50,20 L 50,80" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.5"
-                            stroke-dasharray="4,2" />
-                        <path d="M 20,80 L 50,80 L 35,40 Z" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)"
-                            stroke-width="2">
-                            <animateTransform attributeName="transform" type="rotate" from="0 50 80" to="-30 50 80"
-                                dur="3s" repeatCount="indefinite" />
-                        </path>
-                        <path d="M 80,80 L 50,80 L 65,40 Z" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)"
-                            stroke-width="2">
-                            <animateTransform attributeName="transform" type="rotate" from="0 50 80" to="30 50 80"
-                                dur="3s" repeatCount="indefinite" />
-                        </path>
-                        <circle cx="50" cy="80" r="3" fill="white" />
-                    </svg>
-                </div>
-                <h3>3D Winkelsumme</h3>
-                <p class="card-desc">Erlebe die Winkelsumme im 3-dimensionalen Raum. Dynamische Visualisierung der inneren Winkel eines Dreiecks.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="triangulierer.html" class="card" data-category="hot grade8" data-keywords="geometrie triangulation delaunay voronoi fläche">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 25 L55 15 L85 40 L65 85 L25 75 Z" fill="rgba(198, 33, 40, 0.2)" stroke="white"
-                            stroke-width="2" />
-                        <line x1="20" y1="25" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-                        <line x1="55" y1="15" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-                        <line x1="85" y1="40" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-                        <line x1="65" y1="85" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-                        <line x1="25" y1="75" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-                        <circle cx="20" cy="25" r="5" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="55" cy="15" r="5" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="85" cy="40" r="5" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="65" cy="85" r="5" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="25" cy="75" r="5" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="50" cy="55" r="7" fill="#ff9800" stroke="white" stroke-width="2" />
-                    </svg>
-                </div>
-                <h3>Delaunay</h3>
-                <p class="card-desc">Algorithmen der Triangulierung. Erzeuge optimale Dreiecksnetze nach der Delaunay-Methode.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="beweisinwinkellsumme.html" class="card" data-category="dreiecke grade8" data-keywords="geometrie winkel winkelsumme beweis beweisen">
-                <div class="card-icon">
-                    <svg width="42" height="42" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <clipPath id="triClip">
-                                <polygon points="20,80 80,80 50,20" />
-                            </clipPath>
-                        </defs>
-                        <g clip-path="url(#triClip)">
-                            <circle cx="20" cy="80" r="18" fill="rgb(255, 177, 0)" />
-                            <circle cx="80" cy="80" r="18" fill="rgb(119, 181, 33)" />
-                            <circle cx="50" cy="20" r="18" fill="rgb(198, 33, 40)" />
-                        </g>
-                        <path d="M 32,20 A 18,18 0 0,1 50,20 Z" fill="rgb(255, 177, 0)" />
-                        <path d="M 50,20 A 18,18 0 0,1 68,20 Z" fill="rgb(119, 181, 33)" />
-                        <line x1="5" y1="20" x2="95" y2="20" stroke="rgb(198, 33, 40)" stroke-width="4"
-                            stroke-linecap="round" />
-                        <line x1="5" y1="80" x2="95" y2="80" stroke="rgb(198, 33, 40)" stroke-width="4"
-                            stroke-linecap="round" />
-                        <polygon points="20,80 80,80 50,20" fill="none" stroke="#00d2ff" stroke-width="4"
-                            stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <h3>Winkelsumme Beweis</h3>
-                <p class="card-desc">Warum beträgt die Winkelsumme im Dreieck immer 180°? Hier kannst du den Beweis Schritt für Schritt nachvollziehen.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="winkelsumme.html" class="card" data-category="dreiecke hot grade8" data-keywords="geometrie polygon winkel vieleck winkelsumme">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="25,25 75,25 85,50 75,75 25,75 15,50" fill="rgba(0, 210, 255, 0.2)"
-                            stroke="white" stroke-width="2" />
-                        <circle cx="25" cy="25" r="4" fill="var(--neon-blue)" />
-                        <circle cx="75" cy="25" r="4" fill="var(--neon-blue)" />
-                        <circle cx="85" cy="50" r="4" fill="var(--neon-blue)" />
-                        <circle cx="75" cy="75" r="4" fill="var(--neon-blue)" />
-                        <circle cx="25" cy="75" r="4" fill="var(--neon-blue)" />
-                        <circle cx="15" cy="50" r="4" fill="var(--neon-blue)" />
-                    </svg>
-                </div>
-                <h3>Polygon-Labor</h3>
-                <p class="card-desc">Berechne die Winkelsumme in beliebigen n-Ecken. Entdecke die Formel für die Innenwinkel von Polygonen.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="binomischeslabor.html" class="card" data-category="algebra hot grade8" data-keywords="algebra formel quadrat termvereinfachung">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)"
-                        stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <path d="M3 12h18M12 3v18"></path>
-                        <circle cx="12" cy="12" r="1.5" fill="var(--neon-blue)"></circle>
-                    </svg>
-                </div>
-                <h3>1. Binomische Formel</h3>
-                <p class="card-desc">Visualisiere die binomischen Formeln geometrisch. Verstehe das Quadrat einer Summe durch Flächenzerlegung.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="pythagorasbeweis.html" class="card" data-category="pythagoras grade8" data-keywords="geometrie pythagoras beweis fläche quadrat">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="20,80 80,80 20,20" fill="rgba(198, 33, 40, 0.8)" stroke="white"
-                            stroke-width="4" stroke-linejoin="round" />
-                        <polyline points="20,65 35,65 35,80" fill="none" stroke="white" stroke-width="3" />
-                        <circle cx="80" cy="80" r="7" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="20" cy="20" r="7" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="20" cy="80" r="7" fill="#ff9800" stroke="white" stroke-width="2" />
-                    </svg>
-                </div>
-                <h3>Pythagoras Beweis</h3>
-                <p class="card-desc">Geometrischer Beweis des Satzes von Pythagoras. Schiebe Flächen umher, um den Zusammenhang zu visualisieren.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="winkellabor.html" class="card" data-category="grade6 grade7 dreiecke hot" data-keywords="geometrie winkel dreieck winkelsumme beweis">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="10" y1="80" x2="90" y2="80" stroke="var(--neon-blue)" stroke-width="4" />
-                        <line x1="20" y1="90" x2="70" y2="10" stroke="var(--neon-purple)" stroke-width="4" />
-                        <path d="M 50,80 A 25,25 0 0,0 65,65" fill="none" stroke="var(--neon-yellow)"
-                            stroke-width="3" />
-                        <circle cx="56" cy="74" r="3" fill="var(--neon-yellow)" />
-                    </svg>
-                </div>
-                <h3>Winkel-Labor</h3>
-                <p class="card-desc">Interaktive Untersuchung von Winkelsummen und Dreieckstypen in der Ebene.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="easyhard.html" class="card" data-category="dreiecke grade8" data-keywords="geometrie dreieck problem knobeln problemloesen">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="20,85 80,85 50,20" fill="rgba(198, 33, 40, 0.8)" stroke="white"
-                            stroke-width="4" stroke-linejoin="round" />
-                        <line x1="20" y1="85" x2="62" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
-                        <line x1="80" y1="85" x2="38" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
-                        <circle cx="20" cy="85" r="6" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="80" cy="85" r="6" fill="#666" stroke="white" stroke-width="2" />
-                        <circle cx="50" cy="20" r="9" fill="#ff9800" stroke="white" stroke-width="2.5" />
-                        <text x="50" y="27" font-family="Arial, sans-serif" font-size="22" font-weight="bold"
-                            fill="white" text-anchor="middle">?
-                        </text>
-                    </svg>
-                </div>
-                <h3>Geometrie Knobelei</h3>
-                <p class="card-desc">Ein anspruchsvolles geometrisches Rätsel. Kannst du den fehlenden Winkel nur durch Logik bestimmen?</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="butterfly.html" class="card" data-category="fun grade8" data-keywords="geometrie kurve polarkoordinaten butterfly schmetterling">
-                <div class="card-icon"
-                    style="font-size: 40px; display: flex; align-items: center; justify-content: center;">🦋</div>
-                <h3>Butterfly curve</h3>
-                <p class="card-desc">Eine faszinierende transzendente Kurve, definiert durch Polarkoordinaten. Mathematik trifft Ästhetik.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="heart3d.html" class="card" data-category="fun grade8" data-keywords="3d geometrie fläche herz herzkurve implizit">
-                <div class="card-icon"
-                    style="font-size: 40px; display: flex; align-items: center; justify-content: center;">💖</div>
-                <h3>3D Heart Surface</h3>
-                <p class="card-desc">Visualisierung einer impliziten 3D-Fläche. Entdecke die Formel hinter dem mathematischen Herzen.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="parabellabor.html" class="card" data-category="hot grade9 fun funktionen" data-keywords="parabel quadratisch gleichung scheitelpunkt stauchung streckung">
-                <div class="card-icon">
-                    <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 20,20 Q 50,80 80,20" fill="none" stroke="var(--neon-purple)" stroke-width="4" />
-                        <circle cx="50" cy="80" r="4" fill="var(--neon-blue)" />
-                    </svg>
-                </div>
-                <h3>Parabel-Lab</h3>
-                <p class="card-desc">Manipulation quadratischer Funktionen. Verstehe den Einfluss von Parametern auf die Parabelform.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="uhrzeitwinkel.html" class="card" data-category="geometrie grade5 grade6 grade7 hot" data-keywords="geometrie winkel uhrzeit zeiger berechnung">
-                <div class="card-icon">🕒</div>
-                <h3>Winkel-Uhr Labor</h3>
-                <p class="card-desc">Untersuche den Winkel zwischen Stunden- und Minutenzeiger zu jeder Tageszeit. Verstehe die kontinuierliche Bewegung der Zeiger.</p>
-                <div class="btn">Mission Start</div>
-            </a>
-            <a href="litchi3d.html" class="card" data-category="fun grade8" data-keywords="3d oberfläche litschi litchi visualisierung">
-                <div class="card-icon"
-                    style="font-size: 40px; display: flex; align-items: center; justify-content: center;">🍒</div>
-                <h3>3D Litchi Labor</h3>
-                <p class="card-desc">Komplexe 3D-Oberflächenmathematik. Erkunde die Litschi-Fläche in einer interaktiven 3D-Umgebung.</p>
-                <div class="btn">Mission Start</div>
-            </a>
+            <!-- Cards will be rendered dynamically from js/labs-config.js -->
         </div>
     </div>
 
@@ -1149,6 +945,9 @@
         <button class="btn-admin" onclick="exportChanges()">Änderungen Exportieren</button>
         <button class="btn-admin" style="background: #333; color: #999;" onclick="toggleAdminMode()">Beenden</button>
     </div>
+
+    <!-- Configuration Load -->
+    <script src="js/labs-config.js"></script>
 
     <!-- JavaScript für Sound-Toggle und Autoplay-Fallback -->
     <script>
@@ -1175,6 +974,23 @@
                 isPlaying = false;
             }
         });
+
+        // --- DYNAMIC RENDERING ---
+        function renderCards() {
+            const container = document.getElementById('tool-container');
+            if (!container) return;
+
+            container.innerHTML = LABS_DATA.map(lab => `
+                <a href="${lab.href}" class="card" data-category="${lab.category}" data-keywords="${lab.keywords}">
+                    <div class="card-icon">
+                        ${lab.icon.startsWith('<svg') ? lab.icon : lab.icon}
+                    </div>
+                    <h3>${lab.title}</h3>
+                    <p class="card-desc">${lab.description}</p>
+                    <div class="btn">Mission Start</div>
+                </a>
+            `).join('');
+        }
 
         // --- SEARCH LOGIC ---
         const searchInput = document.getElementById('search-input');
@@ -1215,6 +1031,9 @@
         }
 
         function showFilter(filter, updateHash = true) {
+            // Ensure cards are rendered before filtering
+            if (document.querySelectorAll('#tool-container .card').length === 0) renderCards();
+
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
 
@@ -1257,10 +1076,10 @@
         }
 
         function updateToolCount() {
-            const count = document.querySelectorAll('#tool-container .card').length;
+            const count = LABS_DATA.length;
             const subtitle = document.getElementById('dynamic-subtitle');
             if (subtitle) {
-                subtitle.innerHTML = `<span style="color: #fff; text-shadow: 0 0 10px var(--neon-blue); font-weight: bold;">${count}</span> INTERAKTIVE MATHEMATIK-WERKZEUGE`;
+                subtitle.innerHTML = `${count} INTERAKTIVE MATHEMATIK-WERKZEUGE`;
             }
         }
 
@@ -1300,36 +1119,40 @@
             const changes = [];
             const cards = document.querySelectorAll('#tool-container .card');
             
-            cards.forEach(card => {
-                const href = card.getAttribute('data-old-href') || card.getAttribute('href');
-                const title = card.querySelector('h3').innerText;
-                const desc = card.querySelector('.card-desc') ? card.querySelector('.card-desc').innerText : "";
-                
-                changes.push({
-                    file: href,
-                    title: title,
-                    desc: desc
-                });
+            // Generate a fresh LABS_DATA output based on UI edits
+            const updatedData = LABS_DATA.map(lab => {
+                const card = document.querySelector(`.card[href="${lab.href}"], .card[data-old-href="${lab.href}"]`);
+                if (card) {
+                    return {
+                        ...lab,
+                        title: card.querySelector('h3').innerText,
+                        description: card.querySelector('.card-desc').innerText
+                    };
+                }
+                return lab;
             });
             
-            const json = JSON.stringify(changes, null, 2);
+            const json = JSON.stringify(updatedData, null, 4);
             const blob = new Blob([json], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             
-            // For now, let's log it and offer a simple prompt
-            console.log("AKTUALISIERTE DATEN:", json);
-            const msg = "Änderungen wurden erfasst! Kopiere den folgenden Code und sende ihn mir, damit ich die Datei dauerhaft patchen kann:\n\n" + json.substring(0, 500) + "... (siehe Konsole für Volltext)";
+            console.log("AKTUALISIERTE KONFIGURATION:", json);
+            const msg = "Cyber-Konfiguration generiert! Kopiere den Code aus der Konsole oder schick mir die heruntergeladene Datei, damit ich die 'labs-config.js' für dich patchen kann.";
             alert(msg);
             
-            // Also trigger download for convenience
             const a = document.createElement('a');
             a.href = url;
-            a.download = "cyber_labor_updates.json";
+            a.download = "labs-config-update.json";
             a.click();
         }
 
-        // Immediate execution to prevent flicker (FOUC)
+        // Initialization
+        renderCards();
         handleHash();
+        updateToolCount();
+        
+        window.addEventListener('hashchange', handleHash);
+;
         updateToolCount();
         
         window.addEventListener('hashchange', handleHash);
