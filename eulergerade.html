@@ -290,6 +290,10 @@
             ctx.fillText(label, pt.x, pt.y - 12);
         }
 
+        function getNeonColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
+        }
+
         function draw() {
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
@@ -333,39 +337,47 @@
                 [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
             }
             if (conf('hS')) { // Seitenhalbierende
-                ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; // Fixed: Was black, now white-touch
                 [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
             }
             if (conf('hI')) { // Winkelhalbierende
-                ctx.strokeStyle = "rgba(180, 0, 180, 0.4)";
-                [A, B, C].forEach(p => { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(I.x, I.y); ctx.stroke(); });
+                ctx.strokeStyle = "rgba(157, 80, 187, 0.6)"; 
+                ctx.lineWidth = 2;
+                const a = dist(B, C), b = dist(A, C), c = dist(A, B);
+                const Da = { x: (b * B.x + c * C.x) / (b + c), y: (b * B.y + c * C.y) / (b + c) };
+                const Db = { x: (a * A.x + c * C.x) / (a + c), y: (a * A.y + c * C.y) / (a + c) };
+                const Dc = { x: (a * A.x + b * B.x) / (a + b), y: (a * A.y + b * B.y) / (a + b) };
+                [[A, Da], [B, Db], [C, Dc]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
             }
             ctx.setLineDash([]);
 
             // 4. Kreise
+            const neonBlue = getNeonColor('--neon-blue');
+            const neonPurple = getNeonColor('--neon-purple');
+
             if (conf('cbUmkreis')) { ctx.strokeStyle = "rgba(0,128,0,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(U.x, U.y, rUm, 0, Math.PI * 2); ctx.stroke(); }
             if (conf('cbInkreis')) { ctx.strokeStyle = "rgba(255,0,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(I.x, I.y, rIn, 0, Math.PI * 2); ctx.stroke(); }
             if (conf('cbFeuerbach')) { ctx.strokeStyle = "rgba(0,100,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(F.x, F.y, rUm / 2, 0, Math.PI * 2); ctx.stroke(); drawPt(F, "F", "#0064ff"); }
 
             // 5. Dreieck & Punkte
-            ctx.strokeStyle = "var(--neon-blue)"; ctx.lineWidth = 2.5; ctx.setLineDash([]);
+            ctx.strokeStyle = neonBlue; ctx.lineWidth = 2.5; ctx.setLineDash([]);
             ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
 
             points.forEach((p, i) => {
-                ctx.shadowBlur = 15; ctx.shadowColor = "var(--neon-blue)";
+                ctx.shadowBlur = 15; ctx.shadowColor = neonBlue;
                 ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.font = "bold 14px Orbitron"; ctx.fillStyle = "var(--neon-blue)";
+                ctx.font = "bold 14px Orbitron"; ctx.fillStyle = neonBlue;
                 ctx.fillText(String.fromCharCode(65 + i), p.x, p.y - 15);
             });
 
             // Beschriftung
             if (conf('cbEuler')) {
-                drawPt(H, "H", "var(--neon-pink)");
-                drawPt(U, "U", "var(--neon-green)");
+                drawPt(H, "H", getNeonColor('--neon-pink'));
+                drawPt(U, "U", getNeonColor('--neon-green'));
                 drawPt(S, "S", "white");
             }
-            if (conf('cbInkreis')) drawPt(I, "I", "var(--neon-purple)");
+            if (conf('cbInkreis') || conf('hI')) drawPt(I, "I", neonPurple);
 
             document.getElementById('txt-ratio').innerText = (dist(H, S) / dist(S, U)).toFixed(2);
             document.getElementById('txt-rIn').innerText = rIn.toFixed(1) + " px";

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Winkelsumme Beweis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -20,7 +20,7 @@
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
             color: white;
             display: flex;
@@ -84,19 +84,19 @@
         .proof-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             font-family: 'Orbitron';
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: bold;
         }
 
         .val-box {
-            padding: 4px 10px;
+            padding: 4px 6px;
             border-radius: 8px;
-            min-width: 50px;
+            min-width: 45px;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .box-a { background: var(--color-alpha); color: #000; }
@@ -117,10 +117,35 @@
             height: 100%;
         }
 
+        /* Radio Styling */
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+            transition: 0.3s;
+        }
+        .radio-item:hover { color: var(--neon-blue); }
+        .radio-item input[type="radio"] {
+            accent-color: var(--neon-blue);
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        .radio-item.active { color: white; }
+
         /* Responsive Mobile Layout */
         @media (max-width: 900px) {
             body { flex-direction: column; overflow-y: auto; }
-            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-bottom: 1px ...; }
+            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
             #workspace { width: 100%; height: 60vh; min-height: 400px; }
         }
     </style>
@@ -138,8 +163,18 @@
         </div>
 
         <div class="instrument-card">
+            <div class="instrument-title">Beweis-Konfiguration</div>
+            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 5px;">Parallele durch Punkt:</div>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="pivot" value="0"> A</label>
+                <label class="radio-item"><input type="radio" name="pivot" value="1"> B</label>
+                <label class="radio-item active"><input type="radio" name="pivot" value="2" checked> C</label>
+            </div>
+        </div>
+
+        <div class="instrument-card">
             <div class="instrument-title">Mathematischer Beweis</div>
-            <div style="font-size: 0.7rem; color: var(--neon-blue); opacity: 0.6; text-transform: uppercase;">Oben an der Parallelen:</div>
+            <div style="font-size: 0.7rem; color: var(--neon-blue); opacity: 0.6; text-transform: uppercase;">Am Pivot-Punkt:</div>
             <div class="proof-row">
                 <span class="val-box box-a" id="val-l">0°</span> + 
                 <span class="val-box box-c" id="val-g1">0°</span> + 
@@ -175,6 +210,7 @@
 
         let points = [];
         let dragIdx = -1;
+        let selectedPivotIdx = 2; // Default: C
         const BOGEN_RAD = 65;
 
         function initTriangle() {
@@ -206,7 +242,7 @@
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.arc(p.x, p.y, r, a1, a2, ccw);
-            ctx.fillStyle = color + "44"; // Transparenter Bogen
+            ctx.fillStyle = color + "77"; // Weniger transparenter Bogen
             ctx.fill();
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
@@ -232,56 +268,107 @@
             ctx.clearRect(0, 0, rect.width, rect.height);
 
             const A = points[0], B = points[1], C = points[2];
-            const vAB = { x: B.x - A.x, y: B.y - A.y };
-            const vAC = { x: C.x - A.x, y: C.y - A.y };
-            const vBA = { x: -vAB.x, y: -vAB.y };
-            const vBC = { x: C.x - B.x, y: C.y - B.y };
-            const vCA = { x: -vAC.x, y: -vAC.y };
-            const vCB = { x: -vBC.x, y: -vBC.y };
+            
+            // Calculate all internal angles
+            const angles = [];
+            for (let i = 0; i < 3; i++) {
+                const P = points[i];
+                const P1 = points[(i + 1) % 3];
+                const P2 = points[(i + 2) % 3];
+                const v1 = { x: P1.x - P.x, y: P1.y - P.y };
+                const v2 = { x: P2.x - P.x, y: P2.y - P.y };
+                angles[i] = Math.round(getAngleDeg(v1, v2));
+            }
 
-            let aD = Math.round(getAngleDeg(vAB, vAC));
-            let bD = Math.round(getAngleDeg(vBA, vBC));
-            let cD = Math.round(getAngleDeg(vCA, vCB));
-
-            let diff = 180 - (aD+bD+cD);
-            if(diff !== 0) cD += diff;
+            // Correction for 180 (Rounding errors)
+            let sum = angles[0] + angles[1] + angles[2];
+            if (sum !== 180) angles[selectedPivotIdx] += (180 - sum);
 
             // UI Update
-            document.getElementById('val-l').innerText = aD + "°";
-            document.getElementById('val-g1').innerText = cD + "°";
-            document.getElementById('val-p').innerText = bD + "°";
-            document.getElementById('val-a').innerText = aD + "°";
-            document.getElementById('val-g2').innerText = cD + "°";
-            document.getElementById('val-b').innerText = bD + "°";
-
-            // Draw Parallels
-            const lineLen = 2000;
-            const lenAB = Math.hypot(vAB.x, vAB.y);
-            const nx = vAB.x / lenAB, ny = vAB.y / lenAB;
-            ctx.strokeStyle = "rgba(255,255,255,0.15)";
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath(); ctx.moveTo(A.x - nx*lineLen, A.y - ny*lineLen); ctx.lineTo(A.x + nx*lineLen, A.y + ny*lineLen); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(C.x - nx*lineLen, C.y - ny*lineLen); ctx.lineTo(C.x + nx*lineLen, C.y + ny*lineLen); ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Draw Angles
-            drawAngle(A, vAB, vAC, BOGEN_RAD, "#ffb100", aD + "°");
-            drawAngle(B, vBA, vBC, BOGEN_RAD, "#77b521", bD + "°");
-            drawAngle(C, vCA, vCB, BOGEN_RAD, "#c62128", cD + "°");
+            document.getElementById('val-a').innerText = angles[0] + "°";
+            document.getElementById('val-b').innerText = angles[1] + "°";
+            document.getElementById('val-g2').innerText = angles[2] + "°";
             
-            // Wechselwinkel an C
-            drawAngle(C, {x: -nx, y: -ny}, vCA, BOGEN_RAD, "#ffb100", aD + "°");
-            drawAngle(C, {x: nx, y: ny}, vCB, BOGEN_RAD, "#77b521", bD + "°");
+            // At Pivot (Always same three angles!)
+            document.getElementById('val-l').innerText = angles[(selectedPivotIdx + 1) % 3] + "°";
+            document.getElementById('val-p').innerText = angles[(selectedPivotIdx + 2) % 3] + "°";
+            document.getElementById('val-g1').innerText = angles[selectedPivotIdx] + "°";
+
+            // --- Geometrie ---
+            const P = points[selectedPivotIdx];
+            const P1 = points[(selectedPivotIdx + 1) % 3];
+            const P2 = points[(selectedPivotIdx + 2) % 3];
+            
+            // Opposite Side Vector (e.g. AB if P is C)
+            const vOpp = { x: P2.x - P1.x, y: P2.y - P1.y };
+            const lenOpp = Math.hypot(vOpp.x, vOpp.y);
+            const nx = vOpp.x / lenOpp, ny = vOpp.y / lenOpp;
+            
+            const lineLen = 2000;
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.8)"; // High-Visibility Neon-Blue
+            ctx.lineWidth = 1.2; // Thinner for precision
+            ctx.setLineDash([]); // Solid line
+            ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0, 210, 255, 0.5)";
+            // Draw Parallel through Pivot
+            ctx.beginPath(); ctx.moveTo(P.x - nx * lineLen, P.y - ny * lineLen); ctx.lineTo(P.x + nx * lineLen, P.y + ny * lineLen); ctx.stroke();
+            // Draw Help Line through opposite side
+            ctx.beginPath(); ctx.moveTo(P1.x - nx * lineLen, P1.y - ny * lineLen); ctx.lineTo(P1.x + nx * lineLen, P1.y + ny * lineLen); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Draw Internal Angles
+            const colors = ["#ffb100", "#77b521", "#c62128"]; // Alpha, Beta, Gamma colors
+            for (let i = 0; i < 3; i++) {
+                const vert = points[i];
+                const pNext = points[(i + 1) % 3];
+                const pPrev = points[(i + 2) % 3];
+                drawAngle(vert, { x: pNext.x - vert.x, y: pNext.y - vert.y }, { x: pPrev.x - vert.x, y: pPrev.y - vert.y }, BOGEN_RAD, colors[i], angles[i] + "°");
+            }
+            
+            // --- DRAW ALTERNATE ANGLES AT PIVOT ---
+            // Vector to P1
+            const vToP1 = { x: P1.x - P.x, y: P1.y - P.y };
+            const vToP2 = { x: P2.x - P.x, y: P2.y - P.y };
+            // Vectors on Parallel line (opposite to side vectors)
+            const vPar1 = { x: -nx, y: -ny };
+            const vPar2 = { x: nx, y: ny };
+            
+            // We need to draw the angles correctly. 
+            // Angle 1: between vPar1 and vToP1
+            drawAngle(P, vPar1, vToP1, BOGEN_RAD, colors[(selectedPivotIdx + 1) % 3], angles[(selectedPivotIdx + 1) % 3] + "°");
+            // Angle 2: between vPar2 and vToP2
+            drawAngle(P, vPar2, vToP2, BOGEN_RAD, colors[(selectedPivotIdx + 2) % 3], angles[(selectedPivotIdx + 2) % 3] + "°");
 
             // Dreieck
             ctx.strokeStyle = "white"; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(C.x, C.y); ctx.lineTo(B.x, B.y); ctx.lineTo(A.x, A.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
 
-            // Points
-            points.forEach(p => {
-                ctx.fillStyle = "#00d2ff"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2ff";
-                ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+            // Points & Labels
+            points.forEach((p, i) => {
+                const isDragging = (dragIdx === i);
+                const label = String.fromCharCode(65 + i); // A, B, C
+                
+                // Outer Glow / Selection feedback
+                ctx.fillStyle = isDragging ? "white" : "#00d2ff";
+                ctx.shadowBlur = isDragging ? 25 : 15;
+                ctx.shadowColor = "#00d2ff";
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, isDragging ? 10 : 8, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.shadowBlur = 0;
+
+                // Label
+                ctx.fillStyle = "var(--neon-blue)";
+                ctx.font = "bold 16px Orbitron";
+                ctx.textAlign = "center";
+                
+                // Position label outside the triangle
+                let offX = 0, offY = 0;
+                if (i === 0) { offX = -20; offY = 20; } // A
+                if (i === 1) { offX = 20; offY = 20; }  // B
+                if (i === 2) { offX = 0; offY = -25; } // C
+                
+                ctx.fillText(label, p.x + offX, p.y + offY);
             });
         }
 
@@ -315,6 +402,17 @@
         window.addEventListener('resize', () => { draw(); });
 
         initTriangle();
+
+        // Event Listeners for Radio Menu
+        document.querySelectorAll('input[name="pivot"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                selectedPivotIdx = parseInt(e.target.value);
+                // Update active class
+                document.querySelectorAll('.radio-item').forEach(lbl => lbl.classList.remove('active'));
+                e.target.parentElement.classList.add('active');
+                draw();
+            });
+        });
     </script>
 </body>
 </html>
