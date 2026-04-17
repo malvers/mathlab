@@ -570,7 +570,7 @@ const CyberBranding = {
         
         const subject = encodeURIComponent(`Cyber-Labor Bug: ${filename}`);
         const body = encodeURIComponent(`FEEDBACK:\n${text}\n\n---\nSYSTEM-DATA:\n${meta}`);
-        window.location.href = `mailto:michael@docalvers.de?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:michael.r.alvers@gmail.com?subject=${subject}&body=${body}`;
     },
 
     async copyReportToClipboard(filename, meta) {
