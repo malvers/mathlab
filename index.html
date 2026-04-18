@@ -91,21 +91,25 @@
             position: fixed;
             bottom: 25px;
             right: 25px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            color: rgba(255, 255, 255, 0.9);
-            padding: 10px 18px;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            color: rgba(255, 255, 255, 0.8);
             cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+        }
+
+        .sound-toggle svg {
+            width: 22px;
+            height: 22px;
         }
 
         .sound-toggle:hover {
@@ -886,8 +890,12 @@
     </div>
 
     <!-- Sound Controller floating rechts unten -->
-    <div id="sound-toggle" class="sound-toggle" title="Play Ambient Sound">
-        <span>🔇</span> MUSIC OFF
+    <div id="sound-toggle" class="sound-toggle" title="Ambient Sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-3v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="15" r="3"/>
+        </svg>
     </div>
 
     <header>
@@ -1053,14 +1061,12 @@
     <script>
         const bgAudio = document.getElementById('bg-audio');
         const soundToggle = document.getElementById('sound-toggle');
-        const iconSpan = soundToggle.querySelector('span');
         let isPlaying = false;
 
         soundToggle.addEventListener('click', () => {
             if (!isPlaying) {
-                bgAudio.volume = 0.5; // Angenehme, nicht zu laute Raumatmosphäre
+                bgAudio.volume = 0.5;
                 bgAudio.play().then(() => {
-                    soundToggle.innerHTML = "<span>🔊</span> MUSIC ON";
                     soundToggle.classList.add('playing');
                     isPlaying = true;
                 }).catch(error => {
@@ -1069,7 +1075,6 @@
                 });
             } else {
                 bgAudio.pause();
-                soundToggle.innerHTML = "<span>🔇</span> MUSIC OFF";
                 soundToggle.classList.remove('playing');
                 isPlaying = false;
             }
