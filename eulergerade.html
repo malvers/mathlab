@@ -9,10 +9,8 @@
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
-            --neon-pink: #ff0055;
-            --neon-green: #39FF14;
-            --neon-orange: #ff8800;
-            --euler-color: #ff8c00;
+            --neon-pink: #f472b6;
+            --neon-green: #4ade80;
             --bg-dark: #050b18;
             --glass: rgba(15, 23, 42, 0.7);
             --glass-bright: rgba(255, 255, 255, 0.05);
@@ -21,7 +19,7 @@
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: #050b18;
             color: white;
             display: flex;
             height: 100vh;
@@ -36,11 +34,11 @@
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            z-index: 10;
+            gap: 8px;
+            z-index: 100;
             box-sizing: border-box;
             box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
             overflow-y: auto;
@@ -49,392 +47,336 @@
         #canvas-container {
             flex-grow: 1;
             position: relative;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #050b18;
             overflow: hidden;
         }
 
         canvas {
-            display: block;
-            cursor: crosshair;
-            touch-action: none;
-            flex-grow: 1;
             width: 100%;
             height: 100%;
+            cursor: crosshair;
         }
 
-
-        /* --- INSTRUMENT CARDS --- */
-        .instrument-card {
-            background: var(--glass-bright);
-            padding: 15px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-        }
-
-        .instrument-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
-            margin-bottom: 5px;
-        }
-
-        .option-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .option-group label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.8);
-            transition: 0.2s;
-        }
-
-        .option-group label:hover {
-            color: var(--neon-blue);
-        }
-
-        .option-group input[type="checkbox"] {
-            accent-color: var(--neon-blue);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
         }
 
         .stats-card {
-            background: rgba(0, 210, 255, 0.03);
-            padding: 12px 15px;
-            border-radius: 12px;
-            border-left: 3px solid var(--neon-blue);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .stats-label {
             font-family: 'Orbitron';
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
         }
 
         .stats-val {
             font-family: 'Orbitron';
-            font-size: 1.1rem;
-            color: #fff;
-            margin-top: 5px;
-            display: block;
-        }
-
-        button {
-            padding: 12px 20px;
-            font-size: 0.75rem;
-            font-family: 'Orbitron', sans-serif;
-            background: var(--glass-bright);
-            color: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            width: 100%;
-        }
-
-        button:hover {
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-        }
-
-        footer {
-            padding: 10px 0;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #86868b;
-            background: transparent;
-            width: 100%;
-            margin-top: 10px;
-            z-index: 5;
-        }
-
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-            margin-left: 10px;
+            font-size: 1rem;
+            color: var(--neon-blue);
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 60px;"></div>
 
-        <div class="instrument-card">
-            <div class="instrument-title">Konstruktion [Basis]</div>
-            <div class="option-group">
-                <label><input type="checkbox" id="cbEuler" checked> Eulergerade</label>
-                <label><input type="checkbox" id="cbFeuerbach"> Feuerbach-Kreis</label>
-                <label><input type="checkbox" id="cbUmkreis"> Umkreis</label>
-                <label><input type="checkbox" id="cbInkreis"> Inkreis</label>
-            </div>
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+        <div id="stats-container"></div>
+        
+        <div style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Hilfslinien [Details]</div>
-            <div class="option-group">
-                <label title="Höhenschnittpunkt"><input type="checkbox" id="hH"> Höhen (H)</label>
-                <label title="Schwerpunkt"><input type="checkbox" id="hS"> Seitenhalb. (S)</label>
-                <label title="Inkreismittelpunkt"><input type="checkbox" id="hI"> Winkelhalb. (I)</label>
-                <label><input type="checkbox" id="cbFermat"> Fermat / Napoleon</label>
-            </div>
-        </div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Echtzeit-Analyse</div>
-            <div id="stats">
-                <div class="stats-card">
-                    <span class="stats-label">Ratio HS / SU</span>
-                    <span id="txt-ratio" class="stats-val">0.00</span>
-                </div>
-                <div class="stats-card" style="margin-top: 8px;">
-                    <span class="stats-label">Inkreis-R</span>
-                    <span id="txt-rIn" class="stats-val">0 px</span>
-                </div>
-            </div>
-        </div>
-
-        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
-            <button onclick="resetTriangle()">Labor Reset</button>
-            <footer style="margin: 0; padding-top: 10px;">
-                &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-                <br>
-                <a href="impressum.html"
-                    style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
-            </footer>
-        </div>
-    </div>
+    </aside>
 
     <div id="canvas-container">
-        <canvas id="canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
     </div>
 
+    <script src="js/cyber-canvas.js"></script>
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "EULER, FERMAT & SEITENHALBIERENDE"
-        });
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let points = [];
-        let dragIdx = -1;
-
-        const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
-        const mid = (p1, p2) => ({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
-        const getS = (A, B, C) => ({ x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 });
-
-        function getU(A, B, C) {
-            const x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y, x3 = C.x, y3 = C.y;
-            const d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
-            if (Math.abs(d) < 1) return { x: (x1 + x2 + x3) / 3, y: (y1 + y2 + y3) / 3 };
-            return {
-                x: ((x1 * x1 + y1 * y1) * (y2 - y3) + (x2 * x2 + y2 * y2) * (y3 - y1) + (x3 * x3 + y3 * y3) * (y1 - y2)) / d,
-                y: ((x1 * x1 + y1 * y1) * (x3 - x2) + (x2 * x2 + y2 * y2) * (x1 - x3) + (x3 * x3 + y3 * y3) * (x2 - x1)) / d
-            };
-        }
-
-        function getI(A, B, C) {
-            const a = dist(B, C), b = dist(A, C), c = dist(A, B);
-            const p = a + b + c;
-            if (p < 0.1) return A;
-            return { x: (a * A.x + b * B.x + c * C.x) / p, y: (a * A.y + b * B.y + c * C.y) / p };
-        }
-
-        function getFoot(P, A, B) {
-            const dx = B.x - A.x, dy = B.y - A.y;
-            const m = dx * dx + dy * dy;
-            if (m < 0.1) return A;
-            const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / m;
-            return { x: A.x + t * dx, y: A.y + t * dy };
-        }
-
-        function getEqui(p1, p2, ref) {
-            const dx = p2.x - p1.x, dy = p2.y - p1.y;
-            const h = Math.sqrt(3) / 2;
-            const r1 = { x: p1.x + 0.5 * dx - h * dy, y: p1.y + 0.5 * dy + h * dx };
-            const r2 = { x: p1.x + 0.5 * dx + h * dy, y: p1.y + 0.5 * dy - h * dx };
-            return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
-        }
-
-        function drawPt(pt, label, color) {
-            ctx.shadowBlur = 10; ctx.shadowColor = color;
-            ctx.fillStyle = color; ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "white"; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
-            ctx.fillText(label, pt.x, pt.y - 12);
-        }
-
-        function getNeonColor(name) {
-            return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
-        }
-
-        function draw() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            ctx.clearRect(0, 0, rect.width, rect.height);
-            if (points.length < 3) return;
-            const [A, B, C] = points;
-            const conf = (id) => document.getElementById(id).checked;
-
-            const S = getS(A, B, C), U = getU(A, B, C), I = getI(A, B, C);
-            const H = { x: 3 * S.x - 2 * U.x, y: 3 * S.y - 2 * U.y }, F = mid(H, U);
-            const rUm = dist(U, A), rIn = dist(I, getFoot(I, A, B));
-
-            // 1. Fermat/Napoleon
-            if (conf('cbFermat')) {
-                const pAB = getEqui(A, B, C), pBC = getEqui(B, C, A), pCA = getEqui(C, A, B);
-                ctx.fillStyle = "rgba(255, 165, 0, 0.1)";
-                [[A, B, pAB], [B, C, pBC], [C, A, pCA]].forEach(t => {
-                    ctx.beginPath(); ctx.moveTo(t[0].x, t[0].y); ctx.lineTo(t[1].x, t[1].y); ctx.lineTo(t[2].x, t[2].y); ctx.closePath(); ctx.fill();
-                    ctx.strokeStyle = "rgba(255, 100, 0, 0.4)"; ctx.lineWidth = 1; ctx.stroke();
-                });
-                ctx.setLineDash([5, 5]); ctx.strokeStyle = "rgba(255, 140, 0, 0.6)";
-                [[C, pAB], [A, pBC], [B, pCA]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-                ctx.setLineDash([]);
-            }
-
-            // 2. Euler
-            if (conf('cbEuler')) {
-                ctx.strokeStyle = "rgba(255, 140, 0, 0.8)"; ctx.lineWidth = 3;
-                let dx = U.x - H.x, dy = U.y - H.y, d = Math.sqrt(dx * dx + dy * dy);
-                ctx.beginPath();
-                if (d < 0.5) { ctx.moveTo(S.x, 0); ctx.lineTo(S.x, rect.height); }
-                else { ctx.moveTo(H.x - (dx / d) * 5000, H.y - (dy / d) * 5000); ctx.lineTo(U.x + (dx / d) * 5000, U.y + (dy / d) * 5000); }
-                ctx.stroke();
-            }
-
-            // 3. Hilfslinien
-            ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
-            if (conf('hH')) { // Höhen
-                ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
-                [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-            }
-            if (conf('hS')) { // Seitenhalbierende
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; // Fixed: Was black, now white-touch
-                [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-            }
-            if (conf('hI')) { // Winkelhalbierende
-                ctx.strokeStyle = "rgba(157, 80, 187, 0.6)";
-                ctx.lineWidth = 2;
-                const a = dist(B, C), b = dist(A, C), c = dist(A, B);
-                const Da = { x: (b * B.x + c * C.x) / (b + c), y: (b * B.y + c * C.y) / (b + c) };
-                const Db = { x: (a * A.x + c * C.x) / (a + c), y: (a * A.y + c * C.y) / (a + c) };
-                const Dc = { x: (a * A.x + b * B.x) / (a + b), y: (a * A.y + b * B.y) / (a + b) };
-                [[A, Da], [B, Db], [C, Dc]].forEach(l => { ctx.beginPath(); ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y); ctx.stroke(); });
-            }
-            ctx.setLineDash([]);
-
-            // 4. Kreise
-            const neonBlue = getNeonColor('--neon-blue');
-            const neonPurple = getNeonColor('--neon-purple');
-
-            if (conf('cbUmkreis')) { ctx.strokeStyle = "rgba(0,128,0,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(U.x, U.y, rUm, 0, Math.PI * 2); ctx.stroke(); }
-            if (conf('cbInkreis')) { ctx.strokeStyle = "rgba(255,0,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(I.x, I.y, rIn, 0, Math.PI * 2); ctx.stroke(); }
-            if (conf('cbFeuerbach')) { ctx.strokeStyle = "rgba(0,100,255,0.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(F.x, F.y, rUm / 2, 0, Math.PI * 2); ctx.stroke(); drawPt(F, "F", "#0064ff"); }
-
-            // 5. Dreieck & Punkte
-            ctx.strokeStyle = neonBlue; ctx.lineWidth = 2.5; ctx.setLineDash([]);
-            ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
-
-            points.forEach((p, i) => {
-                ctx.shadowBlur = 15; ctx.shadowColor = neonBlue;
-                ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.font = "bold 14px Orbitron"; ctx.fillStyle = neonBlue;
-                ctx.fillText(String.fromCharCode(65 + i), p.x, p.y - 15);
+        /**
+         * EULER LINE LABORATORY - ULTRA v5.3.8
+         * High-Precision Geometric Proof Engine.
+         */
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "EULER & FERMAT ANALYSE",
+                briefing: `
+                    <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: EULER-ANALYSE</h3>
+                    Erforsche die verborgene Symmetrie des Dreiecks. Überprüfe die Euler-Gerade – eine Linie, auf der Schwerpunkt, Umkreismittelpunkt und Höhenschnittpunkt perfekt kollinierezieren.
+                    
+                    <div class="admin-info">
+                        <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
+                        <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                            <li><b>H-S-U Ratio:</b> Das Verhältnis HS/SU ist mathematisch exakt 2.0.</li>
+                            <li><b>Feuerbach:</b> Der 9-Punkte-Kreis halbiert den Umkreis-Radius.</li>
+                            <li><b>Fermat:</b> Der Punkt minimiert die Summe der Abstände zu A, B und C.</li>
+                        </ul>
+                    </div>
+                `
             });
 
-            // Beschriftung
-            if (conf('cbEuler')) {
-                drawPt(H, "H", getNeonColor('--neon-pink'));
-                drawPt(U, "U", getNeonColor('--neon-green'));
-                drawPt(S, "S", "white");
+            // 2. Initialize UI Engine
+            CyberUI.init();
+
+            // 3. Setup UI Components
+            const state = {
+                cbEuler: true,
+                cbFeuerbach: false,
+                cbUmkreis: false,
+                cbInkreis: false,
+                hH: false,
+                hS: false,
+                hI: false,
+                cbFermat: false
+            };
+
+            CyberUI.createCard('ui-container', 'KONSTRUKTION [BASIS]', `
+                <div id="base-opts" class="cyber-control-group"></div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCheckbox('base-opts', 'Eulergerade', state.cbEuler, (v) => state.cbEuler = v);
+            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v);
+            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v);
+            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v);
+
+            CyberUI.createCard('ui-container', 'HILFSLINIEN [DETAILS]', `
+                <div id="detail-opts" class="cyber-control-group"></div>
+            `, 'var(--neon-purple)');
+
+            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v);
+            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v);
+            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v);
+            CyberUI.createCheckbox('detail-opts', 'Fermat / Napoleon', state.cbFermat, (v) => state.cbFermat = v);
+
+            const statsHTML = `
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <span class="stats-label">Ratio HS / SU</span>
+                        <span id="txt-ratio" class="stats-val">0.00</span>
+                    </div>
+                    <div class="stats-card">
+                        <span class="stats-label">Inkreis-R</span>
+                        <span id="txt-rIn" class="stats-val">0 px</span>
+                    </div>
+                </div>
+            `;
+            CyberUI.createCard('stats-container', 'ECHTZEIT-ANALYSE', statsHTML, 'var(--neon-pink)');
+
+            // 4. Initialize CyberCanvas
+            CyberCanvasInstance.init('main-canvas', {
+                minY: -10,
+                maxY: 10
+            }, {
+                showLabels: true,
+                showTelemetry: false
+            });
+
+            // Geometry Points
+            let points = [
+                { x: -5, y: -4 }, // A
+                { x:  5, y: -4 }, // B
+                { x:  0, y:  5 }  // C
+            ];
+            let dragIdx = -1;
+
+            // Math Tools
+            const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            const mid = (p1, p2) => ({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 });
+            const getS = (A, B, C) => ({ x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 });
+
+            function getU(A, B, C) {
+                const x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y, x3 = C.x, y3 = C.y;
+                const d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+                if (Math.abs(d) < 0.001) return { x: (x1+x2+x3)/3, y:(y1+y2+y3)/3 };
+                return {
+                    x: ((x1 * x1 + y1 * y1) * (y2 - y3) + (x2 * x2 + y2 * y2) * (y3 - y1) + (x3 * x3 + y3 * y3) * (y1 - y2)) / d,
+                    y: ((x1 * x1 + y1 * y1) * (x3 - x2) + (x2 * x2 + y2 * y2) * (x1 - x3) + (x3 * x3 + y3 * y3) * (x2 - x1)) / d
+                };
             }
-            if (conf('cbInkreis') || conf('hI')) drawPt(I, "I", neonPurple);
 
-            document.getElementById('txt-ratio').innerText = (dist(H, S) / dist(S, U)).toFixed(2);
-            document.getElementById('txt-rIn').innerText = rIn.toFixed(1) + " px";
-        }
+            function getI(A, B, C) {
+                const a = dist(B, C), b = dist(A, C), c = dist(A, B);
+                const p = a + b + c;
+                if (p < 0.01) return A;
+                return { x: (a * A.x + b * B.x + c * C.x) / p, y: (a * A.y + b * B.y + c * C.y) / p };
+            }
 
-        function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-            if (points.length === 0) resetTriangle();
-            draw();
-        }
+            function getFoot(P, A, B) {
+                const dx = B.x - A.x, dy = B.y - A.y;
+                const m = dx * dx + dy * dy;
+                if (m < 0.001) return A;
+                const t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / m;
+                return { x: A.x + t * dx, y: A.y + t * dy };
+            }
 
-        function resetTriangle() {
-            const w = canvas.getBoundingClientRect().width, h = canvas.getBoundingClientRect().height;
-            const s = Math.min(w, h) * 0.25, cx = w / 2, cy = h / 2, th = (Math.sqrt(3) / 2) * (s * 2);
-            points = [{ x: cx - s, y: cy + th / 3 }, { x: cx + s, y: cy + th / 3 }, { x: cx, y: cy - 2 * th / 3 }];
-            draw();
-        }
+            function getEqui(p1, p2, ref) {
+                const dx = p2.x - p1.x, dy = p2.y - p1.y;
+                const h = Math.sqrt(3) / 2;
+                const r1 = { x: p1.x + 0.5 * dx - h * dy, y: p1.y + 0.5 * dy + h * dx };
+                const r2 = { x: p1.x + 0.5 * dx + h * dy, y: p1.y + 0.5 * dy - h * dx };
+                return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
+            }
 
-        // --- NEU: TOUCH & MOUSE LOGIK ---
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
+            function drawPt(pt, label, color) {
+                const ctx = CyberCanvasInstance.ctx;
+                const px = CyberCanvasInstance.mapX(pt.x);
+                const py = CyberCanvasInstance.mapY(pt.y);
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "white"; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+                ctx.fillText(label, px, py - 18);
+            }
 
-        function startDrag(e) {
-            const pos = getPos(e);
-            dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40); // 40px Hitbox für Touch!
-            if (dragIdx !== -1) e.preventDefault();
-        }
+            // Interaction
+            CyberCanvasInstance.onMouseDown = (pos) => {
+                dragIdx = points.findIndex(p => dist(p, pos) < 0.8);
+                if (dragIdx !== -1) {
+                    // Disable panning to allow precise point dragging
+                    CyberCanvasInstance.allowPan = false;
+                    CyberCanvasInstance.isDragging = false; 
+                }
+            };
+            CyberCanvasInstance.onMouseMove = (pos) => {
+                if (dragIdx !== -1) {
+                    points[dragIdx] = pos;
+                    CyberCanvasInstance.needsRedraw = true;
+                }
+            };
+            CyberCanvasInstance.onMouseUp = () => {
+                dragIdx = -1;
+                CyberCanvasInstance.allowPan = true;
+            };
 
-        function moveDrag(e) {
-            if (dragIdx === -1) return;
-            const pos = getPos(e);
-            points[dragIdx] = { x: pos.x, y: pos.y };
-            draw();
-            e.preventDefault();
-        }
+            // Context Menu
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    { label: 'Lab Reset', onclick: () => { 
+                        points = [{ x: -5, y: -4 }, { x: 5, y: -4 }, { x: 0, y: 5 }];
+                    }},
+                    { label: 'Ansicht Reset', onclick: () => CyberCanvasInstance.resetView(-10, 10) }
+                ]);
+            };
 
-        function stopDrag() { dragIdx = -1; }
+            // Main Loop
+            function mainLoop() {
+                CyberCanvasInstance.drawGrid({ vignette: true, glow: true });
+                const ctx = CyberCanvasInstance.ctx;
+                const [A, B, C] = points;
 
-        // Mouse Events
-        canvas.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', stopDrag);
+                // Calcs
+                const S = getS(A, B, C), U = getU(A, B, C), I = getI(A, B, C);
+                const H = { x: 3 * S.x - 2 * U.x, y: 3 * S.y - 2 * U.y }, F = mid(H, U);
+                const rUm = dist(U, A), rIn = dist(I, getFoot(I, A, B));
 
-        // Touch Events (iPad/iPhone)
-        canvas.addEventListener('touchstart', startDrag, { passive: false });
-        window.addEventListener('touchmove', moveDrag, { passive: false });
-        window.addEventListener('touchend', stopDrag);
+                // Drawing Layers
+                if (state.cbFermat) {
+                    const pAB = getEqui(A, B, C), pBC = getEqui(B, C, A), pCA = getEqui(C, A, B);
+                    ctx.fillStyle = "rgba(255, 165, 0, 0.05)";
+                    [[A, B, pAB], [B, C, pBC], [C, A, pCA]].forEach(t => {
+                        ctx.beginPath(); 
+                        ctx.moveTo(CyberCanvasInstance.mapX(t[0].x), CyberCanvasInstance.mapY(t[0].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(t[1].x), CyberCanvasInstance.mapY(t[1].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(t[2].x), CyberCanvasInstance.mapY(t[2].y));
+                        ctx.closePath(); ctx.fill();
+                    });
+                }
 
-        document.querySelectorAll('input').forEach(i => i.onchange = draw);
-        window.addEventListener('resize', resize);
-        resize();
+                if (state.cbEuler) {
+                    ctx.strokeStyle = "var(--neon-pink)"; ctx.lineWidth = 3;
+                    const dx = U.x - H.x, dy = U.y - H.y, d = dist(U, H);
+                    ctx.beginPath();
+                    if (d < 0.1) {
+                         ctx.moveTo(CyberCanvasInstance.mapX(S.x), 0);
+                         ctx.lineTo(CyberCanvasInstance.mapX(S.x), CyberCanvasInstance.height);
+                    } else {
+                        const len = 50;
+                        ctx.moveTo(CyberCanvasInstance.mapX(H.x - (dx/d)*len), CyberCanvasInstance.mapY(H.y - (dy/d)*len));
+                        ctx.lineTo(CyberCanvasInstance.mapX(U.x + (dx/d)*len), CyberCanvasInstance.mapY(U.y + (dy/d)*len));
+                    }
+                    ctx.stroke();
+                }
+
+                // Help Lines
+                ctx.setLineDash([5, 5]); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                if (state.hH) {
+                    [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => {
+                        ctx.beginPath(); 
+                        ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(l[1].x), CyberCanvasInstance.mapY(l[1].y));
+                        ctx.stroke();
+                    });
+                }
+                if (state.hS) {
+                    [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => {
+                        ctx.beginPath();
+                        ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(l[1].x), CyberCanvasInstance.mapY(l[1].y));
+                        ctx.stroke();
+                    });
+                }
+                ctx.setLineDash([]);
+
+                // Circles
+                if (state.cbUmkreis) {
+                    ctx.strokeStyle = "rgba(74, 222, 128, 0.3)"; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(U.x), CyberCanvasInstance.mapY(U.y), rUm * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
+                }
+                if (state.cbInkreis) {
+                    ctx.strokeStyle = "rgba(157, 80, 187, 0.3)"; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(I.x), CyberCanvasInstance.mapY(I.y), rIn * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
+                }
+                if (state.cbFeuerbach) {
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)"; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(F.x), CyberCanvasInstance.mapY(F.y), (rUm/2) * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
+                    drawPt(F, "F", "var(--neon-blue)");
+                }
+
+                // Triangle
+                ctx.strokeStyle = "var(--neon-blue)"; ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(CyberCanvasInstance.mapX(A.x), CyberCanvasInstance.mapY(A.y));
+                ctx.lineTo(CyberCanvasInstance.mapX(B.x), CyberCanvasInstance.mapY(B.y));
+                ctx.lineTo(CyberCanvasInstance.mapX(C.x), CyberCanvasInstance.mapY(C.y));
+                ctx.closePath(); ctx.stroke();
+
+                // Points
+                points.forEach((p, i) => drawPt(p, String.fromCharCode(65+i), "white"));
+                
+                if (state.cbEuler) {
+                    drawPt(H, "H", "var(--neon-pink)");
+                    drawPt(U, "U", "var(--neon-green)");
+                    drawPt(S, "S", "white");
+                }
+
+                // Stats Update
+                const ratio = dist(H, S) / dist(S, U);
+                document.getElementById('txt-ratio').innerText = isFinite(ratio) ? ratio.toFixed(2) : "---";
+                document.getElementById('txt-rIn').innerText = rIn.toFixed(2) + " u";
+
+                requestAnimationFrame(mainLoop);
+            }
+            mainLoop();
+        });
     </script>
 </body>
 
