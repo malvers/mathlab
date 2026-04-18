@@ -306,10 +306,11 @@ const CyberBranding = {
 
             /* Central Navigation */
             .cyber-nav {
-                display: grid !important;
-                grid-template-columns: repeat(6, 1fr);
+                display: flex !important;
+                flex-direction: row;
+                justify-content: flex-start;
                 gap: 8px;
-                width: 100%;
+                width: auto;
                 z-index: 100000 !important;
                 animation: branding-fade-in 1.2s ease-out forwards;
             }
@@ -328,9 +329,8 @@ const CyberBranding = {
             }
 
             .nav-btn {
-                width: 100%;
-                height: 54px;
-                max-width: 60px;
+                width: 48px;
+                height: 48px;
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(0, 210, 255, 0.3) !important;

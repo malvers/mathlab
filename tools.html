@@ -82,10 +82,9 @@
             max-width: 1000px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            /* 2 Buttons pro Zeile */
-            gap: 6px;
-            /* Kompakter Abstand */
-            padding: 20px 0 100px 0;
+            gap: 15px; /* Genug Platz gegen Clash */
+            padding: 20px 0 1000px 0; /* Padding harmonisiert */
+            margin-left: 0; /* Linksbündig */
         }
 
         /* --- THE WIDE FLAT BUTTON --- */
@@ -102,8 +101,10 @@
             color: white;
             position: relative;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease-out;
             backdrop-filter: blur(20px);
+            min-height: 52px; /* Euler-Standard Höhe */
+            box-sizing: border-box;
         }
 
         .tool-button::before {
@@ -111,19 +112,15 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 3px;
             height: 100%;
             background: var(--accent-color, var(--neon-blue));
-            box-shadow: 0 0 20px var(--accent-color, var(--neon-blue));
             transition: width 0.3s ease;
         }
 
         .tool-button:hover {
-            transform: scale(1.02) translateX(15px);
             background: rgba(255, 255, 255, 0.08);
-            /* Helleres Glas on Hover */
             border-color: var(--accent-color, var(--neon-blue));
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-color-glow, rgba(0, 210, 255, 0.2));
         }
 
         .tool-button:hover::before {
@@ -131,13 +128,20 @@
         }
 
         .tool-icon {
-            font-size: 1.3rem;
-            /* Noch filigraner */
+            font-size: 1.2rem;
             margin-right: 20px;
-            width: 40px;
-            text-align: center;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
-            transition: transform 0.4s ease;
+            width: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .tool-icon svg {
+            width: 24px !important;
+            height: 24px !important;
+            opacity: 0.9;
         }
 
         .tool-button:hover .tool-icon {
