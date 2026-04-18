@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COORD-TESTER | Cyber-Labor</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+
+    <!-- Project Styles -->
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    
+    <style>
+        /* Local overrides for the tester */
+        #main-content {
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+    </style>
+</head>
+<body class="ultra-v5">
+
+    <!-- Sidebar Navigation -->
+    <aside id="side-panel">
+        <div id="sidebar-header" style="min-height: 60px;">
+            <!-- Branding injected here -->
+        </div>
+
+        <div id="parameters-container">
+            <!-- Initially Empty as requested -->
+        </div>
+
+        <div
+            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
+
+    <div id="main-content">
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+
+    <script>
+        /**
+         * COORDINATE SYSTEM TESTER - ULTRA v5.3.8
+         * A dedicated environment to stress-test and refine the CyberCanvas engine.
+         */
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init("COORD-SYSTEM TESTER");
+
+            // 2. Initialize UI
+            CyberUI.init();
+
+            // Create Control Controls
+            CyberUI.createCard('parameters-container', 'Funktions-Kontrolle', `
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="check-x2" checked>
+                        <label for="check-x2" style="color: var(--branding-orange)">f(x) = -x²</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="check-xi2" checked>
+                        <label for="check-xi2" style="color: var(--branding-purple)">g(x) = x⁻²</label>
+                    </div>
+                </div>
+            `);
+
+            // 3. Initialize CyberCanvas
+            CyberCanvasInstance.init('main-canvas', {
+                minX: -8,
+                maxX: 8,
+                minY: -10,
+                maxY: 10
+            });
+
+            // 4. Bind Redraw
+            CyberCanvasInstance.onResize = () => draw();
+
+            // Bind UI
+            document.getElementById('check-x2').onchange = () => draw();
+            document.getElementById('check-xi2').onchange = () => draw();
+
+            function draw() {
+                // Clear and draw standard grid
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true,
+                    mainColor: 'rgba(0, 210, 255, 0.4)'
+                });
+
+                const ctx = CyberCanvasInstance.ctx;
+                const showX2 = document.getElementById('check-x2').checked;
+                const showXi2 = document.getElementById('check-xi2').checked;
+
+                // Plot f(x) = -x^2
+                if (showX2) {
+                    drawFunction(x => -(x * x), '#ff9d00');
+                }
+
+                // Plot g(x) = x^-2
+                if (showXi2) {
+                    drawFunction(x => 1 / (x * x), '#9d50bb', true);
+                }
+            }
+
+            function drawFunction(fn, color, handleBreak = false) {
+                const ctx = CyberCanvasInstance.ctx;
+                const isDragging = CyberCanvasInstance.isDragging;
+                const step = isDragging ? 2 : 1; // Slightly reduced step for smoothness during drag, but better than 4
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                
+                // Keep Glow active even during drag
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = color;
+                
+                ctx.beginPath();
+                let first = true;
+
+                for (let px = 0; px <= CyberCanvasInstance.width; px += step) {
+                    const x = CyberCanvasInstance.unmapX(px);
+                    const y = fn(x);
+                    
+                    // Filter extreme values or NaN/Infinity
+                    if (isNaN(y) || !isFinite(y) || Math.abs(y) > 50) {
+                        first = true;
+                        continue;
+                    }
+
+                    const py = CyberCanvasInstance.mapY(y);
+                    
+                    if (first) {
+                        ctx.moveTo(px, py);
+                        first = false;
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            // Initial Draw
+            draw();
+
+            // Set Description
+            CyberBranding.setBriefing(`
+                <b>Coordinate System Tester</b><br><br>
+                Dieses Modul dient der Weiterentwicklung und dem Stress-Test der neuen CyberCanvas-Engine.<br><br>
+                Hier werden wir erweiterte Features wie Zooming, Panning oder adaptive Grid-Layer implementieren.
+            `);
+        });
+    </script>
+</body>
+</html>

@@ -56,23 +56,58 @@ body {
     left: 0;
 }
 
-/* --- TELEMETRY OVERLAY --- */
-.telemetry-overlay {
+/* --- CYBER TELEMETRY PANE (GLOBAL MAUSPANE) --- */
+.cyber-telemetry-pane {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    top: 120px;
+    right: 25px;
     pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: tele-fade-in 1.2s ease-out;
 }
 
 .telemetry-card {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    padding: 15px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 210, 255, 0.25);
+    border-radius: 14px;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 210, 255, 0.1);
+}
+
+.telemetry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    min-width: 140px;
+}
+
+.telemetry-row .label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+}
+
+.telemetry-row .value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neon-blue);
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+    min-width: 60px;
+    text-align: right;
+}
+
+@keyframes tele-fade-in {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 /* --- NAVIGATION BUTTONS --- */
