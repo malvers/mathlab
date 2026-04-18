@@ -20,7 +20,7 @@
 
         body {
             margin: 0;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
             color: white;
             display: flex;
@@ -72,42 +72,40 @@
 
         .instrument-title {
             font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.45);
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 8px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .proof-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             font-family: 'Orbitron';
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             font-weight: bold;
+            color: white;
+            margin: 5px 0;
         }
 
         .val-box {
-            padding: 4px 6px;
-            border-radius: 8px;
-            min-width: 45px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            min-width: 55px;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            font-size: 0.8rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
         }
 
         .box-a { background: var(--color-alpha); color: #000; }
         .box-b { background: var(--color-beta); color: #fff; }
         .box-c { background: var(--color-gamma); color: #fff; }
 
-        .briefing-text {
-            font-size: 0.85rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.7);
-        }
 
         canvas {
             display: block;
@@ -155,16 +153,10 @@
     <div id="side-panel">
         <div id="sidebar-header" style="min-height: 60px;"></div>
 
-        <div class="instrument-card">
-            <div class="instrument-title">Missions-Briefing</div>
-            <div class="briefing-text">
-                Ziehe die <b>blauen Eckpunkte</b>, um das Dreieck zu verformen. Beobachte, wie die Wechselwinkel an der Parallelen oben (Gerade h) immer exakt die Summe von 180° bilden.
-            </div>
-        </div>
 
         <div class="instrument-card">
             <div class="instrument-title">Beweis-Konfiguration</div>
-            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 5px;">Parallele durch Punkt:</div>
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">Parallele durch Punkt:</div>
             <div class="radio-group">
                 <label class="radio-item"><input type="radio" name="pivot" value="0"> A</label>
                 <label class="radio-item"><input type="radio" name="pivot" value="1"> B</label>
@@ -174,14 +166,14 @@
 
         <div class="instrument-card">
             <div class="instrument-title">Mathematischer Beweis</div>
-            <div style="font-size: 0.7rem; color: var(--neon-blue); opacity: 0.6; text-transform: uppercase;">Am Pivot-Punkt:</div>
+            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Am Pivot-Punkt:</div>
             <div class="proof-row">
                 <span class="val-box box-a" id="val-l">0°</span> + 
                 <span class="val-box box-c" id="val-g1">0°</span> + 
                 <span class="val-box box-b" id="val-p">0°</span> = 180°
             </div>
             
-            <div style="font-size: 0.7rem; color: var(--neon-blue); opacity: 0.6; text-transform: uppercase; margin-top: 5px;">Innenwinkel im Dreieck:</div>
+            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">Innenwinkel im Dreieck:</div>
             <div class="proof-row">
                 <span class="val-box box-a" id="val-a">0°</span> + 
                 <span class="val-box box-c" id="val-g2">0°</span> + 
@@ -202,7 +194,8 @@
     <script>
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "WINKELSUMME BEWEIS"
+            subtitle: "BEWEIS INNENWINKELSATZ",
+            briefing: "Ziehe die <b>blauen Eckpunkte</b>, um das Dreieck zu verformen. Beobachte, wie die Wechselwinkel an der Parallelen oben (Gerade h) immer exakt die Summe von 180° bilden."
         });
 
         const canvas = document.getElementById('canvas');

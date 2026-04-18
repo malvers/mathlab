@@ -274,7 +274,7 @@ const LABS_DATA = [
     {
         "id": "beweisinwinkellsumme",
         "href": "beweisinwinkellsumme.html",
-        "title": "Winkelsumme Beweis",
+        "title": "Beweis Innenwinkelsatz",
         "description": "Warum beträgt die Winkelsumme im Dreieck immer 180°? Hier kannst du den Beweis Schritt für Schritt nachvollziehen.",
         "tagline": "Interaktive Beweisführung / Schritt für Schritt",
         "icon": `<svg width="42" height="42" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

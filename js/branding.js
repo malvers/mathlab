@@ -15,6 +15,7 @@ const CyberBranding = {
         } else if (typeof config === 'object') {
             if (config.title) title = config.title;
             if (config.subtitle) subtitle = config.subtitle;
+            if (config.briefing) this.briefingContent = config.briefing;
         }
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
@@ -24,7 +25,7 @@ const CyberBranding = {
         this.injectNavigation();
         this.setupActiveScaling();
         this.updateScale();
-        this.briefingContent = ""; // Default empty
+        if (!this.briefingContent) this.briefingContent = "";
     },
 
     injectStyles() {
