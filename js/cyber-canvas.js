@@ -1,6 +1,7 @@
 /**
- * CyberCanvas Engine v1.0.0
- * Modular coordinate system and grid rendering engine for Cyber-Labor.
+ * CyberCanvas Engine v2.2.0 (Multitouch Focal Zoom Edition)
+ * Decoupled Input & Rendering with Pinch-to-Zoom.
+ * Built for zero-latency interactive laboratories.
  */
 class CyberCanvas {
     constructor() {
@@ -9,105 +10,276 @@ class CyberCanvas {
         this.width = 0;
         this.height = 0;
         this.dpr = window.devicePixelRatio || 1;
-        this.view = {
-            minX: -5,
-            maxX: 5,
-            minY: -5,
-            maxY: 5
-        };
-        this.onResize = null;
-    }
-
-    /**
-     * Initialize the canvas and view bounds.
-     * @param {string} canvasId - The ID of the canvas element.
-     * @param {object} viewConfig - Optional initial view bounds.
-     */
-    init(canvasId, viewConfig = {}) {
-        this.canvas = document.getElementById(canvasId);
-        if (!this.canvas) {
-            console.error(`CyberCanvas: Canvas with ID "${canvasId}" not found.`);
-            return;
-        }
-        this.ctx = this.canvas.getContext('2d');
-        this.view = { ...this.view, ...viewConfig };
-
-        window.addEventListener('resize', () => this.resize());
-        this.resize();
+        this.view = { minX: -5, maxX: 5, minY: -5, maxY: 5 };
         
-        console.log("⚛️ CyberCanvas Engine Initialized");
+        // Callbacks
+        this.onResize = null;
+        
+        // State
+        this.isInitialized = false;
+        this.isDragging = false;
+        this.needsRedraw = true;
+        this.showTelemetry = true;
+        
+        // --- INPUT STATE (RAW) ---
+        this.currentMousePos = { x: 0, y: 0, clientX: 0, clientY: 0 };
+        this.lastDragPos = { clientX: 0, clientY: 0 };
+        this.hasNewInput = false;
+
+        // --- ZOOM & TOUCH STATE ---
+        this.zoomIntent = { factor: 1, focalX: 0, focalY: 0 };
+        this.touchPoints = [];
+        this.lastPinchDist = 0;
+
+        // --- MATH STATE ---
+        this.mathX = 0;
+        this.mathY = 0;
+
+        // Telemetry Cache
+        this.telePane = null;
+        this.teleX = null;
+        this.teleY = null;
+
+        // Listener Tracking
+        this.activeListeners = [];
     }
 
-    /**
-     * Set the view bounds.
-     * @param {object} view - Bounds {minX, maxX, minY, maxY}
-     */
-    setView(view) {
-        this.view = { ...this.view, ...view };
+    init(canvasId, viewConfig = {}, options = {}) {
+        this.cleanup();
+
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return console.error(`CyberCanvas: "${canvasId}" not found.`);
+        this.ctx = this.canvas.getContext('2d');
+
+        this.view = { ...this.view, ...viewConfig };
+        this.showTelemetry = options.showTelemetry !== false;
+
+        // Prevent default browser zoom on iPad
+        this.canvas.style.touchAction = 'none';
+
+        // Listeners
+        this.addListener(window, 'resize', () => this.resize());
+        this.addListener(this.canvas, 'mousedown', (e) => this.handleMouseDown(e));
+        this.addListener(window, 'mousemove', (e) => this.handleMouseMove(e), { passive: true });
+        this.addListener(window, 'mouseup', (e) => this.handleMouseUp(e));
+        this.addListener(this.canvas, 'wheel', (e) => this.handleWheel(e), { passive: false });
+        
+        // Touch Support (iPad)
+        this.addListener(this.canvas, 'touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.addListener(this.canvas, 'touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        this.addListener(this.canvas, 'touchend', (e) => this.handleTouchEnd(e));
+
+        this.addListener(this.canvas, 'mouseenter', () => this.setTeleOpacity(1));
+        this.addListener(this.canvas, 'mouseleave', () => this.setTeleOpacity(0.3));
+
+        this.resize();
+        if (this.showTelemetry) this.injectTelemetryPane();
+        
+        this.isInitialized = true;
+        this.startLoop();
+
+        console.log("⚛️ CyberCanvas Engine v2.2 (ZOOM) Initialized");
     }
 
-    /**
-     * Handle canvas resizing and DPI scaling.
-     */
+    addListener(target, type, fn, options = {}) {
+        target.addEventListener(type, fn, options);
+        this.activeListeners.push({ target, type, fn, options });
+    }
+
+    cleanup() {
+        this.activeListeners.forEach(l => l.target.removeEventListener(l.type, l.fn, l.options));
+        this.activeListeners = [];
+        if (this.telePane) { this.telePane.remove(); this.telePane = null; }
+        this.isInitialized = false;
+    }
+
+    startLoop() {
+        const frame = () => {
+            if (!this.isInitialized) return;
+
+            // 1. Process Input Math (Panning & Zoom)
+            if (this.hasNewInput || this.zoomIntent.factor !== 1) {
+                this.processInputMath();
+                this.hasNewInput = false;
+            }
+
+            // 2. Render
+            if (this.needsRedraw || this.isDragging) {
+                if (this.onResize) this.onResize();
+                this.needsRedraw = false;
+            }
+
+            this.updateTelemetryDOM();
+            requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+    }
+
+    processInputMath() {
+        // --- ZOOM MATH (Focal Point) ---
+        if (this.zoomIntent.factor !== 1) {
+            const factor = this.zoomIntent.factor;
+            const fx = this.zoomIntent.focalX;
+            const fy = this.zoomIntent.focalY;
+
+            // Math coordinate under focal point before zoom
+            const mx = this.unmapX(fx);
+            const my = this.unmapY(fy);
+
+            // Rescale range
+            const newRangeX = (this.view.maxX - this.view.minX) * factor;
+            const newRangeY = (this.view.maxY - this.view.minY) * factor;
+
+            // Shift min/max so mx,my stays at fx,fy
+            this.view.minX = mx - (fx / this.width) * newRangeX;
+            this.view.maxX = this.view.minX + newRangeX;
+            this.view.minY = my - ((this.height - fy) / this.height) * newRangeY;
+            this.view.maxY = this.view.minY + newRangeY;
+
+            this.zoomIntent.factor = 1; // Reset intent
+            this.needsRedraw = true;
+        }
+
+        // --- PANNING MATH ---
+        const mx = this.currentMousePos.x;
+        const my = this.currentMousePos.y;
+        this.mathX = this.unmapX(mx);
+        this.mathY = this.unmapY(my);
+
+        if (this.isDragging) {
+            const dx = this.currentMousePos.clientX - this.lastDragPos.clientX;
+            const dy = this.currentMousePos.clientY - this.lastDragPos.clientY;
+            
+            const mw = this.view.maxX - this.view.minX;
+            const mh = this.view.maxY - this.view.minY;
+
+            const moveX = (dx / this.width) * mw;
+            const moveY = (dy / this.height) * mh;
+
+            this.view.minX -= moveX;
+            this.view.maxX -= moveX;
+            this.view.minY += moveY;
+            this.view.maxY += moveY;
+
+            this.lastDragPos.clientX = this.currentMousePos.clientX;
+            this.lastDragPos.clientY = this.currentMousePos.clientY;
+        }
+    }
+
     resize() {
-        if (!this.canvas) return;
-
-        // Use container size or window size
         const parent = this.canvas.parentElement;
         this.width = parent ? parent.clientWidth : window.innerWidth;
         this.height = parent ? parent.clientHeight : window.innerHeight;
-
         this.canvas.width = this.width * this.dpr;
         this.canvas.height = this.height * this.dpr;
         this.canvas.style.width = this.width + 'px';
         this.canvas.style.height = this.height + 'px';
-
+        this.ctx.resetTransform();
         this.ctx.scale(this.dpr, this.dpr);
-
-        if (this.onResize) this.onResize();
+        this.needsRedraw = true;
     }
 
-    /**
-     * Map math X coordinate to screen X coordinate.
-     */
-    mapX(x) {
-        return (x - this.view.minX) / (this.view.maxX - this.view.minX) * this.width;
+    // --- EVENT HANDLERS ---
+
+    handleMouseDown(e) {
+        this.isDragging = true;
+        this.lastDragPos.clientX = e.clientX;
+        this.lastDragPos.clientY = e.clientY;
+        this.canvas.style.cursor = 'grabbing';
     }
 
-    /**
-     * Map math Y coordinate to screen Y coordinate.
-     */
-    mapY(y) {
-        return this.height - (y - this.view.minY) / (this.view.maxY - this.view.minY) * this.height;
+    handleMouseMove(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.currentMousePos.x = e.clientX - rect.left;
+        this.currentMousePos.y = e.clientY - rect.top;
+        this.currentMousePos.clientX = e.clientX;
+        this.currentMousePos.clientY = e.clientY;
+        this.hasNewInput = true;
     }
 
-    /**
-     * Map screen X back to math X.
-     */
-    unmapX(px) {
-        return this.view.minX + (px / this.width) * (this.view.maxX - this.view.minX);
+    handleMouseUp() {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.canvas.style.cursor = 'crosshair';
+            this.needsRedraw = true;
+        }
     }
 
-    /**
-     * Map screen Y back to math Y.
-     */
-    unmapY(py) {
-        return this.view.minY + ((this.height - py) / this.height) * (this.view.maxY - this.view.minY);
+    handleWheel(e) {
+        e.preventDefault(); // Prevent page scroll
+        const rect = this.canvas.getBoundingClientRect();
+        const factor = e.deltaY > 0 ? 1.1 : 0.9;
+        this.zoomIntent.factor = factor;
+        this.zoomIntent.focalX = e.clientX - rect.left;
+        this.zoomIntent.focalY = e.clientY - rect.top;
     }
 
-    /**
-     * Draw a standard cyber-grid.
-     */
+    // --- TOUCH HANDLERS (IPAD) ---
+
+    handleTouchStart(e) {
+        e.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
+        if (e.touches.length === 1) {
+            this.isDragging = true;
+            this.lastDragPos.clientX = e.touches[0].clientX;
+            this.lastDragPos.clientY = e.touches[0].clientY;
+        } else if (e.touches.length === 2) {
+            this.isDragging = false; // Stop panning, start pinching
+            this.lastPinchDist = this.getTouchDist(e.touches);
+        }
+    }
+
+    handleTouchMove(e) {
+        e.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
+        if (e.touches.length === 1 && this.isDragging) {
+            const touch = e.touches[0];
+            this.currentMousePos.x = touch.clientX - rect.left;
+            this.currentMousePos.y = touch.clientY - rect.top;
+            this.currentMousePos.clientX = touch.clientX;
+            this.currentMousePos.clientY = touch.clientY;
+            this.hasNewInput = true;
+        } else if (e.touches.length === 2) {
+            const dist = this.getTouchDist(e.touches);
+            const factor = this.lastPinchDist / dist;
+            
+            // Focal point is midpoint of touches
+            const focalX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+            const focalY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+            this.zoomIntent.factor = factor;
+            this.zoomIntent.focalX = focalX;
+            this.zoomIntent.focalY = focalY;
+            this.lastPinchDist = dist;
+        }
+    }
+
+    handleTouchEnd(e) {
+        this.handleMouseUp();
+        if (e.touches.length < 2) this.lastPinchDist = 0;
+    }
+
+    getTouchDist(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // --- MAPPING ---
+    mapX(x) { return (x - this.view.minX) / (this.view.maxX - this.view.minX) * this.width; }
+    mapY(y) { return this.height - (y - this.view.minY) / (this.view.maxY - this.view.minY) * this.height; }
+    unmapX(px) { return this.view.minX + (px / this.width) * (this.view.maxX - this.view.minX); }
+    unmapY(py) { return this.view.minY + ((this.height - py) / this.height) * (this.view.maxY - this.view.minY); }
+
     drawGrid(options = {}) {
         const ctx = this.ctx;
-        if (!ctx) return;
-
+        this.clear();
+        const isD = this.isDragging;
         const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.4)';
         const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.05)';
 
-        // 1. Background Hint (Optional)
         if (options.vignette) {
-            const grad = ctx.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width / 1.2);
+            const grad = ctx.createRadialGradient(this.width/2, this.height/2, 0, this.width/2, this.height/2, this.width/1.2);
             grad.addColorStop(0, 'rgba(5, 11, 24, 0)');
             grad.addColorStop(1, 'rgba(0, 210, 255, 0.03)');
             ctx.fillStyle = grad;
@@ -116,53 +288,48 @@ class CyberCanvas {
 
         ctx.strokeStyle = gridColor;
         ctx.lineWidth = 1;
-
-        // 2. Adaptive Vertical Grid
         for (let x = Math.ceil(this.view.minX); x <= Math.floor(this.view.maxX); x++) {
-            const px = this.mapX(x);
-            ctx.beginPath();
-            ctx.moveTo(px, 0);
-            ctx.lineTo(px, this.height);
-            ctx.stroke();
+            const px = this.mapX(x); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, this.height); ctx.stroke();
         }
-
-        // 3. Adaptive Horizontal Grid
         for (let y = Math.ceil(this.view.minY); y <= Math.floor(this.view.maxY); y++) {
-            const py = this.mapY(y);
-            ctx.beginPath();
-            ctx.moveTo(0, py);
-            ctx.lineTo(this.width, py);
-            ctx.stroke();
+            const py = this.mapY(y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(this.width, py); ctx.stroke();
         }
 
-        // 4. Main Axes
         ctx.strokeStyle = mainColor;
         ctx.lineWidth = 2;
         ctx.shadowBlur = options.glow ? 10 : 0;
         ctx.shadowColor = mainColor;
-
-        const xAxis = this.mapY(0);
-        ctx.beginPath();
-        ctx.moveTo(0, xAxis);
-        ctx.lineTo(this.width, xAxis);
-        ctx.stroke();
-
-        const yAxis = this.mapX(0);
-        ctx.beginPath();
-        ctx.moveTo(yAxis, 0);
-        ctx.lineTo(yAxis, this.height);
-        ctx.stroke();
-
+        const xA = this.mapY(0); ctx.beginPath(); ctx.moveTo(0, xA); ctx.lineTo(this.width, xA); ctx.stroke();
+        const yA = this.mapX(0); ctx.beginPath(); ctx.moveTo(yA, 0); ctx.lineTo(yA, this.height); ctx.stroke();
         ctx.shadowBlur = 0;
     }
 
-    /**
-     * Utility to clear the canvas.
-     */
-    clear() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
+    clear() { this.ctx.clearRect(0, 0, this.width, this.height); }
+
+    injectTelemetryPane() {
+        const parent = this.canvas.parentElement;
+        if (!parent) return;
+        this.telePane = document.createElement('div');
+        this.telePane.className = 'cyber-telemetry-pane';
+        this.telePane.innerHTML = `
+            <div class="telemetry-card">
+                <div class="telemetry-row"><span class="label">X_COORD</span><span class="value" id="tele-x">0.00</span></div>
+                <div class="telemetry-row"><span class="label">Y_COORD</span><span class="value" id="tele-y">0.00</span></div>
+            </div>`;
+        parent.appendChild(this.telePane);
+        this.teleX = document.getElementById('tele-x');
+        this.teleY = document.getElementById('tele-y');
+    }
+
+    updateTelemetryDOM() {
+        if (!this.showTelemetry || !this.teleX) return;
+        this.teleX.innerText = this.mathX.toFixed(2);
+        this.teleY.innerText = this.mathY.toFixed(2);
+    }
+
+    setTeleOpacity(val) {
+        if (this.telePane) this.telePane.style.opacity = val;
     }
 }
 
-// Export as a singleton or just a global instance for ease of use in simple scripts
 const CyberCanvasInstance = new CyberCanvas();
