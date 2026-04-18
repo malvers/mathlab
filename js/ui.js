@@ -10,7 +10,9 @@ class CyberUI {
 
     static injectStyles() {
         const styleId = 'cyber-ui-dynamic-styles';
-        if (document.getElementById(styleId)) return;
+        // Remove existing to force refresh
+        const old = document.getElementById(styleId);
+        if (old) old.remove();
 
         const style = document.createElement('style');
         style.id = styleId;
@@ -80,7 +82,133 @@ class CyberUI {
                 margin: 0;
             }
 
-            /* CYBER DROPDOWN SYSTEM */
+            /* CYBER CHECKBOX SYSTEM (PREMIUM) */
+            .cyber-control-group {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                width: 100%;
+            }
+
+            .cyber-checkbox-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                cursor: pointer;
+                user-select: none;
+                margin-bottom: 10px;
+                width: 100%;
+            }
+
+            .cyber-checkbox {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.03);
+                cursor: pointer;
+                position: relative;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                outline: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .cyber-checkbox:checked {
+                background: var(--neon-blue);
+                border-color: var(--neon-blue);
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            }
+
+            .cyber-checkbox::after {
+                content: '';
+                position: absolute;
+                width: 5px;
+                height: 10px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: translate(-50%, -55%) rotate(45deg);
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                left: 50%;
+                top: 45%;
+                display: block;
+            }
+
+            .cyber-checkbox:checked::after {
+                opacity: 1;
+            }
+
+            .cyber-label {
+                font-family: 'Outfit', sans-serif;
+                font-size: 0.85rem;
+                color: rgba(255, 255, 255, 0.8);
+                letter-spacing: 0.5px;
+            }
+
+            /* UTILITIES */
+            .cyber-number {
+                font-family: 'Orbitron', sans-serif;
+                font-variant-numeric: tabular-nums;
+            }
+
+            /* CONTEXT MENU */
+            .cyber-context-menu {
+                position: fixed;
+                background: rgba(15, 23, 42, 0.92);
+                backdrop-filter: blur(25px);
+                border: 1px solid rgba(0, 210, 255, 0.4);
+                border-radius: 12px;
+                padding: 10px;
+                min-width: 220px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+                z-index: 1000000;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                opacity: 0;
+                transform: scale(0.95);
+                transform-origin: top left;
+                pointer-events: none;
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .cyber-context-menu.visible {
+                opacity: 1;
+                transform: scale(1);
+                pointer-events: auto;
+            }
+
+            .context-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            .context-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .context-label {
+                font-family: 'Outfit', sans-serif;
+                font-size: 0.85rem;
+                color: rgba(255, 255, 255, 0.85);
+            }
+
+            @keyframes ui-card-fade {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* MISSION BRIEFING BOX */
             .cyber-dropdown {
                 position: relative;
                 width: 100%;
@@ -347,5 +475,37 @@ class CyberUI {
                 window.katex.render(initialMp.dataset.tex, initialMp, { throwOnError: false });
             }
         }
+    }
+
+    /**
+     * Creates a premium Cyber-Checkbox
+     * @param {string} containerId - The ID of the container element
+     * @param {string} label - The label text
+     * @param {boolean} checked - Initial state
+     * @param {function} onchange - Callback for state changes
+     */
+    static createCheckbox(containerId, label, checked, onchange) {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'cyber-checkbox-wrapper';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'cyber-checkbox';
+        checkbox.checked = checked;
+        checkbox.onchange = (e) => onchange(e.target.checked);
+        
+        const labelText = document.createElement('span');
+        labelText.className = 'cyber-label';
+        labelText.textContent = label;
+        
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(labelText);
+        
+        if (containerId) {
+            const container = document.getElementById(containerId);
+            if (container) container.appendChild(wrapper);
+        }
+        
+        return wrapper;
     }
 }

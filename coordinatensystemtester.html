@@ -20,6 +20,14 @@
         #main-content {
             background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
         }
+
+        /* BRUTE FORCE LAYOUT FIX: Force vertical stack for settings groups */
+        .cyber-control-group {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            width: 100% !important;
+        }
     </style>
 </head>
 <body class="ultra-v5">
@@ -60,37 +68,52 @@
             // 1. Initialize Branding
             CyberBranding.init("COORD-SYSTEM TESTER");
 
-            // 2. Initialize UI
+            // 2. Initialize UI Engine (Crucial for the "Box" Styles)
             CyberUI.init();
 
-            // Create Control Controls
-            CyberUI.createCard('parameters-container', 'Funktions-Kontrolle', `
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-x2" checked>
-                        <label for="check-x2" style="color: var(--branding-orange)">f(x) = -x²</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-xi2" checked>
-                        <label for="check-xi2" style="color: var(--branding-purple)">g(x) = x⁻²</label>
-                    </div>
-                </div>
-            `);
+            // 3. Create Navigation & Control Cards
+            CyberUI.createCard('parameters-container', 'PROJEKTIONS-STEUERUNG', `
+                <div id="function-checks" class="cyber-control-group"></div>
+            `, '#00d2ff');
 
-            // 3. Initialize CyberCanvas
+            CyberUI.createCheckbox('function-checks', 'f(x) = -x²', true, (val) => {
+                state.showX2 = val;
+                draw();
+            });
+
+            CyberUI.createCheckbox('function-checks', 'g(x) = x⁻²', true, (val) => {
+                state.showXi2 = val;
+                draw();
+            });
+
+            CyberUI.createCard('parameters-container', 'ANZEIGE-OPTIONEN', `
+                <div id="display-checks" class="cyber-control-group"></div>
+            `, 'var(--branding-orange)');
+
+            CyberUI.createCheckbox('display-checks', 'Achsenbeschriftung', false, (val) => {
+                CyberCanvasInstance.showLabels = val;
+                draw();
+            });
+
+
+            // 4. Initialize CyberCanvas
             CyberCanvasInstance.init('main-canvas', {
                 minX: -8,
                 maxX: 8,
                 minY: -10,
                 maxY: 10
+            }, {
+                showLabels: false // Local start state
             });
 
-            // 4. Bind Redraw
-            CyberCanvasInstance.onResize = () => draw();
+            // 5. State Management
+            const state = {
+                showX2: true,
+                showXi2: true
+            };
 
-            // Bind UI
-            document.getElementById('check-x2').onchange = () => draw();
-            document.getElementById('check-xi2').onchange = () => draw();
+            // 6. Bind Redraw
+            CyberCanvasInstance.onResize = () => draw();
 
             function draw() {
                 // Clear and draw standard grid
@@ -101,16 +124,14 @@
                 });
 
                 const ctx = CyberCanvasInstance.ctx;
-                const showX2 = document.getElementById('check-x2').checked;
-                const showXi2 = document.getElementById('check-xi2').checked;
-
+                
                 // Plot f(x) = -x^2
-                if (showX2) {
+                if (state.showX2) {
                     drawFunction(x => -(x * x), '#ff9d00');
                 }
 
                 // Plot g(x) = x^-2
-                if (showXi2) {
+                if (state.showXi2) {
                     drawFunction(x => 1 / (x * x), '#9d50bb', true);
                 }
             }
