@@ -7,6 +7,7 @@
     <title>Mathematik interaktiv by Dr. Michael R. Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="js/index-ui.css">
     <style>
         :root {
             --space-bg: #050b18;
@@ -85,58 +86,6 @@
             z-index: -2;
             /* Über dem Video, unter den Sternen (-1) und Content (0) */
             pointer-events: none;
-        }
-
-        .sound-toggle {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            color: rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sound-toggle svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .sound-toggle:hover {
-            color: #fff;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            transform: translateY(-3px);
-        }
-
-        .sound-toggle.playing {
-            color: var(--neon-blue);
-            border-color: var(--neon-blue);
-            animation: pulse-border 2s infinite;
-        }
-
-        @keyframes pulse-border {
-            0% {
-                box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
-            }
-
-            50% {
-                box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
-            }
-
-            100% {
-                box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
-            }
         }
 
         @keyframes starsMove {
@@ -886,6 +835,25 @@
             <button class="btn-access" onclick="verifyGate()">ACCESS</button>
             <br>
             <button class="btn-cancel" onclick="closeGate()">ABBRECHEN</button>
+        </div>
+    </div>
+
+    <!-- Kontakt Button oben rechts -->
+    <div class="contact-btn" onclick="document.getElementById('contact-overlay').classList.add('open')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Kontakt
+    </div>
+
+    <!-- Kontakt Modal -->
+    <div id="contact-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
+        <div class="contact-modal" onclick="event.stopPropagation()">
+            <h3>Kontakt</h3>
+            <p>Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
+            <a href="mailto:michael.r.alvers@gmail.com" class="contact-email">michael.r.alvers@gmail.com</a>
+            <button class="contact-close" onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
     </div>
 

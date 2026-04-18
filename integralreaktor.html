@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber-Labor | Integral-Reaktor</title>
+    <title>Cyber-Labor | Integral-Simulator</title>
 
     <!-- Fonts -->
     <link
@@ -22,14 +22,49 @@
     <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
         /* Essential structure only; all branding/padding comes from cyber-layout.css */
-        #reactor-canvas { width: 100%; height: 100%; background: transparent; }
-        .dashboard-grid { display: flex; flex-direction: column; gap: 10px; }
-        .dashboard-stat { padding-bottom: 5px; }
-        .dashboard-stat:last-child { border-bottom: none; }
-        #formula-display { font-size: 2.2rem; min-height: 55px; display: flex; align-items: center; }
-        #integral-value, #error-display { font-size: 1.25rem; }
-        #error-display { color: #ffcc00; }
-        .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        #reactor-canvas {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dashboard-stat {
+            padding-bottom: 5px;
+        }
+
+        .dashboard-stat:last-child {
+            border-bottom: none;
+        }
+
+        #formula-display {
+            font-size: 2.2rem;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+        }
+
+        #integral-value,
+        #error-display {
+            font-size: 1.25rem;
+        }
+
+        #error-display {
+            color: #ffcc00;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
         .mode-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -41,6 +76,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .mode-btn.active {
             background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
@@ -53,8 +89,8 @@
 <body>
     <aside id="side-panel">
         <div id="sidebar-header" style="min-height: 60px;"></div>
-        
-        <div id="briefing-container"></div>
+
+
 
         <div class="instrument-card">
             <div class="dashboard-grid">
@@ -67,7 +103,7 @@
                     <div id="integral-value" class="cyber-number" style="color: var(--neon-blue);">0.000</div>
                 </div>
                 <div class="dashboard-stat">
-                    <div class="stat-meta">FEHLER</div>
+                    <div class="stat-meta">FEHLER BEI BALKEN</div>
                     <div id="error-display" class="cyber-number">0.0%</div>
                 </div>
             </div>
@@ -77,7 +113,8 @@
             <!-- Cards will be injected here via JS -->
         </div>
 
-        <div style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div
+            style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
@@ -92,8 +129,8 @@
         window.addEventListener('load', () => {
             // 1. Initialize Branding
             CyberBranding.init({
-                title: "INTEGRAL-REAKTOR",
-                subtitle: "DOC ALVERS MATHE-LABOR"
+                title: "DOC ALVERS MATHE-LABOR",
+                subtitle: "INTEGRALRECHNUNG"
             });
 
             // 2. Initialize UI Components
@@ -137,14 +174,22 @@
                 </div>
             `, 'var(--neon-blue)', { collapsible: false });
 
-            // 4. Create Mission Briefing
-            CyberUI.injectBriefing('briefing-container', `
-                <b>System-Status</b>: Reaktor online. Alle Parameter wurden in das zentrale Side-Panel fusioniert.
-                Ändern Sie die Grenzen, um den Energiefluss (Fläche) in Echtzeit zu beobachten.
-            `);
+
 
             // 5. Initialize Engine
             initEngine();
+
+            // 6. Briefing Content
+            CyberBranding.setBriefing(`
+                <b>Integral-Simulator</b> – Interaktive Flächenberechnung<br><br>
+                Dieses Labor visualisiert das bestimmte Integral einer Funktion zwischen den Grenzen <b>a</b> und <b>b</b>.<br><br>
+                <b>So funktioniert es:</b><br>
+                • Wähle eine Funktion aus dem Dropdown<br>
+                • Verschiebe die Grenzen a und b mit den Schiebereglern<br>
+                • Erhöhe die Präzision n für genauere Näherungen<br>
+                • Wechsle zwischen analytischer und Balken-Darstellung<br><br>
+                Die angezeigte <b>Fläche</b> entspricht dem numerisch berechneten Integral ∫f(x)dx.
+            `);
 
             CyberUI.createDropdown('func-select-container', MathLibrary.getAll(), (id) => {
                 state.func = id;
@@ -160,4 +205,5 @@
         });
     </script>
 </body>
+
 </html>
