@@ -11,6 +11,7 @@
             --neon-purple: #9d50bb;
             --neon-pink: #f472b6;
             --neon-green: #4ade80;
+            --neon-yellow: #fbbf24;
             --bg-dark: #050b18;
             --glass: rgba(15, 23, 42, 0.7);
             --glass-bright: rgba(255, 255, 255, 0.05);
@@ -118,7 +119,7 @@
             // 1. Initialize Branding
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "EULER & FERMAT ANALYSE",
+                subtitle: "Eulergerade &bull; Feuerbachkreis &bull; Fermatpunkt",
                 briefing: `
                     <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: EULER-ANALYSE</h3>
                     Erforsche die verborgene Symmetrie des Dreiecks. Überprüfe die Euler-Gerade – eine Linie, auf der Schwerpunkt, Umkreismittelpunkt und Höhenschnittpunkt perfekt kollinierezieren.
@@ -137,9 +138,12 @@
             // 2. Initialize UI Engine
             CyberUI.init();
 
+            // Helper to resolve CSS variables for Canvas
+            const getCSSVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
             // 3. Setup UI Components
             const state = {
-                cbEuler: true,
+                cbEuler: false,
                 cbFeuerbach: false,
                 cbUmkreis: false,
                 cbInkreis: false,
@@ -149,37 +153,37 @@
                 cbFermat: false
             };
 
-            CyberUI.createCard('ui-container', 'KONSTRUKTION [BASIS]', `
+            CyberUI.createCard('ui-container', 'KONSTRUKTION', `
                 <div id="base-opts" class="cyber-control-group"></div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCheckbox('base-opts', 'Eulergerade', state.cbEuler, (v) => state.cbEuler = v);
-            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v);
-            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v);
-            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v);
+            CyberUI.createCheckbox('base-opts', 'Eulergerade', state.cbEuler, (v) => state.cbEuler = v, '#ffffff');
+            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v, getCSSVar('--neon-blue'));
+            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v, getCSSVar('--neon-green'));
+            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v, getCSSVar('--neon-yellow'));
 
-            CyberUI.createCard('ui-container', 'HILFSLINIEN [DETAILS]', `
+            CyberUI.createCard('ui-container', 'HILFSLINIEN', `
                 <div id="detail-opts" class="cyber-control-group"></div>
             `, 'var(--neon-purple)');
 
-            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v);
-            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v);
-            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v);
-            CyberUI.createCheckbox('detail-opts', 'Fermat / Napoleon', state.cbFermat, (v) => state.cbFermat = v);
+            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v, getCSSVar('--neon-pink'));
+            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v, getCSSVar('--neon-purple'));
+            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v, getCSSVar('--neon-yellow'));
+            CyberUI.createCheckbox('detail-opts', 'Fermat / Napoleon', state.cbFermat, (v) => state.cbFermat = v, '#ffa500');
 
             const statsHTML = `
                 <div class="stats-grid">
-                    <div class="stats-card">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-pink);">
                         <span class="stats-label">Ratio HS / SU</span>
-                        <span id="txt-ratio" class="stats-val">0.00</span>
+                        <span id="txt-ratio" class="stats-val" style="color:var(--neon-pink);">0.00</span>
                     </div>
-                    <div class="stats-card">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-yellow);">
                         <span class="stats-label">Inkreis-R</span>
-                        <span id="txt-rIn" class="stats-val">0 px</span>
+                        <span id="txt-rIn" class="stats-val" style="color:var(--neon-yellow);">0 px</span>
                     </div>
                 </div>
             `;
-            CyberUI.createCard('stats-container', 'ECHTZEIT-ANALYSE', statsHTML, 'var(--neon-pink)');
+            CyberUI.createCard('stats-container', 'ANALYSE', statsHTML, 'var(--neon-yellow)');
 
             // 4. Initialize CyberCanvas
             CyberCanvasInstance.init('main-canvas', {
@@ -197,6 +201,7 @@
                 { x:  0, y:  5 }  // C
             ];
             let dragIdx = -1;
+
 
             // Math Tools
             const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
@@ -236,14 +241,23 @@
                 return dist(r1, ref) > dist(r2, ref) ? r1 : r2;
             }
 
+            function getLineIntersect(p1, p2, p3, p4) {
+                const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+                const x3 = p3.x, y3 = p3.y, x4 = p4.x, y4 = p4.y;
+                const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+                if (Math.abs(denom) < 0.0001) return p1;
+                const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+                return { x: x1 + ua * (x2 - x1), y: y1 + ua * (y2 - y1) };
+            }
+
             function drawPt(pt, label, color) {
                 const ctx = CyberCanvasInstance.ctx;
                 const px = CyberCanvasInstance.mapX(pt.x);
                 const py = CyberCanvasInstance.mapY(pt.y);
-                ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 15; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = "white"; ctx.font = "bold 12px Orbitron"; ctx.textAlign = "center";
+                ctx.fillStyle = "white"; ctx.font = "bold 13px Orbitron"; ctx.textAlign = "center";
                 ctx.fillText(label, px, py - 18);
             }
 
@@ -291,18 +305,38 @@
                 // Drawing Layers
                 if (state.cbFermat) {
                     const pAB = getEqui(A, B, C), pBC = getEqui(B, C, A), pCA = getEqui(C, A, B);
-                    ctx.fillStyle = "rgba(255, 165, 0, 0.05)";
+                    
+                    // Fermat Triangles
+                    ctx.fillStyle = "rgba(255, 165, 0, 0.12)";
+                    ctx.strokeStyle = "rgba(255, 165, 0, 0.3)";
+                    ctx.lineWidth = 1;
                     [[A, B, pAB], [B, C, pBC], [C, A, pCA]].forEach(t => {
                         ctx.beginPath(); 
                         ctx.moveTo(CyberCanvasInstance.mapX(t[0].x), CyberCanvasInstance.mapY(t[0].y));
                         ctx.lineTo(CyberCanvasInstance.mapX(t[1].x), CyberCanvasInstance.mapY(t[1].y));
                         ctx.lineTo(CyberCanvasInstance.mapX(t[2].x), CyberCanvasInstance.mapY(t[2].y));
-                        ctx.closePath(); ctx.fill();
+                        ctx.closePath(); 
+                        ctx.fill(); ctx.stroke();
                     });
+
+                    // Fermat Lines
+                    ctx.setLineDash([3, 3]);
+                    ctx.strokeStyle = "rgba(255, 165, 0, 0.5)";
+                    [[A, pBC], [B, pCA], [C, pAB]].forEach(l => {
+                        ctx.beginPath();
+                        ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(l[1].x), CyberCanvasInstance.mapY(l[1].y));
+                        ctx.stroke();
+                    });
+                    ctx.setLineDash([]);
+
+                    // Fermat Point
+                    const Fp = getLineIntersect(A, pBC, B, pCA);
+                    drawPt(Fp, "Fp", "#ffa500");
                 }
 
                 if (state.cbEuler) {
-                    ctx.strokeStyle = "var(--neon-pink)"; ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
                     const dx = U.x - H.x, dy = U.y - H.y, d = dist(U, H);
                     ctx.beginPath();
                     if (d < 0.1) {
@@ -317,8 +351,9 @@
                 }
 
                 // Help Lines
-                ctx.setLineDash([5, 5]); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                ctx.setLineDash([5, 5]); ctx.lineWidth = 1.5;
                 if (state.hH) {
+                    ctx.strokeStyle = getCSSVar("--neon-pink") + "88"; // Semi-transparent
                     [[A, getFoot(A, B, C)], [B, getFoot(B, A, C)], [C, getFoot(C, A, B)]].forEach(l => {
                         ctx.beginPath(); 
                         ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
@@ -327,7 +362,21 @@
                     });
                 }
                 if (state.hS) {
+                    ctx.strokeStyle = getCSSVar("--neon-purple") + "88"; 
                     [[A, mid(B, C)], [B, mid(A, C)], [C, mid(A, B)]].forEach(l => {
+                        ctx.beginPath();
+                        ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
+                        ctx.lineTo(CyberCanvasInstance.mapX(l[1].x), CyberCanvasInstance.mapY(l[1].y));
+                        ctx.stroke();
+                    });
+                }
+                if (state.hI) {
+                    ctx.strokeStyle = getCSSVar("--neon-yellow") + "88";
+                    const a = dist(B, C), b = dist(A, C), c = dist(A, B);
+                    const dA = { x: (b * B.x + c * C.x) / (b + c), y: (b * B.y + c * C.y) / (b + c) };
+                    const dB = { x: (a * A.x + c * C.x) / (a + c), y: (a * A.y + c * C.y) / (a + c) };
+                    const dC = { x: (a * A.x + b * B.x) / (a + b), y: (a * A.y + b * B.y) / (a + b) };
+                    [[A, dA], [B, dB], [C, dC]].forEach(l => {
                         ctx.beginPath();
                         ctx.moveTo(CyberCanvasInstance.mapX(l[0].x), CyberCanvasInstance.mapY(l[0].y));
                         ctx.lineTo(CyberCanvasInstance.mapX(l[1].x), CyberCanvasInstance.mapY(l[1].y));
@@ -337,22 +386,24 @@
                 ctx.setLineDash([]);
 
                 // Circles
+                const pxScale = CyberCanvasInstance.width / (CyberCanvasInstance.view.maxX - CyberCanvasInstance.view.minX);
+
                 if (state.cbUmkreis) {
-                    ctx.strokeStyle = "rgba(74, 222, 128, 0.3)"; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(U.x), CyberCanvasInstance.mapY(U.y), rUm * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = "rgba(74, 222, 128, 0.7)"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(U.x), CyberCanvasInstance.mapY(U.y), rUm * pxScale, 0, Math.PI*2); ctx.stroke();
                 }
                 if (state.cbInkreis) {
-                    ctx.strokeStyle = "rgba(157, 80, 187, 0.3)"; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(I.x), CyberCanvasInstance.mapY(I.y), rIn * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = "rgba(251, 191, 36, 0.7)"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(I.x), CyberCanvasInstance.mapY(I.y), rIn * pxScale, 0, Math.PI*2); ctx.stroke();
                 }
                 if (state.cbFeuerbach) {
-                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)"; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(F.x), CyberCanvasInstance.mapY(F.y), (rUm/2) * CyberCanvasInstance.scale, 0, Math.PI*2); ctx.stroke();
-                    drawPt(F, "F", "var(--neon-blue)");
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.7)"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(CyberCanvasInstance.mapX(F.x), CyberCanvasInstance.mapY(F.y), (rUm/2) * pxScale, 0, Math.PI*2); ctx.stroke();
+                    drawPt(F, "F", getCSSVar("--neon-blue"));
                 }
 
                 // Triangle
-                ctx.strokeStyle = "var(--neon-blue)"; ctx.lineWidth = 3;
+                ctx.strokeStyle = getCSSVar("--neon-blue"); ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.moveTo(CyberCanvasInstance.mapX(A.x), CyberCanvasInstance.mapY(A.y));
                 ctx.lineTo(CyberCanvasInstance.mapX(B.x), CyberCanvasInstance.mapY(B.y));
@@ -360,15 +411,20 @@
                 ctx.closePath(); ctx.stroke();
 
                 // Points
-                points.forEach((p, i) => drawPt(p, String.fromCharCode(65+i), "white"));
+                points.forEach((p, i) => drawPt(p, String.fromCharCode(65+i), getCSSVar("--neon-blue")));
                 
-                if (state.cbEuler) {
-                    drawPt(H, "H", "var(--neon-pink)");
-                    drawPt(U, "U", "var(--neon-green)");
-                    drawPt(S, "S", "white");
+                if (state.hH) {
+                    drawPt(H, "H", getCSSVar("--neon-pink"));
                 }
-
-                // Stats Update
+                if (state.hS) {
+                    drawPt(S, "S", getCSSVar("--neon-purple"));
+                }
+                if (state.cbUmkreis) {
+                    drawPt(U, "U", getCSSVar("--neon-green"));
+                }
+                if (state.cbInkreis || state.hI) {
+                    drawPt(I, "I", getCSSVar("--neon-yellow"));
+                }
                 const ratio = dist(H, S) / dist(S, U);
                 document.getElementById('txt-ratio').innerText = isFinite(ratio) ? ratio.toFixed(2) : "---";
                 document.getElementById('txt-rIn').innerText = rIn.toFixed(2) + " u";
