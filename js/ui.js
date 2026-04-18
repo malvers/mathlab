@@ -563,6 +563,12 @@ class CyberUI {
 
         // Render items
         items.forEach(item => {
+            if (item.divider) {
+                const divider = document.createElement('div');
+                divider.className = 'context-divider';
+                menu.appendChild(divider);
+                return;
+            }
             if (item.checked !== undefined) {
                 // Checkbox Item
                 const checkboxWrapper = this.createCheckbox(null, item.label, item.checked, (val) => {

@@ -58,6 +58,13 @@ class CyberCanvas {
         this.view = { ...this.view, ...viewConfig };
         this.showTelemetry = options.showTelemetry !== false;
         
+        // ZOOM LIMITS (v2.3)
+        this.limits = {
+            minRangeY: options.minRangeY || 0.001,
+            maxRangeY: options.maxRangeY || Infinity
+        };
+        this.allowPan = options.allowPan !== false;
+        
         // Allow initial visibility overrides via options
         if (options.showAxes !== undefined) this.showAxes = options.showAxes;
         if (options.showLabels !== undefined) this.showLabels = options.showLabels;
@@ -140,7 +147,11 @@ class CyberCanvas {
             const my = this.unmapY(fy);
 
             // Rescale range uniformly to maintain 1:1 parity
-            const newRangeY = (this.view.maxY - this.view.minY) * factor;
+            let newRangeY = (this.view.maxY - this.view.minY) * factor;
+            
+            // Apply Constraints
+            newRangeY = Math.max(this.limits.minRangeY, Math.min(this.limits.maxRangeY, newRangeY));
+            
             const aspect = this.width / this.height;
             const newRangeX = newRangeY * aspect;
 
@@ -223,6 +234,7 @@ class CyberCanvas {
     // --- EVENT HANDLERS ---
 
     handleMouseDown(e) {
+        if (!this.allowPan) return;
         this.isDragging = true;
         this.lastDragPos.clientX = e.clientX;
         this.lastDragPos.clientY = e.clientY;
@@ -260,7 +272,7 @@ class CyberCanvas {
     handleTouchStart(e) {
         e.preventDefault();
         const rect = this.canvas.getBoundingClientRect();
-        if (e.touches.length === 1) {
+        if (e.touches.length === 1 && this.allowPan) {
             this.isDragging = true;
             this.lastDragPos.clientX = e.touches[0].clientX;
             this.lastDragPos.clientY = e.touches[0].clientY;
@@ -379,9 +391,10 @@ class CyberCanvas {
 
     getStepSize() {
         const range = this.view.maxX - this.view.minX;
-        if (range < 5) return 0.5;
-        if (range < 20) return 1;
-        if (range < 50) return 5;
+        if (range < 8) return 0.5;
+        if (range < 25) return 1;
+        if (range < 60) return 2;
+        if (range < 120) return 5;
         return 10;
     }
 
