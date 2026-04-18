@@ -40,11 +40,12 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            z-index: 10;
+            gap: 15px;
+            z-index: 100;
             box-sizing: border-box;
             box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
             overflow-y: auto;
+            transition: all 0.4s ease;
         }
 
         #canvas-container {
@@ -57,7 +58,6 @@
             overflow: hidden;
         }
 
-        /* --- DASHBOARD BUTTON --- */
         .dashboard-btn {
             display: flex;
             justify-content: center;
@@ -82,18 +82,17 @@
             background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            transform: translateX(5px);
         }
         .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
 
-
         .equation-box {
             background: var(--glass-bright);
-            padding: 18px 20px;
+            padding: 20px;
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             margin-bottom: 5px;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
         }
 
         .equation-label {
@@ -108,12 +107,14 @@
 
         .stats-card {
             background: var(--glass-bright);
-            padding: 12px 20px;
+            padding: 15px 20px;
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
             gap: 5px;
+            transition: all 0.3s ease;
+            min-height: 52px;
         }
 
         .stats-title {
@@ -163,6 +164,57 @@
         }
         button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
 
+        #sidebar-header {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* --- TELEMETRY HUD BOX --- */
+        .cyber-telemetry-pane {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .telemetry-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 210, 255, 0.1);
+            min-width: 140px;
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 4px;
+        }
+        .telemetry-row:last-child { margin-bottom: 0; }
+
+        .telemetry-row .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: rgba(0, 210, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .telemetry-row .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: white;
+            font-variant-numeric: tabular-nums;
+        }
+
         @media (max-width: 768px) {
             body { flex-direction: column; height: auto; overflow-y: auto; }
             #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-top: 1px solid rgba(0, 210, 255, 0.3); order: 2; padding: 20px; }
@@ -173,14 +225,7 @@
 <body>
 
     <div id="side-panel">
-        <header style="border: none; padding-bottom: 5px;">
-            <a href="index.html" class="dashboard-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>DASHBOARD</span>
-            </a>
+        <header id="sidebar-header" style="border: none; padding-bottom: 5px;">
         </header>
         
         <div class="equation-box">
@@ -225,216 +270,207 @@
     </div>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
     <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Steigungs-Labor"
-        });
-
-        // --- Helper: LabUtils (Self-Contained) ---
-        const LabUtils = {
-            varColor: function(name) {
-                return getComputedStyle(document.documentElement).getPropertyValue(name.replace('var(', '').replace(')', '')).trim();
-            },
-            setupCanvas: function(canvas, container) {
-                const dpr = window.devicePixelRatio || 1;
-                const rect = container.getBoundingClientRect();
-                const width = rect.width;
-                const height = rect.height;
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                canvas.style.width = width + 'px';
-                canvas.style.height = height + 'px';
-                const ctx = canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                return { ctx, width, height, centerX: width / 2, centerY: height / 2, scale: (width < 600 ? 30 : 50) };
-            },
-            drawHandle: function(ctx, p, color, label) {
-                ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.beginPath();
-                ctx.arc(p.px, p.py, 6, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                if (label) {
-                    ctx.font = "bold 11px Orbitron";
-                    ctx.fillStyle = "white";
-                    ctx.textAlign = "center";
-                    ctx.fillText(label, p.px, p.py - 20);
-                }
-            }
-        };
-
-        const canvas = document.getElementById('canvas');
-        const container = document.getElementById('canvas-container');
-        let ctx, width, height, scale, centerX, centerY;
+        // --- CORE ENGINE ---
+        let cc = null;
         let m = 1.0, n = 2.0;
         let triX = 1.0, triSize = 2.0;
-        let dragMode = 0; // 1: n, 2: m
+        let dragMode = 0; 
 
-        function init() {
-            const layout = LabUtils.setupCanvas(canvas, container);
-            ctx = layout.ctx;
-            width = layout.width;
-            height = layout.height;
-            centerX = layout.centerX;
-            centerY = layout.centerY;
-            scale = layout.scale;
-            draw();
-        }
+        function startLabor() {
+            try {
+                if (typeof CyberCanvas === 'undefined') return;
+                
+                // Initialize UI Engine
+                if (typeof CyberUI !== 'undefined') CyberUI.init();
 
-        function toScreen(x, y) {
-            return { px: centerX + x * scale, py: centerY - y * scale };
-        }
+                cc = new CyberCanvas();
+                const canvasEl = document.getElementById('canvas');
+                if (!canvasEl) return;
 
-        function toMath(px, py) {
-            return { x: (px - centerX) / scale, y: (centerY - py) / scale };
+                // Branding
+                if (typeof CyberBranding !== 'undefined') {
+                    CyberBranding.init({
+                        title: "Doc Alvers Mathe-Labor",
+                        subtitle: "STEIGUNGS-LABOR",
+                        briefing: "Verändere m und n mit den Handles oder Slidern."
+                    });
+                }
+                
+                cc.init('canvas', { minY: -10, maxY: 10 }, { showTelemetry: false, showLabels: true, allowPan: false });
+                cc.onResize = () => draw(); 
+                
+                // --- FULL VIEWPORT LOCK (Zoom & Pan) ---
+                cc.canvas.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+                cc.canvas.addEventListener('touchmove', e => { if(e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+                // --- INTERACTION SETUP ---
+                cc.onContextMenu = (e) => {
+                    if (typeof CyberUI === 'undefined') return;
+                    CyberUI.showContextMenu(e.clientX, e.clientY, [
+                        {
+                            label: 'Ansicht zurücksetzen',
+                            onclick: () => { cc.resetView(-10, 10); draw(); }
+                        },
+                        { divider: true },
+                        {
+                            label: 'Achsen an',
+                            checked: cc.showAxes,
+                            onchange: (val) => { cc.showAxes = val; draw(); }
+                        },
+                        {
+                            label: 'Achsenbeschriftung',
+                            checked: cc.showLabels,
+                            onchange: (val) => { cc.showLabels = val; draw(); }
+                        },
+                        {
+                            label: 'Koordinaten',
+                            checked: cc.showTelemetry,
+                            onchange: (val) => { 
+                                cc.showTelemetry = val; 
+                                if (val && !cc.telePane) cc.injectTelemetryPane();
+                            }
+                        }
+                    ]);
+                };
+                cc.canvas.addEventListener('mousedown', e => {
+                    const rect = cc.canvas.getBoundingClientRect();
+                    const px = e.clientX - rect.left;
+                    const py = e.clientY - rect.top;
+                    
+                    const mH = { x: cc.mapX(5.0), y: cc.mapY(m * 5.0 + n) };
+                    if (Math.hypot(mH.x - px, mH.y - py) < 30) { dragMode = 2; return; }
+                    
+                    const nH = { x: cc.mapX(0), y: cc.mapY(n) };
+                    if (Math.hypot(nH.x - px, nH.y - py) < 30) { dragMode = 1; return; }
+                });
+
+                window.addEventListener('mousemove', e => {
+                    if (!dragMode) return;
+                    const rect = cc.canvas.getBoundingClientRect();
+                    const mathX = cc.unmapX(e.clientX - rect.left);
+                    const mathY = cc.unmapY(e.clientY - rect.top);
+                    
+                    if (dragMode === 1) { n = mathY - m * mathX; }
+                    else if (dragMode === 2) { m = (mathY - n) / 5.0; syncSliders(); }
+                    draw();
+                });
+
+                window.addEventListener('mouseup', () => dragMode = 0);
+
+                syncSliders();
+                draw();
+            } catch (e) {
+                console.error("Init failure:", e);
+            }
         }
 
         function resetView() {
             m = 1.0; n = 2.0; triX = 1.0; triSize = 2.0;
+            if(cc) cc.resetView(-10, 10);
             syncSliders();
             draw();
         }
 
         function syncSliders() {
-            document.getElementById('m-slider').value = m;
-            document.getElementById('x-slider').value = triX;
-            document.getElementById('size-slider').value = triSize;
-        }
-
-        function drawGrid() {
-            ctx.strokeStyle = "rgba(255,255,255,0.05)";
-            ctx.lineWidth = 1;
-            const xRange = Math.ceil(centerX / scale);
-            const yRange = Math.ceil(centerY / scale);
-
-            for (let x = -xRange; x <= xRange; x++) {
-                const p = toScreen(x, 0);
-                ctx.beginPath(); ctx.moveTo(p.px, 0); ctx.lineTo(p.px, height); ctx.stroke();
-                if (x !== 0) {
-                    ctx.fillStyle = "rgba(255,255,255,0.3)";
-                    ctx.font = "10px Orbitron";
-                    ctx.textAlign = "center";
-                    ctx.fillText(x, p.px, centerY + 15);
-                }
-            }
-            for (let y = -yRange; y <= yRange; y++) {
-                const p = toScreen(0, y);
-                ctx.beginPath(); ctx.moveTo(0, p.py); ctx.lineTo(width, p.py); ctx.stroke();
-                if (y !== 0) {
-                    ctx.fillStyle = "rgba(255,255,255,0.3)";
-                    ctx.font = "10px Orbitron";
-                    ctx.textAlign = "right";
-                    ctx.fillText(y, centerX - 10, p.py + 4);
-                }
-            }
-
-            ctx.strokeStyle = "rgba(255,255,255,0.4)";
-            ctx.lineWidth = 2;
-            const origin = toScreen(0, 0);
-            ctx.beginPath(); ctx.moveTo(0, origin.py); ctx.lineTo(width - 10, origin.py); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width-10, origin.py-5); ctx.lineTo(width, origin.py); ctx.lineTo(width-10, origin.py+5); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(origin.px, 10); ctx.lineTo(origin.px, height); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(origin.px-5, 10); ctx.lineTo(origin.px, 0); ctx.lineTo(origin.px+5, 10); ctx.stroke();
-        }
-
-        function drawLine() {
-            const xL = -centerX / scale, xR = centerX / scale;
-            const pL = toScreen(xL, m * xL + n);
-            const pR = toScreen(xR, m * xR + n);
-            
-            ctx.strokeStyle = LabUtils.varColor('--neon-blue');
-            ctx.lineWidth = 4;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = LabUtils.varColor('--neon-blue');
-            ctx.beginPath(); ctx.moveTo(pL.px, pL.py); ctx.lineTo(pR.px, pR.py); ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
-
-        function drawTriangle() {
-            const pA = toScreen(triX, m * triX + n);
-            const pB = toScreen(triX + triSize, m * triX + n);
-            const pC = toScreen(triX + triSize, m * (triX + triSize) + n);
-
-            ctx.fillStyle = "rgba(157, 80, 187, 0.2)";
-            ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.closePath(); ctx.fill();
-
-            ctx.setLineDash([5, 5]);
-            ctx.strokeStyle = LabUtils.varColor('--neon-purple');
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(pA.px, pA.py); ctx.lineTo(pB.px, pB.py); ctx.lineTo(pC.px, pC.py); ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.font = "bold 13px Orbitron";
-            ctx.fillStyle = LabUtils.varColor('--neon-purple');
-            ctx.textAlign = "center";
-            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.px + (pB.px - pA.px)/2, pA.py + 20);
-            ctx.textAlign = "left";
-            ctx.fillText(`Δy = ${(m * triSize).toFixed(2)}`, pC.px + 10, pA.py + (pC.py - pA.py)/2);
+            const mS = document.getElementById('m-slider');
+            const xS = document.getElementById('x-slider');
+            const sS = document.getElementById('size-slider');
+            if(mS) mS.value = m;
+            if(xS) xS.value = triX;
+            if(sS) sS.value = triSize;
         }
 
         function draw() {
-            ctx.clearRect(0, 0, width, height);
-            drawGrid();
-            drawLine();
-            drawTriangle();
+            if (!cc || !cc.ctx) return;
+            cc.drawGrid({ glow: true, vignette: true });
+            const ctx = cc.ctx;
+
+            const xL = cc.view.minX, xR = cc.view.maxX;
+            const pL = { x: cc.mapX(xL), y: cc.mapY(m * xL + n) };
+            const pR = { x: cc.mapX(xR), y: cc.mapY(m * xR + n) };
             
-            const nHandle = toScreen(0, n);
-            LabUtils.drawHandle(ctx, nHandle, LabUtils.varColor('--neon-pink'), `n = ${n.toFixed(2)}`);
-            
-            const mHandle = toScreen(5.0, m * 5.0 + n);
-            LabUtils.drawHandle(ctx, mHandle, LabUtils.varColor('--neon-purple'), "m");
+            ctx.strokeStyle = "#00d2ff";
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(0, 210, 255, 0.5)";
+            ctx.beginPath(); ctx.moveTo(pL.x, pL.y); ctx.lineTo(pR.x, pR.y); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            const pA = { x: cc.mapX(triX), y: cc.mapY(m * triX + n) };
+            const pB = { x: cc.mapX(triX + triSize), y: cc.mapY(m * triX + n) };
+            const pC = { x: cc.mapX(triX + triSize), y: cc.mapY(m * (triX + triSize) + n) };
+
+            ctx.fillStyle = "rgba(157, 80, 187, 0.2)";
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.closePath(); ctx.fill();
+
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = "#9d50bb";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = "bold 13px Orbitron";
+            ctx.fillStyle = "#9d50bb";
+            ctx.textAlign = "center";
+            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.x + (pB.x - pA.x)/2, pA.y + 20);
+            ctx.textAlign = "left";
+            ctx.fillText(`Δy = ${(m * triSize).toFixed(2)}`, pC.x + 10, pA.y + (pC.y - pA.y)/2);
+
+            drawHandle(cc.mapX(0), cc.mapY(n), "#ff0055", `n = ${n.toFixed(2)}`);
+            drawHandle(cc.mapX(5.0), cc.mapY(m * 5.0 + n), "#9d50bb", "m");
 
             const x0 = Math.abs(m) > 0.001 ? -n/m : null;
             if (x0 !== null) {
-                const x0Handle = toScreen(x0, 0);
-                LabUtils.drawHandle(ctx, x0Handle, LabUtils.varColor('--neon-green'), `x₀ = ${x0.toFixed(2)}`);
+                drawHandle(cc.mapX(x0), cc.mapY(0), "#39FF14", `x₀ = ${x0.toFixed(2)}`);
             }
             updateUI();
+        }
+
+        function drawHandle(px, py, color, label) {
+            const ctx = cc.ctx;
+            ctx.shadowBlur = 10; ctx.shadowColor = color;
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            if (label) {
+                ctx.font = "bold 12px Orbitron";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(label, px, py - 20);
+            }
         }
 
         function updateUI() {
             if (typeof katex !== 'undefined') {
                 const x0 = Math.abs(m) > 0.001 ? -n/m : null;
-                katex.render(`\\textcolor{#9d50bb}{m = ${m.toFixed(2)}}`, document.getElementById('latex-m'));
-                katex.render(`\\textcolor{#ff0055}{n = ${n.toFixed(2)}}`, document.getElementById('latex-n'));
-                katex.render(`\\textcolor{#39FF14}{x_0 = ${x0 !== null ? x0.toFixed(2) : "---"}}`, document.getElementById('latex-x0'));
-                
-                const nSign = n >= 0 ? "+" : "-";
-                const nVal = Math.abs(n).toFixed(2);
-                const eqLatex = `f(x) = \\textcolor{#9d50bb}{${m.toFixed(2)}} \\cdot x ${nSign} \\textcolor{#ff0055}{${nVal}}`;
-                katex.render(eqLatex, document.getElementById('eq-main'));
+                const mEl = document.getElementById('latex-m'), nEl = document.getElementById('latex-n'), xEl = document.getElementById('latex-x0'), eqEl = document.getElementById('eq-main');
+                if (mEl) katex.render(`\\textcolor{#9d50bb}{m = ${m.toFixed(2)}}`, mEl);
+                if (nEl) katex.render(`\\textcolor{#ff0055}{n = ${n.toFixed(2)}}`, nEl);
+                if (xEl) katex.render(`\\textcolor{#39FF14}{x_0 = ${x0 !== null ? x0.toFixed(2) : "---"}}`, xEl);
+                if (eqEl) {
+                    const nSign = n >= 0 ? "+" : "-", nVal = Math.abs(n).toFixed(2);
+                    katex.render(`f(x) = \\textcolor{#9d50bb}{${m.toFixed(2)}} \\cdot x ${nSign} \\textcolor{#ff0055}{${nVal}}`, eqEl);
+                }
             }
         }
 
-        canvas.onpointerdown = e => {
-            const rect = canvas.getBoundingClientRect();
-            const px = e.clientX - rect.left;
-            const py = e.clientY - rect.top;
-            const math = toMath(px, py);
-            const mH = toScreen(5.0, m * 5.0 + n);
-            if (Math.hypot(mH.px - px, mH.py - py) < 30) { dragMode = 2; return; }
-            const lineY = m * math.x + n;
-            if (Math.abs(math.y - lineY) < 0.8) { dragMode = 1; return; }
-        };
-
-        window.onpointermove = e => {
-            if (!dragMode) return;
-            const rect = canvas.getBoundingClientRect();
-            const math = toMath(e.clientX - rect.left, e.clientY - rect.top);
-            if (dragMode === 1) { n = math.y - m * math.x; }
-            else if (dragMode === 2) { m = (math.y - n) / 5.0; document.getElementById('m-slider').value = m; }
-            draw();
-        };
-
-        window.onpointerup = () => dragMode = 0;
         document.getElementById('m-slider').oninput = e => { m = parseFloat(e.target.value); draw(); };
         document.getElementById('x-slider').oninput = e => { triX = parseFloat(e.target.value); draw(); };
         document.getElementById('size-slider').oninput = e => { triSize = parseFloat(e.target.value); draw(); };
-        window.onresize = init;
-        document.fonts.ready.then(init);
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startLabor);
+        } else {
+            startLabor();
+        }
     </script>
 </body>
 </html>
