@@ -3,8 +3,6 @@
  * Optimized for full-screen immersive rendering and glassmorphic UI integration.
  */
 
-let canvas, ctx;
-let width, height;
 let state = {
     func: 'parabel',
     a: -2.0,
@@ -12,31 +10,25 @@ let state = {
     n: 10,
     mode: 'exact',
     view: {
-        minX: -6,
-        maxX: 6,
-        minY: -4,
-        maxY: 8
+        minX: -8,
+        maxX: 8,
+        minY: -2,
+        maxY: 10
     }
 };
 
 function initEngine() {
-    canvas = document.getElementById('reactor-canvas');
-    ctx = canvas.getContext('2d');
-
-    window.addEventListener('resize', resize);
-    resize();
+    CyberCanvasInstance.init('reactor-canvas', state.view);
+    
+    // Wire up the engine's render loop to the canvas resize event
+    CyberCanvasInstance.onResize = () => render();
+    
     render();
 }
 
-function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-    render();
-}
+// Global mapping shorthands for compatibility and brevity
+const mapX = (x) => CyberCanvasInstance.mapX(x);
+const mapY = (y) => CyberCanvasInstance.mapY(y);
 
 function setMode(newMode) {
     state.mode = newMode;
@@ -76,73 +68,18 @@ function updateEngine() {
     render();
 }
 
-// Coordinate Mapping
-function mapX(x) {
-    return (x - state.view.minX) / (state.view.maxX - state.view.minX) * width;
-}
-
-function mapY(y) {
-    return height - (y - state.view.minY) / (state.view.maxY - state.view.minY) * height;
-}
-
 function render() {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, width, height);
+    if (!CyberCanvasInstance.ctx) return;
+    CyberCanvasInstance.clear();
 
-    drawGrid();
+    CyberCanvasInstance.drawGrid({
+        vignette: true,
+        glow: true
+    });
+
     drawIntegral();
     drawFunction();
     updateStats();
-}
-
-function drawGrid() {
-    // Background Radial Hint
-    const grad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 1.2);
-    grad.addColorStop(0, 'rgba(5, 11, 24, 0)');
-    grad.addColorStop(1, 'rgba(0, 210, 255, 0.03)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.lineWidth = 1;
-
-    // Adaptive Vertical Grid
-    for (let x = Math.ceil(state.view.minX); x <= Math.floor(state.view.maxX); x++) {
-        const px = mapX(x);
-        ctx.beginPath();
-        ctx.moveTo(px, 0);
-        ctx.lineTo(px, height);
-        ctx.stroke();
-    }
-
-    // Adaptive Horizontal Grid
-    for (let y = Math.ceil(state.view.minY); y <= Math.floor(state.view.maxY); y++) {
-        const py = mapY(y);
-        ctx.beginPath();
-        ctx.moveTo(0, py);
-        ctx.lineTo(width, py);
-        ctx.stroke();
-    }
-
-    // Main Axes with Glow
-    ctx.strokeStyle = 'rgba(0, 210, 255, 0.4)';
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'rgba(0, 210, 255, 0.3)';
-
-    const xAxis = mapY(0);
-    ctx.beginPath();
-    ctx.moveTo(0, xAxis);
-    ctx.lineTo(width, xAxis);
-    ctx.stroke();
-
-    const yAxis = mapX(0);
-    ctx.beginPath();
-    ctx.moveTo(yAxis, 0);
-    ctx.lineTo(yAxis, height);
-    ctx.stroke();
-
-    ctx.shadowBlur = 0; // Reset shadow for other elements
 }
 
 function drawFunction() {
@@ -150,6 +87,7 @@ function drawFunction() {
     if (!fObj) return;
     const f = fObj.f;
 
+    const ctx = CyberCanvasInstance.ctx;
     ctx.save();
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 4;
@@ -178,6 +116,7 @@ function drawIntegral() {
     const n = state.n;
     const dx = (b - a) / n;
 
+    const ctx = CyberCanvasInstance.ctx;
     ctx.save();
 
     if (state.mode === 'exact') {
@@ -190,6 +129,7 @@ function drawIntegral() {
 }
 
 function renderExact(f, a, b) {
+    const ctx = CyberCanvasInstance.ctx;
     const grad = ctx.createLinearGradient(0, mapY(4), 0, mapY(0));
     grad.addColorStop(0, 'rgba(0, 210, 255, 0.5)');
     grad.addColorStop(1, 'rgba(157, 80, 187, 0.1)');
@@ -207,9 +147,11 @@ function renderExact(f, a, b) {
     ctx.lineTo(mapX(b), mapY(0));
     ctx.closePath();
     ctx.fill();
+    ctx.shadowBlur = 0;
 }
 
 function renderRiemann(f, a, b, n, dx, type) {
+    const ctx = CyberCanvasInstance.ctx;
     if (type === 'centered') {
         // Draw N+1 centered bars for perfect symmetry and the "one more bar" look
         for (let i = 0; i <= n; i++) {
@@ -258,6 +200,7 @@ function renderRiemann(f, a, b, n, dx, type) {
 }
 
 function renderTrapez(f, a, b, n, dx) {
+    const ctx = CyberCanvasInstance.ctx;
     ctx.strokeStyle = 'rgba(0, 210, 255, 0.8)';
     ctx.lineWidth = 1;
 
@@ -302,15 +245,18 @@ function updateStats() {
     let approximate = 0;
     if (state.mode === 'balken') {
         for (let i = 0; i <= n; i++) approximate += f(a + i * dx) * dx;
-    } else if (state.mode === 'exact') {
-        for (let i = 0; i < n; i++) approximate += f(a + (i + 0.5) * dx) * dx; // Midpoint for error reference
     }
 
-    // Exact Reference
+    // Exact Reference (Numerical High-Precision)
     let exact = 0;
     const highN = 2000;
     const highDx = (b - a) / highN;
     for (let i = 0; i < highN; i++) exact += f(a + (i + 0.5) * highDx) * highDx;
+
+    // In exact mode, the "approximation" is the ground truth
+    if (state.mode === 'exact') {
+        approximate = exact;
+    }
 
     const valEl = document.getElementById('integral-value');
     if (valEl) valEl.innerText = approximate.toFixed(3);
@@ -319,6 +265,6 @@ function updateStats() {
     const errorEl = document.getElementById('error-display');
     if (errorEl) {
         errorEl.innerText = error.toFixed(2) + '%';
-        errorEl.style.color = error < 0.5 ? '#00ffcc' : error < 5 ? '#ffcc00' : '#ff0055';
+        errorEl.style.color = error < 5 ? '#ffcc00' : '#ff0055';
     }
 }

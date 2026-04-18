@@ -1,0 +1,175 @@
+/* ============================================
+   index-ui.css — Landingpage-Only Styles
+   Nur von index.html verwendet!
+   ============================================ */
+
+/* --- Sound Toggle (rund, unten rechts) --- */
+.sound-toggle {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sound-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+
+.sound-toggle:hover {
+    color: #fff;
+    border-color: #00d2ff;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    transform: translateY(-3px);
+}
+
+.sound-toggle.playing {
+    color: #00d2ff;
+    border-color: #00d2ff;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0%   { box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
+    50%  { box-shadow: 0 0 25px rgba(0, 210, 255, 0.6); }
+    100% { box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
+}
+
+/* --- Kontakt Button (oben rechts) --- */
+.contact-btn {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 20px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.contact-btn:hover {
+    color: #fff;
+    border-color: #00d2ff;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    transform: translateY(3px);
+}
+
+/* --- Kontakt Modal --- */
+.contact-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 11, 24, 0.85);
+    backdrop-filter: blur(15px);
+    z-index: 50000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.contact-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.contact-modal {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(0, 210, 255, 0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: white;
+}
+
+.contact-overlay.open .contact-modal {
+    transform: translateY(0);
+}
+
+.contact-modal h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #00d2ff;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin: 0 0 20px 0;
+    text-transform: uppercase;
+}
+
+.contact-modal p {
+    font-family: 'Inter', sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.7;
+    margin: 0 0 20px 0;
+    font-size: 0.95rem;
+}
+
+.contact-email {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    color: #00d2ff;
+    text-decoration: none;
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    margin-bottom: 25px;
+}
+
+.contact-email:hover {
+    background: rgba(0, 210, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+}
+
+.contact-close {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    background: rgba(0, 210, 255, 0.1);
+    border: 1px solid #00d2ff;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.contact-close:hover {
+    background: rgba(0, 210, 255, 0.2);
+    transform: translateY(-2px);
+}
