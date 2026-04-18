@@ -504,8 +504,9 @@ class CyberUI {
      * @param {string} label - The label text
      * @param {boolean} checked - Initial state
      * @param {function} onchange - Callback for state changes
+     * @param {string} color - Optional custom color for the label
      */
-    static createCheckbox(containerId, label, checked, onchange) {
+    static createCheckbox(containerId, label, checked, onchange, color = null) {
         const wrapper = document.createElement('label');
         wrapper.className = 'cyber-checkbox-wrapper';
         
@@ -518,6 +519,7 @@ class CyberUI {
         const labelText = document.createElement('span');
         labelText.className = 'cyber-label';
         labelText.textContent = label;
+        if (color) labelText.style.color = color;
         
         wrapper.appendChild(checkbox);
         wrapper.appendChild(labelText);
