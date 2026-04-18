@@ -203,6 +203,27 @@ class CyberUI {
                 color: rgba(255, 255, 255, 0.85);
             }
 
+            .context-close {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                opacity: 0.4;
+                transition: opacity 0.2s;
+                font-size: 1.2rem;
+                line-height: 1;
+                color: white;
+            }
+
+            .context-close:hover {
+                opacity: 1;
+            }
+
             @keyframes ui-card-fade {
                 from { opacity: 0; transform: translateY(10px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -507,5 +528,72 @@ class CyberUI {
         }
         
         return wrapper;
+    }
+
+    static showContextMenu(x, y, items = []) {
+        let menu = document.getElementById('cyber-context-menu');
+        if (menu) menu.remove();
+
+        menu = document.createElement('div');
+        menu.id = 'cyber-context-menu';
+        menu.className = 'cyber-context-menu';
+        document.body.appendChild(menu);
+
+        // Close Button (X)
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'context-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.onclick = () => {
+            menu.classList.remove('visible');
+            setTimeout(() => menu.remove(), 200);
+        };
+        menu.appendChild(closeBtn);
+
+        // Position & Shift if near edges
+        const menuWidth = 220;
+        const menuHeight = items.length * 45 + 20;
+        let finalX = x;
+        let finalY = y;
+
+        if (x + menuWidth > window.innerWidth) finalX -= menuWidth;
+        if (y + menuHeight > window.innerHeight) finalY -= menuHeight;
+
+        menu.style.left = `${finalX}px`;
+        menu.style.top = `${finalY}px`;
+
+        // Render items
+        items.forEach(item => {
+            if (item.checked !== undefined) {
+                // Checkbox Item
+                const checkboxWrapper = this.createCheckbox(null, item.label, item.checked, (val) => {
+                    if (item.onchange) item.onchange(val);
+                });
+                menu.appendChild(checkboxWrapper);
+            } else {
+                // Action Item (No Checkbox)
+                const actionBtn = document.createElement('div');
+                actionBtn.className = 'context-item action-item';
+                actionBtn.innerHTML = `<div class="context-label">${item.label}</div>`;
+                actionBtn.onclick = () => {
+                    if (item.onclick) item.onclick();
+                    // Close menu on action
+                    menu.classList.remove('visible');
+                    setTimeout(() => menu.remove(), 200);
+                };
+                menu.appendChild(actionBtn);
+            }
+        });
+
+        requestAnimationFrame(() => menu.classList.add('visible'));
+
+        // global close
+        const dismiss = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('visible');
+                setTimeout(() => menu.remove(), 200);
+                window.removeEventListener('mousedown', dismiss);
+            }
+        };
+        setTimeout(() => window.addEventListener('mousedown', dismiss), 10);
     }
 }
