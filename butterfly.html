@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,14 +15,14 @@
             --neon-green: #4ade80;
             --neon-amber: #fbbf24;
             --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.75);
+            --glass: rgba(15, 23, 42, 0.7);
             --glass-bright: rgba(255, 255, 255, 0.05);
         }
 
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: #050b18;
             color: white;
             display: flex;
             height: 100vh;
@@ -31,71 +31,45 @@
             touch-action: none;
         }
 
-        /* --- SIDEBAR --- */
         #side-panel {
             width: 380px;
             min-width: 380px;
-            background: var(--glass);
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
+            padding: 5px 20px 20px 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             z-index: 10;
             box-sizing: border-box;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
             overflow-y: auto;
         }
 
-        .dashboard-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            padding: 14px;
+        .stat-card {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-        }
-        .dashboard-btn:hover {
-            color: white;
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        /* --- STATS & CONTROLS --- */
-        .stats-card {
-            background: var(--glass-bright);
             padding: 15px;
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            transition: all 0.3s;
         }
+        .stat-card:hover { border-color: rgba(0, 210, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
 
-        .stats-title {
+        .stat-label {
             font-family: 'Orbitron';
-            font-size: 0.6rem;
+            font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            display: block;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-bottom: 5px;
         }
         .control-header {
             display: flex;
@@ -132,76 +106,56 @@
             margin-top: 5px;
         }
         button {
-            background: var(--glass-bright);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             padding: 12px;
             border-radius: 10px;
             font-family: 'Orbitron';
             font-size: 0.7rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        button:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
+        button:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 20px var(--neon-blue); }
         button.secondary { opacity: 0.6; }
+
+        #main-viewport {
+            flex-grow: 1;
+            position: relative;
+            background: #050b18;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
 
         #equation-panel {
             position: absolute;
-            bottom: 40px;
+            bottom: 180px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999;
-            background: transparent; /* Box removed */
-            backdrop-filter: none;
-            padding: 12px 35px;
-            width: fit-content;
-            max-width: 85%;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            z-index: 100;
             pointer-events: none;
-            transition: all 0.5s ease;
-        }
-        .katex-display { margin: 0 !important; font-size: 1.2rem !important; font-weight: bold; letter-spacing: 1px; }
-
-        /* --- MAIN VIEWPORT --- */
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 40px; /* Restored padding to prevent overflow */
-        }
-        canvas { display: block; }
-
-
-        .footer-credit {
-            margin-top: auto;
-            font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.2);
             text-align: center;
-            letter-spacing: 3px;
+            width: fit-content;
+            background: rgba(15, 23, 42, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 10px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(210, 210, 210, 0.1);
         }
+        .katex-display { margin: 0 !important; color: white; text-shadow: none; }
     </style>
 </head>
 <body>
-
-    <aside id="side-panel">
-        <a href="index.html" class="dashboard-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            DASHBOARD
-        </a>
-
-        <section class="stats-card">
-            <span class="stats-title">Animation</span>
+    <div id="side-panel">
+        <section class="stat-card">
+            <span class="stat-label">Modul-Animation</span>
             <div class="control-group">
                 <div class="control-header">Speed <span class="val-display" id="val-speed">3.5</span></div>
                 <input type="range" id="speed" min="0.5" max="15" step="0.5" value="3.5">
@@ -216,8 +170,8 @@
             </div>
         </section>
 
-        <section class="stats-card">
-            <span class="stats-title">Parameter-Optimierung</span>
+        <section class="stat-card">
+            <span class="stat-label">Parameter-Optimierung</span>
             
             <div class="control-group">
                 <div class="control-header" style="color:var(--neon-pink);">Exp Amp <span id="val-eA" class="val-display" style="color:var(--neon-pink);">1.0</span></div>
@@ -244,174 +198,220 @@
                 <input type="range" id="p-sP" min="1" max="48" step="1" value="24" style="accent-color:var(--neon-amber);">
             </div>
         </section>
+    </div>
 
-        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
-    </aside>
-
-    <main id="canvas-container">
-
-        <div id="equation-panel"></div>
-
+    <main id="main-viewport">
         <canvas id="canvas"></canvas>
+        <div id="equation-panel"></div>
     </main>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
     <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Schmetterlings-Labor"
-        });
+        /**
+         * BUTTERFLY CURVE LABORATORY - ULTRA v5.3.8
+         * High-Precision Polar Equation Rendering.
+         */
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init("SCHMETTERLINGS-LABOR");
 
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const sidePanel = document.getElementById('side-panel');
-        
-        let width, height, cx, cy;
-        let expAmp = 1, cosAmp = 2, cosFreq = 4, sinAmp = 1, sinPeriod = 24;
-        
-        const ui = {
-            speed: { el: document.getElementById('speed'), val: document.getElementById('val-speed') },
-            color: { el: document.getElementById('color'), val: document.getElementById('val-color') },
-            eA: { el: document.getElementById('p-eA'), val: document.getElementById('val-eA') },
-            cA: { el: document.getElementById('p-cA'), val: document.getElementById('val-cA') },
-            cF: { el: document.getElementById('p-cF'), val: document.getElementById('val-cF') },
-            sA: { el: document.getElementById('p-sA'), val: document.getElementById('val-sA') },
-            sP: { el: document.getElementById('p-sP'), val: document.getElementById('val-sP') },
-            toggleBtn: document.getElementById('btn-toggle'),
-            resetBtn: document.getElementById('btn-reset'),
-        };
+            // 2. Initialize UI Engine
+            CyberUI.init();
 
-        function getScale() {
-            const maxR = expAmp * Math.E + cosAmp + sinAmp;
-            const minDim = Math.min(width, height);
-            return (minDim / 2) / (maxR * 1.8); /* Corrected factor to 1.8 for balanced size */
-        }
+            // 3. Initialize CyberCanvas (Locked Viewport)
+            CyberCanvasInstance.init('canvas', {
+                minY: -7,
+                maxY: 7
+            }, {
+                showLabels: true,
+                showTelemetry: false,
+                allowPan: false,
+                maxRangeY: 50
+            });
 
-        function resize() {
-            const container = document.getElementById('canvas-container');
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = container.clientWidth * dpr;
-            canvas.height = container.clientHeight * dpr;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            width = container.clientWidth;
-            height = container.clientHeight;
+            // 4. State Management
+            let currentTheta = 0;
+            let isPlaying = true;
+            let lastUpdate = performance.now();
 
-            // Match formula panel width and scale down font
-            const formulaPanel = document.getElementById('equation-panel');
-            const visualWidth = Math.min(width, height) * 0.7;
-            formulaPanel.style.width = Math.min(visualWidth, width * 0.6) + "px";
-            formulaPanel.style.fontSize = "1.0rem"; // Increased by 10%
+            const params = {
+                expAmp: 1,
+                cosAmp: 2,
+                cosFreq: 4,
+                sinAmp: 1,
+                sinPeriod: 24,
+                speed: 3.5,
+                hue: 180
+            };
 
-            cx = width / 2;
-            cy = height / 2;
-        }
-        
-        window.addEventListener('resize', resize);
-        window.addEventListener('load', resize);
-        
-        let currentTheta = 0;
-        let isPlaying = true;
-        
-        function updateParams() {
-            expAmp = parseFloat(ui.eA.el.value);
-            cosAmp = parseFloat(ui.cA.el.value);
-            cosFreq = parseFloat(ui.cF.el.value);
-            sinAmp = parseFloat(ui.sA.el.value);
-            sinPeriod = parseFloat(ui.sP.el.value);
-            
-            ui.eA.val.innerText = expAmp.toFixed(1);
-            ui.cA.val.innerText = cosAmp.toFixed(1);
-            ui.cF.val.innerText = cosFreq;
-            ui.sA.val.innerText = sinAmp.toFixed(1);
-            ui.sP.val.innerText = sinPeriod;
+            // 5. Context Menu
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: 'Animation Reset',
+                        onclick: () => { currentTheta = 0; }
+                    },
+                    {
+                        label: 'Ansicht zurücksetzen',
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-7, 7);
+                        }
+                    },
+                    { divider: true },
+                    {
+                        label: 'Gitter anzeigen',
+                        checked: CyberCanvasInstance.showGrid,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showGrid = val;
+                        }
+                    },
+                    {
+                        label: 'Achsen anzeigen',
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showAxes = val;
+                        }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showLabels = val;
+                        }
+                    }
+                ]);
+            };
 
-            ui.speed.val.innerText = parseFloat(ui.speed.el.value).toFixed(1);
-            ui.color.val.innerText = ui.color.el.value;
+            // 6. UI Binding
+            const ui = {
+                eA: document.getElementById('p-eA'),
+                cA: document.getElementById('p-cA'),
+                cF: document.getElementById('p-cF'),
+                sA: document.getElementById('p-sA'),
+                sP: document.getElementById('p-sP'),
+                speed: document.getElementById('speed'),
+                color: document.getElementById('color'),
+                toggleBtn: document.getElementById('btn-toggle'),
+                resetBtn: document.getElementById('btn-reset'),
+                displays: {
+                    eA: document.getElementById('val-eA'),
+                    cA: document.getElementById('val-cA'),
+                    cF: document.getElementById('val-cF'),
+                    sA: document.getElementById('val-sA'),
+                    sP: document.getElementById('val-sP'),
+                    speed: document.getElementById('val-speed'),
+                    color: document.getElementById('val-color')
+                }
+            };
 
-            // Render Polished LaTeX Equation
-            function render() {
+            function updateUIValues() {
+                params.expAmp = parseFloat(ui.eA.value);
+                params.cosAmp = parseFloat(ui.cA.value);
+                params.cosFreq = parseFloat(ui.cF.value);
+                params.sinAmp = parseFloat(ui.sA.value);
+                params.sinPeriod = parseFloat(ui.sP.value);
+                params.speed = parseFloat(ui.speed.value);
+                params.hue = parseInt(ui.color.value);
+
+                ui.displays.eA.innerText = params.expAmp.toFixed(1);
+                ui.displays.cA.innerText = params.cosAmp.toFixed(1);
+                ui.displays.cF.innerText = params.cosFreq;
+                ui.displays.sA.innerText = params.sinAmp.toFixed(1);
+                ui.displays.sP.innerText = params.sinPeriod;
+                ui.displays.speed.innerText = params.speed.toFixed(1);
+                ui.displays.color.innerText = params.hue;
+
+                renderLaTeX();
+            }
+
+            function renderLaTeX() {
                 if (window.katex) {
-                    const latex = `r = \\color{#f472b6}{${expAmp === 1 ? '' : expAmp.toFixed(1)} e^{ \\sin(\\theta) }} - \\color{#4ade80}{${cosAmp.toFixed(1)} \\cos(${cosFreq}\\theta)} + \\color{#fbbf24}{${sinAmp === 1 ? '' : sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sinPeriod}}\\right)}`;
+                    const latex = `r = \\color{#f472b6}{${params.expAmp.toFixed(1)} e^{ \\sin(\\theta) }} - \\color{#4ade80}{${params.cosAmp.toFixed(1)} \\cos(${params.cosFreq}\\theta)} + \\color{#fbbf24}{${params.sinAmp.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${params.sinPeriod}}\\right)}`;
                     katex.render(latex, document.getElementById('equation-panel'), {
                         throwOnError: false,
                         displayMode: true
                     });
-                } else {
-                    setTimeout(render, 100);
                 }
             }
-            render();
-        }
 
-        [ui.speed.el, ui.color.el, ui.eA.el, ui.cA.el, ui.cF.el, ui.sA.el, ui.sP.el].forEach(el => {
-            el.addEventListener('input', updateParams);
-        });
+            [ui.eA, ui.cA, ui.cF, ui.sA, ui.sP, ui.speed, ui.color].forEach(el => {
+                el.addEventListener('input', updateUIValues);
+            });
 
-        ui.toggleBtn.addEventListener('click', () => {
-            isPlaying = !isPlaying;
-            ui.toggleBtn.textContent = isPlaying ? "PAUSE" : "PLAY";
-        });
-        
-        ui.resetBtn.addEventListener('click', () => {
-            currentTheta = 0;
-        });
+            ui.toggleBtn.addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                ui.toggleBtn.textContent = isPlaying ? "PAUSE" : "PLAY";
+            });
 
-        function getButterflyXY(theta, currentScale) {
-            const sinT = Math.sin(theta);
-            const cos4T = Math.cos(cosFreq * theta);
-            const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / sinPeriod), 5);
-            const r = expAmp * Math.exp(sinT) - cosAmp * cos4T + sinAmp * term3;
-            return { 
-                x: cx - (r * Math.cos(theta)) * currentScale, 
-                y: cy - (r * Math.sin(theta)) * currentScale 
-            };
-        }
+            ui.resetBtn.addEventListener('click', () => {
+                currentTheta = 0;
+            });
 
-        let lastTime = performance.now();
-        function draw() {
-            const now = performance.now();
-            const dt = (now - lastTime) / 1000;
-            lastTime = now;
-            
-            const speedMult = parseFloat(ui.speed.el.value);
-            const hueBase = parseInt(ui.color.el.value);
-            const dynamicScale = getScale();
-
-            if (isPlaying) currentTheta += speedMult * dt;
-
-            // Transluscent clear for trail effect? No, user wants clean evolution.
-            ctx.clearRect(0, 0, width, height);
-            
-            if (currentTheta > 0) {
-                ctx.lineWidth = 1.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                
-                const step = 0.02; 
-                const maxExpectedTheta = sinPeriod * Math.PI; 
-                const endT = Math.min(currentTheta, maxExpectedTheta);
-                const dynamicHue = (hueBase + currentTheta * 8) % 360;
-                
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = `hsl(${dynamicHue}, 100%, 50%)`;
-                ctx.strokeStyle = `hsl(${dynamicHue}, 100%, 75%)`;
-
-                ctx.beginPath();
-                let first = true;
-                for (let t = 0; t <= endT; t += step) {
-                    const pt = getButterflyXY(t, dynamicScale);
-                    if (first) { ctx.moveTo(pt.x, pt.y); first = false; }
-                    else ctx.lineTo(pt.x, pt.y);
-                }
-                ctx.stroke();
+            // 7. Math & Rendering
+            function getButterflyXY(theta) {
+                const sinT = Math.sin(theta);
+                const cos4T = Math.cos(params.cosFreq * theta);
+                const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / params.sinPeriod), 5);
+                const r = params.expAmp * Math.exp(sinT) - params.cosAmp * cos4T + params.sinAmp * term3;
+                return { 
+                    x: r * Math.cos(theta), 
+                    y: r * Math.sin(theta)
+                };
             }
-            
-            requestAnimationFrame(draw);
-        }
-        
-        updateParams();
-        requestAnimationFrame(draw);
+
+            // High Precision Render Loop
+            function mainLoop() {
+                const now = performance.now();
+                const dt = (now - lastUpdate) / 1000;
+                lastUpdate = now;
+
+                if (isPlaying) currentTheta += params.speed * dt;
+
+                // CyberCanvas Handling
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true,
+                    mainColor: 'rgba(0, 210, 255, 0.4)'
+                });
+
+                const ctx = CyberCanvasInstance.ctx;
+                
+                if (currentTheta > 0) {
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    
+                    const step = 0.02; 
+                    const maxTheta = params.sinPeriod * Math.PI; 
+                    const endT = Math.min(currentTheta, maxTheta);
+                    const currentHue = (params.hue + currentTheta * 8) % 360;
+                    
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = `hsl(${currentHue}, 100%, 50%)`;
+                    ctx.strokeStyle = `hsl(${currentHue}, 100%, 70%)`;
+
+                    ctx.beginPath();
+                    let first = true;
+                    for (let t = 0; t <= endT; t += step) {
+                        const pt = getButterflyXY(t);
+                        const px = CyberCanvasInstance.mapX(pt.x);
+                        const py = CyberCanvasInstance.mapY(pt.y);
+                        if (first) { ctx.moveTo(px, py); first = false; }
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                requestAnimationFrame(mainLoop);
+            }
+
+            // Init
+            updateUIValues();
+            mainLoop();
+        });
     </script>
 </body>
 </html>

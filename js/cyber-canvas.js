@@ -17,9 +17,13 @@ class CyberCanvas {
         
         // State
         this.isInitialized = false;
+        this.showAxes = true;
+        this.showLabels = true;
+        this.showGrid = true;
+        this.showTelemetry = true;
+        
         this.isDragging = false;
         this.needsRedraw = true;
-        this.showTelemetry = true;
         
         // --- INPUT STATE (RAW) ---
         this.currentMousePos = { x: 0, y: 0, clientX: 0, clientY: 0 };
@@ -68,6 +72,7 @@ class CyberCanvas {
         // Allow initial visibility overrides via options
         if (options.showAxes !== undefined) this.showAxes = options.showAxes;
         if (options.showLabels !== undefined) this.showLabels = options.showLabels;
+        if (options.showGrid !== undefined) this.showGrid = options.showGrid;
 
         // Prevent default browser zoom on iPad
         this.canvas.style.touchAction = 'none';
@@ -327,9 +332,9 @@ class CyberCanvas {
     drawGrid(options = {}) {
         const ctx = this.ctx;
         this.clear();
-        const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.4)';
-        const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.05)';
-        const textColor = 'rgba(255, 255, 255, 0.3)';
+        const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.5)';
+        const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.1)';
+        const textColor = 'rgba(255, 255, 255, 0.4)';
 
         if (options.vignette) {
             const grad = ctx.createRadialGradient(this.width/2, this.height/2, 0, this.width/2, this.height/2, this.width/1.2);
@@ -351,7 +356,9 @@ class CyberCanvas {
         // Vertical lines & X labels
         for (let x = Math.floor(this.view.minX / step) * step; x <= this.view.maxX; x += step) {
             const px = this.mapX(x);
-            ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, this.height); ctx.stroke();
+            if (this.showGrid) {
+                ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, this.height); ctx.stroke();
+            }
 
             if (this.showLabels && Math.abs(x) > 0.001) {
                 const py = this.mapY(0);
@@ -364,7 +371,9 @@ class CyberCanvas {
         ctx.textAlign = 'right';
         for (let y = Math.floor(this.view.minY / step) * step; y <= this.view.maxY; y += step) {
             const py = this.mapY(y);
-            ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(this.width, py); ctx.stroke();
+            if (this.showGrid) {
+                ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(this.width, py); ctx.stroke();
+            }
 
             if (this.showLabels && Math.abs(y) > 0.001) {
                 const px = this.mapX(0);
