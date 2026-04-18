@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Steigungs-Labor | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
@@ -77,13 +79,19 @@
             width: 100%;
             box-sizing: border-box;
         }
+
         .dashboard-btn:hover {
             color: white;
             background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
         }
-        .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+
+        .dashboard-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+        }
 
         .equation-box {
             background: var(--glass-bright);
@@ -133,11 +141,26 @@
             letter-spacing: 1px;
         }
 
-        #latex-m { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
-        #latex-n { color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); }
-        #latex-x0 { color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green); }
+        #latex-m {
+            color: var(--neon-purple);
+            text-shadow: 0 0 15px var(--neon-purple);
+        }
 
-        .control-group { display: flex; flex-direction: column; gap: 12px; }
+        #latex-n {
+            color: var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        #latex-x0 {
+            color: var(--neon-green);
+            text-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
         .slider-box {
             background: rgba(255, 255, 255, 0.02);
@@ -145,8 +168,20 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .slider-box label { font-family: 'Orbitron'; font-size: 0.65rem; color: rgba(255, 255, 255, 0.4); letter-spacing: 1px; }
-        input[type=range] { width: 100%; accent-color: var(--neon-blue); cursor: pointer; margin-top: 8px; }
+
+        .slider-box label {
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--neon-blue);
+            cursor: pointer;
+            margin-top: 8px;
+        }
 
         button {
             padding: 15px 20px;
@@ -162,7 +197,12 @@
             letter-spacing: 1.5px;
             width: 100%;
         }
-        button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+
+        button:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
 
         #sidebar-header {
             min-height: 60px;
@@ -181,7 +221,7 @@
             opacity: 0.8;
             transition: opacity 0.3s ease;
         }
-        
+
         .telemetry-card {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(15px);
@@ -199,7 +239,10 @@
             gap: 20px;
             margin-bottom: 4px;
         }
-        .telemetry-row:last-child { margin-bottom: 0; }
+
+        .telemetry-row:last-child {
+            margin-bottom: 0;
+        }
 
         .telemetry-row .label {
             font-family: 'Orbitron', sans-serif;
@@ -216,18 +259,38 @@
         }
 
         @media (max-width: 768px) {
-            body { flex-direction: column; height: auto; overflow-y: auto; }
-            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-top: 1px solid rgba(0, 210, 255, 0.3); order: 2; padding: 20px; }
-            #canvas-container { width: 100%; height: 60vh; min-height: 400px; order: 1; }
+            body {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            #side-panel {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                border-right: none;
+                border-top: 1px solid rgba(0, 210, 255, 0.3);
+                order: 2;
+                padding: 20px;
+            }
+
+            #canvas-container {
+                width: 100%;
+                height: 60vh;
+                min-height: 400px;
+                order: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div id="side-panel">
         <header id="sidebar-header" style="border: none; padding-bottom: 5px;">
         </header>
-        
+
         <div class="equation-box">
             <span class="equation-label">Funktionsgleichung</span>
             <div id="eq-main"></div>
@@ -277,34 +340,44 @@
         let cc = null;
         let m = 1.0, n = 2.0;
         let triX = 1.0, triSize = 2.0;
-        let dragMode = 0; 
+        let dragMode = 0;
 
         function startLabor() {
             try {
                 if (typeof CyberCanvas === 'undefined') return;
-                
+
                 // Initialize UI Engine
                 if (typeof CyberUI !== 'undefined') CyberUI.init();
-
-                cc = new CyberCanvas();
-                const canvasEl = document.getElementById('canvas');
-                if (!canvasEl) return;
 
                 // Branding
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         title: "Doc Alvers Mathe-Labor",
                         subtitle: "STEIGUNGS-LABOR",
-                        briefing: "Verändere m und n mit den Handles oder Slidern."
+                        briefing: `
+                            <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: STEIGUNGS-ANALYSE</h3>
+                            Analysiere die Steigung (m) einer Geraden durch interaktives Verschieben der Handle-Punkte. Beobachte, wie sich das Steigungsdreieck und der Anstieg m verändern. Auch die Größe und/ oder die Position des Anstiegsdreiechs ist egal!<div class="admin-info">
+                                <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
+                                <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                                    <li><b>Interaktion:</b> Verschiebe die Handle-Punkte (P1/P2) für Live-Berechnungen.</li>
+                                    <li><b>Analyse-HUD:</b> Rechtsklick (Kontextmenü) für Gitter und Koordinaten-Telemetrie.</li>
+                                    <li><b>Visualisierung:</b> Das neon-blaue Steigungsdreieck zeigt Delta-X und Delta-Y.</li>
+                                </ul>
+                            </div>
+                        `
                     });
                 }
-                
+
+                cc = new CyberCanvas();
+                const canvasEl = document.getElementById('canvas');
+                if (!canvasEl) return;
+
                 cc.init('canvas', { minY: -10, maxY: 10 }, { showTelemetry: false, showLabels: true, allowPan: false });
-                cc.onResize = () => draw(); 
-                
+                cc.onResize = () => draw();
+
                 // --- FULL VIEWPORT LOCK (Zoom & Pan) ---
                 cc.canvas.addEventListener('wheel', e => e.preventDefault(), { passive: false });
-                cc.canvas.addEventListener('touchmove', e => { if(e.touches.length > 1) e.preventDefault(); }, { passive: false });
+                cc.canvas.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
                 // --- INTERACTION SETUP ---
                 cc.onContextMenu = (e) => {
@@ -328,8 +401,8 @@
                         {
                             label: 'Koordinaten',
                             checked: cc.showTelemetry,
-                            onchange: (val) => { 
-                                cc.showTelemetry = val; 
+                            onchange: (val) => {
+                                cc.showTelemetry = val;
                                 if (val && !cc.telePane) cc.injectTelemetryPane();
                             }
                         }
@@ -339,10 +412,10 @@
                     const rect = cc.canvas.getBoundingClientRect();
                     const px = e.clientX - rect.left;
                     const py = e.clientY - rect.top;
-                    
+
                     const mH = { x: cc.mapX(5.0), y: cc.mapY(m * 5.0 + n) };
                     if (Math.hypot(mH.x - px, mH.y - py) < 30) { dragMode = 2; return; }
-                    
+
                     const nH = { x: cc.mapX(0), y: cc.mapY(n) };
                     if (Math.hypot(nH.x - px, nH.y - py) < 30) { dragMode = 1; return; }
                 });
@@ -352,7 +425,7 @@
                     const rect = cc.canvas.getBoundingClientRect();
                     const mathX = cc.unmapX(e.clientX - rect.left);
                     const mathY = cc.unmapY(e.clientY - rect.top);
-                    
+
                     if (dragMode === 1) { n = mathY - m * mathX; }
                     else if (dragMode === 2) { m = (mathY - n) / 5.0; syncSliders(); }
                     draw();
@@ -369,7 +442,7 @@
 
         function resetView() {
             m = 1.0; n = 2.0; triX = 1.0; triSize = 2.0;
-            if(cc) cc.resetView(-10, 10);
+            if (cc) cc.resetView(-10, 10);
             syncSliders();
             draw();
         }
@@ -378,9 +451,9 @@
             const mS = document.getElementById('m-slider');
             const xS = document.getElementById('x-slider');
             const sS = document.getElementById('size-slider');
-            if(mS) mS.value = m;
-            if(xS) xS.value = triX;
-            if(sS) sS.value = triSize;
+            if (mS) mS.value = m;
+            if (xS) xS.value = triX;
+            if (sS) sS.value = triSize;
         }
 
         function draw() {
@@ -391,7 +464,7 @@
             const xL = cc.view.minX, xR = cc.view.maxX;
             const pL = { x: cc.mapX(xL), y: cc.mapY(m * xL + n) };
             const pR = { x: cc.mapX(xR), y: cc.mapY(m * xR + n) };
-            
+
             ctx.strokeStyle = "#00d2ff";
             ctx.lineWidth = 4;
             ctx.shadowBlur = 15;
@@ -415,14 +488,14 @@
             ctx.font = "bold 13px Orbitron";
             ctx.fillStyle = "#9d50bb";
             ctx.textAlign = "center";
-            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.x + (pB.x - pA.x)/2, pA.y + 20);
+            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.x + (pB.x - pA.x) / 2, pA.y + 20);
             ctx.textAlign = "left";
-            ctx.fillText(`Δy = ${(m * triSize).toFixed(2)}`, pC.x + 10, pA.y + (pC.y - pA.y)/2);
+            ctx.fillText(`Δy = ${(m * triSize).toFixed(2)}`, pC.x + 10, pA.y + (pC.y - pA.y) / 2);
 
             drawHandle(cc.mapX(0), cc.mapY(n), "#ff0055", `n = ${n.toFixed(2)}`);
             drawHandle(cc.mapX(5.0), cc.mapY(m * 5.0 + n), "#9d50bb", "m");
 
-            const x0 = Math.abs(m) > 0.001 ? -n/m : null;
+            const x0 = Math.abs(m) > 0.001 ? -n / m : null;
             if (x0 !== null) {
                 drawHandle(cc.mapX(x0), cc.mapY(0), "#39FF14", `x₀ = ${x0.toFixed(2)}`);
             }
@@ -450,7 +523,7 @@
 
         function updateUI() {
             if (typeof katex !== 'undefined') {
-                const x0 = Math.abs(m) > 0.001 ? -n/m : null;
+                const x0 = Math.abs(m) > 0.001 ? -n / m : null;
                 const mEl = document.getElementById('latex-m'), nEl = document.getElementById('latex-n'), xEl = document.getElementById('latex-x0'), eqEl = document.getElementById('eq-main');
                 if (mEl) katex.render(`\\textcolor{#9d50bb}{m = ${m.toFixed(2)}}`, mEl);
                 if (nEl) katex.render(`\\textcolor{#ff0055}{n = ${n.toFixed(2)}}`, nEl);
@@ -473,4 +546,5 @@
         }
     </script>
 </body>
+
 </html>

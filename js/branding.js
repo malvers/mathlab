@@ -68,8 +68,8 @@ const CyberBranding = {
                 background: rgba(15, 23, 42, 0.95);
                 padding: 35px;
                 border-radius: 24px;
-                border: 1px solid rgba(255, 157, 0, 0.4);
-                box-shadow: 0 0 50px rgba(255, 157, 0, 0.2);
+                border: 1px solid rgba(0, 210, 255, 0.4);
+                box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
                 width: 90%;
                 max-width: 500px;
                 transform: scale(0.9);
@@ -84,7 +84,7 @@ const CyberBranding = {
             .report-title {
                 font-family: 'Orbitron', sans-serif;
                 font-size: 1.1rem;
-                color: var(--branding-orange);
+                color: var(--branding-blue);
                 letter-spacing: 2px;
                 text-transform: uppercase;
                 margin-bottom: 20px;
@@ -112,8 +112,8 @@ const CyberBranding = {
             }
 
             .report-textarea:focus {
-                border-color: var(--branding-orange);
-                box-shadow: 0 0 15px rgba(255, 157, 0, 0.2);
+                border-color: var(--branding-blue);
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
             }
 
             .report-meta {
@@ -148,7 +148,7 @@ const CyberBranding = {
             }
 
             .report-btn.primary {
-                background: var(--branding-orange);
+                background: var(--branding-blue);
                 color: black;
             }
 
@@ -215,35 +215,82 @@ const CyberBranding = {
                 white-space: pre-wrap;
             }
 
+            /* --- SECURE AUTH OVERLAY --- */
+            .auth-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(5, 11, 24, 0.9);
+                backdrop-filter: blur(25px);
+                z-index: 600000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.4s ease;
+            }
+
+            .auth-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .auth-modal {
+                background: rgba(15, 23, 42, 0.95);
+                border: 1px solid var(--branding-blue);
+                padding: 40px;
+                border-radius: 24px;
+                max-width: 400px;
+                width: 85%;
+                text-align: center;
+                box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+            }
+
+            .auth-input {
+                width: 100%;
+                background: rgba(0,0,0,0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 15px;
+                color: white;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.1rem;
+                text-align: center;
+                margin: 20px 0;
+                outline: none;
+                box-sizing: border-box;
+                letter-spacing: 5px;
+            }
+
+            .auth-input:focus {
+                border-color: var(--branding-blue);
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            }
+
+            /* --- VISIBILITY SYSTEM --- */
+            .admin-info {
+                display: none !important;
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(0, 210, 255, 0.05);
+                border-left: 3px solid var(--neon-blue);
+                border-radius: 4px;
+                text-align: left;
+            }
+            body.cyber-edit-active .admin-info {
+                display: block !important;
+            }
+
             /* --- EDIT MODE SYSTEM --- */
             body.cyber-edit-active {
-                cursor: crosshair;
+                cursor: default;
             }
-
-            body.cyber-edit-active .stat-value,
-            body.cyber-edit-active .stat-label,
-            body.cyber-edit-active .instrument-title,
-            body.cyber-edit-active .canvas-branding h1,
-            body.cyber-edit-active .canvas-subtitle,
-            body.cyber-edit-active .briefing-text,
-            body.cyber-edit-active .label-row span:first-child {
-                outline: 2px dashed var(--branding-orange);
+            
+            /* Restricted focus outline for briefing editor only */
+            body.cyber-edit-active .briefing-modal [contenteditable="true"] {
+                outline: 1px solid var(--branding-blue);
                 outline-offset: 4px;
-                position: relative;
-                cursor: text;
-                transition: all 0.2s ease;
-                border-radius: 4px;
-            }
-
-            body.cyber-edit-active .stat-value:hover,
-            body.cyber-edit-active .instrument-title:hover {
-                background: rgba(255, 165, 0, 0.1);
-                box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
-            }
-
-            body.cyber-edit-active .stat-box {
-                border-style: dashed;
-                border-color: var(--branding-orange);
+                background: rgba(0, 210, 255, 0.05);
             }
 
             /* Branding Logo (Right-pinned Master Header) */
@@ -488,16 +535,19 @@ const CyberBranding = {
             }
 
             .briefing-modal {
-                background: var(--glass);
-                border: 1px solid var(--branding-blue);
-                padding: 40px;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(25px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 24px;
-                max-width: 600px;
+                padding: 40px;
                 width: 90%;
+                max-width: 800px;
+                max-height: 80vh;
+                overflow-y: auto;
+                position: relative;
                 color: white;
-                box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
-                transform: translateY(20px);
-                transition: transform 0.4s ease;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 210, 255, 0.1);
+                animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             }
 
             .briefing-overlay.visible .briefing-modal {
@@ -592,7 +642,7 @@ const CyberBranding = {
         const editBtn = document.createElement('div');
         editBtn.className = 'nav-btn';
         editBtn.title = 'Edit-Modus umschalten';
-        editBtn.onclick = () => this.toggleEditMode();
+        editBtn.onclick = () => this.requestEditAccess();
         editBtn.innerHTML = `
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -819,46 +869,106 @@ const CyberBranding = {
         this.isEditMode = !this.isEditMode;
         document.body.classList.toggle('cyber-edit-active', this.isEditMode);
         
-        // Toggle interactivity
-        const editableSelectors = '.stat-value, .stat-label, .stat-meta, .label-row span:first-child, .instrument-title, .canvas-branding h1, .canvas-subtitle, .briefing-text';
-        document.querySelectorAll(editableSelectors).forEach(el => {
-            el.contentEditable = this.isEditMode;
-        });
-
-        console.log(`[CYBER-ENGINE] Edit Mode ${this.isEditMode ? "ENABLED" : "DISABLED"}`);
-        
-        // Toggle Sync Button Visibility
-        const syncBtn = document.getElementById('nav-sync-btn');
-        if (syncBtn) {
-            syncBtn.style.display = this.isEditMode ? 'flex' : 'none';
+        // STRICTLY RESTRICTED: Only the briefing-text becomes editable
+        const briefingText = document.querySelector('.briefing-text');
+        if (briefingText) {
+            briefingText.contentEditable = this.isEditMode;
         }
 
-        // Visual feedback for the button
+        console.log(`[CYBER-ENGINE] Briefing Editor ${this.isEditMode ? "ENABLED" : "DISABLED"}`);
+        
+        // Visual feedback for the Pen button (Blue identity)
         const btns = document.querySelectorAll('.nav-btn');
-        const editBtn = Array.from(btns).find(b => b.title.includes('Edit'));
+        const editBtn = Array.from(btns).find(b => b.title.includes('Edit') || b.title.includes('bearbeiten'));
         
         if (editBtn) {
-            editBtn.style.color = this.isEditMode ? 'var(--branding-orange)' : 'white';
-            editBtn.style.borderColor = this.isEditMode ? 'var(--branding-orange)' : '';
-            editBtn.style.boxShadow = this.isEditMode ? '0 0 15px var(--branding-orange)' : '';
+            editBtn.style.color = this.isEditMode ? 'var(--branding-blue)' : 'white';
+            editBtn.style.borderColor = this.isEditMode ? 'var(--branding-blue)' : '';
+            editBtn.style.boxShadow = this.isEditMode ? '0 0 15px var(--branding-blue)' : '';
         }
 
-        // Optional: Hint to user
         if (this.isEditMode) {
-            this.showNotification("Edit-Modus Aktiv: Elemente zum Bearbeiten wählen");
+            this.showNotification("Briefing-Editor Aktiv: Text kann nun geändert werden.");
         }
 
-        // Module-specific dispatch
         window.dispatchEvent(new CustomEvent('cyber-edit-toggle', { detail: { active: this.isEditMode } }));
+    },
+
+    requestEditAccess: function() {
+        if (this.isEditMode) {
+            this.toggleEditMode();
+            return;
+        }
+
+        let overlay = document.getElementById('cyber-auth-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'cyber-auth-overlay';
+            overlay.className = 'auth-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        overlay.innerHTML = `
+            <div class="auth-modal">
+                <div class="briefing-header" style="color: var(--branding-blue);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    SECURITY CLEARANCE
+                </div>
+                <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6; font-family: Orbitron;">LEVEL 5 ACCESS REQUIRED</div>
+                <input type="password" id="cyber-pwd-input" class="auth-input" placeholder="********" autocomplete="off">
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="nav-btn" style="width: auto; padding: 10px 25px;" onclick="CyberBranding.validateAccess()">LOGIN</button>
+                    <button class="nav-btn" style="width: auto; padding: 10px 25px; opacity: 0.5;" onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            overlay.classList.add('visible');
+            const input = document.getElementById('cyber-pwd-input');
+            input.focus();
+            input.onkeydown = (e) => { if (e.key === 'Enter') this.validateAccess(); };
+        }, 10);
+    },
+
+    validateAccess: function() {
+        const input = document.getElementById('cyber-pwd-input');
+        // Secure Obfuscation (Base64 check for !aMe5007!!??)
+        const target = "IWFNZTUwMDchIT8/"; 
+        
+        if (btoa(input.value) === target) {
+            document.getElementById('cyber-auth-overlay').classList.remove('visible');
+            this.toggleEditMode();
+            this.showNotification("Zugriff gewährt. Briefing-Edit aktiviert.");
+            
+            // Auto-open briefing
+            setTimeout(() => this.showBriefing(), 300);
+        } else {
+            this.showNotification("Zugriff verweigert. Falsches Passwort.");
+            input.value = "";
+            input.focus();
+            
+            // Animation for error
+            const modal = document.querySelector('.auth-modal');
+            modal.style.borderColor = 'red';
+            modal.style.boxShadow = '0 0 30px rgba(255,0,0,0.4)';
+            setTimeout(() => {
+                modal.style.borderColor = '';
+                modal.style.boxShadow = '';
+            }, 500);
+        }
     },
 
     showNotification: function(msg) {
         const toast = document.createElement('div');
         toast.style.cssText = `
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--branding-orange); color: black; padding: 10px 20px;
+            background: var(--branding-blue); color: black; padding: 10px 20px;
             border-radius: 5px; font-family: Orbitron; font-size: 0.8rem;
-            z-index: 10000; box-shadow: 0 0 20px rgba(255,165,0,0.5);
+            z-index: 10000; box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
             animation: fadeIn 0.3s ease;
         `;
         toast.innerText = `⚛️ ${msg}`;
@@ -885,7 +995,7 @@ const CyberBranding = {
         }
 
         const copyBtnHTML = this.isEditMode ? `
-            <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important; border-color: var(--branding-orange) !important;" 
+            <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important; border-color: var(--branding-blue) !important;" 
                 onclick="CyberBranding.copyLocalBriefing()">
                 Text kopieren
             </button>
@@ -912,9 +1022,11 @@ const CyberBranding = {
     },
 
     copyLocalBriefing: function() {
-        const text = document.querySelector('.briefing-text').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            this.showNotification("Beschreibung kopiert!");
+        const el = document.querySelector('.briefing-text');
+        // Copy innerHTML to preserve the structure (!admin-info etc) for Antigravity
+        const content = el.innerHTML;
+        navigator.clipboard.writeText(content).then(() => {
+            this.showNotification("Komplette Struktur kopiert (bereit für Antigravity)!");
         });
     },
 
