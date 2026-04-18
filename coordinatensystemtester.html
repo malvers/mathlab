@@ -86,24 +86,14 @@
                 draw();
             });
 
-            CyberUI.createCard('parameters-container', 'ANZEIGE-OPTIONEN', `
-                <div id="display-checks" class="cyber-control-group"></div>
-            `, 'var(--branding-orange)');
-
-            CyberUI.createCheckbox('display-checks', 'Achsenbeschriftung', false, (val) => {
-                CyberCanvasInstance.showLabels = val;
-                draw();
-            });
-
 
             // 4. Initialize CyberCanvas
             CyberCanvasInstance.init('main-canvas', {
-                minX: -8,
-                maxX: 8,
                 minY: -10,
                 maxY: 10
             }, {
-                showLabels: false // Local start state
+                showLabels: true,    // Achsenbeschriftung an
+                showTelemetry: false // Koordinaten aus
             });
 
             // 5. State Management
@@ -114,6 +104,42 @@
 
             // 6. Bind Redraw
             CyberCanvasInstance.onResize = () => draw();
+
+            // 7. Bind Context Menu (Right Click)
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: 'Ansicht zurücksetzen',
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-10, 10);
+                            draw();
+                        }
+                    },
+                    {
+                        label: 'Achsen an',
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showAxes = val;
+                            draw();
+                        }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showLabels = val;
+                            draw();
+                        }
+                    },
+                    {
+                        label: 'Koordinaten',
+                        checked: CyberCanvasInstance.showTelemetry,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showTelemetry = val;
+                        }
+                    }
+                ]);
+            };
 
             function draw() {
                 // Clear and draw standard grid
@@ -139,35 +165,52 @@
             function drawFunction(fn, color, handleBreak = false) {
                 const ctx = CyberCanvasInstance.ctx;
                 const isDragging = CyberCanvasInstance.isDragging;
-                const step = isDragging ? 2 : 1; // Slightly reduced step for smoothness during drag, but better than 4
+                
+                // MEHR RECHNEN: Sub-Pixel Sampling für maximale Glätte
+                // Bei Drag erhöhen wir die Performance, im Stillstand die Präzision
+                const step = isDragging ? 1 : 0.5; 
 
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 3;
                 
-                // Keep Glow active even during drag
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = color;
                 
                 ctx.beginPath();
                 let first = true;
+                const threshold = 2000;
+                let lastY = null;
 
                 for (let px = 0; px <= CyberCanvasInstance.width; px += step) {
                     const x = CyberCanvasInstance.unmapX(px);
                     const y = fn(x);
                     
-                    // Filter extreme values or NaN/Infinity
-                    if (isNaN(y) || !isFinite(y) || Math.abs(y) > 50) {
-                        first = true;
-                        continue;
-                    }
+                    const isValid = !isNaN(y) && isFinite(y) && Math.abs(y) <= threshold;
 
-                    const py = CyberCanvasInstance.mapY(y);
-                    
-                    if (first) {
-                        ctx.moveTo(px, py);
-                        first = false;
+                    if (isValid) {
+                        // ADAPTIVE SUBDIVISION
+                        if (!first && lastY !== null && Math.abs(y - lastY) > 20) {
+                            const lastX = CyberCanvasInstance.unmapX(px - step);
+                            for (let s = 1; s < 10; s++) {
+                                const subX = lastX + (x - lastX) * (s / 10);
+                                const subY = fn(subX);
+                                if (!isNaN(subY) && isFinite(subY) && Math.abs(subY) <= threshold) {
+                                    ctx.lineTo(CyberCanvasInstance.mapX(subX), CyberCanvasInstance.mapY(subY));
+                                }
+                            }
+                        }
+
+                        const py = CyberCanvasInstance.mapY(y);
+                        if (first) {
+                            ctx.moveTo(px, py);
+                            first = false;
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                        lastY = y;
                     } else {
-                        ctx.lineTo(px, py);
+                        first = true;
+                        lastY = null;
                     }
                 }
                 ctx.stroke();

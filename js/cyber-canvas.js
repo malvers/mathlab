@@ -80,6 +80,12 @@ class CyberCanvas {
         this.addListener(this.canvas, 'mouseenter', () => this.setTeleOpacity(1));
         this.addListener(this.canvas, 'mouseleave', () => this.setTeleOpacity(0.3));
 
+        // Right-Click Context Menu
+        this.addListener(this.canvas, 'contextmenu', (e) => {
+            e.preventDefault();
+            if (this.onContextMenu) this.onContextMenu(e);
+        });
+
         this.resize();
         if (this.showTelemetry) this.injectTelemetryPane();
         
@@ -124,27 +130,26 @@ class CyberCanvas {
     }
 
     processInputMath() {
-        // --- ZOOM MATH (Focal Point) ---
+        // --- ZOOM MATH (Uniform Focal Point) ---
         if (this.zoomIntent.factor !== 1) {
             const factor = this.zoomIntent.factor;
             const fx = this.zoomIntent.focalX;
             const fy = this.zoomIntent.focalY;
 
-            // Math coordinate under focal point before zoom
             const mx = this.unmapX(fx);
             const my = this.unmapY(fy);
 
-            // Rescale range
-            const newRangeX = (this.view.maxX - this.view.minX) * factor;
+            // Rescale range uniformly to maintain 1:1 parity
             const newRangeY = (this.view.maxY - this.view.minY) * factor;
+            const aspect = this.width / this.height;
+            const newRangeX = newRangeY * aspect;
 
-            // Shift min/max so mx,my stays at fx,fy
             this.view.minX = mx - (fx / this.width) * newRangeX;
             this.view.maxX = this.view.minX + newRangeX;
             this.view.minY = my - ((this.height - fy) / this.height) * newRangeY;
             this.view.maxY = this.view.minY + newRangeY;
 
-            this.zoomIntent.factor = 1; // Reset intent
+            this.zoomIntent.factor = 1;
             this.needsRedraw = true;
         }
 
@@ -158,11 +163,11 @@ class CyberCanvas {
             const dx = this.currentMousePos.clientX - this.lastDragPos.clientX;
             const dy = this.currentMousePos.clientY - this.lastDragPos.clientY;
             
-            const mw = this.view.maxX - this.view.minX;
-            const mh = this.view.maxY - this.view.minY;
+            const rangeX = this.view.maxX - this.view.minX;
+            const rangeY = this.view.maxY - this.view.minY;
 
-            const moveX = (dx / this.width) * mw;
-            const moveY = (dy / this.height) * mh;
+            const moveX = (dx / this.width) * rangeX;
+            const moveY = (dy / this.height) * rangeY;
 
             this.view.minX -= moveX;
             this.view.maxX -= moveX;
@@ -182,8 +187,36 @@ class CyberCanvas {
         this.canvas.height = this.height * this.dpr;
         this.canvas.style.width = this.width + 'px';
         this.canvas.style.height = this.height + 'px';
+        
+        // ASPRECT RATIO SYNC: Maintain 1:1 units
+        const currentYRange = this.view.maxY - this.view.minY;
+        const aspect = this.width / this.height;
+        const targetXRange = currentYRange * aspect;
+        
+        // Center the new X range around the current center
+        const centerX = (this.view.minX + this.view.maxX) / 2;
+        this.view.minX = centerX - targetXRange / 2;
+        this.view.maxX = centerX + targetXRange / 2;
+
         this.ctx.resetTransform();
         this.ctx.scale(this.dpr, this.dpr);
+        this.needsRedraw = true;
+    }
+
+    resetView(minY = -10, maxY = 10) {
+        this.view.minY = minY;
+        this.view.maxY = maxY;
+        this.view.minX = -1; // Temporary, resize() will fix it
+        this.view.maxX = 1;
+        
+        // Ensure we center at X=0
+        const currentYRange = this.view.maxY - this.view.minY;
+        const aspect = this.width / this.height;
+        const targetXRange = currentYRange * aspect;
+        
+        this.view.minX = -targetXRange / 2;
+        this.view.maxX = targetXRange / 2;
+        
         this.needsRedraw = true;
     }
 
@@ -297,8 +330,8 @@ class CyberCanvas {
         // --- GRID LINES & LABELS ---
         ctx.strokeStyle = gridColor;
         ctx.lineWidth = 1;
-        ctx.font = '10px Orbitron, sans-serif';
-        ctx.fillStyle = textColor;
+        ctx.font = '12px Orbitron, sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.textAlign = 'center';
 
         const step = this.getStepSize();
@@ -370,6 +403,8 @@ class CyberCanvas {
     }
 
     updateTelemetryDOM() {
+        if (!this.telePane) return;
+        this.telePane.style.display = this.showTelemetry ? 'block' : 'none';
         if (!this.showTelemetry || !this.teleX) return;
         this.teleX.innerText = this.mathX.toFixed(2);
         this.teleY.innerText = this.mathY.toFixed(2);
