@@ -14,51 +14,61 @@
     <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
         /* Lab-specific tuning for ULTRA v5.3.8 aesthetic */
-        #main-canvas { width: 100%; height: 100%; background: transparent; }
-        
-        .control-group { display: flex; flex-direction: column; gap: 15px; }
-        .control-group label { 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 0.6rem; 
-            letter-spacing: 1.5px; 
-            text-transform: uppercase; 
-            color: rgba(255,255,255,0.5);
+        #main-canvas {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
             margin-bottom: 5px;
             display: block;
         }
 
-        .slider-box { 
-            padding: 10px; 
-            background: rgba(255,255,255,0.02); 
-            border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.05);
+        .slider-box {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
         }
+
         .slider-box:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        .val-display { 
+        .val-display {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem; 
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--neon-blue);
             text-shadow: 0 0 15px var(--neon-blue);
             margin-bottom: 10px;
         }
 
-        .checkbox-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            margin-top: 5px; 
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 5px;
             padding: 10px;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .checkbox-item {
             display: flex;
             align-items: center;
@@ -85,9 +95,20 @@
         }
 
         /* Value Colors & Glows */
-        .color-purple { color: var(--neon-purple) !important; text-shadow: 0 0 15px var(--neon-purple); }
-        .color-green { color: var(--neon-green) !important; text-shadow: 0 0 15px var(--neon-green); }
-        .color-orange { color: var(--neon-orange) !important; text-shadow: 0 0 15px var(--neon-orange); }
+        .color-purple {
+            color: var(--neon-purple) !important;
+            text-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        .color-green {
+            color: var(--neon-green) !important;
+            text-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .color-orange {
+            color: var(--neon-orange) !important;
+            text-shadow: 0 0 15px var(--neon-orange);
+        }
     </style>
 </head>
 
@@ -110,6 +131,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/cyber-canvas.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/math-library.js"></script>
     <script src="js/formula.js"></script>
@@ -134,8 +156,6 @@
 
             // UI Setup
             CyberUI.createCard('parameters-container', 'Funktions-Konfigurator', `
-            <div class="control-group">
-                <label>Funktion wählen</label>
                 <div id="function-selector-container"></div>
 
                 <div class="slider-box">
@@ -194,119 +214,97 @@
 
             CyberFormula.init({ anchorId: 'canvas-container' });
 
-            // Canvas Logic
-            const canvas = document.getElementById('main-canvas');
-            const container = document.getElementById('canvas-container');
-            const ctx = canvas.getContext('2d');
-            let width, height, scale = 50, centerX, centerY;
+            // Initialize CyberCanvas
+            CyberCanvasInstance.init('main-canvas', {
+                minX: -8,
+                maxX: 8,
+                minY: -6,
+                maxY: 6
+            });
 
+            function resize() {
+                CyberCanvasInstance.resize();
+                draw();
+            }
+
+            // Bind resize event
+            CyberCanvasInstance.onResize = () => draw();
+
+            // State management
             function getNeonColor(name) {
                 return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
             }
 
-            function resize() {
-                const dpr = window.devicePixelRatio || 1;
-                width = container.clientWidth;
-                height = container.clientHeight;
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                canvas.style.width = width + 'px';
-                canvas.style.height = height + 'px';
-                ctx.scale(dpr, dpr);
-                centerX = width / 2;
-                centerY = height / 2;
-                draw();
-            }
-
-            function toScreen(x, y) {
-                return { x: centerX + x * scale, y: centerY - y * scale };
-            }
-
-            function toMath(x, y) {
-                return { x: (x - centerX) / scale, y: (centerY - y) / scale };
-            }
-
-            function drawGrid() {
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-                ctx.lineWidth = 1;
-
-                for (let x = -Math.ceil(centerX / scale); x <= Math.ceil(centerX / scale); x++) {
-                    const s = toScreen(x, 0);
-                    ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, height); ctx.stroke();
-                }
-                for (let y = -Math.ceil(centerY / scale); y <= Math.ceil(centerY / scale); y++) {
-                    const s = toScreen(0, y);
-                    ctx.beginPath(); ctx.moveTo(0, s.y); ctx.lineTo(width, s.y); ctx.stroke();
-                }
-
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
-            }
-
-            function drawGraph(f, color, width = 3, shadow = true) {
+            function drawGraph(f, color, thickness = 3, shadow = true) {
+                const ctx = CyberCanvasInstance.ctx;
                 ctx.strokeStyle = color;
-                ctx.lineWidth = width;
+                ctx.lineWidth = thickness;
+
                 if (shadow) {
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = color;
                 }
+
                 ctx.beginPath();
-                let started = false;
-                for (let px = 0; px < width * 2; px += 2) { // Logic fix for pixels
-                    const x = (px - centerX) / scale;
+                const width = CyberCanvasInstance.width;
+                const dpr = window.devicePixelRatio || 1;
+
+                for (let px = 0; px <= width; px++) {
+                    const x = CyberCanvasInstance.unmapX(px);
                     const y = f(x);
-                    const p = toScreen(x, y);
-                    if (!started) { ctx.moveTo(p.x, p.y); started = true; }
-                    else ctx.lineTo(p.x, p.y);
-                }
-                // Better loop for smooth graph
-                ctx.beginPath();
-                for (let px = 0; px <= canvas.width / (window.devicePixelRatio || 1); px++) {
-                    const x = (px - centerX) / scale;
-                    const y = f(x);
-                    const p = toScreen(x, y);
-                    if (px === 0) ctx.moveTo(p.x, p.y);
-                    else ctx.lineTo(p.x, p.y);
+                    const py = CyberCanvasInstance.mapY(y);
+
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
                 }
                 ctx.stroke();
                 ctx.shadowBlur = 0;
             }
 
             function drawTangent() {
+                const ctx = CyberCanvasInstance.ctx;
                 const y0 = currentFunc.f(x0);
                 const m = currentFunc.df(x0);
 
-                const L = 5.0; // Increased length
+                const L = 5.0;
                 const halfL = L / 2;
                 const angle = Math.atan(m);
                 const dx = Math.cos(angle) * halfL;
                 const dy = Math.sin(angle) * halfL;
 
                 ctx.strokeStyle = getNeonColor('--neon-purple');
-                ctx.lineWidth = 4; // Increased thickness
+                ctx.lineWidth = 4;
 
-                const p1 = toScreen(x0 - dx, y0 - dy);
-                const p2 = toScreen(x0 + dx, y0 + dy);
+                const p1x = CyberCanvasInstance.mapX(x0 - dx);
+                const p1y = CyberCanvasInstance.mapY(y0 - dy);
+                const p2x = CyberCanvasInstance.mapX(x0 + dx);
+                const p2y = CyberCanvasInstance.mapY(y0 + dy);
 
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = getNeonColor('--neon-purple');
-                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(p1x, p1y);
+                ctx.lineTo(p2x, p2y);
+                ctx.stroke();
                 ctx.shadowBlur = 0;
 
                 // Draw point
-                const p0 = toScreen(x0, y0);
+                const p0x = CyberCanvasInstance.mapX(x0);
+                const p0y = CyberCanvasInstance.mapY(y0);
                 ctx.fillStyle = "white";
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = "white";
-                ctx.beginPath(); ctx.arc(p0.x, p0.y, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p0x, p0y, 6, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.shadowBlur = 0;
             }
 
             function draw() {
-                ctx.clearRect(0, 0, width, height);
-                drawGrid();
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true
+                });
 
                 if (showDerivative) {
                     drawGraph(currentFunc.df, getNeonColor('--neon-orange'), 2, false);
@@ -350,15 +348,15 @@
 
             // Custom interaction on canvas
             let isDragging = false;
-            canvas.addEventListener('mousedown', (e) => { isDragging = true; handleInteraction(e); });
+            CyberCanvasInstance.canvas.addEventListener('mousedown', (e) => { isDragging = true; handleInteraction(e); });
             window.addEventListener('mousemove', (e) => { if (isDragging) handleInteraction(e); });
             window.addEventListener('mouseup', () => { isDragging = false; });
 
             function handleInteraction(e) {
-                const rect = canvas.getBoundingClientRect();
+                const rect = CyberCanvasInstance.canvas.getBoundingClientRect();
                 const posX = e.clientX - rect.left;
-                const math = toMath(posX, 0);
-                x0 = Math.max(-5, Math.min(5, math.x));
+                const mathX = CyberCanvasInstance.unmapX(posX);
+                x0 = Math.max(-5, Math.min(5, mathX));
                 document.getElementById('slider-x0').value = x0;
                 draw();
             }
