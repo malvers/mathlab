@@ -159,6 +159,73 @@ class CyberUI {
                 color: rgba(255, 255, 255, 0.7);
             }
 
+            /* CHECKBOXES */
+            .checkbox-group {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .checkbox-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                cursor: pointer;
+                transition: opacity 0.2s ease;
+                min-height: 24px;
+            }
+
+            .checkbox-item:hover {
+                opacity: 0.8;
+            }
+
+            .checkbox-item input[type="checkbox"] {
+                appearance: none;
+                width: 16px;
+                height: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+                cursor: pointer;
+                position: relative;
+                transition: background 0.2s, border-color 0.2s;
+                flex-shrink: 0;
+                background: rgba(0, 0, 0, 0.2);
+            }
+
+            .checkbox-item input[type="checkbox"]:checked {
+                background: var(--neon-blue);
+                border-color: var(--neon-blue);
+                box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+            }
+
+            .checkbox-item input[type="checkbox"]:checked::after {
+                content: "";
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 8px;
+                height: 8px;
+                background: black;
+                border-radius: 1px;
+            }
+
+            .checkbox-item label {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.62rem;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                cursor: pointer;
+                color: rgba(255, 255, 255, 0.6);
+                transition: color 0.2s;
+            }
+
+            .checkbox-item input[type="checkbox"]:checked + label {
+                color: #fff;
+            }
+
             /* MISSION BRIEFING BOX */
             .briefing-box {
                 font-size: 0.85rem;

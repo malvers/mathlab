@@ -3,11 +3,21 @@
  * Centralized branding and navigation component for Doc Alvers Laboratories.
  */
 const CyberBranding = {
-    init(config = {}) {
-        const title = config.title || "Doc Alvers Mathe-Labor";
-        const subtitle = config.subtitle || "CYBER-LABORATORIUM";
+    MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
 
-        console.log("CyberBranding v5.3.8 (ULTRA Responsive) Initialized");
+    init(config = {}) {
+        let title = this.MASTER_TITLE;
+        let subtitle = "CYBER-LABORATORIUM";
+
+        // Polymorphic Init: Support both string (subtitle only) and object (legacy)
+        if (typeof config === 'string') {
+            subtitle = config;
+        } else if (typeof config === 'object') {
+            if (config.title) title = config.title;
+            if (config.subtitle) subtitle = config.subtitle;
+        }
+
+        console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
 
         this.injectStyles();
         this.injectHTML(title, subtitle);
@@ -518,23 +528,14 @@ const CyberBranding = {
         document.head.appendChild(style);
     },
 
-    injectHTML(arg1, arg2) {
+    injectHTML(topLine, bottomLine) {
         if (document.querySelector('.canvas-branding')) return;
-        
-        // Smart-Swap: Ensure "DOC ALVERS" is always 'topLine'
-        let topLine = arg1;
-        let bottomLine = arg2;
-        
-        if (arg2 && arg2.toUpperCase().includes("ALVERS")) {
-            topLine = arg2;
-            bottomLine = arg1;
-        }
 
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.innerHTML = `
-            <h1>${topLine}</h1>
-            <div class="canvas-subtitle">${bottomLine}</div>
+            <h1 id="branding-master-title">${topLine}</h1>
+            <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
         document.body.appendChild(container);
     },
