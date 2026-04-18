@@ -296,8 +296,10 @@ const CyberBranding = {
 
             /* Central Navigation */
             .cyber-nav {
-                display: flex !important;
-                gap: 12px;
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 8px;
+                width: 100%;
                 z-index: 100000 !important;
                 animation: branding-fade-in 1.2s ease-out forwards;
             }
@@ -316,11 +318,12 @@ const CyberBranding = {
             }
 
             .nav-btn {
-                width: 36px;
-                height: 36px;
+                width: 100%;
+                height: 54px;
+                max-width: 60px;
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border: 1px solid rgba(0, 210, 255, 0.3) !important;
                 border-radius: 10px;
                 display: flex !important;
                 align-items: center;
@@ -339,7 +342,7 @@ const CyberBranding = {
                 box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
             }
 
-            .nav-btn svg { width: 18px; height: 18px; stroke-width: 2.5; display: block; }
+            .nav-btn svg { width: 24px; height: 24px; stroke-width: 2.2; display: block; }
 
             @keyframes branding-fade-in {
                 from { opacity: 0; transform: translateY(-10px); }
@@ -633,24 +636,18 @@ const CyberBranding = {
         // Briefing Button (NEU)
         const briefingBtn = document.createElement('div');
         briefingBtn.className = 'nav-btn';
-        briefingBtn.title = 'Missions-Briefing anzeigen';
+        briefingBtn.title = 'Beschreibung anzeigen';
         briefingBtn.onclick = () => this.showBriefing();
         briefingBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: bold; line-height: 1;">?</div>
         `;
 
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
-        nav.appendChild(briefingBtn); // Jetzt an 3. Stelle
         nav.appendChild(qrBtn);
         nav.appendChild(editBtn); 
         nav.appendChild(bugBtn);
+        nav.appendChild(briefingBtn); // Jetzt ganz am Ende
 
         const sidebarHeader = document.getElementById('sidebar-header');
         const sidebar = sidebarHeader ||
@@ -872,7 +869,7 @@ const CyberBranding = {
     },
 
     showBriefing: function() {
-        if (!this.briefingContent) return this.showNotification("Kein Briefing für dieses Modul vorhanden.");
+        if (!this.briefingContent) return this.showNotification("Keine Beschreibung für dieses Modul vorhanden.");
 
         let overlay = document.getElementById('cyber-briefing-overlay');
         if (!overlay) {
@@ -899,12 +896,12 @@ const CyberBranding = {
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
-                    Missions-Briefing
+                    Beschreibung
                 </div>
                 <div class="briefing-text" ${this.isEditMode ? 'contenteditable="true"' : ''}>${this.briefingContent}</div>
                 <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
                     ${copyBtnHTML}
-                    <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
+                    <button class="nav-btn" style="width: auto; height: auto; padding: 12px 35px; min-width: 140px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
                 </div>
             </div>
         `;
@@ -915,7 +912,7 @@ const CyberBranding = {
     copyLocalBriefing: function() {
         const text = document.querySelector('.briefing-text').innerText;
         navigator.clipboard.writeText(text).then(() => {
-            this.showNotification("Briefing-Text kopiert!");
+            this.showNotification("Beschreibung kopiert!");
         });
     },
 
