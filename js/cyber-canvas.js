@@ -14,6 +14,10 @@ class CyberCanvas {
         
         // Callbacks
         this.onResize = null;
+        this.onMouseDown = null;
+        this.onMouseMove = null;
+        this.onMouseUp = null;
+        this.onContextMenu = null;
         
         // State
         this.isInitialized = false;
@@ -239,6 +243,15 @@ class CyberCanvas {
     // --- EVENT HANDLERS ---
 
     handleMouseDown(e) {
+        if (this.onMouseDown) {
+            const rect = this.canvas.getBoundingClientRect();
+            const pos = {
+                x: this.unmapX(e.clientX - rect.left),
+                y: this.unmapY(e.clientY - rect.top)
+            };
+            this.onMouseDown(pos);
+        }
+
         if (!this.allowPan) return;
         this.isDragging = true;
         this.lastDragPos.clientX = e.clientX;
@@ -253,9 +266,19 @@ class CyberCanvas {
         this.currentMousePos.clientX = e.clientX;
         this.currentMousePos.clientY = e.clientY;
         this.hasNewInput = true;
+
+        if (this.onMouseMove) {
+            const pos = {
+                x: this.unmapX(this.currentMousePos.x),
+                y: this.unmapY(this.currentMousePos.y)
+            };
+            this.onMouseMove(pos);
+        }
     }
 
     handleMouseUp() {
+        if (this.onMouseUp) this.onMouseUp();
+        
         if (this.isDragging) {
             this.isDragging = false;
             this.canvas.style.cursor = 'crosshair';
@@ -277,6 +300,13 @@ class CyberCanvas {
     handleTouchStart(e) {
         e.preventDefault();
         const rect = this.canvas.getBoundingClientRect();
+        const touchPos = {
+            x: this.unmapX(e.touches[0].clientX - rect.left),
+            y: this.unmapY(e.touches[0].clientY - rect.top)
+        };
+
+        if (this.onMouseDown) this.onMouseDown(touchPos);
+
         if (e.touches.length === 1 && this.allowPan) {
             this.isDragging = true;
             this.lastDragPos.clientX = e.touches[0].clientX;
@@ -290,6 +320,15 @@ class CyberCanvas {
     handleTouchMove(e) {
         e.preventDefault();
         const rect = this.canvas.getBoundingClientRect();
+        
+        if (this.onMouseMove) {
+            const touchPos = {
+                x: this.unmapX(e.touches[0].clientX - rect.left),
+                y: this.unmapY(e.touches[0].clientY - rect.top)
+            };
+            this.onMouseMove(touchPos);
+        }
+
         if (e.touches.length === 1 && this.isDragging) {
             const touch = e.touches[0];
             this.currentMousePos.x = touch.clientX - rect.left;
