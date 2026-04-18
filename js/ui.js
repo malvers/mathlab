@@ -96,6 +96,7 @@ class CyberUI {
                 justify-content: space-between;
                 align-items: center;
                 cursor: pointer;
+                box-sizing: border-box;
                 transition: all 0.3s ease;
             }
 
@@ -109,8 +110,9 @@ class CyberUI {
                 top: calc(100% + 8px);
                 left: 0;
                 width: 100%;
+                box-sizing: border-box;
                 background: rgba(10, 15, 25, 0.95);
-                border: 2px solid var(--neon-blue);
+                border: 1px solid var(--neon-blue);
                 border-radius: 12px;
                 z-index: 1000;
                 display: none;

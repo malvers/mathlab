@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,165 +8,97 @@
     <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-pink: #ff0055;
-            --neon-green: #39FF14;
-            --neon-orange: #ff8800;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
-
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-        }
-
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .slider-box {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        label {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 1px;
+        /* Lab-specific tuning for ULTRA v5.3.8 aesthetic */
+        #main-canvas { width: 100%; height: 100%; background: transparent; }
+        
+        .control-group { display: flex; flex-direction: column; gap: 15px; }
+        .control-group label { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 0.6rem; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase; 
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 5px;
             display: block;
-            margin-bottom: 8px;
         }
 
-        input[type=range] {
-            width: 100%;
-            cursor: pointer;
+        .slider-box { 
+            padding: 10px; 
+            background: rgba(255,255,255,0.02); 
+            border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+        .slider-box:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
         }
 
-        .function-select {
-            background: rgba(15, 23, 42, 0.6);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            width: 100%;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .function-select:hover {
-            border-color: var(--neon-blue);
-        }
-
-        .val-display {
-            font-family: 'Orbitron';
-            font-size: 1.1rem;
+        .val-display { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem; 
+            font-weight: 700;
             color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+            margin-bottom: 10px;
         }
 
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px;
+        .checkbox-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            margin-top: 5px; 
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.05);
         }
-
+        
         .checkbox-item {
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 8px;
         }
 
         .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.05);
             transform: translateX(5px);
-        }
-
-        .checkbox-item input[type=checkbox] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--neon-blue);
         }
 
         .checkbox-item label {
             margin-bottom: 0;
-            font-size: 0.85rem;
-            cursor: pointer;
+            font-size: 0.7rem;
             font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            color: white;
+            opacity: 0.7;
+            cursor: pointer;
         }
 
-        /* Responsive Mobile Layout */
-        @media (max-width: 900px) {
-            body { flex-direction: column; overflow-y: auto; }
-            #side-panel { width: 100%; height: auto; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-            #canvas-container { height: 60vh; width: 100%; flex-grow: 0; min-height: 400px; }
-        }
+        /* Value Colors & Glows */
+        .color-purple { color: var(--neon-purple) !important; text-shadow: 0 0 15px var(--neon-purple); }
+        .color-green { color: var(--neon-green) !important; text-shadow: 0 0 15px var(--neon-green); }
+        .color-orange { color: var(--neon-orange) !important; text-shadow: 0 0 15px var(--neon-orange); }
     </style>
 </head>
+
 <body>
 
     <aside id="side-panel">
-        <div id="sidebar-header"></div>
-        <div id="ui-container"></div>
-        
-        <div id="parameter-container"></div>
-        
-        <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div id="sidebar-header" style="min-height: 60px;"></div>
+        <div id="parameters-container"></div>
+
+        <div
+            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
@@ -181,25 +114,24 @@
     <script src="js/ui.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             // Module Engine Initialization
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "DIFFERENTIAL-LABOR | ABLEITUNG & TANGENTE"
+                subtitle: "DIFFERENTIALRECHNUNG"
             });
 
-        CyberUI.injectBriefing('ui-container', 
-            'Erforsche die <b>differentielle Steigung</b>. Bewege den Punkt auf dem Graphen, um zu sehen, wie die Tangente die lokale Steigung der Funktion visualisiert. Der blaue Graph zeigt die Ableitungsfunktion f\'(x).', 
-            'var(--neon-blue)');
+            CyberUI.init();
 
-        // Math Logic
-        let currentFunc = MathLibrary.get('kubisch');
-        let x0 = 1.0;
-        let showDerivative = false;
-        let showSecondDeriv = false;
 
-        // UI Setup
-        CyberUI.createCard('parameter-container', 'Funktions-Konfigurator', `
+            // Math Logic
+            let currentFunc = MathLibrary.get('kubisch');
+            let x0 = 1.0;
+            let showDerivative = false;
+            let showSecondDeriv = false;
+
+            // UI Setup
+            CyberUI.createCard('parameters-container', 'Funktions-Konfigurator', `
             <div class="control-group">
                 <label>Funktion wählen</label>
                 <div id="function-selector-container"></div>
@@ -212,205 +144,225 @@
                 
                 <div class="slider-box">
                     <label>1. Ableitung f'(x₀)</label>
-                    <div class="val-display" id="val-m" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">0.00</div>
+                    <div class="val-display color-purple" id="val-m">0.00</div>
                 </div>
 
                 <div class="slider-box">
                     <label>2. Ableitung f''(x₀)</label>
-                    <div class="val-display" id="val-ddm" style="color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);">0.00</div>
+                    <div class="val-display color-green" id="val-ddm">0.00</div>
                 </div>
 
                 <div class="checkbox-group">
                     <div class="checkbox-item">
-                        <input type="checkbox" id="check-deriv" style="accent-color: var(--neon-orange);">
-                        <label for="check-deriv" style="color: var(--neon-orange);">1. Ableitung zeigen</label>
+                        <input type="checkbox" id="check-deriv">
+                        <label for="check-deriv" class="color-orange">1. Ableitung zeigen</label>
                     </div>
                     <div class="checkbox-item">
-                        <input type="checkbox" id="check-deriv2" style="accent-color: var(--neon-green);">
-                        <label for="check-deriv2" style="color: var(--neon-green);">2. Ableitung zeigen</label>
+                        <input type="checkbox" id="check-deriv2">
+                        <label for="check-deriv2" class="color-green">2. Ableitung zeigen</label>
                     </div>
                 </div>
             </div>
         `, 'var(--neon-blue)');
 
-        // Initialize Dropdown
-        CyberUI.createDropdown('function-selector-container', MathLibrary.getAll(), (id) => {
-            currentFunc = MathLibrary.get(id);
-            draw();
-        }, currentFunc.id);
+            // Initialize Dropdown
+            CyberUI.createDropdown('function-selector-container', MathLibrary.getAll(), (id) => {
+                currentFunc = MathLibrary.get(id);
+                draw();
+            }, currentFunc.id);
 
-        CyberFormula.init({ anchorId: 'canvas-container' });
+            // Force KaTeX render on initial trigger once katex is ready
+            setTimeout(() => {
+                if (window.katex) {
+                    document.querySelectorAll('.math-part[data-tex]').forEach(mp => {
+                        if (mp.dataset.tex) katex.render(mp.dataset.tex, mp, { throwOnError: false });
+                    });
+                }
+            }, 300);
 
-        // Canvas Logic
-        const canvas = document.getElementById('main-canvas');
-        const container = document.getElementById('canvas-container');
-        const ctx = canvas.getContext('2d');
-        let width, height, scale = 50, centerX, centerY;
+            CyberBranding.setBriefing(`
+            <b>Differential-Labor</b> – Ableitung & Tangente<br><br>
+            Dieses Labor visualisiert die Ableitung einer Funktion und die zugehörige Tangente.<br><br>
+            <b>So funktioniert es:</b><br>
+            • Wähle eine Funktion aus dem Dropdown<br>
+            • Verschiebe den Punkt x₀ mit dem Schieberegler oder per Klick auf den Canvas<br>
+            • Die lila Tangente zeigt die lokale Steigung f'(x₀)<br>
+            • Aktiviere die Checkboxen, um f'(x) und f''(x) einzublenden
+        `);
 
-        function getNeonColor(name) {
-            return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
-        }
+            CyberFormula.init({ anchorId: 'canvas-container' });
 
-        function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            width = container.clientWidth;
-            height = container.clientHeight;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            ctx.scale(dpr, dpr);
-            centerX = width / 2;
-            centerY = height / 2;
-            draw();
-        }
+            // Canvas Logic
+            const canvas = document.getElementById('main-canvas');
+            const container = document.getElementById('canvas-container');
+            const ctx = canvas.getContext('2d');
+            let width, height, scale = 50, centerX, centerY;
 
-        function toScreen(x, y) {
-            return { x: centerX + x * scale, y: centerY - y * scale };
-        }
-
-        function toMath(x, y) {
-            return { x: (x - centerX) / scale, y: (centerY - y) / scale };
-        }
-
-        function drawGrid() {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-            ctx.lineWidth = 1;
-            
-            for (let x = -Math.ceil(centerX/scale); x <= Math.ceil(centerX/scale); x++) {
-                const s = toScreen(x, 0);
-                ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, height); ctx.stroke();
-            }
-            for (let y = -Math.ceil(centerY/scale); y <= Math.ceil(centerY/scale); y++) {
-                const s = toScreen(0, y);
-                ctx.beginPath(); ctx.moveTo(0, s.y); ctx.lineTo(width, s.y); ctx.stroke();
+            function getNeonColor(name) {
+                return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
             }
 
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
-        }
+            function resize() {
+                const dpr = window.devicePixelRatio || 1;
+                width = container.clientWidth;
+                height = container.clientHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.scale(dpr, dpr);
+                centerX = width / 2;
+                centerY = height / 2;
+                draw();
+            }
 
-        function drawGraph(f, color, width = 3, shadow = true) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            if (shadow) {
+            function toScreen(x, y) {
+                return { x: centerX + x * scale, y: centerY - y * scale };
+            }
+
+            function toMath(x, y) {
+                return { x: (x - centerX) / scale, y: (centerY - y) / scale };
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+                ctx.lineWidth = 1;
+
+                for (let x = -Math.ceil(centerX / scale); x <= Math.ceil(centerX / scale); x++) {
+                    const s = toScreen(x, 0);
+                    ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, height); ctx.stroke();
+                }
+                for (let y = -Math.ceil(centerY / scale); y <= Math.ceil(centerY / scale); y++) {
+                    const s = toScreen(0, y);
+                    ctx.beginPath(); ctx.moveTo(0, s.y); ctx.lineTo(width, s.y); ctx.stroke();
+                }
+
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
+            }
+
+            function drawGraph(f, color, width = 3, shadow = true) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = width;
+                if (shadow) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = color;
+                }
+                ctx.beginPath();
+                let started = false;
+                for (let px = 0; px < width * 2; px += 2) { // Logic fix for pixels
+                    const x = (px - centerX) / scale;
+                    const y = f(x);
+                    const p = toScreen(x, y);
+                    if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+                    else ctx.lineTo(p.x, p.y);
+                }
+                // Better loop for smooth graph
+                ctx.beginPath();
+                for (let px = 0; px <= canvas.width / (window.devicePixelRatio || 1); px++) {
+                    const x = (px - centerX) / scale;
+                    const y = f(x);
+                    const p = toScreen(x, y);
+                    if (px === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            function drawTangent() {
+                const y0 = currentFunc.f(x0);
+                const m = currentFunc.df(x0);
+
+                const L = 5.0; // Increased length
+                const halfL = L / 2;
+                const angle = Math.atan(m);
+                const dx = Math.cos(angle) * halfL;
+                const dy = Math.sin(angle) * halfL;
+
+                ctx.strokeStyle = getNeonColor('--neon-purple');
+                ctx.lineWidth = 4; // Increased thickness
+
+                const p1 = toScreen(x0 - dx, y0 - dy);
+                const p2 = toScreen(x0 + dx, y0 + dy);
+
                 ctx.shadowBlur = 15;
-                ctx.shadowColor = color;
-            }
-            ctx.beginPath();
-            let started = false;
-            for (let px = 0; px < width * 2; px += 2) { // Logic fix for pixels
-                const x = (px - centerX) / scale;
-                const y = f(x);
-                const p = toScreen(x, y);
-                if (!started) { ctx.moveTo(p.x, p.y); started = true; }
-                else ctx.lineTo(p.x, p.y);
-            }
-            // Better loop for smooth graph
-            ctx.beginPath();
-            for (let px = 0; px <= canvas.width / (window.devicePixelRatio || 1); px++) {
-                const x = (px - centerX) / scale;
-                const y = f(x);
-                const p = toScreen(x, y);
-                if (px === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
+                ctx.shadowColor = getNeonColor('--neon-purple');
+                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                ctx.shadowBlur = 0;
 
-        function drawTangent() {
-            const y0 = currentFunc.f(x0);
-            const m = currentFunc.df(x0);
-            
-            const L = 5.0; // Increased length
-            const halfL = L / 2;
-            const angle = Math.atan(m);
-            const dx = Math.cos(angle) * halfL;
-            const dy = Math.sin(angle) * halfL;
-            
-            ctx.strokeStyle = getNeonColor('--neon-purple');
-            ctx.lineWidth = 4; // Increased thickness
-            
-            const p1 = toScreen(x0 - dx, y0 - dy);
-            const p2 = toScreen(x0 + dx, y0 + dy);
-            
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = getNeonColor('--neon-purple');
-            ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-            ctx.shadowBlur = 0;
-
-            // Draw point
-            const p0 = toScreen(x0, y0);
-            ctx.fillStyle = "white";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "white";
-            ctx.beginPath(); ctx.arc(p0.x, p0.y, 6, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-            drawGrid();
-            
-            if (showDerivative) {
-                drawGraph(currentFunc.df, getNeonColor('--neon-orange'), 2, false);
+                // Draw point
+                const p0 = toScreen(x0, y0);
+                ctx.fillStyle = "white";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "white";
+                ctx.beginPath(); ctx.arc(p0.x, p0.y, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
             }
 
-            if (showSecondDeriv) {
-                drawGraph(currentFunc.ddf, getNeonColor('--neon-green'), 2, false);
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                drawGrid();
+
+                if (showDerivative) {
+                    drawGraph(currentFunc.df, getNeonColor('--neon-orange'), 2, false);
+                }
+
+                if (showSecondDeriv) {
+                    drawGraph(currentFunc.ddf, getNeonColor('--neon-green'), 2, false);
+                }
+
+                drawGraph(currentFunc.f, getNeonColor('--neon-blue'), 3, false);
+                drawTangent();
+
+                updateFormula();
+                document.getElementById('val-x0').innerText = x0.toFixed(2);
+                document.getElementById('val-m').innerText = currentFunc.df(x0).toFixed(2);
+                document.getElementById('val-ddm').innerText = currentFunc.ddf(x0).toFixed(2);
             }
-            
-            drawGraph(currentFunc.f, getNeonColor('--neon-blue'), 3, false);
-            drawTangent();
-            
-            updateFormula();
-            document.getElementById('val-x0').innerText = x0.toFixed(2);
-            document.getElementById('val-m').innerText = currentFunc.df(x0).toFixed(2);
-            document.getElementById('val-ddm').innerText = currentFunc.ddf(x0).toFixed(2);
-        }
 
-        function updateFormula() {
-            CyberFormula.set(currentFunc.tex);
-        }
+            function updateFormula() {
+                CyberFormula.set(currentFunc.tex);
+            }
 
-        // Interaction
-        document.getElementById('slider-x0').addEventListener('input', (e) => {
-            x0 = parseFloat(e.target.value);
-            draw();
-        });
+            // Interaction
+            document.getElementById('slider-x0').addEventListener('input', (e) => {
+                x0 = parseFloat(e.target.value);
+                draw();
+            });
 
-        document.getElementById('check-deriv').addEventListener('change', (e) => {
-            showDerivative = e.target.checked;
-            draw();
-        });
+            document.getElementById('check-deriv').addEventListener('change', (e) => {
+                showDerivative = e.target.checked;
+                draw();
+            });
 
-        document.getElementById('check-deriv2').addEventListener('change', (e) => {
-            showSecondDeriv = e.target.checked;
-            draw();
-        });
+            document.getElementById('check-deriv2').addEventListener('change', (e) => {
+                showSecondDeriv = e.target.checked;
+                draw();
+            });
 
-        window.addEventListener('resize', resize);
-        window.onload = resize;
+            window.addEventListener('resize', resize);
+            resize(); // Direct call - we are already inside the load event
 
-        // Custom interaction on canvas
-        let isDragging = false;
-        canvas.addEventListener('mousedown', (e) => { isDragging = true; handleInteraction(e); });
-        window.addEventListener('mousemove', (e) => { if (isDragging) handleInteraction(e); });
-        window.addEventListener('mouseup', () => { isDragging = false; });
+            // Custom interaction on canvas
+            let isDragging = false;
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; handleInteraction(e); });
+            window.addEventListener('mousemove', (e) => { if (isDragging) handleInteraction(e); });
+            window.addEventListener('mouseup', () => { isDragging = false; });
 
-        function handleInteraction(e) {
-            const rect = canvas.getBoundingClientRect();
-            const posX = e.clientX - rect.left;
-            const math = toMath(posX, 0);
-            x0 = Math.max(-5, Math.min(5, math.x));
-            document.getElementById('slider-x0').value = x0;
-            draw();
-        }
+            function handleInteraction(e) {
+                const rect = canvas.getBoundingClientRect();
+                const posX = e.clientX - rect.left;
+                const math = toMath(posX, 0);
+                x0 = Math.max(-5, Math.min(5, math.x));
+                document.getElementById('slider-x0').value = x0;
+                draw();
+            }
 
         }); // End DOMContentLoaded
     </script>
 </body>
+
 </html>

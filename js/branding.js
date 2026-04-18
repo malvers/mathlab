@@ -238,8 +238,8 @@ const CyberBranding = {
             /* Branding Logo (Right-pinned Master Header) */
             .canvas-branding {
                 position: fixed;
-                top: 40px;
-                right: 40px; 
+                top: 20px;
+                right: 25px; 
                 text-align: right;
                 pointer-events: none;
                 z-index: 99999;
@@ -250,9 +250,9 @@ const CyberBranding = {
 
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(14px + 14px * var(--header-scale));
+                font-size: calc(11px + 11px * var(--header-scale));
                 margin: 0;
-                letter-spacing: calc(1px + 3px * var(--header-scale));
+                letter-spacing: calc(1px + 2.5px * var(--header-scale));
                 background: linear-gradient(to right, var(--branding-blue), var(--branding-white), var(--branding-purple));
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
@@ -503,10 +503,11 @@ const CyberBranding = {
             }
 
             .briefing-text {
-                font-family: 'Inter';
-                line-height: 1.8;
-                font-size: 1rem;
-                color: rgba(255,255,255,0.9);
+                font-family: 'Orbitron', sans-serif;
+                line-height: 2;
+                font-size: 0.78rem;
+                letter-spacing: 0.5px;
+                color: rgba(255,255,255,0.85);
             }
 
             .briefing-text b { color: var(--branding-blue); }
