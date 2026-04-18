@@ -246,15 +246,24 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
                     {
-                        label: 'Ansicht zurücksetzen',
-                        onclick: () => {
-                            CyberCanvasInstance.resetView(-7, 7);
-                            update();
-                        }
+                        label: 'Labor zurücksetzen',
+                        onclick: () => { points = []; update(); }
+                    },
+                    {
+                        label: 'Zufalls-Daten',
+                        onclick: () => generateChaos()
                     },
                     { divider: true },
                     {
-                        label: 'Achsen an',
+                        label: 'Gitter anzeigen',
+                        checked: CyberCanvasInstance.showGrid,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showGrid = val;
+                            update();
+                        }
+                    },
+                    {
+                        label: 'Achsen anzeigen',
                         checked: CyberCanvasInstance.showAxes,
                         onchange: (val) => {
                             CyberCanvasInstance.showAxes = val;
