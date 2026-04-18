@@ -32,16 +32,13 @@
             touch-action: none;
         }
 
-        /* --- BACKGROUND IMMERSION (REMOVED) --- */
-
-        /* --- SIDE PANEL --- */
         #side-panel {
             width: 380px;
             min-width: 380px;
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            padding: 5px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -68,9 +65,6 @@
             text-transform: uppercase;
         }
 
-        /* --- CANVAS HEADER (NEW) --- */
-
-        /* --- STAT CARDS --- */
         .stat-card {
             background: var(--glass-bright);
             padding: 12px 20px;
@@ -78,13 +72,10 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.3s ease;
         }
-        .stat-card:hover {
-            border-color: rgba(0, 210, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-        }
+        .stat-card:hover { border-color: rgba(0, 210, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
         .stat-label {
             font-family: 'Orbitron';
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.4);
             letter-spacing: 1.5px;
             margin-bottom: 10px;
@@ -101,19 +92,9 @@
         .stat-value.highlight-blue { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
         .stat-value.highlight-purple { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
 
-        .m-n-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .m-n-grid { display: flex; flex-direction: column; gap: 12px; }
 
-        /* --- CONTROLS --- */
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
-        }
+        .control-group { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
 
         button {
             padding: 15px 20px;
@@ -135,11 +116,7 @@
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
             transform: translateY(-2px);
         }
-        button.primary { background: var(--neon-blue); color: #000; font-weight: bold; border-color: white; }
-        button.secondary { border-color: var(--neon-pink); color: var(--neon-pink); }
-        button.secondary:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.3); }
 
-        /* --- CANVAS AREA --- */
         #canvas-container {
             flex-grow: 1;
             position: relative;
@@ -149,14 +126,7 @@
             justify-content: center;
             overflow: hidden;
         }
-        canvas { display: block; cursor: crosshair; }
-
-        /* --- SOUND TOGGLE --- */
-        .sound-toggle {
-            display: none;
-        }
-
-        /* --- HELP OVERLAY (REMOVED) --- */
+        canvas { display: block; }
 
         .dashboard-btn {
             display: flex;
@@ -177,19 +147,12 @@
             width: 100%;
             box-sizing: border-box;
         }
-
         .dashboard-btn:hover {
             color: white;
             background: rgba(0, 210, 255, 0.1);
             border-color: var(--neon-blue);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
             transform: translateX(5px);
-        }
-
-        .dashboard-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke-width: 2.5;
         }
 
         footer {
@@ -201,29 +164,16 @@
             letter-spacing: 1px;
         }
 
-        /* Mobile Adjustments */
         @media (max-width: 900px) {
             body { flex-direction: column; overflow-y: auto; }
-            #side-panel { width: 100%; min-width: 100%; order: 2; border-right: none; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+            #side-panel { width: 100%; min-width: 100%; order: 2; }
             #canvas-container { height: 60vh; min-height: 400px; order: 1; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Background Video Removed -->
-    
     <div id="side-panel">
-        <header style="border: none; padding-bottom: 5px;">
-            <a href="index.html" class="dashboard-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>DASHBOARD</span>
-            </a>
-        </header>
-
         <div class="stat-card">
             <span class="stat-label">Korrelation (r)</span>
             <div id="r-display" class="stat-value highlight-purple">+0.00</div>
@@ -235,7 +185,7 @@
                 <div id="m-val" class="stat-value highlight-blue">0.00</div>
             </div>
             <div class="stat-card">
-                <span class="stat-label">n (y-Abschn.)</span>
+                <span class="stat-label">n (y-Abschnitt)</span>
                 <div id="n-val" class="stat-value highlight-blue">0.00</div>
             </div>
         </div>
@@ -261,244 +211,234 @@
         <canvas id="canvas"></canvas>
     </div>
 
-    <!-- Overlays Removed (Clean UI) -->
-
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
     <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Statistik-Labor"
-        });
+        /**
+         * CYBER-REGRESSION LABORATORY - ULTRA v5.3.8
+         * Full Engine Integration with Real-Time Analytics.
+         */
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init("LINEARE REGRESSION");
 
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvas-container');
+            // 2. Initialize UI Engine
+            CyberUI.init();
 
-        let points = [];
-        let selectedPoint = null;
-        let showSD = true;
+            // 3. Initialize CyberCanvas
+            CyberCanvasInstance.init('canvas', {
+                minY: -7,
+                maxY: 7
+            }, {
+                showLabels: true,
+                showTelemetry: false,
+                maxRangeY: 100,
+                allowPan: false
+            });
 
-        const OFF_X = 80;
-        const OFF_Y = 100;
-        const SCALE = 45;
+            // 4. State Management
+            let points = [];
+            let selectedPoint = null;
+            let showSD = true;
 
-        function init() {
-            resize();
-            generateChaos();
-            window.addEventListener('resize', resize);
+            // 5. Context Menu
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: 'Ansicht zurücksetzen',
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-7, 7);
+                            update();
+                        }
+                    },
+                    { divider: true },
+                    {
+                        label: 'Achsen an',
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showAxes = val;
+                            update();
+                        }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showLabels = val;
+                            update();
+                        }
+                    },
+                    {
+                        label: 'Koordinaten',
+                        checked: CyberCanvasInstance.showTelemetry,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showTelemetry = val;
+                        }
+                    }
+                ]);
+            };
 
+            // 6. Bind Redraw/Update
+            CyberCanvasInstance.onResize = () => update();
+
+            // 7. Input Handling
+            function getCoords(e) {
+                const canvas = document.getElementById('canvas');
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: CyberCanvasInstance.unmapX(e.clientX - rect.left),
+                    y: CyberCanvasInstance.unmapY(e.clientY - rect.top)
+                };
+            }
+
+            const canvas = document.getElementById('canvas');
             canvas.addEventListener('mousedown', startAction);
             window.addEventListener('mousemove', moveAction);
             window.addEventListener('mouseup', endAction);
 
-            canvas.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                startAction(touch);
-                e.preventDefault();
-            }, { passive: false });
-
-            window.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                moveAction(touch);
-                e.preventDefault();
-            }, { passive: false });
-
+            canvas.addEventListener('touchstart', (e) => { startAction(e.touches[0]); e.preventDefault(); }, { passive: false });
+            window.addEventListener('touchmove', (e) => { moveAction(e.touches[0]); e.preventDefault(); }, { passive: false });
             window.addEventListener('touchend', endAction);
+
+            // 8. Global Methods
+            window.generateChaos = () => {
+                points = [];
+                const rangeX = CyberCanvasInstance.view.maxX - CyberCanvasInstance.view.minX;
+                const baseM = (Math.random() - 0.5) * 1.5;
+                const baseN = (Math.random() - 0.5) * 1.5; // Achsenabschnitt nahe 0
+                for (let i = 0; i < 20; i++) {
+                    const x = CyberCanvasInstance.view.minX + 2 + Math.random() * (rangeX - 4);
+                    const y = baseM * x + baseN + (normalRandom() * 1.2);
+                    points.push({ x, y: y }); // Erlaube auch negative y für echte Nullpunkt-Läufe
+                }
+                update();
+            };
+
+            window.clearPoints = () => { points = []; update(); };
             
-            // Keyboard Listeners
-            window.addEventListener('keydown', (e) => {
-                if (e.key === "ArrowUp") {
-                    shiftResiduals(0.9);
-                    e.preventDefault();
-                } else if (e.key === "ArrowDown") {
-                    shiftResiduals(1.1);
-                    e.preventDefault();
-                }
-            });
-        }
+            window.shiftResiduals = (factor) => {
+                if (points.length < 2) return;
+                const stats = calculateStats();
+                points.forEach(p => {
+                    const yPred = stats.m * p.x + stats.n;
+                    const residual = p.y - yPred;
+                    p.y = yPred + (residual * factor);
+                });
+                update();
+            };
 
-        function toggleHelp() {
-            // Removed for minimalism
-        }
-
-        function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = container.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
-            ctx.scale(dpr, dpr);
-            draw();
-        }
-
-        function getCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left - OFF_X) / SCALE;
-            const y = (rect.height - OFF_Y - (e.clientY - rect.top)) / SCALE;
-            return { x, y };
-        }
-
-        function startAction(e) {
-            const { x, y } = getCoords(e);
-            selectedPoint = null;
-
-            for (let p of points) {
-                const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
-                if (dist < 0.6) {
-                    selectedPoint = p;
-                    break;
-                }
-            }
-
-            if (!selectedPoint) {
-                selectedPoint = { x, y };
-                points.push(selectedPoint);
-            }
-            update();
-        }
-
-        function moveAction(e) {
-            if (selectedPoint) {
+            // 9. Core Logic
+            function startAction(e) {
                 const { x, y } = getCoords(e);
-                selectedPoint.x = x;
-                selectedPoint.y = y;
+                selectedPoint = null;
+                for (let p of points) {
+                    const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
+                    const hitRadius = (CyberCanvasInstance.view.maxX - CyberCanvasInstance.view.minX) / 35;
+                    if (dist < hitRadius) { selectedPoint = p; break; }
+                }
+                if (!selectedPoint) { selectedPoint = { x, y }; points.push(selectedPoint); }
                 update();
             }
-        }
 
-        function endAction() { selectedPoint = null; }
-        function clearPoints() { points = []; update(); }
+            function moveAction(e) {
+                if (selectedPoint) {
+                    const { x, y } = getCoords(e);
+                    selectedPoint.x = x;
+                    selectedPoint.y = y;
+                    update();
+                }
+            }
 
-        function shiftResiduals(factor) {
-            // Logic preserved but UI removed
-            if (points.length < 2) return;
-            const stats = calculateStats();
-            points.forEach(p => {
-                const yPred = stats.m * p.x + stats.n;
-                const residual = p.y - yPred;
-                p.y = yPred + (residual * factor);
+            function endAction() { selectedPoint = null; }
+
+            function normalRandom() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            // 10. Analytics & Rendering
+            function update() {
+                const stats = calculateStats();
+                draw(stats);
+                document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(2);
+                document.getElementById('m-val').innerText = stats.m.toFixed(2);
+                document.getElementById('n-val').innerText = stats.n.toFixed(2);
+                document.getElementById('sd-val').innerText = stats.sd.toFixed(2);
+            }
+
+            function calculateStats() {
+                const n = points.length;
+                if (n < 2) return { r: 0, m: 0, n: 0, sd: 0 };
+                let sX = 0, sY = 0, sXY = 0, sX2 = 0, sY2 = 0;
+                for (let p of points) {
+                    sX += p.x; sY += p.y; sXY += p.x * p.y;
+                    sX2 += p.x * p.x; sY2 += p.y * p.y;
+                }
+                const numR = n * sXY - sX * sY;
+                const denR = Math.sqrt((n * sX2 - sX * sX) * (n * sY2 - sY * sY));
+                const r = denR !== 0 ? numR / denR : 0;
+                const denM = (n * sX2 - sX * sX);
+                const m = denM !== 0 ? numR / denM : 0;
+                const n_val = (sY / n) - m * (sX / n);
+                let sumSqRes = 0;
+                for (let p of points) sumSqRes += Math.pow(p.y - (m * p.x + n_val), 2);
+                const sd = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
+                return { r, m, n: n_val, sd };
+            }
+
+            function draw(stats) {
+                const ctx = CyberCanvasInstance.ctx;
+                CyberCanvasInstance.drawGrid({ vignette: true, glow: true, mainColor: 'rgba(0, 210, 255, 0.4)' });
+
+                if (points.length >= 3 && stats.sd > 0 && showSD) {
+                    const minX = CyberCanvasInstance.view.minX - 5;
+                    const maxX = CyberCanvasInstance.view.maxX + 5;
+                    ctx.fillStyle = "rgba(0, 210, 255, 0.1)";
+                    ctx.beginPath();
+                    ctx.moveTo(CyberCanvasInstance.mapX(minX), CyberCanvasInstance.mapY(stats.m * minX + stats.n + stats.sd));
+                    ctx.lineTo(CyberCanvasInstance.mapX(maxX), CyberCanvasInstance.mapY(stats.m * maxX + stats.n + stats.sd));
+                    ctx.lineTo(CyberCanvasInstance.mapX(maxX), CyberCanvasInstance.mapY(stats.m * maxX + stats.n - stats.sd));
+                    ctx.lineTo(CyberCanvasInstance.mapX(minX), CyberCanvasInstance.mapY(stats.m * minX + stats.n - stats.sd));
+                    ctx.fill();
+                }
+
+                if (points.length >= 2) {
+                    const minX = CyberCanvasInstance.view.minX - 5;
+                    const maxX = CyberCanvasInstance.view.maxX + 5;
+                    ctx.strokeStyle = "#ff0055";
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = "#ff0055";
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.moveTo(CyberCanvasInstance.mapX(minX), CyberCanvasInstance.mapY(stats.m * minX + stats.n));
+                    ctx.lineTo(CyberCanvasInstance.mapX(maxX), CyberCanvasInstance.mapY(stats.m * maxX + stats.n));
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                points.forEach(p => {
+                    const px = CyberCanvasInstance.mapX(p.x);
+                    const py = CyberCanvasInstance.mapY(p.y);
+                    ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#9d50bb";
+                    ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#9d50bb";
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+            }
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === "ArrowUp") shiftResiduals(0.9);
+                if (e.key === "ArrowDown") shiftResiduals(1.1);
             });
-            update();
-        }
 
-        function generateChaos() {
-            points = [];
-            const rect = container.getBoundingClientRect();
-            const count = 20;
-            const baseM = (Math.random() - 0.5) * 1.5;
-            const baseN = 4 + Math.random() * 4;
-            for (let i = 0; i < count; i++) {
-                const x = Math.random() * (rect.width / SCALE - 3);
-                const y = baseM * x + baseN + (normalRandom() * 1.5);
-                points.push({ x, y: Math.max(0, y) });
-            }
-            update();
-        }
-
-        function normalRandom() {
-            let u = 0, v = 0;
-            while (u === 0) u = Math.random();
-            while (v === 0) v = Math.random();
-            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-        }
-
-        function toggleSD() { showSD = !showSD; draw(); }
-
-        function update() {
-            const stats = calculateStats();
-            draw(stats);
-            
-            document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(2);
-            document.getElementById('m-val').innerText = stats.m.toFixed(2);
-            document.getElementById('n-val').innerText = stats.n.toFixed(2);
-            document.getElementById('sd-val').innerText = stats.sd.toFixed(2);
-        }
-
-        function calculateStats() {
-            const n = points.length;
-            if (n < 2) return { r: 0, m: 0, n: 0, sd: 0 };
-            let sX = 0, sY = 0, sXY = 0, sX2 = 0, sY2 = 0;
-            for (let p of points) {
-                sX += p.x; sY += p.y; sXY += p.x * p.y;
-                sX2 += p.x * p.x; sY2 += p.y * p.y;
-            }
-            const numR = n * sXY - sX * sY;
-            const denR = Math.sqrt((n * sX2 - sX * sX) * (n * sY2 - sY * sY));
-            const r = denR !== 0 ? numR / denR : 0;
-            const denM = (n * sX2 - sX * sX);
-            const m = denM !== 0 ? numR / denM : 0;
-            const n_val = (sY / n) - m * (sX / n);
-            let sumSqRes = 0;
-            for (let p of points) sumSqRes += Math.pow(p.y - (m * p.x + n_val), 2);
-            const sd = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
-            return { r, m, n: n_val, sd };
-        }
-
-        function draw(stats = calculateStats()) {
-            const rect = container.getBoundingClientRect();
-            ctx.clearRect(0, 0, rect.width, rect.height);
-            const w = rect.width, h = rect.height;
-
-            // Grid
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.1)";
-            ctx.lineWidth = 1;
-            for (let x = 0; x < w; x += SCALE) {
-                ctx.beginPath(); ctx.moveTo(OFF_X + x, 0); ctx.lineTo(OFF_X + x, h - OFF_Y); ctx.stroke();
-            }
-            for (let y = 0; y < h; y += SCALE) {
-                ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y - y); ctx.lineTo(w, h - OFF_Y - y); ctx.stroke();
-            }
-
-            // Axes
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.5)";
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(w - 20, h - OFF_Y); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(OFF_X, h - OFF_Y); ctx.lineTo(OFF_X, 20); ctx.stroke();
-
-            // SD Shadow (Light Blue Overlay)
-            if (showSD && points.length >= 3 && stats.sd > 0) {
-                const xMax = (w - OFF_X) / SCALE;
-                ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
-                ctx.beginPath();
-                ctx.moveTo(OFF_X, h - OFF_Y - (stats.m * 0 + stats.n + stats.sd) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n + stats.sd) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n - stats.sd) * SCALE);
-                ctx.lineTo(OFF_X, h - OFF_Y - (stats.m * 0 + stats.n - stats.sd) * SCALE);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            // Regression Line
-            if (points.length >= 2) {
-                const xMax = (w - OFF_X) / SCALE;
-                ctx.strokeStyle = "#ff0055";
-                ctx.lineWidth = 4;
-                ctx.shadowColor = "#ff0055";
-                ctx.shadowBlur = 15;
-                ctx.beginPath();
-                ctx.moveTo(OFF_X, h - OFF_Y - (stats.n) * SCALE);
-                ctx.lineTo(OFF_X + xMax * SCALE, h - OFF_Y - (stats.m * xMax + stats.n) * SCALE);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-            }
-
-            // Scatter Points
-            points.forEach(p => {
-                const px = OFF_X + p.x * SCALE;
-                const py = h - OFF_Y - p.y * SCALE;
-                ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#9d50bb";
-                ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#9d50bb";
-                ctx.shadowBlur = 12;
-                ctx.beginPath();
-                ctx.arc(px, py, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
-        }
-
-        init();
+            generateChaos();
+        });
     </script>
 </body>
 </html>
