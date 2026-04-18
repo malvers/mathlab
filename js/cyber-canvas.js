@@ -40,6 +40,10 @@ class CyberCanvas {
         this.teleX = null;
         this.teleY = null;
 
+        // Visibility Flags
+        this.showAxes = true;
+        this.showLabels = false; // Disabled by default for global stability
+
         // Listener Tracking
         this.activeListeners = [];
     }
@@ -53,6 +57,10 @@ class CyberCanvas {
 
         this.view = { ...this.view, ...viewConfig };
         this.showTelemetry = options.showTelemetry !== false;
+        
+        // Allow initial visibility overrides via options
+        if (options.showAxes !== undefined) this.showAxes = options.showAxes;
+        if (options.showLabels !== undefined) this.showLabels = options.showLabels;
 
         // Prevent default browser zoom on iPad
         this.canvas.style.touchAction = 'none';
@@ -274,9 +282,9 @@ class CyberCanvas {
     drawGrid(options = {}) {
         const ctx = this.ctx;
         this.clear();
-        const isD = this.isDragging;
         const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.4)';
         const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.05)';
+        const textColor = 'rgba(255, 255, 255, 0.3)';
 
         if (options.vignette) {
             const grad = ctx.createRadialGradient(this.width/2, this.height/2, 0, this.width/2, this.height/2, this.width/1.2);
@@ -286,22 +294,62 @@ class CyberCanvas {
             ctx.fillRect(0, 0, this.width, this.height);
         }
 
+        // --- GRID LINES & LABELS ---
         ctx.strokeStyle = gridColor;
         ctx.lineWidth = 1;
-        for (let x = Math.ceil(this.view.minX); x <= Math.floor(this.view.maxX); x++) {
-            const px = this.mapX(x); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, this.height); ctx.stroke();
-        }
-        for (let y = Math.ceil(this.view.minY); y <= Math.floor(this.view.maxY); y++) {
-            const py = this.mapY(y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(this.width, py); ctx.stroke();
+        ctx.font = '10px Orbitron, sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+
+        const step = this.getStepSize();
+
+        // Vertical lines & X labels
+        for (let x = Math.floor(this.view.minX / step) * step; x <= this.view.maxX; x += step) {
+            const px = this.mapX(x);
+            ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, this.height); ctx.stroke();
+
+            if (this.showLabels && Math.abs(x) > 0.001) {
+                const py = this.mapY(0);
+                const labelY = Math.min(Math.max(py + 15, 20), this.height - 10);
+                ctx.fillText(x.toFixed(x % 1 === 0 ? 0 : 1), px, labelY);
+            }
         }
 
-        ctx.strokeStyle = mainColor;
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = options.glow ? 10 : 0;
-        ctx.shadowColor = mainColor;
-        const xA = this.mapY(0); ctx.beginPath(); ctx.moveTo(0, xA); ctx.lineTo(this.width, xA); ctx.stroke();
-        const yA = this.mapX(0); ctx.beginPath(); ctx.moveTo(yA, 0); ctx.lineTo(yA, this.height); ctx.stroke();
-        ctx.shadowBlur = 0;
+        // Horizontal lines & Y labels
+        ctx.textAlign = 'right';
+        for (let y = Math.floor(this.view.minY / step) * step; y <= this.view.maxY; y += step) {
+            const py = this.mapY(y);
+            ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(this.width, py); ctx.stroke();
+
+            if (this.showLabels && Math.abs(y) > 0.001) {
+                const px = this.mapX(0);
+                const labelX = Math.min(Math.max(px - 10, 40), this.width - 10);
+                ctx.fillText(y.toFixed(y % 1 === 0 ? 0 : 1), labelX, py + 4);
+            }
+        }
+
+        // --- MAIN AXES ---
+        if (this.showAxes) {
+            ctx.strokeStyle = mainColor;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = options.glow ? 10 : 0;
+            ctx.shadowColor = mainColor;
+            
+            const xA = this.mapY(0);
+            ctx.beginPath(); ctx.moveTo(0, xA); ctx.lineTo(this.width, xA); ctx.stroke();
+            
+            const yA = this.mapX(0);
+            ctx.beginPath(); ctx.moveTo(yA, 0); ctx.lineTo(yA, this.height); ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    getStepSize() {
+        const range = this.view.maxX - this.view.minX;
+        if (range < 5) return 0.5;
+        if (range < 20) return 1;
+        if (range < 50) return 5;
+        return 10;
     }
 
     clear() { this.ctx.clearRect(0, 0, this.width, this.height); }
