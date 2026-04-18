@@ -66,15 +66,31 @@
          */
         window.addEventListener('load', () => {
             // 1. Initialize Branding
-            CyberBranding.init("COORD-SYSTEM TESTER");
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "COORD-SYSTEM TESTER",
+                briefing: `
+                    <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: ENGINE-TELEMETRIE</h3>
+                    Dieses Modul dient der Stress-Analyse der CyberCanvas-Engine. Überprüfe die Projektion komplexer Funktionen und die Integrität des Koordinatensystems.
+                    
+                    <div class="admin-info">
+                        <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
+                        <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                            <li><b>Stress-Test:</b> Panning und Zooming im laufenden Betrieb testen (Alt + Scroll).</li>
+                            <li><b>Integrität:</b> Validierung der KaTeX-Labels an den Achsen.</li>
+                            <li><b>Performance:</b> Adaptive Subdivision bei asymptotischen Verläufen prüfen.</li>
+                        </ul>
+                    </div>
+                `
+            });
 
-            // 2. Initialize UI Engine (Crucial for the "Box" Styles)
+            // 2. Initialize UI Engine
             CyberUI.init();
 
             // 3. Create Navigation & Control Cards
             CyberUI.createCard('parameters-container', 'PROJEKTIONS-STEUERUNG', `
                 <div id="function-checks" class="cyber-control-group"></div>
-            `, '#00d2ff');
+            `, 'var(--neon-blue)');
 
             CyberUI.createCheckbox('function-checks', 'f(x) = -x²', true, (val) => {
                 state.showX2 = val;
@@ -220,13 +236,6 @@
 
             // Initial Draw
             draw();
-
-            // Set Description
-            CyberBranding.setBriefing(`
-                <b>Coordinate System Tester</b><br><br>
-                Dieses Modul dient der Weiterentwicklung und dem Stress-Test der neuen CyberCanvas-Engine.<br><br>
-                Hier werden wir erweiterte Features wie Zooming, Panning oder adaptive Grid-Layer implementieren.
-            `);
         });
     </script>
 </body>
