@@ -104,7 +104,7 @@ class CyberCanvas {
         });
 
         this.resize();
-        if (this.showTelemetry) this.injectTelemetryPane();
+        this.injectTelemetryPane();
         
         this.isInitialized = true;
         this.startLoop();
@@ -250,7 +250,7 @@ class CyberCanvas {
                 x: this.unmapX(e.clientX - rect.left),
                 y: this.unmapY(e.clientY - rect.top)
             };
-            this.onMouseDown(pos);
+            this.onMouseDown(pos, e);
         }
 
         if (!this.allowPan) return;
@@ -273,12 +273,12 @@ class CyberCanvas {
                 x: this.unmapX(this.currentMousePos.x),
                 y: this.unmapY(this.currentMousePos.y)
             };
-            this.onMouseMove(pos);
+            this.onMouseMove(pos, e);
         }
     }
 
-    handleMouseUp() {
-        if (this.onMouseUp) this.onMouseUp();
+    handleMouseUp(e) {
+        if (this.onMouseUp) this.onMouseUp(e);
         
         if (this.isDragging) {
             this.isDragging = false;
@@ -457,8 +457,8 @@ class CyberCanvas {
         this.telePane.className = 'cyber-telemetry-pane';
         this.telePane.innerHTML = `
             <div class="telemetry-card">
-                <div class="telemetry-row"><span class="label">X_COORD</span><span class="value" id="tele-x">0.00</span></div>
-                <div class="telemetry-row"><span class="label">Y_COORD</span><span class="value" id="tele-y">0.00</span></div>
+                <div class="telemetry-row"><span class="label">X</span><span class="value" id="tele-x">0.00</span></div>
+                <div class="telemetry-row"><span class="label">Y</span><span class="value" id="tele-y">0.00</span></div>
             </div>`;
         parent.appendChild(this.telePane);
         this.teleX = document.getElementById('tele-x');
