@@ -72,6 +72,7 @@ class CyberCanvas {
             maxRangeY: options.maxRangeY || Infinity
         };
         this.allowPan = options.allowPan !== false;
+        this.allowZoom = options.allowZoom !== false;
         
         // Allow initial visibility overrides via options
         if (options.showAxes !== undefined) this.showAxes = options.showAxes;
@@ -287,6 +288,7 @@ class CyberCanvas {
     }
 
     handleWheel(e) {
+        if (!this.allowZoom) return;
         e.preventDefault(); // Prevent page scroll
         const rect = this.canvas.getBoundingClientRect();
         const factor = e.deltaY > 0 ? 1.1 : 0.9;

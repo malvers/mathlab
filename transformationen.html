@@ -181,7 +181,7 @@
                     <span>ROTATION</span>
                     <span id="label-rot" class="val">0°</span>
                 </div>
-                <input type="range" id="slider-rot" min="0" max="360" value="0">
+                <input type="range" id="slider-rot" min="-180" max="180" value="0">
             </div>
 
             <div class="slider-wrap">
@@ -206,6 +206,13 @@
                     <span id="label-ty" class="val">0.0</span>
                 </div>
                 <input type="range" id="slider-ty" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-wrap" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--neon-blue); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px;">
+                    <input type="checkbox" id="check-helpers" checked style="width: 18px; height: 18px; accent-color: var(--neon-pink);">
+                    HILFSLINIEN ANZEIGEN
+                </label>
             </div>
 
             <button onclick="resetLab()">Labor Zurücksetzen</button>
@@ -275,21 +282,18 @@
 
                     sRot.oninput = (e) => { transform.rotation = parseFloat(e.target.value); update(); };
                     sScale.oninput = (e) => { transform.scale = parseFloat(e.target.value) / 100; update(); };
+
+                    document.getElementById('check-helpers').onchange = () => update();
                     
-                    // Verschiebung mit temporärer Visualisierung
                     sTx.oninput = (e) => { 
                         transform.tx = parseFloat(e.target.value) / 10; 
-                        showHelpers = true;
                         update(); 
                     };
-                    sTx.onchange = () => { showHelpers = false; update(); };
                     
                     sTy.oninput = (e) => { 
                         transform.ty = parseFloat(e.target.value) / 10; 
-                        showHelpers = true;
                         update(); 
                     };
-                    sTy.onchange = () => { showHelpers = false; update(); };
 
                     update();
                 } catch (e) {
@@ -395,34 +399,103 @@
 
                 const transformedPoints = points.map(getTransformed);
 
-                // --- HILFSLINIEN (DASHED VOM START - NUR BEI SLIDER-BEWEGUNG) ---
-                if (showHelpers) {
+                // --- HILFSLINIEN (DASHED VOM START - SCHALTBAR) ---
+                const isHelpersEnabled = document.getElementById('check-helpers').checked;
+                if (isHelpersEnabled) {
                     ctx.setLineDash([5, 8]);
-                    ctx.lineWidth = 1;
+                    ctx.lineWidth = 2.5; 
 
-                    // 1. Urbild-Silhouette (Original-Dreieck - EXAKT VOM START)
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    // 1. Urbild-Silhouette (Basispunkte vor aktueller Transformation)
+                    ctx.strokeStyle = "rgba(255, 255, 255, 1.0)"; 
                     ctx.beginPath();
-                    ctx.moveTo(cc.mapX(initialPoints[0].x), cc.mapY(initialPoints[0].y));
-                    ctx.lineTo(cc.mapX(initialPoints[1].x), cc.mapY(initialPoints[1].y));
-                    ctx.lineTo(cc.mapX(initialPoints[2].x), cc.mapY(initialPoints[2].y));
+                    ctx.moveTo(cc.mapX(points[0].x), cc.mapY(points[0].y));
+                    ctx.lineTo(cc.mapX(points[1].x), cc.mapY(points[1].y));
+                    ctx.lineTo(cc.mapX(points[2].x), cc.mapY(points[2].y));
                     ctx.closePath();
                     ctx.stroke();
 
-                    // 2. Verschiebungsvektoren (Initial-Start -> Aktuelles Bild)
-                    initialPoints.forEach((p, i) => {
+                    const pixPerUnit = cc.canvas.width / (cc.view.maxX - cc.view.minX);
+                    const angleRad = (transform.rotation * Math.PI) / 180;
+
+                    points.forEach((p, i) => {
                         const tp = transformedPoints[i];
-                        ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
-                        ctx.beginPath();
-                        ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
-                        ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
-                        ctx.stroke();
+
+                        // 2. Verschiebungsvektoren (Blau) - Vom Basis-Punkt zum aktuellen Bild (NUR WENN NICHT ROTIERT WIRD)
+                        if (Math.abs(transform.rotation) <= 0.1) {
+                            ctx.strokeStyle = "rgba(0, 210, 255, 1.0)";
+                            ctx.beginPath();
+                            ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
+                            ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
+                            ctx.stroke();
+                        }
+                        
+                        // 3. Rotations-Bögen (Pink) - ZENTRIERT IM FESTEN RP
+                        if (Math.abs(transform.rotation) > 0.1) {
+                            try {
+                                // 1. Radius: EXACTLY the distance from RP to the CURRENT transformed point (tp)
+                                const dx = tp.x - rp.x;
+                                const dy = tp.y - rp.y;
+                                const rDist = Math.hypot(dx, dy); // THIS length (the green line)
+                                
+                                // 2. Angles: The arc ends at the current point, and traces backwards by the rotation angle
+                                const endAng = Math.atan2(dy, dx);
+                                const startAng = endAng - angleRad;
+                                
+                                const cx = cc.mapX(rp.x);
+                                const cy = cc.mapY(rp.y);
+                                
+                                // Verwenden des echten Pixel-Radius, um Verzerrungen zu vermeiden
+                                const dxPix = cc.mapX(tp.x) - cc.mapX(rp.x);
+                                const dyPix = cc.mapY(tp.y) - cc.mapY(rp.y);
+                                const pxRadius = Math.hypot(dxPix, dyPix);
+
+                                if (isFinite(cx) && isFinite(cy) && isFinite(pxRadius) && pxRadius > 0) {
+                                    ctx.strokeStyle = "rgba(255, 0, 85, 1.0)"; 
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, pxRadius, -startAng, -endAng, transform.rotation > 0);
+                                    ctx.stroke();
+                                }
+                            } catch (e) {}
+                        }
                     });
                     
-                    ctx.setLineDash([]); // Reset Dash
+                    ctx.setLineDash([]); 
+
+                    // 4. DIREKTER KUNDENWUNSCH: Linien vom RP zu den aktuellen Ecken mit Maßen
+                    transformedPoints.forEach((tp, i) => {
+                        // Gepunktete Neon-Spreichen
+                        ctx.setLineDash([2, 5]);
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = "rgba(173, 255, 47, 0.8)"; // Neon Grün
+                        ctx.beginPath();
+                        ctx.moveTo(cc.mapX(rp.x), cc.mapY(rp.y));
+                        ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
+                        ctx.stroke();
+                        
+                        // Abstands-Messung
+                        const dist = Math.hypot(tp.x - rp.x, tp.y - rp.y);
+                        const midX = (rp.x + tp.x) / 2;
+                        const midY = (rp.y + tp.y) / 2;
+                        
+                        ctx.fillStyle = "rgba(173, 255, 47, 1.0)";
+                        ctx.font = '12px Orbitron, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // Ein kleiner Hintergrund für bessere Lesbarkeit
+                        const text = dist.toFixed(2);
+                        const mx = cc.mapX(midX);
+                        const my = cc.mapY(midY) - 10;
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                        ctx.fillRect(mx - 15, my - 8, 30, 16);
+                        
+                        ctx.fillStyle = "rgba(173, 255, 47, 1.0)";
+                        ctx.fillText(text, mx, my);
+                    });
+                    ctx.setLineDash([]);
                 }
 
-                // Draw Triangle (Current State)
+                // Dreieck zeichnen (Current State)
                 ctx.beginPath();
                 ctx.moveTo(cc.mapX(transformedPoints[0].x), cc.mapY(transformedPoints[0].y));
                 ctx.lineTo(cc.mapX(transformedPoints[1].x), cc.mapY(transformedPoints[1].y));
@@ -434,7 +507,7 @@
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
-                // Draw RP (Rotation Point)
+                // Draw RP (Rotation Point) - FEST VERANKERT
                 ctx.fillStyle = varColor('--neon-pink');
                 ctx.shadowColor = varColor('--neon-pink');
                 ctx.shadowBlur = 10;
