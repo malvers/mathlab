@@ -33,6 +33,7 @@
             overflow-x: hidden;
         }
 
+        /* Legacy Stars disabled for new Galaxy Video Backdrop 
         body::before {
             content: "";
             position: fixed;
@@ -50,6 +51,7 @@
             opacity: 0.8;
             pointer-events: none;
         }
+        */
 
         @keyframes starsMove {
             from {
@@ -374,21 +376,32 @@
             grid-template-columns: repeat(auto-fill, minmax(218px, 262px));
             justify-content: center;
             gap: 25px;
-            max-width: 1123px; /* Forceert die 4er Reihe für das Alignment */
+            max-width: 1123px;
             width: 95%;
             margin: 0 auto;
-            padding: 8px 0;
+            padding: 15px 0; /* Mehr Padding im Grid */
+        }
+
+        /* Spezial-Grid für das 8er Panorama (Klasse 5-12) */
+        #jahrgang-grid {
+            grid-template-columns: repeat(8, 1fr); 
+            max-width: 1120px; /* Kompakter für eine Reihe */
+            gap: 10px;
         }
 
         .card.grade-card {
-            min-height: 131px; /* 10% flacher */
+            min-height: 80px; 
             justify-content: center;
             border: none;
             background: linear-gradient(135deg, var(--c1, var(--neon-blue)), var(--c2, var(--neon-blue)));
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.category-card {
+            min-height: 131px;
         }
 
         .card.grade-card.active {
@@ -421,54 +434,15 @@
             left: 100%;
         }
 
-        /* JG CYBER-RAINBOW SPECTRUM (8 Steps for Grades 5-12) */
-        /* High-vibrancy spectrum flow across the cards */
-        #jahrgang-grid .card:nth-child(1) {
-            --c1: #ff0055;
-            --c2: #ff8c00;
-        }
-
-        /* Red-Orange */
-        #jahrgang-grid .card:nth-child(2) {
-            --c1: #ff8c00;
-            --c2: #ffd700;
-        }
-
-        /* Orange-Gold */
-        #jahrgang-grid .card:nth-child(3) {
-            --c1: #ffd700;
-            --c2: #adff2f;
-        }
-
-        /* Gold-Lime */
-        #jahrgang-grid .card:nth-child(4) {
-            --c1: #adff2f;
-            --c2: #00ffff;
-        }
-
-        /* Lime-Cyan */
-        #jahrgang-grid .card:nth-child(5) {
-            --c1: #00ffff;
-            --c2: #0077ff;
-        }
-
-        /* Cyan-Blue */
-        #jahrgang-grid .card:nth-child(6) {
-            --c1: #0077ff;
-            --c2: #8a2be2;
-        }
-
-        /* Blue-Indigo */
-        #jahrgang-grid .card:nth-child(7) {
-            --c1: #8a2be2;
-            --c2: #ff00ff;
-        }
-
-        /* Indigo-Pink */
-        #jahrgang-grid .card:nth-child(8) {
-            --c1: #ff00ff;
-            --c2: #ff0055;
-        }
+        /* JG CORPORATE SPECTRUM (8 Steps: Blue -> White -> Purple) */
+        #jahrgang-grid .card:nth-child(1) { --c1: #00d2ff; --c2: #44e1ff; } /* 5: Corporate Blue */
+        #jahrgang-grid .card:nth-child(2) { --c1: #44e1ff; --c2: #88f0ff; } /* 6: Sky Blue */
+        #jahrgang-grid .card:nth-child(3) { --c1: #88f0ff; --c2: #ccfaff; } /* 7: Ice Blue */
+        #jahrgang-grid .card:nth-child(4) { --c1: #ccfaff; --c2: #ffffff; } /* 8: WHITE PEAK START */
+        #jahrgang-grid .card:nth-child(5) { --c1: #ffffff; --c2: #eecfff; } /* 9: WHITE PEAK END */
+        #jahrgang-grid .card:nth-child(6) { --c1: #f4dfff; --c2: #e0bfff; } /* 10: Soft Lavender */
+        #jahrgang-grid .card:nth-child(7) { --c1: #e0bfff; --c2: #be75ef; } /* 11: Deep Violet */
+        #jahrgang-grid .card:nth-child(8) { --c1: #be75ef; --c2: #9d50bb; } /* 12: Pure Corporate Purple */
 
         /* Pink-Return to Red */
 
@@ -480,15 +454,15 @@
             justify-content: center;
         }
 
-        .card.grade-card .card-icon svg {
-            width: 80px;
-            height: 80px;
-            filter: drop-shadow(0 0 15px var(--c1));
+        .card.grade-card svg {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 10px var(--c1));
         }
 
         .card.grade-card svg text {
-            fill: white;
-            text-shadow: 0 0 25px var(--c1);
+            fill: #1e293b; /* Softer, more professional Navy */
+            fill-opacity: 0.85;
             dominant-baseline: central;
             font-weight: bold;
         }
@@ -816,7 +790,7 @@
     <!-- Nutze ein lokales Video 'galaxy.mp4' in deinem Ordner! Poster dient als Fallback. -->
     <video id="bg-video" autoplay loop muted playsinline
         poster="https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop">
-        <source src="galaxy.mp4" type="video/mp4">
+        <source src="galay20.mp4" type="video/mp4">
     </video>
 
     <!-- Dunkles Overlay über dem Video für perfekten Kontrast -->
@@ -893,72 +867,63 @@
         <div class="grade-grid" id="jahrgang-grid">
             <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
-                            text-anchor="middle">5</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">5</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
-                            text-anchor="middle">6</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">6</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
-                            text-anchor="middle">7</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">7</text>
                     </svg>
                 </div>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active"
-                id="grade-8-card">
+            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
-                            text-anchor="middle">8</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">8</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="70" fill="white"
-                            text-anchor="middle">9</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">9</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
-                            text-anchor="middle">10</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">10</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
-                            text-anchor="middle">11</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">11</text>
                     </svg>
                 </div>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active">
                 <div class="card-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50" y="50" font-family="'Orbitron'" font-size="60" fill="white"
-                            text-anchor="middle">12</text>
+                    <svg viewBox="0 0 100 100">
+                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">12</text>
                     </svg>
                 </div>
             </a>
         </div>
 
-        <div class="view-section" style="margin-top: 30px;">
+        <div class="view-section" style="margin-top: 60px;">
             <h2>Themen</h2>
             <div class="line"></div>
         </div>
@@ -1300,6 +1265,10 @@
         renderCards();
         handleHash();
         updateToolCount();
+
+        // High-Quality Video Slowdown (ULTRA 5.3.8)
+        const bgVid = document.getElementById('bg-video');
+        if (bgVid) bgVid.playbackRate = 0.5;
         
         window.addEventListener('hashchange', handleHash);
     </script>
