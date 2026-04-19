@@ -5,163 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>1. Binomische Formel | haptisch | docalvers</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
-        :root {
-            --neon-gold: #ffcc00;
-            --neon-green: #39FF14;
-            --neon-cyan: #00f2ff;
-            --neon-blue: #00d2ff;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.75);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        /* --- SIDEBAR --- */
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-        }
-
-        .dashboard-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
-        }
-
-        .dashboard-btn:hover {
-            color: white;
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        /* --- STATS & CONTROLS --- */
-        .stats-card {
-            background: var(--glass-bright);
-            padding: 18px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .stats-title {
-            font-family: 'Orbitron';
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .control-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Orbitron';
-        }
-
-        .val-display {
-            font-weight: bold;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px white;
-        }
-
-        .area-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .area-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.1rem;
-            font-family: 'Orbitron';
-        }
-
-        .stat-val {
-            font-weight: bold;
-        }
-
-        /* --- MAIN VIEWPORT --- */
-        #workspace {
-            flex-grow: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 40px;
-        }
-
         #canvas-container {
             position: relative;
             display: flex;
@@ -173,7 +21,6 @@
             touch-action: none;
         }
 
-        /* --- GEOMETRY WRAPPER (Syncs Canvas & Overlays) --- */
         #geometry-wrapper {
             position: relative;
             pointer-events: none;
@@ -184,7 +31,6 @@
             cursor: grab;
         }
 
-        /* --- LaTeX OVERLAY LABELS --- */
         #label-overlay {
             position: absolute;
             top: 0;
@@ -237,89 +83,42 @@
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
-        .canvas-subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            margin-top: 8px;
-            opacity: 0.8;
-            text-transform: uppercase;
+        .math-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            font-size: 1.1em;
         }
-
-        .footer-credit {
-            margin-top: auto;
-            font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.2);
-            text-align: center;
-            letter-spacing: 3px;
+        
+        .area-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .stat-val {
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
         }
     </style>
 </head>
 
 <body>
-
     <aside id="side-panel">
-        <a href="index.html" class="dashboard-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            DASHBOARD
-        </a>
-
-        <section class="stats-card">
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-gold);">
-                    <span>AUFTEILUNG</span>
-                    <span class="val-display stat-val" id="val-p"
-                        style="color:var(--neon-gold); font-family: 'Orbitron';"></span>
-                </div>
-                <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7"
-                    style="accent-color:var(--neon-gold);">
-            </div>
-            <p style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 5px;">Tipp: Ziehe
-                den Mittelpunkt im Quadrat!</p>
-        </section>
-
-        <section class="stats-card">
-            <div class="area-list">
-                <div class="area-item" style="color:var(--neon-gold);">
-                    <span id="lbl-side-p2"></span>
-                    <span id="stat-p2-lt" class="stat-val"></span>
-                </div>
-                <div class="area-item" style="color:var(--neon-green);">
-                    <span id="lbl-side-2pq"></span>
-                    <span id="stat-2pq-lt" class="stat-val"></span>
-                </div>
-                <div class="area-item" style="color:var(--neon-cyan);">
-                    <span id="lbl-side-q2"></span>
-                    <span id="stat-q2-lt" class="stat-val"></span>
-                </div>
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
-                <div class="area-item" style="color:white; font-size:1.1rem;">
-                    <span>GESAMT</span>
-                    <span id="stat-total" class="stat-val"></span>
-                </div>
-            </div>
-        </section>
-
-        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+        <div id="sidebar-header" style="min-height: 60px;"></div>
+        <div id="parameters-container"></div>
+        <div style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
     </aside>
 
-    <main id="workspace">
-
+    <main id="main-content">
         <div id="canvas-container">
             <div id="geometry-wrapper">
                 <canvas id="binomCanvas"></canvas>
                 <div id="label-overlay">
-                    <!-- Inner Area Labels -->
                     <div id="lbl-p2" class="math-label area-label"></div>
                     <div id="lbl-pq1" class="math-label area-label"></div>
                     <div id="lbl-pq2" class="math-label area-label"></div>
                     <div id="lbl-q2" class="math-label area-label"></div>
-                    <!-- Outer Side Labels -->
                     <div id="lbl-p-top" class="math-label side-label"></div>
                     <div id="lbl-q-top" class="math-label side-label"></div>
                     <div id="lbl-p-left" class="math-label side-label"></div>
@@ -327,39 +126,87 @@
                 </div>
             </div>
         </div>
-
         <div id="formula-glow-v3"></div>
     </main>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
+        let pSlider, board;
         const canvas = document.getElementById('binomCanvas');
         const ctx = canvas.getContext('2d');
-        const pSlider = document.getElementById('p-slider');
-        const board = document.getElementById('formula-glow-v3');
-
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Beweis 1. Binomische Formel"
-        });
 
         const S = 10.0; // Fixed total side length
         let p = 7.0;
         let q = S - p;
 
         let isDragging = false;
-        let offsetX, offsetY, totalSize;
+        let offsetX = 0, offsetY = 0, totalSize;
+
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "Beweis 1. Binomische Formel"
+            });
+
+            // 2. Build Sidebar via CyberUI
+            CyberUI.init();
+            
+            CyberUI.createCard('parameters-container', 'AUFTEILUNG', `
+                <div class="area-item" style="color:var(--neon-gold);">
+                    <span style="font-family:Orbitron; font-size:0.8rem;">P-WERT</span>
+                    <span id="val-p" class="stat-val">7.00</span>
+                </div>
+                <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:var(--neon-gold); width:100%;">
+                <p style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px; font-family:Outfit;">Tipp: Ziehe den Mittelpunkt im Quadrat!</p>
+            `);
+
+            CyberUI.createCard('parameters-container', 'ANALYTIK', `
+                <div class="area-list">
+                    <div class="area-item" style="color:var(--neon-gold);">
+                        <span id="lbl-side-p2"></span>
+                        <span id="stat-p2-lt" class="stat-val"></span>
+                    </div>
+                    <div class="area-item" style="color:var(--neon-green);">
+                        <span id="lbl-side-2pq"></span>
+                        <span id="stat-2pq-lt" class="stat-val"></span>
+                    </div>
+                    <div class="area-item" style="color:var(--neon-cyan);">
+                        <span id="lbl-side-q2"></span>
+                        <span id="stat-q2-lt" class="stat-val"></span>
+                    </div>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 12px 0;">
+                    <div class="area-item" style="color:white; font-size:1.1rem;">
+                        <span style="font-family:Orbitron; font-size:0.8rem;">GESAMT</span>
+                        <span id="stat-total" class="stat-val">100.00</span>
+                    </div>
+                </div>
+            `);
+
+            // Grab references after injection
+            pSlider = document.getElementById('p-slider');
+            board = document.getElementById('formula-glow-v3');
+
+            pSlider.addEventListener('input', (e) => { 
+                p = parseFloat(e.target.value); 
+                updateUI(); 
+                draw(); 
+            });
+
+            updateUI();
+            resize();
+        });
 
         function updateUI() {
             q = S - p;
 
             if (window.katex) {
-                // Main Formula at the bottom: ( ) = white, p=gold, q=cyan, 2=white
+                // Main Formula at the bottom
                 const latex = `\\color{white}{(}\\color{#ffcc00}{p}+\\color{#00f2ff}{q}\\color{white}{)}^2 = \\color{#ffcc00}{p^2} + \\color{white}{2}\\color{#ffcc00}{p}\\color{#00f2ff}{q} + \\color{#00f2ff}{q^2}`;
                 katex.render(latex, board, { displayMode: true, throwOnError: false });
 
-                // Analytics Section Symbols in LaTeX (Consistent colors, NO colons)
+                // Analytics Section Symbols in LaTeX
                 katex.render('\\color{#ffcc00}{p^2}', document.getElementById('lbl-side-p2'), { throwOnError: false });
                 katex.render('\\color{white}{2}\\color{#ffcc00}{p}\\color{#00f2ff}{q}', document.getElementById('lbl-side-2pq'), { throwOnError: false });
                 katex.render('\\color{#00f2ff}{q^2}', document.getElementById('lbl-side-q2'), { throwOnError: false });
@@ -368,8 +215,6 @@
                 katex.render((2 * p * q).toFixed(2), document.getElementById('stat-2pq-lt'), { throwOnError: false });
                 katex.render((q * q).toFixed(2), document.getElementById('stat-q2-lt'), { throwOnError: false });
 
-                // Total and Haptic Value back to Orbitron
-                document.getElementById('stat-total').innerText = (100).toFixed(2);
                 document.getElementById('val-p').innerText = p.toFixed(2);
             }
         }
@@ -377,29 +222,20 @@
         function resize() {
             const container = document.getElementById('canvas-container');
             const wrapper = document.getElementById('geometry-wrapper');
+            if (!container || !wrapper) return;
+
             const dpr = window.devicePixelRatio || 1;
+            totalSize = Math.min(container.clientWidth, container.clientHeight) * 0.7;
 
-            // Scaled size - increased to 0.6 for monumental feel
-            totalSize = Math.min(container.clientWidth, container.clientHeight) * 0.6;
-
-            // Canvas matching
             canvas.width = totalSize * dpr;
             canvas.height = totalSize * dpr;
             canvas.style.width = totalSize + "px";
             canvas.style.height = totalSize + "px";
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            // Wrapper matching
             wrapper.style.width = totalSize + "px";
             wrapper.style.height = totalSize + "px";
-
-            // Dynamic Formula Scaling - maintain width relative to square
-            // Approx factor 0.08 of totalSize for exact width match
             board.style.fontSize = (totalSize * 0.08) + "px";
-
-            // In the wrapper-based system, offsetX/Y within the wrapper are always 0
-            offsetX = 0;
-            offsetY = 0;
 
             draw();
         }
@@ -407,7 +243,6 @@
         function updateLabels(px, qx) {
             if (!window.katex) return;
 
-            // Reference coordinates are now local to the geometry-wrapper (0,0 is top-left of square)
             const labels = {
                 'lbl-p2': { x: px / 2, y: px / 2, tex: '\\color{#ffcc00}{p^2}' },
                 'lbl-pq1': { x: px + qx / 2, y: px / 2, tex: '\\color{#ffcc00}{p}\\color{#00f2ff}{q}' },
@@ -421,10 +256,10 @@
 
             for (const [id, cfg] of Object.entries(labels)) {
                 const el = document.getElementById(id);
+                if (!el) continue;
                 el.style.left = cfg.x + 'px';
                 el.style.top = cfg.y + 'px';
 
-                // Redraw if data varies or initial render
                 if (!el.dataset.rendered || (isDragging && id.includes('lbl-'))) {
                     katex.render(cfg.tex, el, { throwOnError: false });
                     el.dataset.rendered = "true";
@@ -441,24 +276,17 @@
             const px = p * scaleFactor;
             const qx = q * scaleFactor;
 
-            // Outer Frame (p+q)^2
             ctx.strokeStyle = "rgba(255,255,255,0.1)";
             ctx.lineWidth = 1;
             ctx.strokeRect(offsetX, offsetY, totalSize, totalSize);
 
-            // Areas with 60% opacity for vibrant colors ("Solid Look")
-            drawRect(offsetX + 0, offsetY + 0, px, px, 'rgba(255, 204, 0, 0.6)');      // p^2
-            drawRect(offsetX + px, offsetY + 0, qx, px, 'rgba(57, 255, 20, 0.6)');    // pq1
-            drawRect(offsetX + 0, offsetY + px, px, qx, 'rgba(57, 255, 20, 0.6)');    // pq2
+            drawRect(offsetX, offsetY, px, px, 'rgba(255, 204, 0, 0.6)');      // p^2
+            drawRect(offsetX + px, offsetY, qx, px, 'rgba(57, 255, 20, 0.6)');    // pq1
+            drawRect(offsetX, offsetY + px, px, qx, 'rgba(57, 255, 20, 0.6)');    // pq2
             drawRect(offsetX + px, offsetY + px, qx, qx, 'rgba(0, 242, 255, 0.6)');     // q^2
 
-            // Brackets & Annotations
             drawAnnotations(offsetX, offsetY, px, qx);
-
-            // Drag Cursor (Intersection Point) with Pulse Effect
             drawHandle(offsetX + px, offsetY + px, isDragging);
-
-            // Synchronization with LaTeX Overlays
             updateLabels(px, qx);
         }
 
@@ -466,7 +294,7 @@
             ctx.save();
             ctx.shadowBlur = 10;
             ctx.shadowColor = color;
-            ctx.fillStyle = color; // Solid color as requested
+            ctx.fillStyle = color;
             ctx.strokeStyle = "rgba(255,255,255,0.5)";
             ctx.lineWidth = 2;
             ctx.fillRect(x, y, w, h);
@@ -477,22 +305,20 @@
         function drawHandle(x, y, active) {
             ctx.save();
             ctx.shadowBlur = active ? 30 : 20;
-            ctx.shadowColor = active ? "var(--neon-blue)" : "white";
+            ctx.shadowColor = active ? "#00d2ff" : "white";
             ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.arc(x, y, active ? 8 : 6, 0, Math.PI * 2);
             ctx.fill();
             
             if (active) {
-                // Pulse ring
                 ctx.beginPath();
                 ctx.arc(x, y, 15, 0, Math.PI * 2);
                 ctx.strokeStyle = "rgba(255,255,255,0.3)";
                 ctx.stroke();
             }
 
-            // Crosshairs
-            ctx.strokeStyle = active ? "var(--neon-blue)" : "white";
+            ctx.strokeStyle = active ? "#00d2ff" : "white";
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(x - 15, y); ctx.lineTo(x + 15, y);
@@ -504,7 +330,6 @@
         function drawAnnotations(x, y, px, qx) {
             ctx.strokeStyle = "rgba(255,255,255,0.3)";
             ctx.lineWidth = 1;
-            // Lines for brackets
             drawL(x, y - 10, px);
             drawL(x + px, y - 10, qx);
             drawLv(x - 10, y, px);
@@ -524,32 +349,26 @@
             ctx.stroke();
         }
 
-        // --- Interaction Logic (Pointer Events for iPad/Mobile support) ---
         function handleMove(mx, my) {
             const unit = totalSize / S;
             const targetP = (mx - offsetX) / unit;
             if (targetP >= 0.1 && targetP <= 9.9) {
                 p = targetP;
-                pSlider.value = p;
+                if (pSlider) pSlider.value = p;
                 updateUI();
                 draw();
             }
         }
 
         canvas.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); // Block browser gestures
+            e.preventDefault();
             const rect = canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
-            
-            // Interaction Start: Snap to touch or grab center
             isDragging = true;
             canvas.setPointerCapture(e.pointerId);
             canvas.style.cursor = "grabbing";
-            
-            // Haptic vibration (if support)
             if (window.navigator.vibrate) window.navigator.vibrate(10);
-            
             handleMove(mx, my);
         });
 
@@ -570,7 +389,6 @@
                 canvas.style.cursor = dist < 25 ? "grab" : "crosshair";
                 return;
             }
-            
             e.preventDefault(); 
             const rect = canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left;
@@ -578,11 +396,10 @@
             handleMove(mx, my);
         });
 
-        pSlider.addEventListener('input', (e) => { p = parseFloat(e.target.value); updateUI(); draw(); });
-
         window.addEventListener('resize', resize);
-        window.addEventListener('load', () => { updateUI(); resize(); });
     </script>
+</body>
+</html>
 </body>
 
 </html>
