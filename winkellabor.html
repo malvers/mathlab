@@ -14,7 +14,7 @@
             --neon-purple: #9d50bb;
             --neon-pink: #f472b6;
             --neon-green: #4ade80;
-            --neon-amber: #fbbf24;
+            --neon-amber: #ffde00;
             --bg-dark: #050b18;
             --glass: rgba(15, 23, 42, 0.7);
         }
@@ -132,7 +132,7 @@
             let draggedPoint = null;
 
             const COLORS = {
-                A: "#00d2ff", B: "#fbbf24",
+                A: "#00d2ff", B: "#ffde00",
                 TRANS: "#666666", BASE: "#666666"
             };
 
@@ -143,11 +143,11 @@
             // 3. UI System
             CyberUI.createCard('ui-container', 'WINKEL-ANALYSE', `
                 <div class="angle-stat" style="padding: 15px 0;">
-                    <span style="color:var(--neon-blue); font-size: 2.8rem; font-weight: bold; font-family: 'Orbitron';">α</span>
+                    <span style="color:var(--neon-blue); font-size: 2.2rem; font-weight: bold; font-family: 'Outfit', sans-serif; text-shadow: 0 0 15px var(--neon-blue);">α</span>
                     <span id="disp-alpha" class="angle-val" style="color:var(--neon-blue); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
                 </div>
-                <div class="angle-stat" style="padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.05);">
-                    <span style="color:var(--neon-amber); font-size: 2.8rem; font-weight: bold; font-family: 'Orbitron';">β</span>
+                <div class="angle-stat" style="padding: 15px 0; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                    <span style="color:var(--neon-amber); font-size: 2.2rem; font-weight: bold; font-family: 'Outfit', sans-serif; text-shadow: 0 0 15px var(--neon-amber);">β</span>
                     <span id="disp-beta" class="angle-val" style="color:var(--neon-amber); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-amber);">0.0°</span>
                 </div>
                 <div class="angle-sum-area">
@@ -270,7 +270,8 @@
                 const arcRad = 60 * scale; const fontSize = Math.max(12, 16 * scale);
                 ctx.save();
                 ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, arcRad, startAngle, endAngle); ctx.lineTo(p.x, p.y); ctx.closePath();
-                ctx.fillStyle = color + "88"; ctx.fill();
+                ctx.fillStyle = color + "e6"; // 90% opacity
+                ctx.fill();
                 ctx.strokeStyle = color; ctx.lineWidth = 2 * scale; ctx.stroke();
 
                 let midAngle = (startAngle + endAngle) / 2;
