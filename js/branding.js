@@ -355,8 +355,9 @@ const CyberBranding = {
 
             /* Central Navigation */
             .cyber-nav {
-                display: grid !important;
-                grid-template-columns: repeat(6, 1fr) !important;
+                display: flex !important;
+                flex-wrap: wrap;
+                justify-content: center;
                 gap: 8px;
                 width: 100% !important;
                 z-index: 100000 !important;
@@ -377,8 +378,10 @@ const CyberBranding = {
             }
 
             .nav-btn {
-                width: 100% !important;
-                min-height: 48px;
+                position: relative;
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
                 box-sizing: border-box;
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
@@ -392,6 +395,7 @@ const CyberBranding = {
                 color: white !important;
                 text-decoration: none;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+                flex: none !important;
             }
             }
 
