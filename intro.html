@@ -167,20 +167,42 @@
     </div>
 
     <script>
-        // Set playback rate to very slow for cinemantic effect
+        // Set playback rate to very slow for cinematic effect
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
             if (video) video.playbackRate = 0.5;
         });
 
         function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            console.log("⚛️ CYBER-OS: Fullscreen Request detected.");
+
+            // Comprehensive state check
+            const isFullScreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement || doc.webkitIsFullScreen;
+
+            if (!isFullScreen) {
+                // ENTER
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen();
+                } else if (docEl.mozRequestFullScreen) {
+                    docEl.mozRequestFullScreen();
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                } else if (docEl.msRequestFullscreen) {
+                    docEl.msRequestFullscreen();
+                }
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
+                // EXIT
+                if (doc.exitFullscreen) {
+                    doc.exitFullscreen();
+                } else if (doc.mozCancelFullScreen) {
+                    doc.mozCancelFullScreen();
+                } else if (doc.webkitExitFullscreen) {
+                    doc.webkitExitFullscreen();
+                } else if (doc.msExitFullscreen) {
+                    doc.msExitFullscreen();
                 }
             }
         }
