@@ -134,32 +134,15 @@
                 cc.canvas.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
                 // --- INTERACTION SETUP ---
+                // 5. Context Menu (Standard)
                 cc.onContextMenu = (e) => {
-                    if (typeof CyberUI === 'undefined') return;
                     CyberUI.showContextMenu(e.clientX, e.clientY, [
-                        {
-                            label: 'Ansicht zurücksetzen',
-                            onclick: () => { cc.resetView(-10, 10); draw(); }
-                        },
+                        { label: 'Labor Reset', onclick: () => resetLabor() },
+                        { label: 'Ansicht Reset', onclick: () => { cc.resetView(-5, 10); draw(); } },
                         { divider: true },
-                        {
-                            label: 'Achsen an',
-                            checked: cc.showAxes,
-                            onchange: (val) => { cc.showAxes = val; draw(); }
-                        },
-                        {
-                            label: 'Achsenbeschriftung',
-                            checked: cc.showLabels,
-                            onchange: (val) => { cc.showLabels = val; draw(); }
-                        },
-                        {
-                            label: 'Koordinaten',
-                            checked: cc.showTelemetry,
-                            onchange: (val) => {
-                                cc.showTelemetry = val;
-                                if (val && !cc.telePane) cc.injectTelemetryPane();
-                            }
-                        }
+                        { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; draw(); } },
+                        { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; draw(); } },
+                        { label: 'Beschriftung', checked: cc.showLabels, onchange: (v) => { cc.showLabels = v; draw(); } }
                     ]);
                 };
                 cc.canvas.addEventListener('mousedown', e => {
