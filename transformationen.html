@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Transformationen</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Inter:wght@300;400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-pink: #ff0055;
+            --neon-purple: #9d50bb;
+            --neon-green: #adff2f;
+            --bg-dark: #050b18;
+            --glass: rgba(15, 23, 42, 0.4);
+            --glass-bright: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            color: white;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+            box-sizing: border-box;
+            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+        }
+
+        #sidebar-header {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            background: var(--glass-bright);
+            padding: 12px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .slider-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-header span {
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+            letter-spacing: 1px;
+        }
+
+        .slider-header .val {
+            color: white;
+            font-weight: bold;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        button {
+            padding: 12px;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="side-panel">
+        <header id="sidebar-header"></header>
+        
+        <div class="control-group">
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span>ROTATION</span>
+                    <span id="label-rot" class="val">0°</span>
+                </div>
+                <input type="range" id="slider-rot" min="0" max="360" value="0">
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span>ZOOM (SKALIERUNG)</span>
+                    <span id="label-scale" class="val">1.0x</span>
+                </div>
+                <input type="range" id="slider-scale" min="10" max="300" value="100">
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span>VERSCHIEBUNG X</span>
+                    <span id="label-tx" class="val">0.0</span>
+                </div>
+                <input type="range" id="slider-tx" min="-100" max="100" value="0">
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span>VERSCHIEBUNG Y</span>
+                    <span id="label-ty" class="val">0.0</span>
+                </div>
+                <input type="range" id="slider-ty" min="-100" max="100" value="0">
+            </div>
+
+            <button onclick="resetLab()">Labor Zurücksetzen</button>
+        </div>
+
+        <footer>
+            &copy; 2026 DR. MICHAEL R. ALVERS &bull; <a href="impressum.html" style="color: inherit;">IMPRESSUM</a>
+        </footer>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            let cc = null;
+            let points = [
+                { x: -2, y: -2, id: 'A' },
+                { x: 2, y: -2, id: 'B' },
+                { x: 0, y: 2, id: 'C' }
+            ];
+            let rp = { x: 0, y: 0 }; // Rotationspunkt
+            let selectedItem = null;
+
+            // Transformation State
+            let transform = {
+                rotation: 0,
+                scale: 1,
+                tx: 0,
+                ty: 0
+            };
+
+            function startLabor() {
+                try {
+                    if (typeof CyberCanvas === 'undefined') return;
+                    if (typeof CyberUI !== 'undefined') CyberUI.init();
+
+                    cc = new CyberCanvas();
+                    cc.init('canvas', { minX: -10, maxX: 10, minY: -7, maxY: 7 }, { showTelemetry: false, showLabels: false, showGrid: false, showAxes: false });
+                    cc.onResize = () => update();
+
+                    if (typeof CyberBranding !== 'undefined') {
+                        CyberBranding.init({
+                            title: "Doc Alvers Mathe-Labor",
+                            subtitle: "TRANSFORMATIONEN"
+                        });
+                    }
+
+                    // Input listeners
+                    cc.canvas.addEventListener('mousedown', startAction);
+                    window.addEventListener('mousemove', moveAction);
+                    window.addEventListener('mouseup', () => selectedItem = null);
+
+                    // Slider listeners
+                    const sRot = document.getElementById('slider-rot');
+                    const sScale = document.getElementById('slider-scale');
+                    const sTx = document.getElementById('slider-tx');
+                    const sTy = document.getElementById('slider-ty');
+
+                    sRot.oninput = (e) => { transform.rotation = parseFloat(e.target.value); update(); };
+                    sScale.oninput = (e) => { transform.scale = parseFloat(e.target.value) / 100; update(); };
+                    sTx.oninput = (e) => { transform.tx = parseFloat(e.target.value) / 10; update(); };
+                    sTy.oninput = (e) => { transform.ty = parseFloat(e.target.value) / 10; update(); };
+
+                    update();
+                } catch (e) {
+                    console.error("Labor Init Failed:", e);
+                }
+            }
+
+            function startAction(e) {
+                const rect = cc.canvas.getBoundingClientRect();
+                const nRPX = cc.unmapX(e.clientX - rect.left);
+                const nRPY = cc.unmapY(e.clientY - rect.top);
+
+                // --- POSITIONS-KOMPENSATION ---
+                // Wir berechnen die Punkte im Hintergrund so um, dass das Dreieck 
+                // visuell stehen bleibt, während der RP an die Klick-Stelle springt.
+                
+                const angleRad = (transform.rotation * Math.PI) / 180;
+                const cos = Math.cos(angleRad);
+                const sin = Math.sin(angleRad);
+                const cosInv = Math.cos(-angleRad);
+                const sinInv = Math.sin(-angleRad);
+
+                points.forEach(p => {
+                    // 1. Wo ist der Punkt aktuell visuell? (relativ zum alten RP)
+                    const dx0 = (p.x - rp.x) * transform.scale;
+                    const dy0 = (p.y - rp.y) * transform.scale;
+                    const vX = dx0 * cos - dy0 * sin + rp.x;
+                    const vY = dx0 * sin + dy0 * cos + rp.y;
+
+                    // 2. Rückrechnung: Wo muss der Basispunkt relativ zum NEUEN RP liegen?
+                    const qx = vX - nRPX;
+                    const qy = vY - nRPY;
+                    const rX = (qx * cosInv - qy * sinInv) / transform.scale;
+                    const rY = (qx * sinInv + qy * cosInv) / transform.scale;
+
+                    // 3. Update Basis-Punkt
+                    p.x = rX + nRPX;
+                    p.y = rY + nRPY;
+                });
+
+                // RP an neue Klick-Stelle setzen
+                rp.x = nRPX;
+                rp.y = nRPY;
+
+                update();
+            }
+
+            function moveAction(e) {
+                // In Plan B nicht mehr nötig, da RP direkt springt
+            }
+
+            window.resetLab = () => {
+                transform = { rotation: 0, scale: 1, tx: 0, ty: 0 };
+                rp = { x: 0, y: 0 };
+                points = [
+                    { x: -2, y: -2, id: 'A' },
+                    { x: 2, y: -2, id: 'B' },
+                    { x: 0, y: 2, id: 'C' }
+                ];
+                document.getElementById('slider-rot').value = 0;
+                document.getElementById('slider-scale').value = 100;
+                document.getElementById('slider-tx').value = 0;
+                document.getElementById('slider-ty').value = 0;
+                update();
+            }
+
+            function update() {
+                // Update Labels
+                document.getElementById('label-rot').innerText = transform.rotation + "°";
+                document.getElementById('label-scale').innerText = transform.scale.toFixed(1) + "x";
+                document.getElementById('label-tx').innerText = transform.tx.toFixed(1);
+                document.getElementById('label-ty').innerText = transform.ty.toFixed(1);
+
+                draw();
+            }
+
+            function draw() {
+                cc.drawGrid({ vignette: true, glow: true });
+                const ctx = cc.ctx;
+
+                // Transform logic
+                const angleRad = (transform.rotation * Math.PI) / 180;
+                
+                const getTransformed = (p) => {
+                    // 1. Move to RP origin
+                    let nx = p.x - rp.x;
+                    let ny = p.y - rp.y;
+
+                    // 2. Scale
+                    nx *= transform.scale;
+                    ny *= transform.scale;
+
+                    // 3. Rotate
+                    const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
+                    const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
+
+                    // 4. Move back + global translation
+                    return {
+                        x: rx + rp.x + transform.tx,
+                        y: ry + rp.y + transform.ty
+                    };
+                };
+
+                const transformedPoints = points.map(getTransformed);
+
+                // --- HILFSLINIEN (SCHRITT 2.0: START & VERSCHIEBUNG) ---
+                ctx.setLineDash([5, 8]);
+                ctx.lineWidth = 1;
+
+                // 1. Urbild-Silhouette (Original-Dreieck)
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(points[0].x), cc.mapY(points[0].y));
+                ctx.lineTo(cc.mapX(points[1].x), cc.mapY(points[1].y));
+                ctx.lineTo(cc.mapX(points[2].x), cc.mapY(points[2].y));
+                ctx.closePath();
+                ctx.stroke();
+
+                // 2. Verschiebungsvektoren (Urbild -> Bild)
+                points.forEach((p, i) => {
+                    const tp = transformedPoints[i];
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)";
+                    ctx.beginPath();
+                    ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
+                    ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
+                    ctx.stroke();
+                });
+
+                ctx.setLineDash([]); // Reset Dash
+
+                // Draw Triangle (Current State)
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(transformedPoints[0].x), cc.mapY(transformedPoints[0].y));
+                ctx.lineTo(cc.mapX(transformedPoints[1].x), cc.mapY(transformedPoints[1].y));
+                ctx.lineTo(cc.mapX(transformedPoints[2].x), cc.mapY(transformedPoints[2].y));
+                ctx.closePath();
+                ctx.fillStyle = "rgba(0, 210, 255, 0.2)";
+                ctx.fill();
+                ctx.strokeStyle = varColor('--neon-blue');
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Draw RP (Rotation Point)
+                ctx.fillStyle = varColor('--neon-pink');
+                ctx.shadowColor = varColor('--neon-pink');
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Draw RP Cross
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(rp.x) - 12, cc.mapY(rp.y));
+                ctx.lineTo(cc.mapX(rp.x) + 12, cc.mapY(rp.y));
+                ctx.moveTo(cc.mapX(rp.x), cc.mapY(rp.y) - 12);
+                ctx.lineTo(cc.mapX(rp.x), cc.mapY(rp.y) + 12);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            function varColor(name) {
+                return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            }
+
+            startLabor();
+        });
+    </script>
+</body>
+
+</html>
