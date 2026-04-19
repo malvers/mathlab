@@ -76,6 +76,31 @@
             box-shadow: 0 0 20px rgba(255, 136, 0, 0.15);
         }
 
+        /* Floating Digital-Uhr (BOX RESTORED) */
+        #floating-time {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(147, 51, 234, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--neon-purple);
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            color: var(--neon-purple);
+            box-shadow: 0 0 30px rgba(147, 51, 234, 0.2);
+            z-index: 10;
+            pointer-events: none;
+            font-family: 'Orbitron';
+            text-shadow: 0 0 10px var(--neon-purple);
+            text-align: center;
+            min-width: 120px;
+        }
+
+        /* Hide the redundant slider value as it causes jitter */
+        .val-display { display: none !important; }
+
         .angle-arc-beta { fill: rgba(255, 136, 0, 0.1); stroke: #ff8800; stroke-width: 2; }
     </style>
 </head>
@@ -104,6 +129,10 @@
             <line id="hour-hand" x1="100" y1="100" x2="100" y2="60" />
             <line id="minute-hand" x1="100" y1="100" x2="100" y2="45" />
             <circle cx="100" cy="100" r="4" fill="white" />
+            
+            <!-- Interactive Handles (Tips) -->
+            <circle id="minute-handle" cx="100" cy="45" r="15" fill="transparent" style="cursor: grab;" />
+            <circle id="hour-handle" cx="100" cy="62" r="15" fill="transparent" style="cursor: grab;" />
         </svg>
         <div id="floating-time">12:00</div>
     </main>
@@ -139,95 +168,166 @@
             // 2. SVG State
             const hourHand = document.getElementById('hour-hand');
             const minuteHand = document.getElementById('minute-hand');
-            const angleArc = document.getElementById('angle-arc');
+            const hourHandle = document.getElementById('hour-handle');
+            const minuteHandle = document.getElementById('minute-handle');
+            const clock = document.getElementById('clock');
             const ticksContainer = document.getElementById('ticks');
 
+            let totalMinutes = 0;
+            let activeDrag = null; // 'hour' or 'minute'
+
             function createTicks() {
-                for (let i = 0; i < 12; i++) {
-                    const angle = (i * 30) * (Math.PI / 180);
-                    const x1 = 100 + 85 * Math.sin(angle);
-                    const y1 = 100 - 85 * Math.cos(angle);
-                    const x2 = 100 + 92 * Math.sin(angle);
-                    const y2 = 100 - 92 * Math.cos(angle);
-                    const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    tick.setAttribute("x1", x1);
-                    tick.setAttribute("y1", y1);
-                    tick.setAttribute("x2", x2);
-                    tick.setAttribute("y2", y2);
-                    tick.setAttribute("stroke", "rgba(255,255,255,0.2)");
-                    tick.setAttribute("stroke-width", "1");
-                    ticksContainer.appendChild(tick);
+                for (let i = 0; i < 60; i++) {
+                    if (i % 5 === 0) {
+                        const angle = (i * 6) * (Math.PI / 180);
+                        const x1 = 100 + 85 * Math.sin(angle);
+                        const y1 = 100 - 85 * Math.cos(angle);
+                        const x2 = 100 + 92 * Math.sin(angle);
+                        const y2 = 100 - 92 * Math.cos(angle);
+                        const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                        tick.setAttribute("x1", x1);
+                        tick.setAttribute("y1", y1);
+                        tick.setAttribute("x2", x2);
+                        tick.setAttribute("y2", y2);
+                        tick.setAttribute("stroke", "rgba(255,255,255,0.4)");
+                        tick.setAttribute("stroke-width", "1.5");
+                        ticksContainer.appendChild(tick);
+                    }
                 }
             }
 
             // 3. Update Engine
-            function updateClock(totalMinutes) {
-                const hours = Math.floor(totalMinutes / 60);
-                const minutes = totalMinutes % 60;
+            let requestID = null;
+            function updateClock(mins, skipSlider = false) {
+                // totalMinutes stays float for sub-minute precision smoothness
+                totalMinutes = (mins + 720) % 720;
                 
-                const hourDisplay = hours === 0 ? 12 : hours;
-                const hh = hourDisplay.toString().padStart(2, '0');
-                const mm = minutes.toString().padStart(2, '0');
-                const timeString = `${hh}:${mm}`;
+                if (requestID) cancelAnimationFrame(requestID);
+                requestID = requestAnimationFrame(() => {
+                    // Internal high-precision angles
+                    const minuteAngle = (totalMinutes % 60) * 6;
+                    const hourAngle = (totalMinutes % 720) * 0.5;
 
-                const minuteAngle = minutes * 6;
-                const hourAngle = (hours % 12) * 30 + (minutes * 0.5);
+                    // 1. Smooth Visual Rotation (Floating Point)
+                    minuteHand.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
+                    hourHand.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
+                    minuteHandle.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
+                    hourHandle.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
 
-                minuteHand.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
-                hourHand.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
+                    // 2. Rounded Data for HUD (User-friendly)
+                    const displayMins = Math.round(totalMinutes);
+                    const hours = Math.floor(displayMins / 60) % 12;
+                    const minsOnClock = displayMins % 60;
+                    const hourDisplay = hours === 0 ? 12 : hours;
+                    const timeString = `${hourDisplay.toString().padStart(2, '0')}:${minsOnClock.toString().padStart(2, '0')}`;
 
-                let diff = Math.round(Math.abs(hourAngle - minuteAngle));
-                if (diff > 180) diff = 360 - diff;
-                const beta = 360 - diff;
+                    let diff = Math.round(Math.abs(hourAngle - minuteAngle));
+                    if (diff > 180) diff = 360 - diff;
+                    const beta = 360 - diff;
 
-                const angleText = `α = ${diff}°`;
-                const betaText = `β = ${beta}°`;
-                document.getElementById('floating-tag').innerText = angleText;
-                document.getElementById('floating-tag-beta').innerText = betaText;
-                document.getElementById('floating-time').innerText = timeString;
+                    document.getElementById('floating-tag').innerText = `α = ${diff}°`;
+                    document.getElementById('floating-tag-beta').innerText = `β = ${beta}°`;
+                    document.getElementById('floating-time').innerText = timeString;
 
-                // Sync UI Stats
-                CyberUI.updateStatsGrid('data-container', [
-                    { label: 'Winkel α', value: diff + '°', color: 'var(--neon-blue)' },
-                    { label: 'Winkel β', value: beta + '°', color: '#ff8800' }
-                ]);
+                    // 3. Silent Slider Sync (Floored for slider increments)
+                    if (!skipSlider) {
+                        const slider = document.querySelector('#slider-mount input');
+                        if (slider) {
+                            slider.value = displayMins;
+                        }
+                    }
 
-                // Update SVG Arcs
-                const r = 25;
-                const startA = (hourAngle - 90) * (Math.PI / 180);
-                const endA = (minuteAngle - 90) * (Math.PI / 180);
-                const x1 = 100 + r * Math.cos(startA);
-                const y1 = 100 + r * Math.sin(startA);
-                const x2 = 100 + r * Math.cos(endA);
-                const y2 = 100 + r * Math.sin(endA);
-                
-                const clockWise = (minuteAngle - hourAngle + 360) % 360 < 180 ? 1 : 0;
-                
-                if (diff === 0) {
-                    // Special case: 12:00 or overlapping hands -> 360 degree Beta circle
-                    document.getElementById('angle-arc').setAttribute("d", "");
-                    const d_beta_full = `M 100 ${100-r} A ${r} ${r} 0 1 1 100 ${100+r} A ${r} ${r} 0 1 1 100 ${100-r} Z`;
-                    document.getElementById('angle-arc-beta').setAttribute("d", d_beta_full);
-                } else {
-                    // α (Inner Arc)
-                    const d_alpha = `M ${x1} ${y1} A ${r} ${r} 0 0 ${clockWise} ${x2} ${y2} L 100 100 Z`;
-                    document.getElementById('angle-arc').setAttribute("d", d_alpha);
+                    // 4. UI Stats Sync (Rounded)
+                    CyberUI.updateStatsGrid('data-container', [
+                        { label: 'Winkel α', value: diff + '°', color: 'var(--neon-blue)' },
+                        { label: 'Winkel β', value: beta + '°', color: '#ff8800' }
+                    ]);
 
-                    // β (Outer Arc)
-                    const d_beta = `M ${x1} ${y1} A ${r} ${r} 0 1 ${1 - clockWise} ${x2} ${y2} L 100 100 Z`;
-                    document.getElementById('angle-arc-beta').setAttribute("d", d_beta);
-                }
+                    // 5. High-Precision SVG Arcs
+                    const r = 25;
+                    const startA = (hourAngle - 90) * (Math.PI / 180);
+                    const endA = (minuteAngle - 90) * (Math.PI / 180);
+                    const x1 = 100 + r * Math.cos(startA);
+                    const y1 = 100 + r * Math.sin(startA);
+                    const x2 = 100 + r * Math.cos(endA);
+                    const y2 = 100 + r * Math.sin(endA);
+                    const clockWise = (minuteAngle - hourAngle + 360) % 360 < 180 ? 1 : 0;
+                    
+                    if (diff === 0) {
+                        document.getElementById('angle-arc').setAttribute("d", "");
+                        const d_beta_full = `M 100 ${100-r} A ${r} ${r} 0 1 1 100 ${100+r} A ${r} ${r} 0 1 1 100 ${100-r} Z`;
+                        document.getElementById('angle-arc-beta').setAttribute("d", d_beta_full);
+                    } else {
+                        document.getElementById('angle-arc').setAttribute("d", `M ${x1} ${y1} A ${r} ${r} 0 0 ${clockWise} ${x2} ${y2} L 100 100 Z`);
+                        document.getElementById('angle-arc-beta').setAttribute("d", `M ${x1} ${y1} A ${r} ${r} 0 1 ${1 - clockWise} ${x2} ${y2} L 100 100 Z`);
+                    }
+                });
             }
 
-            // 4. UI Layout Deployment
+            // 4. Interaction Logic
+            function getMouseAngle(e) {
+                const pt = clock.createSVGPoint();
+                if (e.touches && e.touches.length > 0) {
+                    pt.x = e.touches[0].clientX;
+                    pt.y = e.touches[0].clientY;
+                } else {
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                }
+                const svgP = pt.matrixTransform(clock.getScreenCTM().inverse());
+                const dx = svgP.x - 100;
+                const dy = svgP.y - 100;
+                let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+                if (angle < 0) angle += 360;
+                return angle;
+            }
+
+            const startDrag = (type) => (e) => {
+                activeDrag = type;
+                document.body.style.cursor = 'grabbing';
+                e.preventDefault();
+            };
+
+            const doDrag = (e) => {
+                if (!activeDrag) return;
+                const angle = getMouseAngle(e);
+                
+                if (activeDrag === 'minute') {
+                    // Continuous minute mapping from angle
+                    const m = angle / 6;
+                    const h = Math.floor(totalMinutes / 60);
+                    updateClock(h * 60 + m);
+                } else {
+                    // Continuous total time mapping from hour angle (360 deg = 720 mins)
+                    const totalMins = angle * 2;
+                    updateClock(totalMins);
+                }
+            };
+
+            const endDrag = () => {
+                activeDrag = null;
+                document.body.style.cursor = 'default';
+            };
+
+            minuteHandle.addEventListener('mousedown', startDrag('minute'));
+            hourHandle.addEventListener('mousedown', startDrag('hour'));
+            minuteHandle.addEventListener('touchstart', startDrag('minute'), { passive: false });
+            hourHandle.addEventListener('touchstart', startDrag('hour'), { passive: false });
+
+            window.addEventListener('mousemove', doDrag);
+            window.addEventListener('touchmove', doDrag, { passive: false });
+            window.addEventListener('mouseup', endDrag);
+            window.addEventListener('touchend', endDrag);
+
+            // 5. UI Layout Deployment
             CyberUI.createCard('ui-container', 'ZEITSTEUERUNG', '<div id="slider-mount"></div>', 'var(--neon-blue)');
             CyberUI.createStatsGrid('data-container', [
-                { label: 'Winkel α', value: '0.0°', color: 'var(--neon-blue)' },
-                { label: 'Winkel β', value: '360.0°', color: '#ff8800' }
+                { label: 'Winkel α', value: '0°', color: 'var(--neon-blue)' },
+                { label: 'Winkel β', value: '360°', color: '#ff8800' }
             ]);
 
             CyberUI.createSlider('slider-mount', '', 0, 719, 0, 1, (val) => {
-                updateClock(parseInt(val));
+                updateClock(parseFloat(val), true);
             }, 'var(--neon-blue)');
 
             createTicks();
