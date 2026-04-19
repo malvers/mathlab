@@ -4,180 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Winkel-Uhr Labor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Fonts & Tools -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        /* SVG Clock Specific Styling */
-        svg#clock {
-            width: 95%;
-            max-width: 500px;
-            height: auto;
-            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.2));
-            /* Absolute centration */
-            display: block;
-        }
-
-        .clock-face { fill: rgba(0, 0, 0, 0.45); stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; }
-        #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-blue)); }
-        #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-purple)); }
-        .angle-arc { fill: rgba(0, 210, 255, 0.2); stroke: var(--neon-blue); stroke-width: 3; }
-
-        #workspace {
-            flex-grow: 1;
-            height: 100vh;
+        /* Essential SVG clock overrides */
+        #main-content {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
+        }
+
+        svg#clock {
+            width: 90%;
+            max-width: 550px;
+            filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.15));
+        }
+
+        #slider-mount .val-display {
+            display: none !important;
+        }
+        .clock-face { fill: rgba(10, 15, 30, 0.6); stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; }
+        #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-blue)); }
+        #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-purple)); }
+        .angle-arc { fill: rgba(0, 210, 255, 0.15); stroke: var(--neon-blue); stroke-width: 3; }
+
+        /* Floating HUD Tags */
+        #tag-container {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        #floating-tag, #floating-tag-beta {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 12px 10px;
+            border-radius: 12px;
+            font-size: 1.6rem;
+            font-family: 'Orbitron';
+            /* TRIPLE WIDTH LOCK FOR ABSOLUTE SYMMETRY */
+            width: 180px !important; 
+            min-width: 180px !important;
+            max-width: 180px !important;
+            flex: 0 0 180px !important;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
             overflow: hidden;
-            background: transparent;
         }
 
         #floating-tag {
-            position: absolute;
-            top: 13%; /* Fine-tuned position for optimal balance */
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--neon-blue);
-            padding: 12px 30px; 
-            border-radius: 20px;
-            font-size: 2.0rem; 
             color: var(--neon-blue);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-            z-index: 20;
-            pointer-events: none;
-            font-family: 'Orbitron';
+            border: 1px solid var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
         }
+
+        #floating-tag-beta {
+            color: #ff8800;
+            border: 1px solid #ff8800;
+            text-shadow: 0 0 10px #ff8800;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.15);
+        }
+
+        .angle-arc-beta { fill: rgba(255, 136, 0, 0.1); stroke: #ff8800; stroke-width: 2; }
     </style>
 </head>
 <body>
 
     <aside id="side-panel">
-        <div id="sidebar-header"></div>
-        <div id="controls-container"></div>
-        <div id="analysis-container"></div>
+        <header id="sidebar-header" style="min-height: 60px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+
+        <div style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
     </aside>
 
-    <div id="workspace">
-        <div id="floating-tag">α = 0°</div>
+    <main id="main-content">
+        <div id="tag-container">
+            <div id="floating-tag">α = 0.0°</div>
+            <div id="floating-tag-beta">β = 360.0°</div>
+        </div>
         <svg id="clock" viewBox="0 0 200 200">
             <circle cx="100" cy="100" r="95" class="clock-face" />
             <g id="ticks"></g>
+            <path id="angle-arc-beta" class="angle-arc-beta" d="" />
             <path id="angle-arc" class="angle-arc" d="" />
             <line id="hour-hand" x1="100" y1="100" x2="100" y2="60" />
             <line id="minute-hand" x1="100" y1="100" x2="100" y2="45" />
             <circle cx="100" cy="100" r="4" fill="white" />
         </svg>
-    </div>
+        <div id="floating-time">12:00</div>
+    </main>
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Winkel-Uhr Labor"
-        });
-        CyberUI.init();
-
-        function initUI() {
-            CyberBranding.setBriefing(`
-                <b>System-Status</b>: Chronometrische Analyse aktiv. Berechne den Innenwinkel zwischen Stunden- und Minutenzeiger.
-                Nutze den Slider, um die Zeit zu manipulieren.
-            `);
-
-            CyberUI.createCard('controls-container', 'Zeitsteuerung', `
-                <div style="display: flex; flex-direction: column; gap: 18px; padding: 5px 0;">
-                    <div class="label-row" style="margin-bottom: 0;">
-                        <span style="opacity: 0.8; font-size: 0.85rem;">Aktuelle Uhrzeit</span>
-                        <span id="digital-time" class="cyber-number" style="color:var(--neon-blue); font-weight:bold; font-size:1.4rem; text-shadow: 0 0 10px rgba(0,210,255,0.3);">12:00</span>
-                    </div>
-                    <div style="width: 100%; display: flex; align-items: center;">
-                        <input type="range" id="time-slider" min="0" max="719" value="0" style="width: 100%; cursor: pointer;">
-                    </div>
-                </div>
-            `);
-
-            CyberUI.createCard('analysis-container', 'Analyse-Daten', `
-                <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:12px; height:12px; border-radius:50%; background:var(--neon-blue); box-shadow:0 0 8px var(--neon-blue);"></div>
-                        <span style="font-size:0.85rem; opacity:0.8;">Stundenzeiger</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:12px; height:12px; border-radius:50%; background:var(--neon-purple); box-shadow:0 0 8px var(--neon-purple);"></div>
-                        <span style="font-size:0.85rem; opacity:0.8;">Minutenzeiger</span>
-                    </div>
-                </div>
-            `);
-
-            const slider = document.getElementById('time-slider');
-            slider.addEventListener('input', () => {
-                updateClock(parseInt(slider.value));
+        /**
+         * CHRONOMETRIC ANALYSIS LAB - ULTRA v5.3.8
+         */
+        window.addEventListener('load', () => {
+            // 1. Branding & Briefing
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "WINKEL ZWISCHEN ZEIGERN FÜR EINE ZEIT"
             });
-            updateClock(0);
-        }
 
-        const floatingTag = document.getElementById('floating-tag');
-        const hourHand = document.getElementById('hour-hand');
-        const minuteHand = document.getElementById('minute-hand');
-        const angleArc = document.getElementById('angle-arc');
-        const ticksContainer = document.getElementById('ticks');
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: CHRONO-DATEN</h3>
+                Analysieren Sie die geometrische Korrelation zwischen Zeit und Winkel. Das System berechnet in Echtzeit den eingeschlossenen Innenwinkel ($\alpha$).
+                
+                <div class="admin-info">
+                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">STEUERUNG</h4>
+                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                        <li><b>Zeit-Slider:</b> Manuelle Zeit-Manipulation (0-12h).</li>
+                        <li><b>Stats-Board:</b> Überwachung von Winkel und digitalem Status.</li>
+                    </ul>
+                </div>
+            `);
 
-        function createTicks() {
-            for (let i = 0; i < 12; i++) {
-                const angle = (i * 30) * (Math.PI / 180);
-                const x1 = 100 + 85 * Math.sin(angle);
-                const y1 = 100 - 85 * Math.cos(angle);
-                const x2 = 100 + 92 * Math.sin(angle);
-                const y2 = 100 - 92 * Math.cos(angle);
-                const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                tick.setAttribute("x1", x1);
-                tick.setAttribute("y1", y1);
-                tick.setAttribute("x2", x2);
-                tick.setAttribute("y2", y2);
-                tick.setAttribute("stroke", "rgba(255,255,255,0.2)");
-                tick.setAttribute("stroke-width", "1");
-                ticksContainer.appendChild(tick);
+            CyberUI.init();
+
+            // 2. SVG State
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const angleArc = document.getElementById('angle-arc');
+            const ticksContainer = document.getElementById('ticks');
+
+            function createTicks() {
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i * 30) * (Math.PI / 180);
+                    const x1 = 100 + 85 * Math.sin(angle);
+                    const y1 = 100 - 85 * Math.cos(angle);
+                    const x2 = 100 + 92 * Math.sin(angle);
+                    const y2 = 100 - 92 * Math.cos(angle);
+                    const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    tick.setAttribute("x1", x1);
+                    tick.setAttribute("y1", y1);
+                    tick.setAttribute("x2", x2);
+                    tick.setAttribute("y2", y2);
+                    tick.setAttribute("stroke", "rgba(255,255,255,0.2)");
+                    tick.setAttribute("stroke-width", "1");
+                    ticksContainer.appendChild(tick);
+                }
             }
-        }
 
-        function updateClock(totalMinutes) {
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            const hourDisplay = hours === 0 ? 12 : hours;
-            const dt = document.getElementById('digital-time');
-            if (dt) dt.innerText = `${hourDisplay}:${minutes < 10 ? '0' : ''}${minutes}`;
+            // 3. Update Engine
+            function updateClock(totalMinutes) {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                
+                const hourDisplay = hours === 0 ? 12 : hours;
+                const hh = hourDisplay.toString().padStart(2, '0');
+                const mm = minutes.toString().padStart(2, '0');
+                const timeString = `${hh}:${mm}`;
 
-            const minuteAngle = minutes * 6;
-            const hourAngle = (hours % 12) * 30 + (minutes * 0.5);
+                const minuteAngle = minutes * 6;
+                const hourAngle = (hours % 12) * 30 + (minutes * 0.5);
 
-            minuteHand.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
-            hourHand.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
+                minuteHand.setAttribute("transform", `rotate(${minuteAngle}, 100, 100)`);
+                hourHand.setAttribute("transform", `rotate(${hourAngle}, 100, 100)`);
 
-            let diff = Math.abs(hourAngle - minuteAngle);
-            if (diff > 180) diff = 360 - diff;
-            floatingTag.innerText = `α = ${diff.toFixed(1)}°`;
+                let diff = Math.round(Math.abs(hourAngle - minuteAngle));
+                if (diff > 180) diff = 360 - diff;
+                const beta = 360 - diff;
 
-            const r = 25;
-            const startAngle = (hourAngle - 90) * (Math.PI / 180);
-            const endAngle = (minuteAngle - 90) * (Math.PI / 180);
-            const x1 = 100 + r * Math.cos(startAngle);
-            const y1 = 100 + r * Math.sin(startAngle);
-            const x2 = 100 + r * Math.cos(endAngle);
-            const y2 = 100 + r * Math.sin(endAngle);
-            const largeArc = diff > 180 ? 1 : 0;
-            const clockWise = (minuteAngle - hourAngle + 360) % 360 < 180 ? 1 : 0;
-            const d = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${clockWise} ${x2} ${y2} L 100 100 Z`;
-            angleArc.setAttribute("d", d);
-        }
+                const angleText = `α = ${diff}°`;
+                const betaText = `β = ${beta}°`;
+                document.getElementById('floating-tag').innerText = angleText;
+                document.getElementById('floating-tag-beta').innerText = betaText;
+                document.getElementById('floating-time').innerText = timeString;
 
-        createTicks();
-        window.addEventListener('load', initUI);
+                // Sync UI Stats
+                CyberUI.updateStatsGrid('data-container', [
+                    { label: 'Winkel α', value: diff + '°', color: 'var(--neon-blue)' },
+                    { label: 'Winkel β', value: beta + '°', color: '#ff8800' }
+                ]);
+
+                // Update SVG Arcs
+                const r = 25;
+                const startA = (hourAngle - 90) * (Math.PI / 180);
+                const endA = (minuteAngle - 90) * (Math.PI / 180);
+                const x1 = 100 + r * Math.cos(startA);
+                const y1 = 100 + r * Math.sin(startA);
+                const x2 = 100 + r * Math.cos(endA);
+                const y2 = 100 + r * Math.sin(endA);
+                
+                const clockWise = (minuteAngle - hourAngle + 360) % 360 < 180 ? 1 : 0;
+                
+                if (diff === 0) {
+                    // Special case: 12:00 or overlapping hands -> 360 degree Beta circle
+                    document.getElementById('angle-arc').setAttribute("d", "");
+                    const d_beta_full = `M 100 ${100-r} A ${r} ${r} 0 1 1 100 ${100+r} A ${r} ${r} 0 1 1 100 ${100-r} Z`;
+                    document.getElementById('angle-arc-beta').setAttribute("d", d_beta_full);
+                } else {
+                    // α (Inner Arc)
+                    const d_alpha = `M ${x1} ${y1} A ${r} ${r} 0 0 ${clockWise} ${x2} ${y2} L 100 100 Z`;
+                    document.getElementById('angle-arc').setAttribute("d", d_alpha);
+
+                    // β (Outer Arc)
+                    const d_beta = `M ${x1} ${y1} A ${r} ${r} 0 1 ${1 - clockWise} ${x2} ${y2} L 100 100 Z`;
+                    document.getElementById('angle-arc-beta').setAttribute("d", d_beta);
+                }
+            }
+
+            // 4. UI Layout Deployment
+            CyberUI.createCard('ui-container', 'ZEITSTEUERUNG', '<div id="slider-mount"></div>', 'var(--neon-blue)');
+            CyberUI.createStatsGrid('data-container', [
+                { label: 'Winkel α', value: '0.0°', color: 'var(--neon-blue)' },
+                { label: 'Winkel β', value: '360.0°', color: '#ff8800' }
+            ]);
+
+            CyberUI.createSlider('slider-mount', '', 0, 719, 0, 1, (val) => {
+                updateClock(parseInt(val));
+            }, 'var(--neon-blue)');
+
+            createTicks();
+            updateClock(0);
+        });
     </script>
 </body>
 </html>
