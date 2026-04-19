@@ -5,6 +5,21 @@
 
 const LABS_DATA = [
     {
+        "id": "cinematic-intro",
+        "href": "intro.html",
+        "title": "Cinematic Intro",
+        "description": "Erlebe den monumentalen Start in das Doc Alvers Labor. Die ULTRA v5.3.8 Visual Identity in 6-Sekunden-Qualität.",
+        "tagline": "Vita Somnium Breve",
+        "icon": `<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)" stroke-width="1.2">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="2 4" opacity="0.5"></circle>
+            <path d="M10 8l6 4-6 4V8z" fill="var(--neon-blue)"></path>
+            <path d="M12 2v4M12 18v4M2 12h4M18 12h4" opacity="0.8"></path>
+        </svg>`,
+        "category": "hot fun",
+        "keywords": "intro startup branding reveal ultra",
+        "color": "blue"
+    },
+    {
         "id": "heart3d",
         "href": "heart3d.html",
         "title": "3D Heart Surface",
