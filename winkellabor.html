@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Winkel-Labor | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -70,19 +73,22 @@
             align-items: center;
             padding: 5px 0;
         }
+
         .angle-val {
             font-family: 'Orbitron';
             font-size: 1.4rem;
             font-weight: bold;
         }
+
         .angle-sum-area {
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
         }
     </style>
 </head>
+
 <body>
     <div id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
@@ -104,7 +110,7 @@
             // 1. Branding & UI Init
             CyberBranding.init({
                 title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "STRUKTURANALYSE: WINKEL"
+                subtitle: "WINKEL AN GESCHNITTENEN PARALLELEN"
             });
             CyberUI.init();
 
@@ -126,8 +132,8 @@
             let draggedPoint = null;
 
             const COLORS = {
-                A: "#00d2ff", B: "#fbbf24", 
-                TRANS: "#9d50bb", BASE: "#00d2ff"
+                A: "#00d2ff", B: "#fbbf24",
+                TRANS: "#666666", BASE: "#666666"
             };
 
             let g1 = { p1: { rx: 0.2, ry: 0.2, x: 0, y: 0 }, p2: { rx: 0.8, ry: 0.8, x: 0, y: 0 } };
@@ -136,13 +142,13 @@
 
             // 3. UI System
             CyberUI.createCard('ui-container', 'WINKEL-ANALYSE', `
-                <div class="angle-stat">
-                    <span style="color:rgba(255,255,255,0.5)">ALPHA (α)</span>
-                    <span id="disp-alpha" class="angle-val" style="color:var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">0.0°</span>
+                <div class="angle-stat" style="padding: 15px 0;">
+                    <span style="color:var(--neon-blue); font-size: 2.8rem; font-weight: bold; font-family: 'Orbitron';">α</span>
+                    <span id="disp-alpha" class="angle-val" style="color:var(--neon-blue); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
                 </div>
-                <div class="angle-stat">
-                    <span style="color:rgba(255,255,255,0.5)">BETA (β)</span>
-                    <span id="disp-beta" class="angle-val" style="color:var(--neon-amber); text-shadow: 0 0 10px var(--neon-amber);">0.0°</span>
+                <div class="angle-stat" style="padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <span style="color:var(--neon-amber); font-size: 2.8rem; font-weight: bold; font-family: 'Orbitron';">β</span>
+                    <span id="disp-beta" class="angle-val" style="color:var(--neon-amber); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-amber);">0.0°</span>
                 </div>
                 <div class="angle-sum-area">
                     <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">NEBENWINKEL-SUMME</div>
@@ -158,7 +164,52 @@
                     <button class="cyber-btn" id="btn-toggle">PARALLELEN: AN</button>
                     <button class="cyber-btn" id="btn-reset">LABOR RESET</button>
                 </div>
-            `, 'var(--neon-purple)');
+                <div style="margin-top:10px; display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+                    <button class="cyber-btn" id="btn-rot-t-l" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↺</button>
+                    <button class="cyber-btn" id="btn-rot-t-r" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↻</button>
+                    <button class="cyber-btn" id="btn-rot-b-l" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↺</button>
+                    <button class="cyber-btn" id="btn-rot-b-r" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↻</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:Orbitron; font-size:0.75rem; font-weight:600; color:var(--neon-blue); letter-spacing:1px;">
+                    <span style="flex:1; text-align:center;">TRANSVERSALE</span>
+                    <span style="flex:1; text-align:center;">PARALLELEN</span>
+                </div>
+                <div style="text-align:center; font-size:0.8rem; font-weight:bold; margin-top:12px; font-family:Orbitron; letter-spacing:1.5px; color:var(--neon-blue); text-shadow: 0 0 10px rgba(0,210,255,0.3);">SCHRITTWEITE: 5.0°</div>
+            `, 'var(--neon-blue)');
+
+            function rotateTransversal(deg) {
+                const inter1 = getIntersection(g1.p1, g1.p2, g2.p1, g2.p2);
+                // Rotate around intersection or center of line if parallel
+                const pivot = inter1 || { x: (g1.p1.x + g1.p2.x) / 2, y: (g1.p1.y + g1.p2.y) / 2 };
+                const rad = deg * Math.PI / 180;
+
+                const rotP = (p) => {
+                    const dx = p.x - pivot.x, dy = p.y - pivot.y;
+                    const nx = dx * Math.cos(rad) - dy * Math.sin(rad) + pivot.x;
+                    const ny = dx * Math.sin(rad) + dy * Math.cos(rad) + pivot.y;
+                    p.x = nx; p.y = ny;
+                    p.rx = nx / width; p.ry = ny / height;
+                };
+
+                rotP(g1.p1); rotP(g1.p2);
+                draw();
+            }
+
+            function rotateBaseLine(deg) {
+                const pivot = { x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 };
+                const rad = deg * Math.PI / 180;
+
+                const rotP = (p) => {
+                    const dx = p.x - pivot.x, dy = p.y - pivot.y;
+                    const nx = dx * Math.cos(rad) - dy * Math.sin(rad) + pivot.x;
+                    const ny = dx * Math.sin(rad) + dy * Math.cos(rad) + pivot.y;
+                    p.x = nx; p.y = ny;
+                    p.rx = nx / width; p.ry = ny / height;
+                };
+
+                rotP(g2.p1); rotP(g2.p2);
+                draw();
+            }
 
             function updateUI(alpha, beta) {
                 document.getElementById('disp-alpha').innerText = alpha.toFixed(1) + "°";
@@ -178,17 +229,21 @@
                 parallelOffsetRel = 0.2;
                 resize();
             };
+            document.getElementById('btn-rot-t-l').onclick = () => rotateTransversal(-5);
+            document.getElementById('btn-rot-t-r').onclick = () => rotateTransversal(5);
+            document.getElementById('btn-rot-b-l').onclick = () => rotateBaseLine(-5);
+            document.getElementById('btn-rot-b-r').onclick = () => rotateBaseLine(5);
 
             // 4. Rendering & Logic
             function resize() {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 width = rect.width; height = rect.height;
                 scale = Math.max(0.6, Math.min(1.2, width / 1000));
-                
+
                 const dpr = window.devicePixelRatio || 1;
                 canvas.width = width * dpr; canvas.height = height * dpr;
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                
+
                 [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => { p.x = p.rx * width; p.y = p.ry * height; });
                 draw();
             }
@@ -207,7 +262,7 @@
                 ctx.moveTo(p1.x - dx * 10, p1.y - dy * 10);
                 ctx.lineTo(p2.x + dx * 10, p2.y + dy * 10);
                 ctx.strokeStyle = color; ctx.globalAlpha = opacity;
-                ctx.lineWidth = 4 * scale; ctx.stroke();
+                ctx.lineWidth = 1.5 * scale; ctx.stroke();
                 ctx.restore();
             }
 
@@ -215,14 +270,14 @@
                 const arcRad = 60 * scale; const fontSize = Math.max(12, 16 * scale);
                 ctx.save();
                 ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, arcRad, startAngle, endAngle); ctx.lineTo(p.x, p.y); ctx.closePath();
-                ctx.fillStyle = color + "44"; ctx.fill();
+                ctx.fillStyle = color + "88"; ctx.fill();
                 ctx.strokeStyle = color; ctx.lineWidth = 2 * scale; ctx.stroke();
-                
+
                 let midAngle = (startAngle + endAngle) / 2;
                 if (Math.abs(endAngle - startAngle) > Math.PI) midAngle += Math.PI;
                 const lx = p.x + Math.cos(midAngle) * (arcRad + 25 * scale);
                 const ly = p.y + Math.sin(midAngle) * (arcRad + 25 * scale);
-                
+
                 ctx.fillStyle = "white"; ctx.font = `bold ${fontSize}px Orbitron`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(label, lx, ly);
                 ctx.restore();
@@ -238,8 +293,18 @@
                 }
 
                 drawLine(g2.p1, g2.p2, COLORS.BASE);
+
+                // --- PHYSICS UPDATE: Normal Vector for true Parallelism ---
+                const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                const len2 = Math.hypot(dx2, dy2);
+                const nx = -dy2 / len2, ny = dx2 / len2; // Normal Vector
                 const po = parallelOffsetRel * height;
-                const g3 = { p1: { x: g2.p1.x, y: g2.p1.y + po }, p2: { x: g2.p2.x, y: g2.p2.y + po } };
+
+                const g3 = {
+                    p1: { x: g2.p1.x + nx * po, y: g2.p1.y + ny * po },
+                    p2: { x: g2.p2.x + nx * po, y: g2.p2.y + ny * po }
+                };
+
                 if (isParallel) drawLine(g3.p1, g3.p2, COLORS.BASE, 0.5);
                 drawLine(g1.p1, g1.p2, COLORS.TRANS);
 
@@ -255,14 +320,14 @@
                         const v1 = Math.atan2(g1.p1.y - p.y, g1.p1.x - p.x);
                         const v2 = Math.atan2(g2.p2.y - g2.p1.y, g2.p2.x - g2.p1.x);
                         const v3 = v1 + Math.PI, v4 = v2 + Math.PI;
-                        const sorted = [v1, v2, v3, v4].sort((a,b) => {
-                            let d = a-b; while(d < -Math.PI) d += Math.PI*2; while(d > Math.PI) d -= Math.PI*2; return d;
+                        const sorted = [v1, v2, v3, v4].sort((a, b) => {
+                            let d = a - b; while (d < -Math.PI) d += Math.PI * 2; while (d > Math.PI) d -= Math.PI * 2; return d;
                         });
                         for (let i = 0; i < 4; i++) {
-                            const st = sorted[i], en = sorted[(i+1)%4];
-                            let diff = en - st; while(diff < 0) diff += Math.PI*2;
-                            const isGroupA = Math.abs(diff*180/Math.PI - alphaDeg) < 1;
-                            drawColoredAngle(p, st, en, isGroupA ? COLORS.A : COLORS.B, `${labels[i]}=${(diff*180/Math.PI).toFixed(1)}°`);
+                            const st = sorted[i], en = sorted[(i + 1) % 4];
+                            let diff = en - st; while (diff < 0) diff += Math.PI * 2;
+                            const isGroupA = Math.abs(diff * 180 / Math.PI - alphaDeg) < 1;
+                            drawColoredAngle(p, st, en, isGroupA ? COLORS.A : COLORS.B, `${labels[i]}=${(diff * 180 / Math.PI).toFixed(1)}°`);
                         }
                     };
                     drawAngles(inter1, ["α", "β", "γ", "δ"]);
@@ -273,11 +338,14 @@
                 }
 
                 const drawHandle = (p, color) => {
-                    ctx.beginPath(); ctx.arc(p.x, p.y, 8*scale, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 8 * scale, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
                     ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
                 };
-                [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => drawHandle(p, (p===g1.p1||p===g1.p2) ? COLORS.TRANS : COLORS.BASE));
-                if (isParallel) drawHandle({ x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 + po }, COLORS.BASE);
+                [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => drawHandle(p, COLORS.BASE));
+                if (isParallel) {
+                    const midG3 = { x: (g3.p1.x + g3.p2.x) / 2, y: (g3.p1.y + g3.p2.y) / 2 };
+                    drawHandle(midG3, COLORS.BASE);
+                }
             }
 
             canvas.onpointerdown = e => {
@@ -285,8 +353,13 @@
                 const hitZone = 35 * scale;
                 [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => { if (Math.hypot(p.x - x, p.y - y) < hitZone) draggedPoint = p; });
                 if (isParallel && !draggedPoint) {
-                    const midX = (g2.p1.x + g2.p2.x) / 2, g3Y = (g2.p1.y + g2.p2.y) / 2 + parallelOffsetRel * height;
-                    if (Math.hypot(midX - x, g3Y - y) < hitZone) draggedPoint = "offset";
+                    // Smart Hit detection for the shifted parallel handle
+                    const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                    const len2 = Math.hypot(dx2, dy2);
+                    const nx = -dy2 / len2, ny = dx2 / len2;
+                    const po = parallelOffsetRel * height;
+                    const midG3 = { x: (g2.p1.x + g2.p2.x) / 2 + nx * po, y: (g2.p1.y + g2.p2.y) / 2 + ny * po };
+                    if (Math.hypot(midG3.x - x, midG3.y - y) < hitZone) draggedPoint = "offset";
                 }
             };
             window.onpointermove = e => {
@@ -294,7 +367,15 @@
                 const rect = canvas.getBoundingClientRect();
                 const x = Math.max(0, Math.min(width, e.clientX - rect.left));
                 const y = Math.max(0, Math.min(height, e.clientY - rect.top));
-                if (draggedPoint === "offset") parallelOffsetRel = (y - (g2.p1.y + g2.p2.y) / 2) / height;
+                if (draggedPoint === "offset") {
+                    // Project movement onto normal vector for smooth offset control
+                    const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                    const len2 = Math.hypot(dx2, dy2);
+                    const nx = -dy2 / len2, ny = dx2 / len2;
+                    const midBase = { x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 };
+                    const dist = (x - midBase.x) * nx + (y - midBase.y) * ny;
+                    parallelOffsetRel = dist / height;
+                }
                 else { draggedPoint.x = x; draggedPoint.y = y; draggedPoint.rx = x / width; draggedPoint.ry = y / height; }
                 draw();
             };
@@ -304,4 +385,5 @@
         });
     </script>
 </body>
+
 </html>
