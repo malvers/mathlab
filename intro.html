@@ -207,10 +207,24 @@
             }
         }
 
+        // Replay Logic
+        function replayAnimation() {
+            console.log("⚛️ CYBER-OS: Animation Reset initiated.");
+            const container = document.querySelector('.intro-container');
+            if (!container) return;
+            
+            const newContainer = container.cloneNode(true);
+            container.parentNode.replaceChild(newContainer, container);
+        }
+
         // Shortcut Key Listener
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'f') {
                 toggleFullscreen();
+            }
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault(); // Prevent scrolling
+                replayAnimation();
             }
         });
     </script>
