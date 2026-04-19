@@ -110,6 +110,9 @@
                     <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron;">
                         <input type="checkbox" id="check-start" checked> URBILD (START)
                     </label>
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron; color:var(--neon-pink);">
+                        <input type="checkbox" id="check-hl-lock"> HL FIXIEREN
+                    </label>
                     <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron; color:#adff2f;">
                         <input type="checkbox" id="check-measurements" style="accent-color:#adff2f;"> MESSWERTE
                     </label>
@@ -135,13 +138,29 @@
             };
 
             const autoHideHL = () => {
+                // Check if HL should be locked (not hidden)
+                const isLocked = document.getElementById('check-hl-lock').checked;
+
                 // 1. Calculate the current state as the new baseline
+                // G is the current centroid
+                const G = {
+                    x: points.reduce((s, p) => s + p.x, 0) / points.length,
+                    y: points.reduce((s, p) => s + p.y, 0) / points.length
+                };
+
                 points = points.map(p => {
-                    let nx = (p.x - rp.x) * transform.scale;
-                    let ny = (p.y - rp.y) * transform.scale;
+                    // Local Scale around G
+                    let lx = (p.x - G.x) * transform.scale;
+                    let ly = (p.y - G.y) * transform.scale;
+                    let ps = { x: lx + G.x, y: ly + G.y };
+
+                    // Rotation around RP
+                    let nx = ps.x - rp.x;
+                    let ny = ps.y - rp.y;
                     const angleRad = (transform.rotation * Math.PI) / 180;
                     const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
                     const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
+                    
                     return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty, id: p.id };
                 });
 
@@ -154,9 +173,9 @@
                 sliderTX.value = 0;
                 sliderTY.value = 0;
 
-                // 4. Hide HL and Redraw
+                // 4. Handle HL Visibility
                 const cb = document.getElementById('check-helpers');
-                if (cb) cb.checked = false;
+                if (cb && !isLocked) cb.checked = false;
                 
                 update();
             };
@@ -228,6 +247,7 @@
             document.getElementById('slider-tx').value = 0;
             document.getElementById('slider-ty').value = 0;
             document.getElementById('check-helpers').checked = true;
+            document.getElementById('check-hl-lock').checked = false;
             document.getElementById('check-start').checked = true;
             update();
         }
@@ -244,12 +264,24 @@
             cc.drawGrid({ vignette: true, glow: true });
             const ctx = cc.ctx;
             const angleRad = (transform.rotation * Math.PI) / 180;
+
+            const G = {
+                x: points.reduce((s, p) => s + p.x, 0) / points.length,
+                y: points.reduce((s, p) => s + p.y, 0) / points.length
+            };
             
             const getTransformed = (p) => {
-                let nx = (p.x - rp.x) * transform.scale;
-                let ny = (p.y - rp.y) * transform.scale;
+                // Local Scale around G
+                let lx = (p.x - G.x) * transform.scale;
+                let ly = (p.y - G.y) * transform.scale;
+                let ps = { x: lx + G.x, y: ly + G.y };
+
+                // Rotation around RP
+                let nx = ps.x - rp.x;
+                let ny = ps.y - rp.y;
                 const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
                 const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
+                
                 return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty };
             };
 
