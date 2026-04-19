@@ -1,405 +1,424 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Delaunay Labor | UX Final Stable</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-        --neon-blue: #00d2ff;
-        --neon-purple: #9d50bb;
-        --neon-pink: #ff0055;
-        --neon-green: #39FF14;
-        --neon-orange: #ff8800;
-        --bg-dark: #050b18;
-        --glass: rgba(15, 23, 42, 0.7);
-        --glass-bright: rgba(255, 255, 255, 0.05);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Triangulierer | ULTRA v5.3.8</title>
+    
+    <!-- Core Engine -->
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 
-    body {
-        margin: 0;
-        font-family: 'Outfit', sans-serif;
-        background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-        color: white;
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden;
-        touch-action: none;
-    }
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --neon-pink: #ff0055;
+            --neon-green: #39FF14;
+            --neon-orange: #ff8800;
+        }
 
-    #side-panel {
-        width: 380px;
-        min-width: 380px;
-        background: var(--glass);
-        backdrop-filter: blur(25px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        z-index: 10;
-        box-sizing: border-box;
-        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-        overflow-y: auto;
-    }
+        body {
+            margin: 0;
+            display: flex !important;
+            flex-direction: row !important;
+            background: #020617 !important;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
 
-    #canvas-container {
-        flex-grow: 1;
-        position: relative;
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        overflow: hidden;
-    }
+        #side-panel {
+            width: 380px;
+            min-width: 380px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
 
-    /* --- DASHBOARD BUTTON --- */
-    .dashboard-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-decoration: none;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        letter-spacing: 1.5px;
-        backdrop-filter: blur(5px);
-        width: 100%;
-        box-sizing: border-box;
-    }
-    .dashboard-btn:hover {
-        color: white;
-        background: rgba(0, 210, 255, 0.1);
-        border-color: var(--neon-blue);
-        box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-        transform: translateX(5px);
-    }
-    .dashboard-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
 
-    canvas { display: block; cursor: crosshair; touch-action: none; }
-    .stats-card {
-        background: var(--glass-bright);
-        padding: 12px 20px;
-        border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
+        /* Cyber-UI Elements */
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 5px;
+        }
 
-    .stats-title {
-        font-family: 'Orbitron';
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.4);
-        letter-spacing: 1.5px;
-        margin-bottom: 5px;
-        display: block;
-        text-transform: uppercase;
-    }
+        .cyber-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-    .val {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 1.6rem;
-        font-weight: bold;
-    }
+        .cyber-btn:hover {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
 
-    .target-val { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
-    .current-val { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .btn-active {
+            border-color: var(--neon-blue) !important;
+            color: var(--neon-blue) !important;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
 
-    .controls { display: flex; flex-direction: column; gap: 12px; }
+        .btn-delete {
+            background: rgba(251, 255, 0, 0.1) !important;
+            color: #fbff00 !important;
+            border-color: #fbff00 !important;
+        }
+        .btn-delete:hover:not(:disabled) {
+            background: #fbff00 !important;
+            color: black !important; /* Better contrast on bright yellow */
+        }
+        .cyber-btn:disabled {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            cursor: not-allowed;
+            box-shadow: none !important;
+            filter: grayscale(1);
+        }
 
-    button {
-        padding: 15px 20px;
-        font-size: 0.85rem;
-        font-family: 'Orbitron', sans-serif;
-        background: var(--glass-bright);
-        color: rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        width: 100%;
-    }
-    button:hover { background: rgba(0, 210, 255, 0.1); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+        /* HUD Table */
+        #equation-hud {
+            position: absolute;
+            /* Positions are now handled dynamically in JavaScript */
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            font-family: 'Orbitron';
+            color: white;
+            pointer-events: auto;
+            z-index: 50;
+            min-width: 240px;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease-out; /* Smooth transition on resize */
+        }
 
-    #btn-multi.active {
-        background: rgba(0, 210, 255, 0.15);
-        color: var(--neon-blue);
-        border-color: var(--neon-blue);
-        box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
-    }
+        .hud-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .hud-table th { text-align: left; color: var(--neon-blue); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .hud-table td { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hud-sum-row { border-top: 2px solid var(--neon-blue); color: var(--neon-blue); font-weight: bold; font-size: 0.9rem; }
+        .hud-sum-val { text-align: right; padding-top: 10px !important; }
 
-    #btn-delete {
-        background: rgba(255, 0, 85, 0.1);
-        color: var(--neon-pink);
-        border: 1px solid var(--neon-pink);
-    }
-    #btn-delete:hover { background: var(--neon-pink); color: white; }
-
-    .footer-credit {
-        margin-top: auto;
-        padding-top: 15px;
-        text-align: center;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.55rem;
-        color: rgba(255,255,255,0.3);
-        letter-spacing: 1px;
-    }
-  </style>
+        canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            filter: drop-shadow(0 0 30px rgba(0, 210, 255, 0.15));
+        }
+    </style>
 </head>
 <body>
 
-<div id="side-panel">
-  <header style="border: none; padding-bottom: 5px;">
-    <a href="index.html" class="dashboard-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-      <span>DASHBOARD</span>
-    </a>
-  </header>
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+        <div style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
 
-  <div class="stats-card">
-    <span class="stats-title">Zielbereich</span>
-    <span class="val target-val">100,00 cm²</span>
-  </div>
-  <div class="stats-card">
-    <span class="stats-title">Summe Dreiecke</span>
-    <span id="val-area" class="val current-val">0,00 cm²</span>
-  </div>
+    <main id="main-content">
+        <div id="equation-hud">
+            <table class="hud-table">
+                <thead>
+                    <tr><th>DREIECK</th><th style="text-align:right">FLÄCHE</th></tr>
+                </thead>
+                <tbody id="hud-body"></tbody>
+                <tfoot>
+                    <tr class="hud-sum-row">
+                        <td style="padding-top:10px;">SUMME Σ</td>
+                        <td id="hud-sum-val" class="hud-sum-val">0,00 cm²</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <canvas id="canvas"></canvas>
+    </main>
 
-  <div class="controls">
-    <button id="btn-multi" onclick="toggleMultiMode()">Mehrfach-Modus: AUS</button>
-    <button id="btn-delete" style="display: none;" onclick="deleteSelected()">Auswahl löschen</button>
-    <button onclick="resetPoints()">Labor Reset</button>
-  </div>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            // 1. Branding
+            CyberBranding.init({
+                title: "DOC ALVERS MATHE-LABOR",
+                subtitle: "DELAUNAY TRIANGULIERUNG"
+            });
 
-  <div class="footer-credit">
-    &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-    <br><br>
-    <a href="impressum.html" style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
-  </div>
-</div>
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: TRIANGULIERER</h3>
+                Platzieren Sie Messpunkte im Zielquadrat. Das System berechnet automatisch die Delaunay-Triangulation und kumuliert die Flächensummen.
+            `);
 
-<div id="canvas-container">
-  <canvas id="canvas"></canvas>
-</div>
+            // 2. Delaunay Engine
+            class Delaunay {
+                static from(points) {
+                    if (points.length < 3) return [];
+                    const minX = Math.min(...points.map(p => p[0])), minY = Math.min(...points.map(p => p[1]));
+                    const maxX = Math.max(...points.map(p => p[0])), maxY = Math.max(...points.map(p => p[1]));
+                    const dx = maxX - minX, dy = maxY - minY, dmax = Math.max(dx, dy);
+                    const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+                    const st = [[midX - 20 * dmax, midY - dmax], [midX + 20 * dmax, midY - dmax], [midX, midY + 20 * dmax]];
+                    let triangles = [{p: [st[0], st[1], st[2]], circum: this.getCircum(st[0], st[1], st[2])}];
+                    for (let p of points) {
+                        let badTris = [], polygon = [];
+                        for (let j = 0; j < triangles.length; j++) {
+                            if (Math.hypot(triangles[j].circum.x - p[0], triangles[j].circum.y - p[1]) < triangles[j].circum.r - 0.0001) badTris.push(j);
+                        }
+                        for (let j of badTris) {
+                            const edges = [[triangles[j].p[0], triangles[j].p[1]], [triangles[j].p[1], triangles[j].p[2]], [triangles[j].p[2], triangles[j].p[0]]];
+                            for (let e of edges) {
+                                if (!badTris.some(o => o !== j && triangles[o].p.some(p1 => p1[0]===e[0][0] && p1[1]===e[0][1]) && triangles[o].p.some(p2 => p2[0]===e[1][0] && p2[1]===e[1][1]))) polygon.push(e);
+                            }
+                        }
+                        badTris.sort((a, b) => b - a).forEach(idx => triangles.splice(idx, 1));
+                        polygon.forEach(e => { const c = this.getCircum(e[0], e[1], p); if (c) triangles.push({p: [e[0], e[1], p], circum: c}); });
+                    }
+                    return triangles.filter(t => !t.p.some(tp => st.some(sp => tp[0]===sp[0] && tp[1]===sp[1])));
+                }
+                static getCircum(p1, p2, p3) {
+                    const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
+                    const D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+                    if (Math.abs(D) < 0.1) return null;
+                    const cx = ((x1*x1+y1*y1)*(y2-y3) + (x2*x2+y2*y2)*(y3-y1) + (x3*x3+y3*y3)*(y1-y2)) / D;
+                    const cy = ((x1*x1+y1*y1)*(x3-x2) + (x2*x2+y2*y2)*(x1-x3) + (x3*x3+y3*y3)*(x2-x1)) / D;
+                    return {x: cx, y: cy, r: Math.hypot(x1 - cx, y1 - cy)};
+                }
+            }
 
-<script src="js/branding.js"></script>
-<script>
-  // Initialize Branding
-  CyberBranding.init({
-      title: "Doc Alvers Mathe-Labor",
-      subtitle: "Triangulierer"
-  });
+            // 3. State & Logic
+            CyberUI.init();
+            const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+            let points = [], selectedIndices = new Set(), draggedIdx = -1;
+            let ox, oy, sWidth, multiMode = false, requestID = null;
+            let longPressTimer = null;
+            const units = 10;
 
-  class Delaunay {
-      static from(points) {
-          if (points.length < 3) return [];
-          const minX = Math.min(...points.map(p => p[0])), minY = Math.min(...points.map(p => p[1]));
-          const maxX = Math.max(...points.map(p => p[0])), maxY = Math.max(...points.map(p => p[1]));
-          const dx = maxX - minX, dy = maxY - minY, dmax = Math.max(dx, dy);
-          const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
-          const st = [[midX - 20 * dmax, midY - dmax], [midX + 20 * dmax, midY - dmax], [midX, midY + 20 * dmax]];
-          let triangles = [{p: [st[0], st[1], st[2]], circum: this.getCircum(st[0], st[1], st[2])}];
-          for (let p of points) {
-              let badTris = [], polygon = [];
-              for (let j = 0; j < triangles.length; j++) {
-                  if (Math.hypot(triangles[j].circum.x - p[0], triangles[j].circum.y - p[1]) < triangles[j].circum.r - 0.0001) badTris.push(j);
-              }
-              for (let j of badTris) {
-                  const edges = [[triangles[j].p[0], triangles[j].p[1]], [triangles[j].p[1], triangles[j].p[2]], [triangles[j].p[2], triangles[j].p[0]]];
-                  for (let e of edges) {
-                      if (!badTris.some(o => o !== j && triangles[o].p.some(p1 => p1[0]===e[0][0] && p1[1]===e[0][1]) && triangles[o].p.some(p2 => p2[0]===e[1][0] && p2[1]===e[1][1]))) polygon.push(e);
-                  }
-              }
-              badTris.sort((a, b) => b - a).forEach(idx => triangles.splice(idx, 1));
-              polygon.forEach(e => { const c = this.getCircum(e[0], e[1], p); if (c) triangles.push({p: [e[0], e[1], p], circum: c}); });
-          }
-          return triangles.filter(t => !t.p.some(tp => st.some(sp => tp[0]===sp[0] && tp[1]===sp[1])));
-      }
-      static getCircum(p1, p2, p3) {
-          const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
-          const D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
-          if (Math.abs(D) < 0.1) return null;
-          const cx = ((x1*x1+y1*y1)*(y2-y3) + (x2*x2+y2*y2)*(y3-y1) + (x3*x3+y3*y3)*(y1-y2)) / D;
-          const cy = ((x1*x1+y1*y1)*(x3-x2) + (x2*x2+y2*y2)*(x1-x3) + (x3*x3+y3*y3)*(x2-x1)) / D;
-          return {x: cx, y: cy, r: Math.hypot(x1 - cx, y1 - cy)};
-      }
-  }
+            function render() {
+                if (requestID) cancelAnimationFrame(requestID);
+                requestID = requestAnimationFrame(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const pxToCm = units / sWidth;
+                    const triangles = Delaunay.from(points);
+                    
+                    // Draw Reference Square
+                    ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth = 1;
+                    ctx.strokeRect(ox, oy, sWidth, sWidth);
 
-  const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-  let points = [], selectedIndices = new Set(), draggedIdx = -1, ox, oy, sWidth;
-  let startPos = {x:0, y:0}, hasMoved = false, multiMode = false;
-  let longPressTimer = null, wasSelectedOnDown = false;
-  const units = 10;
+                    // Dimension Labels
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "15px Orbitron";
+                    ctx.textAlign = "center";
+                    ctx.fillText("10 cm", ox + sWidth/2, oy - 15);
+                    ctx.save();
+                    ctx.translate(ox - 20, oy + sWidth/2);
+                    ctx.rotate(-Math.PI/2);
+                    ctx.fillText("10 cm", 0, 0);
+                    ctx.restore();
 
-  function toggleMultiMode(state) {
-      multiMode = (state !== undefined) ? state : !multiMode;
-      const btn = document.getElementById('btn-multi');
-      btn.innerText = multiMode ? "MEHRFACH-MODUS: AN" : "MEHRFACH-MODUS: AUS";
-      btn.classList.toggle('active', multiMode);
-      if (!multiMode) selectedIndices.clear();
-      update();
-  }
+                    let totalArea = 0;
+                    const hudBody = document.getElementById('hud-body');
+                    const hudSumVal = document.getElementById('hud-sum-val');
+                    if (hudBody) hudBody.innerHTML = '';
 
-  function resetPoints() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = document.getElementById('canvas-container').getBoundingClientRect();
-      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      sWidth = Math.min(rect.height * 0.8, rect.width * 0.6, 600);
-      ox = 40; oy = (rect.height - sWidth) / 2;
-      points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
-      selectedIndices.clear();
-      for (let i = 0; i < 8; i++) points.push([ox + 50 + Math.random()*(sWidth-100), oy + 50 + Math.random()*(sWidth-100)]);
-      update();
-  }
+                    triangles.forEach((tri, idx) => {
+                        const p = tri.p;
+                        const area = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2) * (pxToCm**2);
+                        totalArea += area;
 
-  function deleteSelected() {
-      points = points.filter((_, i) => i < 4 || !selectedIndices.has(i));
-      selectedIndices.clear();
-      update();
-  }
+                        ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
+                        ctx.fillStyle = "rgba(0, 210, 255, 0.05)"; ctx.fill();
+                        ctx.strokeStyle = "rgba(0, 210, 255, 0.2)"; ctx.stroke();
+                        
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.3)"; ctx.font = "bold 9px Orbitron"; ctx.textAlign = "center";
+                        ctx.fillText(String(idx+1).padStart(2,'0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + 3);
 
-  function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const pxToCm = units / sWidth;
-      document.getElementById('btn-delete').style.display = (selectedIndices.size > 0) ? 'block' : 'none';
+                        if (hudBody) { 
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td>${String(idx+1).padStart(2,'0')}</td><td style="text-align:right">${area.toFixed(2).replace('.',',')}</td>`;
+                            hudBody.appendChild(row);
+                        }
+                    });
 
-      const triangles = Delaunay.from(points);
-      ctx.strokeStyle = "#334155"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, sWidth, sWidth);
+                    if (hudSumVal) hudSumVal.innerText = totalArea.toFixed(2).replace('.',',') + ' cm²';
 
-      let totalArea = 0, triangleData = [];
-      triangles.forEach((tri, idx) => {
-          const p = tri.p;
-          const area = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2) * (pxToCm**2);
-          totalArea += area; triangleData.push(area);
-          ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
-          ctx.fillStyle = "rgba(33, 150, 243, 0.2)"; ctx.fill();
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.stroke();
-          ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; ctx.font = "bold 10px Orbitron"; ctx.textAlign = "center";
-          ctx.fillText((idx+1).toString().padStart(2,'0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + 4);
-      });
+                    points.forEach((p, i) => {
+                        const isSel = selectedIndices.has(i), isEdge = i < 4;
+                        ctx.beginPath(); ctx.arc(p[0], p[1], isEdge ? 3 : (isSel ? 6 : 4), 0, Math.PI*2);
+                        if (isSel) {
+                            ctx.shadowBlur = 15; ctx.shadowColor = "var(--neon-blue)";
+                            ctx.fillStyle = "#ffffff";
+                        } else {
+                            ctx.fillStyle = isEdge ? "rgba(255,255,255,0.15)" : (i === draggedIdx ? "#ffffff" : "var(--neon-blue)");
+                        }
+                        ctx.fill(); ctx.shadowBlur = 0;
+                    });
 
-      points.forEach((p, i) => {
-          const isSel = selectedIndices.has(i), isEdge = i < 4;
-          ctx.shadowBlur = isSel ? 15 : 0; ctx.shadowColor = "var(--neon-blue)";
-          ctx.beginPath(); ctx.arc(p[0], p[1], isEdge ? 4 : (isSel ? 7 : 5), 0, Math.PI*2);
-          if (isSel) { ctx.fillStyle = "#ffffff"; }
-          else { ctx.fillStyle = isEdge ? "rgba(255,255,255,0.2)" : (i === draggedIdx ? "#ffffff" : "var(--neon-blue)"); }
-          ctx.fill(); ctx.shadowBlur = 0;
-      });
+                    CyberUI.updateStatsGrid('data-container', [
+                        { label: 'Zielbereich', value: '100,00 cm²', color: 'var(--neon-orange)' },
+                        { label: 'Summe Δ', value: totalArea.toFixed(2).replace('.',',') + ' cm²', color: 'var(--neon-blue)' }
+                    ]);
 
-      document.getElementById('val-area').innerText = totalArea.toFixed(2).replace('.',',') + ' cm²';
+                    // Sync Delete Button State
+                    const btnDel = document.getElementById('btn-delete-points');
+                    if (btnDel) btnDel.disabled = (selectedIndices.size === 0);
+                });
+            }
 
-      const listX = ox + sWidth + 60; let currentY = oy + 20;
-      ctx.textAlign = "left"; ctx.font = "bold 13px Orbitron"; ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.fillText("ADDITION (cm²) [Δ]", listX, currentY); currentY += 40;
-      ctx.font = "bold 14px Orbitron"; 
-      triangleData.forEach((a, i) => {
-          if (currentY < oy + sWidth - 40) {
-              ctx.fillStyle = "rgba(0, 210, 255, 0.4)";
-              ctx.fillText((i+1).toString().padStart(2,'0'), listX, currentY);
-              ctx.textAlign = "right"; ctx.fillStyle = "white";
-              ctx.fillText(a.toFixed(2).replace('.',','), listX + 130, currentY);
-              ctx.textAlign = "left"; currentY += 22;
-          }
-      });
-      ctx.fillStyle = "var(--neon-blue)";
-      ctx.font = "bold 20px Orbitron";
-      ctx.fillText(`Σ = ${totalArea.toFixed(2).replace('.',',')}`, listX, currentY + 40);
-  }
+            function resetPoints() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = document.getElementById('main-content').getBoundingClientRect();
+                canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                sWidth = Math.min(rect.height * 0.8, rect.width * 0.6, 600);
+                ox = (rect.width - sWidth) / 3; oy = (rect.height - sWidth) / 2;
+                points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
+                selectedIndices.clear();
+                for (let i = 0; i < 6; i++) points.push([ox + 50 + Math.random()*(sWidth-100), oy + 50 + Math.random()*(sWidth-100)]);
+                
+                // Update HUD Position: Top-Left of Table to Top-Right of Square
+                const hud = document.getElementById('equation-hud');
+                if (hud) {
+                    hud.style.top = oy + 'px';
+                    hud.style.left = (ox + sWidth + 30) + 'px';
+                }
 
-  canvas.onpointerdown = e => {
-      const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      let hit = -1; for (let i = 4; i < points.length; i++) if (Math.hypot(points[i][0]-x, points[i][1]-y) < 20) { hit = i; break; }
+                render();
+            }
 
-      startPos = {x, y};
-      hasMoved = false;
-      wasSelectedOnDown = selectedIndices.size > 0; // Zustand speichern
+            // Interaction
+            let dragStartPos = { x: 0, y: 0 };
+            let initialPointsMapping = new Map();
 
-      if (hit !== -1) {
-          draggedIdx = hit;
-          longPressTimer = setTimeout(() => {
-              if (!hasMoved) {
-                  if (navigator.vibrate) navigator.vibrate(50);
-                  if (!multiMode) toggleMultiMode(true);
-                  selectedIndices.add(hit);
-                  update();
-              }
-          }, 1000);
-      } else {
-          // Klick ins Leere: Falls etwas selektiert ist, NUR deselektieren
-          if (wasSelectedOnDown) {
-              selectedIndices.clear();
-              toggleMultiMode(false);
-          }
-      }
-      update();
-  };
+            canvas.onpointerdown = e => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                dragStartPos = { x, y };
 
-  window.onpointermove = e => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                let hit = -1;
+                for (let i = 4; i < points.length; i++) {
+                    if (Math.hypot(points[i][0]-x, points[i][1]-y) < 20) { hit = i; break; }
+                }
 
-      if (Math.hypot(x - startPos.x, y - startPos.y) > 5) {
-          hasMoved = true;
-          if (longPressTimer) clearTimeout(longPressTimer);
-      }
+                if (hit !== -1) {
+                    draggedIdx = hit;
+                    
+                    // Improved Multi-Select Logic (Toggle)
+                    if (e.shiftKey || multiMode) {
+                        if (selectedIndices.has(hit)) selectedIndices.delete(hit);
+                        else selectedIndices.add(hit);
+                    } else {
+                        // Single-select mode: isolated selection
+                        selectedIndices.clear();
+                        selectedIndices.add(hit);
+                    }
 
-      if (draggedIdx !== -1) {
-          if (!multiMode && !selectedIndices.has(draggedIdx) && hasMoved) {
-              selectedIndices.clear();
-          }
-          points[draggedIdx] = [Math.max(ox, Math.min(ox+sWidth, x)), Math.max(oy, Math.min(oy+sWidth, y))];
-          update();
-      }
-  };
+                    // Snapshot formation
+                    initialPointsMapping.clear();
+                    selectedIndices.forEach(idx => {
+                        initialPointsMapping.set(idx, [...points[idx]]);
+                    });
 
-  window.onpointerup = e => {
-      if (longPressTimer) clearTimeout(longPressTimer);
-      const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                    if (longPressTimer) clearTimeout(longPressTimer);
+                    longPressTimer = setTimeout(() => {
+                        if (Math.hypot(x - dragStartPos.x, y - dragStartPos.y) < 5) {
+                            if (!multiMode) window.toggleM();
+                            render();
+                        }
+                    }, 600);
+                } else {
+                    // Clicking empty space always clears selection unless Shift is held
+                    if (!e.shiftKey) selectedIndices.clear();
+                }
+                render();
+            };
 
-      if (draggedIdx !== -1) {
-          if (!hasMoved) {
-              if (multiMode || e.shiftKey) {
-                  if (selectedIndices.has(draggedIdx)) selectedIndices.delete(draggedIdx);
-                  else selectedIndices.add(draggedIdx);
-              } else {
-                  selectedIndices.clear();
-                  selectedIndices.add(draggedIdx);
-              }
-          } else {
-              if (!multiMode && selectedIndices.size <= 1) selectedIndices.clear();
-          }
-      } else {
-          // NEUER PUNKT Logik: Nur wenn beim Klick (Down) NICHTS selektiert war
-          if (!hasMoved && !wasSelectedOnDown && x>=ox && x<=ox+sWidth && y>=oy && y<=oy+sWidth) {
-              points.push([x,y]);
-          }
-      }
+            window.onpointermove = e => {
+                if (draggedIdx === -1) return;
+                if (longPressTimer) clearTimeout(longPressTimer);
 
-      draggedIdx = -1;
-      hasMoved = false;
-      wasSelectedOnDown = false;
-      update();
-  };
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                const dx = x - dragStartPos.x, dy = y - dragStartPos.y;
 
-  window.addEventListener('resize', resetPoints);
-  window.onload = resetPoints;
-</script>
+                // Move formation as a group
+                initialPointsMapping.forEach((initPos, idx) => {
+                    points[idx] = [
+                        Math.max(ox, Math.min(ox + sWidth, initPos[0] + dx)),
+                        Math.max(oy, Math.min(oy + sWidth, initPos[1] + dy))
+                    ];
+                });
+                render();
+            };
+
+            window.onpointerup = e => {
+                if (longPressTimer) clearTimeout(longPressTimer);
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+                if (draggedIdx === -1 && Math.hypot(x - dragStartPos.x, y - dragStartPos.y) < 5) {
+                    if (x >= ox && x <= ox + sWidth && y >= oy && y <= oy + sWidth) {
+                        points.push([x, y]);
+                    }
+                }
+                draggedIdx = -1;
+                initialPointsMapping.clear();
+                render();
+            };
+
+            // UI Buttons
+            CyberUI.createCard('ui-container', 'STEUERUNG', `
+                <button class="cyber-btn" onclick="window.toggleM()">Mehrfach-Modus</button>
+                <button class="cyber-btn btn-delete" id="btn-delete-points" onclick="window.delS()">Auswahl löschen</button>
+                <button class="cyber-btn" onclick="window.resP()">Labor Reset</button>
+            `, 'var(--neon-blue)');
+
+            window.toggleM = () => { multiMode = !multiMode; render(); };
+            window.delS = () => { points = points.filter((_, i) => i < 4 || !selectedIndices.has(i)); selectedIndices.clear(); render(); };
+            window.resP = resetPoints;
+
+            window.addEventListener('resize', resetPoints);
+            resetPoints();
+        });
+    </script>
 </body>
 </html>

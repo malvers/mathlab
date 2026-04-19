@@ -309,7 +309,7 @@ const CyberBranding = {
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
                 font-size: calc(11px + 11px * var(--header-scale));
-                margin: 0;
+                margin: 0 !important;
                 letter-spacing: calc(1px + 2.5px * var(--header-scale));
                 background: linear-gradient(to right, var(--branding-blue), var(--branding-white), var(--branding-purple));
                 -webkit-background-clip: text;
@@ -319,7 +319,7 @@ const CyberBranding = {
                 line-height: 1.1;
                 font-weight: 700;
                 transition: font-size 0.2s ease;
-                margin-bottom: 2px;
+                margin-bottom: 2px !important;
             }
 
             .canvas-subtitle {
@@ -327,7 +327,8 @@ const CyberBranding = {
                 font-size: calc(7.9px + 3.5px * var(--header-scale)); /* +20% again */
                 letter-spacing: calc(1px + 3.5px * var(--header-scale));
                 color: var(--branding-blue);
-                margin-top: 3px;
+                margin: 0 !important;
+                margin-top: 3px !important;
                 opacity: 0.9;
                 text-transform: uppercase;
                 text-shadow: 0 0 7px var(--branding-blue);
