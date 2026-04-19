@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Butterfly Curve | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
@@ -54,7 +57,11 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.3s;
         }
-        .stat-card:hover { border-color: rgba(0, 210, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
+
+        .stat-card:hover {
+            border-color: rgba(0, 210, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
 
         .stat-label {
             font-family: 'Orbitron';
@@ -71,6 +78,7 @@
             gap: 8px;
             margin-bottom: 5px;
         }
+
         .control-header {
             display: flex;
             justify-content: space-between;
@@ -79,7 +87,11 @@
             color: rgba(255, 255, 255, 0.7);
             font-family: 'Orbitron';
         }
-        .val-display { color: var(--neon-blue); font-weight: bold; }
+
+        .val-display {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
 
         input[type="range"] {
             -webkit-appearance: none;
@@ -89,6 +101,7 @@
             border-radius: 2px;
             outline: none;
         }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 16px;
@@ -105,6 +118,7 @@
             gap: 10px;
             margin-top: 5px;
         }
+
         button {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -118,8 +132,16 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-        button:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 20px var(--neon-blue); }
-        button.secondary { opacity: 0.6; }
+
+        button:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        button.secondary {
+            opacity: 0.6;
+        }
 
         #main-viewport {
             flex-grow: 1;
@@ -149,9 +171,15 @@
             border-radius: 15px;
             border: 1px solid rgba(210, 210, 210, 0.1);
         }
-        .katex-display { margin: 0 !important; color: white; text-shadow: none; }
+
+        .katex-display {
+            margin: 0 !important;
+            color: white;
+            text-shadow: none;
+        }
     </style>
 </head>
+
 <body>
     <div id="side-panel">
         <section class="stat-card">
@@ -172,30 +200,40 @@
 
         <section class="stat-card">
             <span class="stat-label">Parameter-Optimierung</span>
-            
+
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-pink);">Exp Amp <span id="val-eA" class="val-display" style="color:var(--neon-pink);">1.0</span></div>
-                <input type="range" id="p-eA" min="0" max="4" step="0.1" value="1" style="accent-color:var(--neon-pink);">
+                <div class="control-header" style="color:var(--neon-pink);">Exp Amp <span id="val-eA"
+                        class="val-display" style="color:var(--neon-pink);">1.0</span></div>
+                <input type="range" id="p-eA" min="0" max="4" step="0.1" value="1"
+                    style="accent-color:var(--neon-pink);">
             </div>
 
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-green);">Cos Amp <span id="val-cA" class="val-display" style="color:var(--neon-green);">2.0</span></div>
-                <input type="range" id="p-cA" min="0" max="6" step="0.1" value="2" style="accent-color:var(--neon-green);">
+                <div class="control-header" style="color:var(--neon-green);">Cos Amp <span id="val-cA"
+                        class="val-display" style="color:var(--neon-green);">2.0</span></div>
+                <input type="range" id="p-cA" min="0" max="6" step="0.1" value="2"
+                    style="accent-color:var(--neon-green);">
             </div>
 
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-green);">Cos Freq <span id="val-cF" class="val-display" style="color:var(--neon-green);">4</span></div>
-                <input type="range" id="p-cF" min="1" max="12" step="1" value="4" style="accent-color:var(--neon-green);">
+                <div class="control-header" style="color:var(--neon-green);">Cos Freq <span id="val-cF"
+                        class="val-display" style="color:var(--neon-green);">4</span></div>
+                <input type="range" id="p-cF" min="1" max="12" step="1" value="4"
+                    style="accent-color:var(--neon-green);">
             </div>
 
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-amber);">Sin Amp <span id="val-sA" class="val-display" style="color:var(--neon-amber);">1.0</span></div>
-                <input type="range" id="p-sA" min="0" max="4" step="0.1" value="1" style="accent-color:var(--neon-amber);">
+                <div class="control-header" style="color:var(--neon-amber);">Sin Amp <span id="val-sA"
+                        class="val-display" style="color:var(--neon-amber);">1.0</span></div>
+                <input type="range" id="p-sA" min="0" max="4" step="0.1" value="1"
+                    style="accent-color:var(--neon-amber);">
             </div>
 
             <div class="control-group">
-                <div class="control-header" style="color:var(--neon-amber);">Sin Div <span id="val-sP" class="val-display" style="color:var(--neon-amber);">24</span></div>
-                <input type="range" id="p-sP" min="1" max="48" step="1" value="24" style="accent-color:var(--neon-amber);">
+                <div class="control-header" style="color:var(--neon-amber);">Sin Div <span id="val-sP"
+                        class="val-display" style="color:var(--neon-amber);">24</span></div>
+                <input type="range" id="p-sP" min="1" max="48" step="1" value="24"
+                    style="accent-color:var(--neon-amber);">
             </div>
         </section>
     </div>
@@ -355,8 +393,8 @@
                 const cos4T = Math.cos(params.cosFreq * theta);
                 const term3 = Math.pow(Math.sin((2 * theta - Math.PI) / params.sinPeriod), 5);
                 const r = params.expAmp * Math.exp(sinT) - params.cosAmp * cos4T + params.sinAmp * term3;
-                return { 
-                    x: r * Math.cos(theta), 
+                return {
+                    x: r * Math.cos(theta),
                     y: r * Math.sin(theta)
                 };
             }
@@ -377,17 +415,17 @@
                 });
 
                 const ctx = CyberCanvasInstance.ctx;
-                
+
                 if (currentTheta > 0) {
                     ctx.lineWidth = 3;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
-                    
-                    const step = 0.02; 
-                    const maxTheta = params.sinPeriod * Math.PI; 
+
+                    const step = 0.02;
+                    const maxTheta = params.sinPeriod * Math.PI;
                     const endT = Math.min(currentTheta, maxTheta);
                     const currentHue = (params.hue + currentTheta * 8) % 360;
-                    
+
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = `hsl(${currentHue}, 100%, 50%)`;
                     ctx.strokeStyle = `hsl(${currentHue}, 100%, 70%)`;
@@ -414,4 +452,5 @@
         });
     </script>
 </body>
+
 </html>
