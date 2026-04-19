@@ -354,19 +354,18 @@ const CyberBranding = {
 
             /* Central Navigation */
             .cyber-nav {
-                display: flex !important;
-                flex-direction: row;
-                justify-content: flex-start;
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
                 gap: 8px;
-                width: auto;
+                width: 100% !important;
                 z-index: 100000 !important;
                 animation: branding-fade-in 1.2s ease-out forwards;
+                box-sizing: border-box;
             }
 
             .cyber-nav.integrated {
-                margin-bottom: 15px;
+                margin: 5px 0 20px 0;
                 width: 100%;
-                justify-content: flex-start;
                 position: relative;
             }
 
@@ -377,20 +376,22 @@ const CyberBranding = {
             }
 
             .nav-btn {
-                width: 48px;
-                height: 48px;
+                width: 100% !important;
+                min-height: 48px;
+                box-sizing: border-box;
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(0, 210, 255, 0.3) !important;
-                border-radius: 10px;
+                border-radius: 12px;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 color: white !important;
                 text-decoration: none;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            }
             }
 
             .nav-btn:hover {

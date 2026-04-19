@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Transformationen</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
@@ -19,17 +21,20 @@
             overflow: hidden;
         }
 
-        canvas { display: block; cursor: crosshair; }
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
 
         .math-glow {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
             font-size: 1.1em;
         }
 
-        .val-display { 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 1.2rem; 
-            color: white; 
+        .val-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: white;
             font-weight: bold;
         }
     </style>
@@ -39,7 +44,8 @@
     <aside id="side-panel">
         <div id="sidebar-header" style="min-height: 60px;"></div>
         <div id="parameters-container"></div>
-        <div style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div
+            style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
@@ -60,7 +66,7 @@
             { x: 2, y: -2, id: 'B' },
             { x: 0, y: 2, id: 'C' }
         ];
-        let rp = { x: 0, y: 0 }; 
+        let rp = { x: 0, y: 0 };
         let transform = { rotation: 0, scale: 1, tx: 0, ty: 0 };
         let dragID = null; // null, -1 (RP), 0-2 (points), 100 (Body)
         let dragStartPos = { x: 0, y: 0 };
@@ -74,7 +80,7 @@
             const A3 = area(a, b, p);
             return Math.abs(A - (A1 + A2 + A3)) < 0.01;
         };
-        
+
         window.addEventListener('load', () => {
             // 1. Branding
             CyberBranding.init({
@@ -82,9 +88,16 @@
                 subtitle: "ÄQUIVALENZ"
             });
 
+            CyberBranding.setBriefing(`
+                <b style="color:var(--neon-blue); letter-spacing:1px;">MISSION: ÄQUIVALENZ-BILDUNG</b><br><br>
+                Analysiere die Veränderung von Dreiecksformen durch Translation, Rotation und Skalierung.<br><br>
+                Verifiziere den Erhalt des Flächeninhalts (Äquivalenz) durch das iterative Festschreiben neuer Zustände (Chaining).<br><br>
+                Das gestrichelte Dreieck dient dir dabei stets als statische Referenz (Urbild) deiner aktuellen Aktion.
+            `);
+
             // 2. UI Engine & Cards
             CyberUI.init();
-            
+
             CyberUI.createCard('parameters-container', 'TRANSFORMATION', `
                 <div style="display:flex; flex-direction:column; gap:15px;">
                     <div>
@@ -104,6 +117,7 @@
                 </div>
             `);
 
+
             CyberUI.createCard('parameters-container', 'DARSTELLUNG', `
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <input type="checkbox" id="check-helpers" checked style="display:none;">
@@ -122,12 +136,12 @@
 
             // 3. Canvas & Input
             cc = new CyberCanvas();
-            cc.init('canvas', { minX: -10, maxX: 10, minY: -7, maxY: 7 }, { 
-                showGrid: true, 
-                showAxes: true, 
-                showLabels: false, 
+            cc.init('canvas', { minX: -10, maxX: 10, minY: -7, maxY: 7 }, {
+                showGrid: true,
+                showAxes: true,
+                showLabels: false,
                 showTelemetry: false,
-                vignette: true, 
+                vignette: true,
                 glow: true,
                 allowPan: false
             });
@@ -172,7 +186,7 @@
                 if (cb && !isLocked) {
                     cb.checked = false;
                 }
-                
+
                 update();
             };
 
@@ -197,13 +211,13 @@
                     rp.y = pos.y;
                     dragID = -1;
                 }
-                
+
                 if (dragID !== null) autoShowHL();
             };
 
             cc.onMouseMove = (pos) => {
                 if (dragID === null) return;
-                
+
                 if (dragID === 100) {
                     const dx = pos.x - dragStartPos.x;
                     const dy = pos.y - dragStartPos.y;
@@ -231,34 +245,34 @@
                     { label: 'Labor Reset', onclick: () => resetLab() },
                     { label: 'Ansicht Reset', onclick: () => cc.resetView(-7, 7) },
                     { divider: true },
-                    { 
-                        label: 'Gitter anzeigen', 
-                        checked: cc.showGrid, 
-                        onchange: (val) => { cc.showGrid = val; update(); } 
+                    {
+                        label: 'Gitter anzeigen',
+                        checked: cc.showGrid,
+                        onchange: (val) => { cc.showGrid = val; update(); }
                     },
-                    { 
-                        label: 'Achsen anzeigen', 
-                        checked: cc.showAxes, 
-                        onchange: (val) => { cc.showAxes = val; update(); } 
+                    {
+                        label: 'Achsen anzeigen',
+                        checked: cc.showAxes,
+                        onchange: (val) => { cc.showAxes = val; update(); }
                     },
-                    { 
-                        label: 'Achsenbeschriftung', 
-                        checked: cc.showLabels, 
-                        onchange: (val) => { cc.showLabels = val; update(); } 
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: cc.showLabels,
+                        onchange: (val) => { cc.showLabels = val; update(); }
                     },
-                    { 
-                        label: 'Koordinaten', 
-                        checked: cc.showTelemetry, 
-                        onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); } 
+                    {
+                        label: 'Koordinaten',
+                        checked: cc.showTelemetry,
+                        onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); }
                     }
                 ]);
             };
-            
+
             // Catch accidental releases outside canvas
             window.addEventListener('mouseup', () => {
                 if (dragID !== null) {
-                   dragID = null;
-                   autoHideHL();
+                    dragID = null;
+                    autoHideHL();
                 }
             });
 
@@ -266,20 +280,20 @@
             const sliderRot = document.getElementById('slider-rot');
             const sliderScale = document.getElementById('slider-scale');
 
-            sliderRot.oninput = (e) => { 
+            sliderRot.oninput = (e) => {
                 autoShowHL();
-                transform.rotation = parseFloat(e.target.value); 
-                update(); 
+                transform.rotation = parseFloat(e.target.value);
+                update();
             };
             sliderRot.onchange = autoHideHL;
 
-            sliderScale.oninput = (e) => { 
+            sliderScale.oninput = (e) => {
                 autoShowHL();
-                transform.scale = parseFloat(e.target.value) / 100; 
-                update(); 
+                transform.scale = parseFloat(e.target.value) / 100;
+                update();
             };
             sliderScale.onchange = autoHideHL;
-            
+
             document.getElementById('check-helpers').onchange = () => update();
             document.getElementById('check-start').onchange = () => update();
             document.getElementById('check-measurements').onchange = () => update();
@@ -319,7 +333,7 @@
                 x: points.reduce((s, p) => s + p.x, 0) / points.length,
                 y: points.reduce((s, p) => s + p.y, 0) / points.length
             };
-            
+
             const getTransformed = (p) => {
                 // Local Scale around G
                 let lx = (p.x - G.x) * transform.scale;
@@ -331,7 +345,7 @@
                 let ny = ps.y - rp.y;
                 const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
                 const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
-                
+
                 return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty };
             };
 
@@ -356,7 +370,7 @@
             if (document.getElementById('check-helpers').checked) {
                 ctx.setLineDash([5, 8]);
                 ctx.lineWidth = 2;
-                
+
                 const sourcePoints = (dragID !== null && dragBaseline) ? dragBaseline : points;
                 const targetPoints = (dragID !== null && dragBaseline) ? points : transformedPoints;
 
@@ -364,9 +378,9 @@
                     const tp = targetPoints[i];
                     if (Math.abs(transform.rotation) <= 0.1) {
                         ctx.strokeStyle = "rgba(0, 210, 255, 0.5)";
-                        ctx.beginPath(); 
-                        ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y)); 
-                        ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y)); 
+                        ctx.beginPath();
+                        ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
+                        ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
                         ctx.stroke();
                     } else {
                         const dxPix = cc.mapX(tp.x) - cc.mapX(rp.x);
@@ -390,9 +404,9 @@
                 transformedPoints.forEach((tp) => {
                     ctx.setLineDash([2, 5]);
                     ctx.strokeStyle = "rgba(173, 255, 47, 0.5)";
-                    ctx.beginPath(); 
-                    ctx.moveTo(cc.mapX(rp.x), cc.mapY(rp.y)); 
-                    ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y)); 
+                    ctx.beginPath();
+                    ctx.moveTo(cc.mapX(rp.x), cc.mapY(rp.y));
+                    ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
                     ctx.stroke();
                     const distVal = Math.hypot(tp.x - rp.x, tp.y - rp.y);
                     ctx.fillStyle = "#adff2f";
@@ -416,8 +430,8 @@
 
             // RP
             ctx.fillStyle = "#ff0055";
-            ctx.beginPath(); 
-            ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 6, 0, Math.PI * 2); 
+            ctx.beginPath();
+            ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 6, 0, Math.PI * 2);
             ctx.fill();
         }
 

@@ -61,7 +61,7 @@
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         title: "Doc Alvers Mathe-Labor",
-                        subtitle: "STEIGUNGS-LABOR",
+                        subtitle: "LINEARE FUNKTIONEN",
                         briefing: `
                             <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: STEIGUNGS-ANALYSE</h3>
                             Analysiere die Steigung (m) einer Geraden durch interaktives Verschieben der Handle-Punkte. Beobachte, wie sich das Steigungsdreieck und der Anstieg m verändern. Auch die Größe und/ oder die Position des Anstiegsdreiechs ist egal!<div class="admin-info">
@@ -81,20 +81,20 @@
                     CyberUI.init();
                     
                     CyberUI.createCard('parameters-container', 'FUNKTION', `
-                        <div id="eq-main" class="math-glow"></div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
-                            <div style="text-align:center;">
-                                <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); font-family:Orbitron;">STEIGUNG M</div>
-                                <div id="latex-m" class="val-display"></div>
+                        <div id="eq-main" class="math-glow" style="text-align:left; margin-bottom:2px; padding-left:5px; font-size:1.3rem;"></div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">STEIGUNG M</div>
+                                <div id="latex-m" class="val-display" style="font-size:1.1rem;"></div>
                             </div>
-                            <div style="text-align:center;">
-                                <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); font-family:Orbitron;">Y-ABSCHNITT N</div>
-                                <div id="latex-n" class="val-display"></div>
+                            <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">Y-ABSCHNITT N</div>
+                                <div id="latex-n" class="val-display" style="font-size:1.1rem;"></div>
                             </div>
-                        </div>
-                        <div style="text-align:center; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
-                            <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); font-family:Orbitron;">NULLSTELLE X₀</div>
-                            <div id="latex-x0" class="val-display"></div>
+                            <div style="text-align:left; padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">NULLSTELLE X₀</div>
+                                <div id="latex-x0" class="val-display" style="font-size:1.1rem;"></div>
+                            </div>
                         </div>
                     `);
 
@@ -289,9 +289,6 @@
             }
         }
 
-        document.getElementById('m-slider').oninput = e => { m = parseFloat(e.target.value); draw(); };
-        document.getElementById('x-slider').oninput = e => { triX = parseFloat(e.target.value); draw(); };
-        document.getElementById('size-slider').oninput = e => { triSize = parseFloat(e.target.value); draw(); };
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', startLabor);
