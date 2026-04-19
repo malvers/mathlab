@@ -5,46 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-pink: #f472b6;
-            --neon-green: #4ade80;
-            --neon-yellow: #fbbf24;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: #050b18;
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 100;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-        }
-
         #canvas-container {
             flex-grow: 1;
             position: relative;
@@ -91,10 +54,8 @@
 </head>
 
 <body>
-
-
     <aside id="side-panel">
-        <header id="sidebar-header"></header>
+        <header id="sidebar-header" style="min-height: 60px;"></header>
         <div id="ui-container"></div>
         <div id="stats-container"></div>
         
@@ -103,9 +64,11 @@
         </div>
     </aside>
 
-    <div id="canvas-container">
-        <canvas id="main-canvas"></canvas>
-    </div>
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </main>
 
     <script src="js/cyber-canvas.js"></script>
     <script src="js/branding.js"></script>
@@ -191,7 +154,8 @@
                 maxY: 10
             }, {
                 showLabels: true,
-                showTelemetry: false
+                showTelemetry: false,
+                allowPan: false
             });
 
             // Geometry Points
