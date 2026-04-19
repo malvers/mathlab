@@ -213,6 +213,14 @@
                     <input type="checkbox" id="check-helpers" checked style="width: 18px; height: 18px; accent-color: var(--neon-pink);">
                     HILFSLINIEN ANZEIGEN
                 </label>
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: white; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-top: 10px;">
+                    <input type="checkbox" id="check-start" checked style="width: 18px; height: 18px; accent-color: rgba(255,255,255,0.5);">
+                    START-DREIECK ANZEIGEN
+                </label>
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #adff2f; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-top: 10px;">
+                    <input type="checkbox" id="check-measurements" checked style="width: 18px; height: 18px; accent-color: #adff2f;">
+                    MESSWERTE ANZEIGEN
+                </label>
             </div>
 
             <button onclick="resetLab()">Labor Zurücksetzen</button>
@@ -259,7 +267,7 @@
                     if (typeof CyberUI !== 'undefined') CyberUI.init();
 
                     cc = new CyberCanvas();
-                    cc.init('canvas', { minX: -10, maxX: 10, minY: -7, maxY: 7 }, { showTelemetry: false, showLabels: false, showGrid: false, showAxes: false });
+                    cc.init('canvas', { minX: -10, maxX: 10, minY: -7, maxY: 7 }, { showTelemetry: false, showLabels: false, showGrid: false, showAxes: false, allowZoom: false, allowPan: false });
                     cc.onResize = () => update();
 
                     if (typeof CyberBranding !== 'undefined') {
@@ -284,6 +292,8 @@
                     sScale.oninput = (e) => { transform.scale = parseFloat(e.target.value) / 100; update(); };
 
                     document.getElementById('check-helpers').onchange = () => update();
+                    document.getElementById('check-start').onchange = () => update();
+                    document.getElementById('check-measurements').onchange = () => update();
                     
                     sTx.oninput = (e) => { 
                         transform.tx = parseFloat(e.target.value) / 10; 
@@ -306,33 +316,9 @@
                 const nRPX = cc.unmapX(e.clientX - rect.left);
                 const nRPY = cc.unmapY(e.clientY - rect.top);
 
-                // --- POSITIONS-KOMPENSATION ---
-                // Wir berechnen die Punkte im Hintergrund so um, dass das Dreieck 
-                // visuell stehen bleibt, während der RP an die Klick-Stelle springt.
-                
-                const angleRad = (transform.rotation * Math.PI) / 180;
-                const cos = Math.cos(angleRad);
-                const sin = Math.sin(angleRad);
-                const cosInv = Math.cos(-angleRad);
-                const sinInv = Math.sin(-angleRad);
-
-                points.forEach(p => {
-                    // 1. Wo ist der Punkt aktuell visuell? (relativ zum alten RP)
-                    const dx0 = (p.x - rp.x) * transform.scale;
-                    const dy0 = (p.y - rp.y) * transform.scale;
-                    const vX = dx0 * cos - dy0 * sin + rp.x;
-                    const vY = dx0 * sin + dy0 * cos + rp.y;
-
-                    // 2. Rückrechnung: Wo muss der Basispunkt relativ zum NEUEN RP liegen?
-                    const qx = vX - nRPX;
-                    const qy = vY - nRPY;
-                    const rX = (qx * cosInv - qy * sinInv) / transform.scale;
-                    const rY = (qx * sinInv + qy * cosInv) / transform.scale;
-
-                    // 3. Update Basis-Punkt
-                    p.x = rX + nRPX;
-                    p.y = rY + nRPY;
-                });
+                // --- POSITIONS-KOMPENSATION ENTFERNT ---
+                // Das Dreieck bleibt mathematisch stabil. Verschieben des RP verändert nun
+                // korrekt die Rotationsbahn, genau wie im Mathematik-Unterricht erwartet.
 
                 // RP an neue Klick-Stelle setzen
                 rp.x = nRPX;
@@ -399,13 +385,11 @@
 
                 const transformedPoints = points.map(getTransformed);
 
-                // --- HILFSLINIEN (DASHED VOM START - SCHALTBAR) ---
-                const isHelpersEnabled = document.getElementById('check-helpers').checked;
-                if (isHelpersEnabled) {
+                // --- START-DREIECK (URBILD) ---
+                const isStartEnabled = document.getElementById('check-start') ? document.getElementById('check-start').checked : true;
+                if (isStartEnabled) {
                     ctx.setLineDash([5, 8]);
                     ctx.lineWidth = 2.5; 
-
-                    // 1. Urbild-Silhouette (Basispunkte vor aktueller Transformation)
                     ctx.strokeStyle = "rgba(255, 255, 255, 1.0)"; 
                     ctx.beginPath();
                     ctx.moveTo(cc.mapX(points[0].x), cc.mapY(points[0].y));
@@ -413,6 +397,14 @@
                     ctx.lineTo(cc.mapX(points[2].x), cc.mapY(points[2].y));
                     ctx.closePath();
                     ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // --- HILFSLINIEN (DASHED VOM START - SCHALTBAR) ---
+                const isHelpersEnabled = document.getElementById('check-helpers').checked;
+                if (isHelpersEnabled) {
+                    ctx.setLineDash([5, 8]);
+                    ctx.lineWidth = 2.5; 
 
                     const pixPerUnit = cc.canvas.width / (cc.view.maxX - cc.view.minX);
                     const angleRad = (transform.rotation * Math.PI) / 180;
@@ -460,8 +452,11 @@
                     });
                     
                     ctx.setLineDash([]); 
+                }
 
-                    // 4. DIREKTER KUNDENWUNSCH: Linien vom RP zu den aktuellen Ecken mit Maßen
+                // --- MESSWERTE (ABSTAND ZU ECKEN) ---
+                const isMeasurementsEnabled = document.getElementById('check-measurements') ? document.getElementById('check-measurements').checked : false;
+                if (isMeasurementsEnabled) {
                     transformedPoints.forEach((tp, i) => {
                         // Gepunktete Neon-Spreichen
                         ctx.setLineDash([2, 5]);
