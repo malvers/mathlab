@@ -277,8 +277,12 @@
             const grid = document.getElementById('launcher-grid');
             if (!grid) return;
 
-            // Sort LABS_DATA alphabetically by title
-            const sortedLabs = [...LABS_DATA].sort((a, b) => a.title.localeCompare(b.title));
+            // Separate Intro from the rest to keep it at top (Priority 1)
+            const intro = LABS_DATA.find(lab => lab.id === 'cinematic-intro');
+            const otherLabs = LABS_DATA.filter(lab => lab.id !== 'cinematic-intro')
+                                      .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+            
+            const sortedLabs = intro ? [intro, ...otherLabs] : otherLabs;
 
             grid.innerHTML = sortedLabs.map(lab => `
                 <a href="${lab.href}" target="_blank" class="tool-button color-${lab.color || 'blue'}">
