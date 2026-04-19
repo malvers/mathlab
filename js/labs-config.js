@@ -20,6 +20,20 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "transformationen",
+        "href": "transformationen.html",
+        "title": "Transformationen",
+        "description": "Erforsche Drehung, Verschiebung und Skalierung eines Dreiecks interaktiv. Verschiebe den Rotationspunkt und beobachte die mathematischen Auswirkungen.",
+        "tagline": "Kongruenz",
+        "icon": `<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--neon-green)" stroke-width="1.5">
+            <path d="M5 19L12 5l7 14H5z" fill="rgba(173, 255, 47, 0.1)"></path>
+            <path d="M16 4a8 8 0 0 1 4 4m-4-4l2 2m-2-2l-2 2" stroke="var(--neon-blue)"></path>
+        </svg>`,
+        "category": "geometrie hot grade6 grade7 grade8",
+        "keywords": "geometrie dreieck transformation rotation translation zoom spiegelung",
+        "color": "green"
+    },
+    {
         "id": "heart3d",
         "href": "heart3d.html",
         "title": "3D Heart Surface",
