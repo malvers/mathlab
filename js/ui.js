@@ -564,6 +564,45 @@ class CyberUI {
         };
     }
 
+    /**
+     * Creates a high-fidelity data grid for real-time analysis
+     * @param {string} containerId - Mount point
+     * @param {Array} stats - [{label, value, color}]
+     */
+    static createStatsGrid(containerId, stats) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.innerHTML = `<div class="stats-grid"></div>`;
+        const grid = container.querySelector('.stats-grid');
+        
+        stats.forEach((stat, index) => {
+            const card = document.createElement('div');
+            card.className = 'stats-card';
+            card.id = `stats-card-${containerId}-${index}`;
+            card.innerHTML = `
+                <span class="stats-label">${stat.label}</span>
+                <span class="stats-val" style="color:${stat.color || 'var(--neon-blue)'}">${stat.value}</span>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    /**
+     * Updates values in an existing stats grid
+     * @param {string} containerId - Mount point (used for targeting)
+     * @param {Array} stats - [{value, color}]
+     */
+    static updateStatsGrid(containerId, stats) {
+        stats.forEach((stat, index) => {
+            const valEl = document.querySelector(`#stats-card-${containerId}-${index} .stats-val`);
+            if (valEl) {
+                if (stat.value !== undefined) valEl.innerText = stat.value;
+                if (stat.color) valEl.style.color = stat.color;
+            }
+        });
+    }
+
     static injectBriefing(containerId, text) {
         this.createCard(containerId, 'Missions-Briefing', `
             <div class="briefing-box">
