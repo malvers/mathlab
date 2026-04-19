@@ -241,6 +241,10 @@
                 tx: 0,
                 ty: 0
             };
+            
+            // Fixes Start-Referenz für die Hilfslinien
+            const initialPoints = JSON.parse(JSON.stringify(points));
+            let showHelpers = false;
 
             function startLabor() {
                 try {
@@ -271,8 +275,21 @@
 
                     sRot.oninput = (e) => { transform.rotation = parseFloat(e.target.value); update(); };
                     sScale.oninput = (e) => { transform.scale = parseFloat(e.target.value) / 100; update(); };
-                    sTx.oninput = (e) => { transform.tx = parseFloat(e.target.value) / 10; update(); };
-                    sTy.oninput = (e) => { transform.ty = parseFloat(e.target.value) / 10; update(); };
+                    
+                    // Verschiebung mit temporärer Visualisierung
+                    sTx.oninput = (e) => { 
+                        transform.tx = parseFloat(e.target.value) / 10; 
+                        showHelpers = true;
+                        update(); 
+                    };
+                    sTx.onchange = () => { showHelpers = false; update(); };
+                    
+                    sTy.oninput = (e) => { 
+                        transform.ty = parseFloat(e.target.value) / 10; 
+                        showHelpers = true;
+                        update(); 
+                    };
+                    sTy.onchange = () => { showHelpers = false; update(); };
 
                     update();
                 } catch (e) {
@@ -378,30 +395,32 @@
 
                 const transformedPoints = points.map(getTransformed);
 
-                // --- HILFSLINIEN (SCHRITT 2.0: START & VERSCHIEBUNG) ---
-                ctx.setLineDash([5, 8]);
-                ctx.lineWidth = 1;
+                // --- HILFSLINIEN (DASHED VOM START - NUR BEI SLIDER-BEWEGUNG) ---
+                if (showHelpers) {
+                    ctx.setLineDash([5, 8]);
+                    ctx.lineWidth = 1;
 
-                // 1. Urbild-Silhouette (Original-Dreieck)
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-                ctx.beginPath();
-                ctx.moveTo(cc.mapX(points[0].x), cc.mapY(points[0].y));
-                ctx.lineTo(cc.mapX(points[1].x), cc.mapY(points[1].y));
-                ctx.lineTo(cc.mapX(points[2].x), cc.mapY(points[2].y));
-                ctx.closePath();
-                ctx.stroke();
-
-                // 2. Verschiebungsvektoren (Urbild -> Bild)
-                points.forEach((p, i) => {
-                    const tp = transformedPoints[i];
-                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)";
+                    // 1. Urbild-Silhouette (Original-Dreieck - EXAKT VOM START)
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                     ctx.beginPath();
-                    ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
-                    ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
+                    ctx.moveTo(cc.mapX(initialPoints[0].x), cc.mapY(initialPoints[0].y));
+                    ctx.lineTo(cc.mapX(initialPoints[1].x), cc.mapY(initialPoints[1].y));
+                    ctx.lineTo(cc.mapX(initialPoints[2].x), cc.mapY(initialPoints[2].y));
+                    ctx.closePath();
                     ctx.stroke();
-                });
 
-                ctx.setLineDash([]); // Reset Dash
+                    // 2. Verschiebungsvektoren (Initial-Start -> Aktuelles Bild)
+                    initialPoints.forEach((p, i) => {
+                        const tp = transformedPoints[i];
+                        ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
+                        ctx.beginPath();
+                        ctx.moveTo(cc.mapX(p.x), cc.mapY(p.y));
+                        ctx.lineTo(cc.mapX(tp.x), cc.mapY(tp.y));
+                        ctx.stroke();
+                    });
+                    
+                    ctx.setLineDash([]); // Reset Dash
+                }
 
                 // Draw Triangle (Current State)
                 ctx.beginPath();
