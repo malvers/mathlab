@@ -62,6 +62,8 @@
         ];
         let rp = { x: 0, y: 0 }; 
         let transform = { rotation: 0, scale: 1, tx: 0, ty: 0 };
+        let dragID = null; // null, -1 (RP), 0-2 (points)
+        const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
         
         window.addEventListener('load', () => {
             // 1. Branding
@@ -136,31 +138,26 @@
                 const cb = document.getElementById('check-helpers');
                 if (cb && !cb.checked) cb.checked = true;
             };
-
             const autoHideHL = () => {
-                // Check if HL should be locked (not hidden)
+                const cb = document.getElementById('check-helpers');
                 const isLocked = document.getElementById('check-hl-lock').checked;
 
                 // 1. Calculate the current state as the new baseline
-                // G is the current centroid
+                // We must use the current rotation/scale/tx/ty to lock the points
                 const G = {
                     x: points.reduce((s, p) => s + p.x, 0) / points.length,
                     y: points.reduce((s, p) => s + p.y, 0) / points.length
                 };
 
                 points = points.map(p => {
-                    // Local Scale around G
                     let lx = (p.x - G.x) * transform.scale;
                     let ly = (p.y - G.y) * transform.scale;
                     let ps = { x: lx + G.x, y: ly + G.y };
-
-                    // Rotation around RP
                     let nx = ps.x - rp.x;
                     let ny = ps.y - rp.y;
                     const angleRad = (transform.rotation * Math.PI) / 180;
                     const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
                     const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
-                    
                     return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty, id: p.id };
                 });
 
@@ -173,12 +170,61 @@
                 sliderTX.value = 0;
                 sliderTY.value = 0;
 
-                // 4. Handle HL Visibility
-                const cb = document.getElementById('check-helpers');
-                if (cb && !isLocked) cb.checked = false;
+                // 4. Handle Visibility Lock
+                if (cb && !isLocked) {
+                    cb.checked = false;
+                }
                 
                 update();
             };
+
+            // Canvas Interaction Engine
+            cc.onMouseDown = (pos) => {
+                // Priority 1: Check if we hit an existing point
+                if (dist(pos, rp) < 0.6) {
+                    dragID = -1;
+                } else {
+                    let idx = points.findIndex(p => dist(pos, p) < 0.6);
+                    if (idx !== -1) {
+                        dragID = idx;
+                    } else {
+                        // Priority 3: Jump RP to empty space
+                        rp.x = pos.x;
+                        rp.y = pos.y;
+                        dragID = -1;
+                    }
+                }
+                
+                if (dragID !== null) autoShowHL();
+            };
+
+            cc.onMouseMove = (pos) => {
+                if (dragID === null) return;
+                
+                if (dragID === -1) {
+                    rp.x = pos.x;
+                    rp.y = pos.y;
+                } else {
+                    points[dragID].x = pos.x;
+                    points[dragID].y = pos.y;
+                }
+                update();
+            };
+
+            cc.onMouseUp = () => {
+                if (dragID !== null) {
+                    dragID = null;
+                    autoHideHL();
+                }
+            };
+            
+            // Catch accidental releases outside canvas
+            window.addEventListener('mouseup', () => {
+                if (dragID !== null) {
+                   dragID = null;
+                   autoHideHL();
+                }
+            });
 
             // Bind Events
             const sliderRot = document.getElementById('slider-rot');
@@ -218,21 +264,8 @@
             document.getElementById('check-start').onchange = () => update();
             document.getElementById('check-measurements').onchange = () => update();
 
-            cc.canvas.addEventListener('mousedown', (e) => {
-                autoShowHL();
-                startAction(e);
-            });
-            window.addEventListener('mouseup', autoHideHL);
-
             update();
         });
-
-        function startAction(e) {
-            const rect = cc.canvas.getBoundingClientRect();
-            rp.x = cc.unmapX(e.clientX - rect.left);
-            rp.y = cc.unmapY(e.clientY - rect.top);
-            update();
-        }
 
         window.resetLab = () => {
             points = [
