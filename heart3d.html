@@ -7,126 +7,24 @@
     <!-- KaTeX CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --neon-pink: #ff0055;
-            --neon-blue: #00d2ff;
-            --neon-orange: #ff8800;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            transition: flex-direction 0.4s ease;
-        }
-
-        /* Standard Sidebar Layout */
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 100;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-            transition: all 0.4s ease;
-        }
-
-        #workspace {
-            flex-grow: 1;
-            position: relative;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-            font-family: 'Orbitron';
-        }
-
-        .val-display {
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            height: 4px;
-            border-radius: 2px;
-            outline: none;
-            margin: 10px 0;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        /* Responsive Mobile Layout */
-        @media (max-width: 900px) {
-            body { flex-direction: column; overflow-y: auto; }
-            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
-            #workspace { width: 100%; height: 60vh; min-height: 400px; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
 </head>
 <body>
 
     <aside id="side-panel">
-        <div id="sidebar-header"></div>
+        <header id="sidebar-header" style="min-height: 60px;"></header>
         <div id="ui-container"></div>
-        
         <div id="parameter-container"></div>
 
-        <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
 
-    <div id="workspace">
-        <div id="canvas-container"></div>
-    </div>
+    <main id="main-content">
+        <div id="canvas-container" style="width:100%; height:100%;"></div>
+    </main>
 
     <!-- Three.js & OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -136,204 +34,204 @@
     <script src="js/ui.js"></script>
 
     <script>
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "3D HEART SURFACE | TAUBIN-GLEICHUNG"
-        });
-
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.set(0, 1.0, 5.5);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
-
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 2.0;
-
-        const vertexShader = `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = vec4(position, 1.0);
-            }
-        `;
-
-        const fragmentShader = `
-            uniform mat4 cameraWorldMatrix;
-            uniform mat4 cameraProjectionMatrixInverse;
-            uniform float u_A;
-            uniform float u_B;
-            varying vec2 vUv;
-
-            float heartSDF(vec3 p) {
-                float x = p.x;
-                float y = p.z; 
-                float z = p.y; 
-                float term = x*x + u_A*y*y + z*z - 1.0;
-                return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
-            }
-
-            vec3 calcNormal(vec3 p) {
-                vec2 e = vec2(0.001, 0.0);
-                return normalize(vec3(
-                    heartSDF(p + e.xyy) - heartSDF(p - e.xyy),
-                    heartSDF(p + e.yxy) - heartSDF(p - e.yxy),
-                    heartSDF(p + e.yyx) - heartSDF(p - e.yyx)
-                ));
-            }
-
-            vec2 sphIntersect(vec3 ro, vec3 rd, float r) {
-                float b = dot(ro, rd);
-                float c = dot(ro, ro) - r*r;
-                float h = b*b - c;
-                if(h < 0.0) return vec2(-1.0);
-                h = sqrt(h);
-                return vec2(-b - h, -b + h);
-            }
-
-            void main() {
-                vec2 ndc = vUv * 2.0 - 1.0;
-                vec4 clipPos = vec4(ndc, 1.0, 1.0);
-                vec4 viewPos = cameraProjectionMatrixInverse * clipPos;
-                viewPos /= viewPos.w;
-                vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-                vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
-                
-                vec2 bound = sphIntersect(ro, rd, 1.8);
-                if (bound.y < 0.0) { discard; }
-                
-                float t = max(bound.x, 0.0);
-                float tMax = bound.y;
-                float stepSize = 0.015; // Finer steps
-                bool hit = false;
-                vec3 p;
-                float prevF = heartSDF(ro + rd * t);
-                
-                for (int i = 0; i < 200; i++) {
-                    t += stepSize;
-                    if (t > tMax) break;
-                    
-                    p = ro + rd * t;
-                    float f = heartSDF(p);
-                    
-                    if (f <= 0.0 && prevF > 0.0) {
-                        // High-Precision Refinement (Binary Search)
-                        float tLow = t - stepSize;
-                        float tHigh = t;
-                        for (int j = 0; j < 10; j++) {
-                            float tMid = (tLow + tHigh) * 0.5;
-                            if (heartSDF(ro + rd * tMid) <= 0.0) tHigh = tMid;
-                            else tLow = tMid;
-                        }
-                        t = (tLow + tHigh) * 0.5;
-                        p = ro + rd * t;
-                        hit = true;
-                        break;
-                    }
-                    prevF = f;
-                }
-                
-                if (!hit) { discard; }
-                
-                vec3 n = calcNormal(p);
-                vec3 colTop = vec3(1.0, 0.0, 0.33); // Neon Pink
-                vec3 colBot = vec3(0.0, 0.82, 1.0); // Neon Blue
-                vec3 baseAlbedo = mix(colBot, colTop, clamp((p.y + 1.0) / 2.0, 0.0, 1.0));
-                
-                vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
-                vec3 viewDir = normalize(ro - p);
-                float diff = max(dot(n, lightDir), 0.0);
-                float spec = pow(max(dot(n, normalize(lightDir + viewDir)), 0.0), 128.0) * 1.5;
-                float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0) * 0.8;
-                
-                gl_FragColor = vec4(baseAlbedo * (diff + 0.3) + spec + vec3(1.0, 0.5, 0.8) * rim, 1.0);
-            }
-        `;
-
-        const raymarchMaterial = new THREE.ShaderMaterial({
-            vertexShader,
-            fragmentShader,
-            transparent: true,
-            uniforms: {
-                u_A: { value: 5.0 },
-                u_B: { value: 0.025 },
-                cameraWorldMatrix: { value: new THREE.Matrix4() },
-                cameraProjectionMatrixInverse: { value: new THREE.Matrix4() }
-            }
-        });
-
-        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), raymarchMaterial);
-        quad.frustumCulled = false;
-        scene.add(quad);
-
-        function updateEquation() {
-            const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
-            const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
-            const tex = `(x^{2} + {\\color{#00d2ff}${a}} \\, y^{2} + z^{2} - 1)^{3} - x^{2}z^{3} - {\\color{#ff8800}${b}} \\, y^{2}z^{3} = 0`;
-            CyberFormula.set(tex);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            raymarchMaterial.uniforms.cameraWorldMatrix.value.copy(camera.matrixWorld);
-            raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
-            renderer.render(scene, camera);
-        }
-        animate();
-        
-        // UI Setup
-        CyberUI.injectBriefing('ui-container', 
-            'Willkommen im holografischen Mathe-Labor. Hier untersuchen wir die <b>Taubin-Herz-Gleichung</b>. Nutzen Sie die SDF-Parameter, um die Form und das Volumen des Herzens zu manipulieren. 🛰️🛡️', 
-            'var(--neon-pink)');
-
-        CyberUI.createCard('parameter-container', 'SDF Parameter', `
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Stauchungs-Faktor (A)</span>
-                    <span class="val-display" id="val-a">1.00</span>
-                </div>
-                <input type="range" id="slider-a" min="0.1" max="10.0" step="0.1" value="1.00">
-
-                <div class="control-label">
-                    <span>Oberflächen-Modulation (B)</span>
-                    <span class="val-display" id="val-b">0.05</span>
-                </div>
-                <input type="range" id="slider-b" min="0.0" max="0.3" step="0.005" value="0.05">
-            </div>
-        `, 'var(--neon-pink)');
-
-        CyberFormula.init({ anchorId: 'workspace' });
-        setTimeout(updateEquation, 100);
-
-        // Event Listeners for newly created inputs
-        setTimeout(() => {
-            document.getElementById('slider-a').addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
-                raymarchMaterial.uniforms.u_A.value = val;
-                document.getElementById('val-a').innerText = val.toFixed(2);
-                updateEquation();
+        /**
+         * 3D HEART SURFACE - ULTRA v5.3.8
+         * Raymarching-based Math-Visualizer
+         */
+        window.addEventListener('load', () => {
+            // 1. Branding & Mission
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "3D HEART SURFACE | TAUBIN-GLEICHUNG"
             });
 
-            document.getElementById('slider-b').addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
-                raymarchMaterial.uniforms.u_B.value = val;
-                document.getElementById('val-b').innerText = val.toFixed(3);
-                updateEquation();
-            });
-        }, 200);
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-pink); font-family:Orbitron; margin-bottom:10px;">MISSION: TAUBIN-ANALYSE</h3>
+                Dieses Labor nutzt holografisches Raymarching zur Visualisierung der <b>Taubin-Herz-Gleichung</b>. 
+                
+                <div class="admin-info">
+                    <h4 style="color:var(--neon-pink); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">STEUERUNG</h4>
+                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                        <li><b>Faktor A:</b> Steuert die vertikale Stauchung des algebraischen Objekts.</li>
+                        <li><b>Faktor B:</b> Moduliert die Oberflächen-Spannung / Glättung.</li>
+                        <li><b>3D-Navigation:</b> Linksklick zum Rotieren, Scrollen zum Zoomen.</li>
+                    </ul>
+                </div>
+            `);
 
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
+            CyberUI.init();
+
+            // 2. Three.js Engine Setup
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1.0, 5.5);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0;
+            controls.minDistance = 2.5;
+            controls.maxDistance = 10.0;
+
+            // 3. Raymarching Shaders
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                uniform mat4 cameraWorldMatrix;
+                uniform mat4 cameraProjectionMatrixInverse;
+                uniform float u_A;
+                uniform float u_B;
+                varying vec2 vUv;
+
+                float heartSDF(vec3 p) {
+                    float x = p.x;
+                    float y = p.z; 
+                    float z = p.y; 
+                    float term = x*x + u_A*y*y + z*z - 1.0;
+                    return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
+                }
+
+                vec3 calcNormal(vec3 p) {
+                    vec2 e = vec2(0.001, 0.0);
+                    return normalize(vec3(
+                        heartSDF(p + e.xyy) - heartSDF(p - e.xyy),
+                        heartSDF(p + e.yxy) - heartSDF(p - e.yxy),
+                        heartSDF(p + e.yyx) - heartSDF(p - e.yyx)
+                    ));
+                }
+
+                vec2 sphIntersect(vec3 ro, vec3 rd, float r) {
+                    float b = dot(ro, rd);
+                    float c = dot(ro, ro) - r*r;
+                    float h = b*b - c;
+                    if(h < 0.0) return vec2(-1.0);
+                    h = sqrt(h);
+                    return vec2(-b - h, -b + h);
+                }
+
+                void main() {
+                    vec2 ndc = vUv * 2.0 - 1.0;
+                    vec4 clipPos = vec4(ndc, 1.0, 1.0);
+                    vec4 viewPos = cameraProjectionMatrixInverse * clipPos;
+                    viewPos /= viewPos.w;
+                    vec3 ro = (cameraWorldMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+                    vec3 rd = normalize((cameraWorldMatrix * vec4(viewPos.xyz, 0.0)).xyz);
+                    
+                    vec2 bound = sphIntersect(ro, rd, 1.8);
+                    if (bound.y < 0.0) { discard; }
+                    
+                    float t = max(bound.x, 0.0);
+                    float tMax = bound.y;
+                    float stepSize = 0.015;
+                    bool hit = false;
+                    vec3 p;
+                    float prevF = heartSDF(ro + rd * t);
+                    
+                    for (int i = 0; i < 200; i++) {
+                        t += stepSize;
+                        if (t > tMax) break;
+                        p = ro + rd * t;
+                        float f = heartSDF(p);
+                        if (f <= 0.0 && prevF > 0.0) {
+                            float tLow = t - stepSize;
+                            float tHigh = t;
+                            for (int j = 0; j < 10; j++) {
+                                float tMid = (tLow + tHigh) * 0.5;
+                                if (heartSDF(ro + rd * tMid) <= 0.0) tHigh = tMid;
+                                else tLow = tMid;
+                            }
+                            t = (tLow + tHigh) * 0.5;
+                            p = ro + rd * t;
+                            hit = true;
+                            break;
+                        }
+                        prevF = f;
+                    }
+                    
+                    if (!hit) { discard; }
+                    
+                    vec3 n = calcNormal(p);
+                    vec3 colTop = vec3(1.0, 0.0, 0.33); 
+                    vec3 colBot = vec3(0.0, 0.82, 1.0); 
+                    vec3 baseAlbedo = mix(colBot, colTop, clamp((p.y + 1.0) / 2.0, 0.0, 1.0));
+                    
+                    vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
+                    vec3 viewDir = normalize(ro - p);
+                    float diff = max(dot(n, lightDir), 0.0);
+                    float spec = pow(max(dot(n, normalize(lightDir + viewDir)), 0.0), 128.0) * 1.5;
+                    float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0) * 0.8;
+                    
+                    gl_FragColor = vec4(baseAlbedo * (diff + 0.3) + spec + vec3(1.0, 0.5, 0.8) * rim, 1.0);
+                }
+            `;
+
+            const raymarchMaterial = new THREE.ShaderMaterial({
+                vertexShader,
+                fragmentShader,
+                transparent: true,
+                uniforms: {
+                    u_A: { value: 5.0 },
+                    u_B: { value: 0.025 },
+                    cameraWorldMatrix: { value: new THREE.Matrix4() },
+                    cameraProjectionMatrixInverse: { value: new THREE.Matrix4() }
+                }
+            });
+
+            const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), raymarchMaterial);
+            quad.frustumCulled = false;
+            scene.add(quad);
+
+            // 4. Update Functions
+            function updateEquation() {
+                const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
+                const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
+                const tex = `(x^{2} + {\\color{#00d2ff}${a}} \\, y^{2} + z^{2} - 1)^{3} - x^{2}z^{3} - {\\color{#ff8800}${b}} \\, y^{2}z^{3} = 0`;
+                CyberFormula.set(tex);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                raymarchMaterial.uniforms.cameraWorldMatrix.value.copy(camera.matrixWorld);
+                raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // 5. UI Standardization
+            CyberUI.createCard('parameter-container', 'SDF KONTROLLE', '<div id="slider-box-a"></div><div id="slider-box-b"></div>', 'var(--neon-pink)');
+
+            CyberUI.createSlider('slider-box-a', 'Stauchungs-Faktor (A)', 0.1, 10.0, 5.0, 0.1, (val) => {
+                raymarchMaterial.uniforms.u_A.value = val;
+                updateEquation();
+            }, 'var(--neon-blue)');
+
+            CyberUI.createSlider('slider-box-b', 'Oberflächen-Modulation (B)', 0.0, 0.3, 0.025, 0.005, (val) => {
+                raymarchMaterial.uniforms.u_B.value = val;
+                updateEquation();
+            }, 'var(--neon-orange)');
+
+            CyberFormula.init({ anchorId: 'main-content' });
+            setTimeout(updateEquation, 100);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
         });
     </script>
 </body>

@@ -12,104 +12,6 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
-    <style>
-        /* Lab-specific tuning for ULTRA v5.3.8 aesthetic */
-        #main-canvas {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .control-group label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.6rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .slider-box {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .slider-box:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .val-display {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-blue);
-            margin-bottom: 10px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 5px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .checkbox-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateX(5px);
-        }
-
-        .checkbox-item label {
-            margin-bottom: 0;
-            font-size: 0.7rem;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            color: white;
-            opacity: 0.7;
-            cursor: pointer;
-        }
-
-        /* Value Colors & Glows */
-        .color-purple {
-            color: var(--neon-purple) !important;
-            text-shadow: 0 0 15px var(--neon-purple);
-        }
-
-        .color-green {
-            color: var(--neon-green) !important;
-            text-shadow: 0 0 15px var(--neon-green);
-        }
-
-        .color-orange {
-            color: var(--neon-orange) !important;
-            text-shadow: 0 0 15px var(--neon-orange);
-        }
-    </style>
 </head>
 
 <body>
@@ -145,6 +47,21 @@
                 subtitle: "DIFFERENTIALRECHNUNG"
             });
 
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DIFFERENTIALRECHNUNG</h3>
+                Dieses Labor visualisiert die Ableitung einer Funktion und die zugehörige Tangente.
+                
+                <div class="admin-info">
+                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">STEUERUNG</h4>
+                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                        <li><b>Funktion:</b> Wähle den Typ aus dem Dropdown.</li>
+                        <li><b>Position (x₀):</b> Verschiebe den Punkt per Slider oder Canvas-Klick.</li>
+                        <li><b>Tangente:</b> Visualisiert die lokale Steigung f'(x₀).</li>
+                        <li><b>Ableitungen:</b> Schalte f'(x) und f''(x) Graphen ein/aus.</li>
+                    </ul>
+                </div>
+            `);
+
             CyberUI.init();
 
 
@@ -155,37 +72,43 @@
             let showSecondDeriv = false;
 
             // UI Setup
-            CyberUI.createCard('parameters-container', 'Funktions-Konfigurator', `
+            // x0 State
+            const updateX0 = (val) => {
+                x0 = val;
+                draw();
+                // If the slider update comes from canvas, we might need to sync the slider UI
+                const slider = document.querySelector('.cyber-slider[id^="slider-"]');
+                if (slider && parseFloat(slider.value) !== x0) slider.value = x0;
+            };
+
+            // UI Setup
+            CyberUI.createCard('parameters-container', 'FUNKTIONALITÄT', `
                 <div id="function-selector-container"></div>
+                <div id="x0-slider-container"></div>
+            `, 'var(--neon-blue)');
 
-                <div class="slider-box">
-                    <label>Punkt-Position (x₀)</label>
-                    <div class="val-display" id="val-x0">1.00</div>
-                    <input type="range" id="slider-x0" min="-5" max="5" step="0.01" value="1.00">
-                </div>
-                
-                <div class="slider-box">
-                    <label>1. Ableitung f'(x₀)</label>
-                    <div class="val-display color-purple" id="val-m">0.00</div>
-                </div>
+            CyberUI.createSlider('x0-slider-container', 'Punkt-Position (x₀)', -5, 5, x0, 0.01, updateX0, 'var(--neon-blue)');
 
-                <div class="slider-box">
-                    <label>2. Ableitung f''(x₀)</label>
-                    <div class="val-display color-green" id="val-ddm">0.00</div>
-                </div>
+            CyberUI.createCard('parameters-container', 'VISUALISIERUNG', `
+                <div id="view-opts" style="display:flex; flex-direction:column; gap:6px;"></div>
+            `, 'var(--neon-orange)');
 
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-deriv">
-                        <label for="check-deriv" class="color-orange">1. Ableitung zeigen</label>
+            CyberUI.createCheckbox('view-opts', "1. Ableitung f'(x)", showDerivative, (v) => { showDerivative = v; draw(); }, 'var(--neon-orange)');
+            CyberUI.createCheckbox('view-opts', "2. Ableitung f''(x)", showDerivative, (v) => { showSecondDeriv = v; draw(); }, 'var(--neon-green)');
+
+            const statsHTML = `
+                <div class="stats-grid">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-purple); padding-bottom:10px;">
+                        <span class="stats-label">Steigung f'(x₀)</span>
+                        <span id="val-m" class="stats-val" style="color:var(--neon-purple);">0.00</span>
                     </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-deriv2">
-                        <label for="check-deriv2" class="color-green">2. Ableitung zeigen</label>
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-green); padding-bottom:10px;">
+                        <span class="stats-label">Krümmung f''(x₀)</span>
+                        <span id="val-ddm" class="stats-val" style="color:var(--neon-green);">0.00</span>
                     </div>
                 </div>
-            </div>
-        `, 'var(--neon-blue)');
+            `;
+            CyberUI.createCard('parameters-container', 'ANALYSE', statsHTML, 'var(--neon-yellow)');
 
             // Initialize Dropdown
             CyberUI.createDropdown('function-selector-container', MathLibrary.getAll(), (id) => {
@@ -317,34 +240,17 @@
                 drawGraph(currentFunc.f, getNeonColor('--neon-blue'), 3, false);
                 drawTangent();
 
-                updateFormula();
-                document.getElementById('val-x0').innerText = x0.toFixed(2);
-                document.getElementById('val-m').innerText = currentFunc.df(x0).toFixed(2);
-                document.getElementById('val-ddm').innerText = currentFunc.ddf(x0).toFixed(2);
+                // Update analysis values
+                const m = currentFunc.df(x0);
+                const ddm = currentFunc.ddf(x0);
+                document.getElementById('val-m').innerText = m.toFixed(2);
+                document.getElementById('val-ddm').innerText = ddm.toFixed(2);
+
+                if (window.CyberFormula) CyberFormula.set(currentFunc.tex);
             }
-
-            function updateFormula() {
-                CyberFormula.set(currentFunc.tex);
-            }
-
-            // Interaction
-            document.getElementById('slider-x0').addEventListener('input', (e) => {
-                x0 = parseFloat(e.target.value);
-                draw();
-            });
-
-            document.getElementById('check-deriv').addEventListener('change', (e) => {
-                showDerivative = e.target.checked;
-                draw();
-            });
-
-            document.getElementById('check-deriv2').addEventListener('change', (e) => {
-                showSecondDeriv = e.target.checked;
-                draw();
-            });
 
             window.addEventListener('resize', resize);
-            resize(); // Direct call - we are already inside the load event
+            resize(); 
 
             // Custom interaction on canvas
             let isDragging = false;
@@ -356,10 +262,21 @@
                 const rect = CyberCanvasInstance.canvas.getBoundingClientRect();
                 const posX = e.clientX - rect.left;
                 const mathX = CyberCanvasInstance.unmapX(posX);
-                x0 = Math.max(-5, Math.min(5, mathX));
-                document.getElementById('slider-x0').value = x0;
-                draw();
+                updateX0(Math.max(-5, Math.min(5, mathX)));
             }
+
+            // 5. Context Menu (Standard)
+            CyberCanvasInstance.onContextMenu = (e) => {
+                const cc = CyberCanvasInstance;
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    { label: 'Punkt Reset (x₀)', onclick: () => updateX0(1.0) },
+                    { label: 'Ansicht Reset', onclick: () => cc.resetView(-8, 8) },
+                    { divider: true },
+                    { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; draw(); } },
+                    { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; draw(); } },
+                    { label: 'Beschriftung', checked: cc.showLabels, onchange: (v) => { cc.showLabels = v; draw(); } }
+                ]);
+            };
 
         }); // End DOMContentLoaded
     </script>

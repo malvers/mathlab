@@ -7,50 +7,6 @@
     <title>docalvers | Euler, Fermat & Seitenhalbierende</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
-    <style>
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            background: #050b18;
-            overflow: hidden;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .stats-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .stats-label {
-            font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .stats-val {
-            font-family: 'Orbitron';
-            font-size: 1rem;
-            color: var(--neon-blue);
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
@@ -82,21 +38,22 @@
             // 1. Initialize Branding
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "Eulergerade &bull; Feuerbachkreis &bull; Fermatpunkt",
-                briefing: `
-                    <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: EULER-ANALYSE</h3>
-                    Erforsche die verborgene Symmetrie des Dreiecks. Überprüfe die Euler-Gerade – eine Linie, auf der Schwerpunkt, Umkreismittelpunkt und Höhenschnittpunkt perfekt kollinierezieren.
-                    
-                    <div class="admin-info">
-                        <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
-                        <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
-                            <li><b>H-S-U Ratio:</b> Das Verhältnis HS/SU ist mathematisch exakt 2.0.</li>
-                            <li><b>Feuerbach:</b> Der 9-Punkte-Kreis halbiert den Umkreis-Radius.</li>
-                            <li><b>Fermat:</b> Der Punkt minimiert die Summe der Abstände zu A, B und C.</li>
-                        </ul>
-                    </div>
-                `
+                subtitle: "EULERGERADE & GEOMETRIE"
             });
+
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: EULER-ANALYSE</h3>
+                Erforsche die verborgene Symmetrie des Dreiecks. Überprüfe die Euler-Gerade – eine Linie, auf der Schwerpunkt (S), Umkreismittelpunkt (U) und Höhenschnittpunkt (H) perfekt kollinierezieren.
+                
+                <div class="admin-info">
+                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
+                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                        <li><b>H-S-U Ratio:</b> Das Verhältnis HS/SU ist mathematisch exakt 2.0.</li>
+                        <li><b>Feuerbach:</b> Der 9-Punkte-Kreis (F) halbiert den Umkreis-Radius.</li>
+                        <li><b>Fermat (Fp):</b> Der Punkt minimiert die Summe der Abstände zu A, B und C.</li>
+                    </ul>
+                </div>
+            `);
 
             // 2. Initialize UI Engine
             CyberUI.init();
@@ -117,30 +74,30 @@
             };
 
             CyberUI.createCard('ui-container', 'KONSTRUKTION', `
-                <div id="base-opts" class="cyber-control-group"></div>
+                <div id="base-opts" class="cyber-control-group" style="display:flex; flex-direction:column; gap:6px;"></div>
             `, 'var(--neon-blue)');
 
             CyberUI.createCheckbox('base-opts', 'Eulergerade', state.cbEuler, (v) => state.cbEuler = v, '#ffffff');
-            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v, getCSSVar('--neon-blue'));
-            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v, getCSSVar('--neon-green'));
-            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v, getCSSVar('--neon-yellow'));
+            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v, 'var(--neon-blue)');
+            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v, 'var(--neon-green)');
+            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v, 'var(--neon-yellow)');
 
             CyberUI.createCard('ui-container', 'HILFSLINIEN', `
-                <div id="detail-opts" class="cyber-control-group"></div>
+                <div id="detail-opts" class="cyber-control-group" style="display:flex; flex-direction:column; gap:6px;"></div>
             `, 'var(--neon-purple)');
 
-            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v, getCSSVar('--neon-pink'));
-            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v, getCSSVar('--neon-purple'));
-            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v, getCSSVar('--neon-yellow'));
+            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v, 'var(--neon-pink)');
+            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v, 'var(--neon-purple)');
+            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v, 'var(--neon-yellow)');
             CyberUI.createCheckbox('detail-opts', 'Fermat / Napoleon', state.cbFermat, (v) => state.cbFermat = v, '#ffa500');
 
             const statsHTML = `
                 <div class="stats-grid">
-                    <div class="stats-card" style="border-left: 3px solid var(--neon-pink);">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-pink); padding-bottom:10px;">
                         <span class="stats-label">Ratio HS / SU</span>
                         <span id="txt-ratio" class="stats-val" style="color:var(--neon-pink);">0.00</span>
                     </div>
-                    <div class="stats-card" style="border-left: 3px solid var(--neon-yellow);">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-yellow); padding-bottom:10px;">
                         <span class="stats-label">Inkreis-R</span>
                         <span id="txt-rIn" class="stats-val" style="color:var(--neon-yellow);">0 px</span>
                     </div>
@@ -245,13 +202,18 @@
                 CyberCanvasInstance.allowPan = true;
             };
 
-            // Context Menu
+            // 5. Context Menu (Standard)
             CyberCanvasInstance.onContextMenu = (e) => {
+                const cc = CyberCanvasInstance;
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
-                    { label: 'Lab Reset', onclick: () => { 
+                    { label: 'Konstruktion Reset', onclick: () => { 
                         points = [{ x: -5, y: -4 }, { x: 5, y: -4 }, { x: 0, y: 5 }];
                     }},
-                    { label: 'Ansicht Reset', onclick: () => CyberCanvasInstance.resetView(-10, 10) }
+                    { label: 'Ansicht Reset', onclick: () => cc.resetView(-10, 10) },
+                    { divider: true },
+                    { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => cc.showGrid = v },
+                    { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => cc.showAxes = v },
+                    { label: 'Beschriftung', checked: cc.showLabels, onchange: (v) => cc.showLabels = v }
                 ]);
             };
 

@@ -419,6 +419,84 @@ class CyberUI {
                 border-left: 3px solid var(--neon-blue);
                 padding-left: 15px;
             }
+
+            /* STATS / ANALYSIS GRID */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-top: 5px;
+            }
+
+            .stats-card {
+                background: rgba(255, 255, 255, 0.03);
+                padding: 12px;
+                border-radius: 14px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                transition: all 0.3s ease;
+            }
+
+            .stats-card:hover {
+                background: rgba(255, 255, 255, 0.06);
+                border-color: rgba(255, 255, 255, 0.15);
+            }
+
+            .stats-label {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.55rem;
+                color: rgba(255, 255, 255, 0.4);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .stats-val {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1rem;
+                color: var(--neon-blue);
+                font-weight: bold;
+            }
+
+            /* CYBER SLIDER (PREMIUM) */
+            .cyber-control-group {
+                margin-bottom: 5px;
+                width: 100%;
+            }
+            .control-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 4px;
+            }
+            .cyber-slider {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 2px;
+                outline: none;
+                margin: 8px 0;
+            }
+            .cyber-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                background: var(--accent, var(--neon-blue));
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 0 10px var(--accent, var(--neon-blue));
+                transition: all 0.2s ease;
+            }
+            .cyber-slider::-webkit-slider-thumb:hover {
+                transform: scale(1.2);
+                box-shadow: 0 0 20px var(--accent, var(--neon-blue));
+            }
+            .val-display {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.8rem;
+                font-weight: bold;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -453,6 +531,37 @@ class CyberUI {
                 card.classList.toggle('collapsed');
             });
         }
+    }
+
+    static createSlider(containerId, label, min, max, value, step, oninput, color = 'var(--neon-blue)') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        const sliderId = `slider-${Math.random().toString(36).substr(2, 9)}`;
+        const displayId = `val-${sliderId}`;
+        
+        const html = `
+            <div class="cyber-control-group">
+                <div class="control-header">
+                    <span class="cyber-label" style="color:rgba(255,255,255,0.7); font-size:0.7rem; font-family:'Orbitron';">${label}</span>
+                    <span id="${displayId}" class="val-display" style="color:${color}">${value}</span>
+                </div>
+                <input type="range" class="cyber-slider" id="${sliderId}" 
+                    min="${min}" max="${max}" value="${value}" step="${step}"
+                    style="--accent:${color}">
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', html);
+        
+        const input = document.getElementById(sliderId);
+        const display = document.getElementById(displayId);
+        
+        input.oninput = (e) => {
+            const val = e.target.value;
+            display.innerText = val;
+            oninput(parseFloat(val));
+        };
     }
 
     static injectBriefing(containerId, text) {
