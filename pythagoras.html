@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Der allgemeine Pythagoras</title>
+    <title>Pythagoras-Labor | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
-            --neon-pink: #ff0055;
-            --neon-green: #39FF14;
+            --neon-pink: #f472b6;
+            --neon-green: #4ade80;
+            --neon-amber: #ffde00;
             --neon-orange: #ff8800;
             --bg-dark: #050b18;
             --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-
-            --kathete-a: var(--neon-blue);
-            --kathete-b: var(--neon-green);
-            --hypotenuse: var(--neon-orange);
         }
 
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: var(--bg-dark);
             color: white;
             display: flex;
             height: 100vh;
@@ -37,211 +33,129 @@
             width: 380px;
             min-width: 380px;
             background: var(--glass);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        #ui-container {
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
+            gap: 15px;
             overflow-y: auto;
+            flex-grow: 1;
         }
 
         #canvas-container {
             flex-grow: 1;
             position: relative;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: radial-gradient(circle at center, #101a35 0%, #050b18 100%);
             overflow: hidden;
         }
 
-        canvas {
-            display: block;
-            cursor: crosshair;
-            touch-action: none;
-            flex-grow: 1;
-            width: 100%;
-            height: 100%;
-        }
+        canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
 
-
-        /* --- INSTRUMENT CARDS --- */
-        .instrument-card {
-            background: var(--glass-bright);
-            padding: 15px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .instrument-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
-            margin-bottom: 5px;
-        }
-
-        select {
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.8);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            font-family: 'Orbitron';
-            font-size: 0.8rem;
-            cursor: pointer;
-            width: 100%;
-            outline: none;
-        }
-
-        .stats-card {
+        /* Custom Stats Styling for CyberUI Card integration */
+        .pyth-stat {
             background: rgba(255, 255, 255, 0.03);
-            padding: 12px 15px;
+            padding: 12px;
             border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+            margin-bottom: 8px;
         }
-
-        .stats-label {
+        .pyth-label {
             font-family: 'Orbitron';
             font-size: 0.6rem;
             color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 4px;
         }
-
-        .stats-val {
+        .pyth-val {
             font-family: 'Orbitron';
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: bold;
-        }
-
-        .val-a {
-            color: var(--kathete-a);
-            text-shadow: 0 0 10px var(--kathete-a);
-        }
-
-        .val-b {
-            color: var(--kathete-b);
-            text-shadow: 0 0 10px var(--kathete-b);
-        }
-
-        .val-c {
-            color: var(--hypotenuse);
-            text-shadow: 0 0 12px var(--hypotenuse);
-        }
-
-        button {
-            padding: 15px 20px;
-            font-size: 0.85rem;
-            font-family: 'Orbitron', sans-serif;
-            background: var(--glass-bright);
-            color: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            width: 100%;
-        }
-
-        button:hover {
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-        }
-
-        .footer-credit {
-            margin-top: auto;
-            padding-top: 15px;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 1px;
         }
     </style>
 </head>
-
 <body>
 
-    <div id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 60px;"></div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Konstruktions-Modus</div>
-            <select id="mode" onchange="draw()">
-                <option value="quadrat">Quadrate</option>
-                <option value="halbkreis">Halbkreise</option>
-                <option value="dreieck">Gleichseitige Dreiecke</option>
-                <option value="stern">Crazy Star 🌟</option>
-                <option value="pacman">Pac-Man Mode 🕹️</option>
-            </select>
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div style="padding: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
+    </aside>
 
-        <div class="instrument-card">
-            <div class="instrument-title">Satz des Pythagoras</div>
-            <div class="stats-card">
-                <span class="stats-label">Flächen-Summe [A₁+A₂]</span>
-                <span id="result-text" class="stats-val">0.00</span>
-            </div>
-            <div class="stats-card">
-                <span class="stats-label">Große Fläche [A₃]</span>
-                <span id="check-text" class="stats-val">0.00</span>
-            </div>
-        </div>
-
-        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
-            <button id="btn-reset" onclick="resetLab()">LABOR RESET</button>
-            <footer class="footer-credit">
-                &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-                <br>
-                <a href="impressum.html"
-                    style="color:rgba(255,255,255,0.2); font-size: 0.5rem; text-decoration: none;">IMPRESSUM</a>
-            </footer>
-        </div>
-    </div>
-
-    <div id="canvas-container">
+    <main id="canvas-container">
         <canvas id="canvas"></canvas>
-    </div>
+    </main>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
-        // Initialize Branding
+        // 1. Branding & UI Init
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "Der allgemeine Pythagoras"
+            subtitle: "ALLGEMEINER PYTHAGORAS"
         });
+        CyberUI.init();
+
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const modeSelect = document.getElementById('mode');
+        const container = document.getElementById('canvas-container');
 
         let a_px = 120, b_px = 160;
         let draggingA = false, draggingB = false;
         let ox = 0, oy = 0;
+        let mode = 'quadrat';
 
-        // Cyber-Labor Farbschema (Maximale Vibrancy)
-        const neonPink = "#ff0055";
-        const neonGreen = "#39FF14";
-        const neonOrange = "#ff8800";
-        const neonBlue = "#00d2ff";
+        const COLORS = {
+            A: "#00d2ff", B: "#4ade80", C: "#ff8800"
+        };
+
+        // 2. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'KONSTRUKTION', `
+                <div style="margin-bottom:15px;">
+                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px; font-family:Orbitron;">WÄHLE MODUS</div>
+                    <select id="mode-select" class="cyber-select" style="width:100%;" onchange="updateMode(this.value)">
+                        <option value="quadrat">Quadrate</option>
+                        <option value="halbkreis">Halbkreise</option>
+                        <option value="dreieck">Gleichseitige Dreiecke</option>
+                        <option value="stern">Crazy Star 🌟</option>
+                        <option value="pacman">Pac-Man Mode 🕹️</option>
+                    </select>
+                </div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('ui-container', 'ANALYSE: FLÄCHEN', `
+                <div class="pyth-stat">
+                    <div class="pyth-label">FLÄCHEN-SUMME [A₁ + A₂]</div>
+                    <div id="result-text" class="pyth-val" style="color:var(--neon-amber);">0.00</div>
+                </div>
+                <div class="pyth-stat">
+                    <div class="pyth-label">GROSSE FLÄCHE [A₃]</div>
+                    <div id="check-text" class="pyth-val" style="color:var(--neon-orange);">0.00</div>
+                </div>
+            `, 'var(--neon-purple)');
+        }
+
+        function updateMode(val) {
+            mode = val;
+            draw();
+        }
 
         function drawShape(pStart, pEnd, type, color) {
+            ctx.save();
             ctx.fillStyle = color;
+            ctx.shadowBlur = 20; ctx.shadowColor = color;
+            ctx.globalAlpha = 0.8;
             ctx.beginPath();
 
             let dx = pEnd.x - pStart.x;
@@ -251,137 +165,92 @@
             let ny = dx / dist;
 
             if (type === 'quadrat') {
-                ctx.moveTo(pStart.x, pStart.y);
-                ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
                 ctx.lineTo(pEnd.x + nx * dist, pEnd.y + ny * dist);
                 ctx.lineTo(pStart.x + nx * dist, pStart.y + ny * dist);
             } else if (type === 'halbkreis') {
-                let centerX = (pStart.x + pEnd.x) / 2;
-                let centerY = (pStart.y + pEnd.y) / 2;
+                let centerX = (pStart.x + pEnd.x) / 2; let centerY = (pStart.y + pEnd.y) / 2;
                 let angle = Math.atan2(dy, dx);
-                ctx.moveTo(pStart.x, pStart.y);
-                ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
                 ctx.arc(centerX, centerY, dist / 2, angle, angle + Math.PI, false);
             } else if (type === 'dreieck') {
                 let h = (dist * Math.sqrt(3)) / 2;
-                ctx.moveTo(pStart.x, pStart.y);
-                ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
                 ctx.lineTo((pStart.x + pEnd.x) / 2 + nx * h, (pStart.y + pEnd.y) / 2 + ny * h);
             } else if (type === 'stern') {
-                let steps = 10;
-                ctx.moveTo(pStart.x, pStart.y);
+                let steps = 10; ctx.moveTo(pStart.x, pStart.y);
                 for (let i = 1; i < steps; i++) {
-                    let t = i / steps;
-                    let currX = pStart.x + t * dx;
-                    let currY = pStart.y + t * dy;
+                    let t = i / steps; let currX = pStart.x + t * dx; let currY = pStart.y + t * dy;
                     let h = (i % 2 === 0) ? (dist * 0.2) : (dist * 0.7);
                     if (i === 5) h *= 1.2;
                     ctx.lineTo(currX + nx * h, currY + ny * h);
                 }
                 ctx.lineTo(pEnd.x, pEnd.y);
             } else if (type === 'pacman') {
-                let centerX = (pStart.x + pEnd.x) / 2;
-                let centerY = (pStart.y + pEnd.y) / 2;
+                let centerX = (pStart.x + pEnd.x) / 2; let centerY = (pStart.y + pEnd.y) / 2;
                 let angle = Math.atan2(dy, dx);
-                ctx.moveTo(pStart.x, pStart.y);
-                ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
                 ctx.arc(centerX + nx * dist * 0.1, centerY + ny * dist * 0.1, dist / 2, angle + 0.3, angle + Math.PI - 0.3, false);
                 ctx.lineTo(centerX + nx * dist * 0.1, centerY + ny * dist * 0.1);
             }
-            ctx.closePath();
-            ctx.fill();
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
         }
 
         function draw() {
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, rect.width, rect.height);
 
-            ox = rect.width * 0.35;
-            oy = rect.height * 0.60;
+            ox = rect.width * 0.35; oy = rect.height * 0.60;
+            const A = { x: ox, y: oy - a_px }, B = { x: ox + b_px, y: oy }, C = { x: ox, y: oy };
 
-            const A = { x: ox, y: oy - a_px };
-            const B = { x: ox + b_px, y: oy };
-            const C = { x: ox, y: oy };
+            drawShape(A, C, mode, COLORS.A);
+            drawShape(C, B, mode, COLORS.B);
+            drawShape(B, A, mode, COLORS.C);
 
-            ctx.globalAlpha = 0.85;
+            // Zentrumsdreieck
+            ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; ctx.fill();
+            ctx.strokeStyle = "#050b18"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.strokeRect(ox, oy - 15, 15, 15);
 
-            ctx.shadowBlur = 30; ctx.shadowColor = neonBlue;
-            drawShape(A, C, modeSelect.value, neonBlue);
-
-            ctx.shadowBlur = 30; ctx.shadowColor = neonGreen;
-            drawShape(C, B, modeSelect.value, neonGreen);
-
-            ctx.shadowBlur = 30; ctx.shadowColor = neonOrange;
-            drawShape(B, A, modeSelect.value, neonOrange);
-
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1.0;
-
-            // Dreieck Mitte
-            ctx.beginPath();
-            ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
-            ctx.fillStyle = "white"; ctx.fill();
-            ctx.strokeStyle = "#2d3436"; ctx.lineWidth = 1.5; ctx.stroke();
-
-            // Rechter Winkel (Klassische Ecke)
-            ctx.strokeStyle = "rgba(15, 23, 42, 0.4)"; ctx.lineWidth = 1.5;
-            ctx.strokeRect(ox, oy - 15, 15, 15);
-
-            // Mathematik (Skalierung auf cm)
-            let cmFactor = 40;
-            let valA = a_px / cmFactor, valB = b_px / cmFactor;
-
+            // Analysis
+            let cmFactor = 40; let valA = a_px / cmFactor, valB = b_px / cmFactor;
             let factor = 1;
-            if (modeSelect.value === 'halbkreis') factor = Math.PI / 8;
-            if (modeSelect.value === 'dreieck') factor = Math.sqrt(3) / 4;
-            if (modeSelect.value === 'stern') factor = 0.45;
-            if (modeSelect.value === 'pacman') factor = 0.34;
+            if (mode === 'halbkreis') factor = Math.PI / 8;
+            if (mode === 'dreieck') factor = Math.sqrt(3) / 4;
+            if (mode === 'stern') factor = 0.45;
+            if (mode === 'pacman') factor = 0.34;
 
-            let areaA = factor * Math.pow(valA, 2);
-            let areaB = factor * Math.pow(valB, 2);
-            let areaSum = areaA + areaB;
+            let areaA = factor * Math.pow(valA, 2), areaB = factor * Math.pow(valB, 2), areaSum = areaA + areaB;
 
-            document.getElementById('result-text').innerHTML =
-                `<span class="val-a">${areaA.toFixed(2)}</span> + <span class="val-b">${areaB.toFixed(2)}</span> = <span class="val-c">${areaSum.toFixed(2)}</span>`;
+            const resText = document.getElementById('result-text');
+            const checkText = document.getElementById('check-text');
+            if(resText) resText.innerHTML = `<span style="color:${COLORS.A}">${areaA.toFixed(2)}</span> + <span style="color:${COLORS.B}">${areaB.toFixed(2)}</span> = ${areaSum.toFixed(2)}`;
+            if(checkText) checkText.innerText = `A₃ = ${areaSum.toFixed(2)}`;
 
-            document.getElementById('check-text').innerHTML =
-                `<span class="val-c">A₃ = ${areaSum.toFixed(2)}</span>`;
+            // Canvas Labels
+            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center"; ctx.fillStyle = "#050b18";
+            ctx.fillText(valA.toFixed(2), ox - 20, oy - a_px / 2);
+            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 20);
+            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + b_px / 2 + 15, oy - a_px / 2 - 15);
 
-            // Kantenbeschriftungen am Canvas (Zentrales Dreieck) - TOP LAYER
-            ctx.font = "bold 15px Orbitron";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.shadowBlur = 10; ctx.shadowColor = "white";
-            ctx.fillStyle = "white";
-
-            // Kathete A (Links)
-            ctx.fillText(valA.toFixed(2), ox - 35, oy - a_px / 2);
-
-            // Kathete B (Unten)
-            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 30);
-
-            // Hypotenuse C (Schräg)
-            let mX = ox + b_px / 2, mY = oy - a_px / 2;
-            ctx.fillText(Math.hypot(valA, valB).toFixed(2), mX + 25, mY - 25);
-            ctx.shadowBlur = 0;
-
-            // Anfasser (Punkte)
-            ctx.shadowBlur = 15; ctx.shadowColor = neonGreen;
-            ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(B.x, B.y, 7, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 15; ctx.shadowColor = neonBlue;
-            ctx.beginPath(); ctx.arc(A.x, A.y, 7, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
+            // Handles
+            const drawH = (p, color) => {
+                ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+            };
+            drawH(A, COLORS.A); drawH(B, COLORS.B);
         }
 
         function resetLab() {
             a_px = 120; b_px = 160; draw();
         }
 
-        // --- TOUCH & MOUSE ENGINE ---
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -389,39 +258,33 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
-        function startDrag(e) {
+        canvas.onpointerdown = e => {
             const pos = getPos(e);
             if (Math.hypot(pos.x - (ox + b_px), pos.y - oy) < 40) draggingB = true;
             if (Math.hypot(pos.x - ox, pos.y - (oy - a_px)) < 40) draggingA = true;
-            if (draggingA || draggingB) e.preventDefault();
-        }
+            if (draggingA || draggingB) canvas.setPointerCapture(e.pointerId);
+        };
 
-        function moveDrag(e) {
+        canvas.onpointermove = e => {
             if (!draggingA && !draggingB) return;
             const pos = getPos(e);
-            const rect = canvas.getBoundingClientRect();
-
-            if (draggingA) a_px = Math.max(40, Math.min(rect.height * 0.5, oy - pos.y));
-            if (draggingB) b_px = Math.max(40, Math.min(rect.width * 0.5, pos.x - ox));
-
+            if (draggingA) a_px = Math.max(40, oy - pos.y);
+            if (draggingB) b_px = Math.max(40, pos.x - ox);
             draw();
-            e.preventDefault();
-        }
+        };
 
-        function stopDrag() { draggingA = draggingB = false; }
+        canvas.onpointerup = e => {
+            draggingA = draggingB = false;
+            canvas.releasePointerCapture(e.pointerId);
+        };
 
-        canvas.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', stopDrag);
-
-        canvas.addEventListener('touchstart', startDrag, { passive: false });
-        window.addEventListener('touchmove', moveDrag, { passive: false });
-        window.addEventListener('touchend', stopDrag);
-
-        window.addEventListener('resize', draw);
-
+        window.onresize = draw;
+        setupUI();
         setTimeout(draw, 50);
     </script>
+</body>
+</html>
+pt>
 </body>
 
 </html>

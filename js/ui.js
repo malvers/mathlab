@@ -229,6 +229,46 @@ class CyberUI {
                 to { opacity: 1; transform: translateY(0); }
             }
 
+            /* CYBER SELECT BOX SYSTEM */
+            .cyber-select {
+                appearance: none;
+                -webkit-appearance: none;
+                background: rgba(15, 23, 42, 0.8);
+                border: 1px solid var(--neon-blue);
+                color: #fff;
+                padding: 10px 35px 10px 15px;
+                border-radius: 12px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.75rem;
+                outline: none;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300d2ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 14px;
+                box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+            }
+
+            .cyber-select:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+                border-color: #fff;
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+                transform: translateY(-1px);
+            }
+
+            .cyber-select:focus {
+                border-color: #fff;
+                box-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
+            }
+
+            .cyber-select option {
+                background-color: #0a1329;
+                color: #fff;
+                padding: 10px;
+            }
+
             /* MISSION BRIEFING BOX */
             .cyber-dropdown {
                 position: relative;

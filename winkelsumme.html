@@ -9,20 +9,17 @@
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
-            --neon-pink: #ff0055;
-            --neon-green: #39FF14;
-            --neon-orange: #ff8800;
-            --neon-yellow: #faff00;
+            --neon-pink: #f472b6;
+            --neon-green: #4ade80;
+            --neon-amber: #ffde00;
             --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.75);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-            --labor-red: #ff4757;
+            --glass: rgba(15, 23, 42, 0.7);
         }
 
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: var(--bg-dark);
             color: white;
             display: flex;
             height: 100vh;
@@ -31,220 +28,148 @@
             touch-action: none;
         }
 
-        /* --- SIDEBAR --- */
         #side-panel {
             width: 380px;
             min-width: 380px;
             background: var(--glass);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
         }
 
-
-        /* --- STATS CARDS --- */
-        .stats-card {
-            background: var(--glass-bright);
-            padding: 18px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        #ui-container {
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .stats-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .stats-val {
-            font-family: 'Orbitron';
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        #math-log {
-            max-height: 400px;
+            gap: 15px;
             overflow-y: auto;
-            font-family: 'Orbitron';
-            font-size: 0.8rem;
-            padding-right: 8px;
-            margin-top: 10px;
-        }
-        #math-log::-webkit-scrollbar { width: 4px; }
-        #math-log::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
-        #math-log::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
-        #math-log::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
-
-        .log-entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-grow: 1;
         }
 
-        /* --- CONTROLS --- */
-        .control-group {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-
-        button {
-            padding: 10px;
-            font-size: 0.7rem;
-            font-family: 'Orbitron', sans-serif;
-            background: var(--glass-bright);
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-        }
-        button:hover {
-            border-color: var(--neon-blue);
-            color: white;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-        }
-        button.active {
-            background: rgba(0, 210, 255, 0.15);
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-        }
-
-        .btn-large {
-            grid-column: span 4;
-            padding: 15px;
-            margin-top: 5px;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-        }
-
-        /* --- CANVAS --- */
         #canvas-container {
             flex-grow: 1;
             position: relative;
-            background: transparent;
+            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
             overflow: hidden;
         }
 
+        canvas { display: block; width: 100%; height: 100%; }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+        /* Custom Log Styling for CyberUI Card integration */
+        #math-log {
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
         }
 
-        .footer-credit {
-            margin-top: auto;
-            font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.2);
-            text-align: center;
-            letter-spacing: 3px;
-            padding-top: 20px;
+        .corner-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
     <aside id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 60px;"></div>
-
-        <section class="stats-card">
-            <div class="control-group" id="btn-container">
-                <!-- Eckenzahl Buttons werden per JS generiert -->
-            </div>
-            <button class="btn-large" onclick="initPolygon(nEcken)">LABOR RESET</button>
-        </section>
-
-        <section class="stats-card">
-            <span class="stats-title">Innenwinkelsumme</span>
-            <span id="sum-val" class="stats-val">0°</span>
-            <div id="math-log"></div>
-        </section>
-
-        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div style="padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
     </aside>
 
     <main id="canvas-container">
         <canvas id="canvas"></canvas>
     </main>
 
-    <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/earcut/dist/earcut.min.js"></script>
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
-        // Initialize Branding
+        // 1. Branding & UI Init
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "Polygon-Winkelsumme"
+            subtitle: "WINKELSUMME IN POLYGONEN"
         });
+        CyberUI.init();
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
-        const sumValEl = document.getElementById('sum-val');
-        const mathLogEl = document.getElementById('math-log');
 
-        const neonBlue   = "#00d2ff";
-        const neonPurple = "#9d50bb";
-        const neonPink   = "#ff0055";
-        const neonGreen  = "#39FF14";
-        const neonOrange = "#ff8800";
-        const neonYellow = "#faff00";
-        const laborColors = [neonBlue, neonGreen, neonOrange, neonPurple, neonPink, neonYellow, "#00ffa2", "#ff0080", "#00ffff"];
-
+        const neonColors = ["#00d2ff", "#4ade80", "#ffde00", "#f472b6", "#9d50bb", "#00ffa2", "#ff8800"];
+        
         let width, height, dpr;
         let points = [];
         let nEcken = 3;
         let dragIdx = -1;
         const BOGEN_RAD = 50;
 
-        function init() {
-            dpr = window.devicePixelRatio || 1;
-            const rect = container.getBoundingClientRect();
-            width = rect.width;
-            height = rect.height;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
-            
+        // 2. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'LABOR-STEUERUNG', `
+                <div class="corner-grid" id="btn-container"></div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('ui-container', 'WINKEL-ANALYSE', `
+                <div style="text-align:center; padding: 10px 0;">
+                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px; font-family:Orbitron;">INNENWINKELSUMME</div>
+                    <div id="sum-val" style="font-size:2.2rem; font-family:Orbitron; font-weight:bold; color:white; text-shadow:0 0 15px rgba(255,255,255,0.2);">0°</div>
+                </div>
+                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px; font-family:Orbitron;">WINKEL-PROTOKOLL</div>
+                    <div id="math-log"></div>
+                </div>
+            `, 'var(--neon-purple)');
+
             updateButtons();
-            initPolygon(nEcken);
         }
 
         function updateButtons() {
             const btnContainer = document.getElementById('btn-container');
+            if(!btnContainer) return;
             btnContainer.innerHTML = '';
-            for (let i = 3; i <= 9; i++) {
+            for (let i = 3; i <= 10; i++) {
                 const btn = document.createElement('button');
+                btn.className = 'cyber-btn' + (i === nEcken ? ' active' : '');
                 btn.innerText = i + "E";
-                if (i === nEcken) btn.classList.add('active');
                 btn.onclick = () => { nEcken = i; updateButtons(); initPolygon(i); };
                 btnContainer.appendChild(btn);
             }
         }
 
+        function init() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            width = rect.width; height = rect.height;
+            canvas.width = width * dpr; canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            initPolygon(nEcken);
+        }
+
+        function resetLab() {
+            initPolygon(nEcken);
+        }
+
         function initPolygon(n) {
             points = [];
-            const cx = width / 2;
-            const cy = height * 0.4;
+            const cx = width / 2, cy = height * 0.45;
             const radius = Math.min(width, height) * 0.22;
             for (let i = 0; i < n; i++) {
                 const a = (2 * Math.PI * i) / n - Math.PI / 2;
@@ -257,8 +182,7 @@
             ctx.clearRect(0, 0, width, height);
             
             // Raster
-            ctx.strokeStyle = "rgba(255,255,255,0.03)";
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(255,255,255,0.03)"; ctx.lineWidth = 1;
             for(let x=0; x<width; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,height); ctx.stroke(); }
             for(let y=0; y<height; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(width,y); ctx.stroke(); }
 
@@ -267,12 +191,12 @@
             let totalDeg = 0;
             let winkelWerte = [];
 
-            // Orientierung für Innenwinkel
+            // Orientierung
             let area = 0;
             for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
             const isCW = area < 0;
 
-            // Winkel Zeichnen & Berechnen
+            // Winkel
             for (let i = 0; i < n; i++) {
                 const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
                 const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
@@ -285,71 +209,56 @@
                 winkelWerte.push(Math.abs(diff));
                 totalDeg += deg;
 
-                // Neon-Bogen
-                const color = laborColors[i % laborColors.length];
-                ctx.shadowBlur = 20; ctx.shadowColor = color;
-                ctx.fillStyle = color + "40";
-                ctx.beginPath();
-                ctx.moveTo(P.x, P.y);
-                ctx.arc(P.x, P.y, BOGEN_RAD, a1, a1 + diff, !isCW);
-                ctx.closePath(); ctx.fill();
-                
+                const color = neonColors[i % neonColors.length];
+                ctx.save();
+                ctx.shadowBlur = 15; ctx.shadowColor = color;
+                ctx.fillStyle = color + "33";
+                ctx.beginPath(); ctx.moveTo(P.x, P.y); ctx.arc(P.x, P.y, BOGEN_RAD, a1, a1 + diff, !isCW); ctx.closePath(); ctx.fill();
                 ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
-                ctx.shadowBlur = 0;
+                ctx.restore();
 
-                logHtml += `<div class="log-entry"><span style="color:${color}">Winkel ${i+1}</span><span>${deg.toFixed(1)}°</span></div>`;
+                logHtml += `<div class="log-entry"><span style="color:${color}">WINKEL ${i+1}</span><span>${deg.toFixed(1)}°</span></div>`;
             }
 
-            // Polygon-Umriss (Filigran Weiß, No-Fancy)
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 0.6;
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
+            // Polygon Umriss
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
             for(let i=1; i<n; i++) ctx.lineTo(points[i].x, points[i].y);
-            ctx.closePath();
-            ctx.stroke();
+            ctx.closePath(); ctx.stroke();
 
-            // Handles (Dunkelgrau mit Aura)
-            points.forEach((p, idx) => {
-                const color = laborColors[idx % laborColors.length];
+            // Beweis (Addition an der Geraden)
+            const gY = height * 0.85, gX = width / 2;
+            const lineLen = 280;
+            ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(gX - lineLen, gY); ctx.lineTo(gX + lineLen, gY); ctx.stroke();
+
+            let currentStart = Math.PI;
+            winkelWerte.forEach((w, i) => {
+                const color = neonColors[i % neonColors.length];
+                ctx.save();
                 ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
-                ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 0.8; ctx.stroke();
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = color + "60";
+                ctx.beginPath(); ctx.moveTo(gX, gY); ctx.arc(gX, gY, BOGEN_RAD * 1.6, currentStart, currentStart - w, true); ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.5; ctx.stroke();
+                ctx.restore();
+                currentStart -= w;
             });
 
-            // Visual Proof (Addition an der Gerade) - NUR FÜR 3E und 4E
-            if (n <= 4) {
-                const gY = height * 0.8;
-                const gX = width / 2;
-                const lineLen = 250;
-                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.8;
-                ctx.beginPath(); ctx.moveTo(gX - lineLen, gY); ctx.lineTo(gX + lineLen, gY); ctx.stroke();
+            // Handles
+            points.forEach((p, idx) => {
+                const color = neonColors[idx % neonColors.length];
+                ctx.save();
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+                ctx.restore();
+            });
 
-                let currentStart = Math.PI;
-                winkelWerte.forEach((w, i) => {
-                    const color = laborColors[i % laborColors.length];
-                    ctx.shadowBlur = 15; ctx.shadowColor = color;
-                    ctx.fillStyle = color + "80"; // Etwas satter für die Addition
-                    ctx.beginPath(); ctx.moveTo(gX, gY);
-                    ctx.arc(gX, gY, BOGEN_RAD * 1.5, currentStart, currentStart - w, true);
-                    ctx.closePath(); ctx.fill();
-                    
-                    // Diskrete Trennline zwischen den Winkeln im Beweis
-                    ctx.shadowBlur = 0;
-                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 0.5;
-                    ctx.beginPath(); ctx.moveTo(gX, gY);
-                    ctx.lineTo(gX + Math.cos(currentStart) * BOGEN_RAD * 1.5, gY + Math.sin(currentStart) * BOGEN_RAD * 1.5);
-                    ctx.stroke();
-
-                    currentStart -= w;
-                });
-                ctx.shadowBlur = 0;
-            }
-
-            // Sidebar Update
-            sumValEl.innerText = Math.round(totalDeg) + "°";
-            mathLogEl.innerHTML = logHtml;
+            // Update UI
+            const sumValEl = document.getElementById('sum-val');
+            const mathLogEl = document.getElementById('math-log');
+            if(sumValEl) sumValEl.innerText = Math.round(totalDeg) + "°";
+            if(mathLogEl) mathLogEl.innerHTML = logHtml;
         }
 
         // Interaktion
@@ -363,19 +272,26 @@
         canvas.onpointerdown = e => {
             const pos = getPos(e);
             dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 30);
+            if(dragIdx !== -1) canvas.setPointerCapture(e.pointerId);
         };
 
-        window.onpointermove = e => {
+        canvas.onpointermove = e => {
             if (dragIdx === -1) return;
             const pos = getPos(e);
             points[dragIdx] = { x: pos.x, y: pos.y };
             draw();
         };
 
-        window.onpointerup = () => dragIdx = -1;
+        canvas.onpointerup = e => {
+            dragIdx = -1;
+            canvas.releasePointerCapture(e.pointerId);
+        };
+
         window.onresize = init;
-        document.fonts.ready.then(init);
+        setupUI();
+        init();
 
     </script>
 </body>
+</html>
 </html>
