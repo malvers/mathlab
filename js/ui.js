@@ -30,7 +30,7 @@ class CyberUI {
                 border: 1px solid rgba(0, 210, 255, 0.25);
                 display: flex;
                 flex-direction: column;
-                gap: 15px;
+                gap: 4px;
                 position: relative;
                 overflow: visible; /* To allow dropdown panels to bleed out */
                 backdrop-filter: blur(25px);
@@ -44,8 +44,8 @@ class CyberUI {
                 letter-spacing: 2px;
                 color: rgba(255, 255, 255, 0.4);
                 text-transform: uppercase;
-                margin-bottom: 5px;
-                padding-bottom: 5px;
+                margin-bottom: 2px;
+                padding-bottom: 0px;
             }
 
             /* Collapsible Logic */
@@ -375,6 +375,42 @@ class CyberUI {
                 color: #fff;
             }
 
+            /* CYBER BUTTONS */
+            .cyber-btn {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--neon-blue);
+                color: #fff;
+                padding: 12px 20px;
+                border-radius: 12px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.65rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                backdrop-filter: blur(10px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+                width: 100%;
+                margin-top: 10px;
+                outline: none;
+            }
+
+            .cyber-btn:hover {
+                background: rgba(0, 210, 255, 0.15);
+                box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
+                border-color: #fff;
+                transform: translateY(-1px);
+            }
+
+            .cyber-btn:active {
+                transform: translateY(1px) scale(0.98);
+                background: rgba(0, 210, 255, 0.3);
+            }
+
             /* MISSION BRIEFING BOX */
             .briefing-box {
                 font-size: 0.85rem;
@@ -394,9 +430,11 @@ class CyberUI {
         const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
         const toggleHtml = options.collapsible ? '<span class="toggle-icon">▶</span>' : '';
         
+        const glowColor = (typeof accentColor === 'string' && accentColor.startsWith('#')) ? `${accentColor}66` : 'rgba(0, 210, 255, 0.4)';
+        
         const cardHTML = `
             <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''}">
-                <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${accentColor}66;">
+                <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${glowColor};">
                     ${toggleHtml}
                     ${title}
                 </div>

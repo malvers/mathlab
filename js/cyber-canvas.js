@@ -48,9 +48,6 @@ class CyberCanvas {
         this.teleX = null;
         this.teleY = null;
 
-        // Visibility Flags
-        this.showAxes = true;
-        this.showLabels = false; // Disabled by default for global stability
 
         // Listener Tracking
         this.activeListeners = [];
@@ -293,8 +290,16 @@ class CyberCanvas {
         const rect = this.canvas.getBoundingClientRect();
         const factor = e.deltaY > 0 ? 1.1 : 0.9;
         this.zoomIntent.factor = factor;
-        this.zoomIntent.focalX = e.clientX - rect.left;
-        this.zoomIntent.focalY = e.clientY - rect.top;
+        
+        if (e.shiftKey) {
+            // Zoom to center of viewport
+            this.zoomIntent.focalX = this.width / 2;
+            this.zoomIntent.focalY = this.height / 2;
+        } else {
+            // Focal zoom to mouse position
+            this.zoomIntent.focalX = e.clientX - rect.left;
+            this.zoomIntent.focalY = e.clientY - rect.top;
+        }
     }
 
     // --- TOUCH HANDLERS (IPAD) ---
