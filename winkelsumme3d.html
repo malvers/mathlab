@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>3D Winkelsumme | docalvers</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
             --neon-orange: #ff8800;
-            --neon-green: #39FF14;
+            --neon-green: #4ade80;
+            --neon-red: #ff4444;
             --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.75);
-            --glass-bright: rgba(255, 255, 255, 0.05);
+            --glass: rgba(15, 23, 42, 0.7);
         }
 
         body {
             margin: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
+            background: var(--bg-dark);
             color: white;
             display: flex;
             height: 100vh;
@@ -31,210 +28,94 @@
             touch-action: none;
         }
 
-        /* --- SIDEBAR --- */
         #side-panel {
             width: 380px;
             min-width: 380px;
             background: var(--glass);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        #ui-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             overflow-y: auto;
+            flex-grow: 1;
         }
 
-
-        /* --- STATS CARDS --- */
-        .stats-card {
-            background: var(--glass-bright);
-            padding: 18px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .stats-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .stats-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            font-family: 'Orbitron';
-            font-size: 1.4rem;
-            font-weight: bold;
-        }
-
-        /* --- CONTROLS --- */
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .slider-box {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .slider-label {
-            font-family: 'Orbitron';
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
-            transition: all 0.2s;
-        }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        button {
-            padding: 12px;
-            font-size: 0.7rem;
-            font-family: 'Orbitron', sans-serif;
-            background: var(--glass-bright);
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        button:hover {
-            border-color: var(--neon-blue);
-            color: white;
-            background: rgba(0, 210, 255, 0.05);
-        }
-
-        button.active {
-            background: rgba(0, 210, 255, 0.15);
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-        }
-
-        /* --- CANVAS --- */
         #canvas-container {
             flex-grow: 1;
             position: relative;
-            background: transparent;
+            background: radial-gradient(circle at center, #101a35 0%, #050b18 100%);
             overflow: hidden;
         }
 
-
-        .footer-credit {
-            margin-top: auto;
+        /* Custom Stats for 3D Analysis */
+        .angle-sum-display {
             font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.2);
+            font-size: 1.8rem;
+            color: var(--neon-blue);
             text-align: center;
-            letter-spacing: 3px;
-            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            margin-top: 10px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+        .angle-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .angle-row #vC {
+            color: var(--neon-red) !important;
         }
     </style>
 </head>
 <body>
 
     <aside id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 60px;"></div>
-
-        <section class="stats-card">
-            <span class="stats-title">Animation & Geometrie</span>
-            <div class="control-group">
-                <div class="slider-box">
-                    <span class="slider-label">Faltung</span>
-                    <input type="range" id="fold-slider" min="0" max="3" step="0.01" value="0">
-                </div>
-                <div class="slider-box">
-                    <span class="slider-label">Horizontaler Versatz</span>
-                    <input type="range" id="skew-slider" min="-1.5" max="1.5" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="btn-group">
-                <button id="btn-auto-fold">FALTEN</button>
-                <button id="btn-auto-rotate">ROTATION</button>
-            </div>
-            <button id="btn-reset" style="width:100%; margin-top:10px;">RESET ANSICHT</button>
-        </section>
-
-        <section class="stats-card">
-            <span class="stats-title">Winkel-Check</span>
-            <div class="stats-row">
-                <span id="vA" style="color:var(--neon-orange)">0°</span>
-                <span style="opacity:0.4">+</span>
-                <span id="vB" style="color:var(--neon-green)">0°</span>
-                <span style="opacity:0.4">+</span>
-                <span id="vC" style="color:var(--neon-pink)">0°</span>
-            </div>
-            <div
-                style="text-align:center; font-family:'Orbitron'; color:var(--neon-blue); font-size:1.8rem; margin-top:5px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                = 180°
-            </div>
-        </section>
-
-        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div style="padding: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
     </aside>
 
-    <main id="canvas-container">
-    </main>
+    <main id="canvas-container"></main>
 
-    <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
-        // Initialize Branding
+        // 1. Branding & UI Init
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "Innenwinkelsatz 3D"
+            subtitle: "3D-INNENWINKELSATZ"
         });
+        CyberUI.init();
 
-        // --- 1. SETUP ---
         const container = document.getElementById('canvas-container');
+        const COLORS = { alpha: 0xff8800, beta: 0x4ade80, gamma: 0xff4444 };
+        
+        let isAutoFolding = false, foldDir = 1, pauseFrames = 0;
+        let currentFold = 0, currentSkew = 0.5;
+        let foldSliderId = null;
+
+        // 2. Setup Three.js Engine
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(0, 3, 13); // Leicht erhöht und weiter weg
+        camera.position.set(0, 3, 13);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, precision: 'highp' });
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -244,30 +125,19 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.target.set(0, 1, 0); // Blickpunkt leicht nach oben verschoben
+        controls.target.set(0, 1, 0);
 
-        // --- 2. LIGHTS ---
         scene.add(new THREE.AmbientLight(0xffffff, 0.4));
         const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
         keyLight.position.set(5, 10, 5);
         scene.add(keyLight);
+        scene.add(new THREE.HemisphereLight(0x00d2ff, 0x9d50bb, 0.6));
 
-        const hemiLight = new THREE.HemisphereLight(0x00d2ff, 0x9d50bb, 0.6);
-        scene.add(hemiLight);
+        const paperMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, side: THREE.DoubleSide, roughness: 0.2, metalness: 0.1, clearcoat: 0.5, emissive: 0x111111, transparent: true, opacity: 0.8 });
+        const tubeMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.2 });
 
-        // --- 3. MATERIALS ---
-        const paperMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff, side: THREE.DoubleSide, roughness: 0.2, metalness: 0.1,
-            clearcoat: 0.5, emissive: 0x111111, transparent: true, opacity: 0.75 // Etwas transparenter
-        });
-        const tubeMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff, metalness: 0.5, roughness: 0.2, emissive: 0x000000, emissiveIntensity: 0
-        });
-        const colors = { alpha: 0xff8800, beta: 0x39FF14, gamma: 0xff0055 };
-
-        // --- 4. GEOMETRY ---
         const mainGroup = new THREE.Group();
-        mainGroup.position.y = -1.5; // DIE GESAMTE GEOMETRIE UM 1.5 EINHEITEN RUNTER
+        mainGroup.position.y = -1.5;
         scene.add(mainGroup);
 
         const groups = { center: new THREE.Group(), top: new THREE.Group(), left: new THREE.Group(), right: new THREE.Group() };
@@ -277,8 +147,7 @@
             const group = new THREE.Group();
             for (let i = 0; i < points.length; i++) {
                 const p1 = points[i], p2 = points[(i + 1) % points.length];
-                const dist = p1.distanceTo(p2);
-                const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, dist, 8), tubeMat);
+                const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, p1.distanceTo(p2), 8), tubeMat);
                 tube.position.copy(p1.clone().add(p2).multiplyScalar(0.5));
                 tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
                 group.add(tube);
@@ -287,35 +156,23 @@
         }
 
         function createArc(origin, start, span, color) {
-            const geo = new THREE.CircleGeometry(0.35, 32, start, span);
-            const mat = new THREE.MeshBasicMaterial({ 
-                color, 
-                side: THREE.DoubleSide, 
-                transparent: true, 
-                opacity: 0.95,
-                depthTest: false, // Lässt den Winkel durch das Papier scheinen
-                polygonOffset: true,
-                polygonOffsetFactor: -1,
-                polygonOffsetUnits: -1
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.copy(origin);
-            mesh.position.z = 0.01; // Minimaler Offset für die Vorderseite
-            mesh.renderOrder = 999; // Absolute Priorität beim Zeichnen
+            const mesh = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32, start, span), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.95, depthTest: false }));
+            mesh.position.copy(origin); mesh.position.z = 0.01; mesh.renderOrder = 999;
             return mesh;
         }
 
         function rebuild(cX) {
-            Object.values(groups).forEach(g => { while (g.children.length > 0) g.remove(g.children[0]); });
+            currentSkew = cX;
+            Object.values(groups).forEach(g => { while(g.children.length > 0) g.remove(g.children[0]); });
             const A = new THREE.Vector3(-2.8, 0, 0), B = new THREE.Vector3(2.8, 0, 0), C = new THREE.Vector3(cX, 4.5, 0), F = new THREE.Vector3(cX, 0, 0);
-
             const angA = Math.acos(B.clone().sub(A).normalize().dot(C.clone().sub(A).normalize()));
             const angB = Math.acos(A.clone().sub(B).normalize().dot(C.clone().sub(B).normalize()));
             const angG = Math.acos(A.clone().sub(C).normalize().dot(B.clone().sub(C).normalize()));
 
-            document.getElementById('vA').innerText = Math.round(angA * 180 / Math.PI) + "°";
-            document.getElementById('vB').innerText = Math.round(angB * 180 / Math.PI) + "°";
-            document.getElementById('vC').innerText = (180 - Math.round(angA * 180 / Math.PI) - Math.round(angB * 180 / Math.PI)) + "°";
+            const vA = document.getElementById('vA'), vB = document.getElementById('vB'), vC = document.getElementById('vC');
+            if(vA) vA.innerText = Math.round(angA * 180 / Math.PI) + "°";
+            if(vB) vB.innerText = Math.round(angB * 180 / Math.PI) + "°";
+            if(vC) vC.innerText = (180 - Math.round(angA * 180 / Math.PI) - Math.round(angB * 180 / Math.PI)) + "°";
 
             const M_AC = A.clone().add(C).multiplyScalar(0.5), M_BC = B.clone().add(C).multiplyScalar(0.5);
             const H1 = new THREE.Vector3((A.x + F.x) / 2, 0, 0), H2 = new THREE.Vector3((B.x + F.x) / 2, 0, 0);
@@ -323,26 +180,26 @@
             const addPart = (g, pts) => {
                 const shape = new THREE.Shape(); shape.moveTo(pts[0].x, pts[0].y);
                 for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].y);
-                g.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), paperMat));
-                g.add(createTubes(pts));
+                g.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), paperMat)); g.add(createTubes(pts));
             };
 
             addPart(groups.center, [H1, H2, M_BC, M_AC]);
             groups.top.position.set(0, 2.25, 0);
             addPart(groups.top, [M_AC.clone().sub(new THREE.Vector3(0, 2.25, 0)), M_BC.clone().sub(new THREE.Vector3(0, 2.25, 0)), C.clone().sub(new THREE.Vector3(0, 2.25, 0))]);
-            groups.top.add(createArc(C.clone().sub(new THREE.Vector3(0, 2.25, 0)), Math.atan2(-2.25, M_AC.x - C.x), angG, colors.gamma));
+            groups.top.add(createArc(C.clone().sub(new THREE.Vector3(0, 2.25, 0)), Math.atan2(-2.25, M_AC.x - C.x), angG, COLORS.gamma));
 
             groups.left.position.set(H1.x, 0, 0);
             addPart(groups.left, [A.clone().sub(H1), new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 2.25, 0)]);
-            groups.left.add(createArc(A.clone().sub(H1), 0, angA, colors.alpha));
+            groups.left.add(createArc(A.clone().sub(H1), 0, angA, COLORS.alpha));
 
             groups.right.position.set(H2.x, 0, 0);
             addPart(groups.right, [new THREE.Vector3(0, 0, 0), B.clone().sub(H2), new THREE.Vector3(0, 2.25, 0)]);
-            groups.right.add(createArc(B.clone().sub(H2), Math.PI - angB, angB, colors.beta));
+            groups.right.add(createArc(B.clone().sub(H2), Math.PI - angB, angB, COLORS.beta));
+            updateFold(currentFold);
         }
 
-        const foldSlider = document.getElementById('fold-slider');
         function updateFold(val) {
+            currentFold = val;
             groups.top.rotation.x = Math.PI * Math.max(0, Math.min(1, val));
             groups.left.rotation.y = Math.PI * Math.max(0, Math.min(1, val - 1));
             groups.right.rotation.y = -Math.PI * Math.max(0, Math.min(1, val - 2));
@@ -351,55 +208,86 @@
             groups.right.position.z = 0.018 * Math.max(0, Math.min(1, val - 2));
         }
 
-        document.getElementById('btn-auto-fold').onclick = function () {
-            this.classList.toggle('active');
-            isAutoFolding = this.classList.contains('active');
-        };
-        document.getElementById('btn-auto-rotate').onclick = function () {
-            this.classList.toggle('active');
-            controls.autoRotate = this.classList.contains('active');
-        };
-        document.getElementById('btn-reset').onclick = () => {
-            rebuild(0.5); updateFold(0); foldSlider.value = 0; document.getElementById('skew-slider').value = 0.5;
-            isAutoFolding = false; controls.autoRotate = false;
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        // 3. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'ANIMATION & ENGINE', `
+                <div id="anim-sliders"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                    <button id="btn-auto-fold" class="cyber-btn" onclick="toggleAutoFold()">FALTEN</button>
+                    <button id="btn-auto-rotate" class="cyber-btn" onclick="toggleAutoRotate()">ROTATION</button>
+                </div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createSlider('anim-sliders', 'Faltung', 0, 3, currentFold, 0.01, (v) => updateFold(v));
+            // Store reference to slider inputs manually for animation sync
+            foldSliderId = document.querySelector('#anim-sliders input[type="range"]').id;
+
+            CyberUI.createSlider('anim-sliders', 'Horizontaler Versatz', -1.5, 1.5, currentSkew, 0.01, (v) => rebuild(v));
+
+            CyberUI.createCard('ui-container', 'WINKELSUMME', `
+                <div class="angle-row">
+                    <span id="vA" style="color:var(--neon-orange)">0°</span>
+                    <span style="opacity:0.4">+</span>
+                    <span id="vB" style="color:var(--neon-green)">0°</span>
+                    <span style="opacity:0.4">+</span>
+                    <span id="vC">0°</span>
+                </div>
+                <div class="angle-sum-display">= 180°</div>
+            `, 'var(--neon-purple)');
+        }
+
+        function toggleAutoFold() {
+            const btn = document.getElementById('btn-auto-fold');
+            isAutoFolding = !isAutoFolding;
+            btn.classList.toggle('active', isAutoFolding);
+        }
+
+        function toggleAutoRotate() {
+            const btn = document.getElementById('btn-auto-rotate');
+            controls.autoRotate = !controls.autoRotate;
+            btn.classList.toggle('active', controls.autoRotate);
+        }
+
+        function resetLab() {
+            currentFold = 0; currentSkew = 0.5; rebuild(0.5); updateFold(0);
             camera.position.set(0, 2, 12); controls.target.set(0, 0, 0);
-        };
+            isAutoFolding = false; controls.autoRotate = false;
+            document.querySelectorAll('.cyber-btn').forEach(b => b.classList.remove('active'));
+            // Update Sliders in UI if possible (CyberUI sliders are tricky to update externally without a ref, we'll just reload UI for simplicity if needed or accept visual lag)
+            location.reload(); 
+        }
 
-        let isAutoFolding = false, foldDir = 1, pauseFrames = 0;
         function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
+            requestAnimationFrame(animate); controls.update();
             if (isAutoFolding) {
-                if (pauseFrames > 0) {
-                    pauseFrames--;
-                } else {
-                    let cur = parseFloat(foldSlider.value);
-                    let next = cur + (0.015 * foldDir);
-
-                    if (next >= 3) {
-                        next = 3; foldDir = -1; pauseFrames = 100; // Pause bei 3 (Gefaltet)
-                    } else if (next <= 0) {
-                        next = 0; foldDir = 1; pauseFrames = 100; // Pause bei 0 (Offen)
+                if (pauseFrames > 0) { pauseFrames--; } else {
+                    currentFold += (0.015 * foldDir);
+                    if (currentFold >= 3) { currentFold = 3; foldDir = -1; pauseFrames = 100; }
+                    else if (currentFold <= 0) { currentFold = 0; foldDir = 1; pauseFrames = 100; }
+                    updateFold(currentFold);
+                    // Update slider visual
+                    const slider = document.getElementById(foldSliderId);
+                    if(slider) {
+                        slider.value = currentFold;
+                        const display = document.getElementById('val-' + foldSliderId);
+                        if(display) display.innerText = currentFold.toFixed(2);
                     }
-
-                    foldSlider.value = next;
-                    updateFold(next);
                 }
             }
             renderer.render(scene, camera);
         }
 
-        foldSlider.oninput = (e) => updateFold(parseFloat(e.target.value));
-        document.getElementById('skew-slider').oninput = (e) => rebuild(parseFloat(e.target.value));
         window.onresize = () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
         };
 
-        rebuild(0.5); animate();
+        setupUI(); rebuild(0.5); animate();
     </script>
 </body>
+</html>
+y>
 
 </html>
