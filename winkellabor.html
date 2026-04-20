@@ -8,65 +8,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
+        /* Beweis-Farben */
         :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-pink: #f472b6;
-            --neon-green: #4ade80;
-            --neon-amber: #ffde00;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
+            --color-alpha: #00d2ff;
+            --color-beta: #ffde00;
         }
 
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-dark);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            z-index: 10;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-        }
-
-        #ui-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 0 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        #main-viewport {
-            flex-grow: 1;
-            position: relative;
-            background: var(--bg-dark);
-            overflow: hidden;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            cursor: crosshair;
-        }
-
-        /* Value Highlight Display */
         .angle-stat {
             display: flex;
             justify-content: space-between;
@@ -90,13 +39,18 @@
 </head>
 
 <body>
-    <div id="side-panel">
+    <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
-    </div>
+        <div style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
 
-    <main id="main-viewport">
-        <canvas id="canvas"></canvas>
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
     </main>
 
     <script src="js/branding.js"></script>
@@ -110,17 +64,22 @@
             // 1. Branding & UI Init
             CyberBranding.init({
                 title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "WINKEL AN GESCHNITTENEN PARALLELEN"
+                subtitle: "WINKEL AN GESCHNITTENEN PARALLELEN",
+                headerId: "sidebar-header" // Explicitly target the sidebar header
             });
             CyberUI.init();
 
             CyberBranding.setBriefing(`
-                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: WINKEL</h3>
-                Analysieren Sie Scheitel-, Neben- und Stufenwinkel an Parallelen. Ziehen Sie die Ankerpunkte, um die geometrische Konstellation zu verändern.
-                <div style="margin-top:15px; opacity:0.8;">
-                    <span style="color:var(--neon-blue);">●</span> α, γ, α', γ' (Scheitel/Stufen)<br>
-                    <span style="color:var(--neon-amber);">●</span> β, δ, β', δ' (Wechselwinkel)<br>
-                    <span style="color:white; opacity:0.6;">●</span> Nebenwinkel = 180°
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: WINKEL-ANALYSE</h3>
+                Untersuche Scheitel-, Neben- und Stufenwinkel an Parallelen. 
+                Ziehe die Ankerpunkte, um die geometrische Konstellation zu verändern.
+                
+                <div class="admin-info" style="margin-top:15px; background:rgba(0,210,255,0.05); padding:10px; border-radius:8px; border-left:2px solid var(--neon-blue);">
+                    <ul style="margin:0; padding-left:18px; font-size:0.8rem; line-height:1.6;">
+                        <li><span style="color:var(--neon-blue);">α, γ, α', γ'</span>: Scheitel-/Stufenwinkel</li>
+                        <li><span style="color:var(--neon-amber);">β, δ, β', δ'</span>: Wechselwinkel</li>
+                        <li><span style="color:white; opacity:0.6;">Summe</span>: Nebenwinkel = 180°</li>
+                    </ul>
                 </div>
             `);
 
@@ -160,22 +119,25 @@
             `, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', 'LABOR-STEUERUNG', `
-                <div class="btn-group">
-                    <button class="cyber-btn" id="btn-toggle">PARALLELEN: AN</button>
-                    <button class="cyber-btn" id="btn-reset">LABOR RESET</button>
+                <div class="cyber-control-group">
+                    <button class="cyber-btn primary" id="btn-toggle" style="width:100%; margin-bottom:8px;">PARALLELEN: AN</button>
+                    <button class="cyber-btn" id="btn-reset" style="width:100%; opacity:0.7;">LABOR RESET</button>
                 </div>
-                <div style="margin-top:10px; display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
-                    <button class="cyber-btn" id="btn-rot-t-l" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↺</button>
-                    <button class="cyber-btn" id="btn-rot-t-r" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↻</button>
-                    <button class="cyber-btn" id="btn-rot-b-l" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↺</button>
-                    <button class="cyber-btn" id="btn-rot-b-r" style="font-size:1.8rem; height:48px; border-color:var(--neon-blue); color:var(--neon-blue); display:flex; align-items:center; justify-content:center;">↻</button>
+                
+                <div style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); letter-spacing:1px;">
+                        <span>TRANSVERSALE</span>
+                        <span>PARALLELEN</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+                        <button class="cyber-btn compact" id="btn-rot-t-l">↺</button>
+                        <button class="cyber-btn compact" id="btn-rot-t-r">↻</button>
+                        <button class="cyber-btn compact" id="btn-rot-b-l">↺</button>
+                        <button class="cyber-btn compact" id="btn-rot-b-r">↻</button>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:Orbitron; font-size:0.75rem; font-weight:600; color:var(--neon-blue); letter-spacing:1px;">
-                    <span style="flex:1; text-align:center;">TRANSVERSALE</span>
-                    <span style="flex:1; text-align:center;">PARALLELEN</span>
-                </div>
-                <div style="text-align:center; font-size:0.8rem; font-weight:bold; margin-top:12px; font-family:Orbitron; letter-spacing:1.5px; color:var(--neon-blue); text-shadow: 0 0 10px rgba(0,210,255,0.3);">SCHRITTWEITE: 5.0°</div>
-            `, 'var(--neon-blue)');
+                <div style="text-align:center; font-size:0.75rem; font-weight:bold; margin-top:15px; font-family:Orbitron; letter-spacing:1px; color:var(--neon-blue); opacity:0.8;">SCHRITTWEITE: 5.0°</div>
+            `);
 
             function rotateTransversal(deg) {
                 const inter1 = getIntersection(g1.p1, g1.p2, g2.p1, g2.p2);
