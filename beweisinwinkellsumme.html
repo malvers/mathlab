@@ -8,79 +8,44 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-            /* Beweis-Farben */
-            --color-alpha: #ffb100;
-            --color-beta: #77b521;
-            --color-gamma: #c62128;
+        /* Beweis-spezifische Anpassungen */
+        canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
         }
 
-        body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
+        /* Radio Styling */
+        .radio-group {
             display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            transition: flex-direction 0.4s ease;
-        }
-
-        /* Standard Sidebar Layout */
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
             gap: 15px;
-            z-index: 100;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-            transition: all 0.4s ease;
+            margin-top: 5px;
         }
 
-        #workspace {
-            flex-grow: 1;
-            position: relative;
-            background: transparent;
+        .radio-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 0;
-        }
-
-        /* Instrument Cards */
-        .instrument-card {
-            background: var(--glass-bright);
-            padding: 15px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .instrument-title {
-            font-family: 'Orbitron';
+            gap: 8px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.45);
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 8px;
-            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: 0.3s;
+        }
+
+        .radio-item:hover {
+            color: var(--neon-blue);
+        }
+
+        .radio-item input[type="radio"] {
+            accent-color: var(--neon-blue);
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-item.active {
+            color: white;
         }
 
         .proof-row {
@@ -99,69 +64,40 @@
             border-radius: 10px;
             min-width: 55px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             font-size: 1.1rem;
             letter-spacing: 1px;
         }
 
-        .box-a { background: var(--color-alpha); color: #000; }
-        .box-b { background: var(--color-beta); color: #fff; }
-        .box-c { background: var(--color-gamma); color: #fff; }
-
-
-        canvas {
-            display: block;
-            cursor: crosshair;
-            touch-action: none;
-            width: 100%;
-            height: 100%;
+        .box-a {
+            background: #ffb100;
+            color: #000;
         }
 
-        /* Radio Styling */
-        .radio-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
+        .box-b {
+            background: #77b521;
+            color: #fff;
         }
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.6);
-            transition: 0.3s;
-        }
-        .radio-item:hover { color: var(--neon-blue); }
-        .radio-item input[type="radio"] {
-            accent-color: var(--neon-blue);
-            cursor: pointer;
-            width: 18px;
-            height: 18px;
-        }
-        .radio-item.active { color: white; }
 
-        /* Responsive Mobile Layout */
-        @media (max-width: 900px) {
-            body { flex-direction: column; overflow-y: auto; }
-            #side-panel { width: 100%; min-width: 100%; height: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
-            #workspace { width: 100%; height: 60vh; min-height: 400px; }
+        .box-c {
+            background: #c62128;
+            color: #fff;
         }
     </style>
 </head>
+
 <body>
 
     <aside id="side-panel">
-        <div id="sidebar-header" style="min-height: 60px;"></div>
+        <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="parameters-container"></div>
-        <div style="margin-top: auto; padding-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div style="margin-top: auto; padding: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
 
     <main id="main-content">
-        <div id="workspace">
+        <div id="canvas-container">
             <canvas id="canvas"></canvas>
         </div>
     </main>

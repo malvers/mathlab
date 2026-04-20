@@ -11,145 +11,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-pink: #f472b6;
-            --neon-green: #4ade80;
-            --neon-amber: #fbbf24;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: #050b18;
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 5px 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 15px 0 45px rgba(0, 0, 0, 0.6);
-            overflow-y: auto;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            border-color: rgba(0, 210, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .stat-label {
-            font-family: 'Orbitron';
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 1.5px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 5px;
-        }
-
-        .control-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Orbitron';
-        }
-
-        .val-display {
-            color: var(--neon-blue);
-            font-weight: bold;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            background: var(--neon-blue);
-            color: black;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-
-        button.secondary {
-            opacity: 0.6;
-        }
-
-        #main-viewport {
-            flex-grow: 1;
-            position: relative;
-            background: #050b18;
-            overflow: hidden;
-        }
-
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
         canvas {
             width: 100%;
             height: 100%;
@@ -181,66 +46,65 @@
 </head>
 
 <body>
-    <div id="side-panel">
-        <section class="stat-card">
-            <span class="stat-label">Modul-Animation</span>
-            <div class="control-group">
-                <div class="control-header">Speed <span class="val-display" id="val-speed">3.5</span></div>
-                <input type="range" id="speed" min="0.5" max="15" step="0.5" value="3.5">
-            </div>
-            <div class="control-group">
-                <div class="control-header">Color Hue <span class="val-display" id="val-color">180</span></div>
-                <input type="range" id="color" min="0" max="360" step="1" value="180">
-            </div>
-            <div class="btn-group">
-                <button id="btn-toggle">PAUSE</button>
-                <button id="btn-reset" class="secondary">RESET</button>
-            </div>
-        </section>
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 60px;"></header>
+        <div id="parameters-container">
+            <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); margin-bottom:15px;">
+                <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:10px;">Modul-Animation</span>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;">Speed <span style="color:var(--neon-blue); font-weight:bold;" id="val-speed">3.5</span></div>
+                    <input type="range" id="speed" min="0.5" max="15" step="0.5" value="3.5" style="width:100%;">
+                </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;">Color Hue <span style="color:var(--neon-blue); font-weight:bold;" id="val-color">180</span></div>
+                    <input type="range" id="color" min="0" max="360" step="1" value="180" style="width:100%;">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
+                    <button id="btn-toggle" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:10px; border-radius:8px; font-family:Orbitron; font-size:0.7rem; cursor:pointer;">PAUSE</button>
+                    <button id="btn-reset" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:10px; border-radius:8px; font-family:Orbitron; font-size:0.7rem; cursor:pointer; opacity:0.6;">RESET</button>
+                </div>
+            </section>
 
-        <section class="stat-card">
-            <span class="stat-label">Parameter-Optimierung</span>
+            <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:18px; border:1px solid rgba(255,255,255,0.08);">
+                <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:10px;">Parameter-Optimierung</span>
 
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-pink);">Exp Amp <span id="val-eA"
-                        class="val-display" style="color:var(--neon-pink);">1.0</span></div>
-                <input type="range" id="p-eA" min="0" max="4" step="0.1" value="1"
-                    style="accent-color:var(--neon-pink);">
-            </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:Orbitron; color:var(--neon-pink);">Exp Amp <span id="val-eA" style="color:var(--neon-pink); font-weight:bold;">1.0</span></div>
+                    <input type="range" id="p-eA" min="0" max="4" step="0.1" value="1" style="width:100%; accent-color:var(--neon-pink);">
+                </div>
 
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-green);">Cos Amp <span id="val-cA"
-                        class="val-display" style="color:var(--neon-green);">2.0</span></div>
-                <input type="range" id="p-cA" min="0" max="6" step="0.1" value="2"
-                    style="accent-color:var(--neon-green);">
-            </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:Orbitron; color:var(--neon-green);">Cos Amp <span id="val-cA" style="color:var(--neon-green); font-weight:bold;">2.0</span></div>
+                    <input type="range" id="p-cA" min="0" max="6" step="0.1" value="2" style="width:100%; accent-color:var(--neon-green);">
+                </div>
 
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-green);">Cos Freq <span id="val-cF"
-                        class="val-display" style="color:var(--neon-green);">4</span></div>
-                <input type="range" id="p-cF" min="1" max="12" step="1" value="4"
-                    style="accent-color:var(--neon-green);">
-            </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:Orbitron; color:var(--neon-green);">Cos Freq <span id="val-cF" style="color:var(--neon-green); font-weight:bold;">4</span></div>
+                    <input type="range" id="p-cF" min="1" max="12" step="1" value="4" style="width:100%; accent-color:var(--neon-green);">
+                </div>
 
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-amber);">Sin Amp <span id="val-sA"
-                        class="val-display" style="color:var(--neon-amber);">1.0</span></div>
-                <input type="range" id="p-sA" min="0" max="4" step="0.1" value="1"
-                    style="accent-color:var(--neon-amber);">
-            </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:Orbitron; color:var(--neon-amber);">Sin Amp <span id="val-sA" style="color:var(--neon-amber); font-weight:bold;">1.0</span></div>
+                    <input type="range" id="p-sA" min="0" max="4" step="0.1" value="1" style="width:100%; accent-color:var(--neon-amber);">
+                </div>
 
-            <div class="control-group">
-                <div class="control-header" style="color:var(--neon-amber);">Sin Div <span id="val-sP"
-                        class="val-display" style="color:var(--neon-amber);">24</span></div>
-                <input type="range" id="p-sP" min="1" max="48" step="1" value="24"
-                    style="accent-color:var(--neon-amber);">
-            </div>
-        </section>
-    </div>
+                <div class="control-group" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:Orbitron; color:var(--neon-amber);">Sin Div <span id="val-sP" style="color:var(--neon-amber); font-weight:bold;">24</span></div>
+                    <input type="range" id="p-sP" min="1" max="48" step="1" value="24" style="width:100%; accent-color:var(--neon-amber);">
+                </div>
+            </section>
+        </div>
 
-    <main id="main-viewport">
-        <canvas id="canvas"></canvas>
-        <div id="equation-panel"></div>
+        <div style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div id="equation-panel"></div>
+        </div>
     </main>
 
     <script src="js/branding.js"></script>
