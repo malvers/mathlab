@@ -62,7 +62,7 @@
 
         let factor1 = 456;
         let factor2 = 789;
-        let fineMode = false;
+        let fineMode = true;
         let currentStep = -1; 
         
         let width, height, dpr;
@@ -118,13 +118,47 @@
                 // Fine Mode: digit by digit multiplications
                 for (let i = 0; i < f2Str.length; i++) {
                     const m = parseInt(f2Str[i]);
+                    let carry = 0;
                     // Digits of factor1 from right to left
                     for (let j = f1Str.length - 1; j >= 0; j--) {
+                        // Calculate carry from previous step for this specific loop
+                        // Note: j-index is right to left
+                        let prevCarry = 0;
+                        if (j < f1Str.length - 1) {
+                            let tempCarry = 0;
+                            for (let k = f1Str.length - 1; k > j; k--) {
+                                tempCarry = Math.floor((parseInt(f1Str[k]) * m + tempCarry) / 10);
+                            }
+                            prevCarry = tempCarry;
+                        }
+
+                        // Phase 1: Initiation (Carry + Plus)
+                        if (prevCarry > 0) {
+                            stepSequence.push({ 
+                                type: 'digit-init', 
+                                rowIndex: i, 
+                                f1Idx: j, 
+                                mIdx: i,
+                                carryValue: prevCarry 
+                            });
+
+                            // Phase 2: Show raw product
+                            stepSequence.push({ 
+                                type: 'digit-multiply', 
+                                rowIndex: i, 
+                                f1Idx: j, 
+                                mIdx: i,
+                                carryValue: prevCarry 
+                            });
+                        }
+
+                        // Phase 3: Final result with carry added
                         stepSequence.push({ 
-                            type: 'digit', 
+                            type: 'digit-final', 
                             rowIndex: i, 
                             f1Idx: j, 
-                            mIdx: i 
+                            mIdx: i,
+                            carryValue: prevCarry
                         });
                     }
                     stepSequence.push({ type: 'row-complete', rowIndex: i });
@@ -208,7 +242,7 @@
             ctx.fillStyle = BRAND_BLUE;
             // Highlight specific factor1 digit in fine mode
             for(let j = 0; j < f1Str.length; j++) {
-                const isActive = step && step.type === 'digit' && step.f1Idx === j;
+                const isActive = step && (step.type === 'digit-multiply' || step.type === 'digit-final') && step.f1Idx === j;
                 ctx.fillStyle = isActive ? DIGIT_COLORS[step.mIdx % DIGIT_COLORS.length] : BRAND_BLUE;
                 if (isActive) {
                     ctx.save();
@@ -226,7 +260,7 @@
             ctx.textAlign = 'left';
             for(let i = 0; i < f2Str.length; i++) {
                 const isProcessed = step && ((!fineMode && step.rowIndex >= i) || (fineMode && step.rowIndex >= i));
-                const isActive = step && step.type === 'digit' && step.mIdx === i;
+                const isActive = step && (step.type === 'digit-multiply' || step.type === 'digit-final') && step.mIdx === i;
                 
                 ctx.fillStyle = isProcessed ? DIGIT_COLORS[i % DIGIT_COLORS.length] : 'rgba(255,255,255,0.2)';
                 if (isActive) {
@@ -255,43 +289,98 @@
                 
                 const mDigit = parseInt(f2Str[i]);
                 const zeros = f2Str.length - 1 - i;
-                const color = DIGIT_COLORS[i % DIGIT_COLORS.length];
-                ctx.textAlign = 'right';
-                ctx.fillStyle = color;
+                // Keep the row color consistent with its multiplier digit at all times
+                const rowColor = DIGIT_COLORS[i % DIGIT_COLORS.length];
 
                 if (!fineMode || rowFinished) {
-                    // Just show full row
+                    // Standard Row Rendering (Finished rows or active row in non-fine mode)
                     if (rowFinished || (!fineMode && step.rowIndex === i)) {
+                        ctx.save();
+                        ctx.font = `bold ${fontSize}px Orbitron`;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = rowColor;
                         ctx.fillText(String(factor1 * mDigit), alignX - zeros * charWidth, partialY);
+                        ctx.restore();
                     }
                 } else if (fineMode && step.rowIndex === i) {
-                    // Fine Mode: digit by digit construction
+                    // Fine Mode: Digit by digit construction
                     let rowValStr = "";
                     let carry = 0;
                     for (let j = f1Str.length - 1; j >= 0; j--) {
-                        // All digits from right to left up to the current f1Idx
                         if (j < step.f1Idx) break; 
                         
                         const fDigit = parseInt(f1Str[j]);
                         const prod = fDigit * mDigit + carry;
                         const digitToWrite = prod % 10;
-                        carry = Math.floor(prod / 10);
+                        const nextCarry = Math.floor(prod / 10);
                         
-                        // If it's the last digit (index 0), write the whole number
-                        const charToAppend = (j === 0) ? String(prod) : String(digitToWrite);
-                        // We build the result from right to left, so prepend
-                        rowValStr = charToAppend + rowValStr;
+                        const isCurrentDigitActive = (j === step.f1Idx);
+                        if (isCurrentDigitActive) {
+                            if (step.type === 'digit-init') {
+                                // Phase 1: Only carry above
+                            } else if (step.type === 'digit-multiply') {
+                                // Phase 2: Raw product in row
+                                const rawProd = fDigit * mDigit;
+                                const rawDigit = j === 0 ? rawProd : rawProd % 10;
+                                rowValStr = String(rawDigit) + rowValStr;
+                            } else {
+                                // Phase 3: Final merged result
+                                const charToAppend = (j === 0) ? String(prod) : String(digitToWrite);
+                                rowValStr = charToAppend + rowValStr;
+                            }
+                        } else if (j > step.f1Idx) {
+                            const charToAppend = (j === 0) ? String(prod) : String(digitToWrite);
+                            rowValStr = charToAppend + rowValStr;
+                        }
 
-                        // Render Carry for next step
-                        if (j === step.f1Idx && carry > 0 && j > 0) {
+                        // --- FINAL CLEAN CARRY LOGIC ---
+                        if (isCurrentDigitActive) {
+                            const miniFontSize = fontSize * 0.3;
+                            const fixedCarryY = partialY - rowHeight * 0.55;
+                            
+                            // To ensure Phase 1 and Phase 2 align perfectly, we use a consistent measurement string
+                            const rawProd = fDigit * mDigit;
+                            const rawDigit = j === 0 ? rawProd : rawProd % 10;
+                            // In Phase 1, rowValStr is empty at this pos; in Phase 2, it already has the digit.
+                            const rowToMeasure = (step.type === 'digit-init') ? (String(rawDigit) + rowValStr) : rowValStr;
+
                             ctx.save();
-                            ctx.font = `${fontSize * 0.4}px Orbitron`;
-                            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                            ctx.fillText(String(carry), startX - (f1Str.length - j) * charWidth + charWidth*0.5, startY - rowHeight * 0.6);
+                            ctx.font = `bold ${fontSize}px Orbitron`;
+                            const rowWidth = ctx.measureText(rowToMeasure).width;
+                            const activeDigitWidth = ctx.measureText(String(rawDigit)).width;
+                            const rowRightEdge = alignX - zeros * charWidth;
+                            
+                            // The true pixel center of the active digit in the final row rendering
+                            const activeDigitCenterX = rowRightEdge - (rowWidth - activeDigitWidth / 2);
+
+                            ctx.textAlign = 'center';
+                            if (step.type === 'digit-init' && step.carryValue > 0) {
+                                // STEP 1: PFADFINDER - Isolated Gray Carry
+                                ctx.font = `bold ${miniFontSize}px Orbitron`;
+                                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                                ctx.fillText(String(step.carryValue), activeDigitCenterX, fixedCarryY);
+                            } else if (step.type === 'digit-multiply' && step.carryValue > 0) {
+                                // STEP 2: BEGEGNUNG - Vibrant Yellow Addition Block
+                                ctx.font = `bold ${miniFontSize}px Orbitron`;
+                                ctx.fillStyle = '#ffde00'; 
+                                ctx.fillText(String(step.carryValue), activeDigitCenterX, fixedCarryY);
+                                ctx.font = `${miniFontSize}px Orbitron`;
+                                ctx.fillStyle = '#ffde00';
+                                ctx.fillText('+', activeDigitCenterX, partialY - rowHeight * 0.42);
+                            }
                             ctx.restore();
                         }
+                        // --- END CLEAN CARRY LOGIC ---
+                        carry = nextCarry;
                     }
+
+                    // FINAL RENDER FOR THE ACTIVE ROW
+                    ctx.save();
+                    ctx.font = `bold ${fontSize}px Orbitron`;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = rowColor;
                     ctx.fillText(rowValStr, alignX - zeros * charWidth, partialY);
+                    ctx.restore();
                 }
 
                 if (i > 0) {
@@ -343,22 +432,22 @@
                 const f1Str = String(factor1);
                 const f2Str = String(factor2);
 
+                const color = step.rowIndex !== undefined ? DIGIT_COLORS[step.rowIndex % DIGIT_COLORS.length] : BRAND_BLUE;
+
                 if (step.type === 'row' || step.type === 'row-complete') {
                     const digit = f2Str[step.rowIndex];
-                    info.innerHTML = `<div>Multiplikation mit <b style="color:${DIGIT_COLORS[step.rowIndex % DIGIT_COLORS.length]}">${digit}</b> abgeschlossen.</div>`;
-                } else if (step.type === 'digit') {
+                    info.innerHTML = `<div>Multiplikation mit <b style="color:${color}">${digit}</b> abgeschlossen.</div>`;
+                } else if (step.type === 'digit-multiply') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
-                    
-                    // Simple logic to find current carry
-                    let carry = 0;
-                    for (let j = f1Str.length -1; j > step.f1Idx; j--) {
-                        carry = Math.floor((parseInt(f1Str[j]) * mDigit + carry) / 10);
-                    }
-                    
                     const prod = fDigit * mDigit;
-                    const color = DIGIT_COLORS[step.mIdx % DIGIT_COLORS.length];
-                    info.innerHTML = `<div>Rechne: <b style="color:${color}">${mDigit} &times; ${fDigit}</b> = ${prod}${carry > 0 ? ` (+ ${carry} Übertrag = ${prod + carry})` : ''}</div>`;
+                    info.innerHTML = `<div>Multipliziere: <b style="color:${color}">${mDigit} &times; ${fDigit}</b> = <b>${prod}</b>. <br><span style="opacity:0.7; font-size:0.7rem;">Der Übertrag <b>${step.carryValue}</b> wartet noch...</span></div>`;
+                } else if (step.type === 'digit-final') {
+                    const mDigit = parseInt(f2Str[step.mIdx]);
+                    const fDigit = parseInt(f1Str[step.f1Idx]);
+                    const prod = fDigit * mDigit;
+                    const final = prod + step.carryValue;
+                    info.innerHTML = `<div>Addiere Übertrag: <b>${prod} + ${step.carryValue}</b> = <b style="color:${color}">${final}</b>.</div>`;
                 } else if (step.type === 'final') {
                     info.innerHTML = "<b>Endergebnis:</b> Alle Teilergebnisse wurden addiert.";
                 }
@@ -366,6 +455,13 @@
         }
 
         window.onresize = init;
+        
+        // Keyboard Navigation Support
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextStep();
+            if (e.key === 'ArrowLeft') prevStep();
+        });
+
         setupUI();
         
         // Ensure fonts are loaded before initial draw to prevent "ugly" fallback font
