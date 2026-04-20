@@ -296,7 +296,7 @@ const CyberBranding = {
             /* Branding Logo (Right-pinned Master Header) */
             .canvas-branding {
                 position: fixed;
-                top: 20px;
+                top: 10px; 
                 right: 25px; 
                 text-align: right;
                 pointer-events: none;
@@ -338,75 +338,22 @@ const CyberBranding = {
             }
 
             @media (max-width: 1024px) {
-                .canvas-branding { top: 20px; right: 25px; }
+                .canvas-branding { top: 10px; right: 25px; }
             }
 
             @media (max-width: 768px) {
-                .canvas-branding { top: 20px; right: 15px; max-width: 80%; }
+                .canvas-branding { top: 10px; right: 15px; max-width: 80%; }
                 .canvas-branding h1 { letter-spacing: 2px; margin-top: 2px; font-size: calc(10px + 3px * var(--header-scale)); }
                 .canvas-subtitle { letter-spacing: 1px; font-size: calc(12px + 10px * var(--header-scale)); }
             }
 
             @media (max-width: 500px) {
-                .canvas-branding { top: 20px; right: 10px; max-width: 90%; }
+                .canvas-branding { top: 10px; right: 10px; max-width: 90%; }
                 .canvas-branding h1 { display: none !important; }
                 .canvas-subtitle { font-size: calc(11px + 7px * var(--header-scale)); letter-spacing: 0.5px; }
             }
 
-            /* Central Navigation */
-            .cyber-nav {
-                display: flex !important;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 8px;
-                width: 100% !important;
-                z-index: 100000 !important;
-                animation: branding-fade-in 1.2s ease-out forwards;
-                box-sizing: border-box;
-            }
-
-            .cyber-nav.integrated {
-                margin: 20px 0 5px 0;
-                width: 100%;
-                position: relative;
-            }
-
-            .cyber-nav.floating {
-                position: fixed;
-                top: 20px;
-                left: 20px;
-            }
-
-            .nav-btn {
-                position: relative;
-                width: 48px !important;
-                height: 48px !important;
-                min-width: 48px !important;
-                box-sizing: border-box;
-                background: rgba(15, 23, 42, 0.85) !important;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(0, 210, 255, 0.3) !important;
-                border-radius: 12px;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                color: white !important;
-                text-decoration: none;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-                flex: none !important;
-            }
-
-            .nav-btn:hover {
-                transform: translateY(-3px) scale(1.05);
-                border-color: var(--branding-blue) !important;
-                background: rgba(0, 210, 255, 0.3) !important;
-                box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
-            }
-
-            .nav-btn svg { width: 24px; height: 24px; stroke-width: 2.2; display: block; }
-
+            /* Navigation logic now handled by cyber-layout.css */
             @keyframes branding-fade-in {
                 from { opacity: 0; transform: translateY(-10px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -631,7 +578,7 @@ const CyberBranding = {
         qrBtn.title = 'QR-Code für diese Seite';
         qrBtn.onclick = () => this.showQR();
         qrBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -649,7 +596,7 @@ const CyberBranding = {
         editBtn.title = 'Edit-Modus umschalten';
         editBtn.onclick = () => this.requestEditAccess();
         editBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
@@ -662,7 +609,7 @@ const CyberBranding = {
         bugBtn.style.color = 'var(--branding-orange)';
         bugBtn.onclick = () => this.showBugReport();
         bugBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20V10"></path>
                 <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
                 <path d="M12 10V4"></path>
@@ -696,7 +643,7 @@ const CyberBranding = {
         briefingBtn.title = 'Beschreibung anzeigen';
         briefingBtn.onclick = () => this.showBriefing();
         briefingBtn.innerHTML = `
-            <div style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: bold; line-height: 1;">?</div>
+            <span style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 1.6rem; line-height: 1; margin-top: -2px; display: block;">?</span>
         `;
 
         nav.appendChild(homeBtn);

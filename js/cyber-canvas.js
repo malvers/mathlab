@@ -24,7 +24,7 @@ class CyberCanvas {
         this.showAxes = true;
         this.showLabels = true;
         this.showGrid = true;
-        this.showTelemetry = true;
+        this.showTelemetry = false;
         
         this.isDragging = false;
         this.needsRedraw = true;
@@ -61,7 +61,7 @@ class CyberCanvas {
         this.ctx = this.canvas.getContext('2d');
 
         this.view = { ...this.view, ...viewConfig };
-        this.showTelemetry = options.showTelemetry !== false;
+        this.showTelemetry = !!options.showTelemetry;
         
         // ZOOM LIMITS (v2.3)
         this.limits = {
