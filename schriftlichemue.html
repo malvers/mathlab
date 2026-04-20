@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Schriftliche Multiplikation | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <style>
+        #canvas-container {
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+            overflow: hidden;
+        }
+        .cyber-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div style="padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        // 1. Branding & UI Init
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "SCHRIFTLICHE MULTIPLIKATION"
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // Colors from requirement image
+        // 7 -> Yellow, 8 -> Cyan, 9 -> Purple
+        const DIGIT_COLORS = ["#FFC107", "#03A9F4", "#9C27B0", "#4CAF50", "#F44336"];
+        const BRAND_BLUE = "#00d2ff";
+
+        let factor1 = 456;
+        let factor2 = 789;
+        let fineMode = false;
+        let currentStep = -1; 
+        
+        let width, height, dpr;
+        let stepSequence = []; // Linearized steps for fine mode or row mode
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'MULTIPLIKATION', `
+                <div class="cyber-control-group">
+                    <label class="cyber-label">FAKTOR 1 (Multiplikand)</label>
+                    <input type="number" id="f1-input" class="cyber-select" value="${factor1}" onchange="updateFactors()">
+                </div>
+                <div class="cyber-control-group" style="margin-top:15px;">
+                    <label class="cyber-label">FAKTOR 2 (Multiplikator)</label>
+                    <input type="number" id="f2-input" class="cyber-select" value="${factor2}" onchange="updateFactors()">
+                </div>
+                <div style="margin-top:20px;" id="mode-toggle-container"></div>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
+            `, BRAND_BLUE);
+
+            CyberUI.createCheckbox('mode-toggle-container', 'DETAIL-MODUS (Fein-Analyse)', fineMode, (val) => {
+                fineMode = val;
+                resetSteps();
+            }, '#ffde00');
+
+            CyberUI.createCard('ui-container', 'STEUERUNG', `
+                <div class="stats-grid">
+                    <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-val" style="font-size:1.4rem;">◀</span>
+                    </div>
+                    <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">WEITER</span>
+                        <span class="stats-val" style="font-size:1.4rem;">▶</span>
+                    </div>
+                </div>
+                <div id="step-info" style="margin-top:15px; font-family:'Outfit'; font-size:0.8rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:flex; align-items:center;">
+                    Wähle Ziffern und klicke auf WEITER um die Rechnung zu starten.
+                </div>
+            `, '#ff9d00');
+        }
+
+        function buildStepSequence() {
+            stepSequence = [];
+            const f1Str = String(factor1);
+            const f2Str = String(factor2);
+
+            if (!fineMode) {
+                // Row Mode: one step per multiplier digit
+                for (let i = 0; i < f2Str.length; i++) {
+                    stepSequence.push({ type: 'row', rowIndex: i });
+                }
+            } else {
+                // Fine Mode: digit by digit multiplications
+                for (let i = 0; i < f2Str.length; i++) {
+                    const m = parseInt(f2Str[i]);
+                    // Digits of factor1 from right to left
+                    for (let j = f1Str.length - 1; j >= 0; j--) {
+                        stepSequence.push({ 
+                            type: 'digit', 
+                            rowIndex: i, 
+                            f1Idx: j, 
+                            mIdx: i 
+                        });
+                    }
+                    stepSequence.push({ type: 'row-complete', rowIndex: i });
+                }
+            }
+            stepSequence.push({ type: 'final' });
+        }
+
+        function updateFactors() {
+            factor1 = parseInt(document.getElementById('f1-input').value) || 0;
+            factor2 = parseInt(document.getElementById('f2-input').value) || 0;
+            resetSteps();
+        }
+
+        function resetSteps() {
+            currentStep = -1;
+            buildStepSequence();
+            draw();
+        }
+
+        function nextStep() {
+            if (currentStep < stepSequence.length - 1) {
+                currentStep++;
+                draw();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > -1) {
+                currentStep--;
+                draw();
+            }
+        }
+
+        function init() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            width = rect.width; height = rect.height;
+            canvas.width = width * dpr; canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            buildStepSequence();
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            const f1Str = String(factor1);
+            const f2Str = String(factor2);
+            const resStr = String(factor1 * factor2);
+            
+            // 1. Calculate Font Size
+            // Horizontal footprint: Factor1 + Factor2 + symbols or Result
+            const maxCharsContent = Math.max(f1Str.length + f2Str.length + 3, resStr.length + 2);
+            // Vertical footprint: header + partials + footer lines
+            const totalLines = f2Str.length + 4; 
+
+            // Hard constraints with safety margins (15% padding)
+            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75);
+            const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
+            
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
+            ctx.font = `bold ${fontSize}px Orbitron`;
+            ctx.textBaseline = 'middle';
+
+            const charWidth = fontSize * 0.75;
+            const rowHeight = fontSize * 1.6;
+            
+            // 2. Center vertically
+            const totalCalcHeight = totalLines * rowHeight;
+            const startY = (height - totalCalcHeight) / 2 + rowHeight * 0.5;
+
+            // 3. Center horizontally
+            const totalCalcWidth = maxCharsContent * charWidth;
+            const startX = (width - totalCalcWidth) / 2 + (f1Str.length + 0.5) * charWidth;
+
+            const step = currentStep >= 0 ? stepSequence[currentStep] : null;
+
+            // 1. Render Factors
+            ctx.textAlign = 'right';
+            ctx.fillStyle = BRAND_BLUE;
+            // Highlight specific factor1 digit in fine mode
+            for(let j = 0; j < f1Str.length; j++) {
+                const isActive = step && step.type === 'digit' && step.f1Idx === j;
+                ctx.fillStyle = isActive ? DIGIT_COLORS[step.mIdx % DIGIT_COLORS.length] : BRAND_BLUE;
+                if (isActive) {
+                    ctx.save();
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = ctx.fillStyle;
+                }
+                ctx.fillText(f1Str[j], startX - (f1Str.length - 1 - j) * charWidth, startY);
+                if (isActive) ctx.restore();
+            }
+            
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+            ctx.fillText('·', startX + charWidth * 0.7, startY);
+            
+            ctx.textAlign = 'left';
+            for(let i = 0; i < f2Str.length; i++) {
+                const isProcessed = step && ((!fineMode && step.rowIndex >= i) || (fineMode && step.rowIndex >= i));
+                const isActive = step && step.type === 'digit' && step.mIdx === i;
+                
+                ctx.fillStyle = isProcessed ? DIGIT_COLORS[i % DIGIT_COLORS.length] : 'rgba(255,255,255,0.2)';
+                if (isActive) {
+                    ctx.save();
+                    ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle;
+                }
+                ctx.fillText(f2Str[i], startX + charWidth * 1.4 + i * charWidth, startY);
+                if (isActive) ctx.restore();
+            }
+
+            // Separator Line
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(startX - f1Str.length * charWidth, startY + rowHeight * 0.7);
+            ctx.lineTo(startX + (f2Str.length + 1.5) * charWidth, startY + rowHeight * 0.7);
+            ctx.stroke();
+
+            // 2. Partial Results Calculation & Carry Logic
+            let partialY = startY + rowHeight * 1.6;
+            const alignX = startX + (f2Str.length + 1.4) * charWidth;
+
+            for(let i = 0; i < f2Str.length; i++) {
+                const rowFinished = step && (step.type === 'final' || step.rowIndex > i || (step.rowIndex === i && (step.type === 'row-complete' || (!fineMode && step.type === 'row'))));
+                if (currentStep === -1 || (step.type !== 'final' && step.rowIndex < i)) break;
+                
+                const mDigit = parseInt(f2Str[i]);
+                const zeros = f2Str.length - 1 - i;
+                const color = DIGIT_COLORS[i % DIGIT_COLORS.length];
+                ctx.textAlign = 'right';
+                ctx.fillStyle = color;
+
+                if (!fineMode || rowFinished) {
+                    // Just show full row
+                    if (rowFinished || (!fineMode && step.rowIndex === i)) {
+                        ctx.fillText(String(factor1 * mDigit), alignX - zeros * charWidth, partialY);
+                    }
+                } else if (fineMode && step.rowIndex === i) {
+                    // Fine Mode: digit by digit construction
+                    let rowValStr = "";
+                    let carry = 0;
+                    for (let j = f1Str.length - 1; j >= 0; j--) {
+                        // All digits from right to left up to the current f1Idx
+                        if (j < step.f1Idx) break; 
+                        
+                        const fDigit = parseInt(f1Str[j]);
+                        const prod = fDigit * mDigit + carry;
+                        const digitToWrite = prod % 10;
+                        carry = Math.floor(prod / 10);
+                        
+                        // If it's the last digit (index 0), write the whole number
+                        const charToAppend = (j === 0) ? String(prod) : String(digitToWrite);
+                        // We build the result from right to left, so prepend
+                        rowValStr = charToAppend + rowValStr;
+
+                        // Render Carry for next step
+                        if (j === step.f1Idx && carry > 0 && j > 0) {
+                            ctx.save();
+                            ctx.font = `${fontSize * 0.4}px Orbitron`;
+                            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                            ctx.fillText(String(carry), startX - (f1Str.length - j) * charWidth + charWidth*0.5, startY - rowHeight * 0.6);
+                            ctx.restore();
+                        }
+                    }
+                    ctx.fillText(rowValStr, alignX - zeros * charWidth, partialY);
+                }
+
+                if (i > 0) {
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                    ctx.textAlign = 'left';
+                    ctx.font = `${fontSize * 0.5}px Orbitron`;
+                    ctx.fillText('+', startX - f1Str.length * charWidth, partialY);
+                    ctx.restore();
+                }
+                partialY += rowHeight;
+            }
+
+            // 3. Final Result
+            if (step && step.type === 'final') {
+                ctx.strokeStyle = BRAND_BLUE;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(startX - f1Str.length * charWidth, partialY - rowHeight * 0.5);
+                ctx.lineTo(startX + (f2Str.length + 1.5) * charWidth, partialY - rowHeight * 0.5);
+                ctx.stroke();
+
+                const finalResult = factor1 * factor2;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'right';
+                ctx.fillText(String(finalResult), alignX, partialY + fontSize * 0.2);
+
+                // Double line
+                ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.moveTo(startX - f1Str.length * charWidth, partialY + fontSize * 0.84);
+                ctx.lineTo(startX + (f2Str.length + 1.5) * charWidth, partialY + fontSize * 0.84);
+                ctx.moveTo(startX - f1Str.length * charWidth, partialY + fontSize * 1.05);
+                ctx.lineTo(startX + (f2Str.length + 1.5) * charWidth, partialY + fontSize * 1.05);
+                ctx.stroke();
+            }
+
+            updateStepInfo();
+        }
+
+        function updateStepInfo() {
+            const info = document.getElementById('step-info');
+            if (!info) return;
+
+            if (currentStep === -1) {
+                info.innerHTML = `Multipliziere <b>${factor1}</b> mit <b>${factor2}</b>.`;
+            } else {
+                const step = stepSequence[currentStep];
+                const f1Str = String(factor1);
+                const f2Str = String(factor2);
+
+                if (step.type === 'row' || step.type === 'row-complete') {
+                    const digit = f2Str[step.rowIndex];
+                    info.innerHTML = `<div>Multiplikation mit <b style="color:${DIGIT_COLORS[step.rowIndex % DIGIT_COLORS.length]}">${digit}</b> abgeschlossen.</div>`;
+                } else if (step.type === 'digit') {
+                    const mDigit = parseInt(f2Str[step.mIdx]);
+                    const fDigit = parseInt(f1Str[step.f1Idx]);
+                    
+                    // Simple logic to find current carry
+                    let carry = 0;
+                    for (let j = f1Str.length -1; j > step.f1Idx; j--) {
+                        carry = Math.floor((parseInt(f1Str[j]) * mDigit + carry) / 10);
+                    }
+                    
+                    const prod = fDigit * mDigit;
+                    const color = DIGIT_COLORS[step.mIdx % DIGIT_COLORS.length];
+                    info.innerHTML = `<div>Rechne: <b style="color:${color}">${mDigit} &times; ${fDigit}</b> = ${prod}${carry > 0 ? ` (+ ${carry} Übertrag = ${prod + carry})` : ''}</div>`;
+                } else if (step.type === 'final') {
+                    info.innerHTML = "<b>Endergebnis:</b> Alle Teilergebnisse wurden addiert.";
+                }
+            }
+        }
+
+        window.onresize = init;
+        setupUI();
+        
+        // Ensure fonts are loaded before initial draw to prevent "ugly" fallback font
+        document.fonts.ready.then(() => {
+            setTimeout(init, 100); // Small safety buffer for canvas engine
+        });
+
+    </script>
+</body>
+</html>
+    </script>
+</body>
+</html>

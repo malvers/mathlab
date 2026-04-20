@@ -56,6 +56,23 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "schriftlichemue",
+        "href": "schriftlichemue.html",
+        "title": "Schriftliche Multiplikation",
+        "description": "Visualisiert die schriftliche Multiplikation Schritt für Schritt. Inklusive Übertrag-Tracking und Detail-Modus für tiefe mathematische Analyse.",
+        "tagline": "Grundrechenarten / Detail-Analyse",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 215, 0, 0.1)" stroke="#ffd700" stroke-width="2" />
+            <line x1="30" y1="40" x2="70" y2="40" stroke="white" stroke-width="2" />
+            <line x1="30" y1="55" x2="70" y2="55" stroke="white" stroke-width="2" />
+            <line x1="30" y1="70" x2="70" y2="70" stroke="#00d2ff" stroke-width="3" />
+            <path d="M42 35 L58 51 M58 35 L42 51" stroke="#ffd700" stroke-width="3" stroke-linecap="round" />
+        </svg>`,
+        "category": "arithmetik grade5 hot",
+        "keywords": "multiplikation malrechnen schriftlich mathe schule",
+        "color": "gold"
+    },
+    {
         "id": "winkelsumme3d",
         "href": "winkelsumme3d.html",
         "title": "3D Winkelsumme",
