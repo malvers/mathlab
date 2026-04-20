@@ -366,7 +366,7 @@ const CyberBranding = {
             }
 
             .cyber-nav.integrated {
-                margin: 5px 0 20px 0;
+                margin: 20px 0 5px 0;
                 width: 100%;
                 position: relative;
             }
@@ -396,7 +396,6 @@ const CyberBranding = {
                 text-decoration: none;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.4);
                 flex: none !important;
-            }
             }
 
             .nav-btn:hover {
