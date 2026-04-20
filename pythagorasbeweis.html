@@ -5,68 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pythagoras Beweis | ULTRA v5.3.8</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-pink: #ff0055;
-            --neon-green: #4ade80;
-            --neon-orange: #ff8800;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.7);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-dark);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            z-index: 10;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-        }
-
-        #ui-container {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            background: radial-gradient(circle at center, #1a2b5e 0%, #050b18 100%);
-            overflow: hidden;
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            cursor: crosshair;
-        }
-
-        /* Stats Sub-cards for Labor-Status */
+        /* Beweis-spezifische Anpassungen */
         .stats-grid {
             display: flex;
             flex-direction: column;
@@ -133,25 +75,27 @@
         </div>
     </aside>
 
-    <main id="canvas-container">
-        <div id="equation-hud">
-            <table class="hud-table">
-                <thead>
-                    <tr>
-                        <th># ID</th>
-                        <th style="text-align:right;">FLÄCHE CM²</th>
-                    </tr>
-                </thead>
-                <tbody id="log-body"></tbody>
-                <tfoot>
-                    <tr class="hud-sum-row">
-                        <td class="hud-sum-label">SUMME Σ</td>
-                        <td id="hud-sum-total" class="hud-sum-val">0,00 cm²</td>
-                    </tr>
-                </tfoot>
-            </table>
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="equation-hud">
+                <table class="hud-table">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th style="text-align:right;">FLÄCHE CM²</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-body"></tbody>
+                    <tfoot>
+                        <tr class="hud-sum-row">
+                            <td class="hud-sum-label">SUMME Σ</td>
+                            <td id="hud-sum-total" class="hud-sum-val">0,00 cm²</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <canvas id="canvas"></canvas>
         </div>
-        <canvas id="canvas"></canvas>
     </main>
 
     <script src="js/branding.js"></script>
