@@ -166,7 +166,23 @@
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
                     
-                    // Card 1: STEUERUNG
+                    // Card 1: FUNKTIONSGLEICHUNG
+                    CyberUI.createCard('parameters-container', 'FUNKTIONSGLEICHUNG', `
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHEITELPUNKTFORM</span>
+                            <div id="eq-vertex" class="math-glow"></div>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NORMALFORM</span>
+                            <div id="eq-normal" class="math-glow"></div>
+                        </div>
+                        <div id="eq-roots-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NULLSTELLEN</span>
+                            <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
+                        </div>
+                    `, 'var(--neon-blue)', { collapsible: false });
+
+                    // Card 2: STEUERUNG
                     CyberUI.createCard('parameters-container', 'SCHEITELPUNKT & PARAMETER', `
                         <div class="stats-grid">
                             <div>
@@ -205,22 +221,6 @@
                             <button class="cyber-button" onclick="resetView()" style="width: 100%; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">LABOR ZURÜCKSETZEN</button>
                         </div>
                     `, 'var(--neon-purple)', { collapsible: false });
-
-                    // Card 2: FUNKTIONSGLEICHUNG
-                    CyberUI.createCard('parameters-container', 'FUNKTIONSGLEICHUNG', `
-                        <div style="margin-bottom: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHEITELPUNKTFORM</span>
-                            <div id="eq-vertex" class="math-glow"></div>
-                        </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NORMALFORM</span>
-                            <div id="eq-normal" class="math-glow"></div>
-                        </div>
-                        <div id="eq-roots-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NULLSTELLEN</span>
-                            <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
-                        </div>
-                    `, 'var(--neon-blue)', { collapsible: false });
                 }
 
                 // Bind Sliders
@@ -322,17 +322,19 @@
             ctx.shadowBlur = 0;
         }
 
-        function drawHandle(ctx, mathX, mathY, color, label, position = "top-right") {
+        function drawHandle(ctx, mathX, mathY, color, label, position = "top-right", isHandle = true) {
             const px = cc.mapX(mathX);
             const py = cc.mapY(mathY);
 
-            ctx.beginPath();
-            ctx.arc(px, py, 12, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(0,0,0,0.6)";
-            ctx.fill();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.stroke();
+            if (isHandle) {
+                ctx.beginPath();
+                ctx.arc(px, py, 12, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fill();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
 
             ctx.beginPath();
             ctx.arc(px, py, 5, 0, Math.PI * 2);
@@ -369,20 +371,21 @@
 
             drawParabola(ctx);
 
-            drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
-            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", "STRECKUNG", "top-right");
-
             // --- DRAW ROOTS ON CANVAS ---
             const disc = -paraE / paraA;
             const green = "#4ade80"; // varColor('--neon-green')
             if (disc > 0) {
                 const x1 = paraD - Math.sqrt(disc);
                 const x2 = paraD + Math.sqrt(disc);
-                drawHandle(ctx, x1, 0, green, "x1", "bottom");
-                drawHandle(ctx, x2, 0, green, "x2", "bottom");
+                drawHandle(ctx, x1, 0, green, "x1", "bottom", false);
+                drawHandle(ctx, x2, 0, green, "x2", "bottom", false);
             } else if (Math.abs(disc) < 0.0001) {
-                drawHandle(ctx, paraD, 0, green, "x0", "bottom");
+                drawHandle(ctx, paraD, 0, green, "x0", "bottom", false);
             }
+
+            // Draw handles LAST so they are on top
+            drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
+            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", "STRECKUNG", "top-right");
 
             updateUI();
         }
@@ -435,21 +438,17 @@
             const rootsTarget = document.getElementById('eq-roots');
             
             if (rootsContainer && rootsTarget) {
-                if (Math.abs(paraD) > 0.001 || Math.abs(paraE) > 0.001) {
-                    rootsContainer.style.display = 'block';
-                    const disc = -paraE / paraA;
-                    
-                    if (disc > 0) {
-                        const x1 = paraD - Math.sqrt(disc);
-                        const x2 = paraD + Math.sqrt(disc);
-                        katex.render(`x_1 = ${x1.toFixed(2)}, \\quad x_2 = ${x2.toFixed(2)}`, rootsTarget, { throwOnError: false });
-                    } else if (Math.abs(disc) < 0.0001) {
-                        katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
-                    } else {
-                        katex.render(`\\text{keine reellen Nullstellen}`, rootsTarget, { throwOnError: false });
-                    }
+                rootsContainer.style.display = 'block';
+                const disc = -paraE / paraA;
+                
+                if (disc > 0) {
+                    const x1 = paraD - Math.sqrt(disc);
+                    const x2 = paraD + Math.sqrt(disc);
+                    katex.render(`x_1 = ${x1.toFixed(2)}, \\quad x_2 = ${x2.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                } else if (Math.abs(disc) < 0.0001) {
+                    katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
                 } else {
-                    rootsContainer.style.display = 'none';
+                    katex.render(`\\text{keine reellen Nullstellen}`, rootsTarget, { throwOnError: false });
                 }
             }
         }
