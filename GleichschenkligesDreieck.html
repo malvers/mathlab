@@ -15,22 +15,11 @@
     <!-- Branding & UI -->
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
 
     <style>
-        /* Specific Styles for this Lab */
-        #workspace {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-            position: relative;
-            height: 100vh;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
+        /* Beweis-spezifische Anpassungen */
         .canvas-container {
             min-height: 0;
             background: rgba(255, 255, 255, 0.03);
@@ -53,12 +42,6 @@
 
         #graph-container.collapsed {
             flex: 0 0 50px;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
         }
 
         .panel-toggle {
@@ -112,19 +95,21 @@
         </div>
     </aside>
 
-    <main id="workspace">
-        <div id="tri-container" class="canvas-container">
-            <canvas id="triCanvas"></canvas>
-        </div>
-
-        <div id="graph-container" class="canvas-container">
-            <div class="panel-toggle" onclick="toggleGraph()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round" id="toggle-icon">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+    <main id="main-content">
+        <div id="canvas-container" style="flex-direction: column; gap: 20px; padding: 20px;">
+            <div id="tri-container" class="canvas-container">
+                <canvas id="triCanvas"></canvas>
             </div>
-            <canvas id="graphCanvas"></canvas>
+
+            <div id="graph-container" class="canvas-container">
+                <div class="panel-toggle" onclick="toggleGraph()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" id="toggle-icon">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <canvas id="graphCanvas"></canvas>
+            </div>
         </div>
     </main>
 

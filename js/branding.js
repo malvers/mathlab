@@ -527,6 +527,36 @@ const CyberBranding = {
             }
 
             .briefing-text b { color: var(--branding-blue); }
+
+            /* --- NAVIGATION FAIL-SAFE STYLES (ULTRA v5.3.8) --- */
+            .nav-btn {
+                background: rgba(15, 23, 42, 0.85) !important;
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(0, 210, 255, 0.3) !important;
+                color: white !important;
+                border-radius: 12px;
+                cursor: pointer;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                min-height: 48px;
+                aspect-ratio: 1 / 1;
+                width: 100%;
+                box-sizing: border-box;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .nav-btn svg {
+                width: 26px !important;
+                height: 26px !important;
+                stroke: currentColor;
+                stroke-width: 2.8;
+                display: block !important;
+            }
+            .nav-btn:hover {
+                transform: translateY(-3px) scale(1.05);
+                background: rgba(0, 210, 255, 0.2) !important;
+                border-color: var(--branding-blue) !important;
+            }
         `;
         document.head.appendChild(style);
     },
@@ -554,7 +584,7 @@ const CyberBranding = {
         homeBtn.href = 'index.html';
         homeBtn.title = 'Dashboard öffnen';
         homeBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
@@ -566,7 +596,7 @@ const CyberBranding = {
         backBtn.title = 'Zurück zum Dashboard';
         backBtn.onclick = () => window.history.back();
         backBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
@@ -578,7 +608,7 @@ const CyberBranding = {
         qrBtn.title = 'QR-Code für diese Seite';
         qrBtn.onclick = () => this.showQR();
         qrBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -590,26 +620,26 @@ const CyberBranding = {
             </svg>
         `;
 
-        // Edit Button (NEU)
+        // Edit Button
         const editBtn = document.createElement('div');
         editBtn.className = 'nav-btn';
         editBtn.title = 'Edit-Modus umschalten';
         editBtn.onclick = () => this.requestEditAccess();
         editBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
         `;
 
-        // Bug Report Button (NEU & Am Ende)
+        // Bug Report Button
         const bugBtn = document.createElement('div');
         bugBtn.className = 'nav-btn';
         bugBtn.title = 'Fehler oder Feedback melden';
         bugBtn.style.color = 'var(--branding-orange)';
         bugBtn.onclick = () => this.showBugReport();
         bugBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20V10"></path>
                 <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
                 <path d="M12 10V4"></path>
@@ -621,29 +651,13 @@ const CyberBranding = {
             </svg>
         `;
 
-        // Sync/Transmit Button (NEU - initial hidden)
-        const syncBtn = document.createElement('div');
-        syncBtn.id = 'nav-sync-btn';
-        syncBtn.className = 'nav-btn';
-        syncBtn.title = 'Änderungen an Antigravity senden';
-        syncBtn.style.color = 'var(--branding-blue)';
-        syncBtn.style.display = 'none'; // Hidden by default
-        syncBtn.onclick = () => this.transmitEdits();
-        syncBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
-                <polyline points="12 11 12 16"></polyline>
-                <polyline points="9 14 12 11 15 14"></polyline>
-            </svg>
-        `;
-
-        // Briefing Button (NEU)
+        // Briefing Button
         const briefingBtn = document.createElement('div');
         briefingBtn.className = 'nav-btn';
         briefingBtn.title = 'Beschreibung anzeigen';
         briefingBtn.onclick = () => this.showBriefing();
         briefingBtn.innerHTML = `
-            <span style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 1.6rem; line-height: 1; margin-top: -2px; display: block;">?</span>
+            <span style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 1.5rem; line-height: 1; display: block;">?</span>
         `;
 
         nav.appendChild(homeBtn);
@@ -651,7 +665,7 @@ const CyberBranding = {
         nav.appendChild(qrBtn);
         nav.appendChild(editBtn); 
         nav.appendChild(bugBtn);
-        nav.appendChild(briefingBtn); // Jetzt ganz am Ende
+        nav.appendChild(briefingBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
         const sidebar = sidebarHeader ||
