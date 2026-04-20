@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Winkelsumme Beweis</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -150,47 +151,22 @@
 </head>
 <body>
 
-    <div id="side-panel">
+    <aside id="side-panel">
         <div id="sidebar-header" style="min-height: 60px;"></div>
-
-
-        <div class="instrument-card">
-            <div class="instrument-title">Beweis-Konfiguration</div>
-            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">Parallele durch Punkt:</div>
-            <div class="radio-group">
-                <label class="radio-item"><input type="radio" name="pivot" value="0"> A</label>
-                <label class="radio-item"><input type="radio" name="pivot" value="1"> B</label>
-                <label class="radio-item active"><input type="radio" name="pivot" value="2" checked> C</label>
-            </div>
-        </div>
-
-        <div class="instrument-card">
-            <div class="instrument-title">Mathematischer Beweis</div>
-            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Am Pivot-Punkt:</div>
-            <div class="proof-row">
-                <span class="val-box box-a" id="val-l">0°</span> + 
-                <span class="val-box box-c" id="val-g1">0°</span> + 
-                <span class="val-box box-b" id="val-p">0°</span> = 180°
-            </div>
-            
-            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">Innenwinkel im Dreieck:</div>
-            <div class="proof-row">
-                <span class="val-box box-a" id="val-a">0°</span> + 
-                <span class="val-box box-c" id="val-g2">0°</span> + 
-                <span class="val-box box-b" id="val-b">0°</span> = 180°
-            </div>
-        </div>
-
+        <div id="parameters-container"></div>
         <div style="margin-top: auto; padding-top: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
-    </div>
+    </aside>
 
-    <div id="workspace">
-        <canvas id="canvas"></canvas>
-    </div>
+    <main id="main-content">
+        <div id="workspace">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
 
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <script>
         /**
          * WINKELSUMMEN-BEWEIS LABORATORY - ULTRA v5.3.8
@@ -213,6 +189,33 @@
                 </div>
             `
         });
+
+        // --- CyberUI Initialization ---
+        CyberUI.init();
+        CyberUI.createCard('parameters-container', 'KOORDINATEN', `
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">Parallele durch Punkt:</div>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="pivot" value="0"> A</label>
+                <label class="radio-item"><input type="radio" name="pivot" value="1"> B</label>
+                <label class="radio-item active"><input type="radio" name="pivot" value="2" checked> C</label>
+            </div>
+        `);
+
+        CyberUI.createCard('parameters-container', 'MATHEMATISCHER BEWEIS', `
+            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Am Pivot-Punkt:</div>
+            <div class="proof-row">
+                <span class="val-box box-a" id="val-l">0°</span> + 
+                <span class="val-box box-c" id="val-g1">0°</span> + 
+                <span class="val-box box-b" id="val-p">0°</span> = 180°
+            </div>
+            
+            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">Innenwinkel im Dreieck:</div>
+            <div class="proof-row">
+                <span class="val-box box-a" id="val-a">0°</span> + 
+                <span class="val-box box-c" id="val-g2">0°</span> + 
+                <span class="val-box box-b" id="val-b">0°</span> = 180°
+            </div>
+        `);
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
