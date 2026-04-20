@@ -316,15 +316,25 @@
             const lenOpp = Math.hypot(vOpp.x, vOpp.y);
             const nx = vOpp.x / lenOpp, ny = vOpp.y / lenOpp;
             
-            const lineLen = 2000;
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.8)"; // High-Visibility Neon-Blue
-            ctx.lineWidth = 1.2; // Thinner for precision
-            ctx.setLineDash([]); // Solid line
+            const lineLen = 20000; // 'bis ins Nirvana'
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.9)"; // Stronger Neon-Blue
+            ctx.lineWidth = 2.0; // Thicker for absolute clarity
+            ctx.setLineDash([]); 
             ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0, 210, 255, 0.5)";
-            // Draw Parallel through Pivot
-            ctx.beginPath(); ctx.moveTo(P.x - nx * lineLen, P.y - ny * lineLen); ctx.lineTo(P.x + nx * lineLen, P.y + ny * lineLen); ctx.stroke();
-            // Draw Help Line through opposite side
-            ctx.beginPath(); ctx.moveTo(P1.x - nx * lineLen, P1.y - ny * lineLen); ctx.lineTo(P1.x + nx * lineLen, P1.y + ny * lineLen); ctx.stroke();
+
+            // 1. Draw Parallel lines (Cyan)
+            // Line through Pivot P
+            ctx.beginPath(); 
+            ctx.moveTo(P.x - nx * lineLen, P.y - ny * lineLen); 
+            ctx.lineTo(P.x + nx * lineLen, P.y + ny * lineLen); 
+            ctx.stroke();
+
+            // Line through opposite side (Base line through P1 and P2)
+            ctx.beginPath(); 
+            ctx.moveTo(P1.x - nx * lineLen, P1.y - ny * lineLen); 
+            ctx.lineTo(P1.x + nx * lineLen, P1.y + ny * lineLen); 
+            ctx.stroke();
+            
             ctx.shadowBlur = 0;
 
             // Draw Internal Angles
@@ -344,13 +354,12 @@
             const vPar1 = { x: -nx, y: -ny };
             const vPar2 = { x: nx, y: ny };
             
-            // We need to draw the angles correctly. 
             // Angle 1: between vPar1 and vToP1
             drawAngle(P, vPar1, vToP1, BOGEN_RAD, colors[(selectedPivotIdx + 1) % 3], angles[(selectedPivotIdx + 1) % 3] + "°");
             // Angle 2: between vPar2 and vToP2
             drawAngle(P, vPar2, vToP2, BOGEN_RAD, colors[(selectedPivotIdx + 2) % 3], angles[(selectedPivotIdx + 2) % 3] + "°");
 
-            // Dreieck
+            // Dreieck (Vordergrund)
             ctx.strokeStyle = "white"; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath(); ctx.stroke();
 
