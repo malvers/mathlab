@@ -111,36 +111,66 @@ body {
 }
 
 /* --- NAVIGATION BUTTONS --- */
+/* --- NAVIGATION BUTTONS (GOLD STANDARD AUTHORITY) --- */
 .nav-buttons, .cyber-nav {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    margin: 20px 0 5px 0;
-    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 8px !important;
+    margin: 10px 0 5px 0 !important;
+    width: 100% !important;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1000;
 }
 
 .nav-btn {
-    background: var(--glass-bright);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 12px 6px;
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 210, 255, 0.3) !important;
+    color: white !important;
     border-radius: 12px;
     cursor: pointer;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     min-height: 48px;
+    aspect-ratio: 1 / 1;
     width: 100%;
     box-sizing: border-box;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(0, 210, 255, 0.2) !important;
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+}
+
+.nav-btn svg {
+    width: 26px !important;
+    height: 26px !important;
+    stroke-width: 2.8 !important;
+    display: block !important;
+    filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.cyber-nav.floating {
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: none !important;
 }
 
 

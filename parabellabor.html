@@ -76,11 +76,11 @@
         }
 
         // Named hooks for re-binding on reset
-        const onMouseDownHook = (e) => {
+        const onMouseDownHook = (pos) => {
             if (!cc || !cc.canvas) return false;
-            const rect = cc.canvas.getBoundingClientRect();
-            const px = e.clientX - rect.left;
-            const py = e.clientY - rect.top;
+            
+            const px = cc.mapX(pos.x);
+            const py = cc.mapY(pos.y);
             
             const vX = cc.mapX(paraD);
             const vY = cc.mapY(paraE);
@@ -100,27 +100,56 @@
             return false;
         };
 
-        const onMouseMoveHook = (e) => {
+        const onMouseMoveHook = (pos) => {
             if (!draggedHandle || !cc) return false;
             
             if (draggedHandle === "vertex") {
-                paraD = Math.round(cc.mathX * 10) / 10;
-                paraE = Math.round(cc.mathY * 10) / 10;
+                paraD = Math.round(pos.x * 10) / 10;
+                paraE = Math.round(pos.y * 10) / 10;
             } else if (draggedHandle === "a") {
-                paraA = cc.mathY - paraE;
+                paraA = pos.y - paraE;
             }
             syncSliders();
             draw();
             return true; 
         };
 
-        const onMouseUpHook = (e) => {
+        const onMouseUpHook = () => {
             if (draggedHandle) {
                 draggedHandle = null;
                 if (cc) cc.allowPan = true;
                 return true;
             }
             return false;
+        };
+
+        const onContextMenuHook = (e) => {
+            if (typeof CyberUI !== 'undefined' && CyberUI.showContextMenu) {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    { label: 'Labor Reset', onclick: () => window.resetView() },
+                    { divider: true },
+                    {
+                        label: 'Gitter anzeigen',
+                        checked: cc.showGrid,
+                        onchange: (val) => { cc.showGrid = val; draw(); }
+                    },
+                    {
+                        label: 'Achsen anzeigen',
+                        checked: cc.showAxes,
+                        onchange: (val) => { cc.showAxes = val; draw(); }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: cc.showLabels,
+                        onchange: (val) => { cc.showLabels = val; draw(); }
+                    },
+                    {
+                        label: 'Koordinaten',
+                        checked: cc.showTelemetry,
+                        onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); }
+                    }
+                ]);
+            }
         };
 
         window.addEventListener('load', () => {
@@ -137,19 +166,7 @@
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
                     
-                    // Card 1: FUNKTIONSGLEICHUNG
-                    CyberUI.createCard('parameters-container', 'FUNKTIONSGLEICHUNG', `
-                        <div style="margin-bottom: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHEITELPUNKTFORM</span>
-                            <div id="eq-vertex" class="math-glow"></div>
-                        </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NORMALFORM</span>
-                            <div id="eq-normal" class="math-glow"></div>
-                        </div>
-                    `, 'var(--neon-blue)', { collapsible: false });
-
-                    // Card 2: STEUERUNG
+                    // Card 1: STEUERUNG
                     CyberUI.createCard('parameters-container', 'SCHEITELPUNKT & PARAMETER', `
                         <div class="stats-grid">
                             <div>
@@ -188,6 +205,22 @@
                             <button class="cyber-button" onclick="resetView()" style="width: 100%; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">LABOR ZURÜCKSETZEN</button>
                         </div>
                     `, 'var(--neon-purple)', { collapsible: false });
+
+                    // Card 2: FUNKTIONSGLEICHUNG
+                    CyberUI.createCard('parameters-container', 'FUNKTIONSGLEICHUNG', `
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHEITELPUNKTFORM</span>
+                            <div id="eq-vertex" class="math-glow"></div>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NORMALFORM</span>
+                            <div id="eq-normal" class="math-glow"></div>
+                        </div>
+                        <div id="eq-roots-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NULLSTELLEN</span>
+                            <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
+                        </div>
+                    `, 'var(--neon-blue)', { collapsible: false });
                 }
 
                 // Bind Sliders
@@ -240,6 +273,7 @@
                 cc.onMouseMove = onMouseMoveHook;
                 cc.onMouseUp = onMouseUpHook;
                 cc.onContextMenu = onContextMenuHook;
+                cc.showLabels = true;
             }
             syncSliders();
             draw();
@@ -307,7 +341,7 @@
 
             if (label) {
                 ctx.font = "bold 12px Orbitron";
-                ctx.fillStyle = "white";
+                ctx.fillStyle = color;
                 ctx.textAlign = "center";
 
                 let offX = 0, offY = 0;
@@ -315,7 +349,7 @@
                 else if (position === "top") { offY = -30; }
                 else if (position === "top-right") { offX = 50; offY = -20; }
                 else if (position === "smart-vertex") {
-                    offY = (paraA >= 0) ? 35 : -35;
+                    offY = -35; 
                     if (Math.abs(mathX) < 0.2) offX = 45; 
                 }
 
@@ -336,7 +370,19 @@
             drawParabola(ctx);
 
             drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
-            drawHandle(ctx, paraD + 1, paraA + paraE, varColor('--neon-yellow'), "STRECKUNG", "top-right");
+            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", "STRECKUNG", "top-right");
+
+            // --- DRAW ROOTS ON CANVAS ---
+            const disc = -paraE / paraA;
+            const green = "#4ade80"; // varColor('--neon-green')
+            if (disc > 0) {
+                const x1 = paraD - Math.sqrt(disc);
+                const x2 = paraD + Math.sqrt(disc);
+                drawHandle(ctx, x1, 0, green, "x1", "bottom");
+                drawHandle(ctx, x2, 0, green, "x2", "bottom");
+            } else if (Math.abs(disc) < 0.0001) {
+                drawHandle(ctx, paraD, 0, green, "x0", "bottom");
+            }
 
             updateUI();
         }
@@ -348,7 +394,7 @@
             if (latexSpan) {
                 const px = cc.mapX(paraD);
                 const py = cc.mapY(paraE);
-                let offX = 0, offY = (paraA >= 0) ? 35 : -35;
+                let offX = 0, offY = -35;
                 if (Math.abs(paraD) < 0.2) offX = 45;
 
                 latexSpan.style.left = (px + offX) + "px";
@@ -383,6 +429,29 @@
             const normalLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, x^2 ${bSign} \\textcolor{#00d2ff}{${bVal}} \\, x ${cSign} ${cVal}`;
             const eqN = document.getElementById('eq-normal');
             if (eqN) katex.render(normalLatex, eqN, { throwOnError: false });
+
+            // --- NULLSTELLEN CALCULATION ---
+            const rootsContainer = document.getElementById('eq-roots-container');
+            const rootsTarget = document.getElementById('eq-roots');
+            
+            if (rootsContainer && rootsTarget) {
+                if (Math.abs(paraD) > 0.001 || Math.abs(paraE) > 0.001) {
+                    rootsContainer.style.display = 'block';
+                    const disc = -paraE / paraA;
+                    
+                    if (disc > 0) {
+                        const x1 = paraD - Math.sqrt(disc);
+                        const x2 = paraD + Math.sqrt(disc);
+                        katex.render(`x_1 = ${x1.toFixed(2)}, \\quad x_2 = ${x2.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                    } else if (Math.abs(disc) < 0.0001) {
+                        katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                    } else {
+                        katex.render(`\\text{keine reellen Nullstellen}`, rootsTarget, { throwOnError: false });
+                    }
+                } else {
+                    rootsContainer.style.display = 'none';
+                }
+            }
         }
     </script>
 </body>

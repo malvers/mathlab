@@ -1,188 +1,41 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gleichschenkliges Dreieck | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Gleichschenkliges Dreieck | ULTRA v5.3.8</title>
+
+    <!-- Core Engine -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <!-- Branding & UI -->
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <link rel="stylesheet" href="js/cyber-layout.css">
+
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-purple: #9d50bb;
-            --neon-orange: #ff8800;
-            --neon-green: #39FF14;
-            --neon-red: #ff3333;
-            --bg-dark: #050b18;
-            --glass: rgba(15, 23, 42, 0.75);
-            --glass-bright: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at center, #0a1329 0%, #050b18 100%);
-            color: white;
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        /* --- SIDEBAR --- */
-        #side-panel {
-            width: 380px;
-            min-width: 380px;
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 25px 20px 25px; /* Ultra-tight top padding */
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Reduced gap */
-            z-index: 10;
-            box-sizing: border-box;
-            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-        }
-
-        .dashboard-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
-        }
-        .dashboard-btn:hover {
-            color: white;
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        /* --- STATS CARDS --- */
-        .stats-card {
-            background: var(--glass-bright);
-            padding: 12px 15px; /* Flatter padding */
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 8px; /* Compact gap */
-        }
-
-        .stats-title {
-            font-family: 'Orbitron';
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .val-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .val-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
-        .val-display { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: bold; }
-
-        /* --- WARNING CARD --- */
-        #warning-card {
-            background: rgba(255, 51, 51, 0.1);
-            border: 1px solid var(--neon-red);
-            padding: 15px;
-            border-radius: 15px;
-            display: none;
-            animation: pulse-red 2s infinite;
-        }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); }
-            50% { box-shadow: 0 0 25px rgba(255, 51, 51, 0.5); }
-            100% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); }
-        }
-        .warning-text {
-            color: var(--neon-red);
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            text-align: center;
-            letter-spacing: 1px;
-            line-height: 1.4;
-        }
-
-        /* --- CONTROLS --- */
-        .slider-box {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .slider-controls-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .arrow-btn {
-            background: var(--glass-bright);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--neon-blue);
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            font-family: 'Orbitron';
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .arrow-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            flex-grow: 1;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        /* --- MAIN VIEWPORT --- */
+        /* Specific Styles for this Lab */
         #workspace {
             flex-grow: 1;
             display: flex;
-            flex-direction: column; /* Stacked boxes */
-            padding: 20px 25px 30px 25px; /* Standardized padding */
+            flex-direction: column;
+            padding: 20px;
             gap: 20px;
-            box-sizing: border-box;
             position: relative;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .canvas-container {
-            flex: 1;
-            background: var(--glass-bright);
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
+            border-radius: 20px;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -190,37 +43,30 @@
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Container specific IDs for targeting */
-        #tri-container { flex: 1; }
-        #graph-container { flex: 1; }
+        #tri-container {
+            flex: 1.5;
+        }
 
-        /* Collapse States */
+        #graph-container {
+            flex: 1;
+        }
+
         #graph-container.collapsed {
             flex: 0 0 50px;
-            min-height: 50px;
-            max-height: 50px;
-        }
-        
-        #graph-container.collapsed canvas {
-            opacity: 0;
-            pointer-events: none;
         }
 
-        canvas { 
-            width: 100%; 
-            height: 100%; 
-            display: block; 
-            border-radius: 25px;
-            transition: opacity 0.4s ease;
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
-        /* Toggle Button */
         .panel-toggle {
             position: absolute;
             top: 15px;
             right: 20px;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
@@ -229,75 +75,41 @@
             justify-content: center;
             cursor: pointer;
             z-index: 100;
-            transition: all 0.3s ease;
             color: var(--neon-blue);
+            transition: all 0.3s;
         }
 
         .panel-toggle:hover {
             background: rgba(0, 210, 255, 0.15);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
-            transform: scale(1.1);
         }
 
-        .panel-toggle svg {
-            width: 16px;
-            height: 16px;
-            transition: transform 0.4s ease;
-        }
-
-        #graph-container.collapsed .panel-toggle svg {
-            transform: rotate(180deg);
-        }
-
-        
-        .footer-credit {
-            margin-top: auto;
-            font-family: 'Orbitron';
-            font-size: 0.55rem;
-            color: rgba(255, 255, 255, 0.2);
+        #warning-box {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid #ff3333;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            display: none;
             text-align: center;
-            letter-spacing: 3px;
-            padding-top: 15px;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            color: #ff3333;
+            animation: cyber-glow-red 2s infinite;
         }
     </style>
 </head>
+
 <body>
-
     <aside id="side-panel">
-        <!-- Sidebar Navigation (Home/Back) Injected here by branding.js -->
-        <div id="sidebar-header" style="min-height: 45px;"></div>
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="warning-box">⚠️ KEIN DREIECK MÖGLICH</div>
 
-        <section class="stats-card">
-            <div class="slider-box">
-                <div class="slider-controls-row">
-                    <button class="arrow-btn" id="btn-minus">◀</button>
-                    <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2">
-                    <button class="arrow-btn" id="btn-plus">▶</button>
-                </div>
-            </div>
-        </section>
-
-        <section class="stats-card">
-            <div class="val-row">
-                <span class="val-label">UMFANG</span>
-                <span class="val-display" style="color:white;">8,00</span>
-            </div>
-            <div class="val-row">
-                <span class="val-label">BASIS</span>
-                <span class="val-display" id="disp-b" style="color:var(--neon-purple);">2,00</span>
-            </div>
-            <div class="val-row">
-                <span class="val-label">SCHENKEL</span>
-                <span class="val-display" id="disp-s" style="color:var(--neon-blue);">3,00</span>
-            </div>
-        </section>
-
-        <div id="warning-card">
-            <div class="warning-text">⚠️ ACHTUNG<br>KEIN DREIECK MEHR MÖGLICH</div>
+        <div
+            style="margin-top: auto; padding: 10px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
-
-        <footer class="footer-credit">Doc Alvers Mathe-Labor</footer>
     </aside>
 
     <main id="workspace">
@@ -306,8 +118,9 @@
         </div>
 
         <div id="graph-container" class="canvas-container">
-            <div class="panel-toggle" onclick="toggleGraph()" title="Graph umschalten">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <div class="panel-toggle" onclick="toggleGraph()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" id="toggle-icon">
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </div>
@@ -315,87 +128,56 @@
         </div>
     </main>
 
-    <script src="js/branding.js"></script>
     <script>
-        // Initialize Branding
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "Gleichschenkliges Dreieck"
-        });
-        
+        // --- State Management ---
+        const state = {
+            u: 8.0,
+            b: 2.0,
+            s: 3.0,
+            isValid: true
+        };
+
         function toggleGraph() {
             const container = document.getElementById('graph-container');
+            const icon = document.getElementById('toggle-icon');
             container.classList.toggle('collapsed');
-            
-            // Trigger resize after animation finishes
+            icon.style.transform = container.classList.contains('collapsed') ? 'rotate(180deg)' : 'rotate(0deg)';
             setTimeout(resize, 600);
         }
 
-        const triCanvas = document.getElementById('triCanvas');
-        const triCtx = triCanvas.getContext('2d');
-        const graphCanvas = document.getElementById('graphCanvas');
-        const graphCtx = graphCanvas.getContext('2d');
-        const bSlider = document.getElementById('b-slider');
-        const warningCard = document.getElementById('warning-card');
-        
-        const dispB = document.getElementById('disp-b');
-        const dispS = document.getElementById('disp-s');
+        // --- Math & Logic ---
+        function updateMath(newB) {
+            state.b = parseFloat(newB);
+            state.s = (state.u - state.b) / 2;
+            state.isValid = (state.s > state.b / 2) && (state.b > 0.05);
 
-        let u = 8.0;
-        let b = 2.0;
-        let s = (u - b) / 2;
-        let scale = 100.0;
+            // Update UI
+            const bVal = document.getElementById('val-b');
+            const sVal = document.getElementById('val-s');
+            const warn = document.getElementById('warning-box');
 
-        function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            
-            [triCanvas, graphCanvas].forEach(canvas => {
-                const rect = canvas.parentNode.getBoundingClientRect();
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
-            });
+            if (bVal) bVal.innerText = state.b.toFixed(2).replace('.', ',');
+            if (sVal) sVal.innerText = state.s.toFixed(2).replace('.', ',');
+            if (warn) warn.style.display = state.isValid ? 'none' : 'block';
+
             draw();
         }
 
-        window.addEventListener('resize', resize);
-        window.addEventListener('load', resize);
+        // --- Canvas Initialization ---
+        const triCanvas = document.getElementById('triCanvas');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const triCtx = triCanvas.getContext('2d');
+        const graphCtx = graphCanvas.getContext('2d');
 
-        if (bSlider) {
-            bSlider.addEventListener('input', (e) => {
-                b = parseFloat(e.target.value);
-                s = (u - b) / 2;
-                updateUI();
-                draw();
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            [triCanvas, graphCanvas].forEach(c => {
+                const rect = c.parentNode.getBoundingClientRect();
+                c.width = rect.width * dpr;
+                c.height = rect.height * dpr;
+                c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
             });
-        }
-
-        // Auto-Adjust Buttons
-        let repeatInterval = null;
-        function startAdjust(delta) {
-            if (repeatInterval) return;
-            adjust(delta);
-            repeatInterval = setInterval(() => adjust(delta), 60);
-        }
-        function stopAdjust() { clearInterval(repeatInterval); repeatInterval = null; }
-        function adjust(delta) {
-            let newVal = Math.max(0, Math.min(8, parseFloat(bSlider.value) + delta));
-            bSlider.value = newVal;
-            b = newVal;
-            s = (u - b) / 2;
-            updateUI(); draw();
-        }
-
-        if (document.getElementById('btn-minus')) {
-            document.getElementById('btn-minus').onmousedown = () => startAdjust(-0.01);
-            document.getElementById('btn-plus').onmousedown = () => startAdjust(0.01);
-            window.onmouseup = stopAdjust;
-        }
-
-        function updateUI() {
-            if (dispB) dispB.innerText = b.toFixed(2).replace('.', ',');
-            if (dispS) dispS.innerText = s.toFixed(2).replace('.', ',');
-            if (warningCard) warningCard.style.display = (b >= 4.0 || b <= 0.05) ? 'block' : 'none';
+            draw();
         }
 
         function draw() {
@@ -408,152 +190,199 @@
             triCtx.clearRect(0, 0, rect.width, rect.height);
 
             const cx = rect.width / 2;
-            let h = 0;
-            if (s > b / 2) h = Math.sqrt(s * s - (b / 2) * (b / 2));
-            
             const pxScale = Math.min(rect.width / 10, rect.height / 7);
-            const cy = rect.height / 2 + (h * pxScale) / 2; // Adjusted to center the whole figure
+
+            let h = 0;
+            if (state.s > state.b / 2) h = Math.sqrt(state.s * state.s - (state.b / 2) * (state.b / 2));
+            const cy = rect.height / 2 + (h * pxScale) / 2.5;
 
             const pSpitze = { x: cx, y: cy - h * pxScale };
-            const pLinks = { x: cx - (b / 2) * pxScale, y: cy };
-            const pRechts = { x: cx + (b / 2) * pxScale, y: cy };
+            const pLinks = { x: cx - (state.b / 2) * pxScale, y: cy };
+            const pRechts = { x: cx + (state.b / 2) * pxScale, y: cy };
 
-            // Base Line
-            triCtx.lineWidth = 0.8;
-            triCtx.strokeStyle = "rgba(255,255,255,0.8)";
+            // Draw Base Line First (Subtle Guide)
+            triCtx.lineWidth = 1;
+            triCtx.strokeStyle = "rgba(255,255,255,0.1)";
             triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
 
-            // Triangle Edges
-            if (b < 4.0) {
-                // Leg 1 (Neon Blue)
-                triCtx.strokeStyle = varColor('--neon-blue');
-                triCtx.shadowBlur = 15; triCtx.shadowColor = varColor('--neon-blue');
-                triCtx.lineWidth = 1.2;
-                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pSpitze.x, pSpitze.y); triCtx.stroke();
-                
-                // Leg 2 (Neon Blue)
-                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pSpitze.x, pSpitze.y); triCtx.stroke();
-                
-                // Base (Neon Purple)
-                triCtx.strokeStyle = varColor('--neon-purple');
-                triCtx.shadowColor = varColor('--neon-purple');
+            if (state.isValid) {
+                // Glow Effects
+                triCtx.shadowBlur = 20;
+
+                // Legs (Blue)
+                triCtx.strokeStyle = "#00d2ff";
+                triCtx.shadowColor = "#00d2ff";
+                triCtx.lineWidth = 3;
+                triCtx.beginPath();
+                triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pSpitze.x, pSpitze.y);
+                triCtx.lineTo(pRechts.x, pRechts.y);
+                triCtx.stroke();
+
+                // Base (Purple)
+                triCtx.strokeStyle = "#9d50bb";
+                triCtx.shadowColor = "#9d50bb";
                 triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
+                triCtx.shadowBlur = 0;
+
+                // Labels
+                triCtx.fillStyle = "white";
+                triCtx.font = "14px Orbitron";
+                triCtx.textAlign = "center";
+                triCtx.fillText(state.s.toFixed(2).replace('.', ','), (pLinks.x + pSpitze.x) / 2 - 15, (pLinks.y + pSpitze.y) / 2);
+                triCtx.fillText(state.s.toFixed(2).replace('.', ','), (pRechts.x + pSpitze.x) / 2 + 15, (pRechts.y + pSpitze.y) / 2);
+                triCtx.fillText(state.b.toFixed(2).replace('.', ','), cx, cy + 30);
             } else {
                 // Invalid State - Sophisticated visual feedback
-                const legLen = s * pxScale;
+                const legLen = state.s * pxScale;
                 
-                // 1. Draw the collapsing legs (Blue - because they are the same legs)
-                triCtx.lineWidth = 3;
-                triCtx.strokeStyle = varColor('--neon-blue');
-                triCtx.shadowBlur = 15; triCtx.shadowColor = varColor('--neon-blue');
-                
-                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + legLen, pLinks.y); triCtx.stroke();
-                triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - legLen, pRechts.y); triCtx.stroke();
-                
-                // 2. Draw the GAP in the middle (Red - indicating the failure/missing part)
-                triCtx.strokeStyle = varColor('--neon-red');
-                triCtx.shadowColor = varColor('--neon-red');
-                triCtx.shadowBlur = 25;
-                triCtx.lineWidth = 4;
-                
-                triCtx.beginPath(); 
-                triCtx.moveTo(pLinks.x + legLen, pLinks.y); 
-                triCtx.lineTo(pRechts.x - legLen, pRechts.y); 
-                triCtx.stroke();
-            }
-            triCtx.shadowBlur = 0;
+                if (state.b <= 0.05) {
+                    // Needle State: Basis is 0, schenkel are pressed into a vertical vertical line
+                    triCtx.lineWidth = 4;
+                    triCtx.strokeStyle = "#ff3333";
+                    triCtx.shadowBlur = 25; triCtx.shadowColor = "#ff3333";
+                    triCtx.beginPath();
+                    triCtx.moveTo(cx, cy);
+                    triCtx.lineTo(cx, cy - legLen);
+                    triCtx.stroke();
+                    triCtx.shadowBlur = 0;
+                } else {
+                    // Flat Collapse State: Basis is too wide (b >= 4.0)
+                    // Base (Purple) representing the full distance b
+                    triCtx.lineWidth = 3;
+                    triCtx.strokeStyle = "#9d50bb";
+                    triCtx.shadowBlur = 20; triCtx.shadowColor = "#9d50bb";
+                    triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
 
-            // Values
-            triCtx.fillStyle = "white";
-            triCtx.font = "14px Orbitron";
-            triCtx.textAlign = "center";
-            
-            // Labels for s (always visible now)
-            const labelH = (b < 4.0) ? (pLinks.y + pSpitze.y)/2 : (pLinks.y - 20);
-            triCtx.fillText(s.toFixed(2).replace('.', ','), (pLinks.x + (b < 4.0 ? pSpitze.x : pLinks.x + s*pxScale))/2 - 10, labelH);
-            triCtx.fillText(s.toFixed(2).replace('.', ','), (pRechts.x + (b < 4.0 ? pSpitze.x : pRechts.x - s*pxScale))/2 + 10, labelH);
-            
-            triCtx.fillText(b.toFixed(2).replace('.', ','), cx, cy + 30);
+                    // 1. Draw the collapsing legs (Blue)
+                    triCtx.lineWidth = 3;
+                    triCtx.strokeStyle = "#00d2ff";
+                    triCtx.shadowColor = "#00d2ff";
+                    triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + legLen, pLinks.y); triCtx.stroke();
+                    triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - legLen, pRechts.y); triCtx.stroke();
+                    
+                    // 2. Draw the GAP in the middle (Purple)
+                    triCtx.strokeStyle = "#9d50bb";
+                    triCtx.shadowColor = "#9d50bb";
+                    triCtx.shadowBlur = 20;
+                    triCtx.lineWidth = 3;
+                    triCtx.beginPath(); 
+                    triCtx.moveTo(pLinks.x + legLen, pLinks.y); 
+                    triCtx.lineTo(pRechts.x - legLen, pRechts.y); 
+                    triCtx.stroke();
+                    
+                    triCtx.shadowBlur = 0;
+                }
+            }
         }
 
         function drawGraph() {
+            const container = document.getElementById('graph-container');
+            if (container && container.classList.contains('collapsed')) {
+                // Clear and don't draw if collapsed
+                graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+                return;
+            }
+
             const rect = graphCanvas.getBoundingClientRect();
             graphCtx.clearRect(0, 0, rect.width, rect.height);
-
-            const pad = 65; // Improved padding to prevent arrow clipping
+            const pad = 60;
             const gw = rect.width - pad * 2;
             const gh = rect.height - pad * 2;
-
             const toX = (val) => pad + (val / 8.5) * gw;
             const toY = (val) => rect.height - pad - (val / 4.5) * gh;
 
             // Grid
             graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
             graphCtx.lineWidth = 0.5;
-            for(let i=0; i<=8; i++) {
+            for (let i = 0; i <= 8; i++) {
                 graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(4.5)); graphCtx.stroke();
             }
-            for(let i=0; i<=4; i++) {
+            for (let i = 0; i <= 4; i++) {
                 graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
             }
 
-            // Axes with Arrows
+            // Axes
             graphCtx.lineWidth = 2;
-            
-            // X-Axis (Purple - BASIS)
-            graphCtx.strokeStyle = varColor('--neon-purple');
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.8), toY(0)); graphCtx.stroke();
-            // Arrow X
-            graphCtx.beginPath(); graphCtx.moveTo(toX(8.8)-10, toY(0)-5); graphCtx.lineTo(toX(8.8), toY(0)); graphCtx.lineTo(toX(8.8)-10, toY(0)+5); graphCtx.stroke();
-            
-            // Y-Axis (Blue - SCHENKEL)
-            graphCtx.strokeStyle = varColor('--neon-blue');
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.8)); graphCtx.stroke();
-            // Arrow Y
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0)-5, toY(4.8)+10); graphCtx.lineTo(toX(0), toY(4.8)); graphCtx.lineTo(toX(0)+5, toY(4.8)+10); graphCtx.stroke();
+            graphCtx.strokeStyle = "#9d50bb";
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.5), toY(0)); graphCtx.stroke();
+            graphCtx.strokeStyle = "#00d2ff";
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.5)); graphCtx.stroke();
 
-            // Labels for Axes
-            graphCtx.font = "bold 11px Orbitron";
-            graphCtx.textAlign = "right";
-            graphCtx.fillStyle = varColor('--neon-purple'); // Wort BASIS purple
-            graphCtx.fillText("BASIS (b)", toX(8.5), toY(0) + 35);
-            graphCtx.textAlign = "left";
-            graphCtx.fillStyle = varColor('--neon-blue'); // Wort SCHENKEL blau
-            graphCtx.fillText("SCHENKEL (s)", toX(0) + 15, toY(4.8));
-
-            // Axis Numbering
-            graphCtx.fillStyle = "rgba(255,255,255,0.5)";
-            graphCtx.font = "10px Orbitron";
-            
-            // X-Numbers (Every number)
-            graphCtx.textAlign = "center";
-            for(let i=0; i<=8; i++) graphCtx.fillText(i, toX(i), toY(0) + 18);
-            
-            // Y-Numbers
-            graphCtx.textAlign = "right";
-            for(let i=1; i<=4; i++) graphCtx.fillText(i, toX(0) - 12, toY(i) + 4);
-
-            // Function Line (S = 4 - 0.5B)
+            // Function
             graphCtx.lineWidth = 3;
             graphCtx.shadowBlur = 10;
-            
-            // Valid Part (Green - as requested)
-            graphCtx.strokeStyle = varColor('--neon-green'); graphCtx.shadowColor = varColor('--neon-green');
+            graphCtx.strokeStyle = "#39FF14"; graphCtx.shadowColor = "#39FF14";
             graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(4)); graphCtx.lineTo(toX(4), toY(2)); graphCtx.stroke();
-            
-            // Invalid Part (Red - failure zone)
-            graphCtx.strokeStyle = varColor('--neon-red'); graphCtx.shadowColor = varColor('--neon-red');
+            graphCtx.strokeStyle = "#ff3333"; graphCtx.shadowColor = "#ff3333";
             graphCtx.beginPath(); graphCtx.moveTo(toX(4), toY(2)); graphCtx.lineTo(toX(8), toY(0)); graphCtx.stroke();
             graphCtx.shadowBlur = 0;
 
             // Current Point
             graphCtx.fillStyle = "white";
             graphCtx.shadowBlur = 15; graphCtx.shadowColor = "white";
-            graphCtx.beginPath(); graphCtx.arc(toX(b), toY(s), 5, 0, Math.PI*2); graphCtx.fill();
+            graphCtx.beginPath(); graphCtx.arc(toX(state.b), toY(state.s), 5, 0, Math.PI * 2); graphCtx.fill();
             graphCtx.shadowBlur = 0;
         }
 
-        function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                title: "DOC ALVERS MATHE-LABOR",
+                subtitle: "GLEICHSCHENKLIGES DREIECK"
+            });
+            CyberUI.init();
+
+            CyberUI.createCard('ui-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="stats-grid">
+                        <div class="stats-subcard" style="border-left-color: #9d50bb;">
+                            <span class="stats-label" id="label-u" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">UMFANG</span>
+                            <span class="stats-val" style="color:white;">8,00 cm</span>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stats-subcard" style="border-left-color: #9d50bb;">
+                            <span class="stats-label" id="label-b" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">BASIS</span>
+                            <span id="val-b" class="stats-val" style="color: #9d50bb;">2,00</span>
+                        </div>
+                        <div class="stats-subcard" style="border-left-color: #00d2ff;">
+                            <span class="stats-label" id="label-s" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">SCHENKEL</span>
+                            <span id="val-s" class="stats-val" style="color: #00d2ff;">3,00</span>
+                        </div>
+                    </div>
+                </div>
+            `, '#9d50bb');
+
+            CyberUI.createCard('ui-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="label-row">
+                        <span id="label-b-control" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem; color: rgba(255,255,255,0.8);">BASISLÄNGE</span>
+                    </div>
+                    <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2" oninput="updateMath(this.value)">
+                    <div style="font-size: 0.8rem; opacity: 0.7; font-family: Orbitron; padding-top: 5px;">
+                        HINWEIS: Ein Dreieck existiert nur für b < 4,0.
+                    </div>
+                </div>
+            `, '#00d2ff');
+
+            CyberBranding.setBriefing(`
+                <b>Gleichschenkliges Dreieck</b> – Die Balance der Schenkel.<br><br>
+                In diesem Labor untersuchen wir ein Dreieck mit festem Umfang von <b>u = 8 cm</b>.<br><br>
+                <b>Die Regel:</b><br>
+                Zwei Seiten (Schenkel <b>s</b>) sind immer gleich lang. Verändere die Basis <b>b</b>, um zu sehen, wie sich die Schenkel anpassen müssen.<br><br>
+                <b>Mathematik:</b><br>
+                $s = (u - b) / 2$<br>
+                Ein Dreieck entsteht nur, wenn die Summe zweier Seiten größer als die dritte ist ($2s > b$).
+            `);
+
+            setTimeout(() => {
+                resize();
+                // removed KaTeX overriding for label-u, label-b, label-s
+            }, 100);
+        });
+
+        window.addEventListener('resize', resize);
     </script>
 </body>
+
 </html>
