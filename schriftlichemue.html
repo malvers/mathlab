@@ -56,8 +56,8 @@
         const container = document.getElementById('canvas-container');
 
         // Colors from requirement image
-        // 7 -> Yellow, 8 -> Cyan, 9 -> Purple
-        const DIGIT_COLORS = ["#FFC107", "#03A9F4", "#9C27B0", "#4CAF50", "#F44336"];
+        // Colors: 7 -> Gold/Yellow, 8 -> Purple, 9 -> Cyan
+        const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00d2ff", "#4CAF50", "#F44336"];
         const BRAND_BLUE = "#00d2ff";
 
         let factor1 = 456;
@@ -259,7 +259,7 @@
             
             ctx.textAlign = 'left';
             for(let i = 0; i < f2Str.length; i++) {
-                const isProcessed = step && ((!fineMode && step.rowIndex >= i) || (fineMode && step.rowIndex >= i));
+                const isProcessed = step && (step.type === 'final' || step.rowIndex >= i);
                 const isActive = step && (step.type === 'digit-multiply' || step.type === 'digit-final') && step.mIdx === i;
                 
                 ctx.fillStyle = isProcessed ? DIGIT_COLORS[i % DIGIT_COLORS.length] : 'rgba(255,255,255,0.2)';
@@ -355,17 +355,17 @@
 
                             ctx.textAlign = 'center';
                             if (step.type === 'digit-init' && step.carryValue > 0) {
-                                // STEP 1: PFADFINDER - Isolated Gray Carry
+                                // STEP 1: PFADFINDER - Row-Colored Carry
                                 ctx.font = `bold ${miniFontSize}px Orbitron`;
-                                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                                ctx.fillStyle = rowColor; 
                                 ctx.fillText(String(step.carryValue), activeDigitCenterX, fixedCarryY);
                             } else if (step.type === 'digit-multiply' && step.carryValue > 0) {
-                                // STEP 2: BEGEGNUNG - Vibrant Yellow Addition Block
+                                // STEP 2: BEGEGNUNG - Row-Colored Addition Block
                                 ctx.font = `bold ${miniFontSize}px Orbitron`;
-                                ctx.fillStyle = '#ffde00'; 
+                                ctx.fillStyle = rowColor; 
                                 ctx.fillText(String(step.carryValue), activeDigitCenterX, fixedCarryY);
                                 ctx.font = `${miniFontSize}px Orbitron`;
-                                ctx.fillStyle = '#ffde00';
+                                ctx.fillStyle = rowColor;
                                 ctx.fillText('+', activeDigitCenterX, partialY - rowHeight * 0.42);
                             }
                             ctx.restore();
