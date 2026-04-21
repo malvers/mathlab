@@ -150,6 +150,62 @@ class CyberUI {
                 letter-spacing: 0.5px;
             }
 
+            /* CYBER RADIO SYSTEM */
+            .cyber-radio-group {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 5px;
+                width: 100%;
+            }
+
+            .cyber-radio-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .cyber-radio-input {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.03);
+                cursor: pointer;
+                position: relative;
+                transition: all 0.2s ease;
+                outline: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .cyber-radio-input:checked {
+                border-color: var(--neon-blue);
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            }
+
+            .cyber-radio-input::after {
+                content: '';
+                width: 10px;
+                height: 10px;
+                background: var(--neon-blue);
+                border-radius: 50%;
+                opacity: 0;
+                transform: scale(0.5);
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .cyber-radio-input:checked::after {
+                opacity: 1;
+                transform: scale(1);
+            }
+
             /* UTILITIES */
             .cyber-number {
                 font-family: 'Orbitron', sans-serif;
@@ -547,9 +603,9 @@ class CyberUI {
 
         const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
         const toggleHtml = options.collapsible ? '<span class="toggle-icon">▶</span>' : '';
-        
+
         const glowColor = (typeof accentColor === 'string' && accentColor.startsWith('#')) ? `${accentColor}66` : 'rgba(0, 210, 255, 0.4)';
-        
+
         const cardHTML = `
             <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''}">
                 <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${glowColor};">
@@ -576,10 +632,10 @@ class CyberUI {
     static createSlider(containerId, label, min, max, value, step, oninput, color = 'var(--neon-blue)') {
         const container = document.getElementById(containerId);
         if (!container) return;
-        
+
         const sliderId = `slider-${Math.random().toString(36).substr(2, 9)}`;
         const displayId = `val-${sliderId}`;
-        
+
         const html = `
             <div class="cyber-control-group">
                 <div class="control-header">
@@ -591,12 +647,12 @@ class CyberUI {
                     style="--accent:${color}">
             </div>
         `;
-        
+
         container.insertAdjacentHTML('beforeend', html);
-        
+
         const input = document.getElementById(sliderId);
         const display = document.getElementById(displayId);
-        
+
         input.oninput = (e) => {
             const val = e.target.value;
             display.innerText = val;
@@ -612,10 +668,10 @@ class CyberUI {
     static createStatsGrid(containerId, stats) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        
+
         container.innerHTML = `<div class="stats-grid"></div>`;
         const grid = container.querySelector('.stats-grid');
-        
+
         stats.forEach((stat, index) => {
             const card = document.createElement('div');
             card.className = 'stats-card';
@@ -679,7 +735,7 @@ class CyberUI {
         trigger.addEventListener('click', () => {
             const isOpen = panel.style.display === 'block';
             panel.style.display = isOpen ? 'none' : 'block';
-            
+
             // Render Math in options if open
             if (!isOpen && window.katex) {
                 dropdown.querySelectorAll('.math-part').forEach(mp => {
@@ -695,7 +751,7 @@ class CyberUI {
                 const selectedVal = dropdown.querySelector('.selected-val');
                 selectedVal.innerHTML = opt.innerHTML; // Copy the structured HTML
                 panel.style.display = 'none';
-                
+
                 // Render Math in the selected trigger (selective)
                 if (window.katex) {
                     const mp = selectedVal.querySelector('.math-part');
@@ -703,7 +759,7 @@ class CyberUI {
                         window.katex.render(mp.dataset.tex, mp, { throwOnError: false });
                     }
                 }
-                
+
                 onSelect(id);
             }
         });
@@ -735,27 +791,76 @@ class CyberUI {
     static createCheckbox(containerId, label, checked, onchange, color = null) {
         const wrapper = document.createElement('label');
         wrapper.className = 'cyber-checkbox-wrapper';
-        
+
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'cyber-checkbox';
         checkbox.checked = checked;
         checkbox.onchange = (e) => onchange(e.target.checked);
-        
+
         const labelText = document.createElement('span');
         labelText.className = 'cyber-label';
         labelText.textContent = label;
         if (color) labelText.style.color = color;
-        
+
         wrapper.appendChild(checkbox);
         wrapper.appendChild(labelText);
-        
+
         if (containerId) {
             const container = document.getElementById(containerId);
             if (container) container.appendChild(wrapper);
         }
-        
+
         return wrapper;
+    }
+
+    /**
+     * Creates a premium Cyber-Radio Group
+     * @param {string} containerId - Mount point
+     * @param {string} title - Label for the group
+     * @param {Array} options - [{label, value}]
+     * @param {string} selectedValue - Initial value
+     * @param {function} onchange - Callback(val)
+     */
+    static createRadioGroup(containerId, title, options, selectedValue, onchange) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const groupWrapper = document.createElement('div');
+        groupWrapper.className = 'cyber-radio-group';
+        
+        if (title) {
+            const h = document.createElement('span');
+            h.className = 'cyber-label';
+            h.style.cssText = 'font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;';
+            h.textContent = title;
+            groupWrapper.appendChild(h);
+        }
+
+        const name = `radio-${Math.random().toString(36).substr(2, 9)}`;
+
+        options.forEach(opt => {
+            const wrapper = document.createElement('label');
+            wrapper.className = 'cyber-radio-wrapper';
+            
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = name;
+            radio.className = 'cyber-radio-input';
+            radio.value = opt.value;
+            radio.checked = opt.value === selectedValue;
+            radio.onchange = () => onchange(opt.value);
+            
+            const text = document.createElement('span');
+            text.className = 'cyber-label';
+            text.textContent = opt.label;
+            
+            wrapper.appendChild(radio);
+            wrapper.appendChild(text);
+            groupWrapper.appendChild(wrapper);
+        });
+
+        container.appendChild(groupWrapper);
     }
 
     static showContextMenu(x, y, items = []) {
