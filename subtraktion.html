@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Schriftliche Addition | docalvers</title>
+    <title>Schriftliche Subtraktion | docalvers</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -139,7 +139,7 @@
         
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "SCHRIFTLICHE ADDITION"
+            subtitle: "SCHRIFTLICHE SUBTRAKTION"
         });
         CyberUI.init();
 
@@ -148,20 +148,20 @@
         const container = document.getElementById('canvas-container');
 
         // State (Default 7-digit numbers)
-        let summand1 = 4567890;
-        let summand2 = 1234567;
+        let minuend = 4567890;
+        let subtrahend = 1234567;
         let currentStep = -1;
         let stepSequence = [];
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'ADDITION', `
+            CyberUI.createCard('ui-container', 'SUBTRAKTION', `
                 <div class="cyber-control-group">
-                    <label class="cyber-label">SUMMAND 1</label>
-                    <input type="number" id="s1-input" class="cyber-select" value="${summand1}" onchange="updateSummands()">
+                    <label class="cyber-label">MINUEND</label>
+                    <input type="number" id="s1-input" class="cyber-select" value="${minuend}" onchange="updateNumbers()">
                 </div>
                 <div class="cyber-control-group" style="margin-top:25px;">
-                    <label class="cyber-label">SUMMAND 2</label>
-                    <input type="number" id="s2-input" class="cyber-select" value="${summand2}" onchange="updateSummands()">
+                    <label class="cyber-label">SUBTRAHEND</label>
+                    <input type="number" id="s2-input" class="cyber-select" value="${subtrahend}" onchange="updateNumbers()">
                 </div>
                 <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
             `, BRAND_BLUE);
@@ -184,8 +184,8 @@
 
         function buildStepSequence() {
             stepSequence = [];
-            const s1Str = String(summand1);
-            const s2Str = String(summand2);
+            const s1Str = String(minuend);
+            const s2Str = String(subtrahend);
             const maxLen = Math.max(s1Str.length, s2Str.length);
 
             let carry = 0;
@@ -196,35 +196,37 @@
                 // Calculate
                 const d1 = parseInt(s1Str[s1Str.length - 1 - i] || 0);
                 const d2 = parseInt(s2Str[s2Str.length - 1 - i] || 0);
-                const sum = d1 + d2 + carry;
+                
+                const subtrahendTotal = d2 + carry;
+                let resultDigit;
+                let nextCarry = 0;
+
+                if (d1 >= subtrahendTotal) {
+                    resultDigit = d1 - subtrahendTotal;
+                    nextCarry = 0;
+                } else {
+                    resultDigit = (d1 + 10) - subtrahendTotal;
+                    nextCarry = 1;
+                }
                 
                 stepSequence.push({
                     type: 'calculate',
                     col: i,
                     d1, d2,
                     oldCarry: carry,
-                    sum: sum,
-                    newCarry: Math.floor(sum / 10),
-                    digit: sum % 10
+                    resultDigit: resultDigit,
+                    newCarry: nextCarry
                 });
                 
-                carry = Math.floor(sum / 10);
-            }
-            
-            if (carry > 0) {
-                stepSequence.push({ 
-                    type: 'final-carry', 
-                    col: maxLen,
-                    carry: carry 
-                });
+                carry = nextCarry;
             }
             
             stepSequence.push({ type: 'complete' });
         }
 
-        function updateSummands() {
-            summand1 = parseInt(document.getElementById('s1-input').value) || 0;
-            summand2 = parseInt(document.getElementById('s2-input').value) || 0;
+        function updateNumbers() {
+            minuend = parseInt(document.getElementById('s1-input').value) || 0;
+            subtrahend = parseInt(document.getElementById('s2-input').value) || 0;
             resetSteps();
         }
 
@@ -264,8 +266,8 @@
             const height = rect.height;
             ctx.clearRect(0, 0, width, height);
 
-            const s1Str = String(summand1);
-            const s2Str = String(summand2);
+            const s1Str = String(minuend);
+            const s2Str = String(subtrahend);
             // Ensure we have enough space for the summands, the potential carry, AND the '+' sign
             const maxCols = Math.max(s1Str.length, s2Str.length) + 2; 
             
@@ -313,7 +315,7 @@
             ctx.font = `${fontSize}px Orbitron`; // Non-bold for '+'
             // The '+' sign is now safely shifted to the left of any potential carry
             const plusCol = maxCols - 1;
-            ctx.fillText('+', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
+            ctx.fillText('-', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
             
             ctx.font = `bold ${fontSize}px Orbitron`; // Reset to bold for digits
             for (let i = 0; i < s2Str.length; i++) {
@@ -333,16 +335,19 @@
             ctx.lineTo(startX + charWidth * 0.6, startY + rowHeight * 1.6);
             ctx.stroke();
 
-            // 3. Draw Carries & Result
+            // 3. Draw Results & Carries
             for (let i = 0; i <= currentStep; i++) {
                 const s = stepSequence[i];
                 if (s.type === 'calculate') {
+                    // Result digit
+                    ctx.font = `bold ${fontSize}px Orbitron`;
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(s.resultDigit, startX - s.col * charWidth, startY + rowHeight * 2.2);
+
                     // Carry for NEXT column (placed just above separator)
                     if (s.newCarry > 0) {
                         ctx.save();
                         ctx.font = `bold ${fontSize * 0.35}px Orbitron`;
-                        
-                        // Pedagogy: Only the single most recent "action" carry stays gold
                         const isCurrent = (i === currentStep);
                         
                         ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
@@ -352,29 +357,17 @@
                         ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidth, startY + rowHeight * 1.45);
                         ctx.restore();
                     }
-                    // Result digit
-                    ctx.font = `bold ${fontSize}px Orbitron`;
-                    ctx.fillStyle = 'white';
-                    ctx.fillText(s.digit, startX - s.col * charWidth, startY + rowHeight * 2.2);
-                }
-                if (s.type === 'final-carry') {
-                    const isCurrent = (i === currentStep);
-                    ctx.font = `bold ${fontSize}px Orbitron`;
-                    ctx.fillStyle = isCurrent ? '#ffde00' : 'white';
-                    if (isCurrent) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
-                    ctx.fillText(s.carry, startX - s.col * charWidth, startY + rowHeight * 2.2);
-                    if (isCurrent) ctx.restore();
                 }
             }
 
             // Doppelte Unterstreichung bei Abschluss
             if (step && step.type === 'complete') {
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#888888'; // Solides Grau
+                ctx.strokeStyle = '#888888';
                 ctx.lineWidth = 2;
                 const lineY1 = startY + rowHeight * 2.7;
-                const lineY2 = startY + rowHeight * 2.76; // Noch ein Stück weiter runter
-                const lineStartX = startX - (plusCol + 0.2) * charWidth; // Länge wie Trennlinie
+                const lineY2 = startY + rowHeight * 2.76;
+                const lineStartX = startX - (plusCol + 0.2) * charWidth;
                 const lineEndX = startX + charWidth * 0.6;
                 
                 ctx.beginPath();
@@ -384,14 +377,14 @@
                 ctx.lineTo(lineEndX, lineY2);
                 ctx.stroke();
             }
-
+            
             updateMessages();
         }
 
         function updateMessages() {
             const coach = document.getElementById('coach-content');
             if (currentStep === -1) {
-                coach.innerHTML = "Bereit für die Addition von <span class='coach-math-highlight'>" + summand1 + "</span> und <span class='coach-math-highlight'>" + summand2 + "</span>. Wir rechnen von rechts nach links.";
+                coach.innerHTML = "Bereit für die Subtraktion von <span class='coach-math-highlight'>" + minuend + "</span> und <span class='coach-math-highlight'>" + subtrahend + "</span>. Wir rechnen von rechts nach links.";
                 return;
             }
 
@@ -400,11 +393,14 @@
                 const unit = step.col === 0 ? "Einerstelle" : (step.col === 1 ? "Zehnerstelle" : (step.col === 2 ? "Hunderterstelle" : "nächste Stelle"));
                 coach.innerHTML = `Wir betrachten die <span class='coach-math-highlight'>${unit}</span>.`;
             } else if (step.type === 'calculate') {
-                coach.innerHTML = `Wir addieren <b style="color:#ffde00">${step.d1}</b> + <b style="color:#ffde00">${step.d2}</b> ${step.oldCarry > 0 ? '+ <b style="color:#ffde00">' + step.oldCarry + '</b> (Übertrag)' : ''} = <span class='coach-math-highlight'>${step.sum}</span>.<br><br>Wir notieren <span class='coach-math-highlight'>${step.digit}</span> ${step.newCarry > 0 ? 'und übertragen <b style="color:#ffde00">' + step.newCarry + '</b> in die nächste Spalte' : ''}.`;
-            } else if (step.type === 'final-carry') {
-                coach.innerHTML = `Der letzte Übertrag von <span class='coach-math-highlight'>${step.carry}</span> wird als eigene Ziffer vorne notiert.`;
+                const subTotal = step.d2 + step.oldCarry;
+                if (step.d1 >= subTotal) {
+                    coach.innerHTML = `Wir rechnen an dieser Stelle:<br><span class='coach-math-highlight'>${step.d1} - ${subTotal} = ${step.resultDigit}</span>.<br><br>Wir notieren die <span class='coach-math-highlight'>${step.resultDigit}</span>. Kein Übertrag nötig.`;
+                } else {
+                    coach.innerHTML = `Da <b style="color:#ffde00">${step.d1}</b> kleiner ist als <b style="color:#ffde00">${subTotal}</b>, leihen wir uns eine 10:<br><span class='coach-math-highlight'>1${step.d1} - ${subTotal} = ${step.resultDigit}</span>.<br><br>Wir notieren <span class='coach-math-highlight'>${step.resultDigit}</span> und setzen einen <b>Übertrag von 1</b> für die nächste Spalte.`;
+                }
             } else if (step.type === 'complete') {
-                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Alle Spalten wurden addiert. Das finale Ergebnis ist <span class='coach-math-highlight'>" + (summand1 + summand2) + "</span>.";
+                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Alle Spalten wurden subtrahiert. Das finale Ergebnis ist <span class='coach-math-highlight'>" + (minuend - subtrahend) + "</span>.";
             }
         }
 
