@@ -23,6 +23,15 @@ class CyberUI {
                 --border: rgba(255, 255, 255, 0.1);
             }
 
+            /* GLOBAL SAFETY LOCK: Prevent checkboxes/radios from inflating */
+            input[type="checkbox"], input[type="radio"] {
+                min-height: 18px !important;
+                height: 18px !important;
+                width: 18px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
             .instrument-card {
                 background: var(--glass-bright);
                 padding: 12px 15px;
