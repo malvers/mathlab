@@ -4,6 +4,8 @@
  */
 const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
+    /// MRA ///
+    DEV_MODE: true, // Master Switch for Auto-Reload
 
     init(config = {}) {
         let title = this.MASTER_TITLE;
@@ -26,6 +28,17 @@ const CyberBranding = {
         this.setupActiveScaling();
         this.updateScale();
         if (!this.briefingContent) this.briefingContent = "";
+
+        // --- DEV-MODE: SYSTEM SYNC ---
+        if (this.DEV_MODE) {
+            console.warn("⚠️ DEV_MODE ACTIVE: Page will hard-reload on tab focus.");
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    console.log("♻️ Dev-Mode: Triggering hard reload...");
+                    window.location.reload(true);
+                }
+            });
+        }
     },
 
     injectStyles() {
@@ -569,6 +582,12 @@ const CyberBranding = {
                 border-color: var(--branding-blue) !important;
                 box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
             }
+
+            @keyframes pulse-red-dot {
+                0% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 2px #ff4d4d); }
+                50% { opacity: 0.5; transform: scale(0.8); filter: drop-shadow(0 0 8px #ff4d4d); }
+                100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 2px #ff4d4d); }
+            }
         `;
         document.head.appendChild(style);
     },
@@ -595,6 +614,16 @@ const CyberBranding = {
         homeBtn.className = 'nav-btn';
         homeBtn.href = 'index.html';
         homeBtn.title = 'Dashboard öffnen';
+
+        // --- DEV-MODE INDICATOR: RED HOME BUTTON (INTENSE) ---
+        if (this.DEV_MODE) {
+            homeBtn.style.background = "rgba(255, 0, 0, 0.5)";
+            homeBtn.style.borderColor = "#ff0000";
+            homeBtn.style.color = "#ff0000";
+            homeBtn.style.boxShadow = "0 0 25px rgba(255, 0, 0, 0.6)";
+            homeBtn.title = "DEV-MODE AKTIV: Auto-Reload an!";
+        }
+
         homeBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -675,7 +704,7 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
-        nav.appendChild(editBtn); 
+        nav.appendChild(editBtn);
         nav.appendChild(bugBtn);
         nav.appendChild(briefingBtn);
 
@@ -819,10 +848,10 @@ const CyberBranding = {
      * Centralized KaTeX renderer for laboratory modules.
      * Safely renders LaTeX to a given element.
      */
-    renderMath: function(elementId, latex, options = {}) {
+    renderMath: function (elementId, latex, options = {}) {
         const el = document.getElementById(elementId);
         if (!el) return;
-        
+
         // Force font color to brand blue/white for visibility
         el.style.color = "#ffffff";
         el.style.fontSize = "1.2rem";
@@ -843,10 +872,10 @@ const CyberBranding = {
      * Toggles the experimental Edit Mode.
      * Can be extended for laboratory-specific editing logic.
      */
-    toggleEditMode: function() {
+    toggleEditMode: function () {
         this.isEditMode = !this.isEditMode;
         document.body.classList.toggle('cyber-edit-active', this.isEditMode);
-        
+
         // STRICTLY RESTRICTED: Only the briefing-text becomes editable
         const briefingText = document.querySelector('.briefing-text');
         if (briefingText) {
@@ -854,11 +883,11 @@ const CyberBranding = {
         }
 
         console.log(`[CYBER-ENGINE] Briefing Editor ${this.isEditMode ? "ENABLED" : "DISABLED"}`);
-        
+
         // Visual feedback for the Pen button (Blue identity)
         const btns = document.querySelectorAll('.nav-btn');
         const editBtn = Array.from(btns).find(b => b.title.includes('Edit') || b.title.includes('bearbeiten'));
-        
+
         if (editBtn) {
             editBtn.style.color = this.isEditMode ? 'var(--branding-blue)' : 'white';
             editBtn.style.borderColor = this.isEditMode ? 'var(--branding-blue)' : '';
@@ -872,7 +901,7 @@ const CyberBranding = {
         window.dispatchEvent(new CustomEvent('cyber-edit-toggle', { detail: { active: this.isEditMode } }));
     },
 
-    requestEditAccess: function() {
+    requestEditAccess: function () {
         if (this.isEditMode) {
             this.toggleEditMode();
             return;
@@ -912,23 +941,23 @@ const CyberBranding = {
         }, 10);
     },
 
-    validateAccess: function() {
+    validateAccess: function () {
         const input = document.getElementById('cyber-pwd-input');
         // Secure Obfuscation (Base64 check for !aMe5007!!??)
-        const target = "IWFNZTUwMDchIT8/"; 
-        
+        const target = "IWFNZTUwMDchIT8/";
+
         if (btoa(input.value) === target) {
             document.getElementById('cyber-auth-overlay').classList.remove('visible');
             this.toggleEditMode();
             this.showNotification("Zugriff gewährt. Briefing-Edit aktiviert.");
-            
+
             // Auto-open briefing
             setTimeout(() => this.showBriefing(), 300);
         } else {
             this.showNotification("Zugriff verweigert. Falsches Passwort.");
             input.value = "";
             input.focus();
-            
+
             // Animation for error
             const modal = document.querySelector('.auth-modal');
             modal.style.borderColor = 'red';
@@ -940,7 +969,7 @@ const CyberBranding = {
         }
     },
 
-    showNotification: function(msg) {
+    showNotification: function (msg) {
         const toast = document.createElement('div');
         toast.style.cssText = `
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
@@ -954,11 +983,11 @@ const CyberBranding = {
         setTimeout(() => toast.remove(), 3000);
     },
 
-    setBriefing: function(html) {
+    setBriefing: function (html) {
         this.briefingContent = html;
     },
 
-    showBriefing: function() {
+    showBriefing: function () {
         if (!this.briefingContent) return this.showNotification("Keine Beschreibung für dieses Modul vorhanden.");
 
         let overlay = document.getElementById('cyber-briefing-overlay');
@@ -999,7 +1028,7 @@ const CyberBranding = {
         setTimeout(() => overlay.classList.add('visible'), 10);
     },
 
-    copyLocalBriefing: function() {
+    copyLocalBriefing: function () {
         const el = document.querySelector('.briefing-text');
         // Copy innerHTML to preserve the structure (!admin-info etc) for Antigravity
         const content = el.innerHTML;
@@ -1008,7 +1037,7 @@ const CyberBranding = {
         });
     },
 
-    transmitEdits: function() {
+    transmitEdits: function () {
         const labName = window.location.pathname.split('/').pop() || 'index.html';
         const selectors = '.stat-value, .stat-label, .instrument-title, .canvas-branding h1, .canvas-subtitle, .briefing-text, .label-row span:first-child';
         const edits = [];
@@ -1038,7 +1067,7 @@ const CyberBranding = {
         });
     },
 
-    showSyncModal: function(json) {
+    showSyncModal: function (json) {
         let overlay = document.getElementById('cyber-sync-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
