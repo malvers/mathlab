@@ -56,8 +56,8 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
-        "id": "schriftlichemue",
-        "href": "schriftlichemue.html",
+        "id": "multiplikation",
+        "href": "multiplikation.html",
         "title": "Schriftliche Multiplikation",
         "description": "Visualisiert die schriftliche Multiplikation Schritt für Schritt. Inklusive Übertrag-Tracking und Detail-Modus für tiefe mathematische Analyse.",
         "tagline": "Grundrechenarten / Detail-Analyse",
@@ -98,6 +98,20 @@ const LABS_DATA = [
         </svg>`,
         "category": "arithmetik grade5 hot",
         "keywords": "addition plusrechnen schriftlich addieren mathe schule",
+        "color": "blue"
+    },
+    {
+        "id": "subtraktion",
+        "href": "subtraktion.html",
+        "title": "Schriftliche Subtraktion",
+        "description": "Meistere die schriftliche Subtraktion im Entlehnungsverfahren. Inklusive visueller Markierung von 'geborgten' Einheiten.",
+        "tagline": "Grundrechenarten / Entlehnung",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
+            <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
+        </svg>`,
+        "category": "arithmetik grade5 hot",
+        "keywords": "subtraktion minusrechnen schriftlich abziehen mathe schule",
         "color": "blue"
     },
     {

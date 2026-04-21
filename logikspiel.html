@@ -21,6 +21,14 @@
             --board-gap: 15px;
         }
 
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent global white scrollbars */
+            height: 100%;
+            background: #050b18;
+        }
+
         #main-content {
             display: flex;
             justify-content: center;
@@ -33,17 +41,27 @@
 
         #game-board {
             position: relative;
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            background: transparent; /* Box removed! */
+            border: none;
             border-radius: 20px;
-            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             gap: 20px;
             animation: board-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             max-width: 100%;
-            overflow-x: auto;
+            overflow: auto;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+
+        /* Total Scrollbar and Corner Ban */
+        #game-board::-webkit-scrollbar,
+        #game-board::-webkit-scrollbar-corner,
+        #game-board::-webkit-resizer {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         @keyframes board-in {
@@ -346,7 +364,6 @@
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/guard.js"></script>
     <script>
         let gridSize = 3;
         let grid = [];
@@ -648,7 +665,6 @@
         }
 
         // --- GLOBAL INITIALIZATION ---
-        CyberGuard.init(1024);
     </script>
 </body>
 
