@@ -308,11 +308,13 @@
             }
 
             // Row 2 (with +)
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = `${fontSize}px Orbitron`; // Non-bold for '+'
             // The '+' sign is now safely shifted to the left of any potential carry
             const plusCol = maxCols - 1;
             ctx.fillText('+', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
             
+            ctx.font = `bold ${fontSize}px Orbitron`; // Reset to bold for digits
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
@@ -337,8 +339,14 @@
                     if (s.newCarry > 0) {
                         ctx.save();
                         ctx.font = `bold ${fontSize * 0.35}px Orbitron`;
-                        ctx.fillStyle = '#ffde00';
-                        ctx.shadowBlur = 5; ctx.shadowColor = '#ffde00';
+                        
+                        // Pedagogy: Only the single most recent "action" carry stays gold
+                        const isCurrent = (i === currentStep);
+                        
+                        ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
+                        if (isCurrent) {
+                            ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00';
+                        }
                         ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidth, startY + rowHeight * 1.45);
                         ctx.restore();
                     }
@@ -348,9 +356,12 @@
                     ctx.fillText(s.digit, startX - s.col * charWidth, startY + rowHeight * 2.2);
                 }
                 if (s.type === 'final-carry') {
+                    const isCurrent = (i === currentStep);
                     ctx.font = `bold ${fontSize}px Orbitron`;
-                    ctx.fillStyle = 'white';
+                    ctx.fillStyle = isCurrent ? '#ffde00' : 'white';
+                    if (isCurrent) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
                     ctx.fillText(s.carry, startX - s.col * charWidth, startY + rowHeight * 2.2);
+                    if (isCurrent) ctx.restore();
                 }
             }
 
