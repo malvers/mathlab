@@ -252,7 +252,7 @@
     <header>
         <div class="header-content">
             <h1>Doc Alvers Mathe-Labor</h1>
-            <div class="subtitle">ALLE WERKZEUGE AUF EINEN BLICK</div>
+            <div class="subtitle" id="dynamic-subtitle">WERKZEUGE AUF EINEN BLICK</div>
         </div>
     </header>
 
@@ -277,6 +277,12 @@
             const grid = document.getElementById('launcher-grid');
             if (!grid) return;
 
+            const count = LABS_DATA.length;
+            const subtitle = document.getElementById('dynamic-subtitle');
+            if (subtitle) {
+                subtitle.innerHTML = `${count} WERKZEUGE AUF EINEN BLICK`;
+            }
+
             // Separate Intro from the rest to keep it at top (Priority 1)
             const intro = LABS_DATA.find(lab => lab.id === 'cinematic-intro');
             const otherLabs = LABS_DATA.filter(lab => lab.id !== 'cinematic-intro')
@@ -294,15 +300,17 @@
                     <div class="external-icon">↗</div>
                 </a>
             `).join('');
+
+            return count;
         }
 
-        // Initialize launcher
-        renderLauncher();
+        // Initialize launcher and get count
+        const toolCount = renderLauncher();
 
         // Use Central Branding for consistent navigation & QR feature
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
-            subtitle: "ALLE WERKZEUGE AUF EINEN BLICK"
+            subtitle: `${toolCount} WERKZEUGE AUF EINEN BLICK`
         });
     </script>
 </body>

@@ -528,34 +528,46 @@ const CyberBranding = {
 
             .briefing-text b { color: var(--branding-blue); }
 
-            /* --- NAVIGATION FAIL-SAFE STYLES (ULTRA v5.3.8) --- */
+            /* Navigation logic (ULTRA v5.3.8 Low-Profile) */
+            .cyber-nav {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 8px !important;
+                width: auto !important;
+                margin: 15px 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+            }
+
             .nav-btn {
                 background: rgba(15, 23, 42, 0.85) !important;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(0, 210, 255, 0.3) !important;
                 color: white !important;
-                border-radius: 12px;
+                border-radius: 10px;
                 cursor: pointer;
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
-                min-height: 48px;
-                aspect-ratio: 1 / 1;
-                width: 100%;
+                width: 42px !important;
+                height: 42px !important;
+                min-height: 42px !important;
                 box-sizing: border-box;
                 transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                text-decoration: none !important;
             }
             .nav-btn svg {
-                width: 26px !important;
-                height: 26px !important;
+                width: 20px !important;
+                height: 20px !important;
                 stroke: currentColor;
-                stroke-width: 2.8;
+                stroke-width: 2.5;
                 display: block !important;
             }
             .nav-btn:hover {
-                transform: translateY(-3px) scale(1.05);
+                transform: translateY(-2px) scale(1.05);
                 background: rgba(0, 210, 255, 0.2) !important;
                 border-color: var(--branding-blue) !important;
+                box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
             }
         `;
         document.head.appendChild(style);
