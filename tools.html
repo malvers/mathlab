@@ -7,8 +7,9 @@
     <title>Cyber-Labor | Mission Control</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
-    <!-- Central Branding Engine -->
+    <!-- Central Branding & UI Engine -->
     <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
     <style>
         :root {
             --space-bg: #050b18;
@@ -241,6 +242,16 @@
             }
         }
 
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 0;
+            font-family: 'Orbitron', sans-serif;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
         /* Prevent overlap with the central heading */
         .canvas-branding {
             display: none !important;
@@ -256,8 +267,10 @@
         </div>
     </header>
 
+    <div id="search-mount" style="width: 95%; max-width: 1000px;"></div>
+
     <div id="sidebar-header"
-        style="display: flex; justify-content: flex-start; margin-bottom: 2px; margin-top: -25px; width: 95%; max-width: 1000px;">
+        style="display: flex; justify-content: flex-start; margin-bottom: 2px; margin-top: -5px; width: 95%; max-width: 1000px;">
         <!-- Navigation will be injected here by branding.js -->
     </div>
 
@@ -273,20 +286,35 @@
     <script src="js/labs-config.js"></script>
 
     <script>
-        function renderLauncher() {
+        function renderLauncher(filterText = "") {
             const grid = document.getElementById('launcher-grid');
             if (!grid) return;
 
-            const count = LABS_DATA.length;
+            const searchLower = filterText.toLowerCase().trim();
+            const filteredData = LABS_DATA.filter(lab => {
+                const title = (lab.title || "").toLowerCase();
+                const tagline = (lab.tagline || "").toLowerCase();
+                const keywords = (lab.keywords || "").toLowerCase();
+                return title.includes(searchLower) || 
+                       tagline.includes(searchLower) || 
+                       keywords.includes(searchLower);
+            });
+
+            const count = filteredData.length;
             const subtitle = document.getElementById('dynamic-subtitle');
             if (subtitle) {
-                subtitle.innerHTML = `${count} WERKZEUGE AUF EINEN BLICK`;
+                subtitle.innerHTML = filterText === "" ? `${count} WERKZEUGE AUF EINEN BLICK` : `${count} TREFFER GEFUNDEN`;
+            }
+
+            if (count === 0) {
+                grid.innerHTML = `<div class="no-results">Keine Treffer für "${filterText}"</div>`;
+                return 0;
             }
 
             // Separate Intro from the rest to keep it at top (Priority 1)
-            const intro = LABS_DATA.find(lab => lab.id === 'cinematic-intro');
-            const otherLabs = LABS_DATA.filter(lab => lab.id !== 'cinematic-intro')
-                                      .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+            const intro = filteredData.find(lab => lab.id === 'cinematic-intro');
+            const otherLabs = filteredData.filter(lab => lab.id !== 'cinematic-intro')
+                                          .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
             
             const sortedLabs = intro ? [intro, ...otherLabs] : otherLabs;
 
@@ -304,7 +332,13 @@
             return count;
         }
 
-        // Initialize launcher and get count
+        // Initialize launcher and UI
+        CyberUI.init();
+        
+        CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
+            renderLauncher(val);
+        });
+
         const toolCount = renderLauncher();
 
         // Use Central Branding for consistent navigation & QR feature

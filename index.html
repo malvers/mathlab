@@ -9,6 +9,7 @@
         rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/index-ui.css">
+    <script src="js/ui.js"></script>
     <style>
         :root {
             --space-bg: #050b18;
@@ -859,17 +860,8 @@
         </div>
     </header>
 
-    <!-- Sleek Persistent Search Bar -->
-    <div class="search-bar-container">
-        <div class="search-bar-inner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="search-input" placeholder="Suche nach Laboren oder Themen..." autocomplete="off" aria-label="Labor suchen">
-            <button class="clear-search" onclick="clearSearch()" title="Suche leeren">&times;</button>
-        </div>
-    </div>
+    <!-- NEW ULTRA-SCAN MOUNT (Engine Integrated) -->
+    <div id="search-mount" style="width: 95%; max-width: 1123px; margin: 20px auto 30px auto;"></div>
 
     <div id="grade-view">
         <div class="view-section">
@@ -1046,43 +1038,35 @@
             `).join('');
         }
 
-        // --- SEARCH LOGIC ---
-        const searchInput = document.getElementById('search-input');
-
-        function clearSearch() {
-            searchInput.value = '';
-            performSearch('');
-            searchInput.focus();
-        }
-
-        searchInput.addEventListener('input', (e) => {
-            performSearch(e.target.value);
-        });
-
-        function performSearch(query) {
-            const tools = document.querySelectorAll('#tool-container .card');
-            const q = query.toLowerCase().trim();
-            
-            tools.forEach(tool => {
-                const title = tool.querySelector('h3').innerText.toLowerCase();
-                const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
-                const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
-                const categories = tool.getAttribute('data-category').toLowerCase();
+            // --- SEARCH LOGIC (ULTRA-SCAN INTEGRATED) ---
+            function filterLabs(val) {
+                const tools = document.querySelectorAll('#tool-container .card');
+                const q = val.toLowerCase().trim();
                 
-                // Semantic search: Check title, description, keywords and categories
-                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || categories.includes(q)) {
-                    tool.style.display = 'flex';
-                } else {
-                    tool.style.display = 'none';
-                }
-            });
+                tools.forEach(tool => {
+                    const title = tool.querySelector('h3').innerText.toLowerCase();
+                    const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
+                    const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
+                    const categories = tool.getAttribute('data-category').toLowerCase();
+                    
+                    if (title.includes(q) || desc.includes(q) || keywords.includes(q) || categories.includes(q)) {
+                        tool.style.display = 'flex';
+                    } else {
+                        tool.style.display = 'none';
+                    }
+                });
 
-            // If it's a search, we ensure we show the tool-view
-            if (q.length > 0) {
-                document.getElementById('grade-view').classList.add('hidden');
-                document.getElementById('tool-view').classList.remove('hidden');
+                if (q.length > 0) {
+                    document.getElementById('grade-view').classList.add('hidden');
+                    document.getElementById('tool-view').classList.remove('hidden');
+                }
             }
-        }
+
+            // Centralized Search Engine Hook
+            CyberUI.init();
+            CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
+                filterLabs(val);
+            });
 
         function showFilter(filter, updateHash = true) {
             // Ensure cards are rendered before filtering
