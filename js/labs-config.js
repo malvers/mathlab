@@ -57,7 +57,7 @@ const LABS_DATA = [
     },
     {
         "id": "schriftlichemue",
-        "href": "schriftlichemue.html",
+        "href": "multiplikation.html",
         "title": "Schriftliche Multiplikation",
         "description": "Visualisiert die schriftliche Multiplikation Schritt für Schritt. Inklusive Übertrag-Tracking und Detail-Modus für tiefe mathematische Analyse.",
         "tagline": "Grundrechenarten / Detail-Analyse",
