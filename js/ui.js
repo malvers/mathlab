@@ -749,6 +749,46 @@ class CyberUI {
         };
     }
 
+    static createStepper(containerId, label, min, max, value, onchange, color = 'var(--neon-blue)') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const stepperId = `stepper-${Math.random().toString(36).substr(2, 9)}`;
+        const displayId = `val-${stepperId}`;
+        let currentVal = parseInt(value);
+
+        const html = `
+            <div class="cyber-control-group" id="${stepperId}" style="margin-bottom:15px;">
+                <span class="cyber-label" style="color:rgba(255,255,255,0.5); font-size:0.65rem; margin-bottom:12px; display:block;">${label}</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 5px;">
+                    <button class="stepper-btn prev" style="background: none; border: none; color: white; cursor: pointer; padding: 15px; font-size: 1.2rem; transition: all 0.2s;">◀</button>
+                    <span id="${displayId}" style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: bold; color: ${color}; min-width: 60px; text-align: center; text-shadow: 0 0 15px ${color}44;">${currentVal.toString().padStart(2, '0')}</span>
+                    <button class="stepper-btn next" style="background: none; border: none; color: white; cursor: pointer; padding: 15px; font-size: 1.2rem; transition: all 0.2s;">▶</button>
+                </div>
+                <style>
+                    #${stepperId} .stepper-btn:hover { color: ${color}; transform: scale(1.2); }
+                    #${stepperId} .stepper-btn:active { transform: scale(0.9); }
+                </style>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', html);
+
+        const stepper = document.getElementById(stepperId);
+        const display = document.getElementById(displayId);
+        const btnPrev = stepper.querySelector('.prev');
+        const btnNext = stepper.querySelector('.next');
+
+        const update = (newVal) => {
+            currentVal = Math.min(Math.max(newVal, min), max);
+            display.innerText = currentVal.toString().padStart(2, '0');
+            onchange(currentVal);
+        };
+
+        btnPrev.onclick = () => update(currentVal - 1);
+        btnNext.onclick = () => update(currentVal + 1);
+    }
+
     /**
      * Creates a high-fidelity data grid for real-time analysis
      * @param {string} containerId - Mount point
