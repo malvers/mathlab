@@ -369,6 +369,23 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "logikspiel",
+        "href": "logikspiel.html",
+        "title": "Logik-Architekt",
+        "description": "Stabilisiere den mathematischen Kern! Nutze Logik und Arithmetik, um das Gitter so zu füllen, dass alle Zielsummen erreicht werden. Ein rasanter Strategie-Hacker für Mathe-Profis.",
+        "tagline": "Logik / Strategie / Summen-Rätsel",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="20" width="25" height="25" fill="none" stroke="#00d2ff" stroke-width="2" rx="4" />
+            <rect x="55" y="20" width="25" height="25" fill="none" stroke="#00d2ff" stroke-width="2" rx="4" />
+            <rect x="20" y="55" width="25" height="25" fill="none" stroke="#00d2ff" stroke-width="2" rx="4" />
+            <rect x="55" y="55" width="25" height="25" fill="none" stroke="#adff2f" stroke-width="2" rx="4" />
+            <circle cx="50" cy="50" r="5" fill="#adff2f" />
+        </svg>`,
+        "category": "arithmetic logic fun hot",
+        "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid",
+        "color": "green"
+    },
+    {
         "id": "bluescreen",
         "href": "bluescreen.html",
         "title": "System Failure",
