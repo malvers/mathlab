@@ -136,7 +136,7 @@
         // 1. Branding & UI Init
         const BRAND_BLUE = "#00d2ff";
         const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00ff00", "#4CAF50", "#F44336"];
-        
+
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
             subtitle: "SCHRIFTLICHE ADDITION"
@@ -192,12 +192,12 @@
             for (let i = 0; i < maxLen; i++) {
                 // Focus column
                 stepSequence.push({ type: 'focus', col: i });
-                
+
                 // Calculate
                 const d1 = parseInt(s1Str[s1Str.length - 1 - i] || 0);
                 const d2 = parseInt(s2Str[s2Str.length - 1 - i] || 0);
                 const sum = d1 + d2 + carry;
-                
+
                 stepSequence.push({
                     type: 'calculate',
                     col: i,
@@ -207,18 +207,18 @@
                     newCarry: Math.floor(sum / 10),
                     digit: sum % 10
                 });
-                
+
                 carry = Math.floor(sum / 10);
             }
-            
+
             if (carry > 0) {
-                stepSequence.push({ 
-                    type: 'final-carry', 
+                stepSequence.push({
+                    type: 'final-carry',
                     col: maxLen,
-                    carry: carry 
+                    carry: carry
                 });
             }
-            
+
             stepSequence.push({ type: 'complete' });
         }
 
@@ -267,10 +267,10 @@
             const s1Str = String(summand1);
             const s2Str = String(summand2);
             // Ensure we have enough space for the summands, the potential carry, AND the '+' sign
-            const maxCols = Math.max(s1Str.length, s2Str.length) + 2; 
-            
-            // Dynamic Font Sizing
-            const fontSize = Math.min(width * 0.08, height * 0.12);
+            const maxCols = Math.max(s1Str.length, s2Str.length) + 2;
+
+            // Dynamic Font Sizing (Verkleinert für elegantere Darstellung)
+            const fontSize = Math.min(width * 0.06, height * 0.09);
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
             const charWidth = fontSize * 0.85; // Slightly wider for Orbitron grid
@@ -285,7 +285,7 @@
             const ensembleStartX = (width - ensembleWidth) / 2;
 
             // startX is the center of the rightmost column
-            const startX = ensembleStartX + (maxCols - 1.5) * charWidth; 
+            const startX = ensembleStartX + (maxCols - 1.5) * charWidth;
             const startY = height / 2 - rowHeight;
 
             if (coachBox) {
@@ -298,7 +298,7 @@
 
             // 1. Draw Summands (Center Aligned in Columns)
             ctx.textAlign = 'center';
-            
+
             // Row 1
             for (let i = 0; i < s1Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
@@ -314,7 +314,7 @@
             // The '+' sign is now safely shifted to the left of any potential carry
             const plusCol = maxCols - 1;
             ctx.fillText('+', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
-            
+
             ctx.font = `bold ${fontSize}px Orbitron`; // Reset to bold for digits
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
@@ -325,7 +325,8 @@
             }
 
             // Separator
-            ctx.strokeStyle = 'white';
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#888888';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(startX - (plusCol + 0.2) * charWidth, startY + rowHeight * 1.6);
@@ -340,10 +341,10 @@
                     if (s.newCarry > 0) {
                         ctx.save();
                         ctx.font = `bold ${fontSize * 0.35}px Orbitron`;
-                        
+
                         // Pedagogy: Only the single most recent "action" carry stays gold
                         const isCurrent = (i === currentStep);
-                        
+
                         ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
                         if (isCurrent) {
                             ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00';
@@ -364,6 +365,24 @@
                     ctx.fillText(s.carry, startX - s.col * charWidth, startY + rowHeight * 2.2);
                     if (isCurrent) ctx.restore();
                 }
+            }
+
+            // Doppelte Unterstreichung bei Abschluss
+            if (step && step.type === 'complete') {
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#888888'; // Solides Grau
+                ctx.lineWidth = 2;
+                const lineY1 = startY + rowHeight * 2.7;
+                const lineY2 = startY + rowHeight * 2.76; // Noch ein Stück weiter runter
+                const lineStartX = startX - (plusCol + 0.2) * charWidth; // Länge wie Trennlinie
+                const lineEndX = startX + charWidth * 0.6;
+
+                ctx.beginPath();
+                ctx.moveTo(lineStartX, lineY1);
+                ctx.lineTo(lineEndX, lineY1);
+                ctx.moveTo(lineStartX, lineY2);
+                ctx.lineTo(lineEndX, lineY2);
+                ctx.stroke();
             }
 
             updateMessages();
@@ -390,7 +409,7 @@
         }
 
         window.onresize = init;
-        
+
         // Keyboard Navigation Support (Swapped for Right-to-Left Flow)
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') nextStep();
