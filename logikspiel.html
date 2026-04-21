@@ -26,24 +26,26 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
-            padding: 20px;
+            padding: 40px;
             box-sizing: border-box;
             min-height: 100vh;
+            width: 100%;
         }
 
         #game-board {
+            margin: auto;
             position: relative;
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+            padding: 20px; 
+            background: none; 
+            border: none;
+            backdrop-filter: none;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
             animation: board-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            max-width: 100%;
-            overflow-x: auto;
+            width: fit-content;
+            height: fit-content;
         }
 
         @keyframes board-in {
@@ -51,7 +53,6 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -59,10 +60,11 @@
         }
 
         .grid-container {
-            display: grid;
+            display: inline-grid;
             gap: var(--board-gap);
             position: relative;
-            margin: 0 auto;
+            margin: 0;
+            padding: 0;
         }
 
         .cell {
@@ -95,23 +97,22 @@
             text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        .cell.fixed {
-            color: rgba(255, 255, 255, 0.4);
-            cursor: default;
-            border-style: dashed;
-        }
-
         /* Sum Indicators */
         .sum-target {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.8rem;
+            color: rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            width: var(--cell-size);
-            height: var(--cell-size);
             transition: all 0.4s ease;
+            width: 80px; 
+            height: var(--cell-size);
+        }
+
+        .grid-container .sum-target[id^="col-sum"] {
+            width: var(--cell-size);
+            height: 80px;
         }
 
         .sum-target.solved {
@@ -119,180 +120,50 @@
             text-shadow: 0 0 10px var(--neon-green);
         }
 
-        /* Layout Grid Helpers - NOW PART OF GRID FLOW */
-        .row-sums,
-        .col-sums {
-            display: contents;
-            /* Let children participate in main grid */
-        }
-
         /* --- RESPONSIVE ADJUSTMENTS --- */
         @media (max-width: 1200px) {
-            :root {
-                --cell-size: 100px;
-                --board-gap: 10px;
-            }
-
-            .cell {
-                font-size: 2.8rem;
-            }
-
-            .sum-target {
-                font-size: 1.5rem;
-            }
-
-            #game-board {
-                padding: 25px;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            #side-panel {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 1000;
-            }
-
-            /* Could add a toggle button here, but for now we prioritize space */
-            #main-content {
-                padding: 10px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            :root {
-                --cell-size: 80px;
-                --board-gap: 8px;
-            }
-
-            .cell {
-                font-size: 2.2rem;
-            }
-
-            .sum-target {
-                font-size: 1.2rem;
-            }
-
-            #game-board {
-                padding: 15px;
-                border-radius: 10px;
-            }
-        }
-
-        #game-nav {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            :root { --cell-size: 100px; --board-gap: 10px; }
+            .cell { font-size: 2.8rem; }
+            .sum-target { font-size: 1.5rem; width: 60px; height: 100px; }
+            .grid-container .sum-target[id^="col-sum"] { width: 100px; height: 60px; }
         }
 
         .win-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            border-radius: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; border-radius: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
         }
 
-        .win-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-next {
-            background: var(--neon-green);
-            color: black;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
-            box-shadow: 0 0 15px var(--neon-green);
-        }
-
-        .btn-next:hover {
-            transform: scale(1.1);
-        }
+        .win-overlay.active { opacity: 1; pointer-events: auto; }
 
         .cell.hinted {
-            color: #ffcc00;
-            text-shadow: 0 0 15px #ffcc00;
-            border-color: #ffcc00;
-            background: rgba(255, 204, 0, 0.1);
+            color: #ffcc00; text-shadow: 0 0 15px #ffcc00;
+            border-color: #ffcc00; background: rgba(255, 204, 0, 0.1);
         }
 
         #hint-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 11, 24, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 150;
-            border-radius: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 204, 0, 0.3);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 150; border-radius: 20px;
+            opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(15px); border: 1px solid rgba(255, 204, 0, 0.3);
         }
 
-        #hint-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #hint-overlay.active { opacity: 1; pointer-events: auto; }
 
         .hint-input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--neon-blue);
-            color: white;
-            padding: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            text-align: center;
-            width: 120px;
-            border-radius: 10px;
-            margin: 20px 0;
-            appearance: textfield;
-            /* Firefox */
-        }
-
-        .hint-input::-webkit-outer-spin-button,
-        .hint-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--neon-blue);
+            color: white; padding: 15px; font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem; text-align: center; width: 120px; border-radius: 10px;
+            margin: 20px 0; outline: none;
         }
 
         #game-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
+            display: flex; flex-direction: column; gap: 15px; margin-top: 15px;
         }
     </style>
 </head>
@@ -301,8 +172,7 @@
     <aside id="side-panel">
         <div id="sidebar-header"></div>
         <div id="game-stats"></div>
-        <div
-            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
@@ -314,10 +184,9 @@
             </div>
 
             <div class="win-overlay" id="win-screen">
-                <h2 style="font-family: Orbitron; color: var(--neon-green); letter-spacing: 5px;">PROTOCOL STABILIZED
-                </h2>
+                <h2 style="font-family: Orbitron; color: var(--neon-green); letter-spacing: 5px;">PROTOCOL STABILIZED</h2>
                 <p style="font-family: Outfit; font-weight: 300;">Mathematischer Kern erfolgreich synchronisiert.</p>
-                <button class="btn-next" onclick="nextLevel()">NÄCHSTES LEVEL</button>
+                <button class="cyber-btn" onclick="nextLevel()" style="max-width: 280px; border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green);">NÄCHSTES LEVEL</button>
             </div>
 
             <div id="hint-overlay">
@@ -325,9 +194,9 @@
                 <p style="font-family: Outfit; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Löse die Aufgabe für einen Hinweis:</p>
                 <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;">12 + 5 = ?</div>
                 <input type="number" id="hint-input" class="hint-input">
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn" style="border-color: #ffcc00; color: #ffcc00" onclick="checkHintAnswer()">BESTÄTIGEN</button>
-                    <button class="btn" onclick="closeHint()">ABBRECHEN</button>
+                <div style="display: flex; gap: 15px; width: 80%;">
+                    <button class="cyber-btn" style="border-color: #ffcc00; color: #ffcc00" onclick="checkHintAnswer()">BESTÄTIGEN</button>
+                    <button class="cyber-btn" onclick="closeHint()">ABBRECHEN</button>
                 </div>
             </div>
         </div>
@@ -335,11 +204,12 @@
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/guard.js"></script>
     <script>
         let gridSize = 3;
         let grid = [];
-        let solvedGrid = []; // Reference solution
-        let hintedCells = []; // Track cells revealed by hints
+        let solvedGrid = [];
+        let hintedCells = [];
         let targetRowSums = [];
         let targetColSums = [];
         let currentLevel = 1;
@@ -361,48 +231,30 @@
                 `
             });
             CyberUI.init();
+            CyberGuard.init(1024); // Start modular Resolution Guard
             setupStats();
             initGame();
 
-            // Handle hint input 'Enter' key
             document.getElementById('hint-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') checkHintAnswer();
             });
         });
 
         function setupStats() {
-            CyberUI.createCard('game-stats', 'MISSION STATUS', `
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">LEVEL</span>
-                        <span id="stat-level" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold; color: var(--neon-blue);">01</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZÜGE</span>
-                        <span id="stat-moves" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">0</span>
-                    </div>
-                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZEIT</span>
-                        <span id="stat-time" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">00:00</span>
-                    </div>
-                </div>
-            `, 'var(--neon-blue)');
+            CyberUI.createStatsGrid('game-stats', [
+                { label: 'LEVEL', value: '01', color: 'var(--neon-blue)' },
+                { label: 'ZÜGE', value: '0', color: 'white' },
+                { label: 'ZEIT', value: '00:00', color: 'white' }
+            ]);
 
-            CyberUI.createCard('game-stats', 'TRAINING', `
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label style="font-size: 0.7rem; opacity: 0.6; font-family:Orbitron;">LEVEL WÄHLEN</label>
-                    <input type="range" min="1" max="20" value="${currentLevel}" 
-                           oninput="document.getElementById('lvl-val').innerText = this.value.padStart(2, '0')"
-                           onchange="changeLevel(this.value)"
-                           style="width: 100%; accent-color: var(--neon-blue); cursor: pointer;">
-                    <div id="lvl-val" style="font-family: Orbitron; font-size: 1.2rem; text-align: center; color: var(--neon-blue);">${currentLevel.toString().padStart(2, '0')}</div>
-                </div>
-            `, 'var(--neon-green)');
+            CyberUI.createStepper('game-stats', 'TRAINING: LEVEL', 1, 20, currentLevel, (val) => {
+                changeLevel(val);
+            }, 'var(--neon-green)');
 
             CyberUI.createCard('game-stats', 'STEUERUNG', `
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn" style="width:100%; margin-top: 5px;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
-                    <button class="btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">HILFE ANFORDERN</button>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="cyber-btn" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                    <button class="cyber-btn" style="border-color: #fbff00; color: #fbff00; box-shadow: 0 0 15px rgba(251, 255, 0, 0.2);" onclick="requestHint()">HILFE ANFORDERN</button>
                 </div>
             `, 'var(--neon-orange)');
 
@@ -413,20 +265,19 @@
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
             const s = (elapsed % 60).toString().padStart(2, '0');
-            const el = document.getElementById('stat-time');
+            const el = document.querySelector('#stats-card-game-stats-2 .stats-val');
             if (el) el.textContent = `${m}:${s}`;
         }
 
         function initGame() {
             gridSize = currentLevel > 5 ? 4 : 3;
-            const container = document.getElementById('grid');
-            container.style.gridTemplateColumns = `repeat(${gridSize}, 130px)`;
-
             generatePuzzle();
             renderGrid();
             updateValidation();
 
-            document.getElementById('stat-level').textContent = currentLevel.toString().padStart(2, '0');
+            const levelEl = document.querySelector('#stats-card-game-stats-0 .stats-val');
+            if (levelEl) levelEl.textContent = currentLevel.toString().padStart(2, '0');
+            
             document.getElementById('win-screen').classList.remove('active');
             document.getElementById('hint-overlay').classList.remove('active');
         }
@@ -452,7 +303,8 @@
             const container = document.getElementById('grid');
             container.innerHTML = '';
 
-            container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) auto`;
+            container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) 80px`;
+            container.style.gridTemplateRows = `repeat(${gridSize}, var(--cell-size)) 80px`;
 
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
@@ -482,50 +334,43 @@
             }
 
             const corner = document.createElement('div');
+            corner.style.width = '80px';
+            corner.style.height = '80px';
             container.appendChild(corner);
         }
 
         function handleCellClick(r, c, el) {
-            if (hintedCells[r][c]) return; // Hinted cells are fixed
-
+            if (hintedCells[r][c]) return;
             grid[r][c] = (grid[r][c] + 1) % 10;
             el.textContent = grid[r][c];
             el.classList.add('active');
             setTimeout(() => el.classList.remove('active'), 200);
-
             moves++;
-            document.getElementById('stat-moves').textContent = moves;
-
+            const movesEl = document.querySelector('#stats-card-game-stats-1 .stats-val');
+            if (movesEl) movesEl.textContent = moves;
             updateValidation();
             checkWin();
         }
 
         function updateValidation() {
             let allGood = true;
-
             for (let r = 0; r < gridSize; r++) {
                 const currentSum = grid[r].reduce((a, b) => a + b, 0);
                 const el = document.getElementById(`row-sum-${r}`);
-                if (currentSum === targetRowSums[r]) {
-                    el.classList.add('solved');
-                } else {
-                    el.classList.remove('solved');
-                    allGood = false;
+                if (el) {
+                    if (currentSum === targetRowSums[r]) el.classList.add('solved');
+                    else { el.classList.remove('solved'); allGood = false; }
                 }
             }
-
             for (let c = 0; c < gridSize; c++) {
                 let currentSum = 0;
                 for (let r = 0; r < gridSize; r++) currentSum += grid[r][c];
                 const el = document.getElementById(`col-sum-${c}`);
-                if (currentSum === targetColSums[c]) {
-                    el.classList.add('solved');
-                } else {
-                    el.classList.remove('solved');
-                    allGood = false;
+                if (el) {
+                    if (currentSum === targetColSums[c]) el.classList.add('solved');
+                    else { el.classList.remove('solved'); allGood = false; }
                 }
             }
-
             return allGood;
         }
 
@@ -533,15 +378,13 @@
             if (updateValidation()) {
                 setTimeout(() => {
                     document.getElementById('win-screen').classList.add('active');
-                    if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
                 }, 400);
             }
         }
 
         function requestHint() {
-            let a, b, op, task;
+            let a, b, task;
             const diff = Math.min(10, currentLevel);
-            
             if (Math.random() > 0.5) {
                 a = Math.floor(Math.random() * (10 + diff)) + 5;
                 b = Math.floor(Math.random() * (10 + diff)) + 5;
@@ -553,7 +396,6 @@
                 currentHintAnswer = a - b;
                 task = `${a} - ${b} = ?`;
             }
-
             document.getElementById('hint-task').textContent = task;
             document.getElementById('hint-input').value = '';
             document.getElementById('hint-overlay').classList.add('active');
@@ -567,9 +409,7 @@
                 revealHint();
             } else {
                 document.getElementById('hint-input').style.borderColor = 'var(--neon-red)';
-                setTimeout(() => {
-                    document.getElementById('hint-input').style.borderColor = 'var(--neon-blue)';
-                }, 500);
+                setTimeout(() => { document.getElementById('hint-input').style.borderColor = 'var(--neon-blue)'; }, 500);
             }
         }
 
@@ -577,47 +417,40 @@
             let candidates = [];
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
-                    if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) {
-                        candidates.push({r, c});
-                    }
+                    if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) candidates.push({r, c});
                 }
             }
-
             if (candidates.length === 0) {
                 for (let r = 0; r < gridSize; r++) {
-                    for (let c = 0; c < gridSize; c++) {
-                        if (!hintedCells[r][c]) candidates.push({r, c});
-                    }
+                    for (let c = 0; c < gridSize; c++) if (!hintedCells[r][c]) candidates.push({r, c});
                 }
             }
-
             if (candidates.length > 0) {
                 const target = candidates[Math.floor(Math.random() * candidates.length)];
                 grid[target.r][target.c] = solvedGrid[target.r][target.c];
                 hintedCells[target.r][target.c] = true;
-                
                 renderGrid();
                 updateValidation();
                 checkWin();
             }
         }
 
-        function closeHint() {
-            document.getElementById('hint-overlay').classList.remove('active');
-        }
+        function closeHint() { document.getElementById('hint-overlay').classList.remove('active'); }
 
         function changeLevel(val) {
             currentLevel = parseInt(val);
             moves = 0;
             startTime = Date.now();
-            document.getElementById('stat-moves').textContent = "0";
+            const movesEl = document.querySelector('#stats-card-game-stats-1 .stats-val');
+            if (movesEl) movesEl.textContent = "0";
             initGame();
         }
 
         function resetPuzzle() {
             moves = 0;
             startTime = Date.now();
-            document.getElementById('stat-moves').textContent = "0";
+            const movesEl = document.querySelector('#stats-card-game-stats-1 .stats-val');
+            if (movesEl) movesEl.textContent = "0";
             initGame();
         }
 
@@ -625,7 +458,6 @@
             currentLevel++;
             moves = 0;
             startTime = Date.now();
-            document.getElementById('stat-moves').textContent = "0";
             initGame();
         }
     </script>
