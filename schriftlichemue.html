@@ -29,6 +29,61 @@
             background-size: 50px 50px;
             pointer-events: none;
         }
+
+        #math-coach-box {
+            position: absolute;
+            width: 380px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.05);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+
+        #math-coach-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .coach-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coach-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d2ff;
+        }
+
+        .coach-message {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .coach-math-highlight {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #ffde00;
+        }
     </style>
 </head>
 
@@ -46,6 +101,10 @@
     <main id="main-content">
         <div id="canvas-container">
             <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title">MATH COACH ANALYSIS</div>
+                <div id="coach-content" class="coach-message">Initialisiere Analyse...</div>
+            </div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -108,7 +167,7 @@
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
-                <div id="step-info" style="margin-top:15px; font-family:'Outfit'; font-size:0.8rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:flex; align-items:center;">
+                <div id="step-info" style="margin-top:15px; font-family:'Outfit'; font-size:0.8rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:none; align-items:center;">
                     Wähle Ziffern und klicke auf WEITER um die Rechnung zu starten.
                 </div>
             `, '#ff9d00');
@@ -248,9 +307,24 @@
             const totalCalcHeight = totalLines * rowHeight;
             const startY = (height - totalCalcHeight) / 2 + rowHeight * 0.5;
 
-            // 3. Center horizontally
+            // 3. Center horizontally (AS ENSEMBLE)
+            const coachBox = document.getElementById('math-coach-box');
+            const coachWidth = 380;
+            const gap = 80;
             const totalCalcWidth = maxCharsContent * charWidth;
-            const startX = (width - totalCalcWidth) / 2 + (f1Str.length + 0.5) * charWidth;
+            
+            // Total ensemble is Calculation + Gap + Coach Box
+            const ensembleTotalWidth = totalCalcWidth + gap + coachWidth;
+            const ensembleStartX = (width - ensembleTotalWidth) / 2;
+            
+            const startX = ensembleStartX + (f1Str.length + 0.5) * charWidth;
+
+            // Position the Coach Box DOM element
+            if (coachBox) {
+                coachBox.style.left = `${ensembleStartX + totalCalcWidth + gap}px`;
+                coachBox.style.top = `${startY + rowHeight * 0.7}px`; // Align with separator line
+                coachBox.classList.add('visible');
+            }
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
 
@@ -457,10 +531,13 @@
 
         function updateStepInfo() {
             const info = document.getElementById('step-info');
-            if (!info) return;
+            const coachContent = document.getElementById('coach-content');
+            if (!coachContent) return;
+
+            let message = "";
 
             if (currentStep === -1) {
-                info.innerHTML = `Multipliziere <b>${factor1}</b> mit <b>${factor2}</b>.`;
+                message = `Willkommen im Multiplikations-Labor. Wir berechnen <span class="coach-math-highlight">${factor1} &times; ${factor2}</span>. Klicke auf WEITER, um den ersten Schritt zu starten.`;
             } else {
                 const step = stepSequence[currentStep];
                 const f1Str = String(factor1);
@@ -470,22 +547,25 @@
 
                 if (step.type === 'row' || step.type === 'row-complete') {
                     const digit = f2Str[step.rowIndex];
-                    info.innerHTML = `<div>Multiplikation mit <b style="color:${color}">${digit}</b> abgeschlossen.</div>`;
+                    message = `Die Multiplikation mit der Ziffer <b style="color:${color}">${digit}</b> ist abgeschlossen. Alle Teilergebnisse dieser Zeile wurden berechnet.`;
                 } else if (step.type === 'digit-multiply') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
                     const prod = fDigit * mDigit;
-                    info.innerHTML = `<div>Multipliziere: <b style="color:${color}">${mDigit} &times; ${fDigit}</b> = <b>${prod}</b>. <br><span style="opacity:0.7; font-size:0.7rem;">Der Übertrag <b>${step.carryValue}</b> wartet noch...</span></div>`;
+                    message = `Wir multiplizieren <b style="color:${color}">${mDigit}</b> mit <b style="color:${color}">${fDigit}</b>. Das ergibt <span class="coach-math-highlight">${prod}</span>. Der Übertrag von <b style="color:${BRAND_BLUE}">${step.carryValue}</b> wird im nächsten Schritt addiert.`;
                 } else if (step.type === 'digit-final') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
                     const prod = fDigit * mDigit;
                     const final = prod + step.carryValue;
-                    info.innerHTML = `<div>Addiere Übertrag: <b>${prod} + ${step.carryValue}</b> = <b style="color:${color}">${final}</b>.</div>`;
+                    message = `Jetzt addieren wir den Übertrag: <span class="coach-math-highlight">${prod} + ${step.carryValue} = ${final}</span>. Die Ziffer <b style="color:${color}">${final % 10}</b> wird notiert, der Rest wird als neuer Übertrag mitgenommen.`;
                 } else if (step.type === 'final') {
-                    info.innerHTML = "<b>Endergebnis:</b> Alle Teilergebnisse wurden addiert.";
+                    message = `<b>Berechnung abgeschlossen!</b> Wir haben alle Teilprodukte addiert. Das finale Ergebnis ist <span class="coach-math-highlight">${factor1 * factor2}</span>.`;
                 }
             }
+
+            coachContent.innerHTML = message;
+            if (info) info.innerHTML = message; // Keep sidebar in sync just in case
         }
 
         window.onresize = init;
