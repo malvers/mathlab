@@ -156,17 +156,45 @@
             pointer-events: auto;
         }
 
+        .btn {
+            background: rgba(0, 210, 255, 0.05);
+            color: var(--neon-blue);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(0, 210, 255, 0.2);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
         .btn-next {
             background: var(--neon-green);
             color: black;
             border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
+            padding: 15px 40px;
+            border-radius: 12px;
             font-family: 'Orbitron', sans-serif;
             font-weight: bold;
             cursor: pointer;
             margin-top: 20px;
             transition: transform 0.2s;
+            box-shadow: 0 0 15px var(--neon-green);
         }
 
         .btn-next:hover { transform: scale(1.1); }
@@ -225,24 +253,24 @@
 
         function setupStats() {
             CyberUI.createCard('game-stats', 'MISSION STATUS', `
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-size: 0.7rem; opacity: 0.6;">LEVEL</span>
-                        <span id="stat-level" style="font-family: Orbitron; font-weight: bold; color: var(--neon-blue);">01</span>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">LEVEL</span>
+                        <span id="stat-level" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold; color: var(--neon-blue);">01</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-size: 0.7rem; opacity: 0.6;">ZÜGE</span>
-                        <span id="stat-moves" style="font-family: Orbitron; font-weight: bold;">0</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZÜGE</span>
+                        <span id="stat-moves" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">0</span>
                     </div>
-                     <div style="display: flex; justify-content: space-between;">
-                        <span style="font-size: 0.7rem; opacity: 0.6;">ZEIT</span>
-                        <span id="stat-time" style="font-family: Orbitron; font-weight: bold;">00:00</span>
+                     <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZEIT</span>
+                        <span id="stat-time" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">00:00</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
 
             CyberUI.createCard('game-stats', 'STEUERUNG', `
-                <button class="btn" style="width:100%; padding: 10px; font-size: 0.7rem; margin-top: 0;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                <button class="btn" style="width:100%; margin-top: 0;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
             `, 'var(--neon-orange)');
             
             setInterval(updateTime, 1000);
