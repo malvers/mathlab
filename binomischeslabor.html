@@ -12,6 +12,13 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <style>
         /* Beweis-spezifische Anpassungen */
+        #canvas-container {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+        }
+
         #geometry-wrapper {
             position: relative;
             pointer-events: none;
@@ -54,7 +61,7 @@
 
         #formula-glow-v3 {
             position: absolute;
-            bottom: 40px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -145,17 +152,17 @@
             CyberUI.init();
             
             CyberUI.createCard('parameters-container', 'AUFTEILUNG', `
-                <div class="area-item" style="color:var(--neon-gold);">
+                <div class="area-item" style="color:#ffcc00;">
                     <span style="font-family:Orbitron; font-size:0.8rem;">P-WERT</span>
                     <span id="val-p" class="stat-val">7.00</span>
                 </div>
-                <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:var(--neon-gold); width:100%;">
+                <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:#ffcc00; width:100%;">
                 <p style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px; font-family:Outfit;">Tipp: Ziehe den Mittelpunkt im Quadrat!</p>
-            `);
+            `, '#ffcc00'); // Gold accent for P-Adjustment
 
             CyberUI.createCard('parameters-container', 'ANALYTIK', `
                 <div class="area-list">
-                    <div class="area-item" style="color:var(--neon-gold);">
+                    <div class="area-item" style="color:#ffcc00;">
                         <span id="lbl-side-p2"></span>
                         <span id="stat-p2-lt" class="stat-val"></span>
                     </div>
@@ -163,7 +170,7 @@
                         <span id="lbl-side-2pq"></span>
                         <span id="stat-2pq-lt" class="stat-val"></span>
                     </div>
-                    <div class="area-item" style="color:var(--neon-cyan);">
+                    <div class="area-item" style="color:#00f2ff;">
                         <span id="lbl-side-q2"></span>
                         <span id="stat-q2-lt" class="stat-val"></span>
                     </div>
@@ -173,7 +180,7 @@
                         <span id="stat-total" class="stat-val">100.00</span>
                     </div>
                 </div>
-            `);
+            `, 'var(--neon-blue)'); // Blue accent for result
 
             // Grab references after injection
             pSlider = document.getElementById('p-slider');
@@ -202,9 +209,9 @@
                 katex.render('\\color{white}{2}\\color{#ffcc00}{p}\\color{#00f2ff}{q}', document.getElementById('lbl-side-2pq'), { throwOnError: false });
                 katex.render('\\color{#00f2ff}{q^2}', document.getElementById('lbl-side-q2'), { throwOnError: false });
 
-                katex.render((p * p).toFixed(2), document.getElementById('stat-p2-lt'), { throwOnError: false });
-                katex.render((2 * p * q).toFixed(2), document.getElementById('stat-2pq-lt'), { throwOnError: false });
-                katex.render((q * q).toFixed(2), document.getElementById('stat-q2-lt'), { throwOnError: false });
+                document.getElementById('stat-p2-lt').innerText = (p * p).toFixed(2);
+                document.getElementById('stat-2pq-lt').innerText = (2 * p * q).toFixed(2);
+                document.getElementById('stat-q2-lt').innerText = (q * q).toFixed(2);
 
                 document.getElementById('val-p').innerText = p.toFixed(2);
             }
@@ -216,7 +223,7 @@
             if (!container || !wrapper) return;
 
             const dpr = window.devicePixelRatio || 1;
-            totalSize = Math.min(container.clientWidth, container.clientHeight) * 0.7;
+            totalSize = Math.min(container.clientWidth, container.clientHeight) * 0.6;
 
             canvas.width = totalSize * dpr;
             canvas.height = totalSize * dpr;
