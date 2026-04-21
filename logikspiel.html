@@ -279,7 +279,16 @@
             border-radius: 10px;
             margin: 20px 0;
             appearance: textfield;
-            /* Firefox */
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            color: var(--neon-blue);
         }
 
         .hint-input::-webkit-outer-spin-button,
@@ -322,11 +331,13 @@
 
             <div id="hint-overlay">
                 <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">HILFE-PROTOKOLL</h3>
-                <p style="font-family: Outfit; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Löse die Aufgabe für einen Hinweis:</p>
+                <p style="font-family: Outfit; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Löse die Aufgabe für
+                    einen Hinweis:</p>
                 <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;">12 + 5 = ?</div>
                 <input type="number" id="hint-input" class="hint-input">
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn" style="border-color: #ffcc00; color: #ffcc00" onclick="checkHintAnswer()">BESTÄTIGEN</button>
+                    <button class="btn" style="border-color: #ffcc00; color: #ffcc00"
+                        onclick="checkHintAnswer()">BESTÄTIGEN</button>
                     <button class="btn" onclick="closeHint()">ABBRECHEN</button>
                 </div>
             </div>
@@ -335,6 +346,7 @@
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/guard.js"></script>
     <script>
         let gridSize = 3;
         let grid = [];
@@ -388,21 +400,23 @@
                 </div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('game-stats', 'TRAINING', `
+            CyberUI.createCard('game-stats', '', `
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label style="font-size: 0.7rem; opacity: 0.6; font-family:Orbitron;">LEVEL WÄHLEN</label>
-                    <input type="range" min="1" max="20" value="${currentLevel}" 
-                           oninput="document.getElementById('lvl-val').innerText = this.value.padStart(2, '0')"
-                           onchange="changeLevel(this.value)"
-                           style="width: 100%; accent-color: var(--neon-blue); cursor: pointer;">
-                    <div id="lvl-val" style="font-family: Orbitron; font-size: 1.2rem; text-align: center; color: var(--neon-blue);">${currentLevel.toString().padStart(2, '0')}</div>
+                    <label class="cyber-label" style="font-family: 'Orbitron', sans-serif !important; letter-spacing: 2px;">LEVEL-AUSWAHL</label>
+                    <select class="cyber-select" onchange="changeLevel(this.value)" style="width: 100%; font-family: 'Orbitron', sans-serif !important;">
+                        ${Array.from({ length: 10 }, (_, i) => `
+                            <option value="${i + 1}" ${currentLevel === i + 1 ? 'selected' : ''} style="font-family: 'Orbitron', sans-serif;">
+                                LEVEL ${(i + 1).toString().padStart(2, '0')}
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
             `, 'var(--neon-green)');
 
             CyberUI.createCard('game-stats', 'STEUERUNG', `
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn" style="width:100%; margin-top: 5px;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
-                    <button class="btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">HILFE ANFORDERN</button>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                    <button class="cyber-btn" style="width:100%; border-color: #ffde00; color: #ffde00;" onclick="requestHint()">HILFE ANFORDERN</button>
                 </div>
             `, 'var(--neon-orange)');
 
@@ -418,9 +432,13 @@
         }
 
         function initGame() {
-            gridSize = currentLevel > 5 ? 4 : 3;
+            // Difficulty Stretching: 1-3 (3x3), 4-7 (4x4), 8-10 (5x5)
+            if (currentLevel <= 3) gridSize = 3;
+            else if (currentLevel <= 7) gridSize = 4;
+            else gridSize = 5;
+
             const container = document.getElementById('grid');
-            container.style.gridTemplateColumns = `repeat(${gridSize}, 130px)`;
+            container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) auto`;
 
             generatePuzzle();
             renderGrid();
@@ -541,7 +559,7 @@
         function requestHint() {
             let a, b, op, task;
             const diff = Math.min(10, currentLevel);
-            
+
             if (Math.random() > 0.5) {
                 a = Math.floor(Math.random() * (10 + diff)) + 5;
                 b = Math.floor(Math.random() * (10 + diff)) + 5;
@@ -578,7 +596,7 @@
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
                     if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) {
-                        candidates.push({r, c});
+                        candidates.push({ r, c });
                     }
                 }
             }
@@ -586,7 +604,7 @@
             if (candidates.length === 0) {
                 for (let r = 0; r < gridSize; r++) {
                     for (let c = 0; c < gridSize; c++) {
-                        if (!hintedCells[r][c]) candidates.push({r, c});
+                        if (!hintedCells[r][c]) candidates.push({ r, c });
                     }
                 }
             }
@@ -595,7 +613,7 @@
                 const target = candidates[Math.floor(Math.random() * candidates.length)];
                 grid[target.r][target.c] = solvedGrid[target.r][target.c];
                 hintedCells[target.r][target.c] = true;
-                
+
                 renderGrid();
                 updateValidation();
                 checkWin();
@@ -628,6 +646,9 @@
             document.getElementById('stat-moves').textContent = "0";
             initGame();
         }
+
+        // --- GLOBAL INITIALIZATION ---
+        CyberGuard.init(1024);
     </script>
 </body>
 
