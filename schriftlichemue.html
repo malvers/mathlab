@@ -11,6 +11,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <style>
+        body {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
         #canvas-container {
             position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
@@ -40,7 +44,7 @@
             padding: 25px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.05);
             color: white;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             pointer-events: none;
             opacity: 0;
             transform: translateY(10px);
@@ -84,6 +88,40 @@
             font-weight: 700;
             color: #ffde00;
         }
+
+        /* UI Refinements */
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
+        }
+
+        .stats-val {
+            font-size: 1.1rem !important;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.65rem !important;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        /* Spacing & Scaling Refinements */
+        .cyber-control-group {
+            margin-bottom: 25px !important;
+        }
+
+        #mode-toggle-container .cyber-checkbox-wrapper {
+            margin-top: 10px;
+            transform: scale(1.08);
+            transform-origin: left center;
+        }
+
+        #mode-toggle-container .cyber-label {
+            font-size: 0.75rem !important;
+            opacity: 0.9 !important;
+            color: #ffde00 !important; /* Keep the highlighted color */
+        }
     </style>
 </head>
 
@@ -102,7 +140,7 @@
         <div id="canvas-container">
             <div class="cyber-grid"></div>
             <div id="math-coach-box">
-                <div class="coach-title">MATH COACH ANALYSIS</div>
+                <div class="coach-title">BESCHREIBUNG DER SCHRITTE</div>
                 <div id="coach-content" class="coach-message">Initialisiere Analyse...</div>
             </div>
             <canvas id="canvas"></canvas>
@@ -124,8 +162,8 @@
         const container = document.getElementById('canvas-container');
 
         // Colors from requirement image
-        // Colors: 7 -> Gold/Yellow, 8 -> Purple, 9 -> Cyan
-        const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00d2ff", "#4CAF50", "#F44336"];
+        // Colors: 7 -> Gold/Yellow, 8 -> Purple, 9 -> Neon Green
+        const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00ff00", "#4CAF50", "#F44336"];
         const BRAND_BLUE = "#00d2ff";
 
         let factor1 = 456;
@@ -143,15 +181,15 @@
                     <label class="cyber-label">FAKTOR 1 (Multiplikand)</label>
                     <input type="number" id="f1-input" class="cyber-select" value="${factor1}" onchange="updateFactors()">
                 </div>
-                <div class="cyber-control-group" style="margin-top:15px;">
+                <div class="cyber-control-group" style="margin-top:25px;">
                     <label class="cyber-label">FAKTOR 2 (Multiplikator)</label>
                     <input type="number" id="f2-input" class="cyber-select" value="${factor2}" onchange="updateFactors()">
                 </div>
-                <div style="margin-top:20px;" id="mode-toggle-container"></div>
+                <div style="margin-top:30px;" id="mode-toggle-container"></div>
                 <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
             `, BRAND_BLUE);
 
-            CyberUI.createCheckbox('mode-toggle-container', 'DETAIL-MODUS (Fein-Analyse)', fineMode, (val) => {
+            CyberUI.createCheckbox('mode-toggle-container', 'Schrittweise', fineMode, (val) => {
                 fineMode = val;
                 resetSteps();
             }, '#ffde00');
@@ -167,7 +205,7 @@
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
-                <div id="step-info" style="margin-top:15px; font-family:'Outfit'; font-size:0.8rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:none; align-items:center;">
+                <div id="step-info" style="margin-top:15px; font-family:'Orbitron'; font-size:0.7rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:none; align-items:center;">
                     Wähle Ziffern und klicke auf WEITER um die Rechnung zu starten.
                 </div>
             `, '#ff9d00');
@@ -303,9 +341,9 @@
             const charWidth = fontSize * 0.75;
             const rowHeight = fontSize * 1.6;
 
-            // 2. Center vertically
+            // 2. Center vertically (WITH 10% TOP MARGIN SHIFT)
             const totalCalcHeight = totalLines * rowHeight;
-            const startY = (height - totalCalcHeight) / 2 + rowHeight * 0.5;
+            const startY = (height - totalCalcHeight) / 2 + rowHeight * 0.5 + (height * 0.1);
 
             // 3. Center horizontally (AS ENSEMBLE)
             const coachBox = document.getElementById('math-coach-box');
@@ -426,7 +464,7 @@
                         ctx.fillText(String(cValue), targetCenterX, fixedCarryY);
 
                         if (isCurrentActive && step.type === 'digit-multiply') {
-                            ctx.fillText('+', targetCenterX, partialY - rowHeight * 0.42);
+                            ctx.fillText('+', targetCenterX, partialY - rowHeight * 0.38);
                         }
                         ctx.restore();
                     }
@@ -548,6 +586,8 @@
                 if (step.type === 'row' || step.type === 'row-complete') {
                     const digit = f2Str[step.rowIndex];
                     message = `Die Multiplikation mit der Ziffer <b style="color:${color}">${digit}</b> ist abgeschlossen. Alle Teilergebnisse dieser Zeile wurden berechnet.`;
+                } else if (step.type === 'digit-init') {
+                    message = `Für diese Stelle übernehmen wir den Übertrag von <span class="coach-math-highlight">${step.carryValue}</span> aus der vorherigen Teilrechnung.`;
                 } else if (step.type === 'digit-multiply') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
@@ -558,7 +598,7 @@
                     const fDigit = parseInt(f1Str[step.f1Idx]);
                     const prod = fDigit * mDigit;
                     const final = prod + step.carryValue;
-                    message = `Jetzt addieren wir den Übertrag: <span class="coach-math-highlight">${prod} + ${step.carryValue} = ${final}</span>. Die Ziffer <b style="color:${color}">${final % 10}</b> wird notiert, der Rest wird als neuer Übertrag mitgenommen.`;
+                    message = `Jetzt addieren wir den Übertrag:<br><span class="coach-math-highlight">${prod} + ${step.carryValue} = ${final}</span>.<br>Die Ziffer <b style="color:${color}">${final % 10}</b> wird notiert, der Rest wird als neuer Übertrag mitgenommen.`;
                 } else if (step.type === 'final') {
                     message = `<b>Berechnung abgeschlossen!</b> Wir haben alle Teilprodukte addiert. Das finale Ergebnis ist <span class="coach-math-highlight">${factor1 * factor2}</span>.`;
                 }
