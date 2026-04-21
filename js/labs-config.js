@@ -63,14 +63,27 @@ const LABS_DATA = [
         "tagline": "Grundrechenarten / Detail-Analyse",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 215, 0, 0.1)" stroke="#ffd700" stroke-width="2" />
-            <line x1="30" y1="40" x2="70" y2="40" stroke="white" stroke-width="2" />
-            <line x1="30" y1="55" x2="70" y2="55" stroke="white" stroke-width="2" />
-            <line x1="30" y1="70" x2="70" y2="70" stroke="#00d2ff" stroke-width="3" />
-            <path d="M42 35 L58 51 M58 35 L42 51" stroke="#ffd700" stroke-width="3" stroke-linecap="round" />
+            <circle cx="50" cy="50" r="6" fill="#ffd700" />
         </svg>`,
         "category": "arithmetik grade5 hot",
         "keywords": "multiplikation malrechnen schriftlich mathe schule",
         "color": "gold"
+    },
+    {
+        "id": "dividieren",
+        "href": "dividieren.html",
+        "title": "Schriftliche Division",
+        "description": "Meistere die schriftliche Division mit dem interaktiven ULTRA-Labor. Perfekte Ausrichtung und pädagogische Begleitung durch den Math-Coach.",
+        "tagline": "Grundrechenarten / Grid-Analyse",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
+            <circle cx="50" cy="35" r="5" fill="#00d2ff" />
+            <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="5" stroke-linecap="round" />
+            <circle cx="50" cy="65" r="5" fill="#00d2ff" />
+        </svg>`,
+        "category": "arithmetik grade5 hot",
+        "keywords": "division teilen schriftlich dividieren mathe schule",
+        "color": "blue"
     },
     {
         "id": "winkelsumme3d",
