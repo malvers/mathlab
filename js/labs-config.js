@@ -369,6 +369,21 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "bluescreen",
+        "href": "bluescreen.html",
+        "title": "System Failure",
+        "description": "Ein cineastischer Bluescreen im ULTRA-Look. Simuliert einen mathematischen Überlauf mit Glitch-Effekten und System-Wiederherstellung.",
+        "tagline": "Cinematic / Fun / System-Analyse",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 50,20 L 85,80 L 15,80 Z" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="3" />
+            <rect x="47" y="40" width="6" height="20" fill="#00d2ff" />
+            <rect x="47" y="65" width="6" height="6" fill="#00d2ff" />
+        </svg>`,
+        "category": "fun hot",
+        "keywords": "bluescreen error system failure fun cinematic ultra",
+        "color": "blue"
+    },
+    {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
         "title": "Integral-Simulator",
