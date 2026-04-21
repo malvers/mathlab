@@ -381,7 +381,7 @@ const LABS_DATA = [
             <rect x="55" y="55" width="25" height="25" fill="none" stroke="#adff2f" stroke-width="2" rx="4" />
             <circle cx="50" cy="50" r="5" fill="#adff2f" />
         </svg>`,
-        "category": "arithmetic logic fun hot",
+        "category": "arithmetic logic fun hot grade5",
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid",
         "color": "green"
     },
