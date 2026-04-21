@@ -20,6 +20,8 @@
             position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
             overflow: hidden;
+            width: 100%;
+            height: 85vh; /* Explicit height to ensure visibility */
         }
 
         .cyber-grid {
@@ -130,9 +132,10 @@
         </div>
     </main>
 
-    <script src="js/branding.js"></script>
+    <script src="js/branding.js?v=5.5.6"></script>
     <script src="js/ui.js"></script>
     <script>
+        console.log("⚛️ CYBER-ENGINE: LOADING VERSION 5.5.5 (ACTIVE)");
         // 1. Branding & UI Init
         const BRAND_BLUE = "#00d2ff";
         const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00ff00", "#4CAF50", "#F44336"];
@@ -269,27 +272,30 @@
             // Ensure we have enough space for the summands, the potential carry, AND the '+' sign
             const maxCols = Math.max(s1Str.length, s2Str.length) + 2; 
             
-            // Dynamic Font Sizing
-            const fontSize = Math.min(width * 0.08, height * 0.12);
+            // Dynamic Font Sizing (Reduced by ~10%)
+            const fontSize = Math.min(width * 0.07, height * 0.11);
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
-            const charWidth = fontSize * 0.85; // Slightly wider for Orbitron grid
+            const charWidth = fontSize * 0.85; 
             const rowHeight = fontSize * 1.5;
 
-            // Positioning & Ensemble Alignment
+            // --- PRECISION CENTERING (Numbers between Sidebar and Box) ---
             const coachBox = document.getElementById('math-coach-box');
             const coachWidth = 380;
-            const gap = 80;
+            const rightPadding = 40; 
+            const boxX = width - coachWidth - rightPadding; // Left edge of the box
+            
             const calcWidth = maxCols * charWidth;
-            const ensembleWidth = calcWidth + gap + coachWidth;
-            const ensembleStartX = (width - ensembleWidth) / 2;
+            const horizontalCenter = boxX / 2; // Center point of the 'Numbers Area'
+            
+            // startX is where the rightmost digit (index 0) will be placed.
+            // Since ctx.textAlign is 'center', we offset from horizontalCenter by half the calcWidth.
+            const startX = horizontalCenter + (calcWidth / 2) - (charWidth / 2);
 
-            // startX is the center of the rightmost column
-            const startX = ensembleStartX + (maxCols - 1.5) * charWidth; 
             const startY = height / 2 - rowHeight;
 
             if (coachBox) {
-                coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
+                coachBox.style.left = `${boxX}px`;
                 coachBox.style.top = `${height / 2 - 100}px`;
                 coachBox.classList.add('visible');
             }
@@ -364,6 +370,21 @@
                     ctx.fillText(s.carry, startX - s.col * charWidth, startY + rowHeight * 2.2);
                     if (isCurrent) ctx.restore();
                 }
+            }
+
+            // 4. Double Underline (Final Result)
+            if (step && step.type === 'complete') {
+                const underlineY = startY + rowHeight * 2.7; // Shifted further down from 2.5 to 2.7
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                // Line 1
+                ctx.moveTo(startX - (plusCol + 0.2) * charWidth, underlineY);
+                ctx.lineTo(startX + charWidth * 0.6, underlineY);
+                // Line 2
+                ctx.moveTo(startX - (plusCol + 0.2) * charWidth, underlineY + 8);
+                ctx.lineTo(startX + charWidth * 0.6, underlineY + 8);
+                ctx.stroke();
             }
 
             updateMessages();
