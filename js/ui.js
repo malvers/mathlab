@@ -593,6 +593,86 @@ class CyberUI {
                 font-size: 0.8rem;
                 font-weight: bold;
             }
+
+            /* --- ULTRA-SCAN SEARCH COMPONENT --- */
+            .search-container {
+                position: relative;
+                width: 100%;
+                margin: 0;
+                animation: ui-card-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+
+            .search-input {
+                width: 100%;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(0, 210, 255, 0.2);
+                border-radius: 12px;
+                padding: 15px 50px 15px 55px;
+                font-size: 1.1rem;
+                color: white;
+                font-family: 'Outfit', sans-serif;
+                outline: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(20px);
+                box-sizing: border-box;
+            }
+
+            .search-input:focus {
+                border-color: var(--neon-blue);
+                background: rgba(0, 210, 255, 0.05);
+                box-shadow: 0 0 25px rgba(0, 210, 255, 0.2), inset 0 0 10px rgba(0, 210, 255, 0.1);
+            }
+
+            .search-input::placeholder {
+                color: rgba(255, 255, 255, 0.2);
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.8rem;
+            }
+
+            .search-icon {
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.4rem;
+                opacity: 0.5;
+                pointer-events: none;
+                transition: all 0.3s ease;
+            }
+
+            .search-input:focus + .search-icon {
+                opacity: 1;
+                filter: drop-shadow(0 0 8px var(--neon-blue));
+            }
+
+            .clear-search-btn {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: white;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: none; /* Controlled by JS */
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 1.4rem;
+                transition: all 0.2s ease;
+                padding: 0;
+                line-height: 1;
+            }
+
+            .clear-search-btn:hover {
+                background: rgba(255, 0, 0, 0.2);
+                border-color: #ff0000;
+                box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            }
         `;
         document.head.appendChild(style);
     }
@@ -934,5 +1014,45 @@ class CyberUI {
             }
         };
         setTimeout(() => window.addEventListener('mousedown', dismiss), 10);
+    }
+
+    /**
+     * Creates a high-fidelity ULTRA search bar (Labor-Scan)
+     * @param {string} containerId - Mount point
+     * @param {string} placeholder - Input placeholder
+     * @param {function} onInput - Callback function(value)
+     */
+    static createSearch(containerId, placeholder, onInput) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const html = `
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="${placeholder}" autocomplete="off">
+                <div class="search-icon">🔍</div>
+                <button class="clear-search-btn" title="Suche löschen">×</button>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        const input = container.querySelector('.search-input');
+        const clearBtn = container.querySelector('.clear-search-btn');
+
+        const updateClearBtn = () => {
+            clearBtn.style.display = input.value.length > 0 ? 'flex' : 'none';
+        };
+
+        input.addEventListener('input', (e) => {
+            updateClearBtn();
+            onInput(e.target.value);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            updateClearBtn();
+            input.focus();
+            onInput('');
+        });
     }
 }
