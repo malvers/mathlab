@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Logik-Architekt | ULTRA v5.3.8</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
     <style>
         :root {
             --cell-bg: rgba(15, 23, 42, 0.6);
@@ -13,6 +17,8 @@
             --neon-blue: #00d2ff;
             --neon-green: #adff2f;
             --neon-red: #ff4d4d;
+            --cell-size: 130px;
+            --board-gap: 15px;
         }
 
         #main-content {
@@ -20,6 +26,9 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+            padding: 20px;
+            box-sizing: border-box;
+            min-height: 100vh;
         }
 
         #game-board {
@@ -33,22 +42,32 @@
             flex-direction: column;
             gap: 20px;
             animation: board-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         @keyframes board-in {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .grid-container {
             display: grid;
-            gap: 15px;
+            gap: var(--board-gap);
             position: relative;
+            margin: 0 auto;
         }
 
         .cell {
-            width: 130px;
-            height: 130px;
+            width: var(--cell-size);
+            height: var(--cell-size);
             background: var(--cell-bg);
             border: 2px solid var(--cell-border);
             border-radius: 12px;
@@ -90,6 +109,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            width: var(--cell-size);
+            height: var(--cell-size);
             transition: all 0.4s ease;
         }
 
@@ -98,32 +119,64 @@
             text-shadow: 0 0 10px var(--neon-green);
         }
 
-        /* Layout Grid Helpers */
-        .row-sums {
-            position: absolute;
-            right: -150px;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            height: calc(100% - 15px);
-        }
-
+        /* Layout Grid Helpers - NOW PART OF GRID FLOW */
+        .row-sums,
         .col-sums {
-            position: absolute;
-            bottom: -150px;
-            left: 0;
-            display: flex;
-            gap: 15px;
-            width: calc(100% - 15px);
+            display: contents;
+            /* Let children participate in main grid */
         }
 
-        .sum-item {
-            width: 130px;
-            height: 130px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* --- RESPONSIVE ADJUSTMENTS --- */
+        @media (max-width: 1200px) {
+            :root {
+                --cell-size: 100px;
+                --board-gap: 10px;
+            }
+
+            .cell {
+                font-size: 2.8rem;
+            }
+
+            .sum-target {
+                font-size: 1.5rem;
+            }
+
+            #game-board {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            #side-panel {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 1000;
+            }
+
+            /* Could add a toggle button here, but for now we prioritize space */
+            #main-content {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --cell-size: 80px;
+                --board-gap: 8px;
+            }
+
+            .cell {
+                font-size: 2.2rem;
+            }
+
+            .sum-target {
+                font-size: 1.2rem;
+            }
+
+            #game-board {
+                padding: 15px;
+                border-radius: 10px;
+            }
         }
 
         #game-nav {
@@ -156,27 +209,8 @@
             pointer-events: auto;
         }
 
-        .btn {
-            background: rgba(0, 210, 255, 0.05);
-            color: var(--neon-blue);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            padding: 12px 25px;
-            border-radius: 12px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:hover {
-            background: rgba(0, 210, 255, 0.2);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            transform: translateY(-2px);
-            color: white;
+        .btn:active {
+            transform: scale(0.95);
         }
 
         .btn:active {
@@ -197,35 +231,104 @@
             box-shadow: 0 0 15px var(--neon-green);
         }
 
-        .btn-next:hover { transform: scale(1.1); }
+        .btn-next:hover {
+            transform: scale(1.1);
+        }
 
+        .cell.hinted {
+            color: #ffcc00;
+            text-shadow: 0 0 15px #ffcc00;
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.1);
+        }
+
+        #hint-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 11, 24, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+            border-radius: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        #hint-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .hint-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            padding: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            width: 120px;
+            border-radius: 10px;
+            margin: 20px 0;
+            appearance: textfield;
+            /* Firefox */
+        }
+
+        .hint-input::-webkit-outer-spin-button,
+        .hint-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #game-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
     </style>
 </head>
+
 <body>
     <aside id="side-panel">
         <div id="sidebar-header"></div>
         <div id="game-stats"></div>
-        <div style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div
+            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
 
     <main id="main-content">
         <div id="game-board">
-            <div id="game-nav">
-                <div style="font-family: Orbitron; font-size: 0.8rem; letter-spacing: 2px;">GRID_STABILIZATION_PROTOCOL</div>
-            </div>
-
             <div class="grid-container" id="grid">
-                <!-- Cells will be generated here -->
-                <div class="row-sums" id="row-sums"></div>
-                <div class="col-sums" id="col-sums"></div>
+                <!-- Cells and Sums will be generated here -->
             </div>
 
             <div class="win-overlay" id="win-screen">
-                <h2 style="font-family: Orbitron; color: var(--neon-green); letter-spacing: 5px;">PROTOCOL STABILIZED</h2>
+                <h2 style="font-family: Orbitron; color: var(--neon-green); letter-spacing: 5px;">PROTOCOL STABILIZED
+                </h2>
                 <p style="font-family: Outfit; font-weight: 300;">Mathematischer Kern erfolgreich synchronisiert.</p>
                 <button class="btn-next" onclick="nextLevel()">NÄCHSTES LEVEL</button>
+            </div>
+
+            <div id="hint-overlay">
+                <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">HILFE-PROTOKOLL</h3>
+                <p style="font-family: Outfit; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Löse die Aufgabe für einen Hinweis:</p>
+                <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;">12 + 5 = ?</div>
+                <input type="number" id="hint-input" class="hint-input">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="border-color: #ffcc00; color: #ffcc00" onclick="checkHintAnswer()">BESTÄTIGEN</button>
+                    <button class="btn" onclick="closeHint()">ABBRECHEN</button>
+                </div>
             </div>
         </div>
     </main>
@@ -235,20 +338,36 @@
     <script>
         let gridSize = 3;
         let grid = [];
+        let solvedGrid = []; // Reference solution
+        let hintedCells = []; // Track cells revealed by hints
         let targetRowSums = [];
         let targetColSums = [];
         let currentLevel = 1;
         let moves = 0;
         let startTime = Date.now();
+        let currentHintAnswer = null;
 
         window.addEventListener('load', () => {
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Spiel",
-                subtitle: "Logik-Architekt"
+                subtitle: "Logik-Architekt",
+                briefing: `
+                    <b style="color:var(--branding-blue); font-size:1.1rem; letter-spacing:2px;">MISSION: LOGIK-ARCHITEKT</b><br><br>
+                    Willkommen im Cyber-Labor. Deine Aufgabe ist es, den mathematischen Kern zu stabilisieren.<br><br>
+                    • <b>Ziel:</b> Ändere die Zahlen im Gitter so, dass ihre Summen exakt mit den Zielwerten am Ende jeder Reihe und Spalte übereinstimmen.<br><br>
+                    • <b>Steuerung:</b> Ein Klick auf eine Zelle erhöht ihren Wert (0-9). Danach beginnt der Zyklus erneut.<br><br>
+                    • <b>Hinweise:</b> Löse eine Rechenaufgabe, um eine Ziffer dauerhaft zu fixieren (goldener Glow).<br><br>
+                    • <b>Perfektion:</b> Minimiere Züge und Zeit für den Highscore!
+                `
             });
             CyberUI.init();
             setupStats();
             initGame();
+
+            // Handle hint input 'Enter' key
+            document.getElementById('hint-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkHintAnswer();
+            });
         });
 
         function setupStats() {
@@ -269,10 +388,24 @@
                 </div>
             `, 'var(--neon-blue)');
 
+            CyberUI.createCard('game-stats', 'TRAINING', `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.7rem; opacity: 0.6; font-family:Orbitron;">LEVEL WÄHLEN</label>
+                    <input type="range" min="1" max="20" value="${currentLevel}" 
+                           oninput="document.getElementById('lvl-val').innerText = this.value.padStart(2, '0')"
+                           onchange="changeLevel(this.value)"
+                           style="width: 100%; accent-color: var(--neon-blue); cursor: pointer;">
+                    <div id="lvl-val" style="font-family: Orbitron; font-size: 1.2rem; text-align: center; color: var(--neon-blue);">${currentLevel.toString().padStart(2, '0')}</div>
+                </div>
+            `, 'var(--neon-green)');
+
             CyberUI.createCard('game-stats', 'STEUERUNG', `
-                <button class="btn" style="width:100%; margin-top: 0;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn" style="width:100%; margin-top: 5px;" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                    <button class="btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">HILFE ANFORDERN</button>
+                </div>
             `, 'var(--neon-orange)');
-            
+
             setInterval(updateTime, 1000);
         }
 
@@ -288,83 +421,81 @@
             gridSize = currentLevel > 5 ? 4 : 3;
             const container = document.getElementById('grid');
             container.style.gridTemplateColumns = `repeat(${gridSize}, 130px)`;
-            
+
             generatePuzzle();
             renderGrid();
             updateValidation();
-            
+
             document.getElementById('stat-level').textContent = currentLevel.toString().padStart(2, '0');
             document.getElementById('win-screen').classList.remove('active');
+            document.getElementById('hint-overlay').classList.remove('active');
         }
 
         function generatePuzzle() {
-            // Generate a random solved grid first to ensure valid target sums
             grid = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
+            solvedGrid = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
+            hintedCells = Array(gridSize).fill(0).map(() => Array(gridSize).fill(false));
             targetRowSums = Array(gridSize).fill(0);
             targetColSums = Array(gridSize).fill(0);
 
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
-                    const val = Math.floor(Math.random() * 9) + 1;
+                    const val = Math.floor(Math.random() * 10);
+                    solvedGrid[r][c] = val;
                     targetRowSums[r] += val;
                     targetColSums[c] += val;
                 }
             }
-
-            // Now reset the actual grid to 0
-            grid = Array(gridSize).fill(0).map(() => Array(gridSize).fill(0));
         }
 
         function renderGrid() {
             const container = document.getElementById('grid');
-            const rowSumsEl = document.getElementById('row-sums');
-            const colSumsEl = document.getElementById('col-sums');
+            container.innerHTML = '';
 
-            // Clear previous
-            Array.from(container.children).forEach(child => {
-                if (!child.id || (child.id !== 'row-sums' && child.id !== 'col-sums')) {
-                    container.removeChild(child);
-                }
-            });
-            rowSumsEl.innerHTML = '';
-            colSumsEl.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) auto`;
 
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
+                    if (hintedCells[r][c]) cell.classList.add('hinted');
                     cell.dataset.r = r;
                     cell.dataset.c = c;
-                    cell.textContent = grid[r][c] || '';
+                    cell.textContent = grid[r][c];
                     cell.onclick = () => handleCellClick(r, c, cell);
-                    container.insertBefore(cell, rowSumsEl);
+                    container.appendChild(cell);
                 }
-                
+
                 const rSum = document.createElement('div');
-                rSum.className = 'sum-item sum-target';
+                rSum.className = 'sum-target';
                 rSum.id = `row-sum-${r}`;
                 rSum.textContent = targetRowSums[r];
-                rowSumsEl.appendChild(rSum);
+                container.appendChild(rSum);
             }
 
             for (let c = 0; c < gridSize; c++) {
                 const cSum = document.createElement('div');
-                cSum.className = 'sum-item sum-target';
+                cSum.className = 'sum-target';
                 cSum.id = `col-sum-${c}`;
                 cSum.textContent = targetColSums[c];
-                colSumsEl.appendChild(cSum);
+                container.appendChild(cSum);
             }
+
+            const corner = document.createElement('div');
+            container.appendChild(corner);
         }
 
         function handleCellClick(r, c, el) {
+            if (hintedCells[r][c]) return; // Hinted cells are fixed
+
             grid[r][c] = (grid[r][c] + 1) % 10;
-            el.textContent = grid[r][c] || '';
+            el.textContent = grid[r][c];
             el.classList.add('active');
             setTimeout(() => el.classList.remove('active'), 200);
-            
+
             moves++;
             document.getElementById('stat-moves').textContent = moves;
-            
+
             updateValidation();
             checkWin();
         }
@@ -394,7 +525,7 @@
                     allGood = false;
                 }
             }
-            
+
             return allGood;
         }
 
@@ -405,6 +536,82 @@
                     if (window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
                 }, 400);
             }
+        }
+
+        function requestHint() {
+            let a, b, op, task;
+            const diff = Math.min(10, currentLevel);
+            
+            if (Math.random() > 0.5) {
+                a = Math.floor(Math.random() * (10 + diff)) + 5;
+                b = Math.floor(Math.random() * (10 + diff)) + 5;
+                currentHintAnswer = a + b;
+                task = `${a} + ${b} = ?`;
+            } else {
+                a = Math.floor(Math.random() * (20 + diff)) + 10;
+                b = Math.floor(Math.random() * 10) + 2;
+                currentHintAnswer = a - b;
+                task = `${a} - ${b} = ?`;
+            }
+
+            document.getElementById('hint-task').textContent = task;
+            document.getElementById('hint-input').value = '';
+            document.getElementById('hint-overlay').classList.add('active');
+            setTimeout(() => document.getElementById('hint-input').focus(), 100);
+        }
+
+        function checkHintAnswer() {
+            const input = document.getElementById('hint-input').value;
+            if (parseInt(input) === currentHintAnswer) {
+                closeHint();
+                revealHint();
+            } else {
+                document.getElementById('hint-input').style.borderColor = 'var(--neon-red)';
+                setTimeout(() => {
+                    document.getElementById('hint-input').style.borderColor = 'var(--neon-blue)';
+                }, 500);
+            }
+        }
+
+        function revealHint() {
+            let candidates = [];
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) {
+                        candidates.push({r, c});
+                    }
+                }
+            }
+
+            if (candidates.length === 0) {
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        if (!hintedCells[r][c]) candidates.push({r, c});
+                    }
+                }
+            }
+
+            if (candidates.length > 0) {
+                const target = candidates[Math.floor(Math.random() * candidates.length)];
+                grid[target.r][target.c] = solvedGrid[target.r][target.c];
+                hintedCells[target.r][target.c] = true;
+                
+                renderGrid();
+                updateValidation();
+                checkWin();
+            }
+        }
+
+        function closeHint() {
+            document.getElementById('hint-overlay').classList.remove('active');
+        }
+
+        function changeLevel(val) {
+            currentLevel = parseInt(val);
+            moves = 0;
+            startTime = Date.now();
+            document.getElementById('stat-moves').textContent = "0";
+            initGame();
         }
 
         function resetPuzzle() {
@@ -423,4 +630,5 @@
         }
     </script>
 </body>
+
 </html>
