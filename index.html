@@ -177,14 +177,15 @@
                 transform: translate(var(--sx), var(--sy)) scale(0.1) rotate(0deg);
                 opacity: 0;
             }
-            20% {
-                opacity: 0.7;
+            15% {
+                opacity: 0.8;
             }
-            80% {
-                opacity: 0.7;
+            85% {
+                opacity: 0.8;
+                transform: translate(calc(var(--sx) + (var(--ex) - var(--sx)) * 0.85), calc(var(--sy) + (var(--ey) - var(--sy)) * 0.85)) scale(2.2) rotate(calc(var(--rot) * 0.85));
             }
             100% {
-                transform: translate(var(--ex), var(--ey)) scale(2.2) rotate(var(--rot));
+                transform: translate(var(--ex), var(--ey)) scale(2.5) rotate(var(--rot));
                 opacity: 0;
             }
         }
@@ -1397,7 +1398,7 @@
 
         window.addEventListener('hashchange', handleHash);
         /* --- PLANET FLYBY SYSTEM --- */
-        const planets = ['🪐', '🌍', '☄️', '🛰️', '🌌', '🌟', '🌙', '🌑'];
+        const planets = ['🪐', '🌍', '🛰️', '🛸'];
         const overlay = document.getElementById('planet-overlay');
 
         function spawnPlanet() {
@@ -1418,12 +1419,12 @@
             
             // End far outside
             const angle = Math.random() * Math.PI * 2;
-            const dist = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+            const dist = Math.max(window.innerWidth, window.innerHeight) * 1.5;
             ex = sx + Math.cos(angle) * dist;
             ey = sy + Math.sin(angle) * dist;
 
-            const rot = (Math.random() - 0.5) * 720;
-            const duration = 6 + Math.random() * 8;
+            const rot = (Math.random() - 0.5) * 360;
+            const duration = 30 + Math.random() * 40;
 
             planet.style.left = `0px`;
             planet.style.top = `0px`;
@@ -1439,9 +1440,9 @@
         }
 
         // Start spawning
-        setInterval(spawnPlanet, 1500);
+        setInterval(spawnPlanet, 6000);
         // Initial wave
-        for(let i=0; i<8; i++) setTimeout(spawnPlanet, i * 400);
+        for(let i=0; i<5; i++) setTimeout(spawnPlanet, i * 2000);
 
     </script>
 </body>
