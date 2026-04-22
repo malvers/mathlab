@@ -420,5 +420,20 @@ const LABS_DATA = [
         "category": "hot grade11 grade12 oberstufe analysis funktionen",
         "keywords": "integral analysis fläche summe riemann reaktor",
         "color": "blue"
+    },
+    {
+        "id": "fourier",
+        "href": "fourier.html",
+        "title": "Fourier Labor",
+        "description": "Die Musik der Mathematik. Zerlege komplexe Formen wie Musiknoten in harmonische Kreisschwingungen und rekonstruiere sie.",
+        "tagline": "Fourier-Reihen / Harmonik / Epizykel",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="20" fill="none" stroke="#00d2ff" stroke-width="2" />
+            <circle cx="70" cy="50" r="10" fill="none" stroke="#adff2f" stroke-width="1.5" />
+            <path d="M 40 50 Q 50 20 60 50 T 80 50" fill="none" stroke="#ffffff" stroke-width="2" />
+        </svg>`,
+        "category": "fun geometrie hot",
+        "keywords": "fourier musik note epicycles kreise geometrie harmonik",
+        "color": "blue"
     }
 ];

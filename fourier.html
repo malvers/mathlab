@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fourier Labor | docalvers</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <style>
+        :root {
+            --side-width: 380px;
+            --branding-blue: #00d2ff;
+            --neon-blue: #00d2ff;
+            --deep-bg: #050b18;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--deep-bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #side-panel {
+            width: var(--side-width);
+            min-width: var(--side-width);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.6) 0%, #000 100%);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #top-bar {
+            height: 140px;
+            width: 100%;
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(2, 60px);
+            justify-content: center;
+            align-content: center;
+            gap: 5px 40px;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .component-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .component-label {
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0px;
+            position: absolute;
+            bottom: -5px;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
+            pointer-events: none;
+        }
+
+        #canvas {
+            display: block;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div
+            style="margin-top: auto; padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="top-bar">
+                <!-- Injected via JS to match 2-row layout -->
+            </div>
+            <div class="cyber-grid"></div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/fourier-logic.js"></script>
+    <script>
+        const BRAND_BLUE = "#00d2ff";
+        const GOLDEN = "#ffd700";
+        const COLORS = ["#ff7eb9", "#7afbff", "#fff970", "#ff7eb9", "#7afbff", "#fff970"];
+
+        CyberBranding.init({
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "FOURIER-ANALYSE"
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        let time = 0;
+        let path = [];
+        let fourierZ = [];
+        let currentShapePoints = [];
+        let paused = false;
+
+        // High-Tech SVG Path Sampler
+        function sampleSVGPath(pathData, density) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const path = document.createElementNS(svgNS, "path");
+            path.setAttribute("d", pathData);
+            const length = path.getTotalLength();
+            const points = [];
+            for (let i = 0; i < density; i++) {
+                const p = path.getPointAtLength((i / density) * length);
+                points.push({ x: p.x, y: p.y });
+            }
+            return points;
+        }
+
+        // Enhanced Path Generators
+        function generateSquare(size, density) {
+            const path = [];
+            for (let i = 0; i < density; i++) path.push({ x: -size + (2 * size * i) / density, y: -size }); // Top
+            for (let i = 0; i < density; i++) path.push({ x: size, y: -size + (2 * size * i) / density }); // Right
+            for (let i = 0; i < density; i++) path.push({ x: size - (2 * size * i) / density, y: size }); // Bottom
+            for (let i = 0; i < density; i++) path.push({ x: -size, y: size - (2 * size * i) / density }); // Left
+            return path;
+        }
+
+        // SVG Path for an elegant Eighth Note
+        const NOTE_SVG = "M 25,120 C 25,140 10,155 -10,155 C -30,155 -45,140 -45,120 C -45,100 -30,85 -10,85 C -5,85 0,87 5,90 L 5,-100 L 70,-80 L 70,-20 L 5,0";
+        // SVG Path for a Heart
+        const HEART_SVG = "M 0,60 C -40,60 -80,20 -80,-30 C -80,-80 -40,-110 0,-70 C 40,-110 80,-80 80,-30 C 80,20 40,60 0,60";
+
+        const SHAPES = {
+            "QUADRAT": generateSquare(150, 60),
+            "NOTE": sampleSVGPath(NOTE_SVG, 200),
+            "HERZ": sampleSVGPath(HEART_SVG, 200)
+        };
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'FOURIER-REIHE', `
+                <div class="cyber-control-group">
+                    <label class="cyber-label">FORM WÄHLEN</label>
+                    <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width:100%; margin-bottom:15px;">
+                        <option value="QUADRAT">QUADRAT</option>
+                        <option value="NOTE">MUSIKNOTE</option>
+                        <option value="HERZ">HERZ</option>
+                    </select>
+                </div>
+                <div class="cyber-control-group">
+                    <label class="cyber-label">KOMPLEXITÄT (Vektoren)</label>
+                    <input type="range" id="n-input" min="1" max="150" value="50" oninput="updateParams()">
+                </div>
+                
+                <div class="cyber-control-group" style="margin-top: 15px;">
+                    <label class="cyber-label">GESCHWINDIGKEIT</label>
+                    <input type="range" id="speed-input" min="1" max="100" value="20">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f;">PAUSE</button>
+                    <button class="cyber-btn" onclick="resetSim()" style="flex: 1; border-color: var(--neon-blue);">RESET</button>
+                </div>
+
+                <div style="margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.5);">
+                    Links: Original-Pfad (Referenz)<br>Rechts: Fourier-Rekonstruktion
+                </div>
+            `, BRAND_BLUE);
+        }
+
+        function togglePause() {
+            paused = !paused;
+            const btn = document.getElementById('pause-btn');
+            if (btn) {
+                btn.innerText = paused ? "PLAY" : "PAUSE";
+                btn.style.borderColor = paused ? "var(--neon-blue)" : "#adff2f";
+            }
+        }
+
+        function updateParams() { 
+            const shapeKey = document.getElementById('shape-select')?.value || "QUADRAT";
+            init(shapeKey);
+        }
+
+        function resetSim() { 
+            time = 0; 
+            path = []; 
+        }
+
+        function init(shapeKey = "QUADRAT") {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            resetSim();
+
+            const targetPath = SHAPES[shapeKey];
+            const z = [];
+            currentShapePoints = [];
+            for (let i = 0; i < targetPath.length; i++) {
+                // Double size as requested
+                const scaledX = targetPath[i].x * 2;
+                const scaledY = targetPath[i].y * 2;
+                z.push({ re: scaledX, im: scaledY });
+                currentShapePoints.push({ x: scaledX, y: scaledY });
+            }
+            fourierZ = dft(z);
+            
+            // Only start animate if it's not already running
+            if (!window.animating) {
+                window.animating = true;
+                animate();
+            }
+        }
+
+        function animate() {
+            draw();
+            if (!paused) {
+                const speed = parseFloat(document.getElementById('speed-input')?.value || 20);
+                const dt = speed / 4000; 
+                time += dt;
+                if (time > Math.PI * 2) { 
+                    time = 0; 
+                    path = []; 
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function drawVector(ctx, x1, y1, x2, y2, color) {
+            const headlen = 8;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawEpicycles(x, y, fourier, isChain = true) {
+            const num = parseInt(document.getElementById('n-input')?.value || fourier.length);
+            for (let i = 0; i < Math.min(fourier.length, num); i++) {
+                let prevx = x;
+                let prevy = y;
+                let freq = fourier[i].freq;
+                let radius = fourier[i].amp;
+                let phase = fourier[i].phase;
+                x += radius * Math.cos(freq * time + phase);
+                y += radius * Math.sin(freq * time + phase);
+
+                if (isChain) {
+                    const color = COLORS[i % COLORS.length];
+                    ctx.strokeStyle = `${color}33`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(prevx, prevy, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    drawVector(ctx, prevx, prevy, x, y, color);
+                }
+            }
+            return { x, y };
+        }
+
+        function draw() {
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            ctx.clearRect(0, 0, width, height);
+
+            // 1. Draw Top Bar (2-Row Layout)
+            const topBar = document.getElementById('top-bar');
+            if (topBar && topBar.innerHTML === '') {
+                const freqs = [-3, -2, 2, 3, -1, 0, 1];
+                freqs.forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = 'component-circle';
+                    div.innerHTML = `<div class="component-label">${f}</div><canvas id="comp-${f}" width="80" height="80"></canvas>`;
+                    topBar.appendChild(div);
+                });
+            }
+
+            const freqs = [-3, -2, 2, 3, -1, 0, 1];
+            freqs.forEach((f, idx) => {
+                const c = document.getElementById(`comp-${f}`);
+                if (!c) return;
+                const cctx = c.getContext('2d');
+                cctx.clearRect(0, 0, 80, 80);
+                const component = fourierZ.find(z => z.freq === f);
+                if (component) {
+                    const color = COLORS[idx % COLORS.length];
+                    const radius = Math.min(30, component.amp * 0.5 + 8);
+                    cctx.strokeStyle = `${color}44`;
+                    cctx.beginPath(); cctx.arc(40, 40, radius, 0, Math.PI * 2); cctx.stroke();
+                    const vx = 40 + radius * Math.cos(f * time + component.phase);
+                    const vy = 40 + radius * Math.sin(f * time + component.phase);
+                    drawVector(cctx, 40, 40, vx, vy, color);
+                }
+            });
+
+            // 2. Reference Drawing (ORIGINAL SVG) - Left Side
+            ctx.save();
+            ctx.translate(width / 2 - 250, height / 2);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            for (let i = 0; i < currentShapePoints.length; i++) {
+                ctx.lineTo(currentShapePoints[i].x, currentShapePoints[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.font = "10px Orbitron";
+            ctx.fillText("ORIGINAL PFAD (SVG)", -50, -220);
+            ctx.restore();
+
+            // 3. Fourier Drawing - Right Side
+            ctx.save();
+            const v = drawEpicycles(width / 2 + 150, height / 2, fourierZ);
+            path.unshift(v);
+
+            ctx.fillStyle = "rgba(0, 210, 255, 0.4)";
+            ctx.font = "10px Orbitron";
+            ctx.fillText("REKONSTRUKTION (FOURIER)", width / 2 + 100, height / 2 - 220);
+
+            // Draw trace (GOLDEN)
+            ctx.strokeStyle = GOLDEN;
+            ctx.lineWidth = 1.5;
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.shadowBlur = 8; ctx.shadowColor = GOLDEN;
+            ctx.beginPath();
+            for (let i = 0; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            if (path.length > 5000) path.pop();
+            ctx.restore();
+        }
+
+        window.onresize = () => init(document.getElementById('shape-select')?.value || "QUADRAT");
+        setupUI();
+        document.fonts.ready.then(() => init("QUADRAT"));
+    </script>
+</body>
+</html>
