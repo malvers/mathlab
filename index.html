@@ -146,8 +146,46 @@
             letter-spacing: 3px;
             opacity: 0.9;
             margin-top: 10px;
-            color: #f5f3ff; /* Ultra Bright Lavender */
+            color: #f5f3ff;
+            /* Ultra Bright Lavender */
             text-transform: uppercase;
+        }
+
+        /* --- PLANET FLYBY EFFECT (ULTRA CRAZY) --- */
+        #planet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1; /* Über Video, unter Content? Nee, z-index 1 ist ok, aber Content muss höher */
+            overflow: hidden;
+        }
+
+        .flying-planet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 40px;
+            opacity: 0;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.5));
+            will-change: transform, opacity;
+        }
+
+        @keyframes fly-out {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(4) rotate(var(--rot));
+                opacity: 0;
+            }
         }
 
         /* --- CONTAINER OPTIMIERUNG --- */
@@ -156,7 +194,8 @@
             grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             justify-content: center;
             gap: 30px;
-            max-width: 1123px; /* Exakt 4-Kachel Breite */
+            max-width: 1123px;
+            /* Exakt 4-Kachel Breite */
             width: 95%;
             margin: 0 auto;
             padding: 20px 0 60px 0;
@@ -175,7 +214,7 @@
             flex-direction: column;
             align-items: center;
             padding: 18px 20px;
-            min-height: 180px; 
+            min-height: 180px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
@@ -288,10 +327,11 @@
         #tool-view .card {
             align-items: flex-start;
             text-align: left;
-            padding: 30px 25px;
+            padding: 20px 25px;
             background: rgba(15, 23, 42, 0.45);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            min-height: 220px;
+            aspect-ratio: 16 / 9;
+            min-height: auto;
         }
 
         #tool-view .card-icon {
@@ -342,7 +382,8 @@
         /* --- SECTION HEADERS --- */
         .view-section {
             width: 95%;
-            max-width: 1123px; /* Harmonisiert mit 4-Kachel Grid */
+            max-width: 1123px;
+            /* Harmonisiert mit 4-Kachel Grid */
             margin: 10px auto 5px auto;
             display: flex;
             align-items: center;
@@ -352,8 +393,10 @@
 
         .view-section h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem; /* Signifikant größer */
-            letter-spacing: 5px; /* Spaciger */
+            font-size: 1.5rem;
+            /* Signifikant größer */
+            letter-spacing: 5px;
+            /* Spaciger */
             margin: 0;
             color: var(--neon-blue);
             text-transform: uppercase;
@@ -391,18 +434,20 @@
             max-width: 1123px;
             width: 95%;
             margin: 0 auto;
-            padding: 15px 0; /* Mehr Padding im Grid */
+            padding: 15px 0;
+            /* Mehr Padding im Grid */
         }
 
         /* Spezial-Grid für das 8er Panorama (Klasse 5-12) */
         #jahrgang-grid {
-            grid-template-columns: repeat(8, 1fr); 
-            max-width: 1120px; /* Kompakter für eine Reihe */
+            grid-template-columns: repeat(8, 1fr);
+            max-width: 1120px;
+            /* Kompakter für eine Reihe */
             gap: 10px;
         }
 
         .card.grade-card {
-            min-height: 80px; 
+            min-height: 80px;
             justify-content: center;
             border: none;
             background: linear-gradient(135deg, var(--c1, var(--neon-blue)), var(--c2, var(--neon-blue)));
@@ -447,14 +492,54 @@
         }
 
         /* JG CORPORATE SPECTRUM (8 Steps: Blue -> White -> Purple) */
-        #jahrgang-grid .card:nth-child(1) { --c1: #00d2ff; --c2: #44e1ff; } /* 5: Corporate Blue */
-        #jahrgang-grid .card:nth-child(2) { --c1: #44e1ff; --c2: #88f0ff; } /* 6: Sky Blue */
-        #jahrgang-grid .card:nth-child(3) { --c1: #88f0ff; --c2: #ccfaff; } /* 7: Ice Blue */
-        #jahrgang-grid .card:nth-child(4) { --c1: #ccfaff; --c2: #ffffff; } /* 8: WHITE PEAK START */
-        #jahrgang-grid .card:nth-child(5) { --c1: #ffffff; --c2: #eecfff; } /* 9: WHITE PEAK END */
-        #jahrgang-grid .card:nth-child(6) { --c1: #f4dfff; --c2: #e0bfff; } /* 10: Soft Lavender */
-        #jahrgang-grid .card:nth-child(7) { --c1: #e0bfff; --c2: #be75ef; } /* 11: Deep Violet */
-        #jahrgang-grid .card:nth-child(8) { --c1: #be75ef; --c2: #9d50bb; } /* 12: Pure Corporate Purple */
+        #jahrgang-grid .card:nth-child(1) {
+            --c1: #00d2ff;
+            --c2: #44e1ff;
+        }
+
+        /* 5: Corporate Blue */
+        #jahrgang-grid .card:nth-child(2) {
+            --c1: #44e1ff;
+            --c2: #88f0ff;
+        }
+
+        /* 6: Sky Blue */
+        #jahrgang-grid .card:nth-child(3) {
+            --c1: #88f0ff;
+            --c2: #ccfaff;
+        }
+
+        /* 7: Ice Blue */
+        #jahrgang-grid .card:nth-child(4) {
+            --c1: #ccfaff;
+            --c2: #ffffff;
+        }
+
+        /* 8: WHITE PEAK START */
+        #jahrgang-grid .card:nth-child(5) {
+            --c1: #ffffff;
+            --c2: #eecfff;
+        }
+
+        /* 9: WHITE PEAK END */
+        #jahrgang-grid .card:nth-child(6) {
+            --c1: #f4dfff;
+            --c2: #e0bfff;
+        }
+
+        /* 10: Soft Lavender */
+        #jahrgang-grid .card:nth-child(7) {
+            --c1: #e0bfff;
+            --c2: #be75ef;
+        }
+
+        /* 11: Deep Violet */
+        #jahrgang-grid .card:nth-child(8) {
+            --c1: #be75ef;
+            --c2: #9d50bb;
+        }
+
+        /* 12: Pure Corporate Purple */
 
         /* Pink-Return to Red */
 
@@ -473,7 +558,8 @@
         }
 
         .card.grade-card svg text {
-            fill: #1e293b; /* Softer, more professional Navy */
+            fill: #1e293b;
+            /* Softer, more professional Navy */
             fill-opacity: 0.85;
             dominant-baseline: central;
             font-weight: bold;
@@ -487,7 +573,8 @@
         /* Category Color Accents (NUR THEMEN - Leuchtender Blue-Look) */
         .grade-grid:last-of-type .card.category-card {
             border: 2px solid var(--neon-blue);
-            background: rgba(0, 210, 255, 0.05); /* Hauch von Blau im Glas */
+            background: rgba(0, 210, 255, 0.05);
+            /* Hauch von Blau im Glas */
             backdrop-filter: blur(10px);
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
             transition: all 0.4s ease;
@@ -530,6 +617,18 @@
             margin: 40px auto 20px auto;
             display: flex;
             justify-content: flex-start;
+            align-items: center;
+            gap: 30px;
+        }
+
+        #view-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--neon-blue);
+            margin: 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
         }
 
         .btn-back {
@@ -540,7 +639,8 @@
             justify-content: center;
             background: rgba(15, 23, 42, 0.85) !important;
             backdrop-filter: blur(15px);
-            border: 1px solid #00d2ff !important; /* Offizieller Branding-Akzent */
+            border: 1px solid #00d2ff !important;
+            /* Offizieller Branding-Akzent */
             border-radius: 12px;
             color: white !important;
             font-size: 1.2rem;
@@ -583,7 +683,8 @@
         /* --- SEARCH BAR --- */
         .search-bar-container {
             width: 95%;
-            max-width: 1123px; /* Harmonisiert mit 4-Kachel Grid */
+            max-width: 1123px;
+            /* Harmonisiert mit 4-Kachel Grid */
             margin: 20px auto;
             position: relative;
             z-index: 100;
@@ -594,7 +695,8 @@
             align-items: center;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 20px; /* Harmonisiert mit Kacheln */
+            border-radius: 20px;
+            /* Harmonisiert mit Kacheln */
             padding: 5px 25px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
@@ -632,7 +734,8 @@
             border: none;
             color: rgba(255, 255, 255, 0.3);
             cursor: pointer;
-            font-size: 2.5rem; /* Markant größer */
+            font-size: 2.5rem;
+            /* Markant größer */
             padding: 0 10px;
             display: flex;
             align-items: center;
@@ -707,6 +810,7 @@
             opacity: 1;
             color: var(--neon-orange);
         }
+
         /* --- ADMIN GATE MODAL --- */
         #admin-gate {
             position: fixed;
@@ -797,6 +901,7 @@
 </head>
 
 <body>
+    <div id="planet-overlay"></div>
 
     <!-- Video Background (Galaxy) -->
     <!-- Nutze ein lokales Video 'galaxy.mp4' in deinem Ordner! Poster dient als Fallback. -->
@@ -817,7 +922,8 @@
     <div id="admin-gate">
         <div class="admin-gate-box">
             <h3>BERECHTIGUNG PRÜFEN</h3>
-            <input type="password" id="gate-pwd" placeholder="Passwort" autocomplete="current-password" aria-label="Passwort Eingabe" onkeydown="if(event.key==='Enter') verifyGate()">
+            <input type="password" id="gate-pwd" placeholder="Passwort" autocomplete="current-password"
+                aria-label="Passwort Eingabe" onkeydown="if(event.key==='Enter') verifyGate()">
             <button class="btn-access" onclick="verifyGate()">ACCESS</button>
             <br>
             <button class="btn-cancel" onclick="closeGate()">ABBRECHEN</button>
@@ -826,9 +932,10 @@
 
     <!-- Kontakt Button oben rechts -->
     <div class="contact-btn" onclick="document.getElementById('contact-overlay').classList.add('open')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
         </svg>
         Kontakt
     </div>
@@ -837,24 +944,28 @@
     <div id="contact-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
         <div class="contact-modal" onclick="event.stopPropagation()">
             <h3>Kontakt</h3>
-            <p>Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
+            <p>Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um
+                Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
             <a href="mailto:michael.r.alvers@gmail.com" class="contact-email">michael.r.alvers@gmail.com</a>
-            <button class="contact-close" onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
+            <button class="contact-close"
+                onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
     </div>
 
     <!-- Sound Controller floating rechts unten -->
     <div id="sound-toggle" class="sound-toggle" title="Ambient Sound">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 18V5l12-3v13"/>
-            <circle cx="6" cy="18" r="3"/>
-            <circle cx="18" cy="15" r="3"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 18V5l12-3v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="15" r="3" />
         </svg>
     </div>
 
     <header>
         <div class="header-content">
-            <h1>Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers Mathe-Labor</h1>
+            <h1>Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers
+                Mathe-Labor</h1>
             <div class="subtitle" id="dynamic-subtitle">INTERAKTIVE MATHEMATIK</div>
             <div class="author-attribution">von Dr. Michael R. Alvers</div>
         </div>
@@ -962,7 +1073,8 @@
                 <div class="card-icon">😊</div>
                 <h3>Fun</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('funktionen')" class="card grade-card category-card active">
+            <a href="javascript:void(0)" onclick="showFilter('funktionen')"
+                class="card grade-card category-card active">
                 <div class="card-icon">📈</div>
                 <h3>Funktionen</h3>
             </a>
@@ -972,11 +1084,13 @@
     <div id="tool-view" class="hidden">
         <div class="back-nav">
             <button class="btn-back" onclick="showGrades()" title="Zurück zur Auswahl">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:22px; height:22px;">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
             </button>
+            <h2 id="view-title">LABOR-ANSICHT</h2>
         </div>
         <div class="container" id="tool-container">
             <!-- Cards will be rendered dynamically from js/labs-config.js -->
@@ -1038,39 +1152,49 @@
             `).join('');
         }
 
-            // --- SEARCH LOGIC (ULTRA-SCAN INTEGRATED) ---
-            function filterLabs(val) {
-                const tools = document.querySelectorAll('#tool-container .card');
-                const q = val.toLowerCase().trim();
-                
-                tools.forEach(tool => {
-                    const title = tool.querySelector('h3').innerText.toLowerCase();
-                    const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
-                    const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
-                    const categories = tool.getAttribute('data-category').toLowerCase();
-                    
-                    if (title.includes(q) || desc.includes(q) || keywords.includes(q) || categories.includes(q)) {
-                        tool.style.display = 'flex';
-                    } else {
-                        tool.style.display = 'none';
-                    }
-                });
+        // --- SEARCH LOGIC (ULTRA-SCAN INTEGRATED) ---
+        function filterLabs(val) {
+            const tools = document.querySelectorAll('#tool-container .card');
+            const q = val.toLowerCase().trim();
 
-                if (q.length > 0) {
-                    document.getElementById('grade-view').classList.add('hidden');
-                    document.getElementById('tool-view').classList.remove('hidden');
+            tools.forEach(tool => {
+                const title = tool.querySelector('h3').innerText.toLowerCase();
+                const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
+                const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
+                const categories = tool.getAttribute('data-category').toLowerCase();
+
+                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || categories.includes(q)) {
+                    tool.style.display = 'flex';
+                } else {
+                    tool.style.display = 'none';
                 }
-            }
-
-            // Centralized Search Engine Hook
-            CyberUI.init();
-            CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
-                filterLabs(val);
             });
+
+            if (q.length > 0) {
+                document.getElementById('grade-view').classList.add('hidden');
+                document.getElementById('tool-view').classList.remove('hidden');
+            }
+        }
+
+        // Centralized Search Engine Hook
+        CyberUI.init();
+        CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
+            filterLabs(val);
+        });
 
         function showFilter(filter, updateHash = true) {
             // Ensure cards are rendered before filtering
             if (document.querySelectorAll('#tool-container .card').length === 0) renderCards();
+
+            const titles = {
+                'grade5': 'JAHRGANG 5', 'grade6': 'JAHRGANG 6', 'grade7': 'JAHRGANG 7', 'grade8': 'JAHRGANG 8',
+                'grade9': 'JAHRGANG 9', 'grade10': 'JAHRGANG 10', 'grade11': 'JAHRGANG 11', 'grade12': 'JAHRGANG 12',
+                'fun': 'SPIELE & FUN', 'lgs': 'GLEICHUNGSSYSTEME', 'pythagoras': 'PYTHAGORAS', 
+                'dreiecke': 'DREIECKE', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN'
+            };
+
+            const titleEl = document.getElementById('view-title');
+            if (titleEl) titleEl.innerText = titles[filter] || 'LABOR-ANSICHT';
 
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
@@ -1089,7 +1213,7 @@
             document.getElementById('tool-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            if(updateHash) {
+            if (updateHash) {
                 window.location.hash = filter;
             }
         }
@@ -1099,14 +1223,14 @@
             document.getElementById('grade-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            if(updateHash) {
+            if (updateHash) {
                 window.location.hash = '';
             }
         }
 
         function handleHash() {
             const hash = window.location.hash.substring(1);
-            if(hash) {
+            if (hash) {
                 showFilter(hash, false);
             } else {
                 showGrades(false);
@@ -1161,9 +1285,9 @@
             const pwdInput = document.getElementById('gate-pwd');
             const pwd = pwdInput.value;
             const hash = await sha256(pwd);
-            
+
             const targetHash = "3b421a36c686d295d84c48f434faa21430d55ef34b8a0c9ec39ca2f84b5d2a66";
-            
+
             if (hash === targetHash) {
                 closeGate();
                 activateAdmin();
@@ -1193,10 +1317,10 @@
             cards.forEach(card => {
                 const title = card.querySelector('h3');
                 const desc = card.querySelector('.card-desc');
-                
+
                 if (title) title.contentEditable = adminActive;
                 if (desc) desc.contentEditable = adminActive;
-                
+
                 // Prevent navigation when editing
                 if (adminActive) {
                     if (!card.hasAttribute('data-old-href')) {
@@ -1215,7 +1339,7 @@
 
         function exportChanges() {
             const cards = document.querySelectorAll('#tool-container .card');
-            
+
             // Generate a fresh LABS_DATA output based on UI edits
             const updatedData = LABS_DATA.map(lab => {
                 const card = document.querySelector(`.card[data-old-href="${lab.href}"], .card[href="${lab.href}"]`);
@@ -1228,13 +1352,13 @@
                 }
                 return lab;
             });
-            
+
             const json = JSON.stringify(updatedData, null, 4);
-            
+
             // Show in a modal for easy copy-paste
             const gate = document.getElementById('admin-gate');
             const box = gate.querySelector('.admin-gate-box');
-            
+
             box.innerHTML = `
                 <h3>EXPORT KONFIGURATION</h3>
                 <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 15px;">
@@ -1269,8 +1393,43 @@
         // High-Quality Video Slowdown (ULTRA 5.3.8)
         const bgVid = document.getElementById('bg-video');
         if (bgVid) bgVid.playbackRate = 0.5;
-        
+
         window.addEventListener('hashchange', handleHash);
+        /* --- PLANET FLYBY SYSTEM --- */
+        const planets = ['🪐', '🌍', '☄️', '🛰️', '🌌', '🌟', '🌙', '🌑'];
+        const overlay = document.getElementById('planet-overlay');
+
+        function spawnPlanet() {
+            if (document.hidden) return;
+            
+            const planet = document.createElement('div');
+            planet.className = 'flying-planet';
+            planet.innerText = planets[Math.floor(Math.random() * planets.length)];
+            
+            // Random direction
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.max(window.innerWidth, window.innerHeight) * 0.8;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const rot = (Math.random() - 0.5) * 360;
+            const duration = 4 + Math.random() * 6;
+
+            planet.style.setProperty('--tx', `${tx}px`);
+            planet.style.setProperty('--ty', `${ty}px`);
+            planet.style.setProperty('--rot', `${rot}px`);
+            planet.style.animation = `fly-out ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+
+            overlay.appendChild(planet);
+            
+            setTimeout(() => planet.remove(), duration * 1000);
+        }
+
+        // Start spawning
+        setInterval(spawnPlanet, 2000);
+        // Initial wave
+        for(let i=0; i<5; i++) setTimeout(spawnPlanet, i * 500);
+
     </script>
 </body>
+
 </html>

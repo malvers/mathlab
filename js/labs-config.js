@@ -108,15 +108,15 @@ const LABS_DATA = [
         "description": "Erlebe die Winkelsumme im 3-dimensionalen Raum. Dynamische Visualisierung der inneren Winkel eines Dreiecks.",
         "tagline": "Räumliche Visualisierung / Animation",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 20,80 L 80,80 L 50,20 Z" fill="rgba(0, 210, 255, 0.1)" stroke="white" stroke-width="2" />
-            <path d="M 50,20 L 50,80" stroke="rgba(0, 210, 255, 0.5)" stroke-width="1.5" stroke-dasharray="4,2" />
-            <path d="M 20,80 L 50,80 L 35,40 Z" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)" stroke-width="2">
-                <animateTransform attributeName="transform" type="rotate" from="0 50 80" to="-30 50 80" dur="3s" repeatCount="indefinite" />
-            </path>
-            <path d="M 80,80 L 50,80 L 65,40 Z" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)" stroke-width="2">
-                <animateTransform attributeName="transform" type="rotate" from="0 50 80" to="30 50 80" dur="3s" repeatCount="indefinite" />
-            </path>
-            <circle cx="50" cy="80" r="3" fill="white" />
+            <!-- Rectangular Frame -->
+            <rect x="15" y="25" width="70" height="55" fill="rgba(0, 210, 255, 0.15)" stroke="#00d2ff" stroke-width="1.5" />
+            <!-- Fold Lines meeting at the bottom center (50, 80) -->
+            <line x1="15" y1="25" x2="50" y2="80" stroke="#00d2ff" stroke-width="1" />
+            <line x1="85" y1="25" x2="50" y2="80" stroke="#00d2ff" stroke-width="1" />
+            <!-- The 3 Colored Angle Sectors forming a semi-circle -->
+            <path d="M 32,80 A 18,18 0 0,1 42,65 L 50,80 Z" fill="#ffb100" />
+            <path d="M 42,65 A 18,18 0 0,1 58,65 L 50,80 Z" fill="#ff4d4d" />
+            <path d="M 58,65 A 18,18 0 0,1 68,80 L 50,80 Z" fill="#adff2f" />
         </svg>`,
         "category": "dreiecke hot grade8",
         "keywords": "3d geometrie winkelsumme dreieck animation",
@@ -212,13 +212,13 @@ const LABS_DATA = [
         "description": "Ein anspruchsvolles geometrisches Rätsel. Kannst du den fehlenden Winkel nur durch Logik bestimmen?",
         "tagline": "Logik-Rätsel / Langley / Problemlösung",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="20,85 80,85 50,20" fill="rgba(198, 33, 40, 0.8)" stroke="white" stroke-width="4" stroke-linejoin="round" />
-            <line x1="20" y1="85" x2="62" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
-            <line x1="80" y1="85" x2="38" y2="38" stroke="white" stroke-width="3" stroke-linecap="round" />
-            <circle cx="20" cy="85" r="6" fill="#666" stroke="white" stroke-width="2" />
-            <circle cx="80" cy="85" r="6" fill="#666" stroke="white" stroke-width="2" />
-            <circle cx="50" cy="20" r="9" fill="#ff9800" stroke="white" stroke-width="2.5" />
-            <text x="50" y="27" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">?</text>
+            <polygon points="20,85 80,85 50,20" fill="rgba(157, 78, 221, 0.4)" stroke="rgb(128, 128, 128)" stroke-width="1.5" stroke-linejoin="round" />
+            <line x1="20" y1="85" x2="62" y2="38" stroke="rgb(128, 128, 128)" stroke-width="1.2" />
+            <line x1="80" y1="85" x2="38" y2="38" stroke="rgb(128, 128, 128)" stroke-width="1.2" />
+            <circle cx="20" cy="85" r="4" fill="#666" />
+            <circle cx="80" cy="85" r="4" fill="#666" />
+            <circle cx="50" cy="20" r="7" fill="#ff9800" />
+            <text x="50" y="25" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">?</text>
         </svg>`,
         "category": "dreiecke grade8",
         "keywords": "geometrie dreieck problem knobeln problemloesen",
@@ -257,13 +257,13 @@ const LABS_DATA = [
         "description": "Berechne die Winkelsumme in beliebigen n-Ecken. Entdecke die Formel für die Innenwinkel von Polygonen.",
         "tagline": "Winkelsumme in n-Ecken / Vielecke",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="25,25 75,25 85,50 75,75 25,75 15,50" fill="rgba(0, 210, 255, 0.2)" stroke="white" stroke-width="2" />
-            <circle cx="25" cy="25" r="4" fill="var(--neon-blue)" />
-            <circle cx="75" cy="25" r="4" fill="var(--neon-blue)" />
-            <circle cx="85" cy="50" r="4" fill="var(--neon-blue)" />
-            <circle cx="75" cy="75" r="4" fill="var(--neon-blue)" />
-            <circle cx="25" cy="75" r="4" fill="var(--neon-blue)" />
-            <circle cx="15" cy="50" r="4" fill="var(--neon-blue)" />
+            <polygon points="50,15 80.3,32.5 80.3,67.5 50,85 19.7,67.5 19.7,32.5" fill="rgba(0, 210, 255, 0.2)" stroke="white" stroke-width="1.5" />
+            <circle cx="50" cy="15" r="3" fill="var(--neon-blue)" />
+            <circle cx="80.3" cy="32.5" r="3" fill="var(--neon-blue)" />
+            <circle cx="80.3" cy="67.5" r="3" fill="var(--neon-blue)" />
+            <circle cx="50" cy="85" r="3" fill="var(--neon-blue)" />
+            <circle cx="19.7" cy="67.5" r="3" fill="var(--neon-blue)" />
+            <circle cx="19.7" cy="32.5" r="3" fill="var(--neon-blue)" />
         </svg>`,
         "category": "dreiecke hot grade8",
         "keywords": "geometrie polygon winkel vieleck winkelsumme",
@@ -332,10 +332,11 @@ const LABS_DATA = [
         "description": "Interaktive Untersuchung von Winkelsummen und Dreieckstypen in der Ebene.",
         "tagline": "Stufenwinkel / Wechselwinkel / Scheitelwinkel",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <line x1="10" y1="80" x2="90" y2="80" stroke="var(--neon-blue)" stroke-width="4" />
-            <line x1="20" y1="90" x2="70" y2="10" stroke="var(--neon-purple)" stroke-width="4" />
-            <path d="M 50,80 A 25,25 0 0,0 65,65" fill="none" stroke="var(--neon-yellow)" stroke-width="3" />
-            <circle cx="56" cy="74" r="3" fill="var(--neon-yellow)" />
+            <line x1="10" y1="40" x2="90" y2="40" stroke="var(--neon-blue)" stroke-width="3" />
+            <line x1="10" y1="75" x2="90" y2="75" stroke="var(--neon-blue)" stroke-width="3" />
+            <line x1="20" y1="90" x2="80" y2="25" stroke="var(--neon-purple)" stroke-width="3" />
+            <circle cx="34" cy="75" r="4" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)" stroke-width="1" />
+            <circle cx="65.5" cy="40" r="4" fill="rgba(0, 210, 255, 0.3)" stroke="var(--neon-blue)" stroke-width="1" />
         </svg>`,
         "category": "grade6 grade7 dreiecke hot",
         "keywords": "geometrie winkel dreieck winkelsumme beweis",
@@ -358,18 +359,16 @@ const LABS_DATA = [
         "title": "Beweis Innenwinkelsatz",
         "description": "Warum beträgt die Winkelsumme im Dreieck immer 180°? Hier kannst du den Beweis Schritt für Schritt nachvollziehen.",
         "tagline": "Interaktive Beweisführung / Schritt für Schritt",
-        "icon": `<svg width="42" height="42" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs><clipPath id="triClip"><polygon points="20,80 80,80 50,20" /></clipPath></defs>
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><clipPath id="triClip"><polygon points="10,85 90,85 50,15" /></clipPath></defs>
             <g clip-path="url(#triClip)">
-                <circle cx="20" cy="80" r="18" fill="rgb(255, 177, 0)" />
-                <circle cx="80" cy="80" r="18" fill="rgb(119, 181, 33)" />
-                <circle cx="50" cy="20" r="18" fill="rgb(198, 33, 40)" />
+                <circle cx="10" cy="85" r="25" fill="rgb(255, 177, 0)" />
+                <circle cx="90" cy="85" r="25" fill="rgb(119, 181, 33)" />
+                <circle cx="50" cy="15" r="25" fill="rgb(198, 33, 40)" />
             </g>
-            <path d="M 32,20 A 18,18 0 0,1 50,20 Z" fill="rgb(255, 177, 0)" />
-            <path d="M 50,20 A 18,18 0 0,1 68,20 Z" fill="rgb(119, 181, 33)" />
-            <line x1="5" y1="20" x2="95" y2="20" stroke="rgb(198, 33, 40)" stroke-width="4" stroke-linecap="round" />
-            <line x1="5" y1="80" x2="95" y2="80" stroke="rgb(198, 33, 40)" stroke-width="4" stroke-linecap="round" />
-            <polygon points="20,80 80,80 50,20" fill="none" stroke="#00d2ff" stroke-width="4" stroke-linejoin="round" />
+            <line x1="0" y1="15" x2="100" y2="15" stroke="rgb(198, 33, 40)" stroke-width="3" />
+            <line x1="0" y1="85" x2="100" y2="85" stroke="rgb(198, 33, 40)" stroke-width="3" />
+            <polygon points="10,85 90,85 50,15" fill="none" stroke="#00d2ff" stroke-width="3" stroke-linejoin="round" />
         </svg>`,
         "category": "dreiecke grade8",
         "keywords": "geometrie dreieck problem knobeln problemloesen",
