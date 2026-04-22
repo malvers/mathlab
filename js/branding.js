@@ -1,3 +1,4 @@
+/* @AI-READONLY: CENTRAL BRANDING ENGINE - DO NOT MODIFY WITHOUT EXPLICIT USER COMMAND */
 /**
  * Cyber-Labor Branding Engine v5.3.8 (ULTRA Edition - Responsive Upgrade)
  * Centralized branding and navigation component for Doc Alvers Laboratories.
