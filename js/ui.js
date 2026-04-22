@@ -227,7 +227,7 @@ class CyberUI {
             }
 
             .cyber-label {
-                font-family: 'Outfit', sans-serif;
+                font-family: 'Orbitron', sans-serif;
                 font-size: 0.85rem;
                 color: rgba(255, 255, 255, 0.8);
                 letter-spacing: 0.5px;
