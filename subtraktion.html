@@ -34,14 +34,23 @@
         #side-panel {
             width: var(--side-width);
             min-width: var(--side-width);
-            background: rgba(15, 23, 42, 0.8);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
             display: flex;
             flex-direction: column;
-            padding: 30px;
+            padding: 10px;
+            gap: 10px;
             box-sizing: border-box;
             z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         #main-content {
@@ -50,9 +59,6 @@
             position: relative;
             overflow: hidden;
             background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         #canvas-container {
@@ -60,9 +66,6 @@
             height: 100%;
             position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         #math-coach-box {
@@ -86,6 +89,19 @@
         #math-coach-box.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        .coach-title {
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .coach-title::before {
+            content: ''; width: 8px; height: 8px; background: #00d2ff; border-radius: 50%; box-shadow: 0 0 10px #00d2ff;
         }
 
         .cyber-grid {
@@ -261,17 +277,21 @@
 
             const s1Str = String(minuend);
             const s2Str = String(subtrahend);
-            // Ensure we have enough space for the summands, the potential carry, AND the '+' sign
             const maxCols = Math.max(s1Str.length, s2Str.length) + 2; 
             
-            // Dynamic Font Sizing (Verkleinert für elegantere Darstellung)
-            const fontSize = Math.min(width * 0.06, height * 0.09);
+            // Advanced Adaptive Scaling (Safe-Fit)
+            const maxCharsContent = maxCols;
+            const totalLines = 4;
+            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5); 
+            const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
+            
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
-            const charWidth = fontSize * 0.85; // Slightly wider for Orbitron grid
+            const charWidth = fontSize * 0.85; 
             const rowHeight = fontSize * 1.5;
 
-            // Positioning & Ensemble Alignment
+            // Ensemble Centering Logic
             const coachBox = document.getElementById('math-coach-box');
             const coachWidth = 380;
             const gap = 80;
@@ -279,9 +299,8 @@
             const ensembleWidth = calcWidth + gap + coachWidth;
             const ensembleStartX = (width - ensembleWidth) / 2;
 
-            // startX is the center of the rightmost column
             const startX = ensembleStartX + (maxCols - 1.5) * charWidth; 
-            const startY = height / 2 - rowHeight;
+            const startY = height / 2 - rowHeight * 0.5;
 
             if (coachBox) {
                 coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
@@ -291,7 +310,7 @@
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
 
-            // 1. Draw Summands (Center Aligned in Columns)
+            // 1. Draw Summands
             ctx.textAlign = 'center';
             
             // Row 1
@@ -303,14 +322,13 @@
                 if (isFocused) ctx.restore();
             }
 
-            // Row 2 (with +)
+            // Row 2 (with -)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.font = `${fontSize}px Orbitron`; // Non-bold for '+'
-            // The '+' sign is now safely shifted to the left of any potential carry
+            ctx.font = `${fontSize}px Orbitron`; 
             const plusCol = maxCols - 1;
             ctx.fillText('-', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
             
-            ctx.font = `bold ${fontSize}px Orbitron`; // Reset to bold for digits
+            ctx.font = `bold ${fontSize}px Orbitron`; 
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
@@ -332,45 +350,36 @@
             for (let i = 0; i <= currentStep; i++) {
                 const s = stepSequence[i];
                 if (s.type === 'calculate') {
-                    // Result digit
                     ctx.font = `bold ${fontSize}px Orbitron`;
                     ctx.fillStyle = 'white';
                     ctx.fillText(s.resultDigit, startX - s.col * charWidth, startY + rowHeight * 2.2);
 
-                    // Carry for NEXT column (placed just above separator)
                     if (s.newCarry > 0) {
                         ctx.save();
                         ctx.font = `bold ${fontSize * 0.35}px Orbitron`;
                         const isCurrent = (i === currentStep);
-                        
                         ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
-                        if (isCurrent) {
-                            ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00';
-                        }
+                        if (isCurrent) { ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
                         ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidth, startY + rowHeight * 1.45);
                         ctx.restore();
                     }
                 }
             }
 
-            // Doppelte Unterstreichung bei Abschluss
+            // Doppelte Unterstreichung
             if (step && step.type === 'complete') {
                 ctx.shadowBlur = 0;
                 ctx.strokeStyle = '#888888';
                 ctx.lineWidth = 2;
                 const lineY1 = startY + rowHeight * 2.7;
-                const lineY2 = startY + rowHeight * 2.76;
+                const lineY2 = startY + rowHeight * 2.8;
                 const lineStartX = startX - (plusCol + 0.2) * charWidth;
                 const lineEndX = startX + charWidth * 0.6;
-                
                 ctx.beginPath();
-                ctx.moveTo(lineStartX, lineY1);
-                ctx.lineTo(lineEndX, lineY1);
-                ctx.moveTo(lineStartX, lineY2);
-                ctx.lineTo(lineEndX, lineY2);
+                ctx.moveTo(lineStartX, lineY1); ctx.lineTo(lineEndX, lineY1);
+                ctx.moveTo(lineStartX, lineY2); ctx.lineTo(lineEndX, lineY2);
                 ctx.stroke();
             }
-            
             updateMessages();
         }
 

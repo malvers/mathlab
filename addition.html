@@ -34,14 +34,23 @@
         #side-panel {
             width: var(--side-width);
             min-width: var(--side-width);
-            background: rgba(15, 23, 42, 0.8);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
             display: flex;
             flex-direction: column;
-            padding: 30px;
+            padding: 10px;
+            gap: 10px;
             box-sizing: border-box;
             z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         #main-content {
@@ -50,9 +59,6 @@
             position: relative;
             overflow: hidden;
             background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         #canvas-container {
@@ -60,9 +66,6 @@
             height: 100%;
             position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         #math-coach-box {
@@ -88,6 +91,19 @@
             transform: translateY(0);
         }
 
+        .coach-title {
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .coach-title::before {
+            content: ''; width: 8px; height: 8px; background: #00d2ff; border-radius: 50%; box-shadow: 0 0 10px #00d2ff;
+        }
+
         .cyber-grid {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -98,6 +114,9 @@
         }
 
         .coach-math-highlight { color: #ffde00; font-weight: bold; }
+        .cyber-label { font-family: 'Orbitron'; font-size: 0.65rem; letter-spacing: 1px; opacity: 0.7; }
+        .stats-card { padding: 8px 12px !important; min-height: 50px !important; }
+        .stats-val { font-size: 1.1rem !important; }
     </style>
 </head>
 
@@ -128,7 +147,6 @@
     <script>
         // 1. Branding & UI Init
         const BRAND_BLUE = "#00d2ff";
-        const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00ff00", "#4CAF50", "#F44336"];
         
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
@@ -140,7 +158,7 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
 
-        // State (Default 7-digit numbers)
+        // State
         let summand1 = 1234567;
         let summand2 = 7654321;
         let currentStep = -1;
@@ -183,10 +201,7 @@
 
             let carry = 0;
             for (let i = 0; i < maxLen; i++) {
-                // Focus column
                 stepSequence.push({ type: 'focus', col: i });
-                
-                // Calculate
                 const d1 = parseInt(s1Str[s1Str.length - 1 - i] || 0);
                 const d2 = parseInt(s2Str[s2Str.length - 1 - i] || 0);
                 const sum = d1 + d2 + carry;
@@ -194,21 +209,13 @@
                 const nextCarry = Math.floor(sum / 10);
                 
                 stepSequence.push({
-                    type: 'calculate',
-                    col: i,
-                    d1, d2,
-                    oldCarry: carry,
-                    resultDigit: resultDigit,
-                    newCarry: nextCarry
+                    type: 'calculate', col: i, d1, d2, oldCarry: carry, resultDigit: resultDigit, newCarry: nextCarry
                 });
-                
                 carry = nextCarry;
             }
-            
             if (carry > 0) {
                 stepSequence.push({ type: 'final-carry', carry: carry, col: maxLen });
             }
-            
             stepSequence.push({ type: 'complete' });
         }
 
@@ -258,21 +265,28 @@
             const s2Str = String(summand2);
             const maxCols = Math.max(s1Str.length, s2Str.length) + 1; 
             
-            const fontSize = Math.min(width * 0.06, height * 0.09);
+            // Advanced Adaptive Scaling (Safe-Fit)
+            const maxCharsContent = maxCols;
+            const totalLines = 4;
+            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5); 
+            const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
+            
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
-            const charWidth = fontSize * 0.85;
+            const charWidth = fontSize * 0.85; 
             const rowHeight = fontSize * 1.5;
 
+            // Ensemble Centering Logic
             const coachBox = document.getElementById('math-coach-box');
             const coachWidth = 380;
-            const gap = 80;
+            const gap = 40;
             const calcWidth = maxCols * charWidth;
             const ensembleWidth = calcWidth + gap + coachWidth;
             const ensembleStartX = (width - ensembleWidth) / 2;
 
             const startX = ensembleStartX + (maxCols - 1) * charWidth; 
-            const startY = height / 2 - rowHeight;
+            const startY = height / 2 - rowHeight * 1.4;
 
             if (coachBox) {
                 coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
@@ -295,11 +309,11 @@
 
             // Row 2 (with +)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.font = `${fontSize}px Orbitron`;
+            ctx.font = `${fontSize}px Orbitron`; 
             const plusCol = Math.max(s1Str.length, s2Str.length);
             ctx.fillText('+', startX - plusCol * charWidth, startY + rowHeight);
             
-            ctx.font = `bold ${fontSize}px Orbitron`;
+            ctx.font = `bold ${fontSize}px Orbitron`; 
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
@@ -341,63 +355,49 @@
                 }
             }
 
+            // Doppelte Unterstreichung
             if (step && step.type === 'complete') {
                 ctx.shadowBlur = 0;
                 ctx.strokeStyle = '#888888';
                 ctx.lineWidth = 2;
                 const lineY1 = startY + rowHeight * 2.7;
-                const lineY2 = startY + rowHeight * 2.76;
+                const lineY2 = startY + rowHeight * 2.8;
                 const lineStartX = startX - plusCol * charWidth - charWidth * 0.5;
                 const lineEndX = startX + charWidth * 0.5;
-                
                 ctx.beginPath();
-                ctx.moveTo(lineStartX, lineY1);
-                ctx.lineTo(lineEndX, lineY1);
-                ctx.moveTo(lineStartX, lineY2);
-                ctx.lineTo(lineEndX, lineY2);
+                ctx.moveTo(lineStartX, lineY1); ctx.lineTo(lineEndX, lineY1);
+                ctx.moveTo(lineStartX, lineY2); ctx.lineTo(lineEndX, lineY2);
                 ctx.stroke();
             }
-            
             updateMessages();
         }
 
         function updateMessages() {
             const coach = document.getElementById('coach-content');
             if (currentStep === -1) {
-                coach.innerHTML = "Bereit für die Addition von <span class='coach-math-highlight'>" + summand1 + "</span> und <span class='coach-math-highlight'>" + summand2 + "</span>. Wir rechnen von rechts nach links.";
+                coach.innerHTML = "Bereit für die Addition. Wir rechnen von rechts nach links.";
                 return;
             }
-
             const step = stepSequence[currentStep];
             if (step.type === 'focus') {
-                const unit = step.col === 0 ? "Einerstelle" : (step.col === 1 ? "Zehnerstelle" : (step.col === 2 ? "Hunderterstelle" : "nächste Stelle"));
-                coach.innerHTML = `Wir betrachten die <span class='coach-math-highlight'>${unit}</span>.`;
+                coach.innerHTML = `Wir betrachten die nächste Stelle.`;
             } else if (step.type === 'calculate') {
                 const sum = step.d1 + step.d2 + step.oldCarry;
-                let text = `Wir rechnen: <span class='coach-math-highlight'>${step.d1} + ${step.d2}`;
-                if (step.oldCarry > 0) text += ` + ${step.oldCarry} (Übertrag)`;
-                text += ` = ${sum}</span>.<br><br>`;
-                text += `Wir notieren die <span class='coach-math-highlight'>${step.resultDigit}</span>`;
-                if (step.newCarry > 0) text += ` und merken uns die <span class='coach-math-highlight'>${step.newCarry}</span> als Übertrag.`;
-                else text += ". Kein Übertrag nötig.";
-                coach.innerHTML = text;
+                coach.innerHTML = `<span class='coach-math-highlight'>${step.d1} + ${step.d2} + ${step.oldCarry} = ${sum}</span>.<br>Notiere ${step.resultDigit}, Übertrag ${step.newCarry}.`;
             } else if (step.type === 'final-carry') {
-                coach.innerHTML = `Der letzte Übertrag von <span class='coach-math-highlight'>${step.carry}</span> wird einfach vorne hingeschrieben.`;
+                coach.innerHTML = `Der letzte Übertrag von <span class='coach-math-highlight'>${step.carry}</span> wird notiert.`;
             } else if (step.type === 'complete') {
-                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Das finale Ergebnis ist <span class='coach-math-highlight'>" + (summand1 + summand2) + "</span>.";
+                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Das Ergebnis ist <span class='coach-math-highlight'>" + (summand1 + summand2) + "</span>.";
             }
         }
 
         window.onresize = init;
-        
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') nextStep();
             if (e.key === 'ArrowRight') prevStep();
         });
-
         setupUI();
         document.fonts.ready.then(init);
     </script>
 </body>
-
 </html>
