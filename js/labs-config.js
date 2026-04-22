@@ -197,10 +197,20 @@ const LABS_DATA = [
     {
         "id": "eulergerade",
         "href": "eulergerade.html",
-        "title": "Euler-Gerade & Feuerbach",
-        "description": "Die faszinierende Geometrie des Dreiecks. Entdecke Neunpunktekreis und die Euler'sche Verbindungsgerade.",
-        "tagline": "Neunpunktekreis / Schwerpunkt / Geometrie",
-        "icon": "🪐",
+        "title": "Euler Feuerbach und Napoleon",
+        "description": "Die faszinierende Geometrie des Dreiecks. Entdecke die Euler-Gerade, den Feuerbach-Kreis und Napoleons Satz.",
+        "tagline": "Besondere Linien & Punkte / Klassische Geometrie",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,80 85,80 50,20" fill="none" stroke="rgb(128, 128, 128)" stroke-width="1.5" />
+            <!-- Euler Line -->
+            <line x1="5" y1="65" x2="95" y2="35" stroke="var(--neon-purple)" stroke-width="1.5" />
+            <!-- Nine-point Circle -->
+            <circle cx="50" cy="50" r="28" fill="none" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.6" />
+            <!-- Centroid/Points on the line -->
+            <circle cx="20" cy="60" r="2" fill="white" />
+            <circle cx="50" cy="50" r="2" fill="white" />
+            <circle cx="80" cy="40" r="2" fill="white" />
+        </svg>`,
         "category": "dreiecke grade8 feuerbachkreis feuerbach neunpunktekreis",
         "keywords": "geometrie euler feuerbach kreis dreieck schwerpunkt",
         "color": "blue"
