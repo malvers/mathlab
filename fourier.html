@@ -12,76 +12,26 @@
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <style>
-        :root {
-            --side-width: 380px;
-            --branding-blue: #00d2ff;
-            --neon-blue: #00d2ff;
-            --deep-bg: #050b18;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--deep-bg);
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            display: flex;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #side-panel {
-            width: var(--side-width);
-            min-width: var(--side-width);
-            background: rgba(15, 23, 42, 0.6);
-            border: none;
-            backdrop-filter: blur(25px);
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            gap: 10px;
-            box-sizing: border-box;
-            z-index: 100;
-        }
-
-        #sidebar-header {
-            width: 100%;
-            min-height: 80px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #main-content {
-            flex-grow: 1;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.6) 0%, #000 100%);
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
+        /* Fourier-Specific Refinements */
         #top-bar {
-            height: 140px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 120px;
             width: 100%;
-            background: transparent;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: grid;
             grid-template-columns: repeat(4, 100px);
-            grid-template-rows: repeat(2, 60px);
+            grid-template-rows: repeat(2, 50px);
             justify-content: center;
             align-content: center;
-            gap: 5px 40px;
-            padding: 10px;
+            gap: 2px 40px;
+            padding: 5px;
             box-sizing: border-box;
-            z-index: 10;
+            z-index: 1000;
+            pointer-events: none;
+            /* Let clicks through to canvas unless on a button? No, but circles are fine */
         }
 
         .component-circle {
@@ -90,16 +40,37 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            pointer-events: none;
         }
 
         .component-label {
             font-family: 'Orbitron';
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             color: white;
-            margin-bottom: 0px;
             position: absolute;
-            bottom: -5px;
+            top: -15px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #ui-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .drawing-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            pointer-events: none;
+            text-transform: uppercase;
         }
 
         .cyber-grid {
@@ -115,6 +86,39 @@
         #canvas {
             display: block;
             flex-grow: 1;
+        }
+
+        /* Custom Context Menu Style */
+        .cyber-context-menu {
+            position: fixed;
+            background: rgba(10, 20, 40, 0.98);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
+            padding: 5px;
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            min-width: 160px;
+            backdrop-filter: blur(15px);
+        }
+
+        .context-item {
+            padding: 8px 12px;
+            color: white;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .context-item:last-child { border-bottom: none; }
+        .context-item:hover {
+            background: rgba(0, 210, 255, 0.2);
+            color: #00d2ff;
+            padding-left: 18px;
         }
     </style>
 </head>
@@ -140,8 +144,20 @@
         </div>
     </main>
 
+    <div id="custom-menu" class="cyber-context-menu">
+        <div class="context-item" onclick="resetView()">Ansicht Zentrieren</div>
+        <div class="context-item" onclick="clearPath()">Spur Löschen</div>
+        <div class="context-item" onclick="toggleCircles()">Kreise An/Aus</div>
+        <div style="height: 1px; background: rgba(0, 210, 255, 0.2); margin: 5px 0;"></div>
+        <div class="context-item" onclick="toggleAxes()">Achsen An/Aus</div>
+        <div class="context-item" onclick="toggleGrid()">Gitter An/Aus</div>
+        <div class="context-item" onclick="toggleTele()">Telemetrie</div>
+        <div class="context-item" onclick="hideMenu()" style="color: rgba(255,255,255,0.3); font-size: 0.6rem;">Schliessen</div>
+    </div>
+
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
     <script src="js/fourier-logic.js"></script>
     <script>
         const BRAND_BLUE = "#00d2ff";
@@ -154,26 +170,35 @@
         });
         CyberUI.init();
 
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvas-container');
+        // --- CYBER CANVAS INTEGRATION ---
+        const cc = CyberCanvasInstance;
+        cc.init('canvas', { minX: -600, maxX: 600, minY: -600, maxY: 600 }, {
+            showTelemetry: false,
+            showGrid: false,
+            showAxes: false,
+            allowPan: true,
+            allowZoom: true
+        });
+        const ctx = cc.ctx;
 
+        // State
         let time = 0;
         let path = [];
         let fourierZ = [];
         let currentShapePoints = [];
         let paused = false;
 
-        // High-Tech SVG Path Sampler
+        // High-Tech SVG Path Sampler - Flipped for Math Y-Up
         function sampleSVGPath(pathData, density) {
             const svgNS = "http://www.w3.org/2000/svg";
-            const path = document.createElementNS(svgNS, "path");
-            path.setAttribute("d", pathData);
-            const length = path.getTotalLength();
+            const pathEl = document.createElementNS(svgNS, "path");
+            pathEl.setAttribute("d", pathData);
+            const length = pathEl.getTotalLength();
             const points = [];
             for (let i = 0; i < density; i++) {
-                const p = path.getPointAtLength((i / density) * length);
-                points.push({ x: p.x, y: p.y });
+                const p = pathEl.getPointAtLength((i / density) * length);
+                // Flip Y to match CyberCanvas Y-up coordinate system
+                points.push({ x: p.x, y: -p.y });
             }
             return points;
         }
@@ -181,56 +206,63 @@
         // Enhanced Path Generators
         function generateSquare(size, density) {
             const path = [];
-            for (let i = 0; i < density; i++) path.push({ x: -size + (2 * size * i) / density, y: -size }); // Top
-            for (let i = 0; i < density; i++) path.push({ x: size, y: -size + (2 * size * i) / density }); // Right
-            for (let i = 0; i < density; i++) path.push({ x: size - (2 * size * i) / density, y: size }); // Bottom
-            for (let i = 0; i < density; i++) path.push({ x: -size, y: size - (2 * size * i) / density }); // Left
+            for (let i = 0; i < density; i++) path.push({ x: -size + (2 * size * i) / density, y: size }); // Top
+            for (let i = 0; i < density; i++) path.push({ x: size, y: size - (2 * size * i) / density }); // Right
+            for (let i = 0; i < density; i++) path.push({ x: size - (2 * size * i) / density, y: -size }); // Bottom
+            for (let i = 0; i < density; i++) path.push({ x: -size, y: -size + (2 * size * i) / density }); // Left
             return path;
         }
 
-        // SVG Path for an elegant Eighth Note
-        const NOTE_SVG = "M 25,120 C 25,140 10,155 -10,155 C -30,155 -45,140 -45,120 C -45,100 -30,85 -10,85 C -5,85 0,87 5,90 L 5,-100 L 70,-80 L 70,-20 L 5,0";
+        // Authoritative path from resources/note.svg
+        const NOTE_SVG = "M31.68,6.16c-1.92-3.3-10.6-4-11.58-4.09L19,2V22.29a5.88,5.88,0,0,0-.81-.55,8.33,8.33,0,0,0-6.53-.41c-4.12,1.33-6.77,5.13-5.91,8.47a5.33,5.33,0,0,0,2.66,3.32,7.48,7.48,0,0,0,3.61.88A9.54,9.54,0,0,0,15,33.52c3.7-1.19,6.2-4.37,6.06-7.42,0,0,0,0,0,0V8.49c1,.12,2.37.33,3.82.64a11.17,11.17,0,0,1,4.06,1.46c1,.66.38,1.9.33,2a11.8,11.8,0,0,1-1.66,2,1,1,0,0,0,1.33,1.49C29.15,15.85,34.5,11,31.68,6.16Z";
         // SVG Path for a Heart
         const HEART_SVG = "M 0,60 C -40,60 -80,20 -80,-30 C -80,-80 -40,-110 0,-70 C 40,-110 80,-80 80,-30 C 80,20 40,60 0,60";
 
         const SHAPES = {
-            "QUADRAT": generateSquare(150, 60),
-            "NOTE": sampleSVGPath(NOTE_SVG, 200),
-            "HERZ": sampleSVGPath(HEART_SVG, 200)
+            "QUADRAT": generateSquare(150, 250),
+            "NOTE": sampleSVGPath(NOTE_SVG, 1000),
+            "HERZ": sampleSVGPath(HEART_SVG, 1000)
         };
 
+        // Simulation Controls
         function setupUI() {
             CyberUI.createCard('ui-container', 'FOURIER-REIHE', `
-                <div class="cyber-control-group">
-                    <label class="cyber-label">FORM WÄHLEN</label>
-                    <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width:100%; margin-bottom:15px;">
-                        <option value="QUADRAT">QUADRAT</option>
-                        <option value="NOTE">MUSIKNOTE</option>
-                        <option value="HERZ">HERZ</option>
-                    </select>
-                </div>
-                <div class="cyber-control-group">
-                    <label class="cyber-label">KOMPLEXITÄT (Vektoren)</label>
-                    <input type="range" id="n-input" min="1" max="150" value="50" oninput="updateParams()">
-                </div>
-                
-                <div class="cyber-control-group" style="margin-top: 15px;">
-                    <label class="cyber-label">GESCHWINDIGKEIT</label>
-                    <input type="range" id="speed-input" min="1" max="100" value="20">
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f;">PAUSE</button>
-                    <button class="cyber-btn" onclick="resetSim()" style="flex: 1; border-color: var(--neon-blue);">RESET</button>
-                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; padding: 0;">
+                    <div class="cyber-control-group" style="margin: 0; padding: 0;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">FORM WÄHLEN</label>
+                        <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width: 100%; margin: 0; box-sizing: border-box;">
+                            <option value="NOTE">MUSIKNOTE</option>
+                            <option value="QUADRAT">QUADRAT</option>
+                            <option value="HERZ">HERZ</option>
+                        </select>
+                    </div>
 
-                <div style="margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.5);">
-                    Links: Original-Pfad (Referenz)<br>Rechts: Fourier-Rekonstruktion
+                    <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT</label>
+                        <input type="range" id="n-input" min="1" max="1000" value="1000" oninput="updateParams()" 
+                               style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
+                        <input type="range" id="speed-input" min="1" max="100" value="100" 
+                               style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; margin-top: 5px; padding: 0;">
+                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f; margin: 0;">PAUSE</button>
+                        <button class="cyber-btn" onclick="resetSim()" style="flex: 1; border-color: var(--neon-blue); margin: 0;">RESET</button>
+                    </div>
                 </div>
             `, BRAND_BLUE);
         }
 
         function togglePause() {
+            if (paused && time >= Math.PI * 2) {
+                // Restart cycle if finished
+                time = 0;
+                path = [];
+            }
             paused = !paused;
             const btn = document.getElementById('pause-btn');
             if (btn) {
@@ -239,37 +271,52 @@
             }
         }
 
-        function updateParams() { 
-            const shapeKey = document.getElementById('shape-select')?.value || "QUADRAT";
+        function updateParams() {
+            const shapeKey = document.getElementById('shape-select')?.value || "NOTE";
             init(shapeKey);
         }
 
-        function resetSim() { 
-            time = 0; 
-            path = []; 
+        function resetSim() {
+            time = 0;
+            path = [];
         }
 
-        function init(shapeKey = "QUADRAT") {
+        function init(shapeKey = "NOTE") {
             const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
+            const width = cc.width;
+            const height = cc.height;
 
             resetSim();
 
             const targetPath = SHAPES[shapeKey];
+            if (!targetPath || targetPath.length === 0) return;
+
+            // --- AUTO-CENTERING LOGIC ---
+            // 1. Calculate Bounding Box for Normalization
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            targetPath.forEach(p => {
+                if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+            });
+            const avgX = (minX + maxX) / 2;
+            const avgY = (minY + maxY) / 2;
+            const range = Math.max(maxX - minX, maxY - minY, 1);
+
+            // Normalize all shapes to a consistent visual footprint (~550px)
+            const targetSize = 550;
+            const dynScale = targetSize / range;
+
             const z = [];
             currentShapePoints = [];
             for (let i = 0; i < targetPath.length; i++) {
-                // Double size as requested
-                const scaledX = targetPath[i].x * 2;
-                const scaledY = targetPath[i].y * 2;
+                // 2. Center and apply Dynamic Normalization
+                const scaledX = (targetPath[i].x - avgX) * dynScale;
+                const scaledY = (targetPath[i].y - avgY) * dynScale;
                 z.push({ re: scaledX, im: scaledY });
                 currentShapePoints.push({ x: scaledX, y: scaledY });
             }
             fourierZ = dft(z);
-            
+
             // Only start animate if it's not already running
             if (!window.animating) {
                 window.animating = true;
@@ -281,50 +328,59 @@
             draw();
             if (!paused) {
                 const speed = parseFloat(document.getElementById('speed-input')?.value || 20);
-                const dt = speed / 4000; 
-                time += dt;
-                if (time > Math.PI * 2) { 
-                    time = 0; 
-                    path = []; 
+                const dt = speed / 4000;
+
+                if (time + dt >= Math.PI * 2) {
+                    time = Math.PI * 2; // Precise finish
+                    paused = true;
+                    const btn = document.getElementById('pause-btn');
+                    if (btn) {
+                        btn.innerText = "PLAY";
+                        btn.style.borderColor = "var(--neon-blue)";
+                    }
+                } else {
+                    time += dt;
                 }
             }
             requestAnimationFrame(animate);
         }
 
         function drawVector(ctx, x1, y1, x2, y2, color) {
-            const headlen = 8;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
             ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.stroke();
 
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const headlen = 8;
+            ctx.fillStyle = color;
             ctx.beginPath();
             ctx.moveTo(x2, y2);
             ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
             ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
             ctx.closePath();
-            ctx.fillStyle = color;
             ctx.fill();
         }
 
         function drawEpicycles(x, y, fourier, isChain = true) {
             const num = parseInt(document.getElementById('n-input')?.value || fourier.length);
+            const scale = cc.scale;
             for (let i = 0; i < Math.min(fourier.length, num); i++) {
                 let prevx = x;
                 let prevy = y;
                 let freq = fourier[i].freq;
-                let radius = fourier[i].amp;
+                let radius = fourier[i].amp * scale;
                 let phase = fourier[i].phase;
-                x += radius * Math.cos(freq * time + phase);
-                y += radius * Math.sin(freq * time + phase);
+                const angle = freq * time + phase;
+                x += radius * Math.cos(angle);
+                y += radius * Math.sin(angle);
 
                 if (isChain) {
                     const color = COLORS[i % COLORS.length];
-                    ctx.strokeStyle = `${color}33`;
-                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.arc(prevx, prevy, radius, 0, Math.PI * 2);
                     ctx.stroke();
@@ -335,12 +391,9 @@
         }
 
         function draw() {
-            const rect = canvas.getBoundingClientRect();
-            const width = rect.width;
-            const height = rect.height;
-            ctx.clearRect(0, 0, width, height);
+            cc.clear();
 
-            // 1. Draw Top Bar (2-Row Layout)
+            // 1. Draw Top Bar (Telemetry)
             const topBar = document.getElementById('top-bar');
             if (topBar && topBar.innerHTML === '') {
                 const freqs = [-3, -2, 2, 3, -1, 0, 1];
@@ -362,7 +415,7 @@
                 if (component) {
                     const color = COLORS[idx % COLORS.length];
                     const radius = Math.min(30, component.amp * 0.5 + 8);
-                    cctx.strokeStyle = `${color}44`;
+                    cctx.strokeStyle = color;
                     cctx.beginPath(); cctx.arc(40, 40, radius, 0, Math.PI * 2); cctx.stroke();
                     const vx = 40 + radius * Math.cos(f * time + component.phase);
                     const vy = 40 + radius * Math.sin(f * time + component.phase);
@@ -370,51 +423,151 @@
                 }
             });
 
-            // 2. Reference Drawing (ORIGINAL SVG) - Left Side
+            // 2. Reference Drawing (Dotted Overlay)
             ctx.save();
-            ctx.translate(width / 2 - 250, height / 2);
             ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
             for (let i = 0; i < currentShapePoints.length; i++) {
-                ctx.lineTo(currentShapePoints[i].x, currentShapePoints[i].y);
+                ctx.lineTo(cc.mapX(currentShapePoints[i].x), cc.mapY(currentShapePoints[i].y));
             }
             ctx.closePath();
             ctx.stroke();
-            
-            ctx.setLineDash([]);
-            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-            ctx.font = "10px Orbitron";
-            ctx.fillText("ORIGINAL PFAD (SVG)", -50, -220);
             ctx.restore();
 
-            // 3. Fourier Drawing - Right Side
+            // 3. Main Fourier Drawing (Trace First, Then Epicycles on Top)
             ctx.save();
-            const v = drawEpicycles(width / 2 + 150, height / 2, fourierZ);
-            path.unshift(v);
+            const scale = cc.scale;
+            const num = parseInt(document.getElementById('n-input')?.value || fourierZ.length);
 
-            ctx.fillStyle = "rgba(0, 210, 255, 0.4)";
-            ctx.font = "10px Orbitron";
-            ctx.fillText("REKONSTRUKTION (FOURIER)", width / 2 + 100, height / 2 - 220);
+            // 3a. Path Calculation & Trace (GOLD)
+            let worldTipX = 0, worldTipY = 0;
+            for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
+                const { amp, freq, phase } = fourierZ[i];
+                worldTipX += amp * Math.cos(freq * time + phase);
+                worldTipY += amp * Math.sin(freq * time + phase);
+            }
+            path.unshift({ x: worldTipX, y: worldTipY });
 
-            // Draw trace (GOLDEN)
             ctx.strokeStyle = GOLDEN;
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 4;
             ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-            ctx.shadowBlur = 8; ctx.shadowColor = GOLDEN;
             ctx.beginPath();
-            for (let i = 0; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+            for (let i = 0; i < path.length; i++) {
+                ctx.lineTo(cc.mapX(path[i].x), cc.mapY(path[i].y));
+            }
             ctx.stroke();
-            ctx.shadowBlur = 0;
+
+            // 3b. Epicycles (Mapped correctly to World-Space)
+            let worldX = 0;
+            let worldY = 0;
+            for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
+                const prevX = cc.mapX(worldX);
+                const prevY = cc.mapY(worldY);
+
+                const { amp, freq, phase } = fourierZ[i];
+                const angle = freq * time + phase;
+
+                worldX += amp * Math.cos(angle);
+                worldY += amp * Math.sin(angle);
+
+                const curX = cc.mapX(worldX);
+                const curY = cc.mapY(worldY);
+                const radius = amp * scale;
+
+                // DRAW CIRCLE (World-Space Polygon Method)
+                const color = COLORS[i % COLORS.length];
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                const segments = 64;
+                for (let s = 0; s <= segments; s++) {
+                    const theta = (s / segments) * Math.PI * 2;
+                    // Calculate point in WORLD SPACE first, then MAP it
+                    const wx = worldX + amp * Math.cos(theta);
+                    const wy = worldY + amp * Math.sin(theta);
+                    const sx = cc.mapX(wx);
+                    const sy = cc.mapY(wy);
+
+                    if (s === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                }
+                ctx.stroke();
+
+                // DRAW VECTOR (Colored)
+                drawVector(ctx, prevX, prevY, curX, curY, color);
+            }
 
             if (path.length > 5000) path.pop();
             ctx.restore();
         }
 
-        window.onresize = () => init(document.getElementById('shape-select')?.value || "QUADRAT");
+        // --- CONTEXT MENU LOGIC ---
+        function showMenu(x, y) {
+            const menu = document.getElementById('custom-menu');
+            menu.style.display = 'flex';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+
+        function hideMenu() {
+            const menu = document.getElementById('custom-menu');
+            if (menu) menu.style.display = 'none';
+        }
+
+        function resetView() {
+            cc.resetView(-600, 600);
+            hideMenu();
+        }
+
+        function clearPath() {
+            path = [];
+            hideMenu();
+        }
+        
+        let showEpicycles = true;
+        function toggleCircles() {
+            showEpicycles = !showEpicycles;
+            hideMenu();
+        }
+
+        function toggleAxes() {
+            cc.showAxes = !cc.showAxes;
+            cc.needsRedraw = true;
+            hideMenu();
+        }
+
+        function toggleGrid() {
+            cc.showGrid = !cc.showGrid;
+            cc.needsRedraw = true;
+            hideMenu();
+        }
+
+        function toggleTele() {
+            cc.showTelemetry = !cc.showTelemetry;
+            hideMenu();
+        }
+
+        window.addEventListener('click', () => hideMenu());
+
+        cc.canvas.oncontextmenu = (e) => {
+            e.preventDefault();
+            showMenu(e.clientX, e.clientY);
+        };
+
+        // --- EVENT SHIELD (Stabilized) ---
+        cc.canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 2) {
+                e.stopPropagation(); 
+            }
+        }, true); 
+
+        cc.onResize = () => draw();
         setupUI();
-        document.fonts.ready.then(() => init("QUADRAT"));
+        document.fonts.ready.then(() => init("NOTE"));
     </script>
 </body>
+
 </html>
