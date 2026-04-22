@@ -248,13 +248,13 @@ const LABS_DATA = [
     {
         "id": "parabellabor",
         "href": "parabellabor.html",
-        "title": "Parabel-Lab",
+        "title": "Parabeln",
         "description": "Manipulation quadratischer Funktionen. Verstehe den Einfluss von Parametern auf die Parabelform.",
         "tagline": "Quadratische Funktionen / Parameter-Studie",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 20,10 Q 50,100 80,10" fill="none" stroke="var(--neon-purple)" stroke-width="5" />
-            <circle cx="50" cy="55" r="5" fill="var(--neon-blue)" />
-            <circle cx="65" cy="43.75" r="4.5" fill="#ffd700" />
+            <path d="M 20,20 Q 50,110 80,20" fill="none" stroke="var(--neon-purple)" stroke-width="2" stroke-linecap="round" />
+            <circle cx="50" cy="65" r="3.5" fill="var(--neon-blue)" />
+            <circle cx="65" cy="53.75" r="3" fill="#ffd700" />
         </svg>`,
         "category": "hot grade9 funktionen",
         "keywords": "parabel quadratisch gleichung scheitelpunkt stauchung streckung",
@@ -405,17 +405,17 @@ const LABS_DATA = [
     {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
-        "title": "Integral-Simulator",
+        "title": "Integrale",
         "description": "Die Energie der Fläche. Visualisiere bestimmte Integrale, Riemann-Summen und Näherungsverfahren in einem interaktiven Simulator.",
         "tagline": "Integralrechnung / Riemann-Summen / Flächen",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="40" fill="rgba(0, 210, 255, 0.05)" stroke="var(--neon-blue)" stroke-width="2" stroke-dasharray="10,5" />
-            <path d="M 40,35 L 40,65 M 40,35 C 55,35 55,65 70,65 M 70,35 L 70,65" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" />
-            <text x="50" y="65" font-family="'Orbitron'" font-size="30" fill="var(--neon-blue)" text-anchor="middle" style="filter: drop-shadow(0 0 10px var(--neon-blue));">∫</text>
-            <circle cx="50" cy="50" r="15" fill="none" stroke="var(--neon-purple)" stroke-width="1">
-                <animate attributeName="r" values="10;25;10" dur="3s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
-            </circle>
+            <!-- X-Axis -->
+            <line x1="20" y1="80" x2="90" y2="80" stroke="white" stroke-width="1" />
+            <!-- Integral Area -->
+            <path d="M 20,80 L 20,65 Q 45,15 60,55 T 90,40 L 90,80 Z" fill="rgba(0, 210, 255, 0.2)" />
+            <path d="M 20,65 Q 45,15 60,55 T 90,40" fill="none" stroke="white" stroke-width="1.5" />
+            <!-- Stylized Integral Symbol -->
+            <text x="50" y="60" font-family="'Orbitron'" font-size="60" fill="var(--neon-purple)" text-anchor="middle" style="filter: drop-shadow(0 0 15px var(--neon-purple)); opacity: 0.8;">∫</text>
         </svg>`,
         "category": "hot grade11 grade12 oberstufe analysis funktionen",
         "keywords": "integral analysis fläche summe riemann reaktor",
