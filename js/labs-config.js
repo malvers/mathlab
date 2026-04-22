@@ -1,3 +1,4 @@
+/* @AI-READONLY: CENTRAL LABS CONFIGURATION - DO NOT MODIFY WITHOUT EXPLICIT USER COMMAND */
 /**
  * Cyber-Labor Laboratory Configuration v2.1
  * Centralized registry for all interactive mathematics modules.

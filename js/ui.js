@@ -1,3 +1,4 @@
+/* @AI-READONLY: CENTRAL UI ENGINE - DO NOT MODIFY WITHOUT EXPLICIT USER COMMAND */
 /**
  * Cyber-UI Engine v5.3.8
  * Central component engine for the Cyber-Labor ecosystem.
