@@ -34,7 +34,7 @@
         }
 
         #tri-container {
-            flex: 1.5;
+            flex: 1;
         }
 
         #graph-container {
@@ -97,7 +97,7 @@
     </aside>
 
     <main id="main-content">
-        <div id="canvas-container" style="flex-direction: column; gap: 20px; padding: 20px;">
+        <div id="canvas-container" style="display: flex; flex-direction: column; gap: 20px; padding: 20px;">
             <div id="tri-container" class="canvas-container">
                 <canvas id="triCanvas"></canvas>
             </div>
@@ -277,22 +277,73 @@
             const toX = (val) => pad + (val / 8.5) * gw;
             const toY = (val) => rect.height - pad - (val / 4.5) * gh;
 
-            // Grid
-            graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
+            // Grid & Ticks
             graphCtx.lineWidth = 0.5;
+            graphCtx.font = "10px Orbitron";
+            graphCtx.textAlign = "center";
+            graphCtx.textBaseline = "top";
+            
             for (let i = 0; i <= 8; i++) {
+                // Grid Line
+                graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
                 graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(4.5)); graphCtx.stroke();
+                
+                // Tick & Number
+                graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(0) + 5); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+                graphCtx.fillText(i, toX(i), toY(0) + 8);
             }
+            
+            graphCtx.textAlign = "right";
+            graphCtx.textBaseline = "middle";
             for (let i = 0; i <= 4; i++) {
+                // Grid Line
+                graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
                 graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
+                
+                // Tick & Number
+                graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(0) - 5, toY(i)); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+                graphCtx.fillText(i, toX(0) - 8, toY(i));
             }
 
-            // Axes
+            // Axes with Arrows
             graphCtx.lineWidth = 2;
+            
+            // X-Axis (Basis b)
             graphCtx.strokeStyle = "#9d50bb";
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(8.5), toY(0)); graphCtx.stroke();
+            const xAxisEnd = toX(8.2);
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(xAxisEnd, toY(0)); graphCtx.stroke();
+            // Arrowhead X
+            graphCtx.beginPath();
+            graphCtx.moveTo(xAxisEnd, toY(0));
+            graphCtx.lineTo(xAxisEnd - 10, toY(0) - 5);
+            graphCtx.lineTo(xAxisEnd - 10, toY(0) + 5);
+            graphCtx.fillStyle = "#9d50bb";
+            graphCtx.fill();
+            // Label X (BASIS)
+            graphCtx.fillStyle = "white";
+            graphCtx.font = "bold 13px Orbitron";
+            graphCtx.textAlign = "right";
+            graphCtx.fillText("BASIS", xAxisEnd, toY(0) + 35);
+
+            // Y-Axis (SCHENKEL)
             graphCtx.strokeStyle = "#00d2ff";
-            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), toY(4.5)); graphCtx.stroke();
+            const yAxisEnd = toY(4.2);
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), yAxisEnd); graphCtx.stroke();
+            // Arrowhead Y
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(0), yAxisEnd);
+            graphCtx.lineTo(toX(0) - 5, yAxisEnd + 10);
+            graphCtx.lineTo(toX(0) + 5, yAxisEnd + 10);
+            graphCtx.fillStyle = "#00d2ff";
+            graphCtx.fill();
+            // Label Y (SCHENKEL)
+            graphCtx.fillStyle = "white";
+            graphCtx.textAlign = "center";
+            graphCtx.fillText("SCHENKEL", toX(0), yAxisEnd - 15);
 
             // Function
             graphCtx.lineWidth = 3;
