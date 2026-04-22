@@ -48,7 +48,7 @@
             font-family: 'Orbitron', sans-serif;
             pointer-events: none;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(0);
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10;
         }
@@ -109,9 +109,9 @@
 
         .cyber-label {
             font-family: 'Orbitron', sans-serif !important;
-            font-size: 0.65rem !important;
-            letter-spacing: 1px;
-            opacity: 0.7;
+            font-size: 0.7rem !important;
+            letter-spacing: 2px;
+            opacity: 0.8;
             margin-bottom: 12px !important;
             display: block;
             text-align: left !important;
@@ -139,7 +139,11 @@
             box-shadow: none !important;
             width: 100%;
             box-sizing: border-box;
-            border-radius: 12px; /* Etwas runder für den Ensemble-Look */
+            border-radius: 12px;
+        }
+        
+        .cyber-select {
+            background-image: none !important;
         }
         
         .cyber-select::after {
@@ -353,30 +357,30 @@
             const resStr = String(Math.floor(dividend / divisor));
 
             // 1. GRID METRICS (ULTRA Scaling)
-            const maxChars = Math.max(dStr.length + divStr.length + resStr.length + 10, 15);
+            const maxChars = Math.max(dStr.length + divStr.length + resStr.length + 5, 12);
             const totalLines = (dStr.length * 2) + 2; 
             
-            const fontSizeWidth = (width * 0.9) / (maxChars * 0.85);
-            const fontSizeHeight = (height * 0.85) / (totalLines * 1.6);
-            const fontSize = Math.min(fontSizeWidth, fontSizeHeight, 110); 
+            const fontSizeWidth = (width * 0.96) / (maxChars * 0.85);
+            const fontSizeHeight = (height * 0.95) / (totalLines * 1.3);
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight, 140); 
             
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';
 
             const charWidth = fontSize * 0.85; 
-            const rowHeight = fontSize * 1.7;
+            const rowHeight = fontSize * 1.4;
 
             // 2. ENSEMBLE CENTERING
             const coachBox = document.getElementById('math-coach-box');
             const coachWidth = 380;
-            const gap = 120;
+            const gap = 40;
             const totalCalcWidth = maxChars * charWidth;
             const ensembleTotalWidth = totalCalcWidth + gap + coachWidth;
             const ensembleStartX = (width - ensembleTotalWidth) / 2;
 
             const startX = ensembleStartX + charWidth * 0.5;
-            const startY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5 + 80;
+            const startY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5 + 150;
 
             // Positioning Helpers
             const getColX = (c) => startX + c * charWidth;
@@ -384,7 +388,8 @@
 
             // Position Coach Box
             if (coachBox) {
-                coachBox.style.left = `${ensembleStartX + totalCalcWidth + gap}px`;
+                const boxLeft = Math.floor(ensembleStartX + totalCalcWidth + gap);
+                coachBox.style.left = `${boxLeft}px`;
             }
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
@@ -419,13 +424,13 @@
                 const qStr = (step.type === 'final') ? step.quotient : 
                             stepSequence.slice(0, currentStep + 1).filter(s => s.type === 'divide').map(s => s.qDigit).join('');
                 
-                const qStartCol = opCol + divStr.length + 4; // Spaced after " : 25 = "
+                const qStartCol = opCol + divStr.length + 2.1; // Perfectly symmetric after " : 25 = "
                 drawNumber(qStr, qStartCol, 0, BRAND_GOLD, false);
                 
                 if (step.type === 'final' && step.remainder > 0) {
                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                   ctx.font = `bold ${fontSize * 0.6}px Orbitron`;
-                   ctx.fillText(` R${step.remainder}`, getColX(qStartCol + qStr.length), getRowY(0));
+                   ctx.font = `bold ${fontSize * 0.5}px Orbitron`;
+                   ctx.fillText(` REST ${step.remainder}`, getColX(qStartCol + qStr.length), getRowY(0));
                    ctx.font = `bold ${fontSize}px Orbitron`;
                 }
             }
@@ -499,18 +504,33 @@
                     }
                 });
 
-                // Coach box follows the active row
-                if (coachBox) {
-                    coachBox.style.top = `${lastOperationY - rowHeight*0.4}px`;
-                }
-            } else {
-                // Initial position for step -1
-                if (coachBox) {
-                    coachBox.style.top = `${getRowY(0) - rowHeight*0.4}px`;
-                }
             }
 
+            // --- 3. POSITION COACH BOX (After content is updated for correct height) ---
             updateStepInfo();
+
+            if (coachBox) {
+                const boxHeight = coachBox.offsetHeight;
+                // Determine target Y based on active step
+                let targetY = getRowY(0);
+                if (step) {
+                    // Find lastOperationY from the loop above
+                    let currentRow = 1;
+                    let activeSteps = stepSequence.slice(0, currentStep + 1);
+                    let opY = getRowY(0);
+                    activeSteps.forEach((s) => {
+                        if (s.type === 'divide') {
+                            currentRow++; // Move to remainder row
+                            opY = getRowY(currentRow);
+                        } else if (s.type === 'bringDown') {
+                            opY = getRowY(currentRow);
+                            currentRow++;
+                        }
+                    });
+                    targetY = opY;
+                }
+                coachBox.style.top = `${targetY - boxHeight / 2}px`;
+            }
         }
 
         function updateStepInfo() {
