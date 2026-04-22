@@ -16,7 +16,7 @@ const LABS_DATA = [
             <path d="M10 8l6 4-6 4V8z" fill="var(--neon-blue)"></path>
             <path d="M12 2v4M12 18v4M2 12h4M18 12h4" opacity="0.8"></path>
         </svg>`,
-        "category": "hot fun",
+        "category": "hot",
         "keywords": "intro startup branding reveal ultra",
         "color": "blue"
     },
@@ -41,7 +41,7 @@ const LABS_DATA = [
         "description": "Visualisierung einer impliziten 3D-Fläche. Entdecke die Formel hinter dem mathematischen Herzen.",
         "tagline": "Implizite Funktionen / Herz-Formel",
         "icon": "💖",
-        "category": "fun grade8",
+        "category": "grade8",
         "keywords": "3d geometrie fläche herz herzkurve implizit",
         "color": "blue"
     },
@@ -52,7 +52,7 @@ const LABS_DATA = [
         "description": "Komplexe 3D-Oberflächenmathematik. Erkunde die Litschi-Fläche in einer interaktiven 3D-Umgebung.",
         "tagline": "Prozedurale Oberflächen / SDF Geometrie",
         "icon": "🍒",
-        "category": "fun grade8",
+        "category": "grade8",
         "keywords": "3d oberfläche litschi litchi visualisierung",
         "color": "purple"
     },
@@ -155,7 +155,7 @@ const LABS_DATA = [
         "description": "Eine faszinierende transzendente Kurve, definiert durch Polarkoordinaten. Mathematik trifft Ästhetik.",
         "tagline": "Polarkoordinaten / Mathematik trifft Kunst",
         "icon": "🦋",
-        "category": "fun grade8",
+        "category": "grade8",
         "keywords": "geometrie kurve polarkoordinaten butterfly schmetterling",
         "color": "gold"
     },
@@ -166,12 +166,12 @@ const LABS_DATA = [
         "description": "Algorithmen der Triangulierung. Erzeuge optimale Dreiecksnetze nach der Delaunay-Methode.",
         "tagline": "Delaunay / Voronoi / Algorithmen",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 25 L55 15 L85 40 L65 85 L25 75 Z" fill="rgba(198, 33, 40, 0.2)" stroke="white" stroke-width="2" />
-            <line x1="20" y1="25" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-            <line x1="55" y1="15" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-            <line x1="85" y1="40" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-            <line x1="65" y1="85" x2="50" y2="55" stroke="white" stroke-width="1.5" />
-            <line x1="25" y1="75" x2="50" y2="55" stroke="white" stroke-width="1.5" />
+            <path d="M20 25 L55 15 L85 40 L65 85 L25 75 Z" fill="rgba(198, 33, 40, 0.2)" stroke="white" stroke-width="1" />
+            <line x1="20" y1="25" x2="50" y2="55" stroke="white" stroke-width="0.7" />
+            <line x1="55" y1="15" x2="50" y2="55" stroke="white" stroke-width="0.7" />
+            <line x1="85" y1="40" x2="50" y2="55" stroke="white" stroke-width="0.7" />
+            <line x1="65" y1="85" x2="50" y2="55" stroke="white" stroke-width="0.7" />
+            <line x1="25" y1="75" x2="50" y2="55" stroke="white" stroke-width="0.7" />
             <circle cx="20" cy="25" r="5" fill="#666" stroke="white" stroke-width="2" />
             <circle cx="55" cy="15" r="5" fill="#666" stroke="white" stroke-width="2" />
             <circle cx="85" cy="40" r="5" fill="#666" stroke="white" stroke-width="2" />
@@ -246,7 +246,7 @@ const LABS_DATA = [
             <circle cx="50" cy="55" r="5" fill="var(--neon-blue)" />
             <circle cx="65" cy="43.75" r="4.5" fill="#ffd700" />
         </svg>`,
-        "category": "hot grade9 fun funktionen",
+        "category": "hot grade9 funktionen",
         "keywords": "parabel quadratisch gleichung scheitelpunkt stauchung streckung",
         "color": "purple"
     },
@@ -276,7 +276,7 @@ const LABS_DATA = [
         "description": "Erforsche das Verhalten von Potenz- und Wurzelfunktionen. Verstehe Exponenten durch interaktive Kurvenmanipulation.",
         "tagline": "Exponenten / Wachstum / Kurvendiskussion",
         "icon": "📈",
-        "category": "fun grade8 grade9 hot",
+        "category": "grade8 grade9 hot",
         "keywords": "exponent wurzel wachstum kurvendiskussion funktion",
         "color": "blue"
     },
@@ -287,11 +287,11 @@ const LABS_DATA = [
         "description": "Geometrischer Beweis des Satzes von Pythagoras. Schiebe Flächen umher, um den Zusammenhang zu visualisieren.",
         "tagline": "Quadrate / Beweis durch Zerlegung",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="20,80 80,80 20,20" fill="rgba(198, 33, 40, 0.8)" stroke="white" stroke-width="4" stroke-linejoin="round" />
-            <polyline points="20,65 35,65 35,80" fill="none" stroke="white" stroke-width="3" />
-            <circle cx="80" cy="80" r="7" fill="#666" stroke="white" stroke-width="2" />
-            <circle cx="20" cy="20" r="7" fill="#666" stroke="white" stroke-width="2" />
-            <circle cx="20" cy="80" r="7" fill="#ff9800" stroke="white" stroke-width="2" />
+            <polygon points="20,80 80,80 20,20" fill="rgba(255, 152, 0, 0.8)" stroke="rgb(128, 128, 128)" stroke-width="2" stroke-linejoin="round" />
+            <polyline points="20,65 35,65 35,80" fill="none" stroke="rgb(0, 0, 60)" stroke-width="1.5" />
+            <circle cx="80" cy="80" r="4" fill="#a00" />
+            <circle cx="20" cy="20" r="4" fill="#a00" />
+            <circle cx="20" cy="80" r="4" fill="#a00" />
         </svg>`,
         "category": "pythagoras grade8",
         "keywords": "geometrie pythagoras beweis fläche quadrat",
@@ -303,7 +303,13 @@ const LABS_DATA = [
         "title": "Pythagoras",
         "description": "Entdecke den Satz des Pythagoras durch interaktive Flächenvergleiche und Beweis-Animationen.",
         "tagline": "Geometrie / Rechtwinkliges Dreieck / Beweis",
-        "icon": "🛸",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,80 80,80 20,20" fill="rgba(173, 255, 47, 0.8)" stroke="rgb(128, 128, 128)" stroke-width="2" stroke-linejoin="round" />
+            <polyline points="20,65 35,65 35,80" fill="none" stroke="rgb(0, 0, 60)" stroke-width="1.5" />
+            <circle cx="80" cy="80" r="4" fill="#a00" />
+            <circle cx="20" cy="20" r="4" fill="#a00" />
+            <circle cx="20" cy="80" r="4" fill="#a00" />
+        </svg>`,
         "category": "pythagoras grade8",
         "keywords": "geometrie rechtwinklig dreieck fläche beweis",
         "color": "orange"
@@ -386,21 +392,7 @@ const LABS_DATA = [
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid multiplikation",
         "color": "green"
     },
-    {
-        "id": "bluescreen",
-        "href": "bluescreen.html",
-        "title": "System Failure",
-        "description": "Ein cineastischer Bluescreen im ULTRA-Look. Simuliert einen mathematischen Überlauf mit Glitch-Effekten und System-Wiederherstellung.",
-        "tagline": "Cinematic / Fun / System-Analyse",
-        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 50,20 L 85,80 L 15,80 Z" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="3" />
-            <rect x="47" y="40" width="6" height="20" fill="#00d2ff" />
-            <rect x="47" y="65" width="6" height="6" fill="#00d2ff" />
-        </svg>`,
-        "category": "fun hot",
-        "keywords": "bluescreen error system failure fun cinematic ultra",
-        "color": "blue"
-    },
+
     {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
