@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Faktor-Stabilisator | ULTRA v5.4.0</title>
+    <title>Zahlen Puzzle | ULTRA v6.7.0</title>
+
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+
     <style>
         :root {
             --cell-bg: rgba(15, 23, 42, 0.6);
@@ -17,32 +19,66 @@
             --neon-blue: #00d2ff;
             --neon-green: #adff2f;
             --neon-red: #ff4d4d;
+            --neon-orange: #ffaa00;
+            --neon-gold: #ffcc00;
             --cell-size: 130px;
             --board-gap: 15px;
+            --bg-dark: #050b18;
+        }
+
+        /* --- BASIS LAYOUT --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
 
         #main-content {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.15) 0%, transparent 85%);
             padding: 20px;
             box-sizing: border-box;
-            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- ANWEISUNG GANZ HOCH GEZOGEN (ROTE LINIE) --- */
+        #instruction-header {
+            position: absolute;
+            top: 15px;
+            /* Ganz oben am Rand fixiert */
+            left: 30px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            text-align: left;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1.6;
+            max-width: 450px;
+            opacity: 0.8;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            pointer-events: none;
+            margin: 0;
+            z-index: 100;
         }
 
         #game-board {
             position: relative;
             padding: 40px;
             background: transparent;
-            border: none;
-            border-radius: 20px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             animation: board-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             max-width: 100%;
-            overflow-x: auto;
         }
 
         @keyframes board-in {
@@ -77,9 +113,8 @@
             font-size: 3.5rem;
             color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
-            position: relative;
         }
 
         .cell:hover {
@@ -94,16 +129,19 @@
             text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        .cell.fixed {
-            color: rgba(255, 255, 255, 0.4);
+        .cell.hinted {
+            color: var(--neon-gold);
+            text-shadow: 0 0 15px var(--neon-gold);
+            border-color: var(--neon-gold);
+            background: rgba(255, 204, 0, 0.05);
             cursor: default;
-            border-style: dashed;
         }
 
+        /* Nackte Zielzahlen am Rand */
         .sum-target {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 2.2rem;
+            color: rgba(255, 255, 255, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -117,12 +155,36 @@
             text-shadow: 0 0 10px var(--neon-green);
         }
 
-        .row-sums,
-        .col-sums {
-            display: contents;
+        /* FLACHER SWITCH IN DER SIDEBAR */
+        .mode-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 2px;
+            padding: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
         }
 
-        /* --- RESPONSIVE ADJUSTMENTS (Original übernommen) --- */
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 210, 255, 0.12);
+            color: var(--neon-blue);
+        }
+
+        /* --- VOLLSTÄNDIGE RESPONSIVE QUERIES --- */
         @media (max-width: 1200px) {
             :root {
                 --cell-size: 100px;
@@ -136,10 +198,6 @@
             .sum-target {
                 font-size: 1.5rem;
             }
-
-            #game-board {
-                padding: 25px;
-            }
         }
 
         @media (max-width: 1024px) {
@@ -149,8 +207,13 @@
                 z-index: 1000;
             }
 
-            #main-content {
-                padding: 10px;
+            #instruction-header {
+                position: relative;
+                top: 10px;
+                left: 0;
+                text-align: center;
+                margin-bottom: 20px;
+                max-width: 100%;
             }
         }
 
@@ -163,24 +226,9 @@
             .cell {
                 font-size: 2.2rem;
             }
-
-            .sum-target {
-                font-size: 1.2rem;
-            }
-
-            #game-board {
-                padding: 15px;
-                border-radius: 10px;
-            }
         }
 
-        #game-nav {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        /* VICTORY OVERLAY */
         .win-overlay {
             position: absolute;
             top: 0;
@@ -188,24 +236,16 @@
             width: 100%;
             height: 100%;
             background: rgba(15, 23, 42, 0.9);
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
             border-radius: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
         }
 
         .win-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
+            display: flex;
         }
 
         .btn-next {
@@ -218,21 +258,10 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 20px;
-            transition: transform 0.2s;
             box-shadow: 0 0 15px var(--neon-green);
         }
 
-        .btn-next:hover {
-            transform: scale(1.1);
-        }
-
-        .cell.hinted {
-            color: #ffcc00;
-            text-shadow: 0 0 15px #ffcc00;
-            border-color: #ffcc00;
-            background: rgba(255, 204, 0, 0.1);
-        }
-
+        /* HINT OVERLAY */
         #hint-overlay {
             position: absolute;
             top: 0;
@@ -240,22 +269,18 @@
             width: 100%;
             height: 100%;
             background: rgba(5, 11, 24, 0.95);
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 150;
             border-radius: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 204, 0, 0.3);
         }
 
         #hint-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
+            display: flex;
         }
 
         .hint-input {
@@ -269,7 +294,6 @@
             width: 120px;
             border-radius: 10px;
             margin: 20px 0;
-            appearance: textfield;
         }
 
         .cyber-label {
@@ -280,13 +304,6 @@
             opacity: 0.8;
             margin-bottom: 8px;
             color: var(--neon-blue);
-        }
-
-        #game-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
         }
     </style>
 </head>
@@ -302,30 +319,28 @@
     </aside>
 
     <main id="main-content">
+        <div id="instruction-header"></div>
+
         <div id="game-board">
-            <div class="grid-container" id="grid">
-            </div>
+            <div class="grid-container" id="grid"></div>
 
             <div class="win-overlay" id="win-screen">
                 <div
-                    style="background: rgba(10, 30, 15, 0.95); border: 2px solid var(--neon-green); border-radius: 16px; padding: 40px 60px; text-align: center; box-shadow: 0 0 40px rgba(173, 255, 47, 0.3);">
+                    style="background: rgba(10, 30, 15, 0.95); border: 2px solid var(--neon-green); border-radius: 16px; padding: 40px 60px; text-align: center;">
                     <div
-                        style="font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon-green); letter-spacing: 4px; text-shadow: 0 0 15px var(--neon-green);">
-                        KERN STABILISIERT!</div>
-                    <button class="btn-next" onclick="nextLevel()" style="margin-top: 30px;">NÄCHSTES LEVEL</button>
+                        style="font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon-green); letter-spacing: 4px;">
+                        PROTOKOLL GELÖST!</div>
+                    <button class="btn-next" onclick="nextLevel()">NÄCHSTES PROTOKOLL</button>
                 </div>
             </div>
 
             <div id="hint-overlay">
                 <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">HILFE-PROTOKOLL</h3>
-                <p style="font-family: Outfit; color: rgba(255,255,255,0.7); margin-bottom: 5px;">Löse die Aufgabe für
-                    einen Hinweis:</p>
                 <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;"></div>
                 <input type="number" id="hint-input" class="hint-input">
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn" style="border-color: #ffcc00; color: #ffcc00"
-                        onclick="checkHintAnswer()">BESTÄTIGEN</button>
-                    <button class="btn" onclick="closeHint()">ABBRECHEN</button>
+                    <button class="cyber-btn" onclick="checkHintAnswer()">BESTÄTIGEN</button>
+                    <button class="cyber-btn" onclick="closeHint()">ABBRECHEN</button>
                 </div>
             </div>
         </div>
@@ -335,208 +350,168 @@
     <script src="js/ui.js"></script>
     <script src="js/guard.js"></script>
     <script>
-        // --- DIE LOGIK DES FAKTOR-STABILISATORS ---
-        let gridSize = 3;
-        let grid = [];
-        let solvedGrid = [];
-        let hintedCells = [];
-        let targetRowProds = [];
-        let targetColProds = [];
-        let currentLevel = 1;
-        let moves = 0;
-        let startTime = Date.now();
-        let currentHintAnswer = null;
+        // --- VOLLSTÄNDIGE GAME ENGINE ---
+        let gameMode = 'sum', gridSize = 3, grid = [], solvedGrid = [], hintedCells = [], targetRows = [], targetCols = [], currentLevel = 1, moves = 0, startTime = Date.now(), currentHintAnswer = null;
 
         window.addEventListener('load', () => {
+            // UNTERTITEL IN ZAHLEN-PUZZLE GEÄNDERT
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "Faktor-Stabilisator",
-                briefing: `
-                    <b style="color:var(--branding-blue); font-size:1.1rem; letter-spacing:2px;">MISSION: MULTIPLIKATION</b><br><br>
-                    Stabilisiere den Kern durch korrekte Faktoren.<br><br>
-                    • <b>Ziel:</b> Erreiche durch Multiplikation der Gitterzahlen die Zielwerte (×) am Rand.<br><br>
-                    • <b>Steuerung:</b> Ein Klick erhöht den Wert (1-9).<br><br>
-                    • <b>Hinweise:</b> Löse das Protokoll für eine Fixierung.
-                `
+                subtitle: "Zahlen Puzzle",
+                briefing: "Synchronisiere die Energie-Matrix des Kerns."
             });
             CyberUI.init();
             setupStats();
             initGame();
-
-            document.getElementById('hint-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkHintAnswer();
-            });
+            setInterval(updateTimer, 1000);
+            document.getElementById('hint-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkHintAnswer(); });
         });
 
+        // SIDEBAR SETUP (ZÜGE GANZ OBEN)
         function setupStats() {
             CyberUI.createCard('game-stats', 'MISSION STATUS', `
-                <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 18px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">LEVEL</span>
-                        <span id="stat-level" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold; color: var(--neon-blue);">01</span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">LEVEL</span>
+                        <span id="stat-level" style="font-family: Orbitron; font-size: 1.4rem; color: var(--neon-blue);">01</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZÜGE</span>
-                        <span id="stat-moves" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">0</span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">ZÜGE</span>
+                        <span id="stat-moves" style="font-family: Orbitron; font-size: 1.4rem;">0</span>
                     </div>
-                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.9rem; opacity: 0.6; font-family:Orbitron;">ZEIT</span>
-                        <span id="stat-time" style="font-family: Orbitron; font-size: 1.6rem; font-weight: bold;">00:00</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">ZEIT</span>
+                        <span id="stat-time" style="font-family: Orbitron; font-size: 1.4rem;">00:00</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <span style="font-size: 0.7rem; opacity: 0.5; font-family:Orbitron;">RECHEN-MODUS</span>
+                        <div class="mode-toggle">
+                            <button id="btn-sum" class="mode-btn active" onclick="setMode('sum')">ADD (+)</button>
+                            <button id="btn-prod" class="mode-btn" onclick="setMode('prod')">MUL (X)</button>
+                        </div>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
 
             CyberUI.createCard('game-stats', '', `
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label class="cyber-label">LEVEL-AUSWAHL</label>
+                    <label class="cyber-label">PROTOKOLL-AUSWAHL</label>
                     <select class="cyber-select" onchange="changeLevel(this.value)" style="width: 100%;">
-                        ${Array.from({ length: 10 }, (_, i) => `
-                            <option value="${i + 1}" ${currentLevel === i + 1 ? 'selected' : ''}>LEVEL ${(i + 1).toString().padStart(2, '0')}</option>
-                        `).join('')}
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">LEVEL ${(i + 1).toString().padStart(2, '0')}</option>`).join('')}
                     </select>
                 </div>
             `, 'var(--neon-green)');
 
             CyberUI.createCard('game-stats', 'STEUERUNG', `
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">NEUSTART</button>
-                    <button class="cyber-btn" style="width:100%; border-color: #ffde00; color: #ffde00;" onclick="requestHint()">HILFE</button>
+                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
+                    <button class="cyber-btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">HILFE ANFORDERN</button>
                 </div>
             `, 'var(--neon-orange)');
-
-            setInterval(updateTime, 1000);
         }
 
-        function updateTime() {
+        function setMode(mode) { gameMode = mode; document.getElementById('btn-sum').classList.toggle('active', mode === 'sum'); document.getElementById('btn-prod').classList.toggle('active', mode === 'prod'); resetPuzzle(); }
+
+        function updateTimer() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-            const s = (elapsed % 60).toString().padStart(2, '0');
-            const el = document.getElementById('stat-time');
-            if (el) el.textContent = `${m}:${s}`;
+            const m = Math.floor(elapsed / 60).toString().padStart(2, '0'), s = (elapsed % 60).toString().padStart(2, '0');
+            if (document.getElementById('stat-time')) document.getElementById('stat-time').textContent = `${m}:${s}`;
         }
 
         function initGame() {
             gridSize = currentLevel <= 3 ? 3 : (currentLevel <= 7 ? 4 : 5);
-            generatePuzzle();
-            renderGrid();
-            updateValidation();
+            const instr = document.getElementById('instruction-header');
+            instr.innerText = gameMode === 'sum' ? "Addiere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt." : "Multipliziere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt.";
+            generatePuzzle(); renderGrid(); updateValidation();
             document.getElementById('stat-level').textContent = currentLevel.toString().padStart(2, '0');
+            document.getElementById('stat-moves').textContent = moves;
             document.getElementById('win-screen').classList.remove('active');
             document.getElementById('hint-overlay').classList.remove('active');
         }
 
         function generatePuzzle() {
-            grid = Array(gridSize).fill(1).map(() => Array(gridSize).fill(1));
-            solvedGrid = Array(gridSize).fill(1).map(() => Array(gridSize).fill(1));
+            let startVal = (gameMode === 'sum') ? 0 : 1;
+            grid = Array(gridSize).fill(startVal).map(() => Array(gridSize).fill(startVal));
+            solvedGrid = Array(gridSize).fill(startVal).map(() => Array(gridSize).fill(startVal));
             hintedCells = Array(gridSize).fill(false).map(() => Array(gridSize).fill(false));
-            targetRowProds = Array(gridSize).fill(1);
-            targetColProds = Array(gridSize).fill(1);
-
+            targetRows = Array(gridSize).fill((gameMode === 'sum' ? 0 : 1));
+            targetCols = Array(gridSize).fill((gameMode === 'sum' ? 0 : 1));
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
-                    const val = Math.floor(Math.random() * 5) + 1;
+                    const val = (gameMode === 'sum') ? Math.floor(Math.random() * 10) : (Math.floor(Math.random() * 5) + 1);
                     solvedGrid[r][c] = val;
-                    targetRowProds[r] *= val;
-                    targetColProds[c] *= val;
+                    if (gameMode === 'sum') { targetRows[r] += val; targetCols[c] += val; }
+                    else { targetRows[r] *= val; targetCols[c] *= val; }
                 }
             }
         }
 
         function renderGrid() {
-            const container = document.getElementById('grid');
-            container.innerHTML = '';
+            const container = document.getElementById('grid'); container.innerHTML = '';
             container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) auto`;
-
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell' + (hintedCells[r][c] ? ' hinted' : '');
                     cell.textContent = grid[r][c];
-                    cell.onclick = () => handleCellClick(r, c, cell);
+                    cell.onclick = () => {
+                        if (hintedCells[r][c]) return;
+                        if (gameMode === 'sum') grid[r][c] = (grid[r][c] + 1) % 10; else grid[r][c] = grid[r][c] >= 9 ? 1 : grid[r][c] + 1;
+                        cell.textContent = grid[r][c];
+                        moves++; document.getElementById('stat-moves').textContent = moves;
+                        cell.classList.add('active'); setTimeout(() => cell.classList.remove('active'), 200);
+                        if (updateValidation()) document.getElementById('win-screen').classList.add('active');
+                    };
                     container.appendChild(cell);
                 }
-                const rT = document.createElement('div');
-                rT.className = 'sum-target';
-                rT.id = `row-prod-${r}`;
-                rT.textContent = '×' + targetRowProds[r];
-                container.appendChild(rT);
+                // Target-Zahlen REIN NUMERISCH
+                const rT = document.createElement('div'); rT.className = 'sum-target'; rT.id = `row-target-${r}`; rT.textContent = targetRows[r]; container.appendChild(rT);
             }
-
             for (let c = 0; c < gridSize; c++) {
-                const cT = document.createElement('div');
-                cT.className = 'sum-target';
-                cT.id = `col-prod-${c}`;
-                cT.textContent = '×' + targetColProds[c];
-                container.appendChild(cT);
+                const cT = document.createElement('div'); cT.className = 'sum-target'; cT.id = `col-target-${c}`; cT.textContent = targetCols[c]; container.appendChild(cT);
             }
-            container.appendChild(document.createElement('div'));
-        }
-
-        function handleCellClick(r, c, el) {
-            if (hintedCells[r][c]) return;
-            grid[r][c] = grid[r][c] >= 9 ? 1 : grid[r][c] + 1;
-            el.textContent = grid[r][c];
-            el.classList.add('active');
-            setTimeout(() => el.classList.remove('active'), 200);
-            moves++;
-            document.getElementById('stat-moves').textContent = moves;
-            if (updateValidation()) checkWin();
         }
 
         function updateValidation() {
-            let allGood = true;
+            let win = true;
             for (let r = 0; r < gridSize; r++) {
-                const p = grid[r].reduce((a, b) => a * b, 1);
-                const el = document.getElementById(`row-prod-${r}`);
-                if (p === targetRowProds[r]) el.classList.add('solved');
-                else { el.classList.remove('solved'); allGood = false; }
+                const res = (gameMode === 'sum') ? grid[r].reduce((a, b) => a + b, 0) : grid[r].reduce((a, b) => a * b, 1);
+                const el = document.getElementById(`row-target-${r}`);
+                if (res === targetRows[r]) el.classList.add('solved'); else { el.classList.remove('solved'); win = false; }
             }
             for (let c = 0; c < gridSize; c++) {
-                let p = 1;
-                for (let r = 0; r < gridSize; r++) p *= grid[r][c];
-                const el = document.getElementById(`col-prod-${c}`);
-                if (p === targetColProds[c]) el.classList.add('solved');
-                else { el.classList.remove('solved'); allGood = false; }
+                let res = (gameMode === 'sum') ? 0 : 1;
+                for (let r = 0; r < gridSize; r++) { if (gameMode === 'sum') res += grid[r][c]; else res *= grid[r][c]; }
+                const el = document.getElementById(`col-target-${c}`);
+                if (res === targetCols[c]) el.classList.add('solved'); else { el.classList.remove('solved'); win = false; }
             }
-            return allGood;
+            return win;
         }
 
-        function checkWin() {
-            setTimeout(() => document.getElementById('win-screen').classList.add('active'), 400);
-        }
-
+        // HILFE LOGIK
         function requestHint() {
-            const a = Math.floor(Math.random() * 15) + 5;
-            const b = Math.floor(Math.random() * 10);
-            currentHintAnswer = a + b;
-            document.getElementById('hint-task').textContent = `${a} + ${b} = ?`;
-            document.getElementById('hint-input').value = '';
-            document.getElementById('hint-overlay').classList.add('active');
+            const a = Math.floor(Math.random() * 15) + 5; const b = Math.floor(Math.random() * 10);
+            currentHintAnswer = a + b; document.getElementById('hint-task').textContent = `${a} + ${b} = ?`;
+            document.getElementById('hint-input').value = ''; document.getElementById('hint-overlay').classList.add('active');
+            setTimeout(() => document.getElementById('hint-input').focus(), 100);
         }
 
-        function checkHintAnswer() {
-            if (parseInt(document.getElementById('hint-input').value) === currentHintAnswer) {
-                closeHint();
-                revealHint();
-            }
-        }
+        function checkHintAnswer() { if (parseInt(document.getElementById('hint-input').value) === currentHintAnswer) { closeHint(); revealHint(); } }
 
         function revealHint() {
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) {
-                        grid[r][c] = solvedGrid[r][c];
-                        hintedCells[r][c] = true;
-                        renderGrid(); updateValidation(); return;
-                    }
-                }
+            let cand = [];
+            for (let r = 0; r < gridSize; r++) for (let c = 0; c < gridSize; c++) if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) cand.push({ r, c });
+            if (cand.length > 0) {
+                const t = cand[Math.floor(Math.random() * cand.length)];
+                grid[t.r][t.c] = solvedGrid[t.r][t.c]; hintedCells[t.r][t.c] = true;
+                renderGrid(); updateValidation();
             }
         }
 
         function closeHint() { document.getElementById('hint-overlay').classList.remove('active'); }
-        function changeLevel(val) { currentLevel = parseInt(val); resetPuzzle(); }
-        function resetPuzzle() { moves = 0; startTime = Date.now(); initGame(); }
-        function nextLevel() { currentLevel++; resetPuzzle(); }
+        function changeLevel(v) { currentLevel = parseInt(v); moves = 0; resetPuzzle(); }
+        function resetPuzzle() { startTime = Date.now(); initGame(); }
+        function nextLevel() { currentLevel++; moves = 0; resetPuzzle(); }
 
         CyberGuard.init(1024);
     </script>
