@@ -5,7 +5,80 @@
 class CyberUI {
     static init() {
         console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
+        this.installResourceGuard();
         this.injectStyles();
+    }
+
+    static installResourceGuard() {
+        if (window.__cyberResourceGuardInstalled) return;
+        window.__cyberResourceGuardInstalled = true;
+
+        window.addEventListener('error', (event) => {
+            const target = event && event.target;
+            if (!target) return;
+
+            if (target.tagName === 'SCRIPT') {
+                const src = target.getAttribute('src') || target.src || 'unknown script';
+                this.showRuntimeWarning(`Script konnte nicht geladen werden: ${src}`);
+                return;
+            }
+
+            if (target.tagName === 'LINK' && String(target.getAttribute('rel') || '').toLowerCase().includes('stylesheet')) {
+                const href = target.getAttribute('href') || target.href || 'unknown stylesheet';
+                this.showRuntimeWarning(`Stylesheet konnte nicht geladen werden: ${href}`);
+            }
+        }, true);
+    }
+
+    static showRuntimeWarning(message) {
+        const rootId = 'cyber-runtime-warning-root';
+        let root = document.getElementById(rootId);
+        if (!root) {
+            root = document.createElement('div');
+            root.id = rootId;
+            root.style.cssText = [
+                'position:fixed',
+                'right:16px',
+                'bottom:16px',
+                'z-index:2147483647',
+                'max-width:min(90vw,560px)',
+                'display:flex',
+                'flex-direction:column',
+                'gap:10px'
+            ].join(';');
+            document.body.appendChild(root);
+        }
+
+        const item = document.createElement('div');
+        item.style.cssText = [
+            'background:rgba(120,0,0,0.92)',
+            'color:#fff',
+            'border:1px solid rgba(255,90,90,0.7)',
+            'border-radius:12px',
+            'padding:12px 14px',
+            'font-family:Outfit,sans-serif',
+            'font-size:0.85rem',
+            'line-height:1.4',
+            'box-shadow:0 8px 24px rgba(0,0,0,0.45)'
+        ].join(';');
+        item.innerHTML = `<b>Resource Guard:</b> ${message}`;
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.textContent = 'x';
+        close.style.cssText = [
+            'float:right',
+            'margin-left:12px',
+            'background:transparent',
+            'border:0',
+            'color:#fff',
+            'font-size:1rem',
+            'cursor:pointer'
+        ].join(';');
+        close.onclick = () => item.remove();
+        item.prepend(close);
+
+        root.appendChild(item);
     }
 
     static injectStyles() {
