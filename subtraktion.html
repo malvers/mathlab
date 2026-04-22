@@ -114,6 +114,9 @@
         }
 
         .coach-math-highlight { color: #ffde00; font-weight: bold; }
+        .cyber-label { font-family: 'Orbitron'; font-size: 0.65rem; letter-spacing: 1px; opacity: 0.7; }
+        .stats-card { padding: 8px 12px !important; min-height: 50px !important; }
+        .stats-val { font-size: 1.1rem; }
     </style>
 </head>
 
@@ -277,7 +280,7 @@
 
             const s1Str = String(minuend);
             const s2Str = String(subtrahend);
-            const maxCols = Math.max(s1Str.length, s2Str.length) + 2; 
+            const maxCols = Math.max(s1Str.length, s2Str.length) + 1; 
             
             // Advanced Adaptive Scaling (Safe-Fit)
             const maxCharsContent = maxCols;
@@ -294,13 +297,13 @@
             // Ensemble Centering Logic
             const coachBox = document.getElementById('math-coach-box');
             const coachWidth = 380;
-            const gap = 80;
+            const gap = 40;
             const calcWidth = maxCols * charWidth;
             const ensembleWidth = calcWidth + gap + coachWidth;
             const ensembleStartX = (width - ensembleWidth) / 2;
 
-            const startX = ensembleStartX + (maxCols - 1.5) * charWidth; 
-            const startY = height / 2 - rowHeight * 0.5;
+            const startX = ensembleStartX + (maxCols - 1) * charWidth; 
+            const startY = height / 2 - rowHeight * 1.4;
 
             if (coachBox) {
                 coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
@@ -325,8 +328,8 @@
             // Row 2 (with -)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.font = `${fontSize}px Orbitron`; 
-            const plusCol = maxCols - 1;
-            ctx.fillText('-', startX - (plusCol - 0.5) * charWidth, startY + rowHeight);
+            const plusCol = Math.max(s1Str.length, s2Str.length);
+            ctx.fillText('-', startX - plusCol * charWidth, startY + rowHeight);
             
             ctx.font = `bold ${fontSize}px Orbitron`; 
             for (let i = 0; i < s2Str.length; i++) {
@@ -342,8 +345,8 @@
             ctx.strokeStyle = '#888888';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(startX - (plusCol + 0.2) * charWidth, startY + rowHeight * 1.6);
-            ctx.lineTo(startX + charWidth * 0.6, startY + rowHeight * 1.6);
+            ctx.moveTo(startX - plusCol * charWidth - charWidth * 0.5, startY + rowHeight * 1.6);
+            ctx.lineTo(startX + charWidth * 0.5, startY + rowHeight * 1.6);
             ctx.stroke();
 
             // 3. Draw Results & Carries
@@ -373,8 +376,8 @@
                 ctx.lineWidth = 2;
                 const lineY1 = startY + rowHeight * 2.7;
                 const lineY2 = startY + rowHeight * 2.8;
-                const lineStartX = startX - (plusCol + 0.2) * charWidth;
-                const lineEndX = startX + charWidth * 0.6;
+                const lineStartX = startX - plusCol * charWidth - charWidth * 0.5;
+                const lineEndX = startX + charWidth * 0.5;
                 ctx.beginPath();
                 ctx.moveTo(lineStartX, lineY1); ctx.lineTo(lineEndX, lineY1);
                 ctx.moveTo(lineStartX, lineY2); ctx.lineTo(lineEndX, lineY2);
