@@ -165,25 +165,26 @@
 
         .flying-planet {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 40px;
+            font-size: 45px;
             opacity: 0;
-            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.5));
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
             will-change: transform, opacity;
+            z-index: 0;
         }
 
-        @keyframes fly-out {
+        @keyframes planet-flyby {
             0% {
-                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                transform: translate(var(--sx), var(--sy)) scale(0.1) rotate(0deg);
                 opacity: 0;
             }
-            10% {
-                opacity: 0.8;
+            20% {
+                opacity: 0.7;
+            }
+            80% {
+                opacity: 0.7;
             }
             100% {
-                transform: translate(var(--tx), var(--ty)) scale(4) rotate(var(--rot));
+                transform: translate(var(--ex), var(--ey)) scale(2.2) rotate(var(--rot));
                 opacity: 0;
             }
         }
@@ -1406,28 +1407,41 @@
             planet.className = 'flying-planet';
             planet.innerText = planets[Math.floor(Math.random() * planets.length)];
             
-            // Random direction
+            // Random diagonal path
+            const startSide = Math.floor(Math.random() * 4); // 0: Top, 1: Right, 2: Bottom, 3: Left
+            let sx, sy, ex, ey;
+            const padding = 100;
+            
+            // Start near center-ish to create "coming at you" feel
+            sx = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
+            sy = window.innerHeight / 2 + (Math.random() - 0.5) * 200;
+            
+            // End far outside
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.max(window.innerWidth, window.innerHeight) * 0.8;
-            const tx = Math.cos(angle) * distance;
-            const ty = Math.sin(angle) * distance;
-            const rot = (Math.random() - 0.5) * 360;
-            const duration = 4 + Math.random() * 6;
+            const dist = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+            ex = sx + Math.cos(angle) * dist;
+            ey = sy + Math.sin(angle) * dist;
 
-            planet.style.setProperty('--tx', `${tx}px`);
-            planet.style.setProperty('--ty', `${ty}px`);
-            planet.style.setProperty('--rot', `${rot}px`);
-            planet.style.animation = `fly-out ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+            const rot = (Math.random() - 0.5) * 720;
+            const duration = 6 + Math.random() * 8;
+
+            planet.style.left = `0px`;
+            planet.style.top = `0px`;
+            planet.style.setProperty('--sx', `${sx}px`);
+            planet.style.setProperty('--sy', `${sy}px`);
+            planet.style.setProperty('--ex', `${ex}px`);
+            planet.style.setProperty('--ey', `${ey}px`);
+            planet.style.setProperty('--rot', `${rot}deg`);
+            planet.style.animation = `planet-flyby ${duration}s linear forwards`;
 
             overlay.appendChild(planet);
-            
             setTimeout(() => planet.remove(), duration * 1000);
         }
 
         // Start spawning
-        setInterval(spawnPlanet, 2000);
+        setInterval(spawnPlanet, 1500);
         // Initial wave
-        for(let i=0; i<5; i++) setTimeout(spawnPlanet, i * 500);
+        for(let i=0; i<8; i++) setTimeout(spawnPlanet, i * 400);
 
     </script>
 </body>
