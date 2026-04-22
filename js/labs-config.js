@@ -41,7 +41,7 @@ const LABS_DATA = [
         "description": "Visualisierung einer impliziten 3D-Fläche. Entdecke die Formel hinter dem mathematischen Herzen.",
         "tagline": "Implizite Funktionen / Herz-Formel",
         "icon": "💖",
-        "category": "grade8",
+        "category": "fun grade8",
         "keywords": "3d geometrie fläche herz herzkurve implizit",
         "color": "blue"
     },
@@ -52,7 +52,7 @@ const LABS_DATA = [
         "description": "Komplexe 3D-Oberflächenmathematik. Erkunde die Litschi-Fläche in einer interaktiven 3D-Umgebung.",
         "tagline": "Prozedurale Oberflächen / SDF Geometrie",
         "icon": "🍒",
-        "category": "grade8",
+        "category": "fun grade8",
         "keywords": "3d oberfläche litschi litchi visualisierung",
         "color": "purple"
     },
@@ -155,7 +155,7 @@ const LABS_DATA = [
         "description": "Eine faszinierende transzendente Kurve, definiert durch Polarkoordinaten. Mathematik trifft Ästhetik.",
         "tagline": "Polarkoordinaten / Mathematik trifft Kunst",
         "icon": "🦋",
-        "category": "grade8",
+        "category": "fun grade8",
         "keywords": "geometrie kurve polarkoordinaten butterfly schmetterling",
         "color": "gold"
     },
@@ -397,7 +397,7 @@ const LABS_DATA = [
             <rect x="55" y="55" width="25" height="25" fill="none" stroke="#adff2f" stroke-width="2" rx="4" />
             <circle cx="50" cy="50" r="5" fill="#adff2f" />
         </svg>`,
-        "category": "arithmetic logic fun hot grade5",
+        "category": "arithmetic logic hot grade5",
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid multiplikation",
         "color": "green"
     },
