@@ -114,7 +114,7 @@
         }
 
         .coach-math-highlight { color: #ffde00; font-weight: bold; }
-        .cyber-label { font-family: 'Orbitron'; font-size: 0.65rem; letter-spacing: 1px; opacity: 0.7; }
+        .cyber-label { font-family: 'Orbitron' !important; font-size: 0.7rem; letter-spacing: 2px; opacity: 0.8; }
         .stats-card { padding: 8px 12px !important; min-height: 50px !important; }
         .stats-val { font-size: 1.1rem; }
 
@@ -182,11 +182,11 @@
             CyberUI.createCard('ui-container', 'SUBTRAKTION', `
                 <div class="cyber-control-group">
                     <label class="cyber-label">MINUEND</label>
-                    <input type="number" id="s1-input" class="cyber-select" value="${minuend}" onchange="updateNumbers()">
+                    <input type="number" id="s1-input" class="cyber-select" value="${minuend}" max="9999999" onchange="updateNumbers()">
                 </div>
                 <div class="cyber-control-group" style="margin-top:25px;">
                     <label class="cyber-label">SUBTRAHEND</label>
-                    <input type="number" id="s2-input" class="cyber-select" value="${subtrahend}" onchange="updateNumbers()">
+                    <input type="number" id="s2-input" class="cyber-select" value="${subtrahend}" max="9999999" onchange="updateNumbers()">
                 </div>
                 <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
             `, BRAND_BLUE);
@@ -250,8 +250,17 @@
         }
 
         function updateNumbers() {
-            minuend = parseInt(document.getElementById('s1-input').value) || 0;
-            subtrahend = parseInt(document.getElementById('s2-input').value) || 0;
+            let v1 = parseInt(document.getElementById('s1-input').value) || 0;
+            let v2 = parseInt(document.getElementById('s2-input').value) || 0;
+            
+            if (v1 > 9999999) v1 = 9999999;
+            if (v2 > 9999999) v2 = 9999999;
+            
+            document.getElementById('s1-input').value = v1;
+            document.getElementById('s2-input').value = v2;
+            
+            minuend = v1;
+            subtrahend = v2;
             resetSteps();
         }
 
