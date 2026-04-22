@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Logik-Architekt | ULTRA v5.3.8</title>
+    <title>Zahlen-Puzzle | ULTRA v5.3.8</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -34,10 +34,9 @@
         #game-board {
             position: relative;
             padding: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: transparent;
+            border: none;
             border-radius: 20px;
-            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -362,9 +361,9 @@
         window.addEventListener('load', () => {
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Spiel",
-                subtitle: "Logik-Architekt",
+                subtitle: "Zahlen-Puzzle",
                 briefing: `
-                    <b style="color:var(--branding-blue); font-size:1.1rem; letter-spacing:2px;">MISSION: LOGIK-ARCHITEKT</b><br><br>
+                    <b style="color:var(--branding-blue); font-size:1.1rem; letter-spacing:2px;">MISSION: ZAHLEN-PUZZLE</b><br><br>
                     Willkommen im Cyber-Labor. Deine Aufgabe ist es, den mathematischen Kern zu stabilisieren.<br><br>
                     • <b>Ziel:</b> Ändere die Zahlen im Gitter so, dass ihre Summen exakt mit den Zielwerten am Ende jeder Reihe und Spalte übereinstimmen.<br><br>
                     • <b>Steuerung:</b> Ein Klick auf eine Zelle erhöht ihren Wert (0-9). Danach beginnt der Zyklus erneut.<br><br>
@@ -464,6 +463,9 @@
                     targetColSums[c] += val;
                 }
             }
+
+            // DEBUG: Start mit gelöstem Grid
+            grid = solvedGrid.map(row => [...row]);
         }
 
         function renderGrid() {
