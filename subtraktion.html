@@ -100,23 +100,48 @@
             align-items: center;
             gap: 10px;
         }
+
         .coach-title::before {
-            content: ''; width: 8px; height: 8px; background: #00d2ff; border-radius: 50%; box-shadow: 0 0 10px #00d2ff;
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d2ff;
         }
 
         .cyber-grid {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
         }
 
-        .coach-math-highlight { color: #ffde00; font-weight: bold; }
-        .cyber-label { font-family: 'Orbitron' !important; font-size: 0.7rem; letter-spacing: 2px; opacity: 0.8; }
-        .stats-card { padding: 8px 12px !important; min-height: 50px !important; }
-        .stats-val { font-size: 1.1rem; }
+        .coach-math-highlight {
+            color: #ffde00;
+            font-weight: bold;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron' !important;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
+        }
+
+        .stats-val {
+            font-size: 1.1rem;
+        }
 
         /* Spinner (Pfeile) ausblenden */
         input::-webkit-outer-spin-button,
@@ -124,9 +149,11 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type=number] {
             -moz-appearance: textfield;
         }
+
         .cyber-select {
             background-image: none !important;
         }
@@ -161,7 +188,7 @@
         // 1. Branding & UI Init
         const BRAND_BLUE = "#00d2ff";
         const DIGIT_COLORS = ["#FFC107", "#9d00ff", "#00ff00", "#4CAF50", "#F44336"];
-        
+
         CyberBranding.init({
             title: "Doc Alvers Mathe-Labor",
             subtitle: "SCHRIFTLICHE SUBTRAKTION"
@@ -217,11 +244,11 @@
             for (let i = 0; i < maxLen; i++) {
                 // Focus column
                 stepSequence.push({ type: 'focus', col: i });
-                
+
                 // Calculate
                 const d1 = parseInt(s1Str[s1Str.length - 1 - i] || 0);
                 const d2 = parseInt(s2Str[s2Str.length - 1 - i] || 0);
-                
+
                 const subtrahendTotal = d2 + carry;
                 let resultDigit;
                 let nextCarry = 0;
@@ -233,7 +260,7 @@
                     resultDigit = (d1 + 10) - subtrahendTotal;
                     nextCarry = 1;
                 }
-                
+
                 stepSequence.push({
                     type: 'calculate',
                     col: i,
@@ -242,23 +269,23 @@
                     resultDigit: resultDigit,
                     newCarry: nextCarry
                 });
-                
+
                 carry = nextCarry;
             }
-            
+
             stepSequence.push({ type: 'complete' });
         }
 
         function updateNumbers() {
             let v1 = parseInt(document.getElementById('s1-input').value) || 0;
             let v2 = parseInt(document.getElementById('s2-input').value) || 0;
-            
+
             if (v1 > 9999999) v1 = 9999999;
             if (v2 > 9999999) v2 = 9999999;
-            
+
             document.getElementById('s1-input').value = v1;
             document.getElementById('s2-input').value = v2;
-            
+
             minuend = v1;
             subtrahend = v2;
             resetSteps();
@@ -302,18 +329,18 @@
 
             const s1Str = String(minuend);
             const s2Str = String(subtrahend);
-            const maxCols = Math.max(s1Str.length, s2Str.length) + 1; 
-            
+            const maxCols = Math.max(s1Str.length, s2Str.length) + 1;
+
             // Advanced Adaptive Scaling (Safe-Fit)
             const maxCharsContent = maxCols;
             const totalLines = 4;
-            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5); 
+            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5);
             const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
             const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
-            
+
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
-            const charWidth = fontSize * 0.85; 
+            const charWidth = fontSize * 0.85;
             const rowHeight = fontSize * 1.5;
 
             // Ensemble Centering Logic
@@ -324,7 +351,7 @@
             const ensembleWidth = calcWidth + gap + coachWidth;
             const ensembleStartX = (width - ensembleWidth) / 2;
 
-            const startX = ensembleStartX + (maxCols - 1) * charWidth; 
+            const startX = ensembleStartX + (maxCols - 1) * charWidth;
             const startY = height / 2 - rowHeight * 1.4;
 
             if (coachBox) {
@@ -337,7 +364,7 @@
 
             // 1. Draw Summands
             ctx.textAlign = 'center';
-            
+
             // Row 1
             for (let i = 0; i < s1Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
@@ -349,11 +376,11 @@
 
             // Row 2 (with -)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.font = `${fontSize}px Orbitron`; 
+            ctx.font = `${fontSize}px Orbitron`;
             const plusCol = Math.max(s1Str.length, s2Str.length);
             ctx.fillText('-', startX - plusCol * charWidth, startY + rowHeight);
-            
-            ctx.font = `bold ${fontSize}px Orbitron`; 
+
+            ctx.font = `bold ${fontSize}px Orbitron`;
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
@@ -432,7 +459,7 @@
         }
 
         window.onresize = init;
-        
+
         // Keyboard Navigation Support (Swapped for Right-to-Left Flow)
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') nextStep();
