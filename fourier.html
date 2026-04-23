@@ -87,42 +87,6 @@
             display: block;
             flex-grow: 1;
         }
-
-        /* Custom Context Menu Style */
-        .cyber-context-menu {
-            position: fixed;
-            background: rgba(10, 20, 40, 0.98);
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
-            padding: 5px;
-            z-index: 99999;
-            display: none;
-            flex-direction: column;
-            min-width: 160px;
-            backdrop-filter: blur(15px);
-        }
-
-        .context-item {
-            padding: 8px 12px;
-            color: white;
-            font-family: 'Orbitron';
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .context-item:last-child {
-            border-bottom: none;
-        }
-
-        .context-item:hover {
-            background: rgba(0, 210, 255, 0.2);
-            color: #00d2ff;
-            padding-left: 18px;
-        }
     </style>
 </head>
 
@@ -147,20 +111,7 @@
         </div>
     </main>
 
-    <div id="custom-menu" class="cyber-context-menu">
-        <div class="context-item" onclick="toggleTracking()" style="display: flex; align-items: center;">
-            <span>Verfolgerkamera</span>
-            <span id="tracking-status" style="color: var(--neon-blue); font-size: 0.8em; margin-left: auto;">OFF</span>
-        </div>
-        <div class="context-item" onclick="resetView()">Ansicht zurücksetzen</div>
-        <div class="context-item" onclick="clearPath()">Spur Löschen</div>
-        <div class="context-item" onclick="toggleCircles()">Kreise An/Aus</div>
-        <div class="context-item" onclick="toggleAxes()">Achsen An/Aus</div>
-        <div class="context-item" onclick="toggleGrid()">Gitter An/Aus</div>
-        <div class="context-item" onclick="toggleTele()">Telemetrie</div>
-        <div class="context-item" onclick="hideMenu()" style="color: rgba(255,255,255,0.3); font-size: 0.6rem;">
-            Schliessen</div>
-    </div>
+
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
@@ -183,8 +134,10 @@
             showTelemetry: false,
             showGrid: false,
             showAxes: false,
+            showLabels: false,
             allowPan: true,
-            allowZoom: true
+            allowZoom: true,
+            maxRangeY: 1200
         });
         const ctx = cc.ctx;
 
@@ -195,20 +148,40 @@
         let fourierZ = [];
         let currentShapePoints = [];
         let paused = false;
+        let isTracking = false;
+        let showEpicycles = true;
+        let isEvolving = false;
+        let evolutionIndex = 0;
+        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 50, 100, 250, 500, 1000];
 
-        // High-Tech SVG Path Sampler - Flipped for Math Y-Up
-        function sampleSVGPath(pathData, density) {
+        // High-Tech SVG Path Sampler - Flipped and Centered for Math Y-Up
+        function sampleSVGPath(pathData, density, targetScale = 10) {
             const svgNS = "http://www.w3.org/2000/svg";
             const pathEl = document.createElementNS(svgNS, "path");
             pathEl.setAttribute("d", pathData);
             const length = pathEl.getTotalLength();
-            const points = [];
+            const rawPoints = [];
+            
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
             for (let i = 0; i < density; i++) {
                 const p = pathEl.getPointAtLength((i / density) * length);
-                // Flip Y to match CyberCanvas Y-up coordinate system
-                points.push({ x: p.x, y: -p.y });
+                const x = p.x;
+                const y = -p.y; // Flip Y for Math-Up
+                rawPoints.push({ x, y });
+                
+                minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y); maxY = Math.max(maxY, y);
             }
-            return points;
+
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+
+            // Center at origin and scale
+            return rawPoints.map(p => ({
+                x: (p.x - centerX) * targetScale,
+                y: (p.y - centerY) * targetScale
+            }));
         }
 
         // Enhanced Path Generators
@@ -322,10 +295,6 @@
             resetSim();
         }
 
-        let isEvolving = false;
-        let evolutionIndex = 0;
-        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 50, 100, 250, 500, 1000];
-
         function startEvolution() {
             isEvolving = !isEvolving;
             if (isEvolving) {
@@ -411,7 +380,7 @@
                     if (isEvolving) {
                         // ARCHIVE CURRENT PATH
                         historicalPaths.push([...path]);
-                        
+
                         // Move to next step in evolution
                         evolutionIndex++;
                         if (evolutionIndex < evolutionSteps.length) {
@@ -484,18 +453,21 @@
         }
 
         function draw() {
-            cc.clear();
+            cc.drawGrid({ vignette: true });
 
             // 1. Draw Top Bar (Telemetry)
             const topBar = document.getElementById('top-bar');
-            if (topBar && topBar.innerHTML === '') {
-                const freqs = [-3, -2, 2, 3, -1, 0, 1];
-                freqs.forEach(f => {
-                    const div = document.createElement('div');
-                    div.className = 'component-circle';
-                    div.innerHTML = `<div class="component-label">${f}</div><canvas id="comp-${f}" width="80" height="80"></canvas>`;
-                    topBar.appendChild(div);
-                });
+            if (topBar) {
+                topBar.style.display = cc.showTelemetry ? 'grid' : 'none';
+                if (cc.showTelemetry && topBar.innerHTML === '') {
+                    const freqs = [-3, -2, 2, 3, -1, 0, 1];
+                    freqs.forEach(f => {
+                        const div = document.createElement('div');
+                        div.className = 'component-circle';
+                        div.innerHTML = `<div class="component-label">${f}</div><canvas id="comp-${f}" width="80" height="80"></canvas>`;
+                        topBar.appendChild(div);
+                    });
+                }
             }
 
             const freqs = [-3, -2, 2, 3, -1, 0, 1];
@@ -555,13 +527,20 @@
             path.unshift({ x: worldTipX, y: worldTipY });
 
             // --- AUTO-TRACKING LOGIC ---
-            if (isTracking) {
-                const rangeX = cc.view.maxX - cc.view.minX;
-                const rangeY = cc.view.maxY - cc.view.minY;
-                cc.view.minX = worldTipX - rangeX / 2;
-                cc.view.maxX = worldTipX + rangeX / 2;
-                cc.view.minY = worldTipY - rangeY / 2;
-                cc.view.maxY = worldTipY + rangeY / 2;
+            // Smooth Tracking (Lerp)
+            if (isTracking && path.length > 0) {
+                const lastPos = path[path.length - 1];
+                const currentX = (cc.view.minX + cc.view.maxX) / 2;
+                const currentY = (cc.view.minY + cc.view.maxY) / 2;
+
+                // Cinematic smoothing: move 10% towards target every frame
+                const dx = (worldTipX - currentX) * 0.1;
+                const dy = (worldTipY - currentY) * 0.1;
+
+                cc.view.minX += dx;
+                cc.view.maxX += dx;
+                cc.view.minY += dy;
+                cc.view.maxY += dy;
             }
 
             ctx.strokeStyle = GOLDEN;
@@ -618,40 +597,44 @@
 
             if (path.length > 5000) path.pop();
             ctx.restore();
-        }
-
-        // --- CONTEXT MENU LOGIC ---
-        function showMenu(x, y) {
-            const menu = document.getElementById('custom-menu');
-            menu.style.display = 'flex';
-            menu.style.left = x + 'px';
-            menu.style.top = y + 'px';
-        }
-
-        function hideMenu() {
-            const menu = document.getElementById('custom-menu');
-            if (menu) menu.style.display = 'none';
-        }
+        }        // --- CONTEXT MENU (ULTRA STYLE) ---
+        cc.onContextMenu = (e) => {
+            CyberUI.showContextMenu(e.clientX, e.clientY, [
+                { label: 'Ansicht Reset', onclick: resetView },
+                { divider: true },
+                { 
+                    label: 'Verfolgerkamera', 
+                    checked: isTracking, 
+                    onchange: (v) => {
+                        isTracking = v;
+                        const status = document.getElementById('tracking-status');
+                        if (status) {
+                            status.innerText = isTracking ? "ON" : "OFF";
+                            status.style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
+                        }
+                    } 
+                },
+                { label: 'Kreise anzeigen', checked: showEpicycles, onchange: (v) => showEpicycles = v },
+                { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.showLabels = v; cc.needsRedraw = true; } },
+                { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
+                { label: 'Telemetrie', checked: cc.showTelemetry, onchange: (v) => cc.showTelemetry = v }
+            ]);
+        };
 
         function resetView() {
             cc.resetView(-600, 600);
-            hideMenu();
         }
 
         function clearPath() {
             path = [];
-            hideMenu();
         }
 
-        let isTracking = false;
         function toggleTracking() {
             isTracking = !isTracking;
             document.getElementById('tracking-status').innerText = isTracking ? "ON" : "OFF";
             document.getElementById('tracking-status').style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
-            hideMenu();
         }
 
-        let showEpicycles = true;
         function toggleCircles() {
             const cb = document.getElementById('circles-checkbox');
             if (cb) {
@@ -660,32 +643,23 @@
                 // Fallback for context menu if UI checkbox is not found
                 showEpicycles = !showEpicycles;
             }
-            hideMenu();
         }
 
         function toggleAxes() {
             cc.showAxes = !cc.showAxes;
             cc.needsRedraw = true;
-            hideMenu();
         }
 
         function toggleGrid() {
             cc.showGrid = !cc.showGrid;
             cc.needsRedraw = true;
-            hideMenu();
         }
 
         function toggleTele() {
             cc.showTelemetry = !cc.showTelemetry;
-            hideMenu();
         }
 
-        window.addEventListener('click', () => hideMenu());
 
-        cc.canvas.oncontextmenu = (e) => {
-            e.preventDefault();
-            showMenu(e.clientX, e.clientY);
-        };
 
         // --- EVENT SHIELD & TRACKING CONTROL ---
         cc.canvas.addEventListener('mousedown', (e) => {
