@@ -114,7 +114,10 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .context-item:last-child { border-bottom: none; }
+        .context-item:last-child {
+            border-bottom: none;
+        }
+
         .context-item:hover {
             background: rgba(0, 210, 255, 0.2);
             color: #00d2ff;
@@ -155,7 +158,8 @@
         <div class="context-item" onclick="toggleAxes()">Achsen An/Aus</div>
         <div class="context-item" onclick="toggleGrid()">Gitter An/Aus</div>
         <div class="context-item" onclick="toggleTele()">Telemetrie</div>
-        <div class="context-item" onclick="hideMenu()" style="color: rgba(255,255,255,0.3); font-size: 0.6rem;">Schliessen</div>
+        <div class="context-item" onclick="hideMenu()" style="color: rgba(255,255,255,0.3); font-size: 0.6rem;">
+            Schliessen</div>
     </div>
 
     <script src="js/branding.js"></script>
@@ -241,7 +245,13 @@
                     </div>
 
                     <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT</label>
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT: <span id="n-value" style="color: var(--neon-blue);">1000</span> KREISE</label>
+                        <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                            <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
+                            <button class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
+                            <button class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
+                            <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
+                        </div>
                         <input type="range" id="n-input" min="1" max="1000" value="1000" oninput="updateParams()" 
                                style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
                     </div>
@@ -275,8 +285,21 @@
         }
 
         function updateParams() {
+            const nInput = document.getElementById('n-input');
+            const nValue = document.getElementById('n-value');
+            if (nInput && nValue) {
+                nValue.innerText = nInput.value;
+            }
             const shapeKey = document.getElementById('shape-select')?.value || "NOTE";
             init(shapeKey);
+        }
+
+        function adjustN(delta) {
+            const input = document.getElementById('n-input');
+            if (input) {
+                input.value = Math.max(1, Math.min(1000, parseInt(input.value) + delta));
+                updateParams();
+            }
         }
 
         function resetSim() {
@@ -547,7 +570,7 @@
             document.getElementById('tracking-status').style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
             hideMenu();
         }
-        
+
         let showEpicycles = true;
         function toggleCircles() {
             showEpicycles = !showEpicycles;
@@ -586,11 +609,11 @@
                 document.getElementById('tracking-status').innerText = "OFF";
                 document.getElementById('tracking-status').style.color = "var(--neon-blue)";
             }
-            
+
             if (e.button === 2) {
-                e.stopPropagation(); 
+                e.stopPropagation();
             }
-        }, true); 
+        }, true);
 
         // Auto-enable tracking on zoom
         cc.canvas.addEventListener('wheel', () => {
