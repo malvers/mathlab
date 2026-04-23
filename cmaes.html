@@ -11,20 +11,29 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <!-- Branding & UI -->
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/cmaes-logic.js"></script>
+    
     <style>
         /* CMA-ES Specific Refinements */
-        #side-panel {
-            width: 360px !important;
-            min-width: 360px !important;
-            max-width: 360px !important;
-            flex-basis: 360px !important;
-            flex-shrink: 0 !important;
-        }
-
         #ui-container {
             flex-grow: 1;
             overflow-y: auto;
-            padding-right: 5px;
+        }
+
+        body {
+            background-color: #050b18; /* Tiefblaues All */
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(157, 80, 187, 0.05) 0%, transparent 40%);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            width: 100vw;
+            height: 100vh;
         }
 
         .cyber-grid {
@@ -33,8 +42,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
+            background: 
+                url('https://www.transparenttextures.com/patterns/stardust.png'), /* Sternenstaub */
+                radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
+            opacity: 0.4;
             pointer-events: none;
+            z-index: -1;
+        }
+
+        #main-content {
+            flex: 1;
+            position: relative;
+            background: transparent; /* Damit das All durchscheint */
+            overflow: hidden;
+            border-left: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
         #canvas {
@@ -42,16 +69,9 @@
             flex-grow: 1;
         }
 
-        #canvas-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
         #telemetry-overlay {
             position: absolute;
-            right: 30px; /* Leicht nach rechts gerückt */
+            right: 30px;
             top: 50%;
             transform: translateY(-50%);
             font-family: 'Orbitron', sans-serif;
@@ -59,31 +79,31 @@
             text-align: right;
             pointer-events: none;
             background: rgba(10, 15, 25, 0.85);
-            padding: 12px 20px; /* Vertikales Padding auf 12px reduziert */
+            padding: 12px 20px;
             border-radius: 15px;
             border: 1px solid rgba(0, 210, 255, 0.4);
             backdrop-filter: blur(15px);
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
             z-index: 1000;
-            width: 220px !important; /* Ultraschmal gemacht */
+            width: 220px !important;
         }
 
         .telemetry-item {
-            margin-bottom: 8px; /* Reduziert von 15px */
+            margin-bottom: 8px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
 
         .telemetry-item:last-child {
-            margin-bottom: 0; /* Letzter Abstand entfernt */
+            margin-bottom: 0;
         }
 
         .telemetry-label {
-            font-size: 0.65rem; /* Etwas kleiner */
+            font-size: 0.65rem;
             color: rgba(255, 255, 255, 0.4);
             letter-spacing: 2px;
-            margin-bottom: 2px; /* Reduziert von 5px */
+            margin-bottom: 2px;
         }
 
         /* --- STABLE NUMBER WIDGET --- */
@@ -91,41 +111,50 @@
             display: inline-flex;
             gap: 2px;
             align-items: center;
+            justify-content: flex-end;
+            min-height: 24px;
         }
 
         .cyber-digit-box {
-            width: 20px;
-            height: 32px;
+            width: 18px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: bold;
             color: var(--neon-blue);
-            text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+            transition: all 0.1s ease;
         }
 
-        .cyber-digit-box.separator {
+        .cyber-separator {
             width: 8px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: bold;
             color: var(--neon-blue);
+            opacity: 0.6;
         }
     </style>
 </head>
 
 <body>
-
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
-        <div
-            style="margin-top: auto; padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
+        <div style="margin-top: auto; padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
             &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
         </div>
     </aside>
 
     <main id="main-content">
         <div id="canvas-container">
-            <div class="cyber-grid"></div>
             <div id="telemetry-overlay">
                 <div class="telemetry-item">
                     <div class="telemetry-label">GENERATION</div>
@@ -135,7 +164,9 @@
                     <div class="telemetry-label">FITNESS</div>
                     <div id="widget-fitness-top" class="cyber-number-widget"></div>
                 </div>
-                <hr style="border:0; border-top:1px solid rgba(0,210,255,0.2); margin:10px 0;">
+                
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0; width: 100%;">
+
                 <div class="telemetry-item">
                     <div class="telemetry-label">UMFANG</div>
                     <div id="widget-perimeter" class="cyber-number-widget"></div>
@@ -149,10 +180,6 @@
         </div>
     </main>
 
-    <script src="js/branding.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/cyber-canvas.js"></script>
-    <script src="js/cmaes-logic.js"></script>
     <script>
         const BRAND_BLUE = "#00d2ff";
         const GOLDEN = "#ffd700";
