@@ -245,16 +245,21 @@
                     </div>
 
                     <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT: <span id="n-value" style="color: var(--neon-blue);">1000</span> KREISE</label>
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT: <span id="n-value" style="color: var(--neon-blue);">2</span> KREISE</label>
                         <div style="display: flex; gap: 4px; margin-bottom: 8px;">
                             <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
                             <button class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
                             <button class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
                             <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
                         </div>
-                        <input type="range" id="n-input" min="1" max="1000" value="1000" oninput="updateParams()" 
+                        <input type="range" id="n-input" min="1" max="1000" value="2" oninput="updateParams()" 
                                style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
                     </div>
+                    
+                    <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="circles-checkbox" checked onchange="toggleCircles()" style="cursor: pointer;">
+                        KREISE ANZEIGEN
+                    </label>
                     
                     <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
                         <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
@@ -530,10 +535,12 @@
                     if (s === 0) ctx.moveTo(sx, sy);
                     else ctx.lineTo(sx, sy);
                 }
-                ctx.stroke();
-
-                // DRAW VECTOR (Colored)
-                drawVector(ctx, prevX, prevY, curX, curY, color);
+                
+                if (showEpicycles) {
+                    ctx.stroke();
+                    // DRAW VECTOR (Colored)
+                    drawVector(ctx, prevX, prevY, curX, curY, color);
+                }
             }
 
             if (path.length > 5000) path.pop();
@@ -573,7 +580,13 @@
 
         let showEpicycles = true;
         function toggleCircles() {
-            showEpicycles = !showEpicycles;
+            const cb = document.getElementById('circles-checkbox');
+            if (cb) {
+                showEpicycles = cb.checked;
+            } else {
+                // Fallback for context menu if UI checkbox is not found
+                showEpicycles = !showEpicycles;
+            }
             hideMenu();
         }
 
