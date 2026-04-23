@@ -269,8 +269,10 @@
                     
                     <div style="display: flex; gap: 8px; margin-top: 5px; padding: 0;">
                         <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f; margin: 0;">PAUSE</button>
-                        <button class="cyber-btn" onclick="resetSim()" style="flex: 1; border-color: var(--neon-blue); margin: 0;">RESET</button>
+                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0;">RESET</button>
                     </div>
+                    
+                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 5px; border-color: #ff00ff; color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);">AUTO-EVOLUTION STARTEN</button>
                 </div>
             `, BRAND_BLUE);
         }
@@ -310,6 +312,46 @@
         function resetSim() {
             time = 0;
             path = [];
+        }
+
+        function manualReset() {
+            isEvolving = false;
+            updateEvolveButton();
+            resetSim();
+        }
+
+        let isEvolving = false;
+        let evolutionIndex = 0;
+        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 50, 100, 250, 500, 1000];
+
+        function startEvolution() {
+            isEvolving = !isEvolving;
+            if (isEvolving) {
+                evolutionIndex = 0;
+                adjustNTo(evolutionSteps[evolutionIndex]);
+                time = 0;
+                path = [];
+                paused = false;
+                const pBtn = document.getElementById('pause-btn');
+                if (pBtn) { pBtn.innerText = "PAUSE"; pBtn.style.borderColor = "#adff2f"; }
+            }
+            updateEvolveButton();
+        }
+
+        function updateEvolveButton() {
+            const btn = document.getElementById('evolve-btn');
+            if (btn) {
+                btn.innerText = isEvolving ? "EVOLUTION STOPPEN" : "AUTO-EVOLUTION STARTEN";
+                btn.style.borderColor = isEvolving ? "#ff7eb9" : "#ff00ff";
+            }
+        }
+
+        function adjustNTo(val) {
+            const input = document.getElementById('n-input');
+            if (input) {
+                input.value = val;
+                updateParams();
+            }
         }
 
         function init(shapeKey = "NOTE") {
@@ -363,11 +405,26 @@
 
                 if (time + dt >= Math.PI * 2) {
                     time = Math.PI * 2; // Precise finish
-                    paused = true;
-                    const btn = document.getElementById('pause-btn');
-                    if (btn) {
-                        btn.innerText = "PLAY";
-                        btn.style.borderColor = "var(--neon-blue)";
+                    
+                    if (isEvolving) {
+                        // Move to next step in evolution
+                        evolutionIndex++;
+                        if (evolutionIndex < evolutionSteps.length) {
+                            adjustNTo(evolutionSteps[evolutionIndex]);
+                            time = 0;
+                            path = [];
+                        } else {
+                            isEvolving = false;
+                            paused = true;
+                            updateEvolveButton();
+                        }
+                    } else {
+                        paused = true;
+                        const btn = document.getElementById('pause-btn');
+                        if (btn) {
+                            btn.innerText = "PLAY";
+                            btn.style.borderColor = "var(--neon-blue)";
+                        }
                     }
                 } else {
                     time += dt;
