@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CMA-ES Port Test</title>
+    <script src="js/cmaes-logic.js"></script>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .success { color: #adff2f; font-weight: bold; }
+        .fail { color: #ff4500; font-weight: bold; }
+        hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>CMA-ES PORT VERIFICATION</h1>
+    <div id="output">Running tests...</div>
+
+    <script>
+        const out = document.getElementById('output');
+        function log(msg, className = '') {
+            const div = document.createElement('div');
+            div.className = className;
+            div.innerText = msg;
+            out.appendChild(div);
+            console.log(msg);
+        }
+
+        async function runTests() {
+            out.innerHTML = '';
+            log("Starting Hansen-Compliance Test (Rosenbrock 4D)...");
+
+            // Setup
+            const xstart = [0.5, 0.5, 0.5, 0.5];
+            const sigma = 0.5;
+            const es = new CMAES(xstart, sigma);
+            
+            log(`Initial Sigma: ${sigma}`);
+            log(`Dimension: ${xstart.length}`);
+            log(`Population Size (lambda): ${es.params.lam}`);
+
+            let generation = 0;
+            const maxGens = 1000;
+            
+            while (generation < maxGens) {
+                const candidates = es.ask();
+                const fitnesses = candidates.map(x => CMAESLogic.rosenbrock(x));
+                es.tell(candidates, fitnesses);
+                
+                generation++;
+                
+                if (generation % 20 === 0) {
+                    log(`GEN ${generation.toString().padStart(4)} | Best Fitness: ${es.best.f.toExponential(4)} | Sigma: ${es.sigma.toExponential(4)}`);
+                }
+
+                if (es.best.f < 1e-12) {
+                    log(`\nSUCCESS: Target fitness reached!`, 'success');
+                    break;
+                }
+
+                const stopReason = es.stop();
+                if (stopReason) {
+                    log(`\nSTOPPED: ${JSON.stringify(stopReason)}`);
+                    break;
+                }
+            }
+
+            log("\n--- FINAL RESULT ---");
+            log(`Total Generations: ${generation}`);
+            log(`Total Evaluations: ${es.counteval}`);
+            log(`Best Fitness: ${es.best.f}`);
+            log(`Best Solution: [${es.best.x.map(v => v.toFixed(6)).join(', ')}]`);
+
+            if (es.best.f < 1e-12) {
+                log("\nPORT VERIFIED: The JS implementation converges correctly on Rosenbrock.", 'success');
+            } else {
+                log("\nVERIFICATION FAILED: Did not reach target accuracy.", 'fail');
+            }
+        }
+
+        window.onload = runTests;
+    </script>
+</body>
+</html>
