@@ -309,8 +309,20 @@
             if (nInput && nValue) {
                 nValue.innerText = nInput.value;
             }
+            updateFormula();
             const shapeKey = document.getElementById('shape-select')?.value || "NOTE";
             init(shapeKey);
+        }
+
+        function updateFormula() {
+            const num = parseInt(document.getElementById('n-input')?.value || 2);
+            if (window.katex) {
+                const formula = "{ \\color{#ffd700} f(t) } = \\sum_{{\\color{#aaddff} n}=1}^{\\color{#00d2ff} " + num + "} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
+                katex.render(formula, document.getElementById('formula-overlay'), {
+                    throwOnError: false,
+                    trust: true
+                });
+            }
         }
 
         function adjustN(delta) {
@@ -746,11 +758,7 @@
         setupUI();
         document.fonts.ready.then(() => {
             init("NOTE");
-            if (window.katex) {
-                katex.render("f(t) = \\sum_{n=-\\infty}^{\\infty} c_n \\cdot e^{i n \\omega t}", document.getElementById('formula-overlay'), {
-                    throwOnError: false
-                });
-            }
+            updateFormula();
         });
     </script>
 </body>
