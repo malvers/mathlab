@@ -337,9 +337,11 @@ class CyberUI {
             }
 
             .context-label {
-                font-family: 'Outfit', sans-serif;
-                font-size: 0.85rem;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.75rem;
                 color: rgba(255, 255, 255, 0.85);
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .context-close {

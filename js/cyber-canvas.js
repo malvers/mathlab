@@ -450,7 +450,10 @@ class CyberCanvas {
         if (range < 25) return 1;
         if (range < 60) return 2;
         if (range < 120) return 5;
-        return 10;
+        if (range < 300) return 20;
+        if (range < 800) return 50;
+        if (range < 1500) return 100;
+        return 200;
     }
 
     clear() { this.ctx.clearRect(0, 0, this.width, this.height); }
