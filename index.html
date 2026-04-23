@@ -1052,6 +1052,10 @@
                 <div class="card-icon">🚀</div>
                 <h3>Alle Werkzeuge</h3>
             </a>
+            <a href="javascript:void(0)" onclick="showFilter('highlight')" class="card grade-card category-card active">
+                <div class="card-icon">💎</div>
+                <h3>Highlights</h3>
+            </a>
             <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
                 <div class="card-icon">🎮</div>
                 <h3>Spiele</h3>
@@ -1144,10 +1148,11 @@
             const container = document.getElementById('tool-container');
             if (!container) return;
 
+            // Render All Tools (Filtered View)
             container.innerHTML = LABS_DATA.map(lab => `
                 <a href="${lab.href}" class="card" data-category="${lab.category}" data-keywords="${lab.keywords}">
                     <div class="card-icon">
-                        ${lab.icon.startsWith('<svg') ? lab.icon : lab.icon}
+                        ${lab.icon}
                     </div>
                     <h3>${lab.title}</h3>
                     <p class="card-desc">${lab.description}</p>
@@ -1177,6 +1182,8 @@
             if (q.length > 0) {
                 document.getElementById('grade-view').classList.add('hidden');
                 document.getElementById('tool-view').classList.remove('hidden');
+            } else {
+                showGrades();
             }
         }
 
@@ -1194,7 +1201,8 @@
                 'grade5': 'JAHRGANG 5', 'grade6': 'JAHRGANG 6', 'grade7': 'JAHRGANG 7', 'grade8': 'JAHRGANG 8',
                 'grade9': 'JAHRGANG 9', 'grade10': 'JAHRGANG 10', 'grade11': 'JAHRGANG 11', 'grade12': 'JAHRGANG 12',
                 'fun': 'SPIELE & FUN', 'lgs': 'GLEICHUNGSSYSTEME', 'pythagoras': 'PYTHAGORAS', 
-                'dreiecke': 'DREIECKE', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN'
+                'dreiecke': 'DREIECKE', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN',
+                'highlight': 'HIGHLIGHTS'
             };
 
             const titleEl = document.getElementById('view-title');
