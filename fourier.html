@@ -191,6 +191,7 @@
         // State
         let time = 0;
         let path = [];
+        let historicalPaths = [];
         let fourierZ = [];
         let currentShapePoints = [];
         let paused = false;
@@ -316,6 +317,7 @@
 
         function manualReset() {
             isEvolving = false;
+            historicalPaths = [];
             updateEvolveButton();
             resetSim();
         }
@@ -405,8 +407,11 @@
 
                 if (time + dt >= Math.PI * 2) {
                     time = Math.PI * 2; // Precise finish
-                    
+
                     if (isEvolving) {
+                        // ARCHIVE CURRENT PATH
+                        historicalPaths.push([...path]);
+                        
                         // Move to next step in evolution
                         evolutionIndex++;
                         if (evolutionIndex < evolutionSteps.length) {
@@ -529,7 +534,18 @@
             const scale = cc.scale;
             const num = parseInt(document.getElementById('n-input')?.value || fourierZ.length);
 
-            // 3a. Path Calculation & Trace (GOLD)
+            // 3a. Draw Historical Paths (Faint background)
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = "rgba(255, 215, 0, 0.3)";
+            historicalPaths.forEach(hPath => {
+                ctx.beginPath();
+                for (let i = 0; i < hPath.length; i++) {
+                    ctx.lineTo(cc.mapX(hPath[i].x), cc.mapY(hPath[i].y));
+                }
+                ctx.stroke();
+            });
+
+            // 3b. Path Calculation & Trace (GOLD)
             let worldTipX = 0, worldTipY = 0;
             for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
                 const { amp, freq, phase } = fourierZ[i];
@@ -592,7 +608,7 @@
                     if (s === 0) ctx.moveTo(sx, sy);
                     else ctx.lineTo(sx, sy);
                 }
-                
+
                 if (showEpicycles) {
                     ctx.stroke();
                     // DRAW VECTOR (Colored)
