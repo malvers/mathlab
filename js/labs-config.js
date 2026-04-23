@@ -256,7 +256,7 @@ const LABS_DATA = [
             <circle cx="50" cy="65" r="3.5" fill="var(--neon-blue)" />
             <circle cx="65" cy="53.75" r="3" fill="#ffd700" />
         </svg>`,
-        "category": "hot grade9 funktionen",
+        "category": "hot grade9 funktionen highlight",
         "keywords": "parabel quadratisch gleichung scheitelpunkt stauchung streckung",
         "color": "purple"
     },
@@ -417,23 +417,19 @@ const LABS_DATA = [
             <!-- Stylized Integral Symbol -->
             <text x="50" y="60" font-family="'Orbitron'" font-size="60" fill="var(--neon-purple)" text-anchor="middle" style="filter: drop-shadow(0 0 15px var(--neon-purple)); opacity: 0.8;">∫</text>
         </svg>`,
-        "category": "hot grade11 grade12 oberstufe analysis funktionen",
+        "category": "hot grade11 grade12 oberstufe analysis funktionen highlight",
         "keywords": "integral analysis fläche summe riemann reaktor",
         "color": "blue"
     },
     {
         "id": "fourier",
         "href": "fourier.html",
-        "title": "Fourier Labor",
-        "description": "Die Musik der Mathematik. Zerlege komplexe Formen wie Musiknoten in harmonische Kreisschwingungen und rekonstruiere sie.",
+        "title": "Fourier-Transformation",
+        "description": "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen und rekonstruiere sie. Verstehe die Magie der Frequenzanalyse interaktiv.",
         "tagline": "Fourier-Reihen / Harmonik / Epizykel",
-        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="20" fill="none" stroke="#00d2ff" stroke-width="2" />
-            <circle cx="70" cy="50" r="10" fill="none" stroke="#adff2f" stroke-width="1.5" />
-            <path d="M 40 50 Q 50 20 60 50 T 80 50" fill="none" stroke="#ffffff" stroke-width="2" />
-        </svg>`,
-        "category": "fun geometrie hot",
-        "keywords": "fourier musik note epicycles kreise geometrie harmonik",
+        "icon": "🎻",
+        "category": "fun geometrie hot highlight",
+        "keywords": "fourier musik note epicycles kreise geometrie harmonik transformation",
         "color": "blue"
     }
 ];
