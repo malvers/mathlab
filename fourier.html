@@ -182,7 +182,7 @@
         let showEpicycles = true;
         let isEvolving = false;
         let evolutionIndex = 0;
-        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 50, 100, 250, 500, 1000];
+        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000];
 
         // High-Tech SVG Path Sampler - Flipped and Centered for Math Y-Up
         function sampleSVGPath(pathData, density, targetScale = 10) {
@@ -251,15 +251,15 @@
                     <div class="cyber-control-group" style="margin: 5px 0 0 0 !important; padding: 0; overflow: visible;">
                         <div style="display: flex; gap: 4px; margin-bottom: 8px;">
                             <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
-                            <button class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
-                            <button class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
+                            <button id="btn-n-down" class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
+                            <button id="btn-n-up" class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
                             <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
                         </div>
                         <div class="cyber-label" style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 4px;">
                             <span id="n-value" style="color: var(--neon-blue);">2</span>
                             <span>KREISE</span>
                         </div>
-                        <input type="range" id="n-input" min="1" max="1000" value="2" oninput="updateParams()" 
+                        <input type="range" id="n-input" min="2" max="1000" value="2" oninput="updateParams()" 
                                style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
@@ -279,12 +279,12 @@
                                style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
-                    <div style="display: flex; gap: 8px; margin-top: 15px; padding: 0;">
-                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f; margin: 0; padding: 4px;">PAUSE</button>
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 2; border-color: #ffd700; color: #ffd700; margin: 0; padding: 4px;">PAUSE</button>
                         <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0; padding: 4px;">RESET</button>
                     </div>
                     
-                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #ff00ff; color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); padding: 4px;">AUTO-EVOLUTION</button>
+                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #adff2f; color: #adff2f; box-shadow: 0 0 15px rgba(173, 255, 47, 0.2); padding: 4px;">AUTO-EVOLUTION</button>
                 </div>
             `, BRAND_BLUE);
         }
@@ -296,10 +296,23 @@
                 path = [];
             }
             paused = !paused;
+            updatePauseButton();
+        }
+
+        function updatePauseButton() {
             const btn = document.getElementById('pause-btn');
             if (btn) {
                 btn.innerText = paused ? "PLAY" : "PAUSE";
-                btn.style.borderColor = paused ? "var(--neon-blue)" : "#adff2f";
+                btn.style.borderColor = paused ? "var(--neon-blue)" : "#ffd700";
+                btn.style.color = paused ? "var(--neon-blue)" : "#ffd700";
+                btn.style.boxShadow = paused ? "0 0 15px rgba(0, 210, 255, 0.2)" : "0 0 15px rgba(255, 215, 0, 0.3)";
+
+                // Auto-hide circles when paused
+                if (paused) {
+                    showEpicycles = false;
+                    const cb = document.getElementById('circles-checkbox');
+                    if (cb) cb.checked = false;
+                }
             }
         }
 
@@ -307,7 +320,27 @@
             const nInput = document.getElementById('n-input');
             const nValue = document.getElementById('n-value');
             if (nInput && nValue) {
-                nValue.innerText = nInput.value;
+                let val = parseInt(nInput.value);
+                
+                // FORCE SNAP TO evolutionSteps
+                const closest = evolutionSteps.reduce((prev, curr) => 
+                    Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+                
+                val = closest;
+                nInput.value = val;
+                nValue.innerText = val;
+
+                // Dynamic Button UI (Next/Prev labels)
+                const btnDown = document.getElementById('btn-n-down');
+                const btnUp = document.getElementById('btn-n-up');
+                if (btnDown && btnUp) {
+                    let idx = evolutionSteps.indexOf(val);
+                    let nextVal = (idx < evolutionSteps.length - 1) ? evolutionSteps[idx+1] : val;
+                    let prevVal = (idx > 0) ? evolutionSteps[idx-1] : val;
+                    
+                    btnDown.innerText = (val > prevVal) ? `-${val - prevVal}` : "-0";
+                    btnUp.innerText = (nextVal > val) ? `+${nextVal - val}` : "+0";
+                }
             }
             updateFormula();
             const shapeKey = document.getElementById('shape-select')?.value || "NOTE";
@@ -326,11 +359,23 @@
         }
 
         function adjustN(delta) {
-            const input = document.getElementById('n-input');
-            if (input) {
-                input.value = Math.max(1, Math.min(1000, parseInt(input.value) + delta));
-                updateParams();
+            const nInput = document.getElementById('n-input');
+            if (!nInput) return;
+            
+            let currentVal = parseInt(nInput.value);
+            let idx = evolutionSteps.indexOf(currentVal);
+            if (idx === -1) {
+                idx = evolutionSteps.reduce((prev, curr, i) => 
+                    Math.abs(curr - currentVal) < Math.abs(evolutionSteps[prev] - currentVal) ? i : prev, 0);
             }
+
+            // Map delta to index steps: +/- 1 -> 1 index, +/- 10 -> 5 indices
+            let indexJump = (Math.abs(delta) >= 10) ? 5 : 1;
+            if (delta < 0) indexJump *= -1;
+
+            let newIdx = Math.max(0, Math.min(evolutionSteps.length - 1, idx + indexJump));
+            nInput.value = evolutionSteps[newIdx];
+            updateParams();
         }
 
         function resetSim() {
@@ -364,7 +409,9 @@
             const btn = document.getElementById('evolve-btn');
             if (btn) {
                 btn.innerText = isEvolving ? "EVOLUTION STOPPEN" : "AUTO-EVOLUTION STARTEN";
-                btn.style.borderColor = isEvolving ? "#ff7eb9" : "#ff00ff";
+                btn.style.borderColor = "#adff2f";
+                btn.style.color = "#adff2f";
+                btn.style.boxShadow = isEvolving ? "0 0 20px rgba(173, 255, 47, 0.4)" : "0 0 15px rgba(173, 255, 47, 0.2)";
             }
         }
 
@@ -420,41 +467,61 @@
         }
 
         function animate() {
-            draw();
             if (!paused) {
                 const speed = parseFloat(document.getElementById('speed-input')?.value || 20);
-                const dt = speed / 4000;
+                const dtTotal = speed / 4000;
 
-                if (time + dt >= Math.PI * 2) {
-                    time = Math.PI * 2; // Precise finish
+                // Sub-sampling: calculate more points per frame at higher speeds
+                const subSteps = Math.max(1, Math.ceil(speed / 50));
+                const dt = dtTotal / subSteps;
+                const num = parseInt(document.getElementById('n-input')?.value || fourierZ.length);
 
-                    if (isEvolving) {
-                        // ARCHIVE CURRENT PATH
-                        historicalPaths.push([...path]);
-
-                        // Move to next step in evolution
-                        evolutionIndex++;
-                        if (evolutionIndex < evolutionSteps.length) {
-                            adjustNTo(evolutionSteps[evolutionIndex]);
-                            time = 0;
-                            path = [];
-                        } else {
-                            isEvolving = false;
-                            paused = true;
-                            updateEvolveButton();
-                        }
-                    } else {
-                        paused = true;
-                        const btn = document.getElementById('pause-btn');
-                        if (btn) {
-                            btn.innerText = "PLAY";
-                            btn.style.borderColor = "var(--neon-blue)";
-                        }
-                    }
-                } else {
+                for (let s = 0; s < subSteps; s++) {
                     time += dt;
+
+                    // Calculate current tip position
+                    let worldTipX = 0, worldTipY = 0;
+                    for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
+                        const { amp, freq, phase } = fourierZ[i];
+                        worldTipX += amp * Math.cos(freq * time + phase);
+                        worldTipY += amp * Math.sin(freq * time + phase);
+                    }
+                    path.unshift({ x: worldTipX, y: worldTipY });
+                    if (path.length > 5000) path.pop();
+
+                    if (time >= Math.PI * 2) {
+                        time = Math.PI * 2;
+
+                        const isAtFinalStep = isEvolving && evolutionIndex >= evolutionSteps.length - 1;
+
+                        // Auto-hide circles ONLY at the very end of everything or in normal play
+                        if (!isEvolving || isAtFinalStep) {
+                            showEpicycles = false;
+                            const cb = document.getElementById('circles-checkbox');
+                            if (cb) cb.checked = false;
+                        }
+
+                        if (isEvolving) {
+                            historicalPaths.push([...path]);
+                            evolutionIndex++;
+                            if (evolutionIndex < evolutionSteps.length) {
+                                adjustNTo(evolutionSteps[evolutionIndex]);
+                                time = 0;
+                                path = [];
+                            } else {
+                                isEvolving = false;
+                                paused = true;
+                                updateEvolveButton();
+                            }
+                        } else {
+                            paused = true;
+                            updatePauseButton();
+                        }
+                        break;
+                    }
                 }
             }
+            draw();
             requestAnimationFrame(animate);
         }
 
@@ -568,40 +635,32 @@
                 ctx.stroke();
             });
 
-            // 3b. Path Calculation & Trace (GOLD)
-            let worldTipX = 0, worldTipY = 0;
-            for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
-                const { amp, freq, phase } = fourierZ[i];
-                worldTipX += amp * Math.cos(freq * time + phase);
-                worldTipY += amp * Math.sin(freq * time + phase);
+            // 3b. Trace (GOLD)
+            if (path.length > 0) {
+                ctx.strokeStyle = GOLDEN;
+                ctx.lineWidth = 4;
+                ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+                ctx.beginPath();
+                for (let i = 0; i < path.length; i++) {
+                    ctx.lineTo(cc.mapX(path[i].x), cc.mapY(path[i].y));
+                }
+                ctx.stroke();
             }
-            path.unshift({ x: worldTipX, y: worldTipY });
 
-            // --- AUTO-TRACKING LOGIC ---
-            // Smooth Tracking (Lerp)
+            // --- AUTO-TRACKING LOGIC (Using current tip) ---
             if (isTracking && path.length > 0) {
-                const lastPos = path[path.length - 1];
+                const tip = path[0];
                 const currentX = (cc.view.minX + cc.view.maxX) / 2;
                 const currentY = (cc.view.minY + cc.view.maxY) / 2;
 
-                // Cinematic smoothing: move 10% towards target every frame
-                const dx = (worldTipX - currentX) * 0.1;
-                const dy = (worldTipY - currentY) * 0.1;
+                const dx = (tip.x - currentX) * 0.1;
+                const dy = (tip.y - currentY) * 0.1;
 
                 cc.view.minX += dx;
                 cc.view.maxX += dx;
                 cc.view.minY += dy;
                 cc.view.maxY += dy;
             }
-
-            ctx.strokeStyle = GOLDEN;
-            ctx.lineWidth = 4;
-            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-            ctx.beginPath();
-            for (let i = 0; i < path.length; i++) {
-                ctx.lineTo(cc.mapX(path[i].x), cc.mapY(path[i].y));
-            }
-            ctx.stroke();
 
             // 3b. Epicycles (Mapped correctly to World-Space)
             let worldX = 0;
