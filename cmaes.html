@@ -55,21 +55,55 @@
             top: 50%;
             transform: translateY(-50%);
             font-family: 'Orbitron', sans-serif;
-            font-variant-numeric: tabular-nums;
             color: var(--neon-blue);
-            font-size: 1.2rem;
-            line-height: 1.6;
             text-align: right;
             pointer-events: none;
-            background: rgba(10, 15, 25, 0.8);
-            padding: 25px;
+            background: rgba(10, 15, 25, 0.85);
+            padding: 20px; /* Reduziert von 25px */
             border-radius: 15px;
             border: 1px solid rgba(0, 210, 255, 0.4);
             backdrop-filter: blur(15px);
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
             z-index: 1000;
             width: 320px !important;
-            max-width: 320px !important;
+        }
+
+        .telemetry-item {
+            margin-bottom: 8px; /* Reduziert von 15px */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .telemetry-label {
+            font-size: 0.65rem; /* Etwas kleiner */
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            margin-bottom: 2px; /* Reduziert von 5px */
+        }
+
+        /* --- STABLE NUMBER WIDGET --- */
+        .cyber-number-widget {
+            display: inline-flex;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .cyber-digit-box {
+            width: 20px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+        }
+
+        .cyber-digit-box.separator {
+            width: 8px;
+            color: var(--neon-blue);
         }
     </style>
 </head>
@@ -89,9 +123,31 @@
         <div id="canvas-container">
             <div class="cyber-grid"></div>
             <div id="telemetry-overlay">
-                GEN: 0<br>
-                FITNESS: --<br>
-                SIGMA: --
+                <div class="telemetry-item">
+                    <div class="telemetry-label">GENERATION</div>
+                    <div id="widget-gen" class="cyber-number-widget"></div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-label">FITNESS (AREA)</div>
+                    <div id="widget-fitness-top" class="cyber-number-widget"></div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-label">STRATEGY (SIGMA)</div>
+                    <div id="widget-sigma" class="cyber-number-widget"></div>
+                </div>
+                <hr style="border:0; border-top:1px solid rgba(0,210,255,0.2); margin:10px 0;">
+                <div class="telemetry-item">
+                    <div class="telemetry-label">UMFANG (U)</div>
+                    <div id="widget-perimeter" class="cyber-number-widget"></div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-label">FLÄCHE (A)</div>
+                    <div id="widget-fitness" class="cyber-number-widget"></div>
+                </div>
+                <div class="telemetry-item">
+                    <div class="telemetry-label">RATIO (R)</div>
+                    <div id="widget-ratio" class="cyber-number-widget"></div>
+                </div>
             </div>
             <canvas id="canvas"></canvas>
         </div>
@@ -222,23 +278,37 @@
             updateTelemetry();
         }
 
-        function updateTelemetry() {
-            const overlay = document.getElementById('telemetry-overlay');
-            if (overlay) {
-                const perimeter = CMAESLogic.getPerimeter(blockPoints);
-                const area = CMAESLogic.getArea(blockPoints);
-                const ratio = area > 0 ? (perimeter / area) : 0;
-
-                overlay.innerHTML = `
-                    GEN: ${generation}<br>
-                    FITNESS: ${area.toFixed(2)}<br>
-                    SIGMA: ${sigma.toFixed(3)}<br>
-                    <hr style="border:0; border-top:1px solid rgba(0,210,255,0.2); margin:5px 0;">
-                    UMFANG: ${perimeter.toFixed(1)} px<br>
-                    FLÄCHE: ${area.toFixed(1)} px²<br>
-                    RATIO U/A: ${ratio.toFixed(5)}
-                `;
+        function updateCyberWidget(containerId, value, decimals = 2, minDigits = 1) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            let str = value.toFixed(decimals);
+            const parts = str.split('.');
+            while (parts[0].length < minDigits) parts[0] = ' ' + parts[0];
+            str = parts.join('.');
+            let html = '';
+            for (let char of str) {
+                if (char === '.' || char === ',' || char === '-') {
+                    html += `<div class="cyber-digit-box separator">${char}</div>`;
+                } else if (char === ' ') {
+                    html += `<div class="cyber-digit-box" style="opacity:0;">0</div>`;
+                } else {
+                    html += `<div class="cyber-digit-box">${char}</div>`;
+                }
             }
+            container.innerHTML = html;
+        }
+
+        function updateTelemetry() {
+            const area = CMAESLogic.getArea(blockPoints);
+            const perimeter = CMAESLogic.getPerimeter(blockPoints);
+            const ratio = area > 0 ? (perimeter / area) : 0;
+
+            updateCyberWidget('widget-gen', generation, 0, 5);
+            updateCyberWidget('widget-fitness-top', area, 1, 6);
+            updateCyberWidget('widget-sigma', sigma, 3, 2);
+            updateCyberWidget('widget-perimeter', perimeter, 1, 5);
+            updateCyberWidget('widget-fitness', area, 1, 6);
+            updateCyberWidget('widget-ratio', ratio, 5, 1);
         }
 
         function animate() {
