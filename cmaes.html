@@ -116,13 +116,13 @@
         }
 
         .cyber-digit-box {
-            width: 18px;
-            height: 24px;
+            width: 20px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: var(--neon-blue);
             text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
@@ -130,13 +130,13 @@
         }
 
         .cyber-separator {
-            width: 8px;
-            height: 24px;
+            width: 10px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: var(--neon-blue);
             opacity: 0.6;
@@ -371,33 +371,28 @@
                     const sx = cc.mapX(p.x);
                     const sy = cc.mapY(p.y);
 
+                    const r = 3; // Alle Punkte gleich groß
+                    
                     ctx.beginPath();
-                    ctx.arc(sx, sy, (idx === FIXED_POINT_INDEX) ? 10 : 6, 0, Math.PI * 2);
+                    ctx.arc(sx, sy, r, 0, Math.PI * 2);
                     
                     if (idx === FIXED_POINT_INDEX) {
-                        ctx.fillStyle = "#ff4500"; // Orange-Red for Fixed Point
-                        ctx.shadowColor = "#ff4500";
+                        ctx.fillStyle = "#ff0000"; // Sattes Vollrot
+                        ctx.shadowBlur = 0; // Kein Glow für den Fixpunkt
                     } else {
                         ctx.fillStyle = (draggedPoint === p) ? "#adff2f" : BRAND_BLUE;
                         ctx.shadowColor = (draggedPoint === p) ? "#adff2f" : BRAND_BLUE;
+                        ctx.shadowBlur = (draggedPoint === p) ? 20 : 10;
                     }
                     
-                    ctx.shadowBlur = (draggedPoint === p || idx === FIXED_POINT_INDEX) ? 20 : 10;
                     ctx.fill();
 
                     // Small Ring
                     ctx.strokeStyle = "white";
                     ctx.lineWidth = 1;
                     ctx.beginPath();
-                    ctx.arc(sx, sy, (idx === FIXED_POINT_INDEX) ? 12 : 8, 0, Math.PI * 2);
+                    ctx.arc(sx, sy, r + 2, 0, Math.PI * 2);
                     ctx.stroke();
-                    
-                    if (idx === FIXED_POINT_INDEX) {
-                        ctx.font = "bold 10px Orbitron";
-                        ctx.fillStyle = "white";
-                        ctx.textAlign = "center";
-                        ctx.fillText("FIX", sx, sy - 18);
-                    }
                 });
 
                 ctx.restore();
@@ -536,7 +531,7 @@
         // --- CONTEXT MENU ---
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
-                { label: 'Ansicht Reset', onclick: () => cc.resetView() },
+                { label: 'Ansicht Reset', onclick: () => cc.resetView(-4, 4) },
                 { divider: true },
                 { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
                 { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.needsRedraw = true; } }
