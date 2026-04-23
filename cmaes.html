@@ -51,7 +51,7 @@
 
         #telemetry-overlay {
             position: absolute;
-            right: 40px;
+            right: 30px; /* Leicht nach rechts gerückt */
             top: 50%;
             transform: translateY(-50%);
             font-family: 'Orbitron', sans-serif;
@@ -59,13 +59,13 @@
             text-align: right;
             pointer-events: none;
             background: rgba(10, 15, 25, 0.85);
-            padding: 20px; /* Reduziert von 25px */
+            padding: 12px 20px; /* Vertikales Padding auf 12px reduziert */
             border-radius: 15px;
             border: 1px solid rgba(0, 210, 255, 0.4);
             backdrop-filter: blur(15px);
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
             z-index: 1000;
-            width: 320px !important;
+            width: 220px !important; /* Ultraschmal gemacht */
         }
 
         .telemetry-item {
@@ -73,6 +73,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+        }
+
+        .telemetry-item:last-child {
+            margin-bottom: 0; /* Letzter Abstand entfernt */
         }
 
         .telemetry-label {
@@ -128,25 +132,17 @@
                     <div id="widget-gen" class="cyber-number-widget"></div>
                 </div>
                 <div class="telemetry-item">
-                    <div class="telemetry-label">FITNESS (AREA)</div>
+                    <div class="telemetry-label">FITNESS</div>
                     <div id="widget-fitness-top" class="cyber-number-widget"></div>
-                </div>
-                <div class="telemetry-item">
-                    <div class="telemetry-label">STRATEGY (SIGMA)</div>
-                    <div id="widget-sigma" class="cyber-number-widget"></div>
                 </div>
                 <hr style="border:0; border-top:1px solid rgba(0,210,255,0.2); margin:10px 0;">
                 <div class="telemetry-item">
-                    <div class="telemetry-label">UMFANG (U)</div>
+                    <div class="telemetry-label">UMFANG</div>
                     <div id="widget-perimeter" class="cyber-number-widget"></div>
                 </div>
                 <div class="telemetry-item">
-                    <div class="telemetry-label">FLÄCHE (A)</div>
+                    <div class="telemetry-label">FLÄCHE</div>
                     <div id="widget-fitness" class="cyber-number-widget"></div>
-                </div>
-                <div class="telemetry-item">
-                    <div class="telemetry-label">RATIO (R)</div>
-                    <div id="widget-ratio" class="cyber-number-widget"></div>
                 </div>
             </div>
             <canvas id="canvas"></canvas>
@@ -176,11 +172,11 @@
 
         // --- CYBER CANVAS INTEGRATION ---
         const cc = CyberCanvasInstance;
-        cc.init('canvas', { minX: -400, maxX: 400, minY: -400, maxY: 400 }, {
+        cc.init('canvas', { minX: -4, maxX: 4, minY: -4, maxY: 4 }, {
             showTelemetry: false,
             showGrid: true,
             showAxes: true,
-            showLabels: false,
+            showLabels: true, // Beschriftung aktiviert
             allowPan: false,
             allowZoom: true
         });
@@ -190,7 +186,7 @@
         let es = null;
         let generation = 0;
         let fitness = 0;
-        let sigma = 5.0; // Initial step size in pixels
+        let sigma = 0.05; // Initial step size in coordinates (formerly 5.0 px)
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
@@ -204,7 +200,7 @@
             const points = [];
             const center = { x: 0, y: 0 };
             const numPoints = 20;
-            const avgRadius = 150;
+            const avgRadius = 1.5; // Scaled to coordinate units (formerly 150)
             
             // Sample angles and radii
             const angles = [];
@@ -227,18 +223,20 @@
         function setupUI() {
             CyberUI.createCard('ui-container', 'OPTIMIERUNG', `
                 <div style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; padding: 0;">
+                    <!-- 
                     <div class="cyber-control-group">
                         <label class="cyber-label">POPULATIONSGRÖSSE (λ)</label>
                         <input type="range" id="pop-size" min="1" max="50" value="10" oninput="populationSize = parseInt(this.value)" style="width: 100%;">
                     </div>
                     <div class="cyber-control-group">
                         <label class="cyber-label">MUTATIONS-RATE (SIGMA)</label>
-                        <input type="range" id="sigma-input" min="0.1" max="20" step="0.1" value="5.0" oninput="sigma = parseFloat(this.value)" style="width: 100%;">
+                        <input type="range" id="sigma-input" min="0.001" max="0.5" step="0.001" value="0.05" oninput="sigma = parseFloat(this.value)" style="width: 100%;">
                     </div>
+                    -->
                     
                     <div style="display: flex; gap: 8px; width: 100%; margin-top: 10px;">
                         <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f;">START EVOLUTION</button>
-                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-pink); color: var(--neon-pink);">RESET</button>
+                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue);">RESET</button>
                     </div>
                 </div>
             `, BRAND_BLUE);
@@ -301,14 +299,20 @@
         function updateTelemetry() {
             const area = CMAESLogic.getArea(blockPoints);
             const perimeter = CMAESLogic.getPerimeter(blockPoints);
-            const ratio = area > 0 ? (perimeter / area) : 0;
 
             updateCyberWidget('widget-gen', generation, 0, 5);
-            updateCyberWidget('widget-fitness-top', area, 1, 6);
-            updateCyberWidget('widget-sigma', sigma, 3, 2);
-            updateCyberWidget('widget-perimeter', perimeter, 1, 5);
-            updateCyberWidget('widget-fitness', area, 1, 6);
-            updateCyberWidget('widget-ratio', ratio, 5, 1);
+            
+            let internalFitness = 0;
+            if (es && es.best.f !== Infinity) {
+                internalFitness = Math.abs(es.best.f);
+            } else {
+                internalFitness = area; 
+            }
+            const errorValue = internalFitness > 0 ? (1 / internalFitness) : 0;
+            updateCyberWidget('widget-fitness-top', errorValue, 5, 1);
+            
+            updateCyberWidget('widget-perimeter', perimeter, 3, 1);
+            updateCyberWidget('widget-fitness', area, 3, 1);
         }
 
         function animate() {
@@ -505,7 +509,7 @@
         // --- CONTEXT MENU ---
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
-                { label: 'Ansicht Reset', onclick: resetOptimization },
+                { label: 'Ansicht Reset', onclick: () => cc.resetView() },
                 { divider: true },
                 { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
                 { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.needsRedraw = true; } }
