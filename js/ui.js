@@ -773,11 +773,12 @@ class CyberUI {
 
         const cardHTML = `
             <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''}">
+                ${title ? `
                 <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${glowColor};">
                     ${toggleHtml}
                     ${title}
-                </div>
-                <div class="card-content">
+                </div>` : ''}
+                <div class="card-content" style="${!title ? 'padding-top: 0;' : ''}">
                     ${contentHTML}
                 </div>
             </div>

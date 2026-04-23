@@ -87,6 +87,14 @@
             display: block;
             flex-grow: 1;
         }
+
+        /* Override Central Button Authority for flatter look */
+        .cyber-btn,
+        .cyber-select {
+            min-height: 32px !important;
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+        }
     </style>
 </head>
 
@@ -161,7 +169,7 @@
             pathEl.setAttribute("d", pathData);
             const length = pathEl.getTotalLength();
             const rawPoints = [];
-            
+
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
 
             for (let i = 0; i < density; i++) {
@@ -169,7 +177,7 @@
                 const x = p.x;
                 const y = -p.y; // Flip Y for Math-Up
                 rawPoints.push({ x, y });
-                
+
                 minX = Math.min(minX, x); maxX = Math.max(maxX, x);
                 minY = Math.min(minY, y); maxY = Math.max(maxY, y);
             }
@@ -207,9 +215,9 @@
 
         // Simulation Controls
         function setupUI() {
-            CyberUI.createCard('ui-container', 'FOURIER-REIHE', `
-                <div style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; padding: 0;">
-                    <div class="cyber-control-group" style="margin: 0; padding: 0;">
+            CyberUI.createCard('ui-container', null, `
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; padding: 0;">
+                    <div class="cyber-control-group" style="margin: 0 !important; padding: 0;">
                         <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">FORM WÄHLEN</label>
                         <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width: 100%; margin: 0; box-sizing: border-box;">
                             <option value="NOTE">MUSIKNOTE</option>
@@ -218,35 +226,43 @@
                         </select>
                     </div>
 
-                    <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">KOMPLEXITÄT: <span id="n-value" style="color: var(--neon-blue);">2</span> KREISE</label>
+                    <div class="cyber-control-group" style="margin: 5px 0 0 0 !important; padding: 0; overflow: visible;">
                         <div style="display: flex; gap: 4px; margin-bottom: 8px;">
-                            <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
-                            <button class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
-                            <button class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
-                            <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 2px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
+                            <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
+                            <button class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
+                            <button class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
+                            <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
+                        </div>
+                        <div class="cyber-label" style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 4px;">
+                            <span id="n-value" style="color: var(--neon-blue);">2</span>
+                            <span>KREISE</span>
                         </div>
                         <input type="range" id="n-input" min="1" max="1000" value="2" oninput="updateParams()" 
-                               style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
+                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
                     <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; user-select: none;">
                         <input type="checkbox" id="circles-checkbox" checked onchange="toggleCircles()" style="cursor: pointer;">
                         KREISE ANZEIGEN
                     </label>
+
+                    <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 5px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="tracking-checkbox" onchange="toggleTracking()" style="cursor: pointer;">
+                        VERFOLGERKAMERA
+                    </label>
                     
-                    <div class="cyber-control-group" style="margin: 0; padding: 0; overflow: visible;">
+                    <div class="cyber-control-group" style="margin: 10px 0 0 0 !important; padding: 0; overflow: visible;">
                         <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
-                        <input type="range" id="speed-input" min="1" max="100" value="100" 
-                               style="width: calc(100% + 10px); margin-left: -5px; margin-right: -5px; padding: 0; display: block; box-sizing: border-box;">
+                        <input type="range" id="speed-input" min="1" max="500" value="100" 
+                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
-                    <div style="display: flex; gap: 8px; margin-top: 5px; padding: 0;">
-                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f; margin: 0;">PAUSE</button>
-                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0;">RESET</button>
+                    <div style="display: flex; gap: 8px; margin-top: 15px; padding: 0;">
+                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 1; border-color: #adff2f; margin: 0; padding: 4px;">PAUSE</button>
+                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0; padding: 4px;">RESET</button>
                     </div>
                     
-                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 5px; border-color: #ff00ff; color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);">AUTO-EVOLUTION STARTEN</button>
+                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #ff00ff; color: #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); padding: 4px;">AUTO-EVOLUTION</button>
                 </div>
             `, BRAND_BLUE);
         }
@@ -293,6 +309,7 @@
             historicalPaths = [];
             updateEvolveButton();
             resetSim();
+            resetView();
         }
 
         function startEvolution() {
@@ -602,17 +619,13 @@
             CyberUI.showContextMenu(e.clientX, e.clientY, [
                 { label: 'Ansicht Reset', onclick: resetView },
                 { divider: true },
-                { 
-                    label: 'Verfolgerkamera', 
-                    checked: isTracking, 
+                {
+                    label: 'Verfolgerkamera',
+                    checked: isTracking,
                     onchange: (v) => {
                         isTracking = v;
-                        const status = document.getElementById('tracking-status');
-                        if (status) {
-                            status.innerText = isTracking ? "ON" : "OFF";
-                            status.style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
-                        }
-                    } 
+                        updateTrackingUI();
+                    }
                 },
                 { label: 'Kreise anzeigen', checked: showEpicycles, onchange: (v) => showEpicycles = v },
                 { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.showLabels = v; cc.needsRedraw = true; } },
@@ -630,9 +643,25 @@
         }
 
         function toggleTracking() {
-            isTracking = !isTracking;
-            document.getElementById('tracking-status').innerText = isTracking ? "ON" : "OFF";
-            document.getElementById('tracking-status').style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
+            const cb = document.getElementById('tracking-checkbox');
+            if (cb) {
+                isTracking = cb.checked;
+            } else {
+                isTracking = !isTracking;
+            }
+            updateTrackingUI();
+        }
+
+        function updateTrackingUI() {
+            const cb = document.getElementById('tracking-checkbox');
+            if (cb) cb.checked = isTracking;
+
+            // Sync status text if it exists (for legacy support or telemetry)
+            const status = document.getElementById('tracking-status');
+            if (status) {
+                status.innerText = isTracking ? "ON" : "OFF";
+                status.style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
+            }
         }
 
         function toggleCircles() {
@@ -666,8 +695,7 @@
             // Stop tracking on manual interaction
             if (isTracking) {
                 isTracking = false;
-                document.getElementById('tracking-status').innerText = "OFF";
-                document.getElementById('tracking-status').style.color = "var(--neon-blue)";
+                updateTrackingUI();
             }
 
             if (e.button === 2) {
@@ -679,8 +707,7 @@
         cc.canvas.addEventListener('wheel', () => {
             if (!isTracking) {
                 isTracking = true;
-                document.getElementById('tracking-status').innerText = "ON";
-                document.getElementById('tracking-status').style.color = "var(--neon-green)";
+                updateTrackingUI();
             }
         }, { passive: true });
         cc.onResize = () => draw();
