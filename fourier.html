@@ -130,10 +130,19 @@
             top: 50%;
             transform: translateY(-50%);
             font-family: 'Orbitron', sans-serif;
-            font-size: 140px;
+            font-size: 126px;
             font-weight: 700;
-            color: #00d2ff;
-            text-shadow: 0 0 30px rgba(0, 210, 255, 0.8);
+            display: block;
+            text-align: right;
+            
+            /* Enhanced High-Contrast Golden Gradient */
+            background: linear-gradient(180deg, #ffffff 0%, #fff970 30%, #ffd700 70%, #ff9900 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            
+            filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.4));
             pointer-events: none;
             user-select: none;
             z-index: 9999;
@@ -375,7 +384,8 @@
         function updateFormula() {
             const num = parseInt(document.getElementById('n-input')?.value || 2);
             if (window.katex) {
-                const formula = "{ \\color{#ffd700} f(t) } = \\sum_{{\\color{#aaddff} n}=1}^{\\color{#00d2ff} " + num + "} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
+                // Changed upper limit color to #ffd700 (Golden) to match telemetry
+                const formula = "{ \\color{#ffd700} f(t) } = \\sum_{{\\color{#aaddff} n}=1}^{\\color{#ffd700} " + num + "} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
                 katex.render(formula, document.getElementById('formula-overlay'), {
                     throwOnError: false,
                     trust: true
