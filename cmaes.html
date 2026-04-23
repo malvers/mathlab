@@ -399,8 +399,11 @@
             }
 
             if (!paused) {
-                generation++;
-                evolve();
+                const steps = (generation >= 100) ? 100 : 1;
+                for (let i = 0; i < steps; i++) {
+                    generation++;
+                    evolve();
+                }
             }
 
             updateTelemetry();
