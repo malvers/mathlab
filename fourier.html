@@ -11,6 +11,8 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
     <style>
         /* Fourier-Specific Refinements */
         #top-bar {
@@ -95,6 +97,25 @@
             padding: 6px 12px !important;
             border-radius: 8px !important;
         }
+
+        #formula-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            color: white;
+            font-size: 1.8rem;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+            pointer-events: none;
+            user-select: none;
+            background: rgba(10, 15, 25, 0.6);
+            padding: 10px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            font-family: 'Outfit', sans-serif;
+        }
     </style>
 </head>
 
@@ -115,6 +136,7 @@
                 <!-- Injected via JS to match 2-row layout -->
             </div>
             <div class="cyber-grid"></div>
+            <div id="formula-overlay"></div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -614,6 +636,16 @@
 
             if (path.length > 5000) path.pop();
             ctx.restore();
+
+            // 4. Dynamic Info Overlay (Massive Glowing Number)
+            ctx.save();
+            ctx.font = "bold 96px Orbitron";
+            ctx.fillStyle = "#00d2ff";
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = "#00d2ff";
+            ctx.textAlign = "left";
+            ctx.fillText(num, cc.mapX(450), cc.mapY(0));
+            ctx.restore();
         }        // --- CONTEXT MENU (ULTRA STYLE) ---
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
@@ -712,7 +744,14 @@
         }, { passive: true });
         cc.onResize = () => draw();
         setupUI();
-        document.fonts.ready.then(() => init("NOTE"));
+        document.fonts.ready.then(() => {
+            init("NOTE");
+            if (window.katex) {
+                katex.render("f(t) = \\sum_{n=-\\infty}^{\\infty} c_n \\cdot e^{i n \\omega t}", document.getElementById('formula-overlay'), {
+                    throwOnError: false
+                });
+            }
+        });
     </script>
 </body>
 
