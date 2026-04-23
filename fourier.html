@@ -145,10 +145,13 @@
     </main>
 
     <div id="custom-menu" class="cyber-context-menu">
-        <div class="context-item" onclick="resetView()">Ansicht Zentrieren</div>
+        <div class="context-item" onclick="toggleTracking()" style="display: flex; align-items: center;">
+            <span>Verfolgerkamera</span>
+            <span id="tracking-status" style="color: var(--neon-blue); font-size: 0.8em; margin-left: auto;">OFF</span>
+        </div>
+        <div class="context-item" onclick="resetView()">Ansicht zurücksetzen</div>
         <div class="context-item" onclick="clearPath()">Spur Löschen</div>
         <div class="context-item" onclick="toggleCircles()">Kreise An/Aus</div>
-        <div style="height: 1px; background: rgba(0, 210, 255, 0.2); margin: 5px 0;"></div>
         <div class="context-item" onclick="toggleAxes()">Achsen An/Aus</div>
         <div class="context-item" onclick="toggleGrid()">Gitter An/Aus</div>
         <div class="context-item" onclick="toggleTele()">Telemetrie</div>
@@ -450,6 +453,16 @@
             }
             path.unshift({ x: worldTipX, y: worldTipY });
 
+            // --- AUTO-TRACKING LOGIC ---
+            if (isTracking) {
+                const rangeX = cc.view.maxX - cc.view.minX;
+                const rangeY = cc.view.maxY - cc.view.minY;
+                cc.view.minX = worldTipX - rangeX / 2;
+                cc.view.maxX = worldTipX + rangeX / 2;
+                cc.view.minY = worldTipY - rangeY / 2;
+                cc.view.maxY = worldTipY + rangeY / 2;
+            }
+
             ctx.strokeStyle = GOLDEN;
             ctx.lineWidth = 4;
             ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -526,6 +539,14 @@
             path = [];
             hideMenu();
         }
+
+        let isTracking = false;
+        function toggleTracking() {
+            isTracking = !isTracking;
+            document.getElementById('tracking-status').innerText = isTracking ? "ON" : "OFF";
+            document.getElementById('tracking-status').style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
+            hideMenu();
+        }
         
         let showEpicycles = true;
         function toggleCircles() {
@@ -557,13 +578,28 @@
             showMenu(e.clientX, e.clientY);
         };
 
-        // --- EVENT SHIELD (Stabilized) ---
+        // --- EVENT SHIELD & TRACKING CONTROL ---
         cc.canvas.addEventListener('mousedown', (e) => {
+            // Stop tracking on manual interaction
+            if (isTracking) {
+                isTracking = false;
+                document.getElementById('tracking-status').innerText = "OFF";
+                document.getElementById('tracking-status').style.color = "var(--neon-blue)";
+            }
+            
             if (e.button === 2) {
                 e.stopPropagation(); 
             }
         }, true); 
 
+        // Auto-enable tracking on zoom
+        cc.canvas.addEventListener('wheel', () => {
+            if (!isTracking) {
+                isTracking = true;
+                document.getElementById('tracking-status').innerText = "ON";
+                document.getElementById('tracking-status').style.color = "var(--neon-green)";
+            }
+        }, { passive: true });
         cc.onResize = () => draw();
         setupUI();
         document.fonts.ready.then(() => init("NOTE"));
