@@ -134,14 +134,14 @@
             font-weight: 700;
             display: block;
             text-align: right;
-            
+
             /* NUCLEAR GOLD GRADIENT - High Contrast */
             background: linear-gradient(180deg, #ffffff 0%, #fff970 20%, #ffd700 60%, #ff8c00 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: transparent;
-            
+
             filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
             pointer-events: none;
             user-select: none;
@@ -347,11 +347,11 @@
             const nValue = document.getElementById('n-value');
             if (nInput && nValue) {
                 let val = parseInt(nInput.value);
-                
+
                 // FORCE SNAP TO evolutionSteps
-                const closest = evolutionSteps.reduce((prev, curr) => 
+                const closest = evolutionSteps.reduce((prev, curr) =>
                     Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
-                
+
                 val = closest;
                 nInput.value = val;
                 nValue.innerText = val;
@@ -361,9 +361,9 @@
                 const btnUp = document.getElementById('btn-n-up');
                 if (btnDown && btnUp) {
                     let idx = evolutionSteps.indexOf(val);
-                    let nextVal = (idx < evolutionSteps.length - 1) ? evolutionSteps[idx+1] : val;
-                    let prevVal = (idx > 0) ? evolutionSteps[idx-1] : val;
-                    
+                    let nextVal = (idx < evolutionSteps.length - 1) ? evolutionSteps[idx + 1] : val;
+                    let prevVal = (idx > 0) ? evolutionSteps[idx - 1] : val;
+
                     btnDown.innerText = (val > prevVal) ? `-${val - prevVal}` : "-0";
                     btnUp.innerText = (nextVal > val) ? `+${nextVal - val}` : "+0";
                 }
@@ -395,11 +395,11 @@
         function adjustN(delta) {
             const nInput = document.getElementById('n-input');
             if (!nInput) return;
-            
+
             let currentVal = parseInt(nInput.value);
             let idx = evolutionSteps.indexOf(currentVal);
             if (idx === -1) {
-                idx = evolutionSteps.reduce((prev, curr, i) => 
+                idx = evolutionSteps.reduce((prev, curr, i) =>
                     Math.abs(curr - currentVal) < Math.abs(evolutionSteps[prev] - currentVal) ? i : prev, 0);
             }
 
@@ -673,7 +673,7 @@
             if (path.length > 0) {
                 ctx.save();
                 ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-                
+
                 // Layer 1: Outer Glow
                 ctx.strokeStyle = GOLDEN;
                 ctx.lineWidth = 6;
@@ -692,7 +692,7 @@
                 ctx.globalAlpha = 1.0;
                 ctx.strokeStyle = "#fff970"; // Brighter yellow core
                 ctx.stroke();
-                
+
                 ctx.restore();
             }
 

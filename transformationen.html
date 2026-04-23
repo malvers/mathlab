@@ -59,6 +59,8 @@
         let dragID = null; // null, -1 (RP), 0-2 (points), 100 (Body)
         let dragStartPos = { x: 0, y: 0 };
         let dragBaseline = null; // Snapshot for HL during drag
+        let isMirrored = false;
+        let mirrorAngle = 90;
         const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
         const pointInTriangle = (p, a, b, c) => {
             const area = (p1, p2, p3) => Math.abs((p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2);
@@ -102,6 +104,16 @@
                         </div>
                         <input type="range" id="slider-scale" min="10" max="300" value="100" style="width:100%; accent-color:var(--neon-blue);">
                     </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-family:Orbitron; font-size:0.6rem; color:#00d2ff; margin-bottom:5px;">
+                            <span>SPIEGEL-WINKEL</span>
+                            <span id="label-mirror-rot" style="color:white;">90°</span>
+                        </div>
+                        <input type="range" id="slider-mirror-rot" min="0" max="180" value="90" style="width:100%; accent-color:#00d2ff;">
+                    </div>
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron; color:#00d2ff;">
+                        <input type="checkbox" id="check-mirror"> SPIEGELUNG AKTIV
+                    </label>
                 </div>
             `);
 
@@ -158,13 +170,31 @@
                     let nx = ps.x - rp.x;
                     let ny = ps.y - rp.y;
                     const angleRad = (transform.rotation * Math.PI) / 180;
-                    const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
-                    const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
-                    return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty, id: p.id };
+                    let rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
+                    let ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
+                    
+                    let fx = rx + rp.x + transform.tx;
+                    let fy = ry + rp.y + transform.ty;
+
+                    // Bake Reflection if active
+                    if (isMirrored) {
+                        const mAlpha = (mirrorAngle * Math.PI) / 180;
+                        const dx = fx - rp.x;
+                        const dy = fy - rp.y;
+                        const nxm = dx * Math.cos(2 * mAlpha) + dy * Math.sin(2 * mAlpha);
+                        const nym = dx * Math.sin(2 * mAlpha) - dy * Math.cos(2 * mAlpha);
+                        fx = rp.x + nxm;
+                        fy = rp.y + nym;
+                    }
+
+                    return { x: fx, y: fy, id: p.id };
                 });
 
                 // 2. Reset transform state to neutral
                 transform = { rotation: 0, scale: 1, tx: 0, ty: 0 };
+                isMirrored = false;
+                const checkMirror = document.getElementById('check-mirror');
+                if (checkMirror) checkMirror.checked = false;
 
                 // 3. Sync UI Sliders
                 sliderRot.value = 0;
@@ -285,6 +315,23 @@
             document.getElementById('check-helpers').onchange = () => update();
             document.getElementById('check-start').onchange = () => update();
             document.getElementById('check-measurements').onchange = () => update();
+            
+            const checkMirror = document.getElementById('check-mirror');
+            if (checkMirror) {
+                checkMirror.onchange = (e) => {
+                    isMirrored = e.target.checked;
+                    update();
+                };
+            }
+            
+            const mirrorSlider = document.getElementById('slider-mirror-rot');
+            if (mirrorSlider) {
+                mirrorSlider.oninput = (e) => {
+                    mirrorAngle = parseFloat(e.target.value);
+                    update();
+                };
+                mirrorSlider.onchange = autoHideHL;
+            }
 
             update();
         });
@@ -309,6 +356,9 @@
         function update() {
             document.getElementById('label-rot').innerText = transform.rotation + "°";
             document.getElementById('label-scale').innerText = transform.scale.toFixed(1) + "x";
+            if (document.getElementById('label-mirror-rot')) {
+                document.getElementById('label-mirror-rot').innerText = mirrorAngle + "°";
+            }
             draw();
         }
 
@@ -331,10 +381,24 @@
                 // Rotation around RP
                 let nx = ps.x - rp.x;
                 let ny = ps.y - rp.y;
-                const rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
-                const ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
+                let rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
+                let ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
 
-                return { x: rx + rp.x + transform.tx, y: ry + rp.y + transform.ty };
+                let fx = rx + rp.x + transform.tx;
+                let fy = ry + rp.y + transform.ty;
+
+                // Universal Reflection at Axis through RP with Angle Alpha
+                if (isMirrored) {
+                    const mAlpha = (mirrorAngle * Math.PI) / 180;
+                    const dx = fx - rp.x;
+                    const dy = fy - rp.y;
+                    const nx = dx * Math.cos(2 * mAlpha) + dy * Math.sin(2 * mAlpha);
+                    const ny = dx * Math.sin(2 * mAlpha) - dy * Math.cos(2 * mAlpha);
+                    fx = rp.x + nx;
+                    fy = rp.y + ny;
+                }
+
+                return { x: fx, y: fy };
             };
 
             const transformedPoints = points.map(getTransformed);
@@ -421,6 +485,29 @@
             ctx.beginPath();
             ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 6, 0, Math.PI * 2);
             ctx.fill();
+
+            // Reflection Axis (Rotating through RP)
+            if (isMirrored) {
+                const mAlpha = (mirrorAngle * Math.PI) / 180;
+                
+                ctx.save();
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.8)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 10]);
+                
+                // Line length enough to cover screen
+                const L = 30; 
+                const x1 = rp.x + L * Math.cos(mAlpha);
+                const y1 = rp.y + L * Math.sin(mAlpha);
+                const x2 = rp.x - L * Math.cos(mAlpha);
+                const y2 = rp.y - L * Math.sin(mAlpha);
+                
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(x1), cc.mapY(y1));
+                ctx.lineTo(cc.mapX(x2), cc.mapY(y2));
+                ctx.stroke();
+                ctx.restore();
+            }
         }
 
         function varColor(name) {

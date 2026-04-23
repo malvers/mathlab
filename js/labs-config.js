@@ -431,5 +431,21 @@ const LABS_DATA = [
         "category": "fun geometrie hot highlight",
         "keywords": "fourier musik note epicycles kreise geometrie harmonik transformation",
         "color": "blue"
+    },
+    {
+        "id": "cmaes",
+        "href": "cmaes.html",
+        "title": "CMA-ES Optimierer",
+        "description": "Die Evolution der Form. Nutze die Covariance Matrix Adaptation Evolution Strategy zur Echtzeit-Optimierung komplexer Geometrien. Ein Blick in die Zukunft der computergestützten Linsengestaltung.",
+        "tagline": "Evolutionäre Strategien / Optimierung",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="35" fill="none" stroke="var(--neon-green)" stroke-width="1" stroke-dasharray="2 4" />
+            <circle cx="50" cy="50" r="5" fill="var(--neon-green)" />
+            <path d="M 50 15 L 50 35 M 50 65 L 50 85 M 15 50 L 35 50 M 65 50 L 85 50" stroke="var(--neon-green)" stroke-width="2" />
+            <path d="M 30 30 Q 50 50 70 70" stroke="var(--neon-blue)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.6" />
+        </svg>`,
+        "category": "hot highlight fun",
+        "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
+        "color": "green"
     }
 ];
