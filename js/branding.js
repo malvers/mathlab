@@ -313,11 +313,12 @@ const CyberBranding = {
                 top: 10px; 
                 right: 25px; 
                 text-align: right;
-                pointer-events: none;
+                pointer-events: auto; /* Updated to allow fullscreen click */
                 z-index: 99999;
                 animation: branding-fade-in 1.2s ease-out forwards;
                 max-width: 70%;
                 transition: top 0.3s ease, right 0.3s ease;
+                cursor: pointer;
             }
 
             .canvas-branding h1 {
@@ -598,11 +599,26 @@ const CyberBranding = {
 
         const container = document.createElement('div');
         container.className = 'canvas-branding';
+        container.title = "Vollbild umschalten";
         container.innerHTML = `
             <h1 id="branding-master-title">${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
+
+        container.addEventListener('click', () => this.toggleFullscreen());
         document.body.appendChild(container);
+    },
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn(`Fullscreen error: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
     },
 
     injectNavigation() {
