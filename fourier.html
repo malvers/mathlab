@@ -116,6 +116,30 @@
             border: 1px solid rgba(0, 210, 255, 0.2);
             font-family: 'Outfit', sans-serif;
         }
+
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #n-telemetry {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 140px;
+            font-weight: 700;
+            color: #00d2ff;
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.8);
+            pointer-events: none;
+            user-select: none;
+            z-index: 9999;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
     </style>
 </head>
 
@@ -137,6 +161,7 @@
             </div>
             <div class="cyber-grid"></div>
             <div id="formula-overlay"></div>
+            <div id="n-telemetry">2</div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -263,6 +288,12 @@
                                style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
+                    <div class="cyber-control-group" style="margin: 10px 0 0 0 !important; padding: 0; overflow: visible;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
+                        <input type="range" id="speed-input" min="1" max="500" value="100" 
+                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
+                    </div>
+
                     <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; user-select: none;">
                         <input type="checkbox" id="circles-checkbox" checked onchange="toggleCircles()" style="cursor: pointer;">
                         KREISE ANZEIGEN
@@ -272,12 +303,6 @@
                         <input type="checkbox" id="tracking-checkbox" onchange="toggleTracking()" style="cursor: pointer;">
                         VERFOLGERKAMERA
                     </label>
-                    
-                    <div class="cyber-control-group" style="margin: 10px 0 0 0 !important; padding: 0; overflow: visible;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
-                        <input type="range" id="speed-input" min="1" max="500" value="100" 
-                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
-                    </div>
                     
                     <div style="display: flex; gap: 8px; width: 100%;">
                         <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 2; border-color: #ffd700; color: #ffd700; margin: 0; padding: 4px;">PAUSE</button>
@@ -306,13 +331,6 @@
                 btn.style.borderColor = paused ? "var(--neon-blue)" : "#ffd700";
                 btn.style.color = paused ? "var(--neon-blue)" : "#ffd700";
                 btn.style.boxShadow = paused ? "0 0 15px rgba(0, 210, 255, 0.2)" : "0 0 15px rgba(255, 215, 0, 0.3)";
-
-                // Auto-hide circles when paused
-                if (paused) {
-                    showEpicycles = false;
-                    const cb = document.getElementById('circles-checkbox');
-                    if (cb) cb.checked = false;
-                }
             }
         }
 
@@ -340,6 +358,13 @@
                     
                     btnDown.innerText = (val > prevVal) ? `-${val - prevVal}` : "-0";
                     btnUp.innerText = (nextVal > val) ? `+${nextVal - val}` : "+0";
+                }
+
+                // Update DOM Telemetry
+                const tele = document.getElementById('n-telemetry');
+                if (tele) {
+                    tele.innerText = val;
+                    tele.style.opacity = showEpicycles ? "0.9" : "0";
                 }
             }
             updateFormula();
@@ -494,8 +519,8 @@
 
                         const isAtFinalStep = isEvolving && evolutionIndex >= evolutionSteps.length - 1;
 
-                        // Auto-hide circles ONLY at the very end of everything or in normal play
-                        if (!isEvolving || isAtFinalStep) {
+                        // Auto-hide circles ONLY at the absolute end of the whole evolution
+                        if (isAtFinalStep) {
                             showEpicycles = false;
                             const cb = document.getElementById('circles-checkbox');
                             if (cb) cb.checked = false;
@@ -635,16 +660,31 @@
                 ctx.stroke();
             });
 
-            // 3b. Trace (GOLD)
+            // 3b. Trace (GOLD) with High-End Glow
             if (path.length > 0) {
-                ctx.strokeStyle = GOLDEN;
-                ctx.lineWidth = 4;
+                ctx.save();
                 ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+                
+                // Layer 1: Outer Glow
+                ctx.strokeStyle = GOLDEN;
+                ctx.lineWidth = 6;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = GOLDEN;
+                ctx.globalAlpha = 0.6;
                 ctx.beginPath();
                 for (let i = 0; i < path.length; i++) {
                     ctx.lineTo(cc.mapX(path[i].x), cc.mapY(path[i].y));
                 }
                 ctx.stroke();
+
+                // Layer 2: Bright Core
+                ctx.lineWidth = 2.5;
+                ctx.shadowBlur = 5;
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = "#fff970"; // Brighter yellow core
+                ctx.stroke();
+                
+                ctx.restore();
             }
 
             // --- AUTO-TRACKING LOGIC (Using current tip) ---
@@ -706,16 +746,6 @@
             }
 
             if (path.length > 5000) path.pop();
-            ctx.restore();
-
-            // 4. Dynamic Info Overlay (Massive Glowing Number)
-            ctx.save();
-            ctx.font = "bold 96px Orbitron";
-            ctx.fillStyle = "#00d2ff";
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = "#00d2ff";
-            ctx.textAlign = "left";
-            ctx.fillText(num, cc.mapX(450), cc.mapY(0));
             ctx.restore();
         }        // --- CONTEXT MENU (ULTRA STYLE) ---
         cc.onContextMenu = (e) => {
