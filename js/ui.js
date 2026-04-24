@@ -370,6 +370,64 @@ class CyberUI {
                 to { opacity: 1; transform: translateY(0); }
             }
 
+            /* --- HIGH-FIDELITY NUMBER WIDGETS --- */
+            .cyber-number-widget {
+                display: inline-flex;
+                gap: 2px;
+                align-items: center;
+                justify-content: flex-start;
+                min-height: 32px;
+            }
+
+            .cyber-digit-box {
+                width: 20px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.4rem;
+                font-weight: bold;
+                color: var(--neon-blue);
+                text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+                transition: all 0.1s ease;
+            }
+
+            .cyber-digit-box.separator {
+                width: 10px;
+                opacity: 0.6;
+            }
+
+            /* --- DROPDOWN PANEL FIX --- */
+            .dropdown-panel {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 15, 25, 0.98);
+                border: 1px solid var(--neon-blue);
+                border-radius: 8px;
+                z-index: 10000;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+                margin-top: 5px;
+            }
+
+            .dropdown-option {
+                padding: 10px 15px;
+                cursor: pointer;
+                font-family: 'Orbitron';
+                font-size: 0.75rem;
+                color: rgba(255,255,255,0.7);
+                transition: all 0.2s;
+            }
+
+            .dropdown-option:hover {
+                background: rgba(0, 210, 255, 0.2);
+                color: #fff;
+            }
+
             /* CYBER SELECT BOX SYSTEM */
             .cyber-select {
                 appearance: none;
@@ -898,11 +956,20 @@ class CyberUI {
         const trigger = dropdown.querySelector('.dropdown-trigger');
         const panel = dropdown.querySelector('.dropdown-panel');
 
-        trigger.addEventListener('click', () => {
-            const isOpen = panel.style.display === 'block';
-            panel.style.display = isOpen ? 'none' : 'block';
+        // Ensure children don't swallow the click
+        trigger.querySelectorAll('*').forEach(child => child.style.pointerEvents = 'none');
 
-            // Render Math in options if open
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const currentDisplay = window.getComputedStyle(panel).display;
+            const isOpen = currentDisplay === 'block';
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-panel').forEach(p => p.style.display = 'none');
+            
+            panel.style.display = isOpen ? 'none' : 'block';
+            panel.style.zIndex = "1000000";
+
             if (!isOpen && window.katex) {
                 dropdown.querySelectorAll('.math-part').forEach(mp => {
                     window.katex.render(mp.dataset.tex, mp, { throwOnError: false });
@@ -994,7 +1061,7 @@ class CyberUI {
 
         const groupWrapper = document.createElement('div');
         groupWrapper.className = 'cyber-radio-group';
-        
+
         if (title) {
             const h = document.createElement('span');
             h.className = 'cyber-label';
@@ -1008,7 +1075,7 @@ class CyberUI {
         options.forEach(opt => {
             const wrapper = document.createElement('label');
             wrapper.className = 'cyber-radio-wrapper';
-            
+
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.name = name;
@@ -1016,11 +1083,11 @@ class CyberUI {
             radio.value = opt.value;
             radio.checked = opt.value === selectedValue;
             radio.onchange = () => onchange(opt.value);
-            
+
             const text = document.createElement('span');
             text.className = 'cyber-label';
             text.textContent = opt.label;
-            
+
             wrapper.appendChild(radio);
             wrapper.appendChild(text);
             groupWrapper.appendChild(wrapper);
@@ -1140,5 +1207,34 @@ class CyberUI {
             input.focus();
             onInput('');
         });
+    }
+
+    /**
+     * Updates a high-fidelity Cyber-Number-Widget with stable digit alignment.
+     * @param {string} containerId - Target container ID
+     * @param {number} value - Numeric value
+     * @param {number} decimals - Precision
+     * @param {number} minDigits - Integer padding
+     */
+    static updateNumberWidget(containerId, value, decimals = 2, minDigits = 1) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        let str = (typeof value === 'number') ? value.toFixed(decimals) : String(value);
+        const parts = str.split('.');
+        while (parts[0].length < minDigits) parts[0] = ' ' + parts[0];
+        str = parts.join('.');
+
+        let html = '';
+        for (let char of str) {
+            if (char === '.' || char === ',' || char === '-') {
+                html += `<div class="cyber-digit-box separator">${char}</div>`;
+            } else if (char === ' ') {
+                html += `<div class="cyber-digit-box" style="opacity:0;">0</div>`;
+            } else {
+                html += `<div class="cyber-digit-box">${char}</div>`;
+            }
+        }
+        container.innerHTML = html;
     }
 }

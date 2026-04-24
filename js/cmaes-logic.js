@@ -498,6 +498,114 @@ const CMAESLogic = {
 
     // --- BENCHMARK FUNCTIONS (from Hansen's ff class) ---
 
+    // --- OPTICAL PHYSICS ENGINE (v6.8) ---
+    
+    findIntersection: function(x, y, dx, dy, points) {
+        let bestT = Infinity;
+        let bestHit = null;
+
+        for (let i = 0; i < points.length; i++) {
+            const p1 = points[i];
+            const p2 = points[(i + 1) % points.length];
+            
+            // Ray: R = P + t*D
+            // Segment: S = A + u*(B-A)
+            const x1 = p1.x, y1 = p1.y;
+            const x2 = p2.x, y2 = p2.y;
+            const x3 = x, y3 = y;
+            const x4 = x + dx, y4 = y + dy;
+
+            const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (den === 0) continue; // Parallel
+
+            const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+            const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+
+            if (t >= 0 && t <= 1 && u > 0.0001) {
+                if (u < bestT) {
+                    bestT = u;
+                    bestHit = {
+                        x: x3 + u * dx,
+                        y: y3 + u * dy,
+                        t: u,
+                        edgeIndex: i
+                    };
+                }
+            }
+        }
+        return bestHit;
+    },
+
+    getNormal: function(edgeIndex, points) {
+        const p1 = points[edgeIndex];
+        const p2 = points[(edgeIndex + 1) % points.length];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        // Outward normal for a CCW polygon
+        const len = Math.hypot(dx, dy);
+        return { x: dy / len, y: -dx / len };
+    },
+
+    refract: function(dir, normal, n1, n2) {
+        const r = n1 / n2;
+        const c1 = -(normal.x * dir.x + normal.y * dir.y);
+        const c2sq = 1 - r * r * (1 - c1 * c1);
+        if (c2sq < 0) return null; // Total internal reflection
+        const c2 = Math.sqrt(c2sq);
+        return {
+            x: r * dir.x + (r * c1 - c2) * normal.x,
+            y: r * dir.y + (r * c1 - c2) * normal.y
+        };
+    },
+
+    getLensFitness: function(points, targetFocusX = 3) {
+        const rayCount = 7;
+        const startX = -4.0;
+        const nLens = 1.5;
+        let totalError = 0;
+        let validRays = 0;
+
+        for (let i = 0; i < rayCount; i++) {
+            const startY = (i - (rayCount - 1) / 2) * 0.8; // Parallel rays around center
+            const dir = { x: 1, y: 0 };
+
+            // 1. Entry
+            const entry = this.findIntersection(startX, startY, dir.x, dir.y, points);
+            if (!entry) { totalError += 10; continue; }
+
+            const normal1 = this.getNormal(entry.edgeIndex, points);
+            // Flip normal if it points towards the ray (entry)
+            const dot = normal1.x * dir.x + normal1.y * dir.y;
+            const actualNormal1 = dot > 0 ? { x: -normal1.x, y: -normal1.y } : normal1;
+            
+            const rayIn = this.refract(dir, actualNormal1, 1.0, nLens);
+            if (!rayIn) { totalError += 10; continue; }
+
+            // 2. Exit
+            const exit = this.findIntersection(entry.x + rayIn.x * 0.001, entry.y + rayIn.y * 0.001, rayIn.x, rayIn.y, points);
+            if (!exit) { totalError += 10; continue; }
+
+            const normal2 = this.getNormal(exit.edgeIndex, points);
+            const dot2 = normal2.x * rayIn.x + normal2.y * rayIn.y;
+            const actualNormal2 = dot2 < 0 ? { x: -normal2.x, y: -normal2.y } : normal2;
+
+            const rayOut = this.refract(rayIn, actualNormal2, nLens, 1.0);
+            if (!rayOut) { totalError += 10; continue; }
+
+            // 3. Focal Error
+            // Find y-intercept at targetFocusX
+            // Equation: y = y_exit + (rayOut.y / rayOut.x) * (targetX - x_exit)
+            if (Math.abs(rayOut.x) < 0.001) { totalError += 10; continue; }
+            
+            const focusY = exit.y + (rayOut.y / rayOut.x) * (targetFocusX - exit.x);
+            totalError += focusY * focusY; // Distance squared from y=0
+            validRays++;
+        }
+
+        if (validRays === 0) return -1000;
+        return -totalError;
+    },
+
     rosenbrock: function (x) {
         let n = x.length;
         if (n < 2) throw new Error("Dimension must be > 1 for Rosenbrock");

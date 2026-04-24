@@ -4,559 +4,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMA-ES Optimierer | docalvers</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
-        rel="stylesheet">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>CMA-ES Evolution Lab | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
-    <!-- Branding & UI -->
+    <link rel="stylesheet" href="js/cmaes-ui-overrides.css">
+    
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
     <script src="js/cmaes-logic.js"></script>
-    
-    <style>
-        /* CMA-ES Specific Refinements */
-        #ui-container {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        body {
-            background-color: #050b18; /* Tiefblaues All */
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(157, 80, 187, 0.05) 0%, transparent 40%);
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        .cyber-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                url('https://www.transparenttextures.com/patterns/stardust.png'), /* Sternenstaub */
-                radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
-            opacity: 0.4;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        #main-content {
-            flex: 1;
-            position: relative;
-            background: transparent; /* Damit das All durchscheint */
-            overflow: hidden;
-            border-left: 1px solid rgba(0, 210, 255, 0.2);
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        #canvas {
-            display: block;
-            flex-grow: 1;
-        }
-
-        #telemetry-overlay {
-            position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-blue);
-            text-align: right;
-            pointer-events: none;
-            background: rgba(10, 15, 25, 0.85);
-            padding: 12px 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
-            z-index: 1000;
-            width: 220px !important;
-        }
-
-        .telemetry-item {
-            margin-bottom: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .telemetry-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .telemetry-label {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            margin-bottom: 2px;
-        }
-
-        /* --- STABLE NUMBER WIDGET --- */
-        .cyber-number-widget {
-            display: inline-flex;
-            gap: 2px;
-            align-items: center;
-            justify-content: flex-end;
-            min-height: 24px;
-        }
-
-        .cyber-digit-box {
-            width: 20px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-            transition: all 0.1s ease;
-        }
-
-        .cyber-separator {
-            width: 10px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--neon-blue);
-            opacity: 0.6;
-        }
-    </style>
 </head>
 
 <body>
+    <!-- Mini Rail (YouTube Style) -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
-        <div style="margin-top: auto; padding: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        </div>
     </aside>
 
     <main id="main-content">
         <div id="canvas-container">
-            <div id="telemetry-overlay">
-                <div class="telemetry-item">
-                    <div class="telemetry-label">GENERATION</div>
-                    <div id="widget-gen" class="cyber-number-widget"></div>
-                </div>
-                <div class="telemetry-item">
-                    <div class="telemetry-label">FITNESS</div>
-                    <div id="widget-fitness-top" class="cyber-number-widget"></div>
-                </div>
-                
-                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0; width: 100%;">
-
-                <div class="telemetry-item">
-                    <div class="telemetry-label">UMFANG</div>
-                    <div id="widget-perimeter" class="cyber-number-widget"></div>
-                </div>
-                <div class="telemetry-item">
-                    <div class="telemetry-label">FLÄCHE</div>
-                    <div id="widget-fitness" class="cyber-number-widget"></div>
-                </div>
-            </div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
 
     <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            // Gitter muss sich anpassen
+            setTimeout(() => {
+                cc.resize();
+                cc.needsRedraw = true;
+            }, 400);
+        }
         const BRAND_BLUE = "#00d2ff";
         const GOLDEN = "#ffd700";
 
-        CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "CMA-ES OPTIMIERER"
-        });
-
-        CyberBranding.setBriefing(`
-            <b style="color:var(--neon-blue); letter-spacing:1px;">MISSION: OPTISCHE EVOLUTION</b><br><br>
-            Nutze die <b>Covariance Matrix Adaptation Evolution Strategy</b> (CMA-ES), um komplexe Geometrien in Echtzeit zu optimieren.<br><br>
-            Verschiebe den Brennpunkt und beobachte, wie die Strategie die Form eines Glasblocks anpasst, um die perfekte Lichtbrechung zu erzielen – so wie du es in deiner Dissertation implementiert hast.
-        `);
-
+        CyberBranding.init({ title: "Doc Alvers Mathe-Labor", subtitle: "CMA-ES EVOLUTION" });
         CyberUI.init();
 
-        // --- CYBER CANVAS INTEGRATION ---
         const cc = CyberCanvasInstance;
         cc.init('canvas', { minX: -4, maxX: 4, minY: -4, maxY: 4 }, {
-            showTelemetry: false,
-            showGrid: true,
-            showAxes: true,
-            showLabels: true, // Beschriftung aktiviert
-            allowPan: false,
-            allowZoom: true
+            showTelemetry: false, showGrid: true, showAxes: true, showLabels: true, allowPan: false, allowZoom: true
         });
         const ctx = cc.ctx;
 
-        // CMA-ES / Evolution State
+        // State
+        let activeMission = 'LENS'; // 'CIRCLE' or 'LENS'
         let es = null;
         let generation = 0;
         let fitness = 0;
-        let sigma = 0.05; // Initial step size in coordinates (formerly 5.0 px)
+        let sigma = 0.05; 
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
-
-        // Interaction State
+        let targetFocusX = 3.0; 
+        let blockPoints = [];
+        const FIXED_POINT_INDEX = 0; 
         let draggedPoint = null;
         const dragRadius = 15;
 
-        // Create an irregular 20-gon (non-self-intersecting)
-        function generateIrregular20Gon() {
+        function initPoints() {
             const points = [];
-            const center = { x: 0, y: 0 };
-            const numPoints = 20;
-            const avgRadius = 1.5; // Scaled to coordinate units (formerly 150)
-            
-            // Sample angles and radii
-            const angles = [];
-            for (let i = 0; i < numPoints; i++) angles.push(Math.random() * Math.PI * 2);
-            angles.sort((a, b) => a - b); // Sorting angles prevents self-intersection
-
-            for (let i = 0; i < numPoints; i++) {
-                const r = avgRadius * (0.4 + Math.random() * 1.2);
-                points.push({
-                    x: center.x + Math.cos(angles[i]) * r,
-                    y: center.y + Math.sin(angles[i]) * r
-                });
+            const N = 20;
+            if (activeMission === 'CIRCLE') {
+                for (let i = 0; i < N; i++) {
+                    const angle = (i / N) * Math.PI * 2;
+                    // Unregelmäßiges 20-Eck durch Zufallfaktor
+                    const r = 0.8 + Math.random() * 1.2; 
+                    points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
+                }
+            } else {
+                const w = 1.0, h = 3.5, pps = 5;
+                for (let i = 0; i < pps; i++) points.push({ x: -w/2, y: -h/2 + (i/pps)*h }); 
+                for (let i = 0; i < pps; i++) points.push({ x: -w/2 + (i/pps)*w, y: h/2 });
+                for (let i = 0; i < pps; i++) points.push({ x: w/2, y: h/2 - (i/pps)*h });
+                for (let i = 0; i < pps; i++) points.push({ x: w/2 - (i/pps)*w, y: -h/2 });
             }
             return points;
         }
 
-        let blockPoints = generateIrregular20Gon();
-        const FIXED_POINT_INDEX = 0; // The "Anchor" point
+        function setMission(m) {
+            activeMission = m;
+            const subtitle = m === 'CIRCLE' ? "OPTIMIERUNG KREIS" : "OPTIMIERUNG LINSE";
+            CyberBranding.init({ title: "Doc Alvers Mathe-Labor", subtitle: subtitle });
+            
+            if (m === 'CIRCLE') {
+                cc.showAxes = true; cc.showLabels = true;
+                CyberBranding.setBriefing(`<b>Optimierung Isoperimetrie</b><br>Maximiere die Fläche bei konstantem Umfang. Die Lösung ist ein Kreis.`);
+            } else {
+                cc.showAxes = false; cc.showLabels = false;
+                CyberBranding.setBriefing(`<b>Optimierung Optik</b><br>Optimiere den Glasblock zur Linse. Bündle die Strahlen im Brennpunkt.`);
+            }
+            cc.needsRedraw = true;
+            resetOptimization();
+        }
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'OPTIMIERUNG', `
-                <div style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; padding: 0;">
-                    <!-- 
-                    <div class="cyber-control-group">
-                        <label class="cyber-label">POPULATIONSGRÖSSE (λ)</label>
-                        <input type="range" id="pop-size" min="1" max="50" value="10" oninput="populationSize = parseInt(this.value)" style="width: 100%;">
+            // OPTIMIERUNG DROP-DOWN
+            CyberUI.createCard('ui-container', 'OPTIMIERUNG WÄHLEN', `
+                <div id="mission-selector-mount"></div>
+            `);
+            
+            CyberUI.createDropdown('mission-selector-mount', [
+                { id: 'CIRCLE', label: 'OPTIMIERUNG KREIS' },
+                { id: 'LENS', label: 'OPTIMIERUNG LINSE' }
+            ], (id) => setMission(id), 'LENS');
+
+            // SPACER (PUSH DOWN)
+            const spacer = document.createElement('div');
+            spacer.style.flex = "1";
+            document.getElementById('ui-container').appendChild(spacer);
+
+            // CONTROLS
+            CyberUI.createCard('ui-container', 'STEUERUNG', `
+                <div style="display: flex; gap: 8px; width: 100%;">
+                    <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">START</button>
+                    <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">RESET</button>
+                </div>
+            `);
+
+            // TELEMETRIE
+            CyberUI.createCard('ui-container', 'EVOLUTIONSDATEN', `
+                <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">GENERATION</div>
+                        <div id="widget-gen" class="cyber-number-widget"></div>
                     </div>
-                    <div class="cyber-control-group">
-                        <label class="cyber-label">MUTATIONS-RATE (SIGMA)</label>
-                        <input type="range" id="sigma-input" min="0.001" max="0.5" step="0.001" value="0.05" oninput="sigma = parseFloat(this.value)" style="width: 100%;">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">FITNESS</div>
+                        <div id="widget-fit" class="cyber-number-widget"></div>
                     </div>
-                    -->
-                    
-                    <div style="display: flex; gap: 8px; width: 100%; margin-top: 10px;">
-                        <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f;">START EVOLUTION</button>
-                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue);">RESET</button>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; margin: 5px 0;">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">UMFANG</div>
+                        <div id="widget-umfang" class="cyber-number-widget"></div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">FLÄCHE</div>
+                        <div id="widget-flaeche" class="cyber-number-widget"></div>
                     </div>
                 </div>
-            `, BRAND_BLUE);
+            `);
+            
+            setMission('LENS');
         }
 
         function toggleOptimization() {
-            targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
-            
             if (paused && !es) {
-                // Initialize Professional CMA-ES
-                // Dimension = (points - 1) * 2 (First point is fixed)
                 const xstart = [];
-                blockPoints.forEach((p, idx) => {
-                    if (idx !== FIXED_POINT_INDEX) {
-                        xstart.push(p.x);
-                        xstart.push(p.y);
+                blockPoints.forEach((p, idx) => { 
+                    if (activeMission === 'CIRCLE') {
+                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y); 
+                    } else {
+                        xstart.push(p.x, p.y); // All points for Lens
                     }
                 });
                 es = new CMAES(xstart, sigma, populationSize);
+                targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
             }
-
             paused = !paused;
             const btn = document.getElementById('start-btn');
-            if (btn) {
-                btn.innerText = paused ? "RESUME EVOLUTION" : "PAUSE EVOLUTION";
-                btn.style.borderColor = paused ? "#ffd700" : "#adff2f";
-                btn.style.color = paused ? "#ffd700" : "#adff2f";
-            }
+            if (btn) btn.innerText = paused ? "RESUME" : "PAUSE";
         }
 
         function resetOptimization() {
-            generation = 0;
-            paused = true;
-            es = null;
+            generation = 0; paused = true; es = null;
+            blockPoints = initPoints();
+            
+            // Initiale Fitness berechnen (nicht 0!)
+            if (activeMission === 'CIRCLE') {
+                fitness = -CMAESLogic.getArea(blockPoints);
+            } else {
+                fitness = -CMAESLogic.getLensFitness(blockPoints, targetFocusX);
+            }
+
             const btn = document.getElementById('start-btn');
-            if (btn) btn.innerText = "START EVOLUTION";
+            if (btn) btn.innerText = "START";
+            cc.needsRedraw = true;
             updateTelemetry();
         }
 
-        function updateCyberWidget(containerId, value, decimals = 2, minDigits = 1) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            let str = value.toFixed(decimals);
-            const parts = str.split('.');
-            while (parts[0].length < minDigits) parts[0] = ' ' + parts[0];
-            str = parts.join('.');
-            let html = '';
-            for (let char of str) {
-                if (char === '.' || char === ',' || char === '-') {
-                    html += `<div class="cyber-digit-box separator">${char}</div>`;
-                } else if (char === ' ') {
-                    html += `<div class="cyber-digit-box" style="opacity:0;">0</div>`;
-                } else {
-                    html += `<div class="cyber-digit-box">${char}</div>`;
-                }
-            }
-            container.innerHTML = html;
-        }
-
         function updateTelemetry() {
-            const area = CMAESLogic.getArea(blockPoints);
-            const perimeter = CMAESLogic.getPerimeter(blockPoints);
-
-            updateCyberWidget('widget-gen', generation, 0, 5);
-            
-            let internalFitness = 0;
-            if (es && es.best.f !== Infinity) {
-                internalFitness = Math.abs(es.best.f);
-            } else {
-                internalFitness = area; 
-            }
-            const errorValue = internalFitness > 0 ? (1 / internalFitness) : 0;
-            updateCyberWidget('widget-fitness-top', errorValue, 5, 1);
-            
-            updateCyberWidget('widget-perimeter', perimeter, 3, 1);
-            updateCyberWidget('widget-fitness', area, 3, 1);
+            CyberUI.updateNumberWidget('widget-gen', generation, 0, 1);
+            CyberUI.updateNumberWidget('widget-fit', Math.abs(fitness), 4, 1);
+            CyberUI.updateNumberWidget('widget-umfang', CMAESLogic.getPerimeter(blockPoints), 2, 1);
+            CyberUI.updateNumberWidget('widget-flaeche', CMAESLogic.getArea(blockPoints), 2, 1);
         }
 
         function animate() {
-            cc.drawGrid({ vignette: true });
-
-            // Draw the Glass Block (Polygon)
+            cc.drawGrid({ glow: true });
             if (blockPoints.length > 0) {
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(cc.mapX(blockPoints[0].x), cc.mapY(blockPoints[0].y));
-                for (let i = 1; i < blockPoints.length; i++) {
-                    ctx.lineTo(cc.mapX(blockPoints[i].x), cc.mapY(blockPoints[i].y));
-                }
+                for (let i = 1; i < blockPoints.length; i++) ctx.lineTo(cc.mapX(blockPoints[i].x), cc.mapY(blockPoints[i].y));
                 ctx.closePath();
-
-                // Style: Translucent Cyan Glass
-                ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
+                ctx.fillStyle = activeMission === 'LENS' ? "rgba(0, 210, 255, 0.25)" : "rgba(0, 210, 255, 0.15)";
                 ctx.fill();
+                ctx.strokeStyle = BRAND_BLUE; ctx.lineWidth = 2; ctx.stroke();
 
-                // Outer Glow
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.8)";
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "rgba(0, 210, 255, 0.5)";
-                ctx.stroke();
-
-                // Draw Vertex Handles
-                blockPoints.forEach((p, idx) => {
-                    const sx = cc.mapX(p.x);
-                    const sy = cc.mapY(p.y);
-
-                    const r = 3; // Alle Punkte gleich groß
-                    
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, r, 0, Math.PI * 2);
-                    
-                    if (idx === FIXED_POINT_INDEX) {
-                        ctx.fillStyle = "#ff0000"; // Sattes Vollrot
-                        ctx.shadowBlur = 0; // Kein Glow für den Fixpunkt
-                    } else {
-                        ctx.fillStyle = (draggedPoint === p) ? "#adff2f" : BRAND_BLUE;
-                        ctx.shadowColor = (draggedPoint === p) ? "#adff2f" : BRAND_BLUE;
-                        ctx.shadowBlur = (draggedPoint === p) ? 20 : 10;
+                if (activeMission === 'LENS') {
+                    const fx = cc.mapX(targetFocusX), fy = cc.mapY(0);
+                    ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(fx-10, fy); ctx.lineTo(fx+10, fy); ctx.moveTo(fx, fy-10); ctx.lineTo(fx, fy+10); ctx.stroke();
+                    for (let i = 0; i < 7; i++) {
+                        const sY = (i-3)*0.8, ray = simulateVisualRay(-10, sY, blockPoints);
+                        if (ray) {
+                            // Incoming (Dashed)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.setLineDash([5,5]); ctx.lineWidth = 1;
+                            ctx.moveTo(cc.mapX(-10), cc.mapY(sY)); ctx.lineTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.stroke();
+                            
+                            // Inside (Solid Cyan)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(0,210,255,0.9)"; ctx.setLineDash([]); ctx.lineWidth = 2;
+                            ctx.moveTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.lineTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y)); ctx.stroke();
+                            
+                            // Outgoing (Solid Gold)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,215,0,0.9)"; ctx.lineWidth = 2;
+                            ctx.moveTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y));
+                            ctx.lineTo(cc.mapX(ray.exit.x + ray.rayOut.x*20), cc.mapY(ray.exit.y + ray.rayOut.y*20)); ctx.stroke();
+                        }
                     }
-                    
-                    ctx.fill();
-
-                    // Small Ring
-                    ctx.strokeStyle = "white";
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, r + 2, 0, Math.PI * 2);
-                    ctx.stroke();
+                }
+                blockPoints.forEach((p, idx) => {
+                    const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
+                    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2);
+                    // Roter Punkt nur im Kreis-Modus
+                    const isFixed = (activeMission === 'CIRCLE' && idx === FIXED_POINT_INDEX);
+                    ctx.fillStyle = isFixed ? "#ff0000" : (draggedPoint === p ? "#adff2f" : BRAND_BLUE);
+                    ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
                 });
-
                 ctx.restore();
             }
-
             if (!paused) {
-                const steps = (generation >= 100) ? 100 : 1;
-                for (let i = 0; i < steps; i++) {
-                    generation++;
-                    evolve();
+                let steps = 1;
+                if (generation >= 1000) steps = 200;
+                else if (generation >= 100) steps = 100;
+                
+                for (let i = 0; i < steps; i++) { 
+                    generation++; 
+                    evolve(); 
                 }
             }
-
             updateTelemetry();
             requestAnimationFrame(animate);
         }
 
+        function simulateVisualRay(startX, startY, points) {
+            const dir = { x: 1, y: 0 }, nL = 1.5;
+            const ent = CMAESLogic.findIntersection(startX, startY, dir.x, dir.y, points);
+            if (!ent) return null;
+            const norm1 = CMAESLogic.getNormal(ent.edgeIndex, points);
+            const dot1 = norm1.x * dir.x + norm1.y * dir.y;
+            const rIn = CMAESLogic.refract(dir, dot1 > 0 ? {x:-norm1.x, y:-norm1.y} : norm1, 1.0, nL);
+            if (!rIn) return null;
+            const exi = CMAESLogic.findIntersection(ent.x + rIn.x * 0.001, ent.y + rIn.y * 0.001, rIn.x, rIn.y, points);
+            if (!exi) return null;
+            const norm2 = CMAESLogic.getNormal(exi.edgeIndex, points);
+            const dot2 = norm2.x * rIn.x + norm2.y * rIn.y;
+            const rOut = CMAESLogic.refract(rIn, dot2 < 0 ? {x:-norm2.x, y:-norm2.y} : norm2, nL, 1.0);
+            if (!rOut) return null;
+            return { entry: ent, exit: exi, rayOut: rOut };
+        }
+
         function evolve() {
             if (!es) return;
-
-            const anchorPoint = blockPoints[FIXED_POINT_INDEX];
-
-            // 1. ASK
             const candidates = es.ask();
-            const fitnesses = [];
-            const processedCandidates = [];
-
-            // 2. EVALUATE
+            const fitVals = []; const processed = [];
+            
             candidates.forEach(vec => {
-                let points = [];
-                // Reconstruct points: First point is ALWAYS the anchor
-                points.push({ x: anchorPoint.x, y: anchorPoint.y });
-                
-                for (let i = 0; i < vec.length; i += 2) {
-                    points.push({ x: vec[i], y: vec[i + 1] });
+                let pts = [];
+                if (activeMission === 'CIRCLE') {
+                    const anchor = blockPoints[FIXED_POINT_INDEX];
+                    pts.push({ x: anchor.x, y: anchor.y });
+                    for (let i = 0; i < vec.length; i += 2) pts.push({ x: vec[i], y: vec[i + 1] });
+                    pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
+                    const sX = anchor.x - pts[FIXED_POINT_INDEX].x, sY = anchor.y - pts[FIXED_POINT_INDEX].y;
+                    pts = pts.map(p => ({ x: p.x + sX, y: p.y + sY }));
+                } else {
+                    for (let i = 0; i < vec.length; i += 2) pts.push({ x: vec[i], y: vec[i + 1] });
+                    pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
                 }
-
-                // Apply Constraint: Keep Perimeter Constant
-                points = CMAESLogic.rescaleToPerimeter(points, targetPerimeter);
-                
-                // IMPORTANT: After rescaling, the anchor might have moved.
-                // We must shift the entire polygon back so the anchor is EXACTLY at its fixed position.
-                const shiftX = anchorPoint.x - points[FIXED_POINT_INDEX].x;
-                const shiftY = anchorPoint.y - points[FIXED_POINT_INDEX].y;
-                points = points.map(p => ({ x: p.x + shiftX, y: p.y + shiftY }));
-
-                processedCandidates.push(points);
-
-                const area = CMAESLogic.getArea(points);
-                fitnesses.push(-area); 
-            });
-
-            // 3. TELL
-            const flatProcessed = processedCandidates.map(pts => {
-                const flat = [];
-                pts.forEach((p, idx) => {
-                    if (idx !== FIXED_POINT_INDEX) {
-                        flat.push(p.x);
-                        flat.push(p.y);
-                    }
-                });
-                return flat;
+                processed.push(pts);
+                if (activeMission === 'CIRCLE') fitVals.push(-CMAESLogic.getArea(pts));
+                else fitVals.push(-CMAESLogic.getLensFitness(pts, targetFocusX));
             });
             
-            es.tell(flatProcessed, fitnesses);
-
-            // Update display to the best current mean
-            const bestMean = es.xmean;
-            const newPoints = [];
-            newPoints.push({ x: anchorPoint.x, y: anchorPoint.y });
-            for (let i = 0; i < bestMean.length; i += 2) {
-                newPoints.push({ x: bestMean[i], y: bestMean[i + 1] });
-            }
+            es.tell(processed.map(pts => {
+                const vec = [];
+                const startIdx = (activeMission === 'CIRCLE') ? 1 : 0;
+                for (let i = startIdx; i < pts.length; i++) vec.push(pts[i].x, pts[i].y);
+                return vec;
+            }), fitVals);
             
-            // Re-apply constraints to mean solution
-            let finalPoints = CMAESLogic.rescaleToPerimeter(newPoints, targetPerimeter);
-            const finalShiftX = anchorPoint.x - finalPoints[FIXED_POINT_INDEX].x;
-            const finalShiftY = anchorPoint.y - finalPoints[FIXED_POINT_INDEX].y;
-            blockPoints = finalPoints.map(p => ({ x: p.x + finalShiftX, y: p.y + finalShiftY }));
-
-            sigma = es.sigma;
-            const sigmaInput = document.getElementById('sigma-input');
-            if (sigmaInput) sigmaInput.value = sigma.toFixed(1);
-        }
-
-        // --- MOUSE INTERACTION (Engine-Integrated) ---
-        function handleDragStart(pos, e) {
-            const rect = cc.canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-
-            // Find closest point in PIXELS
-            let closest = null;
-            let minDist = dragRadius;
-
-            blockPoints.forEach(p => {
-                const sx = cc.mapX(p.x);
-                const sy = cc.mapY(p.y);
-                const d = Math.hypot(sx - mx, sy - my);
-                if (d < minDist) {
-                    minDist = d;
-                    closest = p;
-                }
-            });
-
-            if (closest) {
-                draggedPoint = closest;
-                cc.canvas.style.cursor = 'grabbing';
-            }
-        }
-
-        function handleDragMove(pos, e) {
-            if (draggedPoint) {
-                draggedPoint.x = pos.x;
-                draggedPoint.y = pos.y;
-                cc.needsRedraw = true;
+            const bPts = [];
+            const bVec = es.best.x;
+            if (activeMission === 'CIRCLE') {
+                const anchor = blockPoints[FIXED_POINT_INDEX];
+                bPts.push({ x: anchor.x, y: anchor.y });
+                for (let i = 0; i < bVec.length; i += 2) bPts.push({ x: bVec[i], y: bVec[i + 1] });
+                let finalPts = CMAESLogic.rescaleToPerimeter(bPts, targetPerimeter);
+                const fsX = anchor.x - finalPts[FIXED_POINT_INDEX].x, fsY = anchor.y - finalPts[FIXED_POINT_INDEX].y;
+                blockPoints = finalPts.map(p => ({ x: p.x + fsX, y: p.y + fsY }));
             } else {
-                // Hover effect in PIXELS
-                const rect = cc.canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-
-                let overPoint = false;
-                blockPoints.forEach(p => {
-                    const sx = cc.mapX(p.x);
-                    const sy = cc.mapY(p.y);
-                    if (Math.hypot(sx - mx, sy - my) < dragRadius) overPoint = true;
-                });
-                cc.canvas.style.cursor = overPoint ? 'pointer' : 'default';
+                for (let i = 0; i < bVec.length; i += 2) bPts.push({ x: bVec[i], y: bVec[i + 1] });
+                blockPoints = CMAESLogic.rescaleToPerimeter(bPts, targetPerimeter);
             }
+            fitness = es.best.f;
         }
 
-        function handleDragEnd() {
-            draggedPoint = null;
-            cc.canvas.style.cursor = 'default';
-            cc.needsRedraw = true;
+        function handleDragStart(pos, e) {
+            let closest = null, minDist = dragRadius;
+            blockPoints.forEach(p => {
+                const d = Math.hypot(cc.mapX(p.x) - (e.clientX - cc.canvas.getBoundingClientRect().left), cc.mapY(p.y) - (e.clientY - cc.canvas.getBoundingClientRect().top));
+                if (d < minDist) { minDist = d; closest = p; }
+            });
+            if (closest) { draggedPoint = closest; cc.canvas.style.cursor = 'grabbing'; }
         }
+        function handleDragMove(pos, e) {
+            if (draggedPoint) { draggedPoint.x = pos.x; draggedPoint.y = pos.y; cc.needsRedraw = true; }
+        }
+        function handleDragEnd() { draggedPoint = null; cc.canvas.style.cursor = 'default'; }
 
-        // --- CONTEXT MENU ---
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
                 { label: 'Ansicht Reset', onclick: () => cc.resetView(-4, 4) },
                 { divider: true },
-                { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
-                { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.needsRedraw = true; } }
+                { label: 'OPTIMIERUNG: KREIS', onclick: () => setMission('CIRCLE') },
+                { label: 'OPTIMIERUNG: LINSE', onclick: () => setMission('LENS') },
+                { divider: true },
+                { label: 'Gitter', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
             ]);
         };
 
         window.onload = () => {
             setupUI();
-            
-            // Initial Target Perimeter
-            targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
-
-            // Register Engine Callbacks
-            cc.onMouseDown = handleDragStart;
-            cc.onMouseMove = handleDragMove;
-            cc.onMouseUp = handleDragEnd;
-
-            updateTelemetry();
+            cc.onMouseDown = handleDragStart; cc.onMouseMove = handleDragMove; cc.onMouseUp = handleDragEnd;
             animate();
         };
-
     </script>
 </body>
-
 </html>
