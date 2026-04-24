@@ -499,15 +499,15 @@ const CMAESLogic = {
     // --- BENCHMARK FUNCTIONS (from Hansen's ff class) ---
 
     // --- OPTICAL PHYSICS ENGINE (v6.8) ---
-    
-    findIntersection: function(x, y, dx, dy, points) {
+
+    findIntersection: function (x, y, dx, dy, points) {
         let bestT = Infinity;
         let bestHit = null;
 
         for (let i = 0; i < points.length; i++) {
             const p1 = points[i];
             const p2 = points[(i + 1) % points.length];
-            
+
             // Ray: R = P + t*D
             // Segment: S = A + u*(B-A)
             const x1 = p1.x, y1 = p1.y;
@@ -536,7 +536,7 @@ const CMAESLogic = {
         return bestHit;
     },
 
-    getNormal: function(edgeIndex, points) {
+    getNormal: function (edgeIndex, points) {
         const p1 = points[edgeIndex];
         const p2 = points[(edgeIndex + 1) % points.length];
         const dx = p2.x - p1.x;
@@ -546,7 +546,7 @@ const CMAESLogic = {
         return { x: dy / len, y: -dx / len };
     },
 
-    refract: function(dir, normal, n1, n2) {
+    refract: function (dir, normal, n1, n2) {
         const r = n1 / n2;
         const c1 = -(normal.x * dir.x + normal.y * dir.y);
         const c2sq = 1 - r * r * (1 - c1 * c1);
@@ -558,7 +558,7 @@ const CMAESLogic = {
         };
     },
 
-    getLensFitness: function(points, targetFocusX = 3) {
+    getLensFitness: function (points, targetFocusX = 3) {
         const rayCount = 7;
         const startX = -4.0;
         const nLens = 1.5;
@@ -577,7 +577,7 @@ const CMAESLogic = {
             // Flip normal if it points towards the ray (entry)
             const dot = normal1.x * dir.x + normal1.y * dir.y;
             const actualNormal1 = dot > 0 ? { x: -normal1.x, y: -normal1.y } : normal1;
-            
+
             const rayIn = this.refract(dir, actualNormal1, 1.0, nLens);
             if (!rayIn) { totalError += 10; continue; }
 
@@ -596,7 +596,7 @@ const CMAESLogic = {
             // Find y-intercept at targetFocusX
             // Equation: y = y_exit + (rayOut.y / rayOut.x) * (targetX - x_exit)
             if (Math.abs(rayOut.x) < 0.001) { totalError += 10; continue; }
-            
+
             const focusY = exit.y + (rayOut.y / rayOut.x) * (targetFocusX - exit.x);
             totalError += focusY * focusY; // Distance squared from y=0
             validRays++;
@@ -642,4 +642,6 @@ const CMAESLogic = {
 // Export for module systems or keep global for browser
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CMAES, CMAESParameters, CMAESLogic };
+}
+module.exports = { CMAES, CMAESParameters, CMAESLogic };
 }
