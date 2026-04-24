@@ -90,14 +90,14 @@
                 }
             } else {
                 const w = 1.0, h = 3.6;
-                const ppsSide = 15, ppsTop = 2;
+                const ppsSide = 15, ppsTop = 1;
                 // Left
                 for (let i = 0; i < ppsSide; i++) points.push({ x: -w / 2, y: -h / 2 + (i / ppsSide) * h });
-                // Top
+                // Top (Corner only)
                 for (let i = 0; i < ppsTop; i++) points.push({ x: -w / 2 + (i / ppsTop) * w, y: h / 2 });
                 // Right
                 for (let i = 0; i < ppsSide; i++) points.push({ x: w / 2, y: h / 2 - (i / ppsSide) * h });
-                // Bottom
+                // Bottom (Corner only)
                 for (let i = 0; i < ppsTop; i++) points.push({ x: w / 2 - (i / ppsTop) * w, y: -h / 2 });
             }
             return points;
@@ -234,9 +234,9 @@
                     ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
                     ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
-                    const rayCount = 15; const hLens = 3.6; const epsilonOffset = 0.000007;
+                    const rayCount = 15; const hTotal = 3.6; const segH = hTotal / rayCount;
                     for (let i = 0; i < rayCount; i++) {
-                        const sY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95) + epsilonOffset;
+                        const sY = -hTotal / 2 + (i + 0.5) * segH;
                         const ray = simulateVisualRay(-10, sY, blockPoints);
                         if (ray) {
                             // Incoming (Solid Yellow)
@@ -255,15 +255,10 @@
                     }
                 }
                 blockPoints.forEach((p, idx) => {
-                    const ppsSide = 15, ppsTop = 2;
-                    const isTop = idx >= ppsSide && idx < ppsSide + ppsTop;
-                    const isBottom = idx >= 2 * ppsSide + ppsTop;
-                    if (isTop || isBottom) return; // Quersteg-Punkte weg
-
                     const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
                     ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
-                    const isFixed = (activeMission === 'CIRCLE' && idx === FIXED_POINT_INDEX);
-                    ctx.fillStyle = isFixed ? "#ff0000" : (draggedPoint === p ? "#adff2f" : BRAND_BLUE);
+                    // Alle Punkte in Rot für maximale Transparenz
+                    ctx.fillStyle = "#ff4444"; 
                     ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
                 });
                 ctx.restore();
