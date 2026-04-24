@@ -644,4 +644,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CMAES, CMAESParameters, CMAESLogic };
 }
 module.exports = { CMAES, CMAESParameters, CMAESLogic };
-}
+
