@@ -15,6 +15,31 @@
     padding: 25px 0;
     z-index: 2000;
     backdrop-filter: blur(25px);
+    border-right: none; /* Border is handled dynamically */
+}
+
+#side-panel.collapsed ~ #mini-rail, 
+#side-panel.collapsed + #mini-rail,
+#side-panel.collapsed {
+    /* When collapsed, we might need a border on the rail */
+}
+
+/* The 'Clean Line' Logic */
+#mini-rail {
+    border-right: 1px solid rgba(0, 210, 255, 0.2);
+}
+
+#side-panel:not(.collapsed) {
+    border-left: none !important;
+    margin-left: -1px; /* Overlap the mini-rail border for a single line */
+}
+
+/* --- COMPACT UI OVERRIDES (e.g. Fourier) --- */
+.compact-ui .cyber-btn,
+.compact-ui .cyber-select {
+    min-height: 32px !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
 }
 
 #side-panel { 
@@ -28,6 +53,7 @@
     position: relative;
     z-index: 1500;
     border-right: 1px solid rgba(0, 210, 255, 0.2);
+    padding: 7px !important; /* Matches mini-rail button centering (66-52)/2 = 7 */
 }
 
 #side-panel.collapsed {
@@ -73,8 +99,9 @@
     overflow-y: auto; 
     display: flex; 
     flex-direction: column; 
-    width: 380px; 
-    padding: 10px; 
+    width: 100% !important; 
+    padding: 0 !important; /* Panel padding is handled by #side-panel */
+    box-sizing: border-box;
 }
 
 body { 
@@ -202,6 +229,109 @@ body {
     font-size: 0.75rem !important;
     color: rgba(255,255,255,0.8) !important;
     border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+/* --- FOURIER SPECIFIC OVERRIDES --- */
+#top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(5, 11, 24, 0.8) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.component-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    pointer-events: none;
+}
+
+.component-label {
+    font-family: 'Orbitron';
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    position: absolute;
+    top: -15px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.drawing-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.2);
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.cyber-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
+    pointer-events: none;
+}
+
+#formula-overlay {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    color: white;
+    font-size: 1.8rem;
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+    pointer-events: none;
+    user-select: none;
+    background: rgba(10, 15, 25, 0.6);
+    padding: 10px 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    font-family: 'Outfit', sans-serif;
+}
+
+#n-telemetry {
+    position: absolute;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 126px;
+    font-weight: 700;
+    display: block;
+    text-align: right;
+    background: linear-gradient(180deg, #ffffff 0%, #fff970 20%, #ffd700 60%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
+    pointer-events: none;
+    user-select: none;
+    z-index: 9999;
+    opacity: 0.9;
 }
 
 .dropdown-option:hover {
