@@ -11,6 +11,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
 
     <style>
         :root {
@@ -49,25 +50,30 @@
             position: relative;
         }
 
-        /* --- ANWEISUNG GANZ HOCH GEZOGEN (ROTE LINIE) --- */
+        /* --- ANWEISUNG GERADEGEZOGEN & NACH RECHTS VERSCHOBEN --- */
         #instruction-header {
             position: absolute;
-            top: 15px;
-            /* Ganz oben am Rand fixiert */
-            left: 30px;
+            top: 25px; /* Fluchtet mit Mini-Rail Buttons */
+            left: 460px; /* Platz für Mini-Rail (66px) + Nav-Icons (ca. 380px) */
             font-family: 'Orbitron', sans-serif;
             color: var(--neon-blue);
             text-align: left;
             font-size: 0.85rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            line-height: 1.6;
-            max-width: 450px;
-            opacity: 0.8;
+            line-height: 1.4;
+            max-width: 500px;
+            opacity: 0.9;
             text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
             pointer-events: none;
             margin: 0;
             z-index: 100;
+        }
+
+        /* Nav-Icons fixieren, damit sie nicht im Mini-Rail kleben */
+        .cyber-nav.floating {
+            left: 85px !important;
+            top: 25px !important;
         }
 
         #game-board {
@@ -201,20 +207,7 @@
         }
 
         @media (max-width: 1024px) {
-            #side-panel {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 1000;
-            }
-
-            #instruction-header {
-                position: relative;
-                top: 10px;
-                left: 0;
-                text-align: center;
-                margin-bottom: 20px;
-                max-width: 100%;
-            }
+            /* Overrides handle the sidebar standard */
         }
 
         @media (max-width: 768px) {
