@@ -569,14 +569,11 @@ const CMAESLogic = {
         const rayCount = 15;
         const startX = -4.0;
         const nLens = 1.5;
-        const hLens = 3.6;
-        let totalError = 0;
-        let validRays = 0;
-
-        const epsilonOffset = 0.000007; // Prevent vertex hits
+        const hTotal = 3.6;
+        const segH = hTotal / rayCount;
 
         for (let i = 0; i < rayCount; i++) {
-            const startY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95) + epsilonOffset; 
+            const startY = -hTotal / 2 + (i + 0.5) * segH; 
             const dir = { x: 1, y: 0 };
 
             // 1. Entry
