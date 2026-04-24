@@ -69,7 +69,7 @@
         let es = null;
         let generation = 0;
         let fitness = 0;
-        let sigma = 0.02;
+        let sigma = 0.05;
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
@@ -285,7 +285,7 @@
             const dot1 = norm1.x * dir.x + norm1.y * dir.y;
             const rIn = CMAESLogic.refract(dir, dot1 > 0 ? { x: -norm1.x, y: -norm1.y } : norm1, 1.0, nL);
             if (!rIn) return null;
-            const exi = CMAESLogic.findIntersection(ent.x + rIn.x * 0.001, ent.y + rIn.y * 0.001, rIn.x, rIn.y, points);
+            const exi = CMAESLogic.findIntersection(ent.x + rIn.x * 1e-7, ent.y + rIn.y * 1e-7, rIn.x, rIn.y, points);
             if (!exi) return null;
             const norm2 = CMAESLogic.getNormal(exi.edgeIndex, points);
             const dot2 = norm2.x * rIn.x + norm2.y * rIn.y;
@@ -308,13 +308,15 @@
                     pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
                     const sX = anchor.x - pts[FIXED_POINT_INDEX].x, sY = anchor.y - pts[FIXED_POINT_INDEX].y;
                     pts = pts.map(p => ({ x: p.x + sX, y: p.y + sY }));
+                    fitVals.push(-CMAESLogic.getArea(pts));
                 } else {
-                    for (let i = 0; i < vec.length; i++) pts.push({ x: vec[i], y: blockPoints[i].y });
-                    pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
+                    pts = blockPoints.map((p, idx) => {
+                        if (idx === 7 || idx === 23) return { x: p.x, y: p.y }; // Anchors
+                        return { x: vec[idx], y: p.y };
+                    });
+                    fitVals.push(-CMAESLogic.getLensFitness(pts, 5.2));
                 }
                 processed.push(pts);
-                if (activeMission === 'CIRCLE') fitVals.push(-CMAESLogic.getArea(pts));
-                else fitVals.push(-CMAESLogic.getLensFitness(pts, 5.2));
             });
 
             es.tell(processed.map(pts => {
@@ -337,8 +339,11 @@
                 const fsX = anchor.x - finalPts[FIXED_POINT_INDEX].x, fsY = anchor.y - finalPts[FIXED_POINT_INDEX].y;
                 blockPoints = finalPts.map(p => ({ x: p.x + fsX, y: p.y + fsY }));
             } else {
-                for (let i = 0; i < bVec.length; i++) bPts.push({ x: bVec[i], y: blockPoints[i].y });
-                blockPoints = CMAESLogic.rescaleToPerimeter(bPts, targetPerimeter);
+                for (let i = 0; i < bVec.length; i++) {
+                    if (i === 7 || i === 23) bPts.push({ x: blockPoints[i].x, y: blockPoints[i].y });
+                    else bPts.push({ x: bVec[i], y: blockPoints[i].y });
+                }
+                blockPoints = bPts;
             }
             fitness = es.best.f;
         }
