@@ -59,7 +59,7 @@
         CyberUI.init();
 
         const cc = CyberCanvasInstance;
-        cc.init('canvas', { minX: -4, maxX: 4, minY: -4, maxY: 4 }, {
+        cc.init('canvas', { minX: -8, maxX: 8, minY: -4, maxY: 4 }, {
             showTelemetry: false, showGrid: true, showAxes: true, showLabels: true, allowPan: false, allowZoom: true
         });
         const ctx = cc.ctx;
@@ -73,7 +73,7 @@
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
-        let targetFocusX = 3.0;
+        let targetFocusX = 5.2;
         let blockPoints = [];
         const FIXED_POINT_INDEX = 0;
         let draggedPoint = null;
@@ -258,7 +258,7 @@
                     const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
                     ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
                     // Alle Punkte in Rot für maximale Transparenz
-                    ctx.fillStyle = "#ff4444"; 
+                    ctx.fillStyle = "#ff4444";
                     ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
                 });
                 ctx.restore();
@@ -314,7 +314,7 @@
                 }
                 processed.push(pts);
                 if (activeMission === 'CIRCLE') fitVals.push(-CMAESLogic.getArea(pts));
-                else fitVals.push(-CMAESLogic.getLensFitness(pts, targetFocusX));
+                else fitVals.push(-CMAESLogic.getLensFitness(pts, 5.2));
             });
 
             es.tell(processed.map(pts => {
