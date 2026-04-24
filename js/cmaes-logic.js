@@ -601,13 +601,29 @@ const CMAESLogic = {
             const rayOut = this.refract(rayIn, actualNormal2, nLens, 1.0);
             if (!rayOut) { totalError += 10; continue; }
 
+            // Penalty if the ray doesn't hit its "opposite" leg
+            // Left segments are 0..14 (Bottom to Top)
+            // Right segments are 16..30 (Top to Bottom)
+            const expectedEdgeIndex = 16 + (14 - i);
+            if (exit.edgeIndex !== expectedEdgeIndex) {
+                totalError += 500; // Penalty for missing the opposite facet
+            }
+
             // 3. Focal Error
             // Find y-intercept at targetFocusX
             // Equation: y = y_exit + (rayOut.y / rayOut.x) * (targetX - x_exit)
             if (Math.abs(rayOut.x) < 0.001) { totalError += 10; continue; }
 
-            const focusY = exit.y + (rayOut.y / rayOut.x) * (targetFocusX - exit.x);
-            totalError += focusY * focusY; // Distance squared from y=0
+            const thickness = exit.x - entry.x;
+            totalError += thickness * 100; // Penalty for thickness
+
+            totalError += focusY * focusY;
+
+            // Penalty for crossing rays inside the lens
+            if (i > 0 && typeof lastExitY !== 'undefined') {
+                if (exit.y <= lastExitY) totalError += 1000; // Hard penalty for crossing
+            }
+            lastExitY = exit.y;
             validRays++;
         }
 
