@@ -137,9 +137,15 @@
 
             // CONTROLS
             CyberUI.createCard('ui-container', 'STEUERUNG', `
-                <div style="display: flex; gap: 8px; width: 100%;">
-                    <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">START</button>
-                    <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">RESET</button>
+                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">START</button>
+                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">RESET</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button class="cyber-btn" onclick="stepEvolution(1)" style="flex: 1; border-color: #ffd700; color: #ffd700; height: 40px; font-size: 11px;">STEP 1</button>
+                        <button class="cyber-btn" onclick="stepEvolution(10)" style="flex: 1; border-color: #ffa500; color: #ffa500; height: 40px; font-size: 11px;">STEP 10</button>
+                    </div>
                 </div>
             `);
 
@@ -249,6 +255,11 @@
                     }
                 }
                 blockPoints.forEach((p, idx) => {
+                    const ppsSide = 15, ppsTop = 2;
+                    const isTop = idx >= ppsSide && idx < ppsSide + ppsTop;
+                    const isBottom = idx >= 2 * ppsSide + ppsTop;
+                    if (isTop || isBottom) return; // Quersteg-Punkte weg
+
                     const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
                     ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
                     const isFixed = (activeMission === 'CIRCLE' && idx === FIXED_POINT_INDEX);
@@ -360,6 +371,34 @@
                 { label: 'Gitter', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
             ]);
         };
+
+        function stepEvolution(count = 1) {
+            if (!es) {
+                const xstart = [];
+                blockPoints.forEach((p, idx) => {
+                    if (activeMission === 'CIRCLE') {
+                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y);
+                    } else {
+                        xstart.push(p.x);
+                    }
+                });
+                es = new CMAES(xstart, sigma, populationSize);
+                targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
+            }
+            for (let i = 0; i < count; i++) {
+                generation++;
+                evolve();
+            }
+            updateTelemetry();
+            cc.needsRedraw = true;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            if (e.key === '1') stepEvolution(1);
+            if (e.key === '0') stepEvolution(10);
+            if (e.key === ' ') toggleOptimization();
+        });
 
         window.onload = () => {
             setupUI();
