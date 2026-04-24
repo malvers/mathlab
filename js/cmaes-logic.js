@@ -521,8 +521,8 @@ const CMAESLogic = {
             const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
             const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
-            const eps = 0.00001;
-            if (t > eps && t < (1 - eps) && u > eps) {
+            const eps = 1e-10;
+            if (t >= 0 && t <= 1 && u > eps) {
                 if (u < bestT) {
                     bestT = u;
                     bestHit = {
@@ -580,7 +580,7 @@ const CMAESLogic = {
 
             // 1. Entry
             const entry = this.findIntersection(startX, startY, dir.x, dir.y, points);
-            if (!entry) { totalError += 10; continue; }
+            if (!entry) { totalError += 5000; continue; }
 
             const normal1 = this.getNormal(entry.edgeIndex, points);
             // Flip normal if it points towards the ray (entry)
@@ -588,25 +588,25 @@ const CMAESLogic = {
             const actualNormal1 = dot > 0 ? { x: -normal1.x, y: -normal1.y } : normal1;
 
             const rayIn = this.refract(dir, actualNormal1, 1.0, nLens);
-            if (!rayIn) { totalError += 10; continue; }
+            if (!rayIn) { totalError += 5000; continue; }
 
             // 2. Exit
-            const exit = this.findIntersection(entry.x + rayIn.x * 0.001, entry.y + rayIn.y * 0.001, rayIn.x, rayIn.y, points);
-            if (!exit) { totalError += 10; continue; }
+            const exit = this.findIntersection(entry.x + rayIn.x * 1e-7, entry.y + rayIn.y * 1e-7, rayIn.x, rayIn.y, points);
+            if (!exit) { totalError += 5000; continue; }
 
             const normal2 = this.getNormal(exit.edgeIndex, points);
             const dot2 = normal2.x * rayIn.x + normal2.y * rayIn.y;
             const actualNormal2 = dot2 < 0 ? { x: -normal2.x, y: -normal2.y } : normal2;
 
             const rayOut = this.refract(rayIn, actualNormal2, nLens, 1.0);
-            if (!rayOut) { totalError += 10; continue; }
+            if (!rayOut) { totalError += 5000; continue; }
 
             // Penalty if the ray doesn't hit its "opposite" leg
             // Left segments are 0..14 (Bottom to Top)
             // Right segments are 16..30 (Top to Bottom)
             const expectedEdgeIndex = 16 + (14 - i);
             if (exit.edgeIndex !== expectedEdgeIndex) {
-                totalError += 500; // Penalty for missing the opposite facet
+                totalError += 100; // Reduced penalty for missing the opposite facet
             }
 
             // 3. Focal Error
@@ -615,8 +615,10 @@ const CMAESLogic = {
             if (Math.abs(rayOut.x) < 0.001) { totalError += 10; continue; }
 
             const thickness = exit.x - entry.x;
-            totalError += thickness * 100; // Penalty for thickness
+            if (thickness < 0.01) totalError += 2000; // Hard penalty for too thin or inverted lens
+            // totalError += Math.abs(thickness) * 1; // Thickness penalty removed
 
+            const focusY = exit.y + (rayOut.y / rayOut.x) * (targetFocusX - exit.x);
             totalError += focusY * focusY;
 
             // Penalty for crossing rays inside the lens
@@ -628,6 +630,21 @@ const CMAESLogic = {
         }
 
         if (validRays === 0) return -1000;
+
+        // Smoothness / Curvature Penalty (Beauty-Update)
+        let smoothnessPenalty = 0;
+        // Left surface: 0 to 14
+        for (let j = 1; j < 14; j++) {
+            const laplacian = points[j-1].x - 2 * points[j].x + points[j+1].x;
+            smoothnessPenalty += laplacian * laplacian * 500;
+        }
+        // Right surface: 16 to 30
+        for (let j = 17; j < 30; j++) {
+            const laplacian = points[j-1].x - 2 * points[j].x + points[j+1].x;
+            smoothnessPenalty += laplacian * laplacian * 500;
+        }
+        totalError += smoothnessPenalty;
+
         return -totalError;
     },
 
