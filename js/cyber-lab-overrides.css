@@ -34,16 +34,34 @@
     margin-left: -1px; /* Overlap the mini-rail border for a single line */
 }
 
-/* --- COMPACT UI OVERRIDES (e.g. Fourier) --- */
-.compact-ui .cyber-btn,
-.compact-ui .cyber-select {
-    min-height: 32px !important;
-    padding: 6px 12px !important;
-    border-radius: 8px !important;
+/* --- NAVIGATION COMPRESSION FOR 350px --- */
+#side-panel .cyber-nav,
+#sidebar-header .cyber-nav {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 18px 0 15px 0 !important; /* 18px top margin + 7px panel padding = 25px (matches mini-rail) */
+    box-sizing: border-box !important;
+}
+
+#side-panel .cyber-nav .nav-btn,
+#sidebar-header .cyber-nav .nav-btn {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
 }
 
 #side-panel { 
-    width: 380px; 
+    width: 350px !important; 
+    min-width: 350px !important; /* Overriding the base layout's min-width */
     height: 100vh; 
     background: rgba(10, 15, 26, 0.98); 
     display: flex; 
@@ -94,7 +112,9 @@
     filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3)) !important;
 }
 
-#ui-container { 
+#ui-container,
+#parameters-container,
+#parameter-container { 
     flex-grow: 1; 
     overflow-y: auto; 
     display: flex; 

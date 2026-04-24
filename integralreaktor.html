@@ -22,6 +22,7 @@
     <script src="js/ui.js"></script>
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <style>
         /* Essential structure only; all branding/padding comes from cyber-layout.css */
         #reactor-canvas {
@@ -89,10 +90,19 @@
 </head>
 
 <body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
     <aside id="side-panel">
         <div id="sidebar-header" style="min-height: 80px;"></div>
-
-
 
         <div class="instrument-card">
             <div class="dashboard-grid">
@@ -114,11 +124,6 @@
         <div id="parameters-container">
             <!-- Cards will be injected here via JS -->
         </div>
-
-        <div
-            style="margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        </div>
     </aside>
 
     <main id="main-content">
@@ -129,6 +134,13 @@
     <script src="js/cyber-canvas.js"></script>
     <script src="js/integral-engine.js"></script>
     <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
         window.addEventListener('load', () => {
             // 1. Initialize Branding
             CyberBranding.init({
