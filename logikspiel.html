@@ -306,13 +306,20 @@
 </head>
 
 <body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
     <aside id="side-panel">
         <div id="sidebar-header"></div>
         <div id="game-stats"></div>
-        <div
-            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        </div>
     </aside>
 
     <main id="main-content">
@@ -360,6 +367,13 @@
     <script src="js/ui.js"></script>
     <script src="js/guard.js"></script>
     <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
         let gridSize = 3;
         let grid = [];
         let solvedGrid = []; // Reference solution
