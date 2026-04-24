@@ -85,16 +85,20 @@
             if (activeMission === 'CIRCLE') {
                 for (let i = 0; i < N; i++) {
                     const angle = (i / N) * Math.PI * 2;
-                    // Unregelmäßiges 20-Eck durch Zufallfaktor
                     const r = 0.8 + Math.random() * 1.2;
                     points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
                 }
             } else {
-                const w = 1.0, h = 3.5, pps = 5;
-                for (let i = 0; i < pps; i++) points.push({ x: -w / 2, y: -h / 2 + (i / pps) * h });
-                for (let i = 0; i < pps; i++) points.push({ x: -w / 2 + (i / pps) * w, y: h / 2 });
-                for (let i = 0; i < pps; i++) points.push({ x: w / 2, y: h / 2 - (i / pps) * h });
-                for (let i = 0; i < pps; i++) points.push({ x: w / 2 - (i / pps) * w, y: -h / 2 });
+                const w = 1.0, h = 3.6;
+                const ppsSide = 15, ppsTop = 2;
+                // Left
+                for (let i = 0; i < ppsSide; i++) points.push({ x: -w / 2, y: -h / 2 + (i / ppsSide) * h });
+                // Top
+                for (let i = 0; i < ppsTop; i++) points.push({ x: -w / 2 + (i / ppsTop) * w, y: h / 2 });
+                // Right
+                for (let i = 0; i < ppsSide; i++) points.push({ x: w / 2, y: h / 2 - (i / ppsSide) * h });
+                // Bottom
+                for (let i = 0; i < ppsTop; i++) points.push({ x: w / 2 - (i / ppsTop) * w, y: -h / 2 });
             }
             return points;
         }
@@ -172,7 +176,7 @@
                     if (activeMission === 'CIRCLE') {
                         if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y);
                     } else {
-                        xstart.push(p.x, p.y); // All points for Lens
+                        xstart.push(p.x); // Only X for Lens
                     }
                 });
                 es = new CMAES(xstart, sigma, populationSize);
@@ -224,11 +228,13 @@
                     ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
                     ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
-                    for (let i = 0; i < 7; i++) {
-                        const sY = (i - 3) * 0.8, ray = simulateVisualRay(-10, sY, blockPoints);
+                    const rayCount = 15; const hLens = 3.6;
+                    for (let i = 0; i < rayCount; i++) {
+                        const sY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95);
+                        const ray = simulateVisualRay(-10, sY, blockPoints);
                         if (ray) {
-                            // Incoming (Dashed)
-                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.setLineDash([5, 5]); ctx.lineWidth = 1;
+                            // Incoming (Solid Yellow)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,215,0,0.9)"; ctx.setLineDash([]); ctx.lineWidth = 2;
                             ctx.moveTo(cc.mapX(-10), cc.mapY(sY)); ctx.lineTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.stroke();
 
                             // Inside (Solid Cyan)
@@ -245,7 +251,6 @@
                 blockPoints.forEach((p, idx) => {
                     const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
                     ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
-                    // Roter Punkt nur im Kreis-Modus
                     const isFixed = (activeMission === 'CIRCLE' && idx === FIXED_POINT_INDEX);
                     ctx.fillStyle = isFixed ? "#ff0000" : (draggedPoint === p ? "#adff2f" : BRAND_BLUE);
                     ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
@@ -298,7 +303,7 @@
                     const sX = anchor.x - pts[FIXED_POINT_INDEX].x, sY = anchor.y - pts[FIXED_POINT_INDEX].y;
                     pts = pts.map(p => ({ x: p.x + sX, y: p.y + sY }));
                 } else {
-                    for (let i = 0; i < vec.length; i += 2) pts.push({ x: vec[i], y: vec[i + 1] });
+                    for (let i = 0; i < vec.length; i++) pts.push({ x: vec[i], y: blockPoints[i].y });
                     pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
                 }
                 processed.push(pts);
@@ -308,8 +313,11 @@
 
             es.tell(processed.map(pts => {
                 const vec = [];
-                const startIdx = (activeMission === 'CIRCLE') ? 1 : 0;
-                for (let i = startIdx; i < pts.length; i++) vec.push(pts[i].x, pts[i].y);
+                if (activeMission === 'CIRCLE') {
+                    for (let i = 1; i < pts.length; i++) vec.push(pts[i].x, pts[i].y);
+                } else {
+                    for (let i = 0; i < pts.length; i++) vec.push(pts[i].x);
+                }
                 return vec;
             }), fitVals);
 
@@ -323,7 +331,7 @@
                 const fsX = anchor.x - finalPts[FIXED_POINT_INDEX].x, fsY = anchor.y - finalPts[FIXED_POINT_INDEX].y;
                 blockPoints = finalPts.map(p => ({ x: p.x + fsX, y: p.y + fsY }));
             } else {
-                for (let i = 0; i < bVec.length; i += 2) bPts.push({ x: bVec[i], y: bVec[i + 1] });
+                for (let i = 0; i < bVec.length; i++) bPts.push({ x: bVec[i], y: blockPoints[i].y });
                 blockPoints = CMAESLogic.rescaleToPerimeter(bPts, targetPerimeter);
             }
             fitness = es.best.f;
