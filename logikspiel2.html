@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zahlen Puzzle | ULTRA v6.7.0</title>
+    <title>Zahlen-Puzzle | ULTRA v5.3.8</title>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
@@ -309,13 +309,20 @@
 </head>
 
 <body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
     <aside id="side-panel">
         <div id="sidebar-header"></div>
         <div id="game-stats"></div>
-        <div
-            style="margin-top: auto; padding-top: 20px; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.2); font-family: 'Orbitron';">
-            &bull; &copy; 2026 DR. MICHAEL R. ALVERS &bull;
-        </div>
     </aside>
 
     <main id="main-content">
@@ -350,6 +357,13 @@
     <script src="js/ui.js"></script>
     <script src="js/guard.js"></script>
     <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
         // --- VOLLSTÄNDIGE GAME ENGINE ---
         let gameMode = 'sum', gridSize = 3, grid = [], solvedGrid = [], hintedCells = [], targetRows = [], targetCols = [], currentLevel = 1, moves = 0, startTime = Date.now(), currentHintAnswer = null;
 
