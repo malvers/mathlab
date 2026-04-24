@@ -547,26 +547,33 @@ const CMAESLogic = {
     },
 
     refract: function (dir, normal, n1, n2) {
+        let dot = dir.x * normal.x + dir.y * normal.y;
+        let n = normal;
+        if (dot > 0) {
+            n = { x: -normal.x, y: -normal.y };
+            dot = -dot;
+        }
         const r = n1 / n2;
-        const c1 = -(normal.x * dir.x + normal.y * dir.y);
+        const c1 = -dot;
         const c2sq = 1 - r * r * (1 - c1 * c1);
         if (c2sq < 0) return null; // Total internal reflection
         const c2 = Math.sqrt(c2sq);
         return {
-            x: r * dir.x + (r * c1 - c2) * normal.x,
-            y: r * dir.y + (r * c1 - c2) * normal.y
+            x: r * dir.x + (r * c1 - c2) * n.x,
+            y: r * dir.y + (r * c1 - c2) * n.y
         };
     },
 
     getLensFitness: function (points, targetFocusX = 3) {
-        const rayCount = 7;
+        const rayCount = 15;
         const startX = -4.0;
         const nLens = 1.5;
+        const hLens = 3.6;
         let totalError = 0;
         let validRays = 0;
 
         for (let i = 0; i < rayCount; i++) {
-            const startY = (i - (rayCount - 1) / 2) * 0.8; // Parallel rays around center
+            const startY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95); 
             const dir = { x: 1, y: 0 };
 
             // 1. Entry
