@@ -1,6 +1,6 @@
 /**
  * OPTI-LENS Standalone (cmaes_java.js)
- * PURE 1:1 JAVA PORT - NO CUSTOM PENALTIES.
+ * FULL OPTIMIZATION with CONTROL FLAGS (Safety Version).
  */
 
 class CMAES {
@@ -99,13 +99,13 @@ const App = {
     canvas: null, ctx: null,
     points: [], basePoints: [], focus: { x: 850, y: 380 },
     es: null, generation: 0, fitness: 0, penalty: 0, calls: 0,
-    nLens: 1.60, nAir: 1.0, sigma: 0.1, ppsSide: 23,
-    paused: true, dragging: null,
+    nLens: 1.50, nAir: 1.0, sigma: 0.1, ppsSide: 23, optiMode: 9,
+    paused: true, dragging: null, showRays: true,
     offsetX: 200, offsetY: 180, perimeter: 400,
 
     init() {
         this.canvas = document.getElementById('lensCanvas');
-        this.ctx = this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d');
         window.addEventListener('resize', () => this.resize()); this.resize();
         document.getElementById('btn-play').onclick = () => this.togglePlay();
         document.getElementById('btn-reset').onclick = () => this.reset();
@@ -125,17 +125,53 @@ const App = {
         this.basePoints = this.points.map(p => ({ ...p }));
         this.focus = { x: 850, y: this.offsetY + this.perimeter / 2 };
         this.es = null; this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0; this.paused = true;
-        document.getElementById('btn-play').innerHTML = 'START';
+        const btn = document.getElementById('btn-play'); if(btn) btn.innerHTML = 'START';
+        this.updateFlags();
+    },
+    updateFlags() {
+        const f = document.getElementById('check-front');
+        const b = document.getElementById('check-back');
+        const s = document.getElementById('check-sym');
+        const doFront = f ? f.checked : true;
+        const doBack = b ? b.checked : true;
+        const doSym = s ? s.checked : false;
+        const ptsPerSide = doSym ? Math.ceil(this.ppsSide / 2) : this.ppsSide;
+        let dim = 0;
+        if (doFront) dim += ptsPerSide;
+        if (doBack) dim += ptsPerSide;
+        const d = document.getElementById('val-dim'); if(d) d.innerText = dim;
+        return { doFront, doBack, doSym, ptsPerSide, dim };
     },
     togglePlay() {
-        if (!this.es) { this.es = new CMAES(new Array(23).fill(0), this.sigma, 20); }
-        this.paused = !this.paused; document.getElementById('btn-play').innerHTML = this.paused ? 'START' : 'PAUSE';
+        if (!this.es) {
+            const flags = this.updateFlags();
+            this.es = new CMAES(new Array(flags.dim).fill(0), this.sigma, 20);
+        }
+        this.paused = !this.paused; 
+        const btn = document.getElementById('btn-play'); if(btn) btn.innerHTML = this.paused ? 'START' : 'PAUSE';
     },
     toLens(vec, points) {
         const newPoints = points.map(p => ({ ...p }));
-        const backOffset = this.ppsSide;
-        for (let i = 0; i < this.ppsSide; i++) {
-            newPoints[backOffset + i].x = this.basePoints[backOffset + i].x + (vec[i] || 0);
+        const flags = this.updateFlags();
+        let cursor = 0;
+        if (flags.doFront) {
+            for (let i = 0; i < flags.ptsPerSide; i++) {
+                const val = vec[cursor++];
+                if (i < this.ppsSide) {
+                    newPoints[i].x = this.basePoints[i].x + val;
+                    if (flags.doSym) newPoints[this.ppsSide - 1 - i].x = this.basePoints[this.ppsSide - 1 - i].x + val;
+                }
+            }
+        }
+        if (flags.doBack) {
+            const backOffset = this.ppsSide;
+            for (let i = 0; i < flags.ptsPerSide; i++) {
+                const val = vec[cursor++];
+                if (backOffset + i < newPoints.length) {
+                    newPoints[backOffset + i].x = this.basePoints[backOffset + i].x + val;
+                    if (flags.doSym) newPoints[backOffset + this.ppsSide - 1 - i].x = this.basePoints[backOffset + this.ppsSide - 1 - i].x + val;
+                }
+            }
         }
         return newPoints;
     },
@@ -189,7 +225,7 @@ const App = {
         this.penalty = Math.sqrt(penalty) / (this.ppsSide - 1);
         const q = Math.sqrt(qualityFocus) / this.ppsSide;
         this.fitness = q + this.penalty; 
-        return qualityFocus; // EXACT JAVA RETURN
+        return qualityFocus;
     },
     step() {
         if (this.paused || !this.es) return;
@@ -201,19 +237,20 @@ const App = {
         this.updateTelemetry();
     },
     updateTelemetry() {
-        document.getElementById('val-gen').innerText = this.generation;
-        document.getElementById('val-fit').innerText = this.fitness.toFixed(6);
-        document.getElementById('val-penalty').innerText = this.penalty.toFixed(3);
-        document.getElementById('val-calls').innerText = this.calls;
-        document.getElementById('val-sigma').innerText = this.sigma.toFixed(5);
+        const g = document.getElementById('val-gen'); if(g) g.innerText = this.generation;
+        const f = document.getElementById('val-fit'); if(f) f.innerText = this.fitness.toFixed(6);
+        const p = document.getElementById('val-penalty'); if(p) p.innerText = this.penalty.toFixed(3);
+        const c = document.getElementById('val-calls'); if(c) c.innerText = this.calls;
+        const s = document.getElementById('val-sigma'); if(s) s.innerText = this.sigma.toFixed(5);
     },
     animate() { this.step(); this.draw(); requestAnimationFrame(() => this.animate()); },
     draw() {
-        const { ctx, canvas } = this; ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const { ctx, canvas } = this; if(!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath(); ctx.moveTo(this.points[0].x, this.points[0].y);
         for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y);
         ctx.closePath(); ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill(); ctx.strokeStyle = "#00f2ff"; ctx.lineWidth = 2; ctx.stroke();
-        this.drawPreview();
+        if (this.showRays) this.drawPreview();
         ctx.beginPath(); ctx.strokeStyle = "#ffcc00"; ctx.lineWidth = 2; ctx.arc(this.focus.x, this.focus.y, 8, 0, Math.PI * 2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(this.focus.x - 12, this.focus.y); ctx.lineTo(this.focus.x + 12, this.focus.y);
         ctx.moveTo(this.focus.x, this.focus.y - 12); ctx.lineTo(this.focus.x, this.focus.y + 12); ctx.stroke();
@@ -254,9 +291,21 @@ const App = {
             }
         }
     },
-    handleMouseDown(e) { const mx = e.clientX, my = e.clientY; if (Math.hypot(mx - this.focus.x, my - this.focus.y) < 20) { this.dragging = { type: 'focus' }; } else { this.points.forEach((p, idx) => { if (Math.hypot(mx - p.x, my - p.y) < 10) this.dragging = { type: 'vertex', index: idx }; }); } },
+    handleMouseDown(e) {
+        const mx = e.clientX, my = e.clientY;
+        this.focus.x = mx; this.focus.y = my;
+        this.dragging = { type: 'focus' };
+    },
     handleMouseMove(e) { if (!this.dragging) return; if (this.dragging.type === 'focus') { this.focus.x = e.clientX; this.focus.y = e.clientY; } else if (this.dragging.type === 'vertex') { this.points[this.dragging.index].x = e.clientX; this.points[this.dragging.index].y = e.clientY; } },
     handleMouseUp() { this.dragging = null; },
-    handleKeyDown(e) { if (e.code === 'Space') this.togglePlay(); if (e.key === 'r' || e.key === 'R') this.reset(); }
+    handleKeyDown(e) {
+        if (e.code === 'Space') this.togglePlay();
+        if (e.code === 'Escape') this.reset();
+        if (e.key === 'r' || e.key === 'R') this.showRays = !this.showRays;
+        if (e.key === '1') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = false; this.reset(); }
+        if (e.key === '2') { document.getElementById('check-front').checked = false; document.getElementById('check-back').checked = true; this.reset(); }
+        if (e.key === '3') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = true; this.reset(); }
+        if (e.key === '4') { document.getElementById('check-sym').checked = !document.getElementById('check-sym').checked; this.reset(); }
+    }
 };
 window.onload = () => App.init();

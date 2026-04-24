@@ -113,12 +113,18 @@ canvas {
 /* Telemetry Sidebar */
 #telemetry {
     position: absolute;
-    right: 20px;
-    top: 80px;
-    width: 280px;
+    bottom: 110px;
+    left: 20px;
+    right: 320px;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 20px;
+    pointer-events: none;
+}
+
+#telemetry .glass-card {
+    flex: 1;
+    pointer-events: auto;
 }
 
 .glass-card {
@@ -152,16 +158,18 @@ canvas {
 }
 
 .data-item label {
-    font-size: 10px;
+    font-size: 12px; /* Was 10px */
     color: var(--text-dim);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
 }
 
 .neon-text {
     font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
+    font-size: 24px; /* Was 16px */
     color: var(--neon-cyan);
-    text-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
+    text-shadow: 0 0 12px rgba(0, 242, 255, 0.4);
+    font-weight: 700;
 }
 
 .config-list {
@@ -173,7 +181,8 @@ canvas {
 .config-item {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: 16px; /* Was 12px */
+    padding: 4px 0;
 }
 
 .config-item label {
@@ -181,23 +190,72 @@ canvas {
 }
 
 .controls-hint {
-    margin-top: 10px;
+    margin-top: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 10px;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 15px 0 0 0;
+    border-top: 1px solid var(--glass-border);
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-main);
+    padding: 6px 0;
+    transition: all 0.2s ease;
+}
+
+.check-item:hover {
+    color: var(--neon-cyan);
+}
+
+.check-item input {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 4px;
+    background: rgba(0, 242, 255, 0.05);
+    cursor: pointer;
+    position: relative;
+}
+
+.check-item input:checked {
+    background: var(--neon-cyan);
+}
+
+.check-item input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bg-deep);
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .hint {
-    font-size: 11px;
-    color: var(--text-dim);
+    font-size: 14px; /* Was 9px */
+    color: var(--text-main);
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    flex: 1;
 }
 
 .hint span {
     color: var(--neon-gold);
-    width: 50px;
+    font-weight: 700;
+    font-size: 18px; /* Was 11px */
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
 }
 
 /* Control Bar */
