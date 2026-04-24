@@ -1,6 +1,6 @@
 /**
  * OPTI-LENS Standalone (cmaes_java.js)
- * FULL OPTIMIZATION with CONTROL FLAGS (Safety Version).
+ * RESTORED STABLE VERSION (Prioritizing Back Optimization)
  */
 
 class CMAES {
@@ -99,7 +99,7 @@ const App = {
     canvas: null, ctx: null,
     points: [], basePoints: [], focus: { x: 850, y: 380 },
     es: null, generation: 0, fitness: 0, penalty: 0, calls: 0,
-    nLens: 1.50, nAir: 1.0, sigma: 0.1, ppsSide: 23, optiMode: 9,
+    nLens: 0.80, nAir: 1.0, sigma: 0.1, ppsSide: 23,
     paused: true, dragging: null, showRays: true,
     offsetX: 200, offsetY: 180, perimeter: 400,
 
@@ -119,7 +119,7 @@ const App = {
     },
     resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
     reset() {
-        this.points = []; const w = 150, h = this.perimeter; const space = this.perimeter / (this.ppsSide - 1);
+        this.points = []; const w = 150; const space = this.perimeter / (this.ppsSide - 1);
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w/2, y: this.offsetY + i * space });
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w/2, y: this.offsetY + this.perimeter - i * space });
         this.basePoints = this.points.map(p => ({ ...p }));
@@ -131,16 +131,15 @@ const App = {
     updateFlags() {
         const f = document.getElementById('check-front');
         const b = document.getElementById('check-back');
-        const s = document.getElementById('check-sym');
-        const doFront = f ? f.checked : true;
+        const doFront = f ? f.checked : false;
         const doBack = b ? b.checked : true;
-        const doSym = s ? s.checked : false;
-        const ptsPerSide = doSym ? Math.ceil(this.ppsSide / 2) : this.ppsSide;
+        
         let dim = 0;
-        if (doFront) dim += ptsPerSide;
-        if (doBack) dim += ptsPerSide;
+        if (doFront) dim += this.ppsSide;
+        if (doBack) dim += this.ppsSide;
+        
         const d = document.getElementById('val-dim'); if(d) d.innerText = dim;
-        return { doFront, doBack, doSym, ptsPerSide, dim };
+        return { doFront, doBack, dim };
     },
     togglePlay() {
         if (!this.es) {
@@ -155,22 +154,14 @@ const App = {
         const flags = this.updateFlags();
         let cursor = 0;
         if (flags.doFront) {
-            for (let i = 0; i < flags.ptsPerSide; i++) {
-                const val = vec[cursor++];
-                if (i < this.ppsSide) {
-                    newPoints[i].x = this.basePoints[i].x + val;
-                    if (flags.doSym) newPoints[this.ppsSide - 1 - i].x = this.basePoints[this.ppsSide - 1 - i].x + val;
-                }
+            for (let i = 0; i < this.ppsSide; i++) {
+                newPoints[i].x = this.basePoints[i].x + vec[cursor++];
             }
         }
         if (flags.doBack) {
             const backOffset = this.ppsSide;
-            for (let i = 0; i < flags.ptsPerSide; i++) {
-                const val = vec[cursor++];
-                if (backOffset + i < newPoints.length) {
-                    newPoints[backOffset + i].x = this.basePoints[backOffset + i].x + val;
-                    if (flags.doSym) newPoints[backOffset + this.ppsSide - 1 - i].x = this.basePoints[backOffset + this.ppsSide - 1 - i].x + val;
-                }
+            for (let i = 0; i < this.ppsSide; i++) {
+                newPoints[backOffset + i].x = this.basePoints[backOffset + i].x + vec[cursor++];
             }
         }
         return newPoints;
@@ -178,9 +169,16 @@ const App = {
     calcPathAndQuality(points) {
         let qualityFocus = 0; const raysIn = []; const raysInter = []; const raysOut = [];
         const space = this.perimeter / (this.ppsSide - 1); const fare = Physics.FARE;
+        let missingRays = 0;
+
+        // 1. Check for Self-Intersection (Front crossing Back) -> MUERTO
+        for (let i = 0; i < this.ppsSide; i++) {
+            if (points[i].x >= points[this.ppsSide + i].x - 5) return 1e20;
+        }
+
         for (let i = 0; i < this.ppsSide - 1; i++) raysIn.push({ x1: -fare, y1: this.offsetY + i * space + space/2, x2: fare, y2: this.offsetY + i * space + space/2 });
         for (let i = 0; i < raysIn.length; i++) {
-            const ray = raysIn[i];
+            const ray = raysIn[i]; let hitFront = false;
             for (let j = 0; j < this.ppsSide - 1; j++) {
                 const seg = { x1: points[j].x, y1: points[j].y, x2: points[j+1].x, y2: points[j+1].y };
                 const intersect = { x: 0, y: 0 };
@@ -191,14 +189,17 @@ const App = {
                     if (Math.abs(arg) <= 1.0) {
                         const angleOut = Math.asin(arg); const dy = Math.sin(angleIn - angleOut) * fare;
                         raysInter.push({ x1: intersect.x, y1: intersect.y, x2: intersect.x + fare, y2: intersect.y - dy });
+                        hitFront = true;
                     }
                     break;
                 }
             }
+            if (!hitFront) missingRays++;
         }
+        
         const backOffset = this.ppsSide;
         for (let i = 0; i < raysInter.length; i++) {
-            const ray = raysInter[i];
+            const ray = raysInter[i]; let hitBack = false;
             for (let j = 0; j < this.ppsSide - 1; j++) {
                 const seg = { x1: points[backOffset+j].x, y1: points[backOffset+j].y, x2: points[backOffset+j+1].x, y2: points[backOffset+j+1].y };
                 const intersect = { x: 0, y: 0 };
@@ -209,11 +210,17 @@ const App = {
                     if (Math.abs(arg) <= 1.0) {
                         const angleOut = Math.asin(arg); const dy = Math.sin(angleIn - angleOut) * fare;
                         raysOut.push({ x1: intersect.x, y1: intersect.y, x2: intersect.x + fare, y2: intersect.y - dy });
+                        hitBack = true;
                     }
                     break;
                 }
             }
+            if (!hitBack) missingRays++;
         }
+
+        // 2. Missing Ray Penalty -> MUERTO
+        if (missingRays > 0) return 1e20;
+
         for (let i = 0; i < raysOut.length; i++) {
             const r = raysOut[i]; const dx = r.x2 - r.x1; const dy = r.y2 - r.y1; const l2 = dx*dx + dy*dy;
             const t = ((this.focus.x - r.x1) * dx + (this.focus.y - r.y1) * dy) / (l2 || 1e-18);
@@ -305,7 +312,7 @@ const App = {
         if (e.key === '1') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = false; this.reset(); }
         if (e.key === '2') { document.getElementById('check-front').checked = false; document.getElementById('check-back').checked = true; this.reset(); }
         if (e.key === '3') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = true; this.reset(); }
-        if (e.key === '4') { document.getElementById('check-sym').checked = !document.getElementById('check-sym').checked; this.reset(); }
+        // 4 was Symmetry, now disabled
     }
 };
 window.onload = () => App.init();
