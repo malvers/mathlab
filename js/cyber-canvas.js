@@ -11,24 +11,24 @@ class CyberCanvas {
         this.height = 0;
         this.dpr = window.devicePixelRatio || 1;
         this.view = { minX: -5, maxX: 5, minY: -5, maxY: 5 };
-        
+
         // Callbacks
         this.onResize = null;
         this.onMouseDown = null;
         this.onMouseMove = null;
         this.onMouseUp = null;
         this.onContextMenu = null;
-        
+
         // State
         this.isInitialized = false;
         this.showAxes = true;
         this.showLabels = true;
         this.showGrid = true;
         this.showTelemetry = false;
-        
+
         this.isDragging = false;
         this.needsRedraw = true;
-        
+
         // --- INPUT STATE (RAW) ---
         this.currentMousePos = { x: 0, y: 0, clientX: 0, clientY: 0 };
         this.lastDragPos = { clientX: 0, clientY: 0 };
@@ -62,7 +62,7 @@ class CyberCanvas {
 
         this.view = { ...this.view, ...viewConfig };
         this.showTelemetry = !!options.showTelemetry;
-        
+
         // ZOOM LIMITS (v2.3)
         this.limits = {
             minRangeY: options.minRangeY || 0.001,
@@ -70,7 +70,7 @@ class CyberCanvas {
         };
         this.allowPan = options.allowPan !== false;
         this.allowZoom = options.allowZoom !== false;
-        
+
         // Allow initial visibility overrides via options
         if (options.showAxes !== undefined) this.showAxes = options.showAxes;
         if (options.showLabels !== undefined) this.showLabels = options.showLabels;
@@ -85,7 +85,7 @@ class CyberCanvas {
         this.addListener(window, 'mousemove', (e) => this.handleMouseMove(e), { passive: true });
         this.addListener(window, 'mouseup', (e) => this.handleMouseUp(e));
         this.addListener(this.canvas, 'wheel', (e) => this.handleWheel(e), { passive: false });
-        
+
         // Touch Support (iPad)
         this.addListener(this.canvas, 'touchstart', (e) => this.handleTouchStart(e), { passive: false });
         this.addListener(this.canvas, 'touchmove', (e) => this.handleTouchMove(e), { passive: false });
@@ -102,7 +102,7 @@ class CyberCanvas {
 
         this.resize();
         this.injectTelemetryPane();
-        
+
         this.isInitialized = true;
         this.startLoop();
 
@@ -133,7 +133,8 @@ class CyberCanvas {
 
             // 2. Render
             if (this.needsRedraw || this.isDragging) {
-                if (this.onResize) this.onResize();
+                if (this.onRender) this.onRender(this);
+                if (this.onResize) this.onResize(); // Legacy support for older labs
                 this.needsRedraw = false;
             }
 
@@ -155,10 +156,10 @@ class CyberCanvas {
 
             // Rescale range uniformly to maintain 1:1 parity
             let newRangeY = (this.view.maxY - this.view.minY) * factor;
-            
+
             // Apply Constraints
             newRangeY = Math.max(this.limits.minRangeY, Math.min(this.limits.maxRangeY, newRangeY));
-            
+
             const aspect = this.width / this.height;
             const newRangeX = newRangeY * aspect;
 
@@ -180,7 +181,7 @@ class CyberCanvas {
         if (this.isDragging) {
             const dx = this.currentMousePos.clientX - this.lastDragPos.clientX;
             const dy = this.currentMousePos.clientY - this.lastDragPos.clientY;
-            
+
             const rangeX = this.view.maxX - this.view.minX;
             const rangeY = this.view.maxY - this.view.minY;
 
@@ -205,12 +206,12 @@ class CyberCanvas {
         this.canvas.height = this.height * this.dpr;
         this.canvas.style.width = this.width + 'px';
         this.canvas.style.height = this.height + 'px';
-        
+
         // ASPRECT RATIO SYNC: Maintain 1:1 units
         const currentYRange = this.view.maxY - this.view.minY;
         const aspect = this.width / this.height;
         const targetXRange = currentYRange * aspect;
-        
+
         // Center the new X range around the current center
         const centerX = (this.view.minX + this.view.maxX) / 2;
         this.view.minX = centerX - targetXRange / 2;
@@ -226,15 +227,15 @@ class CyberCanvas {
         this.view.maxY = maxY;
         this.view.minX = -1; // Temporary, resize() will fix it
         this.view.maxX = 1;
-        
+
         // Ensure we center at X=0
         const currentYRange = this.view.maxY - this.view.minY;
         const aspect = this.width / this.height;
         const targetXRange = currentYRange * aspect;
-        
+
         this.view.minX = -targetXRange / 2;
         this.view.maxX = targetXRange / 2;
-        
+
         this.needsRedraw = true;
     }
 
@@ -276,7 +277,7 @@ class CyberCanvas {
 
     handleMouseUp(e) {
         if (this.onMouseUp) this.onMouseUp(e);
-        
+
         if (this.isDragging) {
             this.isDragging = false;
             this.canvas.style.cursor = 'crosshair';
@@ -290,7 +291,7 @@ class CyberCanvas {
         const rect = this.canvas.getBoundingClientRect();
         const factor = e.deltaY > 0 ? 1.1 : 0.9;
         this.zoomIntent.factor = factor;
-        
+
         if (e.shiftKey) {
             // Zoom to center of viewport
             this.zoomIntent.focalX = this.width / 2;
@@ -327,7 +328,7 @@ class CyberCanvas {
     handleTouchMove(e) {
         e.preventDefault();
         const rect = this.canvas.getBoundingClientRect();
-        
+
         if (this.onMouseMove) {
             const touchPos = {
                 x: this.unmapX(e.touches[0].clientX - rect.left),
@@ -346,7 +347,7 @@ class CyberCanvas {
         } else if (e.touches.length === 2) {
             const dist = this.getTouchDist(e.touches);
             const factor = this.lastPinchDist / dist;
-            
+
             // Focal point is midpoint of touches
             const focalX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
             const focalY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
@@ -383,7 +384,7 @@ class CyberCanvas {
         const textColor = 'rgba(255, 255, 255, 0.4)';
 
         if (options.vignette) {
-            const grad = ctx.createRadialGradient(this.width/2, this.height/2, 0, this.width/2, this.height/2, this.width/1.2);
+            const grad = ctx.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width / 1.2);
             grad.addColorStop(0, 'rgba(5, 11, 24, 0)');
             grad.addColorStop(1, 'rgba(0, 210, 255, 0.03)');
             ctx.fillStyle = grad;
@@ -434,10 +435,10 @@ class CyberCanvas {
             ctx.lineWidth = 2;
             ctx.shadowBlur = options.glow ? 10 : 0;
             ctx.shadowColor = mainColor;
-            
+
             const xA = this.mapY(0);
             ctx.beginPath(); ctx.moveTo(0, xA); ctx.lineTo(this.width, xA); ctx.stroke();
-            
+
             const yA = this.mapX(0);
             ctx.beginPath(); ctx.moveTo(yA, 0); ctx.lineTo(yA, this.height); ctx.stroke();
             ctx.shadowBlur = 0;

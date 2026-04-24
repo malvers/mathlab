@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CMA-ES Evolution Lab | docalvers</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
-    
+
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -67,13 +69,13 @@
         let es = null;
         let generation = 0;
         let fitness = 0;
-        let sigma = 0.05; 
+        let sigma = 0.05;
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
-        let targetFocusX = 3.0; 
+        let targetFocusX = 3.0;
         let blockPoints = [];
-        const FIXED_POINT_INDEX = 0; 
+        const FIXED_POINT_INDEX = 0;
         let draggedPoint = null;
         const dragRadius = 15;
 
@@ -84,15 +86,15 @@
                 for (let i = 0; i < N; i++) {
                     const angle = (i / N) * Math.PI * 2;
                     // Unregelmäßiges 20-Eck durch Zufallfaktor
-                    const r = 0.8 + Math.random() * 1.2; 
+                    const r = 0.8 + Math.random() * 1.2;
                     points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
                 }
             } else {
                 const w = 1.0, h = 3.5, pps = 5;
-                for (let i = 0; i < pps; i++) points.push({ x: -w/2, y: -h/2 + (i/pps)*h }); 
-                for (let i = 0; i < pps; i++) points.push({ x: -w/2 + (i/pps)*w, y: h/2 });
-                for (let i = 0; i < pps; i++) points.push({ x: w/2, y: h/2 - (i/pps)*h });
-                for (let i = 0; i < pps; i++) points.push({ x: w/2 - (i/pps)*w, y: -h/2 });
+                for (let i = 0; i < pps; i++) points.push({ x: -w / 2, y: -h / 2 + (i / pps) * h });
+                for (let i = 0; i < pps; i++) points.push({ x: -w / 2 + (i / pps) * w, y: h / 2 });
+                for (let i = 0; i < pps; i++) points.push({ x: w / 2, y: h / 2 - (i / pps) * h });
+                for (let i = 0; i < pps; i++) points.push({ x: w / 2 - (i / pps) * w, y: -h / 2 });
             }
             return points;
         }
@@ -101,7 +103,7 @@
             activeMission = m;
             const subtitle = m === 'CIRCLE' ? "OPTIMIERUNG KREIS" : "OPTIMIERUNG LINSE";
             CyberBranding.init({ title: "Doc Alvers Mathe-Labor", subtitle: subtitle });
-            
+
             if (m === 'CIRCLE') {
                 cc.showAxes = true; cc.showLabels = true;
                 CyberBranding.setBriefing(`<b>Optimierung Isoperimetrie</b><br>Maximiere die Fläche bei konstantem Umfang. Die Lösung ist ein Kreis.`);
@@ -118,7 +120,7 @@
             CyberUI.createCard('ui-container', 'OPTIMIERUNG WÄHLEN', `
                 <div id="mission-selector-mount"></div>
             `);
-            
+
             CyberUI.createDropdown('mission-selector-mount', [
                 { id: 'CIRCLE', label: 'OPTIMIERUNG KREIS' },
                 { id: 'LENS', label: 'OPTIMIERUNG LINSE' }
@@ -159,16 +161,16 @@
                     </div>
                 </div>
             `);
-            
+
             setMission('LENS');
         }
 
         function toggleOptimization() {
             if (paused && !es) {
                 const xstart = [];
-                blockPoints.forEach((p, idx) => { 
+                blockPoints.forEach((p, idx) => {
                     if (activeMission === 'CIRCLE') {
-                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y); 
+                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y);
                     } else {
                         xstart.push(p.x, p.y); // All points for Lens
                     }
@@ -184,7 +186,7 @@
         function resetOptimization() {
             generation = 0; paused = true; es = null;
             blockPoints = initPoints();
-            
+
             // Initiale Fitness berechnen (nicht 0!)
             if (activeMission === 'CIRCLE') {
                 fitness = -CMAESLogic.getArea(blockPoints);
@@ -220,29 +222,29 @@
                 if (activeMission === 'LENS') {
                     const fx = cc.mapX(targetFocusX), fy = cc.mapY(0);
                     ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI*2); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(fx-10, fy); ctx.lineTo(fx+10, fy); ctx.moveTo(fx, fy-10); ctx.lineTo(fx, fy+10); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
                     for (let i = 0; i < 7; i++) {
-                        const sY = (i-3)*0.8, ray = simulateVisualRay(-10, sY, blockPoints);
+                        const sY = (i - 3) * 0.8, ray = simulateVisualRay(-10, sY, blockPoints);
                         if (ray) {
                             // Incoming (Dashed)
-                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.setLineDash([5,5]); ctx.lineWidth = 1;
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.setLineDash([5, 5]); ctx.lineWidth = 1;
                             ctx.moveTo(cc.mapX(-10), cc.mapY(sY)); ctx.lineTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.stroke();
-                            
+
                             // Inside (Solid Cyan)
                             ctx.beginPath(); ctx.strokeStyle = "rgba(0,210,255,0.9)"; ctx.setLineDash([]); ctx.lineWidth = 2;
                             ctx.moveTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.lineTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y)); ctx.stroke();
-                            
+
                             // Outgoing (Solid Gold)
                             ctx.beginPath(); ctx.strokeStyle = "rgba(255,215,0,0.9)"; ctx.lineWidth = 2;
                             ctx.moveTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y));
-                            ctx.lineTo(cc.mapX(ray.exit.x + ray.rayOut.x*20), cc.mapY(ray.exit.y + ray.rayOut.y*20)); ctx.stroke();
+                            ctx.lineTo(cc.mapX(ray.exit.x + ray.rayOut.x * 20), cc.mapY(ray.exit.y + ray.rayOut.y * 20)); ctx.stroke();
                         }
                     }
                 }
                 blockPoints.forEach((p, idx) => {
                     const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
-                    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2);
+                    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
                     // Roter Punkt nur im Kreis-Modus
                     const isFixed = (activeMission === 'CIRCLE' && idx === FIXED_POINT_INDEX);
                     ctx.fillStyle = isFixed ? "#ff0000" : (draggedPoint === p ? "#adff2f" : BRAND_BLUE);
@@ -254,10 +256,10 @@
                 let steps = 1;
                 if (generation >= 1000) steps = 200;
                 else if (generation >= 100) steps = 100;
-                
-                for (let i = 0; i < steps; i++) { 
-                    generation++; 
-                    evolve(); 
+
+                for (let i = 0; i < steps; i++) {
+                    generation++;
+                    evolve();
                 }
             }
             updateTelemetry();
@@ -270,13 +272,13 @@
             if (!ent) return null;
             const norm1 = CMAESLogic.getNormal(ent.edgeIndex, points);
             const dot1 = norm1.x * dir.x + norm1.y * dir.y;
-            const rIn = CMAESLogic.refract(dir, dot1 > 0 ? {x:-norm1.x, y:-norm1.y} : norm1, 1.0, nL);
+            const rIn = CMAESLogic.refract(dir, dot1 > 0 ? { x: -norm1.x, y: -norm1.y } : norm1, 1.0, nL);
             if (!rIn) return null;
             const exi = CMAESLogic.findIntersection(ent.x + rIn.x * 0.001, ent.y + rIn.y * 0.001, rIn.x, rIn.y, points);
             if (!exi) return null;
             const norm2 = CMAESLogic.getNormal(exi.edgeIndex, points);
             const dot2 = norm2.x * rIn.x + norm2.y * rIn.y;
-            const rOut = CMAESLogic.refract(rIn, dot2 < 0 ? {x:-norm2.x, y:-norm2.y} : norm2, nL, 1.0);
+            const rOut = CMAESLogic.refract(rIn, dot2 < 0 ? { x: -norm2.x, y: -norm2.y } : norm2, nL, 1.0);
             if (!rOut) return null;
             return { entry: ent, exit: exi, rayOut: rOut };
         }
@@ -285,7 +287,7 @@
             if (!es) return;
             const candidates = es.ask();
             const fitVals = []; const processed = [];
-            
+
             candidates.forEach(vec => {
                 let pts = [];
                 if (activeMission === 'CIRCLE') {
@@ -303,14 +305,14 @@
                 if (activeMission === 'CIRCLE') fitVals.push(-CMAESLogic.getArea(pts));
                 else fitVals.push(-CMAESLogic.getLensFitness(pts, targetFocusX));
             });
-            
+
             es.tell(processed.map(pts => {
                 const vec = [];
                 const startIdx = (activeMission === 'CIRCLE') ? 1 : 0;
                 for (let i = startIdx; i < pts.length; i++) vec.push(pts[i].x, pts[i].y);
                 return vec;
             }), fitVals);
-            
+
             const bPts = [];
             const bVec = es.best.x;
             if (activeMission === 'CIRCLE') {
@@ -358,4 +360,5 @@
         };
     </script>
 </body>
+
 </html>
