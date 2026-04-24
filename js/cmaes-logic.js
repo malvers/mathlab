@@ -521,7 +521,8 @@ const CMAESLogic = {
             const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
             const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
-            if (t >= 0 && t <= 1 && u > 0.0001) {
+            const eps = 0.00001;
+            if (t > eps && t < (1 - eps) && u > eps) {
                 if (u < bestT) {
                     bestT = u;
                     bestHit = {
@@ -572,8 +573,10 @@ const CMAESLogic = {
         let totalError = 0;
         let validRays = 0;
 
+        const epsilonOffset = 0.000007; // Prevent vertex hits
+
         for (let i = 0; i < rayCount; i++) {
-            const startY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95); 
+            const startY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95) + epsilonOffset; 
             const dir = { x: 1, y: 0 };
 
             // 1. Entry

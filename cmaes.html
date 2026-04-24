@@ -228,9 +228,9 @@
                     ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
                     ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
-                    const rayCount = 15; const hLens = 3.6;
+                    const rayCount = 15; const hLens = 3.6; const epsilonOffset = 0.000007;
                     for (let i = 0; i < rayCount; i++) {
-                        const sY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95);
+                        const sY = (i - (rayCount - 1) / 2) * (hLens / rayCount * 0.95) + epsilonOffset;
                         const ray = simulateVisualRay(-10, sY, blockPoints);
                         if (ray) {
                             // Incoming (Solid Yellow)
