@@ -565,15 +565,17 @@ const CMAESLogic = {
         };
     },
 
-    getLensFitness: function (points, targetFocusX = 3) {
+    getLensFitness: function (points, targetFocusX = 5.2) {
         const rayCount = 15;
         const startX = -4.0;
         const nLens = 1.5;
         const hTotal = 3.6;
         const segH = hTotal / rayCount;
+        let totalError = 0;
+        let validRays = 0;
 
         for (let i = 0; i < rayCount; i++) {
-            const startY = -hTotal / 2 + (i + 0.5) * segH; 
+            const startY = -hTotal / 2 + (i + 0.5) * segH;
             const dir = { x: 1, y: 0 };
 
             // 1. Entry
