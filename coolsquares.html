@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Cool Squares - The Proof</title>
+    <!-- Prioritize Orbitron -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <style>
+        /* Force Orbitron Everywhere */
+        * {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
         #main-content {
             display: flex;
             justify-content: center;
@@ -79,6 +85,7 @@
             
             let a = 2;
             const x = 5; 
+            let showLabels = true; 
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -92,7 +99,7 @@
                 const totalW = s4 + y;
                 const totalH = s4 + a + s2; 
 
-                const padding = 120;
+                const padding = 240; 
                 const scale = Math.min((canvas.width - padding) / totalW, (canvas.height - padding) / totalH);
                 
                 const offsetX = (canvas.width - totalW * scale) / 2;
@@ -100,12 +107,12 @@
                 const spineX = offsetX + s4 * scale;
 
                 const squares = [
-                    { id: 'S4', w: s4, h: s4, x: 0, y: 0, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
-                    { id: 'G',  w: y,  h: y,  x: s4, y: 0, color: "rgba(163, 190, 100, 0.8)", stroke: "#a3be64", area: (y*y).toFixed(0), txt: "white" }, 
-                    { id: 'O',  w: a,  h: a,  x: s4 - a, y: s4, color: "rgba(255, 204, 0, 0.9)", stroke: "#ffcc00", area: (a*a).toFixed(0), txt: "black" }, 
-                    { id: 'S1', w: s1, h: s1, x: s4, y: y, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
-                    { id: 'S3', w: s3, h: s3, x: s4 - a - s3, y: s4, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
-                    { id: 'S2', w: s2, h: s2, x: s4 - a, y: s4 + a, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" } 
+                    { id: 'S4', w: s4, h: s4, x: 0, y: 0, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 4a` }, 
+                    { id: 'G',  w: y,  h: y,  x: s4, y: 0, color: "#84cc16", stroke: "#84cc16", area: (y*y).toFixed(0), txt: "white", label: `y = 4a` }, 
+                    { id: 'O',  w: a,  h: a,  x: s4 - a, y: s4, color: "#ffcc00", stroke: "#ffcc00", area: (a*a).toFixed(0), txt: "black" }, 
+                    { id: 'S1', w: s1, h: s1, x: s4, y: y, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + a` }, 
+                    { id: 'S3', w: s3, h: s3, x: s4 - a - s3, y: s4, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 3a` }, 
+                    { id: 'S2', w: s2, h: s2, x: s4 - a, y: s4 + a, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 2a` } 
                 ];
 
                 squares.forEach(s => {
@@ -122,26 +129,47 @@
 
                     if (s.area !== undefined) {
                         ctx.fillStyle = s.txt;
-                        ctx.font = `700 12pt Orbitron`;
+                        ctx.font = 'bold 22px Orbitron'; 
                         ctx.textAlign = "center";
-                        ctx.fillText(s.area, rx + rw/2, ry + rh/2 + 6);
+                        ctx.fillText(s.area, rx + rw/2, ry + rh/2 + 8);
+                    }
+
+                    if (showLabels && s.label) {
+                        ctx.fillStyle = "#00d2ff"; 
+                        ctx.font = 'bold 18px Orbitron'; 
+                        if (s.id === 'S4') { 
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry - 30); 
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh/2 + 8); 
+                        }
+                        if (s.id === 'G') { 
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry - 30); 
+                            ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh/2 + 8); 
+                        }
+                        if (s.id === 'S1') { ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh/2 + 8); }
+                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 50); }
+                        if (s.id === 'S3') { 
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh/2 + 8); 
+                            // ADDED BOTTOM LABEL FOR S3
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 50);
+                        }
                     }
                 });
 
                 const spineY_green_bottom = y * scale;
                 const spineY_orange_top = s4 * scale;
                 
+                ctx.lineWidth = 1.5;
+
                 ctx.beginPath();
                 ctx.strokeStyle = "#9d50bb"; 
-                ctx.lineWidth = 4;
                 ctx.moveTo(spineX, offsetY + spineY_green_bottom);
                 ctx.lineTo(spineX, offsetY + spineY_orange_top);
                 ctx.stroke();
 
-                ctx.font = `600 12pt Orbitron`;
+                ctx.font = 'bold 22px Orbitron';
                 ctx.fillStyle = "#9d50bb";
                 ctx.textAlign = "left";
-                ctx.fillText(`x`, spineX + 15, offsetY + (spineY_green_bottom + spineY_orange_top)/2 + 6);
+                ctx.fillText(`x`, spineX + 30, offsetY + (spineY_green_bottom + spineY_orange_top)/2 + 8);
 
                 ctx.beginPath();
                 ctx.strokeStyle = "#ff8c00";
@@ -150,11 +178,11 @@
                 ctx.stroke();
                 
                 ctx.fillStyle = "#ff8c00";
-                ctx.fillText(`a = ${a}`, spineX + 15, offsetY + spineY_orange_top + (a/2) * scale + 6);
+                ctx.fillText(`a = ${a}`, spineX + 30, offsetY + spineY_orange_top + (a/2) * scale + 8);
 
                 ctx.fillStyle = "white";
                 ctx.textAlign = "right";
-                ctx.fillText(`y = ${y}`, spineX - 15, offsetY + (y/2) * scale + 6);
+                ctx.fillText(`y = ${y}`, spineX - 30, offsetY + (y/2) * scale + 8);
             }
 
             function update() {
@@ -179,7 +207,30 @@
                 a = parseInt(val); 
                 update(); 
             }, '#ffcc00');
-            update();
+
+            const labelToggleHtml = `
+                <div class="control-group" style="margin-top:20px; display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="window.toggleLabels()">
+                    <div id="label-toggle-box" style="width:20px; height:20px; border:2px solid var(--neon-blue); border-radius:4px; display:flex; justify-content:center; align-items:center;">
+                        <div id="label-toggle-check" style="width:10px; height:10px; background:var(--neon-blue); display:block;"></div>
+                    </div>
+                    <span style="font-family:Orbitron; font-size:0.8rem; color:white; letter-spacing:1px;">Labels einblenden</span>
+                </div>
+            `;
+            document.getElementById('sliders').insertAdjacentHTML('beforeend', labelToggleHtml);
+
+            window.toggleLabels = function() {
+                showLabels = !showLabels;
+                document.getElementById('label-toggle-check').style.display = showLabels ? 'block' : 'none';
+                update();
+            };
+
+            if (document.fonts) {
+                document.fonts.ready.then(() => {
+                    update();
+                });
+            } else {
+                setTimeout(update, 500);
+            }
         });
     </script>
 </body>
