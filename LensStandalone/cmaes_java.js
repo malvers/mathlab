@@ -188,6 +188,8 @@ const App = {
     HARD_MIN_GAP: 18,
     SOFT_MIN_GAP: 45,
     edgeGapPenalty: 0,
+    SURFACE_CONVEX_PENALTY_WEIGHT: 3.0,
+    surfacePenalty: 0,
     zoom: 1.0, panX: 0, panY: 0,
     MIN_ZOOM: 1.0, MAX_ZOOM: 10,
     SIDEBAR_RIGHT_GAP: 320,
@@ -225,7 +227,8 @@ const App = {
                     this.focusBaseY = this.focus.y;
                     this.focusOscPhase = 0;
                 } else {
-                    this.focus.y = this.focusBaseY;
+                    this.focusBaseY = this.focus.y;
+                    this.focusOscPhase = 0;
                 }
             };
         }
@@ -299,7 +302,7 @@ const App = {
         this.focusOscPhase = 0;
         this.es = null;
         this.generation = 0; this.calls = 0;
-        this.fitness = 0; this.penalty = 0; this.legPenalty = 0; this.edgeGapPenalty = 0;
+        this.fitness = 0; this.penalty = 0; this.legPenalty = 0; this.edgeGapPenalty = 0; this.surfacePenalty = 0;
         const sigmaSlider = document.getElementById('slider-sigma');
         if (sigmaSlider) this.sigma = parseFloat(sigmaSlider.value);
         this.paused = true;
@@ -307,6 +310,7 @@ const App = {
         this.updateFlags();
         this.fitness = this.calcPathAndQuality(this.points);
         this.updateTelemetry();
+        this.updateRunningIndicator();
     },
     updateFlags() {
         this.syncControlUI();
@@ -334,6 +338,12 @@ const App = {
         }
         this.paused = !this.paused;
         const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = this.paused ? 'START' : 'PAUSE';
+        this.updateRunningIndicator();
+    },
+    updateRunningIndicator() {
+        const el = document.getElementById('running-indicator');
+        if (!el) return;
+        el.classList.toggle('hidden', this.paused);
     },
     toLens(vec, points) {
         const newPoints = points.map(p => ({ ...p }));
@@ -383,6 +393,22 @@ const App = {
             if (gap < this.SOFT_MIN_GAP) gapDeficitSum += this.SOFT_MIN_GAP - gap;
         }
         this.edgeGapPenalty = gapDeficitSum / this.ppsSide;
+
+        // 1b. Surface convexity. Front should bulge left (smaller x in the
+        //     middle than the chord between neighbours); back should bulge
+        //     right. Any inward dent makes the polygon locally concave and
+        //     produces non-physical refraction. Soft-penalise the deviation.
+        let surfaceDent = 0;
+        for (let i = 1; i < this.ppsSide - 1; i++) {
+            const chordX = (points[i - 1].x + points[i + 1].x) / 2;
+            const dent = points[i].x - chordX;
+            if (dent > 0) surfaceDent += dent;
+            const bIdx = backOffset + i;
+            const bChordX = (points[backOffset + i - 1].x + points[backOffset + i + 1].x) / 2;
+            const bDent = bChordX - points[bIdx].x;
+            if (bDent > 0) surfaceDent += bDent;
+        }
+        this.surfacePenalty = surfaceDent / Math.max(1, 2 * (this.ppsSide - 2));
 
         // Strahlen berechnen: Eingang -> Inter (Glas)
         for (let i = 0; i < this.ppsSide - 1; i++) raysIn.push({ x1: -fare, y1: this.offsetY + i * space + space / 2, x2: fare, y2: this.offsetY + i * space + space / 2 });
@@ -440,13 +466,12 @@ const App = {
         this.penalty = Math.sqrt(penalty) / (this.ppsSide - 1);
         const q = Math.sqrt(qualityFocus) / raysOut.length;
         this.legPenalty = raysOut.length > 0 ? legDeviationSum / raysOut.length : 0;
-        this.fitness = q + 0.25 * this.penalty + this.LEG_PENALTY_WEIGHT * this.legPenalty + this.EDGE_GAP_PENALTY_WEIGHT * this.edgeGapPenalty;
+        this.fitness = q + 0.25 * this.penalty + this.LEG_PENALTY_WEIGHT * this.legPenalty + this.EDGE_GAP_PENALTY_WEIGHT * this.edgeGapPenalty + this.SURFACE_CONVEX_PENALTY_WEIGHT * this.surfacePenalty;
         return this.fitness;
     },
     displayInterval() {
         if (this.generation < 100) return 1;
-        if (this.generation < 500) return 10;
-        return 100;
+        return 2;
     },
     shouldDisplay() {
         return this.generation % this.displayInterval() === 0;
