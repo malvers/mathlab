@@ -871,8 +871,8 @@ class CyberUI {
      */
     static ensureScreenWarning(options = {}) {
         const {
-            minWidth = 1200,
-            minHeight = 700,
+            minWidth = 980,
+            minHeight = 620,
             message = "Bildschirm zu klein für optimale Labor-Ansicht",
             id = "cyber-screen-warning"
         } = options;
