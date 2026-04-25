@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Cool Squares Labor</title>
+    <!-- Fonts & Tools -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #geometry-container {
+            width: 90%;
+            max-width: 600px;
+            height: 600px;
+            background: rgba(10, 15, 30, 0.4);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas#squareCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Floating HUD Tags for the new tool */
+        #tag-container {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .floating-tag {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron';
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="tag-container">
+            <!-- Placeholders for variables from the screenshot -->
+            <div class="floating-tag" id="tag-y">y = 24</div>
+            <div class="floating-tag" id="tag-x" style="border-color: #ff3344; color: #ff3344; text-shadow: 0 0 10px #ff3344;">x = 5</div>
+            <div class="floating-tag" id="tag-a" style="border-color: #ffcc00; color: #ffcc00; text-shadow: 0 0 10px #ffcc00;">a = 6</div>
+        </div>
+        
+        <div id="geometry-container">
+            <canvas id="squareCanvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+
+        /**
+         * COOL SQUARES GEOMETRY LAB - ULTRA v6.0.0
+         */
+        window.addEventListener('load', () => {
+            // 1. Branding & Briefing
+            CyberBranding.init({
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "GEOMETRISCHE QUADRAT-PUZZLES"
+            });
+
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: AREA ANALYSIS</h3>
+                Analysieren Sie die geometrischen Beziehungen zwischen den Quadraten und Rechtecken. 
+                
+                <div class="admin-info">
+                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">PARAMETER</h4>
+                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                        <li><b>Grünes Quadrat:</b> y = 24 (A = 576)</li>
+                        <li><b>Oranges Quadrat:</b> a = 6 (A = 36)</li>
+                        <li><b>Abstand:</b> x = 5</li>
+                    </ul>
+                </div>
+            `);
+
+            CyberUI.init();
+
+            // 2. Setup Canvas
+            const canvas = document.getElementById('squareCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                draw();
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Placeholder draw for the layout in the screenshot
+                const scale = 10;
+                const offsetX = canvas.width / 2 - 50;
+                const offsetY = canvas.height / 2 - 150;
+
+                // Vertikale Bezugslinie (y + x + a = 35)
+                // Wir zeichnen erst mal nur die Komponenten aus dem Screenshot schematisch
+                
+                ctx.lineWidth = 2;
+
+                // 1. Grünes Quadrat (y=24)
+                ctx.fillStyle = "rgba(163, 190, 100, 0.6)"; // Muted Green
+                ctx.strokeStyle = "#a3be64";
+                ctx.fillRect(offsetX, offsetY, 24 * scale, 24 * scale);
+                ctx.strokeRect(offsetX, offsetY, 24 * scale, 24 * scale);
+                
+                // Text inside green square
+                ctx.fillStyle = "white";
+                ctx.font = "16px Outfit";
+                ctx.textAlign = "center";
+                ctx.fillText("576", offsetX + 12 * scale, offsetY + 12 * scale);
+
+                // 2. Rote Linie (x=5)
+                ctx.beginPath();
+                ctx.strokeStyle = "#ff3344";
+                ctx.moveTo(offsetX, offsetY + 24 * scale);
+                ctx.lineTo(offsetX, offsetY + 29 * scale);
+                ctx.stroke();
+
+                // 3. Oranges Quadrat (a=6)
+                // Es liegt links von der Linie, wenn a=6 die rechte Seite ist
+                ctx.fillStyle = "rgba(255, 204, 0, 0.6)";
+                ctx.strokeStyle = "#ffcc00";
+                ctx.fillRect(offsetX - 6 * scale, offsetY + 29 * scale, 6 * scale, 6 * scale);
+                ctx.strokeRect(offsetX - 6 * scale, offsetY + 29 * scale, 6 * scale, 6 * scale);
+                
+                ctx.fillStyle = "white";
+                ctx.fillText("36", offsetX - 3 * scale, offsetY + 32 * scale);
+            }
+
+            // 5. UI Layout Deployment (Empty for now as requested)
+            CyberUI.createCard('ui-container', 'KONFIGURATION', '<div id="slider-mount"></div>', 'var(--neon-blue)');
+            // Rechnungen (data-container) bleiben leer
+            document.getElementById('data-container').innerHTML = '';
+
+            draw();
+        });
+    </script>
+</body>
+</html>
