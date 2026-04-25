@@ -12,8 +12,26 @@ const CyberBranding = {
     /// MRA ///
     DEV_MODE: true, // Master Switch for Auto-Reload
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
+    _coreLoadRequested: false,
+
+    ensureCoreModuleLoaded() {
+        if (window.CyberBrandingCore || this._coreLoadRequested) return;
+
+        const script = document.createElement("script");
+        script.src = "js/branding/core.js";
+        script.async = true;
+        script.dataset.cyberBrandingCore = "1";
+        script.onerror = () => {
+            this._coreLoadRequested = false;
+            console.warn("CyberBranding: failed to load js/branding/core.js, using in-file fallback.");
+        };
+
+        this._coreLoadRequested = true;
+        document.head.appendChild(script);
+    },
 
     init(config = {}) {
+        this.ensureCoreModuleLoaded();
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
             return brandingCore.init.call(this, config);
