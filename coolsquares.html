@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Cool Squares Labor</title>
-    <!-- Fonts & Tools -->
+    <title>docalvers | Cool Squares - The Proof</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
@@ -17,61 +14,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
             overflow: hidden;
         }
-
         #geometry-container {
-            width: 95%;
-            height: 85vh;
-            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         canvas#squareCanvas {
-            max-width: 100%;
-            max-height: 100%;
-            filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5));
+            max-width: 95%;
+            max-height: 95%;
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.1));
         }
-
-        /* Floating HUD Tags */
-        #tag-container {
-            position: absolute;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 20;
-            pointer-events: none;
-        }
-
-        .floating-tag {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Orbitron';
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            color: var(--neon-blue);
-            transition: all 0.3s ease;
-        }
-
-        .tag-y { border-color: #a3be64; color: #a3be64; }
-        .tag-x { border-color: #ff3344; color: #ff3344; }
-        .tag-a { border-color: #ffcc00; color: #ffcc00; }
     </style>
 </head>
 <body>
-    <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -87,12 +48,6 @@
     </aside>
 
     <main id="main-content">
-        <div id="tag-container">
-            <div class="floating-tag tag-y" id="hud-y">y = 24</div>
-            <div class="floating-tag tag-x" id="hud-x">x = 5</div>
-            <div class="floating-tag tag-a" id="hud-a">a = 6</div>
-        </div>
-        
         <div id="geometry-container">
             <canvas id="squareCanvas"></canvas>
         </div>
@@ -102,31 +57,19 @@
     <script src="js/ui.js"></script>
     <script>
         function toggleSidebar() {
-            const panel = document.getElementById('side-panel');
-            panel.classList.toggle('collapsed');
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 400);
+            document.getElementById('side-panel').classList.toggle('collapsed');
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
         }
 
         window.addEventListener('load', () => {
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "GEOMETRISCHE QUADRAT-ANALYSE"
+                subtitle: "DER ULTIMATIVE QUADRAT-BEWEIS"
             });
 
             CyberBranding.setBriefing(`
-                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: PROPORTION</h3>
-                Untersuchen Sie, wie sich die Flächen verändern, wenn die Kernvariablen angepasst werden.
-                
-                <div class="admin-info">
-                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">VARIABLE KOMPONENTEN</h4>
-                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
-                        <li><b>y:</b> Höhe/Breite des grünen Quadrats.</li>
-                        <li><b>x:</b> Die rote Lücke zwischen den Blöcken.</li>
-                        <li><b>a:</b> Höhe/Breite des orangen Quadrats.</li>
-                    </ul>
-                </div>
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DER BEWEIS</h3>
+                Die Variable <b>x</b> kürzt sich mathematisch heraus.
             `);
 
             CyberUI.init();
@@ -134,156 +77,109 @@
             const canvas = document.getElementById('squareCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Initial State matching the screenshot
-            let y = 24;
-            let x = 5;
-            let a = 6;
-            let wL = 35; // Default left width
-
-            function updateGeometry() {
-                // Keep the layout visually balanced but respect variables
-                wL = Math.max(a + 10, y + x); 
-                draw();
-                updateHUD();
-                updateStats();
-            }
-
-            function updateHUD() {
-                document.getElementById('hud-y').innerText = `y = ${y}`;
-                document.getElementById('hud-x').innerText = `x = ${x}`;
-                document.getElementById('hud-a').innerText = `a = ${a}`;
-            }
-
-            function updateStats() {
-                const areaGreen = y * y;
-                const areaOrange = a * a;
-                const areaBlueTopLeft = wL * (y + x);
-                const areaBlueBottomLeft = (wL - a) * a;
-                const areaBlueRight = y * (x + a);
-                const totalArea = (wL + y) * (y + x + a);
-
-                CyberUI.updateStatsGrid('data-container', [
-                    { label: 'Fläche Grün', value: areaGreen, color: '#a3be64' },
-                    { label: 'Fläche Orange', value: areaOrange, color: '#ffcc00' },
-                    { label: 'Fläche Blau (TL)', value: areaBlueTopLeft.toFixed(0), color: 'var(--neon-blue)' },
-                    { label: 'Fläche Blau (BL)', value: areaBlueBottomLeft.toFixed(0), color: 'var(--neon-blue)' },
-                    { label: 'Fläche Blau (R)', value: areaBlueRight.toFixed(0), color: 'var(--neon-blue)' },
-                    { label: 'Gesamtfläche', value: totalArea.toFixed(0), color: 'white' }
-                ]);
-            }
+            let a = 2;
+            const x = 5; 
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                const totalH = y + x + a;
-                const totalW = wL + y;
+                const y = 4 * a;        
+                const s1 = x + a;       
+                const s2 = x + 2 * a;   
+                const s3 = x + 3 * a;   
+                const s4 = x + 4 * a;   
+
+                const totalW = s4 + y;
+                const totalH = s4 + a + s2; 
+
+                const padding = 120;
+                const scale = Math.min((canvas.width - padding) / totalW, (canvas.height - padding) / totalH);
                 
-                const padding = 60;
-                const availableW = canvas.width - padding * 2;
-                const availableH = canvas.height - padding * 2;
-                const scale = Math.min(availableW / totalW, availableH / totalH);
+                const offsetX = (canvas.width - totalW * scale) / 2;
+                const offsetY = (canvas.height - totalH * scale) / 2;
+                const spineX = offsetX + s4 * scale;
+
+                const squares = [
+                    { id: 'S4', w: s4, h: s4, x: 0, y: 0, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
+                    { id: 'G',  w: y,  h: y,  x: s4, y: 0, color: "rgba(163, 190, 100, 0.8)", stroke: "#a3be64", area: (y*y).toFixed(0), txt: "white" }, 
+                    { id: 'O',  w: a,  h: a,  x: s4 - a, y: s4, color: "rgba(255, 204, 0, 0.9)", stroke: "#ffcc00", area: (a*a).toFixed(0), txt: "black" }, 
+                    { id: 'S1', w: s1, h: s1, x: s4, y: y, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
+                    { id: 'S3', w: s3, h: s3, x: s4 - a - s3, y: s4, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" }, 
+                    { id: 'S2', w: s2, h: s2, x: s4 - a, y: s4 + a, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)" } 
+                ];
+
+                squares.forEach(s => {
+                    const rx = offsetX + s.x * scale;
+                    const ry = offsetY + s.y * scale;
+                    const rw = s.w * scale;
+                    const rh = s.h * scale;
+
+                    ctx.fillStyle = s.color;
+                    ctx.fillRect(rx, ry, rw, rh);
+                    ctx.strokeStyle = s.stroke || "rgba(255,255,255,0.2)";
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(rx, ry, rw, rh);
+
+                    if (s.area !== undefined) {
+                        ctx.fillStyle = s.txt;
+                        ctx.font = `700 12pt Orbitron`;
+                        ctx.textAlign = "center";
+                        ctx.fillText(s.area, rx + rw/2, ry + rh/2 + 6);
+                    }
+                });
+
+                const spineY_green_bottom = y * scale;
+                const spineY_orange_top = s4 * scale;
                 
-                const drawW = totalW * scale;
-                const drawH = totalH * scale;
-                const startX = (canvas.width - drawW) / 2;
-                const startY = (canvas.height - drawH) / 2;
-                const spineX = startX + wL * scale;
-
-                ctx.lineJoin = "round";
-
-                // 1. Blue Rect: Top-Left
-                ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-                ctx.lineWidth = 2;
-                ctx.fillRect(startX, startY, wL * scale, (y + x) * scale);
-                ctx.strokeRect(startX, startY, wL * scale, (y + x) * scale);
-                
-                // 2. Blue Rect: Bottom-Left (left of orange)
-                ctx.fillRect(startX, startY + (y + x) * scale, (wL - a) * scale, a * scale);
-                ctx.strokeRect(startX, startY + (y + x) * scale, (wL - a) * scale, a * scale);
-
-                // 3. Blue Rect: Right (below green)
-                ctx.fillRect(spineX, startY + y * scale, y * scale, (x + a) * scale);
-                ctx.strokeRect(spineX, startY + y * scale, y * scale, (x + a) * scale);
-
-                // 4. Green Square (Top-Right)
-                ctx.fillStyle = "rgba(163, 190, 100, 0.7)";
-                ctx.strokeStyle = "#a3be64";
-                ctx.fillRect(spineX, startY, y * scale, y * scale);
-                ctx.strokeRect(spineX, startY, y * scale, y * scale);
-                
-                // Label for Green
-                ctx.fillStyle = "white";
-                ctx.font = `${Math.max(12, 18 * scale / 10)}px Orbitron`;
-                ctx.textAlign = "center";
-                ctx.fillText(y * y, spineX + (y * scale) / 2, startY + (y * scale) / 2 + 7);
-                
-                // Label "y = ..."
-                ctx.fillStyle = "#a3be64";
-                ctx.font = `${Math.max(10, 14 * scale / 10)}px Outfit`;
-                ctx.textAlign = "right";
-                ctx.fillText(`y = ${y}`, spineX - 15, startY + (y * scale) / 2 + 5);
-
-                // 5. Orange Square (Bottom-Near-Left)
-                ctx.fillStyle = "rgba(255, 204, 0, 0.7)";
-                ctx.strokeStyle = "#ffcc00";
-                const orangeX = spineX - a * scale;
-                const orangeY = startY + (y + x) * scale;
-                ctx.fillRect(orangeX, orangeY, a * scale, a * scale);
-                ctx.strokeRect(orangeX, orangeY, a * scale, a * scale);
-                
-                // Label for Orange
-                ctx.fillStyle = "black";
-                ctx.font = `${Math.max(12, 18 * scale / 10)}px Orbitron`;
-                ctx.fillText(a * a, orangeX + (a * scale) / 2, orangeY + (a * scale) / 2 + 7);
-
-                // Label "a = ..."
-                ctx.fillStyle = "#ffcc00";
-                ctx.textAlign = "left";
-                ctx.fillText(`a = ${a}`, spineX + 15, orangeY + (a * scale) / 2 + 5);
-
-                // 6. Red Spine Segment (x)
                 ctx.beginPath();
-                ctx.strokeStyle = "#ff3344";
+                ctx.strokeStyle = "#9d50bb"; 
                 ctx.lineWidth = 4;
-                ctx.moveTo(spineX, startY + y * scale);
-                ctx.lineTo(spineX, startY + (y + x) * scale);
+                ctx.moveTo(spineX, offsetY + spineY_green_bottom);
+                ctx.lineTo(spineX, offsetY + spineY_orange_top);
+                ctx.stroke();
+
+                ctx.font = `600 12pt Orbitron`;
+                ctx.fillStyle = "#9d50bb";
+                ctx.textAlign = "left";
+                ctx.fillText(`x`, spineX + 15, offsetY + (spineY_green_bottom + spineY_orange_top)/2 + 6);
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#ff8c00";
+                ctx.moveTo(spineX, offsetY + spineY_orange_top);
+                ctx.lineTo(spineX, offsetY + spineY_orange_top + a * scale);
                 ctx.stroke();
                 
-                // Label "x = ..."
-                ctx.fillStyle = "#ff3344";
-                ctx.textAlign = "left";
-                ctx.fillText(`x = ${x}`, spineX + 15, startY + (y + x / 2) * scale + 5);
+                ctx.fillStyle = "#ff8c00";
+                ctx.fillText(`a = ${a}`, spineX + 15, offsetY + spineY_orange_top + (a/2) * scale + 6);
+
+                ctx.fillStyle = "white";
+                ctx.textAlign = "right";
+                ctx.fillText(`y = ${y}`, spineX - 15, offsetY + (y/2) * scale + 6);
             }
 
-            function resize() {
-                const rect = canvas.parentElement.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
+            function update() {
                 draw();
+                CyberUI.updateStatsGrid('data-container', [
+                    { label: 'Input a', value: a, color: '#ffcc00' },
+                    { label: 'Lücke x', value: x, color: '#9d50bb' },
+                    { label: 'Ergebnis y', value: 4*a, color: '#a3be64' },
+                    { label: 'Fläche Grün', value: 16*a*a, color: 'white' }
+                ]);
             }
-            window.addEventListener('resize', resize);
-            resize();
 
-            // UI Components
-            CyberUI.createCard('ui-container', 'PARAMETER-CONTROL', '<div id="sliders"></div>', 'var(--neon-blue)');
-            
-            CyberUI.createSlider('sliders', 'Höhe Grün (y)', 10, 100, 24, 1, (val) => {
-                y = parseInt(val);
-                updateGeometry();
-            }, '#a3be64');
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                draw();
+            });
+            window.dispatchEvent(new Event('resize'));
 
-            CyberUI.createSlider('sliders', 'Lücke (x)', 0, 50, 5, 1, (val) => {
-                x = parseInt(val);
-                updateGeometry();
-            }, '#ff3344');
-
-            CyberUI.createSlider('sliders', 'Höhe Orange (a)', 5, 100, 6, 1, (val) => {
-                a = parseInt(val);
-                updateGeometry();
+            CyberUI.createCard('ui-container', 'PROPORTIONEN', '<div id="sliders"></div>', 'var(--neon-blue)');
+            CyberUI.createSlider('sliders', 'Zentral-Seite a', 1, 40, 2, 1, (val) => { 
+                a = parseInt(val); 
+                update(); 
             }, '#ffcc00');
-
-            updateGeometry();
+            update();
         });
     </script>
 </body>
