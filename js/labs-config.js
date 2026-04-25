@@ -447,5 +447,25 @@ const LABS_DATA = [
         "category": "hot highlight fun",
         "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
         "color": "green"
+    },
+    {
+        "id": "opti-lens",
+        "href": "../LensStandalone/cmaes_java.html",
+        "title": "OPTI-LENS Premium",
+        "description": "Premium-Edition der CMA-ES Linsenoptimierung. Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und interaktive Maus-Zoom-Steuerung in einem standalone Hochleistungs-Lab.",
+        "tagline": "Linsen-Evolution / Strahlenoptik / CMA-ES",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="5" y1="28" x2="40" y2="28" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
+            <line x1="5" y1="50" x2="40" y2="50" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
+            <line x1="5" y1="72" x2="40" y2="72" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
+            <path d="M 50 18 Q 35 50 50 82 Q 65 50 50 18 Z" fill="rgba(0, 210, 255, 0.18)" stroke="var(--neon-cyan)" stroke-width="1.5" />
+            <line x1="60" y1="28" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
+            <line x1="60" y1="50" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
+            <line x1="60" y1="72" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
+            <circle cx="92" cy="50" r="3" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffcc00);" />
+        </svg>`,
+        "category": "hot highlight fun",
+        "keywords": "linse opti lens optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
+        "color": "blue"
     }
 ];
