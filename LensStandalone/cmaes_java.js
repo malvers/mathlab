@@ -179,7 +179,7 @@ const App = {
     canvas: null, ctx: null,
     points: [], basePoints: [], focus: { x: 1275, y: 380 },
     es: null, generation: 0, fitness: 0, penalty: 0, calls: 0,
-    nLens: 1.60, nAir: 1.0, sigma: 0.1, ppsSide: 23,
+    nLens: 1.60, nAir: 1.0, sigma: 0.1, ppsSide: 13,
     paused: true, dragging: null, showRays: true, showPoints: true,
     offsetX: 200, offsetY: 180, perimeter: 400,
     LEG_PENALTY_WEIGHT: 0.75,
