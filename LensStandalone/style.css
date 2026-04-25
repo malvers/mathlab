@@ -1,0 +1,418 @@
+:root {
+    --bg-deep: #050b18;
+    --bg-card: rgba(15, 23, 42, 0.85);
+    --neon-cyan: #00f2ff;
+    --neon-blue: #0072ff;
+    --neon-gold: #ffcc00;
+    --neon-red: #ff3344;
+    --glass-border: rgba(0, 210, 255, 0.3);
+    --text-main: #e0e6ed;
+    --text-dim: #94a3b8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+    color: var(--text-main);
+    font-family: 'Orbitron', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+#viewport {
+    position: relative;
+    flex: 1;
+    background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+/* HUD Top */
+#hud-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, var(--neon-cyan), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.version {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.mission-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+}
+
+#status-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--neon-cyan);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+/* Telemetry Sidebar */
+#telemetry {
+    position: absolute;
+    bottom: 95px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    pointer-events: none;
+}
+
+#telemetry .glass-card {
+    flex: 1;
+    pointer-events: auto;
+}
+
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 7px 14px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 210, 255, 0.08);
+}
+
+.glass-card h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 1.5px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 3px;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+}
+
+.data-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.data-item label {
+    font-size: 13px;
+    color: var(--text-main);
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+}
+
+.neon-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.35);
+    font-weight: 700;
+}
+
+.config-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.config-list.check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 3px 16px;
+}
+
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 1px 0;
+}
+
+.config-item label {
+    color: var(--text-main);
+}
+
+.controls-hint {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 15px 0 0 0;
+    border-top: 1px solid var(--glass-border);
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-main);
+    padding: 1px 0;
+    transition: all 0.2s ease;
+}
+
+.check-item:hover {
+    color: var(--neon-cyan);
+}
+
+.check-item input {
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 3px;
+    background: rgba(0, 242, 255, 0.05);
+    cursor: pointer;
+    position: relative;
+}
+
+.check-item input:checked {
+    background: var(--neon-cyan);
+}
+
+.check-item input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bg-deep);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.hint {
+    font-size: 14px; /* Was 9px */
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.hint span {
+    color: var(--neon-gold);
+    font-weight: 700;
+    font-size: 18px; /* Was 11px */
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+}
+
+/* Control Bar */
+#control-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px 14px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 210, 255, 0.08);
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    width: calc((100vw - 70px) / 3 - 14px);
+}
+
+.btn-group .action-btn {
+    flex: 1;
+    min-width: 0;
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn:hover {
+    background: rgba(0, 242, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+}
+
+.action-btn.primary {
+    background: var(--neon-cyan);
+    color: var(--bg-deep);
+    font-weight: 700;
+}
+
+.action-btn.primary:hover {
+    background: #00d8e6;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.divider {
+    width: 1px;
+    height: 30px;
+    background: var(--glass-border);
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.slider-group label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+input[type="range"] {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.05);
+    height: 4px;
+    border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Branding Header (top-right) — extracted from CyberBranding v5.3.8 */
+.canvas-branding {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    text-align: right;
+    z-index: 100;
+    pointer-events: none;
+    animation: branding-fade-in 1.2s ease-out forwards;
+    max-width: 720px;
+}
+
+.canvas-branding h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    margin: 0;
+    letter-spacing: 3px;
+    background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+    text-transform: uppercase;
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+.canvas-subtitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #00d2ff;
+    margin-top: 6px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    text-shadow: 0 0 7px #00d2ff;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+@keyframes branding-fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
