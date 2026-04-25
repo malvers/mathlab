@@ -83,7 +83,7 @@
             const canvas = document.getElementById('squareCanvas');
             const ctx = canvas.getContext('2d');
             
-            let a = 2;
+            let a = 1; // Start with a=1 as requested
             const x = 5; 
             let showLabels = true; 
 
@@ -146,11 +146,10 @@
                             ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh/2 + 8); 
                         }
                         if (s.id === 'S1') { ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh/2 + 8); }
-                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 50); }
+                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 55); }
                         if (s.id === 'S3') { 
                             ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh/2 + 8); 
-                            // ADDED BOTTOM LABEL FOR S3
-                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 50);
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw/2, ry + rh + 55);
                         }
                     }
                 });
@@ -203,7 +202,7 @@
             window.dispatchEvent(new Event('resize'));
 
             CyberUI.createCard('ui-container', 'PROPORTIONEN', '<div id="sliders"></div>', 'var(--neon-blue)');
-            CyberUI.createSlider('sliders', 'Zentral-Seite a', 1, 40, 2, 1, (val) => { 
+            CyberUI.createSlider('sliders', 'Zentral-Seite a', 1, 40, 1, 1, (val) => { 
                 a = parseInt(val); 
                 update(); 
             }, '#ffcc00');
