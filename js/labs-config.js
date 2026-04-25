@@ -57,6 +57,35 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "addition",
+        "href": "addition.html",
+        "title": "Schriftliche Addition",
+        "description": "Lerne die schriftliche Addition Schritt für Schritt. Visualisiert den Spaltenaufbau und das Übertrag-System in Echtzeit.",
+        "tagline": "Grundrechenarten / Spalten-Analyse",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
+            <line x1="50" y1="35" x2="50" y2="65" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
+            <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
+        </svg>`,
+        "category": "arithmetik grade5 hot",
+        "keywords": "addition plusrechnen schriftlich addieren mathe schule",
+        "color": "blue"
+    },
+    {
+        "id": "subtraktion",
+        "href": "subtraktion.html",
+        "title": "Schriftliche Subtraktion",
+        "description": "Trainiere die schriftliche Subtraktion mit Entborgen Schritt für Schritt. Interaktive Spaltenhilfe für saubere Minusrechnung.",
+        "tagline": "Grundrechenarten / Entborgen",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
+            <line x1="32" y1="50" x2="68" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
+        </svg>`,
+        "category": "arithmetik grade5 hot",
+        "keywords": "subtraktion minus schriftlich entborgen mathe schule",
+        "color": "blue"
+    },
+    {
         "id": "schriftlichemue",
         "href": "schriftlichemue.html",
         "title": "Schriftliche Multiplikation",
@@ -84,21 +113,6 @@ const LABS_DATA = [
         </svg>`,
         "category": "arithmetik grade5 hot",
         "keywords": "division teilen schriftlich dividieren mathe schule",
-        "color": "blue"
-    },
-    {
-        "id": "addition",
-        "href": "addition.html",
-        "title": "Schriftliche Addition",
-        "description": "Lerne die schriftliche Addition Schritt für Schritt. Visualisiert den Spaltenaufbau und das Übertrag-System in Echtzeit.",
-        "tagline": "Grundrechenarten / Spalten-Analyse",
-        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
-            <line x1="50" y1="35" x2="50" y2="65" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
-            <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
-        </svg>`,
-        "category": "arithmetik grade5 hot",
-        "keywords": "addition plusrechnen schriftlich addieren mathe schule",
         "color": "blue"
     },
     {
