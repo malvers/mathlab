@@ -8,7 +8,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
@@ -391,7 +391,8 @@
             const coachWidth = 380;
             const gap = 40;
             const totalCalcWidth = maxChars * charWidth;
-            const ensembleTotalWidth = totalCalcWidth + gap + coachWidth;
+            const canShowCoachBesideCalc = !!coachBox && (width >= (totalCalcWidth + gap + coachWidth + 80));
+            const ensembleTotalWidth = canShowCoachBesideCalc ? (totalCalcWidth + gap + coachWidth) : totalCalcWidth;
             const ensembleStartX = (width - ensembleTotalWidth) / 2;
 
             const startX = ensembleStartX + charWidth * 0.5;
@@ -403,8 +404,15 @@
 
             // Position Coach Box
             if (coachBox) {
-                const boxLeft = Math.floor(ensembleStartX + totalCalcWidth + gap);
-                coachBox.style.left = `${boxLeft}px`;
+                coachBox.style.display = 'block';
+                if (canShowCoachBesideCalc) {
+                    const boxLeft = Math.floor(ensembleStartX + totalCalcWidth + gap);
+                    coachBox.style.left = `${boxLeft}px`;
+                } else {
+                    // Keep the coach box visible as overlay on small screens
+                    const overlayLeft = Math.max(20, width - coachWidth - 20);
+                    coachBox.style.left = `${overlayLeft}px`;
+                }
             }
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
@@ -544,7 +552,10 @@
                     });
                     targetY = opY;
                 }
-                coachBox.style.top = `${targetY - boxHeight / 2}px`;
+                const minTop = 20 + boxHeight / 2;
+                const maxTop = height - 20 - boxHeight / 2;
+                const clampedY = Math.max(minTop, Math.min(maxTop, targetY));
+                coachBox.style.top = `${clampedY - boxHeight / 2}px`;
             }
         }
 

@@ -8,6 +8,11 @@ class CyberUI {
         console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
         this.installResourceGuard();
         this.injectStyles();
+        this.ensureScreenWarning({
+            minWidth: 980,
+            minHeight: 620,
+            message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
+        });
     }
 
     static installResourceGuard() {

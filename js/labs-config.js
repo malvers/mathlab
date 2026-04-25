@@ -78,16 +78,16 @@ const LABS_DATA = [
         "description": "Trainiere die schriftliche Subtraktion mit Entborgen Schritt für Schritt. Interaktive Spaltenhilfe für saubere Minusrechnung.",
         "tagline": "Grundrechenarten / Entborgen",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
-            <line x1="32" y1="50" x2="68" y2="50" stroke="#00d2ff" stroke-width="6" stroke-linecap="round" />
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
+            <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />
         </svg>`,
         "category": "arithmetik grade5 hot",
         "keywords": "subtraktion minus schriftlich entborgen mathe schule",
         "color": "blue"
     },
     {
-        "id": "schriftlichemue",
-        "href": "schriftlichemue.html",
+        "id": "multiplikation",
+        "href": "multiplikation.html",
         "title": "Schriftliche Multiplikation",
         "description": "Visualisiert die schriftliche Multiplikation Schritt für Schritt. Inklusive Übertrag-Tracking und Detail-Modus für tiefe mathematische Analyse.",
         "tagline": "Grundrechenarten / Detail-Analyse",
@@ -106,10 +106,10 @@ const LABS_DATA = [
         "description": "Meistere die schriftliche Division mit dem interaktiven ULTRA-Labor. Perfekte Ausrichtung und pädagogische Begleitung durch den Math-Coach.",
         "tagline": "Grundrechenarten / Grid-Analyse",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0, 210, 255, 0.1)" stroke="#00d2ff" stroke-width="2" />
-            <circle cx="50" cy="35" r="5" fill="#00d2ff" />
-            <line x1="35" y1="50" x2="65" y2="50" stroke="#00d2ff" stroke-width="5" stroke-linecap="round" />
-            <circle cx="50" cy="65" r="5" fill="#00d2ff" />
+            <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(173, 255, 47, 0.1)" stroke="#adff2f" stroke-width="2" />
+            <circle cx="50" cy="35" r="5" fill="#adff2f" />
+            <line x1="35" y1="50" x2="65" y2="50" stroke="#adff2f" stroke-width="5" stroke-linecap="round" />
+            <circle cx="50" cy="65" r="5" fill="#adff2f" />
         </svg>`,
         "category": "arithmetik grade5 hot",
         "keywords": "division teilen schriftlich dividieren mathe schule",
