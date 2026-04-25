@@ -184,12 +184,18 @@ const App = {
     offsetX: 200, offsetY: 180, perimeter: 400,
     LEG_PENALTY_WEIGHT: 0.75,
     legPenalty: 0,
-    EDGE_GAP_PENALTY_WEIGHT: 0.5,
-    HARD_MIN_GAP: 8,
-    SOFT_MIN_GAP: 25,
+    EDGE_GAP_PENALTY_WEIGHT: 1.0,
+    HARD_MIN_GAP: 18,
+    SOFT_MIN_GAP: 45,
     edgeGapPenalty: 0,
     zoom: 1.0, panX: 0, panY: 0,
     MIN_ZOOM: 1.0, MAX_ZOOM: 10,
+    SIDEBAR_RIGHT_GAP: 320,
+    focusOscillate: false,
+    focusBaseY: 0,
+    focusOscPhase: 0,
+    FOCUS_OSC_AMP: 150,
+    FOCUS_OSC_SPEED: 0.015,
 
     init() {
         this.canvas = document.getElementById('lensCanvas');
@@ -207,6 +213,19 @@ const App = {
         if (pointsCheck) {
             this.showPoints = pointsCheck.checked;
             pointsCheck.onchange = () => { this.showPoints = pointsCheck.checked; };
+        }
+        const oscCheck = document.getElementById('check-oscillate');
+        if (oscCheck) {
+            this.focusOscillate = oscCheck.checked;
+            oscCheck.onchange = () => {
+                this.focusOscillate = oscCheck.checked;
+                if (this.focusOscillate) {
+                    this.focusBaseY = this.focus.y;
+                    this.focusOscPhase = 0;
+                } else {
+                    this.focus.y = this.focusBaseY;
+                }
+            };
         }
         document.getElementById('slider-n').oninput = (e) => { this.nLens = parseFloat(e.target.value); document.getElementById('val-n').innerText = this.nLens.toFixed(2); };
         document.getElementById('slider-sigma').oninput = (e) => { this.sigma = parseFloat(e.target.value); document.getElementById('val-sigma').innerText = this.sigma.toFixed(3); if (this.es) this.es.sigma = this.sigma; };
@@ -240,6 +259,17 @@ const App = {
         this.zoom = newZoom;
     },
     resetView() { this.zoom = 1.0; this.panX = 0; this.panY = 0; },
+    getFocusDefaultX() {
+        const cb = document.getElementById('check-symmetry');
+        if (cb) {
+            const card = cb.closest('.glass-card');
+            if (card) {
+                const rect = card.getBoundingClientRect();
+                if (rect.width > 0) return rect.left;
+            }
+        }
+        return this.canvas ? this.canvas.width - this.SIDEBAR_RIGHT_GAP : 1275;
+    },
     syncControlUI() {
         const frontCheck = document.getElementById('check-front');
         const backCheck = document.getElementById('check-back');
@@ -262,10 +292,18 @@ const App = {
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w / 2, y: this.offsetY + i * space });
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w / 2, y: this.offsetY + this.perimeter - i * space });
         this.basePoints = this.points.map(p => ({ ...p }));
-        this.focus = { x: 1275, y: this.offsetY + this.perimeter / 2 };
-        this.es = null; this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0; this.paused = true;
+        this.focus = { x: this.getFocusDefaultX(), y: this.offsetY + this.perimeter / 2 };
+        this.focusBaseY = this.focus.y;
+        this.focusOscPhase = 0;
+        this.es = null;
+        this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0;
+        this.legPenalty = 0; this.edgeGapPenalty = 0;
+        const sigmaSlider = document.getElementById('slider-sigma');
+        if (sigmaSlider) this.sigma = parseFloat(sigmaSlider.value);
+        this.paused = true;
         const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = 'START';
         this.updateFlags();
+        this.updateTelemetry();
     },
     updateFlags() {
         this.syncControlUI();
@@ -427,8 +465,12 @@ const App = {
         const s = document.getElementById('val-sigma'); if (s) s.innerText = this.sigma.toFixed(5);
     },
     animate() {
+        if (this.focusOscillate) {
+            this.focusOscPhase += this.FOCUS_OSC_SPEED;
+            this.focus.y = this.focusBaseY + this.FOCUS_OSC_AMP * Math.sin(this.focusOscPhase);
+        }
         this.step();
-        if (this.paused || this.shouldDisplay()) this.draw();
+        if (this.paused || this.shouldDisplay() || this.focusOscillate) this.draw();
         requestAnimationFrame(() => this.animate());
     },
     draw() {
@@ -490,51 +532,23 @@ const App = {
     handleMouseDown(e) {
         const w = this.screenToWorld(e.clientX, e.clientY);
         this.focus.x = w.x; this.focus.y = w.y;
+        this.focusBaseY = w.y;
+        this.focusOscPhase = 0;
         this.dragging = { type: 'focus' };
     },
     handleMouseMove(e) {
         if (!this.dragging) return;
         const w = this.screenToWorld(e.clientX, e.clientY);
-        if (this.dragging.type === 'focus') { this.focus.x = w.x; this.focus.y = w.y; }
+        if (this.dragging.type === 'focus') {
+            this.focus.x = w.x; this.focus.y = w.y;
+            this.focusBaseY = w.y;
+            this.focusOscPhase = 0;
+        }
         else if (this.dragging.type === 'vertex') { this.points[this.dragging.index].x = w.x; this.points[this.dragging.index].y = w.y; }
     },
     handleMouseUp() { this.dragging = null; },
     handleKeyDown(e) {
         if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); return; }
-        if (e.code === 'Escape') { e.preventDefault(); this.resetView(); return; }
-        if (e.key === 'r' || e.key === 'R') { e.preventDefault(); this.showRays = !this.showRays; return; }
-        if (e.key === 'p' || e.key === 'P') {
-            e.preventDefault();
-            this.showPoints = !this.showPoints;
-            const pc = document.getElementById('check-points');
-            if (pc) pc.checked = this.showPoints;
-            return;
-        }
-        if (e.key === '0') { e.preventDefault(); this.resetView(); return; }
-        if (e.key === '1') {
-            document.getElementById('check-front').checked = true;
-            document.getElementById('check-back').checked = false;
-            document.getElementById('check-symmetry').checked = false;
-            this.reset();
-        }
-        if (e.key === '2') {
-            document.getElementById('check-front').checked = false;
-            document.getElementById('check-back').checked = true;
-            document.getElementById('check-symmetry').checked = false;
-            this.reset();
-        }
-        if (e.key === '3') {
-            document.getElementById('check-front').checked = true;
-            document.getElementById('check-back').checked = true;
-            document.getElementById('check-symmetry').checked = false;
-            this.reset();
-        }
-        if (e.key === '4') {
-            document.getElementById('check-front').checked = false;
-            document.getElementById('check-back').checked = true;
-            document.getElementById('check-symmetry').checked = true;
-            this.reset();
-        }
     }
 };
 window.onload = () => App.init();
