@@ -1053,7 +1053,7 @@
         </div>
 
         <div class="view-section" style="margin-top: 15px;">
-            <h2>Themen</h2>
+            <h2><span id="themes-count">0</span> Themen</h2>
             <div class="line"></div>
         </div>
         <div class="grade-grid">
@@ -1271,6 +1271,13 @@
             }
         }
 
+        function updateThemesCount() {
+            const countEl = document.getElementById('themes-count');
+            if (!countEl) return;
+            const themeCards = document.querySelectorAll('#grade-view .grade-grid:last-of-type .category-card');
+            countEl.innerText = themeCards.length;
+        }
+
         // --- ADMIN ACCESS LOGIC ---
         let adminActive = false;
 
@@ -1415,6 +1422,7 @@
         renderCards();
         handleHash();
         updateToolCount();
+        updateThemesCount();
 
         // High-Quality Video Slowdown (ULTRA 5.3.8)
         const bgVid = document.getElementById('bg-video');
