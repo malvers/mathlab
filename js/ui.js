@@ -818,8 +818,102 @@ class CyberUI {
                 border-color: #ff0000;
                 box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
             }
+
+            /* GLOBAL SCREEN SIZE WARNING */
+            .cyber-screen-warning {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0.96);
+                padding: 18px 28px;
+                border-radius: 14px;
+                border: 1px solid rgba(255, 60, 60, 0.6);
+                background: rgba(90, 10, 20, 0.88);
+                color: #ffd0d0;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.95rem;
+                letter-spacing: 1.4px;
+                z-index: 1000001;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 14px rgba(255, 30, 30, 0.45);
+                text-transform: uppercase;
+                text-align: center;
+                max-width: min(98vw, 1080px);
+                line-height: 1.35;
+            }
+
+            .cyber-screen-warning.visible {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            .cyber-screen-warning .warn-icon-top {
+                display: block;
+                width: 56px;
+                height: 56px;
+                margin: 0 auto 10px auto;
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.45));
+            }
+
         `;
         document.head.appendChild(style);
+    }
+
+    /**
+     * Global screen-size warning banner.
+     * @param {Object} options
+     * @param {number} options.minWidth
+     * @param {number} options.minHeight
+     * @param {string} options.message
+     * @param {string} options.id
+     */
+    static ensureScreenWarning(options = {}) {
+        const {
+            minWidth = 1200,
+            minHeight = 700,
+            message = "Bildschirm zu klein für optimale Labor-Ansicht",
+            id = "cyber-screen-warning"
+        } = options;
+
+        let warning = document.getElementById(id);
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.id = id;
+            warning.className = 'cyber-screen-warning';
+            warning.innerHTML = `
+                <svg class="warn-icon-top" viewBox="0 0 64 64" aria-hidden="true">
+                    <path d="M32 6 L58 54 H6 Z" fill="#ffd400" stroke="#111" stroke-width="3" />
+                    <rect x="29" y="21" width="6" height="19" rx="3" fill="#111" />
+                    <circle cx="32" cy="47" r="3.6" fill="#111" />
+                </svg>
+                <div>${message}</div>
+            `;
+            document.body.appendChild(warning);
+        } else {
+            warning.innerHTML = `
+                <svg class="warn-icon-top" viewBox="0 0 64 64" aria-hidden="true">
+                    <path d="M32 6 L58 54 H6 Z" fill="#ffd400" stroke="#111" stroke-width="3" />
+                    <rect x="29" y="21" width="6" height="19" rx="3" fill="#111" />
+                    <circle cx="32" cy="47" r="3.6" fill="#111" />
+                </svg>
+                <div>${message}</div>
+            `;
+        }
+
+        const update = () => {
+            const tooSmall = window.innerWidth < minWidth || window.innerHeight < minHeight;
+            warning.classList.toggle('visible', tooSmall);
+        };
+
+        // Avoid duplicate listeners if called multiple times.
+        const listenerKey = '__cyberScreenWarningListenerAttached__';
+        if (!warning[listenerKey]) {
+            window.addEventListener('resize', update);
+            warning[listenerKey] = true;
+        }
+        update();
     }
 
     static createCard(containerId, title, contentHTML, accentColor = '#00d2ff', options = { collapsible: false }) {

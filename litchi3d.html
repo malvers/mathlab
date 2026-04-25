@@ -29,7 +29,6 @@
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
-        <div id="parameter-container"></div>
     </aside>
 
     <main id="main-content">
@@ -41,7 +40,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/formula.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/ui.js?v=4"></script>
 
     <script>
         function toggleSidebar() {
@@ -243,7 +242,7 @@
             animate();
 
             // 5. UI Standardization
-            CyberUI.createCard('parameter-container', 'SDF KONTROLLE', '<div id="s-reife"></div><div id="s-bumps"></div><div id="s-shape"></div>', 'var(--neon-red)');
+            CyberUI.createCard('ui-container', 'SDF KONTROLLE', '<div id="s-reife"></div><div id="s-bumps"></div><div id="s-shape"></div>', 'var(--neon-red)');
 
             CyberUI.createSlider('s-reife', 'Frucht-Reife', 0.5, 2.0, 1.0, 0.01, (v) => {
                 raymarchMaterial.uniforms.u_Reife.value = v;
@@ -267,6 +266,12 @@
                 camera.aspect = container.clientWidth / container.clientHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            CyberUI.ensureScreenWarning({
+                minWidth: 1200,
+                minHeight: 700,
+                message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 1200 × 700)"
             });
         });
     </script>
