@@ -11,6 +11,7 @@ const CyberBranding = {
     init(config = {}) {
         let title = this.MASTER_TITLE;
         let subtitle = "CYBER-LABORATORIUM";
+        let useExternalStyles = false;
 
         // Polymorphic Init: Support both string (subtitle only) and object (legacy)
         if (typeof config === 'string') {
@@ -19,11 +20,18 @@ const CyberBranding = {
             if (config.title) title = config.title;
             if (config.subtitle) subtitle = config.subtitle;
             if (config.briefing) this.briefingContent = config.briefing;
+            if (config.useExternalStyles === true) useExternalStyles = true;
         }
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
 
-        this.injectStyles();
+        // Safe migration path:
+        // If a page opts into external branding CSS, use it only when CSS variables are present.
+        // Otherwise, automatically fall back to the legacy inlined style injection.
+        const externalStylesReady = useExternalStyles && this.hasExternalStyles();
+        if (!externalStylesReady) {
+            this.injectStyles();
+        }
         this.injectHTML(title, subtitle);
         this.injectNavigation();
         this.setupActiveScaling();
@@ -40,6 +48,11 @@ const CyberBranding = {
                 }
             });
         }
+    },
+
+    hasExternalStyles() {
+        const rootStyles = getComputedStyle(document.documentElement);
+        return rootStyles.getPropertyValue('--branding-blue').trim().length > 0;
     },
 
     injectStyles() {
