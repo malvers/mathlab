@@ -566,9 +566,10 @@ const CMAESLogic = {
     },
 
     getLensFitness: function (points, targetFocusX = 5.2) {
-        const rayCount = 15;
+        const ppsSide = (points.length - 2) / 2;
+        const rayCount = 25; // Matching Java screenshot complexity
         const startX = -4.0;
-        const nLens = 1.5;
+        const nLens = 1.6; // Matching Java screenshot refraction index
         const hTotal = 3.6;
         const segH = hTotal / rayCount;
         let totalError = 0;
@@ -583,7 +584,6 @@ const CMAESLogic = {
             if (!entry) { totalError += 5000; continue; }
 
             const normal1 = this.getNormal(entry.edgeIndex, points);
-            // Flip normal if it points towards the ray (entry)
             const dot = normal1.x * dir.x + normal1.y * dir.y;
             const actualNormal1 = dot > 0 ? { x: -normal1.x, y: -normal1.y } : normal1;
 
@@ -601,47 +601,43 @@ const CMAESLogic = {
             const rayOut = this.refract(rayIn, actualNormal2, nLens, 1.0);
             if (!rayOut) { totalError += 5000; continue; }
 
-            // Penalty if the ray doesn't hit its "opposite" leg
-            // Left segments are 0..14 (Bottom to Top)
-            // Right segments are 16..30 (Top to Bottom)
-            const expectedEdgeIndex = 16 + (14 - i);
-            if (exit.edgeIndex !== expectedEdgeIndex) {
-                totalError += 100; // Reduced penalty for missing the opposite facet
+            // Softer penalty: Just ensure it hits the "Right" half of the lens
+            if (exit.edgeIndex < ppsSide + 1) {
+                totalError += 2000; 
             }
 
             // 3. Focal Error
-            // Find y-intercept at targetFocusX
-            // Equation: y = y_exit + (rayOut.y / rayOut.x) * (targetX - x_exit)
             if (Math.abs(rayOut.x) < 0.001) { totalError += 10; continue; }
 
             const thickness = exit.x - entry.x;
-            if (thickness < 0.01) totalError += 2000; // Hard penalty for too thin or inverted lens
-            // totalError += Math.abs(thickness) * 1; // Thickness penalty removed
+            if (thickness < 0.01) totalError += 2000; 
 
             const focusY = exit.y + (rayOut.y / rayOut.x) * (targetFocusX - exit.x);
-            totalError += focusY * focusY;
+            totalError += focusY * focusY * 10; // Slightly higher weight for focal precision
 
             // Penalty for crossing rays inside the lens
             if (i > 0 && typeof lastExitY !== 'undefined') {
-                if (exit.y <= lastExitY) totalError += 1000; // Hard penalty for crossing
+                if (exit.y <= lastExitY) totalError += 1000; 
             }
             lastExitY = exit.y;
             validRays++;
         }
 
-        if (validRays === 0) return -1000;
+        if (validRays === 0) return -10000;
 
         // Smoothness / Curvature Penalty (Beauty-Update)
         let smoothnessPenalty = 0;
-        // Left surface: 0 to 14
-        for (let j = 1; j < 14; j++) {
+        // Left surface
+        for (let j = 1; j < ppsSide - 1; j++) {
             const laplacian = points[j-1].x - 2 * points[j].x + points[j+1].x;
-            smoothnessPenalty += laplacian * laplacian * 500;
+            smoothnessPenalty += laplacian * laplacian * 2500; // Massively increased for premium smoothness
         }
-        // Right surface: 16 to 30
-        for (let j = 17; j < 30; j++) {
-            const laplacian = points[j-1].x - 2 * points[j].x + points[j+1].x;
-            smoothnessPenalty += laplacian * laplacian * 500;
+        // Right surface
+        const backOffset = ppsSide + 1;
+        for (let j = 1; j < ppsSide - 1; j++) {
+            const idx = backOffset + j;
+            const laplacian = points[idx-1].x - 2 * points[idx].x + points[idx+1].x;
+            smoothnessPenalty += laplacian * laplacian * 2500;
         }
         totalError += smoothnessPenalty;
 
@@ -678,12 +674,198 @@ const CMAESLogic = {
             sum += Math.pow(x[i], 2) * Math.pow(aratio, (2 * i) / (n - 1));
         }
         return sum;
+    },
+
+    // --- PARAMETER MAPPING (Port of GenerateParameterVectorLens) ---
+
+    ParameterMapper: {
+        /**
+         * Maps optimization vector to lens points.
+         * @param {number[]} vec - The optimization vector (relative offsets).
+         * @param {Object[]} points - The reference block points.
+         * @param {number} optiMode - Bitmask (0x4: Front, 0x8: Back, 0x10: Mirror, 0x20: Y-axis)
+         * @param {number} offsetX - The central anchor X coordinate (e.g. 0).
+         * @returns {Object[]} New points array.
+         */
+        toLens: function (vec, points, optiMode, offsetX = 0) {
+            const newPoints = points.map(p => ({ ...p }));
+            let count = 0;
+
+            const ppsSide = (points.length - 2) / 2;
+            const frontIndices = Array.from({ length: ppsSide }, (_, i) => i);
+            const backIndices = Array.from({ length: ppsSide }, (_, i) => ppsSide + 1 + i);
+            const frontAnchor = Math.floor(ppsSide / 2);
+            const backAnchor = ppsSide + 1 + Math.floor(ppsSide / 2);
+
+            // MODE 0x10: SYMMETRY (Mirror Front to Back)
+            if ((optiMode & 0x10) !== 0) {
+                frontIndices.forEach(idx => {
+                    // Anchor check (Index 7 is the center)
+                    if (idx === frontAnchor) return; 
+
+                    newPoints[idx].x = points[idx].x + vec[count++];
+                    if ((optiMode & 0x20) !== 0) {
+                        newPoints[idx].y = points[idx].y + vec[count++];
+                    }
+                });
+
+                // Mirroring
+                for (let i = 0; i < ppsSide; i++) {
+                    const frontIdx = frontIndices[i];
+                    const backIdx = backIndices[ppsSide - 1 - i]; // Mirror mapping
+                    const distMiddle = offsetX - newPoints[frontIdx].x;
+                    newPoints[backIdx].x = offsetX + distMiddle;
+                    newPoints[backIdx].y = newPoints[frontIdx].y; // Sync Y for symmetry
+                }
+                return newPoints;
+            }
+
+            // MODE 0x4: FRONT ONLY
+            if ((optiMode & 0x4) !== 0) {
+                frontIndices.forEach(idx => {
+                    if (idx === frontAnchor) return; 
+                    newPoints[idx].x = points[idx].x + vec[count++];
+                    if ((optiMode & 0x20) !== 0) {
+                        newPoints[idx].y = points[idx].y + vec[count++];
+                    }
+                });
+            }
+
+            // MODE 0x8: BACK ONLY
+            if ((optiMode & 0x8) !== 0) {
+                // Skipping first and last back points (corners 16 and 30)
+                for (let i = 1; i < ppsSide - 1; i++) {
+                    const idx = backIndices[i];
+                    if (idx === backAnchor) continue; 
+
+                    newPoints[idx].x = points[idx].x + vec[count++];
+                    if ((optiMode & 0x20) !== 0) {
+                        newPoints[idx].y = points[idx].y + vec[count++];
+                    }
+                }
+            }
+
+            return newPoints;
+        },
+
+        /**
+         * Creates an initial optimization vector (all zeros since we use relative offsets).
+         * @param {Object[]} points - Current points.
+         * @param {number} optiMode - Bitmask.
+         * @returns {number[]} Initial vector.
+         */
+        toParameters: function (points, optiMode) {
+            let paramCount = 0;
+            const ppsSide = (points.length - 2) / 2;
+
+            if ((optiMode & 0x10) !== 0) {
+                paramCount += (ppsSide - 1); // Front minus anchor
+                if ((optiMode & 0x20) !== 0) paramCount += (ppsSide - 1);
+            } else {
+                if ((optiMode & 0x4) !== 0) {
+                    paramCount += (ppsSide - 1);
+                    if ((optiMode & 0x20) !== 0) paramCount += (ppsSide - 1);
+                }
+                if ((optiMode & 0x8) !== 0) {
+                    paramCount += (ppsSide - 3); // Back minus anchor and 2 corners
+                    if ((optiMode & 0x20) !== 0) paramCount += (ppsSide - 3);
+                }
+            }
+            return new Array(paramCount).fill(0);
+        }
     }
 };
 
+/**
+ * ESLens Class (Port of ESLens.java)
+ * High-level manager for the evolution process.
+ */
+class ESLens {
+    constructor(points, mission, options = {}) {
+        this.basePoints = points.map(p => ({ ...p }));
+        this.mission = mission;
+        this.optiMode = options.optiMode || 0x10; // Default to Mirroring
+        this.targetFocusX = options.targetFocusX || 5.2;
+        this.sigma = options.sigma || 0.05;
+        this.popSize = options.popSize || 10;
+        
+        this.generation = 0;
+        this.functionCalls = 0;
+        this.bestFitness = -Infinity;
+        this.bestPoints = points.map(p => ({ ...p }));
+
+        this.init();
+    }
+
+    init() {
+        let xstart;
+        if (this.mission === 'CIRCLE') {
+            // Circle mission still uses absolute for now or can be refactored too
+            xstart = [];
+            this.basePoints.forEach((p, idx) => {
+                if (idx !== 0) xstart.push(p.x, p.y);
+            });
+        } else {
+            xstart = CMAESLogic.ParameterMapper.toParameters(this.basePoints, this.optiMode);
+        }
+        
+        this.es = new CMAES(xstart, this.sigma, this.popSize);
+        this.targetPerimeter = CMAESLogic.getPerimeter(this.basePoints);
+    }
+
+    step() {
+        this.generation++;
+        const candidates = this.es.ask();
+        const fitVals = [];
+        const processed = [];
+
+        candidates.forEach(vec => {
+            let pts;
+            let fit;
+            if (this.mission === 'CIRCLE') {
+                pts = [];
+                const anchor = this.basePoints[0];
+                pts.push({ x: anchor.x, y: anchor.y });
+                for (let i = 0; i < vec.length; i += 2) pts.push({ x: vec[i], y: vec[i + 1] });
+                pts = CMAESLogic.rescaleToPerimeter(pts, this.targetPerimeter);
+                const sX = anchor.x - pts[0].x, sY = anchor.y - pts[0].y;
+                pts = pts.map(p => ({ x: p.x + sX, y: p.y + sY }));
+                fit = -CMAESLogic.getArea(pts);
+            } else {
+                pts = CMAESLogic.ParameterMapper.toLens(vec, this.basePoints, this.optiMode, 0);
+                fit = -CMAESLogic.getLensFitness(pts, this.targetFocusX);
+            }
+            fitVals.push(fit);
+            processed.push(pts);
+            this.functionCalls++;
+        });
+
+        this.es.tell(candidates, fitVals);
+        
+        // Update best
+        if (this.es.best.f > this.bestFitness) {
+            this.bestFitness = this.es.best.f;
+            // Map best vector to points
+            if (this.mission === 'CIRCLE') {
+                const bVec = this.es.best.x;
+                const anchor = this.basePoints[0];
+                const pts = [{ x: anchor.x, y: anchor.y }];
+                for (let i = 0; i < bVec.length; i += 2) pts.push({ x: bVec[i], y: bVec[i + 1] });
+                let finalPts = CMAESLogic.rescaleToPerimeter(pts, this.targetPerimeter);
+                const fsX = anchor.x - finalPts[0].x, fsY = anchor.y - finalPts[0].y;
+                this.bestPoints = finalPts.map(p => ({ x: p.x + fsX, y: p.y + fsY }));
+            } else {
+                this.bestPoints = CMAESLogic.ParameterMapper.toLens(this.es.best.x, this.basePoints, this.optiMode, 0);
+            }
+        }
+        
+        return this.bestPoints;
+    }
+}
+
 // Export for module systems or keep global for browser
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CMAES, CMAESParameters, CMAESLogic };
+    module.exports = { CMAES, CMAESParameters, CMAESLogic, ESLens };
 }
-module.exports = { CMAES, CMAESParameters, CMAESLogic };
+module.exports = { CMAES, CMAESParameters, CMAESLogic, ESLens };
 
