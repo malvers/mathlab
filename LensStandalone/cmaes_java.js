@@ -194,7 +194,7 @@ const App = {
     focusOscillate: false,
     focusBaseY: 0,
     focusOscPhase: 0,
-    FOCUS_OSC_AMP: 150,
+    FOCUS_OSC_AMP: 180,
     FOCUS_OSC_SPEED: 0.015,
 
     init() {
@@ -203,6 +203,8 @@ const App = {
         window.addEventListener('resize', () => this.resize()); this.resize();
         document.getElementById('btn-play').onclick = () => this.togglePlay();
         document.getElementById('btn-reset').onclick = () => this.reset();
+        const btnResetView = document.getElementById('btn-reset-view');
+        if (btnResetView) btnResetView.onclick = () => this.resetView();
         const frontCheck = document.getElementById('check-front');
         const backCheck = document.getElementById('check-back');
         const symmetryCheck = document.getElementById('check-symmetry');
@@ -265,10 +267,10 @@ const App = {
             const card = cb.closest('.glass-card');
             if (card) {
                 const rect = card.getBoundingClientRect();
-                if (rect.width > 0) return rect.left;
+                if (rect.width > 0) return rect.right;
             }
         }
-        return this.canvas ? this.canvas.width - this.SIDEBAR_RIGHT_GAP : 1275;
+        return this.canvas ? this.canvas.width - 20 : 1275;
     },
     syncControlUI() {
         const frontCheck = document.getElementById('check-front');
@@ -296,13 +298,14 @@ const App = {
         this.focusBaseY = this.focus.y;
         this.focusOscPhase = 0;
         this.es = null;
-        this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0;
-        this.legPenalty = 0; this.edgeGapPenalty = 0;
+        this.generation = 0; this.calls = 0;
+        this.fitness = 0; this.penalty = 0; this.legPenalty = 0; this.edgeGapPenalty = 0;
         const sigmaSlider = document.getElementById('slider-sigma');
         if (sigmaSlider) this.sigma = parseFloat(sigmaSlider.value);
         this.paused = true;
         const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = 'START';
         this.updateFlags();
+        this.fitness = this.calcPathAndQuality(this.points);
         this.updateTelemetry();
     },
     updateFlags() {
