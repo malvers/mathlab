@@ -3,6 +3,10 @@
  * Cyber-Labor Branding Engine v5.3.8 (ULTRA Edition - Responsive Upgrade)
  * Centralized branding and navigation component for Doc Alvers Laboratories.
  */
+function getBrandingCore() {
+    return window.CyberBrandingCore || null;
+}
+
 const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
     /// MRA ///
@@ -10,9 +14,12 @@ const CyberBranding = {
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
 
     init(config = {}) {
+        const brandingCore = getBrandingCore();
+        if (brandingCore && typeof brandingCore.init === "function") {
+            return brandingCore.init.call(this, config);
+        }
         let title = this.MASTER_TITLE;
         let subtitle = "CYBER-LABORATORIUM";
-        let useExternalStyles = false;
 
         // Polymorphic Init: Support both string (subtitle only) and object (legacy)
         if (typeof config === 'string') {
@@ -21,7 +28,6 @@ const CyberBranding = {
             if (config.title) title = config.title;
             if (config.subtitle) subtitle = config.subtitle;
             if (config.briefing) this.briefingContent = config.briefing;
-            if (config.useExternalStyles === true) useExternalStyles = true;
         }
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
@@ -58,6 +64,10 @@ const CyberBranding = {
     },
 
     injectHTML(topLine, bottomLine) {
+        const brandingCore = getBrandingCore();
+        if (brandingCore && typeof brandingCore.injectHTML === "function") {
+            return brandingCore.injectHTML.call(this, topLine, bottomLine);
+        }
         if (document.querySelector('.canvas-branding')) return;
 
         const container = document.createElement('div');
@@ -73,6 +83,10 @@ const CyberBranding = {
     },
 
     toggleFullscreen() {
+        const brandingCore = getBrandingCore();
+        if (brandingCore && typeof brandingCore.toggleFullscreen === "function") {
+            return brandingCore.toggleFullscreen.call(this);
+        }
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
                 console.warn(`Fullscreen error: ${err.message}`);
@@ -209,11 +223,19 @@ const CyberBranding = {
     },
 
     setupActiveScaling() {
+        const brandingCore = getBrandingCore();
+        if (brandingCore && typeof brandingCore.setupActiveScaling === "function") {
+            return brandingCore.setupActiveScaling.call(this);
+        }
         window.addEventListener('resize', () => this.updateScale());
         window.addEventListener('load', () => this.updateScale());
     },
 
     updateScale() {
+        const brandingCore = getBrandingCore();
+        if (brandingCore && typeof brandingCore.updateScale === "function") {
+            return brandingCore.updateScale.call(this);
+        }
         const w = window.innerWidth;
         // Optimized Responsive Scale between 320px and 1400px
         let scale = (w - 320) / (1400 - 320);
