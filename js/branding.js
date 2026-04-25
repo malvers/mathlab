@@ -11,6 +11,10 @@ function getBrandingNav() {
     return window.CyberBrandingNav || null;
 }
 
+function getBrandingOverlays() {
+    return window.CyberBrandingOverlays || null;
+}
+
 const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
     /// MRA ///
@@ -18,6 +22,7 @@ const CyberBranding = {
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
     _coreLoadRequested: false,
     _navLoadRequested: false,
+    _overlaysLoadRequested: false,
 
     ensureCoreModuleLoaded() {
         if (window.CyberBrandingCore || this._coreLoadRequested) return;
@@ -51,9 +56,26 @@ const CyberBranding = {
         document.head.appendChild(script);
     },
 
+    ensureOverlaysModuleLoaded() {
+        if (window.CyberBrandingOverlays || this._overlaysLoadRequested) return;
+
+        const script = document.createElement("script");
+        script.src = "js/branding/overlays.js";
+        script.async = true;
+        script.dataset.cyberBrandingOverlays = "1";
+        script.onerror = () => {
+            this._overlaysLoadRequested = false;
+            console.warn("CyberBranding: failed to load js/branding/overlays.js, using in-file fallback.");
+        };
+
+        this._overlaysLoadRequested = true;
+        document.head.appendChild(script);
+    },
+
     init(config = {}) {
         this.ensureCoreModuleLoaded();
         this.ensureNavModuleLoaded();
+        this.ensureOverlaysModuleLoaded();
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
             return brandingCore.init.call(this, config);
@@ -288,6 +310,10 @@ const CyberBranding = {
     },
 
     showQR() {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.showQR === "function") {
+            return brandingOverlays.showQR.call(this);
+        }
         let overlay = document.getElementById('cyber-qr-overlay');
 
         // Build the public URL (map local to docalvers.de)
@@ -323,6 +349,10 @@ const CyberBranding = {
     },
 
     showBugReport() {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.showBugReport === "function") {
+            return brandingOverlays.showBugReport.call(this);
+        }
         let overlay = document.getElementById('cyber-report-overlay');
         const filename = window.location.pathname.split('/').pop() || 'index.html';
         const systemInfo = `Module: ${filename} | OS: ${navigator.platform} | Agent: ${navigator.userAgent.substring(0, 50)}... | Res: ${window.innerWidth}x${window.innerHeight}`;
@@ -360,6 +390,10 @@ const CyberBranding = {
     },
 
     sendReportEmail(filename, meta) {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.sendReportEmail === "function") {
+            return brandingOverlays.sendReportEmail.call(this, filename, meta);
+        }
         const text = document.getElementById('report-text').value;
         if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
 
@@ -369,6 +403,10 @@ const CyberBranding = {
     },
 
     async copyReportToClipboard(filename, meta) {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.copyReportToClipboard === "function") {
+            return brandingOverlays.copyReportToClipboard.call(this, filename, meta);
+        }
         const text = document.getElementById('report-text').value;
         if (!text) return alert("Bitte gib eine kurze Beschreibung ein.");
 
@@ -419,6 +457,10 @@ const CyberBranding = {
      * Can be extended for laboratory-specific editing logic.
      */
     toggleEditMode: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.toggleEditMode === "function") {
+            return brandingOverlays.toggleEditMode.call(this);
+        }
         this.isEditMode = !this.isEditMode;
         document.body.classList.toggle('cyber-edit-active', this.isEditMode);
 
@@ -448,6 +490,10 @@ const CyberBranding = {
     },
 
     requestEditAccess: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.requestEditAccess === "function") {
+            return brandingOverlays.requestEditAccess.call(this);
+        }
         if (this.isEditMode) {
             this.toggleEditMode();
             return;
@@ -488,6 +534,10 @@ const CyberBranding = {
     },
 
     validateAccess: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.validateAccess === "function") {
+            return brandingOverlays.validateAccess.call(this);
+        }
         const input = document.getElementById('cyber-pwd-input');
         // Secure Obfuscation (Base64 check for !aMe5007!!??)
         const target = "IWFNZTUwMDchIT8/";
@@ -516,6 +566,10 @@ const CyberBranding = {
     },
 
     showNotification: function (msg) {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.showNotification === "function") {
+            return brandingOverlays.showNotification.call(this, msg);
+        }
         const toast = document.createElement('div');
         toast.style.cssText = `
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
@@ -530,10 +584,18 @@ const CyberBranding = {
     },
 
     setBriefing: function (html) {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.setBriefing === "function") {
+            return brandingOverlays.setBriefing.call(this, html);
+        }
         this.briefingContent = html;
     },
 
     showBriefing: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.showBriefing === "function") {
+            return brandingOverlays.showBriefing.call(this);
+        }
         if (!this.briefingContent) return this.showNotification("Keine Beschreibung für dieses Modul vorhanden.");
 
         let overlay = document.getElementById('cyber-briefing-overlay');
@@ -575,6 +637,10 @@ const CyberBranding = {
     },
 
     copyLocalBriefing: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.copyLocalBriefing === "function") {
+            return brandingOverlays.copyLocalBriefing.call(this);
+        }
         const el = document.querySelector('.briefing-text');
         // Copy innerHTML to preserve the structure (!admin-info etc) for Antigravity
         const content = el.innerHTML;
@@ -584,6 +650,10 @@ const CyberBranding = {
     },
 
     transmitEdits: function () {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.transmitEdits === "function") {
+            return brandingOverlays.transmitEdits.call(this);
+        }
         const labName = window.location.pathname.split('/').pop() || 'index.html';
         const selectors = '.stat-value, .stat-label, .instrument-title, .canvas-branding h1, .canvas-subtitle, .briefing-text, .label-row span:first-child';
         const edits = [];
@@ -614,6 +684,10 @@ const CyberBranding = {
     },
 
     showSyncModal: function (json) {
+        const brandingOverlays = getBrandingOverlays();
+        if (brandingOverlays && typeof brandingOverlays.showSyncModal === "function") {
+            return brandingOverlays.showSyncModal.call(this, json);
+        }
         let overlay = document.getElementById('cyber-sync-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
