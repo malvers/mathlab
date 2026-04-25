@@ -450,7 +450,7 @@ const LABS_DATA = [
     },
     {
         "id": "opti-lens",
-        "href": "../LensStandalone/cmaes_java.html",
+        "href": "LensStandalone/cmaes_java.html",
         "title": "OPTI-LENS Premium",
         "description": "Premium-Edition der CMA-ES Linsenoptimierung. Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und interaktive Maus-Zoom-Steuerung in einem standalone Hochleistungs-Lab.",
         "tagline": "Linsen-Evolution / Strahlenoptik / CMA-ES",
