@@ -791,7 +791,7 @@ class ESLens {
         
         this.generation = 0;
         this.functionCalls = 0;
-        this.bestFitness = -Infinity;
+        this.bestFitness = Infinity;
         this.bestPoints = points.map(p => ({ ...p }));
 
         this.init();
@@ -843,7 +843,7 @@ class ESLens {
         this.es.tell(candidates, fitVals);
         
         // Update best
-        if (this.es.best.f > this.bestFitness) {
+        if (this.es.best.f < this.bestFitness) {
             this.bestFitness = this.es.best.f;
             // Map best vector to points
             if (this.mission === 'CIRCLE') {

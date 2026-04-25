@@ -65,7 +65,7 @@
         const ctx = cc.ctx;
 
         // State
-        let activeMission = 'LENS'; // 'CIRCLE' or 'LENS'
+        let activeMission = 'CIRCLE';
         let es = null;
         let generation = 0;
         let fitness = 0;
@@ -78,6 +78,7 @@
         const FIXED_POINT_INDEX = 0;
         let draggedPoint = null;
         const dragRadius = 15;
+        const CIRCLE_MAX_GENERATIONS = 5000;
 
         function initPoints() {
             const points = [];
@@ -120,21 +121,6 @@
         }
 
         function setupUI() {
-            // OPTIMIERUNG DROP-DOWN
-            CyberUI.createCard('ui-container', 'OPTIMIERUNG WÄHLEN', `
-                <div id="mission-selector-mount"></div>
-            `);
-
-            CyberUI.createDropdown('mission-selector-mount', [
-                { id: 'CIRCLE', label: 'OPTIMIERUNG KREIS' },
-                { id: 'LENS', label: 'OPTIMIERUNG LINSE' }
-            ], (id) => setMission(id), 'LENS');
-
-            // SPACER (PUSH DOWN)
-            const spacer = document.createElement('div');
-            spacer.style.flex = "1";
-            document.getElementById('ui-container').appendChild(spacer);
-
             // CONTROLS
             CyberUI.createCard('ui-container', 'STEUERUNG', `
                 <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
@@ -172,7 +158,7 @@
                 </div>
             `);
 
-            setMission('LENS');
+            setMission('CIRCLE');
         }
 
         function toggleOptimization() {
@@ -261,11 +247,22 @@
                 ctx.restore();
             }
             if (!paused) {
+                if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
+                    paused = true;
+                    const btn = document.getElementById('start-btn');
+                    if (btn) btn.innerText = "MAX 5000";
+                }
                 let steps = 1;
                 if (generation >= 2000) steps = 100;
                 else if (generation >= 500) steps = 50;
 
                 for (let i = 0; i < steps; i++) {
+                    if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
+                        paused = true;
+                        const btn = document.getElementById('start-btn');
+                        if (btn) btn.innerText = "MAX 5000";
+                        break;
+                    }
                     evolve();
                 }
             }
@@ -315,8 +312,6 @@
                 { label: 'Ansicht Reset', onclick: () => cc.resetView(-4, 4) },
                 { divider: true },
                 { label: 'OPTIMIERUNG: KREIS', onclick: () => setMission('CIRCLE') },
-                { label: 'OPTIMIERUNG: LINSE', onclick: () => setMission('LENS') },
-                { divider: true },
                 { label: 'Gitter', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
             ]);
         };
