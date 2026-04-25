@@ -7,6 +7,7 @@ const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
     /// MRA ///
     DEV_MODE: true, // Master Switch for Auto-Reload
+    FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
 
     init(config = {}) {
         let title = this.MASTER_TITLE;
@@ -25,11 +26,11 @@ const CyberBranding = {
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
 
-        // Safe migration path:
-        // If a page opts into external branding CSS, use it only when CSS variables are present.
-        // Otherwise, automatically fall back to the legacy inlined style injection.
-        const externalStylesReady = useExternalStyles && this.hasExternalStyles();
-        if (!externalStylesReady) {
+        // Safe migration path with global override:
+        // - FORCE_INTERNAL_STYLES=true forces legacy inlined styles for quick rollback.
+        // - Otherwise, pages should rely on extracted external CSS.
+        const shouldUseInternalStyles = this.FORCE_INTERNAL_STYLES === true;
+        if (shouldUseInternalStyles) {
             this.injectStyles();
         }
         this.injectHTML(title, subtitle);
