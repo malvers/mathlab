@@ -69,7 +69,7 @@
         let es = null;
         let generation = 0;
         let fitness = 0;
-        let sigma = 0.05;
+        let sigma = 0.02;
         let paused = true;
         let targetPerimeter = 0;
         let populationSize = 10;
@@ -90,7 +90,7 @@
                 }
             } else {
                 const w = 1.0, h = 3.6;
-                const ppsSide = 15, ppsTop = 1;
+                const ppsSide = 23, ppsTop = 1;
                 // Left
                 for (let i = 0; i < ppsSide; i++) points.push({ x: -w / 2, y: -h / 2 + (i / ppsSide) * h });
                 // Top (Corner only)
@@ -177,16 +177,13 @@
 
         function toggleOptimization() {
             if (paused && !es) {
-                const xstart = [];
-                blockPoints.forEach((p, idx) => {
-                    if (activeMission === 'CIRCLE') {
-                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y);
-                    } else {
-                        xstart.push(p.x); // Only X for Lens
-                    }
+                es = new ESLens(blockPoints, activeMission, {
+                    optiMode: 0x10, // Mirror mode
+                    targetFocusX: targetFocusX,
+                    sigma: sigma,
+                    popSize: populationSize
                 });
-                es = new CMAES(xstart, sigma, populationSize);
-                targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
+                targetPerimeter = es.targetPerimeter;
             }
             paused = !paused;
             const btn = document.getElementById('start-btn');
@@ -234,7 +231,7 @@
                     ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
                     ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
-                    const rayCount = 15; const hTotal = 3.6; const segH = hTotal / rayCount;
+                    const rayCount = 25; const hTotal = 3.6; const segH = hTotal / rayCount;
                     for (let i = 0; i < rayCount; i++) {
                         const sY = -hTotal / 2 + (i + 0.5) * segH;
                         const ray = simulateVisualRay(-10, sY, blockPoints);
@@ -265,11 +262,10 @@
             }
             if (!paused) {
                 let steps = 1;
-                if (generation >= 1000) steps = 200;
-                else if (generation >= 100) steps = 100;
+                if (generation >= 2000) steps = 100;
+                else if (generation >= 500) steps = 50;
 
                 for (let i = 0; i < steps; i++) {
-                    generation++;
                     evolve();
                 }
             }
@@ -296,56 +292,9 @@
 
         function evolve() {
             if (!es) return;
-            const candidates = es.ask();
-            const fitVals = []; const processed = [];
-
-            candidates.forEach(vec => {
-                let pts = [];
-                if (activeMission === 'CIRCLE') {
-                    const anchor = blockPoints[FIXED_POINT_INDEX];
-                    pts.push({ x: anchor.x, y: anchor.y });
-                    for (let i = 0; i < vec.length; i += 2) pts.push({ x: vec[i], y: vec[i + 1] });
-                    pts = CMAESLogic.rescaleToPerimeter(pts, targetPerimeter);
-                    const sX = anchor.x - pts[FIXED_POINT_INDEX].x, sY = anchor.y - pts[FIXED_POINT_INDEX].y;
-                    pts = pts.map(p => ({ x: p.x + sX, y: p.y + sY }));
-                    fitVals.push(-CMAESLogic.getArea(pts));
-                } else {
-                    pts = blockPoints.map((p, idx) => {
-                        if (idx === 7 || idx === 23) return { x: p.x, y: p.y }; // Anchors
-                        return { x: vec[idx], y: p.y };
-                    });
-                    fitVals.push(-CMAESLogic.getLensFitness(pts, 5.2));
-                }
-                processed.push(pts);
-            });
-
-            es.tell(processed.map(pts => {
-                const vec = [];
-                if (activeMission === 'CIRCLE') {
-                    for (let i = 1; i < pts.length; i++) vec.push(pts[i].x, pts[i].y);
-                } else {
-                    for (let i = 0; i < pts.length; i++) vec.push(pts[i].x);
-                }
-                return vec;
-            }), fitVals);
-
-            const bPts = [];
-            const bVec = es.best.x;
-            if (activeMission === 'CIRCLE') {
-                const anchor = blockPoints[FIXED_POINT_INDEX];
-                bPts.push({ x: anchor.x, y: anchor.y });
-                for (let i = 0; i < bVec.length; i += 2) bPts.push({ x: bVec[i], y: bVec[i + 1] });
-                let finalPts = CMAESLogic.rescaleToPerimeter(bPts, targetPerimeter);
-                const fsX = anchor.x - finalPts[FIXED_POINT_INDEX].x, fsY = anchor.y - finalPts[FIXED_POINT_INDEX].y;
-                blockPoints = finalPts.map(p => ({ x: p.x + fsX, y: p.y + fsY }));
-            } else {
-                for (let i = 0; i < bVec.length; i++) {
-                    if (i === 7 || i === 23) bPts.push({ x: blockPoints[i].x, y: blockPoints[i].y });
-                    else bPts.push({ x: bVec[i], y: blockPoints[i].y });
-                }
-                blockPoints = bPts;
-            }
-            fitness = es.best.f;
+            blockPoints = es.step();
+            fitness = es.bestFitness;
+            generation = es.generation;
         }
 
         function handleDragStart(pos, e) {
@@ -374,19 +323,14 @@
 
         function stepEvolution(count = 1) {
             if (!es) {
-                const xstart = [];
-                blockPoints.forEach((p, idx) => {
-                    if (activeMission === 'CIRCLE') {
-                        if (idx !== FIXED_POINT_INDEX) xstart.push(p.x, p.y);
-                    } else {
-                        xstart.push(p.x);
-                    }
+                es = new ESLens(blockPoints, activeMission, {
+                    optiMode: 0x10,
+                    targetFocusX: targetFocusX,
+                    sigma: sigma,
+                    popSize: populationSize
                 });
-                es = new CMAES(xstart, sigma, populationSize);
-                targetPerimeter = CMAESLogic.getPerimeter(blockPoints);
             }
             for (let i = 0; i < count; i++) {
-                generation++;
                 evolve();
             }
             updateTelemetry();

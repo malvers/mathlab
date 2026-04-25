@@ -18,53 +18,54 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            overflow: hidden;
         }
 
         #geometry-container {
-            width: 90%;
-            max-width: 600px;
-            height: 600px;
-            background: rgba(10, 15, 30, 0.4);
-            border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 20px;
+            width: 95%;
+            height: 85vh;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.05);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         canvas#squareCanvas {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5));
         }
 
-        /* Floating HUD Tags for the new tool */
+        /* Floating HUD Tags */
         #tag-container {
             position: absolute;
             top: 40px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
+            gap: 15px;
             z-index: 20;
             pointer-events: none;
         }
 
         .floating-tag {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(20px);
-            padding: 12px 15px;
-            border-radius: 12px;
-            font-size: 1.2rem;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-family: 'Orbitron';
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             white-space: nowrap;
-            border: 1px solid var(--neon-blue);
+            border: 1px solid rgba(0, 210, 255, 0.5);
             color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
+            transition: all 0.3s ease;
         }
+
+        .tag-y { border-color: #a3be64; color: #a3be64; }
+        .tag-x { border-color: #ff3344; color: #ff3344; }
+        .tag-a { border-color: #ffcc00; color: #ffcc00; }
     </style>
 </head>
 <body>
@@ -87,10 +88,9 @@
 
     <main id="main-content">
         <div id="tag-container">
-            <!-- Placeholders for variables from the screenshot -->
-            <div class="floating-tag" id="tag-y">y = 24</div>
-            <div class="floating-tag" id="tag-x" style="border-color: #ff3344; color: #ff3344; text-shadow: 0 0 10px #ff3344;">x = 5</div>
-            <div class="floating-tag" id="tag-a" style="border-color: #ffcc00; color: #ffcc00; text-shadow: 0 0 10px #ffcc00;">a = 6</div>
+            <div class="floating-tag tag-y" id="hud-y">y = 24</div>
+            <div class="floating-tag tag-x" id="hud-x">x = 5</div>
+            <div class="floating-tag tag-a" id="hud-a">a = 6</div>
         </div>
         
         <div id="geometry-container">
@@ -109,36 +109,153 @@
             }, 400);
         }
 
-        /**
-         * COOL SQUARES GEOMETRY LAB - ULTRA v6.0.0
-         */
         window.addEventListener('load', () => {
-            // 1. Branding & Briefing
             CyberBranding.init({
                 title: "Doc Alvers Mathe-Labor",
-                subtitle: "GEOMETRISCHE QUADRAT-PUZZLES"
+                subtitle: "GEOMETRISCHE QUADRAT-ANALYSE"
             });
 
             CyberBranding.setBriefing(`
-                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: AREA ANALYSIS</h3>
-                Analysieren Sie die geometrischen Beziehungen zwischen den Quadraten und Rechtecken. 
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: PROPORTION</h3>
+                Untersuchen Sie, wie sich die Flächen verändern, wenn die Kernvariablen angepasst werden.
                 
                 <div class="admin-info">
-                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">PARAMETER</h4>
+                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">VARIABLE KOMPONENTEN</h4>
                     <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
-                        <li><b>Grünes Quadrat:</b> y = 24 (A = 576)</li>
-                        <li><b>Oranges Quadrat:</b> a = 6 (A = 36)</li>
-                        <li><b>Abstand:</b> x = 5</li>
+                        <li><b>y:</b> Höhe/Breite des grünen Quadrats.</li>
+                        <li><b>x:</b> Die rote Lücke zwischen den Blöcken.</li>
+                        <li><b>a:</b> Höhe/Breite des orangen Quadrats.</li>
                     </ul>
                 </div>
             `);
 
             CyberUI.init();
 
-            // 2. Setup Canvas
             const canvas = document.getElementById('squareCanvas');
             const ctx = canvas.getContext('2d');
             
+            // Initial State matching the screenshot
+            let y = 24;
+            let x = 5;
+            let a = 6;
+            let wL = 35; // Default left width
+
+            function updateGeometry() {
+                // Keep the layout visually balanced but respect variables
+                wL = Math.max(a + 10, y + x); 
+                draw();
+                updateHUD();
+                updateStats();
+            }
+
+            function updateHUD() {
+                document.getElementById('hud-y').innerText = `y = ${y}`;
+                document.getElementById('hud-x').innerText = `x = ${x}`;
+                document.getElementById('hud-a').innerText = `a = ${a}`;
+            }
+
+            function updateStats() {
+                const areaGreen = y * y;
+                const areaOrange = a * a;
+                const areaBlueTopLeft = wL * (y + x);
+                const areaBlueBottomLeft = (wL - a) * a;
+                const areaBlueRight = y * (x + a);
+                const totalArea = (wL + y) * (y + x + a);
+
+                CyberUI.updateStatsGrid('data-container', [
+                    { label: 'Fläche Grün', value: areaGreen, color: '#a3be64' },
+                    { label: 'Fläche Orange', value: areaOrange, color: '#ffcc00' },
+                    { label: 'Fläche Blau (TL)', value: areaBlueTopLeft.toFixed(0), color: 'var(--neon-blue)' },
+                    { label: 'Fläche Blau (BL)', value: areaBlueBottomLeft.toFixed(0), color: 'var(--neon-blue)' },
+                    { label: 'Fläche Blau (R)', value: areaBlueRight.toFixed(0), color: 'var(--neon-blue)' },
+                    { label: 'Gesamtfläche', value: totalArea.toFixed(0), color: 'white' }
+                ]);
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const totalH = y + x + a;
+                const totalW = wL + y;
+                
+                const padding = 60;
+                const availableW = canvas.width - padding * 2;
+                const availableH = canvas.height - padding * 2;
+                const scale = Math.min(availableW / totalW, availableH / totalH);
+                
+                const drawW = totalW * scale;
+                const drawH = totalH * scale;
+                const startX = (canvas.width - drawW) / 2;
+                const startY = (canvas.height - drawH) / 2;
+                const spineX = startX + wL * scale;
+
+                ctx.lineJoin = "round";
+
+                // 1. Blue Rect: Top-Left
+                ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                ctx.lineWidth = 2;
+                ctx.fillRect(startX, startY, wL * scale, (y + x) * scale);
+                ctx.strokeRect(startX, startY, wL * scale, (y + x) * scale);
+                
+                // 2. Blue Rect: Bottom-Left (left of orange)
+                ctx.fillRect(startX, startY + (y + x) * scale, (wL - a) * scale, a * scale);
+                ctx.strokeRect(startX, startY + (y + x) * scale, (wL - a) * scale, a * scale);
+
+                // 3. Blue Rect: Right (below green)
+                ctx.fillRect(spineX, startY + y * scale, y * scale, (x + a) * scale);
+                ctx.strokeRect(spineX, startY + y * scale, y * scale, (x + a) * scale);
+
+                // 4. Green Square (Top-Right)
+                ctx.fillStyle = "rgba(163, 190, 100, 0.7)";
+                ctx.strokeStyle = "#a3be64";
+                ctx.fillRect(spineX, startY, y * scale, y * scale);
+                ctx.strokeRect(spineX, startY, y * scale, y * scale);
+                
+                // Label for Green
+                ctx.fillStyle = "white";
+                ctx.font = `${Math.max(12, 18 * scale / 10)}px Orbitron`;
+                ctx.textAlign = "center";
+                ctx.fillText(y * y, spineX + (y * scale) / 2, startY + (y * scale) / 2 + 7);
+                
+                // Label "y = ..."
+                ctx.fillStyle = "#a3be64";
+                ctx.font = `${Math.max(10, 14 * scale / 10)}px Outfit`;
+                ctx.textAlign = "right";
+                ctx.fillText(`y = ${y}`, spineX - 15, startY + (y * scale) / 2 + 5);
+
+                // 5. Orange Square (Bottom-Near-Left)
+                ctx.fillStyle = "rgba(255, 204, 0, 0.7)";
+                ctx.strokeStyle = "#ffcc00";
+                const orangeX = spineX - a * scale;
+                const orangeY = startY + (y + x) * scale;
+                ctx.fillRect(orangeX, orangeY, a * scale, a * scale);
+                ctx.strokeRect(orangeX, orangeY, a * scale, a * scale);
+                
+                // Label for Orange
+                ctx.fillStyle = "black";
+                ctx.font = `${Math.max(12, 18 * scale / 10)}px Orbitron`;
+                ctx.fillText(a * a, orangeX + (a * scale) / 2, orangeY + (a * scale) / 2 + 7);
+
+                // Label "a = ..."
+                ctx.fillStyle = "#ffcc00";
+                ctx.textAlign = "left";
+                ctx.fillText(`a = ${a}`, spineX + 15, orangeY + (a * scale) / 2 + 5);
+
+                // 6. Red Spine Segment (x)
+                ctx.beginPath();
+                ctx.strokeStyle = "#ff3344";
+                ctx.lineWidth = 4;
+                ctx.moveTo(spineX, startY + y * scale);
+                ctx.lineTo(spineX, startY + (y + x) * scale);
+                ctx.stroke();
+                
+                // Label "x = ..."
+                ctx.fillStyle = "#ff3344";
+                ctx.textAlign = "left";
+                ctx.fillText(`x = ${x}`, spineX + 15, startY + (y + x / 2) * scale + 5);
+            }
+
             function resize() {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width;
@@ -148,55 +265,25 @@
             window.addEventListener('resize', resize);
             resize();
 
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Placeholder draw for the layout in the screenshot
-                const scale = 10;
-                const offsetX = canvas.width / 2 - 50;
-                const offsetY = canvas.height / 2 - 150;
+            // UI Components
+            CyberUI.createCard('ui-container', 'PARAMETER-CONTROL', '<div id="sliders"></div>', 'var(--neon-blue)');
+            
+            CyberUI.createSlider('sliders', 'Höhe Grün (y)', 10, 100, 24, 1, (val) => {
+                y = parseInt(val);
+                updateGeometry();
+            }, '#a3be64');
 
-                // Vertikale Bezugslinie (y + x + a = 35)
-                // Wir zeichnen erst mal nur die Komponenten aus dem Screenshot schematisch
-                
-                ctx.lineWidth = 2;
+            CyberUI.createSlider('sliders', 'Lücke (x)', 0, 50, 5, 1, (val) => {
+                x = parseInt(val);
+                updateGeometry();
+            }, '#ff3344');
 
-                // 1. Grünes Quadrat (y=24)
-                ctx.fillStyle = "rgba(163, 190, 100, 0.6)"; // Muted Green
-                ctx.strokeStyle = "#a3be64";
-                ctx.fillRect(offsetX, offsetY, 24 * scale, 24 * scale);
-                ctx.strokeRect(offsetX, offsetY, 24 * scale, 24 * scale);
-                
-                // Text inside green square
-                ctx.fillStyle = "white";
-                ctx.font = "16px Outfit";
-                ctx.textAlign = "center";
-                ctx.fillText("576", offsetX + 12 * scale, offsetY + 12 * scale);
+            CyberUI.createSlider('sliders', 'Höhe Orange (a)', 5, 100, 6, 1, (val) => {
+                a = parseInt(val);
+                updateGeometry();
+            }, '#ffcc00');
 
-                // 2. Rote Linie (x=5)
-                ctx.beginPath();
-                ctx.strokeStyle = "#ff3344";
-                ctx.moveTo(offsetX, offsetY + 24 * scale);
-                ctx.lineTo(offsetX, offsetY + 29 * scale);
-                ctx.stroke();
-
-                // 3. Oranges Quadrat (a=6)
-                // Es liegt links von der Linie, wenn a=6 die rechte Seite ist
-                ctx.fillStyle = "rgba(255, 204, 0, 0.6)";
-                ctx.strokeStyle = "#ffcc00";
-                ctx.fillRect(offsetX - 6 * scale, offsetY + 29 * scale, 6 * scale, 6 * scale);
-                ctx.strokeRect(offsetX - 6 * scale, offsetY + 29 * scale, 6 * scale, 6 * scale);
-                
-                ctx.fillStyle = "white";
-                ctx.fillText("36", offsetX - 3 * scale, offsetY + 32 * scale);
-            }
-
-            // 5. UI Layout Deployment (Empty for now as requested)
-            CyberUI.createCard('ui-container', 'KONFIGURATION', '<div id="slider-mount"></div>', 'var(--neon-blue)');
-            // Rechnungen (data-container) bleiben leer
-            document.getElementById('data-container').innerHTML = '';
-
-            draw();
+            updateGeometry();
         });
     </script>
 </body>
