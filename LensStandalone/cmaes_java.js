@@ -41,8 +41,12 @@ class CMAES {
         for (let i = 0; i < N; i++) this.pc[i] = (1 - this.cc) * this.pc[i] + (hsig ? cc_factor * y[i] : 0);
         const artmp = indices.slice(0, this.mu).map(idx => arx[idx].map((v, i) => (v - xold[i]) / this.sigma));
         const old_c1 = hsig ? this.c1 : this.c1 * (1 - this.cc * (2 - this.cc));
-        for (let i = 0; i < N; i++) { for (let j = 0; j < N; j++) { let rank_mu = 0; for (let k = 0; k < this.mu; k++) rank_mu += this.weights[k] * artmp[k][i] * artmp[k][j];
-                this.C[i][j] = (1 - this.c1 - this.cmu) * this.C[i][j] + this.c1 * (this.pc[i] * this.pc[j] + old_c1 * this.C[i][j]) + this.cmu * rank_mu; } }
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++) {
+                let rank_mu = 0; for (let k = 0; k < this.mu; k++) rank_mu += this.weights[k] * artmp[k][i] * artmp[k][j];
+                this.C[i][j] = (1 - this.c1 - this.cmu) * this.C[i][j] + this.c1 * (this.pc[i] * this.pc[j] + old_c1 * this.C[i][j]) + this.cmu * rank_mu;
+            }
+        }
         this.sigma *= Math.exp((this.cs / this.damps) * (ps_norm / this.chiN - 1));
         if (this.counteval - this.eigeneval > this.lambda / (this.c1 + this.cmu) / N / 10) this.updateEigensystem();
     }
@@ -58,12 +62,18 @@ class CMAES {
         for (let iter = 0; iter < 50; iter++) {
             let max_off = 0; for (let i = 0; i < N - 1; i++) { for (let j = i + 1; j < N; j++) max_off = Math.max(max_off, Math.abs(A[i][j])); }
             if (max_off < 1e-15) break;
-            for (let i = 0; i < N - 1; i++) { for (let j = i + 1; j < N; j++) { const off = Math.abs(A[i][j]); if (off > 0) { const h = d[j] - d[i]; let t; if (Math.abs(h) + off === Math.abs(h)) t = A[i][j] / h; else { const theta = 0.5 * h / A[i][j]; t = 1 / (Math.abs(theta) + Math.sqrt(1 + theta * theta)); if (theta < 0) t = -t; }
+            for (let i = 0; i < N - 1; i++) {
+                for (let j = i + 1; j < N; j++) {
+                    const off = Math.abs(A[i][j]); if (off > 0) {
+                        const h = d[j] - d[i]; let t; if (Math.abs(h) + off === Math.abs(h)) t = A[i][j] / h; else { const theta = 0.5 * h / A[i][j]; t = 1 / (Math.abs(theta) + Math.sqrt(1 + theta * theta)); if (theta < 0) t = -t; }
                         const c = 1 / Math.sqrt(1 + t * t); const s = t * c; const tau = s / (1 + c); const temp = t * A[i][j]; d[i] -= temp; d[j] += temp; A[i][j] = 0;
                         for (let k = 0; k < i; k++) { const g = A[k][i], h = A[k][j]; A[k][i] = g - s * (h + g * tau); A[k][j] = h + s * (g - h * tau); }
                         for (let k = i + 1; k < j; k++) { const g = A[i][k], h = A[k][j]; A[i][k] = g - s * (h + g * tau); A[k][j] = h + s * (g - h * tau); }
                         for (let k = j + 1; k < N; k++) { const g = A[i][k], h = A[j][k]; A[i][k] = g - s * (h + g * tau); A[j][k] = h + s * (g - h * tau); }
-                        for (let k = 0; k < N; k++) { const g = V[k][i], h = V[k][j]; V[k][i] = g - s * (h + g * tau); V[k][j] = h + s * (g - h * tau); } } } }
+                        for (let k = 0; k < N; k++) { const g = V[k][i], h = V[k][j]; V[k][i] = g - s * (h + g * tau); V[k][j] = h + s * (g - h * tau); }
+                    }
+                }
+            }
         }
         return { d, V };
     }
@@ -73,6 +83,11 @@ class CMAES {
 
 const Physics = {
     FARE: 4000.0,
+    normalize(v) {
+        const len = Math.sqrt(v.x * v.x + v.y * v.y) || 1e-18;
+        return { x: v.x / len, y: v.y / len };
+    },
+    dot(a, b) { return a.x * b.x + a.y * b.y; },
     angleBetween2Lines(l1, l2) {
         const dx1 = l1.x1 - l1.x2; const dy1 = l1.y1 - l1.y2;
         const dx2 = l2.x1 - l2.x2; const dy2 = l2.y1 - l2.y2;
@@ -92,6 +107,38 @@ const Physics = {
             return true;
         }
         return false;
+    },
+    segmentIntersectionStrict(l1, l2, eps = 1e-6) {
+        const denom = (l1.x2 - l1.x1) * (l2.y2 - l2.y1) - (l1.y2 - l1.y1) * (l2.x2 - l2.x1);
+        if (Math.abs(denom) < eps) return false;
+
+        const rnum = (l1.y1 - l2.y1) * (l2.x2 - l2.x1) - (l1.x1 - l2.x1) * (l2.y2 - l2.y1);
+        const snum = (l1.y1 - l2.y1) * (l1.x2 - l1.x1) - (l1.x1 - l2.x1) * (l1.y2 - l1.y1);
+        const r = rnum / denom;
+        const s = snum / denom;
+        return r > eps && r < 1 - eps && s > eps && s < 1 - eps;
+    },
+    refractRayThroughSegment(ray, seg, nFrom, nTo, outLen) {
+        const hit = { x: 0, y: 0 };
+        if (!this.lineIntersection2D(ray, seg, hit)) return null;
+
+        const incident = this.normalize({ x: ray.x2 - ray.x1, y: ray.y2 - ray.y1 });
+        const tangent = this.normalize({ x: seg.x2 - seg.x1, y: seg.y2 - seg.y1 });
+        let normal = { x: -tangent.y, y: tangent.x };
+        if (this.dot(incident, normal) > 0) normal = { x: -normal.x, y: -normal.y };
+
+        const eta = nFrom / nTo;
+        const cosi = -this.dot(normal, incident);
+        const k = 1 - eta * eta * (1 - cosi * cosi);
+        if (k < 0) return null;
+
+        const tx = eta * incident.x + (eta * cosi - Math.sqrt(k)) * normal.x;
+        const ty = eta * incident.y + (eta * cosi - Math.sqrt(k)) * normal.y;
+        const t = this.normalize({ x: tx, y: ty });
+        return {
+            hit,
+            refracted: { x1: hit.x, y1: hit.y, x2: hit.x + t.x * outLen, y2: hit.y + t.y * outLen }
+        };
     }
 };
 
@@ -99,7 +146,7 @@ const App = {
     canvas: null, ctx: null,
     points: [], basePoints: [], focus: { x: 850, y: 380 },
     es: null, generation: 0, fitness: 0, penalty: 0, calls: 0,
-    nLens: 0.80, nAir: 1.0, sigma: 0.1, ppsSide: 23,
+    nLens: 1.60, nAir: 1.0, sigma: 0.1, ppsSide: 23,
     paused: true, dragging: null, showRays: true,
     offsetX: 200, offsetY: 180, perimeter: 400,
 
@@ -109,6 +156,12 @@ const App = {
         window.addEventListener('resize', () => this.resize()); this.resize();
         document.getElementById('btn-play').onclick = () => this.togglePlay();
         document.getElementById('btn-reset').onclick = () => this.reset();
+        const frontCheck = document.getElementById('check-front');
+        const backCheck = document.getElementById('check-back');
+        const symmetryCheck = document.getElementById('check-symmetry');
+        if (frontCheck) frontCheck.onchange = () => this.reset();
+        if (backCheck) backCheck.onchange = () => this.reset();
+        if (symmetryCheck) symmetryCheck.onchange = () => this.reset();
         document.getElementById('slider-n').oninput = (e) => { this.nLens = parseFloat(e.target.value); document.getElementById('val-n').innerText = this.nLens.toFixed(2); };
         document.getElementById('slider-sigma').oninput = (e) => { this.sigma = parseFloat(e.target.value); document.getElementById('val-sigma').innerText = this.sigma.toFixed(3); if (this.es) this.es.sigma = this.sigma; };
         this.canvas.onmousedown = (e) => this.handleMouseDown(e);
@@ -118,41 +171,77 @@ const App = {
         this.reset(); this.animate();
     },
     resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
+    syncControlUI() {
+        const frontCheck = document.getElementById('check-front');
+        const backCheck = document.getElementById('check-back');
+        const symmetryCheck = document.getElementById('check-symmetry');
+        if (!frontCheck || !backCheck || !symmetryCheck) return;
+
+        if (symmetryCheck.checked) {
+            frontCheck.checked = false;
+            backCheck.checked = true;
+            frontCheck.disabled = true;
+            backCheck.disabled = true;
+        } else {
+            frontCheck.disabled = false;
+            backCheck.disabled = false;
+        }
+    },
     reset() {
+        this.syncControlUI();
         this.points = []; const w = 150; const space = this.perimeter / (this.ppsSide - 1);
-        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w/2, y: this.offsetY + i * space });
-        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w/2, y: this.offsetY + this.perimeter - i * space });
+        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w / 2, y: this.offsetY + i * space });
+        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w / 2, y: this.offsetY + this.perimeter - i * space });
         this.basePoints = this.points.map(p => ({ ...p }));
         this.focus = { x: 850, y: this.offsetY + this.perimeter / 2 };
         this.es = null; this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0; this.paused = true;
-        const btn = document.getElementById('btn-play'); if(btn) btn.innerHTML = 'START';
+        const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = 'START';
         this.updateFlags();
     },
     updateFlags() {
+        this.syncControlUI();
         const f = document.getElementById('check-front');
         const b = document.getElementById('check-back');
-        const doFront = f ? f.checked : false;
-        const doBack = b ? b.checked : true;
-        
+        const sym = document.getElementById('check-symmetry');
+        const isSymmetry = sym ? sym.checked : false;
+        const doFront = isSymmetry ? false : (f ? f.checked : false);
+        const doBack = isSymmetry ? true : (b ? b.checked : true);
+
         let dim = 0;
-        if (doFront) dim += this.ppsSide;
-        if (doBack) dim += this.ppsSide;
-        
-        const d = document.getElementById('val-dim'); if(d) d.innerText = dim;
-        return { doFront, doBack, dim };
+        if (isSymmetry) dim = this.ppsSide;
+        else {
+            if (doFront) dim += this.ppsSide;
+            if (doBack) dim += this.ppsSide;
+        }
+
+        const d = document.getElementById('val-dim'); if (d) d.innerText = dim;
+        return { doFront, doBack, dim, isSymmetry };
     },
     togglePlay() {
         if (!this.es) {
             const flags = this.updateFlags();
             this.es = new CMAES(new Array(flags.dim).fill(0), this.sigma, 20);
         }
-        this.paused = !this.paused; 
-        const btn = document.getElementById('btn-play'); if(btn) btn.innerHTML = this.paused ? 'START' : 'PAUSE';
+        this.paused = !this.paused;
+        const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = this.paused ? 'START' : 'PAUSE';
     },
     toLens(vec, points) {
         const newPoints = points.map(p => ({ ...p }));
         const flags = this.updateFlags();
         let cursor = 0;
+        if (flags.isSymmetry) {
+            const backOffset = this.ppsSide;
+            for (let i = 0; i < this.ppsSide; i++) {
+                const backIdx = backOffset + (this.ppsSide - 1 - i);
+                const baseFrontX = this.basePoints[i].x;
+                const baseBackX = this.basePoints[backIdx].x;
+                const midX = (baseFrontX + baseBackX) / 2;
+                const backX = this.basePoints[backIdx].x + vec[cursor++];
+                newPoints[backIdx].x = backX;
+                newPoints[i].x = 2 * midX - backX;
+            }
+            return newPoints;
+        }
         if (flags.doFront) {
             for (let i = 0; i < this.ppsSide; i++) {
                 newPoints[i].x = this.basePoints[i].x + vec[cursor++];
@@ -169,70 +258,78 @@ const App = {
     calcPathAndQuality(points) {
         let qualityFocus = 0; const raysIn = []; const raysInter = []; const raysOut = [];
         const space = this.perimeter / (this.ppsSide - 1); const fare = Physics.FARE;
+        const raysGlass = [];
         let missingRays = 0;
 
         // 1. Check for Self-Intersection (Front crossing Back) -> MUERTO
+        const backOffset = this.ppsSide;
         for (let i = 0; i < this.ppsSide; i++) {
-            if (points[i].x >= points[this.ppsSide + i].x - 5) return 1e20;
+            const backIdx = backOffset + (this.ppsSide - 1 - i);
+            if (points[i].x >= points[backIdx].x - 5) return 1e20;
         }
 
-        for (let i = 0; i < this.ppsSide - 1; i++) raysIn.push({ x1: -fare, y1: this.offsetY + i * space + space/2, x2: fare, y2: this.offsetY + i * space + space/2 });
+        // Strahlen berechnen: Eingang -> Inter (Glas)
+        for (let i = 0; i < this.ppsSide - 1; i++) raysIn.push({ x1: -fare, y1: this.offsetY + i * space + space / 2, x2: fare, y2: this.offsetY + i * space + space / 2 });
         for (let i = 0; i < raysIn.length; i++) {
             const ray = raysIn[i]; let hitFront = false;
             for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: points[j].x, y1: points[j].y, x2: points[j+1].x, y2: points[j+1].y };
-                const intersect = { x: 0, y: 0 };
-                if (Physics.lineIntersection2D(ray, seg, intersect)) {
-                    ray.x2 = intersect.x; ray.y2 = intersect.y;
-                    const angleIn = Physics.angleBetween2Lines(ray, seg) + Math.PI/2;
-                    const arg = (this.nAir / this.nLens) * Math.sin(angleIn);
-                    if (Math.abs(arg) <= 1.0) {
-                        const angleOut = Math.asin(arg); const dy = Math.sin(angleIn - angleOut) * fare;
-                        raysInter.push({ x1: intersect.x, y1: intersect.y, x2: intersect.x + fare, y2: intersect.y - dy });
-                        hitFront = true;
-                    }
+                const seg = { x1: points[j].x, y1: points[j].y, x2: points[j + 1].x, y2: points[j + 1].y };
+                const refr = Physics.refractRayThroughSegment(ray, seg, this.nAir, this.nLens, fare);
+                if (refr) {
+                    ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
+                    raysInter.push(refr.refracted);
+                    hitFront = true;
                     break;
                 }
             }
             if (!hitFront) missingRays++;
         }
-        
-        const backOffset = this.ppsSide;
+
         for (let i = 0; i < raysInter.length; i++) {
-            const ray = raysInter[i]; let hitBack = false;
+            const ray = raysInter[i];
+            const frontHit = { x: ray.x1, y: ray.y1 };
+            let hitBack = false;
             for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: points[backOffset+j].x, y1: points[backOffset+j].y, x2: points[backOffset+j+1].x, y2: points[backOffset+j+1].y };
-                const intersect = { x: 0, y: 0 };
-                if (Physics.lineIntersection2D(ray, seg, intersect)) {
-                    ray.x2 = intersect.x; ray.y2 = intersect.y;
-                    const angleIn = Physics.angleBetween2Lines(ray, seg) + Math.PI/2;
-                    const arg = (this.nLens / this.nAir) * Math.sin(angleIn);
-                    if (Math.abs(arg) <= 1.0) {
-                        const angleOut = Math.asin(arg); const dy = Math.sin(angleIn - angleOut) * fare;
-                        raysOut.push({ x1: intersect.x, y1: intersect.y, x2: intersect.x + fare, y2: intersect.y - dy });
-                        hitBack = true;
-                    }
+                const seg = { x1: points[backOffset + j].x, y1: points[backOffset + j].y, x2: points[backOffset + j + 1].x, y2: points[backOffset + j + 1].y };
+                const refr = Physics.refractRayThroughSegment(ray, seg, this.nLens, this.nAir, fare);
+                if (refr) {
+                    ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
+                    raysOut.push(refr.refracted);
+                    raysGlass.push({ x1: frontHit.x, y1: frontHit.y, x2: refr.hit.x, y2: refr.hit.y });
+                    hitBack = true;
                     break;
                 }
             }
             if (!hitBack) missingRays++;
         }
 
-        // 2. Missing Ray Penalty -> MUERTO
+        // Penalize rays that cross while they travel inside the lens body.
+        for (let i = 0; i < raysGlass.length; i++) {
+            for (let j = i + 1; j < raysGlass.length; j++) {
+                if (Physics.segmentIntersectionStrict(raysGlass[i], raysGlass[j])) return 1e25;
+            }
+        }
+
         if (missingRays > 0) return 1e20;
 
+        if (raysOut.length === 0) return 1e20;
         for (let i = 0; i < raysOut.length; i++) {
-            const r = raysOut[i]; const dx = r.x2 - r.x1; const dy = r.y2 - r.y1; const l2 = dx*dx + dy*dy;
-            const t = ((this.focus.x - r.x1) * dx + (this.focus.y - r.y1) * dy) / (l2 || 1e-18);
-            const px = r.x1 + t * dx; const py = r.y1 + t * dy;
-            qualityFocus += Math.pow(this.focus.x - px, 2) + Math.pow(this.focus.y - py, 2);
+            const r = raysOut[i];
+            const dx = r.x2 - r.x1;
+            const dy = r.y2 - r.y1;
+            if (Math.abs(dx) < 1e-9) return 1e20;
+            const tFocus = (this.focus.x - r.x1) / dx;
+            // Penalize rays that do not propagate toward the focus plane.
+            if (tFocus < 0) return 1e20;
+            const yAtFocus = r.y1 + tFocus * dy;
+            qualityFocus += Math.pow(this.focus.y - yAtFocus, 2);
         }
         let penalty = 0;
         for (let i = 0; i < raysInter.length; i++) { const r = raysInter[i]; penalty += Math.pow(r.x2 - r.x1, 2) + Math.pow(r.y2 - r.y1, 2); }
         this.penalty = Math.sqrt(penalty) / (this.ppsSide - 1);
-        const q = Math.sqrt(qualityFocus) / this.ppsSide;
-        this.fitness = q + this.penalty; 
-        return qualityFocus;
+        const q = Math.sqrt(qualityFocus) / raysOut.length;
+        this.fitness = q + 0.25 * this.penalty;
+        return this.fitness;
     },
     step() {
         if (this.paused || !this.es) return;
@@ -244,19 +341,20 @@ const App = {
         this.updateTelemetry();
     },
     updateTelemetry() {
-        const g = document.getElementById('val-gen'); if(g) g.innerText = this.generation;
-        const f = document.getElementById('val-fit'); if(f) f.innerText = this.fitness.toFixed(6);
-        const p = document.getElementById('val-penalty'); if(p) p.innerText = this.penalty.toFixed(3);
-        const c = document.getElementById('val-calls'); if(c) c.innerText = this.calls;
-        const s = document.getElementById('val-sigma'); if(s) s.innerText = this.sigma.toFixed(5);
+        const g = document.getElementById('val-gen'); if (g) g.innerText = this.generation;
+        const f = document.getElementById('val-fit'); if (f) f.innerText = this.fitness.toFixed(6);
+        const p = document.getElementById('val-penalty'); if (p) p.innerText = this.penalty.toFixed(3);
+        const c = document.getElementById('val-calls'); if (c) c.innerText = this.calls;
+        const s = document.getElementById('val-sigma'); if (s) s.innerText = this.sigma.toFixed(5);
     },
     animate() { this.step(); this.draw(); requestAnimationFrame(() => this.animate()); },
     draw() {
-        const { ctx, canvas } = this; if(!ctx) return;
+        const { ctx, canvas } = this; if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath(); ctx.moveTo(this.points[0].x, this.points[0].y);
         for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y);
         ctx.closePath(); ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill(); ctx.strokeStyle = "#00f2ff"; ctx.lineWidth = 2; ctx.stroke();
+        this.drawMidline();
         if (this.showRays) this.drawPreview();
         ctx.beginPath(); ctx.strokeStyle = "#ffcc00"; ctx.lineWidth = 2; ctx.arc(this.focus.x, this.focus.y, 8, 0, Math.PI * 2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(this.focus.x - 12, this.focus.y); ctx.lineTo(this.focus.x + 12, this.focus.y);
@@ -266,37 +364,47 @@ const App = {
     drawPreview() {
         const ctx = this.ctx; const space = this.perimeter / (this.ppsSide - 1); const fare = Physics.FARE; const backOffset = this.ppsSide;
         for (let i = 0; i < this.ppsSide - 1; i++) {
-            const rayIn = { x1: 0, y1: this.offsetY + i * space + space/2, x2: fare, y2: this.offsetY + i * space + space/2 };
+            const rayIn = { x1: 0, y1: this.offsetY + i * space + space / 2, x2: fare, y2: this.offsetY + i * space + space / 2 };
             for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: this.points[j].x, y1: this.points[j].y, x2: this.points[j+1].x, y2: this.points[j+1].y };
-                const intersect = { x: 0, y: 0 };
-                if (Physics.lineIntersection2D(rayIn, seg, intersect)) {
+                const seg = { x1: this.points[j].x, y1: this.points[j].y, x2: this.points[j + 1].x, y2: this.points[j + 1].y };
+                const refrIn = Physics.refractRayThroughSegment(rayIn, seg, this.nAir, this.nLens, fare);
+                if (refrIn) {
+                    const intersect = refrIn.hit;
                     ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.4)"; ctx.moveTo(rayIn.x1, rayIn.y1); ctx.lineTo(intersect.x, intersect.y); ctx.stroke();
-                    const angleIn = Physics.angleBetween2Lines(rayIn, seg) + Math.PI/2;
-                    const arg = (this.nAir / this.nLens) * Math.sin(angleIn);
-                    if (Math.abs(arg) <= 1.0) {
-                        const angleOut = Math.asin(arg); const dy = Math.sin(angleIn - angleOut) * fare;
-                        const rayInter = { x1: intersect.x, y1: intersect.y, x2: intersect.x + fare, y2: intersect.y - dy };
-                        for (let k = 0; k < this.ppsSide - 1; k++) {
-                            const segB = { x1: this.points[backOffset+k].x, y1: this.points[backOffset+k].y, x2: this.points[backOffset+k+1].x, y2: this.points[backOffset+k+1].y };
-                            const intersectB = { x: 0, y: 0 };
-                            if (Physics.lineIntersection2D(rayInter, segB, intersectB)) {
-                                ctx.beginPath(); ctx.strokeStyle = "rgba(0, 242, 255, 0.8)"; ctx.moveTo(intersect.x, intersect.y); ctx.lineTo(intersectB.x, intersectB.y); ctx.stroke();
-                                const angleInB = Physics.angleBetween2Lines(rayInter, segB) + Math.PI/2;
-                                const argB = (this.nLens / this.nAir) * Math.sin(angleInB);
-                                if (Math.abs(argB) <= 1.0) {
-                                    const angleOutB = Math.asin(argB); const dyB = Math.sin(angleInB - angleOutB) * fare;
-                                    ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.8)"; ctx.moveTo(intersectB.x, intersectB.y);
-                                    ctx.lineTo(intersectB.x + fare, intersectB.y - dyB); ctx.stroke();
-                                }
-                                break;
-                            }
+                    const rayInter = refrIn.refracted;
+                    for (let k = 0; k < this.ppsSide - 1; k++) {
+                        const segB = { x1: this.points[backOffset + k].x, y1: this.points[backOffset + k].y, x2: this.points[backOffset + k + 1].x, y2: this.points[backOffset + k + 1].y };
+                        const refrOut = Physics.refractRayThroughSegment(rayInter, segB, this.nLens, this.nAir, fare);
+                        if (refrOut) {
+                            const intersectB = refrOut.hit;
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(0, 242, 255, 0.8)"; ctx.moveTo(intersect.x, intersect.y); ctx.lineTo(intersectB.x, intersectB.y); ctx.stroke();
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.8)"; ctx.moveTo(intersectB.x, intersectB.y);
+                            ctx.lineTo(refrOut.refracted.x2, refrOut.refracted.y2); ctx.stroke();
+                            break;
                         }
                     }
                     break;
                 }
             }
         }
+    },
+    drawMidline() {
+        const ctx = this.ctx;
+        const backOffset = this.ppsSide;
+        if (!ctx || this.points.length < backOffset + this.ppsSide) return;
+        ctx.beginPath();
+        for (let i = 0; i < this.ppsSide; i++) {
+            const backIdx = backOffset + (this.ppsSide - 1 - i);
+            const x = 0.5 * (this.points[i].x + this.points[backIdx].x);
+            const y = this.points[i].y;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = "rgba(255, 204, 0, 0.5)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
     },
     handleMouseDown(e) {
         const mx = e.clientX, my = e.clientY;
@@ -309,10 +417,30 @@ const App = {
         if (e.code === 'Space') this.togglePlay();
         if (e.code === 'Escape') this.reset();
         if (e.key === 'r' || e.key === 'R') this.showRays = !this.showRays;
-        if (e.key === '1') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = false; this.reset(); }
-        if (e.key === '2') { document.getElementById('check-front').checked = false; document.getElementById('check-back').checked = true; this.reset(); }
-        if (e.key === '3') { document.getElementById('check-front').checked = true; document.getElementById('check-back').checked = true; this.reset(); }
-        // 4 was Symmetry, now disabled
+        if (e.key === '1') {
+            document.getElementById('check-front').checked = true;
+            document.getElementById('check-back').checked = false;
+            document.getElementById('check-symmetry').checked = false;
+            this.reset();
+        }
+        if (e.key === '2') {
+            document.getElementById('check-front').checked = false;
+            document.getElementById('check-back').checked = true;
+            document.getElementById('check-symmetry').checked = false;
+            this.reset();
+        }
+        if (e.key === '3') {
+            document.getElementById('check-front').checked = true;
+            document.getElementById('check-back').checked = true;
+            document.getElementById('check-symmetry').checked = false;
+            this.reset();
+        }
+        if (e.key === '4') {
+            document.getElementById('check-front').checked = false;
+            document.getElementById('check-back').checked = true;
+            document.getElementById('check-symmetry').checked = true;
+            this.reset();
+        }
     }
 };
 window.onload = () => App.init();
