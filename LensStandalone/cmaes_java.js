@@ -279,7 +279,7 @@ const App = {
         if (!frontCheck || !backCheck || !symmetryCheck) return;
 
         if (symmetryCheck.checked) {
-            frontCheck.checked = false;
+            frontCheck.checked = true;
             backCheck.checked = true;
             frontCheck.disabled = true;
             backCheck.disabled = true;

@@ -1,11 +1,11 @@
 :root {
-    --bg-deep: #05070a;
-    --bg-card: rgba(15, 22, 33, 0.7);
+    --bg-deep: #050b18;
+    --bg-card: rgba(15, 23, 42, 0.85);
     --neon-cyan: #00f2ff;
     --neon-blue: #0072ff;
     --neon-gold: #ffcc00;
     --neon-red: #ff3344;
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(0, 210, 255, 0.3);
     --text-main: #e0e6ed;
     --text-dim: #94a3b8;
 }
@@ -18,7 +18,7 @@
 }
 
 body {
-    background: var(--bg-deep);
+    background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
     color: var(--text-main);
     font-family: 'Orbitron', sans-serif;
     height: 100vh;
@@ -34,7 +34,7 @@ body {
 #viewport {
     position: relative;
     flex: 1;
-    background: radial-gradient(circle at center, #111827 0%, #05070a 100%);
+    background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
     display: flex;
     flex-direction: column;
 }
@@ -113,12 +113,12 @@ canvas {
 /* Telemetry Sidebar */
 #telemetry {
     position: absolute;
-    bottom: 110px;
+    bottom: 95px;
     left: 20px;
     right: 20px;
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    gap: 15px;
     pointer-events: none;
 }
 
@@ -131,25 +131,25 @@ canvas {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 10px;
-    padding: 10px 14px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 7px 14px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 210, 255, 0.08);
 }
 
 .glass-card h3 {
     font-family: 'Orbitron', sans-serif;
     font-size: 9px;
     color: var(--text-dim);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     letter-spacing: 1.5px;
     border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 4px;
+    padding-bottom: 3px;
 }
 
 .data-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
+    gap: 4px 12px;
 }
 
 .data-item {
@@ -175,14 +175,22 @@ canvas {
 .config-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
+}
+
+.config-list.check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 3px 16px;
 }
 
 .config-item {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    padding: 2px 0;
+    padding: 1px 0;
 }
 
 .config-item label {
@@ -205,7 +213,7 @@ canvas {
     cursor: pointer;
     font-size: 13px;
     color: var(--text-main);
-    padding: 2px 0;
+    padding: 1px 0;
     transition: all 0.2s ease;
 }
 
@@ -267,22 +275,39 @@ canvas {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 15px 25px;
-    backdrop-filter: blur(12px);
+    padding: 15px 14px;
+    backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
     gap: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 210, 255, 0.08);
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    width: calc((100vw - 70px) / 3 - 14px);
+}
+
+.btn-group .action-btn {
+    flex: 1;
+    min-width: 0;
 }
 
 .action-btn {
     background: transparent;
     border: 1px solid var(--neon-cyan);
     color: var(--neon-cyan);
-    padding: 8px 20px;
+    padding: 8px 14px;
     border-radius: 6px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 8px;
