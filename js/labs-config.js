@@ -449,6 +449,30 @@ const LABS_DATA = [
         "color": "green"
     },
     {
+        "id": "happy-birthday-ulf",
+        "href": "happybirthday.html?name=Ulf",
+        "title": "Happy Birthday Ulf",
+        "description": "Eine kosmische Glückwunsch-Site für Ulf mit Feuerwerk, Konfetti und animierter Geburtstagstorte. Klick für Raketen, SPACE für das große Finale.",
+        "tagline": "Konfetti / Feuerwerk / Cyber-Cake",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="50" cy="82" rx="34" ry="5" fill="#1a2440" />
+            <rect x="22" y="55" width="56" height="22" rx="3" fill="#ff6fb3" stroke="rgba(255,255,255,0.18)" stroke-width="0.5" />
+            <rect x="30" y="40" width="40" height="18" rx="3" fill="#ffd1f0" stroke="rgba(255,255,255,0.18)" stroke-width="0.5" />
+            <rect x="38" y="28" width="24" height="14" rx="3" fill="#ffd76a" stroke="rgba(255,255,255,0.18)" stroke-width="0.5" />
+            <rect x="44" y="14" width="3" height="14" fill="#cf2a6c" />
+            <rect x="53" y="14" width="3" height="14" fill="#cf2a6c" />
+            <ellipse cx="45.5" cy="11" rx="2.5" ry="4" fill="#ffd24a" style="filter: drop-shadow(0 0 4px #ffaa00);" />
+            <ellipse cx="54.5" cy="11" rx="2.5" ry="4" fill="#ffd24a" style="filter: drop-shadow(0 0 4px #ffaa00);" />
+            <circle cx="15" cy="20" r="1.5" fill="#00d2ff" />
+            <circle cx="85" cy="22" r="1.5" fill="#ff3ed1" />
+            <circle cx="12" cy="50" r="1.2" fill="#ffcc00" />
+            <circle cx="88" cy="55" r="1.2" fill="#9d50bb" />
+        </svg>`,
+        "category": "fun",
+        "keywords": "happy birthday geburtstag glueckwunsch konfetti feuerwerk torte party celebrate ulf",
+        "color": "purple"
+    },
+    {
         "id": "opti-lens",
         "href": "LensStandalone/cmaes_java.html",
         "title": "OPTI-LENS Premium",
