@@ -401,7 +401,6 @@ const LABS_DATA = [
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid multiplikation",
         "color": "green"
     },
-
     {
         "id": "integralreaktor",
         "href": "integralreaktor.html",
@@ -490,6 +489,22 @@ const LABS_DATA = [
         </svg>`,
         "category": "hot highlight fun",
         "keywords": "linse opti lens optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
+        "color": "blue"
+    },
+    {
+        "id": "cool-squares",
+        "href": "coolsquares.html",
+        "title": "Cool Squares",
+        "description": "Der ultimative geometrische Beweis. Verfolge die Spirale der Quadrate und entdecke, warum die Variable x am Ende keine Rolle spielt. Ein visuelles Aha-Erlebnis.",
+        "tagline": "Geometrie / Algebra / Spirale",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="15" width="40" height="40" fill="rgba(0, 210, 255, 0.15)" stroke="var(--neon-blue)" stroke-width="1.5" />
+            <rect x="55" y="15" width="30" height="30" fill="#84cc16" stroke="#84cc16" stroke-width="1.5" />
+            <rect x="45" y="45" width="10" height="10" fill="#ffcc00" stroke="#ffcc00" stroke-width="1.5" />
+            <path d="M 55 45 L 55 55 L 45 55" fill="none" stroke="#9d50bb" stroke-width="2" />
+        </svg>`,
+        "category": "fun highlight geometrie hot grade7 grade8",
+        "keywords": "geometrie quadrat beweis spirale fläche algebra x a cool squares squares",
         "color": "blue"
     }
 ];
