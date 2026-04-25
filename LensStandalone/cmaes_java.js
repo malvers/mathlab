@@ -108,6 +108,39 @@ const Physics = {
         }
         return false;
     },
+    rayHitParam(ray, seg) {
+        const denom = (ray.x2 - ray.x1) * (seg.y2 - seg.y1) - (ray.y2 - ray.y1) * (seg.x2 - seg.x1);
+        if (denom === 0) return null;
+        const rnum = (ray.y1 - seg.y1) * (seg.x2 - seg.x1) - (ray.x1 - seg.x1) * (seg.y2 - seg.y1);
+        const snum = (ray.y1 - seg.y1) * (ray.x2 - ray.x1) - (ray.x1 - seg.x1) * (ray.y2 - ray.y1);
+        const r = rnum / denom;
+        const s = snum / denom;
+        if (r < 0 || r > 1 || s < 0 || s > 1) return null;
+        return r;
+    },
+    refractRayClosestSurface(ray, points, startIdx, segCount, nFrom, nTo, outLen) {
+        let bestR = Infinity;
+        let bestJ = -1;
+        for (let j = 0; j < segCount; j++) {
+            const seg = {
+                x1: points[startIdx + j].x, y1: points[startIdx + j].y,
+                x2: points[startIdx + j + 1].x, y2: points[startIdx + j + 1].y
+            };
+            const t = this.rayHitParam(ray, seg);
+            if (t !== null && t > 1e-9 && t < bestR) {
+                bestR = t;
+                bestJ = j;
+            }
+        }
+        if (bestJ < 0) return null;
+        const seg = {
+            x1: points[startIdx + bestJ].x, y1: points[startIdx + bestJ].y,
+            x2: points[startIdx + bestJ + 1].x, y2: points[startIdx + bestJ + 1].y
+        };
+        const refr = this.refractRayThroughSegment(ray, seg, nFrom, nTo, outLen);
+        if (refr) refr.legIndex = bestJ;
+        return refr;
+    },
     segmentIntersectionStrict(l1, l2, eps = 1e-6) {
         const denom = (l1.x2 - l1.x1) * (l2.y2 - l2.y1) - (l1.y2 - l1.y1) * (l2.x2 - l2.x1);
         if (Math.abs(denom) < eps) return false;
@@ -144,11 +177,19 @@ const Physics = {
 
 const App = {
     canvas: null, ctx: null,
-    points: [], basePoints: [], focus: { x: 850, y: 380 },
+    points: [], basePoints: [], focus: { x: 1275, y: 380 },
     es: null, generation: 0, fitness: 0, penalty: 0, calls: 0,
     nLens: 1.60, nAir: 1.0, sigma: 0.1, ppsSide: 23,
-    paused: true, dragging: null, showRays: true,
+    paused: true, dragging: null, showRays: true, showPoints: true,
     offsetX: 200, offsetY: 180, perimeter: 400,
+    LEG_PENALTY_WEIGHT: 0.75,
+    legPenalty: 0,
+    EDGE_GAP_PENALTY_WEIGHT: 0.5,
+    HARD_MIN_GAP: 8,
+    SOFT_MIN_GAP: 25,
+    edgeGapPenalty: 0,
+    zoom: 1.0, panX: 0, panY: 0,
+    MIN_ZOOM: 1.0, MAX_ZOOM: 10,
 
     init() {
         this.canvas = document.getElementById('lensCanvas');
@@ -162,15 +203,43 @@ const App = {
         if (frontCheck) frontCheck.onchange = () => this.reset();
         if (backCheck) backCheck.onchange = () => this.reset();
         if (symmetryCheck) symmetryCheck.onchange = () => this.reset();
+        const pointsCheck = document.getElementById('check-points');
+        if (pointsCheck) {
+            this.showPoints = pointsCheck.checked;
+            pointsCheck.onchange = () => { this.showPoints = pointsCheck.checked; };
+        }
         document.getElementById('slider-n').oninput = (e) => { this.nLens = parseFloat(e.target.value); document.getElementById('val-n').innerText = this.nLens.toFixed(2); };
         document.getElementById('slider-sigma').oninput = (e) => { this.sigma = parseFloat(e.target.value); document.getElementById('val-sigma').innerText = this.sigma.toFixed(3); if (this.es) this.es.sigma = this.sigma; };
         this.canvas.onmousedown = (e) => this.handleMouseDown(e);
         window.onmousemove = (e) => this.handleMouseMove(e);
         window.onmouseup = () => this.handleMouseUp();
         window.onkeydown = (e) => this.handleKeyDown(e);
+        this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
         this.reset(); this.animate();
     },
     resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
+    screenToWorld(sx, sy) {
+        const rect = this.canvas.getBoundingClientRect();
+        const cx = sx - rect.left;
+        const cy = sy - rect.top;
+        return {
+            x: (cx - this.panX) / this.zoom,
+            y: (cy - this.panY) / this.zoom
+        };
+    },
+    handleWheel(e) {
+        e.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        const newZoom = Math.max(this.MIN_ZOOM, Math.min(this.MAX_ZOOM, this.zoom * factor));
+        const realFactor = newZoom / this.zoom;
+        this.panX = cx - (cx - this.panX) * realFactor;
+        this.panY = cy - (cy - this.panY) * realFactor;
+        this.zoom = newZoom;
+    },
+    resetView() { this.zoom = 1.0; this.panX = 0; this.panY = 0; },
     syncControlUI() {
         const frontCheck = document.getElementById('check-front');
         const backCheck = document.getElementById('check-back');
@@ -193,7 +262,7 @@ const App = {
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w / 2, y: this.offsetY + i * space });
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w / 2, y: this.offsetY + this.perimeter - i * space });
         this.basePoints = this.points.map(p => ({ ...p }));
-        this.focus = { x: 850, y: this.offsetY + this.perimeter / 2 };
+        this.focus = { x: 1275, y: this.offsetY + this.perimeter / 2 };
         this.es = null; this.generation = 0; this.fitness = 0; this.penalty = 0; this.calls = 0; this.paused = true;
         const btn = document.getElementById('btn-play'); if (btn) btn.innerHTML = 'START';
         this.updateFlags();
@@ -261,46 +330,47 @@ const App = {
         const raysGlass = [];
         let missingRays = 0;
 
-        // 1. Check for Self-Intersection (Front crossing Back) -> MUERTO
+        // 1. Check Front/Back gap. Below HARD_MIN_GAP -> KO (degenerate vertex).
+        //    Below SOFT_MIN_GAP -> accumulate smooth penalty so the optimizer
+        //    keeps the lens edges from collapsing to a singular point.
         const backOffset = this.ppsSide;
+        let gapDeficitSum = 0;
         for (let i = 0; i < this.ppsSide; i++) {
             const backIdx = backOffset + (this.ppsSide - 1 - i);
-            if (points[i].x >= points[backIdx].x - 5) return 1e20;
+            const gap = points[backIdx].x - points[i].x;
+            if (gap < this.HARD_MIN_GAP) return 1e20;
+            if (gap < this.SOFT_MIN_GAP) gapDeficitSum += this.SOFT_MIN_GAP - gap;
         }
+        this.edgeGapPenalty = gapDeficitSum / this.ppsSide;
 
         // Strahlen berechnen: Eingang -> Inter (Glas)
         for (let i = 0; i < this.ppsSide - 1; i++) raysIn.push({ x1: -fare, y1: this.offsetY + i * space + space / 2, x2: fare, y2: this.offsetY + i * space + space / 2 });
         for (let i = 0; i < raysIn.length; i++) {
-            const ray = raysIn[i]; let hitFront = false;
-            for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: points[j].x, y1: points[j].y, x2: points[j + 1].x, y2: points[j + 1].y };
-                const refr = Physics.refractRayThroughSegment(ray, seg, this.nAir, this.nLens, fare);
-                if (refr) {
-                    ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
-                    raysInter.push(refr.refracted);
-                    hitFront = true;
-                    break;
-                }
+            const ray = raysIn[i];
+            const refr = Physics.refractRayClosestSurface(ray, points, 0, this.ppsSide - 1, this.nAir, this.nLens, fare);
+            if (refr) {
+                ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
+                raysInter.push({ ray: refr.refracted, frontLeg: refr.legIndex });
+            } else {
+                missingRays++;
             }
-            if (!hitFront) missingRays++;
         }
 
+        let legDeviationSum = 0;
         for (let i = 0; i < raysInter.length; i++) {
-            const ray = raysInter[i];
+            const item = raysInter[i];
+            const ray = item.ray;
+            const expectedBackLeg = (this.ppsSide - 2) - item.frontLeg;
             const frontHit = { x: ray.x1, y: ray.y1 };
-            let hitBack = false;
-            for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: points[backOffset + j].x, y1: points[backOffset + j].y, x2: points[backOffset + j + 1].x, y2: points[backOffset + j + 1].y };
-                const refr = Physics.refractRayThroughSegment(ray, seg, this.nLens, this.nAir, fare);
-                if (refr) {
-                    ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
-                    raysOut.push(refr.refracted);
-                    raysGlass.push({ x1: frontHit.x, y1: frontHit.y, x2: refr.hit.x, y2: refr.hit.y });
-                    hitBack = true;
-                    break;
-                }
+            const refr = Physics.refractRayClosestSurface(ray, points, backOffset, this.ppsSide - 1, this.nLens, this.nAir, fare);
+            if (refr) {
+                ray.x2 = refr.hit.x; ray.y2 = refr.hit.y;
+                raysOut.push(refr.refracted);
+                raysGlass.push({ x1: frontHit.x, y1: frontHit.y, x2: refr.hit.x, y2: refr.hit.y });
+                legDeviationSum += Math.abs(refr.legIndex - expectedBackLeg);
+            } else {
+                missingRays++;
             }
-            if (!hitBack) missingRays++;
         }
 
         // Penalize rays that cross while they travel inside the lens body.
@@ -325,11 +395,20 @@ const App = {
             qualityFocus += Math.pow(this.focus.y - yAtFocus, 2);
         }
         let penalty = 0;
-        for (let i = 0; i < raysInter.length; i++) { const r = raysInter[i]; penalty += Math.pow(r.x2 - r.x1, 2) + Math.pow(r.y2 - r.y1, 2); }
+        for (let i = 0; i < raysInter.length; i++) { const r = raysInter[i].ray; penalty += Math.pow(r.x2 - r.x1, 2) + Math.pow(r.y2 - r.y1, 2); }
         this.penalty = Math.sqrt(penalty) / (this.ppsSide - 1);
         const q = Math.sqrt(qualityFocus) / raysOut.length;
-        this.fitness = q + 0.25 * this.penalty;
+        this.legPenalty = raysOut.length > 0 ? legDeviationSum / raysOut.length : 0;
+        this.fitness = q + 0.25 * this.penalty + this.LEG_PENALTY_WEIGHT * this.legPenalty + this.EDGE_GAP_PENALTY_WEIGHT * this.edgeGapPenalty;
         return this.fitness;
+    },
+    displayInterval() {
+        if (this.generation < 100) return 1;
+        if (this.generation < 500) return 10;
+        return 100;
+    },
+    shouldDisplay() {
+        return this.generation % this.displayInterval() === 0;
     },
     step() {
         if (this.paused || !this.es) return;
@@ -338,7 +417,7 @@ const App = {
         this.es.tell(samples, fits);
         this.points = this.toLens(this.es.xmean, this.points);
         this.generation++; this.calls = this.es.counteval; this.sigma = this.es.sigma;
-        this.updateTelemetry();
+        if (this.shouldDisplay()) this.updateTelemetry();
     },
     updateTelemetry() {
         const g = document.getElementById('val-gen'); if (g) g.innerText = this.generation;
@@ -347,45 +426,46 @@ const App = {
         const c = document.getElementById('val-calls'); if (c) c.innerText = this.calls;
         const s = document.getElementById('val-sigma'); if (s) s.innerText = this.sigma.toFixed(5);
     },
-    animate() { this.step(); this.draw(); requestAnimationFrame(() => this.animate()); },
+    animate() {
+        this.step();
+        if (this.paused || this.shouldDisplay()) this.draw();
+        requestAnimationFrame(() => this.animate());
+    },
     draw() {
         const { ctx, canvas } = this; if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(this.panX, this.panY);
+        ctx.scale(this.zoom, this.zoom);
+        const inv = 1 / this.zoom;
         ctx.beginPath(); ctx.moveTo(this.points[0].x, this.points[0].y);
         for (let i = 1; i < this.points.length; i++) ctx.lineTo(this.points[i].x, this.points[i].y);
-        ctx.closePath(); ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill(); ctx.strokeStyle = "#00f2ff"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.closePath(); ctx.fillStyle = "rgba(0, 242, 255, 0.15)"; ctx.fill(); ctx.strokeStyle = "#00f2ff"; ctx.lineWidth = 2 * inv; ctx.stroke();
         this.drawMidline();
         if (this.showRays) this.drawPreview();
-        ctx.beginPath(); ctx.strokeStyle = "#ffcc00"; ctx.lineWidth = 2; ctx.arc(this.focus.x, this.focus.y, 8, 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(this.focus.x - 12, this.focus.y); ctx.lineTo(this.focus.x + 12, this.focus.y);
-        ctx.moveTo(this.focus.x, this.focus.y - 12); ctx.lineTo(this.focus.x, this.focus.y + 12); ctx.stroke();
-        this.points.forEach(p => { ctx.beginPath(); ctx.fillStyle = "#ff3344"; ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill(); });
+        ctx.beginPath(); ctx.strokeStyle = "#ffcc00"; ctx.lineWidth = 2 * inv; ctx.arc(this.focus.x, this.focus.y, 8 * inv, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(this.focus.x - 12 * inv, this.focus.y); ctx.lineTo(this.focus.x + 12 * inv, this.focus.y);
+        ctx.moveTo(this.focus.x, this.focus.y - 12 * inv); ctx.lineTo(this.focus.x, this.focus.y + 12 * inv); ctx.stroke();
+        if (this.showPoints) {
+            this.points.forEach(p => { ctx.beginPath(); ctx.fillStyle = "#ff3344"; ctx.arc(p.x, p.y, 3 * inv, 0, Math.PI * 2); ctx.fill(); });
+        }
+        ctx.restore();
     },
     drawPreview() {
         const ctx = this.ctx; const space = this.perimeter / (this.ppsSide - 1); const fare = Physics.FARE; const backOffset = this.ppsSide;
         for (let i = 0; i < this.ppsSide - 1; i++) {
             const rayIn = { x1: 0, y1: this.offsetY + i * space + space / 2, x2: fare, y2: this.offsetY + i * space + space / 2 };
-            for (let j = 0; j < this.ppsSide - 1; j++) {
-                const seg = { x1: this.points[j].x, y1: this.points[j].y, x2: this.points[j + 1].x, y2: this.points[j + 1].y };
-                const refrIn = Physics.refractRayThroughSegment(rayIn, seg, this.nAir, this.nLens, fare);
-                if (refrIn) {
-                    const intersect = refrIn.hit;
-                    ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.4)"; ctx.moveTo(rayIn.x1, rayIn.y1); ctx.lineTo(intersect.x, intersect.y); ctx.stroke();
-                    const rayInter = refrIn.refracted;
-                    for (let k = 0; k < this.ppsSide - 1; k++) {
-                        const segB = { x1: this.points[backOffset + k].x, y1: this.points[backOffset + k].y, x2: this.points[backOffset + k + 1].x, y2: this.points[backOffset + k + 1].y };
-                        const refrOut = Physics.refractRayThroughSegment(rayInter, segB, this.nLens, this.nAir, fare);
-                        if (refrOut) {
-                            const intersectB = refrOut.hit;
-                            ctx.beginPath(); ctx.strokeStyle = "rgba(0, 242, 255, 0.8)"; ctx.moveTo(intersect.x, intersect.y); ctx.lineTo(intersectB.x, intersectB.y); ctx.stroke();
-                            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.8)"; ctx.moveTo(intersectB.x, intersectB.y);
-                            ctx.lineTo(refrOut.refracted.x2, refrOut.refracted.y2); ctx.stroke();
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
+            const refrIn = Physics.refractRayClosestSurface(rayIn, this.points, 0, this.ppsSide - 1, this.nAir, this.nLens, fare);
+            if (!refrIn) continue;
+            const intersect = refrIn.hit;
+            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.4)"; ctx.moveTo(rayIn.x1, rayIn.y1); ctx.lineTo(intersect.x, intersect.y); ctx.stroke();
+            const rayInter = refrIn.refracted;
+            const refrOut = Physics.refractRayClosestSurface(rayInter, this.points, backOffset, this.ppsSide - 1, this.nLens, this.nAir, fare);
+            if (!refrOut) continue;
+            const intersectB = refrOut.hit;
+            ctx.beginPath(); ctx.strokeStyle = "rgba(0, 242, 255, 0.8)"; ctx.moveTo(intersect.x, intersect.y); ctx.lineTo(intersectB.x, intersectB.y); ctx.stroke();
+            ctx.beginPath(); ctx.strokeStyle = "rgba(255, 204, 0, 0.8)"; ctx.moveTo(intersectB.x, intersectB.y);
+            ctx.lineTo(refrOut.refracted.x2, refrOut.refracted.y2); ctx.stroke();
         }
     },
     drawMidline() {
@@ -400,23 +480,37 @@ const App = {
             if (i === 0) ctx.moveTo(x, y);
             else ctx.lineTo(x, y);
         }
+        const inv = 1 / this.zoom;
         ctx.strokeStyle = "rgba(255, 204, 0, 0.5)";
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 1.5 * inv;
+        ctx.setLineDash([6 * inv, 6 * inv]);
         ctx.stroke();
         ctx.setLineDash([]);
     },
     handleMouseDown(e) {
-        const mx = e.clientX, my = e.clientY;
-        this.focus.x = mx; this.focus.y = my;
+        const w = this.screenToWorld(e.clientX, e.clientY);
+        this.focus.x = w.x; this.focus.y = w.y;
         this.dragging = { type: 'focus' };
     },
-    handleMouseMove(e) { if (!this.dragging) return; if (this.dragging.type === 'focus') { this.focus.x = e.clientX; this.focus.y = e.clientY; } else if (this.dragging.type === 'vertex') { this.points[this.dragging.index].x = e.clientX; this.points[this.dragging.index].y = e.clientY; } },
+    handleMouseMove(e) {
+        if (!this.dragging) return;
+        const w = this.screenToWorld(e.clientX, e.clientY);
+        if (this.dragging.type === 'focus') { this.focus.x = w.x; this.focus.y = w.y; }
+        else if (this.dragging.type === 'vertex') { this.points[this.dragging.index].x = w.x; this.points[this.dragging.index].y = w.y; }
+    },
     handleMouseUp() { this.dragging = null; },
     handleKeyDown(e) {
-        if (e.code === 'Space') this.togglePlay();
-        if (e.code === 'Escape') this.reset();
-        if (e.key === 'r' || e.key === 'R') this.showRays = !this.showRays;
+        if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); return; }
+        if (e.code === 'Escape') { e.preventDefault(); this.resetView(); return; }
+        if (e.key === 'r' || e.key === 'R') { e.preventDefault(); this.showRays = !this.showRays; return; }
+        if (e.key === 'p' || e.key === 'P') {
+            e.preventDefault();
+            this.showPoints = !this.showPoints;
+            const pc = document.getElementById('check-points');
+            if (pc) pc.checked = this.showPoints;
+            return;
+        }
+        if (e.key === '0') { e.preventDefault(); this.resetView(); return; }
         if (e.key === '1') {
             document.getElementById('check-front').checked = true;
             document.getElementById('check-back').checked = false;
