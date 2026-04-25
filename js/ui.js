@@ -747,8 +747,8 @@ class CyberUI {
 
             .search-input {
                 width: 100%;
-                background: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(0, 210, 255, 0.2);
+                background: rgba(8, 18, 40, 0.78);
+                border: 1px solid rgba(0, 210, 255, 0.5);
                 border-radius: 12px;
                 padding: 15px 50px 15px 55px;
                 font-size: 1.1rem;
@@ -758,6 +758,7 @@ class CyberUI {
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 backdrop-filter: blur(20px);
                 box-sizing: border-box;
+                box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35), 0 0 18px rgba(0, 210, 255, 0.18);
             }
 
             .search-input:focus {
@@ -767,11 +768,11 @@ class CyberUI {
             }
 
             .search-input::placeholder {
-                color: rgba(255, 255, 255, 0.2);
+                color: rgba(185, 226, 255, 0.82);
                 letter-spacing: 2px;
                 text-transform: uppercase;
                 font-family: 'Orbitron', sans-serif;
-                font-size: 0.8rem;
+                font-size: 0.86rem;
             }
 
             .search-icon {
@@ -780,9 +781,10 @@ class CyberUI {
                 top: 50%;
                 transform: translateY(-50%);
                 font-size: 1.4rem;
-                opacity: 0.5;
+                opacity: 0.95;
                 pointer-events: none;
                 transition: all 0.3s ease;
+                filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.45));
             }
 
             .search-input:focus + .search-icon {
@@ -963,10 +965,10 @@ class CyberUI {
             e.stopPropagation();
             const currentDisplay = window.getComputedStyle(panel).display;
             const isOpen = currentDisplay === 'block';
-            
+
             // Close all other dropdowns
             document.querySelectorAll('.dropdown-panel').forEach(p => p.style.display = 'none');
-            
+
             panel.style.display = isOpen ? 'none' : 'block';
             panel.style.zIndex = "1000000";
 
