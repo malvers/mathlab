@@ -150,6 +150,41 @@
                 pegTopY: 0,
                 pegBottomY: 0
             };
+            const SETTINGS_KEY = "galtonboard-slider-settings-v1";
+
+            function clamp(value, min, max) {
+                return Math.min(max, Math.max(min, value));
+            }
+
+            function loadSliderSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    if (!parsed || typeof parsed !== "object") return;
+                    if (Number.isFinite(parsed.rows)) sim.rows = Math.round(clamp(parsed.rows, 6, 18));
+                    if (Number.isFinite(parsed.spawnIntervalMs)) sim.spawnIntervalMs = Math.round(clamp(parsed.spawnIntervalMs, 10, 1000));
+                    if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 3.0);
+                    if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 300));
+                } catch (err) {
+                    // Ignore invalid local storage content.
+                }
+            }
+
+            function saveSliderSettings() {
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                        rows: sim.rows,
+                        spawnIntervalMs: sim.spawnIntervalMs,
+                        flightSpeed: sim.flightSpeed,
+                        maxBalls: sim.maxBalls
+                    }));
+                } catch (err) {
+                    // Ignore persistence errors (private mode/storage limits).
+                }
+            }
+
+            loadSliderSettings();
 
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
@@ -363,19 +398,27 @@
                 ctx.fillStyle = "rgba(5, 11, 24, 0.85)";
                 const binHeightPx = sim.binBaseY - sim.binTopY;
                 ctx.fillRect(0, sim.binTopY, w, binHeightPx);
-                ctx.strokeStyle = "rgba(0,210,255,0.2)";
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(0, sim.binTopY);
-                ctx.lineTo(w, sim.binTopY);
-                ctx.stroke();
 
                 const maxCount = Math.max(1, ...sim.bins.map(b => b.count));
                 for (let i = 0; i < sim.bins.length; i++) {
                     const b = sim.bins[i];
                     const barH = (b.count / maxCount) * (binHeightPx - 12);
-                    ctx.fillStyle = "#ff9f3b";
-                    ctx.fillRect(b.x + 2, sim.binBaseY - barH, Math.max(3, b.w - 4), barH);
+                    const barX = b.x + 2;
+                    const barW = Math.max(3, b.w - 4);
+                    const barY = sim.binBaseY - barH;
+                    const grad = ctx.createLinearGradient(barX, sim.binBaseY, barX, barY);
+                    grad.addColorStop(0, "#ff7a1a");
+                    grad.addColorStop(0.55, "#ff9f3b");
+                    grad.addColorStop(1, "#ffd08a");
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = "rgba(255, 159, 59, 0.45)";
+                    ctx.shadowBlur = 10;
+                    ctx.fillRect(barX, barY, barW, barH);
+
+                    // Thin bright cap line for a cleaner "active" look.
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "rgba(255, 235, 190, 0.9)";
+                    ctx.fillRect(barX, barY, barW, 1.5);
                     ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
                     ctx.strokeRect(b.x, sim.binTopY, b.w, binHeightPx);
 
@@ -491,21 +534,25 @@
                 labelRows.textContent = sim.rows;
                 resetStats();
                 rebuildBoard();
+                saveSliderSettings();
             });
 
             sliderSpawn.addEventListener("input", (e) => {
                 sim.spawnIntervalMs = parseInt(e.target.value, 10);
                 labelSpawn.textContent = sim.spawnIntervalMs;
+                saveSliderSettings();
             });
 
             sliderSpeed.addEventListener("input", (e) => {
                 sim.flightSpeed = parseFloat(e.target.value);
                 labelSpeed.textContent = sim.flightSpeed.toFixed(2);
+                saveSliderSettings();
             });
 
             sliderMaxBalls.addEventListener("input", (e) => {
                 sim.maxBalls = parseInt(e.target.value, 10);
                 labelMaxBalls.textContent = sim.maxBalls;
+                saveSliderSettings();
             });
 
             document.getElementById("btn-play-pause").addEventListener("click", () => { sim.running = !sim.running; });
