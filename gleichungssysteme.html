@@ -68,7 +68,7 @@
         let draggedPoint = null; 
         let draggedLine = null; // Für Rotation
         let snapToGrid = true; // Magnet-Snap Status
-        let scrambleMode = false;
+        let scrambleLevel = 0;
 
         // Form-Typen für Scramble (0: normal, 1: swapped, 2: 2y, 3: implicit, 4: mixed)
         line1.form = 0;
@@ -82,7 +82,7 @@
                     line1: line1,
                     line2: line2,
                     snapToGrid: snapToGrid,
-                    scrambleMode: scrambleMode,
+                    scrambleLevel: scrambleLevel,
                     view: cc ? cc.view : null
                 };
                 localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -97,7 +97,10 @@
                 if (parsed.line1) line1 = parsed.line1;
                 if (parsed.line2) line2 = parsed.line2;
                 if (parsed.snapToGrid !== undefined) snapToGrid = parsed.snapToGrid;
-                if (parsed.scrambleMode !== undefined) scrambleMode = parsed.scrambleMode;
+                if (parsed.scrambleLevel !== undefined) scrambleLevel = parsed.scrambleLevel;
+                if (parsed.scrambleMode !== undefined && parsed.scrambleLevel === undefined) {
+                    scrambleLevel = parsed.scrambleMode ? 5 : 0; // Migration alter Saves
+                }
                 if (parsed.view && cc) {
                     cc.view = parsed.view;
                     cc.isInitialized = false;
@@ -140,8 +143,15 @@
                             <input type="checkbox" id="snap-toggle" ${snapToGrid ? 'checked' : ''} style="cursor: pointer;" onchange="snapToGrid = this.checked; saveSettings();">
                         </div>
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">SCRAMBLE MODE</span>
-                            <input type="checkbox" id="scramble-toggle" ${scrambleMode ? 'checked' : ''} style="cursor: pointer;" onchange="toggleScramble(this.checked)">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">NOTATION</span>
+                            <select id="scramble-combo" style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(0, 210, 255, 0.3); color: var(--neon-blue); font-family: 'Orbitron'; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; font-size: 0.7rem;" onchange="setScrambleLevel(this.value)">
+                                <option value="0" ${scrambleLevel == 0 ? 'selected' : ''}>NORMAL</option>
+                                <option value="1" ${scrambleLevel == 1 ? 'selected' : ''}>GESPIEGELT</option>
+                                <option value="2" ${scrambleLevel == 2 ? 'selected' : ''}>SKALIERT (2Y)</option>
+                                <option value="3" ${scrambleLevel == 3 ? 'selected' : ''}>IMPLIZIT A</option>
+                                <option value="4" ${scrambleLevel == 4 ? 'selected' : ''}>IMPLIZIT B</option>
+                                <option value="5" ${scrambleLevel == 5 ? 'selected' : ''}>ZUFALL MIX</option>
+                            </select>
                         </div>
                         <div style="display: flex; gap: 10px; margin-top: 5px;">
                             <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">NEUE AUFGABE</button>
@@ -269,14 +279,14 @@
             }
         });
 
-        window.toggleScramble = (val) => {
-            scrambleMode = val;
-            if (scrambleMode) {
-                line1.form = Math.floor(Math.random() * 5);
-                line2.form = Math.floor(Math.random() * 5);
+        window.setScrambleLevel = (val) => {
+            scrambleLevel = parseInt(val);
+            if (scrambleLevel === 5) {
+                line1.form = Math.floor(Math.random() * 4) + 1;
+                line2.form = Math.floor(Math.random() * 4) + 1;
             } else {
-                line1.form = 0;
-                line2.form = 0;
+                line1.form = scrambleLevel;
+                line2.form = scrambleLevel;
             }
             saveSettings();
             draw();
@@ -284,9 +294,12 @@
 
         window.generateRandomTask = () => {
             // ... (xs, ys, b1, b2 logic)
-            if (scrambleMode) {
-                line1.form = Math.floor(Math.random() * 5);
-                line2.form = Math.floor(Math.random() * 5);
+            if (scrambleLevel === 5) {
+                line1.form = Math.floor(Math.random() * 4) + 1;
+                line2.form = Math.floor(Math.random() * 4) + 1;
+            } else {
+                line1.form = scrambleLevel;
+                line2.form = scrambleLevel;
             }
             // ... (rest of logic)
             // 1. Ganzzahligen Schnittpunkt würfeln (x zwischen -6 und 6, aber nicht 0)
@@ -453,10 +466,11 @@
             const getEqData = (line) => {
                 const dx = line.p2.x - line.p1.x;
                 const dy = line.p2.y - line.p1.y;
-                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x, form: scrambleMode ? (line.form || 0) : 0 };
+                const f = scrambleLevel === 0 ? 0 : (line.form || 0);
+                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x, form: f };
                 const m = dy / dx;
                 const b = line.p1.y - m * line.p1.x;
-                return { m, b, form: scrambleMode ? (line.form || 0) : 0 };
+                return { m, b, form: f };
             };
 
             const eq1 = getEqData(line1);
@@ -477,7 +491,7 @@
                             case 4: l = `-x`; r = `-${xValStr}`; break;
                             default: l = `x`; r = xValStr; break;
                         }
-                        if (scrambleMode) return `\\textcolor{${color}}{${l} = ${r}}`;
+                        if (scrambleLevel > 0) return `\\textcolor{${color}}{${l} = ${r}}`;
                         return `\\textcolor{${color}}{${l}} & \\textcolor{${color}}{{}= ${r}}`;
                     }
 
@@ -526,7 +540,7 @@
                             }
                     }
                     // Im Scramble Mode keine Ausrichtung am = (einfacher String)
-                    if (scrambleMode) {
+                    if (scrambleLevel > 0) {
                         return `\\textcolor{${color}}{${left} = ${right}}`;
                     }
                     // Im Normal-Modus: Ausrichtung ohne extra Padding
@@ -542,7 +556,7 @@
             const aligned = formatEqPartsAligned(eq1, eq2);
 
             // Formales LGS: Standard-Array, da die manuellen Abstände (\quad und \phantom) bereits entfernt wurden
-            const colDef = scrambleMode ? "l" : "ll";
+            const colDef = scrambleLevel > 0 ? "l" : "ll";
             const formalLatex = `\\left| \\begin{array}{${colDef}} ${aligned.l1} \\\\ ${aligned.l2} \\end{array} \\right|`;
             katex.render(formalLatex, document.getElementById('eq-formal-gs'), { throwOnError: false });
             
