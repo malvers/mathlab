@@ -1316,8 +1316,9 @@ class CyberUI {
      * @param {number} value - Numeric value
      * @param {number} decimals - Precision
      * @param {number} minDigits - Integer padding
+     * @param {object|null} styleConfig - Optional per-widget overrides
      */
-    static updateNumberWidget(containerId, value, decimals = 2, minDigits = 1) {
+    static updateNumberWidget(containerId, value, decimals = 2, minDigits = 1, styleConfig = null) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
@@ -1337,5 +1338,18 @@ class CyberUI {
             }
         }
         container.innerHTML = html;
+
+        // Optional style overrides for a single widget instance (backward-compatible).
+        if (styleConfig && typeof styleConfig === 'object') {
+            const digits = container.querySelectorAll('.cyber-digit-box');
+            for (const el of digits) {
+                if (styleConfig.fontSize) el.style.fontSize = styleConfig.fontSize;
+                if (styleConfig.digitWidth && !el.classList.contains('separator')) el.style.width = styleConfig.digitWidth;
+                if (styleConfig.digitHeight && !el.classList.contains('separator')) el.style.height = styleConfig.digitHeight;
+                if (styleConfig.separatorWidth && el.classList.contains('separator')) el.style.width = styleConfig.separatorWidth;
+                if (styleConfig.color) el.style.color = styleConfig.color;
+                if (styleConfig.textShadow) el.style.textShadow = styleConfig.textShadow;
+            }
+        }
     }
 }
