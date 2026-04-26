@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Fibonacci</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #stage-wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #stage {
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="stage-wrap"><canvas id="stage"></canvas></div>
+    </main>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById("side-panel");
+            panel.classList.toggle("collapsed");
+            setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+            }, 400);
+        }
+
+        window.addEventListener("load", () => {
+            const canvas = document.getElementById("stage");
+            const ctx = canvas.getContext("2d");
+            let targetStep = 7;
+            let currentStep = 7;
+            let viewUnitPx = 0;
+            let viewOffsetX = 0;
+            let viewOffsetY = 0;
+            let showSpiral = true;
+            let showSquares = true;
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = Math.max(640, Math.floor(rect.width));
+                canvas.height = Math.max(420, Math.floor(rect.height));
+                // Reset view to snap on resize
+                viewUnitPx = 0; 
+                drawFibonacciTo13();
+            }
+
+            // Wie im Referenzbild: 1er links, 1er rechts, dann unten / links / oben / rechts / unten; Teal, erstes Q gelb.
+            const SQUARE_FILL_BLUE = "#ff9d00";
+            const SQUARE_FILL_FIRST = "#ff9d00";
+            const SQUARE_STROKE = "#000000";
+
+            function drawSquare(x, y, size, color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, size, size);
+                if (showSquares) {
+                    ctx.strokeStyle = SQUARE_STROKE;
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(x, y, size, size);
+                }
+            }
+
+            function buildFibonacciSquares(stepLimit) {
+                const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
+                const squares = [];
+                
+                let x = 0; let y = 0;
+                let minX = 0; let minY = 0; let maxX = 1; let maxY = 1;
+
+                // Klassische Sequenz: Right, Down, Left, Up
+                const dirs = ["right", "down", "left", "up"];
+
+                for (let i = 0; i < stepLimit; i++) {
+                    const s = fib[i];
+                    if (i > 0) {
+                        const dir = dirs[(i - 1) % 4];
+                        if (i === 1) { x = 1; y = 0; } // Spezialfall für das zweite 1er Quadrat
+                        else {
+                            if (dir === "right") { x = maxX; y = maxY - s; }
+                            else if (dir === "down") { x = maxX - s; y = maxY; }
+                            else if (dir === "left") { x = minX - s; y = minY; }
+                            else if (dir === "up") { x = minX; y = minY - s; }
+                        }
+                    }
+
+                    // Bogen-Logik: Mittelpunkt und Winkel für nahtlose Übergänge
+                    let cx, cy, a0, a1;
+                    const phase = i % 4;
+                    if (i === 0) { cx = x + 1; cy = y + 1; a0 = Math.PI; a1 = 1.5 * Math.PI; }
+                    else if (phase === 1) { cx = x; cy = y + s; a0 = 1.5 * Math.PI; a1 = 2 * Math.PI; }
+                    else if (phase === 2) { cx = x; cy = y; a0 = 0; a1 = 0.5 * Math.PI; }
+                    else if (phase === 3) { cx = x + s; cy = y; a0 = 0.5 * Math.PI; a1 = Math.PI; }
+                    else if (phase === 0) { cx = x + s; cy = y + s; a0 = Math.PI; a1 = 1.5 * Math.PI; }
+
+                    squares.push({ x, y, s, arc: { cx, cy, a0, a1 } });
+                    
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x + s);
+                    maxY = Math.max(maxY, y + s);
+                }
+
+                return { squares, minX, minY, maxX, maxY };
+            }
+
+            function drawFibonacciTo13() {
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                // 1. Target Layout berechnen
+                const layout = buildFibonacciSquares(Math.round(targetStep));
+                const unitW = layout.maxX - layout.minX;
+                const unitH = layout.maxY - layout.minY;
+                const pad = 80;
+                
+                const targetUnitPx = Math.min((w - pad * 2) / unitW, (h - pad * 2) / unitH);
+                const targetOffsetX = (w - unitW * targetUnitPx) / 2 - layout.minX * targetUnitPx;
+                const targetOffsetY = (h - unitH * targetUnitPx) / 2 - layout.minY * targetUnitPx;
+
+                // 2. Smooth Interpolation (Zoom & Pan)
+                if (viewUnitPx === 0) {
+                    viewUnitPx = targetUnitPx;
+                    viewOffsetX = targetOffsetX;
+                    viewOffsetY = targetOffsetY;
+                }
+
+                viewUnitPx += (targetUnitPx - viewUnitPx) * 0.1;
+                viewOffsetX += (targetOffsetX - viewOffsetX) * 0.1;
+                viewOffsetY += (targetOffsetY - viewOffsetY) * 0.1;
+
+                ctx.save();
+
+                // 3. Quadrate zeichnen (immer bis targetStep für Konsistenz)
+                layout.squares.forEach((sq, i) => {
+                    // Goldener Verlauf über 20 Schritte
+                    const lightness = 45 + (i * 2.5); 
+                    const color = `hsl(37, 100%, ${lightness}%)`;
+                    
+                    drawSquare(
+                        viewOffsetX + sq.x * viewUnitPx,
+                        viewOffsetY + sq.y * viewUnitPx,
+                        sq.s * viewUnitPx,
+                        color
+                    );
+                });
+
+                // 4. Spirale zeichnen
+                if (showSpiral) {
+                    ctx.strokeStyle = SQUARE_STROKE;
+                    ctx.lineWidth = Math.max(0.8, viewUnitPx / 35);
+                    layout.squares.forEach((sq) => {
+                        const arc = sq.arc;
+                        const cx = viewOffsetX + arc.cx * viewUnitPx;
+                        const cy = viewOffsetY + arc.cy * viewUnitPx;
+                        const r = sq.s * viewUnitPx;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r, arc.a0, arc.a1);
+                        ctx.stroke();
+                    });
+                }
+
+                ctx.restore();
+
+                // 5. Animation Loop
+                if (Math.abs(targetUnitPx - viewUnitPx) > 0.1 || Math.abs(targetOffsetX - viewOffsetX) > 0.1) {
+                    requestAnimationFrame(drawFibonacciTo13);
+                }
+            }
+
+            function updateStepLabel() {
+                const el = document.getElementById("fib-step-label");
+                if (!el) return;
+                const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
+                const val = fib[Math.max(0, Math.min(targetStep - 1, fib.length - 1))];
+                el.textContent = `Schritt ${targetStep}/20  |  Fibonacci: ${val}`;
+            }
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "FIBONACCI"
+            });
+
+            CyberUI.init();
+            CyberUI.createCard("ui-container", "DB", `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div id="fib-step-label" class="cyber-number" style="font-size:0.8rem; color:var(--branding-orange);">Schritt 7/20</div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
+                        <input type="checkbox" id="fib-spiral" checked>
+                        <span>Viertelkreise (Spirale)</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
+                        <input type="checkbox" id="fib-squares" checked>
+                        <span>Quadrat-Grenzlinien</span>
+                    </label>
+                    <div style="display:flex; gap:8px;">
+                        <button id="fib-prev" class="cyber-btn" style="flex:1;">ZURÜCK</button>
+                        <button id="fib-next" class="cyber-btn" style="flex:1;">VOR</button>
+                    </div>
+                </div>
+            `, "#ff9d00");
+
+            document.getElementById("fib-spiral").addEventListener("change", (e) => {
+                showSpiral = e.target.checked;
+                drawFibonacciTo13();
+            });
+            document.getElementById("fib-squares").addEventListener("change", (e) => {
+                showSquares = e.target.checked;
+                drawFibonacciTo13();
+            });
+
+            document.getElementById("fib-prev").addEventListener("click", () => {
+                targetStep = Math.max(1, targetStep - 1);
+                updateStepLabel();
+                drawFibonacciTo13();
+            });
+            document.getElementById("fib-next").addEventListener("click", () => {
+                targetStep = Math.min(20, targetStep + 1);
+                updateStepLabel();
+                drawFibonacciTo13();
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowLeft") {
+                    targetStep = Math.max(1, targetStep - 1);
+                    updateStepLabel();
+                    drawFibonacciTo13();
+                } else if (e.key === "ArrowRight") {
+                    targetStep = Math.min(20, targetStep + 1);
+                    updateStepLabel();
+                    drawFibonacciTo13();
+                }
+            });
+
+            updateStepLabel();
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>
