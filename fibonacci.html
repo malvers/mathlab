@@ -83,6 +83,34 @@
             let showSpiral = true;
             let showSquares = true;
 
+            const SETTINGS_KEY = "fibonacci-settings-v1";
+
+            function saveSettings() {
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                        targetStep,
+                        showSpiral,
+                        showSquares
+                    }));
+                } catch (e) {}
+            }
+
+            function loadSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    if (parsed.targetStep !== undefined) {
+                        targetStep = Math.max(1, Math.min(20, parsed.targetStep));
+                        currentStep = targetStep;
+                    }
+                    if (parsed.showSpiral !== undefined) showSpiral = parsed.showSpiral;
+                    if (parsed.showSquares !== undefined) showSquares = parsed.showSquares;
+                } catch (e) {}
+            }
+
+            loadSettings();
+
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = Math.max(640, Math.floor(rect.width));
@@ -95,7 +123,7 @@
             // Wie im Referenzbild: 1er links, 1er rechts, dann unten / links / oben / rechts / unten; Teal, erstes Q gelb.
             const SQUARE_FILL_BLUE = "#ff9d00";
             const SQUARE_FILL_FIRST = "#ff9d00";
-            const SQUARE_STROKE = "#000000";
+            const SQUARE_STROKE = "#000040";
 
             function drawSquare(x, y, size, color) {
                 ctx.fillStyle = color;
@@ -234,11 +262,11 @@
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div id="fib-step-label" class="cyber-number" style="font-size:0.8rem; color:var(--branding-orange);">Schritt 7/20</div>
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
-                        <input type="checkbox" id="fib-spiral" checked>
+                        <input type="checkbox" id="fib-spiral" ${showSpiral ? 'checked' : ''}>
                         <span>Viertelkreise (Spirale)</span>
                     </label>
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
-                        <input type="checkbox" id="fib-squares" checked>
+                        <input type="checkbox" id="fib-squares" ${showSquares ? 'checked' : ''}>
                         <span>Quadrat-Grenzlinien</span>
                     </label>
                     <div style="display:flex; gap:8px;">
@@ -250,21 +278,25 @@
 
             document.getElementById("fib-spiral").addEventListener("change", (e) => {
                 showSpiral = e.target.checked;
+                saveSettings();
                 drawFibonacciTo13();
             });
             document.getElementById("fib-squares").addEventListener("change", (e) => {
                 showSquares = e.target.checked;
+                saveSettings();
                 drawFibonacciTo13();
             });
 
             document.getElementById("fib-prev").addEventListener("click", () => {
                 targetStep = Math.max(1, targetStep - 1);
                 updateStepLabel();
+                saveSettings();
                 drawFibonacciTo13();
             });
             document.getElementById("fib-next").addEventListener("click", () => {
                 targetStep = Math.min(20, targetStep + 1);
                 updateStepLabel();
+                saveSettings();
                 drawFibonacciTo13();
             });
 
@@ -272,10 +304,12 @@
                 if (e.key === "ArrowLeft") {
                     targetStep = Math.max(1, targetStep - 1);
                     updateStepLabel();
+                    saveSettings();
                     drawFibonacciTo13();
                 } else if (e.key === "ArrowRight") {
                     targetStep = Math.min(20, targetStep + 1);
                     updateStepLabel();
+                    saveSettings();
                     drawFibonacciTo13();
                 }
             });
