@@ -82,15 +82,19 @@
             let viewOffsetY = 0;
             let showSpiral = true;
             let showSquares = true;
+            let mouseRGB = "RGB: -";
+            let lastMouseX = 0;
+            let lastMouseY = 0;
 
-            const SETTINGS_KEY = "fibonacci-settings-v1";
+            const SETTINGS_KEY = "fibonacci-settings-v2";
 
             function saveSettings() {
                 try {
                     localStorage.setItem(SETTINGS_KEY, JSON.stringify({
                         targetStep,
                         showSpiral,
-                        showSquares
+                        showSquares,
+                        zenMode: localStorage.getItem("zen-mode") === "true"
                     }));
                 } catch (e) {}
             }
@@ -106,6 +110,9 @@
                     }
                     if (parsed.showSpiral !== undefined) showSpiral = parsed.showSpiral;
                     if (parsed.showSquares !== undefined) showSquares = parsed.showSquares;
+                    if (parsed.zenMode !== undefined) {
+                        localStorage.setItem("zen-mode", parsed.zenMode);
+                    }
                 } catch (e) {}
             }
 
@@ -120,20 +127,7 @@
                 drawFibonacciTo13();
             }
 
-            // Wie im Referenzbild: 1er links, 1er rechts, dann unten / links / oben / rechts / unten; Teal, erstes Q gelb.
-            const SQUARE_FILL_BLUE = "#ff9d00";
-            const SQUARE_FILL_FIRST = "#ff9d00";
-            const SQUARE_STROKE = "#000040";
-
-            function drawSquare(x, y, size, color) {
-                ctx.fillStyle = color;
-                ctx.fillRect(x, y, size, size);
-                if (showSquares) {
-                    ctx.strokeStyle = SQUARE_STROKE;
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeRect(x, y, size, size);
-                }
-            }
+            const SQUARE_STROKE = "rgb(0, 0, 40)";
 
             function buildFibonacciSquares(stepLimit) {
                 const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
@@ -204,27 +198,60 @@
                 viewOffsetX += (targetOffsetX - viewOffsetX) * 0.1;
                 viewOffsetY += (targetOffsetY - viewOffsetY) * 0.1;
 
+                // Zen-Modus Check: Wenn alles weg soll, zeichnen wir nichts
+                if (localStorage.getItem("zen-mode") === "true") {
+                    ctx.clearRect(0, 0, w, h);
+                    document.getElementById("side-panel").style.display = "none";
+                    document.getElementById("mini-rail").style.display = "none";
+                    return;
+                } else {
+                    document.getElementById("side-panel").style.display = "flex";
+                    document.getElementById("mini-rail").style.display = "flex";
+                }
+
                 ctx.save();
 
-                // 3. Quadrate zeichnen (immer bis targetStep für Konsistenz)
+                // 3. Quadrate zeichnen
                 layout.squares.forEach((sq, i) => {
-                    // Goldener Verlauf über 20 Schritte
-                    const lightness = 45 + (i * 2.5); 
-                    const color = `hsl(37, 100%, ${lightness}%)`;
-                    
-                    drawSquare(
-                        viewOffsetX + sq.x * viewUnitPx,
-                        viewOffsetY + sq.y * viewUnitPx,
-                        sq.s * viewUnitPx,
-                        color
-                    );
+                    const arc = sq.arc;
+                    const qX = viewOffsetX + sq.x * viewUnitPx;
+                    const qY = viewOffsetY + sq.y * viewUnitPx;
+                    const qS = sq.s * viewUnitPx;
+
+                    // Weltkoordinaten der Bogen-Endpunkte für den Gradienten
+                    const cx = viewOffsetX + arc.cx * viewUnitPx;
+                    const cy = viewOffsetY + arc.cy * viewUnitPx;
+                    const r = sq.s * viewUnitPx;
+                    const x1 = cx + r * Math.cos(arc.a0);
+                    const y1 = cy + r * Math.sin(arc.a0);
+                    const x2 = cx + r * Math.cos(arc.a1);
+                    const y2 = cy + r * Math.sin(arc.a1);
+
+                    // Gradient von Farbe(i) zu Farbe(i+1)
+                    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+                    const l1 = 45 + (i * 2.5);
+                    const l2 = 45 + ((i + 1) * 2.5);
+                    grad.addColorStop(0, `hsl(37, 100%, ${l1}%)`);
+                    grad.addColorStop(1, `hsl(37, 100%, ${l2}%)`);
+
+                    ctx.fillStyle = grad;
+                    // Minimaler Overlap (0.5px bis 1px), um Rendering-Artefakte (Seams) an den Kanten zu vermeiden
+                    ctx.fillRect(qX - 0.5, qY - 0.5, qS + 1, qS + 1);
+
+                    if (showSquares) {
+                        ctx.strokeStyle = SQUARE_STROKE;
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(qX, qY, qS, qS);
+                    }
                 });
 
-                // 4. Spirale zeichnen
+                // 4. Spirale zeichnen (Dunkelblau)
                 if (showSpiral) {
                     ctx.strokeStyle = SQUARE_STROKE;
-                    ctx.lineWidth = Math.max(0.8, viewUnitPx / 35);
-                    layout.squares.forEach((sq) => {
+                    layout.squares.forEach((sq, i) => {
+                        // Konstante, extrem feine Linienstärke für maximale Eleganz
+                        ctx.lineWidth = Math.max(0.8, viewUnitPx / 60);
+
                         const arc = sq.arc;
                         const cx = viewOffsetX + arc.cx * viewUnitPx;
                         const cy = viewOffsetY + arc.cy * viewUnitPx;
@@ -237,7 +264,32 @@
 
                 ctx.restore();
 
-                // 5. Animation Loop
+                // 6. Color Dashboard (Vorschau + Werte)
+                try {
+                    const pixel = ctx.getImageData(lastMouseX, lastMouseY, 1, 1).data;
+                    const rgbStr = `${pixel[0]}, ${pixel[1]}, ${pixel[2]}`;
+                    const sampledColor = `rgb(${rgbStr})`;
+                    
+                    // Hintergrund-Panel
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                    ctx.fillRect(10, 10, 180, 50);
+                    
+                    // Vorschau-Box
+                    ctx.fillStyle = sampledColor;
+                    ctx.fillRect(15, 15, 40, 40);
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                    ctx.strokeRect(15, 15, 40, 40);
+                    
+                    // RGB-Werte daneben
+                    ctx.fillStyle = "var(--branding-orange)";
+                    ctx.font = "12px Orbitron";
+                    ctx.textAlign = "left";
+                    ctx.fillText("RGB:", 65, 30);
+                    ctx.fillStyle = "white";
+                    ctx.fillText(rgbStr, 65, 48);
+                } catch (err) {}
+
+                // 7. Animation Loop
                 if (Math.abs(targetUnitPx - viewUnitPx) > 0.1 || Math.abs(targetOffsetX - viewOffsetX) > 0.1) {
                     requestAnimationFrame(drawFibonacciTo13);
                 }
@@ -311,7 +363,20 @@
                     updateStepLabel();
                     saveSettings();
                     drawFibonacciTo13();
+                } else if (e.key.toLowerCase() === "h") {
+                    // Zen-Modus Toggle (H wie Hide)
+                    const isZen = localStorage.getItem("zen-mode") === "true";
+                    localStorage.setItem("zen-mode", !isZen);
+                    saveSettings();
+                    drawFibonacciTo13();
                 }
+            });
+
+            canvas.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                lastMouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                lastMouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+                drawFibonacciTo13(); // Trigger redraw for new mouse position
             });
 
             updateStepLabel();
