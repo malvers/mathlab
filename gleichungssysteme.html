@@ -82,6 +82,7 @@
                     line1: line1,
                     line2: line2,
                     snapToGrid: snapToGrid,
+                    scrambleMode: scrambleMode,
                     view: cc ? cc.view : null
                 };
                 localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -96,6 +97,7 @@
                 if (parsed.line1) line1 = parsed.line1;
                 if (parsed.line2) line2 = parsed.line2;
                 if (parsed.snapToGrid !== undefined) snapToGrid = parsed.snapToGrid;
+                if (parsed.scrambleMode !== undefined) scrambleMode = parsed.scrambleMode;
                 if (parsed.view && cc) {
                     cc.view = parsed.view;
                     cc.isInitialized = false;
@@ -127,7 +129,7 @@
                     CyberUI.createCard('parameters-container', 'GLEICHUNGSSYSTEM', `
                         <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.1);">
                             <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 10px; display: block;">FORMALES SYSTEM</span>
-                            <div id="eq-formal-gs" class="math-glow" style="font-size: 1.4rem; text-align: center;"></div>
+                            <div id="eq-formal-gs" class="math-glow" style="font-size: 1.4rem; text-align: left; padding-left: 0; margin-left: -2px;"></div>
                         </div>
                         <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; background: rgba(0, 210, 255, 0.05); padding: 10px; border-radius: 4px; margin-bottom: 15px;">
                             <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHNITTPUNKT S</span>
@@ -451,51 +453,83 @@
             const getEqData = (line) => {
                 const dx = line.p2.x - line.p1.x;
                 const dy = line.p2.y - line.p1.y;
-                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x };
+                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x, form: scrambleMode ? (line.form || 0) : 0 };
                 const m = dy / dx;
                 const b = line.p1.y - m * line.p1.x;
-                return { m, b, form: line.form || 0 };
+                return { m, b, form: scrambleMode ? (line.form || 0) : 0 };
             };
 
             const eq1 = getEqData(line1);
             const eq2 = getEqData(line2);
 
             const formatEqPartsAligned = (d1, d2) => {
-                const getSignComp = (val) => (val < 0 ? '-' : '\\phantom{-}');
-
                 const f = (data, color) => {
-                    const mVal = data.m === null ? 0 : data.m;
                     const bVal = data.b;
+                    
+                    // Bugfix: Vertikale Linien (m = null) abfangen
+                    if (data.m === null) {
+                        const xValStr = bVal.toFixed(2);
+                        let l, r;
+                        switch(data.form) {
+                            case 1: l = xValStr; r = `x`; break;
+                            case 2: l = `2x`; r = (bVal * 2).toFixed(2); break;
+                            case 3: l = `x - ${xValStr}`; r = `0.00`; break;
+                            case 4: l = `-x`; r = `-${xValStr}`; break;
+                            default: l = `x`; r = xValStr; break;
+                        }
+                        if (scrambleMode) return `\\textcolor{${color}}{${l} = ${r}}`;
+                        return `\\textcolor{${color}}{${l}} & \\textcolor{${color}}{{}= ${r}}`;
+                    }
+
+                    const mVal = data.m;
                     const bSign = bVal >= 0 ? "+" : "-";
                     const absB = Math.abs(bVal).toFixed(2);
                     const absM = Math.abs(mVal).toFixed(2);
-                    const mSign = mVal >= 0 ? "+" : "-";
                     const mSignInv = mVal >= 0 ? "-" : "+";
-                    const leadSign = getSignComp(mVal);
+                    const leadSign = mVal < 0 ? '-' : '';
+                    
+                    const isMZero = Math.abs(mVal) < 0.005;
 
                     // Form-Selector
                     let left, right;
                     switch(data.form) {
                         case 1: // Swapped: mx + b = y
-                            left = `${leadSign}${absM}x ${bSign} ${absB}`;
+                            if (isMZero) {
+                                left = bVal < 0 ? `-${absB}` : `${absB}`;
+                            } else {
+                                left = `${leadSign}${absM}x ${bSign} ${absB}`;
+                            }
                             right = `y`;
                             break;
                         case 2: // Scaled: 2y = 2mx + 2b
-                            left = `\\phantom{-} 2y`;
-                            right = `${(mVal*2).toFixed(2)}x ${bVal*2 >= 0 ? "+" : "-"} ${Math.abs(bVal*2).toFixed(2)}`;
+                            left = `2y`;
+                            if (isMZero) {
+                                right = (bVal * 2) < 0 ? `-${Math.abs(bVal*2).toFixed(2)}` : `${Math.abs(bVal*2).toFixed(2)}`;
+                            } else {
+                                right = `${(mVal*2).toFixed(2)}x ${bVal*2 >= 0 ? "+" : "-"} ${Math.abs(bVal*2).toFixed(2)}`;
+                            }
                             break;
                         case 3: // Implicit: mx - y = -b
-                            left = `${leadSign}${absM}x - y`;
+                            left = isMZero ? `-y` : `${leadSign}${absM}x - y`;
                             right = `${(-bVal).toFixed(2)}`;
                             break;
                         case 4: // Mixed: y - mx = b
-                            left = `\\phantom{-} y ${mSignInv} ${absM}x`;
+                            left = isMZero ? `y` : `y ${mSignInv} ${absM}x`;
                             right = `${bVal.toFixed(2)}`;
                             break;
                         default: // Normal: y = mx + b
-                            left = `\\phantom{-} y`;
-                            right = `${leadSign}${absM}x ${bSign} ${absB}`;
+                            left = `y`;
+                            if (isMZero) {
+                                right = bVal < 0 ? `-${absB}` : `${absB}`;
+                            } else {
+                                right = `${leadSign}${absM}x ${bSign} ${absB}`;
+                            }
                     }
+                    // Im Scramble Mode keine Ausrichtung am = (einfacher String)
+                    if (scrambleMode) {
+                        return `\\textcolor{${color}}{${left} = ${right}}`;
+                    }
+                    // Im Normal-Modus: Ausrichtung ohne extra Padding
                     return `\\textcolor{${color}}{${left}} & \\textcolor{${color}}{{}= ${right}}`;
                 };
 
@@ -507,8 +541,9 @@
 
             const aligned = formatEqPartsAligned(eq1, eq2);
 
-            // Formales LGS: Array{ll} für strikte Linksbündigkeit
-            const formalLatex = `\\left| \\begin{array}{ll} ${aligned.l1} \\\\ ${aligned.l2} \\end{array} \\right|`;
+            // Formales LGS: Standard-Array, da die manuellen Abstände (\quad und \phantom) bereits entfernt wurden
+            const colDef = scrambleMode ? "l" : "ll";
+            const formalLatex = `\\left| \\begin{array}{${colDef}} ${aligned.l1} \\\\ ${aligned.l2} \\end{array} \\right|`;
             katex.render(formalLatex, document.getElementById('eq-formal-gs'), { throwOnError: false });
             
             if (sp) {
