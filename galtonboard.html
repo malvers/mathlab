@@ -15,7 +15,82 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
+
+        #board-wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #board {
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* Restore previous local slider styling */
+        #controls input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+            outline: none;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        #controls input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+        }
+
+        #controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border: 2.5px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-blue);
+            margin-top: -5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #controls input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        #controls input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            border: none;
+        }
+
+        #controls input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border: 2.5px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-blue);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
     </style>
 </head>
 <body>
@@ -35,9 +110,7 @@
         <div id="data-container"></div>
     </aside>
 
-    <main id="main-content">
-        <!-- Empty template for Galton board -->
-    </main>
+    <main id="main-content"><div id="board-wrap"><canvas id="board"></canvas></div></main>
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
@@ -51,6 +124,309 @@
         }
 
         window.addEventListener("load", () => {
+            const canvas = document.getElementById("board");
+            const ctx = canvas.getContext("2d");
+
+            const sim = {
+                running: true,
+                rows: 18,
+                spawnIntervalMs: 10,
+                flightSpeed: 0.04,
+                ballRadius: 3.2,
+                gravity: 0.16,
+                drag: 0.998,
+                maxBalls: 1,
+                balls: [],
+                pegs: [],
+                bins: [],
+                lastSpawn: 0,
+                droppedCount: 0,
+                explorerEvery: 60,
+                rowY: [],
+                spacingX: 42,
+                centerX: 0,
+                binTopY: 0,
+                binBaseY: 0,
+                pegTopY: 0,
+                pegBottomY: 0
+            };
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = Math.max(640, Math.floor(rect.width));
+                canvas.height = Math.max(420, Math.floor(rect.height));
+                rebuildBoard();
+            }
+
+            function rebuildBoard() {
+                const w = canvas.width;
+                const h = canvas.height;
+                const rows = sim.rows;
+                const binBaseY = h - 40; // 40px above bottom edge
+                const binHeight = h * 0.25; // 25% of total height
+                const binTop = binBaseY - binHeight;
+                sim.binBaseY = binBaseY;
+                sim.binTopY = binTop;
+
+                const pegTop = 40; // 40px below top edge
+                const pegBottom = Math.max(pegTop + 40, binTop - 40); // 40px gap above bins
+                sim.pegTopY = pegTop;
+                sim.pegBottomY = pegBottom;
+                const spacingY = (pegBottom - pegTop) / Math.max(1, rows - 1);
+                const maxPegCount = rows + 1;
+                const spacingX = Math.min(56, (w - 130) / (maxPegCount + 2));
+                sim.spacingX = spacingX;
+                const centerX = w * 0.5;
+                sim.centerX = centerX;
+                sim.rowY = [];
+
+                sim.pegs = [];
+                for (let r = 0; r < rows; r++) {
+                    const count = r + 1;
+                    const startX = centerX - ((count - 1) * spacingX) / 2;
+                    const y = pegTop + r * spacingY;
+                    sim.rowY.push(y);
+                    for (let i = 0; i < count; i++) {
+                        sim.pegs.push({
+                            x: startX + i * spacingX,
+                            y,
+                            r: 4.3
+                        });
+                    }
+                }
+
+                const binCount = rows + 1;
+                const totalW = binCount * spacingX;
+                const left = centerX - totalW / 2;
+                sim.bins = new Array(binCount).fill(0).map((_, i) => ({
+                    x: left + i * spacingX,
+                    w: spacingX,
+                    count: 0,
+                    top: binTop
+                }));
+            }
+
+            function pickEmptyBinIndex() {
+                const empty = [];
+                for (let i = 0; i < sim.bins.length; i++) {
+                    if (sim.bins[i].count === 0) empty.push(i);
+                }
+                if (empty.length === 0) return null;
+                return empty[Math.floor(Math.random() * empty.length)];
+            }
+
+            function spawnBall(targetTurns = null) {
+                if (sim.balls.length >= sim.maxBalls) return;
+                sim.balls.push({
+                    x: canvas.width * 0.5 + (Math.random() - 0.5) * 8,
+                    y: -sim.ballRadius * 3,
+                    vx: 0,
+                    vy: 0,
+                    settled: false,
+                    binIndex: -1,
+                    rowIndex: 0,
+                    rightTurns: 0,
+                    targetX: canvas.width * 0.5,
+                    targetTurns,
+                    segment: null
+                });
+            }
+
+            function updateBall(ball) {
+                if (ball.settled) return;
+                const speed = sim.flightSpeed;
+                const pegRadius = sim.pegs.length ? sim.pegs[0].r : 7;
+                // Fly clearly over peg tops: top edge + half peg radius clearance.
+                const overPegOffset = pegRadius * 1.5;
+                const rowFlyY = (rowIdx) => sim.rowY[rowIdx] - overPegOffset;
+
+                // If a peg-to-peg segment exists, follow a slight curved arc.
+                if (ball.segment) {
+                    ball.segment.t += Math.max(0.002, speed * 0.045);
+                    const seg = ball.segment;
+                    const u = Math.min(1, seg.t);
+                    const omt = 1 - u;
+                    // Quadratic curve: clear, controllable "light arc" from peg to peg.
+                    ball.x = (omt * omt) * seg.fromX + (2 * omt * u) * seg.ctrlX + (u * u) * seg.toX;
+                    ball.y = (omt * omt) * seg.fromY + (2 * omt * u) * seg.ctrlY + (u * u) * seg.toY;
+                    if (u >= 1) ball.segment = null;
+                } else {
+                    // Pre-entry from spawn to first peg row.
+                    ball.vy += sim.gravity * speed;
+                    ball.vx += (ball.targetX - ball.x) * 0.01 * speed;
+                    ball.vx *= Math.pow(0.82, speed);
+                    ball.vy *= Math.pow(sim.drag, speed);
+                    ball.x += ball.vx * speed;
+                    ball.y += ball.vy * speed;
+                }
+
+                // Screen walls.
+                if (ball.x < sim.ballRadius) {
+                    ball.x = sim.ballRadius;
+                    ball.vx = Math.abs(ball.vx) * 0.6;
+                } else if (ball.x > canvas.width - sim.ballRadius) {
+                    ball.x = canvas.width - sim.ballRadius;
+                    ball.vx = -Math.abs(ball.vx) * 0.6;
+                }
+
+                // Galton principle: each row decision is exactly 50/50.
+                while (ball.rowIndex < sim.rowY.length && ball.y >= rowFlyY(ball.rowIndex)) {
+                    const r = ball.rowIndex;
+                    // Snap to the current row's over-peg flight line.
+                    const pegX = sim.centerX - (r * sim.spacingX) * 0.5 + ball.rightTurns * sim.spacingX;
+                    ball.x = pegX;
+                    ball.y = rowFlyY(r);
+                    ball.segment = null;
+
+                    let goRight;
+                    if (ball.targetTurns === null || ball.targetTurns === undefined) {
+                        goRight = Math.random() < 0.5;
+                    } else {
+                        // For "explorer balls": steer probabilistically to a specific bin.
+                        const remaining = sim.rows - ball.rowIndex;
+                        const needRight = ball.targetTurns - ball.rightTurns;
+                        if (needRight <= 0) goRight = false;
+                        else if (needRight >= remaining) goRight = true;
+                        else goRight = Math.random() < (needRight / remaining);
+                    }
+                    if (goRight) ball.rightTurns += 1;
+                    const nextR = r + 1;
+                    const nextPegX = sim.centerX - (nextR * sim.spacingX) * 0.5 + ball.rightTurns * sim.spacingX;
+                    ball.targetX = nextPegX;
+                    // Build one explicit curved segment to next peg center.
+                    if (nextR < sim.rowY.length) {
+                        const fromY = rowFlyY(r);
+                        const toY = rowFlyY(nextR);
+                        const ctrlX = (pegX + nextPegX) * 0.5 + (goRight ? 1 : -1) * Math.max(6, sim.spacingX * 0.28);
+                        const ctrlY = fromY + (toY - fromY) * 0.55;
+                        ball.segment = {
+                            fromX: pegX,
+                            fromY,
+                            toX: nextPegX,
+                            toY,
+                            ctrlX,
+                            ctrlY,
+                            t: 0,
+                            dir: goRight ? 1 : -1
+                        };
+                    } else {
+                        // Last decision goes toward the corresponding bin center.
+                        const targetBinIndex = Math.max(0, Math.min(sim.bins.length - 1, ball.rightTurns));
+                        const b = sim.bins[targetBinIndex];
+                        const binCenterX = b.x + b.w * 0.5;
+                        const fromY = rowFlyY(r);
+                        const toY = sim.binBaseY - sim.ballRadius - 1;
+                        const ctrlX = (pegX + binCenterX) * 0.5 + (goRight ? 1 : -1) * Math.max(4, sim.spacingX * 0.18);
+                        const ctrlY = fromY + (toY - fromY) * 0.45;
+                        ball.segment = {
+                            fromX: pegX,
+                            fromY,
+                            toX: binCenterX,
+                            toY,
+                            ctrlX,
+                            ctrlY,
+                            t: 0,
+                            dir: goRight ? 1 : -1
+                        };
+                    }
+                    ball.rowIndex += 1;
+                }
+
+                // Bin settle.
+                const floorY = sim.binBaseY - sim.ballRadius;
+                if (ball.y >= floorY) {
+                    ball.y = floorY;
+                    const idx = Math.max(0, Math.min(sim.bins.length - 1, ball.rightTurns));
+                    if (idx >= 0) {
+                        const b = sim.bins[idx];
+                        b.count += 1;
+                        ball.dead = true; // vanish after counting into histogram bin
+                    }
+                }
+            }
+
+            function draw() {
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                // Pegs.
+                for (let i = 0; i < sim.pegs.length; i++) {
+                    const p = sim.pegs[i];
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "#9de8ff";
+                    ctx.fill();
+                }
+
+                // Bin area and bars.
+                ctx.fillStyle = "rgba(5, 11, 24, 0.85)";
+                const binHeightPx = sim.binBaseY - sim.binTopY;
+                ctx.fillRect(0, sim.binTopY, w, binHeightPx);
+                ctx.strokeStyle = "rgba(0,210,255,0.2)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, sim.binTopY);
+                ctx.lineTo(w, sim.binTopY);
+                ctx.stroke();
+
+                const maxCount = Math.max(1, ...sim.bins.map(b => b.count));
+                for (let i = 0; i < sim.bins.length; i++) {
+                    const b = sim.bins[i];
+                    const barH = (b.count / maxCount) * (binHeightPx - 12);
+                    ctx.fillStyle = "#ff9f3b";
+                    ctx.fillRect(b.x + 2, sim.binBaseY - barH, Math.max(3, b.w - 4), barH);
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+                    ctx.strokeRect(b.x, sim.binTopY, b.w, binHeightPx);
+
+                    // Count label under each bin.
+                    ctx.fillStyle = "rgba(240, 248, 255, 0.98)";
+                    ctx.font = "13px Orbitron";
+                    ctx.textAlign = "center";
+                    ctx.fillText(String(b.count), b.x + b.w * 0.5, sim.binBaseY + 14);
+                }
+
+                // Balls.
+                for (let i = 0; i < sim.balls.length; i++) {
+                    const b = sim.balls[i];
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, sim.ballRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = "#ff9f3b";
+                    ctx.fill();
+                }
+
+            }
+
+            function resetStats() {
+                sim.balls = [];
+                for (let i = 0; i < sim.bins.length; i++) sim.bins[i].count = 0;
+                sim.droppedCount = 0;
+            }
+
+            function loop(ts) {
+                if (sim.running && sim.balls.length < sim.maxBalls && ts - sim.lastSpawn >= sim.spawnIntervalMs) {
+                    sim.lastSpawn = ts;
+                    let targetTurns = null;
+                    if (sim.droppedCount > 0 && sim.droppedCount % sim.explorerEvery === 0) {
+                        targetTurns = pickEmptyBinIndex();
+                    }
+                    spawnBall(targetTurns);
+                    sim.droppedCount += 1;
+                }
+
+                if (sim.running) {
+                    for (let i = 0; i < sim.balls.length; i++) updateBall(sim.balls[i]);
+                    sim.balls = sim.balls.filter((b) => !b.dead);
+                }
+                draw();
+                CyberUI.updateStatsGrid("data-container", [
+                    { label: "Reihen", value: sim.rows, color: "#00d2ff" },
+                    { label: "Kugeln aktiv", value: sim.balls.length, color: "#ffd36a" },
+                    { label: "Spawn (ms)", value: sim.spawnIntervalMs, color: "#adff2f" }
+                ]);
+                requestAnimationFrame(loop);
+            }
+
             CyberBranding.init({
                 useExternalStyles: true,
                 title: "Doc Alvers Mathe-Labor",
@@ -58,6 +434,86 @@
             });
 
             CyberUI.init();
+
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: GALTON BOARD</h3>
+                Beobachte, wie aus zufälligen Links/Rechts-Abzweigungen am Nagelbrett eine glockenförmige Verteilung im Histogramm entsteht.
+            `);
+
+            CyberUI.createCard("ui-container", "STEUERUNG", `
+                <div id="controls" style="display:flex; flex-direction:column; gap:16px;">
+                    <div>
+                        <div class="label-row">
+                            <span>Reihen</span>
+                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color: var(--neon-blue);">${sim.rows}</span>
+                        </div>
+                        <input type="range" id="slider-rows" min="6" max="18" value="${sim.rows}" step="1">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>Spawn Intervall (ms)</span>
+                            <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#adff2f;">${sim.spawnIntervalMs}</span>
+                        </div>
+                        <input type="range" id="slider-spawn" min="10" max="1000" value="${sim.spawnIntervalMs}" step="10">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>Fluggeschwindigkeit</span>
+                            <span id="label-speed" class="cyber-number" style="font-size:0.8rem; color:#ffb266;">${sim.flightSpeed.toFixed(2)}</span>
+                        </div>
+                        <input type="range" id="slider-speed" min="0.04" max="3.0" value="${sim.flightSpeed}" step="0.04">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>Number Balls</span>
+                            <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#ffd36a;">${sim.maxBalls}</span>
+                        </div>
+                        <input type="range" id="slider-maxballs" min="1" max="300" value="${sim.maxBalls}" step="1">
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <button id="btn-play-pause" class="cyber-btn" style="flex:1;">PLAY / PAUSE</button>
+                        <button id="btn-reset" class="cyber-btn" style="flex:1; border-color:#ffcc00; color:#ffcc00;">RESET</button>
+                    </div>
+                </div>
+            `, "var(--neon-blue)");
+
+            const sliderRows = document.getElementById("slider-rows");
+            const sliderSpawn = document.getElementById("slider-spawn");
+            const sliderSpeed = document.getElementById("slider-speed");
+            const sliderMaxBalls = document.getElementById("slider-maxballs");
+            const labelRows = document.getElementById("label-rows");
+            const labelSpawn = document.getElementById("label-spawn");
+            const labelSpeed = document.getElementById("label-speed");
+            const labelMaxBalls = document.getElementById("label-maxballs");
+
+            sliderRows.addEventListener("input", (e) => {
+                sim.rows = parseInt(e.target.value, 10);
+                labelRows.textContent = sim.rows;
+                resetStats();
+                rebuildBoard();
+            });
+
+            sliderSpawn.addEventListener("input", (e) => {
+                sim.spawnIntervalMs = parseInt(e.target.value, 10);
+                labelSpawn.textContent = sim.spawnIntervalMs;
+            });
+
+            sliderSpeed.addEventListener("input", (e) => {
+                sim.flightSpeed = parseFloat(e.target.value);
+                labelSpeed.textContent = sim.flightSpeed.toFixed(2);
+            });
+
+            sliderMaxBalls.addEventListener("input", (e) => {
+                sim.maxBalls = parseInt(e.target.value, 10);
+                labelMaxBalls.textContent = sim.maxBalls;
+            });
+
+            document.getElementById("btn-play-pause").addEventListener("click", () => { sim.running = !sim.running; });
+            document.getElementById("btn-reset").addEventListener("click", () => resetStats());
+
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+            requestAnimationFrame(loop);
         });
     </script>
 </body>
