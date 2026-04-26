@@ -24,6 +24,22 @@ const CyberBranding = {
     _navLoadRequested: false,
     _overlaysLoadRequested: false,
 
+    ensureFavicon(href = "resources/favicon.svg") {
+        const head = document.head || document.getElementsByTagName("head")[0];
+        if (!head) return;
+
+        // Prefer one managed favicon link and keep it stable across labs.
+        let link = head.querySelector('link[rel="icon"][data-cyber-favicon="1"]');
+        if (!link) {
+            link = document.createElement("link");
+            link.setAttribute("rel", "icon");
+            link.setAttribute("data-cyber-favicon", "1");
+            head.appendChild(link);
+        }
+        link.setAttribute("type", "image/svg+xml");
+        link.setAttribute("href", href);
+    },
+
     ensureCoreModuleLoaded() {
         if (window.CyberBrandingCore || this._coreLoadRequested) return;
 
@@ -101,6 +117,7 @@ const CyberBranding = {
         if (shouldUseInternalStyles) {
             this.injectStyles();
         }
+        this.ensureFavicon();
         this.injectHTML(title, subtitle);
         this.injectNavigation();
         this.setupActiveScaling();

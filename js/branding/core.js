@@ -26,6 +26,9 @@
             if (shouldUseInternalStyles) {
                 this.injectStyles();
             }
+            if (typeof this.ensureFavicon === "function") {
+                this.ensureFavicon();
+            }
             this.injectHTML(title, subtitle);
             this.injectNavigation();
             this.setupActiveScaling();
