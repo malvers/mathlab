@@ -464,8 +464,8 @@ const LABS_DATA = [
     {
         "id": "happy-birthday-ulf",
         "href": "happybirthday.html?name=Ulf",
-        "title": "Happy Birthday Ulf",
-        "description": "Eine kosmische Glückwunsch-Site für Ulf mit Feuerwerk, Konfetti und animierter Geburtstagstorte. Klick für Raketen, SPACE für das große Finale.",
+        "title": "Happy Birthday",
+        "description": "Eine kosmische Glückwunsch-Site mit Feuerwerk, Konfetti und animierter Geburtstagstorte. Klick für Raketen, SPACE für das große Finale.",
         "tagline": "Konfetti / Feuerwerk / Cyber-Cake",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="50" cy="82" rx="34" ry="5" fill="#1a2440" />
