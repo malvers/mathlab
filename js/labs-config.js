@@ -543,5 +543,20 @@ const LABS_DATA = [
         "category": "fun highlight geometrie hot grade7 grade8",
         "keywords": "geometrie quadrat beweis spirale fläche algebra x a cool squares squares",
         "color": "blue"
+    },
+    {
+        "id": "fibonacci",
+        "href": "fibonacci.html",
+        "title": "Fibonacci-Labor",
+        "description": "Erkunde die goldene Spirale und die Fibonacci-Folge. Visualisiere das organische Wachstum durch Quadrate und Viertelkreise in einer interaktiven Unendlichkeitsschleife.",
+        "tagline": "Goldener Schnitt / Organisches Wachstum",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="35" width="40" height="40" fill="rgba(255, 157, 0, 0.15)" stroke="#ff9d00" stroke-width="1.5" />
+            <rect x="55" y="35" width="25" height="25" fill="rgba(255, 157, 0, 0.1)" stroke="#ff9d00" stroke-width="1.2" />
+            <path d="M 15 75 A 40 40 0 0 1 55 35 A 25 25 0 0 1 80 60" fill="none" stroke="rgb(0, 0, 40)" stroke-width="2.5" />
+        </svg>`,
+        "category": "fun highlight geometrie hot grade8",
+        "keywords": "fibonacci spirale goldener schnitt wachstum quadrat folge unendlichkeit",
+        "color": "orange"
     }
 ];
