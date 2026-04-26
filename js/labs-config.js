@@ -486,6 +486,29 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "galtonboard",
+        "href": "galtonboard.html",
+        "title": "Galton Board",
+        "description": "Interaktives Nagelbrett mit 50/50-Abzweigung, sanften Kugelbahnen und stylischem Histogramm. Beobachte live, wie die Glockenkurve entsteht.",
+        "tagline": "Wahrscheinlichkeit / Binomialverteilung / Simulation",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="14" r="3" fill="#ff9f3b" />
+            <circle cx="40" cy="27" r="2.4" fill="#9de8ff" />
+            <circle cx="60" cy="27" r="2.4" fill="#9de8ff" />
+            <circle cx="30" cy="40" r="2.2" fill="#9de8ff" />
+            <circle cx="50" cy="40" r="2.2" fill="#9de8ff" />
+            <circle cx="70" cy="40" r="2.2" fill="#9de8ff" />
+            <rect x="22" y="55" width="12" height="22" fill="rgba(255,159,59,0.85)" />
+            <rect x="38" y="49" width="12" height="28" fill="rgba(255,159,59,0.9)" />
+            <rect x="54" y="43" width="12" height="34" fill="rgba(255,159,59,0.95)" />
+            <rect x="70" y="51" width="12" height="26" fill="rgba(255,159,59,0.9)" />
+            <line x1="18" y1="77" x2="84" y2="77" stroke="rgba(190,235,255,0.8)" stroke-width="1" />
+        </svg>`,
+        "category": "fun highlight hot grade8",
+        "keywords": "galton board nagelbrett wahrscheinlichkeit zufall binomialverteilung histogramm simulation",
+        "color": "blue"
+    },
+    {
         "id": "opti-lens",
         "href": "LensStandalone/cmaes_java.html",
         "title": "OPTI-LENS Premium",

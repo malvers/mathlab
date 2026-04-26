@@ -163,7 +163,7 @@
                     if (!raw) return;
                     const parsed = JSON.parse(raw);
                     if (!parsed || typeof parsed !== "object") return;
-                    if (Number.isFinite(parsed.rows)) sim.rows = Math.round(clamp(parsed.rows, 6, 18));
+                    if (Number.isFinite(parsed.rows)) sim.rows = Math.round(clamp(parsed.rows, 9, 29));
                     if (Number.isFinite(parsed.spawnIntervalMs)) sim.spawnIntervalMs = Math.round(clamp(parsed.spawnIntervalMs, 10, 1000));
                     if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 5.0);
                     if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 300));
@@ -427,6 +427,17 @@
                 const h = canvas.height;
                 ctx.clearRect(0, 0, w, h);
 
+                // Counter placed above the left edge of the first bin.
+                const counterAnchorX = sim.bins.length ? sim.bins[0].x + 95 : 115;
+                const counterY = 28;
+                ctx.fillStyle = "rgba(190, 230, 255, 0.9)";
+                ctx.font = "12px Orbitron";
+                ctx.textAlign = "center";
+                ctx.fillText("ANZAHL ALLER KUGELN", counterAnchorX, counterY);
+                ctx.fillStyle = "#ffb866";
+                ctx.font = "30px Orbitron";
+                ctx.fillText(String(sim.droppedCount), counterAnchorX, counterY + 30);
+
                 // Pegs.
                 for (let i = 0; i < sim.pegs.length; i++) {
                     const p = sim.pegs[i];
@@ -585,14 +596,14 @@
                 <div id="controls" style="display:flex; flex-direction:column; gap:16px;">
                     <div>
                         <div class="label-row">
-                            <span>Reihen</span>
-                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color: var(--neon-blue);">${sim.rows}</span>
+                            <span>Bins</span>
+                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color: var(--neon-blue);">${sim.rows + 1}</span>
                         </div>
-                        <input type="range" id="slider-rows" min="6" max="18" value="${sim.rows}" step="1">
+                        <input type="range" id="slider-rows" min="10" max="30" value="${sim.rows + 1}" step="1">
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Spawn Intervall (ms)</span>
+                            <span>Austrittsintervall (ms)</span>
                             <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#adff2f;">${sim.spawnIntervalMs}</span>
                         </div>
                         <input type="range" id="slider-spawn" min="10" max="1000" value="${sim.spawnIntervalMs}" step="10">
@@ -606,7 +617,7 @@
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Number Balls</span>
+                            <span>Anzahl der Bälle</span>
                             <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#ffd36a;">${sim.maxBalls}</span>
                         </div>
                         <input type="range" id="slider-maxballs" min="1" max="300" value="${sim.maxBalls}" step="1">
@@ -628,8 +639,9 @@
             const labelMaxBalls = document.getElementById("label-maxballs");
 
             sliderRows.addEventListener("input", (e) => {
-                sim.rows = parseInt(e.target.value, 10);
-                labelRows.textContent = sim.rows;
+                const bins = parseInt(e.target.value, 10);
+                sim.rows = bins - 1;
+                labelRows.textContent = bins;
                 resetStats();
                 rebuildBoard();
                 saveSliderSettings();
