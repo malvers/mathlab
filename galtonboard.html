@@ -16,6 +16,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: relative;
         }
 
         #board-wrap {
@@ -36,6 +37,40 @@
             border: none;
             border-radius: 0;
             box-shadow: none;
+        }
+
+        #balls-counter {
+            position: absolute;
+            top: 16px;
+            left: 120px;
+            transform: translateX(-50%);
+            z-index: 12;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        #balls-counter-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: rgba(190, 230, 255, 0.9);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #balls-counter-widget .cyber-digit-box {
+            color: #ffb866;
+            text-shadow: 0 0 10px rgba(255, 170, 95, 0.55);
+            font-size: 2.8rem;
+            width: 32px;
+            height: 48px;
+        }
+
+        #balls-counter-widget .cyber-digit-box.separator {
+            width: 10px;
         }
 
         /* Restore previous local slider styling */
@@ -91,6 +126,10 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
+        #btn-play-pause.running {
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.55), inset 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
     </style>
 </head>
 <body>
@@ -110,7 +149,13 @@
         <div id="data-container"></div>
     </aside>
 
-    <main id="main-content"><div id="board-wrap"><canvas id="board"></canvas></div></main>
+    <main id="main-content">
+        <div id="balls-counter">
+            <div id="balls-counter-label">ANZAHL ALLER KUGELN</div>
+            <div id="balls-counter-widget" class="cyber-number-widget"></div>
+        </div>
+        <div id="board-wrap"><canvas id="board"></canvas></div>
+    </main>
 
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
@@ -157,16 +202,23 @@
                 return Math.min(max, Math.max(min, value));
             }
 
+            function normalizeRowsForOddBins(rowsValue) {
+                let bins = Math.round(rowsValue) + 1;
+                bins = Math.round(clamp(bins, 11, 29));
+                if (bins % 2 === 0) bins = Math.min(29, bins + 1);
+                return bins - 1;
+            }
+
             function loadSliderSettings() {
                 try {
                     const raw = localStorage.getItem(SETTINGS_KEY);
                     if (!raw) return;
                     const parsed = JSON.parse(raw);
                     if (!parsed || typeof parsed !== "object") return;
-                    if (Number.isFinite(parsed.rows)) sim.rows = Math.round(clamp(parsed.rows, 9, 29));
+                    if (Number.isFinite(parsed.rows)) sim.rows = normalizeRowsForOddBins(parsed.rows);
                     if (Number.isFinite(parsed.spawnIntervalMs)) sim.spawnIntervalMs = Math.round(clamp(parsed.spawnIntervalMs, 10, 1000));
                     if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 5.0);
-                    if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 300));
+                    if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 500));
                 } catch (err) {
                     // Ignore invalid local storage content.
                 }
@@ -242,6 +294,14 @@
                     count: 0,
                     top: binTop
                 }));
+                updateCounterPosition();
+            }
+
+            function updateCounterPosition() {
+                const counter = document.getElementById("balls-counter");
+                if (!counter) return;
+                const anchorX = sim.bins.length ? sim.bins[0].x + 95 : 115;
+                counter.style.left = `${Math.round(anchorX)}px`;
             }
 
             function pickEmptyBinIndex() {
@@ -427,17 +487,6 @@
                 const h = canvas.height;
                 ctx.clearRect(0, 0, w, h);
 
-                // Counter placed above the left edge of the first bin.
-                const counterAnchorX = sim.bins.length ? sim.bins[0].x + 95 : 115;
-                const counterY = 28;
-                ctx.fillStyle = "rgba(190, 230, 255, 0.9)";
-                ctx.font = "12px Orbitron";
-                ctx.textAlign = "center";
-                ctx.fillText("ANZAHL ALLER KUGELN", counterAnchorX, counterY);
-                ctx.fillStyle = "#ffb866";
-                ctx.font = "30px Orbitron";
-                ctx.fillText(String(sim.droppedCount), counterAnchorX, counterY + 30);
-
                 // Pegs.
                 for (let i = 0; i < sim.pegs.length; i++) {
                     const p = sim.pegs[i];
@@ -511,10 +560,19 @@
                     ctx.strokeRect(b.x, sim.binTopY, b.w, binHeightPx);
 
                     // Count label under each bin.
+                    let binLabelFontPx = Math.max(7, Math.min(15, Math.floor(b.w * 0.44)));
+                    const labelText = String(b.count);
+                    ctx.font = `${binLabelFontPx}px Orbitron`;
+                    const maxLabelWidth = Math.max(6, b.w - 4);
+                    const measured = ctx.measureText(labelText).width;
+                    if (measured > maxLabelWidth) {
+                        const scaled = Math.floor(binLabelFontPx * (maxLabelWidth / measured));
+                        binLabelFontPx = Math.max(6, scaled);
+                        ctx.font = `${binLabelFontPx}px Orbitron`;
+                    }
                     ctx.fillStyle = b.count > 0 ? "#ffb866" : "rgba(220, 232, 245, 0.7)";
-                    ctx.font = "15px Orbitron";
                     ctx.textAlign = "center";
-                    ctx.fillText(String(b.count), b.x + b.w * 0.5, sim.binBaseY + 19);
+                    ctx.fillText(labelText, b.x + b.w * 0.5, sim.binBaseY + binLabelFontPx + 5);
                 }
 
                 // Balls.
@@ -571,6 +629,14 @@
                     sim.balls = sim.balls.filter((b) => !b.dead);
                 }
                 draw();
+                CyberUI.updateNumberWidget("balls-counter-widget", sim.droppedCount, 0, 3, {
+                    fontSize: "3.2rem",
+                    digitWidth: "36px",
+                    digitHeight: "54px",
+                    separatorWidth: "12px",
+                    color: "#ffb866",
+                    textShadow: "0 0 10px rgba(255, 170, 95, 0.55)"
+                });
                 CyberUI.updateStatsGrid("data-container", [
                     { label: "Reihen", value: sim.rows, color: "#00d2ff" },
                     { label: "Kugeln aktiv", value: sim.balls.length, color: "#ffd36a" },
@@ -597,33 +663,36 @@
                     <div>
                         <div class="label-row">
                             <span>Bins</span>
-                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color: var(--neon-blue);">${sim.rows + 1}</span>
+                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.rows + 1}</span>
                         </div>
-                        <input type="range" id="slider-rows" min="10" max="30" value="${sim.rows + 1}" step="1">
+                        <input type="range" id="slider-rows" min="11" max="29" value="${sim.rows + 1}" step="2">
                     </div>
                     <div>
                         <div class="label-row">
                             <span>Austrittsintervall (ms)</span>
-                            <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#adff2f;">${sim.spawnIntervalMs}</span>
+                            <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.spawnIntervalMs}</span>
                         </div>
                         <input type="range" id="slider-spawn" min="10" max="1000" value="${sim.spawnIntervalMs}" step="10">
                     </div>
                     <div>
                         <div class="label-row">
                             <span>Fluggeschwindigkeit</span>
-                            <span id="label-speed" class="cyber-number" style="font-size:0.8rem; color:#ffb266;">${sim.flightSpeed.toFixed(2)}</span>
+                            <span style="display:flex; justify-content:space-between; width:120px; font-size:0.72rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45); letter-spacing:0.4px;">
+                                <span>langsam</span>
+                                <span>schnell</span>
+                            </span>
                         </div>
                         <input type="range" id="slider-speed" min="0.04" max="5.0" value="${sim.flightSpeed}" step="0.04">
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Anzahl der Bälle</span>
-                            <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#ffd36a;">${sim.maxBalls}</span>
+                            <span>Anzahl Kugeln</span>
+                            <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.maxBalls}</span>
                         </div>
-                        <input type="range" id="slider-maxballs" min="1" max="300" value="${sim.maxBalls}" step="1">
+                        <input type="range" id="slider-maxballs" min="1" max="500" value="${sim.maxBalls}" step="1">
                     </div>
                     <div style="display:flex; gap:8px; margin-top:4px;">
-                        <button id="btn-play-pause" class="cyber-btn" style="flex:1;">PLAY / PAUSE</button>
+                        <button id="btn-play-pause" class="cyber-btn" style="flex:1;">STOP</button>
                         <button id="btn-reset" class="cyber-btn" style="flex:1; border-color:#ffcc00; color:#ffcc00;">RESET</button>
                     </div>
                 </div>
@@ -635,8 +704,13 @@
             const sliderMaxBalls = document.getElementById("slider-maxballs");
             const labelRows = document.getElementById("label-rows");
             const labelSpawn = document.getElementById("label-spawn");
-            const labelSpeed = document.getElementById("label-speed");
             const labelMaxBalls = document.getElementById("label-maxballs");
+            const btnPlayPause = document.getElementById("btn-play-pause");
+
+            function updatePlayPauseButton() {
+                btnPlayPause.textContent = sim.running ? "STOP" : "PLAY";
+                btnPlayPause.classList.toggle("running", sim.running);
+            }
 
             sliderRows.addEventListener("input", (e) => {
                 const bins = parseInt(e.target.value, 10);
@@ -655,7 +729,6 @@
 
             sliderSpeed.addEventListener("input", (e) => {
                 sim.flightSpeed = parseFloat(e.target.value);
-                labelSpeed.textContent = sim.flightSpeed.toFixed(2);
                 saveSliderSettings();
             });
 
@@ -665,7 +738,11 @@
                 saveSliderSettings();
             });
 
-            document.getElementById("btn-play-pause").addEventListener("click", () => { sim.running = !sim.running; });
+            updatePlayPauseButton();
+            btnPlayPause.addEventListener("click", () => {
+                sim.running = !sim.running;
+                updatePlayPauseButton();
+            });
             document.getElementById("btn-reset").addEventListener("click", () => resetStats());
 
             window.addEventListener("resize", resizeCanvas);
