@@ -132,7 +132,7 @@
                 rows: 18,
                 spawnIntervalMs: 10,
                 flightSpeed: 0.04,
-                ballRadius: 3.2,
+                ballRadius: 4.3,
                 gravity: 0.16,
                 drag: 0.998,
                 maxBalls: 1,
@@ -142,6 +142,7 @@
                 lastSpawn: 0,
                 droppedCount: 0,
                 explorerEvery: 60,
+                binColumns: 4,
                 rowY: [],
                 spacingX: 42,
                 centerX: 0,
@@ -164,7 +165,7 @@
                     if (!parsed || typeof parsed !== "object") return;
                     if (Number.isFinite(parsed.rows)) sim.rows = Math.round(clamp(parsed.rows, 6, 18));
                     if (Number.isFinite(parsed.spawnIntervalMs)) sim.spawnIntervalMs = Math.round(clamp(parsed.spawnIntervalMs, 10, 1000));
-                    if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 3.0);
+                    if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 5.0);
                     if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 300));
                 } catch (err) {
                     // Ignore invalid local storage content.
@@ -229,6 +230,8 @@
                         });
                     }
                 }
+                // Keep balls exactly as large as pegs.
+                if (sim.pegs.length) sim.ballRadius = sim.pegs[0].r;
 
                 const binCount = rows + 1;
                 const totalW = binCount * spacingX;
@@ -258,6 +261,10 @@
                     vx: 0,
                     vy: 0,
                     settled: false,
+                    fading: false,
+                    countedInBin: false,
+                    alpha: 1,
+                    fadeTargetX: null,
                     binIndex: -1,
                     rowIndex: 0,
                     rightTurns: 0,
@@ -268,6 +275,24 @@
             }
 
             function updateBall(ball) {
+                if (ball.dead) return;
+                if (ball.fading) {
+                    const speed = sim.flightSpeed;
+                    if (ball.fadeTargetX !== null && ball.fadeTargetX !== undefined) {
+                        ball.x += (ball.fadeTargetX - ball.x) * 0.2;
+                    }
+                    // Keep moving into the bin while fading.
+                    ball.vx *= Math.pow(0.92, Math.max(0.5, speed * 20));
+                    ball.vy += sim.gravity * 0.45 * speed;
+                    ball.vy *= Math.pow(sim.drag, Math.max(0.5, speed * 20));
+                    ball.x += ball.vx * speed;
+                    ball.y += ball.vy * speed;
+                    const floorY = sim.binBaseY - sim.ballRadius;
+                    if (ball.y > floorY) ball.y = floorY;
+                    ball.alpha = Math.max(0, ball.alpha - 0.045);
+                    if (ball.alpha <= 0.001) ball.dead = true;
+                    return;
+                }
                 if (ball.settled) return;
                 const speed = sim.flightSpeed;
                 const pegRadius = sim.pegs.length ? sim.pegs[0].r : 7;
@@ -367,15 +392,32 @@
                     ball.rowIndex += 1;
                 }
 
-                // Bin settle.
-                const floorY = sim.binBaseY - sim.ballRadius;
-                if (ball.y >= floorY) {
-                    ball.y = floorY;
+                // Start fading at the top of the corresponding histogram bar.
+                if (ball.y >= sim.binTopY - sim.ballRadius) {
                     const idx = Math.max(0, Math.min(sim.bins.length - 1, ball.rightTurns));
                     if (idx >= 0) {
-                        const b = sim.bins[idx];
-                        b.count += 1;
-                        ball.dead = true; // vanish after counting into histogram bin
+                        const maxCount = Math.max(1, ...sim.bins.map((bn) => bn.count));
+                        const binHeightPx = sim.binBaseY - sim.binTopY;
+                        const currentCount = sim.bins[idx].count;
+                        const barH = (currentCount / maxCount) * (binHeightPx - 12);
+                        const barTopY = sim.binBaseY - barH - sim.ballRadius;
+                        if (ball.y >= barTopY) {
+                            if (!ball.countedInBin) {
+                                sim.bins[idx].count += 1;
+                                ball.countedInBin = true;
+                            }
+                            // Distribute fading balls across multiple lanes in each bin.
+                            const laneCount = Math.max(1, sim.binColumns | 0);
+                            const lane = currentCount % laneCount;
+                            const lanePad = Math.max(2, sim.ballRadius * 0.75);
+                            const usableW = Math.max(sim.ballRadius * 2, sim.bins[idx].w - lanePad * 2);
+                            const laneStep = laneCount > 1 ? usableW / (laneCount - 1) : 0;
+                            ball.fadeTargetX = sim.bins[idx].x + lanePad + lane * laneStep;
+                            ball.segment = null;
+                            ball.binIndex = idx;
+                            ball.settled = true;
+                            ball.fading = true;
+                        }
                     }
                 }
             }
@@ -388,18 +430,53 @@
                 // Pegs.
                 for (let i = 0; i < sim.pegs.length; i++) {
                     const p = sim.pegs[i];
+                    const pg = ctx.createRadialGradient(
+                        p.x - p.r * 0.35,
+                        p.y - p.r * 0.35,
+                        Math.max(0.4, p.r * 0.2),
+                        p.x,
+                        p.y,
+                        p.r
+                    );
+                    pg.addColorStop(0, "#f4fbff");
+                    pg.addColorStop(0.35, "#b7eaff");
+                    pg.addColorStop(0.72, "#66c8ec");
+                    pg.addColorStop(1, "#2a8eb3");
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = "#9de8ff";
+                    ctx.fillStyle = pg;
+                    ctx.shadowColor = "rgba(74, 207, 255, 0.28)";
+                    ctx.shadowBlur = 5;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = "rgba(205, 244, 255, 0.5)";
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+
+                    // Tiny metallic highlight spot for a pin-head feel.
+                    ctx.beginPath();
+                    ctx.arc(p.x - p.r * 0.38, p.y - p.r * 0.38, Math.max(0.6, p.r * 0.22), 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
                     ctx.fill();
                 }
 
                 // Bin area and bars.
-                ctx.fillStyle = "rgba(5, 11, 24, 0.85)";
                 const binHeightPx = sim.binBaseY - sim.binTopY;
-                ctx.fillRect(0, sim.binTopY, w, binHeightPx);
+                const binLeft = sim.bins.length ? sim.bins[0].x : 0;
+                const binRight = sim.bins.length ? (sim.bins[sim.bins.length - 1].x + sim.bins[sim.bins.length - 1].w) : w;
+                const binWidth = Math.max(0, binRight - binLeft);
+                const binBg = ctx.createLinearGradient(0, sim.binTopY, 0, sim.binBaseY);
+                // Top very bright blue, bottom still bright blue.
+                binBg.addColorStop(0, "rgba(248, 253, 255, 0.50)");
+                binBg.addColorStop(1, "rgba(58, 150, 230, 0.45)");
+                ctx.fillStyle = binBg;
+                ctx.fillRect(binLeft, sim.binTopY, binWidth, binHeightPx);
+                // Subtle cyan glow line at the bin top edge (only inside bin area).
+                ctx.fillStyle = "rgba(214, 248, 255, 0.6)";
+                ctx.fillRect(binLeft, sim.binTopY, binWidth, 1);
 
-                const maxCount = Math.max(1, ...sim.bins.map(b => b.count));
+                // Ensure a single hit does not instantly produce a full-height bar.
+                const maxCount = Math.max(2, ...sim.bins.map(b => b.count));
                 for (let i = 0; i < sim.bins.length; i++) {
                     const b = sim.bins[i];
                     const barH = (b.count / maxCount) * (binHeightPx - 12);
@@ -423,19 +500,40 @@
                     ctx.strokeRect(b.x, sim.binTopY, b.w, binHeightPx);
 
                     // Count label under each bin.
-                    ctx.fillStyle = "rgba(240, 248, 255, 0.98)";
-                    ctx.font = "13px Orbitron";
+                    ctx.fillStyle = b.count > 0 ? "#ffb866" : "rgba(220, 232, 245, 0.7)";
+                    ctx.font = "15px Orbitron";
                     ctx.textAlign = "center";
-                    ctx.fillText(String(b.count), b.x + b.w * 0.5, sim.binBaseY + 14);
+                    ctx.fillText(String(b.count), b.x + b.w * 0.5, sim.binBaseY + 19);
                 }
 
                 // Balls.
                 for (let i = 0; i < sim.balls.length; i++) {
                     const b = sim.balls[i];
+                    const r = sim.ballRadius;
+                    ctx.save();
+                    ctx.globalAlpha = b.alpha === undefined ? 1 : b.alpha;
+                    const g = ctx.createRadialGradient(
+                        b.x - r * 0.35,
+                        b.y - r * 0.35,
+                        Math.max(0.4, r * 0.25),
+                        b.x,
+                        b.y,
+                        r
+                    );
+                    g.addColorStop(0, "#ffe3bf");
+                    g.addColorStop(0.35, "#ffb866");
+                    g.addColorStop(1, "#ff7a1a");
                     ctx.beginPath();
-                    ctx.arc(b.x, b.y, sim.ballRadius, 0, Math.PI * 2);
-                    ctx.fillStyle = "#ff9f3b";
+                    ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+                    ctx.fillStyle = g;
+                    ctx.shadowColor = "rgba(255, 150, 50, 0.45)";
+                    ctx.shadowBlur = 7;
                     ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = "rgba(255, 233, 198, 0.45)";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore();
                 }
 
             }
@@ -504,7 +602,7 @@
                             <span>Fluggeschwindigkeit</span>
                             <span id="label-speed" class="cyber-number" style="font-size:0.8rem; color:#ffb266;">${sim.flightSpeed.toFixed(2)}</span>
                         </div>
-                        <input type="range" id="slider-speed" min="0.04" max="3.0" value="${sim.flightSpeed}" step="0.04">
+                        <input type="range" id="slider-speed" min="0.04" max="5.0" value="${sim.flightSpeed}" step="0.04">
                     </div>
                     <div>
                         <div class="label-row">
