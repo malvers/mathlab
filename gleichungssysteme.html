@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gleichungssysteme | ULTRA v5.3.8</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <style>
+        .math-glow {
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <div id="sidebar-header" style="min-height: 80px;"></div>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <div id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+
+        console.log("🚀 LGS-Labor: Booting...");
+        let cc = null;
+        
+        // Zwei Geraden, definiert durch jeweils zwei Punkte (Startwerte kalibriert, Handles 3x weiter auseinander)
+        let line1 = { p1: {x: 1, y: -2}, p2: {x: 13, y: 1}, color: '--neon-blue', id: 'L1' };
+        let line2 = { p1: {x: 1, y: -2}, p2: {x: -5, y: 5.2}, color: '--neon-orange', id: 'L2' };
+        
+        let draggedPoint = null; 
+        let draggedLine = null; // Für Rotation
+        let snapToGrid = true; // Magnet-Snap Status
+        let scrambleMode = false;
+
+        // Form-Typen für Scramble (0: normal, 1: swapped, 2: 2y, 3: implicit, 4: mixed)
+        line1.form = 0;
+        line2.form = 0;
+
+        const SETTINGS_KEY = "lgs-settings-v1";
+
+        function saveSettings() {
+            try {
+                const settings = {
+                    line1: line1,
+                    line2: line2,
+                    snapToGrid: snapToGrid,
+                    view: cc ? cc.view : null
+                };
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            } catch (e) { console.warn("Save failed", e); }
+        }
+
+        function loadSettings() {
+            try {
+                const raw = localStorage.getItem(SETTINGS_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed.line1) line1 = parsed.line1;
+                if (parsed.line2) line2 = parsed.line2;
+                if (parsed.snapToGrid !== undefined) snapToGrid = parsed.snapToGrid;
+                if (parsed.view && cc) {
+                    cc.view = parsed.view;
+                    cc.isInitialized = false;
+                    cc.init('canvas', cc.view);
+                }
+            } catch (e) { console.warn("Load failed", e); }
+        }
+
+        function varColor(name) {
+            const val = getComputedStyle(document.documentElement).getPropertyValue(name.replace('var(', '').replace(')', '')).trim();
+            return val || "#00d2ff";
+        }
+
+        window.addEventListener('load', () => {
+            console.log("📦 DOM Load complete. Initializing components...");
+            
+            try {
+                if (typeof CyberBranding !== 'undefined') {
+                    CyberBranding.init({
+                        useExternalStyles: true,
+                        title: "Doc Alvers Mathe-Labor",
+                        subtitle: "GLEICHUNGSSYSTEME"
+                    });
+                }
+                
+                if (typeof CyberUI !== 'undefined') {
+                    CyberUI.init();
+                    
+                    CyberUI.createCard('parameters-container', 'GLEICHUNGSSYSTEM', `
+                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.1);">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 10px; display: block;">FORMALES SYSTEM</span>
+                            <div id="eq-formal-gs" class="math-glow" style="font-size: 1.4rem; text-align: center;"></div>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; background: rgba(0, 210, 255, 0.05); padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHNITTPUNKT S</span>
+                            <div id="eq-sp" class="math-glow" style="color: var(--neon-green); font-weight: bold;"></div>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron';">MAGNET-SNAP</span>
+                            <input type="checkbox" id="snap-toggle" ${snapToGrid ? 'checked' : ''} style="cursor: pointer;" onchange="snapToGrid = this.checked; saveSettings();">
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">SCRAMBLE MODE</span>
+                            <input type="checkbox" id="scramble-toggle" ${scrambleMode ? 'checked' : ''} style="cursor: pointer;" onchange="toggleScramble(this.checked)">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 5px;">
+                            <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">NEUE AUFGABE</button>
+                            <button class="cyber-button" onclick="resetView()" style="flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">VIEW RESET</button>
+                        </div>
+                    `, 'var(--neon-blue)', { collapsible: false });
+                }
+
+                // Interaction Hooks
+                cc = new CyberCanvas();
+                loadSettings(); // Erst hier laden, da cc existieren muss
+                cc.init('canvas', cc.view || { minX: -10, maxX: 10, minY: -10, maxY: 10 });
+                
+                cc.onMouseDown = (pos) => {
+                    const threshold = 0.5;
+                    let hit = null;
+                    // 1. Check Points (Priority)
+                    if (Math.hypot(line1.p1.x - pos.x, line1.p1.y - pos.y) < threshold) { hit = {l: line1, p: 'p1'}; }
+                    else if (Math.hypot(line1.p2.x - pos.x, line1.p2.y - pos.y) < threshold) { hit = {l: line1, p: 'p2'}; }
+                    else if (Math.hypot(line2.p1.x - pos.x, line2.p1.y - pos.y) < threshold) { hit = {l: line2, p: 'p1'}; }
+                    else if (Math.hypot(line2.p2.x - pos.x, line2.p2.y - pos.y) < threshold) { hit = {l: line2, p: 'p2'}; }
+                    
+                    if (hit) {
+                        draggedPoint = hit;
+                        cc.allowPan = false;
+                        return true;
+                    }
+
+                    // 2. Check Lines (Rotation)
+                    const distToLine = (l, p) => {
+                        const {p1, p2} = l;
+                        return Math.abs((p2.y - p1.y) * p.x - (p2.x - p1.x) * p.y + p2.x * p1.y - p2.y * p1.x) / Math.hypot(p2.y - p1.y, p2.x - p1.x);
+                    };
+
+                    if (distToLine(line1, pos) < 0.3) { draggedLine = line1; cc.allowPan = false; return true; }
+                    if (distToLine(line2, pos) < 0.3) { draggedLine = line2; cc.allowPan = false; return true; }
+
+                    return false;
+                };
+
+                cc.onMouseMove = (pos) => {
+                    if (draggedPoint) {
+                        let tx = pos.x, ty = pos.y;
+                        if (snapToGrid) {
+                            if (Math.abs(Math.round(tx) - tx) < 0.15) tx = Math.round(tx);
+                            if (Math.abs(Math.round(ty) - ty) < 0.15) ty = Math.round(ty);
+                        }
+                        draggedPoint.l[draggedPoint.p].x = Math.round(tx * 10) / 10;
+                        draggedPoint.l[draggedPoint.p].y = Math.round(ty * 10) / 10;
+                        draw(); return true;
+                    }
+
+                    if (draggedLine) {
+                        const p2 = draggedLine.p2;
+                        const p1 = draggedLine.p1;
+                        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                        const angle = Math.atan2(pos.y - p2.y, pos.x - p2.x);
+                        
+                        let tx = p2.x + dist * Math.cos(angle);
+                        let ty = p2.y + dist * Math.sin(angle);
+
+                        if (snapToGrid) {
+                            if (Math.abs(Math.round(tx) - tx) < 0.15) tx = Math.round(tx);
+                            if (Math.abs(Math.round(ty) - ty) < 0.15) ty = Math.round(ty);
+                        }
+
+                        draggedLine.p1.x = Math.round(tx * 10) / 10;
+                        draggedLine.p1.y = Math.round(ty * 10) / 10;
+                        draw(); return true;
+                    }
+                    return false;
+                };
+
+                cc.onMouseUp = () => {
+                    if (draggedPoint || draggedLine) {
+                        draggedPoint = null;
+                        draggedLine = null;
+                        cc.allowPan = true;
+                        saveSettings();
+                        return true;
+                    }
+                    return false;
+                };
+
+                // Panning speichern
+                cc.onPan = () => saveSettings();
+                cc.onZoom = () => saveSettings();
+                
+                cc.onContextMenu = (e) => {
+                    if (typeof CyberUI !== 'undefined' && CyberUI.showContextMenu) {
+                        CyberUI.showContextMenu(e.clientX, e.clientY, [
+                            { label: 'Labor Reset', onclick: () => window.resetView() },
+                            { divider: true },
+                            {
+                                label: 'Gitter anzeigen',
+                                checked: cc.showGrid,
+                                onchange: (val) => { cc.showGrid = val; draw(); }
+                            },
+                            {
+                                label: 'Achsen anzeigen',
+                                checked: cc.showAxes,
+                                onchange: (val) => { cc.showAxes = val; draw(); }
+                            },
+                            {
+                                label: 'Achsenbeschriftung',
+                                checked: cc.showLabels,
+                                onchange: (val) => { cc.showLabels = val; draw(); }
+                            },
+                            {
+                                label: 'Koordinaten',
+                                checked: cc.showTelemetry,
+                                onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); }
+                            }
+                        ]);
+                    }
+                };
+
+                cc.onResize = () => draw();
+
+                console.log("✅ Engine ready. Starting first render...");
+                draw();
+
+            } catch (err) {
+                console.error("❌ Fatal Init Error:", err);
+            }
+        });
+
+        window.toggleScramble = (val) => {
+            scrambleMode = val;
+            if (scrambleMode) {
+                line1.form = Math.floor(Math.random() * 5);
+                line2.form = Math.floor(Math.random() * 5);
+            } else {
+                line1.form = 0;
+                line2.form = 0;
+            }
+            saveSettings();
+            draw();
+        };
+
+        window.generateRandomTask = () => {
+            // ... (xs, ys, b1, b2 logic)
+            if (scrambleMode) {
+                line1.form = Math.floor(Math.random() * 5);
+                line2.form = Math.floor(Math.random() * 5);
+            }
+            // ... (rest of logic)
+            // 1. Ganzzahligen Schnittpunkt würfeln (x zwischen -6 und 6, aber nicht 0)
+            const xs = (Math.floor(Math.random() * 12) - 6) || 4; 
+            const ys = Math.floor(Math.random() * 12) - 6;
+
+            // 2. Ganzzahlige Achsenabschnitte würfeln (zwischen -5 und 5)
+            const b1 = Math.floor(Math.random() * 11) - 5;
+            let b2 = Math.floor(Math.random() * 11) - 5;
+            if (b1 === b2) b2 = (b1 > 0) ? b1 - 2 : b1 + 2;
+
+            // 3. Geraden setzen (p1 am AA, p2 am Schnittpunkt)
+            line1.p1 = { x: 0, y: b1 };
+            line1.p2 = { x: xs, y: ys };
+            
+            line2.p1 = { x: 0, y: b2 };
+            line2.p2 = { x: xs, y: ys };
+
+            // Hebel auf exakte Ganzzahlen verlängern
+            const extend = (l) => {
+                const dx = l.p2.x - l.p1.x;
+                const dy = l.p2.y - l.p1.y;
+                l.p2.x = Math.round(l.p1.x + dx * 3);
+                l.p2.y = Math.round(l.p1.y + dy * 3);
+            };
+            extend(line1);
+            extend(line2);
+
+            saveSettings();
+            draw();
+        };
+
+        window.resetView = () => {
+            if (cc) {
+                cc.view = { minX: -10, maxX: 10, minY: -10, maxY: 10 };
+                cc.isInitialized = false; 
+                cc.init('canvas', cc.view);
+                cc.onResize = () => draw();
+                cc.onMouseDown = cc.onMouseDown; // Re-bind Hooks falls nötig
+                cc.onMouseMove = cc.onMouseMove;
+                cc.onMouseUp = cc.onMouseUp;
+                cc.onContextMenu = cc.onContextMenu;
+                saveSettings();
+            }
+            draw();
+        };
+
+        function draw() {
+            if (!cc || !cc.isInitialized) return;
+            const ctx = cc.ctx;
+
+            // --- RADIKALES ZOOM LIMIT ---
+            const maxView = 40;
+            const minView = 2;
+            let dx = cc.view.maxX - cc.view.minX;
+            let dy = cc.view.maxY - cc.view.minY;
+
+            if (dx > maxView || dy > maxView || dx < minView || dy < minView) {
+                const centerX = (cc.view.minX + cc.view.maxX) / 2;
+                const centerY = (cc.view.minY + cc.view.maxY) / 2;
+                const targetSize = dx > maxView || dy > maxView ? maxView : minView;
+                const ratio = Math.max(dx, dy) / targetSize;
+
+                cc.view.minX = centerX - (dx / ratio) / 2;
+                cc.view.maxX = centerX + (dx / ratio) / 2;
+                cc.view.minY = centerY - (dy / ratio) / 2;
+                cc.view.maxY = centerY + (dy / ratio) / 2;
+                // Kein Re-Init hier, um Flackern zu vermeiden, einfach View anpassen
+            }
+
+            ctx.clearRect(0, 0, cc.canvas.width, cc.canvas.height);
+
+            cc.drawGrid();
+
+            // 1. Geraden zeichnen
+            renderLine(line1);
+            renderLine(line2);
+
+            // 2. Schnittpunkt berechnen & zeichnen
+            const sp = calculateIntersection(line1, line2);
+            if (sp) {
+                drawSP(sp);
+            }
+
+            // 3. UI Updates
+            updateLGSUI(sp);
+        }
+
+        function renderLine(line) {
+            const ctx = cc.ctx;
+            const color = varColor(line.color);
+            
+            // Unendliche Gerade berechnen
+            const dx = line.p2.x - line.p1.x;
+            const dy = line.p2.y - line.p1.y;
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            
+            if (Math.abs(dx) < 0.001) { // Vertikale Gerade
+                ctx.moveTo(cc.mapX(line.p1.x), cc.mapY(-200));
+                ctx.lineTo(cc.mapX(line.p1.x), cc.mapY(200));
+            } else {
+                const m = dy / dx;
+                const b = line.p1.y - m * line.p1.x;
+                ctx.moveTo(cc.mapX(-200), cc.mapY(m * -200 + b));
+                ctx.lineTo(cc.mapX(200), cc.mapY(m * 200 + b));
+            }
+            ctx.stroke();
+
+            // Griffe zeichnen
+            drawHandle(line.p1.x, line.p1.y, color);
+            drawHandle(line.p2.x, line.p2.y, color);
+        }
+
+        function drawHandle(x, y, color) {
+            const ctx = cc.ctx;
+            const px = cc.mapX(x);
+            const py = cc.mapY(y);
+            
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function calculateIntersection(l1, l2) {
+            const x1 = l1.p1.x, y1 = l1.p1.y, x2 = l1.p2.x, y2 = l1.p2.y;
+            const x3 = l2.p1.x, y3 = l2.p1.y, x4 = l2.p2.x, y4 = l2.p2.y;
+
+            const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (Math.abs(denom) < 0.001) return null; // Parallel
+
+            const x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+            const y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+            
+            return { x, y };
+        }
+
+        function drawSP(sp) {
+            const ctx = cc.ctx;
+            const px = cc.mapX(sp.x);
+            const py = cc.mapY(sp.y);
+            const color = varColor('--neon-green');
+
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function updateLGSUI(sp) {
+            if (typeof katex === 'undefined') return;
+
+            const getEqData = (line) => {
+                const dx = line.p2.x - line.p1.x;
+                const dy = line.p2.y - line.p1.y;
+                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x };
+                const m = dy / dx;
+                const b = line.p1.y - m * line.p1.x;
+                return { m, b, form: line.form || 0 };
+            };
+
+            const eq1 = getEqData(line1);
+            const eq2 = getEqData(line2);
+
+            const formatEqPartsAligned = (d1, d2) => {
+                const getSignComp = (val) => (val < 0 ? '-' : '\\phantom{-}');
+
+                const f = (data, color) => {
+                    const mVal = data.m === null ? 0 : data.m;
+                    const bVal = data.b;
+                    const bSign = bVal >= 0 ? "+" : "-";
+                    const absB = Math.abs(bVal).toFixed(2);
+                    const absM = Math.abs(mVal).toFixed(2);
+                    const mSign = mVal >= 0 ? "+" : "-";
+                    const mSignInv = mVal >= 0 ? "-" : "+";
+                    const leadSign = getSignComp(mVal);
+
+                    // Form-Selector
+                    let left, right;
+                    switch(data.form) {
+                        case 1: // Swapped: mx + b = y
+                            left = `${leadSign}${absM}x ${bSign} ${absB}`;
+                            right = `y`;
+                            break;
+                        case 2: // Scaled: 2y = 2mx + 2b
+                            left = `\\phantom{-} 2y`;
+                            right = `${(mVal*2).toFixed(2)}x ${bVal*2 >= 0 ? "+" : "-"} ${Math.abs(bVal*2).toFixed(2)}`;
+                            break;
+                        case 3: // Implicit: mx - y = -b
+                            left = `${leadSign}${absM}x - y`;
+                            right = `${(-bVal).toFixed(2)}`;
+                            break;
+                        case 4: // Mixed: y - mx = b
+                            left = `\\phantom{-} y ${mSignInv} ${absM}x`;
+                            right = `${bVal.toFixed(2)}`;
+                            break;
+                        default: // Normal: y = mx + b
+                            left = `\\phantom{-} y`;
+                            right = `${leadSign}${absM}x ${bSign} ${absB}`;
+                    }
+                    return `\\textcolor{${color}}{${left}} & \\textcolor{${color}}{{}= ${right}}`;
+                };
+
+                return {
+                    l1: f(d1, '#00d2ff'),
+                    l2: f(d2, '#ff9d00')
+                };
+            };
+
+            const aligned = formatEqPartsAligned(eq1, eq2);
+
+            // Formales LGS: Array{ll} für strikte Linksbündigkeit
+            const formalLatex = `\\left| \\begin{array}{ll} ${aligned.l1} \\\\ ${aligned.l2} \\end{array} \\right|`;
+            katex.render(formalLatex, document.getElementById('eq-formal-gs'), { throwOnError: false });
+            
+            if (sp) {
+                // Epsilon-Korrektur für die Anzeige (vermeidet 2.999999)
+                const clean = (val) => Math.abs(Math.round(val) - val) < 0.0001 ? Math.round(val) : val;
+                const spX = clean(sp.x);
+                const spY = clean(sp.y);
+                katex.render(`S(${spX.toFixed(2)} \\mid ${spY.toFixed(2)})`, document.getElementById('eq-sp'), { throwOnError: false });
+            } else {
+                document.getElementById('eq-sp').innerText = "Parallel / Keine Lösung";
+            }
+        }
+    </script>
+</body>
+</html>
