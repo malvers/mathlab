@@ -67,9 +67,9 @@
             var(--space-bg);
         }
 
-        /* Formelbox: +6 px vs. orbitals/styles.css (top: 10px) */
+        /* Formelbox: +6 px vs. orbitals/styles.css, dann −4px wie Nav (2+2) */
         #canvas-wrap .overlay-formula {
-            top: 16px;
+            top: 12px;
         }
 
         /* KaTeX-Formel: +30 %, Text orange; Rand/Schatten Cyan wie Lab */
@@ -135,8 +135,9 @@
             margin-top: 0 !important;
         }
 
-        /* Tastaturhilfe: 2-Spalten-Raster, ausgerichtet, Cyber-Look (ohne volle Karten-Box) */
+        /* Tastaturhilfe: 2-Spalten-Raster; Fließtext wie Key-Caps in Orbitron */
         .kff-help-inline {
+            font-family: "Orbitron", sans-serif;
             background: linear-gradient(180deg, rgba(0, 20, 40, 0.2) 0%, transparent 100%) !important;
             border: none !important;
             border-top: 1px solid rgba(0, 210, 255, 0.14) !important;
@@ -144,7 +145,7 @@
             margin-top: 0.45rem;
             margin-left: 0;
             margin-right: 0;
-            padding: 0.6rem 0 0.2rem 0;
+            padding: 0.75rem 0 0.4rem 0;
             border-radius: 0 0 6px 6px;
         }
 
@@ -154,7 +155,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 0.55rem;
+            gap: 0.88rem;
         }
 
         .kff-help-list > li {
@@ -168,7 +169,7 @@
         @media (max-width: 380px) {
             .kff-help-list > li {
                 grid-template-columns: 1fr;
-                row-gap: 0.3rem;
+                row-gap: 0.45rem;
             }
         }
 
@@ -196,16 +197,20 @@
 
         .kff-help-txt {
             font-size: 0.72rem;
-            line-height: 1.45;
+            line-height: 1.5;
+            font-weight: 500;
+            letter-spacing: 0.02em;
             color: rgba(230, 236, 245, 0.88);
             margin: 0;
         }
 
         .kff-help-meta {
             font-size: 0.65rem;
-            line-height: 1.45;
+            line-height: 1.5;
+            font-weight: 400;
+            letter-spacing: 0.03em;
             color: rgba(180, 210, 230, 0.58);
-            margin: 0.2rem 0 0 0;
+            margin: 0.35rem 0 0 0;
             padding-left: 0.1rem;
         }
 
@@ -296,6 +301,70 @@
             flex-direction: column;
             gap: 8px;
             margin-top: 12px;
+        }
+
+        #side-panel .kff-param-card .kff-prob-cloud-row {
+            margin-top: 14px !important;
+        }
+
+        .kff-prob-switch-row {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            cursor: pointer;
+        }
+
+        .kff-prob-switch {
+            flex-shrink: 0;
+            width: 44px;
+            height: 26px;
+            padding: 0;
+            border: 1px solid rgba(0, 210, 255, 0.38);
+            border-radius: 13px;
+            background: rgba(0, 8, 20, 0.75);
+            cursor: pointer;
+            position: relative;
+            box-sizing: border-box;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kff-prob-switch:hover {
+            border-color: rgba(0, 210, 255, 0.65);
+        }
+
+        .kff-prob-switch.kff-prob-switch--on {
+            background: rgba(0, 60, 90, 0.55);
+            border-color: #00d2ff;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.25);
+        }
+
+        .kff-prob-switch-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #f0f8ff 0%, #a8d4e6 100%);
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .kff-prob-switch--on .kff-prob-switch-knob {
+            transform: translateX(18px);
+        }
+
+        .kff-prob-cloud-text {
+            font-size: 0.72rem;
+            line-height: 1.42;
+            color: rgba(230, 236, 245, 0.9);
+            user-select: none;
+        }
+
+        .kff-prob-sq {
+            color: #6ee7ff;
+            font-weight: 600;
         }
 
         /* Custom-Dropdown: Y-Spalte fest, ORBITAL bündig (native <select> kann das nicht) */
@@ -409,6 +478,21 @@
                             <span id="opacity-value" class="range-value">1.00</span>
                         </div>
                         <input id="opacity" class="cyber-slider" type="range" min="0.1" max="1" value="1" step="0.05" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group kff-prob-cloud-row">
+                        <div class="kff-prob-switch-row">
+                            <button
+                                type="button"
+                                id="kff-prob-cloud"
+                                class="kff-prob-switch"
+                                role="switch"
+                                aria-checked="false"
+                                aria-label="Wolkemodus: nur Punktwolke |Y|², Kugelfläche aus"
+                            >
+                                <span class="kff-prob-switch-knob" aria-hidden="true"></span>
+                            </button>
+                            <span class="kff-prob-cloud-text">Wahrscheinlichkeitswolke <span class="kff-prob-sq" title="Ein: nur |Y|²-Punkte. Aus: nur Kugelfläche (getrennte Modi).">|Y|²</span> (Fläche aus)</span>
+                        </div>
                     </div>
                     <div class="kff-side-btns">
                         <button type="button" class="cyber-btn" id="toggle-rotate" style="border-color: rgba(0, 210, 255, 0.4);">AUTO-ROTATION (LEERTASTE)</button>
@@ -732,6 +816,12 @@
         const autoRotateClock = new THREE.Clock();
         
         const SCALE = 130;
+        /** Wahrscheinlichkeitswolke: Stichproben-Ziel, Dichte ∝ |Y|², radial um den Ursprung. */
+        const PROB_CLOUD_TARGET = 200000;
+        const PROB_CLOUD_MAX_ATT = 28000000;
+        /* Wolke: r = t·(√p+ε)·SCALE·Faktor; p=|Y|² ⇒ √p=|Y| — gleicher Faktor wie Fläche (r=|Y|·SCALE), sonst wirkte ~2,4× zu weit draußen. */
+        const PROB_CLOUD_RADIAL = 1.0;
+
         /** Referenz-Kameradistanz; 1.0× = diese Distanz (Standardansicht: Orbital gut sichtbar groß). */
         const BASE_REF_CAMERA_DISTANCE = 480;
         /** Einstiegsansicht: zuerst 90° horizontal (Blick in die XZ-Ebene), dann +2° um X, −2° um Y. */
@@ -828,7 +918,9 @@
           resolution: 180,
           specular: 32,
           opacity: 1,
-          autoRotate: false,
+          autoRotate: true,
+          /** Wolkemodus: Punktwolke |Y|² an, Kugelfläche aus (umschaltbar). */
+          showProbabilityCloud: false,
           ambientOn: true,
           pointLightOn: true,
         };
@@ -837,6 +929,8 @@
         
         let scene, camera, renderer, controls;
         let meshGroup, orbitalMesh;
+        /** Wahrscheinlichkeitswolke |Y|²; mit Wolkemodus ist die Fläche ausgeblendet. */
+        let probabilityCloud = null;
         let ambientLight;
         /** Punktlichter an der Kamera: wandern nicht getrennt von der Blickrichtung (kein „mitdrehendes“ Studio-Licht in der Welt). */
         let pointLight, pointFillLight;
@@ -920,7 +1014,105 @@
           geo.computeVertexNormals();
           return geo;
         }
-        
+
+        function estimateProbDensityMax(orbitalId) {
+          const n = 72;
+          let maxP = 0;
+          const PI = Math.PI;
+          for (let i = 0; i <= n; i++) {
+            const theta = (i / n) * PI;
+            for (let j = 0; j < n; j++) {
+              const phi = (j / n) * 2 * PI;
+              const v = getValueAtPhiAndTheta(orbitalId, phi, theta);
+              const p = v * v;
+              if (p > maxP) maxP = p;
+            }
+          }
+          return maxP > 1e-20 ? maxP : 1e-20;
+        }
+
+        function pushProbCloudSample(orbitalId, phi, theta, sinT, cosT, p, val, pos, cols, tmpC) {
+          const t = 0.1 + 0.9 * Math.pow(Math.random(), 0.5);
+          /* +ε nur gegen numerische Null; zu groß flacht „leere“ Richtungen auf. */
+          const rLen = t * (Math.sqrt(p) + 0.001) * SCALE * PROB_CLOUD_RADIAL;
+          const x = rLen * sinT * Math.cos(phi);
+          const y = rLen * sinT * Math.sin(phi);
+          const z = rLen * cosT;
+          pos.push(x, y, z);
+          vertexColorForSample(orbitalId, val, tmpC);
+          cols.push(tmpC.r, tmpC.g, tmpC.b);
+        }
+
+        /**
+         * Punktwolke: Richtung gleichverteilt auf S², Annahme ∝ p=|Y|² (Verwerfung gegen pMax) → Dichte ∝ |Y|².
+         * Keine Auffüll-Gitter-Phase: die hätte p zu locker gewichtet und wirkte „gleichverteilt“.
+         */
+        function buildProbabilityCloud(orbitalId) {
+          const pMax = estimateProbDensityMax(orbitalId);
+          const pos = [];
+          const cols = [];
+          const tmpC = new THREE.Color();
+          const twoPI = 2 * Math.PI;
+          let attempts = 0;
+          while (pos.length / 3 < PROB_CLOUD_TARGET && attempts < PROB_CLOUD_MAX_ATT) {
+            attempts++;
+            const u = Math.random();
+            const v = Math.random();
+            const cosT = 2 * u - 1;
+            const sinT = Math.sqrt(Math.max(0, 1 - cosT * cosT));
+            const phi = v * twoPI;
+            const th = Math.acos(cosT);
+            const val = getValueAtPhiAndTheta(orbitalId, phi, th);
+            const p = val * val;
+            if (Math.random() * pMax > p) continue;
+            pushProbCloudSample(orbitalId, phi, th, sinT, cosT, p, val, pos, cols, tmpC);
+          }
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pos), 3));
+          geo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cols), 3));
+          const mat = new THREE.PointsMaterial({
+            size: 0.12,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: Math.min(0.55, 0.28 + state.opacity * 0.22),
+            depthWrite: false,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+          });
+          const pts = new THREE.Points(geo, mat);
+          pts.renderOrder = 1;
+          return pts;
+        }
+
+        function disposeProbabilityCloud() {
+          if (probabilityCloud) {
+            probabilityCloud.geometry.dispose();
+            probabilityCloud.material.dispose();
+            if (meshGroup) meshGroup.remove(probabilityCloud);
+            probabilityCloud = null;
+          }
+        }
+
+        function refreshProbabilityCloud() {
+          disposeProbabilityCloud();
+          if (!state.showProbabilityCloud || !meshGroup) return;
+          probabilityCloud = buildProbabilityCloud(ORBITAL_TYPES[state.orbitalIndex].id);
+          meshGroup.add(probabilityCloud);
+        }
+
+        function syncProbCloudSwitchUi() {
+          const btn = document.getElementById("kff-prob-cloud");
+          if (!btn) return;
+          const on = state.showProbabilityCloud;
+          btn.classList.toggle("kff-prob-switch--on", on);
+          btn.setAttribute("aria-checked", on ? "true" : "false");
+        }
+
+        /** Wolkemodus an: nur Punktwolke; Fläche per `visible` aus (Mesh bleibt für schnelles Umschalten). */
+        function applyOrbitalSurfaceVisibilityForCloudMode() {
+          if (orbitalMesh) orbitalMesh.visible = !state.showProbabilityCloud;
+        }
+
         function disposeMesh() {
           if (orbitalMesh) {
             orbitalMesh.geometry.dispose();
@@ -937,6 +1129,8 @@
           const mat = createOrbitalMaterial();
           orbitalMesh = new THREE.Mesh(geo, mat);
           meshGroup.add(orbitalMesh);
+          refreshProbabilityCloud();
+          applyOrbitalSurfaceVisibilityForCloudMode();
           applyDefaultCameraForCurrentOrbital();
           renderFormula(id);
           updateStats();
@@ -1021,14 +1215,21 @@
           const verts = pos ? pos.count : 0;
           const tris = idx ? idx.count / 3 : 0;
           const id = ORBITAL_TYPES[state.orbitalIndex].id;
+          const nCloud =
+            state.showProbabilityCloud && probabilityCloud
+              ? probabilityCloud.geometry.getAttribute("position")?.count ?? 0
+              : 0;
           const rest = [
             orbitalSelectOptionText(id),
             `Auflösung: ${state.resolution}`,
             `Punkte: ${verts.toLocaleString()}`,
             `Dreiecke: ${Math.floor(tris).toLocaleString()}`,
+            nCloud > 0 ? `Wolke: ${nCloud.toLocaleString()}` : null,
             `Specular: ${state.specular}`,
             `Opacity: ${state.opacity.toFixed(2)}`,
-          ].join(" · ");
+          ]
+            .filter(Boolean)
+            .join(" · ");
         
           if (metaEl) metaEl.textContent = rest;
         }
@@ -1187,8 +1388,27 @@
               orbitalMesh.material.transparent = state.opacity < 1;
               orbitalMesh.material.needsUpdate = true;
             }
+            if (probabilityCloud && probabilityCloud.material) {
+              probabilityCloud.material.opacity = Math.min(0.55, 0.28 + state.opacity * 0.22);
+            }
             updateStats();
           });
+
+          const probRow = document.querySelector(".kff-prob-switch-row");
+          if (probRow) {
+            probRow.addEventListener("click", (e) => {
+              e.stopPropagation();
+              if (typeof window.kffSetOrbitalDropdownOpen === "function") {
+                window.kffSetOrbitalDropdownOpen(false);
+              }
+              state.showProbabilityCloud = !state.showProbabilityCloud;
+              syncProbCloudSwitchUi();
+              refreshProbabilityCloud();
+              applyOrbitalSurfaceVisibilityForCloudMode();
+              updateStats();
+            });
+          }
+          syncProbCloudSwitchUi();
         
           document.getElementById("toggle-rotate").addEventListener("click", () => {
             state.autoRotate = !state.autoRotate;
@@ -1201,6 +1421,7 @@
         
           window.addEventListener("keydown", (ev) => {
             if (ev.target.matches("input, select, textarea")) return;
+            if (ev.code === "Space" && ev.target instanceof HTMLButtonElement) return;
             switch (ev.code) {
               case "ArrowUp": {
                 ev.preventDefault();
