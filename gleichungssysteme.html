@@ -143,14 +143,11 @@
                             <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHNITTPUNKT S</span>
                             <div id="eq-sp" class="math-glow" style="color: var(--neon-green); font-weight: bold;"></div>
                         </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron';">MAGNET-SNAP</span>
-                            <input type="checkbox" id="snap-toggle" ${snapToGrid ? 'checked' : ''} style="cursor: pointer;" onchange="snapToGrid = this.checked; saveSettings();">
-                        </div>
-                        <div style="margin-bottom: 15px;">
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-bottom: 15px;">
                             <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NOTATION</span>
                             <div id="scramble-dropdown-container" style="width: 100%;"></div>
                         </div>
+                        <div id="magnet-snap-container" style="margin-bottom: 15px;"></div>
                         <div style="display: flex; gap: 10px; margin-top: 5px;">
                             <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">NEUE AUFGABE</button>
                             <button class="cyber-button" onclick="resetView()" style="flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">VIEW RESET</button>
@@ -169,6 +166,11 @@
                     CyberUI.createDropdown('scramble-dropdown-container', scrambleOptions, (val) => {
                         window.setScrambleLevel(val);
                     }, String(scrambleLevel));
+                    
+                    CyberUI.createCheckbox('magnet-snap-container', 'MAGNET-SNAP', snapToGrid, (val) => {
+                        snapToGrid = val;
+                        saveSettings();
+                    }, '#94a3b8');
                     
                     setTimeout(() => {
                         const mp = document.querySelector('#scramble-dropdown-container .selected-val .math-part');
