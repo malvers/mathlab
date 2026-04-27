@@ -33,14 +33,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="orbitals/styles.css" />
     <style>
-        /* Cyber-Lab: globale 120%-Schrift aus orbitals/styles.css zurücknehmen, Layout nutzt cyber-body */
+        /* Cyber-Lab: globale 120%-Schrift aus orbitals/styles.css zurücknehmen; HG wie andere Labs (cyber-layout) */
         html {
             font-size: 100%;
+            background-color: var(--space-bg);
         }
 
-        /* orbitals/styles.css setzt body-Hintergrund — Cyber-Lab-Layer nicht überdecken */
         body {
-            background: transparent !important;
+            background-color: var(--space-bg) !important;
         }
 
         /* Wie bei anderen Labs: Hauptbereich muss in der flex-Zeile wachsen (min-width 0 = kein 0-breit-Bug) */
@@ -54,6 +54,8 @@
             flex-direction: column !important;
             position: relative;
             overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
+            var(--space-bg);
         }
 
         #canvas-wrap {
@@ -61,6 +63,13 @@
             width: 100%;
             min-height: 200px;
             position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
+            var(--space-bg);
+        }
+
+        /* Formelbox: +6 px vs. orbitals/styles.css (top: 10px) */
+        #canvas-wrap .overlay-formula {
+            top: 16px;
         }
 
         /* KaTeX-Formel: +30 %, Text orange; Rand/Schatten Cyan wie Lab */
@@ -613,7 +622,6 @@
         const autoRotateClock = new THREE.Clock();
         
         const SCALE = 130;
-        const BG = 0x000028;
         /** Referenz-Kameradistanz; 1.0× = diese Distanz (Standardansicht: Orbital gut sichtbar groß). */
         const BASE_REF_CAMERA_DISTANCE = 480;
         /** Einstiegsansicht: zuerst 90° horizontal (Blick in die XZ-Ebene), dann +2° um X, −2° um Y. */
@@ -918,12 +926,14 @@
         function initThree() {
           const container = document.getElementById("canvas-wrap");
           scene = new THREE.Scene();
-          scene.background = new THREE.Color(BG);
+          /* Kein Vollflächen-Farbfilm: gleicher Radial-Gradient auf #canvas-wrap sichtbar (wie Lab-CSS) */
+          scene.background = null;
         
           camera = new THREE.PerspectiveCamera(44, container.clientWidth / container.clientHeight, 0.1, 15000);
           camera.position.set(0, 0, BASE_REF_CAMERA_DISTANCE);
         
-          renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          renderer.setClearColor(0x000000, 0);
           renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
           renderer.setSize(container.clientWidth, container.clientHeight);
           renderer.outputColorSpace = THREE.SRGBColorSpace;
