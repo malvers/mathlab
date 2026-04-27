@@ -135,24 +135,102 @@
             margin-top: 0 !important;
         }
 
-        /* Hilfe: nur Text + kbd, keine Karten-Box */
+        /* Tastaturhilfe: 2-Spalten-Raster, ausgerichtet, Cyber-Look (ohne volle Karten-Box) */
         .kff-help-inline {
-            background: transparent !important;
+            background: linear-gradient(180deg, rgba(0, 20, 40, 0.2) 0%, transparent 100%) !important;
             border: none !important;
+            border-top: 1px solid rgba(0, 210, 255, 0.14) !important;
             box-shadow: none !important;
-            margin-top: 0.35rem;
-            padding: 0.15rem 0 0.25rem 0;
+            margin-top: 0.45rem;
+            margin-left: 0;
+            margin-right: 0;
+            padding: 0.6rem 0 0.2rem 0;
+            border-radius: 0 0 6px 6px;
         }
 
-        .kff-help-inline kbd {
+        .kff-help-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .kff-help-list > li {
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            column-gap: 0.7rem;
+            row-gap: 0.1rem;
+            align-items: baseline;
+        }
+
+        @media (max-width: 380px) {
+            .kff-help-list > li {
+                grid-template-columns: 1fr;
+                row-gap: 0.3rem;
+            }
+        }
+
+        .kff-help-keys {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.2rem 0.28rem;
+        }
+
+        .kff-help-sep {
+            color: rgba(200, 230, 255, 0.32);
+            font-size: 0.68rem;
+            font-weight: 500;
+            user-select: none;
+            margin: 0 0.02rem;
+        }
+
+        .kff-help-txt kbd,
+        .kff-help-inline .kff-help-txt kbd {
+            font-size: 0.64rem;
+            padding: 0.1rem 0.32rem 0.08rem;
+            vertical-align: 0.04em;
+        }
+
+        .kff-help-txt {
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: rgba(230, 236, 245, 0.88);
+            margin: 0;
+        }
+
+        .kff-help-meta {
+            font-size: 0.65rem;
+            line-height: 1.45;
+            color: rgba(180, 210, 230, 0.58);
+            margin: 0.2rem 0 0 0;
+            padding-left: 0.1rem;
+        }
+
+        .kff-help-inline kbd,
+        .kff-help-inline .kff-kbd--wide {
             display: inline-block;
-            padding: 0.1rem 0.35rem;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 210, 255, 0.35);
-            background: rgba(0, 0, 0, 0.35);
-            font-family: ui-monospace, monospace;
-            font-size: 0.7rem;
-            color: #00d2ff;
+            min-width: 1.1em;
+            text-align: center;
+            padding: 0.18rem 0.4rem 0.14rem;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            background: linear-gradient(180deg, rgba(0, 30, 55, 0.65) 0%, rgba(0, 8, 20, 0.75) 100%);
+            font-family: "Orbitron", ui-monospace, monospace;
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: #6ee7ff;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.35);
+            box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.08) inset, 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+        }
+
+        .kff-help-inline .kff-kbd--wide {
+            min-width: unset;
+            padding-left: 0.45rem;
+            padding-right: 0.45rem;
         }
 
         .kff-error {
@@ -339,12 +417,44 @@
                 </div>
             </div>
 
-            <div id="help-panel" class="kff-help-inline" hidden>
-                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>↑</kbd> / <kbd>↓</kbd> vorheriges / nächstes Orbital</p>
-                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>←</kbd> / <kbd>→</kbd> Auflösung (−1 / +1, mit <kbd>Shift</kbd> ±10)</p>
-                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>Leertaste</kbd> Auto-Rotation · <kbd>Esc</kbd> zurück</p>
-                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>1</kbd>–<kbd>9</kbd> / <kbd>0</kbd> Auflösung</p>
-                <p class="kff-intro" style="margin: 0"><kbd>H</kbd> Hilfe · Trackball: links drehen, Rad/ Mitte zoom, Rechts Schwenk</p>
+            <div id="help-panel" class="kff-help-inline" hidden role="region" aria-label="Tastaturkürzel">
+                <ul class="kff-help-list">
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>↑</kbd><span class="kff-help-sep">/</span><kbd>↓</kbd>
+                        </div>
+                        <p class="kff-help-txt">Vorheriges / nächstes Orbital</p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>←</kbd><span class="kff-help-sep">/</span><kbd>→</kbd>
+                        </div>
+                        <p class="kff-help-txt">Auflösung: ±1 pro Tastendruck, mit <kbd>Shift</kbd> jeweils ±10</p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd class="kff-kbd--wide">Leertaste</kbd>
+                            <span class="kff-help-sep">·</span>
+                            <kbd>Esc</kbd>
+                        </div>
+                        <p class="kff-help-txt">Auto-Rotation (Leertaste) · Zurück (Esc)</p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>1</kbd><span class="kff-help-sep">–</span><kbd>9</kbd><span class="kff-help-sep">/</span><kbd>0</kbd>
+                        </div>
+                        <p class="kff-help-txt">Auflösung: Schnellwahl (Ziffern)</p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>H</kbd>
+                        </div>
+                        <div>
+                            <p class="kff-help-txt">Hilfe ein- und ausblenden</p>
+                            <p class="kff-help-meta">Trackball: links drehen · Rad / Mitte zoom · rechts schwenken</p>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </aside>
