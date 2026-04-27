@@ -126,7 +126,6 @@
                 </div>
             `);
 
-
             CyberUI.createCard('parameters-container', 'DARSTELLUNG', `
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <input type="checkbox" id="check-helpers" checked style="display:none;">
@@ -376,6 +375,7 @@
             draw();
         }
 
+
         function draw() {
             cc.drawGrid({ vignette: true, glow: true });
             const ctx = cc.ctx;
@@ -529,6 +529,68 @@
             ctx.arc(cc.mapX(m2.x), cc.mapY(m2.y), 5, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
+
+            // --- ON-CANVAS CONGRUENCE INDICATOR (DEUTLICH GRÖSSER & DYNAMISCH) ---
+            const isInteracting = (dragID !== null) || 
+                                 (Math.abs(transform.rotation) > 0.01) || 
+                                 (Math.abs(transform.scale - 1.0) > 0.001) || 
+                                 (transform.isMirrored);
+
+            if (isInteracting) {
+                const getDist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                const urbild = (dragID !== null && dragBaseline) ? dragBaseline : points;
+                const bild = transformedPoints;
+                
+                const uSides = [getDist(urbild[0], urbild[1]), getDist(urbild[1], urbild[2]), getDist(urbild[2], urbild[0])];
+                const bSides = [getDist(bild[0], bild[1]), getDist(bild[1], bild[2]), getDist(bild[2], bild[0])];
+                const isCongruent = uSides.every((s, i) => Math.abs(s - bSides[i]) < 0.005);
+
+                const statusColor = isCongruent ? "#4ade80" : "#ff4d4d";
+                const statusGlow = isCongruent ? "rgba(74, 222, 128, 0.7)" : "rgba(255, 77, 77, 0.7)";
+                
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0); 
+                const padding = 30;
+                const boxW = 400, boxH = 100;
+                const bx = padding;
+                const by = padding;
+
+                // Box with glass effect
+                ctx.fillStyle = "rgba(10, 15, 26, 0.92)";
+                ctx.strokeStyle = statusColor;
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = statusGlow;
+                
+                const r = 20;
+                ctx.beginPath();
+                ctx.moveTo(bx + r, by); ctx.lineTo(bx + boxW - r, by);
+                ctx.quadraticCurveTo(bx + boxW, by, bx + boxW, by + r);
+                ctx.lineTo(bx + boxW, by + boxH - r);
+                ctx.quadraticCurveTo(bx + boxW, by + boxH, bx + boxW - r, by + boxH);
+                ctx.lineTo(bx + r, by + boxH);
+                ctx.quadraticCurveTo(bx, by + boxH, bx, by + boxH - r);
+                ctx.lineTo(bx, by + r);
+                ctx.quadraticCurveTo(bx, by, bx + r, by);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Icon
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = statusColor;
+                ctx.font = "bold 46px Orbitron";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(isCongruent ? "✓" : "✗", bx + 55, by + boxH / 2 + 4);
+
+                // Text
+                ctx.font = "bold 24px Orbitron";
+                ctx.textAlign = "left";
+                ctx.fillText(isCongruent ? "KONGRUENT" : "NICHT KONGRUENT", bx + 105, by + boxH / 2);
+                
+                ctx.restore();
+            }
 
         }
 

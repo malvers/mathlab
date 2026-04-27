@@ -87,7 +87,7 @@
         let mode = 'quadrat';
 
         const COLORS = {
-            A: "#00d2ff", B: "#4ade80", C: "#ff8800"
+            A: "#00d2ff", B: "#ff00ff", C: "#ffd700"
         };
 
         // 2. Build UI Cards
@@ -126,8 +126,8 @@
         function drawShape(pStart, pEnd, type, color) {
             ctx.save();
             ctx.fillStyle = color;
-            ctx.shadowBlur = 20; ctx.shadowColor = color;
-            ctx.globalAlpha = 0.8;
+            ctx.shadowBlur = 40; ctx.shadowColor = color;
+            ctx.globalAlpha = 0.65;
             ctx.beginPath();
 
             let dx = pEnd.x - pStart.x;
@@ -185,9 +185,12 @@
 
             // Zentrumsdreieck
             ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
-            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"; ctx.fill();
-            ctx.strokeStyle = "#050b18"; ctx.lineWidth = 2; ctx.stroke();
-            ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.strokeRect(ox, oy - 15, 15, 15);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.07)"; ctx.fill();
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; ctx.lineWidth = 2; ctx.stroke();
+            
+            // Rechter Winkel Symbol
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.2)"; 
+            ctx.strokeRect(ox, oy - 15, 15, 15);
 
             // Analysis
             let cmFactor = 40; let valA = a_px / cmFactor, valB = b_px / cmFactor;
@@ -201,14 +204,14 @@
 
             const resText = document.getElementById('result-text');
             const checkText = document.getElementById('check-text');
-            if(resText) resText.innerHTML = `<span style="color:${COLORS.A}">${areaA.toFixed(2)}</span> + <span style="color:${COLORS.B}">${areaB.toFixed(2)}</span> = ${areaSum.toFixed(2)}`;
-            if(checkText) checkText.innerText = `A₃ = ${areaSum.toFixed(2)}`;
+            if(resText) resText.innerHTML = `<span style="color:${COLORS.A}">${areaA.toFixed(2)}</span> + <span style="color:${COLORS.B}">${areaB.toFixed(2)}</span> = <span style="color:var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">${areaSum.toFixed(2)}</span>`;
+            if(checkText) checkText.innerHTML = `<span style="color:${COLORS.C}">A₃ = ${areaSum.toFixed(2)}</span>`;
 
             // Canvas Labels
-            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center"; ctx.fillStyle = "#050b18";
-            ctx.fillText(valA.toFixed(2), ox - 20, oy - a_px / 2);
-            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 20);
-            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + b_px / 2 + 15, oy - a_px / 2 - 15);
+            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillText(valA.toFixed(2), ox - 25, oy - a_px / 2);
+            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 25);
+            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + b_px / 2 + 20, oy - a_px / 2 - 20);
 
             // Handles
             const drawH = (p, color) => {
@@ -255,8 +258,4 @@
         setTimeout(draw, 50);
     </script>
 </body>
-</html>
-pt>
-</body>
-
 </html>

@@ -17,11 +17,14 @@
             align-items: center;
             overflow: hidden;
             position: relative;
+            min-height: 0;
+            flex: 1;
         }
 
         #stage-wrap {
             width: 100%;
             height: 100%;
+            min-height: min(70vh, 560px);
             display: flex;
             justify-content: center;
             align-items: stretch;
@@ -179,16 +182,18 @@
 
                 // 1. Target Layout berechnen
                 const layout = buildFibonacciSquares(Math.round(targetStep));
-                const unitW = layout.maxX - layout.minX;
-                const unitH = layout.maxY - layout.minY;
+                const unitW = Math.max(1e-6, layout.maxX - layout.minX);
+                const unitH = Math.max(1e-6, layout.maxY - layout.minY);
                 const pad = 80;
                 
-                const targetUnitPx = Math.min((w - pad * 2) / unitW, (h - pad * 2) / unitH);
+                const rawUnit = Math.min((w - pad * 2) / unitW, (h - pad * 2) / unitH);
+                const targetUnitPx =
+                    Number.isFinite(rawUnit) && rawUnit > 0 ? rawUnit : 1;
                 const targetOffsetX = (w - unitW * targetUnitPx) / 2 - layout.minX * targetUnitPx;
                 const targetOffsetY = (h - unitH * targetUnitPx) / 2 - layout.minY * targetUnitPx;
 
-                // 2. Smooth Interpolation (Zoom & Pan)
-                if (viewUnitPx === 0) {
+                // 2. Smooth Interpolation (Zoom & Pan) — bei Start oder ungültigen Werten sofort snappen
+                if (viewUnitPx === 0 || !Number.isFinite(viewUnitPx) || !Number.isFinite(viewOffsetX)) {
                     viewUnitPx = targetUnitPx;
                     viewOffsetX = targetOffsetX;
                     viewOffsetY = targetOffsetY;
@@ -198,15 +203,23 @@
                 viewOffsetX += (targetOffsetX - viewOffsetX) * 0.1;
                 viewOffsetY += (targetOffsetY - viewOffsetY) * 0.1;
 
-                // Zen-Modus Check: Wenn alles weg soll, zeichnen wir nichts
+                if (!Number.isFinite(viewUnitPx) || viewUnitPx <= 0) {
+                    viewUnitPx = targetUnitPx;
+                    viewOffsetX = targetOffsetX;
+                    viewOffsetY = targetOffsetY;
+                }
+
+                // Zen: nur Leiste ausblenden, Muster weiter zeichnen (leerer Vollbild-Modus war missverständlich)
                 if (localStorage.getItem("zen-mode") === "true") {
-                    ctx.clearRect(0, 0, w, h);
-                    document.getElementById("side-panel").style.display = "none";
-                    document.getElementById("mini-rail").style.display = "none";
-                    return;
+                    const sp = document.getElementById("side-panel");
+                    const nav = document.getElementById("mini-rail");
+                    if (sp) sp.style.display = "none";
+                    if (nav) nav.style.display = "none";
                 } else {
-                    document.getElementById("side-panel").style.display = "flex";
-                    document.getElementById("mini-rail").style.display = "flex";
+                    const sp = document.getElementById("side-panel");
+                    const nav = document.getElementById("mini-rail");
+                    if (sp) sp.style.display = "flex";
+                    if (nav) nav.style.display = "flex";
                 }
 
                 ctx.save();
