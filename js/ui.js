@@ -26,6 +26,7 @@ class CyberUI {
         
         // Inject the global donate modal structure
         this.injectDonateModal();
+        this.installAppScreenshot();
     }
 
     static injectCoffeeButton() {
@@ -103,6 +104,112 @@ class CyberUI {
     static showDonateModal() {
         const overlay = document.getElementById('cyber-donate-overlay');
         if (overlay) overlay.classList.add('open');
+    }
+
+    /**
+     * Cmd+S / Ctrl+S: PNG-Screenshot des größten sichtbaren Canvas (typisch WebGL-View).
+     * blockiert dabei den Browser-„Seite speichern“-Dialog. In Textfeldern unverändert.
+     */
+    static installAppScreenshot() {
+        if (window.__cyberAppScreenshotInstalled) return;
+        window.__cyberAppScreenshotInstalled = true;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 's' && e.key !== 'S') return;
+            if (!(e.metaKey || e.ctrlKey)) return;
+            const t = e.target;
+            if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            CyberUI.captureAppScreenshot();
+        }, true);
+    }
+
+    static _suggestedScreenshotFileStem() {
+        const part = (document.title && document.title.split(/\s*[|\u2013\u2014-]\s*/)[0].trim()) || 'lab';
+        const slug = part.replace(/[^\w\-.]+/g, '-').replace(/^-|-$/g, '') || 'lab';
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const ts = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+        return `cyber-lab-snapshot-${slug}-${ts}`;
+    }
+
+    static _selectPrimaryCanvas() {
+        let best = null;
+        let bestArea = 0;
+        for (const c of document.querySelectorAll('canvas')) {
+            if (!(c instanceof HTMLCanvasElement)) continue;
+            const r = c.getBoundingClientRect();
+            if (r.width < 2 || r.height < 2) continue;
+            const area = r.width * r.height;
+            if (area > bestArea) {
+                bestArea = area;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    static _flashScreenshotHint(message, isError) {
+        const id = 'cyber-screenshot-hint';
+        let el = document.getElementById(id);
+        if (el) el.remove();
+        el = document.createElement('div');
+        el.id = id;
+        el.setAttribute('role', 'status');
+        el.textContent = message;
+        el.style.cssText = [
+            'position:fixed',
+            'left:50%',
+            'bottom:28px',
+            'transform:translateX(-50%)',
+            'z-index:2147483646',
+            'max-width:min(90vw,420px)',
+            'padding:12px 18px',
+            'border-radius:12px',
+            'font-family:Outfit,system-ui,sans-serif',
+            'font-size:0.88rem',
+            'line-height:1.4',
+            'box-shadow:0 8px 28px rgba(0,0,0,0.4)',
+            isError
+                ? 'background:rgba(120,0,0,0.92);color:#fff;border:1px solid rgba(255,90,90,0.6);'
+                : 'background:rgba(0,32,48,0.95);color:#9de8ff;border:1px solid rgba(0,210,255,0.35);'
+        ].join('');
+        document.body.appendChild(el);
+        window.clearTimeout(CyberUI._flashScreenshotHint.t);
+        CyberUI._flashScreenshotHint.t = window.setTimeout(() => {
+            el.remove();
+        }, 3200);
+    }
+
+    static captureAppScreenshot() {
+        const canvas = CyberUI._selectPrimaryCanvas();
+        if (!canvas) {
+            CyberUI._flashScreenshotHint('Kein sichtbares Canvas – Screenshot entfällt (reine Text-/SVG-Seiten).', true);
+            return;
+        }
+        let dataUrl;
+        try {
+            dataUrl = canvas.toDataURL('image/png');
+        } catch (err) {
+            console.warn('CyberUI screenshot:', err);
+            CyberUI._flashScreenshotHint('Screenshot fehlgeschlagen (Canvas geschützt / CORS).', true);
+            return;
+        }
+        if (!dataUrl || dataUrl.length < 64 || dataUrl === 'data:,') {
+            CyberUI._flashScreenshotHint('Leeres Bild – ggf. preserveDrawingBuffer im WebGL-Renderer setzen.', true);
+            return;
+        }
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `${CyberUI._suggestedScreenshotFileStem()}.png`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        CyberUI._flashScreenshotHint('PNG heruntergeladen.');
     }
 
     static hideDonateModal() {
@@ -1512,4 +1619,9 @@ class CyberUI {
             }
         }
     }
+}
+
+/** Programmierter Aufruf wie Tastenkürzel (z. B. aus Labs). */
+if (typeof window !== 'undefined') {
+    window.CyberAppScreenshot = () => CyberUI.captureAppScreenshot();
 }
