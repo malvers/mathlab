@@ -113,6 +113,15 @@
             flex-shrink: 0;
         }
 
+        /* Einklappen: Padding/Flex-Minimum verhindert oft 0px-Breite (Doppelkante/Spalt neben Mini-Rail) */
+        #side-panel.collapsed {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 0 !important;
+            flex: 0 0 0 !important;
+            overflow: hidden !important;
+        }
+
         #side-panel .card-content > .cyber-control-group:first-child {
             margin-top: 0 !important;
         }
@@ -439,6 +448,8 @@
             if (paramCard) paramCard.classList.remove("kff-orbital-menu-open");
           }
         }
+
+        window.kffSetOrbitalDropdownOpen = setOrbitalDropdownOpen;
 
         function updateOrbitalOptionsSelection() {
           const panel = document.getElementById("orbital-dropdown-panel");
@@ -1167,6 +1178,9 @@
         function toggleSidebar() {
             const panel = document.getElementById("side-panel");
             panel.classList.toggle("collapsed");
+            if (panel.classList.contains("collapsed") && typeof window.kffSetOrbitalDropdownOpen === "function") {
+                window.kffSetOrbitalDropdownOpen(false);
+            }
             setTimeout(() => {
                 window.dispatchEvent(new Event("resize"));
             }, 400);
