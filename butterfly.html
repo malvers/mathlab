@@ -309,8 +309,13 @@
                 }
 
                 // --- PASS 2: CORE (Sharp Layer + Dynamic Hue) ---
+                ctx.save();
                 ctx.lineWidth = 2.5;
-                ctx.shadowBlur = 10;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                const chunkSize = 40;
+                let chunkCounter = 0;
                 
                 ctx.beginPath();
                 for (let t = 0; t <= drawLimit; t += step) {
@@ -318,18 +323,24 @@
                     const px = CyberCanvasInstance.mapX(pt.x);
                     const py = CyberCanvasInstance.mapY(pt.y);
                     
-                    // Chromatic shift based on path progress
-                    const hue = (state.params.hue + t * 5) % 360;
-                    ctx.strokeStyle = `hsl(${hue}, 100%, 75%)`;
-                    
-                    if (t === 0) ctx.moveTo(px, py);
-                    else {
-                        ctx.beginPath(); // New path per segment for gradient effect
-                        ctx.moveTo(oldX, oldY);
+                    if (t === 0) {
+                        ctx.moveTo(px, py);
+                    } else {
                         ctx.lineTo(px, py);
-                        ctx.stroke();
                     }
-                    var oldX = px, oldY = py;
+                    
+                    chunkCounter++;
+                    if (chunkCounter >= chunkSize || t + step > drawLimit) {
+                        const hue = (state.params.hue + t * 5) % 360;
+                        ctx.strokeStyle = `hsl(${hue}, 100%, 75%)`;
+                        ctx.stroke();
+                        
+                        if (t + step <= drawLimit) {
+                            ctx.beginPath();
+                            ctx.moveTo(px, py);
+                        }
+                        chunkCounter = 0;
+                    }
                 }
                 ctx.restore();
 
