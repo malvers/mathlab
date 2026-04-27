@@ -6,7 +6,7 @@
 
   Einstiegs-Orbital (Combo / state.orbitalIndex)
     Y₂,₋₂ — ORBITAL_TYPES.id === "L2M_MINUS2" — Konstante ORBITAL_INDEX_START.
-    Vorher Default war Y₀₀ (s); fillOrbitalSelect setzt value aus state.orbitalIndex.
+    Vorher Default war Y₀₀ (s); initOrbitalDropdown füllt die Liste + Trigger aus state.orbitalIndex.
 
   Kamera-Reset / Escape / rebuildOrbital
     applyDefaultCameraForCurrentOrbital: Distanz defaultCameraDistance(orbitalIndex),
@@ -84,24 +84,6 @@
             gap: 0;
             width: 100%;
             padding-bottom: 6px;
-        }
-
-        .kff-select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 210, 255, 0.45);
-            background: #0a1329;
-            color: #fff;
-            font-family: "Orbitron", sans-serif;
-            font-size: 0.75rem;
-            box-shadow: 0 0 12px rgba(0, 210, 255, 0.08);
-        }
-
-        .kff-select:focus {
-            outline: none;
-            border-color: var(--neon-blue, #00d2ff);
-            box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
         }
 
         #side-panel > #sidebar-header {
@@ -182,6 +164,64 @@
             margin-top: 0 !important;
             width: 100%;
         }
+
+        /* Custom-Dropdown: Y-Spalte fest, ORBITAL bündig (native <select> kann das nicht) */
+        #side-panel .kff-orbital-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        #side-panel .kff-orbital-trigger {
+            text-align: left;
+            display: block !important;
+        }
+
+        #side-panel .kff-orbital-trigger-inner,
+        #side-panel .kff-orbital-option {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 0.4rem;
+        }
+
+        #side-panel .kff-orbital-y {
+            flex: 0 0 5.5ch;
+            min-width: 5.5ch;
+            text-align: left;
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.75rem;
+        }
+
+        #side-panel .kff-orbital-tag {
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+        }
+
+        #side-panel .kff-orbital-panel.kff-orbital-panel--open {
+            display: block !important;
+        }
+
+        #side-panel .kff-orbital-option[aria-selected="true"] {
+            background: rgba(0, 210, 255, 0.12) !important;
+        }
+
+        /* Offenes Orbital-Menü über allen folgenden Karten (z. B. LICHT & ANSICHT) */
+        #side-panel .kff-param-card.kff-orbital-menu-open {
+            position: relative;
+            z-index: 5000000;
+            isolation: isolate;
+        }
+
+        #side-panel .kff-param-card.kff-orbital-menu-open #orbital-dropdown-panel {
+            z-index: 5000001 !important;
+            background: rgba(6, 12, 26, 0.98) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body>
@@ -202,13 +242,19 @@
             <div class="instrument-card kff-param-card">
                 <div class="instrument-title" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);">PARAMETER</div>
                 <div class="card-content">
-                    <div class="cyber-control-group">
+                    <div class="cyber-control-group kff-orbital-row">
                         <div class="label-row">
                             <span>Orbital</span>
                         </div>
-                        <label>
-                            <select id="orbital-select" class="kff-select" aria-label="Orbital wählen"></select>
-                        </label>
+                        <div class="kff-orbital-dropdown cyber-dropdown" id="kff-orbital-root">
+                            <button type="button" class="cyber-select kff-orbital-trigger" id="orbital-trigger" style="width: 100%; font-family: 'Orbitron', sans-serif !important;" aria-haspopup="listbox" aria-expanded="false" aria-controls="orbital-dropdown-panel" aria-label="Orbital wählen">
+                                <span class="kff-orbital-trigger-inner" id="orbital-trigger-line">
+                                    <span class="kff-orbital-y" id="orbital-trigger-y">Y0,0</span>
+                                    <span class="kff-orbital-tag">ORBITAL</span>
+                                </span>
+                            </button>
+                            <div class="dropdown-panel kff-orbital-panel" id="orbital-dropdown-panel" role="listbox" aria-labelledby="orbital-trigger" hidden></div>
+                        </div>
                     </div>
                     <div class="cyber-control-group">
                         <div class="label-row">
@@ -336,6 +382,58 @@
 
         /** Einstieg: Y₂,₋₂ (l=2, m=−2), nicht Y₀₀. */
         const ORBITAL_INDEX_START = ORBITAL_TYPES.findIndex((t) => t.id === "L2M_MINUS2");
+
+        function orbitalYPart(orbitalId) {
+          if (orbitalId === "L0M0") return "Y0,0";
+          const m = String(orbitalId).match(/^L(\d+)M_(MINUS(\d+)|PLUS(\d+)|(\d+))$/);
+          if (!m) return String(orbitalId);
+          const l = m[1];
+          let mag;
+          if (m[3]) mag = -Number(m[3]);
+          else if (m[4]) mag = Number(m[4]);
+          else mag = Number(m[5]);
+          return `Y${l},${mag}`;
+        }
+
+        function orbitalSelectOptionText(orbitalId) {
+          return `${orbitalYPart(orbitalId)} ORBITAL`;
+        }
+
+        function updateOrbitalTriggerLine() {
+          const yEl = document.getElementById("orbital-trigger-y");
+          if (!yEl) return;
+          const id = ORBITAL_TYPES[state.orbitalIndex].id;
+          yEl.textContent = orbitalYPart(id);
+        }
+
+        function setOrbitalDropdownOpen(open) {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          const tr = document.getElementById("orbital-trigger");
+          if (!panel || !tr) return;
+          const paramCard = document.querySelector("#side-panel .kff-param-card");
+          if (open) {
+            panel.removeAttribute("hidden");
+            panel.classList.add("kff-orbital-panel--open");
+            tr.setAttribute("aria-expanded", "true");
+            if (paramCard) paramCard.classList.add("kff-orbital-menu-open");
+          } else {
+            panel.setAttribute("hidden", "");
+            panel.classList.remove("kff-orbital-panel--open");
+            tr.setAttribute("aria-expanded", "false");
+            if (paramCard) paramCard.classList.remove("kff-orbital-menu-open");
+          }
+        }
+
+        function updateOrbitalOptionsSelection() {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          if (!panel) return;
+          const opts = panel.querySelectorAll(".kff-orbital-option[role=option]");
+          opts.forEach((el) => {
+            const i = Number(el.getAttribute("data-index"));
+            const sel = i === state.orbitalIndex;
+            el.setAttribute("aria-selected", sel ? "true" : "false");
+          });
+        }
         
         const LATEX_BY_ID = {
           L0M0: String.raw`Y_{0,0} = \sqrt{\frac{1}{4\pi}}`,
@@ -690,6 +788,8 @@
           applyDefaultCameraForCurrentOrbital();
           renderFormula(id);
           updateStats();
+          updateOrbitalTriggerLine();
+          updateOrbitalOptionsSelection();
         }
         
         function renderFormula(orbitalId) {
@@ -770,7 +870,7 @@
           const tris = idx ? idx.count / 3 : 0;
           const id = ORBITAL_TYPES[state.orbitalIndex].id;
           const rest = [
-            `${ORBITAL_TYPES[state.orbitalIndex].label} (${id})`,
+            orbitalSelectOptionText(id),
             `Auflösung: ${state.resolution}`,
             `Punkte: ${verts.toLocaleString()}`,
             `Dreiecke: ${Math.floor(tris).toLocaleString()}`,
@@ -860,23 +960,53 @@
           renderer.render(scene, camera);
         }
         
-        function fillOrbitalSelect() {
-          const sel = document.getElementById("orbital-select");
+        function initOrbitalDropdown() {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          if (!panel) return;
+          panel.innerHTML = "";
           ORBITAL_TYPES.forEach((t, i) => {
-            const opt = document.createElement("option");
-            opt.value = String(i);
-            opt.textContent = `${t.label} — ${t.id}`;
-            sel.appendChild(opt);
+            const row = document.createElement("div");
+            row.className = "dropdown-option kff-orbital-option";
+            row.setAttribute("role", "option");
+            row.setAttribute("data-index", String(i));
+            row.setAttribute("tabindex", "-1");
+            row.innerHTML = `<span class="kff-orbital-y">${orbitalYPart(t.id)}</span><span class="kff-orbital-tag">ORBITAL</span>`;
+            row.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const idx = Number(row.getAttribute("data-index"));
+              if (state.orbitalIndex === idx) {
+                setOrbitalDropdownOpen(false);
+                return;
+              }
+              state.orbitalIndex = idx;
+              updateOrbitalOptionsSelection();
+              updateOrbitalTriggerLine();
+              setOrbitalDropdownOpen(false);
+              rebuildOrbital();
+            });
+            panel.appendChild(row);
           });
-          sel.value = String(state.orbitalIndex);
+          updateOrbitalOptionsSelection();
+          updateOrbitalTriggerLine();
+
+          const root = document.getElementById("kff-orbital-root");
+          if (root && !root.dataset.kffWired) {
+            root.dataset.kffWired = "1";
+            root.addEventListener("click", (e) => e.stopPropagation());
+            const tr0 = document.getElementById("orbital-trigger");
+            if (tr0) {
+              tr0.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const panelEl = document.getElementById("orbital-dropdown-panel");
+                const nowOpen = panelEl && !panelEl.hasAttribute("hidden");
+                setOrbitalDropdownOpen(!nowOpen);
+              });
+            }
+            document.addEventListener("click", () => setOrbitalDropdownOpen(false));
+          }
         }
         
         function wireUi() {
-          document.getElementById("orbital-select").addEventListener("change", (e) => {
-            state.orbitalIndex = Number(e.target.value);
-            rebuildOrbital();
-          });
-        
           const res = document.getElementById("resolution");
           const resVal = document.getElementById("resolution-value");
           res.addEventListener("input", () => {
@@ -931,14 +1061,12 @@
               case "ArrowUp": {
                 ev.preventDefault();
                 state.orbitalIndex = (state.orbitalIndex + 1) % ORBITAL_TYPES.length;
-                document.getElementById("orbital-select").value = String(state.orbitalIndex);
                 rebuildOrbital();
                 break;
               }
               case "ArrowDown": {
                 ev.preventDefault();
                 state.orbitalIndex = (state.orbitalIndex - 1 + ORBITAL_TYPES.length) % ORBITAL_TYPES.length;
-                document.getElementById("orbital-select").value = String(state.orbitalIndex);
                 rebuildOrbital();
                 break;
               }
@@ -966,6 +1094,7 @@
                 break;
               }
               case "Escape": {
+                setOrbitalDropdownOpen(false);
                 meshGroup.rotation.set(0, 0, 0);
                 state.autoRotate = false;
                 resetCameraView();
@@ -1006,7 +1135,7 @@
         }
         
         try {
-          fillOrbitalSelect();
+          initOrbitalDropdown();
           wireUi();
           initThree();
           document.getElementById("resolution").value = String(state.resolution);
