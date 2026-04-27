@@ -13,7 +13,103 @@ class CyberUI {
             minHeight: 620,
             message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
         });
+
+        // Robust injection: retry until mini-rail is found
+        const tryInject = () => {
+            if (CyberUI.injectCoffeeButton()) {
+                console.log("☕ Cyber-Coffee injected.");
+            } else {
+                setTimeout(tryInject, 100);
+            }
+        };
+        tryInject();
+        
+        // Inject the global donate modal structure
+        this.injectDonateModal();
     }
+
+    static injectCoffeeButton() {
+        const miniRail = document.getElementById('mini-rail');
+        if (!miniRail) return false;
+
+        if (miniRail.querySelector('.coffee-btn')) return true;
+
+        const coffeeBtn = document.createElement('div');
+        coffeeBtn.className = "nav-btn coffee-btn";
+        coffeeBtn.title = "Cyber-Kaffee spendieren";
+        coffeeBtn.onclick = () => CyberUI.showDonateModal();
+        coffeeBtn.style.color = "#ffd700";
+        coffeeBtn.style.borderColor = "rgba(255, 215, 0, 0.3)";
+        coffeeBtn.style.textDecoration = "none";
+        
+        coffeeBtn.innerHTML = `
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px !important; height: 22px !important; stroke-width: 1.5 !important;">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+        `;
+
+        coffeeBtn.onmouseover = () => {
+            coffeeBtn.style.borderColor = "#ffe033";
+            coffeeBtn.style.boxShadow = "0 0 20px rgba(255, 215, 0, 0.4)";
+            coffeeBtn.style.color = "#ffe033";
+        };
+        coffeeBtn.onmouseout = () => {
+            coffeeBtn.style.borderColor = "rgba(255, 215, 0, 0.3)";
+            coffeeBtn.style.boxShadow = "none";
+            coffeeBtn.style.color = "#ffd700";
+        };
+
+        miniRail.appendChild(coffeeBtn);
+        return true;
+    }
+
+    static injectDonateModal() {
+        if (document.getElementById('cyber-donate-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'cyber-donate-overlay';
+        overlay.className = 'cyber-overlay';
+        overlay.onclick = () => CyberUI.hideDonateModal();
+
+        overlay.innerHTML = `
+            <div class="cyber-modal" onclick="event.stopPropagation()">
+                <h3 style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">Cyber-Kaffee Spendieren</h3>
+                <p>Dir gefallen die interaktiven Labore und du möchtest die Weiterentwicklung des Cyber-Labors unterstützen? Ich freue mich über jeden virtuellen Kaffee, der mich nachts beim Coden wachhält! ☕️🚀</p>
+                
+                <a href="https://www.paypal.com/donate/?business=michael.r.alvers@gmail.com&no_recurring=1&currency_code=EUR" 
+                   target="_blank" 
+                   style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; padding: 15px; border-radius: 8px; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 1rem; margin: 25px 0 15px 0; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);"
+                   onmouseover="this.style.background='rgba(255, 215, 0, 0.2)'; this.style.boxShadow='0 0 25px rgba(255, 215, 0, 0.4)';"
+                   onmouseout="this.style.background='rgba(255, 215, 0, 0.1)'; this.style.boxShadow='0 0 15px rgba(255, 215, 0, 0.2)';"
+                >
+                    <svg viewBox="0 0 24 24" width="22" height="22" style="margin-top:-2px;">
+                        <path fill="#00457C" d="M20.067 8.478c-.492-3.269-3.111-4.721-7.01-4.721H6.848a1.05 1.05 0 0 0-1.042.88L3.25 20.893c-.033.208.13.393.342.393h3.585a.99.99 0 0 0 .984-.836l.72-4.57c.063-.4.401-.699.807-.699h1.764c3.513 0 6.071-1.633 6.643-5.263.15-.953.07-1.71-.247-2.316l.22.876z"/>
+                        <path fill="#0079C1" d="M19.467 8.162c-.183-.497-.478-.91-.861-1.246-.826-.723-2.222-1.002-4.004-1.002h-4.32a.965.965 0 0 0-.958.81l-2.457 15.61c-.031.196.12.366.319.366h3.42a.91.91 0 0 0 .905-.769l.79-5.01c.058-.368.369-.643.743-.643h1.62c3.23 0 5.584-1.503 6.112-4.843.197-1.25.044-2.274-.309-3.273z"/>
+                    </svg>
+                    JETZT SPENDEN MIT PayPal
+                </a>
+                
+                <button class="cyber-modal-close" onclick="CyberUI.hideDonateModal()">SCHLIESSEN</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
+
+    static showDonateModal() {
+        const overlay = document.getElementById('cyber-donate-overlay');
+        if (overlay) overlay.classList.add('open');
+    }
+
+    static hideDonateModal() {
+        const overlay = document.getElementById('cyber-donate-overlay');
+        if (overlay) overlay.classList.remove('open');
+    }
+
 
     static installResourceGuard() {
         if (window.__cyberResourceGuardInstalled) return;
@@ -862,6 +958,70 @@ class CyberUI {
                 filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.45));
             }
 
+            /* GLOBAL MODAL STYLES (Cyber-Branding) */
+            .cyber-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(5, 11, 24, 0.85);
+                backdrop-filter: blur(15px);
+                z-index: 50000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            .cyber-overlay.open {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .cyber-modal {
+                background: rgba(15, 23, 42, 0.95);
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                border-radius: 20px;
+                padding: 40px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255, 215, 0, 0.1);
+                position: relative;
+                color: #fff;
+                font-family: 'Inter', sans-serif;
+                text-align: center;
+            }
+            .cyber-modal h3 {
+                margin-top: 0;
+                font-family: 'Orbitron', sans-serif;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                margin-bottom: 20px;
+            }
+            .cyber-modal p {
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.8);
+                margin-bottom: 30px;
+                font-size: 0.95rem;
+            }
+            .cyber-modal-close {
+                display: block;
+                margin: 20px auto 0 auto;
+                padding: 8px 16px;
+                font-family: 'Inter', sans-serif;
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 6px;
+                color: rgba(255, 255, 255, 0.4);
+                cursor: pointer;
+                transition: all 0.2s;
+                text-transform: uppercase;
+            }
+            .cyber-modal-close:hover {
+                background: rgba(255, 255, 255, 0.05);
+                color: rgba(255, 255, 255, 0.8);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
         `;
         document.head.appendChild(style);
     }
