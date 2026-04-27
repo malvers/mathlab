@@ -575,5 +575,20 @@ const LABS_DATA = [
         "category": "highlight dreiecke geometrie hot grade8",
         "keywords": "fermat punkt geometrie dreieck abstand minimierung netz kürzeste wege",
         "color": "purple"
+    },
+    {
+        "id": "gleichungssysteme",
+        "href": "gleichungssysteme.html",
+        "title": "LGS Labor",
+        "description": "Erkunde Lineare Gleichungssysteme visuell. Ziehe Geraden, beobachte die Formeln in Echtzeit und scrambele die Notation für echte Gehirn-Akrobatik.",
+        "tagline": "Schnittpunkte / Lineare Algebra",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="80" x2="80" y2="20" stroke="var(--neon-blue)" stroke-width="2.5" />
+            <line x1="20" y1="30" x2="80" y2="70" stroke="var(--neon-orange)" stroke-width="2.5" />
+            <circle cx="50" cy="50" r="4.5" fill="var(--neon-green)" style="filter: drop-shadow(0 0 5px var(--neon-green));" />
+        </svg>`,
+        "category": "highlight lgs geometrie hot grade8",
+        "keywords": "lgs gleichungssystem schnittpunkt geraden algebra mathe",
+        "color": "green"
     }
 ];
