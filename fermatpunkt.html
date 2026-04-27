@@ -202,6 +202,15 @@
             // Math Tools
             const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
+            const isInside = (p, a, b, c) => {
+                const area = (p1, p2, p3) => Math.abs((p1.x*(p2.y - p3.y) + p2.x*(p3.y - p1.y) + p3.x*(p1.y - p2.y)) / 2);
+                const A = area(a, b, c);
+                const A1 = area(p, b, c);
+                const A2 = area(a, p, c);
+                const A3 = area(a, b, p);
+                return Math.abs(A - (A1 + A2 + A3)) < 0.5;
+            };
+
             const getAngle = (p1, p2, p3) => {
                 const a = dist(p2, p3);
                 const b = dist(p1, p3);
@@ -373,8 +382,33 @@
             const doDrag = (e) => {
                 if (!activeDrag) return;
                 const coords = getMouseCoords(e);
-                pts[activeDrag].x = Math.max(20, Math.min(580, coords.x));
-                pts[activeDrag].y = Math.max(20, Math.min(580, coords.y));
+                
+                // 1. Ränder-Kollision
+                let nx = Math.max(25, Math.min(575, coords.x));
+                let ny = Math.max(25, Math.min(575, coords.y));
+                
+                // 2. Punkt-Punkt-Kollision (A, B, C, P)
+                const minDist = 35;
+                for (let id in pts) {
+                    if (id === activeDrag) continue;
+                    if (id === 'P' && !showP) continue; // P ignorieren wenn ausgeblendet
+                    if (dist({x: nx, y: ny}, pts[id]) < minDist) return; // Bewegung blockieren
+                }
+                
+                // 3. P-In-Triangle Kollision (P darf das Dreieck nicht verlassen)
+                if (activeDrag === 'P') {
+                    if (!isInside({x: nx, y: ny}, pts.A, pts.B, pts.C)) return;
+                }
+                
+                // 4. Eckpunkt-Kollision (Verhindert, dass Ecken so bewegt werden, dass P "rausfliegt")
+                if (activeDrag === 'A' || activeDrag === 'B' || activeDrag === 'C') {
+                    const nextPts = { ...pts };
+                    nextPts[activeDrag] = { x: nx, y: ny };
+                    if (!isInside(pts.P, nextPts.A, nextPts.B, nextPts.C)) return;
+                }
+
+                pts[activeDrag].x = nx;
+                pts[activeDrag].y = ny;
                 draw();
             };
 
