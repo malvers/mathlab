@@ -509,6 +509,22 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "atomorbitale",
+        "href": "orbitals.html",
+        "title": "Atomorbitale",
+        "description": "Kugelflächenfunktionen Y_ℓ^m in 3D: Kugelfläche und optionale |Y|²-Punktwolke, KaTeX-Formeln, Orbitwechsel. Cyber-Lab-Optik, Trackball, Auto-Rotation.",
+        "tagline": "Kugelflächen / Harmonische / 3D",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="5" fill="var(--neon-cyan)" style="filter: drop-shadow(0 0 6px var(--neon-cyan));" />
+            <ellipse cx="50" cy="50" rx="34" ry="10" fill="none" stroke="var(--neon-blue)" stroke-width="1.4" />
+            <ellipse cx="50" cy="50" rx="10" ry="34" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" transform="rotate(30 50 50)" />
+            <path d="M 50 20 Q 62 40 50 50 Q 38 40 50 20 M 50 50 Q 62 60 50 80 Q 38 60 50 50" fill="none" stroke="var(--neon-green)" stroke-width="1.2" />
+        </svg>`,
+        "category": "highlight hot grade11 grade12 oberstufe fun",
+        "keywords": "atom orbital kugelflächenfunktion kff harmonische ylm wahrscheinlichkeit 3d quanten chemie physik d orbital",
+        "color": "blue"
+    },
+    {
         "id": "opti-lens",
         "href": "LensStandalone/cmaes_java.html",
         "title": "OPTI-LENS Premium",
