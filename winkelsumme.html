@@ -250,8 +250,49 @@
         canvas.onpointermove = e => {
             if (dragIdx === -1) return;
             const pos = getPos(e);
-            points[dragIdx] = { x: pos.x, y: pos.y };
-            draw();
+            
+            // 1. Ränder-Kollision
+            const margin = 30;
+            let nx = Math.max(margin, Math.min(width - margin, pos.x));
+            let ny = Math.max(margin, Math.min(height - margin, pos.y));
+            
+            // 2. Punkt-Punkt-Kollision
+            const minDist = 35;
+            for(let i=0; i<points.length; i++) {
+                if(i === dragIdx) continue;
+                if(Math.hypot(points[i].x - nx, points[i].y - ny) < minDist) return;
+            }
+
+            // 3. Selbst-Schnitt-Kollision (Kein "Überkreuzen" erlauben)
+            const n = points.length;
+            const testPoints = [...points];
+            testPoints[dragIdx] = { x: nx, y: ny };
+
+            const intersects = (p1, p2, p3, p4) => {
+                const det = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+                if (det === 0) return false;
+                const lambda = ((p4.y - p3.y) * (p4.x - p1.x) + (p3.x - p4.x) * (p4.y - p1.y)) / det;
+                const gamma = ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) / det;
+                return (0.01 < lambda && lambda < 0.99) && (0.01 < gamma && gamma < 0.99);
+            };
+
+            // Prüfe alle Kanten gegen alle anderen Kanten
+            let hasIntersection = false;
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 2; j < n; j++) {
+                    if (i === 0 && j === n - 1) continue;
+                    if (intersects(testPoints[i], testPoints[(i + 1) % n], testPoints[j], testPoints[(j + 1) % n])) {
+                        hasIntersection = true;
+                        break;
+                    }
+                }
+                if (hasIntersection) break;
+            }
+
+            if (!hasIntersection) {
+                points[dragIdx] = { x: nx, y: ny };
+                draw();
+            }
         };
 
         canvas.onpointerup = e => {
