@@ -558,5 +558,22 @@ const LABS_DATA = [
         "category": "fun highlight geometrie hot grade8",
         "keywords": "fibonacci spirale goldener schnitt wachstum quadrat folge unendlichkeit",
         "color": "orange"
+    },
+    {
+        "id": "fermatpunkt",
+        "href": "fermatpunkt.html",
+        "title": "Fermat-Punkt",
+        "description": "Finde den Punkt, dessen Abstandssumme zu den Ecken eines Dreiecks minimal ist. Beweise, dass F das absolute Strecken-Minimum bildet.",
+        "tagline": "Kürzeste Netze / Geometrische Optimierung",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,20 20,70 80,70" fill="rgba(0, 210, 255, 0.1)" stroke="var(--neon-blue)" stroke-width="1.5" />
+            <line x1="50" y1="53" x2="50" y2="20" stroke="var(--neon-purple)" stroke-width="1.5" stroke-dasharray="2 2" />
+            <line x1="50" y1="53" x2="20" y2="70" stroke="var(--neon-purple)" stroke-width="1.5" stroke-dasharray="2 2" />
+            <line x1="50" y1="53" x2="80" y2="70" stroke="var(--neon-purple)" stroke-width="1.5" stroke-dasharray="2 2" />
+            <circle cx="50" cy="53" r="3" fill="var(--neon-purple)" />
+        </svg>`,
+        "category": "highlight dreiecke geometrie hot grade8",
+        "keywords": "fermat punkt geometrie dreieck abstand minimierung netz kürzeste wege",
+        "color": "purple"
     }
 ];
