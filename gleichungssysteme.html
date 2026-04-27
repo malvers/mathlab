@@ -116,8 +116,13 @@
 
         window.addEventListener('load', () => {
             console.log("📦 DOM Load complete. Initializing components...");
-            
             try {
+                // Initialize Engine & Load Settings FIRST so UI knows the correct state
+                cc = new CyberCanvas();
+                loadSettings();
+                cc.init('canvas', cc.view || { minX: -10, maxX: 10, minY: -10, maxY: 10 });
+
+
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         useExternalStyles: true,
@@ -142,29 +147,40 @@
                             <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron';">MAGNET-SNAP</span>
                             <input type="checkbox" id="snap-toggle" ${snapToGrid ? 'checked' : ''} style="cursor: pointer;" onchange="snapToGrid = this.checked; saveSettings();">
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">NOTATION</span>
-                            <select id="scramble-combo" style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(0, 210, 255, 0.3); color: var(--neon-blue); font-family: 'Orbitron'; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; font-size: 0.7rem;" onchange="setScrambleLevel(this.value)">
-                                <option value="0" ${scrambleLevel == 0 ? 'selected' : ''}>NORMAL</option>
-                                <option value="1" ${scrambleLevel == 1 ? 'selected' : ''}>GESPIEGELT</option>
-                                <option value="2" ${scrambleLevel == 2 ? 'selected' : ''}>SKALIERT (2Y)</option>
-                                <option value="3" ${scrambleLevel == 3 ? 'selected' : ''}>IMPLIZIT A</option>
-                                <option value="4" ${scrambleLevel == 4 ? 'selected' : ''}>IMPLIZIT B</option>
-                                <option value="5" ${scrambleLevel == 5 ? 'selected' : ''}>ZUFALL MIX</option>
-                            </select>
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NOTATION</span>
+                            <div id="scramble-dropdown-container" style="width: 100%;"></div>
                         </div>
                         <div style="display: flex; gap: 10px; margin-top: 5px;">
                             <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">NEUE AUFGABE</button>
                             <button class="cyber-button" onclick="resetView()" style="flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">VIEW RESET</button>
                         </div>
                     `, 'var(--neon-blue)', { collapsible: false });
+                    
+                    const scrambleOptions = [
+                        { id: "0", label: `<span class="math-part" data-tex="y=..">y=..</span> <span class="desc-part">NORMAL</span>` },
+                        { id: "1", label: `<span class="math-part" data-tex="..=y">..=y</span> <span class="desc-part">GESPIEGELT</span>` },
+                        { id: "2", label: `<span class="math-part" data-tex="sy=..">sy=..</span> <span class="desc-part">SKALIERT (sY)</span>` },
+                        { id: "3", label: `<span class="math-part" data-tex="mx-y">mx-y</span> <span class="desc-part">IMPLIZIT A</span>` },
+                        { id: "4", label: `<span class="math-part" data-tex="y-mx">y-mx</span> <span class="desc-part">IMPLIZIT B</span>` },
+                        { id: "5", label: `<span class="math-part" data-tex="?\\!">?\\!</span> <span class="desc-part">ZUFALL MIX</span>` }
+                    ];
+
+                    CyberUI.createDropdown('scramble-dropdown-container', scrambleOptions, (val) => {
+                        window.setScrambleLevel(val);
+                    }, String(scrambleLevel));
+                    
+                    setTimeout(() => {
+                        const mp = document.querySelector('#scramble-dropdown-container .selected-val .math-part');
+                        if (mp && window.katex) {
+                            window.katex.render(mp.dataset.tex, mp, { throwOnError: false });
+                        }
+                    }, 100);
                 }
 
                 // Interaction Hooks
-                cc = new CyberCanvas();
-                loadSettings(); // Erst hier laden, da cc existieren muss
-                cc.init('canvas', cc.view || { minX: -10, maxX: 10, minY: -10, maxY: 10 });
                 
+
                 cc.onMouseDown = (pos) => {
                     const threshold = 0.5;
                     let hit = null;
@@ -288,6 +304,8 @@
                 line1.form = scrambleLevel;
                 line2.form = scrambleLevel;
             }
+            line1.scale = Math.floor(Math.random() * 4) + 2;
+            line2.scale = Math.floor(Math.random() * 4) + 2;
             saveSettings();
             draw();
         };
@@ -301,6 +319,8 @@
                 line1.form = scrambleLevel;
                 line2.form = scrambleLevel;
             }
+            line1.scale = Math.floor(Math.random() * 4) + 2;
+            line2.scale = Math.floor(Math.random() * 4) + 2;
             // ... (rest of logic)
             // 1. Ganzzahligen Schnittpunkt würfeln (x zwischen -6 und 6, aber nicht 0)
             const xs = (Math.floor(Math.random() * 12) - 6) || 4; 
@@ -467,10 +487,11 @@
                 const dx = line.p2.x - line.p1.x;
                 const dy = line.p2.y - line.p1.y;
                 const f = scrambleLevel === 0 ? 0 : (line.form || 0);
-                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x, form: f };
+                const scale = line.scale || 2;
+                if (Math.abs(dx) < 0.001) return { m: null, b: line.p1.x, form: f, scale };
                 const m = dy / dx;
                 const b = line.p1.y - m * line.p1.x;
-                return { m, b, form: f };
+                return { m, b, form: f, scale };
             };
 
             const eq1 = getEqData(line1);
@@ -486,7 +507,7 @@
                         let l, r;
                         switch(data.form) {
                             case 1: l = xValStr; r = `x`; break;
-                            case 2: l = `2x`; r = (bVal * 2).toFixed(2); break;
+                            case 2: l = `${data.scale}x`; r = (bVal * data.scale).toFixed(2); break;
                             case 3: l = `x - ${xValStr}`; r = `0.00`; break;
                             case 4: l = `-x`; r = `-${xValStr}`; break;
                             default: l = `x`; r = xValStr; break;
@@ -515,12 +536,13 @@
                             }
                             right = `y`;
                             break;
-                        case 2: // Scaled: 2y = 2mx + 2b
-                            left = `2y`;
+                        case 2: // Scaled: sy = smx + sb
+                            const s = data.scale;
+                            left = `${s}y`;
                             if (isMZero) {
-                                right = (bVal * 2) < 0 ? `-${Math.abs(bVal*2).toFixed(2)}` : `${Math.abs(bVal*2).toFixed(2)}`;
+                                right = (bVal * s) < 0 ? `-${Math.abs(bVal*s).toFixed(2)}` : `${Math.abs(bVal*s).toFixed(2)}`;
                             } else {
-                                right = `${(mVal*2).toFixed(2)}x ${bVal*2 >= 0 ? "+" : "-"} ${Math.abs(bVal*2).toFixed(2)}`;
+                                right = `${(mVal*s).toFixed(2)}x ${bVal*s >= 0 ? "+" : "-"} ${Math.abs(bVal*s).toFixed(2)}`;
                             }
                             break;
                         case 3: // Implicit: mx - y = -b
