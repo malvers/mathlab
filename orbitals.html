@@ -1,9 +1,28 @@
 <!DOCTYPE html>
+<!--
+  === Atomorbitale (Kugelflächenfunktionen) ===
+  Laufzeit: three@0.160 (importmap, unpkg), TrackballControls, RoomEnvironment, KaTeX.
+  Kein Bundler nötig; Seite lokal per file:// nutzbar, sofern Netz für CDN-Imports.
+
+  Einstiegs-Orbital (Combo / state.orbitalIndex)
+    Y₂,₋₂ — ORBITAL_TYPES.id === "L2M_MINUS2" — Konstante ORBITAL_INDEX_START.
+    Vorher Default war Y₀₀ (s); fillOrbitalSelect setzt value aus state.orbitalIndex.
+
+  Kamera-Reset / Escape / rebuildOrbital
+    applyDefaultCameraForCurrentOrbital: Distanz defaultCameraDistance(orbitalIndex),
+    Blick (0,0,0), optional KFF_START_VIEW_DEG (90° Y, 2° X, −2° Y fein).
+
+  Styling: js/cyber-layout.css, buttons-ultra.css, cyber-lab-overrides, branding; orbitals/styles.css.
+  Steuerung: Tasten/Hilfe im Markup; Telemetrie-Zeilen optional entfernbar (#stats* fehlend = updateStats no-op).
+
+  Wartung: große Logik im Modul-Block unten; build-inline-kff.sh nur bei ausgelagerten .js-Quellen relevant.
+  Safety-guard: große reine Lösch-Diffs an dieser Datei triggern Commit-Blocker — Doku-Block bewusst etwas breiter.
+-->
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Orbitals (KFF)</title>
+    <title>docalvers | Atomorbitale</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" href="resources/favicon.png">
@@ -45,34 +64,72 @@
         }
 
         /* Seitenleiste: Inhalt aus orbitals/index.html, ohne eigenes Vollbild-Panel-Grid */
-        #side-panel .orbitals-aside {
-            border: none;
-            background: transparent;
-            padding: 0.2rem 0.15rem 0.75rem 0.15rem;
-        }
-
-        #side-panel .orbitals-aside h1 {
-            font-size: 0.95rem;
-            color: var(--branding-white, #fff);
-        }
-
-        .orb-stats {
-            font-size: 0.7rem;
-            line-height: 1.4;
-            color: var(--muted, #b8b0a0);
-            padding: 0.4rem 0.2rem 0;
-            border-top: 1px solid rgba(255, 170, 68, 0.2);
-            margin-top: 0.35rem;
-        }
-
-        .orb-stats .footer-zoom {
-            color: #ffaa44;
-            font-size: 0.65rem;
-            margin: 0 0 0.4rem 0;
-        }
-
-        .orb-stats .footer-meta {
+        .kff-intro {
             margin: 0;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .kff-intro code {
+            font-size: 0.72em;
+        }
+
+        .orbital-panel-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            width: 100%;
+            padding-bottom: 6px;
+        }
+
+        .kff-select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            background: #0a1329;
+            color: #fff;
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.75rem;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.08);
+        }
+
+        .kff-select:focus {
+            outline: none;
+            border-color: var(--neon-blue, #00d2ff);
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
+        }
+
+        #side-panel > #sidebar-header {
+            flex-shrink: 0;
+        }
+
+        #side-panel .card-content > .cyber-control-group:first-child {
+            margin-top: 0 !important;
+        }
+
+        /* Hilfe: nur Text + kbd, keine Karten-Box */
+        .kff-help-inline {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin-top: 0.35rem;
+            padding: 0.15rem 0 0.25rem 0;
+        }
+
+        .kff-help-inline kbd {
+            display: inline-block;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            background: rgba(0, 0, 0, 0.35);
+            font-family: ui-monospace, monospace;
+            font-size: 0.7rem;
+            color: #00d2ff;
         }
 
         .kff-error {
@@ -95,6 +152,36 @@
             font-size: 0.75em;
             color: #8ef;
         }
+
+        /* PARAMETER: etwas enger als globales 15px, Slider ohne 52px-Input-Höhe */
+        #side-panel .kff-param-card .cyber-control-group {
+            margin-top: 9px !important;
+            margin-bottom: 4px !important;
+        }
+
+        #side-panel .kff-param-card .cyber-control-group:first-child {
+            margin-top: 0 !important;
+            margin-bottom: 6px !important;
+        }
+
+        #side-panel .kff-param-card .label-row {
+            margin-bottom: 4px !important;
+        }
+
+        #side-panel .kff-param-card .range-value {
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #00d2ff;
+        }
+
+        #side-panel .kff-param-card input[type="range"].cyber-slider {
+            min-height: unset !important;
+            padding: 0 !important;
+            margin-top: 0 !important;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -109,72 +196,69 @@
     </nav>
 
     <aside id="side-panel">
-        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="sidebar-header" style="min-height: 80px;"></div>
 
-        <div class="sidebar orbitals-aside" aria-label="Kugelflächen — Steuerung">
-            <h1>Kugelflächen (KFF)</h1>
-            <p class="sub">
-                Oberfläche <code>r = |Y_l^m(θ,φ)|</code> (wie in der JavaFX-Version) ·
-                <a href="https://threejs.org/" rel="noreferrer" style="color: var(--accent)">Three.js</a> ·
-                Dieselbe Logik wie <code>orbitals/orbital-math.js</code> + <code>main.js</code>, hier inline (Doppelklick / <code>file://</code>)
-            </p>
-
-            <label class="field">
-                Orbital
-                <select id="orbital-select" aria-label="Orbital wählen"></select>
-            </label>
-
-            <label class="field">
-                <span class="row">
-                    Auflösung (Gitter)
-                    <span id="resolution-value" class="range-value">180</span>
-                </span>
-                <input id="resolution" type="range" min="10" max="1000" value="180" step="1" />
-            </label>
-
-            <label class="field">
-                <span class="row">
-                    Specular (Shininess)
-                    <span id="specular-value" class="range-value">32</span>
-                </span>
-                <input id="specular" type="range" min="1" max="256" value="32" step="1" />
-            </label>
-
-            <label class="field">
-                <span class="row">
-                    Opacity
-                    <span id="opacity-value" class="range-value">1.00</span>
-                </span>
-                <input id="opacity" type="range" min="0.1" max="1" value="1" step="0.05" />
-            </label>
-
-            <label class="row">
-                <input id="toggle-ambient" type="checkbox" checked />
-                Umgebungslicht
-            </label>
-            <label class="row">
-                <input id="toggle-point" type="checkbox" checked />
-                Punktlicht
-            </label>
-
-            <button type="button" id="toggle-rotate">Auto-Rotation (Leertaste)</button>
-            <button type="button" id="help-toggle">Tastaturhilfe</button>
-
-            <div id="help-panel" hidden>
-                <p><kbd>↑</kbd> / <kbd>↓</kbd> vorheriges / nächstes Orbital</p>
-                <p><kbd>←</kbd> / <kbd>→</kbd> Auflösung (−1 / +1, mit <kbd>Shift</kbd> ±10)</p>
-                <p><kbd>Leertaste</kbd> Auto-Rotation (aus) · <kbd>Esc</kbd> Orbital+Kamera zurück</p>
-                <p><kbd>1</kbd>–<kbd>9</kbd> Auflösung 100–900 · <kbd>0</kbd> sehr niedrig (10)</p>
-                <p>
-                    <kbd>H</kbd> Hilfe ·
-                    <strong>Trackball:</strong> links drehen · Rad / Mitte Zoom · Rechts Schwenk — Faktor unten + ZOOM in der Formel
-                </p>
+        <div class="orbital-panel-scroll" aria-label="Kugelflächen — Steuerung">
+            <div class="instrument-card kff-param-card">
+                <div class="instrument-title" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);">PARAMETER</div>
+                <div class="card-content">
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <span>Orbital</span>
+                        </div>
+                        <label>
+                            <select id="orbital-select" class="kff-select" aria-label="Orbital wählen"></select>
+                        </label>
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <span>Auflösung (Gitter)</span>
+                            <span id="resolution-value" class="range-value">180</span>
+                        </div>
+                        <input id="resolution" class="cyber-slider" type="range" min="10" max="1000" value="180" step="1" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <span>Specular</span>
+                            <span id="specular-value" class="range-value">32</span>
+                        </div>
+                        <input id="specular" class="cyber-slider" type="range" min="1" max="256" value="32" step="1" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <span>Opacity</span>
+                            <span id="opacity-value" class="range-value">1.00</span>
+                        </div>
+                        <input id="opacity" class="cyber-slider" type="range" min="0.1" max="1" value="1" step="0.05" style="--accent: #00d2ff" />
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div id="data-container" class="orb-stats">
-            <p class="footer-zoom" id="stats-zoom"></p>
-            <p class="footer-meta" id="stats"></p>
+            <div class="instrument-card">
+                <div class="instrument-title" style="color: #ff8c00; text-shadow: 0 0 10px rgba(255, 140, 0, 0.35);">LICHT &amp; ANSICHT</div>
+                <div class="card-content">
+                    <div class="checkbox-group" style="border-top: none; margin-top: 0; padding-top: 0;">
+                        <label class="checkbox-item">
+                            <input id="toggle-ambient" type="checkbox" checked />
+                            <span>Umgebungslicht</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input id="toggle-point" type="checkbox" checked />
+                            <span>Punktlicht</span>
+                        </label>
+                    </div>
+                    <button type="button" class="cyber-btn" id="toggle-rotate" style="margin-top: 8px; border-color: rgba(0, 210, 255, 0.4);">AUTO-ROTATION (LEERTASTE)</button>
+                    <button type="button" class="cyber-btn" id="help-toggle" style="margin-top: 8px; border-color: rgba(0, 210, 255, 0.4);">TASTATURHILFE</button>
+                </div>
+            </div>
+
+            <div id="help-panel" class="kff-help-inline" hidden>
+                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>↑</kbd> / <kbd>↓</kbd> vorheriges / nächstes Orbital</p>
+                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>←</kbd> / <kbd>→</kbd> Auflösung (−1 / +1, mit <kbd>Shift</kbd> ±10)</p>
+                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>Leertaste</kbd> Auto-Rotation · <kbd>Esc</kbd> zurück</p>
+                <p class="kff-intro" style="margin-bottom: 0.4rem"><kbd>1</kbd>–<kbd>9</kbd> / <kbd>0</kbd> Auflösung</p>
+                <p class="kff-intro" style="margin: 0"><kbd>H</kbd> Hilfe · Trackball: links drehen, Rad/ Mitte zoom, Rechts Schwenk</p>
+            </div>
         </div>
     </aside>
 
@@ -249,6 +333,9 @@
           { id: "L5M_PLUS4", label: "Y₅,₄" },
           { id: "L5M_PLUS5", label: "Y₅,₅" },
         ];
+
+        /** Einstieg: Y₂,₋₂ (l=2, m=−2), nicht Y₀₀. */
+        const ORBITAL_INDEX_START = ORBITAL_TYPES.findIndex((t) => t.id === "L2M_MINUS2");
         
         const LATEX_BY_ID = {
           L0M0: String.raw`Y_{0,0} = \sqrt{\frac{1}{4\pi}}`,
@@ -397,6 +484,12 @@
         const BG = 0x000028;
         /** Referenz-Kameradistanz; 1.0× = diese Distanz (Standardansicht: Orbital gut sichtbar groß). */
         const BASE_REF_CAMERA_DISTANCE = 480;
+        /** Einstiegsansicht: zuerst 90° horizontal (Blick in die XZ-Ebene), dann +2° um X, −2° um Y. */
+        const KFF_START_VIEW_DEG = { horizontal: 90, tiltX: 2, tiltY: -2 };
+        const KFF_VIEW_AXIS = {
+          Y: new THREE.Vector3(0, 1, 0),
+          X: new THREE.Vector3(1, 0, 0),
+        };
         /** … Y₄,₀ 1,7; Y₄,±₁ 0,7 (|Y| gleich für ±m); Y₄,₋₂ Y₄,₋₃ 2,3; Y₄,₋₄ 2,1; L=3-Defaults: Y₃,₋₁ 0,75; Y₃,₀ 1,9; Y₃,₁ 2,5; Y₃,₃ 2,3; … bis Y₃,₋₂: 2,4; sonst 1,0. */
         const ZOOM_DEFAULT_BIS_L3M_MINUS2 = 2.4;
         const ZOOM_DEFAULT_L3M_MINUS1 = 0.75;
@@ -465,10 +558,15 @@
         
         function applyDefaultCameraForCurrentOrbital() {
           if (!camera || !controls) return;
-          const z = defaultCameraDistance(state.orbitalIndex);
+          const d = defaultCameraDistance(state.orbitalIndex);
+          const v = new THREE.Vector3(0, 0, d);
+          v.applyAxisAngle(KFF_VIEW_AXIS.Y, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.horizontal));
+          v.applyAxisAngle(KFF_VIEW_AXIS.X, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.tiltX));
+          v.applyAxisAngle(KFF_VIEW_AXIS.Y, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.tiltY));
           camera.up.set(0, 1, 0);
-          camera.position.set(0, 0, z);
+          camera.position.copy(v);
           controls.target.set(0, 0, 0);
+          camera.lookAt(controls.target);
           controls.update();
         }
         /** Pos. Phase: Cyan; neg. Phase bleibt Gold (#f9c247) */
@@ -476,7 +574,7 @@
         const PHASE_NEG = new THREE.Color(0xf9c247);
         const PHASE_NODE = new THREE.Color(0xe1eaf6);
         const state = {
-          orbitalIndex: 0,
+          orbitalIndex: ORBITAL_INDEX_START >= 0 ? ORBITAL_INDEX_START : 0,
           resolution: 180,
           specular: 32,
           opacity: 1,
@@ -770,7 +868,7 @@
             opt.textContent = `${t.label} — ${t.id}`;
             sel.appendChild(opt);
           });
-          sel.value = "0";
+          sel.value = String(state.orbitalIndex);
         }
         
         function wireUi() {
@@ -942,11 +1040,14 @@
         }
 
         window.addEventListener("load", () => {
+            if (typeof CyberUI !== "undefined") {
+                CyberUI.init();
+            }
             if (typeof CyberBranding !== "undefined") {
                 CyberBranding.init({
                     useExternalStyles: true,
                     title: "Doc Alvers Mathe-Labor",
-                    subtitle: "KUGELFLÄCHEN (Yₗᵐ)"
+                    subtitle: "ATOMORBITALE"
                 });
             }
         });
