@@ -67,7 +67,7 @@
         }
 
         header,
-        #search-mount,
+        .search-scan-row,
         #sidebar-header,
         .launcher-grid,
         footer {
@@ -278,6 +278,81 @@
             text-transform: uppercase;
         }
 
+        /*
+         * Labor-Scan + Universe-Galaxy (wie index.html)
+         * Höhe des Buttons = gemessene Höhe von .search-input (JS), nicht Flex-Stretch/Bild-Höhe.
+         */
+        .search-scan-row {
+            width: 95%;
+            max-width: 1000px;
+            margin: 20px auto 30px auto;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .search-scan-row #search-mount {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .universe-galaxy-btn {
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            width: clamp(42px, 7.5vw, 68px);
+            position: relative;
+            overflow: hidden;
+            align-self: center;
+            height: 56px;
+            border-radius: 12px;
+            border: none;
+            box-shadow:
+                0 8px 26px rgba(0, 0, 0, 0.38),
+                0 0 18px rgba(0, 210, 255, 0.14);
+            transition: box-shadow 0.22s ease;
+            padding: 0;
+            background: #070d18;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            line-height: 0;
+        }
+
+        .universe-galaxy-btn:hover {
+            box-shadow:
+                0 0 28px rgba(0, 210, 255, 0.35),
+                0 10px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .universe-galaxy-btn:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 3px;
+        }
+
+        .universe-galaxy-btn img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        @media (max-width: 520px) {
+            .search-scan-row {
+                gap: 10px;
+            }
+
+            .universe-galaxy-btn {
+                width: clamp(36px, 14vw, 56px);
+            }
+        }
+
         /* Prevent overlap with the central heading */
         .canvas-branding {
             display: none !important;
@@ -298,7 +373,15 @@
         </div>
     </header>
 
-    <div id="search-mount" style="width: 95%; max-width: 1000px;"></div>
+    <!-- Labor-Scan + Universe (Galaxy) -->
+    <div class="search-scan-row">
+        <div id="search-mount"></div>
+        <a href="universe.html" class="universe-galaxy-btn" title="Universe · Labor-Galerie im Weltraum"
+            aria-label="Universe · Labor-Galerie öffnen">
+            <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
+                alt="" width="400" height="400" loading="lazy" decoding="async">
+        </a>
+    </div>
 
     <div id="sidebar-header"
         style="display: flex; justify-content: flex-start; margin-bottom: 2px; margin-top: -5px; width: 95%; max-width: 1000px;">
@@ -369,6 +452,33 @@
         CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
             renderLauncher(val);
         });
+
+        (function syncUniverseGalaxyBtnHeight() {
+            const btn = document.querySelector('.search-scan-row .universe-galaxy-btn');
+            function sync() {
+                const inp = document.querySelector('#search-mount .search-input');
+                const wrap = document.querySelector('#search-mount .search-container');
+                if (!inp || !btn) return;
+                const hInp = inp.getBoundingClientRect().height;
+                const hWrap = wrap ? wrap.getBoundingClientRect().height : 0;
+                const base = Math.max(hInp, hWrap);
+                const px = Math.ceil(base) + 2;
+                btn.style.height = Math.max(36, px) + 'px';
+            }
+            sync();
+            requestAnimationFrame(sync);
+            window.addEventListener('resize', () => requestAnimationFrame(sync));
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => requestAnimationFrame(sync));
+            }
+            if (typeof ResizeObserver !== 'undefined') {
+                const ro = new ResizeObserver(() => sync());
+                const inp = document.querySelector('#search-mount .search-input');
+                const wrap = document.querySelector('#search-mount .search-container');
+                if (inp) ro.observe(inp);
+                if (wrap) ro.observe(wrap);
+            }
+        })();
 
         const toolCount = renderLauncher();
 
