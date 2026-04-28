@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Mandelbrot Labor</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --bg-dark: #050b18;
+            --panel-bg: rgba(10, 15, 30, 0.95);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            display: flex;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+        }
+
+        #side-panel {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 2px solid rgba(0, 210, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        #main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            position: relative;
+        }
+
+        canvas#fractal-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000;
+            cursor: crosshair;
+        }
+
+        #tag-container {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .hud-tag {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px var(--neon-blue);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        #sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #ui-container { padding: 25px; flex: 1; overflow-y: auto; }
+        .control-group { margin-bottom: 30px; }
+        label { display: block; font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue); margin-bottom: 10px; letter-spacing: 1px; }
+        input[type="range"] { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; appearance: none; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: var(--neon-blue); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px var(--neon-blue); }
+        button.ultra-btn { flex:1; padding:10px; background:rgba(255,255,255,0.1); border:none; color:white; font-family:'Orbitron'; font-size:0.7rem; border-radius:5px; cursor:pointer; transition: 0.3s; }
+        button.ultra-btn.active { background:var(--neon-blue); color:black; }
+        #btn-flight.active { background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
+    </style>
+</head>
+<body>
+    <div id="side-panel">
+        <div id="sidebar-header">
+            <h1 style="margin:0; font-family:'Orbitron'; font-size:1.4rem; color:white; letter-spacing:1px;">DOC <span style="color:var(--neon-blue)">ALVERS</span></h1>
+            <p style="margin:5px 0 0 0; font-size:0.7rem; color:var(--neon-blue); opacity:0.8; letter-spacing:2px;">MATHE-LABOR</p>
+        </div>
+        <div id="ui-container">
+            <div class="control-group">
+                <label>AUTO-PILOT</label>
+                <button id="btn-flight" class="ultra-btn" style="width:100%; font-size:0.9rem; padding:15px;">START FLIGHT</button>
+            </div>
+            <div class="control-group">
+                <label>FRAKTAL MODUS</label>
+                <div style="display:flex; gap:10px;">
+                    <button id="mode-mandel" class="ultra-btn">MANDELBROT</button>
+                    <button id="mode-julia" class="ultra-btn active">JULIA</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>ITERATIONEN: <span id="iter-val-side">300</span></label>
+                <input type="range" id="slider-iter" min="50" max="1000" value="300">
+            </div>
+            <div class="control-group" id="julia-controls">
+                <label>JULIA C (REAL)</label>
+                <input type="range" id="slider-cx" min="-2" max="1" step="0.001" value="-0.7">
+                <label style="margin-top:15px;">JULIA C (IMAG)</label>
+                <input type="range" id="slider-cy" min="-1.5" max="1.5" step="0.001" value="0.27">
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div id="tag-container">
+            <div class="hud-tag" id="zoom-tag">ZOOM: 1.5x</div>
+            <div class="hud-tag" id="iter-tag" style="border-color:var(--neon-purple); color:var(--neon-purple);">ITER: 300</div>
+        </div>
+        <canvas id="fractal-canvas"></canvas>
+    </div>
+
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec2 position;
+        void main() { gl_Position = vec4(position, 0.0, 1.0); }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision highp float;
+        uniform vec2 u_res;
+        uniform vec2 u_center_h;
+        uniform vec2 u_center_l;
+        uniform vec2 u_julia_c;
+        uniform float u_zoom;
+        uniform float u_iter;
+        uniform float u_time;
+        uniform float u_is_julia;
+
+        vec2 ds_set(float a) { return vec2(a, 0.0); }
+        vec2 ds_add(vec2 dsa, vec2 dsb) {
+            float t1 = dsa.x + dsb.x;
+            float e = t1 - dsa.x;
+            float t2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;
+            float high = t1 + t2;
+            float low = t2 - (high - t1);
+            return vec2(high, low);
+        }
+        vec2 ds_mul(vec2 dsa, vec2 dsb) {
+            float c11 = dsa.x * dsb.x;
+            float c21 = dsa.y * dsb.x + dsa.x * dsb.y;
+            float high = c11 + c21;
+            float low = c21 - (high - c11);
+            return vec2(high, low);
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+            float inv_zoom = 1.0 / u_zoom;
+            vec2 cx = ds_add(vec2(u_center_h.x, u_center_l.x), ds_set(uv.x * 3.0 * inv_zoom));
+            vec2 cy = ds_add(vec2(u_center_h.y, u_center_l.y), ds_set(uv.y * 3.0 * inv_zoom));
+            vec2 zx = vec2(0.0), zy = vec2(0.0);
+            vec2 seedX = cx, seedY = cy;
+            if (u_is_julia > 0.5) { zx = cx; zy = cy; seedX = ds_set(u_julia_c.x); seedY = ds_set(u_julia_c.y); }
+            float it = 0.0;
+            for (int i = 0; i < 1000; i++) {
+                if (float(i) >= u_iter) break;
+                vec2 x2 = ds_mul(zx, zx); vec2 y2 = ds_mul(zy, zy);
+                if (x2.x + y2.x > 4.0) break;
+                vec2 zxzy = ds_mul(zx, zy);
+                zy = ds_add(ds_add(zxzy, zxzy), seedY);
+                zx = ds_add(ds_add(x2, vec2(-y2.x, -y2.y)), seedX);
+                it += 1.0;
+            }
+            if (it >= u_iter) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+            else {
+                float dist = sqrt(zx.x*zx.x + zy.x*zy.x);
+                float sn = it - log2(max(1.0, log2(dist)));
+                float r = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + u_time * 0.5);
+                float g = 0.5 + 0.5 * cos(2.0 + sn * 0.15 + u_time * 0.5);
+                float b = 0.5 + 0.5 * cos(1.0 + sn * 0.15 + u_time * 0.5);
+                gl_FragColor = vec4(r, g, b, 1.0);
+            }
+        }
+    </script>
+
+    <script>
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('fractal-canvas');
+            const gl = canvas.getContext('webgl', { alpha: false });
+            if (!gl) return;
+
+            const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
+            const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, document.getElementById('fs').text); gl.compileShader(fs);
+            const program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
+
+            const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+            const posLoc = gl.getAttribLocation(program, 'position'); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+            const resLoc = gl.getUniformLocation(program, 'u_res'), cH = gl.getUniformLocation(program, 'u_center_h'), cL = gl.getUniformLocation(program, 'u_center_l'), julLoc = gl.getUniformLocation(program, 'u_julia_c'), zoomLoc = gl.getUniformLocation(program, 'u_zoom'), iterLoc = gl.getUniformLocation(program, 'u_iter'), timeLoc = gl.getUniformLocation(program, 'u_time'), isJulLoc = gl.getUniformLocation(program, 'u_is_julia');
+
+            let centerX = 0, centerY = 0, zoom = 1.5, maxIter = 300, time = 0, isJulia = true, juliaCX = -0.7, juliaCY = 0.27;
+            let isAutoFlight = false, frameCount = 0;
+
+            const sIter = document.getElementById('slider-iter'), sCX = document.getElementById('slider-cx'), sCY = document.getElementById('slider-cy'), iterVal = document.getElementById('iter-val-side'), julControls = document.getElementById('julia-controls');
+            const btnFlight = document.getElementById('btn-flight'), btnM = document.getElementById('mode-mandel'), btnJ = document.getElementById('mode-julia');
+
+            sIter.oninput = () => { maxIter = sIter.value; iterVal.innerText = maxIter; document.getElementById('iter-tag').innerText = `ITER: ${maxIter}`; };
+            sCX.oninput = () => juliaCX = parseFloat(sCX.value);
+            sCY.oninput = () => juliaCY = parseFloat(sCY.value);
+            
+            btnM.onclick = () => { isJulia = false; julControls.style.display = 'none'; btnM.classList.add('active'); btnJ.classList.remove('active'); isAutoFlight = false; btnFlight.classList.remove('active'); btnFlight.innerText = "START FLIGHT"; };
+            btnJ.onclick = () => { isJulia = true; julControls.style.display = 'block'; btnJ.classList.add('active'); btnM.classList.remove('active'); };
+
+            btnFlight.onclick = () => {
+                isAutoFlight = !isAutoFlight;
+                btnFlight.classList.toggle('active');
+                btnFlight.innerText = isAutoFlight ? "STOP FLIGHT" : "START FLIGHT";
+                if(isAutoFlight) { isJulia = true; julControls.style.display = 'block'; btnJ.classList.add('active'); btnM.classList.remove('active'); }
+            };
+
+            function render() {
+                const w = Math.floor(canvas.clientWidth), h = Math.floor(canvas.clientHeight);
+                if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+                time += 0.01; frameCount++;
+
+                if (isAutoFlight) {
+                    zoom *= 1.005;
+                    let targetX = 0.12, targetY = 0.08;
+                    centerX += (targetX - centerX) * 0.002;
+                    centerY += (targetY - centerY) * 0.002;
+                }
+
+                // Throttled Tag Updates (alle 10 Frames)
+                if (frameCount % 10 === 0) {
+                    document.getElementById('zoom-tag').innerText = `ZOOM: ${zoom < 1000 ? zoom.toFixed(1) : zoom.toExponential(2)}x`;
+                }
+
+                gl.uniform2f(resLoc, w, h); gl.uniform1f(zoomLoc, zoom); gl.uniform1f(iterLoc, maxIter); gl.uniform1f(timeLoc, time); gl.uniform1f(isJulLoc, isJulia ? 1.0 : 0.0); gl.uniform2f(julLoc, juliaCX, juliaCY);
+                const hx = Math.fround(centerX), lx = centerX - hx, hy = Math.fround(centerY), ly = centerY - hy;
+                gl.uniform2f(cH, hx, hy); gl.uniform2f(cL, lx, ly);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                requestAnimationFrame(render);
+            }
+            let isDragging = false, lastX, lastY;
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+            window.addEventListener('mousemove', (e) => { if (!isDragging) return; const dx = e.clientX - lastX, dy = e.clientY - lastY, s = Math.min(canvas.width, canvas.height); centerX -= (dx / s) / (zoom / 2); centerY += (dy / s) / (zoom / 2); lastX = e.clientX; lastY = e.clientY; });
+            window.addEventListener('mouseup', () => isDragging = false);
+            canvas.addEventListener('wheel', (e) => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const mx = ((e.clientX - rect.left) - canvas.width / 2) / Math.min(canvas.width, canvas.height) * 2, my = -((e.clientY - rect.top) - canvas.height / 2) / Math.min(canvas.width, canvas.height) * 2; const oz = zoom; zoom *= (e.deltaY > 0 ? 0.9 : 1.1); zoom = Math.max(zoom, 1.5); centerX += mx / oz - mx / zoom; centerY += my / oz - my / zoom; }, { passive: false });
+            render();
+        });
+    </script>
+</body>
+</html>

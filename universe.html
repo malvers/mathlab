@@ -46,7 +46,6 @@
             to { transform: scale(1.2); opacity: 0.55; }
         }
 
-        /* Screenshots: aus der Mitte, darüber klickbar */
         #thumb-plane {
             position: fixed;
             inset: 0;
@@ -58,14 +57,14 @@
             position: absolute;
             left: 50%;
             top: 50%;
-            width: min(42vw, 340px);
+            width: min(46vw, 374px);
             pointer-events: auto;
-            border-radius: 14px;
+            border-radius: 8px;
             overflow: hidden;
             box-shadow:
-                0 12px 40px rgba(0, 0, 0, 0.55),
+                0 20px 50px rgba(0, 0, 0, 0.5),
                 0 0 0 1px rgba(255, 255, 255, 0.12);
-            will-change: transform;
+            will-change: transform, opacity;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
@@ -73,16 +72,7 @@
         }
 
         .universe-thumb:focus-visible {
-            box-shadow:
-                0 0 0 3px rgba(0, 210, 255, 0.85),
-                0 12px 40px rgba(0, 0, 0, 0.55);
-        }
-
-        .universe-thumb:hover {
-            box-shadow:
-                0 0 28px rgba(0, 210, 255, 0.35),
-                0 12px 44px rgba(0, 0, 0, 0.55),
-                0 0 0 1px rgba(0, 210, 255, 0.35);
+            box-shadow: 0 0 0 3px #00d2ff, 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .universe-thumb img {
@@ -136,7 +126,6 @@
     </video>
 
     <div class="glow-sphere"></div>
-
     <div id="thumb-plane" aria-live="polite"></div>
 
     <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" aria-label="Vollbild">
@@ -146,10 +135,6 @@
     </button>
 
     <script>
-        /**
-         * Zuordnung Screenshot-Dateiname → Lab (wie resources/screenshots/*.png).
-         * Bei neuen Labs: Eintrag + PNG ergänzen.
-         */
         const UNIVERSE_LABS = [
             { href: 'orbitals.html', file: 'Atomorbitale.png' },
             { href: 'coolsquares.html', file: 'Cool-Squares.png' },
@@ -169,8 +154,6 @@
         ];
 
         const SCREENSHOT_BASE = 'resources/screenshots/';
-
-        /** Leertaste: Animation stoppen / weiter */
         let universeAnimPaused = false;
 
         window.addEventListener('load', () => {
@@ -183,7 +166,6 @@
             const doc = window.document;
             const docEl = doc.documentElement;
             const isFullScreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement || doc.webkitIsFullScreen;
-
             if (!isFullScreen) {
                 if (docEl.requestFullscreen) docEl.requestFullscreen();
                 else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
@@ -205,38 +187,29 @@
             }
         });
 
-        /* --- Universe thumb flight --- */
         function initUniverseThumbs() {
             const plane = document.getElementById('thumb-plane');
             if (!plane) return;
 
             const pool = [];
-            Promise.all(
-                UNIVERSE_LABS.map(
-                    (lab) =>
-                        new Promise((resolve) => {
-                            const img = new Image();
-                            img.onload = () => resolve({ ...lab, ok: true });
-                            img.onerror = () => resolve({ ...lab, ok: false });
-                            img.src = SCREENSHOT_BASE + lab.file;
-                        })
-                )
-            ).then((results) => {
-                results.filter((r) => r.ok).forEach((r) => pool.push(r));
+            Promise.all(UNIVERSE_LABS.map(lab => new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => resolve({ ...lab, ok: true });
+                img.onerror = () => resolve({ ...lab, ok: false });
+                img.src = SCREENSHOT_BASE + lab.file;
+            }))).then(results => {
+                results.filter(r => r.ok).forEach(r => pool.push(r));
                 if (pool.length === 0) return;
 
-                /** Mind. gleichzeitig sichtbar (begrenzt durch Pool). Kein zweites gleiches Lab gleichzeitig. */
                 const WANT_VISIBLE = Math.min(6, pool.length);
-                const maxLive = Math.min(pool.length, 16);
-
-                const active = [];
-                let spawnAcc = 0;
-                const spawnEveryMs = () => 2200 + Math.random() * 2600;
-
-                let nextSpawnIn = spawnEveryMs();
+                const maxLive     = Math.min(pool.length, 16);
+                const active      = [];
+                let spawnAcc      = 0;
+                const spawnEveryMs = () => 1200 + Math.random() * 1500;
+                let nextSpawnIn   = spawnEveryMs();
 
                 const SCALE_FACTOR = 6;
-                const scaleMax = 0.92 * SCALE_FACTOR;
+                const scaleMax     = 0.92 * SCALE_FACTOR;
 
                 function angleDelta(a, b) {
                     let d = Math.abs(a - b);
@@ -244,7 +217,6 @@
                     return d;
                 }
 
-                /** Mindest-Winkelabstand zu allen aktiven Strahlen */
                 function pickSpawnAngle(minRad) {
                     for (let attempt = 0; attempt < 140; attempt++) {
                         const ang = Math.random() * Math.PI * 2;
@@ -257,11 +229,29 @@
                     return Math.random() * Math.PI * 2;
                 }
 
+                let deck = [];
+
                 function pickUnusedLab() {
-                    const used = new Set(active.map((o) => o.href));
-                    const cand = pool.filter((l) => !used.has(l.href));
-                    if (cand.length === 0) return null;
-                    return cand[(Math.random() * cand.length) | 0];
+                    // Falls der Stapel leer ist, neu füllen und mischen
+                    if (deck.length === 0) {
+                        deck = [...pool];
+                        // Fisher-Yates Shuffle
+                        for (let i = deck.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [deck[i], deck[j]] = [deck[j], deck[i]];
+                        }
+                    }
+
+                    const used = new Set(active.map(o => o.href));
+                    // Suche das erste Labor im Stapel, das gerade NICHT sichtbar ist
+                    for (let i = 0; i < deck.length; i++) {
+                        if (!used.has(deck[i].href)) {
+                            return deck.splice(i, 1)[0];
+                        }
+                    }
+
+                    // Falls wirklich ALLES aus dem Pool gerade sichtbar ist (unwahrscheinlich bei 15 Labs)
+                    return null;
                 }
 
                 function spawnOne(lab) {
@@ -275,9 +265,7 @@
 
                     const a = document.createElement('a');
                     a.className = 'universe-thumb';
-                    a.href = lab.href;
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
+                    a.href = lab.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
                     const im = document.createElement('img');
                     im.src = SCREENSHOT_BASE + lab.file;
                     im.alt = ''; im.decoding = 'async'; im.draggable = false;
@@ -286,105 +274,104 @@
 
                     const obj = {
                         el:      a,
-                        angle, 
-                        depth:   0,                       // 0 (Mitte) bis 1 (Rand)
-                        vDepth:  speed / killDist,        // Zuwachs pro Sekunde
-                        targetX: Math.cos(angle) * killDist, // Wo sie bei depth=1 wäre
+                        angle,
+                        depth:   0,
+                        vDepth:  speed / killDist,
+                        targetX: Math.cos(angle) * killDist,
                         targetY: Math.sin(angle) * killDist,
                         href:    lab.href,
                         frozen:  false,
+                        alwaysOnTop: false,
+                        isDragging: false,
+                        isFocused: false
                     };
                     active.push(obj);
 
-                    a.addEventListener('click', (e) => e.preventDefault());
-
+                    a.addEventListener('click', (e) => {
+                        if (!obj.isFocused) e.preventDefault();
+                        else obj.isFocused = false; // Fokus verbraucht
+                    });
                     a.addEventListener('pointerdown', (e) => {
                         obj.frozen    = true;
                         obj.ptrStartX = e.clientX;
                         obj.ptrStartY = e.clientY;
-                        // Aktuelle Position für den Drag-Offset merken
                         obj.dragStartX = obj.targetX * obj.depth;
                         obj.dragStartY = obj.targetY * obj.depth;
+                        obj.isDragging = true;
                         a.style.boxShadow = '0 0 30px rgba(0,210,255,0.7), 0 12px 40px rgba(0,0,0,0.55)';
+                        a.style.opacity = '1';
+                        a.style.zIndex = '20000';
+                        obj.alwaysOnTop = true;
                         a.setPointerCapture(e.pointerId);
                         e.preventDefault();
                     });
 
                     a.addEventListener('pointermove', (e) => {
-                        if (!obj.frozen || obj.depth <= 0) return;
+                        if (!obj.isDragging || obj.depth <= 0) return;
                         const curX = obj.dragStartX + (e.clientX - obj.ptrStartX);
                         const curY = obj.dragStartY + (e.clientY - obj.ptrStartY);
-                        
-                        // Wir ändern das "Ziel", aber behalten die "Tiefe" bei -> Größe bleibt fix!
                         obj.targetX = curX / obj.depth;
                         obj.targetY = curY / obj.depth;
-
                         const sc = obj.depth * scaleMax;
+                        const opacity = 1; // Fade verschwindet beim Halten
                         a.style.transform = `translate(-50%,-50%) translate(${curX.toFixed(1)}px,${curY.toFixed(1)}px) scale(${sc.toFixed(4)})`;
-                        a.style.zIndex = String(10000 + Math.round(obj.depth * 1000));
+                        a.style.opacity = opacity.toFixed(3);
+                        a.style.zIndex = '20000';
                     });
 
-                    const resume = () => {
-                        if (!obj.frozen) return;
-                        obj.frozen = false;
-                        a.style.boxShadow = '';
-                    };
-                    window.addEventListener('pointerup',     resume, { once: false });
-                    window.addEventListener('pointercancel', resume, { once: false });
-                }
+                    a.addEventListener('dblclick', (e) => {
+                        obj.frozen = true;
+                        obj.alwaysOnTop = true;
+                        obj.depth = 0.5;
+                        obj.targetX = 0;
+                        obj.isFocused = true;
+                        const sc = obj.depth * scaleMax;
+                        a.style.transform = `translate(-50%,-50%) translate(0,0) scale(${sc.toFixed(4)})`;
+                        a.style.opacity = '1';
+                        a.style.zIndex = '20000';
+                        a.style.boxShadow = '0 0 40px rgba(0,210,255,0.8), 0 20px 60px rgba(0,0,0,0.6)';
+                    });
 
-                function refillMinimum() {
-                    while (active.length < WANT_VISIBLE && active.length < maxLive) {
-                        const lab = pickUnusedLab();
-                        if (!lab) break;
-                        spawnOne(lab);
-                    }
+                    const resume = () => { 
+                        if (obj.frozen) { 
+                            obj.frozen = false; 
+                            obj.isDragging = false; 
+                            // obj.isFocused lassen wir stehen, damit der Click danach funktioniert
+                            a.style.boxShadow = ''; 
+                        } 
+                    };
+                    window.addEventListener('pointerup', resume);
+                    window.addEventListener('pointercancel', resume);
                 }
 
                 let last = performance.now();
-
                 function tick(now) {
                     let dt = 0;
-                    if (!universeAnimPaused) {
-                        dt   = Math.min(48, now - last) / 1000;
-                        last = now;
-                    }
-
-                    refillMinimum();
+                    if (!universeAnimPaused) { dt = Math.min(48, now - last) / 1000; last = now; }
 
                     spawnAcc += dt * 1000;
-                    if (active.length >= WANT_VISIBLE && active.length < maxLive && spawnAcc >= nextSpawnIn) {
-                        const lab = pickUnusedLab();
-                        if (lab) { spawnOne(lab); spawnAcc = 0; nextSpawnIn = spawnEveryMs(); }
+                    // Am Anfang 500ms Takt bis WANT_VISIBLE erreicht ist, danach Zufall
+                    const currentInterval = (active.length < WANT_VISIBLE) ? 500 : nextSpawnIn;
+
+                    if (active.length < maxLive && spawnAcc >= currentInterval) {
+                        const l = pickUnusedLab();
+                        if (l) { spawnOne(l); spawnAcc = 0; nextSpawnIn = spawnEveryMs(); }
                     }
-
                     for (let i = active.length - 1; i >= 0; i--) {
-                        const o = active[i];
-                        if (o.frozen) continue;
-
+                        const o = active[i]; if (o.frozen) continue;
                         o.depth += o.vDepth * dt;
-                        
                         const sc = o.depth * scaleMax;
                         const px = o.targetX * o.depth;
                         const py = o.targetY * o.depth;
-
+                        const opacity = o.depth > 0.5 ? Math.max(0, 1 - (o.depth - 0.5) / 0.1) : 1;
                         o.el.style.transform = `translate(-50%,-50%) translate(${px.toFixed(1)}px,${py.toFixed(1)}px) scale(${sc.toFixed(4)})`;
-                        o.el.style.zIndex       = String(10000 + Math.round(o.depth * 1000));
-                        o.el.style.pointerEvents = o.depth < 0.03 ? 'none' : 'auto';
-
-                        if (o.depth > 1.1) {
-                            if (o.el.parentNode) o.el.parentNode.removeChild(o.el);
-                            active.splice(i, 1);
-                        }
+                        o.el.style.opacity = opacity.toFixed(3);
+                        o.el.style.zIndex = o.alwaysOnTop ? '20000' : String(10000 + Math.round(o.depth * 1000));
+                        o.el.style.pointerEvents = (o.depth < 0.03 || opacity < 0.1) ? 'none' : 'auto';
+                        if (o.depth > 1.1) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); active.splice(i, 1); }
                     }
-
-                    refillMinimum();
                     requestAnimationFrame(tick);
                 }
-
-                refillMinimum();
-
-
                 requestAnimationFrame(tick);
             });
         }
