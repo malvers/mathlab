@@ -10,6 +10,110 @@
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <style>
+        html { font-size: 100%; background-color: var(--space-bg, #050b18); }
+        body { margin: 0; overflow: hidden; min-height: 100vh; }
+        #main-content {
+            flex: 1 1 0%;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 45%, rgba(0, 210, 255, 0.06) 0%, transparent 55%), var(--space-bg, #050b18);
+        }
+        #canvas-container {
+            flex: 1 1 0%;
+            width: 100%;
+            min-height: 0;
+            position: relative;
+        }
+        #canvas-container canvas { display: block; cursor: crosshair; }
+
+        /* Formelbox: Rand immer blau · Hauptformeln orange · Parameter cyan */
+        .lissajous-overlay-formula {
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            max-width: min(94vw, 620px);
+            pointer-events: none;
+            z-index: 6;
+        }
+        .lissajous-formula-box {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            padding: 0.28rem 1.05rem 0.4rem;
+            box-sizing: border-box;
+            background: rgba(8, 15, 32, 0.88);
+            border-radius: 12px;
+            border: 1px solid rgba(100, 190, 255, 0.5);
+            box-shadow: 0 0 22px rgba(80, 170, 255, 0.2);
+        }
+        .lissajous-formula-params {
+            width: 100%;
+            margin: 0;
+            padding: 0.18rem 0 0;
+            border-top: 1px solid rgba(100, 190, 255, 0.28);
+        }
+        /* KaTeX display: weniger Luft oben/unten */
+        #canvas-container .lissajous-formula-box .katex-display {
+            margin: 0 !important;
+        }
+        #canvas-container #lissajous-formula-tex .katex {
+            font-size: 1.08em !important;
+            color: #ffb070 !important;
+            text-shadow: 0 0 14px rgba(255, 157, 80, 0.28);
+            line-height: 1.12 !important;
+        }
+        #canvas-container #lissajous-formula-params .katex {
+            font-size: 0.92em !important;
+            color: #9ae8ff !important;
+            letter-spacing: 0.03em;
+            line-height: 1.15 !important;
+        }
+        #ui-container { overflow-y: auto; max-height: calc(100vh - 90px); }
+
+        /* Slider kompakt (Y) — nochmals −6 px vertikal (Pad oben/unten + Titelabstand) */
+        #ui-container .instrument-card .card-content {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        #ui-container .instrument-title {
+            margin-bottom: 0 !important;
+            padding-bottom: 1px !important;
+        }
+        #ui-container .cyber-control-group {
+            margin-bottom: 0 !important;
+            gap: 0 !important;
+        }
+        #ui-container .cyber-control-group .control-header {
+            margin-bottom: 0 !important;
+            line-height: 1.05 !important;
+        }
+        #ui-container .cyber-label {
+            font-size: 0.62rem !important;
+        }
+        #ui-container .val-display {
+            font-size: 0.62rem !important;
+        }
+        #ui-container .cyber-slider {
+            margin-top: 0 !important;
+        }
+        #ui-container #grp-extras .cyber-checkbox-wrapper {
+            margin-bottom: 2px !important;
+        }
+        #ui-container #grp-extras .cyber-checkbox-wrapper:last-child {
+            margin-bottom: 0 !important;
+        }
+        #ui-container #btn-reset-view {
+            margin-top: 6px !important;
+            padding: 6px 10px !important;
+        }
+    </style>
 </head>
 <body>
     <nav id="mini-rail">
@@ -28,11 +132,21 @@
     </aside>
 
     <main id="main-content">
-        <div id="canvas-container"></div>
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+            <div class="lissajous-overlay-formula" aria-live="polite">
+                <div class="lissajous-formula-box">
+                    <div id="lissajous-formula-tex"></div>
+                    <div id="lissajous-formula-params" class="lissajous-formula-params"></div>
+                </div>
+            </div>
+        </div>
     </main>
 
+    <script src="js/cyber-canvas.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -40,19 +154,277 @@
             setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
         }
 
+        function gcd(a, b) {
+            a = Math.abs(Math.round(a)); b = Math.abs(Math.round(b));
+            if (!b) return a || 1;
+            return gcd(b, a % b);
+        }
+        function lcm(a, b) {
+            return Math.abs(a * b) / gcd(a, b);
+        }
+        /** Eine geschlossene Bahn für ganzzahlige Kreisfrequenzen ωx, ωy */
+        function closurePeriodT(wx, wy) {
+            wx = Math.max(1, Math.round(Math.abs(wx)));
+            wy = Math.max(1, Math.round(Math.abs(wy)));
+            const g = gcd(wx, wy);
+            const px = wx / g;
+            const py = wy / g;
+            return (2 * Math.PI * lcm(px, py)) / (px * py);
+        }
+
+        const state = {
+            A: 2,
+            B: 2,
+            wx: 3,
+            wy: 4,
+            deltaDeg: 0,
+            cycles: 1,
+            animate: false,
+            showDots: true,
+            curveHue: 28
+        };
+
+        let animRaf = null;
+        let animAnchor = 0;
+
+        function phaseRad() {
+            const base = (state.deltaDeg * Math.PI) / 180;
+            if (!state.animate) return base;
+            return base + (performance.now() - animAnchor) * 0.0015;
+        }
+
+        function tickAnim() {
+            if (!state.animate) return;
+            draw();
+            animRaf = requestAnimationFrame(tickAnim);
+        }
+
+        function stopAnim() {
+            if (animRaf) cancelAnimationFrame(animRaf);
+            animRaf = null;
+        }
+
+        function startAnimLoop() {
+            stopAnim();
+            if (!state.animate) return;
+            animAnchor = performance.now();
+            animRaf = requestAnimationFrame(tickAnim);
+        }
+
+        function draw() {
+            const CC = CyberCanvasInstance;
+            CC.drawGrid({ vignette: true, glow: true });
+            const ctx = CC.ctx;
+
+            const wx = state.wx;
+            const wy = state.wy;
+            const T0 = closurePeriodT(wx, wy);
+            const span = T0 * Math.max(0.25, state.cycles);
+            const steps = Math.min(16000, Math.max(400, Math.ceil(span * 120)));
+
+            const delta = phaseRad();
+            let px0 = null;
+            let py0 = null;
+
+            ctx.strokeStyle = `hsla(${state.curveHue}, 95%, 58%, 0.92)`;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = `hsla(${state.curveHue}, 100%, 45%, 0.55)`;
+
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * span;
+                const x = state.A * Math.sin(wx * t + delta);
+                const y = state.B * Math.sin(wy * t);
+                const sx = CC.mapX(x);
+                const sy = CC.mapY(y);
+                if (i === 0) {
+                    ctx.moveTo(sx, sy);
+                    px0 = sx; py0 = sy;
+                } else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            if (state.showDots && px0 != null) {
+                ctx.fillStyle = `hsla(${state.curveHue}, 90%, 65%, 0.95)`;
+                ctx.beginPath(); ctx.arc(px0, py0, 5, 0, Math.PI * 2); ctx.fill();
+            }
+
+            updateFormulaStrip(wx, wy, delta);
+        }
+
+        function updateFormulaStrip(wx, wy, delta) {
+            const elTex = document.getElementById('lissajous-formula-tex');
+            const elPar = document.getElementById('lissajous-formula-params');
+            if (!elTex || !elPar) return;
+
+            const deg = ((delta * 180) / Math.PI % 360 + 360) % 360;
+            const T0 = closurePeriodT(wx, wy);
+
+            /* Kein [t] nach aligned — sonst kann KaTeX „[t]“ als Text ausgeben, wenn kein Leerzeichen folgt */
+            const texMain =
+                '\\begin{aligned}' +
+                'x(t) &= A\\sin(\\omega_{x} t+\\delta)\\\\' +
+                'y(t) &= B\\sin(\\omega_{y} t)' +
+                '\\end{aligned}';
+
+            const AD = state.A.toFixed(2).replace('.', '{,}');
+            const BD = state.B.toFixed(2).replace('.', '{,}');
+            const T0s = T0.toFixed(3).replace('.', '{,}');
+            /* Zeile 1: drei Parameter (A, B, ωₓ) · Zeile 2: ωᵧ, δ, T₀ */
+            const texParams =
+                '\\begin{aligned}' +
+                '&A=' + AD + ',\\quad B=' + BD + ',\\quad \\omega_{x}=' + wx + '\\\\' +
+                '&\\omega_{y}=' + wy + ',\\quad \\delta \\approx ' + deg.toFixed(0) + '^{\\circ},\\quad T_{0} \\approx ' + T0s +
+                '\\end{aligned}';
+
+            if (window.katex) {
+                try {
+                    katex.render(texMain, elTex, { throwOnError: false, displayMode: true });
+                    katex.render(texParams, elPar, { throwOnError: false, displayMode: true });
+                } catch (e) {
+                    elTex.textContent = 'x(t)=A·sin(ωₓt+δ), y(t)=B·sin(ωᵧt)';
+                    elPar.innerHTML =
+                        `A=${state.A.toFixed(2)}, B=${state.B.toFixed(2)}, ωₓ=${wx}<br>` +
+                        `ωᵧ=${wy}, δ≈${deg.toFixed(0)}°, T₀≈${T0.toFixed(3)}`;
+                }
+            } else {
+                elTex.textContent = 'x(t)=A·sin(ωₓt+δ), y(t)=B·sin(ωᵧt)';
+                elPar.innerHTML =
+                    `A=${state.A.toFixed(2)}, B=${state.B.toFixed(2)}, ωₓ=${wx}<br>` +
+                    `ωᵧ=${wy}, δ≈${deg.toFixed(0)}°, T₀≈${T0.toFixed(3)}`;
+            }
+        }
+
         window.addEventListener('load', () => {
             CyberBranding.init({
                 useExternalStyles: true,
                 title: 'Doc Alvers Mathe-Labor',
-                subtitle: 'LISSAJOUS · PLATZHALTER'
+                subtitle: 'LISSAJOUS · PARAMETRISCHE KURVEN'
             });
             CyberBranding.setBriefing(`
-                <p style="margin:0 0 12px 0; font-size:0.88rem; line-height:1.45; color:rgba(255,255,255,0.82);">
-                    Neues Tool (<code style="font-size:0.85em;">lissajous.html</code>): Inhalt folgt.
-                    Figuren nach Jules Antoine <strong>Lissajous</strong>.
-                </p>
+                <div style="font-size:0.88rem;line-height:1.45;color:rgba(255,255,255,0.85);">
+                    <h3 style="color:#ff9a5c;font-family:Orbitron,sans-serif;margin:0 0 10px 0;font-size:0.95rem;">LISSAJOUS-FIGUREN</h3>
+                    Überlagerung zweier harmonischer Schwingungen senkrecht zueinander:
+                    <strong style="font-family:Orbitron,sans-serif;color:#7fdcff;">x=A sin(ω<sub>x</sub>t+δ)</strong>,
+                    <strong style="font-family:Orbitron,sans-serif;color:#ff9a5c;">y=B sin(ω<sub>y</sub>t)</strong>.
+                    Verhältnis <strong>ω<sub>x</sub>:ω<sub>y</sub></strong> und Phase <strong>δ</strong> bestimmen die Form.
+                    <div class="admin-info" style="margin-top:12px;">
+                        <h4 style="color:#00d2ff;font-family:Orbitron,sans-serif;font-size:0.78rem;margin:0 0 6px 0;">BEDIENTEIL</h4>
+                        <ul style="margin:0;padding-left:18px;font-size:0.82rem;opacity:0.92;">
+                            <li><b>Pfad-Umfang:</b> Vielfaches einer geschlossenen Periode <code>T₀</code> (bei ganzzahligen ω).</li>
+                            <li><b>Pan / Zoom:</b> Maus ziehen · Mausrad · Shift+Rad zoomt zur Bildmitte.</li>
+                            <li><b>Animation:</b>läuft δ durch die Zeit (nur optisch).</li>
+                        </ul>
+                    </div>
+                </div>
             `);
             CyberUI.init();
+
+            CyberUI.createCard('ui-container', 'PARAMETER', `
+                <div id="grp-amp"></div>
+                <div id="grp-freq"></div>
+                <div id="grp-phase"></div>
+                <div id="grp-span"></div>
+                <div id="grp-color"></div>
+                <div id="grp-extras"></div>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" id="btn-reset-view" style="flex:1;min-width:120px;padding:9px 12px;border:1px solid rgba(255,154,92,0.45);background:rgba(18,28,48,0.85);color:#ffe8d8;font-family:Orbitron,sans-serif;font-size:0.72rem;border-radius:10px;cursor:pointer;">Ansicht zurücksetzen</button>
+                </div>
+            `, '#ff9a5c');
+
+            CyberUI.createSlider('grp-amp', 'Amplitude A', 0.4, 2.6, state.A, 0.05, (v) => {
+                state.A = v;
+                draw();
+            }, '#ff9a5c');
+            CyberUI.createSlider('grp-amp', 'Amplitude B', 0.4, 2.6, state.B, 0.05, (v) => {
+                state.B = v;
+                draw();
+            }, '#7fdcff');
+
+            CyberUI.createSlider('grp-freq', 'ωₓ (Kreisfrequenz)', 1, 16, state.wx, 1, (v) => {
+                state.wx = Math.round(v);
+                draw();
+            }, '#ff9a5c');
+            CyberUI.createSlider('grp-freq', 'ωᵧ (Kreisfrequenz)', 1, 16, state.wy, 1, (v) => {
+                state.wy = Math.round(v);
+                draw();
+            }, '#7fdcff');
+
+            CyberUI.createSlider('grp-phase', 'Phase δ (Grad)', 0, 359, state.deltaDeg, 1, (v) => {
+                state.deltaDeg = Math.round(v);
+                draw();
+            }, '#00d2ff');
+
+            CyberUI.createSlider('grp-span', 'Pfad-Umfang (× Perioden)', 0.25, 6, state.cycles, 0.05, (v) => {
+                state.cycles = v;
+                draw();
+            }, '#00d2ff');
+
+            CyberUI.createSlider('grp-color', 'Kurvenfarbe (Hue)', 0, 330, state.curveHue, 1, (v) => {
+                state.curveHue = Math.round(v);
+                draw();
+            }, '#ffb070');
+
+            CyberUI.createCheckbox('grp-extras', 'δ animieren (Zeit)', false, (val) => {
+                state.animate = val;
+                if (val) startAnimLoop();
+                else { stopAnim(); draw(); }
+            });
+
+            CyberUI.createCheckbox('grp-extras', 'Startpunkt zeigen', true, (val) => {
+                state.showDots = val;
+                draw();
+            });
+
+            document.getElementById('btn-reset-view').addEventListener('click', () => {
+                CyberCanvasInstance.resetView(-3.2, 3.2);
+                draw();
+            });
+
+            CyberCanvasInstance.init('main-canvas', {
+                minY: -3.2,
+                maxY: 3.2
+            }, {
+                showLabels: true,
+                showTelemetry: false,
+                showGrid: true
+            });
+            CyberCanvasInstance.resetView(-3.2, 3.2);
+            CyberCanvasInstance.onResize = () => draw();
+
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: 'Ansicht zurücksetzen',
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-3.2, 3.2);
+                            draw();
+                        }
+                    },
+                    { divider: true },
+                    {
+                        label: 'Achsen',
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (v) => { CyberCanvasInstance.showAxes = v; draw(); }
+                    },
+                    {
+                        label: 'Gitternetz',
+                        checked: CyberCanvasInstance.showGrid,
+                        onchange: (v) => { CyberCanvasInstance.showGrid = v; draw(); }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (v) => { CyberCanvasInstance.showLabels = v; draw(); }
+                    }
+                ]);
+            };
+
+            draw();
         });
     </script>
 </body>
