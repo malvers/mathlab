@@ -266,6 +266,9 @@
 
                 function spawnOne(lab) {
                     if (!lab) return;
+                    const diag = Math.hypot(window.innerWidth, window.innerHeight);
+                    const killDist = diag * 0.96 + 220;
+
                     const minSep = active.length > 14 ? 0.28 : active.length > 8 ? 0.34 : 0.4;
                     const angle  = pickSpawnAngle(minSep);
                     const speed  = 28 + Math.random() * 42;
@@ -275,7 +278,6 @@
                     a.href = lab.href;
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
-                    a.setAttribute('aria-label', 'Labor in neuem Tab öffnen');
                     const im = document.createElement('img');
                     im.src = SCREENSHOT_BASE + lab.file;
                     im.alt = ''; im.decoding = 'async'; im.draggable = false;
@@ -283,64 +285,50 @@
                     plane.appendChild(a);
 
                     const obj = {
-                        el:     a,
-                        angle,              // nur für Overlap-Check beim Spawn
-                        x:  0, y:  0,       // Position (Versatz von Bildmitte)
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        href:   lab.href,
-                        frozen: false,
+                        el:      a,
+                        angle, 
+                        depth:   0,                       // 0 (Mitte) bis 1 (Rand)
+                        vDepth:  speed / killDist,        // Zuwachs pro Sekunde
+                        targetX: Math.cos(angle) * killDist, // Wo sie bei depth=1 wäre
+                        targetY: Math.sin(angle) * killDist,
+                        href:    lab.href,
+                        frozen:  false,
                     };
                     active.push(obj);
 
-                    // Kein Link — nur Freeze/Drag/Resume
                     a.addEventListener('click', (e) => e.preventDefault());
 
                     a.addEventListener('pointerdown', (e) => {
-                        const diag = Math.hypot(window.innerWidth, window.innerHeight);
-                        const kd   = diag * 0.96 + 220;
-                        obj.frozen     = true;
-                        obj.frozenDist = Math.hypot(obj.x, obj.y);          // Radius einfrieren
-                        obj.frozenSc   = Math.min(1, obj.frozenDist / kd) * scaleMax; // Scale einfrieren
-                        obj.ptrStartX  = e.clientX;
-                        obj.ptrStartY  = e.clientY;
-                        obj.dragStartX = obj.x;
-                        obj.dragStartY = obj.y;
+                        obj.frozen    = true;
+                        obj.ptrStartX = e.clientX;
+                        obj.ptrStartY = e.clientY;
+                        // Aktuelle Position für den Drag-Offset merken
+                        obj.dragStartX = obj.targetX * obj.depth;
+                        obj.dragStartY = obj.targetY * obj.depth;
                         a.style.boxShadow = '0 0 30px rgba(0,210,255,0.7), 0 12px 40px rgba(0,0,0,0.55)';
                         a.setPointerCapture(e.pointerId);
                         e.preventDefault();
                     });
 
                     a.addEventListener('pointermove', (e) => {
-                        if (!obj.frozen) return;
-                        obj.x = obj.dragStartX + (e.clientX - obj.ptrStartX);
-                        obj.y = obj.dragStartY + (e.clientY - obj.ptrStartY);
-                        // Scale bleibt eingefroren — keine Größenänderung beim Drag
-                        a.style.transform =
-                            'translate(-50%,-50%) translate(' + obj.x.toFixed(1) + 'px,' +
-                            obj.y.toFixed(1) + 'px) scale(' + obj.frozenSc.toFixed(4) + ')';
-                        a.style.zIndex = String(10000 + Math.round(obj.frozenDist));
+                        if (!obj.frozen || obj.depth <= 0) return;
+                        const curX = obj.dragStartX + (e.clientX - obj.ptrStartX);
+                        const curY = obj.dragStartY + (e.clientY - obj.ptrStartY);
+                        
+                        // Wir ändern das "Ziel", aber behalten die "Tiefe" bei -> Größe bleibt fix!
+                        obj.targetX = curX / obj.depth;
+                        obj.targetY = curY / obj.depth;
+
+                        const sc = obj.depth * scaleMax;
+                        a.style.transform = `translate(-50%,-50%) translate(${curX.toFixed(1)}px,${curY.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+                        a.style.zIndex = String(10000 + Math.round(obj.depth * 1000));
                     });
 
                     const resume = () => {
                         if (!obj.frozen) return;
                         obj.frozen = false;
-                        // Richtung aus Drag-Position, aber Radius = frozenDist → Scale bleibt gleich
-                        const dragDist = Math.hypot(obj.x, obj.y);
-                        if (dragDist > 0.1) {
-                            const spd = Math.hypot(obj.vx, obj.vy);
-                            const nx  = obj.x / dragDist;
-                            const ny  = obj.y / dragDist;
-                            obj.x  = nx * obj.frozenDist; // auf gleichen Radius projizieren
-                            obj.y  = ny * obj.frozenDist;
-                            obj.vx = nx * spd;             // Geschwindigkeit in neue Richtung
-                            obj.vy = ny * spd;
-                        }
                         a.style.boxShadow = '';
                     };
-                    window.addEventListener('pointerup',     resume, { once: false });
-                    window.addEventListener('pointercancel', resume, { once: false });
-
                     window.addEventListener('pointerup',     resume, { once: false });
                     window.addEventListener('pointercancel', resume, { once: false });
                 }
@@ -362,9 +350,6 @@
                         last = now;
                     }
 
-                    const diag     = Math.hypot(window.innerWidth, window.innerHeight);
-                    const killDist = diag * 0.96 + 220;
-
                     refillMinimum();
 
                     spawnAcc += dt * 1000;
@@ -375,22 +360,19 @@
 
                     for (let i = active.length - 1; i >= 0; i--) {
                         const o = active[i];
-                        if (o.frozen) continue; // Drag aktiv — tick überspringt
+                        if (o.frozen) continue;
 
-                        // Position in x/y
-                        o.x += o.vx * dt;
-                        o.y += o.vy * dt;
+                        o.depth += o.vDepth * dt;
+                        
+                        const sc = o.depth * scaleMax;
+                        const px = o.targetX * o.depth;
+                        const py = o.targetY * o.depth;
 
-                        const dist = Math.hypot(o.x, o.y);
-                        const sc   = Math.min(1, dist / killDist) * scaleMax;
+                        o.el.style.transform = `translate(-50%,-50%) translate(${px.toFixed(1)}px,${py.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+                        o.el.style.zIndex       = String(10000 + Math.round(o.depth * 1000));
+                        o.el.style.pointerEvents = o.depth < 0.03 ? 'none' : 'auto';
 
-                        o.el.style.transform =
-                            'translate(-50%,-50%) translate(' + o.x.toFixed(1) + 'px,' +
-                            o.y.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
-                        o.el.style.zIndex       = String(10000 + Math.round(dist));
-                        o.el.style.pointerEvents = sc < 0.03 ? 'none' : 'auto';
-
-                        if (dist > killDist) {
+                        if (o.depth > 1.1) {
                             if (o.el.parentNode) o.el.parentNode.removeChild(o.el);
                             active.splice(i, 1);
                         }
@@ -401,6 +383,7 @@
                 }
 
                 refillMinimum();
+
 
                 requestAnimationFrame(tick);
             });
