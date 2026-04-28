@@ -244,16 +244,13 @@
                     return d;
                 }
 
-                /** Mindest-Winkelabstand zu allen aktiven Strahlen (reduziert Überlappungen). */
+                /** Mindest-Winkelabstand zu allen aktiven Strahlen */
                 function pickSpawnAngle(minRad) {
                     for (let attempt = 0; attempt < 140; attempt++) {
                         const ang = Math.random() * Math.PI * 2;
                         let ok = true;
                         for (const o of active) {
-                            if (angleDelta(ang, o.angle) < minRad) {
-                                ok = false;
-                                break;
-                            }
+                            if (angleDelta(ang, o.angle) < minRad) { ok = false; break; }
                         }
                         if (ok) return ang;
                     }
@@ -267,14 +264,12 @@
                     return cand[(Math.random() * cand.length) | 0];
                 }
 
-                /** Exakt aus der Bildmitte: dist=0, Skala folgt erst beim Abdriften (siehe tick). */
                 function spawnOne(lab) {
                     if (!lab) return;
-                    const minSep =
-                        active.length > 14 ? 0.28 : active.length > 8 ? 0.34 : 0.4;
-                    const angle = pickSpawnAngle(minSep);
-                    const initialDist = 0;
-                    const speed = 28 + Math.random() * 42;
+                    const minSep = active.length > 14 ? 0.28 : active.length > 8 ? 0.34 : 0.4;
+                    const angle  = pickSpawnAngle(minSep);
+                    const speed  = 28 + Math.random() * 42;
+
                     const a = document.createElement('a');
                     a.className = 'universe-thumb';
                     a.href = lab.href;
@@ -283,33 +278,34 @@
                     a.setAttribute('aria-label', 'Labor in neuem Tab öffnen');
                     const im = document.createElement('img');
                     im.src = SCREENSHOT_BASE + lab.file;
-                    im.alt = '';
-                    im.decoding = 'async';
-                    im.draggable = false;
+                    im.alt = ''; im.decoding = 'async'; im.draggable = false;
                     a.appendChild(im);
                     plane.appendChild(a);
 
                     const obj = {
-                        el: a,
-                        angle,
-                        dist: initialDist,
-                        speed,
-                        href: lab.href,
+                        el:     a,
+                        angle,              // nur für Overlap-Check beim Spawn
+                        x:  0, y:  0,       // Position (Versatz von Bildmitte)
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        href:   lab.href,
                         frozen: false,
                     };
                     active.push(obj);
 
-                    // Klick hält die Kachel an — Loslassen lässt sie weiter fliegen (kein Link)
+                    // Kein Link — nur Freeze/Drag/Resume
                     a.addEventListener('click', (e) => e.preventDefault());
 
                     a.addEventListener('pointerdown', (e) => {
-                        obj.frozen = true;
-                        obj.dragX = Math.cos(obj.angle) * obj.dist; // aktuelle screen-Verschiebung
-                        obj.dragY = Math.sin(obj.angle) * obj.dist;
-                        obj.ptrStartX = e.clientX;
-                        obj.ptrStartY = e.clientY;
-                        obj.dragStartX = obj.dragX;
-                        obj.dragStartY = obj.dragY;
+                        const diag = Math.hypot(window.innerWidth, window.innerHeight);
+                        const kd   = diag * 0.96 + 220;
+                        obj.frozen     = true;
+                        obj.frozenDist = Math.hypot(obj.x, obj.y);          // Radius einfrieren
+                        obj.frozenSc   = Math.min(1, obj.frozenDist / kd) * scaleMax; // Scale einfrieren
+                        obj.ptrStartX  = e.clientX;
+                        obj.ptrStartY  = e.clientY;
+                        obj.dragStartX = obj.x;
+                        obj.dragStartY = obj.y;
                         a.style.boxShadow = '0 0 30px rgba(0,210,255,0.7), 0 12px 40px rgba(0,0,0,0.55)';
                         a.setPointerCapture(e.pointerId);
                         e.preventDefault();
@@ -317,37 +313,40 @@
 
                     a.addEventListener('pointermove', (e) => {
                         if (!obj.frozen) return;
-                        const ddx = e.clientX - obj.ptrStartX;
-                        const ddy = e.clientY - obj.ptrStartY;
-                        obj.dragX = obj.dragStartX + ddx;
-                        obj.dragY = obj.dragStartY + ddy;
-                        // Transform direkt setzen (tick überspringt frozen)
-                        const sc = Math.min(1, obj.dist / (Math.hypot(window.innerWidth, window.innerHeight) * 0.96 + 220)) * scaleMax;
+                        obj.x = obj.dragStartX + (e.clientX - obj.ptrStartX);
+                        obj.y = obj.dragStartY + (e.clientY - obj.ptrStartY);
+                        // Scale bleibt eingefroren — keine Größenänderung beim Drag
                         a.style.transform =
-                            'translate(-50%, -50%) translate(' + obj.dragX.toFixed(1) + 'px,' + obj.dragY.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
+                            'translate(-50%,-50%) translate(' + obj.x.toFixed(1) + 'px,' +
+                            obj.y.toFixed(1) + 'px) scale(' + obj.frozenSc.toFixed(4) + ')';
+                        a.style.zIndex = String(10000 + Math.round(obj.frozenDist));
                     });
 
                     const resume = () => {
                         if (!obj.frozen) return;
                         obj.frozen = false;
-                        // Nur Winkel neu setzen — dist bleibt, kein z-Sprung
-                        obj.angle = Math.atan2(obj.dragY, obj.dragX);
-                        // dist auf die tatsächliche Drag-Distanz setzen, aber z-index sofort anpassen
-                        const newDist = Math.hypot(obj.dragX, obj.dragY);
-                        obj.dist = newDist;
-                        obj.el.style.zIndex = String(10000 + Math.floor(newDist));
+                        // Richtung aus Drag-Position, aber Radius = frozenDist → Scale bleibt gleich
+                        const dragDist = Math.hypot(obj.x, obj.y);
+                        if (dragDist > 0.1) {
+                            const spd = Math.hypot(obj.vx, obj.vy);
+                            const nx  = obj.x / dragDist;
+                            const ny  = obj.y / dragDist;
+                            obj.x  = nx * obj.frozenDist; // auf gleichen Radius projizieren
+                            obj.y  = ny * obj.frozenDist;
+                            obj.vx = nx * spd;             // Geschwindigkeit in neue Richtung
+                            obj.vy = ny * spd;
+                        }
                         a.style.boxShadow = '';
                     };
                     window.addEventListener('pointerup',     resume, { once: false });
                     window.addEventListener('pointercancel', resume, { once: false });
 
+                    window.addEventListener('pointerup',     resume, { once: false });
+                    window.addEventListener('pointercancel', resume, { once: false });
                 }
 
                 function refillMinimum() {
-                    while (
-                        active.length < WANT_VISIBLE &&
-                        active.length < maxLive
-                    ) {
+                    while (active.length < WANT_VISIBLE && active.length < maxLive) {
                         const lab = pickUnusedLab();
                         if (!lab) break;
                         spawnOne(lab);
@@ -359,60 +358,50 @@
                 function tick(now) {
                     let dt = 0;
                     if (!universeAnimPaused) {
-                        dt = Math.min(48, now - last) / 1000;
+                        dt   = Math.min(48, now - last) / 1000;
                         last = now;
                     }
 
-                    const diag = Math.hypot(window.innerWidth, window.innerHeight);
+                    const diag     = Math.hypot(window.innerWidth, window.innerHeight);
                     const killDist = diag * 0.96 + 220;
 
                     refillMinimum();
 
                     spawnAcc += dt * 1000;
-                    if (
-                        active.length >= WANT_VISIBLE &&
-                        active.length < maxLive &&
-                        spawnAcc >= nextSpawnIn
-                    ) {
+                    if (active.length >= WANT_VISIBLE && active.length < maxLive && spawnAcc >= nextSpawnIn) {
                         const lab = pickUnusedLab();
-                        if (lab) {
-                            spawnOne(lab);
-                            spawnAcc = 0;
-                            nextSpawnIn = spawnEveryMs();
-                        }
+                        if (lab) { spawnOne(lab); spawnAcc = 0; nextSpawnIn = spawnEveryMs(); }
                     }
 
                     for (let i = active.length - 1; i >= 0; i--) {
                         const o = active[i];
-                    if (o.frozen) continue;  // eingefroren — nicht bewegen
-                        o.dist += o.speed * dt;
-                        const t = Math.min(1, o.dist / killDist);
-                        const sc = t * scaleMax;
-                        const dx = Math.cos(o.angle) * o.dist;
-                        const dy = Math.sin(o.angle) * o.dist;
+                        if (o.frozen) continue; // Drag aktiv — tick überspringt
+
+                        // Position in x/y
+                        o.x += o.vx * dt;
+                        o.y += o.vy * dt;
+
+                        const dist = Math.hypot(o.x, o.y);
+                        const sc   = Math.min(1, dist / killDist) * scaleMax;
+
                         o.el.style.transform =
-                            'translate(-50%, -50%) translate(' +
-                            dx.toFixed(1) +
-                            'px,' +
-                            dy.toFixed(1) +
-                            'px) scale(' +
-                            sc.toFixed(4) +
-                            ')';
-                        o.el.style.zIndex = String(10000 + Math.floor(o.dist));
+                            'translate(-50%,-50%) translate(' + o.x.toFixed(1) + 'px,' +
+                            o.y.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
+                        o.el.style.zIndex       = String(10000 + Math.round(dist));
                         o.el.style.pointerEvents = sc < 0.03 ? 'none' : 'auto';
 
-                        if (o.dist > killDist) {
+                        if (dist > killDist) {
                             if (o.el.parentNode) o.el.parentNode.removeChild(o.el);
                             active.splice(i, 1);
                         }
                     }
 
                     refillMinimum();
-
                     requestAnimationFrame(tick);
                 }
 
                 refillMinimum();
+
                 requestAnimationFrame(tick);
             });
         }
