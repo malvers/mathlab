@@ -50,14 +50,8 @@
             qrBtn.onclick = () => this.showQR();
             qrBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-                <path d="M7 7h.01"></path>
-                <path d="M17 7h.01"></path>
-                <path d="M17 17h.01"></path>
-                <path d="M7 17h.01"></path>
+                <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>
+                <path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path>
             </svg>
         `;
 
@@ -81,14 +75,17 @@
             bugBtn.onclick = () => this.showBugReport();
             bugBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20V10"></path>
-                <path d="M18 9a6 6 0 0 0-12 0v3a6 6 0 0 0 12 0v-3Z"></path>
-                <path d="M12 10V4"></path>
-                <path d="M6 12H2"></path>
-                <path d="M22 12h-4"></path>
-                <path d="M15 4l-3 3-3-3"></path>
-                <path d="M18 17h4"></path>
-                <path d="M2 17h4"></path>
+                <path d="m8 2 1.88 1.88"></path>
+                <path d="M14.12 3.88 16 2"></path>
+                <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path>
+                <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path>
+                <path d="M12 20v-9"></path>
+                <path d="M6.53 9C4.6 8.8 3 7.1 3 5"></path>
+                <path d="M6 13H2"></path>
+                <path d="M3 21c0-2.1 1.7-3.9 3.8-4"></path>
+                <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"></path>
+                <path d="M22 13h-4"></path>
+                <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"></path>
             </svg>
         `;
 
@@ -98,7 +95,7 @@
             briefingBtn.title = "Beschreibung anzeigen";
             briefingBtn.onclick = () => this.showBriefing();
             briefingBtn.innerHTML = `
-            <span style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 1.5rem; line-height: 1; display: block;">?</span>
+            <span style="font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 1.35rem; line-height: 1; display: block;">?</span>
         `;
 
             nav.appendChild(homeBtn);

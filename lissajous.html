@@ -77,7 +77,7 @@
         }
         #ui-container { overflow-y: auto; max-height: calc(100vh - 90px); }
 
-        /* Slider kompakt (Y) — nochmals −6 px vertikal (Pad oben/unten + Titelabstand) */
+        /* Slider kompakt (Y): margin ui.js 8→2; cyber-layout range-Padding 10→7 (je −6 px/Zeile) */
         #ui-container .instrument-card .card-content {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
@@ -85,6 +85,7 @@
         #ui-container .instrument-title {
             margin-bottom: 0 !important;
             padding-bottom: 1px !important;
+            font-size: 0.78rem !important;
         }
         #ui-container .cyber-control-group {
             margin-bottom: 0 !important;
@@ -95,23 +96,45 @@
             line-height: 1.05 !important;
         }
         #ui-container .cyber-label {
-            font-size: 0.62rem !important;
+            font-size: 0.78rem !important;
         }
         #ui-container .val-display {
-            font-size: 0.62rem !important;
+            font-size: 0.78rem !important;
         }
         #ui-container .cyber-slider {
             margin-top: 0 !important;
+            margin-bottom: 2px !important; /* ui.js: 8px → 2px = −6 px unter dem Track */
+        }
+        #ui-container input[type="range"].cyber-slider {
+            padding-top: 7px !important;
+            padding-bottom: 7px !important; /* cyber-layout default 10px: −3 oben/unten = −6 px */
+        }
+        #ui-container #grp-extras {
+            margin-top: 10px !important;
+            padding-top: 4px !important;
         }
         #ui-container #grp-extras .cyber-checkbox-wrapper {
-            margin-bottom: 2px !important;
+            margin-bottom: 14px !important;
         }
         #ui-container #grp-extras .cyber-checkbox-wrapper:last-child {
             margin-bottom: 0 !important;
         }
         #ui-container #btn-reset-view {
+            flex: 1;
+            min-width: 120px;
             margin-top: 6px !important;
-            padding: 6px 10px !important;
+            padding: 9px 12px !important;
+            border: 1px solid rgba(100, 190, 255, 0.55) !important;
+            background: rgba(18, 28, 48, 0.85);
+            color: #d6f2ff;
+            font-family: Orbitron, sans-serif;
+            font-size: 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #ui-container #btn-reset-view:hover {
+            border-color: rgba(130, 210, 255, 0.85) !important;
+            box-shadow: 0 0 12px rgba(80, 170, 255, 0.25);
         }
     </style>
 </head>
@@ -332,9 +355,9 @@
                 <div id="grp-color"></div>
                 <div id="grp-extras"></div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-                    <button type="button" id="btn-reset-view" style="flex:1;min-width:120px;padding:9px 12px;border:1px solid rgba(255,154,92,0.45);background:rgba(18,28,48,0.85);color:#ffe8d8;font-family:Orbitron,sans-serif;font-size:0.72rem;border-radius:10px;cursor:pointer;">Ansicht zurücksetzen</button>
+                    <button type="button" id="btn-reset-view" title="Ansicht und Zoom zurücksetzen">RESET</button>
                 </div>
-            `, '#ff9a5c');
+            `, '#00d2ff');
 
             CyberUI.createSlider('grp-amp', 'Amplitude A', 0.4, 2.6, state.A, 0.05, (v) => {
                 state.A = v;
@@ -399,7 +422,7 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
                     {
-                        label: 'Ansicht zurücksetzen',
+                        label: 'RESET',
                         onclick: () => {
                             CyberCanvasInstance.resetView(-3.2, 3.2);
                             draw();
