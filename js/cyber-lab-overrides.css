@@ -4,6 +4,11 @@
  * Standardizes the YouTube-style navigation and high-fidelity telemetry.
  */
 
+:root {
+    /* Oberkante Hamburger / Sidebar-Nav-Zeile — gleiche Bezugshöhe wie typische Canvas-Overlays (Formeln, HUD, links oben ca. 14px) */
+    --cyber-nav-band-top: 14px;
+}
+
 #mini-rail {
     width: 66px;
     height: 100vh;
@@ -12,8 +17,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Optisch zu .canvas-branding; links oben etwas kompakter */
-    padding: 8px 0 22px 0;
+    padding: var(--cyber-nav-band-top) 0 22px 0;
     z-index: 2000;
     backdrop-filter: blur(25px);
     border-right: none; /* Border is handled dynamically */
@@ -44,8 +48,8 @@
     width: 100% !important;
     max-width: none !important;
     padding: 0 !important;
-    /* Moderat kompakter: PARAMETER-/Instrument-Karten näher unter die Button-Reihe */
-    margin: 6px 0 8px 0 !important;
+    /* Kein Extra-Abstand oben — Oberkante kommt aus #side-panel padding + diese Variable */
+    margin: 0 0 8px 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -80,8 +84,7 @@
     position: relative;
     z-index: 1500;
     border-right: 1px solid rgba(0, 210, 255, 0.2);
-    /* Oben 2px; Seiten 7: Karten etwas höher unter Mini-Rail */
-    padding: 2px 7px 7px !important;
+    padding: var(--cyber-nav-band-top) 7px 7px !important;
 }
 
 #side-panel.collapsed {
