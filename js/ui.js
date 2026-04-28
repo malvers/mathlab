@@ -1034,7 +1034,7 @@ class CyberUI {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%) scale(0.96);
-                padding: 18px 28px;
+                padding: 18px 28px 22px;
                 border-radius: 14px;
                 border: 1px solid rgba(255, 60, 60, 0.6);
                 background: rgba(90, 10, 20, 0.88);
@@ -1056,6 +1056,53 @@ class CyberUI {
             .cyber-screen-warning.visible {
                 opacity: 1;
                 transform: translate(-50%, -50%) scale(1);
+                pointer-events: auto;
+            }
+
+            .cyber-screen-warning-close {
+                position: absolute;
+                top: 8px;
+                right: 10px;
+                text-transform: none;
+                width: 34px;
+                height: 34px;
+                padding: 0;
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                border-radius: 8px;
+                background: rgba(0, 0, 0, 0.25);
+                color: rgba(255, 220, 220, 0.95);
+                font-size: 1.35rem;
+                line-height: 1;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s, border-color 0.2s, color 0.2s;
+            }
+            .cyber-screen-warning-close:hover {
+                background: rgba(255, 80, 80, 0.35);
+                border-color: rgba(255, 160, 160, 0.55);
+                color: #fff;
+            }
+
+            .cyber-screen-warning-ok {
+                margin-top: 16px;
+                padding: 10px 22px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.72rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                border-radius: 10px;
+                border: 1px solid rgba(255, 180, 180, 0.45);
+                background: rgba(40, 8, 14, 0.65);
+                color: #ffe8e8;
+                cursor: pointer;
+                transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            }
+            .cyber-screen-warning-ok:hover {
+                background: rgba(120, 25, 35, 0.75);
+                border-color: rgba(255, 220, 220, 0.65);
+                box-shadow: 0 0 14px rgba(255, 80, 80, 0.35);
             }
 
             .cyber-screen-warning .warn-icon-top {
@@ -1141,49 +1188,82 @@ class CyberUI {
      * @param {number} options.minHeight
      * @param {string} options.message
      * @param {string} options.id
+     * @param {number} [options.snoozeMs=3600000] Nach „Verstanden“/× nicht mehr anzeigen (Standard 1 h); wie üblich per localStorage
+     * @param {string} [options.storageKey] Schlüssel für localStorage (Default fest mit Mindestauflösung)
      */
     static ensureScreenWarning(options = {}) {
         const {
             minWidth = 980,
             minHeight = 620,
             message = "Bildschirm zu klein für optimale Labor-Ansicht",
-            id = "cyber-screen-warning"
+            id = "cyber-screen-warning",
+            snoozeMs = 60 * 60 * 1000,
+            storageKey = `cyberLabScreenSnooze_${minWidth}x${minHeight}`
         } = options;
+
+        const readSnoozeUntil = () => {
+            try {
+                const raw = localStorage.getItem(storageKey);
+                if (raw == null) return 0;
+                const n = parseInt(raw, 10);
+                return Number.isFinite(n) ? n : 0;
+            } catch (e) {
+                return 0;
+            }
+        };
+
+        const isSnoozeActive = () => Date.now() < readSnoozeUntil();
+
+        const setSnooze = () => {
+            try {
+                localStorage.setItem(storageKey, String(Date.now() + snoozeMs));
+            } catch (e) {
+                /* Private Mode / disabled storage — Hinweis erscheint beim nächsten Mal wieder */
+            }
+        };
+
+        const buildInnerHtml = () => `
+                <button type="button" class="cyber-screen-warning-close" aria-label="Schließen">×</button>
+                <svg class="warn-icon-top" viewBox="0 0 64 64" aria-hidden="true">
+                    <path d="M32 6 L58 54 H6 Z" fill="#ffd400" stroke="#111" stroke-width="3" />
+                    <rect x="29" y="21" width="6" height="19" rx="3" fill="#111" />
+                    <circle cx="32" cy="47" r="3.6" fill="#111" />
+                </svg>
+                <div>${message}</div>
+                <button type="button" class="cyber-screen-warning-ok">Verstanden</button>
+            `;
 
         let warning = document.getElementById(id);
         if (!warning) {
             warning = document.createElement('div');
             warning.id = id;
             warning.className = 'cyber-screen-warning';
-            warning.innerHTML = `
-                <svg class="warn-icon-top" viewBox="0 0 64 64" aria-hidden="true">
-                    <path d="M32 6 L58 54 H6 Z" fill="#ffd400" stroke="#111" stroke-width="3" />
-                    <rect x="29" y="21" width="6" height="19" rx="3" fill="#111" />
-                    <circle cx="32" cy="47" r="3.6" fill="#111" />
-                </svg>
-                <div>${message}</div>
-            `;
+            warning.innerHTML = buildInnerHtml();
             document.body.appendChild(warning);
         } else {
-            warning.innerHTML = `
-                <svg class="warn-icon-top" viewBox="0 0 64 64" aria-hidden="true">
-                    <path d="M32 6 L58 54 H6 Z" fill="#ffd400" stroke="#111" stroke-width="3" />
-                    <rect x="29" y="21" width="6" height="19" rx="3" fill="#111" />
-                    <circle cx="32" cy="47" r="3.6" fill="#111" />
-                </svg>
-                <div>${message}</div>
-            `;
+            warning.innerHTML = buildInnerHtml();
         }
+
+        const dismiss = () => {
+            setSnooze();
+            warning.classList.remove('visible');
+        };
 
         const update = () => {
             const tooSmall = window.innerWidth < minWidth || window.innerHeight < minHeight;
-            warning.classList.toggle('visible', tooSmall);
+            warning.classList.toggle('visible', tooSmall && !isSnoozeActive());
         };
 
         // Avoid duplicate listeners if called multiple times.
         const listenerKey = '__cyberScreenWarningListenerAttached__';
         if (!warning[listenerKey]) {
             window.addEventListener('resize', update);
+            warning.addEventListener('click', (e) => {
+                const t = e.target;
+                if (t.closest('.cyber-screen-warning-close') || t.closest('.cyber-screen-warning-ok')) {
+                    dismiss();
+                }
+            });
             warning[listenerKey] = true;
         }
         update();
