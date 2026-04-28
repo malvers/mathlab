@@ -95,8 +95,11 @@
         </div>
         <div id="ui-container">
             <div class="control-group">
-                <label>AUTO-PILOT</label>
-                <button id="btn-flight" class="ultra-btn" style="width:100%; font-size:0.9rem; padding:15px;">START FLIGHT</button>
+                <label>NAVIGATION</label>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button id="btn-flight" class="ultra-btn" style="padding:15px; font-size:0.9rem;">START FLIGHT</button>
+                    <button id="btn-reset" class="ultra-btn" style="padding:15px; font-size:0.9rem;">RESET VIEW</button>
+                </div>
             </div>
             <div class="control-group">
                 <label>FRAKTAL MODUS</label>
@@ -192,7 +195,7 @@
     <script>
         window.addEventListener('load', () => {
             const canvas = document.getElementById('fractal-canvas');
-            const gl = canvas.getContext('webgl', { alpha: false });
+            const gl = canvas.getContext('webgl', { alpha: false, antialias: false });
             if (!gl) return;
 
             const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
@@ -209,7 +212,7 @@
             let isAutoFlight = false, frameCount = 0;
 
             const sIter = document.getElementById('slider-iter'), sCX = document.getElementById('slider-cx'), sCY = document.getElementById('slider-cy'), iterVal = document.getElementById('iter-val-side'), julControls = document.getElementById('julia-controls');
-            const btnFlight = document.getElementById('btn-flight'), btnM = document.getElementById('mode-mandel'), btnJ = document.getElementById('mode-julia');
+            const btnFlight = document.getElementById('btn-flight'), btnM = document.getElementById('mode-mandel'), btnJ = document.getElementById('mode-julia'), btnReset = document.getElementById('btn-reset');
 
             sIter.oninput = () => { maxIter = sIter.value; iterVal.innerText = maxIter; document.getElementById('iter-tag').innerText = `ITER: ${maxIter}`; };
             sCX.oninput = () => juliaCX = parseFloat(sCX.value);
@@ -217,6 +220,15 @@
             
             btnM.onclick = () => { isJulia = false; julControls.style.display = 'none'; btnM.classList.add('active'); btnJ.classList.remove('active'); isAutoFlight = false; btnFlight.classList.remove('active'); btnFlight.innerText = "START FLIGHT"; };
             btnJ.onclick = () => { isJulia = true; julControls.style.display = 'block'; btnJ.classList.add('active'); btnM.classList.remove('active'); };
+
+            btnReset.onclick = () => {
+                centerX = 0; centerY = 0; zoom = 1.5; maxIter = 300;
+                juliaCX = -0.7; juliaCY = 0.27;
+                sIter.value = 300; iterVal.innerText = 300;
+                sCX.value = -0.7; sCY.value = 0.27;
+                document.getElementById('iter-tag').innerText = "ITER: 300";
+                isAutoFlight = false; btnFlight.classList.remove('active'); btnFlight.innerText = "START FLIGHT";
+            };
 
             btnFlight.onclick = () => {
                 isAutoFlight = !isAutoFlight;
@@ -226,25 +238,26 @@
             };
 
             function render() {
-                const w = Math.floor(canvas.clientWidth), h = Math.floor(canvas.clientHeight);
-                if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+                // STABILER RESIZE: Nur bei echten Änderungen > 2 Pixel
+                const cw = Math.floor(canvas.clientWidth), ch = Math.floor(canvas.clientHeight);
+                if (Math.abs(canvas.width - cw) > 2 || Math.abs(canvas.height - ch) > 2) {
+                    canvas.width = cw; canvas.height = ch; gl.viewport(0, 0, cw, ch);
+                }
+                
                 time += 0.01; frameCount++;
 
                 if (isAutoFlight) {
                     zoom *= 1.005;
-                    let targetX = 0.12, targetY = 0.08;
-                    centerX += (targetX - centerX) * 0.002;
-                    centerY += (targetY - centerY) * 0.002;
                 }
 
-                // Throttled Tag Updates (alle 10 Frames)
-                if (frameCount % 10 === 0) {
+                if (frameCount % 30 === 0) {
                     document.getElementById('zoom-tag').innerText = `ZOOM: ${zoom < 1000 ? zoom.toFixed(1) : zoom.toExponential(2)}x`;
                 }
 
-                gl.uniform2f(resLoc, w, h); gl.uniform1f(zoomLoc, zoom); gl.uniform1f(iterLoc, maxIter); gl.uniform1f(timeLoc, time); gl.uniform1f(isJulLoc, isJulia ? 1.0 : 0.0); gl.uniform2f(julLoc, juliaCX, juliaCY);
+                gl.uniform2f(resLoc, canvas.width, canvas.height); gl.uniform1f(zoomLoc, zoom); gl.uniform1f(iterLoc, maxIter); gl.uniform1f(timeLoc, time); gl.uniform1f(isJulLoc, isJulia ? 1.0 : 0.0); gl.uniform2f(julLoc, juliaCX, juliaCY);
                 const hx = Math.fround(centerX), lx = centerX - hx, hy = Math.fround(centerY), ly = centerY - hy;
                 gl.uniform2f(cH, hx, hy); gl.uniform2f(cL, lx, ly);
+                
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
                 requestAnimationFrame(render);
             }
@@ -252,7 +265,18 @@
             canvas.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
             window.addEventListener('mousemove', (e) => { if (!isDragging) return; const dx = e.clientX - lastX, dy = e.clientY - lastY, s = Math.min(canvas.width, canvas.height); centerX -= (dx / s) / (zoom / 2); centerY += (dy / s) / (zoom / 2); lastX = e.clientX; lastY = e.clientY; });
             window.addEventListener('mouseup', () => isDragging = false);
-            canvas.addEventListener('wheel', (e) => { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const mx = ((e.clientX - rect.left) - canvas.width / 2) / Math.min(canvas.width, canvas.height) * 2, my = -((e.clientY - rect.top) - canvas.height / 2) / Math.min(canvas.width, canvas.height) * 2; const oz = zoom; zoom *= (e.deltaY > 0 ? 0.9 : 1.1); zoom = Math.max(zoom, 1.5); centerX += mx / oz - mx / zoom; centerY += my / oz - my / zoom; }, { passive: false });
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const mx = ((e.clientX - rect.left) - canvas.width / 2) / Math.min(canvas.width, canvas.height) * 2, my = -((e.clientY - rect.top) - canvas.height / 2) / Math.min(canvas.width, canvas.height) * 2;
+                const oz = zoom;
+                let zoomFactor = e.shiftKey ? 1.002 : 1.02;
+                if (e.deltaY > 0) zoomFactor = 1.0 / zoomFactor;
+                zoom *= zoomFactor;
+                zoom = Math.max(zoom, 1.5);
+                centerX += mx / oz - mx / zoom;
+                centerY += my / oz - my / zoom;
+            }, { passive: false });
             render();
         });
     </script>
