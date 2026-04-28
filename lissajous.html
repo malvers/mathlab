@@ -77,7 +77,7 @@
         }
         #ui-container { overflow-y: auto; max-height: calc(100vh - 90px); }
 
-        /* Slider kompakt (Y): margin ui.js 8→2; cyber-layout range-Padding 10→7 (je −6 px/Zeile) */
+        /* Slider kompakt (Y): margin ui.js 8→2; range-Padding 10→4 (cyber-layout) */
         #ui-container .instrument-card .card-content {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
@@ -105,32 +105,53 @@
             margin-top: 0 !important;
             margin-bottom: 2px !important; /* ui.js: 8px → 2px = −6 px unter dem Track */
         }
+        /* CyberUI injectStyles lädt nach diesem Block — Padding + gezieltes Überschneiden wirkt sicher sichtbar */
         #ui-container input[type="range"].cyber-slider {
-            padding-top: 7px !important;
-            padding-bottom: 7px !important; /* cyber-layout default 10px: −3 oben/unten = −6 px */
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
         }
-        #ui-container #grp-extras {
-            margin-top: 10px !important;
-            padding-top: 4px !important;
+        #ui-container [id^='grp-'] .cyber-control-group + .cyber-control-group {
+            margin-top: -6px !important;
         }
-        #ui-container #grp-extras .cyber-checkbox-wrapper {
-            margin-bottom: 14px !important;
+        #ui-container .card-content > #grp-amp + #grp-freq,
+        #ui-container .card-content > #grp-freq + #grp-phase,
+        #ui-container .card-content > #grp-phase + #grp-span,
+        #ui-container .card-content > #grp-span + #grp-color,
+        #ui-container .card-content > #grp-color + #grp-actions {
+            margin-top: -6px !important;
         }
-        #ui-container #grp-extras .cyber-checkbox-wrapper:last-child {
-            margin-bottom: 0 !important;
+        #ui-container #grp-actions {
+            margin-top: 12px !important;
+            display: flex !important;
+            gap: 8px !important;
+            flex-wrap: wrap !important;
         }
-        #ui-container #btn-reset-view {
+        #ui-container #btn-reset-view,
+        #ui-container #btn-animate {
             flex: 1;
             min-width: 120px;
-            margin-top: 6px !important;
             padding: 9px 12px !important;
-            border: 1px solid rgba(100, 190, 255, 0.55) !important;
-            background: rgba(18, 28, 48, 0.85);
-            color: #d6f2ff;
             font-family: Orbitron, sans-serif;
             font-size: 0.8rem;
             border-radius: 10px;
             cursor: pointer;
+            background: rgba(18, 28, 48, 0.85);
+        }
+        #ui-container #btn-animate {
+            border: 1px solid rgba(255, 154, 92, 0.5) !important;
+            color: #ffe8d8;
+        }
+        #ui-container #btn-animate.is-active {
+            border-color: rgba(255, 170, 90, 0.95) !important;
+            box-shadow: 0 0 14px rgba(255, 130, 60, 0.35);
+            color: #fff5e8;
+        }
+        #ui-container #btn-animate:hover {
+            border-color: rgba(255, 190, 120, 0.85) !important;
+        }
+        #ui-container #btn-reset-view {
+            border: 1px solid rgba(100, 190, 255, 0.55) !important;
+            color: #d6f2ff;
         }
         #ui-container #btn-reset-view:hover {
             border-color: rgba(130, 210, 255, 0.85) !important;
@@ -203,21 +224,33 @@
             deltaDeg: 0,
             cycles: 1,
             animate: false,
-            showDots: true,
             curveHue: 28
         };
 
         let animRaf = null;
-        let animAnchor = 0;
+        /** Anteil [0,1] des Pfads sichtbar; bei RESET 0 = keine Kurve */
+        let traceProgress = 1;
+        let lastTraceTs = 0;
+        /** Dauer eines vollen Durchlaufs t=0…span (ms); danach bleibt die Kurve voll sichtbar */
+        const TRACE_LOOP_MS = 3600;
 
+        /** Phase δ nur aus dem Slider — keine Zeitabhängigkeit, sonst dreht sich die ganze Figur in der Ebene */
         function phaseRad() {
-            const base = (state.deltaDeg * Math.PI) / 180;
-            if (!state.animate) return base;
-            return base + (performance.now() - animAnchor) * 0.0015;
+            return (state.deltaDeg * Math.PI) / 180;
         }
 
         function tickAnim() {
             if (!state.animate) return;
+            const now = performance.now();
+            const dt = Math.min(120, now - lastTraceTs);
+            lastTraceTs = now;
+            traceProgress += dt / TRACE_LOOP_MS;
+            if (traceProgress >= 1) {
+                traceProgress = 1;
+                draw();
+                animRaf = null;
+                return;
+            }
             draw();
             animRaf = requestAnimationFrame(tickAnim);
         }
@@ -230,8 +263,30 @@
         function startAnimLoop() {
             stopAnim();
             if (!state.animate) return;
-            animAnchor = performance.now();
+            traceProgress = 0;
+            lastTraceTs = performance.now();
             animRaf = requestAnimationFrame(tickAnim);
+        }
+
+        function syncAnimateButton() {
+            const b = document.getElementById('btn-animate');
+            if (!b) return;
+            b.textContent = state.animate ? 'STOPP' : 'ANIMIEREN';
+            b.classList.toggle('is-active', state.animate);
+        }
+
+        /** Nach RESET ohne Animation: Slider wieder volle Kurve */
+        function touchParameterWhileIdle() {
+            if (!state.animate) traceProgress = 1;
+        }
+
+        function applyResetCurveAndView() {
+            CyberCanvasInstance.resetView(-3.2, 3.2);
+            state.animate = false;
+            stopAnim();
+            traceProgress = 0;
+            draw();
+            syncAnimateButton();
         }
 
         function draw() {
@@ -246,8 +301,9 @@
             const steps = Math.min(16000, Math.max(400, Math.ceil(span * 120)));
 
             const delta = phaseRad();
-            let px0 = null;
-            let py0 = null;
+
+            const endFrac = traceProgress;
+            const maxIndex = Math.min(steps, Math.max(0, Math.round(endFrac * steps)));
 
             ctx.strokeStyle = `hsla(${state.curveHue}, 95%, 58%, 0.92)`;
             ctx.lineWidth = 2;
@@ -257,24 +313,17 @@
             ctx.shadowColor = `hsla(${state.curveHue}, 100%, 45%, 0.55)`;
 
             ctx.beginPath();
-            for (let i = 0; i <= steps; i++) {
+            for (let i = 0; i <= maxIndex; i++) {
                 const t = (i / steps) * span;
                 const x = state.A * Math.sin(wx * t + delta);
                 const y = state.B * Math.sin(wy * t);
                 const sx = CC.mapX(x);
                 const sy = CC.mapY(y);
-                if (i === 0) {
-                    ctx.moveTo(sx, sy);
-                    px0 = sx; py0 = sy;
-                } else ctx.lineTo(sx, sy);
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
             }
-            ctx.stroke();
+            if (maxIndex >= 1) ctx.stroke();
             ctx.shadowBlur = 0;
-
-            if (state.showDots && px0 != null) {
-                ctx.fillStyle = `hsla(${state.curveHue}, 90%, 65%, 0.95)`;
-                ctx.beginPath(); ctx.arc(px0, py0, 5, 0, Math.PI * 2); ctx.fill();
-            }
 
             updateFormulaStrip(wx, wy, delta);
         }
@@ -340,7 +389,7 @@
                         <ul style="margin:0;padding-left:18px;font-size:0.82rem;opacity:0.92;">
                             <li><b>Pfad-Umfang:</b> Vielfaches einer geschlossenen Periode <code>T₀</code> (bei ganzzahligen ω).</li>
                             <li><b>Pan / Zoom:</b> Maus ziehen · Mausrad · Shift+Rad zoomt zur Bildmitte.</li>
-                            <li><b>Animation:</b>läuft δ durch die Zeit (nur optisch).</li>
+                            <li><b>Animation:</b> ANIMIEREN zeichnet die Kurve einmal entlang <code>t</code>; danach bleibt sie stehen. Erneut ANIMIEREN startet von vorn.</li>
                         </ul>
                     </div>
                 </div>
@@ -353,60 +402,66 @@
                 <div id="grp-phase"></div>
                 <div id="grp-span"></div>
                 <div id="grp-color"></div>
-                <div id="grp-extras"></div>
-                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                <div id="grp-actions">
+                    <button type="button" id="btn-animate" title="Phase δ(t) und Pfad — ein/aus">ANIMIEREN</button>
                     <button type="button" id="btn-reset-view" title="Ansicht und Zoom zurücksetzen">RESET</button>
                 </div>
             `, '#00d2ff');
 
             CyberUI.createSlider('grp-amp', 'Amplitude A', 0.4, 2.6, state.A, 0.05, (v) => {
                 state.A = v;
+                touchParameterWhileIdle();
                 draw();
             }, '#ff9a5c');
             CyberUI.createSlider('grp-amp', 'Amplitude B', 0.4, 2.6, state.B, 0.05, (v) => {
                 state.B = v;
+                touchParameterWhileIdle();
                 draw();
             }, '#7fdcff');
 
             CyberUI.createSlider('grp-freq', 'ωₓ (Kreisfrequenz)', 1, 16, state.wx, 1, (v) => {
                 state.wx = Math.round(v);
+                touchParameterWhileIdle();
                 draw();
             }, '#ff9a5c');
             CyberUI.createSlider('grp-freq', 'ωᵧ (Kreisfrequenz)', 1, 16, state.wy, 1, (v) => {
                 state.wy = Math.round(v);
+                touchParameterWhileIdle();
                 draw();
             }, '#7fdcff');
 
             CyberUI.createSlider('grp-phase', 'Phase δ (Grad)', 0, 359, state.deltaDeg, 1, (v) => {
                 state.deltaDeg = Math.round(v);
+                touchParameterWhileIdle();
                 draw();
             }, '#00d2ff');
 
             CyberUI.createSlider('grp-span', 'Pfad-Umfang (× Perioden)', 0.25, 6, state.cycles, 0.05, (v) => {
                 state.cycles = v;
+                touchParameterWhileIdle();
                 draw();
             }, '#00d2ff');
 
             CyberUI.createSlider('grp-color', 'Kurvenfarbe (Hue)', 0, 330, state.curveHue, 1, (v) => {
                 state.curveHue = Math.round(v);
+                touchParameterWhileIdle();
                 draw();
             }, '#ffb070');
 
-            CyberUI.createCheckbox('grp-extras', 'δ animieren (Zeit)', false, (val) => {
-                state.animate = val;
-                if (val) startAnimLoop();
-                else { stopAnim(); draw(); }
+            document.getElementById('btn-animate').addEventListener('click', () => {
+                state.animate = !state.animate;
+                if (state.animate) startAnimLoop();
+                else {
+                    stopAnim();
+                    traceProgress = 1;
+                    draw();
+                }
+                syncAnimateButton();
             });
 
-            CyberUI.createCheckbox('grp-extras', 'Startpunkt zeigen', true, (val) => {
-                state.showDots = val;
-                draw();
-            });
+            document.getElementById('btn-reset-view').addEventListener('click', () => applyResetCurveAndView());
 
-            document.getElementById('btn-reset-view').addEventListener('click', () => {
-                CyberCanvasInstance.resetView(-3.2, 3.2);
-                draw();
-            });
+            syncAnimateButton();
 
             CyberCanvasInstance.init('main-canvas', {
                 minY: -3.2,
@@ -423,10 +478,7 @@
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
                     {
                         label: 'RESET',
-                        onclick: () => {
-                            CyberCanvasInstance.resetView(-3.2, 3.2);
-                            draw();
-                        }
+                        onclick: () => applyResetCurveAndView()
                     },
                     { divider: true },
                     {
