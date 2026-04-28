@@ -289,13 +289,58 @@
                     a.appendChild(im);
                     plane.appendChild(a);
 
-                    active.push({
+                    const obj = {
                         el: a,
                         angle,
                         dist: initialDist,
                         speed,
                         href: lab.href,
+                        frozen: false,
+                    };
+                    active.push(obj);
+
+                    // Klick hält die Kachel an — Loslassen lässt sie weiter fliegen (kein Link)
+                    a.addEventListener('click', (e) => e.preventDefault());
+
+                    a.addEventListener('pointerdown', (e) => {
+                        obj.frozen = true;
+                        obj.dragX = Math.cos(obj.angle) * obj.dist; // aktuelle screen-Verschiebung
+                        obj.dragY = Math.sin(obj.angle) * obj.dist;
+                        obj.ptrStartX = e.clientX;
+                        obj.ptrStartY = e.clientY;
+                        obj.dragStartX = obj.dragX;
+                        obj.dragStartY = obj.dragY;
+                        a.style.boxShadow = '0 0 30px rgba(0,210,255,0.7), 0 12px 40px rgba(0,0,0,0.55)';
+                        a.setPointerCapture(e.pointerId);
+                        e.preventDefault();
                     });
+
+                    a.addEventListener('pointermove', (e) => {
+                        if (!obj.frozen) return;
+                        const ddx = e.clientX - obj.ptrStartX;
+                        const ddy = e.clientY - obj.ptrStartY;
+                        obj.dragX = obj.dragStartX + ddx;
+                        obj.dragY = obj.dragStartY + ddy;
+                        // Transform direkt setzen (tick überspringt frozen)
+                        const sc = Math.min(1, obj.dist / (Math.hypot(window.innerWidth, window.innerHeight) * 0.96 + 220)) * scaleMax;
+                        a.style.transform =
+                            'translate(-50%, -50%) translate(' + obj.dragX.toFixed(1) + 'px,' + obj.dragY.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
+                    });
+
+                    const resume = () => {
+                        if (!obj.frozen) return;
+                        obj.frozen = false;
+                        // Nur Winkel neu setzen — dist bleibt, kein z-Sprung
+                        obj.angle = Math.atan2(obj.dragY, obj.dragX);
+                        // dist auf die tatsächliche Drag-Distanz setzen, aber z-index sofort anpassen
+                        const newDist = Math.hypot(obj.dragX, obj.dragY);
+                        obj.dist = newDist;
+                        obj.el.style.zIndex = String(10000 + Math.floor(newDist));
+                        a.style.boxShadow = '';
+                    };
+                    window.addEventListener('pointerup',     resume, { once: false });
+                    window.addEventListener('pointercancel', resume, { once: false });
+
                 }
 
                 function refillMinimum() {
@@ -339,6 +384,7 @@
 
                     for (let i = active.length - 1; i >= 0; i--) {
                         const o = active[i];
+                    if (o.frozen) continue;  // eingefroren — nicht bewegen
                         o.dist += o.speed * dt;
                         const t = Math.min(1, o.dist / killDist);
                         const sc = t * scaleMax;
