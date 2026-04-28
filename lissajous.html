@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Lissajous</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container"></div>
+    </main>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: 'Doc Alvers Mathe-Labor',
+                subtitle: 'LISSAJOUS · PLATZHALTER'
+            });
+            CyberBranding.setBriefing(`
+                <p style="margin:0 0 12px 0; font-size:0.88rem; line-height:1.45; color:rgba(255,255,255,0.82);">
+                    Neues Tool (<code style="font-size:0.85em;">lissajous.html</code>): Inhalt folgt.
+                    Figuren nach Jules Antoine <strong>Lissajous</strong>.
+                </p>
+            `);
+            CyberUI.init();
+        });
+    </script>
+</body>
+</html>

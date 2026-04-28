@@ -107,8 +107,8 @@ class CyberUI {
     }
 
     /**
-     * Cmd+S / Ctrl+S: PNG-Screenshot des größten sichtbaren Canvas (typisch WebGL-View).
-     * blockiert dabei den Browser-„Seite speichern“-Dialog. In Textfeldern unverändert.
+     * Cmd+Shift+S / Ctrl+Shift+S: PNG-Screenshot des größten sichtbaren Canvas (typisch WebGL-View).
+     * Cmd+S bleibt dem „Seite speichern“-Dialog. In Textfeldern unverändert.
      */
     static installAppScreenshot() {
         if (window.__cyberAppScreenshotInstalled) return;
@@ -116,6 +116,7 @@ class CyberUI {
 
         document.addEventListener('keydown', (e) => {
             if (e.key !== 's' && e.key !== 'S') return;
+            if (!e.shiftKey) return;
             if (!(e.metaKey || e.ctrlKey)) return;
             const t = e.target;
             if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) {
