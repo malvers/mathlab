@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Mandelbrot Deep Zoom</title>
+    <!-- Fonts & Tools -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #main-content {
+            background: #000;
+        }
+
+        /* HUD Overlay pinned to right top */
+        #hud-overlay {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            pointer-events: none;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-tag {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 15px;
+            border-radius: 12px;
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px var(--neon-blue);
+            text-align: right;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="hud-overlay">
+            <div class="hud-tag" id="zoom-display">Zoom: 1.0x</div>
+            <div class="hud-tag" id="precision-display">Precision: 50 Digits</div>
+        </div>
+    </main>
+    
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec2 position;
+        void main() { gl_Position = vec4(position, 0.0, 1.0); }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision highp float;
+        uniform vec2 u_res;
+        uniform float u_zoom;
+        uniform int u_max_iter;
+        uniform vec2 u_ref_orbit[64]; 
+        uniform float u_time;
+
+        void main() {
+            vec3 color = vec3(0.01, 0.02, 0.05); 
+            vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+            float zoom = max(0.00001, u_zoom);
+            vec2 delta_c = uv * (3.0 / zoom); 
+            
+            vec2 delta = vec2(0.0);
+            int final_i = 0;
+            bool escaped = false;
+            vec2 escapedX = vec2(0.0);
+
+            for (int i = 0; i < 64; i++) {
+                if (i >= u_max_iter) break;
+                vec2 X = u_ref_orbit[i];
+                
+                vec2 two_X_delta = vec2(2.0 * (X.x * delta.x - X.y * delta.y), 2.0 * (X.x * delta.y + X.y * delta.x));
+                vec2 delta_sq = vec2(delta.x * delta.x - delta.y * delta.y, 2.0 * delta.x * delta.y);
+                delta = two_X_delta + delta_sq + delta_c;
+                
+                if (length(X + delta) > 2.0) { 
+                    escaped = true; 
+                    final_i = i; 
+                    escapedX = X;
+                    break; 
+                }
+            }
+
+            if (escaped) {
+                float sn = float(final_i) - log2(max(1.0, log2(length(escapedX + delta))));
+                color = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + vec3(0.0, 1.0, 2.0) + u_time * 0.5);
+            }
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
+
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
+        }
+
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "MANDELBROT DEEP ZOOM (PERTURBATION)"
+            });
+
+            CyberBranding.setBriefing(`
+                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DEEP SPACE</h3>
+                Dieses Labor nutzt <b>Störungsrechnung</b>, um die 64-Bit Grenze zu sprengen.
+            `);
+
+            CyberUI.init();
+
+            const canvas = document.getElementById('canvas');
+            const gl = canvas.getContext('webgl');
+            if (!gl) return;
+
+            const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
+            const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, document.getElementById('fs').text); gl.compileShader(fs);
+            const program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
+
+            const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+            const posLoc = gl.getAttribLocation(program, 'position'); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+            const uRes = gl.getUniformLocation(program, 'u_res'), uZoom = gl.getUniformLocation(program, 'u_zoom'), uMaxIter = gl.getUniformLocation(program, 'u_max_iter'), uRefOrbit = gl.getUniformLocation(program, 'u_ref_orbit'), uTime = gl.getUniformLocation(program, 'u_time');
+
+            Decimal.set({ precision: 50 });
+            let centerX = new Decimal(0), centerY = new Decimal(0), zoom = new Decimal(1.0), maxIter = 64, time = 0;
+
+            function calculateReferenceOrbit(cX, cY, iters) {
+                let orbit = new Float32Array(64 * 2);
+                let zX = new Decimal(0), zY = new Decimal(0);
+                for (let i = 0; i < 64; i++) {
+                    orbit[i * 2] = zX.toNumber(); orbit[i * 2 + 1] = zY.toNumber();
+                    if (i < iters) {
+                        let x2 = zX.times(zX), y2 = zY.times(zY);
+                        if (x2.plus(y2).gt(4)) { for(let j = i; j < 64; j++) { orbit[j*2] = 100.0; orbit[j*2+1] = 100.0; } break; }
+                        let nextX = x2.minus(y2).plus(cX), nextY = zX.times(zY).times(2).plus(cY);
+                        zX = nextX; zY = nextY;
+                    }
+                }
+                return orbit;
+            }
+
+            function render() {
+                const w = canvas.clientWidth, h = canvas.clientHeight;
+                if (canvas.width !== w || canvas.height !== h) {
+                    canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h);
+                }
+                time += 0.01;
+                const orbit = calculateReferenceOrbit(centerX, centerY, maxIter);
+                gl.uniform2f(uRes, canvas.width, canvas.height); gl.uniform1f(uZoom, zoom.toNumber()); gl.uniform1i(uMaxIter, maxIter); gl.uniform2fv(uRefOrbit, orbit); gl.uniform1f(uTime, time);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                document.getElementById('zoom-display').innerText = `Zoom: 10^${zoom.log10().toFixed(1)}`;
+                document.getElementById('precision-display').innerText = `Precision: ${Decimal.precision} Digits`;
+                requestAnimationFrame(render);
+            }
+            
+            let isDragging = false, lastX, lastY;
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - lastX, dy = e.clientY - lastY, s = Math.min(canvas.width, canvas.height);
+                centerX = centerX.minus(new Decimal(dx).div(s).div(zoom).times(3));
+                centerY = centerY.plus(new Decimal(dy).div(s).div(zoom).times(3));
+                lastX = e.clientX; lastY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => isDragging = false);
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let zoomFactor = e.shiftKey ? 1.002 : 1.05;
+                if (e.deltaY > 0) zoomFactor = 1.0 / zoomFactor;
+                zoom = zoom.times(zoomFactor);
+                if (zoom.lt(1.0)) zoom = new Decimal(1.0);
+            }, { passive: false });
+            render();
+        });
+    </script>
+
+</body>
+</html>
