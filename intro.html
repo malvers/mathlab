@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Intro | docalvers ULTRA</title>
+    <title>Catching Words | docalvers ULTRA</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,18 +15,11 @@
             margin: 0;
             padding: 0;
             background: #050b18;
-            overflow: hidden;
+            overflow: visible;
             height: 100vh;
             width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: 'Orbitron', sans-serif;
             color: white;
-        }
-
-        body.mode-catching-words {
-            overflow: visible;
         }
 
         #bg-video {
@@ -41,127 +34,7 @@
             filter: brightness(0.62);
         }
 
-        /* eigenes Kontextmenü (Rechtsklick) */
-        /* Über CyberUI-Overlays (z. B. Screen-Warning ~1e6); sonst wirkt das Menü „weg“ */
-        .intro-ctx-menu {
-            position: fixed;
-            z-index: 2147483647;
-            min-width: 200px;
-            padding: 6px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            background: rgba(15, 23, 42, 0.96);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 210, 255, 0.12);
-            display: none;
-            pointer-events: none;
-            visibility: hidden;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .intro-ctx-menu.open {
-            display: flex;
-            pointer-events: auto;
-            visibility: visible;
-        }
-        .intro-ctx-menu button {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.62rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            text-align: left;
-            padding: 10px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: transparent;
-            color: #e2e8f0;
-            transition: background 0.15s, color 0.15s;
-        }
-        .intro-ctx-menu button:hover,
-        .intro-ctx-menu button:focus-visible {
-            background: rgba(0, 210, 255, 0.15);
-            color: var(--neon-blue);
-            outline: none;
-        }
-        .intro-ctx-menu button.primary {
-            background: rgba(0, 210, 255, 0.12);
-            color: #fff;
-        }
-
-        .intro-container {
-            text-align: center;
-            z-index: 10;
-        }
-
-        body.mode-catching-words .intro-container {
-            display: none;
-        }
-
-        .intro-container h1 {
-            font-size: 5rem;
-            margin: 0;
-            letter-spacing: 20px;
-            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.7));
-            text-transform: uppercase;
-            font-weight: 700;
-            opacity: 0;
-            transform: scale(0.05);
-            letter-spacing: 80px;
-            animation: none;
-        }
-
-        body.start-cinematic .intro-container h1 {
-            animation: cinematic-fade-in 6s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
-        }
-
-        body.start-cinematic .intro-container h1.intro-line-2 {
-            animation-delay: 0.5s;
-        }
-
-        .intro-container .coming-soon {
-            font-size: clamp(0.72rem, 2.5vw, 2rem);
-            letter-spacing: clamp(3px, 0.65vw, 10px);
-            color: #fff;
-            margin-top: 40px;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: min(96vw, 52rem);
-            padding: 0 14px;
-            box-sizing: border-box;
-            text-align: center;
-            line-height: 1.35;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: none;
-            text-transform: uppercase;
-            font-weight: 400;
-            text-shadow: 0 0 15px var(--neon-blue);
-        }
-
-        body.start-cinematic .intro-container .coming-soon {
-            animation: subtitle-fade 4s ease-out 1.5s forwards;
-        }
-
-        @keyframes cinematic-fade-in {
-            0% {
-                opacity: 0;
-                transform: scale(0.05);
-                letter-spacing: 80px;
-            }
-            40% {
-                opacity: 0.6;
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1.8);
-                letter-spacing: 12px;
-            }
-        }
-
-        /* Catching Words: gleicher Ablauf wie Intro, End-Größe 50 % (scale 0.9 statt 1.8) */
+        /* Catching Words: End-Größe scale 0.9 */
         @keyframes cinematic-fade-in-cw {
             0% {
                 opacity: 0;
@@ -181,11 +54,6 @@
                 transform: scale(0.9);
                 letter-spacing: 12px;
             }
-        }
-
-        @keyframes subtitle-fade {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 0.7; transform: translateY(0); }
         }
 
         .glow-sphere {
@@ -238,17 +106,13 @@
             stroke-width: 2;
         }
 
-        /* Catching Words — gleiche Seite, kein Extra-HTML */
         #catching-words-panel {
-            display: none;
+            display: block;
             position: fixed;
             inset: 0;
             z-index: 100;
             overflow: visible;
             --cw-anim-sec: 8;
-        }
-        body.mode-catching-words #catching-words-panel {
-            display: block;
         }
         #catching-words-panel .cw-play {
             position: absolute;
@@ -287,7 +151,7 @@
             transform: translateY(-50%);
             justify-content: center;
         }
-        /* Wie Intro-h1, Endgröße halb so groß wie dort (scale 0.9) */
+        /* Schlagwort: Orbitron-Gradient, Endgröße scale 0.9 */
         #catching-words-panel .falling-word {
             position: relative;
             left: auto;
@@ -433,22 +297,11 @@
 
     <div class="glow-sphere"></div>
 
-    <div id="intro-ctx-menu" class="intro-ctx-menu" role="menu" aria-label="Modus wählen">
-        <button type="button" role="menuitem" id="ctx-pick-intro">Intro</button>
-        <button type="button" class="primary" role="menuitem" id="ctx-pick-catching">Catching Words</button>
-    </div>
-
     <button class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
         <svg viewBox="0 0 24 24">
             <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
     </button>
-
-    <div class="intro-container">
-        <h1 class="intro-line-1" style="margin-bottom: 40px;">DOC ALVERS</h1>
-        <h1 class="intro-line-2">MATHE-LABOR</h1>
-        <div class="coming-soon">INTERAKTIVE MATHEMATIK-SIMULATIONEN</div>
-    </div>
 
     <div id="catching-words-panel" aria-hidden="false">
         <div class="cw-play" id="cw-play">
@@ -462,102 +315,6 @@
             CyberUI.init();
         } catch (err) {
             console.warn('CyberUI.init', err);
-        }
-
-        const ctxMenu = document.getElementById('intro-ctx-menu');
-        let ctxMenuOpenedAt = 0;
-
-        function closeCtxMenu() {
-            if (ctxMenu) {
-                ctxMenu.classList.remove('open');
-                ctxMenu.style.visibility = '';
-            }
-        }
-
-        function openCtxMenu(clientX, clientY) {
-            if (!ctxMenu) return;
-            ctxMenuOpenedAt = performance.now();
-            ctxMenu.classList.add('open');
-            ctxMenu.style.left = '0px';
-            ctxMenu.style.top = '0px';
-            ctxMenu.style.visibility = 'hidden';
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (!ctxMenu.classList.contains('open')) return;
-                    const pad = 8;
-                    let x = clientX;
-                    let y = clientY;
-                    const w = ctxMenu.offsetWidth;
-                    const h = ctxMenu.offsetHeight;
-                    x = Math.min(x, window.innerWidth - w - pad);
-                    y = Math.min(y, window.innerHeight - h - pad);
-                    x = Math.max(pad, x);
-                    y = Math.max(pad, y);
-                    ctxMenu.style.left = x + 'px';
-                    ctxMenu.style.top = y + 'px';
-                    ctxMenu.style.visibility = 'visible';
-                });
-            });
-        }
-
-        document.addEventListener(
-            'contextmenu',
-            (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openCtxMenu(e.clientX, e.clientY);
-            },
-            true
-        );
-
-        const CTX_CLOSE_GRACE_MS = 450;
-        document.addEventListener(
-            'pointerdown',
-            (e) => {
-                if (!ctxMenu || !ctxMenu.classList.contains('open')) return;
-                if (performance.now() - ctxMenuOpenedAt < CTX_CLOSE_GRACE_MS) return;
-                if (e.button !== 0) return;
-                if (ctxMenu.contains(e.target)) return;
-                closeCtxMenu();
-            },
-            true
-        );
-
-        function pickIntroMode() {
-            closeCtxMenu();
-            cwPlayAllActive = false;
-            clearCwPlayAllTimer();
-            stopCatchingWords();
-            document.body.classList.remove('mode-catching-words');
-            document.body.classList.add('start-cinematic');
-            document.getElementById('catching-words-panel').setAttribute('aria-hidden', 'true');
-            replayAnimation();
-        }
-
-        function pickCatchingMode() {
-            closeCtxMenu();
-            document.body.classList.remove('start-cinematic');
-            document.body.classList.add('mode-catching-words');
-            document.getElementById('catching-words-panel').setAttribute('aria-hidden', 'false');
-            cwSectionIndex = 0;
-            cwSequence = cwSections[0] || [];
-            stopCatchingWords();
-            startCatchingWords();
-        }
-
-        const ctxPickIntro = document.getElementById('ctx-pick-intro');
-        const ctxPickCatching = document.getElementById('ctx-pick-catching');
-        if (ctxPickIntro) {
-            ctxPickIntro.addEventListener('click', (e) => {
-                e.stopPropagation();
-                pickIntroMode();
-            });
-        }
-        if (ctxPickCatching) {
-            ctxPickCatching.addEventListener('click', (e) => {
-                e.stopPropagation();
-                pickCatchingMode();
-            });
         }
 
         const DEV_MODE = true;
@@ -586,13 +343,6 @@
                 if (doc.exitFullscreen) doc.exitFullscreen();
                 else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
             }
-        }
-
-        function replayAnimation() {
-            const container = document.querySelector('.intro-container');
-            if (!container) return;
-            const fresh = container.cloneNode(true);
-            container.parentNode.replaceChild(fresh, container);
         }
 
         function isCwTypingTarget(target) {
@@ -646,13 +396,58 @@
         let cwDebugHudVisible = false;
         let cwPlayAllActive = false;
         let cwPlayAllTimer = null;
-        const CW_PLAY_ALL_GAP_MS = 650;
+        let cwPlayAllCompletionRaf = null;
+        const CW_PLAY_ALL_GAP_MS = 320;
 
         function clearCwPlayAllTimer() {
             if (cwPlayAllTimer) {
                 clearTimeout(cwPlayAllTimer);
                 cwPlayAllTimer = null;
             }
+            if (cwPlayAllCompletionRaf != null) {
+                cancelAnimationFrame(cwPlayAllCompletionRaf);
+                cwPlayAllCompletionRaf = null;
+            }
+        }
+
+        function isCwPlayAllSectionVisuallyComplete() {
+            const stack = document.getElementById('cw-stack');
+            if (!stack) return true;
+            const words = stack.querySelectorAll('.falling-word');
+            for (let i = 0; i < words.length; i++) {
+                const el = words[i];
+                if (!el.classList.contains('cw-settled') && !el.classList.contains('caught')) return false;
+            }
+            const portals = stack.querySelectorAll('.cw-portal-btn');
+            for (let j = 0; j < portals.length; j++) {
+                if (!portals[j].classList.contains('cw-portal-settled')) return false;
+            }
+            return true;
+        }
+
+        function runCwPlayAllSectionCompletionWatch() {
+            const tick = () => {
+                cwPlayAllCompletionRaf = null;
+                if (!cwPlayAllActive || !cwRunning) return;
+                if (cwSpawnRoundIndex < cwSequence.length) {
+                    cwPlayAllCompletionRaf = requestAnimationFrame(tick);
+                    return;
+                }
+                if (cwPaused) {
+                    cwPlayAllCompletionRaf = requestAnimationFrame(tick);
+                    return;
+                }
+                if (!isCwPlayAllSectionVisuallyComplete()) {
+                    cwPlayAllCompletionRaf = requestAnimationFrame(tick);
+                    return;
+                }
+                tryAdvanceCwPlayAllAfterCurrentSectionSpawnDone();
+            };
+            if (cwPlayAllCompletionRaf != null) {
+                cancelAnimationFrame(cwPlayAllCompletionRaf);
+                cwPlayAllCompletionRaf = null;
+            }
+            cwPlayAllCompletionRaf = requestAnimationFrame(tick);
         }
 
         const INTRO_PREFS_KEY = 'docalvers.intro.prefs';
@@ -709,7 +504,8 @@
                     'Spawn-Takt:      ' + cwSpawnMs + ' ms',
                     '↑ schneller · ↓ langsamer  (±0,1 s · ±10 ms)',
                     'h · d  Video heller / dunkler',
-                    'S  alle Abschnitte hintereinander',
+                    '%stop in .txt beendet S‑Play-all',
+                    'S  Play-all: Wechsel wenn Section fertig animiert',
                     '⌘D  Debug ein/aus',
                 ].join('\n');
             }
@@ -738,6 +534,20 @@
             syncCwMotionVars();
         }
 
+        function handleCwSectionSpawnExhausted() {
+            if (cwSpawnTimer) {
+                clearTimeout(cwSpawnTimer);
+                cwSpawnTimer = null;
+            }
+            if (!cwRunning) return;
+            if (cwPlayAllActive) runCwPlayAllSectionCompletionWatch();
+        }
+
+        function stopCwPlayAllFromScript() {
+            cwPlayAllActive = false;
+            clearCwPlayAllTimer();
+        }
+
         function beginCwPlayAllSections() {
             if (!document.body.classList.contains('mode-catching-words')) return;
             if (!cwSections.length) return;
@@ -754,6 +564,8 @@
             if (!cwPlayAllActive) return;
             clearCwPlayAllTimer();
             if (cwSectionIndex < cwSections.length - 1) {
+                const stack = document.getElementById('cw-stack');
+                if (stack) stack.innerHTML = '';
                 cwPlayAllTimer = setTimeout(() => {
                     cwPlayAllTimer = null;
                     if (!cwPlayAllActive || !document.body.classList.contains('mode-catching-words')) return;
@@ -765,6 +577,7 @@
                 }, CW_PLAY_ALL_GAP_MS);
             } else {
                 cwPlayAllActive = false;
+                stopCatchingWords();
             }
         }
 
@@ -810,20 +623,21 @@
         }
 
         function spawnCwWord() {
-            if (!cwRunning || cwPaused) return;
             const playStack = document.getElementById('cw-stack');
             if (!playStack) return;
             if (cwSpawnRoundIndex >= cwSequence.length) {
-                if (cwSpawnTimer) {
-                    clearTimeout(cwSpawnTimer);
-                    cwSpawnTimer = null;
-                }
-                tryAdvanceCwPlayAllAfterCurrentSectionSpawnDone();
+                handleCwSectionSpawnExhausted();
                 return;
             }
+            if (!cwRunning || cwPaused) return;
 
             const entry = cwSequence[cwSpawnRoundIndex];
             cwSpawnRoundIndex += 1;
+
+            if (entry.kind === 'stop-play-all') {
+                stopCwPlayAllFromScript();
+                return;
+            }
 
             if (entry.kind === 'nav') {
                 const a = document.createElement('a');
@@ -835,6 +649,10 @@
                 }
                 a.textContent = entry.label;
                 a.style.zIndex = String(cwSpawnRoundIndex);
+                a.addEventListener('animationend', (ev) => {
+                    if (!ev.animationName || ev.animationName.indexOf('cw-portal-in') === -1) return;
+                    a.classList.add('cw-portal-settled');
+                });
                 playStack.appendChild(a);
                 return;
             }
@@ -869,7 +687,10 @@
 
         function scheduleCwSpawn() {
             if (!cwRunning || cwPaused) return;
-            if (cwSpawnRoundIndex >= cwSequence.length) return;
+            if (cwSpawnRoundIndex >= cwSequence.length) {
+                handleCwSectionSpawnExhausted();
+                return;
+            }
             cwSpawnTimer = setTimeout(() => {
                 if (!cwRunning || cwPaused) return;
                 spawnCwWord();
@@ -884,10 +705,10 @@
         }
 
         function stopCatchingWords() {
+            clearCwPlayAllTimer();
             cwRunning = false;
             cwPaused = false;
             cwSpawnRoundIndex = 0;
-            clearCwPlayAllTimer();
             if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
             cwSpawnTimer = null;
             const stack = document.getElementById('cw-stack');
@@ -913,12 +734,14 @@
             return line;
         }
 
-        /**
+         /**
          * Sections (←/→): neuer Abschnitt bei jeder #‑Zeile (# allein, # Kommentar oder # 60pt in einer Zeile).
          * Größe: «# 60pt» oder eigene Zeile nur «60pt» / «200pt» (gilt für folgende Wörter bis zur nächsten Größenzeile).
          * Zeilen, die mit «//» beginnen: Kommentar (ignorieren).
          * Navigation: «%button» → Button nach index.html; «%button index» / «%button orbitals.html»; optional Beschriftung:
          * «%button orbitals.html Orbitale». Ein einzelnes Wort, das kein Ziel ist (z. B. «%button TOLL»), wird nur als Text auf index verlinkt.
+         * «%stop» beendet den S‑Play-all-Lauf (keine automatischen Abschnittswechsel mehr), die laufende Section spielt normal weiter.
+         * S: alle Abschnitte von #1 an nacheinander — Wechsel erst, wenn alle Wörter eingeflogen sind (oder erwischt) und %button-Animationen fertig sind; kurze Pause; letzter Abschnitt Stopp. ←/→ / Drop brechen ab.
          */
         function isCwNavTargetToken(t) {
             const s = String(t || '').trim();
@@ -1008,6 +831,11 @@
                     continue;
                 }
 
+                if (/^%stop\b/i.test(line)) {
+                    current.push({ kind: 'stop-play-all' });
+                    continue;
+                }
+
                 current.push({ text: line, fontSizePt: currentPt });
             }
             flush();
@@ -1017,6 +845,8 @@
         function applyCwSequenceFromText(text) {
             const sections = parseCwSections(text);
             if (!sections.length) return;
+            cwPlayAllActive = false;
+            clearCwPlayAllTimer();
             stopCatchingWords();
             cwSections = sections;
             cwSectionIndex = 0;
@@ -1093,11 +923,6 @@
         document.addEventListener(
             'keydown',
             (e) => {
-                if (e.key === 'Escape' && ctxMenu && ctxMenu.classList.contains('open')) {
-                    e.preventDefault();
-                    closeCtxMenu();
-                    return;
-                }
                 if (!isCwTypingTarget(e.target)) {
                     const noChord = !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
                     if (noChord && (e.key === 'h' || e.key === 'H')) {
@@ -1137,6 +962,12 @@
                         toggleCwDebugHud();
                         return;
                     }
+                    const cwNoMod = !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
+                    if (cwNoMod && (e.key === 's' || e.key === 'S')) {
+                        e.preventDefault();
+                        beginCwPlayAllSections();
+                        return;
+                    }
                 }
                 if (e.key.toLowerCase() === 'f') toggleFullscreen();
                 if (e.code === 'Space' || e.key === ' ') {
@@ -1144,10 +975,6 @@
                         e.preventDefault();
                         toggleCatchingWordsPause();
                         return;
-                    }
-                    if (document.body.classList.contains('start-cinematic')) {
-                        e.preventDefault();
-                        replayAnimation();
                     }
                     return;
                 }
