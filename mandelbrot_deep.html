@@ -15,40 +15,7 @@
             background: #000;
         }
 
-        /* Zoom/Präzision: linke obere Ecke des Canvas (nicht zentriert) */
-        #hud-overlay {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            transform: none;
-            pointer-events: none;
-            z-index: 1500;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: flex-start;
-            justify-content: flex-start;
-            max-width: calc(100% - 24px);
-        }
-
-        .hud-tag {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--neon-blue);
-            padding: 4px 12px;
-            border-radius: 999px;
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.72rem;
-            line-height: 1.3;
-            text-shadow: 0 0 8px var(--neon-blue);
-            text-align: left;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-            min-width: 0;
-            white-space: nowrap;
-        }
-
+        /* Zahlen nur in der Sidebar — kein Canvas-HUD */
         /*
          * Obere Icon-Zeile (#sidebar-header .cyber-nav): Der rote „zu hohe Box“-Bereich.
          * cyber-lab-overrides.css erzwingt 52×52 px; branding.styles.extracted.css definiert
@@ -102,19 +69,72 @@
             overflow-wrap: anywhere;
         }
 
-        #side-panel .nav-col {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /*
+         * PARAMETER-Zeile wie lissajous.html (#grp-view — dort lissajous-view-btn):
+         * KEIN .cyber-btn: sonst erzwingt buttons-ultra.css + ui.js weiter Padding/Schrift per !important.
+         */
+        #side-panel .lab-param-toggle-row {
+            display: flex !important;
+            gap: 8px !important;
+            flex-wrap: nowrap !important;
+            margin: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
-        #side-panel .nav-col .cyber-btn {
-            margin-top: 0 !important;
+        #side-panel .lab-param-toggle-row .lab-param-toggle-btn {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            box-sizing: border-box !important;
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            min-height: 56px !important;
+            padding: 14px 12px !important;
+            width: auto !important;
+            max-width: none !important;
+            border-radius: 22px !important;
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.76rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.1em !important;
+            text-transform: uppercase !important;
+            line-height: 1.2 !important;
+            cursor: pointer !important;
+            outline: none !important;
+            background: rgba(18, 28, 48, 0.9) !important;
+            border: 1px solid rgba(100, 190, 255, 0.45) !important;
+            color: #d8f0ff !important;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45) !important;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
         }
 
-        /* Wie winkellabor.html: corner-grid + CSS-Grid; buttons-ultra .corner-grid .cyber-btn */
-        #side-panel .corner-grid .cyber-btn {
-            margin-top: 0 !important;
+        #side-panel .lab-param-toggle-row .lab-param-toggle-btn:hover {
+            border-color: rgba(140, 215, 255, 0.75) !important;
+            background: rgba(24, 38, 62, 0.95) !important;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.22) !important;
+        }
+
+        #side-panel .lab-param-toggle-row .lab-param-toggle-btn.active {
+            background: rgba(0, 210, 255, 0.24) !important;
+            border: 2px solid rgba(0, 210, 255, 0.95) !important;
+            color: #f0fdff !important;
+            box-shadow: 0 0 22px rgba(0, 210, 255, 0.42), 0 0 40px rgba(0, 210, 255, 0.15) !important;
+        }
+
+        #side-panel .lab-param-toggle-row #btn-flight.active {
+            background: rgba(157, 80, 187, 0.32) !important;
+            border: 2px solid rgba(215, 160, 255, 0.95) !important;
+            color: #faf2ff !important;
+            box-shadow: 0 0 22px rgba(157, 80, 187, 0.5), 0 0 34px rgba(157, 80, 187, 0.2) !important;
+        }
+
+        #side-panel .lab-param-toggle-row .lab-param-toggle-btn:active:not(:disabled) {
+            transform: translateY(1px) scale(0.99) !important;
+        }
+
+        #side-panel .instrument-card:has(.lab-param-toggle-row) {
+            border-radius: 16px !important;
         }
 
         #side-panel .stat-row .stat-label {
@@ -128,18 +148,6 @@
         #side-panel .stat-row .stat-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
-        }
-
-        #side-panel .cyber-btn.active {
-            background: rgba(0, 210, 255, 0.28) !important;
-            border-color: #00d2ff !important;
-            box-shadow: 0 0 18px rgba(0, 210, 255, 0.35) !important;
-        }
-
-        #side-panel #btn-flight.active {
-            background: rgba(157, 80, 187, 0.3) !important;
-            border-color: var(--neon-purple) !important;
-            box-shadow: 0 0 18px rgba(157, 80, 187, 0.45) !important;
         }
 
         /* FRAKTAL-PARAMETER: buttons-ultra setzt .cyber-control-group margin-top:15px — hier stark straffen */
@@ -162,14 +170,28 @@
             margin-bottom: 2px !important;
         }
 
-        #side-panel .instrument-card:has(#jx-mount) #iter-stats-mount .stats-grid {
-            margin-top: 2px !important;
-            gap: 6px !important;
+        /* Telemetrie wie binomischeslabor.html (ANALYTIK · area-list / area-item) */
+        #side-panel #fraktal-readouts-mount.area-list {
+            margin-top: 6px;
         }
 
-        #side-panel .instrument-card:has(#jx-mount) #iter-stats-mount .stats-card {
-            min-height: 0 !important;
-            padding: 8px 10px !important;
+        #side-panel #fraktal-readouts-mount .area-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        #side-panel #fraktal-readouts-mount .area-item:last-child {
+            margin-bottom: 0;
+        }
+
+        #side-panel #fraktal-readouts-mount .stat-val {
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            text-align: right;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -191,10 +213,6 @@
     <main id="main-content">
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
-        </div>
-        <div id="hud-overlay">
-            <div class="hud-tag" id="zoom-display">Zoom: 10^0.0</div>
-            <div class="hud-tag" id="precision-display">Präzision: 80 Stellen</div>
         </div>
     </main>
     <script id="vs" type="x-shader/x-vertex">
@@ -263,10 +281,66 @@
             const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
             const pos = gl.getAttribLocation(prg, 'position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
             const uRes = gl.getUniformLocation(prg, 'u_res'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uRefOrbit = gl.getUniformLocation(prg, 'u_ref_orbit'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
-            Decimal.set({ precision: 80 });
-            let centerX = new Decimal(0), centerY = new Decimal(0), zoom = new Decimal(1.0), maxIter = 256, time = 0, isFlight = false;
-            let mode = "MANDELBROT"; // or "JULIA"
-            let juliaX = new Decimal(-0.8), juliaY = new Decimal(0.156);
+            const DECIMAL_PRECISION = 80;
+            Decimal.set({ precision: DECIMAL_PRECISION });
+            const DEF_MB_CENTER_X = new Decimal(0), DEF_MB_CENTER_Y = new Decimal(0), DEF_MB_ZOOM = new Decimal(1.0);
+            const DEF_JL_CENTER_X = new Decimal(0), DEF_JL_CENTER_Y = new Decimal(0), DEF_JL_ZOOM = new Decimal(1.0);
+            const DEF_JULIA_X = new Decimal(-0.8), DEF_JULIA_Y = new Decimal(0.156);
+            const DEF_MAX_ITER = 256;
+            const DEF_SLIDER_JX = -800, DEF_SLIDER_JY = 156, DEF_SLIDER_ITER = 256;
+            let maxIter = DEF_MAX_ITER, time = 0, isFlight = false;
+            let mode = 'JULIA';
+            let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
+            let juliaX = DEF_JULIA_X, juliaY = DEF_JULIA_Y;
+
+            function setRangeInMount(mountId, value) {
+                const inp = document.querySelector('#' + mountId + ' input.cyber-slider');
+                if (!inp) return;
+                inp.value = String(value);
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            function formatZoomExponent(decZ) {
+                const exp = decZ.logarithm(10).toNumber();
+                if (!Number.isFinite(exp)) return '0,0';
+                return exp.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            }
+
+            function syncFraktalReadouts() {
+                const d = document.getElementById('readout-detail');
+                const z = document.getElementById('readout-zoom');
+                const p = document.getElementById('readout-prec');
+                if (d) d.textContent = String(maxIter);
+                if (z) z.textContent = formatZoomExponent(zoom);
+                if (p) p.textContent = `${DECIMAL_PRECISION} Stellen`;
+            }
+
+            function resetView() {
+                maxIter = DEF_MAX_ITER;
+                juliaX = DEF_JULIA_X;
+                juliaY = DEF_JULIA_Y;
+                isFlight = false;
+                time = 0;
+                if (mode === 'JULIA') {
+                    centerX = DEF_JL_CENTER_X;
+                    centerY = DEF_JL_CENTER_Y;
+                    zoom = DEF_JL_ZOOM;
+                    document.getElementById('btn-mode-j').classList.add('active');
+                    document.getElementById('btn-mode-m').classList.remove('active');
+                } else {
+                    centerX = DEF_MB_CENTER_X;
+                    centerY = DEF_MB_CENTER_Y;
+                    zoom = DEF_MB_ZOOM;
+                    document.getElementById('btn-mode-m').classList.add('active');
+                    document.getElementById('btn-mode-j').classList.remove('active');
+                }
+                document.getElementById('btn-flight').innerText = 'START FLIGHT';
+                document.getElementById('btn-flight').classList.remove('active');
+                setRangeInMount('jx-mount', DEF_SLIDER_JX);
+                setRangeInMount('jy-mount', DEF_SLIDER_JY);
+                setRangeInMount('iter-mount', DEF_SLIDER_ITER);
+                syncFraktalReadouts();
+            }
 
             function getOrbit(cX, cY, iters) {
                 let orbit = new Float32Array(256 * 2), zX = new Decimal(0), zY = new Decimal(0);
@@ -303,73 +377,53 @@
                 gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
 
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
-                document.getElementById('zoom-display').innerText = `Zoom: 10^${zoom.logarithm(10).toFixed(1)}`;
-                CyberUI.updateStatsGrid('iter-stats-mount', [
-                    { value: String(maxIter) }
-                ]);
+                syncFraktalReadouts();
                 requestAnimationFrame(render);
             }
 
-            function applyLabModeCompact() {
-                const btn = document.getElementById('btn-mode-m');
-                const card = btn && btn.closest('.instrument-card');
-                if (!card) return;
-                card.style.setProperty('padding', '8px 12px 9px', 'important');
-                card.style.setProperty('gap', '2px', 'important');
-                const titleEl = card.querySelector('.instrument-title');
-                if (titleEl) {
-                    titleEl.style.setProperty('margin-bottom', '0', 'important');
-                    titleEl.style.setProperty('padding-bottom', '0', 'important');
-                }
-                const cc = card.querySelector('.card-content');
-                if (cc) {
-                    cc.style.setProperty('padding', '0', 'important');
-                    cc.style.setProperty('margin', '0', 'important');
-                }
-                document.querySelectorAll('#btn-mode-m, #btn-mode-j').forEach((b) => {
-                    b.style.setProperty('min-height', '36px', 'important');
-                    b.style.setProperty('padding', '6px 10px', 'important');
-                    b.style.setProperty('margin-top', '0', 'important');
-                    b.style.setProperty('font-size', '0.62rem', 'important');
-                    b.style.setProperty('letter-spacing', '0.1em', 'important');
-                });
-            }
             CyberUI.createCard('ui-container', 'LABOR-MODUS', `
-                <div class="corner-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <button type="button" id="btn-mode-m" class="cyber-btn compact">MANDELBROT</button>
-                    <button type="button" id="btn-mode-j" class="cyber-btn compact">JULIA-MENGE</button>
+                <div class="lab-param-toggle-row">
+                    <button type="button" id="btn-mode-m" class="lab-param-toggle-btn">MANDELBROT</button>
+                    <button type="button" id="btn-mode-j" class="lab-param-toggle-btn">JULIA-MENGE</button>
                 </div>
             `, 'var(--neon-blue)');
-            applyLabModeCompact();
-            requestAnimationFrame(applyLabModeCompact);
 
             CyberUI.createCard('ui-container', 'FRAKTAL-PARAMETER', `
                 <div id="jx-mount"></div>
                 <div id="jy-mount" style="margin-top:2px;"></div>
                 <div id="iter-mount" style="margin-top:2px;"></div>
-                <div id="iter-stats-mount" style="margin-top:3px;"></div>
+                <div id="fraktal-readouts-mount" class="area-list">
+                    <div class="area-item" style="color:#00f2ff;">
+                        <span style="font-family:Orbitron; font-size:0.8rem;">DETAILGRAD</span>
+                        <span id="readout-detail" class="stat-val">256</span>
+                    </div>
+                    <div class="area-item" style="color:#00f2ff;">
+                        <span style="font-family:Orbitron; font-size:0.8rem;">10 HOCH</span>
+                        <span id="readout-zoom" class="stat-val">0,0</span>
+                    </div>
+                    <div class="area-item" style="color:#00f2ff;">
+                        <span style="font-family:Orbitron; font-size:0.8rem;">PRÄZISION</span>
+                        <span id="readout-prec" class="stat-val">80 Stellen</span>
+                    </div>
+                </div>
             `, 'var(--neon-blue)');
-
-            CyberUI.createStatsGrid('iter-stats-mount', [
-                { label: 'DETAILGRAD', value: '256', color: 'var(--neon-purple)' }
-            ]);
 
             CyberUI.createSlider('jx-mount', 'REAL-TEIL (C_re)', -2000, 2000, -800, 1, (v) => {
                 juliaX = new Decimal(v).div(1000);
-            }, 'var(--neon-pink)');
+            }, 'var(--neon-blue)');
 
             CyberUI.createSlider('jy-mount', 'IMAGINÄR-TEIL (C_im)', -2000, 2000, 156, 1, (v) => {
                 juliaY = new Decimal(v).div(1000);
-            }, 'var(--neon-pink)');
+            }, 'var(--neon-blue)');
 
             CyberUI.createSlider('iter-mount', 'MAX. ITERATIONEN', 32, 256, 256, 1, (v) => {
                 maxIter = parseInt(v, 10);
-            }, 'var(--neon-purple)');
+            }, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', 'NAVIGATION', `
-                <div class="nav-col">
-                    <button type="button" id="btn-flight" class="cyber-btn">START FLIGHT</button>
-                    <button type="button" id="btn-reset" class="cyber-btn">RESET VIEW</button>
+                <div class="lab-param-toggle-row">
+                    <button type="button" id="btn-flight" class="lab-param-toggle-btn">START FLIGHT</button>
+                    <button type="button" id="btn-reset" class="lab-param-toggle-btn">RESET</button>
                 </div>
             `, 'var(--neon-blue)');
 
@@ -383,7 +437,13 @@
                 document.getElementById('btn-mode-j').classList.add('active');
                 document.getElementById('btn-mode-m').classList.remove('active');
             };
-            document.getElementById('btn-mode-m').classList.add('active');
+            if (mode === 'JULIA') {
+                document.getElementById('btn-mode-j').classList.add('active');
+                document.getElementById('btn-mode-m').classList.remove('active');
+            } else {
+                document.getElementById('btn-mode-m').classList.add('active');
+                document.getElementById('btn-mode-j').classList.remove('active');
+            }
 
             document.getElementById('btn-flight').onclick = () => {
                 isFlight = !isFlight;
@@ -391,17 +451,7 @@
                 btn.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
                 btn.classList.toggle('active', isFlight);
             };
-            document.getElementById('btn-reset').onclick = () => {
-                centerX = new Decimal(0);
-                centerY = new Decimal(0);
-                zoom = new Decimal(1.0);
-                isFlight = false;
-                mode = 'MANDELBROT';
-                document.getElementById('btn-flight').innerText = 'START FLIGHT';
-                document.getElementById('btn-flight').classList.remove('active');
-                document.getElementById('btn-mode-m').classList.add('active');
-                document.getElementById('btn-mode-j').classList.remove('active');
-            };
+            document.getElementById('btn-reset').onclick = () => resetView();
             let isDrag = false, lX, lY;
             canvas.onmousedown = (e) => { isDrag = true; lX = e.clientX; lY = e.clientY; };
             window.onmousemove = (e) => {
