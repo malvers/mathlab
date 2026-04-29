@@ -123,10 +123,10 @@
         }
 
         #side-panel .lab-param-toggle-row #btn-flight.active {
-            background: rgba(157, 80, 187, 0.32) !important;
-            border: 2px solid rgba(215, 160, 255, 0.95) !important;
-            color: #faf2ff !important;
-            box-shadow: 0 0 22px rgba(157, 80, 187, 0.5), 0 0 34px rgba(157, 80, 187, 0.2) !important;
+            background: rgba(0, 210, 255, 0.24) !important;
+            border: 2px solid rgba(0, 210, 255, 0.95) !important;
+            color: #f0fdff !important;
+            box-shadow: 0 0 22px rgba(0, 210, 255, 0.42), 0 0 40px rgba(0, 210, 255, 0.15) !important;
         }
 
         #side-panel .lab-param-toggle-row .lab-param-toggle-btn:active:not(:disabled) {
@@ -222,34 +222,33 @@
     <script id="fs" type="x-shader/x-fragment">
         precision highp float;
         uniform vec2 u_res;
+        uniform vec2 u_center;
         uniform float u_zoom;
         uniform int u_max_iter;
-        uniform vec2 u_ref_orbit[256]; 
+        uniform vec2 u_julia_c;
         uniform float u_time;
         uniform int u_julia;
         void main() {
-            vec3 color = vec3(0.0); 
+            vec3 color = vec3(0.0);
             vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
-            /* Mandelbrot: Störung δc (fest pro Pixel). Julia: nur Störung δz, c ist konstant — kein +δc in der Rekursion. */
-            vec2 delta_c = uv * (3.0 / max(0.0000001, u_zoom)); 
-            vec2 delta = (u_julia == 1) ? delta_c : vec2(0.0);
-            int final_i = 0;
+            float sc = 3.0 / max(1e-8, u_zoom);
+            vec2 z, c;
+            if (u_julia == 1) {
+                z = u_center + uv * sc;
+                c = u_julia_c;
+            } else {
+                z = vec2(0.0);
+                c = u_center + uv * sc;
+            }
+            int iter = 0;
             bool escaped = false;
-            vec2 escapedX = vec2(0.0);
-            for (int i = 0; i < 256; i++) {
-                if (i >= u_max_iter) break;
-                vec2 X = u_ref_orbit[i];
-                vec2 two_X_delta = vec2(2.0 * (X.x * delta.x - X.y * delta.y), 2.0 * (X.x * delta.y + X.y * delta.x));
-                vec2 delta_sq = vec2(delta.x * delta.x - delta.y * delta.y, 2.0 * delta.x * delta.y);
-                if (u_julia == 1) {
-                    delta = two_X_delta + delta_sq;
-                } else {
-                    delta = two_X_delta + delta_sq + delta_c;
-                }
-                if (length(X + delta) > 2.0) { escaped = true; final_i = i; escapedX = X; break; }
+            for (int k = 0; k < 512; k++) {
+                if (k >= u_max_iter) break;
+                if (dot(z, z) > 4.0) { escaped = true; iter = k; break; }
+                z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
             }
             if (escaped) {
-                float sn = float(final_i) - log2(max(1.0, log2(length(escapedX + delta))));
+                float sn = float(iter) - log2(max(1.0, log2(length(z))));
                 float r = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + u_time * 0.5);
                 float g = 0.5 + 0.5 * cos(2.0 + sn * 0.15 + u_time * 0.5);
                 float b = 0.5 + 0.5 * cos(1.0 + sn * 0.15 + u_time * 0.5);
@@ -260,7 +259,6 @@
     </script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -270,7 +268,7 @@
         window.addEventListener('load', () => {
             CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "MANDELBROT DEEP ZOOM" });
             CyberBranding.setBriefing(`<h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DEEP SPACE</h3>
-                Überwinden Sie die 64-Bit Grenze. Störungsrechnung aktiv.<br><br>
+                Direkte Iteration <code style="color:#9ae7ff;">z → z² + c</code> im Shader (Float32).<br><br>
                 <b>Steuerung:</b> Mausrad (Zoom), Shift (Fein-Zoom), Drag (Move).`);
             CyberUI.init();
             const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
@@ -280,18 +278,76 @@
             const prg = gl.createProgram(); gl.attachShader(prg, vs); gl.attachShader(prg, fs); gl.linkProgram(prg); gl.useProgram(prg);
             const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
             const pos = gl.getAttribLocation(prg, 'position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-            const uRes = gl.getUniformLocation(prg, 'u_res'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uRefOrbit = gl.getUniformLocation(prg, 'u_ref_orbit'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
-            const DECIMAL_PRECISION = 80;
-            Decimal.set({ precision: DECIMAL_PRECISION });
-            const DEF_MB_CENTER_X = new Decimal(0), DEF_MB_CENTER_Y = new Decimal(0), DEF_MB_ZOOM = new Decimal(1.0);
-            const DEF_JL_CENTER_X = new Decimal(0), DEF_JL_CENTER_Y = new Decimal(0), DEF_JL_ZOOM = new Decimal(1.0);
-            const DEF_JULIA_X = new Decimal(-0.8), DEF_JULIA_Y = new Decimal(0.156);
+            const uRes = gl.getUniformLocation(prg, 'u_res'), uCenter = gl.getUniformLocation(prg, 'u_center'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uJuliaC = gl.getUniformLocation(prg, 'u_julia_c'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
+            const DEF_MB_CENTER_X = 0, DEF_MB_CENTER_Y = 0, DEF_MB_ZOOM = 1;
+            const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
+            const DEF_JULIA_X = -0.8, DEF_JULIA_Y = 0.156;
             const DEF_MAX_ITER = 256;
             const DEF_SLIDER_JX = -800, DEF_SLIDER_JY = 156, DEF_SLIDER_ITER = 256;
+            const GPU_MATH_LABEL = 'Float32 / Pixel';
             let maxIter = DEF_MAX_ITER, time = 0, isFlight = false;
             let mode = 'JULIA';
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
             let juliaX = DEF_JULIA_X, juliaY = DEF_JULIA_Y;
+            let resetAnim = null;
+            const RESET_ANIM_MS = 4000;
+
+            function easeOutCubic(t) {
+                const u = 1 - t;
+                return 1 - u * u * u;
+            }
+
+            function lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
+
+            function abortResetAnim() {
+                if (!resetAnim) return;
+                resetAnim = null;
+                const br = document.getElementById('btn-reset');
+                if (br) br.disabled = false;
+            }
+
+            function updateSliderMountVisual(mountId, numericValue) {
+                const inp = document.querySelector('#' + mountId + ' input.cyber-slider');
+                if (!inp) return;
+                const str = String(Math.round(numericValue));
+                inp.value = str;
+                const disp = document.querySelector('#' + mountId + ' .val-display');
+                if (disp) disp.textContent = str;
+            }
+
+            function tickResetAnim() {
+                if (!resetAnim) return;
+                const rawT = Math.min(1, (performance.now() - resetAnim.t0) / RESET_ANIM_MS);
+                const e = easeOutCubic(rawT);
+                const f = resetAnim.from;
+                const to = resetAnim.to;
+                centerX = lerp(f.cx, to.cx, e);
+                centerY = lerp(f.cy, to.cy, e);
+                if (f.zoom > 0 && to.zoom > 0 && Number.isFinite(f.zoom) && Number.isFinite(to.zoom)) {
+                    zoom = Math.exp(lerp(Math.log(f.zoom), Math.log(to.zoom), e));
+                } else {
+                    zoom = lerp(f.zoom, to.zoom, e);
+                }
+                juliaX = lerp(f.jx, to.jx, e);
+                juliaY = lerp(f.jy, to.jy, e);
+                maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, e))));
+                updateSliderMountVisual('jx-mount', juliaX * 1000);
+                updateSliderMountVisual('jy-mount', juliaY * 1000);
+                updateSliderMountVisual('iter-mount', maxIter);
+
+                if (rawT >= 1) {
+                    centerX = to.cx; centerY = to.cy; zoom = to.zoom;
+                    juliaX = to.jx; juliaY = to.jy; maxIter = to.mi;
+                    resetAnim = null;
+                    const br = document.getElementById('btn-reset');
+                    if (br) br.disabled = false;
+                    setRangeInMount('jx-mount', DEF_SLIDER_JX);
+                    setRangeInMount('jy-mount', DEF_SLIDER_JY);
+                    setRangeInMount('iter-mount', DEF_SLIDER_ITER);
+                }
+            }
 
             function setRangeInMount(mountId, value) {
                 const inp = document.querySelector('#' + mountId + ' input.cyber-slider');
@@ -300,79 +356,56 @@
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
-            function formatZoomFactor(decZ) {
-                const n = decZ.toNumber();
-                if (!Number.isFinite(n) || n <= 0) return '1,000';
-                return n.toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+            function formatZoomFactor(z) {
+                if (!Number.isFinite(z) || z <= 0) return '1,000';
+                return z.toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
             }
 
             function syncFraktalReadouts() {
                 const d = document.getElementById('readout-detail');
-                const z = document.getElementById('readout-zoom');
+                const zEl = document.getElementById('readout-zoom');
                 const p = document.getElementById('readout-prec');
                 if (d) d.textContent = String(maxIter);
-                if (z) z.textContent = formatZoomFactor(zoom);
-                if (p) p.textContent = `${DECIMAL_PRECISION} Stellen`;
+                if (zEl) zEl.textContent = formatZoomFactor(zoom);
+                if (p) p.textContent = GPU_MATH_LABEL;
             }
 
             function resetView() {
-                maxIter = DEF_MAX_ITER;
-                juliaX = DEF_JULIA_X;
-                juliaY = DEF_JULIA_Y;
                 isFlight = false;
                 time = 0;
                 if (mode === 'JULIA') {
-                    centerX = DEF_JL_CENTER_X;
-                    centerY = DEF_JL_CENTER_Y;
-                    zoom = DEF_JL_ZOOM;
                     document.getElementById('btn-mode-j').classList.add('active');
                     document.getElementById('btn-mode-m').classList.remove('active');
                 } else {
-                    centerX = DEF_MB_CENTER_X;
-                    centerY = DEF_MB_CENTER_Y;
-                    zoom = DEF_MB_ZOOM;
                     document.getElementById('btn-mode-m').classList.add('active');
                     document.getElementById('btn-mode-j').classList.remove('active');
                 }
                 document.getElementById('btn-flight').innerText = 'START FLIGHT';
                 document.getElementById('btn-flight').classList.remove('active');
-                setRangeInMount('jx-mount', DEF_SLIDER_JX);
-                setRangeInMount('jy-mount', DEF_SLIDER_JY);
-                setRangeInMount('iter-mount', DEF_SLIDER_ITER);
-                syncFraktalReadouts();
-            }
-
-            function getOrbit(cX, cY, iters) {
-                let orbit = new Float32Array(256 * 2), zX = new Decimal(0), zY = new Decimal(0);
-
-                // For Julia, the constant C is fixed, and the starting Z is the center
-                let C_X = (mode === "JULIA") ? juliaX : cX;
-                let C_Y = (mode === "JULIA") ? juliaY : cY;
-                if (mode === "JULIA") { zX = cX; zY = cY; }
-
-                for (let i = 0; i < 256; i++) {
-                    orbit[i * 2] = zX.toNumber(); orbit[i * 2 + 1] = zY.toNumber();
-                    if (i < iters) {
-                        let x2 = zX.times(zX), y2 = zY.times(zY);
-                        if (x2.plus(y2).gt(4)) { for (let j = i; j < 256; j++) { orbit[j * 2] = 100.0; orbit[j * 2 + 1] = 100.0; } break; }
-                        let nX = x2.minus(y2).plus(C_X), nY = zX.times(zY).times(2).plus(C_Y);
-                        zX = nX; zY = nY;
-                    }
-                }
-                return orbit;
+                const to = (mode === 'JULIA')
+                    ? { cx: DEF_JL_CENTER_X, cy: DEF_JL_CENTER_Y, zoom: DEF_JL_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER }
+                    : { cx: DEF_MB_CENTER_X, cy: DEF_MB_CENTER_Y, zoom: DEF_MB_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER };
+                resetAnim = {
+                    t0: performance.now(),
+                    from: { cx: centerX, cy: centerY, zoom, jx: juliaX, jy: juliaY, mi: maxIter },
+                    to
+                };
+                const br = document.getElementById('btn-reset');
+                if (br) br.disabled = true;
             }
 
             function render() {
                 const w = canvas.clientWidth, h = canvas.clientHeight;
                 if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
-                if (isFlight) zoom = zoom.times(new Decimal(1.005));
+                if (resetAnim) tickResetAnim();
+                else if (isFlight) zoom *= 1.005;
                 time += 0.01;
-                const orb = getOrbit(centerX, centerY, maxIter);
 
                 gl.uniform2f(uRes, canvas.width, canvas.height);
-                gl.uniform1f(uZoom, zoom.toNumber());
+                gl.uniform2f(uCenter, centerX, centerY);
+                gl.uniform1f(uZoom, zoom);
                 gl.uniform1i(uMaxIter, maxIter);
-                gl.uniform2fv(uRefOrbit, orb);
+                gl.uniform2f(uJuliaC, juliaX, juliaY);
                 gl.uniform1f(uTime, time);
                 gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
 
@@ -402,21 +435,24 @@
                         <span id="readout-zoom" class="stat-val">1,000</span>
                     </div>
                     <div class="area-item" style="color:#00f2ff;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">PRÄZISION</span>
-                        <span id="readout-prec" class="stat-val">80 Stellen</span>
+                        <span style="font-family:Orbitron; font-size:0.8rem;">ARITHMETIK</span>
+                        <span id="readout-prec" class="stat-val">Float32 / Pixel</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
 
             CyberUI.createSlider('jx-mount', 'REAL-TEIL (C_re)', -2000, 2000, -800, 1, (v) => {
-                juliaX = new Decimal(v).div(1000);
+                abortResetAnim();
+                juliaX = v / 1000;
             }, 'var(--neon-blue)');
 
             CyberUI.createSlider('jy-mount', 'IMAGINÄR-TEIL (C_im)', -2000, 2000, 156, 1, (v) => {
-                juliaY = new Decimal(v).div(1000);
+                abortResetAnim();
+                juliaY = v / 1000;
             }, 'var(--neon-blue)');
 
             CyberUI.createSlider('iter-mount', 'MAX. ITERATIONEN', 32, 256, 256, 1, (v) => {
+                abortResetAnim();
                 maxIter = parseInt(v, 10);
             }, 'var(--neon-blue)');
 
@@ -453,25 +489,29 @@
             };
             document.getElementById('btn-reset').onclick = () => resetView();
             let isDrag = false, lX, lY;
-            canvas.onmousedown = (e) => { isDrag = true; lX = e.clientX; lY = e.clientY; };
+            canvas.onmousedown = (e) => {
+                abortResetAnim();
+                isDrag = true; lX = e.clientX; lY = e.clientY;
+            };
             window.onmousemove = (e) => {
                 if (!isDrag) return;
                 const dx = e.clientX - lX, dy = e.clientY - lY, s = Math.min(canvas.width, canvas.height);
-                centerX = centerX.minus(new Decimal(dx).div(s).div(zoom).times(3));
-                centerY = centerY.plus(new Decimal(dy).div(s).div(zoom).times(3));
+                centerX -= (dx / s / zoom) * 3;
+                centerY += (dy / s / zoom) * 3;
                 lX = e.clientX; lY = e.clientY;
             };
             window.onmouseup = () => isDrag = false;
             canvas.onwheel = (e) => {
                 e.preventDefault();
+                abortResetAnim();
                 const rect = canvas.getBoundingClientRect();
                 const mx = e.clientX - rect.left, my = e.clientY - rect.top, s = Math.min(canvas.width, canvas.height);
-                const fX = centerX.plus(new Decimal(mx - canvas.width / 2).div(s).div(zoom).times(3));
-                const fY = centerY.minus(new Decimal(my - canvas.height / 2).div(s).div(zoom).times(3));
+                const fX = centerX + ((mx - canvas.width / 2) / s / zoom) * 3;
+                const fY = centerY - ((my - canvas.height / 2) / s / zoom) * 3;
                 let zM = e.shiftKey ? 1.002 : 1.015; if (e.deltaY > 0) zM = 1.0 / zM;
-                zoom = zoom.times(new Decimal(zM)); if (zoom.lt(1.0)) zoom = new Decimal(1.0);
-                centerX = fX.minus(new Decimal(mx - canvas.width / 2).div(s).div(zoom).times(3));
-                centerY = fY.plus(new Decimal(my - canvas.height / 2).div(s).div(zoom).times(3));
+                zoom *= zM; if (zoom < 1.0) zoom = 1.0;
+                centerX = fX - ((mx - canvas.width / 2) / s / zoom) * 3;
+                centerY = fY + ((my - canvas.height / 2) / s / zoom) * 3;
             };
             render();
         });
