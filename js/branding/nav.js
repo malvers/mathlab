@@ -5,7 +5,9 @@
 (function attachBrandingNav(global) {
     const CyberBrandingNav = {
         injectNavigation() {
-            if (document.querySelector(".cyber-nav")) return;
+            if (typeof cleanupIncompleteBrandingNav === "function") cleanupIncompleteBrandingNav();
+            if (typeof hasCompleteBrandingNav === "function" && hasCompleteBrandingNav()) return;
+
             const nav = document.createElement("div");
             nav.className = "cyber-nav";
 
@@ -93,7 +95,11 @@
             const briefingBtn = document.createElement("div");
             briefingBtn.className = "nav-btn";
             briefingBtn.title = "Beschreibung anzeigen";
-            briefingBtn.onclick = () => this.showBriefing();
+            briefingBtn.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                const cb = window.CyberBranding;
+                if (cb && typeof cb.showBriefing === "function") cb.showBriefing();
+            });
             briefingBtn.innerHTML = `
             <span style="font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 1.35rem; line-height: 1; display: block;">?</span>
         `;

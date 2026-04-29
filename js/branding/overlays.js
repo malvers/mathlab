@@ -188,7 +188,11 @@
                 this.showNotification("Zugriff gewährt. Briefing-Edit aktiviert.");
 
                 // Auto-open briefing
-                setTimeout(() => this.showBriefing(), 300);
+                setTimeout(() => {
+                    if (global.CyberBranding && typeof global.CyberBranding.showBriefing === "function") {
+                        global.CyberBranding.showBriefing();
+                    }
+                }, 300);
             } else {
                 this.showNotification("Zugriff verweigert. Falsches Passwort.");
                 input.value = "";
@@ -296,34 +300,3 @@
 
     global.CyberBrandingOverlays = CyberBrandingOverlays;
 })(window);
-if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "cyber-sync-overlay";
-    overlay.className = "sync-overlay";
-    overlay.onclick = (e) => {
-        if (e.target === overlay) overlay.classList.remove("visible");
-    };
-    document.body.appendChild(overlay);
-}
-
-overlay.innerHTML = `
-            <div class="sync-modal">
-                <div class="briefing-header">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
-                    </svg>
-                    Sync-Paket geschnürt
-                </div>
-                <div style="font-size: 0.9rem; margin-bottom: 15px;">Alle Änderungen wurden erfasst und in die <b>Zwischenablage kopiert</b>.</div>
-                <div class="sync-report-area">${json}</div>
-                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 25px;">Kopiere diesen Text einfach zurück in den Chat mit Antigravity.</div>
-                <button class="nav-btn" style="width: auto; height: auto; padding: 10px 25px; display: inline-flex !important;" onclick="document.getElementById('cyber-sync-overlay').classList.remove('visible')">Verstanden</button>
-            </div>
-        `;
-
-setTimeout(() => overlay.classList.add("visible"), 10);
-        }
-    };
-
-global.CyberBrandingOverlays = CyberBrandingOverlays;
-}) (window);
