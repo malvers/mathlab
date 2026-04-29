@@ -217,7 +217,9 @@ const CyberBranding = {
             this.injectStyles();
         }
         this.ensureFavicon();
-        if (!skipCanvasBranding) {
+        if (skipCanvasBranding) {
+            document.querySelectorAll(".canvas-branding").forEach((el) => el.remove());
+        } else {
             this.injectHTML(title, subtitle);
         }
         this.injectNavigation();

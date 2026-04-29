@@ -31,7 +31,9 @@
             if (typeof this.ensureFavicon === "function") {
                 this.ensureFavicon();
             }
-            if (!skipCanvasBranding) {
+            if (skipCanvasBranding) {
+                document.querySelectorAll(".canvas-branding").forEach((el) => el.remove());
+            } else {
                 this.injectHTML(title, subtitle);
             }
             this.injectNavigation();
