@@ -19,6 +19,20 @@
             --neon-orange: #ff9d00;
             --neon-purple: #9d50bb;
             --text-main: #ffffff;
+            /* Index-Kacheln (Referenz: dunkle Portal-Karten) */
+            --index-tile-bg: rgba(18, 22, 32, 0.94);
+            --index-tile-border: rgba(165, 186, 210, 0.28);
+            --index-tile-border-hover: rgba(102, 204, 255, 0.45);
+            --index-tile-title-cyan: #66ccff;
+            --index-tile-desc: #a0a0a0;
+            /* Index-Themen + Jahrgang: Rand wie Referenz-Kachel (Parabeln), ohne Neon-Kante */
+            --hub-tile-border: 1px solid #33333b;
+            --hub-tile-border-hover: 1px solid #484c5c;
+            --hub-tile-radius: 26px;
+            --hub-tile-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            --hub-tile-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.48);
+            /* Gleicher Verlauf wie header h1 */
+            --header-title-gradient: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
         }
 
         html {
@@ -177,8 +191,9 @@
             margin: 0;
             letter-spacing: clamp(1px, 1vw, 3.2px);
             line-height: 1.2;
-            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            background: var(--header-title-gradient);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px var(--neon-blue));
             text-transform: uppercase;
@@ -390,8 +405,13 @@
             align-items: flex-start;
             text-align: left;
             padding: 15px 20px;
-            background: rgba(15, 23, 42, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--index-tile-bg);
+            border: 1px solid var(--index-tile-border);
+            border-radius: 20px;
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.35),
+                0 8px 28px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(14px);
             aspect-ratio: 16 / 9;
             min-height: auto;
         }
@@ -400,7 +420,7 @@
             margin-bottom: 12px;
             min-height: 50px;
             align-self: flex-start;
-            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.2));
+            filter: drop-shadow(0 0 8px rgba(102, 204, 255, 0.15));
             transform: scale(1);
         }
 
@@ -408,16 +428,19 @@
             font-size: 1.08rem;
             margin: 0 0 8px 0;
             text-align: left;
-            background: linear-gradient(to right, #fff, var(--neon-blue));
+            background: linear-gradient(to right, #ffffff 0%, #ffffff 42%, var(--index-tile-title-cyan) 72%, var(--neon-blue) 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: none;
             letter-spacing: normal;
+            font-weight: 600;
         }
 
         #tool-view .card .card-desc {
             font-size: 0.8rem;
             line-height: 1.4;
+            color: var(--index-tile-desc);
         }
 
         /* Description using Inter for readability */
@@ -440,10 +463,34 @@
             display: none;
         }
 
-        /* Hover Glow for Tool Cards */
+        /* Hover: dezenter Rand-Glow (ohne Größen-Scale) */
         #tool-view .card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.15);
+            transform: none;
+            background: rgba(22, 26, 38, 0.97);
+            border-color: var(--index-tile-border-hover);
+            box-shadow:
+                0 0 0 1px rgba(102, 204, 255, 0.22),
+                0 10px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        #tool-view .card:hover::before {
+            opacity: 0.35;
+        }
+
+        #tool-view .card:hover h3 {
+            background: linear-gradient(to right, #ffffff 0%, #ffffff 42%, var(--index-tile-title-cyan) 72%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+        }
+
+        #tool-view .card:hover .card-desc {
+            color: var(--index-tile-desc);
+        }
+
+        #tool-view .card:hover .card-icon {
+            transform: none;
         }
 
         /* --- SECTION HEADERS --- */
@@ -505,12 +552,109 @@
             /* Mehr Padding im Grid */
         }
 
-        /* Spezial-Grid für das 8er Panorama (Klasse 5-12) */
+        /* Spezial-Grid: Klassen 5–12 + Uni */
         #jahrgang-grid {
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(9, 1fr);
             width: 100%;
             max-width: none;
             gap: 10px;
+        }
+
+        /* Jahrgang-Hub: eine Reihe Portal-Kacheln (wie Index-Themen), kein Verlauf */
+        #jahrgang-grid > .card.grade-card::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile {
+            justify-content: center;
+            border-radius: var(--hub-tile-radius);
+            border: var(--hub-tile-border);
+            background: rgba(18, 22, 32, 0.97);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--hub-tile-shadow);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile::before {
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile::after {
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:hover,
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile.active:hover {
+            transform: translateY(-3px);
+            filter: none;
+            background: rgba(24, 28, 40, 0.98);
+            border: var(--hub-tile-border-hover);
+            box-shadow: var(--hub-tile-shadow-hover);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile h3 {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.1rem, 2.85vw, 1.62rem);
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            line-height: 1.05;
+            text-transform: none;
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            filter: none;
+            text-shadow: none;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(1) h3 {
+            color: var(--neon-blue);
+            -webkit-text-fill-color: var(--neon-blue);
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(2) h3 {
+            color: #44e1ff;
+            -webkit-text-fill-color: #44e1ff;
+            text-shadow: 0 0 12px rgba(68, 225, 255, 0.35);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(3) h3 {
+            color: #7ae8ff;
+            -webkit-text-fill-color: #7ae8ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(4) h3 {
+            color: #b3f0ff;
+            -webkit-text-fill-color: #b3f0ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(5) h3 {
+            color: #cde0ff;
+            -webkit-text-fill-color: #cde0ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(6) h3 {
+            color: #d4c4ff;
+            -webkit-text-fill-color: #d4c4ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(7) h3 {
+            color: #c4a3ff;
+            -webkit-text-fill-color: #c4a3ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(8) h3 {
+            color: #b77eff;
+            -webkit-text-fill-color: #b77eff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(9) h3 {
+            color: var(--neon-purple);
+            -webkit-text-fill-color: var(--neon-purple);
+            text-shadow: 0 0 12px rgba(157, 80, 187, 0.45);
         }
 
         /* EDUCATION: Jahrgänge einblenden, Themen ausblenden */
@@ -523,6 +667,11 @@
         }
 
         #grade-view.grade-view--edu-only #index-themes-block {
+            display: none;
+        }
+
+        /* EDUCATION: Labor-Scan + Universe-Kachel ausblenden */
+        body.cyber-hub:has(#grade-view.grade-view--edu-only) > .search-scan-row {
             display: none;
         }
 
@@ -599,58 +748,6 @@
             left: 100%;
         }
 
-        /* JG CORPORATE SPECTRUM (8 Steps: Blue -> White -> Purple) */
-        #jahrgang-grid .card:nth-child(1) {
-            --c1: #00d2ff;
-            --c2: #44e1ff;
-        }
-
-        /* 5: Corporate Blue */
-        #jahrgang-grid .card:nth-child(2) {
-            --c1: #44e1ff;
-            --c2: #88f0ff;
-        }
-
-        /* 6: Sky Blue */
-        #jahrgang-grid .card:nth-child(3) {
-            --c1: #88f0ff;
-            --c2: #ccfaff;
-        }
-
-        /* 7: Ice Blue */
-        #jahrgang-grid .card:nth-child(4) {
-            --c1: #ccfaff;
-            --c2: #ffffff;
-        }
-
-        /* 8: WHITE PEAK START */
-        #jahrgang-grid .card:nth-child(5) {
-            --c1: #ffffff;
-            --c2: #eecfff;
-        }
-
-        /* 9: WHITE PEAK END */
-        #jahrgang-grid .card:nth-child(6) {
-            --c1: #f4dfff;
-            --c2: #e0bfff;
-        }
-
-        /* 10: Soft Lavender */
-        #jahrgang-grid .card:nth-child(7) {
-            --c1: #e0bfff;
-            --c2: #be75ef;
-        }
-
-        /* 11: Deep Violet */
-        #jahrgang-grid .card:nth-child(8) {
-            --c1: #be75ef;
-            --c2: #9d50bb;
-        }
-
-        /* 12: Pure Corporate Purple */
-
-        /* Pink-Return to Red */
-
         .card.grade-card .card-icon {
             margin-bottom: 0;
             flex-grow: 1;
@@ -665,38 +762,86 @@
             filter: drop-shadow(0 0 10px var(--c1));
         }
 
-        .card.grade-card svg text {
-            fill: #1e293b;
-            /* Softer, more professional Navy */
-            fill-opacity: 0.85;
-            dominant-baseline: central;
-            font-weight: bold;
-        }
-
         .card.grade-card.active {
             opacity: 1;
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(255, 255, 255, 0.05);
         }
 
-        /* Category Color Accents (NUR THEMEN - Leuchtender Blue-Look) */
-        .grade-grid:last-of-type .card.category-card {
-            border: 2px solid var(--neon-blue);
-            background: rgba(0, 210, 255, 0.05);
-            /* Hauch von Blau im Glas */
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-            transition: all 0.4s ease;
+        /* Themen-Kacheln (Referenz: dunkle Karte, feiner Rand, letzter Buchstabe cyan) */
+        /* grade-card dient nur Layout/JS — kein JG-Gradient-Glanz (::before/::after), kein Icon-Scale, kein active-Hover-Filter */
+        #index-themes-block .card.category-card::before,
+        #index-themes-block .card.category-card::after {
+            content: none !important;
         }
 
-        .grade-grid:last-of-type .card.category-card:hover {
-            background: rgba(0, 210, 255, 0.1);
-            box-shadow: 0 0 35px rgba(0, 210, 255, 0.5), inset 0 0 15px rgba(0, 210, 255, 0.2);
-            transform: scale(1.03);
+        #index-themes-block .card.category-card:hover::before {
+            opacity: 0 !important;
         }
 
-        .grade-grid:last-of-type .card.category-card h3 {
-            color: white;
-            text-shadow: 0 0 10px var(--neon-blue);
+        #index-themes-block .card.category-card .card-icon {
+            flex-grow: 0;
+            margin-bottom: 10px;
+        }
+
+        #index-themes-block .card.category-card:hover .card-icon {
+            transform: none !important;
+        }
+
+        #index-themes-block .card.category-card:hover,
+        #index-themes-block .card.category-card.active:hover {
+            filter: none;
+            z-index: auto;
+        }
+
+        #index-themes-block .card.category-card {
+            border-radius: var(--hub-tile-radius);
+            border: var(--hub-tile-border);
+            background: rgba(18, 22, 32, 0.97);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--hub-tile-shadow);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+            text-align: center;
+        }
+
+        #index-themes-block .card.category-card:hover {
+            background: rgba(24, 28, 40, 0.98);
+            border: var(--hub-tile-border-hover);
+            box-shadow: var(--hub-tile-shadow-hover);
+            transform: translateY(-3px);
+        }
+
+        #index-themes-block .card.category-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            line-height: 1.35;
+            margin: 10px 0 0 0;
+            text-align: center;
+            text-transform: uppercase;
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            background: none;
+            background-clip: border-box;
+            -webkit-background-clip: border-box;
+            text-shadow: none;
+        }
+
+        #index-themes-block .card.category-card h3 .theme-title-accent {
+            color: var(--index-tile-title-cyan);
+            -webkit-text-fill-color: var(--index-tile-title-cyan);
+        }
+
+        #index-themes-block .card.category-card:hover h3 {
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            background: none;
+            text-shadow: none;
+        }
+
+        #index-themes-block .card.category-card:hover h3 .theme-title-accent {
+            color: #7ddbff;
+            -webkit-text-fill-color: #7ddbff;
         }
 
         /* Locked Logik für JG-Kacheln (Deutlich inaktiv) */
@@ -1242,61 +1387,34 @@
             <div class="line"></div>
         </div>
         <div class="grade-grid" id="jahrgang-grid">
-            <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">5</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active jahrgang-portal-tile"
+                aria-label="Jahrgang 5">
+                <h3>5</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">6</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 6">
+                <h3>6</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">7</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 7">
+                <h3>7</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">8</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 8">
+                <h3>8</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="70" text-anchor="middle">9</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 9">
+                <h3>9</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">10</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 10">
+                <h3>10</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">11</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 11">
+                <h3>11</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active">
-                <div class="card-icon">
-                    <svg viewBox="0 0 100 100">
-                        <text x="50" y="55" font-family="'Orbitron'" font-size="60" text-anchor="middle">12</text>
-                    </svg>
-                </div>
+            <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 12">
+                <h3>12</h3>
+            </a>
+            <a href="universe.html" target="_blank" rel="noopener noreferrer" class="card grade-card active jahrgang-portal-tile"
+                title="Universe · Labor-Galerie im Weltraum" aria-label="Universe Labor-Galerie öffnen">
+                <h3>Uni</h3>
             </a>
         </div>
         </div>
@@ -1577,8 +1695,26 @@
         function updateThemesCount() {
             const countEl = document.getElementById('themes-count');
             if (!countEl) return;
-            const themeCards = document.querySelectorAll('#grade-view .grade-grid:last-of-type .category-card');
+            const themeCards = document.querySelectorAll('#index-themes-block .category-card');
             countEl.innerText = themeCards.length;
+        }
+
+        /** Letzter Buchstabe jeder Themen-Überschrift in Cyan (wie Layout-Referenz). */
+        function indexApplyThemeTitleAccents() {
+            document.querySelectorAll('#index-themes-block .category-card h3').forEach(h3 => {
+                if (h3.querySelector('.theme-title-accent')) return;
+                const raw = (h3.textContent || '').trim();
+                if (!raw) return;
+                const upper = raw.toUpperCase();
+                const last = upper.slice(-1);
+                const rest = upper.slice(0, -1);
+                h3.replaceChildren();
+                h3.appendChild(document.createTextNode(rest));
+                const span = document.createElement('span');
+                span.className = 'theme-title-accent';
+                span.textContent = last;
+                h3.appendChild(span);
+            });
         }
 
         // --- ADMIN ACCESS LOGIC ---
@@ -1738,6 +1874,7 @@
         handleHash();
         updateToolCount();
         updateThemesCount();
+        indexApplyThemeTitleAccents();
 
         // High-Quality Video Slowdown (ULTRA 5.3.8)
         const bgVid = document.getElementById('bg-video');
