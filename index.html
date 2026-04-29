@@ -1881,16 +1881,37 @@
         if (bgVid) bgVid.playbackRate = 0.5;
 
         window.addEventListener('hashchange', handleHash);
-        /* --- SPIELWIESE: Saturn & UFO fliegen aus der Bildschirmmitte in zufällige Richtungen --- */
-        const playgroundSprites = ['🪐', '🛸'];
+        /* --- SPIELWIESE: Saturn & UFO nacheinander aus der Mitte, nie doppelt hintereinander --- */
+        const playgroundSprites = ['🪐', '🛸', '🚀', '🛰️', '☄️', '🌙', '🌍', '🌠', '⭐', '🌟', '🌌', '☀️', '🌕', '🌑', '✨'];
         const overlay = document.getElementById('planet-overlay');
+        let lastFlyingSprite = null;
+
+        function pickNextSprite() {
+            if (playgroundSprites.length < 2) return playgroundSprites[0];
+            let next;
+            do {
+                next = playgroundSprites[Math.floor(Math.random() * playgroundSprites.length)];
+            } while (next === lastFlyingSprite);
+            return next;
+        }
+
+        function scheduleNextFlyby(delayMs) {
+            setTimeout(spawnPlanet, delayMs);
+        }
 
         function spawnPlanet() {
-            if (document.hidden) return;
+            if (!overlay) return;
+            if (document.hidden) {
+                scheduleNextFlyby(2500);
+                return;
+            }
+
+            const sprite = pickNextSprite();
+            lastFlyingSprite = sprite;
 
             const planet = document.createElement('div');
             planet.className = 'flying-planet';
-            planet.textContent = playgroundSprites[Math.floor(Math.random() * playgroundSprites.length)];
+            planet.textContent = sprite;
 
             const angle = Math.random() * Math.PI * 2;
             const dist = Math.max(window.innerWidth, window.innerHeight) * 0.85;
@@ -1908,11 +1929,18 @@
             planet.style.animation = `planet-flyby ${duration}s linear forwards`;
 
             overlay.appendChild(planet);
-            setTimeout(() => planet.remove(), duration * 1000);
+            setTimeout(() => {
+                planet.remove();
+                scheduleNextFlyby(4200 + Math.random() * 5000);
+            }, duration * 1000);
         }
 
-        setInterval(spawnPlanet, 5500);
-        for (let i = 0; i < 5; i++) setTimeout(spawnPlanet, i * 1600);
+        scheduleNextFlyby(1200);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && overlay && overlay.querySelectorAll('.flying-planet').length === 0) {
+                scheduleNextFlyby(800);
+            }
+        });
 
     </script>
     <script src="js/branding/briefings.js"></script>
