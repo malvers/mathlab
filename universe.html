@@ -128,7 +128,7 @@
     <div class="glow-sphere"></div>
     <div id="thumb-plane" aria-live="polite"></div>
 
-    <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" aria-label="Vollbild">
+    <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbild (F)" aria-label="Vollbild umschalten (Taste F)">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -180,7 +180,14 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'f') toggleFullscreen();
+            const plainF = (e.code === 'KeyF' || e.key.toLowerCase() === 'f')
+                && !e.ctrlKey && !e.metaKey && !e.altKey;
+            if (plainF) {
+                const el = e.target;
+                if (el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]')) return;
+                e.preventDefault();
+                toggleFullscreen();
+            }
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault();
                 universeAnimPaused = !universeAnimPaused;
