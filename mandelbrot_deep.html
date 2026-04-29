@@ -231,7 +231,8 @@
         void main() {
             vec3 color = vec3(0.0);
             vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
-            float sc = 3.0 / max(1e-8, u_zoom);
+            float zm = min(max(u_zoom, 1e-8), 200000.0);
+            float sc = 3.0 / zm;
             vec2 z, c;
             if (u_julia == 1) {
                 z = u_center + uv * sc;
@@ -257,8 +258,10 @@
             gl_FragColor = vec4(color, 1.0);
         }
     </script>
-    <script src="js/branding.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -266,10 +269,9 @@
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
         }
         window.addEventListener('load', () => {
+            if (window.__forloopMandelbrotDeepInit) return;
+            window.__forloopMandelbrotDeepInit = true;
             CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "MANDELBROT DEEP ZOOM" });
-            CyberBranding.setBriefing(`<h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DEEP SPACE</h3>
-                Direkte Iteration <code style="color:#9ae7ff;">z → z² + c</code> im Shader (Float32).<br><br>
-                <b>Steuerung:</b> Mausrad (Zoom), Shift (Fein-Zoom), Drag (Move).`);
             CyberUI.init();
             const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
             if (!gl) return;
@@ -290,7 +292,10 @@
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
             let juliaX = DEF_JULIA_X, juliaY = DEF_JULIA_Y;
             let resetAnim = null;
-            const RESET_ANIM_MS = 12000;
+            const RESET_ANIM_MS_MAX = 12000;
+            const RESET_ANIM_MS_MIN = 2800;
+            /** Maximaler Zoomfaktor (Float32 sinnvoll + gleichmäßigeres Radgefühl) */
+            const ZOOM_MAX = 200000;
 
             function easeOutCubic(t) {
                 const u = 1 - t;
@@ -299,6 +304,48 @@
 
             function lerp(a, b, t) {
                 return a + (b - a) * t;
+            }
+
+            function clampZoom(z) {
+                if (!Number.isFinite(z)) return 1;
+                const zc = Number(z);
+                return zc <= 1 ? 1 : (zc >= ZOOM_MAX ? ZOOM_MAX : zc);
+            }
+
+            function stopFlightUi() {
+                isFlight = false;
+                const bf = document.querySelector('#side-panel #btn-flight');
+                if (bf) {
+                    bf.innerText = 'START FLIGHT';
+                    bf.classList.remove('active');
+                }
+            }
+
+            /** 0 bei zoom≈1, 1 bei ZOOM_MAX — Tiefenmaß in Log-Skala */
+            function zoomDepthLogUnit(z) {
+                if (!Number.isFinite(z) || z <= 1) return 0;
+                return Math.min(1, Math.log(z) / Math.log(ZOOM_MAX));
+            }
+
+            /**
+             * Rad: Dämpfung ~ u³ in Log-Tiefe u → hoher Zoom (200k→10k) spürbar langsamer,
+             * unten am Limit noch ~4,5 % der Basis-Schrittweite.
+             */
+            function deepZoomWheelDamp(zoomBefore) {
+                const u = zoomDepthLogUnit(zoomBefore);
+                if (u <= 0) return 1;
+                const MIN_DAMP = 0.045;
+                return 1 - (1 - MIN_DAMP) * u * u * u;
+            }
+
+            /** Kurze Resets bei Maus-Zoom (wenig Log-Spanne), lange ab Flight-Zeiler (bis ZOOM_MAX). */
+            function computeResetDurationMs(fromZ, toZ) {
+                const lnFrom = Math.log(Math.max(1, fromZ));
+                const lnTo = Math.log(Math.max(1, toZ));
+                const span = Math.max(0, lnFrom - lnTo);
+                const ref = Math.log(ZOOM_MAX);
+                const t = ref > 0 ? Math.min(1, span / ref) : 0;
+                return Math.round(RESET_ANIM_MS_MIN + (RESET_ANIM_MS_MAX - RESET_ANIM_MS_MIN) * t);
             }
 
             function abortResetAnim() {
@@ -319,10 +366,11 @@
 
             function tickResetAnim() {
                 if (!resetAnim) return;
-                const rawT = Math.min(1, (performance.now() - resetAnim.t0) / RESET_ANIM_MS);
-                const e = easeOutCubic(rawT);
+                const dur = resetAnim.durationMs;
+                const rawT = Math.min(1, (performance.now() - resetAnim.t0) / dur);
                 const f = resetAnim.from;
                 const to = resetAnim.to;
+                const e = easeOutCubic(rawT);
                 centerX = lerp(f.cx, to.cx, e);
                 centerY = lerp(f.cy, to.cy, e);
                 if (f.zoom > 0 && to.zoom > 0 && Number.isFinite(f.zoom) && Number.isFinite(to.zoom)) {
@@ -330,6 +378,7 @@
                 } else {
                     zoom = lerp(f.zoom, to.zoom, e);
                 }
+                zoom = clampZoom(zoom);
                 juliaX = lerp(f.jx, to.jx, e);
                 juliaY = lerp(f.jy, to.jy, e);
                 maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, e))));
@@ -380,15 +429,21 @@
                     document.getElementById('btn-mode-m').classList.add('active');
                     document.getElementById('btn-mode-j').classList.remove('active');
                 }
-                document.getElementById('btn-flight').innerText = 'START FLIGHT';
-                document.getElementById('btn-flight').classList.remove('active');
+                const bf = document.querySelector('#side-panel #btn-flight');
+                if (bf) {
+                    bf.innerText = 'START FLIGHT';
+                    bf.classList.remove('active');
+                }
+                zoom = clampZoom(zoom);
                 const to = (mode === 'JULIA')
                     ? { cx: DEF_JL_CENTER_X, cy: DEF_JL_CENTER_Y, zoom: DEF_JL_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER }
                     : { cx: DEF_MB_CENTER_X, cy: DEF_MB_CENTER_Y, zoom: DEF_MB_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER };
+                const from = { cx: centerX, cy: centerY, zoom, jx: juliaX, jy: juliaY, mi: maxIter };
                 resetAnim = {
                     t0: performance.now(),
-                    from: { cx: centerX, cy: centerY, zoom, jx: juliaX, jy: juliaY, mi: maxIter },
-                    to
+                    from,
+                    to,
+                    durationMs: computeResetDurationMs(from.zoom, to.zoom)
                 };
                 const br = document.getElementById('btn-reset');
                 if (br) br.disabled = true;
@@ -397,10 +452,29 @@
             function render() {
                 const w = canvas.clientWidth, h = canvas.clientHeight;
                 if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+                zoom = clampZoom(zoom);
                 if (resetAnim) tickResetAnim();
-                else if (isFlight) zoom *= 1.005;
+                else if (isFlight) {
+                    if (zoom >= ZOOM_MAX) {
+                        zoom = ZOOM_MAX;
+                        stopFlightUi();
+                    } else {
+                        const u = zoomDepthLogUnit(zoom);
+                        const head = 1 - u;
+                        const nextZoom = zoom * (1 + 0.005 * head);
+                        if (nextZoom >= ZOOM_MAX) {
+                            zoom = ZOOM_MAX;
+                            stopFlightUi();
+                        } else {
+                            zoom = nextZoom;
+                        }
+                    }
+                }
+                zoom = clampZoom(zoom);
+                if (isFlight && zoom >= ZOOM_MAX) stopFlightUi();
                 time += 0.01;
 
+                zoom = clampZoom(zoom);
                 gl.uniform2f(uRes, canvas.width, canvas.height);
                 gl.uniform2f(uCenter, centerX, centerY);
                 gl.uniform1f(uZoom, zoom);
@@ -481,12 +555,14 @@
                 document.getElementById('btn-mode-j').classList.remove('active');
             }
 
-            document.getElementById('btn-flight').onclick = () => {
-                isFlight = !isFlight;
-                const btn = document.getElementById('btn-flight');
-                btn.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
-                btn.classList.toggle('active', isFlight);
-            };
+            const btnFlightEl = document.querySelector('#side-panel #btn-flight');
+            if (btnFlightEl) {
+                btnFlightEl.onclick = () => {
+                    isFlight = !isFlight;
+                    btnFlightEl.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
+                    btnFlightEl.classList.toggle('active', isFlight);
+                };
+            }
             document.getElementById('btn-reset').onclick = () => resetView();
             let isDrag = false, lX, lY;
             canvas.onmousedown = (e) => {
@@ -508,8 +584,12 @@
                 const mx = e.clientX - rect.left, my = e.clientY - rect.top, s = Math.min(canvas.width, canvas.height);
                 const fX = centerX + ((mx - canvas.width / 2) / s / zoom) * 3;
                 const fY = centerY - ((my - canvas.height / 2) / s / zoom) * 3;
-                let zM = e.shiftKey ? 1.002 : 1.015; if (e.deltaY > 0) zM = 1.0 / zM;
-                zoom *= zM; if (zoom < 1.0) zoom = 1.0;
+                let zM = e.shiftKey ? 1.002 : 1.015;
+                if (e.deltaY > 0) zM = 1.0 / zM;
+                const damp = deepZoomWheelDamp(zoom);
+                if (damp < 1) zM = Math.exp(Math.log(zM) * damp);
+                zoom *= zM;
+                zoom = clampZoom(zoom);
                 centerX = fX - ((mx - canvas.width / 2) / s / zoom) * 3;
                 centerY = fY + ((my - canvas.height / 2) / s / zoom) * 3;
             };

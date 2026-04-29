@@ -110,6 +110,7 @@ Hochmodernes 3D-ULTRA-Design mit transparenten Materialeffekten und präziser r�
 Dieser mathematische Beweis nutzt die Eigenschaften von Parallelen und Wechselwinkeln (Z-Winkel). Durch das Zeichnen einer Parallelen zu einer Dreiecksseite durch den gegenüberliegenden Eckpunkt wird gezeigt, dass die drei Innenwinkel zusammen einen gestreckten Winkel von 180° bilden.
 
 FEATURES & STEUERUNG:
+- Interaktion: Eckpunkte A, B, C ziehen, um das Dreieck zu verformen.
 - Parallelprojektion: Automatische Konstruktion einer Parallelen durch einen wählbaren Pivot-Punkt (A, B oder C).
 - Wechselwinkel-Check: Die farbliche Übereinstimmung der Winkel am Pivot-Punkt mit den Winkeln im Dreieck visualisiert die Identität der Wechselwinkel.
 - Beweis-Synchronisation: Zwei parallele Rechnungen zeigen die Summe am Pivot und die Summe im Dreieck, die beide stets 180° ergeben.
@@ -154,7 +155,7 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Übersichtliches ULTRA-Labor für das Erlernen der Basiskonzepte der Ebenengeometrie.`,
 
-    "gleichschenkligesDreieck": `MATHEMATISCHER HINTERGRUND:
+    "gleichschenkligesdreieck": `MATHEMATISCHER HINTERGRUND:
 In diesem Labor wird ein Dreieck mit festem Umfang (u = 8 cm) untersucht. Durch die Bedingung der Gleichschenkligkeit reduziert sich das System auf einen Freiheitsgrad: Die Veränderung der Basis b bestimmt zwangsläufig die Länge der Schenkel s.
 
 FEATURES & STEUERUNG:
@@ -207,9 +208,10 @@ Das Labor visualisiert die Parameter m (Steigung) und n (y-Achsenabschnitt) der 
 
 FEATURES & STEUERUNG:
 - Handle-Interaktion: Dynamisches Verschieben der Punkte P1 und P2 zur Veränderung des Anstiegs m.
-- Steigungsdreieck-Visualisierung: Ein neon-blaues Dreieck zeigt die katheten-basierte Herleitung der Steigung.
+- Steigungsdreieck-Visualisierung: Ein neon-blaues Dreieck zeigt **Delta-X** und **Delta-Y**; **Größe und Lage** des Dreiecks ändern den Quotienten m nicht.
 - Formel-Synchronisation: Die Geradengleichung wird in Echtzeit mittels KaTeX aktualisiert und spiegelt jede Parameter-Änderung wider.
 - n-Achsen-Korrektur: Untersuchung des Einflusses des Achsenabschnitts n auf die vertikale Position der Geraden.
+- Kontextmenü: Rechtsklick für Gitter, Achsen und Koordinaten-Telemetrie.
 
 INTERFACE:
 Analytisches ULTRA-Interface mit Fokus auf die Kopplung von algebraischen Werten und geometrischer Darstellung.`,
@@ -262,6 +264,18 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Klares ULTRA-Design mit Fokus auf die duale Repräsentation von Algebra und Geometrie; inklusive leuchtender Flächen-Labels.`,
 
+    "coordinatensystemtester": `MATHEMATISCHER HINTERGRUND:
+Dieses Modul ist ein Entwicklungs- und Diagnosewerkzeug für die **CyberCanvas**-Engine. Es prüft die Projektion von Funktionsgraphen und die Konsistenz von Achsen, Raster und Beschriftung im interaktiven Koordinatensystem.
+
+FEATURES & STEUERUNG:
+- Stress-Test: **Pan** und **Zoom** im laufenden Betrieb (u. a. **Alt + Scroll**, je nach Canvas-Konfiguration).
+- Funktions-Overlays: Schaltbare Graphen wie **f(x) = -x²** und **g(x) = x⁻²** zum Test steiler und asymptotischer Bereiche.
+- Integrität: **KaTeX**-gestützte Achsenbeschriftung und Abgleich mit den Viewport-Transformationen.
+- Kontextmenü: Achsen, Beschriftung und Koordinaten-Telemetrie ein- und ausblenden.
+
+INTERFACE:
+ULTRA-Sidebar mit Projektions-Checkboxen; Canvas mit CyberCanvas-Standardraster und optionalem HUD.`,
+
     "galtonboard": `MATHEMATISCHER HINTERGRUND:
 Das Galtonboard visualisiert das Entstehen der Normalverteilung (Glockenkurve) durch einen stochastischen Prozess. Jede Kugel trifft auf eine Reihe von Hindernissen und entscheidet sich bei jedem Stoß mit einer Wahrscheinlichkeit von p=0,5 für die linke oder rechte Seite.
 
@@ -293,7 +307,10 @@ FEATURES & STEUERUNG:
 - Frequenz-Manipulation: Unabhängige Steuerung der Schwingfrequenzen für die horizontale und vertikale Achse.
 - Phasen-Shift: Untersuchung des Einflusses der zeitlichen Verschiebung auf die Kurvenform (von Geraden über Ellipsen bis zu komplexen Knoten).
 - Formel-Overlay: Permanente Einblendung der zugrunde liegenden Sinus-Gleichungen inklusive Echtzeit-Parameterwerten.
-- Pendel-Modus: Simulation des physikalischen Ursprungs als gekoppelte Schwingungen.
+- Pendel-Modus: Simulation des physikalischen Ursprungs als gekoppelte Schwingungen; **3D Pendel** als räumliche Analogie (Kamera per Maus drehbar).
+- Pfad-Umfang: Vielfaches einer geschlossenen Periode **T0**, sobald das Frequenzverhältnis rational ist.
+- Pan / Zoom: Maus ziehen, Mausrad; **Shift+Rad** zoomt zur Bildmitte.
+- Simulation: Animation entlang **t**; Stopp beendet die Bewegung, die gezeichnete Kurve bleibt sichtbar.
 
 INTERFACE:
 Ästhetisch anspruchsvolles ULTRA-Design mit leuchtenden Trajektorien und einem detaillierten Analyse-Panel für Frequenzverhältnisse.`,
@@ -333,6 +350,19 @@ FEATURES & STEUERUNG:
 
 INTERFACE:
 Futuristisches Schaltungs-Design im ULTRA-Standard mit klarer Signal-Hervorhebung und intuitivem Interface für logische Experimente.`,
+
+    "logikspiel2": `MATHEMATISCHER HINTERGRUND:
+Magisches Quadrat / Zielwert-Rätsel: Du siehst ein Raster und **Soll-Summen** bzw. **Soll-Produkte** pro Zeile und Spalte am Rand. Die Lösung ist die Belegung der Zellen mit Ziffern, sodass jede Zeile und jede Spalte exakt den angezeigten Randwerten liefert.
+
+FEATURES & STEUERUNG:
+- **ADD (+) / MUL (×):** Umschalten zwischen Summen- und Produktmodus; das Raster wird neu aufgebaut.
+- **Klick auf Zelle:** Im Add-Modus Ziffer 0–9 zyklisch; im Mul-Modus Ziffer 1–9.
+- **Rand-Validierung:** Passt Zeile oder Spalte zum Ziel, leuchtet der Randwert grün auf; alle Randwerte grün = Auflösung.
+- **Level 1–10:** Rasend kleineres Raster (bis Level 3: 3×3, bis 7: 4×4, sonst 5×5); Auswahl per Dropdown.
+- **Hilfe anfordern:** Kurze Rechenaufgabe lösen – danach wird eine noch falsche Zelle als Hinweis gesetzt (golden markiert).
+
+INTERFACE:
+ULTRA-Sidebar mit Level, Zügen, Zeit und Steuerung; Gewinn-Overlay und Hilfe-Dialog im Board-Bereich.`,
 
     "heart3d": `MATHEMATISCHER HINTERGRUND:
 Dieses Labor visualisiert die Taubin-Herz-Gleichung, eine algebraische Fläche 6. Ordnung. Die Darstellung erfolgt mittels Raymarching-Algorithmen, die Signed Distance Fields (SDF) in Echtzeit auf der GPU berechnen.
@@ -395,16 +425,16 @@ INTERFACE:
 Stilisiertes Cyber-Clock-Design mit Fokus auf die mathematische Interpretation von Zeitintervallen.`,
 
     "mandelbrot_deep": `MATHEMATISCHER HINTERGRUND:
-Die Mandelbrot-Menge ist die Menge aller komplexen Zahlen c, für welche die rekursive Folge z_{n+1} = z_n^2 + c mit dem Startwert z_0 = 0 beschränkt bleibt. Dieses Labor nutzt eine hochpräzise "Störungsrechnung" (Perturbation Theory), um die 64-Bit-Gleitkommagrenze herkömmlicher GPUs zu durchbrechen. Dies ermöglicht Zooms bis in Bereiche von 10^-80 und tiefer.
+Die Mandelbrot-Menge entsteht aus der Iteration z_{n+1} = z_n^2 + c mit z_0 = 0 über komplexen c. Bei Julia-Mengen wird c festgehalten und die Iteration aus variierenden Startpunkten betrachtet. Dieses Labor rendert **direkt im WebGL-Fragment-Shader** (Float32 pro Pixel) – sehr schnell, mit typischer Gleitkomma-Genauigkeit bei extrem hohem Zoom.
 
 FEATURES & STEUERUNG:
-- Modus: Wechsel zwischen der klassischen Mandelbrot-Menge und der Julia-Menge (basierend auf der aktuellen Cursor-Position).
-- Präzision: Realisiert durch die decimal.js Bibliothek für 80-Bit-Berechnungen.
-- Autopilot: Startet einen kontinuierlichen Flug in die fraktalen Strukturen.
-- Detailgrad: Regelt die maximale Iterationszahl (maxIter). Höhere Werte enthüllen komplexere Strukturen an den Rändern, benötigen aber mehr Rechenleistung.
+- Modus: Mandelbrot und Julia; Julia-Parameter per Steuerelementen bzw. Cursor-Bezug.
+- Zoom & Pan: Mausrad zoomen, **Shift** für feinere Schritte; Ziehen verschiebt die Ebene (hoher Zoom kann gedämpft sein).
+- Iterationen / Detail: Maximale Iterationszahl (Detail vs. Leistung).
+- Flight: Automatischer Zoom-/Flugmodus optional; Reset stellt die Ansicht zurück.
 
 INTERFACE:
-Das Labor folgt dem ULTRA-Design-Standard mit Echtzeit-Telemetrie im StatsGrid für Zoom-Faktor und aktuelle Koordinaten.`,
+ULTRA-Sidebar mit Parametern; zentrales WebGL-Canvas.`,
 
     "index": `FUNKTION:
 Dieses Modul dient als zentrales Betriebssystem und Navigations-Hub der ULTRA-Labor-Suite. Es bietet einen kuratierten Zugriff auf alle verfügbaren mathematischen und physikalischen Experimente.
@@ -440,6 +470,28 @@ FEATURES & STEUERUNG:
 
 INTERFACE:
 Hochkomplexes Analyse-Tool im ULTRA-v6-Standard mit Echtzeit-Raytracing-Visualisierung für die Linsen-Optimierung.`,
+
+    "cmaes_circle": `MATHEMATISCHER HINTERGRUND:
+Diese Teilmission behandelt **Isoperimetrie**: Bei **konstantem Umfang** soll die eingeschlossene Fläche maximal werden; die stabile Lösung ist der **Kreis**. Der Optimierer verformt dazu die geschlossene Polylinie schrittweise.
+
+FEATURES & STEUERUNG:
+- Evolution: Kontur bei festem Umfang so anpassen, dass die Fläche wächst, bis die Konvergenz zum Kreis erkennbar ist.
+- Drag: Startpunkte der Polylinie verschieben und neue Startszenarien erzeugen.
+- START / PAUSE / STEP: Evolution steuern (inkl. Kontextmenü auf dem Canvas).
+
+INTERFACE:
+Wie CMA-ES-Labor; Achsen und Gitter bleiben für die Kreis-Mission sichtbar.`,
+
+    "cmaes_lens": `MATHEMATISCHER HINTERGRUND:
+Diese Teilmission behandelt **Optik**: Ein **Glasblock** soll so geformt werden, dass **parallele Strahlen** möglichst gut im **Brennpunkt** gebündelt werden. Die Fitness bewertet die Strahlführung durch den Block.
+
+FEATURES & STEUERUNG:
+- Evolution: CMA-ES formt die Blockkontur in Richtung besserer Fokussierung der Strahlen.
+- Drag: Block-Umriss anpassen.
+- START / PAUSE / STEP: wie bei der Kreis-Mission.
+
+INTERFACE:
+ULTRA-Layout; in der Linsen-Mission Fokus auf Strahl-Visualisierung (Achsen oft ausgeblendet).`,
 
     "winkelpuzzle": `MATHEMATISCHER HINTERGRUND:
 Das Winkelpuzzle ist ein anspruchsvolles Modul zur Bestimmung unbekannter Winkel in einer Keil-Konstruktion. Es erfordert die Anwendung von Winkelsummen in Dreiecken, Nebenwinkel-Beziehungen und dem Stufenwinkelsatz.
@@ -485,26 +537,6 @@ FEATURES & STEUERUNG:
 - Über das Fragezeichen in der Navigationszeile erreichst du diese Kurzinfo jederzeit erneut.
 
 INTERFACE:
-ULTRA-Labor-Layout mit zentraler Branding-Navigation.`,
-
-    "tools": `ÜBERSICHT:
-Werkzeug-Übersicht (Mission Control) – Startliste und Labor-Scan für die Doc-Alvers-Suite.
-
-FEATURES & STEUERUNG:
-- Suche filtert die angezeigten Labore.
-- Verlinkungen öffnen die jeweiligen Module (oft in neuem Tab).
-
-INTERFACE:
-Dashboard-Layout; Navigation wird wie in den anderen Laboren über CyberBranding eingebunden.`,
-
-    "mandelbrot_deep": `ÜBERSICHT:
-Deep-Zoom-Mandelbrot im WebGL-Shader (Float32-Iteration). Zusätzlicher Kurztext kann auf der Seite per setBriefing gesetzt sein.
-
-FEATURES & STEUERUNG:
-- Mausrad: Zoom; mit Modifier oft Feinschritt (siehe on-Seiten-Hinweis).
-- Drag: Verschieben der komplexen Ebene.
-
-INTERFACE:
-Sidebar-ULTRA-Layout wie die übrigen Labore.`
+ULTRA-Labor-Layout mit zentraler Branding-Navigation.`
 };
 

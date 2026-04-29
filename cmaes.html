@@ -12,13 +12,6 @@
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
-
-    <script src="js/branding/briefings.js"></script>
-    <script src="js/branding/overlays.js"></script>
-    <script src="js/branding.js"></script>
-    <script src="js/ui.js?v=4"></script>
-    <script src="js/cyber-canvas.js"></script>
-    <script src="js/cmaes-logic.js"></script>
 </head>
 
 <body>
@@ -45,6 +38,12 @@
         </div>
     </main>
 
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/cmaes-logic.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -112,12 +111,14 @@
             const subtitle = m === 'CIRCLE' ? "OPTIMIERUNG KREIS" : "OPTIMIERUNG LINSE";
             CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: subtitle });
 
+            const bKey = m === 'CIRCLE' ? 'cmaes_circle' : 'cmaes_lens';
+            const rawB = window.CyberBriefings && window.CyberBriefings[bKey];
+            CyberBranding.setBriefing(rawB ? CyberBranding.formatBriefingText(rawB) : '');
+
             if (m === 'CIRCLE') {
                 cc.showAxes = true; cc.showLabels = true;
-                CyberBranding.setBriefing(`<b>Optimierung Isoperimetrie</b><br>Maximiere die Fläche bei konstantem Umfang. Die Lösung ist ein Kreis.`);
             } else {
                 cc.showAxes = false; cc.showLabels = false;
-                CyberBranding.setBriefing(`<b>Optimierung Optik</b><br>Optimiere den Glasblock zur Linse. Bündle die Strahlen im Brennpunkt.`);
             }
             cc.needsRedraw = true;
             resetOptimization();
