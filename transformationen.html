@@ -181,7 +181,7 @@
                     const angleRad = (transform.rotation * Math.PI) / 180;
                     let rx = nx * Math.cos(angleRad) - ny * Math.sin(angleRad);
                     let ry = nx * Math.sin(angleRad) + ny * Math.cos(angleRad);
-                    
+
                     let fx = rx + rp.x + transform.tx;
                     let fy = ry + rp.y + transform.ty;
 
@@ -342,7 +342,7 @@
             document.getElementById('check-helpers').onchange = () => update();
             document.getElementById('check-start').onchange = () => update();
             document.getElementById('check-measurements').onchange = () => update();
-            
+
             // Mirror Toggle Logic
             window.toggleMirror = () => {
                 autoShowHL();
@@ -479,7 +479,7 @@
                         // Center Dot
                         ctx.fillStyle = "#ff0055";
                         ctx.beginPath();
-                        ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 3, 0, Math.PI*2);
+                        ctx.arc(cc.mapX(rp.x), cc.mapY(rp.y), 3, 0, Math.PI * 2);
                         ctx.fill();
                     } else if (Math.abs(transform.rotation) <= 0.1) {
                         ctx.strokeStyle = "rgba(0, 210, 255, 0.5)";
@@ -550,12 +550,12 @@
                 ctx.setLineDash([5, 5]);
                 ctx.strokeStyle = "rgba(255, 77, 77, 0.5)";
             }
-            
+
             ctx.beginPath();
             ctx.moveTo(cc.mapX(m1.x), cc.mapY(m1.y));
             ctx.lineTo(cc.mapX(m2.x), cc.mapY(m2.y));
             ctx.stroke();
-            
+
             // Draw Endpoints
             ctx.fillStyle = "#ff4d4d";
             ctx.shadowBlur = 0;
@@ -566,26 +566,26 @@
             ctx.restore();
 
             // --- ON-CANVAS CONGRUENCE INDICATOR (DEUTLICH GRÖSSER & DYNAMISCH) ---
-            const isInteracting = (dragID !== null) || 
-                                 (Math.abs(transform.rotation) > 0.01) || 
-                                 (Math.abs(transform.scale - 1.0) > 0.001) || 
-                                 (transform.isMirrored) ||
-                                 (transform.isPointReflected);
+            const isInteracting = (dragID !== null) ||
+                (Math.abs(transform.rotation) > 0.01) ||
+                (Math.abs(transform.scale - 1.0) > 0.001) ||
+                (transform.isMirrored) ||
+                (transform.isPointReflected);
 
             if (isInteracting) {
                 const getDist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
                 const urbild = (dragID !== null && dragBaseline) ? dragBaseline : points;
                 const bild = transformedPoints;
-                
+
                 const uSides = [getDist(urbild[0], urbild[1]), getDist(urbild[1], urbild[2]), getDist(urbild[2], urbild[0])];
                 const bSides = [getDist(bild[0], bild[1]), getDist(bild[1], bild[2]), getDist(bild[2], bild[0])];
                 const isCongruent = uSides.every((s, i) => Math.abs(s - bSides[i]) < 0.005);
 
                 const statusColor = isCongruent ? "#4ade80" : "#ff4d4d";
                 const statusGlow = isCongruent ? "rgba(74, 222, 128, 0.7)" : "rgba(255, 77, 77, 0.7)";
-                
+
                 ctx.save();
-                ctx.setTransform(1, 0, 0, 1, 0, 0); 
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
                 const padding = 30;
                 const boxW = 400, boxH = 100;
                 const bx = padding;
@@ -597,7 +597,7 @@
                 ctx.lineWidth = 4;
                 ctx.shadowBlur = 30;
                 ctx.shadowColor = statusGlow;
-                
+
                 const r = 20;
                 ctx.beginPath();
                 ctx.moveTo(bx + r, by); ctx.lineTo(bx + boxW - r, by);
@@ -624,7 +624,7 @@
                 ctx.font = "bold 24px Orbitron";
                 ctx.textAlign = "left";
                 ctx.fillText(isCongruent ? "KONGRUENT" : "NICHT KONGRUENT", bx + 105, by + boxH / 2);
-                
+
                 ctx.restore();
             }
 
