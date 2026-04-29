@@ -8,6 +8,7 @@
             let title = this.MASTER_TITLE;
             let subtitle = "CYBER-LABORATORIUM";
             let skipCanvasBranding = false;
+            let skipNavigation = false;
 
             // Polymorphic Init: Support both string (subtitle only) and object (legacy)
             if (typeof config === "string") {
@@ -17,7 +18,10 @@
                 if (config.subtitle) subtitle = config.subtitle;
                 if (config.briefing) this.briefingContent = config.briefing;
                 if (config.skipCanvasBranding === true) skipCanvasBranding = true;
+                if (config.skipNavigation === true) skipNavigation = true;
             }
+
+            this._skipNavigation = skipNavigation;
 
             console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
 
@@ -36,7 +40,11 @@
             } else {
                 this.injectHTML(title, subtitle);
             }
-            this.injectNavigation();
+            if (skipNavigation) {
+                document.querySelectorAll("body > .cyber-nav").forEach((el) => el.remove());
+            } else {
+                this.injectNavigation();
+            }
             this.setupActiveScaling();
             this.updateScale();
             if (!this.briefingContent) this.briefingContent = "";

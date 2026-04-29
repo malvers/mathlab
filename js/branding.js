@@ -84,7 +84,12 @@ function runNavigationConsistency() {
     try {
         reconcileFloatingNavAwayFromHost();
         cleanupIncompleteBrandingNav();
-        if (!hasCompleteBrandingNav() && window.CyberBranding && typeof window.CyberBranding.injectNavigation === "function") {
+        if (
+            !hasCompleteBrandingNav() &&
+            window.CyberBranding &&
+            !window.CyberBranding._skipNavigation &&
+            typeof window.CyberBranding.injectNavigation === "function"
+        ) {
             window.CyberBranding.injectNavigation();
         }
     } catch (e) {
@@ -196,6 +201,7 @@ const CyberBranding = {
         let title = this.MASTER_TITLE;
         let subtitle = "CYBER-LABORATORIUM";
         let skipCanvasBranding = false;
+        let skipNavigation = false;
 
         // Polymorphic Init: Support both string (subtitle only) and object (legacy)
         if (typeof config === 'string') {
@@ -205,7 +211,10 @@ const CyberBranding = {
             if (config.subtitle) subtitle = config.subtitle;
             if (config.briefing) this.briefingContent = config.briefing;
             if (config.skipCanvasBranding === true) skipCanvasBranding = true;
+            if (config.skipNavigation === true) skipNavigation = true;
         }
+
+        this._skipNavigation = skipNavigation;
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
 
@@ -222,7 +231,11 @@ const CyberBranding = {
         } else {
             this.injectHTML(title, subtitle);
         }
-        this.injectNavigation();
+        if (skipNavigation) {
+            document.querySelectorAll("body > .cyber-nav").forEach((el) => el.remove());
+        } else {
+            this.injectNavigation();
+        }
         this.setupActiveScaling();
         this.updateScale();
         if (!this.briefingContent) this.briefingContent = "";
@@ -282,6 +295,7 @@ const CyberBranding = {
     },
 
     injectNavigation() {
+        if (this._skipNavigation === true) return;
         cleanupIncompleteBrandingNav();
         const brandingNav = getBrandingNav();
         if (brandingNav && typeof brandingNav.injectNavigation === "function") {
