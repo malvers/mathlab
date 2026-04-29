@@ -95,6 +95,23 @@
             -webkit-user-drag: none;
         }
 
+        .universe-thumb__placeholder {
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 14px;
+            box-sizing: border-box;
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92));
+            color: #7dd3fc;
+            font-size: clamp(0.7rem, 2.2vw, 0.88rem);
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-align: center;
+            text-transform: uppercase;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
         .universe-close-x {
             position: absolute;
             top: 0;
@@ -199,25 +216,21 @@
     </button>
 
     <script>
-        const UNIVERSE_LABS = [
-            { href: 'orbitals.html', file: 'atomorbitale.png' },
-            { href: 'coolsquares.html', file: 'cool-squares.png' },
-            { href: 'addition.html', file: 'schriftliche-addition.png' },
-            { href: 'subtraktion.html', file: 'schriftliche-subtraktion.png' },
-            { href: 'dividieren.html', file: 'schriftliche-division.png' },
-            { href: 'index.html', file: 'labor-auswahl-index.png' },
-            { href: 'lissajous.html', file: 'lissajous.png' },
-            { href: 'butterfly.html', file: 'schmetterlingskurve.png' },
-            { href: 'logikspiel2.html', file: 'zahlen-puzzle.png' },
-            { href: 'easyhard.html', file: 'geometrie-knobelei.png' },
-            { href: 'gleichungssysteme.html', file: 'lgs-labor.png' },
-            { href: 'fourier.html', file: 'fourier-transformation.png' },
-            { href: 'fibonacci.html', file: 'fibonacci-labor.png' },
-            { href: 'fermatpunkt.html', file: 'fermat-punkt.png' },
-            { href: 'gleichschenkligesDreieck.html', file: 'gleichschenkliges-dreieck.png' },
-        ];
-
         const SCREENSHOT_BASE = 'resources/screenshots/';
+        /**
+         * Redaktionelle Auswahl für diese Galerie (Dateiname „universe“ = Kosmos-Optik, nicht `uni`).
+         * Das Config-Token `uni` in labs-config.js bedeutet Universität/komplex — steuert diese Seite nicht.
+         * PNGs unter resources/screenshots/ (fehlend → Platzhalter).
+         */
+        const UNIVERSE_LABS = [
+            { href: 'orbitals.html', file: 'atomorbitale.png', label: 'ATOMORBITALE' },
+            { href: 'cmaes.html', file: 'cmaes.png', label: 'CMA-ES OPTIMIERER' },
+            { href: 'differentiallabor.html', file: 'differentiallabor.png', label: 'DIFFERENTIAL-LABOR' },
+            { href: 'fourier.html', file: 'fourier-transformation.png', label: 'FOURIER-TRANSFORMATION' },
+            { href: 'mandelbrot_deep.html', file: 'fraktale.png', label: 'FRAKTALE' },
+            { href: 'integralreaktor.html', file: 'integralreaktor.png', label: 'INTEGRALE' },
+            { href: 'LensStandalone/cmaes_java.html', file: 'opti-lens.png', label: 'OPTI-LENS PREMIUM' },
+        ];
         let universeAnimPaused = false;
         let universeFocusedObj = null;
 
@@ -297,19 +310,12 @@
             const plane = document.getElementById('thumb-plane');
             if (!plane) return;
 
-            const pool = [];
-            Promise.all(UNIVERSE_LABS.map(lab => new Promise(resolve => {
-                const img = new Image();
-                img.onload = () => resolve({ ...lab, ok: true });
-                img.onerror = () => resolve({ ...lab, ok: false });
-                img.src = SCREENSHOT_BASE + lab.file;
-            }))).then(results => {
-                results.filter(r => r.ok).forEach(r => pool.push(r));
-                if (pool.length === 0) return;
+            const pool = UNIVERSE_LABS.length ? UNIVERSE_LABS.slice() : [];
+            if (pool.length === 0) return;
 
-                const WANT_VISIBLE = Math.min(6, pool.length);
-                const maxLive     = Math.min(pool.length, 16);
-                const active      = [];
+            const WANT_VISIBLE = Math.min(6, pool.length);
+            const maxLive     = Math.min(pool.length, 16);
+            const active      = [];
                 let spawnAcc      = 0;
                 const spawnEveryMs = () => 1200 + Math.random() * 1500;
                 let nextSpawnIn   = spawnEveryMs();
@@ -376,7 +382,17 @@
                     media.className = 'universe-thumb__media';
                     const im = document.createElement('img');
                     im.src = SCREENSHOT_BASE + lab.file;
-                    im.alt = ''; im.decoding = 'async'; im.draggable = false;
+                    im.alt = lab.label || '';
+                    im.decoding = 'async';
+                    im.draggable = false;
+                    im.addEventListener('error', () => {
+                        im.remove();
+                        if (media.querySelector('.universe-thumb__placeholder')) return;
+                        const ph = document.createElement('div');
+                        ph.className = 'universe-thumb__placeholder';
+                        ph.textContent = lab.label || 'HIGH END';
+                        media.appendChild(ph);
+                    }, { once: true });
                     media.appendChild(im);
                     a.appendChild(media);
                     plane.appendChild(a);
@@ -497,8 +513,7 @@
                     }
                     requestAnimationFrame(tick);
                 }
-                requestAnimationFrame(tick);
-            });
+                    requestAnimationFrame(tick);
         }
     </script>
 </body>
