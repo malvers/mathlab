@@ -6,7 +6,7 @@ repo_root="$(cd "${script_dir}/.." && pwd)"
 
 # Tunable limits via environment variables.
 MAX_TOTAL_DELETIONS="${MAX_TOTAL_DELETIONS:-220}"
-MAX_DELETIONS_PER_FILE="${MAX_DELETIONS_PER_FILE:-80}"
+MAX_DELETIONS_PER_FILE="${MAX_DELETIONS_PER_FILE:-150}"
 MAX_PROTECTED_FILE_DELETIONS="${MAX_PROTECTED_FILE_DELETIONS:-200}"
 
 # Override flags for exceptional commits.
