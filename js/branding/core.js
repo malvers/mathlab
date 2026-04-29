@@ -7,6 +7,7 @@
         init(config = {}) {
             let title = this.MASTER_TITLE;
             let subtitle = "CYBER-LABORATORIUM";
+            let skipCanvasBranding = false;
 
             // Polymorphic Init: Support both string (subtitle only) and object (legacy)
             if (typeof config === "string") {
@@ -15,6 +16,7 @@
                 if (config.title) title = config.title;
                 if (config.subtitle) subtitle = config.subtitle;
                 if (config.briefing) this.briefingContent = config.briefing;
+                if (config.skipCanvasBranding === true) skipCanvasBranding = true;
             }
 
             console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
@@ -29,7 +31,9 @@
             if (typeof this.ensureFavicon === "function") {
                 this.ensureFavicon();
             }
-            this.injectHTML(title, subtitle);
+            if (!skipCanvasBranding) {
+                this.injectHTML(title, subtitle);
+            }
             this.injectNavigation();
             this.setupActiveScaling();
             this.updateScale();
