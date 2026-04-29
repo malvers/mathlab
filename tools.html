@@ -377,12 +377,40 @@
             display: none;
         }
 
-        /* Zurück zur Labor-Auswahl (Dashboard) — oben rechts, über fixierter Nav */
+        /* Gemeinsame Spalte = „Panel“; Schließen sitzt in der rechten oberen Ecke */
+        .tools-panel {
+            position: relative;
+            width: 95%;
+            max-width: 1000px;
+            margin: 0 auto;
+            z-index: 2;
+            box-sizing: border-box;
+        }
+        .tools-panel .search-scan-row,
+        .tools-panel .launcher-grid {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .tools-panel .search-scan-row {
+            margin-top: 12px;
+            margin-bottom: 18px;
+        }
+        .tools-panel #sidebar-header {
+            width: 100% !important;
+            max-width: none !important;
+        }
+        .tools-panel > header:not(#sidebar-header) .header-content {
+            padding-right: 52px;
+            box-sizing: border-box;
+        }
+
         .tools-hub-close {
-            position: fixed;
-            top: 20px;
-            right: 16px;
-            z-index: 50000;
+            position: absolute;
+            top: 10px;
+            right: 8px;
+            z-index: 30;
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -416,6 +444,13 @@
 </head>
 
 <body class="cyber-hub">
+    <!-- Poster wie index.html (Fallback ohne lokales favicon-PNG). Video: resources/galay20.mp4 -->
+    <video id="bg-video" autoplay loop muted playsinline
+        poster="https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop">
+        <source src="resources/galay20.mp4" type="video/mp4">
+    </video>
+
+    <div class="tools-panel">
     <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zur Labor-Auswahl (Esc)"
         aria-label="Werkzeug-Übersicht schließen und zur Labor-Auswahl">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
@@ -423,12 +458,6 @@
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
     </a>
-    <!-- Poster wie index.html (Fallback ohne lokales favicon-PNG). Video: resources/galay20.mp4 -->
-    <video id="bg-video" autoplay loop muted playsinline
-        poster="https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop">
-        <source src="resources/galay20.mp4" type="video/mp4">
-    </video>
-
     <header>
         <div class="header-content">
             <h1>Doc Alvers Mathe-Labor</h1>
@@ -447,12 +476,13 @@
     </div>
 
     <header id="sidebar-header"
-        style="display: flex; justify-content: flex-start; margin-bottom: 2px; margin-top: -5px; width: 95%; max-width: 1000px;">
+        style="display: flex; justify-content: flex-start; margin-bottom: 2px; margin-top: -5px;">
         <!-- Navigation will be injected here by branding.js -->
     </header>
 
     <div class="launcher-grid" id="launcher-grid" style="padding-top: 0;">
         <!-- Launcher buttons will be rendered dynamically from js/labs-config.js -->
+    </div>
     </div>
 
     <footer>
