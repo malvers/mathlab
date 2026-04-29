@@ -5,6 +5,7 @@
 (function attachBrandingNav(global) {
     const CyberBrandingNav = {
         injectNavigation() {
+            if (window.CyberBranding && window.CyberBranding._skipNavigation === true) return;
             if (typeof cleanupIncompleteBrandingNav === "function") cleanupIncompleteBrandingNav();
             if (typeof hasCompleteBrandingNav === "function" && hasCompleteBrandingNav()) return;
 

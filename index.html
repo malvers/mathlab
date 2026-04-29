@@ -38,12 +38,21 @@
         }
 
         /*
-         * Feste CyberNav (top: 25px, ~48px hoch) würde sonst mit dem zentrierten Hero-Header kollidieren
-         * („DOC AL…“ wirkt abgeschnitten / eine Zeile mit den Icons).
+         * Mission Control: keine zweite Nav-Leiste (KAFFEE/QR/Kontakt reichen). padding nur für die feste Aktionszeile rechts oben.
          */
         body.cyber-hub {
-            padding-top: 96px;
+            padding-top: 56px;
             box-sizing: border-box;
+        }
+
+        /* Echter Content über dem Planet-Overlay (z-index 0), sonst Übermalen durch 🪐/🛸. */
+        body.cyber-hub > header,
+        body.cyber-hub > .search-scan-row,
+        body.cyber-hub > #grade-view,
+        body.cyber-hub > #tool-view,
+        body.cyber-hub > footer {
+            position: relative;
+            z-index: 2;
         }
 
         body.cyber-hub > header .header-content {
@@ -67,6 +76,8 @@
         /* Hub: kein zweites „Canvas“-Branding (Titel oben rechts); Startseite hat eigene Hero-Zeile. */
         body.cyber-hub .canvas-branding {
             display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
 
         /* Kein Kurz-Briefing-Button auf Mission Control (wie tools.html). */
@@ -74,20 +85,9 @@
             display: none !important;
         }
 
-        /* Kein #sidebar-header auf der Startseite: Navigation ist .floating am body — ohne position:fixed rutschen Titel-Leiste und Icons ins Dokumentende unter den Footer. */
-        body > .cyber-nav.floating {
-            position: fixed !important;
-            top: 25px !important;
-            left: 85px !important;
-            width: auto !important;
-            max-width: calc(100vw - 95px);
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            align-items: center;
-            gap: 8px !important;
-            z-index: 2001 !important;
-            margin: 0 !important;
+        /* Index: keine feste CyberNav — Styles nur noch für andere Seiten mit .cyber-hub ignorierbar. */
+        body.cyber-hub.index-mission .cyber-nav.floating {
+            display: none !important;
         }
 
         /* Legacy Stars disabled for new Galaxy Video Backdrop 
@@ -207,6 +207,7 @@
         }
 
         /* --- PLANET FLYBY EFFECT (ULTRA CRAZY) --- */
+        /* Hinter festem UI-Content, damit Hero/Scan/Cards nicht überdeckt werden */
         #planet-overlay {
             position: fixed;
             top: 0;
@@ -214,8 +215,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 1;
-            /* Über Video, unter Content? Nee, z-index 1 ist ok, aber Content muss höher */
+            z-index: 0;
             overflow: hidden;
         }
 
@@ -1046,7 +1046,7 @@
     </style>
 </head>
 
-<body class="cyber-hub">
+<body class="cyber-hub index-mission">
     <div id="planet-overlay"></div>
 
     <!-- Video Background (Galaxy) -->
@@ -1707,7 +1707,12 @@
                 CyberBranding.init({
                     title: "Doc Alvers Mathe-Labor",
                     subtitle: "MISSION CONTROL",
-                    skipCanvasBranding: true
+                    skipCanvasBranding: true,
+                    skipNavigation: true
+                });
+                queueMicrotask(() => {
+                    document.querySelectorAll(".canvas-branding").forEach((el) => el.remove());
+                    document.querySelectorAll("body > .cyber-nav").forEach((el) => el.remove());
                 });
             }
         });
