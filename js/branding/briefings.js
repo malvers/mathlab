@@ -298,18 +298,6 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Ästhetisch anspruchsvolles ULTRA-Design mit leuchtenden Trajektorien und einem detaillierten Analyse-Panel für Frequenzverhältnisse.`,
 
-    "mandelbrot": `MATHEMATISCHER HINTERGRUND:
-Die Mandelbrot-Menge ist das bekannteste Fraktal der Mathematik. Sie wird durch die iterative Folge z_{n+1} = z_n^2 + c in der komplexen Zahlenebene definiert. Punkte c, für die die Folge beschränkt bleibt, gehören zur Menge.
-
-FEATURES & STEUERUNG:
-- Fraktale Exploration: Interaktives Navigieren durch die komplexe Ebene zur Entdeckung selbstähnlicher Strukturen.
-- Farb-Mapping: Visualisierung der Divergenzgeschwindigkeit durch ästhetische Farbverläufe (Escape-Time-Algorithmus).
-- Präzisions-Zoom: Untersuchung der unendlichen Komplexität an den Rändern der Menge.
-- ULTRA-V6-Engine: Hochperformante Berechnung der Iterationen direkt im Browser-Canvas.
-
-INTERFACE:
-Minimalistisches ULTRA-Design, das die mathematische Schönheit des Fraktals ohne störende UI-Elemente in den Vordergrund stellt.`,
-
     "fibonacci": `MATHEMATISCHER HINTERGRUND:
 Die Fibonacci-Folge (0, 1, 1, 2, 3, 5, 8, ...) ist durch das Bildungsgesetz f(n) = f(n-1) + f(n-2) definiert. Das Verhältnis aufeinanderfolgender Glieder nähert sich dem Goldenen Schnitt (ca. 1,618) an. Dieses Labor visualisiert den Zusammenhang zwischen der Zahlenfolge und der daraus resultierenden logarithmischen Spirale.
 
@@ -464,6 +452,18 @@ FEATURES & STEUERUNG:
 - Echtzeit-Rendering: Hochperformante GPU-Berechnung der Wahrscheinlichkeitsdichten für flüssige Interaktion.
 
 INTERFACE:
-Wissenschaftlich präzises ULTRA-Labor mit KaTeX-gestützter Formelanzeige und physikalischer Telemetrie.`
+Wissenschaftlich präzises ULTRA-Labor mit KaTeX-gestützter Formelanzeige und physikalischer Telemetrie.`,
+
+    "universe": `MATHEMATISCHER HINTERGRUND:
+Das Universe-Modul visualisiert das Ökosystem der ULTRA-Labore als dynamische Galaxie. Es nutzt prozedurale Animationen und Tiefenprojektionen (Raycasting-ähnliche Logik), um die Vernetzung der verschiedenen mathematischen Disziplinen in einem unendlichen Raum darzustellen.
+
+FEATURES & STEUERUNG:
+- Dynamische Lab-Matrix: Module fliegen aus dem Zentrum auf den Betrachter zu und repräsentieren die Expansion des mathematischen Wissens.
+- Interaktive Exploration: Durch Anklicken der schwebenden Labor-Symbole können diese fokussiert oder direkt gestartet werden.
+- Tiefen-Synchronisation: Die Skalierung und Opazität der Elemente korrespondiert mit ihrer virtuellen Z-Koordinate.
+- Fokus-Modus: Ein Doppelklick zentriert ein Labor und bereitet den Übergang in die entsprechende Detail-Umgebung vor.
+
+INTERFACE:
+Cinematisches ULTRA-Interface mit Fokus auf Immersion und die navigatorische Verknüpfung der gesamten Suite.`
 };
 
