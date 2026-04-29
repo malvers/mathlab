@@ -38,6 +38,7 @@
             object-fit: cover;
             z-index: -1;
             pointer-events: none;
+            filter: brightness(0.62);
         }
 
         /* eigenes Kontextmenü (Rechtsklick) */
@@ -261,7 +262,7 @@
             box-shadow: inset 0 0 0 3px rgba(0, 210, 255, 0.45);
             background: rgba(0, 210, 255, 0.04);
         }
-        /* Oben im Playbereich, horizontal zentriert; neue Zeilen nur nach unten */
+        /* Mehrzeilig: oben verankert (kein Aufwärts-Sprung). Ein Schlagwort: vertikal zentriert. */
         #catching-words-panel .cw-stack {
             position: absolute;
             left: 0;
@@ -280,6 +281,11 @@
             padding: 0 6px;
             isolation: isolate;
             overflow: visible;
+        }
+        #catching-words-panel .cw-stack.cw-stack-centered {
+            top: 50%;
+            transform: translateY(-50%);
+            justify-content: center;
         }
         /* Wie Intro-h1, Endgröße halb so groß wie dort (scale 0.9) */
         #catching-words-panel .falling-word {
@@ -338,6 +344,63 @@
                 filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.9));
                 transform: scale(1.05);
             }
+        }
+        @keyframes cw-portal-in {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.94);
+                filter: blur(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        #catching-words-panel a.cw-portal-btn {
+            position: relative;
+            flex: 0 0 auto;
+            align-self: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: rgba(240, 252, 255, 0.98);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 0.28em;
+            text-indent: 0.28em;
+            text-transform: uppercase;
+            padding: 1rem 2.4rem;
+            border: 2px solid rgba(0, 210, 255, 0.9);
+            border-radius: 6px;
+            background: linear-gradient(145deg, rgba(0, 210, 255, 0.14), rgba(168, 85, 247, 0.1));
+            box-shadow:
+                0 0 32px rgba(0, 210, 255, 0.4),
+                0 0 64px rgba(168, 85, 247, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(18px) scale(0.94);
+            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition:
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+        #catching-words-panel a.cw-portal-btn:hover {
+            color: #fff;
+            border-color: rgba(200, 120, 255, 0.95);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow:
+                0 0 40px rgba(168, 85, 247, 0.5),
+                0 0 80px rgba(0, 210, 255, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
         }
 
         .cw-debug-hud {
@@ -462,6 +525,8 @@
 
         function pickIntroMode() {
             closeCtxMenu();
+            cwPlayAllActive = false;
+            clearCwPlayAllTimer();
             stopCatchingWords();
             document.body.classList.remove('mode-catching-words');
             document.body.classList.add('start-cinematic');
@@ -538,60 +603,35 @@
             return false;
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && ctxMenu && ctxMenu.classList.contains('open')) {
-                e.preventDefault();
-                closeCtxMenu();
-                return;
-            }
-            if (document.body.classList.contains('mode-catching-words') && !isCwTypingTarget(e.target)) {
-                const goRight = e.code === 'ArrowRight' || e.key === 'ArrowRight';
-                const goLeft = e.code === 'ArrowLeft' || e.key === 'ArrowLeft';
-                if (goRight || goLeft) {
-                    e.preventDefault();
-                    stepCwSection(goRight ? 1 : -1);
-                    return;
-                }
-                const goUp = e.code === 'ArrowUp' || e.key === 'ArrowUp';
-                const goDown = e.code === 'ArrowDown' || e.key === 'ArrowDown';
-                if (goUp || goDown) {
-                    e.preventDefault();
-                    nudgeCwMotion(goUp);
-                    return;
-                }
-                if (
-                    (e.key === 'd' || e.key === 'D') &&
-                    !e.metaKey &&
-                    !e.ctrlKey &&
-                    !e.altKey
-                ) {
-                    e.preventDefault();
-                    toggleCwDebugHud();
-                    return;
-                }
-            }
-            if (e.key.toLowerCase() === 'f') toggleFullscreen();
-            if (e.code === 'Space' || e.key === ' ') {
-                if (document.body.classList.contains('mode-catching-words')) {
-                    e.preventDefault();
-                    toggleCatchingWordsPause();
-                    return;
-                }
-                if (document.body.classList.contains('start-cinematic')) {
-                    e.preventDefault();
-                    replayAnimation();
-                }
-                return;
-            }
-        }, { capture: true });
+        const BG_VIDEO_BRIGHTNESS_DEFAULT = 0.62;
+        const BG_VIDEO_BRIGHTNESS_STEP = 0.06;
+        const BG_VIDEO_BRIGHTNESS_MIN = 0.15;
+        const BG_VIDEO_BRIGHTNESS_MAX = 1.0;
+        let bgVideoBrightness = BG_VIDEO_BRIGHTNESS_DEFAULT;
+
+        function syncBgVideoBrightness() {
+            const video = document.getElementById('bg-video');
+            if (video) video.style.filter = 'brightness(' + bgVideoBrightness + ')';
+        }
+
+        function nudgeBgVideoBrightness(brighter) {
+            const d = brighter ? BG_VIDEO_BRIGHTNESS_STEP : -BG_VIDEO_BRIGHTNESS_STEP;
+            bgVideoBrightness = Math.round(
+                Math.max(BG_VIDEO_BRIGHTNESS_MIN, Math.min(BG_VIDEO_BRIGHTNESS_MAX, bgVideoBrightness + d)) * 100
+            ) / 100;
+            syncBgVideoBrightness();
+            saveIntroPersistedPrefs();
+        }
+
+        /* keydown: unten registriert (nach allen CW-Helfern), damit Pfeile zuverlässig greifen */
 
         /* —— Catching Words: Reihenfolge per .txt/.md (Zeile = Eintrag) oder Drop von Text —— */
         const CW_SEQUENCE_DEFAULT = Object.freeze([
-            'Cascading Style Sheets',
-            'Java Script',
-            'Hypertext',
-            'Python',
-            'Java',
+            '1. Zeile',
+            '2. Zeile',
+            '3. Zeile',
+            '4. Zeile',
+            '5. Zeile',
         ]);
         /** Jede Zeile mit # beginnt eine neue Section; folgende Wörter gehören dazu (inkl. # 20pt …). ←/→ wechseln die Section. */
         let cwSections = [CW_SEQUENCE_DEFAULT.map((text) => ({ text, fontSizePt: null }))];
@@ -604,6 +644,60 @@
         let cwSpawnRoundIndex = 0;
         let cwPaused = false;
         let cwDebugHudVisible = false;
+        let cwPlayAllActive = false;
+        let cwPlayAllTimer = null;
+        const CW_PLAY_ALL_GAP_MS = 650;
+
+        function clearCwPlayAllTimer() {
+            if (cwPlayAllTimer) {
+                clearTimeout(cwPlayAllTimer);
+                cwPlayAllTimer = null;
+            }
+        }
+
+        const INTRO_PREFS_KEY = 'docalvers.intro.prefs';
+        const INTRO_PREFS_VERSION = 1;
+
+        function loadIntroPersistedPrefs() {
+            try {
+                const raw = localStorage.getItem(INTRO_PREFS_KEY);
+                if (!raw) return;
+                const s = JSON.parse(raw);
+                if (!s || typeof s !== 'object' || s.v !== INTRO_PREFS_VERSION) return;
+                if (typeof s.bgBrightness === 'number' && Number.isFinite(s.bgBrightness)) {
+                    bgVideoBrightness = Math.max(
+                        BG_VIDEO_BRIGHTNESS_MIN,
+                        Math.min(BG_VIDEO_BRIGHTNESS_MAX, Math.round(s.bgBrightness * 100) / 100)
+                    );
+                }
+                if (typeof s.cwAnimSec === 'number' && Number.isFinite(s.cwAnimSec)) {
+                    cwAnimSec = Math.round(Math.max(4, Math.min(18, s.cwAnimSec)) * 10) / 10;
+                }
+                if (typeof s.cwSpawnMs === 'number' && Number.isFinite(s.cwSpawnMs)) {
+                    cwSpawnMs = Math.round(Math.max(400, Math.min(2000, s.cwSpawnMs)));
+                }
+            } catch (err) {
+                /* file:// oder private mode */
+            }
+        }
+
+        function saveIntroPersistedPrefs() {
+            try {
+                localStorage.setItem(
+                    INTRO_PREFS_KEY,
+                    JSON.stringify({
+                        v: INTRO_PREFS_VERSION,
+                        bgBrightness: bgVideoBrightness,
+                        cwAnimSec,
+                        cwSpawnMs,
+                    })
+                );
+            } catch (err) {
+                /* quota / private mode */
+            }
+        }
+
+        loadIntroPersistedPrefs();
 
         function syncCwMotionVars() {
             const panel = document.getElementById('catching-words-panel');
@@ -614,7 +708,9 @@
                     'Flug (Keyframe): ' + cwAnimSec.toFixed(1) + ' s',
                     'Spawn-Takt:      ' + cwSpawnMs + ' ms',
                     '↑ schneller · ↓ langsamer  (±0,1 s · ±10 ms)',
-                    'd  Debug ein/aus',
+                    'h · d  Video heller / dunkler',
+                    'S  alle Abschnitte hintereinander',
+                    '⌘D  Debug ein/aus',
                 ].join('\n');
             }
         }
@@ -624,6 +720,7 @@
             cwAnimSec = Math.round(Math.max(4, Math.min(18, cwAnimSec - dir * 0.1)) * 10) / 10;
             cwSpawnMs = Math.round(Math.max(400, Math.min(2000, cwSpawnMs - dir * 10)));
             syncCwMotionVars();
+            saveIntroPersistedPrefs();
         }
 
         function toggleCwDebugHud() {
@@ -641,9 +738,48 @@
             syncCwMotionVars();
         }
 
+        function beginCwPlayAllSections() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            if (!cwSections.length) return;
+            clearCwPlayAllTimer();
+            cwPlayAllActive = true;
+            cwSectionIndex = 0;
+            cwSequence = cwSections[0] || [];
+            syncCwStackVerticalAlign();
+            stopCatchingWords();
+            startCatchingWords();
+        }
+
+        function tryAdvanceCwPlayAllAfterCurrentSectionSpawnDone() {
+            if (!cwPlayAllActive) return;
+            clearCwPlayAllTimer();
+            if (cwSectionIndex < cwSections.length - 1) {
+                cwPlayAllTimer = setTimeout(() => {
+                    cwPlayAllTimer = null;
+                    if (!cwPlayAllActive || !document.body.classList.contains('mode-catching-words')) return;
+                    cwSectionIndex += 1;
+                    cwSequence = cwSections[cwSectionIndex] || [];
+                    syncCwStackVerticalAlign();
+                    stopCatchingWords();
+                    startCatchingWords();
+                }, CW_PLAY_ALL_GAP_MS);
+            } else {
+                cwPlayAllActive = false;
+            }
+        }
+
         function stepCwSection(delta) {
             if (!document.body.classList.contains('mode-catching-words')) return;
-            if (cwSections.length <= 1) return;
+            cwPlayAllActive = false;
+            clearCwPlayAllTimer();
+            if (cwSections.length === 0) return;
+            if (cwSections.length === 1) {
+                cwSectionIndex = 0;
+                cwSequence = cwSections[0] || [];
+                stopCatchingWords();
+                startCatchingWords();
+                return;
+            }
             const next = Math.max(0, Math.min(cwSections.length - 1, cwSectionIndex + delta));
             if (next === cwSectionIndex) return;
             cwSectionIndex = next;
@@ -662,11 +798,11 @@
                     clearTimeout(cwSpawnTimer);
                     cwSpawnTimer = null;
                 }
-                stack.querySelectorAll('.falling-word').forEach((el) => {
+                stack.querySelectorAll('.falling-word, .cw-portal-btn').forEach((el) => {
                     el.style.animationPlayState = 'paused';
                 });
             } else {
-                stack.querySelectorAll('.falling-word').forEach((el) => {
+                stack.querySelectorAll('.falling-word, .cw-portal-btn').forEach((el) => {
                     if (!el.classList.contains('caught')) el.style.animationPlayState = 'running';
                 });
                 scheduleCwSpawn();
@@ -682,11 +818,27 @@
                     clearTimeout(cwSpawnTimer);
                     cwSpawnTimer = null;
                 }
+                tryAdvanceCwPlayAllAfterCurrentSectionSpawnDone();
                 return;
             }
 
             const entry = cwSequence[cwSpawnRoundIndex];
             cwSpawnRoundIndex += 1;
+
+            if (entry.kind === 'nav') {
+                const a = document.createElement('a');
+                a.className = 'cw-portal-btn';
+                a.href = entry.href;
+                if (/^https?:\/\//i.test(entry.href)) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
+                a.textContent = entry.label;
+                a.style.zIndex = String(cwSpawnRoundIndex);
+                playStack.appendChild(a);
+                return;
+            }
+
             const label = entry.text;
             const fontPt = entry.fontSizePt;
 
@@ -725,10 +877,17 @@
             }, cwSpawnMs);
         }
 
+        function syncCwStackVerticalAlign() {
+            const stack = document.getElementById('cw-stack');
+            if (!stack) return;
+            stack.classList.toggle('cw-stack-centered', Array.isArray(cwSequence) && cwSequence.length <= 1);
+        }
+
         function stopCatchingWords() {
             cwRunning = false;
             cwPaused = false;
             cwSpawnRoundIndex = 0;
+            clearCwPlayAllTimer();
             if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
             cwSpawnTimer = null;
             const stack = document.getElementById('cw-stack');
@@ -742,6 +901,7 @@
             cwSpawnRoundIndex = 0;
             const stack = document.getElementById('cw-stack');
             if (stack) stack.innerHTML = '';
+            syncCwStackVerticalAlign();
 
             spawnCwWord();
             scheduleCwSpawn();
@@ -757,7 +917,36 @@
          * Sections (←/→): neuer Abschnitt bei jeder #‑Zeile (# allein, # Kommentar oder # 60pt in einer Zeile).
          * Größe: «# 60pt» oder eigene Zeile nur «60pt» / «200pt» (gilt für folgende Wörter bis zur nächsten Größenzeile).
          * Zeilen, die mit «//» beginnen: Kommentar (ignorieren).
+         * Navigation: «%button» → Button nach index.html; «%button index» / «%button orbitals.html»; optional Beschriftung:
+         * «%button orbitals.html Orbitale». Ein einzelnes Wort, das kein Ziel ist (z. B. «%button TOLL»), wird nur als Text auf index verlinkt.
          */
+        function isCwNavTargetToken(t) {
+            const s = String(t || '').trim();
+            if (!s) return false;
+            if (/^https?:\/\//i.test(s)) return true;
+            if (/[/\\]/.test(s)) return true;
+            if (/\.html?$/i.test(s)) return true;
+            if (/^index$/i.test(s)) return true;
+            return false;
+        }
+
+        function sanitizeCwNavHref(raw) {
+            const t = String(raw || '').trim();
+            if (!t) return 'index.html';
+            if (/^[a-z][a-z0-9+.-]*:/i.test(t) && !/^https?:\/\//i.test(t)) return 'index.html';
+            if (/^https?:\/\//i.test(t)) return t;
+            if (/^index$/i.test(t)) return 'index.html';
+            if (/\.html?$/i.test(t)) return t;
+            if (/[/\\]/.test(t)) return t;
+            return t + '.html';
+        }
+
+        function defaultCwNavLabel(href) {
+            const h = String(href || '').toLowerCase().split(/[?#]/)[0];
+            if (h === 'index.html' || h.endsWith('/index.html')) return 'ZUM INDEX';
+            return 'WEITER';
+        }
+
         function parseCwSections(text) {
             const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\n|\r/);
             const hashWithPt = /^\s*#\s*(\d+(?:\.\d+)?)\s*pt\b/i;
@@ -795,6 +984,27 @@
                 if (mPt) {
                     const v = parseFloat(mPt[1]);
                     currentPt = Number.isFinite(v) ? v : null;
+                    continue;
+                }
+
+                if (/^%button\b/i.test(line)) {
+                    const rest = line.replace(/^%button\s*/i, '').trim();
+                    if (!rest) {
+                        current.push({ kind: 'nav', href: 'index.html', label: 'ZUM INDEX' });
+                        continue;
+                    }
+                    const parts = rest.split(/\s+/).filter(Boolean);
+                    const first = parts[0];
+                    let href;
+                    let label;
+                    if (parts.length === 1 && !isCwNavTargetToken(first)) {
+                        href = 'index.html';
+                        label = first;
+                    } else {
+                        href = sanitizeCwNavHref(first);
+                        label = parts.length > 1 ? parts.slice(1).join(' ') : defaultCwNavLabel(href);
+                    }
+                    current.push({ kind: 'nav', href, label });
                     continue;
                 }
 
@@ -880,7 +1090,73 @@
             });
         }
 
+        document.addEventListener(
+            'keydown',
+            (e) => {
+                if (e.key === 'Escape' && ctxMenu && ctxMenu.classList.contains('open')) {
+                    e.preventDefault();
+                    closeCtxMenu();
+                    return;
+                }
+                if (!isCwTypingTarget(e.target)) {
+                    const noChord = !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey;
+                    if (noChord && (e.key === 'h' || e.key === 'H')) {
+                        e.preventDefault();
+                        nudgeBgVideoBrightness(true);
+                        return;
+                    }
+                    if (noChord && (e.key === 'd' || e.key === 'D')) {
+                        e.preventDefault();
+                        nudgeBgVideoBrightness(false);
+                        return;
+                    }
+                }
+                if (document.body.classList.contains('mode-catching-words') && !isCwTypingTarget(e.target)) {
+                    const goRight = e.code === 'ArrowRight' || e.key === 'ArrowRight';
+                    const goLeft = e.code === 'ArrowLeft' || e.key === 'ArrowLeft';
+                    if (goRight || goLeft) {
+                        e.preventDefault();
+                        stepCwSection(goRight ? 1 : -1);
+                        return;
+                    }
+                    const goUp = e.code === 'ArrowUp' || e.key === 'ArrowUp';
+                    const goDown = e.code === 'ArrowDown' || e.key === 'ArrowDown';
+                    if (goUp || goDown) {
+                        e.preventDefault();
+                        nudgeCwMotion(goUp);
+                        return;
+                    }
+                    if (
+                        (e.key === 'd' || e.key === 'D') &&
+                        e.metaKey &&
+                        !e.ctrlKey &&
+                        !e.altKey &&
+                        !e.shiftKey
+                    ) {
+                        e.preventDefault();
+                        toggleCwDebugHud();
+                        return;
+                    }
+                }
+                if (e.key.toLowerCase() === 'f') toggleFullscreen();
+                if (e.code === 'Space' || e.key === ' ') {
+                    if (document.body.classList.contains('mode-catching-words')) {
+                        e.preventDefault();
+                        toggleCatchingWordsPause();
+                        return;
+                    }
+                    if (document.body.classList.contains('start-cinematic')) {
+                        e.preventDefault();
+                        replayAnimation();
+                    }
+                    return;
+                }
+            },
+            { capture: true }
+        );
+
         syncCwMotionVars();
+        syncBgVideoBrightness();
         startCatchingWords();
     </script>
 </body>
