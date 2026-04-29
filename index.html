@@ -671,6 +671,20 @@
             user-select: none;
         }
 
+        .jahrgang-grid-debug-unique {
+            font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+            font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+            color: rgba(255, 180, 100, 0.85);
+            letter-spacing: 0.04em;
+            margin: 10px 0 0 0;
+            padding: 6px 10px;
+            text-align: center;
+            border: 1px dashed rgba(255, 180, 100, 0.35);
+            border-radius: 8px;
+            background: rgba(20, 12, 8, 0.35);
+            line-height: 1.35;
+        }
+
         /* EDUCATION: Jahrgänge einblenden, Themen ausblenden */
         #index-jahrgang-block {
             display: none;
@@ -1422,6 +1436,7 @@
                 <h3>Uni</h3>
             </a>
         </div>
+        <p id="jahrgang-grid-debug-unique" class="jahrgang-grid-debug-unique" aria-label="Debug: eindeutige Labs JG- und Uni-Kacheln"></p>
         </div>
 
         <div id="index-themes-block">
@@ -1732,6 +1747,40 @@
             }).length;
         }
 
+        /** Tokens der Jahrgangszeile + Uni (wie data-jg-category), für Union-Zählung. */
+        const JG_UNI_HUB_TOKENS = ['grade5', 'grade6', 'grade7', 'grade8', 'grade9', 'grade10', 'grade11', 'grade12', 'uni'];
+
+        /**
+         * Eindeutige Lab-Kacheln: jedes `id` höchstens einmal, wenn mindestens ein JG- oder uni-Token in category.
+         * `columnSum` = Summe der Spaltenzähler (Labs mit mehreren Tags zählen mehrfach).
+         * `excludedIds` = in LABS_DATA, aber ohne grade5–12/uni (z. B. nur „hot“).
+         */
+        function countUniqueLabsJahrgangUniDebug() {
+            if (typeof LABS_DATA === 'undefined') {
+                return { union: 0, columnSum: 0, excludedIds: [], totalAll: 0 };
+            }
+            const tokenSet = new Set(JG_UNI_HUB_TOKENS);
+            const ids = new Set();
+            const excludedIds = [];
+            for (const lab of LABS_DATA) {
+                const cats = String(lab.category || '').trim().split(/\s+/).filter(Boolean);
+                if (cats.some(c => tokenSet.has(c))) ids.add(lab.id);
+                else excludedIds.push(lab.id);
+            }
+            const columnSum = JG_UNI_HUB_TOKENS.reduce((s, t) => s + countLabsInCategory(t), 0);
+            return { union: ids.size, columnSum, excludedIds, totalAll: LABS_DATA.length };
+        }
+
+        function updateJahrgangGridDebugUnique() {
+            const el = document.getElementById('jahrgang-grid-debug-unique');
+            if (!el) return;
+            const { union, columnSum, excludedIds, totalAll } = countUniqueLabsJahrgangUniDebug();
+            const extra = excludedIds.length
+                ? ` · exkl. (kein JG/Uni-Tag): ${excludedIds.join(', ')} — gleich Header ${totalAll} = ${union} + ${excludedIds.length}`
+                : '';
+            el.textContent = `[debug] eindeutige Labs (JG 5–12 + Uni): ${union} · Σ Spalten: ${columnSum}${extra}`;
+        }
+
         function updateJahrgangLabCounts() {
             const grid = document.getElementById('jahrgang-grid');
             if (!grid) return;
@@ -1750,6 +1799,7 @@
                 const prefix = token === 'uni' ? 'Universität' : baseAria.replace(/,.*$/, '');
                 tile.setAttribute('aria-label', `${prefix}, ${laborePhrase}`);
             });
+            updateJahrgangGridDebugUnique();
         }
 
         // --- ADMIN ACCESS LOGIC ---
