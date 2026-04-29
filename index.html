@@ -767,7 +767,7 @@
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(255, 255, 255, 0.05);
         }
 
-        /* Themen-Kacheln (Referenz: dunkle Karte, feiner Rand, letzter Buchstabe cyan) */
+        /* Themen-Kacheln: dunkle Portal-Karten, eine durchgängige weiße Überschrift */
         /* grade-card dient nur Layout/JS — kein JG-Gradient-Glanz (::before/::after), kein Icon-Scale, kein active-Hover-Filter */
         #index-themes-block .card.category-card::before,
         #index-themes-block .card.category-card::after {
@@ -812,9 +812,9 @@
 
         #index-themes-block .card.category-card h3 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.68rem;
+            font-size: clamp(0.8rem, 2.15vw, 0.96rem);
             font-weight: 600;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.11em;
             line-height: 1.35;
             margin: 10px 0 0 0;
             text-align: center;
@@ -827,21 +827,11 @@
             text-shadow: none;
         }
 
-        #index-themes-block .card.category-card h3 .theme-title-accent {
-            color: var(--index-tile-title-cyan);
-            -webkit-text-fill-color: var(--index-tile-title-cyan);
-        }
-
         #index-themes-block .card.category-card:hover h3 {
             color: #ffffff;
             -webkit-text-fill-color: #ffffff;
             background: none;
             text-shadow: none;
-        }
-
-        #index-themes-block .card.category-card:hover h3 .theme-title-accent {
-            color: #7ddbff;
-            -webkit-text-fill-color: #7ddbff;
         }
 
         /* Locked Logik für JG-Kacheln (Deutlich inaktiv) */
@@ -1699,24 +1689,6 @@
             countEl.innerText = themeCards.length;
         }
 
-        /** Letzter Buchstabe jeder Themen-Überschrift in Cyan (wie Layout-Referenz). */
-        function indexApplyThemeTitleAccents() {
-            document.querySelectorAll('#index-themes-block .category-card h3').forEach(h3 => {
-                if (h3.querySelector('.theme-title-accent')) return;
-                const raw = (h3.textContent || '').trim();
-                if (!raw) return;
-                const upper = raw.toUpperCase();
-                const last = upper.slice(-1);
-                const rest = upper.slice(0, -1);
-                h3.replaceChildren();
-                h3.appendChild(document.createTextNode(rest));
-                const span = document.createElement('span');
-                span.className = 'theme-title-accent';
-                span.textContent = last;
-                h3.appendChild(span);
-            });
-        }
-
         // --- ADMIN ACCESS LOGIC ---
         let adminActive = false;
 
@@ -1874,7 +1846,6 @@
         handleHash();
         updateToolCount();
         updateThemesCount();
-        indexApplyThemeTitleAccents();
 
         // High-Quality Video Slowdown (ULTRA 5.3.8)
         const bgVid = document.getElementById('bg-video');
