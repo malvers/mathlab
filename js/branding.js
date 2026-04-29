@@ -529,7 +529,11 @@ const CyberBranding = {
         }
 
         overlay.innerHTML = `
-            <div class="briefing-modal">
+            <div class="briefing-modal" style="position: relative;">
+                <div style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.8rem; line-height: 1; opacity: 0.5; transition: all 0.2s; color: var(--branding-blue);" 
+                     onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')"
+                     onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.opacity='0.5'; this.style.transform='scale(1)'">×</div>
                 <div class="briefing-header">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
