@@ -508,9 +508,50 @@
         /* Spezial-Grid für das 8er Panorama (Klasse 5-12) */
         #jahrgang-grid {
             grid-template-columns: repeat(8, 1fr);
-            max-width: 1120px;
-            /* Kompakter für eine Reihe */
+            width: 100%;
+            max-width: none;
             gap: 10px;
+        }
+
+        /* EDUCATION: Jahrgänge einblenden, Themen ausblenden */
+        #index-jahrgang-block {
+            display: none;
+        }
+
+        #grade-view.grade-view--edu-only #index-jahrgang-block {
+            display: block;
+        }
+
+        #grade-view.grade-view--edu-only #index-themes-block {
+            display: none;
+        }
+
+        /* Jahrgang (EDUCATION): gleiche Zeilenbreite, Zurück links */
+        #index-jahrgang-block .view-section {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        #index-jahrgang-block .view-section .btn-back {
+            flex-shrink: 0;
+        }
+
+        /* Themen-Hub: fest 4 Kacheln pro Reihe, volle Hub-Breite */
+        #index-themes-block .grade-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+            gap: 20px;
+        }
+
+        @media (max-width: 720px) {
+            #index-themes-block .grade-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         .card.grade-card {
@@ -819,13 +860,19 @@
         }
 
         /*
-         * Labor-Scan + Universe-Galaxy
-         * Höhe des Buttons = gemessene Höhe von .search-input (JS), nicht Flex-Stretch/Bild-Höhe —
-         * sonst bläst ein Hochformat-Nebula-Foto die Zeile unnötig auf.
+         * Labor-Scan + Universe-Galaxy — gleiche äußere Breite wie Themen-Kacheln
          */
-        .search-scan-row {
-            width: 95%;
+        .search-scan-row,
+        #grade-view > #index-themes-block,
+        #grade-view > #index-jahrgang-block {
+            width: min(1123px, calc(100vw - 24px));
             max-width: 1123px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        .search-scan-row {
             margin: 20px auto 30px auto;
             display: flex;
             flex-direction: row;
@@ -833,7 +880,6 @@
             gap: 14px;
             position: relative;
             z-index: 100;
-            box-sizing: border-box;
         }
 
         .search-scan-row #search-mount {
@@ -1182,7 +1228,16 @@
     </div>
 
     <div id="grade-view">
+        <div id="index-jahrgang-block">
         <div class="view-section">
+            <button type="button" class="btn-back" onclick="showGrades()" title="Zurück zur Themenauswahl"
+                aria-label="Zurück zur Themenauswahl">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:22px; height:22px;" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
             <h2>Jahrgang</h2>
             <div class="line"></div>
         </div>
@@ -1244,8 +1299,10 @@
                 </div>
             </a>
         </div>
+        </div>
 
-        <div class="view-section" style="margin-top: 15px;">
+        <div id="index-themes-block">
+        <div class="view-section" style="margin-top: 8px;">
             <h2><span id="themes-count">0</span> Themen</h2>
             <div class="line"></div>
         </div>
@@ -1259,9 +1316,9 @@
                 <div class="card-icon">💎</div>
                 <h3>Highlights</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('fraktale')" class="card grade-card category-card active">
-                <div class="card-icon">🌀</div>
-                <h3>Fraktale</h3>
+            <a href="javascript:void(0)" onclick="showEducationJahrgang()" class="card grade-card category-card active">
+                <div class="card-icon">🎓</div>
+                <h3>EDUCATION</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
                 <div class="card-icon">🎮</div>
@@ -1297,6 +1354,7 @@
                 <div class="card-icon">📈</div>
                 <h3>Funktionen</h3>
             </a>
+        </div>
         </div>
     </div>
 
@@ -1431,9 +1489,26 @@
             }
         })();
 
+        function showEducationJahrgang(updateHash = true) {
+            document.getElementById('tool-view').classList.add('hidden');
+            const gv = document.getElementById('grade-view');
+            gv.classList.remove('hidden');
+            gv.classList.add('grade-view--edu-only');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const block = document.getElementById('index-jahrgang-block');
+            if (block) {
+                requestAnimationFrame(() => block.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            }
+            if (updateHash) {
+                window.location.hash = 'education';
+            }
+        }
+
         function showFilter(filter, updateHash = true) {
             // Ensure cards are rendered before filtering
             if (document.querySelectorAll('#tool-container .card').length === 0) renderCards();
+
+            document.getElementById('grade-view').classList.remove('grade-view--edu-only');
 
             const titles = {
                 'grade5': 'JAHRGANG 5', 'grade6': 'JAHRGANG 6', 'grade7': 'JAHRGANG 7', 'grade8': 'JAHRGANG 8',
@@ -1470,7 +1545,9 @@
 
         function showGrades(updateHash = true) {
             document.getElementById('tool-view').classList.add('hidden');
-            document.getElementById('grade-view').classList.remove('hidden');
+            const gv = document.getElementById('grade-view');
+            gv.classList.remove('hidden');
+            gv.classList.remove('grade-view--edu-only');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (updateHash) {
@@ -1480,7 +1557,9 @@
 
         function handleHash() {
             const hash = window.location.hash.substring(1);
-            if (hash) {
+            if (hash === 'education') {
+                showEducationJahrgang(false);
+            } else if (hash) {
                 showFilter(hash, false);
             } else {
                 showGrades(false);

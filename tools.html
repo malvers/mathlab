@@ -250,6 +250,27 @@
             --accent-color-glow: rgba(255, 215, 0, 0.3);
         }
 
+        /* Nur Fraktale: kein auffälliger Akzent-Rahmen (vorher mit Universe verwechselt) */
+        .tool-button.tool-button--mute-chrome {
+            border-color: var(--border);
+        }
+        .tool-button.tool-button--mute-chrome::before {
+            background: rgba(226, 232, 240, 0.35);
+        }
+        .tool-button.tool-button--mute-chrome:hover {
+            border-color: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .tool-button.tool-button--mute-chrome:hover::before {
+            width: 5px;
+        }
+        .tool-button.tool-button--mute-chrome:hover .tool-name {
+            text-shadow: none;
+        }
+        .tool-button.tool-button--mute-chrome:hover .external-icon {
+            color: rgba(255, 255, 255, 0.55);
+        }
+
         footer {
             margin-top: auto;
             width: 100%;
@@ -531,15 +552,18 @@
             
             const sortedLabs = intro ? [intro, ...otherLabs] : otherLabs;
 
-            grid.innerHTML = sortedLabs.map(lab => `
-                <a href="${lab.href}" target="_blank" class="tool-button color-${lab.color || 'blue'}">
+            grid.innerHTML = sortedLabs.map(lab => {
+                const muteChrome = lab.id === 'mandelbrot-deep' ? ' tool-button--mute-chrome' : '';
+                return `
+                <a href="${lab.href}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">
                     <div class="tool-icon">${lab.icon}</div>
                     <div class="tool-info">
                         <div class="tool-name">${lab.title}</div>
                     </div>
                     <div class="external-icon">↗</div>
                 </a>
-            `).join('');
+            `;
+            }).join('');
 
             return count;
         }
