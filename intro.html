@@ -25,7 +25,6 @@
             color: white;
         }
 
-        /* The Galaxy Backdrop */
         #bg-video {
             position: fixed;
             top: 0;
@@ -37,13 +36,73 @@
             pointer-events: none;
         }
 
-        /* Intro Animation Container */
+        /* eigenes Kontextmenü (Rechtsklick) */
+        .intro-ctx-menu {
+            position: fixed;
+            z-index: 4000;
+            min-width: 200px;
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 210, 255, 0.5);
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 210, 255, 0.12);
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .intro-ctx-menu.open {
+            display: flex;
+        }
+        .intro-ctx-menu button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            color: #e2e8f0;
+            transition: background 0.15s, color 0.15s;
+        }
+        .intro-ctx-menu button:hover,
+        .intro-ctx-menu button:focus-visible {
+            background: rgba(0, 210, 255, 0.15);
+            color: var(--neon-blue);
+            outline: none;
+        }
+        .intro-ctx-menu button.primary {
+            background: rgba(0, 210, 255, 0.12);
+            color: #fff;
+        }
+
+        .intro-ctx-hint {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.06em;
+            color: rgba(226, 232, 240, 0.45);
+            pointer-events: none;
+            max-width: 92vw;
+            text-align: center;
+        }
+
         .intro-container {
             text-align: center;
             z-index: 10;
         }
 
-        h1 {
+        body.mode-catching-words .intro-container {
+            display: none;
+        }
+
+        .intro-container h1 {
             font-size: 5rem;
             margin: 0;
             letter-spacing: 20px;
@@ -53,17 +112,24 @@
             filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.7));
             text-transform: uppercase;
             font-weight: 700;
-            
-            /* Initial State */
             opacity: 0;
-            transform: scale(0.01);
+            transform: scale(0.05);
+            letter-spacing: 80px;
+            animation: none;
+        }
+
+        body.start-cinematic .intro-container h1 {
             animation: cinematic-fade-in 6s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
         }
 
-        .coming-soon {
+        body.start-cinematic .intro-container h1.intro-line-2 {
+            animation-delay: 0.5s;
+        }
+
+        .intro-container .coming-soon {
             font-size: clamp(0.72rem, 2.5vw, 2rem);
             letter-spacing: clamp(3px, 0.65vw, 10px);
-            color: #fff; /* Strahlendes Weiß für maximale Sichtbarkeit */
+            color: #fff;
             margin-top: 40px;
             margin-left: auto;
             margin-right: auto;
@@ -73,10 +139,15 @@
             text-align: center;
             line-height: 1.35;
             opacity: 0;
-            animation: subtitle-fade 4s ease-out 1.5s forwards;
+            transform: translateY(20px);
+            animation: none;
             text-transform: uppercase;
             font-weight: 400;
             text-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        body.start-cinematic .intro-container .coming-soon {
+            animation: subtitle-fade 4s ease-out 1.5s forwards;
         }
 
         @keyframes cinematic-fade-in {
@@ -100,7 +171,6 @@
             to { opacity: 0.7; transform: translateY(0); }
         }
 
-        /* Subtle Glow pulsing in background */
         .glow-sphere {
             position: absolute;
             width: 600px;
@@ -112,16 +182,15 @@
         }
 
         @keyframes pulse-glow {
-            from { transform: scale(1) opacity(0.3); }
-            to { transform: scale(1.2) opacity(0.6); }
+            from { transform: scale(1); opacity: 0.3; }
+            to { transform: scale(1.2); opacity: 0.6; }
         }
 
-        /* Fullscreen Toggle Button */
         .fs-toggle {
             position: fixed;
             top: 30px;
             right: 30px;
-            z-index: 1000;
+            z-index: 2500;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
@@ -151,15 +220,182 @@
             stroke: currentColor;
             stroke-width: 2;
         }
+
+        /* Catching Words — gleiche Seite, kein Extra-HTML */
+        #catching-words-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+        }
+        body.mode-catching-words #catching-words-panel {
+            display: block;
+        }
+        #catching-words-panel .cw-play {
+            position: absolute;
+            inset: 0;
+            padding: 72px 16px 88px;
+            box-sizing: border-box;
+            cursor: crosshair;
+            perspective: 1100px;
+            perspective-origin: 50% 40%;
+        }
+        /* Obere Kante bei 50 % — neue Zeilen nur nach unten; fertige Wörter wandern nicht (wie feststehendes Intro) */
+        #catching-words-panel .cw-stack {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: min(96vw, 52rem);
+        }
+        #catching-words-panel .cw-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            padding-right: 72px;
+            background: linear-gradient(180deg, rgba(5, 11, 24, 0.92), transparent);
+            pointer-events: none;
+        }
+        #catching-words-panel .cw-hud strong {
+            color: var(--neon-blue);
+            letter-spacing: 0.18em;
+            font-size: 0.68rem;
+        }
+        #catching-words-panel .cw-hud .cw-score {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+        }
+        #catching-words-panel .cw-hud .cw-nav {
+            pointer-events: auto;
+            display: flex;
+            gap: 8px;
+        }
+        #catching-words-panel .cw-hud button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            background: rgba(15, 23, 42, 0.85);
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+        #catching-words-panel .cw-hud button:hover {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        /* Eine Größe für alle; 6s + forwards = wie body.start-cinematic .intro-container h1 (stoppt „vorne“) */
+        #catching-words-panel .falling-word {
+            position: relative;
+            left: auto;
+            top: auto;
+            flex-shrink: 0;
+            width: 100%;
+            max-width: min(96vw, 52rem);
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.05rem, 3.6vw, 2.65rem);
+            font-weight: 700;
+            line-height: 1.12;
+            text-align: center;
+            background-image: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.7));
+            user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            opacity: 0;
+            transform: translateZ(-900px) scale(0.05);
+            letter-spacing: 80px;
+            animation: cw-cinematic-fade-in 6s cubic-bezier(0.1, 0.7, 0.3, 1) 1 forwards;
+        }
+        /* Nach Ende: Keyframes aus, Werte fest — kein weiteres Bewegen/Zittern (wie stehende Intro-Zeile) */
+        #catching-words-panel .falling-word.cw-settled {
+            animation: none;
+            opacity: 1;
+            transform: translateZ(0) scale(1.8);
+            letter-spacing: 12px;
+        }
+        #catching-words-panel .falling-word:not(:last-child) {
+            margin-bottom: clamp(20px, 3.5vh, 40px);
+        }
+        @keyframes cw-cinematic-fade-in {
+            0% {
+                opacity: 0;
+                transform: translateZ(-900px) scale(0.05);
+                letter-spacing: 80px;
+            }
+            40% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 1;
+                transform: translateZ(0) scale(1.8);
+                letter-spacing: 12px;
+            }
+        }
+        #catching-words-panel .falling-word.long-label {
+            white-space: normal;
+            line-height: 1.2;
+        }
+        #catching-words-panel .falling-word.caught {
+            animation: cw-caught 0.38s ease-out forwards;
+        }
+        @keyframes cw-caught {
+            to {
+                opacity: 0;
+                filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.9));
+                transform: translateZ(120px) scale(2.1);
+            }
+        }
+        #catching-words-panel .cw-hint {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem;
+            opacity: 0.5;
+            text-align: center;
+            max-width: 90vw;
+        }
     </style>
 </head>
-<body>
-    
+<body class="start-cinematic">
+
     <video id="bg-video" autoplay loop muted playsinline>
         <source src="resources/galay20.mp4" type="video/mp4">
     </video>
 
     <div class="glow-sphere"></div>
+
+    <div id="intro-ctx-menu" class="intro-ctx-menu" role="menu" aria-label="Modus wählen">
+        <button type="button" class="primary" role="menuitem" id="ctx-pick-intro">Intro</button>
+        <button type="button" role="menuitem" id="ctx-pick-catching">Catching Words</button>
+    </div>
+
+    <p class="intro-ctx-hint">Rechtsklick — Intro oder Catching Words</p>
 
     <button class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
         <svg viewBox="0 0 24 24">
@@ -168,16 +404,93 @@
     </button>
 
     <div class="intro-container">
-        <h1 style="margin-bottom: 40px;">DOC ALVERS</h1>
-        <h1 style="animation-delay: 0.5s;">MATHE-LABOR</h1>
+        <h1 class="intro-line-1" style="margin-bottom: 40px;">DOC ALVERS</h1>
+        <h1 class="intro-line-2">MATHE-LABOR</h1>
         <div class="coming-soon">INTERAKTIVE MATHEMATIK-SIMULATIONEN</div>
+    </div>
+
+    <div id="catching-words-panel" aria-hidden="true">
+        <div class="cw-hud">
+            <strong>CATCHING WORDS</strong>
+            <span class="cw-score" id="cw-score">Score: 0</span>
+            <div class="cw-nav">
+                <button type="button" id="cw-btn-intro">Intro</button>
+            </div>
+        </div>
+        <div class="cw-play" id="cw-play">
+            <div class="cw-stack" id="cw-stack"></div>
+        </div>
+        <p class="cw-hint">Wie im Intro: aus dem Zentrum heran &mdash; Zeilen stapeln sich · klicken · Rechtsklick Modus</p>
     </div>
 
     <script src="js/ui.js?v=4"></script>
     <script>
         CyberUI.init();
 
-        const DEV_MODE = true; // Master Switch for Auto-Reload (gleiche Idee wie CyberBranding.DEV_MODE in js/branding.js)
+        const ctxMenu = document.getElementById('intro-ctx-menu');
+
+        function closeCtxMenu() {
+            ctxMenu.classList.remove('open');
+        }
+
+        function openCtxMenu(clientX, clientY) {
+            ctxMenu.classList.add('open');
+            ctxMenu.style.left = '0px';
+            ctxMenu.style.top = '0px';
+            requestAnimationFrame(() => {
+                const pad = 8;
+                let x = clientX;
+                let y = clientY;
+                const w = ctxMenu.offsetWidth;
+                const h = ctxMenu.offsetHeight;
+                x = Math.min(x, window.innerWidth - w - pad);
+                y = Math.min(y, window.innerHeight - h - pad);
+                x = Math.max(pad, x);
+                y = Math.max(pad, y);
+                ctxMenu.style.left = x + 'px';
+                ctxMenu.style.top = y + 'px';
+            });
+        }
+
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openCtxMenu(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!ctxMenu.classList.contains('open')) return;
+            if (ctxMenu.contains(e.target)) return;
+            closeCtxMenu();
+        }, true);
+
+        function pickIntroMode() {
+            closeCtxMenu();
+            stopCatchingWords();
+            document.body.classList.remove('mode-catching-words');
+            document.body.classList.add('start-cinematic');
+            document.getElementById('catching-words-panel').setAttribute('aria-hidden', 'true');
+            replayAnimation();
+        }
+
+        function pickCatchingMode() {
+            closeCtxMenu();
+            document.body.classList.remove('start-cinematic');
+            document.body.classList.add('mode-catching-words');
+            document.getElementById('catching-words-panel').setAttribute('aria-hidden', 'false');
+            startCatchingWords();
+        }
+
+        document.getElementById('ctx-pick-intro').addEventListener('click', (e) => {
+            e.stopPropagation();
+            pickIntroMode();
+        });
+
+        document.getElementById('ctx-pick-catching').addEventListener('click', (e) => {
+            e.stopPropagation();
+            pickCatchingMode();
+        });
+
+        const DEV_MODE = true;
         if (DEV_MODE) {
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
@@ -185,6 +498,10 @@
                 }
             });
         }
+
+        document.getElementById('cw-btn-intro').addEventListener('click', () => {
+            pickIntroMode();
+        });
 
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
@@ -194,57 +511,119 @@
         function toggleFullscreen() {
             const doc = window.document;
             const docEl = doc.documentElement;
-
-            console.log("⚛️ CYBER-OS: Fullscreen Request detected.");
-
-            // Comprehensive state check
             const isFullScreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement || doc.webkitIsFullScreen;
 
             if (!isFullScreen) {
-                // ENTER
-                if (docEl.requestFullscreen) {
-                    docEl.requestFullscreen();
-                } else if (docEl.mozRequestFullScreen) {
-                    docEl.mozRequestFullScreen();
-                } else if (docEl.webkitRequestFullscreen) {
-                    docEl.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                } else if (docEl.msRequestFullscreen) {
-                    docEl.msRequestFullscreen();
-                }
+                if (docEl.requestFullscreen) docEl.requestFullscreen();
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
             } else {
-                // EXIT
-                if (doc.exitFullscreen) {
-                    doc.exitFullscreen();
-                } else if (doc.mozCancelFullScreen) {
-                    doc.mozCancelFullScreen();
-                } else if (doc.webkitExitFullscreen) {
-                    doc.webkitExitFullscreen();
-                } else if (doc.msExitFullscreen) {
-                    doc.msExitFullscreen();
-                }
+                if (doc.exitFullscreen) doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
             }
         }
 
-        // Replay Logic
         function replayAnimation() {
-            console.log("⚛️ CYBER-OS: Animation Reset initiated.");
             const container = document.querySelector('.intro-container');
             if (!container) return;
-
-            const newContainer = container.cloneNode(true);
-            container.parentNode.replaceChild(newContainer, container);
+            const fresh = container.cloneNode(true);
+            container.parentNode.replaceChild(fresh, container);
         }
 
-        // Shortcut Key Listener
         document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'f') {
-                toggleFullscreen();
+            if (e.key === 'Escape' && ctxMenu.classList.contains('open')) {
+                e.preventDefault();
+                closeCtxMenu();
+                return;
             }
+            if (e.key.toLowerCase() === 'f') toggleFullscreen();
+            if (document.body.classList.contains('mode-catching-words')) return;
+            if (!document.body.classList.contains('start-cinematic')) return;
             if (e.code === 'Space' || e.key === ' ') {
-                e.preventDefault(); // Prevent scrolling
+                e.preventDefault();
                 replayAnimation();
             }
         });
+
+        /* —— Catching Words: feste Reihenfolge, schnelle „bam bam“-Kaskade —— */
+        const CW_SEQUENCE = [
+            'Cascading Style Sheets',
+            'Java Script',
+            'Hypertext',
+            'Python',
+            'Java',
+        ];
+        /* Staffel wie zweite Intro-Zeile (intro-line-2: 0.5s delay) */
+        const CW_SPAWN_MS = 500;
+        let cwSpawnTimer = null;
+        let cwScore = 0;
+        let cwRunning = false;
+        let cwSpawnRoundIndex = 0;
+
+        function stopCatchingWords() {
+            cwRunning = false;
+            cwSpawnRoundIndex = 0;
+            if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
+            cwSpawnTimer = null;
+            const stack = document.getElementById('cw-stack');
+            if (stack) stack.innerHTML = '';
+        }
+
+        function startCatchingWords() {
+            if (cwRunning) return;
+            cwRunning = true;
+            cwSpawnRoundIndex = 0;
+            cwScore = 0;
+            document.getElementById('cw-score').textContent = 'Score: 0';
+            const stack = document.getElementById('cw-stack');
+            if (stack) stack.innerHTML = '';
+
+            function spawn() {
+                if (!cwRunning) return;
+                const playStack = document.getElementById('cw-stack');
+                if (!playStack) return;
+                if (cwSpawnRoundIndex >= CW_SEQUENCE.length) {
+                    playStack.innerHTML = '';
+                    cwSpawnRoundIndex = 0;
+                }
+
+                const label = CW_SEQUENCE[cwSpawnRoundIndex];
+                cwSpawnRoundIndex += 1;
+
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'falling-word';
+                if (label.length > 13) el.classList.add('long-label');
+                el.textContent = label;
+
+                playStack.appendChild(el);
+
+                el.addEventListener('animationend', (ev) => {
+                    if (ev.animationName !== 'cw-cinematic-fade-in') return;
+                    if (!cwRunning || el.classList.contains('caught')) return;
+                    el.classList.add('cw-settled');
+                });
+                    e.preventDefault();
+                    if (!cwRunning || el.classList.contains('caught')) return;
+                    el.classList.add('caught');
+                    cwScore += 10;
+                    document.getElementById('cw-score').textContent = 'Score: ' + cwScore;
+                    setTimeout(() => el.remove(), 380);
+                }
+                el.addEventListener('click', onCatch);
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
+            }
+
+            function scheduleSpawn() {
+                if (!cwRunning) return;
+                cwSpawnTimer = setTimeout(() => {
+                    spawn();
+                    scheduleSpawn();
+                }, CW_SPAWN_MS);
+            }
+
+            spawn();
+            scheduleSpawn();
+        }
     </script>
 </body>
 </html>
