@@ -84,6 +84,41 @@
             -webkit-user-drag: none;
         }
 
+        .universe-close-x {
+            position: fixed;
+            top: 30px;
+            right: 84px;
+            z-index: 1001;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 23, 42, 0.75);
+            color: #fff;
+            font-size: 1.35rem;
+            line-height: 1;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.25);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .universe-close-x.visible {
+            display: flex;
+        }
+        .universe-close-x:hover {
+            background: rgba(220, 38, 38, 0.35);
+            box-shadow: 0 0 18px rgba(255, 80, 80, 0.45);
+            transform: scale(1.06);
+        }
+        .universe-close-x:focus-visible {
+            outline: 2px solid #00d2ff;
+            outline-offset: 3px;
+        }
+
         .fs-toggle {
             position: fixed;
             top: 30px;
@@ -128,6 +163,9 @@
     <div class="glow-sphere"></div>
     <div id="thumb-plane" aria-live="polite"></div>
 
+    <button type="button" id="universe-close-focus" class="universe-close-x"
+        title="Ansicht schließen (Esc)" aria-label="Labor-Ansicht schließen">×</button>
+
     <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbild (F)" aria-label="Vollbild umschalten (Taste F)">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -155,6 +193,24 @@
 
         const SCREENSHOT_BASE = 'resources/screenshots/';
         let universeAnimPaused = false;
+        let universeFocusedObj = null;
+
+        function setUniverseCloseVisible(show) {
+            const b = document.getElementById('universe-close-focus');
+            if (b) b.classList.toggle('visible', !!show);
+        }
+
+        function releaseUniverseFocus() {
+            const o = universeFocusedObj;
+            if (!o) return;
+            o.frozen = false;
+            o.isFocused = false;
+            o.isDragging = false;
+            o.alwaysOnTop = false;
+            o.el.style.boxShadow = '';
+            universeFocusedObj = null;
+            setUniverseCloseVisible(false);
+        }
 
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
@@ -179,7 +235,18 @@
             }
         }
 
+        document.getElementById('universe-close-focus')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            releaseUniverseFocus();
+        });
+
         document.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape' && universeFocusedObj) {
+                e.preventDefault();
+                releaseUniverseFocus();
+                return;
+            }
             const plainF = (e.code === 'KeyF' || e.key.toLowerCase() === 'f')
                 && !e.ctrlKey && !e.metaKey && !e.altKey;
             if (plainF) {
@@ -296,7 +363,7 @@
 
                     a.addEventListener('click', (e) => {
                         if (!obj.isFocused) e.preventDefault();
-                        else obj.isFocused = false; // Fokus verbraucht
+                        else releaseUniverseFocus();
                     });
                     a.addEventListener('pointerdown', (e) => {
                         obj.frozen    = true;
@@ -327,6 +394,10 @@
                     });
 
                     a.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        if (universeFocusedObj && universeFocusedObj !== obj) {
+                            releaseUniverseFocus();
+                        }
                         obj.frozen = true;
                         obj.alwaysOnTop = true;
                         obj.depth = 0.5;
@@ -337,15 +408,20 @@
                         a.style.opacity = '1';
                         a.style.zIndex = '20000';
                         a.style.boxShadow = '0 0 40px rgba(0,210,255,0.8), 0 20px 60px rgba(0,0,0,0.6)';
+                        universeFocusedObj = obj;
+                        setUniverseCloseVisible(true);
                     });
 
-                    const resume = () => { 
-                        if (obj.frozen) { 
-                            obj.frozen = false; 
-                            obj.isDragging = false; 
-                            // obj.isFocused lassen wir stehen, damit der Click danach funktioniert
-                            a.style.boxShadow = ''; 
-                        } 
+                    const resume = () => {
+                        if (obj.isFocused) {
+                            obj.isDragging = false;
+                            return;
+                        }
+                        if (obj.frozen) {
+                            obj.frozen = false;
+                            obj.isDragging = false;
+                            a.style.boxShadow = '';
+                        }
                     };
                     window.addEventListener('pointerup', resume);
                     window.addEventListener('pointercancel', resume);
