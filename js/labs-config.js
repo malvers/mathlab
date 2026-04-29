@@ -2,6 +2,23 @@
 /**
  * Cyber-Labor Laboratory Configuration v2.1
  * Centralized registry for all interactive mathematics modules.
+ *
+ * Jahrgangstabelle (Gymnasium): Filter über `category`-Token `grade5` … `grade12`.
+ * `uni` = Universität / besonders komplexe Labs (Analysis, Physik, Fraktale, …) — nicht die Seite universe.html.
+ * Hub-Ansicht aller uni-Labs: index.html#university
+ * ————————————————————————————————————————————————————————————————
+ * ————————————————————————————————————————————————————————————————
+ * JG 5:  addition, subtraktion, multiplikation, dividieren, uhrzeitwinkel, logikspiel
+ * JG 6:  uhrzeitwinkel, winkellabor
+ * JG 7:  uhrzeitwinkel, winkellabor, cool-squares, transformationen (Kongruenz)
+ * JG 8:  alle grade8-Labs inkl. Potenz (ab JG 8), Dreiecks-/Algebra-/LGS-Reihe, Fibonacci, …
+ * JG 8–9: potenzlabor, pythagoras, pythagorasbeweis
+ * JG 9:  parabellabor (zusätzlich zu JG 8–9 bei Pythagoras/Potenz)
+ * JG 10–12: cmaes, opti-lens
+ * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
+ * uni (zusätzlich): lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
+ * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
+ * ————————————————————————————————————————————————————————————————
  */
 
 const LABS_DATA = [
@@ -30,7 +47,7 @@ const LABS_DATA = [
             <path d="M5 19L12 5l7 14H5z" fill="rgba(173, 255, 47, 0.1)"></path>
             <path d="M16 4a8 8 0 0 1 4 4m-4-4l2 2m-2-2l-2 2" stroke="var(--neon-blue)"></path>
         </svg>`,
-        "category": "geometrie hot grade6 grade7 grade8",
+        "category": "geometrie hot grade7 grade8",
         "keywords": "kongruenz geometrie dreieck transformation rotation translation zoom spiegelung",
         "color": "green"
     },
@@ -204,7 +221,7 @@ const LABS_DATA = [
         "description": "Meistere die Differentialrechnung. Erkunde den Zusammenhang zwischen einer Funktion und ihrer Ableitung durch die Tangente.",
         "tagline": "Ableitungen / Tangenten / Kurvendiskussion",
         "icon": "⚡",
-        "category": "hot grade11",
+        "category": "hot grade11 grade12 uni",
         "keywords": "differential ableitung tangente analysis funktion kurvendiskussion",
         "color": "blue"
     },
@@ -317,7 +334,7 @@ const LABS_DATA = [
             <circle cx="20" cy="20" r="4" fill="#a00" />
             <circle cx="20" cy="80" r="4" fill="#a00" />
         </svg>`,
-        "category": "pythagoras grade8",
+        "category": "pythagoras grade8 grade9",
         "keywords": "geometrie pythagoras beweis fläche quadrat",
         "color": "purple"
     },
@@ -334,7 +351,7 @@ const LABS_DATA = [
             <circle cx="20" cy="20" r="4" fill="#a00" />
             <circle cx="20" cy="80" r="4" fill="#a00" />
         </svg>`,
-        "category": "pythagoras grade8",
+        "category": "pythagoras grade8 grade9",
         "keywords": "geometrie rechtwinklig dreieck fläche beweis",
         "color": "orange"
     },
@@ -411,7 +428,7 @@ const LABS_DATA = [
             <rect x="55" y="55" width="25" height="25" fill="none" stroke="#adff2f" stroke-width="2" rx="4" />
             <circle cx="50" cy="50" r="5" fill="#adff2f" />
         </svg>`,
-        "category": "arithmetic logic hot grade5",
+        "category": "arithmetik logik hot grade5",
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid multiplikation",
         "color": "green"
     },
@@ -430,7 +447,7 @@ const LABS_DATA = [
             <!-- Stylized Integral Symbol -->
             <text x="50" y="60" font-family="'Orbitron'" font-size="60" fill="var(--neon-purple)" text-anchor="middle" style="filter: drop-shadow(0 0 15px var(--neon-purple)); opacity: 0.8;">∫</text>
         </svg>`,
-        "category": "hot grade11 grade12 oberstufe analysis funktionen highlight",
+        "category": "hot grade11 grade12 oberstufe analysis funktionen highlight uni",
         "keywords": "integral analysis fläche summe riemann reaktor",
         "color": "blue"
     },
@@ -441,8 +458,23 @@ const LABS_DATA = [
         "description": "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen und rekonstruiere sie. Verstehe die Magie der Frequenzanalyse interaktiv.",
         "tagline": "Fourier-Reihen / Harmonik / Epizykel",
         "icon": "🎻",
-        "category": "fun geometrie hot highlight",
+        "category": "fun geometrie hot highlight grade11 grade12 uni",
         "keywords": "fourier musik note epicycles kreise geometrie harmonik transformation",
+        "color": "blue"
+    },
+    {
+        "id": "lissajous",
+        "href": "lissajous.html",
+        "title": "Lissajous",
+        "description": "Überlagerung zweier harmonischer Schwingungen: Frequenzverhältnis, Phase und KaTeX-Parameter live. 2D-Kurve oder gedankliche 3D-Pendelansicht.",
+        "tagline": "Harmonische Schwingungen / Parametrische Kurven",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20 50 Q 35 25 50 50 T 80 50" fill="none" stroke="var(--neon-cyan)" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M 50 22 Q 62 50 50 78 Q 38 50 50 22" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>
+            <circle cx="50" cy="50" r="2.2" fill="var(--neon-green)"/>
+        </svg>`,
+        "category": "fun geometrie hot highlight grade11 grade12 oberstufe uni",
+        "keywords": "lissajous harmonisch schwingung frequenz phase parametrische kurve pendel figur",
         "color": "blue"
     },
     {
@@ -457,7 +489,7 @@ const LABS_DATA = [
             <path d="M 50 15 L 50 35 M 50 65 L 50 85 M 15 50 L 35 50 M 65 50 L 85 50" stroke="var(--neon-green)" stroke-width="2" />
             <path d="M 30 30 Q 50 50 70 70" stroke="var(--neon-blue)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.6" />
         </svg>`,
-        "category": "hot highlight fun",
+        "category": "hot highlight fun grade10 grade11 grade12 uni",
         "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
         "color": "green"
     },
@@ -523,7 +555,7 @@ const LABS_DATA = [
             <ellipse cx="50" cy="50" rx="10" ry="34" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" transform="rotate(30 50 50)" />
             <path d="M 50 20 Q 62 40 50 50 Q 38 40 50 20 M 50 50 Q 62 60 50 80 Q 38 60 50 50" fill="none" stroke="var(--neon-green)" stroke-width="1.2" />
         </svg>`,
-        "category": "highlight hot grade11 grade12 oberstufe fun",
+        "category": "highlight hot grade11 grade12 oberstufe fun uni",
         "keywords": "atom orbital kugelflächenfunktion kff harmonische ylm wahrscheinlichkeit 3d quanten chemie physik d orbital",
         "color": "blue"
     },
@@ -543,7 +575,7 @@ const LABS_DATA = [
             <line x1="60" y1="72" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
             <circle cx="92" cy="50" r="3" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffcc00);" />
         </svg>`,
-        "category": "hot highlight fun",
+        "category": "hot highlight fun grade10 grade11 grade12 uni",
         "keywords": "linse opti lens optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
         "color": "blue"
     },
@@ -603,7 +635,7 @@ const LABS_DATA = [
             <circle cx="76" cy="38" r="2.4" fill="#adff2f" opacity="0.8"/>
             <circle cx="48" cy="48" r="3" fill="#050b18" stroke="#e2e8f0" stroke-width="0.9"/>
         </svg>`,
-        "category": "fraktale highlight hot grade11 grade12 oberstufe",
+        "category": "fraktale highlight hot grade11 grade12 oberstufe uni",
         "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",
         "color": "purple"
     },

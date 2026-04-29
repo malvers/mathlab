@@ -574,6 +574,7 @@
             backdrop-filter: blur(14px);
             box-shadow: var(--hub-tile-shadow);
             transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+            flex-direction: column;
         }
 
         #jahrgang-grid > .card.grade-card.jahrgang-portal-tile::before {
@@ -655,6 +656,19 @@
             color: var(--neon-purple);
             -webkit-text-fill-color: var(--neon-purple);
             text-shadow: 0 0 12px rgba(157, 80, 187, 0.45);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile .jahrgang-portal-tile__lab-count {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(0.45rem, 1.15vw, 0.62rem);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.42);
+            line-height: 1.15;
+            margin-top: 7px;
+            pointer-events: none;
+            user-select: none;
         }
 
         /* EDUCATION: Jahrgänge einblenden, Themen ausblenden */
@@ -1378,32 +1392,33 @@
         </div>
         <div class="grade-grid" id="jahrgang-grid">
             <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active jahrgang-portal-tile"
-                aria-label="Jahrgang 5">
+                data-jg-category="grade5" aria-label="Jahrgang 5">
                 <h3>5</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 6">
+            <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade6" aria-label="Jahrgang 6">
                 <h3>6</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 7">
+            <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade7" aria-label="Jahrgang 7">
                 <h3>7</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 8">
+            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade8" aria-label="Jahrgang 8">
                 <h3>8</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 9">
+            <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade9" aria-label="Jahrgang 9">
                 <h3>9</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 10">
+            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade10" aria-label="Jahrgang 10">
                 <h3>10</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 11">
+            <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade11" aria-label="Jahrgang 11">
                 <h3>11</h3>
             </a>
-            <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active jahrgang-portal-tile" aria-label="Jahrgang 12">
+            <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade12" aria-label="Jahrgang 12">
                 <h3>12</h3>
             </a>
-            <a href="universe.html" target="_blank" rel="noopener noreferrer" class="card grade-card active jahrgang-portal-tile"
-                title="Universe · Labor-Galerie im Weltraum" aria-label="Universe Labor-Galerie öffnen">
+            <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card active jahrgang-portal-tile"
+                data-jg-category="uni"
+                title="Universität · besonders komplexe Labore (Analysis, Physik, Fraktale, …)" aria-label="Universität: komplexe Labore anzeigen">
                 <h3>Uni</h3>
             </a>
         </div>
@@ -1462,13 +1477,18 @@
                 <div class="card-icon">📈</div>
                 <h3>Funktionen</h3>
             </a>
+            <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card category-card active">
+                <div class="card-icon">🔬</div>
+                <h3>Universität</h3>
+            </a>
         </div>
         </div>
     </div>
 
     <div id="tool-view" class="hidden">
         <div class="back-nav">
-            <button class="btn-back" onclick="showGrades()" title="Zurück zur Auswahl">
+            <button type="button" class="btn-back" onclick="backFromToolView()" title="Zurück"
+                aria-label="Zurück">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round" style="width:22px; height:22px;">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -1548,8 +1568,10 @@
                 const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
                 const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
                 const categories = tool.getAttribute('data-category').toLowerCase();
+                const catParts = categories.split(/\s+/).filter(Boolean);
+                const catHit = categories.includes(q) || (q === 'university' && catParts.includes('uni'));
 
-                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || categories.includes(q)) {
+                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || catHit) {
                     tool.style.display = 'flex';
                 } else {
                     tool.style.display = 'none';
@@ -1616,25 +1638,30 @@
             // Ensure cards are rendered before filtering
             if (document.querySelectorAll('#tool-container .card').length === 0) renderCards();
 
-            document.getElementById('grade-view').classList.remove('grade-view--edu-only');
+            const gvEl = document.getElementById('grade-view');
+            gvEl.classList.remove('grade-view--edu-only');
+
+            /** Route `university` / `uni` → category token `uni` in labs-config (High-End-Labs). */
+            const categoryToken = (filter === 'university' || filter === 'uni') ? 'uni' : filter;
 
             const titles = {
                 'grade5': 'JAHRGANG 5', 'grade6': 'JAHRGANG 6', 'grade7': 'JAHRGANG 7', 'grade8': 'JAHRGANG 8',
                 'grade9': 'JAHRGANG 9', 'grade10': 'JAHRGANG 10', 'grade11': 'JAHRGANG 11', 'grade12': 'JAHRGANG 12',
                 'fun': 'SPIELE & FUN', 'lgs': 'GLEICHUNGSSYSTEME', 'pythagoras': 'PYTHAGORAS',
                 'dreiecke': 'DREIECKE', 'arithmetik': 'GRUNDRECHENARTEN', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN',
-                'highlight': 'HIGHLIGHTS', 'fraktale': 'Fraktale'
+                'highlight': 'HIGHLIGHTS', 'fraktale': 'Fraktale',
+                'uni': 'UNIVERSITÄT', 'university': 'UNIVERSITÄT'
             };
 
             const titleEl = document.getElementById('view-title');
-            if (titleEl) titleEl.innerText = titles[filter] || 'LABOR-ANSICHT';
+            if (titleEl) titleEl.innerText = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
 
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
 
             tools.forEach(tool => {
                 const categories = tool.getAttribute('data-category').split(' ');
-                if (categories.includes(filter)) {
+                if (categories.includes(categoryToken)) {
                     tool.style.display = 'flex';
                     visibleCount++;
                 } else {
@@ -1647,7 +1674,8 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (updateHash) {
-                window.location.hash = filter;
+                const hashOut = (filter === 'uni' || filter === 'university') ? 'university' : filter;
+                window.location.hash = hashOut;
             }
         }
 
@@ -1663,10 +1691,17 @@
             }
         }
 
+        /** Zurück: Browser-Verlauf (vorheriger Hash — z. B. #education nach Jahrgangsklick). */
+        function backFromToolView() {
+            window.history.back();
+        }
+
         function handleHash() {
             const hash = window.location.hash.substring(1);
             if (hash === 'education') {
                 showEducationJahrgang(false);
+            } else if (hash === 'uni') {
+                showFilter('university', false);
             } else if (hash) {
                 showFilter(hash, false);
             } else {
@@ -1687,6 +1722,34 @@
             if (!countEl) return;
             const themeCards = document.querySelectorAll('#index-themes-block .category-card');
             countEl.innerText = themeCards.length;
+        }
+
+        function countLabsInCategory(categoryToken) {
+            if (typeof LABS_DATA === 'undefined') return 0;
+            return LABS_DATA.filter(lab => {
+                const cats = String(lab.category || '').trim().split(/\s+/).filter(Boolean);
+                return cats.includes(categoryToken);
+            }).length;
+        }
+
+        function updateJahrgangLabCounts() {
+            const grid = document.getElementById('jahrgang-grid');
+            if (!grid) return;
+            grid.querySelectorAll('.jahrgang-portal-tile[data-jg-category]').forEach(tile => {
+                const token = tile.getAttribute('data-jg-category');
+                const n = countLabsInCategory(token);
+                let el = tile.querySelector('.jahrgang-portal-tile__lab-count');
+                if (!el) {
+                    el = document.createElement('span');
+                    el.className = 'jahrgang-portal-tile__lab-count';
+                    tile.appendChild(el);
+                }
+                el.textContent = `${n} Labs`;
+                const laborePhrase = n === 1 ? '1 Labor' : `${n} Labore`;
+                const baseAria = tile.getAttribute('aria-label') || '';
+                const prefix = token === 'uni' ? 'Universität' : baseAria.replace(/,.*$/, '');
+                tile.setAttribute('aria-label', `${prefix}, ${laborePhrase}`);
+            });
         }
 
         // --- ADMIN ACCESS LOGIC ---
@@ -1846,6 +1909,7 @@
         handleHash();
         updateToolCount();
         updateThemesCount();
+        updateJahrgangLabCounts();
 
         // High-Quality Video Slowdown (ULTRA 5.3.8)
         const bgVid = document.getElementById('bg-video');
