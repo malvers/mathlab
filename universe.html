@@ -88,7 +88,7 @@
             position: fixed;
             top: 30px;
             right: 84px;
-            z-index: 1001;
+            z-index: 50000;
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -98,6 +98,7 @@
             font-size: 1.35rem;
             line-height: 1;
             cursor: pointer;
+            pointer-events: auto;
             display: none;
             align-items: center;
             justify-content: center;
@@ -108,6 +109,10 @@
         }
         .universe-close-x.visible {
             display: flex;
+            opacity: 1;
+            box-shadow:
+                0 0 0 2px rgba(0, 210, 255, 0.55),
+                0 8px 28px rgba(0, 0, 0, 0.55);
         }
         .universe-close-x:hover {
             background: rgba(220, 38, 38, 0.35);
@@ -123,7 +128,7 @@
             position: fixed;
             top: 30px;
             right: 30px;
-            z-index: 1000;
+            z-index: 50000;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
@@ -164,7 +169,11 @@
     <div id="thumb-plane" aria-live="polite"></div>
 
     <button type="button" id="universe-close-focus" class="universe-close-x"
-        title="Ansicht schließen (Esc)" aria-label="Labor-Ansicht schließen">×</button>
+        title="Ansicht schließen (Esc)" aria-label="Labor-Ansicht schließen">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+    </button>
 
     <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbild (F)" aria-label="Vollbild umschalten (Taste F)">
         <svg viewBox="0 0 24 24" aria-hidden="true">
