@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Mandelbrot Deep Zoom</title>
-    <!-- Fonts & Tools -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doc Alvers | Deep Space Mandelbrot</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
@@ -16,35 +15,166 @@
             background: #000;
         }
 
-        /* HUD Overlay pinned to right top */
+        /* Zoom/Präzision: linke obere Ecke des Canvas (nicht zentriert) */
         #hud-overlay {
             position: absolute;
-            top: 25px;
-            right: 25px;
+            top: 12px;
+            left: 12px;
+            transform: none;
             pointer-events: none;
             z-index: 1500;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: flex-start;
+            justify-content: flex-start;
+            max-width: calc(100% - 24px);
+        }
+
+        .hud-tag {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--neon-blue);
+            padding: 4px 12px;
+            border-radius: 999px;
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            line-height: 1.3;
+            text-shadow: 0 0 8px var(--neon-blue);
+            text-align: left;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        /*
+         * Obere Icon-Zeile (#sidebar-header .cyber-nav): Der rote „zu hohe Box“-Bereich.
+         * cyber-lab-overrides.css erzwingt 52×52 px; branding.styles.extracted.css definiert
+         * Low-Profile 42 px, wird aber geschlagen. Hier branding-konform — nur in dieser Datei.
+         */
+        #sidebar-header .cyber-nav {
+            margin: 0 0 6px 0 !important;
+            gap: 6px !important;
+        }
+
+        #sidebar-header .cyber-nav .nav-btn {
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            flex: 0 0 42px !important;
+        }
+
+        #sidebar-header .cyber-nav .nav-btn svg {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        /* Sidebar: zentrales Layout (cyber-lab-overrides + gleichmäßige Karten) */
+        #ui-container {
+            min-height: 0;
+        }
+
+        #side-panel .instrument-card {
+            margin-bottom: 12px;
+        }
+
+        #side-panel .instrument-card:last-child {
+            margin-bottom: 6px;
+        }
+
+        #side-panel .stats-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px;
+            margin-top: 0;
+        }
+
+        #side-panel .stats-card {
+            min-width: 0;
+        }
+
+        #side-panel .stats-val {
+            font-size: 0.72rem;
+            line-height: 1.25;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        #side-panel .nav-col {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .hud-tag {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--neon-blue);
-            padding: 8px 15px;
-            border-radius: 12px;
-            color: var(--neon-blue);
-            font-family: 'Orbitron';
-            font-size: 0.9rem;
-            text-shadow: 0 0 10px var(--neon-blue);
-            text-align: right;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        #side-panel .nav-col .cyber-btn {
+            margin-top: 0 !important;
+        }
+
+        /* Wie winkellabor.html: corner-grid + CSS-Grid; buttons-ultra .corner-grid .cyber-btn */
+        #side-panel .corner-grid .cyber-btn {
+            margin-top: 0 !important;
+        }
+
+        #side-panel .stat-row .stat-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.45);
+            text-transform: uppercase;
+        }
+
+        #side-panel .stat-row .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+        }
+
+        #side-panel .cyber-btn.active {
+            background: rgba(0, 210, 255, 0.28) !important;
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 18px rgba(0, 210, 255, 0.35) !important;
+        }
+
+        #side-panel #btn-flight.active {
+            background: rgba(157, 80, 187, 0.3) !important;
+            border-color: var(--neon-purple) !important;
+            box-shadow: 0 0 18px rgba(157, 80, 187, 0.45) !important;
+        }
+
+        /* FRAKTAL-PARAMETER: buttons-ultra setzt .cyber-control-group margin-top:15px — hier stark straffen */
+        #side-panel .instrument-card:has(#jx-mount) #jx-mount > .cyber-control-group:first-child {
+            margin-top: 0 !important;
+        }
+
+        #side-panel .instrument-card:has(#jx-mount) .cyber-control-group {
+            margin-top: 2px !important;
+            margin-bottom: 0 !important;
+        }
+
+        #side-panel .instrument-card:has(#jx-mount) .control-header {
+            margin-bottom: 1px !important;
+            line-height: 1.15 !important;
+        }
+
+        #side-panel .instrument-card:has(#jx-mount) .cyber-slider {
+            margin-top: 2px !important;
+            margin-bottom: 2px !important;
+        }
+
+        #side-panel .instrument-card:has(#jx-mount) #iter-stats-mount .stats-grid {
+            margin-top: 2px !important;
+            gap: 6px !important;
+        }
+
+        #side-panel .instrument-card:has(#jx-mount) #iter-stats-mount .stats-card {
+            min-height: 0 !important;
+            padding: 8px 10px !important;
         }
     </style>
 </head>
+
 <body>
-    <!-- Mini Rail -->
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,71 +184,62 @@
             </svg>
         </div>
     </nav>
-
     <aside id="side-panel">
-        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <header id="sidebar-header"></header>
         <div id="ui-container"></div>
-        <div id="data-container"></div>
     </aside>
-
     <main id="main-content">
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
         </div>
         <div id="hud-overlay">
-            <div class="hud-tag" id="zoom-display">Zoom: 1.0x</div>
-            <div class="hud-tag" id="precision-display">Precision: 50 Digits</div>
+            <div class="hud-tag" id="zoom-display">Zoom: 10^0.0</div>
+            <div class="hud-tag" id="precision-display">Präzision: 80 Stellen</div>
         </div>
     </main>
-    
     <script id="vs" type="x-shader/x-vertex">
         attribute vec2 position;
         void main() { gl_Position = vec4(position, 0.0, 1.0); }
     </script>
-
     <script id="fs" type="x-shader/x-fragment">
         precision highp float;
         uniform vec2 u_res;
         uniform float u_zoom;
         uniform int u_max_iter;
-        uniform vec2 u_ref_orbit[64]; 
+        uniform vec2 u_ref_orbit[256]; 
         uniform float u_time;
-
+        uniform int u_julia;
         void main() {
-            vec3 color = vec3(0.01, 0.02, 0.05); 
+            vec3 color = vec3(0.0); 
             vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
-            float zoom = max(0.00001, u_zoom);
-            vec2 delta_c = uv * (3.0 / zoom); 
-            
-            vec2 delta = vec2(0.0);
+            /* Mandelbrot: Störung δc (fest pro Pixel). Julia: nur Störung δz, c ist konstant — kein +δc in der Rekursion. */
+            vec2 delta_c = uv * (3.0 / max(0.0000001, u_zoom)); 
+            vec2 delta = (u_julia == 1) ? delta_c : vec2(0.0);
             int final_i = 0;
             bool escaped = false;
             vec2 escapedX = vec2(0.0);
-
-            for (int i = 0; i < 64; i++) {
+            for (int i = 0; i < 256; i++) {
                 if (i >= u_max_iter) break;
                 vec2 X = u_ref_orbit[i];
-                
                 vec2 two_X_delta = vec2(2.0 * (X.x * delta.x - X.y * delta.y), 2.0 * (X.x * delta.y + X.y * delta.x));
                 vec2 delta_sq = vec2(delta.x * delta.x - delta.y * delta.y, 2.0 * delta.x * delta.y);
-                delta = two_X_delta + delta_sq + delta_c;
-                
-                if (length(X + delta) > 2.0) { 
-                    escaped = true; 
-                    final_i = i; 
-                    escapedX = X;
-                    break; 
+                if (u_julia == 1) {
+                    delta = two_X_delta + delta_sq;
+                } else {
+                    delta = two_X_delta + delta_sq + delta_c;
                 }
+                if (length(X + delta) > 2.0) { escaped = true; final_i = i; escapedX = X; break; }
             }
-
             if (escaped) {
                 float sn = float(final_i) - log2(max(1.0, log2(length(escapedX + delta))));
-                color = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + vec3(0.0, 1.0, 2.0) + u_time * 0.5);
+                float r = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + u_time * 0.5);
+                float g = 0.5 + 0.5 * cos(2.0 + sn * 0.15 + u_time * 0.5);
+                float b = 0.5 + 0.5 * cos(1.0 + sn * 0.15 + u_time * 0.5);
+                color = vec3(r, g, b);
             }
             gl_FragColor = vec4(color, 1.0);
         }
     </script>
-
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
@@ -128,48 +249,40 @@
             panel.classList.toggle('collapsed');
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
         }
-
         window.addEventListener('load', () => {
-            CyberBranding.init({
-                useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "MANDELBROT DEEP ZOOM (PERTURBATION)"
-            });
-
-            CyberBranding.setBriefing(`
-                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DEEP SPACE</h3>
-                Dieses Labor nutzt <b>Störungsrechnung</b>, um die 64-Bit Grenze zu sprengen.
-            `);
-
+            CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "MANDELBROT DEEP ZOOM" });
+            CyberBranding.setBriefing(`<h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: DEEP SPACE</h3>
+                Überwinden Sie die 64-Bit Grenze. Störungsrechnung aktiv.<br><br>
+                <b>Steuerung:</b> Mausrad (Zoom), Shift (Fein-Zoom), Drag (Move).`);
             CyberUI.init();
-
-            const canvas = document.getElementById('canvas');
-            const gl = canvas.getContext('webgl');
+            const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
             if (!gl) return;
-
             const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
             const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, document.getElementById('fs').text); gl.compileShader(fs);
-            const program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program); gl.useProgram(program);
+            const prg = gl.createProgram(); gl.attachShader(prg, vs); gl.attachShader(prg, fs); gl.linkProgram(prg); gl.useProgram(prg);
+            const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+            const pos = gl.getAttribLocation(prg, 'position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+            const uRes = gl.getUniformLocation(prg, 'u_res'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uRefOrbit = gl.getUniformLocation(prg, 'u_ref_orbit'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
+            Decimal.set({ precision: 80 });
+            let centerX = new Decimal(0), centerY = new Decimal(0), zoom = new Decimal(1.0), maxIter = 256, time = 0, isFlight = false;
+            let mode = "MANDELBROT"; // or "JULIA"
+            let juliaX = new Decimal(-0.8), juliaY = new Decimal(0.156);
 
-            const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
-            const posLoc = gl.getAttribLocation(program, 'position'); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+            function getOrbit(cX, cY, iters) {
+                let orbit = new Float32Array(256 * 2), zX = new Decimal(0), zY = new Decimal(0);
 
-            const uRes = gl.getUniformLocation(program, 'u_res'), uZoom = gl.getUniformLocation(program, 'u_zoom'), uMaxIter = gl.getUniformLocation(program, 'u_max_iter'), uRefOrbit = gl.getUniformLocation(program, 'u_ref_orbit'), uTime = gl.getUniformLocation(program, 'u_time');
+                // For Julia, the constant C is fixed, and the starting Z is the center
+                let C_X = (mode === "JULIA") ? juliaX : cX;
+                let C_Y = (mode === "JULIA") ? juliaY : cY;
+                if (mode === "JULIA") { zX = cX; zY = cY; }
 
-            Decimal.set({ precision: 50 });
-            let centerX = new Decimal(0), centerY = new Decimal(0), zoom = new Decimal(1.0), maxIter = 64, time = 0;
-
-            function calculateReferenceOrbit(cX, cY, iters) {
-                let orbit = new Float32Array(64 * 2);
-                let zX = new Decimal(0), zY = new Decimal(0);
-                for (let i = 0; i < 64; i++) {
+                for (let i = 0; i < 256; i++) {
                     orbit[i * 2] = zX.toNumber(); orbit[i * 2 + 1] = zY.toNumber();
                     if (i < iters) {
                         let x2 = zX.times(zX), y2 = zY.times(zY);
-                        if (x2.plus(y2).gt(4)) { for(let j = i; j < 64; j++) { orbit[j*2] = 100.0; orbit[j*2+1] = 100.0; } break; }
-                        let nextX = x2.minus(y2).plus(cX), nextY = zX.times(zY).times(2).plus(cY);
-                        zX = nextX; zY = nextY;
+                        if (x2.plus(y2).gt(4)) { for (let j = i; j < 256; j++) { orbit[j * 2] = 100.0; orbit[j * 2 + 1] = 100.0; } break; }
+                        let nX = x2.minus(y2).plus(C_X), nY = zX.times(zY).times(2).plus(C_Y);
+                        zX = nX; zY = nY;
                     }
                 }
                 return orbit;
@@ -177,38 +290,142 @@
 
             function render() {
                 const w = canvas.clientWidth, h = canvas.clientHeight;
-                if (canvas.width !== w || canvas.height !== h) {
-                    canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h);
-                }
+                if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+                if (isFlight) zoom = zoom.times(new Decimal(1.005));
                 time += 0.01;
-                const orbit = calculateReferenceOrbit(centerX, centerY, maxIter);
-                gl.uniform2f(uRes, canvas.width, canvas.height); gl.uniform1f(uZoom, zoom.toNumber()); gl.uniform1i(uMaxIter, maxIter); gl.uniform2fv(uRefOrbit, orbit); gl.uniform1f(uTime, time);
+                const orb = getOrbit(centerX, centerY, maxIter);
+
+                gl.uniform2f(uRes, canvas.width, canvas.height);
+                gl.uniform1f(uZoom, zoom.toNumber());
+                gl.uniform1i(uMaxIter, maxIter);
+                gl.uniform2fv(uRefOrbit, orb);
+                gl.uniform1f(uTime, time);
+                gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
+
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
-                document.getElementById('zoom-display').innerText = `Zoom: 10^${zoom.log10().toFixed(1)}`;
-                document.getElementById('precision-display').innerText = `Precision: ${Decimal.precision} Digits`;
+                document.getElementById('zoom-display').innerText = `Zoom: 10^${zoom.logarithm(10).toFixed(1)}`;
+                CyberUI.updateStatsGrid('iter-stats-mount', [
+                    { value: String(maxIter) }
+                ]);
                 requestAnimationFrame(render);
             }
-            
-            let isDragging = false, lastX, lastY;
-            canvas.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                const dx = e.clientX - lastX, dy = e.clientY - lastY, s = Math.min(canvas.width, canvas.height);
+
+            function applyLabModeCompact() {
+                const btn = document.getElementById('btn-mode-m');
+                const card = btn && btn.closest('.instrument-card');
+                if (!card) return;
+                card.style.setProperty('padding', '8px 12px 9px', 'important');
+                card.style.setProperty('gap', '2px', 'important');
+                const titleEl = card.querySelector('.instrument-title');
+                if (titleEl) {
+                    titleEl.style.setProperty('margin-bottom', '0', 'important');
+                    titleEl.style.setProperty('padding-bottom', '0', 'important');
+                }
+                const cc = card.querySelector('.card-content');
+                if (cc) {
+                    cc.style.setProperty('padding', '0', 'important');
+                    cc.style.setProperty('margin', '0', 'important');
+                }
+                document.querySelectorAll('#btn-mode-m, #btn-mode-j').forEach((b) => {
+                    b.style.setProperty('min-height', '36px', 'important');
+                    b.style.setProperty('padding', '6px 10px', 'important');
+                    b.style.setProperty('margin-top', '0', 'important');
+                    b.style.setProperty('font-size', '0.62rem', 'important');
+                    b.style.setProperty('letter-spacing', '0.1em', 'important');
+                });
+            }
+            CyberUI.createCard('ui-container', 'LABOR-MODUS', `
+                <div class="corner-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button type="button" id="btn-mode-m" class="cyber-btn compact">MANDELBROT</button>
+                    <button type="button" id="btn-mode-j" class="cyber-btn compact">JULIA-MENGE</button>
+                </div>
+            `, 'var(--neon-blue)');
+            applyLabModeCompact();
+            requestAnimationFrame(applyLabModeCompact);
+
+            CyberUI.createCard('ui-container', 'FRAKTAL-PARAMETER', `
+                <div id="jx-mount"></div>
+                <div id="jy-mount" style="margin-top:2px;"></div>
+                <div id="iter-mount" style="margin-top:2px;"></div>
+                <div id="iter-stats-mount" style="margin-top:3px;"></div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createStatsGrid('iter-stats-mount', [
+                { label: 'DETAILGRAD', value: '256', color: 'var(--neon-purple)' }
+            ]);
+
+            CyberUI.createSlider('jx-mount', 'REAL-TEIL (C_re)', -2000, 2000, -800, 1, (v) => {
+                juliaX = new Decimal(v).div(1000);
+            }, 'var(--neon-pink)');
+
+            CyberUI.createSlider('jy-mount', 'IMAGINÄR-TEIL (C_im)', -2000, 2000, 156, 1, (v) => {
+                juliaY = new Decimal(v).div(1000);
+            }, 'var(--neon-pink)');
+
+            CyberUI.createSlider('iter-mount', 'MAX. ITERATIONEN', 32, 256, 256, 1, (v) => {
+                maxIter = parseInt(v, 10);
+            }, 'var(--neon-purple)');
+
+            CyberUI.createCard('ui-container', 'NAVIGATION', `
+                <div class="nav-col">
+                    <button type="button" id="btn-flight" class="cyber-btn">START FLIGHT</button>
+                    <button type="button" id="btn-reset" class="cyber-btn">RESET VIEW</button>
+                </div>
+            `, 'var(--neon-blue)');
+
+            document.getElementById('btn-mode-m').onclick = () => {
+                mode = 'MANDELBROT';
+                document.getElementById('btn-mode-m').classList.add('active');
+                document.getElementById('btn-mode-j').classList.remove('active');
+            };
+            document.getElementById('btn-mode-j').onclick = () => {
+                mode = 'JULIA';
+                document.getElementById('btn-mode-j').classList.add('active');
+                document.getElementById('btn-mode-m').classList.remove('active');
+            };
+            document.getElementById('btn-mode-m').classList.add('active');
+
+            document.getElementById('btn-flight').onclick = () => {
+                isFlight = !isFlight;
+                const btn = document.getElementById('btn-flight');
+                btn.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
+                btn.classList.toggle('active', isFlight);
+            };
+            document.getElementById('btn-reset').onclick = () => {
+                centerX = new Decimal(0);
+                centerY = new Decimal(0);
+                zoom = new Decimal(1.0);
+                isFlight = false;
+                mode = 'MANDELBROT';
+                document.getElementById('btn-flight').innerText = 'START FLIGHT';
+                document.getElementById('btn-flight').classList.remove('active');
+                document.getElementById('btn-mode-m').classList.add('active');
+                document.getElementById('btn-mode-j').classList.remove('active');
+            };
+            let isDrag = false, lX, lY;
+            canvas.onmousedown = (e) => { isDrag = true; lX = e.clientX; lY = e.clientY; };
+            window.onmousemove = (e) => {
+                if (!isDrag) return;
+                const dx = e.clientX - lX, dy = e.clientY - lY, s = Math.min(canvas.width, canvas.height);
                 centerX = centerX.minus(new Decimal(dx).div(s).div(zoom).times(3));
                 centerY = centerY.plus(new Decimal(dy).div(s).div(zoom).times(3));
-                lastX = e.clientX; lastY = e.clientY;
-            });
-            window.addEventListener('mouseup', () => isDragging = false);
-            canvas.addEventListener('wheel', (e) => {
+                lX = e.clientX; lY = e.clientY;
+            };
+            window.onmouseup = () => isDrag = false;
+            canvas.onwheel = (e) => {
                 e.preventDefault();
-                let zoomFactor = e.shiftKey ? 1.002 : 1.05;
-                if (e.deltaY > 0) zoomFactor = 1.0 / zoomFactor;
-                zoom = zoom.times(zoomFactor);
-                if (zoom.lt(1.0)) zoom = new Decimal(1.0);
-            }, { passive: false });
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left, my = e.clientY - rect.top, s = Math.min(canvas.width, canvas.height);
+                const fX = centerX.plus(new Decimal(mx - canvas.width / 2).div(s).div(zoom).times(3));
+                const fY = centerY.minus(new Decimal(my - canvas.height / 2).div(s).div(zoom).times(3));
+                let zM = e.shiftKey ? 1.002 : 1.015; if (e.deltaY > 0) zM = 1.0 / zM;
+                zoom = zoom.times(new Decimal(zM)); if (zoom.lt(1.0)) zoom = new Decimal(1.0);
+                centerX = fX.minus(new Decimal(mx - canvas.width / 2).div(s).div(zoom).times(3));
+                centerY = fY.plus(new Decimal(my - canvas.height / 2).div(s).div(zoom).times(3));
+            };
             render();
         });
     </script>
-
 </body>
+
 </html>
