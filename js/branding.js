@@ -15,6 +15,75 @@ function getBrandingOverlays() {
     return window.CyberBrandingOverlays || null;
 }
 
+/** Basename without .html (lowercase); pathname + href fallback for file:// and edge cases */
+function getBriefingModuleKey() {
+    try {
+        let path = window.location.pathname || "";
+        const segments = path.split("/").filter(Boolean);
+        let filename = segments.length ? segments[segments.length - 1] : "";
+        if (!filename || !/\.html?$/i.test(filename)) {
+            const href = window.location.href || "";
+            const m = href.match(/\/([^/?#]+\.html?)(?:$|[?#])/i);
+            if (m) filename = m[1];
+        }
+        if (!filename) filename = "index.html";
+        filename = filename.split("?")[0].split("#")[0];
+        return filename.replace(/\.html?$/i, "").toLowerCase();
+    } catch (e) {
+        return "index";
+    }
+}
+
+const CYBER_BRIEFING_BTN = '.nav-btn[title="Beschreibung anzeigen"]';
+
+function getBrandingNavHost() {
+    return (
+        document.getElementById("sidebar-header") ||
+        document.getElementById("side-panel") ||
+        document.getElementById("sidebar")
+    );
+}
+
+function isCyberNavComplete(navEl) {
+    return !!(navEl && navEl.querySelector(CYBER_BRIEFING_BTN));
+}
+
+/** Alte/leere .cyber-nav-Reste blockierten die komplette Injektion (ohne ?-Button). */
+function cleanupIncompleteBrandingNav() {
+    const host = getBrandingNavHost();
+    if (host) {
+        host.querySelectorAll(".cyber-nav").forEach((nav) => {
+            if (!isCyberNavComplete(nav)) nav.remove();
+        });
+        return;
+    }
+    document.querySelectorAll("body > .cyber-nav.floating").forEach((nav) => {
+        if (!isCyberNavComplete(nav)) nav.remove();
+    });
+}
+
+function hasCompleteBrandingNav() {
+    const host = getBrandingNavHost();
+    if (host) {
+        return Array.from(host.querySelectorAll(".cyber-nav")).some((n) => isCyberNavComplete(n));
+    }
+    const floating = document.querySelector("body > .cyber-nav.floating");
+    return isCyberNavComplete(floating);
+}
+
+function scheduleNavigationConsistencyCheck() {
+    queueMicrotask(() => {
+        try {
+            cleanupIncompleteBrandingNav();
+            if (!hasCompleteBrandingNav() && window.CyberBranding && typeof window.CyberBranding.injectNavigation === "function") {
+                window.CyberBranding.injectNavigation();
+            }
+        } catch (e) {
+            console.warn("CyberBranding: navigation consistency check failed", e);
+        }
+    });
+}
+
 const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
     /// MRA ///
@@ -94,7 +163,9 @@ const CyberBranding = {
         this.ensureOverlaysModuleLoaded();
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
-            return brandingCore.init.call(this, config);
+            brandingCore.init.call(this, config);
+            scheduleNavigationConsistencyCheck();
+            return;
         }
         let title = this.MASTER_TITLE;
         let subtitle = "CYBER-LABORATORIUM";
@@ -134,6 +205,7 @@ const CyberBranding = {
                 }
             });
         }
+        scheduleNavigationConsistencyCheck();
     },
 
     injectStyles() {
@@ -178,11 +250,12 @@ const CyberBranding = {
     },
 
     injectNavigation() {
+        cleanupIncompleteBrandingNav();
         const brandingNav = getBrandingNav();
         if (brandingNav && typeof brandingNav.injectNavigation === "function") {
             return brandingNav.injectNavigation.call(this);
         }
-        if (document.querySelector('.cyber-nav')) return;
+        if (hasCompleteBrandingNav()) return;
         const nav = document.createElement('div');
         nav.className = 'cyber-nav';
 
@@ -272,7 +345,11 @@ const CyberBranding = {
         const briefingBtn = document.createElement('div');
         briefingBtn.className = 'nav-btn';
         briefingBtn.title = 'Beschreibung anzeigen';
-        briefingBtn.onclick = () => this.showBriefing();
+        briefingBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const cb = window.CyberBranding;
+            if (cb && typeof cb.showBriefing === 'function') cb.showBriefing();
+        });
         briefingBtn.innerHTML = `
             <span style="font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 1.35rem; line-height: 1; display: block;">?</span>
         `;
@@ -458,7 +535,7 @@ const CyberBranding = {
         this.briefingContent = html;
     },
 
-    formatBriefingText: function(text) {
+    formatBriefingText: function (text) {
         if (!text) return "";
         let lines = text.split("\n");
         let html = "";
@@ -469,7 +546,7 @@ const CyberBranding = {
             // Skip empty lines, separator lines, or "LABOR:" header lines
             if (!trimmed || /^[=\-]+$/.test(trimmed) || trimmed.startsWith("LABOR:")) {
                 if (inList) { html += "</ul>"; inList = false; }
-                if (!trimmed) html += "<div style='height:5px;'></div>"; 
+                if (!trimmed) html += "<div style='height:5px;'></div>";
                 return;
             }
 
@@ -496,13 +573,10 @@ const CyberBranding = {
     },
 
     showBriefing: function () {
-        const pathParts = window.location.pathname.split("/");
-        let filename = pathParts[pathParts.length - 1] || "index.html";
-        filename = filename.split("?")[0].split("#")[0];
-        const moduleKey = filename.replace(".html", "").toLowerCase();
+        const moduleKey = getBriefingModuleKey();
 
-        // 1. Try Registry
-        if (window.CyberBriefings && window.CyberBriefings[moduleKey]) {
+        const pageBrief = this.briefingContent != null && String(this.briefingContent).trim() !== "";
+        if (!pageBrief && window.CyberBriefings && window.CyberBriefings[moduleKey]) {
             this.briefingContent = this.formatBriefingText(window.CyberBriefings[moduleKey]);
         }
 
@@ -578,3 +652,5 @@ const CyberBranding = {
         console.warn("CyberBranding overlays module not ready: showSyncModal.");
     }
 };
+
+window.CyberBranding = CyberBranding;
