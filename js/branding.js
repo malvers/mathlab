@@ -458,12 +458,93 @@ const CyberBranding = {
         this.briefingContent = html;
     },
 
+    formatBriefingText: function(text) {
+        if (!text) return "";
+        let lines = text.split("\n");
+        let html = "";
+        let inList = false;
+
+        lines.forEach(line => {
+            let trimmed = line.trim();
+            // Skip empty lines or separator lines (like === or ---)
+            if (!trimmed || /^[=\-]+$/.test(trimmed)) {
+                if (inList) { html += "</ul>"; inList = false; }
+                // Use a smaller spacer instead of a full <br> for empty lines if desired, 
+                // but for now we just keep the <br> and rely on reduced margins elsewhere.
+                if (!trimmed) html += "<div style='height:5px;'></div>"; 
+                return;
+            }
+
+            // Headers
+            if (trimmed.endsWith(":") && trimmed === trimmed.toUpperCase() && trimmed.length > 3) {
+                if (inList) { html += "</ul>"; inList = false; }
+                html += `<h3 style="color:var(--branding-blue); font-family:Orbitron; margin-top:5px; margin-bottom:5px; border-bottom:1px solid rgba(0,210,255,0.2); padding-bottom:3px; font-size:1.1rem;">${trimmed}</h3>`;
+            }
+            // List items
+            else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+                if (!inList) { html += "<ul style='margin-left:20px; margin-bottom:7px;'>"; inList = true; }
+                html += `<li style='margin-bottom:4px;'>${trimmed.substring(2)}</li>`;
+            }
+            // Normal text
+            else {
+                if (inList) { html += "</ul>"; inList = false; }
+                // Bold tags
+                let processed = trimmed.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/__(.*?)__/g, "<b>$1</b>");
+                html += `<p style='margin-bottom:5px; line-height:1.5;'>${processed}</p>`;
+            }
+        });
+        if (inList) html += "</ul>";
+        return html;
+    },
+
     showBriefing: function () {
-        const brandingOverlays = getBrandingOverlays();
-        if (brandingOverlays && typeof brandingOverlays.showBriefing === "function") {
-            return brandingOverlays.showBriefing.call(this);
+        const pathParts = window.location.pathname.split("/");
+        let filename = pathParts[pathParts.length - 1] || "index.html";
+        filename = filename.split("?")[0].split("#")[0];
+        const moduleKey = filename.replace(".html", "").toLowerCase();
+
+        // 1. Try Registry
+        if (window.CyberBriefings && window.CyberBriefings[moduleKey]) {
+            this.briefingContent = this.formatBriefingText(window.CyberBriefings[moduleKey]);
         }
-        console.warn("CyberBranding overlays module not ready: showBriefing.");
+
+        if (!this.briefingContent) {
+            const brandingOverlays = getBrandingOverlays();
+            if (brandingOverlays && typeof brandingOverlays.showBriefing === "function") {
+                return brandingOverlays.showBriefing.call(this);
+            }
+            return this.showNotification("Keine Dokumentation gefunden.");
+        }
+
+        let overlay = document.getElementById("cyber-briefing-overlay");
+        if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.id = "cyber-briefing-overlay";
+            overlay.className = "briefing-overlay";
+            overlay.style.zIndex = "1000000";
+            overlay.onclick = (e) => {
+                if (e.target === overlay) overlay.classList.remove("visible");
+            };
+            document.body.appendChild(overlay);
+        }
+
+        overlay.innerHTML = `
+            <div class="briefing-modal">
+                <div class="briefing-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Beschreibung
+                </div>
+                <div class="briefing-text">${this.briefingContent}</div>
+                <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+                    <button class="nav-btn" style="width: auto; height: auto; padding: 12px 35px; min-width: 140px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => overlay.classList.add("visible"), 10);
     },
 
     copyLocalBriefing: function () {
