@@ -418,6 +418,17 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Das administrative Herzstück des Doc-Alvers-Ökosystems; cinematisches Design mit Fokus auf Usability und technologische Ästhetik.`,
 
+    "coolsquares": `MATHEMATISCHER HINTERGRUND:
+„Cool Squares“ zeigt einen geometrischen Flächenbeweis mit ineinander geschachtelten Quadraten. Ausgehend von einer festen Lücke **x** und dem frei wählbaren Parameter **a** entstehen Seitenlängen **x+a** bis **x+4a** sowie **y = 4a** und ein orangenes Referenz-Quadrat **a²**. Die Anordnung macht die Proportionen und Flächenbeziehungen sichtbar – der didaktische Kern ist, dass die Konstruktion **x** nur noch als gemeinsame Struktur nutzt und das Ergebnis über **a** und **y** stabil unter dem Slider für **a** bleibt.
+
+FEATURES & STEUERUNG:
+- **Zentral-Seite a:** Slider passt **a** (1–40) an; alle Quadrate und Kennlinien werden neu skaliert.
+- **Labels ein/aus:** Kantenbeschriftungen (x+a …, y = 4a) für Präsentation oder reduzierte Ansicht.
+- **Statistik-Karten:** Live-Werte für **a**, festes **x**, **y = 4a** und die grüne Fläche **y² = (4a)²**.
+
+INTERFACE:
+ULTRA-Sidebar mit Proportionen-Karte und Telemetrie; Canvas-Zentrum mit Orbitron-Typo und Neon-Akzenten.`,
+
     "cmaes": `MATHEMATISCHER HINTERGRUND:
 Das Labor nutzt den "Covariance Matrix Adaptation Evolution Strategy" (CMA-ES) Algorithmus. Dies ist ein hochmoderner stochastischer Optimierer für nicht-lineare, nicht-konvexe Probleme. Er adaptiert eine Kovarianzmatrix, um die Suchrichtung im multidimensionalen Raum kontinuierlich zu verbessern – analog zur biologischen Evolution.
 
