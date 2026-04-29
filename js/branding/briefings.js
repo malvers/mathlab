@@ -464,6 +464,36 @@ FEATURES & STEUERUNG:
 - Fokus-Modus: Ein Doppelklick zentriert ein Labor und bereitet den Übergang in die entsprechende Detail-Umgebung vor.
 
 INTERFACE:
-Cinematisches ULTRA-Interface mit Fokus auf Immersion und die navigatorische Verknüpfung der gesamten Suite.`
+Cinematisches ULTRA-Interface mit Fokus auf Immersion und die navigatorische Verknüpfung der gesamten Suite.`,
+
+    "easyhard": `ÜBERSICHT:
+Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade (je nach Aufbau der Seite).
+
+FEATURES & STEUERUNG:
+- Nutze die Steuerelemente in der Sidebar gemäß Beschriftung.
+- Über das Fragezeichen in der Navigationszeile erreichst du diese Kurzinfo jederzeit erneut.
+
+INTERFACE:
+ULTRA-Labor-Layout mit zentraler Branding-Navigation.`,
+
+    "tools": `ÜBERSICHT:
+Werkzeug-Übersicht (Mission Control) – Startliste und Labor-Scan für die Doc-Alvers-Suite.
+
+FEATURES & STEUERUNG:
+- Suche filtert die angezeigten Labore.
+- Verlinkungen öffnen die jeweiligen Module (oft in neuem Tab).
+
+INTERFACE:
+Dashboard-Layout; Navigation wird wie in den anderen Laboren über CyberBranding eingebunden.`,
+
+    "mandelbrot_deep": `ÜBERSICHT:
+Deep-Zoom-Mandelbrot im WebGL-Shader (Float32-Iteration). Zusätzlicher Kurztext kann auf der Seite per setBriefing gesetzt sein.
+
+FEATURES & STEUERUNG:
+- Mausrad: Zoom; mit Modifier oft Feinschritt (siehe on-Seiten-Hinweis).
+- Drag: Verschieben der komplexen Ebene.
+
+INTERFACE:
+Sidebar-ULTRA-Layout wie die übrigen Labore.`
 };
 

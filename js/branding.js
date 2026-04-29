@@ -71,17 +71,43 @@ function hasCompleteBrandingNav() {
     return isCyberNavComplete(floating);
 }
 
-function scheduleNavigationConsistencyCheck() {
-    queueMicrotask(() => {
-        try {
-            cleanupIncompleteBrandingNav();
-            if (!hasCompleteBrandingNav() && window.CyberBranding && typeof window.CyberBranding.injectNavigation === "function") {
-                window.CyberBranding.injectNavigation();
-            }
-        } catch (e) {
-            console.warn("CyberBranding: navigation consistency check failed", e);
+/** Wenn es einen Sidebar-Host gibt, aber nur eine floatende Nav, blockiert die oft die spätere integrierte Leiste. */
+function reconcileFloatingNavAwayFromHost() {
+    const host = getBrandingNavHost();
+    if (!host) return;
+    const hasInHost = Array.from(host.querySelectorAll(".cyber-nav")).some((n) => isCyberNavComplete(n));
+    if (hasInHost) return;
+    document.querySelectorAll("body > .cyber-nav.floating").forEach((n) => n.remove());
+}
+
+function runNavigationConsistency() {
+    try {
+        reconcileFloatingNavAwayFromHost();
+        cleanupIncompleteBrandingNav();
+        if (!hasCompleteBrandingNav() && window.CyberBranding && typeof window.CyberBranding.injectNavigation === "function") {
+            window.CyberBranding.injectNavigation();
         }
-    });
+    } catch (e) {
+        console.warn("CyberBranding: navigation consistency check failed", e);
+    }
+}
+
+let __cyberBrandingNavHooksInstalled = false;
+
+function installNavigationConsistencyHooks() {
+    if (__cyberBrandingNavHooksInstalled) return;
+    __cyberBrandingNavHooksInstalled = true;
+    const onLater = () => queueMicrotask(() => runNavigationConsistency());
+    if (document.readyState === "complete") {
+        onLater();
+    } else {
+        window.addEventListener("load", onLater, { once: true });
+    }
+}
+
+function scheduleNavigationConsistencyCheck() {
+    installNavigationConsistencyHooks();
+    queueMicrotask(() => runNavigationConsistency());
 }
 
 const CyberBranding = {
