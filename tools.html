@@ -376,10 +376,53 @@
         .tool-info .tool-tagline {
             display: none;
         }
+
+        /* Zurück zur Labor-Auswahl (Dashboard) — oben rechts, über fixierter Nav */
+        .tools-hub-close {
+            position: fixed;
+            top: 20px;
+            right: 16px;
+            z-index: 50000;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(15, 23, 42, 0.82);
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            backdrop-filter: blur(10px);
+            box-shadow:
+                0 0 0 1px rgba(0, 210, 255, 0.35),
+                0 8px 24px rgba(0, 0, 0, 0.45);
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .tools-hub-close:hover {
+            background: rgba(220, 38, 38, 0.4);
+            box-shadow: 0 0 20px rgba(255, 80, 80, 0.45);
+            transform: scale(1.05);
+        }
+        .tools-hub-close:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 3px;
+        }
+        .tools-hub-close svg {
+            display: block;
+        }
     </style>
 </head>
 
 <body class="cyber-hub">
+    <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zur Labor-Auswahl (Esc)"
+        aria-label="Werkzeug-Übersicht schließen und zur Labor-Auswahl">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+            stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+    </a>
     <!-- Poster wie index.html (Fallback ohne lokales favicon-PNG). Video: resources/galay20.mp4 -->
     <video id="bg-video" autoplay loop muted playsinline
         poster="https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop">
@@ -516,6 +559,14 @@
             subtitle: `${toolCount} WERKZEUGE AUF EINEN BLICK`,
             useExternalStyles: true,
             skipCanvasBranding: true
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code !== 'Escape') return;
+            const t = e.target;
+            if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+            e.preventDefault();
+            window.location.href = 'index.html';
         });
     </script>
 </body>
