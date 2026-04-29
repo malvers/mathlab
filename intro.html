@@ -25,6 +25,10 @@
             color: white;
         }
 
+        body.mode-catching-words {
+            overflow: visible;
+        }
+
         #bg-video {
             position: fixed;
             top: 0;
@@ -37,9 +41,10 @@
         }
 
         /* eigenes Kontextmenü (Rechtsklick) */
+        /* Über CyberUI-Overlays (z. B. Screen-Warning ~1e6); sonst wirkt das Menü „weg“ */
         .intro-ctx-menu {
             position: fixed;
-            z-index: 4000;
+            z-index: 2147483647;
             min-width: 200px;
             padding: 6px;
             border-radius: 10px;
@@ -47,11 +52,15 @@
             background: rgba(15, 23, 42, 0.96);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 210, 255, 0.12);
             display: none;
+            pointer-events: none;
+            visibility: hidden;
             flex-direction: column;
             gap: 4px;
         }
         .intro-ctx-menu.open {
             display: flex;
+            pointer-events: auto;
+            visibility: visible;
         }
         .intro-ctx-menu button {
             font-family: 'Orbitron', sans-serif;
@@ -76,21 +85,6 @@
         .intro-ctx-menu button.primary {
             background: rgba(0, 210, 255, 0.12);
             color: #fff;
-        }
-
-        .intro-ctx-hint {
-            position: fixed;
-            bottom: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.68rem;
-            letter-spacing: 0.06em;
-            color: rgba(226, 232, 240, 0.45);
-            pointer-events: none;
-            max-width: 92vw;
-            text-align: center;
         }
 
         .intro-container {
@@ -166,6 +160,28 @@
             }
         }
 
+        /* Catching Words: gleicher Ablauf wie Intro, End-Größe 50 % (scale 0.9 statt 1.8) */
+        @keyframes cinematic-fade-in-cw {
+            0% {
+                opacity: 0;
+                transform: scale(0.05);
+                letter-spacing: 80px;
+            }
+            40% {
+                opacity: 0.6;
+            }
+            99.5% {
+                opacity: 1;
+                transform: scale(0.9);
+                letter-spacing: 12px;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(0.9);
+                letter-spacing: 12px;
+            }
+        }
+
         @keyframes subtitle-fade {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 0.7; transform: translateY(0); }
@@ -227,6 +243,8 @@
             position: fixed;
             inset: 0;
             z-index: 100;
+            overflow: visible;
+            --cw-anim-sec: 8;
         }
         body.mode-catching-words #catching-words-panel {
             display: block;
@@ -234,85 +252,56 @@
         #catching-words-panel .cw-play {
             position: absolute;
             inset: 0;
-            padding: 72px 16px 88px;
+            padding: 28px 0 88px;
             box-sizing: border-box;
             cursor: crosshair;
-            perspective: 1100px;
-            perspective-origin: 50% 40%;
+            overflow: visible;
         }
-        /* Obere Kante bei 50 % — neue Zeilen nur nach unten; fertige Wörter wandern nicht (wie feststehendes Intro) */
+        #catching-words-panel.cw-drag-over {
+            box-shadow: inset 0 0 0 3px rgba(0, 210, 255, 0.45);
+            background: rgba(0, 210, 255, 0.04);
+        }
+        /* Oben im Playbereich, horizontal zentriert; neue Zeilen nur nach unten */
         #catching-words-panel .cw-stack {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: min(96vw, 52rem);
-        }
-        #catching-words-panel .cw-hud {
-            position: absolute;
-            top: 0;
             left: 0;
             right: 0;
-            z-index: 5;
+            top: clamp(96px, 14vh, 180px);
+            transform: none;
             display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
             align-items: center;
-            justify-content: space-between;
-            padding: 14px 18px;
-            padding-right: 72px;
-            background: linear-gradient(180deg, rgba(5, 11, 24, 0.92), transparent);
-            pointer-events: none;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: none;
+            box-sizing: border-box;
+            gap: 24px;
+            padding: 0 6px;
+            isolation: isolate;
+            overflow: visible;
         }
-        #catching-words-panel .cw-hud strong {
-            color: var(--neon-blue);
-            letter-spacing: 0.18em;
-            font-size: 0.68rem;
-        }
-        #catching-words-panel .cw-hud .cw-score {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-        }
-        #catching-words-panel .cw-hud .cw-nav {
-            pointer-events: auto;
-            display: flex;
-            gap: 8px;
-        }
-        #catching-words-panel .cw-hud button {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.58rem;
-            letter-spacing: 0.1em;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 210, 255, 0.35);
-            background: rgba(15, 23, 42, 0.85);
-            color: #e2e8f0;
-            cursor: pointer;
-        }
-        #catching-words-panel .cw-hud button:hover {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-        }
-        /* Eine Größe für alle; 6s + forwards = wie body.start-cinematic .intro-container h1 (stoppt „vorne“) */
+        /* Wie Intro-h1, Endgröße halb so groß wie dort (scale 0.9) */
         #catching-words-panel .falling-word {
             position: relative;
             left: auto;
             top: auto;
-            flex-shrink: 0;
-            width: 100%;
-            max-width: min(96vw, 52rem);
+            flex: 0 0 auto;
+            align-self: center;
+            width: auto;
+            max-width: none;
+            min-width: max-content;
+            overflow: visible;
             margin: 0;
             padding: 0;
             border: none;
             border-radius: 0;
-            background: none;
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.05rem, 3.6vw, 2.65rem);
+            font-size: 5rem;
             font-weight: 700;
             line-height: 1.12;
             text-align: center;
-            background-image: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -323,41 +312,22 @@
             touch-action: manipulation;
             white-space: nowrap;
             cursor: pointer;
-            transform-style: preserve-3d;
             transform-origin: center center;
             opacity: 0;
-            transform: translateZ(-900px) scale(0.05);
+            transform: scale(0.05);
             letter-spacing: 80px;
-            animation: cw-cinematic-fade-in 6s cubic-bezier(0.1, 0.7, 0.3, 1) 1 forwards;
+            animation-name: cinematic-fade-in-cw;
+            animation-duration: calc(var(--cw-anim-sec) * 1s);
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
         }
-        /* Nach Ende: Keyframes aus, Werte fest — kein weiteres Bewegen/Zittern (wie stehende Intro-Zeile) */
         #catching-words-panel .falling-word.cw-settled {
             animation: none;
+            transition: none;
             opacity: 1;
-            transform: translateZ(0) scale(1.8);
+            transform: scale(0.9);
             letter-spacing: 12px;
-        }
-        #catching-words-panel .falling-word:not(:last-child) {
-            margin-bottom: clamp(20px, 3.5vh, 40px);
-        }
-        @keyframes cw-cinematic-fade-in {
-            0% {
-                opacity: 0;
-                transform: translateZ(-900px) scale(0.05);
-                letter-spacing: 80px;
-            }
-            40% {
-                opacity: 0.6;
-            }
-            100% {
-                opacity: 1;
-                transform: translateZ(0) scale(1.8);
-                letter-spacing: 12px;
-            }
-        }
-        #catching-words-panel .falling-word.long-label {
-            white-space: normal;
-            line-height: 1.2;
         }
         #catching-words-panel .falling-word.caught {
             animation: cw-caught 0.38s ease-out forwards;
@@ -366,23 +336,33 @@
             to {
                 opacity: 0;
                 filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.9));
-                transform: translateZ(120px) scale(2.1);
+                transform: scale(1.05);
             }
         }
-        #catching-words-panel .cw-hint {
-            position: absolute;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.7rem;
-            opacity: 0.5;
-            text-align: center;
-            max-width: 90vw;
+
+        .cw-debug-hud {
+            position: fixed;
+            left: 12px;
+            bottom: 56px;
+            z-index: 10001;
+            font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
+            font-size: 11px;
+            line-height: 1.45;
+            color: rgba(185, 235, 255, 0.95);
+            background: rgba(5, 15, 30, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 8px;
+            padding: 8px 11px;
+            pointer-events: none;
+            white-space: pre-line;
+            display: none;
+        }
+        .cw-debug-hud.visible {
+            display: block;
         }
     </style>
 </head>
-<body class="start-cinematic">
+<body class="mode-catching-words">
 
     <video id="bg-video" autoplay loop muted playsinline>
         <source src="resources/galay20.mp4" type="video/mp4">
@@ -391,11 +371,9 @@
     <div class="glow-sphere"></div>
 
     <div id="intro-ctx-menu" class="intro-ctx-menu" role="menu" aria-label="Modus wählen">
-        <button type="button" class="primary" role="menuitem" id="ctx-pick-intro">Intro</button>
-        <button type="button" role="menuitem" id="ctx-pick-catching">Catching Words</button>
+        <button type="button" role="menuitem" id="ctx-pick-intro">Intro</button>
+        <button type="button" class="primary" role="menuitem" id="ctx-pick-catching">Catching Words</button>
     </div>
-
-    <p class="intro-ctx-hint">Rechtsklick — Intro oder Catching Words</p>
 
     <button class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
         <svg viewBox="0 0 24 24">
@@ -409,59 +387,78 @@
         <div class="coming-soon">INTERAKTIVE MATHEMATIK-SIMULATIONEN</div>
     </div>
 
-    <div id="catching-words-panel" aria-hidden="true">
-        <div class="cw-hud">
-            <strong>CATCHING WORDS</strong>
-            <span class="cw-score" id="cw-score">Score: 0</span>
-            <div class="cw-nav">
-                <button type="button" id="cw-btn-intro">Intro</button>
-            </div>
-        </div>
+    <div id="catching-words-panel" aria-hidden="false">
         <div class="cw-play" id="cw-play">
             <div class="cw-stack" id="cw-stack"></div>
         </div>
-        <p class="cw-hint">Wie im Intro: aus dem Zentrum heran &mdash; Zeilen stapeln sich · klicken · Rechtsklick Modus</p>
     </div>
 
     <script src="js/ui.js?v=4"></script>
     <script>
-        CyberUI.init();
+        try {
+            CyberUI.init();
+        } catch (err) {
+            console.warn('CyberUI.init', err);
+        }
 
         const ctxMenu = document.getElementById('intro-ctx-menu');
+        let ctxMenuOpenedAt = 0;
 
         function closeCtxMenu() {
-            ctxMenu.classList.remove('open');
+            if (ctxMenu) {
+                ctxMenu.classList.remove('open');
+                ctxMenu.style.visibility = '';
+            }
         }
 
         function openCtxMenu(clientX, clientY) {
+            if (!ctxMenu) return;
+            ctxMenuOpenedAt = performance.now();
             ctxMenu.classList.add('open');
             ctxMenu.style.left = '0px';
             ctxMenu.style.top = '0px';
+            ctxMenu.style.visibility = 'hidden';
             requestAnimationFrame(() => {
-                const pad = 8;
-                let x = clientX;
-                let y = clientY;
-                const w = ctxMenu.offsetWidth;
-                const h = ctxMenu.offsetHeight;
-                x = Math.min(x, window.innerWidth - w - pad);
-                y = Math.min(y, window.innerHeight - h - pad);
-                x = Math.max(pad, x);
-                y = Math.max(pad, y);
-                ctxMenu.style.left = x + 'px';
-                ctxMenu.style.top = y + 'px';
+                requestAnimationFrame(() => {
+                    if (!ctxMenu.classList.contains('open')) return;
+                    const pad = 8;
+                    let x = clientX;
+                    let y = clientY;
+                    const w = ctxMenu.offsetWidth;
+                    const h = ctxMenu.offsetHeight;
+                    x = Math.min(x, window.innerWidth - w - pad);
+                    y = Math.min(y, window.innerHeight - h - pad);
+                    x = Math.max(pad, x);
+                    y = Math.max(pad, y);
+                    ctxMenu.style.left = x + 'px';
+                    ctxMenu.style.top = y + 'px';
+                    ctxMenu.style.visibility = 'visible';
+                });
             });
         }
 
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            openCtxMenu(e.clientX, e.clientY);
-        });
+        document.addEventListener(
+            'contextmenu',
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openCtxMenu(e.clientX, e.clientY);
+            },
+            true
+        );
 
-        document.addEventListener('click', (e) => {
-            if (!ctxMenu.classList.contains('open')) return;
-            if (ctxMenu.contains(e.target)) return;
-            closeCtxMenu();
-        }, true);
+        const CTX_CLOSE_GRACE_MS = 450;
+        document.addEventListener(
+            'pointerdown',
+            (e) => {
+                if (!ctxMenu || !ctxMenu.classList.contains('open')) return;
+                if (performance.now() - ctxMenuOpenedAt < CTX_CLOSE_GRACE_MS) return;
+                if (e.button !== 0) return;
+                if (ctxMenu.contains(e.target)) return;
+                closeCtxMenu();
+            },
+            true
+        );
 
         function pickIntroMode() {
             closeCtxMenu();
@@ -477,18 +474,26 @@
             document.body.classList.remove('start-cinematic');
             document.body.classList.add('mode-catching-words');
             document.getElementById('catching-words-panel').setAttribute('aria-hidden', 'false');
+            cwSectionIndex = 0;
+            cwSequence = cwSections[0] || [];
+            stopCatchingWords();
             startCatchingWords();
         }
 
-        document.getElementById('ctx-pick-intro').addEventListener('click', (e) => {
-            e.stopPropagation();
-            pickIntroMode();
-        });
-
-        document.getElementById('ctx-pick-catching').addEventListener('click', (e) => {
-            e.stopPropagation();
-            pickCatchingMode();
-        });
+        const ctxPickIntro = document.getElementById('ctx-pick-intro');
+        const ctxPickCatching = document.getElementById('ctx-pick-catching');
+        if (ctxPickIntro) {
+            ctxPickIntro.addEventListener('click', (e) => {
+                e.stopPropagation();
+                pickIntroMode();
+            });
+        }
+        if (ctxPickCatching) {
+            ctxPickCatching.addEventListener('click', (e) => {
+                e.stopPropagation();
+                pickCatchingMode();
+            });
+        }
 
         const DEV_MODE = true;
         if (DEV_MODE) {
@@ -498,10 +503,6 @@
                 }
             });
         }
-
-        document.getElementById('cw-btn-intro').addEventListener('click', () => {
-            pickIntroMode();
-        });
 
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
@@ -529,38 +530,204 @@
             container.parentNode.replaceChild(fresh, container);
         }
 
+        function isCwTypingTarget(target) {
+            if (!target || !target.tagName) return false;
+            const tag = target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+            if (target.isContentEditable) return true;
+            return false;
+        }
+
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && ctxMenu.classList.contains('open')) {
+            if (e.key === 'Escape' && ctxMenu && ctxMenu.classList.contains('open')) {
                 e.preventDefault();
                 closeCtxMenu();
                 return;
             }
-            if (e.key.toLowerCase() === 'f') toggleFullscreen();
-            if (document.body.classList.contains('mode-catching-words')) return;
-            if (!document.body.classList.contains('start-cinematic')) return;
-            if (e.code === 'Space' || e.key === ' ') {
-                e.preventDefault();
-                replayAnimation();
+            if (document.body.classList.contains('mode-catching-words') && !isCwTypingTarget(e.target)) {
+                const goRight = e.code === 'ArrowRight' || e.key === 'ArrowRight';
+                const goLeft = e.code === 'ArrowLeft' || e.key === 'ArrowLeft';
+                if (goRight || goLeft) {
+                    e.preventDefault();
+                    stepCwSection(goRight ? 1 : -1);
+                    return;
+                }
+                const goUp = e.code === 'ArrowUp' || e.key === 'ArrowUp';
+                const goDown = e.code === 'ArrowDown' || e.key === 'ArrowDown';
+                if (goUp || goDown) {
+                    e.preventDefault();
+                    nudgeCwMotion(goUp);
+                    return;
+                }
+                if (
+                    (e.key === 'd' || e.key === 'D') &&
+                    !e.metaKey &&
+                    !e.ctrlKey &&
+                    !e.altKey
+                ) {
+                    e.preventDefault();
+                    toggleCwDebugHud();
+                    return;
+                }
             }
-        });
+            if (e.key.toLowerCase() === 'f') toggleFullscreen();
+            if (e.code === 'Space' || e.key === ' ') {
+                if (document.body.classList.contains('mode-catching-words')) {
+                    e.preventDefault();
+                    toggleCatchingWordsPause();
+                    return;
+                }
+                if (document.body.classList.contains('start-cinematic')) {
+                    e.preventDefault();
+                    replayAnimation();
+                }
+                return;
+            }
+        }, { capture: true });
 
-        /* —— Catching Words: feste Reihenfolge, schnelle „bam bam“-Kaskade —— */
-        const CW_SEQUENCE = [
+        /* —— Catching Words: Reihenfolge per .txt/.md (Zeile = Eintrag) oder Drop von Text —— */
+        const CW_SEQUENCE_DEFAULT = Object.freeze([
             'Cascading Style Sheets',
             'Java Script',
             'Hypertext',
             'Python',
             'Java',
-        ];
-        /* Staffel wie zweite Intro-Zeile (intro-line-2: 0.5s delay) */
-        const CW_SPAWN_MS = 500;
+        ]);
+        /** Jede Zeile mit # beginnt eine neue Section; folgende Wörter gehören dazu (inkl. # 20pt …). ←/→ wechseln die Section. */
+        let cwSections = [CW_SEQUENCE_DEFAULT.map((text) => ({ text, fontSizePt: null }))];
+        let cwSectionIndex = 0;
+        let cwSequence = cwSections[0];
+        let cwAnimSec = 8;
+        let cwSpawnMs = 700;
         let cwSpawnTimer = null;
-        let cwScore = 0;
         let cwRunning = false;
         let cwSpawnRoundIndex = 0;
+        let cwPaused = false;
+        let cwDebugHudVisible = false;
+
+        function syncCwMotionVars() {
+            const panel = document.getElementById('catching-words-panel');
+            if (panel) panel.style.setProperty('--cw-anim-sec', String(cwAnimSec));
+            const hud = document.getElementById('cw-debug-hud');
+            if (hud && hud.classList.contains('visible')) {
+                hud.textContent = [
+                    'Flug (Keyframe): ' + cwAnimSec.toFixed(1) + ' s',
+                    'Spawn-Takt:      ' + cwSpawnMs + ' ms',
+                    '↑ schneller · ↓ langsamer  (±0,1 s · ±10 ms)',
+                    'd  Debug ein/aus',
+                ].join('\n');
+            }
+        }
+
+        function nudgeCwMotion(isUpFaster) {
+            const dir = isUpFaster ? 1 : -1;
+            cwAnimSec = Math.round(Math.max(4, Math.min(18, cwAnimSec - dir * 0.1)) * 10) / 10;
+            cwSpawnMs = Math.round(Math.max(400, Math.min(2000, cwSpawnMs - dir * 10)));
+            syncCwMotionVars();
+        }
+
+        function toggleCwDebugHud() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            cwDebugHudVisible = !cwDebugHudVisible;
+            let hud = document.getElementById('cw-debug-hud');
+            if (!hud) {
+                hud = document.createElement('div');
+                hud.id = 'cw-debug-hud';
+                hud.className = 'cw-debug-hud';
+                hud.setAttribute('aria-live', 'polite');
+                document.body.appendChild(hud);
+            }
+            hud.classList.toggle('visible', cwDebugHudVisible);
+            syncCwMotionVars();
+        }
+
+        function stepCwSection(delta) {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            if (cwSections.length <= 1) return;
+            const next = Math.max(0, Math.min(cwSections.length - 1, cwSectionIndex + delta));
+            if (next === cwSectionIndex) return;
+            cwSectionIndex = next;
+            cwSequence = cwSections[cwSectionIndex];
+            stopCatchingWords();
+            startCatchingWords();
+        }
+
+        function toggleCatchingWordsPause() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            const stack = document.getElementById('cw-stack');
+            if (!stack) return;
+            cwPaused = !cwPaused;
+            if (cwPaused) {
+                if (cwSpawnTimer) {
+                    clearTimeout(cwSpawnTimer);
+                    cwSpawnTimer = null;
+                }
+                stack.querySelectorAll('.falling-word').forEach((el) => {
+                    el.style.animationPlayState = 'paused';
+                });
+            } else {
+                stack.querySelectorAll('.falling-word').forEach((el) => {
+                    if (!el.classList.contains('caught')) el.style.animationPlayState = 'running';
+                });
+                scheduleCwSpawn();
+            }
+        }
+
+        function spawnCwWord() {
+            if (!cwRunning || cwPaused) return;
+            const playStack = document.getElementById('cw-stack');
+            if (!playStack) return;
+            if (cwSpawnRoundIndex >= cwSequence.length) {
+                if (cwSpawnTimer) {
+                    clearTimeout(cwSpawnTimer);
+                    cwSpawnTimer = null;
+                }
+                return;
+            }
+
+            const entry = cwSequence[cwSpawnRoundIndex];
+            cwSpawnRoundIndex += 1;
+            const label = entry.text;
+            const fontPt = entry.fontSizePt;
+
+            const el = document.createElement('button');
+            el.type = 'button';
+            el.className = 'falling-word';
+            el.textContent = label;
+            el.style.zIndex = String(cwSpawnRoundIndex);
+            if (fontPt != null && Number.isFinite(fontPt)) el.style.setProperty('font-size', fontPt + 'pt', 'important');
+
+            playStack.appendChild(el);
+
+            el.addEventListener('animationend', (ev) => {
+                if (!ev.animationName || ev.animationName.indexOf('cinematic-fade-in') === -1) return;
+                if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
+                el.classList.add('cw-settled');
+            });
+
+            function onCatch(e) {
+                e.preventDefault();
+                if (!cwRunning || el.classList.contains('caught')) return;
+                el.classList.add('caught');
+                setTimeout(() => el.remove(), 380);
+            }
+            el.addEventListener('click', onCatch);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
+        }
+
+        function scheduleCwSpawn() {
+            if (!cwRunning || cwPaused) return;
+            if (cwSpawnRoundIndex >= cwSequence.length) return;
+            cwSpawnTimer = setTimeout(() => {
+                if (!cwRunning || cwPaused) return;
+                spawnCwWord();
+                scheduleCwSpawn();
+            }, cwSpawnMs);
+        }
 
         function stopCatchingWords() {
             cwRunning = false;
+            cwPaused = false;
             cwSpawnRoundIndex = 0;
             if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
             cwSpawnTimer = null;
@@ -571,59 +738,150 @@
         function startCatchingWords() {
             if (cwRunning) return;
             cwRunning = true;
+            cwPaused = false;
             cwSpawnRoundIndex = 0;
-            cwScore = 0;
-            document.getElementById('cw-score').textContent = 'Score: 0';
             const stack = document.getElementById('cw-stack');
             if (stack) stack.innerHTML = '';
 
-            function spawn() {
-                if (!cwRunning) return;
-                const playStack = document.getElementById('cw-stack');
-                if (!playStack) return;
-                if (cwSpawnRoundIndex >= CW_SEQUENCE.length) {
-                    playStack.innerHTML = '';
-                    cwSpawnRoundIndex = 0;
-                }
-
-                const label = CW_SEQUENCE[cwSpawnRoundIndex];
-                cwSpawnRoundIndex += 1;
-
-                const el = document.createElement('button');
-                el.type = 'button';
-                el.className = 'falling-word';
-                if (label.length > 13) el.classList.add('long-label');
-                el.textContent = label;
-
-                playStack.appendChild(el);
-
-                el.addEventListener('animationend', (ev) => {
-                    if (ev.animationName !== 'cw-cinematic-fade-in') return;
-                    if (!cwRunning || el.classList.contains('caught')) return;
-                    el.classList.add('cw-settled');
-                });
-                    e.preventDefault();
-                    if (!cwRunning || el.classList.contains('caught')) return;
-                    el.classList.add('caught');
-                    cwScore += 10;
-                    document.getElementById('cw-score').textContent = 'Score: ' + cwScore;
-                    setTimeout(() => el.remove(), 380);
-                }
-                el.addEventListener('click', onCatch);
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
-            }
-
-            function scheduleSpawn() {
-                if (!cwRunning) return;
-                cwSpawnTimer = setTimeout(() => {
-                    spawn();
-                    scheduleSpawn();
-                }, CW_SPAWN_MS);
-            }
-
-            spawn();
-            scheduleSpawn();
+            spawnCwWord();
+            scheduleCwSpawn();
         }
+
+        function normalizeCwLine(raw) {
+            let line = String(raw || '').replace(/^\uFEFF/, '').trim();
+            if (line.length && line.charCodeAt(0) === 0xff03) line = '#' + line.slice(1);
+            return line;
+        }
+
+        /**
+         * Sections (←/→): neuer Abschnitt bei jeder #‑Zeile (# allein, # Kommentar oder # 60pt in einer Zeile).
+         * Größe: «# 60pt» oder eigene Zeile nur «60pt» / «200pt» (gilt für folgende Wörter bis zur nächsten Größenzeile).
+         * Zeilen, die mit «//» beginnen: Kommentar (ignorieren).
+         */
+        function parseCwSections(text) {
+            const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\n|\r/);
+            const hashWithPt = /^\s*#\s*(\d+(?:\.\d+)?)\s*pt\b/i;
+            const standalonePt = /^\s*(\d+(?:\.\d+)?)\s*pt\s*$/i;
+            const sections = [];
+            let current = [];
+            let currentPt = null;
+
+            function flush() {
+                if (current.length > 0) {
+                    sections.push(current);
+                    current = [];
+                }
+            }
+
+            for (const raw of lines) {
+                const line = normalizeCwLine(raw);
+                if (!line) continue;
+                if (line.startsWith('//')) continue;
+
+                if (line.startsWith('#')) {
+                    const mHash = line.match(hashWithPt);
+                    if (mHash) {
+                        flush();
+                        const v = parseFloat(mHash[1]);
+                        currentPt = Number.isFinite(v) ? v : null;
+                        continue;
+                    }
+                    flush();
+                    currentPt = null;
+                    continue;
+                }
+
+                const mPt = line.match(standalonePt);
+                if (mPt) {
+                    const v = parseFloat(mPt[1]);
+                    currentPt = Number.isFinite(v) ? v : null;
+                    continue;
+                }
+
+                current.push({ text: line, fontSizePt: currentPt });
+            }
+            flush();
+            return sections.filter((s) => s.length > 0);
+        }
+
+        function applyCwSequenceFromText(text) {
+            const sections = parseCwSections(text);
+            if (!sections.length) return;
+            stopCatchingWords();
+            cwSections = sections;
+            cwSectionIndex = 0;
+            cwSequence = cwSections[0];
+            startCatchingWords();
+        }
+
+        function readDroppedFiles(files, cb) {
+            const list = Array.from(files || []);
+            if (!list.length) {
+                cb('');
+                return;
+            }
+            const textLike = list.filter((f) => {
+                const ct = (f.type || '').toLowerCase();
+                return ct.startsWith('text/') || /\.(txt|csv|md|text)$/i.test(f.name || '');
+            });
+            const todo = (textLike.length ? textLike : list).slice(0, 16);
+            let pending = todo.length;
+            let merged = '';
+            if (!pending) {
+                cb('');
+                return;
+            }
+            todo.forEach((file) => {
+                const r = new FileReader();
+                r.onload = () => {
+                    const chunk = typeof r.result === 'string' ? r.result : '';
+                    merged = merged ? merged + '\n' + chunk : chunk;
+                    pending -= 1;
+                    if (pending === 0) cb(merged);
+                };
+                r.onerror = () => {
+                    pending -= 1;
+                    if (pending === 0) cb(merged);
+                };
+                r.readAsText(file, 'UTF-8');
+            });
+        }
+
+        const cwPanelEl = document.getElementById('catching-words-panel');
+        if (cwPanelEl) {
+            cwPanelEl.addEventListener('dragenter', (e) => {
+                if (!document.body.classList.contains('mode-catching-words')) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+                cwPanelEl.classList.add('cw-drag-over');
+            });
+            cwPanelEl.addEventListener('dragover', (e) => {
+                if (!document.body.classList.contains('mode-catching-words')) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+            });
+            cwPanelEl.addEventListener('dragleave', (e) => {
+                if (!cwPanelEl.contains(e.relatedTarget)) cwPanelEl.classList.remove('cw-drag-over');
+            });
+            cwPanelEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cwPanelEl.classList.remove('cw-drag-over');
+                if (!document.body.classList.contains('mode-catching-words')) return;
+                const dt = e.dataTransfer;
+                if (!dt) return;
+                if (dt.files && dt.files.length) {
+                    readDroppedFiles(dt.files, (text) => {
+                        if (text) applyCwSequenceFromText(text);
+                    });
+                    return;
+                }
+                const plain = dt.getData('text/plain');
+                if (plain) applyCwSequenceFromText(plain);
+            });
+        }
+
+        syncCwMotionVars();
+        startCatchingWords();
     </script>
 </body>
 </html>
