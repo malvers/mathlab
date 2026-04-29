@@ -4,47 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doc Alvers | Deep Space Mandelbrot</title>
+    <meta name="forloop.mandelbrot-deep.panel" content="553">
+    <title>Fraktale · Mandelbrot & Julia | Doc Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
     <style>
         #main-content {
             background: #000;
+            /* Flex: volle Restbreite wie multiplikation.html — verhindert sichtbaren Streifen rechts */
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
         }
 
-        /* Zahlen nur in der Sidebar — kein Canvas-HUD */
-        /*
-         * Obere Icon-Zeile (#sidebar-header .cyber-nav): Der rote „zu hohe Box“-Bereich.
-         * cyber-lab-overrides.css erzwingt 52×52 px; branding.styles.extracted.css definiert
-         * Low-Profile 42 px, wird aber geschlagen. Hier branding-konform — nur in dieser Datei.
-         */
-        #sidebar-header .cyber-nav {
-            margin: 0 0 6px 0 !important;
-            gap: 6px !important;
+        /* Sidebar: global 350px + 10px nur in diesem Labor */
+        #side-panel:not(.collapsed) {
+            width: 360px !important;
+            min-width: 360px !important;
         }
 
-        #sidebar-header .cyber-nav .nav-btn {
-            width: 42px !important;
-            height: 42px !important;
-            min-width: 42px !important;
-            min-height: 42px !important;
-            flex: 0 0 42px !important;
+        /* Wie multiplikation.html, Farben/Glas */
+        #side-panel {
+            background: rgba(10, 20, 36, 0.75);
+            border: none;
+            border-right: 1px solid rgba(0, 210, 255, 0.28);
+            backdrop-filter: blur(28px);
+            align-items: stretch !important;
         }
 
-        #sidebar-header .cyber-nav .nav-btn svg {
-            width: 20px !important;
-            height: 20px !important;
-        }
-
-        /* Sidebar: zentrales Layout (cyber-lab-overrides + gleichmäßige Karten) */
-        #ui-container {
-            min-height: 0;
+        #side-panel #ui-container {
+            width: 100% !important;
+            max-width: none !important;
+            align-self: stretch !important;
         }
 
         #side-panel .instrument-card {
+            background: rgba(255, 255, 255, 0.055);
+            border-color: rgba(0, 210, 255, 0.32);
+            box-shadow: 0 0 18px rgba(0, 180, 220, 0.07);
+            width: 100% !important;
+            max-width: none !important;
+            box-sizing: border-box !important;
             margin-bottom: 12px;
         }
 
@@ -52,102 +56,90 @@
             margin-bottom: 6px;
         }
 
-        #side-panel .stats-grid {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 8px;
-            margin-top: 0;
+        #side-panel .instrument-title {
+            color: rgba(0, 210, 255, 0.92) !important;
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.35) !important;
         }
 
-        #side-panel .stats-card {
+        /* Zahlen nur in der Sidebar — kein Canvas-HUD */
+        /* Obere Icon-Zeile: kein eigenes Kleiner-Ziehen — Größe kommt aus cyber-lab-overrides.css (52×52). */
+        #sidebar-header .cyber-nav {
+            margin: 0 0 6px 0 !important;
+            gap: 6px !important;
+        }
+
+        /* Sidebar: zentrales Layout (cyber-lab-overrides + gleichmäßige Karten) */
+        #ui-container {
+            min-height: 0;
+        }
+
+        /* Zwei-Wege-Zeilen wie lissajous.html (#grp-view · lissajous-view-btn), kein Pill-Rieselformat */
+        #side-panel .fraktal-seg-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #side-panel .fraktal-seg-btn {
+            flex: 1;
+            min-width: 118px;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 8px 10px;
+            font-family: Orbitron, sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.2;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none;
+            background: rgba(16, 30, 52, 0.9);
+            border: 1px solid rgba(90, 200, 230, 0.38);
+            color: #d4eefc;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        #side-panel .fraktal-seg-btn:hover:not(:disabled) {
+            border-color: rgba(120, 220, 255, 0.55);
+            background: rgba(20, 38, 62, 0.95);
+        }
+
+        #side-panel .fraktal-seg-btn.is-active {
+            border-color: rgba(0, 210, 255, 0.9);
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.3);
+            color: #f0fdff;
+            background: rgba(0, 210, 255, 0.14);
+        }
+
+        #side-panel .fraktal-seg-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #side-panel .stats-grid.fraktal-readouts {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        #side-panel .fraktal-readouts .stats-card {
             min-width: 0;
         }
 
-        #side-panel .stats-val {
+        #side-panel .fraktal-readouts .stats-card:last-child:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+
+        #side-panel .fraktal-readouts .stats-val {
             font-size: 0.72rem;
             line-height: 1.25;
             word-break: break-word;
             overflow-wrap: anywhere;
-        }
-
-        /*
-         * PARAMETER-Zeile wie lissajous.html (#grp-view — dort lissajous-view-btn):
-         * KEIN .cyber-btn: sonst erzwingt buttons-ultra.css + ui.js weiter Padding/Schrift per !important.
-         */
-        #side-panel .lab-param-toggle-row {
-            display: flex !important;
-            gap: 8px !important;
-            flex-wrap: nowrap !important;
-            margin: 0 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        #side-panel .lab-param-toggle-row .lab-param-toggle-btn {
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            box-sizing: border-box !important;
-            flex: 1 1 0 !important;
-            min-width: 0 !important;
-            margin: 0 !important;
-            min-height: 56px !important;
-            padding: 14px 12px !important;
-            width: auto !important;
-            max-width: none !important;
-            border-radius: 22px !important;
-            font-family: 'Orbitron', sans-serif !important;
-            font-size: 0.76rem !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.1em !important;
-            text-transform: uppercase !important;
-            line-height: 1.2 !important;
-            cursor: pointer !important;
-            outline: none !important;
-            background: rgba(18, 28, 48, 0.9) !important;
-            border: 1px solid rgba(100, 190, 255, 0.45) !important;
-            color: #d8f0ff !important;
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45) !important;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
-        }
-
-        #side-panel .lab-param-toggle-row .lab-param-toggle-btn:hover {
-            border-color: rgba(140, 215, 255, 0.75) !important;
-            background: rgba(24, 38, 62, 0.95) !important;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.22) !important;
-        }
-
-        #side-panel .lab-param-toggle-row .lab-param-toggle-btn.active {
-            background: rgba(0, 210, 255, 0.24) !important;
-            border: 2px solid rgba(0, 210, 255, 0.95) !important;
-            color: #f0fdff !important;
-            box-shadow: 0 0 22px rgba(0, 210, 255, 0.42), 0 0 40px rgba(0, 210, 255, 0.15) !important;
-        }
-
-        #side-panel .lab-param-toggle-row #btn-flight.active {
-            background: rgba(0, 210, 255, 0.24) !important;
-            border: 2px solid rgba(0, 210, 255, 0.95) !important;
-            color: #f0fdff !important;
-            box-shadow: 0 0 22px rgba(0, 210, 255, 0.42), 0 0 40px rgba(0, 210, 255, 0.15) !important;
-        }
-
-        #side-panel .lab-param-toggle-row .lab-param-toggle-btn:active:not(:disabled) {
-            transform: translateY(1px) scale(0.99) !important;
-        }
-
-        #side-panel .instrument-card:has(.lab-param-toggle-row) {
-            border-radius: 16px !important;
-        }
-
-        #side-panel .stat-row .stat-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            letter-spacing: 0.05em;
-            color: rgba(255, 255, 255, 0.45);
-            text-transform: uppercase;
-        }
-
-        #side-panel .stat-row .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
         }
 
         /* FRAKTAL-PARAMETER: buttons-ultra setzt .cyber-control-group margin-top:15px — hier stark straffen */
@@ -170,28 +162,41 @@
             margin-bottom: 2px !important;
         }
 
-        /* Telemetrie wie binomischeslabor.html (ANALYTIK · area-list / area-item) */
-        #side-panel #fraktal-readouts-mount.area-list {
-            margin-top: 6px;
+        /* KaTeX-Overlay: Position über dem Canvas */
+        .mb-fractal-formula-overlay {
+            position: absolute;
+            left: 14px;
+            top: var(--cyber-nav-band-top, 14px);
+            z-index: 6;
+            pointer-events: none;
+            max-width: min(92vw, 640px);
+            box-sizing: border-box;
         }
 
-        #side-panel #fraktal-readouts-mount .area-item {
-            display: flex;
-            justify-content: space-between;
+        /* KaTeX: gut lesbar; min. wie Button-Höhe, Kasten wächst mit Formel */
+        .mb-fractal-formula-box {
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 8px;
+            justify-content: center;
+            box-sizing: border-box;
+            min-height: 52px;
+            height: auto;
+            padding: 10px 18px;
+            background: rgba(6, 14, 28, 0.9);
+            border-radius: 12px;
+            border: 0.5px solid rgba(0, 210, 255, 0.55);
+            box-shadow: 0 0 14px rgba(0, 210, 255, 0.12);
         }
 
-        #side-panel #fraktal-readouts-mount .area-item:last-child {
-            margin-bottom: 0;
+        #canvas-container .mb-fractal-formula-box .katex-display {
+            margin: 0 !important;
         }
 
-        #side-panel #fraktal-readouts-mount .stat-val {
-            font-weight: 700;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            text-align: right;
-            margin-left: 8px;
+        #canvas-container #mb-fractal-formula-tex .katex {
+            font-size: 1.38rem !important;
+            color: #ffc49a !important;
+            text-shadow: 0 0 12px rgba(255, 170, 100, 0.32);
+            line-height: 1.2 !important;
         }
     </style>
 </head>
@@ -213,6 +218,11 @@
     <main id="main-content">
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
+            <div class="mb-fractal-formula-overlay" aria-hidden="true">
+                <div class="mb-fractal-formula-box">
+                    <div id="mb-fractal-formula-tex"></div>
+                </div>
+            </div>
         </div>
     </main>
     <script id="vs" type="x-shader/x-vertex">
@@ -258,21 +268,177 @@
             gl_FragColor = vec4(color, 1.0);
         }
     </script>
-    <script src="js/branding/briefings.js?v=539"></script>
-    <script src="js/branding/overlays.js?v=539"></script>
-    <script src="js/branding.js?v=539"></script>
-    <script src="js/ui.js?v=539"></script>
+    <script src="js/branding/briefings.js?v=542"></script>
+    <script src="js/branding/overlays.js?v=542"></script>
+    <script src="js/branding.js?v=542"></script>
+    <script src="js/ui.js?v=542"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
         }
+
+        /** Mandelbrot/Julia: komplexe Iteration (gleiche Logik wie im Fragment-Shader). */
+        function renderMbFractalFormula() {
+            const el = document.getElementById('mb-fractal-formula-tex');
+            if (!el) return;
+            const tex = 'z_{n+1} = z_n^{2} + c\\quad z_n,\\, c \\in \\mathbb{C}';
+            if (typeof katex !== 'undefined') {
+                katex.render(tex, el, { throwOnError: false, displayMode: true });
+            } else {
+                el.textContent = 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
+                el.style.cssText = 'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#ffc49a;text-align:center;';
+            }
+        }
+
+        /**
+         * Panel-Look erzwingen:
+         * - Inline !important am #side-panel schlägt jedes Stylesheet.
+         * - <style> ans Ende von document.body (nach cyber-ui-dynamic im <head>).
+         * - Nach Frames/Timeouts erneut (falls Module später noch Styles nachladen).
+         */
+        function injectMandelbrotDeepPanelAuthority() {
+            const panel = document.getElementById('side-panel');
+            if (panel) {
+                panel.style.setProperty('background', 'rgba(10, 20, 36, 0.75)', 'important');
+                panel.style.setProperty('border', 'none', 'important');
+                panel.style.setProperty('border-right', '1px solid rgba(0, 210, 255, 0.28)', 'important');
+                panel.style.setProperty('backdrop-filter', 'blur(28px)', 'important');
+            }
+
+            const id = 'mandelbrot-deep-panel-authority';
+            let el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('style');
+                el.id = id;
+            }
+            el.textContent = `
+#side-panel:not(.collapsed) {
+    width: 360px !important;
+    min-width: 360px !important;
+}
+#side-panel {
+    align-items: stretch !important;
+    background: rgba(10, 20, 36, 0.75) !important;
+    border: none !important;
+    border-right: 1px solid rgba(0, 210, 255, 0.28) !important;
+    backdrop-filter: blur(28px) !important;
+}
+#side-panel #ui-container {
+    width: 100% !important;
+    max-width: none !important;
+    align-self: stretch !important;
+}
+#side-panel .instrument-card {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border-color: rgba(0, 210, 255, 0.32) !important;
+    box-shadow: 0 0 18px rgba(0, 180, 220, 0.07) !important;
+}
+#side-panel .instrument-title {
+    color: rgba(0, 210, 255, 0.92) !important;
+    text-shadow: 0 0 12px rgba(0, 210, 255, 0.35) !important;
+}
+#side-panel .fraktal-seg-row {
+    display: flex !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+#side-panel .fraktal-seg-btn {
+    flex: 1 1 0 !important;
+    min-width: 118px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    min-height: 0 !important;
+    font-family: Orbitron, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    outline: none !important;
+    background: rgba(16, 30, 52, 0.9) !important;
+    border: 1px solid rgba(90, 200, 230, 0.38) !important;
+    color: #d4eefc !important;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s !important;
+}
+#side-panel .fraktal-seg-btn:hover:not(:disabled) {
+    border-color: rgba(120, 220, 255, 0.55) !important;
+    background: rgba(20, 38, 62, 0.95) !important;
+}
+#side-panel .fraktal-seg-btn.is-active {
+    border-color: rgba(0, 210, 255, 0.9) !important;
+    box-shadow: 0 0 16px rgba(0, 210, 255, 0.3) !important;
+    color: #f0fdff !important;
+    background: rgba(0, 210, 255, 0.14) !important;
+}
+#side-panel .fraktal-seg-btn:disabled {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+}
+#side-panel .stats-grid.fraktal-readouts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+}
+#side-panel .fraktal-readouts .stats-card {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+    align-items: stretch !important;
+}
+#side-panel .fraktal-readouts .stats-card:last-child:nth-child(3) {
+    grid-column: 1 / -1 !important;
+}
+#side-panel .fraktal-readouts .stats-label {
+    font-size: 0.55rem !important;
+    margin-bottom: 4px !important;
+}
+#side-panel .fraktal-readouts .stats-val {
+    font-size: 0.78rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+}
+            `.trim();
+            document.body.appendChild(el);
+        }
+
+        function scheduleMandelbrotDeepPanelAuthority() {
+            injectMandelbrotDeepPanelAuthority();
+            requestAnimationFrame(() => {
+                injectMandelbrotDeepPanelAuthority();
+                queueMicrotask(injectMandelbrotDeepPanelAuthority);
+            });
+            setTimeout(injectMandelbrotDeepPanelAuthority, 50);
+            setTimeout(injectMandelbrotDeepPanelAuthority, 250);
+        }
+
         window.addEventListener('load', () => {
             if (window.__forloopMandelbrotDeepInit) return;
             window.__forloopMandelbrotDeepInit = true;
-            CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "MANDELBROT DEEP ZOOM" });
-            CyberUI.init();
+            try {
+                CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "FRAKTALE · MANDELBROT & JULIA" });
+            } catch (e) {
+                console.warn('CyberBranding.init', e);
+            }
+            try {
+                CyberUI.init();
+            } catch (e) {
+                console.warn('CyberUI.init', e);
+            }
+            scheduleMandelbrotDeepPanelAuthority();
+            renderMbFractalFormula();
             const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
             if (!gl) return;
             const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
@@ -296,6 +462,11 @@
             const RESET_ANIM_MS_MIN = 2800;
             /** Maximaler Zoomfaktor (Float32 sinnvoll + gleichmäßigeres Radgefühl) */
             const ZOOM_MAX = 200000;
+            /** Bei START FLIGHT gespeichert — RESET fliegt hierhin zurück (statt nur DEF_*). */
+            let flightSnapshot = null;
+            /** Canvas-Pixel (für Mausfolge während Flight); null = Bildmitte */
+            let flightMouseCanvasX = null;
+            let flightMouseCanvasY = null;
 
             function easeOutCubic(t) {
                 const u = 1 - t;
@@ -317,7 +488,7 @@
                 const bf = document.querySelector('#side-panel #btn-flight');
                 if (bf) {
                     bf.innerText = 'START FLIGHT';
-                    bf.classList.remove('active');
+                    bf.classList.remove('is-active');
                 }
             }
 
@@ -364,6 +535,17 @@
                 if (disp) disp.textContent = str;
             }
 
+            /** Während Flight: Blickzentrum = komplexer Punkt unter dem Cursor (wie Zoom-Fokus). */
+            function applyFlightMouseToCenter(w, h) {
+                const s = Math.min(w, h);
+                const mx = flightMouseCanvasX != null ? flightMouseCanvasX : w / 2;
+                const my = flightMouseCanvasY != null ? flightMouseCanvasY : h / 2;
+                const vx = centerX + ((mx - w / 2) / s / zoom) * 3;
+                const vy = centerY - ((my - h / 2) / s / zoom) * 3;
+                centerX = vx;
+                centerY = vy;
+            }
+
             function tickResetAnim() {
                 if (!resetAnim) return;
                 const dur = resetAnim.durationMs;
@@ -389,12 +571,14 @@
                 if (rawT >= 1) {
                     centerX = to.cx; centerY = to.cy; zoom = to.zoom;
                     juliaX = to.jx; juliaY = to.jy; maxIter = to.mi;
+                    const clearFlight = resetAnim.clearFlightSnapshotOnDone;
                     resetAnim = null;
                     const br = document.getElementById('btn-reset');
                     if (br) br.disabled = false;
-                    setRangeInMount('jx-mount', DEF_SLIDER_JX);
-                    setRangeInMount('jy-mount', DEF_SLIDER_JY);
-                    setRangeInMount('iter-mount', DEF_SLIDER_ITER);
+                    if (clearFlight) flightSnapshot = null;
+                    setRangeInMount('jx-mount', Math.round(to.jx * 1000));
+                    setRangeInMount('jy-mount', Math.round(to.jy * 1000));
+                    setRangeInMount('iter-mount', to.mi);
                 }
             }
 
@@ -423,27 +607,42 @@
                 isFlight = false;
                 time = 0;
                 if (mode === 'JULIA') {
-                    document.getElementById('btn-mode-j').classList.add('active');
-                    document.getElementById('btn-mode-m').classList.remove('active');
+                    document.getElementById('btn-mode-j').classList.add('is-active');
+                    document.getElementById('btn-mode-m').classList.remove('is-active');
                 } else {
-                    document.getElementById('btn-mode-m').classList.add('active');
-                    document.getElementById('btn-mode-j').classList.remove('active');
+                    document.getElementById('btn-mode-m').classList.add('is-active');
+                    document.getElementById('btn-mode-j').classList.remove('is-active');
                 }
                 const bf = document.querySelector('#side-panel #btn-flight');
                 if (bf) {
                     bf.innerText = 'START FLIGHT';
-                    bf.classList.remove('active');
+                    bf.classList.remove('is-active');
                 }
                 zoom = clampZoom(zoom);
-                const to = (mode === 'JULIA')
-                    ? { cx: DEF_JL_CENTER_X, cy: DEF_JL_CENTER_Y, zoom: DEF_JL_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER }
-                    : { cx: DEF_MB_CENTER_X, cy: DEF_MB_CENTER_Y, zoom: DEF_MB_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER };
+                let to;
+                let clearFlightSnapshotOnDone = false;
+                if (flightSnapshot !== null) {
+                    to = {
+                        cx: flightSnapshot.cx,
+                        cy: flightSnapshot.cy,
+                        zoom: flightSnapshot.zoom,
+                        jx: flightSnapshot.jx,
+                        jy: flightSnapshot.jy,
+                        mi: flightSnapshot.mi
+                    };
+                    clearFlightSnapshotOnDone = true;
+                } else {
+                    to = (mode === 'JULIA')
+                        ? { cx: DEF_JL_CENTER_X, cy: DEF_JL_CENTER_Y, zoom: DEF_JL_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER }
+                        : { cx: DEF_MB_CENTER_X, cy: DEF_MB_CENTER_Y, zoom: DEF_MB_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER };
+                }
                 const from = { cx: centerX, cy: centerY, zoom, jx: juliaX, jy: juliaY, mi: maxIter };
                 resetAnim = {
                     t0: performance.now(),
                     from,
                     to,
-                    durationMs: computeResetDurationMs(from.zoom, to.zoom)
+                    durationMs: computeResetDurationMs(from.zoom, to.zoom),
+                    clearFlightSnapshotOnDone
                 };
                 const br = document.getElementById('btn-reset');
                 if (br) br.disabled = true;
@@ -455,6 +654,7 @@
                 zoom = clampZoom(zoom);
                 if (resetAnim) tickResetAnim();
                 else if (isFlight) {
+                    applyFlightMouseToCenter(canvas.width, canvas.height);
                     if (zoom >= ZOOM_MAX) {
                         zoom = ZOOM_MAX;
                         stopFlightUi();
@@ -489,9 +689,9 @@
             }
 
             CyberUI.createCard('ui-container', 'LABOR-MODUS', `
-                <div class="lab-param-toggle-row">
-                    <button type="button" id="btn-mode-m" class="lab-param-toggle-btn">MANDELBROT</button>
-                    <button type="button" id="btn-mode-j" class="lab-param-toggle-btn">JULIA-MENGE</button>
+                <div class="fraktal-seg-row">
+                    <button type="button" id="btn-mode-m" class="fraktal-seg-btn">MANDELBROT</button>
+                    <button type="button" id="btn-mode-j" class="fraktal-seg-btn">JULIA-MENGE</button>
                 </div>
             `, 'var(--neon-blue)');
 
@@ -499,18 +699,18 @@
                 <div id="jx-mount"></div>
                 <div id="jy-mount" style="margin-top:2px;"></div>
                 <div id="iter-mount" style="margin-top:2px;"></div>
-                <div id="fraktal-readouts-mount" class="area-list">
-                    <div class="area-item" style="color:#00f2ff;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">DETAILGRAD</span>
-                        <span id="readout-detail" class="stat-val">256</span>
+                <div id="fraktal-readouts-mount" class="stats-grid fraktal-readouts">
+                    <div class="stats-card">
+                        <span class="stats-label">DETAILGRAD</span>
+                        <span id="readout-detail" class="stats-val">256</span>
                     </div>
-                    <div class="area-item" style="color:#00f2ff;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">ZOOMFAKTOR</span>
-                        <span id="readout-zoom" class="stat-val">1,000</span>
+                    <div class="stats-card">
+                        <span class="stats-label">ZOOMFAKTOR</span>
+                        <span id="readout-zoom" class="stats-val">1,000</span>
                     </div>
-                    <div class="area-item" style="color:#00f2ff;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">ARITHMETIK</span>
-                        <span id="readout-prec" class="stat-val">Float32 / Pixel</span>
+                    <div class="stats-card">
+                        <span class="stats-label">ARITHMETIK</span>
+                        <span id="readout-prec" class="stats-val">Float32 / Pixel</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
@@ -531,28 +731,28 @@
             }, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', 'NAVIGATION', `
-                <div class="lab-param-toggle-row">
-                    <button type="button" id="btn-flight" class="lab-param-toggle-btn">START FLIGHT</button>
-                    <button type="button" id="btn-reset" class="lab-param-toggle-btn">RESET</button>
+                <div class="fraktal-seg-row">
+                    <button type="button" id="btn-flight" class="fraktal-seg-btn">START FLIGHT</button>
+                    <button type="button" id="btn-reset" class="fraktal-seg-btn">RESET</button>
                 </div>
             `, 'var(--neon-blue)');
 
             document.getElementById('btn-mode-m').onclick = () => {
                 mode = 'MANDELBROT';
-                document.getElementById('btn-mode-m').classList.add('active');
-                document.getElementById('btn-mode-j').classList.remove('active');
+                document.getElementById('btn-mode-m').classList.add('is-active');
+                document.getElementById('btn-mode-j').classList.remove('is-active');
             };
             document.getElementById('btn-mode-j').onclick = () => {
                 mode = 'JULIA';
-                document.getElementById('btn-mode-j').classList.add('active');
-                document.getElementById('btn-mode-m').classList.remove('active');
+                document.getElementById('btn-mode-j').classList.add('is-active');
+                document.getElementById('btn-mode-m').classList.remove('is-active');
             };
             if (mode === 'JULIA') {
-                document.getElementById('btn-mode-j').classList.add('active');
-                document.getElementById('btn-mode-m').classList.remove('active');
+                document.getElementById('btn-mode-j').classList.add('is-active');
+                document.getElementById('btn-mode-m').classList.remove('is-active');
             } else {
-                document.getElementById('btn-mode-m').classList.add('active');
-                document.getElementById('btn-mode-j').classList.remove('active');
+                document.getElementById('btn-mode-m').classList.add('is-active');
+                document.getElementById('btn-mode-j').classList.remove('is-active');
             }
 
             const btnFlightEl = document.querySelector('#side-panel #btn-flight');
@@ -560,16 +760,42 @@
                 btnFlightEl.onclick = () => {
                     isFlight = !isFlight;
                     btnFlightEl.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
-                    btnFlightEl.classList.toggle('active', isFlight);
+                    btnFlightEl.classList.toggle('is-active', isFlight);
+                    if (isFlight) {
+                        flightSnapshot = {
+                            cx: centerX, cy: centerY, zoom: clampZoom(zoom),
+                            jx: juliaX, jy: juliaY, mi: maxIter
+                        };
+                        const w = canvas.width, h = canvas.height;
+                        flightMouseCanvasX = w > 0 ? w / 2 : null;
+                        flightMouseCanvasY = h > 0 ? h / 2 : null;
+                        isDrag = false;
+                    }
                 };
             }
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / Math.max(1, rect.width);
+                const scaleY = canvas.height / Math.max(1, rect.height);
+                flightMouseCanvasX = (e.clientX - rect.left) * scaleX;
+                flightMouseCanvasY = (e.clientY - rect.top) * scaleY;
+            });
+            canvas.addEventListener('mouseleave', () => {
+                const w = canvas.width, h = canvas.height;
+                if (w > 0 && h > 0) {
+                    flightMouseCanvasX = w / 2;
+                    flightMouseCanvasY = h / 2;
+                }
+            });
             document.getElementById('btn-reset').onclick = () => resetView();
             let isDrag = false, lX, lY;
             canvas.onmousedown = (e) => {
                 abortResetAnim();
+                if (isFlight) return;
                 isDrag = true; lX = e.clientX; lY = e.clientY;
             };
             window.onmousemove = (e) => {
+                if (isFlight) return;
                 if (!isDrag) return;
                 const dx = e.clientX - lX, dy = e.clientY - lY, s = Math.min(canvas.width, canvas.height);
                 centerX -= (dx / s / zoom) * 3;

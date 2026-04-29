@@ -9,6 +9,8 @@
         rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="stylesheet" href="js/index-ui.css">
+    <!-- Branding-Styles: fixe Position für Titel + Nav (.floating), sonst erscheinen sie unten im Fluss. -->
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <script src="js/ui.js?v=4"></script>
     <style>
         :root {
@@ -33,6 +35,22 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
+        }
+
+        /* Kein #sidebar-header auf der Startseite: Navigation ist .floating am body — ohne position:fixed rutschen Titel-Leiste und Icons ins Dokumentende unter den Footer. */
+        body > .cyber-nav.floating {
+            position: fixed !important;
+            top: 25px !important;
+            left: 85px !important;
+            width: auto !important;
+            max-width: calc(100vw - 95px);
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            align-items: center;
+            gap: 8px !important;
+            z-index: 2001 !important;
+            margin: 0 !important;
         }
 
         /* Legacy Stars disabled for new Galaxy Video Backdrop 
@@ -1384,7 +1402,7 @@
                 'grade9': 'JAHRGANG 9', 'grade10': 'JAHRGANG 10', 'grade11': 'JAHRGANG 11', 'grade12': 'JAHRGANG 12',
                 'fun': 'SPIELE & FUN', 'lgs': 'GLEICHUNGSSYSTEME', 'pythagoras': 'PYTHAGORAS',
                 'dreiecke': 'DREIECKE', 'arithmetik': 'GRUNDRECHENARTEN', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN',
-                'highlight': 'HIGHLIGHTS', 'fraktale': 'FRAKTALE'
+                'highlight': 'HIGHLIGHTS', 'fraktale': 'Fraktale'
             };
 
             const titleEl = document.getElementById('view-title');
