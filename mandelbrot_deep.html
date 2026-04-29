@@ -300,10 +300,10 @@
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
-            function formatZoomExponent(decZ) {
-                const exp = decZ.logarithm(10).toNumber();
-                if (!Number.isFinite(exp)) return '0,0';
-                return exp.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            function formatZoomFactor(decZ) {
+                const n = decZ.toNumber();
+                if (!Number.isFinite(n) || n <= 0) return '1,000';
+                return n.toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
             }
 
             function syncFraktalReadouts() {
@@ -311,7 +311,7 @@
                 const z = document.getElementById('readout-zoom');
                 const p = document.getElementById('readout-prec');
                 if (d) d.textContent = String(maxIter);
-                if (z) z.textContent = formatZoomExponent(zoom);
+                if (z) z.textContent = formatZoomFactor(zoom);
                 if (p) p.textContent = `${DECIMAL_PRECISION} Stellen`;
             }
 
@@ -398,8 +398,8 @@
                         <span id="readout-detail" class="stat-val">256</span>
                     </div>
                     <div class="area-item" style="color:#00f2ff;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">10 HOCH</span>
-                        <span id="readout-zoom" class="stat-val">0,0</span>
+                        <span style="font-family:Orbitron; font-size:0.8rem;">ZOOMFAKTOR</span>
+                        <span id="readout-zoom" class="stat-val">1,000</span>
                     </div>
                     <div class="area-item" style="color:#00f2ff;">
                         <span style="font-family:Orbitron; font-size:0.8rem;">PRÄZISION</span>
