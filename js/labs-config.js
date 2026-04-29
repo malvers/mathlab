@@ -576,6 +576,22 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "mandelbrot-deep",
+        "href": "mandelbrot_deep.html",
+        "title": "Mandelbrot Deep Zoom",
+        "description": "Tiefenzoom in die Mandelbrot- und Julia-Menge: Iteration z²+c im WebGL-Shader, Zoom & Pan durch die fraktale Grenze, optionaler Flight-Modus.",
+        "tagline": "Fraktale / Komplexe Ebene / Mandelbrot & Julia",
+        "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 50 6 C 82 6 96 42 80 68 C 64 94 36 94 20 68 C 4 42 18 6 50 6 Z" fill="none" stroke="#00d2ff" stroke-width="2" />
+            <path d="M 50 80 C 28 60 28 40 50 20 C 72 40 72 60 50 80" fill="rgba(157,80,187,0.28)" stroke="#9d50bb" stroke-width="1.4" />
+            <circle cx="50" cy="36" r="5" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffaa00);" />
+            <circle cx="68" cy="58" r="2.5" fill="#adff2f" opacity="0.9" />
+        </svg>`,
+        "category": "fraktale highlight hot grade11 grade12 oberstufe",
+        "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",
+        "color": "purple"
+    },
+    {
         "id": "fermatpunkt",
         "href": "fermatpunkt.html",
         "title": "Fermat-Punkt",
