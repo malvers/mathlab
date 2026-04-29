@@ -466,11 +466,9 @@ const CyberBranding = {
 
         lines.forEach(line => {
             let trimmed = line.trim();
-            // Skip empty lines or separator lines (like === or ---)
-            if (!trimmed || /^[=\-]+$/.test(trimmed)) {
+            // Skip empty lines, separator lines, or "LABOR:" header lines
+            if (!trimmed || /^[=\-]+$/.test(trimmed) || trimmed.startsWith("LABOR:")) {
                 if (inList) { html += "</ul>"; inList = false; }
-                // Use a smaller spacer instead of a full <br> for empty lines if desired, 
-                // but for now we just keep the <br> and rely on reduced margins elsewhere.
                 if (!trimmed) html += "<div style='height:5px;'></div>"; 
                 return;
             }
@@ -529,20 +527,25 @@ const CyberBranding = {
         }
 
         overlay.innerHTML = `
-            <div class="briefing-modal" style="position: relative;">
-                <div style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.8rem; line-height: 1; opacity: 0.5; transition: all 0.2s; color: var(--branding-blue);" 
+            <div class="briefing-modal" style="position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 0;">
+                <div style="position: absolute; top: 22px; right: 25px; cursor: pointer; opacity: 0.5; transition: all 0.2s; color: var(--branding-blue); z-index: 10;" 
                      onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')"
                      onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" 
-                     onmouseout="this.style.opacity='0.5'; this.style.transform='scale(1)'">×</div>
-                <div class="briefing-header">
+                     onmouseout="this.style.opacity='0.5'; this.style.transform='scale(1)'">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                     </svg>
+                </div>
+                <div class="briefing-header" style="padding: 25px 25px 15px 25px; flex-shrink: 0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
                     Beschreibung
                 </div>
-                <div class="briefing-text">${this.briefingContent}</div>
-                <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+                <div class="briefing-text" style="flex: 1; overflow-y: auto; padding: 0 35px 25px 25px; margin-right: 5px;">${this.briefingContent}</div>
+                <div style="padding: 0 25px 25px 25px; display: flex; justify-content: flex-end; flex-shrink: 0;">
                     <button class="nav-btn" style="width: auto; height: auto; padding: 12px 35px; min-width: 140px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
                 </div>
             </div>
