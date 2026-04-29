@@ -176,7 +176,14 @@
     <script src="js/ui.js?v=4"></script>
     <script>
         CyberUI.init();
-        // Set playback rate to very slow for cinematic effect
+
+        /* autoload on show — lokal (entspricht CyberBranding DEV_MODE / visibilitychange in branding.js) */
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                window.location.reload(true);
+            }
+        });
+
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
             if (video) video.playbackRate = 0.5;
@@ -221,7 +228,7 @@
             console.log("⚛️ CYBER-OS: Animation Reset initiated.");
             const container = document.querySelector('.intro-container');
             if (!container) return;
-            
+
             const newContainer = container.cloneNode(true);
             container.parentNode.replaceChild(newContainer, container);
         }
