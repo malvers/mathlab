@@ -177,12 +177,14 @@
     <script>
         CyberUI.init();
 
-        /* autoload on show — lokal (entspricht CyberBranding DEV_MODE / visibilitychange in branding.js) */
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                window.location.reload(true);
-            }
-        });
+        const DEV_MODE = true; // Master Switch for Auto-Reload (gleiche Idee wie CyberBranding.DEV_MODE in js/branding.js)
+        if (DEV_MODE) {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    window.location.reload(true);
+                }
+            });
+        }
 
         window.addEventListener('load', () => {
             const video = document.getElementById('bg-video');
