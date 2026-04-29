@@ -75,6 +75,17 @@
             box-shadow: 0 0 0 3px #00d2ff, 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
+        /* Innen: abgerundeter Ausschnitt; außen: Kachel darf Schließen-Button nach außen zeigen */
+        .universe-thumb__media {
+            overflow: hidden;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .universe-thumb.universe-thumb--focused {
+            overflow: visible;
+        }
+
         .universe-thumb img {
             display: block;
             width: 100%;
@@ -85,43 +96,49 @@
         }
 
         .universe-close-x {
-            position: fixed;
-            top: 30px;
-            right: 84px;
-            z-index: 50000;
-            width: 44px;
-            height: 44px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            z-index: 10;
+            /* deutlich kleiner als vorher (44px) */
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.82);
             color: #fff;
-            font-size: 1.35rem;
-            line-height: 1;
+            line-height: 0;
             cursor: pointer;
             pointer-events: auto;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 0;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.25);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.35);
             transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
         }
         .universe-close-x.visible {
             display: flex;
             opacity: 1;
             box-shadow:
-                0 0 0 2px rgba(0, 210, 255, 0.55),
-                0 8px 28px rgba(0, 0, 0, 0.55);
+                0 0 0 1px rgba(0, 210, 255, 0.5),
+                0 4px 14px rgba(0, 0, 0, 0.45);
         }
         .universe-close-x:hover {
             background: rgba(220, 38, 38, 0.35);
-            box-shadow: 0 0 18px rgba(255, 80, 80, 0.45);
-            transform: scale(1.06);
+            box-shadow: 0 0 12px rgba(255, 80, 80, 0.4);
+            transform: translate(50%, -50%) scale(1.08);
         }
         .universe-close-x:focus-visible {
             outline: 2px solid #00d2ff;
-            outline-offset: 3px;
+            outline-offset: 2px;
+        }
+        .universe-close-x svg {
+            display: block;
+            width: 8px;
+            height: 8px;
         }
 
         .fs-toggle {
@@ -170,7 +187,7 @@
 
     <button type="button" id="universe-close-focus" class="universe-close-x"
         title="Ansicht schließen (Esc)" aria-label="Labor-Ansicht schließen">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
     </button>
@@ -217,7 +234,12 @@
             o.isDragging = false;
             o.alwaysOnTop = false;
             o.el.style.boxShadow = '';
+            o.el.classList.remove('universe-thumb--focused');
             universeFocusedObj = null;
+            const b = document.getElementById('universe-close-focus');
+            if (b && b.parentElement !== document.body) {
+                document.body.appendChild(b);
+            }
             setUniverseCloseVisible(false);
         }
 
@@ -247,8 +269,9 @@
         document.getElementById('universe-close-focus')?.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             releaseUniverseFocus();
-        });
+        }, true);
 
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Escape' && universeFocusedObj) {
@@ -349,10 +372,13 @@
                     const a = document.createElement('a');
                     a.className = 'universe-thumb';
                     a.href = lab.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                    const media = document.createElement('div');
+                    media.className = 'universe-thumb__media';
                     const im = document.createElement('img');
                     im.src = SCREENSHOT_BASE + lab.file;
                     im.alt = ''; im.decoding = 'async'; im.draggable = false;
-                    a.appendChild(im);
+                    media.appendChild(im);
+                    a.appendChild(media);
                     plane.appendChild(a);
 
                     const obj = {
@@ -371,8 +397,12 @@
                     active.push(obj);
 
                     a.addEventListener('click', (e) => {
-                        if (!obj.isFocused) e.preventDefault();
-                        else releaseUniverseFocus();
+                        if (!obj.isFocused) {
+                            e.preventDefault();
+                            return;
+                        }
+                        e.preventDefault();
+                        releaseUniverseFocus();
                     });
                     a.addEventListener('pointerdown', (e) => {
                         obj.frozen    = true;
@@ -417,7 +447,10 @@
                         a.style.opacity = '1';
                         a.style.zIndex = '20000';
                         a.style.boxShadow = '0 0 40px rgba(0,210,255,0.8), 0 20px 60px rgba(0,0,0,0.6)';
+                        a.classList.add('universe-thumb--focused');
                         universeFocusedObj = obj;
+                        const closeBtn = document.getElementById('universe-close-focus');
+                        if (closeBtn) a.appendChild(closeBtn);
                         setUniverseCloseVisible(true);
                     });
 
