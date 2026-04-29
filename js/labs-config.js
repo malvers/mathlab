@@ -461,6 +461,8 @@ const LABS_DATA = [
         "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
         "color": "green"
     },
+    /*
+     * Happy-Birthday-Kachel (Cyber-Cake): temporär aus — happybirthday.html per direktem Link weiter nutzbar.
     {
         "id": "happy-birthday-ulf",
         "href": "happybirthday.html?name=Ulf",
@@ -485,6 +487,7 @@ const LABS_DATA = [
         "keywords": "happy birthday geburtstag glueckwunsch konfetti feuerwerk torte party celebrate ulf",
         "color": "purple"
     },
+    */
     {
         "id": "galtonboard",
         "href": "galtonboard.html",
@@ -578,14 +581,27 @@ const LABS_DATA = [
     {
         "id": "mandelbrot-deep",
         "href": "mandelbrot_deep.html",
-        "title": "Mandelbrot Deep Zoom",
-        "description": "Tiefenzoom in die Mandelbrot- und Julia-Menge: Iteration z²+c im WebGL-Shader, Zoom & Pan durch die fraktale Grenze, optionaler Flight-Modus.",
-        "tagline": "Fraktale / Komplexe Ebene / Mandelbrot & Julia",
+        "title": "Fraktale",
+        "description": "Mandelbrot- und Julia-Menge im WebGL-Shader: Iteration z²+c, Tiefenzoom und Pan an der fraktalen Grenze, optionaler Flight-Modus.",
+        "tagline": "Mandelbrot / Julia / Komplexe Ebene",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 50 6 C 82 6 96 42 80 68 C 64 94 36 94 20 68 C 4 42 18 6 50 6 Z" fill="none" stroke="#00d2ff" stroke-width="2" />
-            <path d="M 50 80 C 28 60 28 40 50 20 C 72 40 72 60 50 80" fill="rgba(157,80,187,0.28)" stroke="#9d50bb" stroke-width="1.4" />
-            <circle cx="50" cy="36" r="5" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffaa00);" />
-            <circle cx="68" cy="58" r="2.5" fill="#adff2f" opacity="0.9" />
+            <defs>
+                <linearGradient id="juliaCardGrad" x1="15%" y1="85%" x2="85%" y2="15%">
+                    <stop offset="0%" stop-color="#6b21a8"/>
+                    <stop offset="50%" stop-color="#00d2ff"/>
+                    <stop offset="100%" stop-color="#fbbf24"/>
+                </linearGradient>
+            </defs>
+            <!-- Stilisierte Julia-Menge: asymmetrischer Hauptkörper + Satelliten-Bulle am Rand -->
+            <path fill="url(#juliaCardGrad)" fill-opacity="0.32" stroke="#00d2ff" stroke-width="1.65" stroke-linejoin="round"
+                d="M 52 20 C 78 22 88 48 78 66 C 72 76 56 82 44 76 C 22 64 18 38 36 24 C 40 20 46 19 52 20 Z"/>
+            <path fill="none" stroke="#9d50bb" stroke-width="1.35" stroke-linecap="round"
+                d="M 44 44 Q 50 30 58 44 Q 50 58 44 44"/>
+            <path fill="none" stroke="#ffcc00" stroke-width="1.15" stroke-linecap="round" opacity="0.9"
+                d="M 38 58 Q 48 68 62 62"/>
+            <circle cx="76" cy="38" r="8" fill="none" stroke="#adff2f" stroke-width="1.35" opacity="0.95"/>
+            <circle cx="76" cy="38" r="2.4" fill="#adff2f" opacity="0.8"/>
+            <circle cx="48" cy="48" r="3" fill="#050b18" stroke="#e2e8f0" stroke-width="0.9"/>
         </svg>`,
         "category": "fraktale highlight hot grade11 grade12 oberstufe",
         "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",

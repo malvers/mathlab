@@ -431,7 +431,7 @@ FEATURES & STEUERUNG:
 - Modus: Mandelbrot und Julia; Julia-Parameter per Steuerelementen bzw. Cursor-Bezug.
 - Zoom & Pan: Mausrad zoomen, **Shift** für feinere Schritte; Ziehen verschiebt die Ebene (hoher Zoom kann gedämpft sein).
 - Iterationen / Detail: Maximale Iterationszahl (Detail vs. Leistung).
-- Flight: Automatischer Zoom-/Flugmodus optional; Reset stellt die Ansicht zurück.
+- Flight: **START FLIGHT** zoomt ein; der Blickmittelpunkt **folgt der Maus** auf dem Canvas. Beim Start wird ein **Anker** gespeichert — **erster RESET** animiert zurück zu genau diesem Zustand (inkl. c, Zoom, Iterationen); **zweiter RESET** (ohne neuen Flight) kehrt zu den Labor-Defaults.
 
 INTERFACE:
 ULTRA-Sidebar mit Parametern; zentrales WebGL-Canvas.`,
