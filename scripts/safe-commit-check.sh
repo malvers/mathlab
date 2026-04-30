@@ -14,6 +14,12 @@ ALLOW_MASS_DELETE="${ALLOW_MASS_DELETE:-0}"
 ALLOW_PROTECTED_EDIT="${ALLOW_PROTECTED_EDIT:-0}"
 ALLOW_FILE_DELETE="${ALLOW_FILE_DELETE:-0}"
 
+# Falls die Umgebung keine Env-Variablen an Hooks durchreicht (z. B. Agent),
+# einmalig: git config hooks.allowMassDelete true
+if [[ "$(git -C "${repo_root}" config --get hooks.allowMassDelete 2>/dev/null)" == "true" ]]; then
+  ALLOW_MASS_DELETE="1"
+fi
+
 protected_files=(
   "js/cyber-layout.css"
   "js/index-ui.css"
@@ -50,7 +56,7 @@ while IFS=$'\t' read -r added deleted file_path; do
 
   total_deleted=$((total_deleted + deleted))
 
-  if (( deleted > MAX_DELETIONS_PER_FILE )); then
+  if (( deleted > MAX_DELETIONS_PER_FILE )) && [[ "$ALLOW_MASS_DELETE" != "1" ]]; then
     errors+=("Large deletion in ${file_path}: -${deleted} lines (limit ${MAX_DELETIONS_PER_FILE})")
   fi
 
@@ -77,7 +83,7 @@ if (( ${#errors[@]} > 0 )); then
   for e in "${errors[@]}"; do
     printf '  - %s\n' "$e"
   done
-  printf '\nTip: run `git diff --cached --stat` before committing.\n\n'
+  printf '\nTip: run `git diff --cached --stat` before committing. Mass cleanup: ALLOW_MASS_DELETE=1 or `git config hooks.allowMassDelete true`.\n\n'
   exit 1
 fi
 
