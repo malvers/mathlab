@@ -1,5 +1,5 @@
 /**
- * OPTI-LENS Standalone (cmaes_java.js)
+ * Linsenoptimierung Standalone (cmaes_java.js)
  * RESTORED STABLE VERSION (Prioritizing Back Optimization)
  */
 

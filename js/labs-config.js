@@ -17,7 +17,7 @@
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
  * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel): fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linse)
+ * top5 (Hub-Kachel): fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
@@ -488,9 +488,29 @@ const LABS_DATA = [
         "description": "Überlagerung zweier harmonischer Schwingungen: Frequenzverhältnis, Phase und KaTeX-Parameter live. 2D-Kurve oder gedankliche 3D-Pendelansicht.",
         "tagline": "Harmonische Schwingungen / Parametrische Kurven",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 20 50 Q 35 25 50 50 T 80 50" fill="none" stroke="var(--neon-cyan)" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M 50 22 Q 62 50 50 78 Q 38 50 50 22" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>
-            <circle cx="50" cy="50" r="2.2" fill="var(--neon-green)"/>
+            <defs>
+                <filter id="lisOscGlow" x="-35%" y="-35%" width="170%" height="170%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.35" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <rect width="100" height="100" rx="6" fill="#070f18"/>
+            <g stroke="rgba(80,120,160,0.22)" stroke-width="0.55">
+                <line x1="14" y1="14" x2="86" y2="14"/><line x1="14" y1="32" x2="86" y2="32"/><line x1="14" y1="50" x2="86" y2="50"/>
+                <line x1="14" y1="68" x2="86" y2="68"/><line x1="14" y1="86" x2="86" y2="86"/>
+                <line x1="14" y1="14" x2="14" y2="86"/><line x1="32" y1="14" x2="32" y2="86"/><line x1="50" y1="14" x2="50" y2="86"/>
+                <line x1="68" y1="14" x2="68" y2="86"/><line x1="86" y1="14" x2="86" y2="86"/>
+            </g>
+            <line x1="14" y1="50" x2="86" y2="50" stroke="#5ee9ff" stroke-width="1.35"/>
+            <line x1="50" y1="14" x2="50" y2="86" stroke="#5ee9ff" stroke-width="1.35"/>
+            <g fill="#ddeeff" font-family="system-ui,sans-serif" font-size="5.2" opacity="0.82">
+                <text x="11" y="51.5" text-anchor="end">−2</text><text x="30" y="51.5" text-anchor="middle">−1</text>
+                <text x="50" y="51.5" text-anchor="middle">0</text><text x="69" y="51.5" text-anchor="middle">1</text><text x="88" y="51.5" text-anchor="middle">2</text>
+                <text x="51" y="17" text-anchor="start">2</text><text x="51" y="35" text-anchor="start">1</text>
+                <text x="51" y="71" text-anchor="start">−1</text><text x="51" y="89" text-anchor="start">−2</text>
+            </g>
+            <path fill="none" stroke="#ff9f3b" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" filter="url(#lisOscGlow)"
+                d="M 50.0,50.0 L 57.0,45.31 L 63.62,40.73 L 69.48,36.38 L 74.27,32.37 L 77.72,28.79 L 79.63,25.73 L 79.91,23.27 L 78.53,21.47 L 75.58,20.37 L 71.21,20.0 L 65.67,20.37 L 59.27,21.47 L 52.35,23.27 L 45.31,25.73 L 38.52,28.79 L 32.37,32.37 L 27.19,36.38 L 23.27,40.73 L 20.83,45.31 L 20.0,50.0 L 20.83,54.69 L 23.27,59.27 L 27.19,63.62 L 32.37,67.63 L 38.52,71.21 L 45.31,74.27 L 52.35,76.73 L 59.27,78.53 L 65.67,79.63 L 71.21,80.0 L 75.58,79.63 L 78.53,78.53 L 79.91,76.73 L 79.63,74.27 L 77.72,71.21 L 74.27,67.63 L 69.48,63.62 L 63.62,59.27 L 57.0,54.69 L 50.0,50.0 L 43.0,45.31 L 36.38,40.73 L 30.52,36.38 L 25.73,32.37 L 22.28,28.79 L 20.37,25.73 L 20.09,23.27 L 21.47,21.47 L 24.42,20.37 L 28.79,20.0 L 34.33,20.37 L 40.73,21.47 L 47.65,23.27 L 54.69,25.73 L 61.48,28.79 L 67.63,32.37 L 72.81,36.38 L 76.73,40.73 L 79.17,45.31 L 80.0,50.0 L 79.17,54.69 L 76.73,59.27 L 72.81,63.62 L 67.63,67.63 L 61.48,71.21 L 54.69,74.27 L 47.65,76.73 L 40.73,78.53 L 34.33,79.63 L 28.79,80.0 L 24.42,79.63 L 21.47,78.53 L 20.09,76.73 L 20.37,74.27 L 22.28,71.21 L 25.73,67.63 L 30.52,63.62 L 36.38,59.27 L 43.0,54.69 L 50.0,50.0"/>
         </svg>`,
         "category": "fun geometrie hot highlight grade11 grade12 oberstufe uni",
         "keywords": "lissajous harmonisch schwingung frequenz phase parametrische kurve pendel figur",
@@ -503,10 +523,12 @@ const LABS_DATA = [
         "description": "Die Evolution der Form. Nutze die Covariance Matrix Adaptation Evolution Strategy zur Echtzeit-Optimierung komplexer Geometrien. Ein Blick in die Zukunft der computergestützten Linsengestaltung.",
         "tagline": "Evolutionäre Strategien / Optimierung",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="35" fill="none" stroke="var(--neon-green)" stroke-width="1" stroke-dasharray="2 4" />
-            <circle cx="50" cy="50" r="5" fill="var(--neon-green)" />
-            <path d="M 50 15 L 50 35 M 50 65 L 50 85 M 15 50 L 35 50 M 65 50 L 85 50" stroke="var(--neon-green)" stroke-width="2" />
-            <path d="M 30 30 Q 50 50 70 70" stroke="var(--neon-blue)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.6" />
+            <polygon points="20,50 44,24 86,34 92,58 48,80"
+                fill="rgba(45,85,92,0.92)" stroke="rgba(0,210,255,0.35)" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="44" cy="24" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
+            <circle cx="86" cy="34" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
+            <circle cx="92" cy="58" r="3.2" fill="var(--neon-purple)" stroke="rgba(255,255,255,0.2)" stroke-width="0.4"/>
+            <circle cx="48" cy="80" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
         </svg>`,
         "category": "hot highlight fun grade10 grade11 grade12 uni",
         "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
@@ -569,10 +591,30 @@ const LABS_DATA = [
         "description": "Kugelflächenfunktionen Y_ℓ^m in 3D: Kugelfläche und optionale |Y|²-Punktwolke, KaTeX-Formeln, Orbitwechsel. Cyber-Lab-Optik, Trackball, Auto-Rotation.",
         "tagline": "Kugelflächen / Harmonische / 3D",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="5" fill="var(--neon-cyan)" style="filter: drop-shadow(0 0 6px var(--neon-cyan));" />
-            <ellipse cx="50" cy="50" rx="34" ry="10" fill="none" stroke="var(--neon-blue)" stroke-width="1.4" />
-            <ellipse cx="50" cy="50" rx="10" ry="34" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" transform="rotate(30 50 50)" />
-            <path d="M 50 20 Q 62 40 50 50 Q 38 40 50 20 M 50 50 Q 62 60 50 80 Q 38 60 50 50" fill="none" stroke="var(--neon-green)" stroke-width="1.2" />
+            <defs>
+                <linearGradient id="orbLobeCy" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b8f8ff"/><stop offset="55%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0e7490"/>
+                </linearGradient>
+                <linearGradient id="orbLobeAu" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#b45309"/>
+                </linearGradient>
+            </defs>
+            <g>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeCy)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(0 50 50)"/>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeAu)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(60 50 50)"/>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeCy)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(120 50 50)"/>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeAu)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(180 50 50)"/>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeCy)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(240 50 50)"/>
+                <ellipse cx="50" cy="27" rx="9.5" ry="25" fill="url(#orbLobeAu)" stroke="rgba(255,255,255,0.35)" stroke-width="0.65"
+                    transform="rotate(300 50 50)"/>
+            </g>
+            <circle cx="50" cy="50" r="4.2" fill="none" stroke="#7eedff" stroke-width="1.1"
+                style="filter: drop-shadow(0 0 5px rgba(126,237,255,0.75));"/>
         </svg>`,
         "category": "highlight hot grade11 grade12 oberstufe fun uni top5",
         "keywords": "atom orbital kugelflächenfunktion kff harmonische ylm wahrscheinlichkeit 3d quanten chemie physik d orbital",
@@ -581,21 +623,29 @@ const LABS_DATA = [
     {
         "id": "opti-lens",
         "href": "LensStandalone/cmaes_java.html",
-        "title": "OPTI-LENS Premium",
-        "description": "Premium-Edition der CMA-ES Linsenoptimierung. Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und interaktive Maus-Zoom-Steuerung in einem standalone Hochleistungs-Lab.",
-        "tagline": "Linsen-Evolution / Strahlenoptik / CMA-ES",
+        "title": "Linsenoptimierung (Premium)",
+        "description": "Premium-Labor zur evolutionären Linsenoptimierung (CMA-ES): Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und Maus-Zoom in einer eigenständigen Hochleistungs-Oberfläche.",
+        "tagline": "Strahlenoptik / Brennpunkt / Evolution",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <line x1="5" y1="28" x2="40" y2="28" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
-            <line x1="5" y1="50" x2="40" y2="50" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
-            <line x1="5" y1="72" x2="40" y2="72" stroke="var(--neon-cyan)" stroke-width="1.2" opacity="0.7" />
-            <path d="M 50 18 Q 35 50 50 82 Q 65 50 50 18 Z" fill="rgba(0, 210, 255, 0.18)" stroke="var(--neon-cyan)" stroke-width="1.5" />
-            <line x1="60" y1="28" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
-            <line x1="60" y1="50" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
-            <line x1="60" y1="72" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
-            <circle cx="92" cy="50" r="3" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffcc00);" />
+            <defs>
+                <linearGradient id="optLensGlassGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stop-color="#2a5f68"/><stop offset="42%" stop-color="#9fe8f0"/><stop offset="58%" stop-color="#b8f5fb"/><stop offset="100%" stop-color="#2a5f68"/>
+                </linearGradient>
+            </defs>
+            <!-- Zerstreuungslinse: parallel einfallend von links → divergieren rechts (virtueller Brennpunkt links der Linse) -->
+            <line x1="8" y1="34" x2="43.88" y2="34" stroke="#89ecff" stroke-width="1.35" stroke-linecap="round"/>
+            <line x1="8" y1="50" x2="44.5" y2="50" stroke="#89ecff" stroke-width="1.35" stroke-linecap="round"/>
+            <line x1="8" y1="66" x2="43.88" y2="66" stroke="#89ecff" stroke-width="1.35" stroke-linecap="round"/>
+            <path d="M 42 18 L 58 18 Q 53 50 58 82 L 42 82 Q 47 50 42 18 Z"
+                fill="url(#optLensGlassGrad)" fill-opacity="0.88" stroke="#5ee9ff" stroke-width="1.2" stroke-linejoin="round"/>
+            <line x1="56.12" y1="34" x2="94" y2="17" stroke="#42b4ff" stroke-width="1.35" stroke-linecap="round"/>
+            <line x1="55.5" y1="50" x2="94" y2="50" stroke="#42b4ff" stroke-width="1.35" stroke-linecap="round"/>
+            <line x1="56.12" y1="66" x2="94" y2="83" stroke="#42b4ff" stroke-width="1.35" stroke-linecap="round"/>
+            <circle cx="11" cy="50" r="3.6" fill="#facc15" stroke="rgba(255,237,160,0.65)" stroke-width="0.7"
+                style="filter: drop-shadow(0 0 6px rgba(250,204,21,0.95));"/>
         </svg>`,
         "category": "hot highlight fun grade10 grade11 grade12 uni top5",
-        "keywords": "linse opti lens optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
+        "keywords": "linse linsenoptimierung optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
         "color": "blue"
     },
     {
@@ -637,22 +687,18 @@ const LABS_DATA = [
         "tagline": "Mandelbrot / Julia / Komplexe Ebene",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <linearGradient id="juliaCardGrad" x1="15%" y1="85%" x2="85%" y2="15%">
+                <linearGradient id="mbDeepFill" x1="0%" y1="40%" x2="100%" y2="60%">
                     <stop offset="0%" stop-color="#6b21a8"/>
-                    <stop offset="50%" stop-color="#00d2ff"/>
+                    <stop offset="55%" stop-color="#00d2ff"/>
                     <stop offset="100%" stop-color="#fbbf24"/>
                 </linearGradient>
             </defs>
-            <!-- Stilisierte Julia-Menge: asymmetrischer Hauptkörper + Satelliten-Bulle am Rand -->
-            <path fill="url(#juliaCardGrad)" fill-opacity="0.32" stroke="#00d2ff" stroke-width="1.65" stroke-linejoin="round"
-                d="M 52 20 C 78 22 88 48 78 66 C 72 76 56 82 44 76 C 22 64 18 38 36 24 C 40 20 46 19 52 20 Z"/>
-            <path fill="none" stroke="#9d50bb" stroke-width="1.35" stroke-linecap="round"
-                d="M 44 44 Q 50 30 58 44 Q 50 58 44 44"/>
-            <path fill="none" stroke="#ffcc00" stroke-width="1.15" stroke-linecap="round" opacity="0.9"
-                d="M 38 58 Q 48 68 62 62"/>
-            <circle cx="76" cy="38" r="8" fill="none" stroke="#adff2f" stroke-width="1.35" opacity="0.95"/>
-            <circle cx="76" cy="38" r="2.4" fill="#adff2f" opacity="0.8"/>
-            <circle cx="48" cy="48" r="3" fill="#050b18" stroke="#e2e8f0" stroke-width="0.9"/>
+            <line x1="10" y1="50" x2="94" y2="50" stroke="#64748b" stroke-width="0.85" opacity="0.45"/>
+            <line x1="50" y1="10" x2="50" y2="90" stroke="#64748b" stroke-width="0.85" opacity="0.45"/>
+            <circle cx="16" cy="50" r="8.5" fill="url(#mbDeepFill)" fill-opacity="0.38" stroke="#adff2f" stroke-width="1.15"/>
+            <path fill="url(#mbDeepFill)" fill-opacity="0.45" stroke="#00d2ff" stroke-width="1.35" stroke-linejoin="round"
+                d="M 58.50,50.00 L 58.82,49.93 L 59.70,49.45 L 60.88,48.22 L 62.02,46.06 L 62.70,42.98 L 62.52,39.16 L 61.17,35.00 L 58.50,31.00 L 54.54,27.73 L 49.50,25.73 L 43.81,25.43 L 37.98,27.06 L 32.61,30.67 L 28.28,36.01 L 25.47,42.66 L 24.50,50.00 L 25.47,57.34 L 28.28,63.99 L 32.61,69.33 L 37.98,72.94 L 43.81,74.57 L 49.50,74.27 L 54.54,72.27 L 58.50,69.00 L 61.17,65.00 L 62.52,60.84 L 62.70,57.02 L 62.02,53.94 L 60.88,51.78 L 59.70,50.55 L 58.82,50.07 Z"/>
+            <circle cx="50" cy="50" r="2.6" fill="#050b18" stroke="#e2e8f0" stroke-width="0.85"/>
         </svg>`,
         "category": "fraktale highlight hot grade11 grade12 oberstufe uni top5",
         "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",
