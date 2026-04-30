@@ -520,7 +520,7 @@ const LABS_DATA = [
         "id": "cmaes",
         "href": "cmaes.html",
         "title": "Flächenoptimierung",
-        "description": "Die Evolution der Form. Nutze die Covariance Matrix Adaptation Evolution Strategy zur Echtzeit-Optimierung komplexer Geometrien — geschlossene Polygone und Freiform-Konturen. Ein Blick in die Zukunft der computergestützten Linsengestaltung.",
+        "description": "CMA-ES in Echtzeit: geschlossene Polygone und Freiform-Konturen evolutionär verbessern — komplexe Geometrien, Schritt für Schritt.",
         "tagline": "CMA-ES / Evolutionäre Flächen- & Konturoptimierung",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -569,7 +569,7 @@ const LABS_DATA = [
             <circle cx="36.63" cy="25.4" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
         </svg>`,
         "category": "hot highlight fun grade10 grade11 grade12 uni",
-        "keywords": "cmaes flächenoptimierung fläche polygon geometrie evolution optimierung linsen optik strategie simulation",
+        "keywords": "cmaes flächenoptimierung fläche polygon geometrie evolution optimierung strategie simulation",
         "color": "green"
     },
     /*
