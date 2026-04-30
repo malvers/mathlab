@@ -43,6 +43,7 @@
 
         /* Echter Content über dem Planet-Overlay (z-index 0), sonst Übermalen durch 🪐/🛸. */
         body.cyber-hub > header,
+        body.cyber-hub > #tool-subchrome,
         body.cyber-hub > .search-scan-row,
         body.cyber-hub > #grade-view,
         body.cyber-hub > #tool-view,
@@ -426,7 +427,8 @@
         }
 
         #grade-view,
-        #tool-view {
+        #tool-view,
+        #tool-subchrome {
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
             display: flex;
@@ -604,8 +606,8 @@
             display: none;
         }
 
-        /* Unterseiten: großen Hero-Header ausblenden (Labor-Scan bleibt; Zurück in tool-view / Jahrgang) */
-        body.cyber-hub.index-mission:has(#tool-view:not(.hidden)) > header,
+        /* Unterseiten: großen Hero-Header ausblenden (Labor-Scan unter Zurück-Zeile) */
+        body.cyber-hub.index-mission:has(#tool-subchrome:not(.hidden)) > header,
         body.cyber-hub.index-mission:has(#grade-view.grade-view--edu-only) > header {
             display: none !important;
         }
@@ -1352,6 +1354,21 @@
         </div>
     </header>
 
+    <!-- Unterseiten (Labor-Liste): Zurück + Bereichstitel über Labor-Scan -->
+    <div id="tool-subchrome" class="hidden">
+        <div class="back-nav">
+            <button type="button" class="btn-back" onclick="backFromToolView()" title="Zurück"
+                aria-label="Zurück">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:22px; height:22px;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 id="view-title">LABOR-ANSICHT</h2>
+        </div>
+    </div>
+
     <!-- Labor-Scan + Universe (Galaxy) -->
     <div class="search-scan-row">
         <div id="search-mount"></div>
@@ -1503,17 +1520,6 @@
     </div>
 
     <div id="tool-view" class="hidden">
-        <div class="back-nav">
-            <button type="button" class="btn-back" onclick="backFromToolView()" title="Zurück"
-                aria-label="Zurück">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" style="width:22px; height:22px;">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </button>
-            <h2 id="view-title">LABOR-ANSICHT</h2>
-        </div>
         <div class="container" id="tool-container">
             <!-- Cards will be rendered dynamically from js/labs-config.js -->
         </div>
@@ -1600,7 +1606,7 @@
 
             if (q.length > 0) {
                 document.getElementById('grade-view').classList.add('hidden');
-                document.getElementById('tool-view').classList.remove('hidden');
+                setLabToolLayerVisible(true);
             } else {
                 showGrades();
             }
@@ -1639,8 +1645,15 @@
             }
         })();
 
+        function setLabToolLayerVisible(visible) {
+            ['tool-view', 'tool-subchrome'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', !visible);
+            });
+        }
+
         function showEducationJahrgang(updateHash = true) {
-            document.getElementById('tool-view').classList.add('hidden');
+            setLabToolLayerVisible(false);
             const gv = document.getElementById('grade-view');
             gv.classList.remove('hidden');
             gv.classList.add('grade-view--edu-only');
@@ -1690,7 +1703,7 @@
             });
 
             document.getElementById('grade-view').classList.add('hidden');
-            document.getElementById('tool-view').classList.remove('hidden');
+            setLabToolLayerVisible(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (updateHash) {
@@ -1700,7 +1713,7 @@
         }
 
         function showGrades(updateHash = true) {
-            document.getElementById('tool-view').classList.add('hidden');
+            setLabToolLayerVisible(false);
             const gv = document.getElementById('grade-view');
             gv.classList.remove('hidden');
             gv.classList.remove('grade-view--edu-only');
