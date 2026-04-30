@@ -519,19 +519,57 @@ const LABS_DATA = [
     {
         "id": "cmaes",
         "href": "cmaes.html",
-        "title": "CMA-ES Optimierer",
-        "description": "Die Evolution der Form. Nutze die Covariance Matrix Adaptation Evolution Strategy zur Echtzeit-Optimierung komplexer Geometrien. Ein Blick in die Zukunft der computergestützten Linsengestaltung.",
-        "tagline": "Evolutionäre Strategien / Optimierung",
+        "title": "Flächenoptimierung",
+        "description": "Die Evolution der Form. Nutze die Covariance Matrix Adaptation Evolution Strategy zur Echtzeit-Optimierung komplexer Geometrien — geschlossene Polygone und Freiform-Konturen. Ein Blick in die Zukunft der computergestützten Linsengestaltung.",
+        "tagline": "CMA-ES / Evolutionäre Flächen- & Konturoptimierung",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="20,50 44,24 86,34 92,58 48,80"
-                fill="rgba(45,85,92,0.92)" stroke="rgba(0,210,255,0.35)" stroke-width="1.2" stroke-linejoin="round"/>
-            <circle cx="44" cy="24" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
-            <circle cx="86" cy="34" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
-            <circle cx="92" cy="58" r="3.2" fill="var(--neon-purple)" stroke="rgba(255,255,255,0.2)" stroke-width="0.4"/>
-            <circle cx="48" cy="80" r="3.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
+            <defs>
+                <linearGradient id="cmaesLuxDiag" x1="8" y1="12" x2="94" y2="90" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#022c22"/><stop offset="22%" stop-color="#0f766e"/><stop offset="48%" stop-color="#14b8a6"/>
+                    <stop offset="62%" stop-color="#0891b2"/><stop offset="82%" stop-color="#155e75"/><stop offset="100%" stop-color="#3730a3"/>
+                </linearGradient>
+                <radialGradient id="cmaesLuxHot" cx="34" cy="22" r="58" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ecfeff" stop-opacity="0.55"/><stop offset="35%" stop-color="#5eead4" stop-opacity="0.38"/>
+                    <stop offset="65%" stop-color="#134e4a" stop-opacity="0.15"/><stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="cmaesLuxBloom" x="-35%" y="-35%" width="170%" height="170%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
+                    <feFlood flood-color="#2dd4bf" flood-opacity="0.45" result="fl"/>
+                    <feComposite in="fl" in2="b" operator="in" result="g"/>
+                    <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <g filter="url(#cmaesLuxBloom)">
+                <polygon points="44.8,20.16 57.33,13.4 72.62,14.69 62.74,37.48 70.77,43.25 94.35,56.57 66.27,60.24 59.12,64.92 58.9,86.6 44.8,85.28 35.06,74.6 30.75,64.56 5.65,70.44 6.64,54.57 24.39,44.24 9.87,27.68 17.27,15.03 36.63,25.4"
+                    fill="url(#cmaesLuxDiag)" stroke="none" stroke-linejoin="round"/>
+                <polygon points="44.8,20.16 57.33,13.4 72.62,14.69 62.74,37.48 70.77,43.25 94.35,56.57 66.27,60.24 59.12,64.92 58.9,86.6 44.8,85.28 35.06,74.6 30.75,64.56 5.65,70.44 6.64,54.57 24.39,44.24 9.87,27.68 17.27,15.03 36.63,25.4"
+                    fill="url(#cmaesLuxHot)" stroke="none" stroke-linejoin="round"/>
+            </g>
+            <polygon points="44.8,20.16 57.33,13.4 72.62,14.69 62.74,37.48 70.77,43.25 94.35,56.57 66.27,60.24 59.12,64.92 58.9,86.6 44.8,85.28 35.06,74.6 30.75,64.56 5.65,70.44 6.64,54.57 24.39,44.24 9.87,27.68 17.27,15.03 36.63,25.4"
+                fill="none" stroke="rgba(207,250,254,0.92)" stroke-width="1.35" stroke-linejoin="round"/>
+            <polygon points="44.8,20.16 57.33,13.4 72.62,14.69 62.74,37.48 70.77,43.25 94.35,56.57 66.27,60.24 59.12,64.92 58.9,86.6 44.8,85.28 35.06,74.6 30.75,64.56 5.65,70.44 6.64,54.57 24.39,44.24 9.87,27.68 17.27,15.03 36.63,25.4"
+                fill="none" stroke="rgba(45,212,191,0.35)" stroke-width="2.85" stroke-linejoin="round"/>
+            <circle cx="44.8" cy="20.16" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="57.33" cy="13.4" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="72.62" cy="14.69" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="62.74" cy="37.48" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="70.77" cy="43.25" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="94.35" cy="56.57" r="2.55" fill="var(--neon-purple)" stroke="rgba(255,255,255,0.35)" stroke-width="0.45"/>
+            <circle cx="66.27" cy="60.24" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="59.12" cy="64.92" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="58.9" cy="86.6" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="44.8" cy="85.28" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="35.06" cy="74.6" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="30.75" cy="64.56" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="5.65" cy="70.44" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="6.64" cy="54.57" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="24.39" cy="44.24" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="9.87" cy="27.68" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="17.27" cy="15.03" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
+            <circle cx="36.63" cy="25.4" r="2.35" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="0.45"/>
         </svg>`,
         "category": "hot highlight fun grade10 grade11 grade12 uni",
-        "keywords": "cmaes evolution optimierung linsen optik strategie simulation",
+        "keywords": "cmaes flächenoptimierung fläche polygon geometrie evolution optimierung linsen optik strategie simulation",
         "color": "green"
     },
     /*
@@ -623,8 +661,8 @@ const LABS_DATA = [
     {
         "id": "opti-lens",
         "href": "LensStandalone/cmaes_java.html",
-        "title": "Linsenoptimierung (Premium)",
-        "description": "Premium-Labor zur evolutionären Linsenoptimierung (CMA-ES): Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und Maus-Zoom in einer eigenständigen Hochleistungs-Oberfläche.",
+        "title": "Linsenoptimierung",
+        "description": "Labor zur evolutionären Linsenoptimierung (CMA-ES): Symmetriemodus, oszillierender Brennpunkt, Echtzeit-Strahlsimulation und Maus-Zoom in einer eigenständigen Hochleistungs-Oberfläche.",
         "tagline": "Strahlenoptik / Brennpunkt / Evolution",
         "icon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -645,7 +683,7 @@ const LABS_DATA = [
                 style="filter: drop-shadow(0 0 6px rgba(250,204,21,0.95));"/>
         </svg>`,
         "category": "hot highlight fun grade10 grade11 grade12 uni top5",
-        "keywords": "linse linsenoptimierung optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
+        "keywords": "linse linsenoptimierung optik strahlen brennpunkt cmaes evolution standalone symmetrie refraktion",
         "color": "blue"
     },
     {
