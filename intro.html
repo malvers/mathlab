@@ -114,6 +114,13 @@
             stroke-width: 2;
         }
 
+        #intro-ambient-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            stroke: none;
+        }
+
         .intro-back-btn {
             box-sizing: border-box;
             width: 44px;
@@ -400,9 +407,9 @@
             position: relative;
             flex: 0 0 auto;
             align-self: center;
-            width: min(92vw, 960px);
-            max-width: 100%;
-            margin: 0;
+            width: fit-content;
+            max-width: min(92vw, 960px);
+            margin: 0 auto;
             padding: 0;
             border: none;
             border-radius: 12px;
@@ -417,18 +424,21 @@
             animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
             z-index: 1;
         }
-        #catching-words-panel .cw-media-video {
+        #catching-words-panel .cw-media-video,
+        #catching-words-panel .cw-media-img {
             display: block;
-            width: 100%;
+            width: auto;
+            max-width: min(92vw, 960px);
             height: auto;
             max-height: min(46vh, 520px);
             vertical-align: middle;
-            background: #000;
+            background: transparent;
             object-fit: contain;
             opacity: 0;
             transition: opacity 0.75s ease-out;
         }
-        #catching-words-panel .cw-media-video.cw-media-video-visible {
+        #catching-words-panel .cw-media-video.cw-media-video-visible,
+        #catching-words-panel .cw-media-img.cw-media-img-visible {
             opacity: 1;
         }
         #catching-words-panel .cw-coverr-fallback-msg {
@@ -483,6 +493,14 @@
     <div class="glow-sphere"></div>
 
     <div class="intro-top-actions">
+        <button type="button" class="fs-toggle" id="intro-ambient-btn" onclick="toggleIntroAmbientMuted()" title="Ambient-Sound (Standard aus · Klick aktiviert und wird gespeichert)" aria-label="Ambient-Sound ein oder aus">
+            <svg id="intro-ambient-icon-on" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <svg id="intro-ambient-icon-off" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+                <path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+            </svg>
+        </button>
         <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -606,6 +624,36 @@
         let cwPlayAllTimer = null;
         let cwPlayAllCompletionRaf = null;
         const CW_PLAY_ALL_GAP_MS = 320;
+        const cwActiveSfxSet = new Set();
+        const CW_SFX_FADE_OUT_SEC = 1.15;
+
+        function attachCwSfxFadeOut(snd) {
+            snd.volume = 1;
+            function armFade() {
+                const d = snd.duration;
+                if (!Number.isFinite(d) || d <= 0) return;
+                const fadeDur = Math.min(CW_SFX_FADE_OUT_SEC, Math.max(0.28, d * 0.55));
+                const fadeStart = Math.max(0, d - fadeDur);
+                function onTimeUpdate() {
+                    const t = snd.currentTime;
+                    if (t + 0.02 < fadeStart) return;
+                    const rem = Math.max(0, d - t);
+                    snd.volume = Math.max(0, Math.min(1, rem / fadeDur));
+                    if (rem < 0.025) snd.removeEventListener('timeupdate', onTimeUpdate);
+                }
+                snd.addEventListener('timeupdate', onTimeUpdate);
+                snd.addEventListener(
+                    'ended',
+                    () => {
+                        snd.removeEventListener('timeupdate', onTimeUpdate);
+                        snd.volume = 1;
+                    },
+                    { once: true }
+                );
+            }
+            if (snd.readyState >= 1) armFade();
+            else snd.addEventListener('loadedmetadata', armFade, { once: true });
+        }
 
         function clearCwPlayAllTimer() {
             if (cwPlayAllTimer) {
@@ -663,7 +711,13 @@
         }
 
         const INTRO_PREFS_KEY = 'docalvers.intro.prefs';
-        const INTRO_PREFS_VERSION = 2;
+        const INTRO_PREFS_VERSION = 3;
+        const INTRO_AMBIENT_MASTER_GAIN = 0.085;
+
+        let introAmbCtx = null;
+        let introAmbMaster = null;
+        let introAmbGraphBuilt = false;
+        let introAmbMuted = true;
 
         function loadIntroPersistedPrefs() {
             try {
@@ -671,7 +725,7 @@
                 if (!raw) return;
                 const s = JSON.parse(raw);
                 if (!s || typeof s !== 'object') return;
-                if (s.v !== 1 && s.v !== INTRO_PREFS_VERSION) return;
+                if (!s.v || s.v < 1 || s.v > INTRO_PREFS_VERSION) return;
                 if (typeof s.bgBrightness === 'number' && Number.isFinite(s.bgBrightness)) {
                     bgVideoBrightness = Math.max(
                         BG_VIDEO_BRIGHTNESS_MIN,
@@ -686,6 +740,9 @@
                 }
                 if (typeof s.cwDebugHud === 'boolean') {
                     cwDebugHudVisible = s.cwDebugHud;
+                }
+                if (typeof s.introAmbMuted === 'boolean') {
+                    introAmbMuted = s.introAmbMuted;
                 }
             } catch (err) {
                 /* file:// oder private mode */
@@ -702,6 +759,7 @@
                         cwAnimSec,
                         cwSpawnMs,
                         cwDebugHud: cwDebugHudVisible,
+                        introAmbMuted,
                     })
                 );
             } catch (err) {
@@ -710,6 +768,111 @@
         }
 
         loadIntroPersistedPrefs();
+
+        function syncIntroAmbientBtn() {
+            const btn = document.getElementById('intro-ambient-btn');
+            const onIc = document.getElementById('intro-ambient-icon-on');
+            const offIc = document.getElementById('intro-ambient-icon-off');
+            if (btn) btn.setAttribute('aria-pressed', introAmbMuted ? 'false' : 'true');
+            if (onIc && offIc) {
+                onIc.style.display = introAmbMuted ? 'none' : 'block';
+                offIc.style.display = introAmbMuted ? 'block' : 'none';
+            }
+        }
+
+        function buildIntroAmbientGraph() {
+            if (introAmbGraphBuilt) return;
+            const Ctor = window.AudioContext || window.webkitAudioContext;
+            if (!Ctor) return;
+            introAmbCtx = new Ctor();
+            introAmbMaster = introAmbCtx.createGain();
+            introAmbMaster.connect(introAmbCtx.destination);
+
+            const lowPass = introAmbCtx.createBiquadFilter();
+            lowPass.type = 'lowpass';
+            lowPass.frequency.value = 620;
+            lowPass.Q.value = 0.45;
+            lowPass.connect(introAmbMaster);
+
+            /** Sanftes Dur‑Pad (C‑Dur Grundlage): wirkt warm/freundlich statt „dunkler Sci‑Fi‑Drone“. */
+            function voice(freqHz, type, detuneCents, peakGain) {
+                const g = introAmbCtx.createGain();
+                g.gain.value = peakGain;
+                const o = introAmbCtx.createOscillator();
+                o.type = type;
+                o.frequency.value = freqHz;
+                if (detuneCents) o.detune.value = detuneCents;
+                o.connect(g);
+                g.connect(lowPass);
+                o.start();
+            }
+
+            voice(130.81, 'sine', 1.5, 0.048);
+            voice(164.81, 'sine', -2, 0.042);
+            voice(196.0, 'sine', 2.5, 0.036);
+            voice(261.63, 'triangle', 0, 0.014);
+
+            introAmbGraphBuilt = true;
+            applyIntroAmbientGainImmediate();
+        }
+
+        function applyIntroAmbientGainImmediate() {
+            if (!introAmbMaster || !introAmbCtx) return;
+            const t = introAmbCtx.currentTime;
+            introAmbMaster.gain.cancelScheduledValues(t);
+            introAmbMaster.gain.setValueAtTime(introAmbMuted ? 0 : INTRO_AMBIENT_MASTER_GAIN, t);
+        }
+
+        function applyIntroAmbientGainRamp() {
+            if (!introAmbMaster || !introAmbCtx) return;
+            const t = introAmbCtx.currentTime;
+            introAmbMaster.gain.cancelScheduledValues(t);
+            const target = introAmbMuted ? 0 : INTRO_AMBIENT_MASTER_GAIN;
+            introAmbMaster.gain.setTargetAtTime(target, t, 0.07);
+        }
+
+        async function unlockIntroAmbientAudio() {
+            if (introAmbMuted) return;
+            buildIntroAmbientGraph();
+            if (!introAmbCtx) return;
+            try {
+                if (introAmbCtx.state === 'suspended') await introAmbCtx.resume();
+            } catch (err) {
+                /* ignore */
+            }
+            applyIntroAmbientGainRamp();
+        }
+
+        function toggleIntroAmbientMuted() {
+            introAmbMuted = !introAmbMuted;
+            if (!introAmbMuted) {
+                unlockIntroAmbientAudio();
+            } else {
+                applyIntroAmbientGainRamp();
+            }
+            syncIntroAmbientBtn();
+            saveIntroPersistedPrefs();
+        }
+
+        syncIntroAmbientBtn();
+
+        (function hookIntroAmbientFirstGesture() {
+            function detach() {
+                document.body.removeEventListener('pointerdown', onPtr, true);
+                document.body.removeEventListener('keydown', onKey, true);
+            }
+            function onPtr(e) {
+                if (e.target && e.target.closest && e.target.closest('#intro-ambient-btn')) return;
+                unlockIntroAmbientAudio();
+                detach();
+            }
+            function onKey() {
+                unlockIntroAmbientAudio();
+                detach();
+            }
+            document.body.addEventListener('pointerdown', onPtr, { capture: true });
+            document.body.addEventListener('keydown', onKey, { capture: true });
+        })();
 
         function syncCwDebugHudDom() {
             if (!document.body.classList.contains('mode-catching-words')) return;
@@ -750,6 +913,7 @@
                     '%stop in Script/.txt beendet Play-all',
                     'S  Play-all neu ab Abschnitt 1 · Wechsel wenn Section fertig animiert',
                     '⌘D  Debug ein/aus (bleibt gespeichert)',
+                    'M · Ambient ein/aus (Standard aus · bleibt gespeichert)',
                 ].join('\n');
             }
         }
@@ -870,12 +1034,22 @@
                         /* ignore */
                     }
                 });
+                cwActiveSfxSet.forEach((snd) => {
+                    try {
+                        snd.pause();
+                    } catch (err) {
+                        /* ignore */
+                    }
+                });
             } else {
                 stack.querySelectorAll('.falling-word, .cw-portal-btn, .cw-media-wrap').forEach((el) => {
                     if (!el.classList.contains('caught')) el.style.animationPlayState = 'running';
                 });
                 stack.querySelectorAll('.cw-media-video').forEach((v) => {
                     v.play().catch(() => {});
+                });
+                cwActiveSfxSet.forEach((snd) => {
+                    snd.play().catch(() => {});
                 });
                 scheduleCwSpawn();
             }
@@ -913,6 +1087,85 @@
                     a.classList.add('cw-portal-settled');
                 });
                 playStack.appendChild(a);
+                return;
+            }
+
+            if (entry.kind === 'sfx') {
+                let rawSrc = String(entry.src || '').trim();
+                if (/^javascript:/i.test(rawSrc)) rawSrc = '';
+                if (rawSrc) {
+                    try {
+                        const snd = new Audio(rawSrc);
+                        snd.preload = 'auto';
+                        attachCwSfxFadeOut(snd);
+                        cwActiveSfxSet.add(snd);
+                        function releaseSfx() {
+                            cwActiveSfxSet.delete(snd);
+                        }
+                        snd.addEventListener('ended', releaseSfx, { once: true });
+                        snd.addEventListener('error', releaseSfx, { once: true });
+                        const p = snd.play();
+                        if (p && typeof p.catch === 'function') p.catch(releaseSfx);
+                    } catch (err) {
+                        /* ignore */
+                    }
+                }
+                return;
+            }
+
+            if (entry.kind === 'media-image') {
+                const wrap = document.createElement('div');
+                wrap.className = 'cw-media-wrap';
+                wrap.style.zIndex = String(cwSpawnRoundIndex);
+                let settled = false;
+                function markImgSettled() {
+                    if (settled) return;
+                    settled = true;
+                    wrap.classList.add('cw-media-settled');
+                    if (cwPlayAllActive) runCwPlayAllSectionCompletionWatch();
+                }
+
+                function sanitizeCwImgSrc(u) {
+                    const s = String(u || '').trim();
+                    if (!s) return '';
+                    if (/^javascript:/i.test(s)) return '';
+                    return s;
+                }
+
+                const rawSrc = sanitizeCwImgSrc(String(entry.src || '').trim());
+                playStack.appendChild(wrap);
+                if (!rawSrc) {
+                    markImgSettled();
+                    return;
+                }
+
+                const img = document.createElement('img');
+                img.className = 'cw-media-img';
+                img.alt = '';
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                img.addEventListener('load', () => {
+                    img.classList.add('cw-media-img-visible');
+                    markImgSettled();
+                });
+                img.addEventListener('error', () => {
+                    wrap.innerHTML = '';
+                    if (rawSrc) {
+                        const a = document.createElement('a');
+                        a.className = 'cw-media-fallback-link';
+                        a.href = rawSrc;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        a.textContent = 'Bild konnte nicht geladen werden · Link öffnen';
+                        wrap.appendChild(a);
+                    }
+                    markImgSettled();
+                });
+                wrap.appendChild(img);
+                img.src = rawSrc;
+                setTimeout(() => {
+                    if (!settled) markImgSettled();
+                }, 12000);
                 return;
             }
 
@@ -1142,6 +1395,16 @@
             if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
             cwSpawnTimer = null;
             const stack = document.getElementById('cw-stack');
+            cwActiveSfxSet.forEach((snd) => {
+                try {
+                    snd.pause();
+                    snd.removeAttribute('src');
+                    snd.load();
+                } catch (err) {
+                    /* ignore */
+                }
+            });
+            cwActiveSfxSet.clear();
             if (stack) stack.innerHTML = '';
         }
 
@@ -1174,6 +1437,8 @@
          * Ohne URL: «%video» → resources/galay20.mp4
          * Navigation: «%button» → Button nach index.html; «%button index» / «%button orbitals.html»; optional Beschriftung:
          * «%button orbitals.html Orbitale». Ein einzelnes Wort, das kein Ziel ist (z. B. «%button TOLL»), wird nur als Text auf index verlinkt.
+         * Sound: «%sound pfad» — WAV/MP3/OGG/M4A (z. B. resources/kids.wav); eine Zeile nur mit Ton-URL/Pfad zählt ebenso.
+         * Bild: «%bild pfad» oder «%bildhttps://…» — lokaler Pfad (z. B. resources/kids.webp) oder URL; WebP/JPEG/PNG/GIF/SVG.
          * Emoji: «%emoji 😎» oder «%emoji😎» — wirkt wie ein Schlagwort, ohne Textverlauf (farbiges Emoji).
          * S (und Standard beim Laden): alle Abschnitte von #1 an nacheinander — Wechsel erst, wenn alle Wörter eingeflogen sind (oder erwischt) und %button-Animationen fertig sind; kurze Pause; letzter Abschnitt Stopp. ←/→ / Drop brechen ab.
          */
@@ -1211,6 +1476,24 @@
             if (/^https?:\/\/(?:www\.)?coverr\.co\/videos\/./i.test(s)) return true;
             if (/^https?:\/\/.+\.(?:mp4|webm|ogg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
             if (/^[a-z0-9_./-]+\.(?:mp4|webm|ogg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            return false;
+        }
+
+        /** Eine Zeile nur Bild-URL oder relativer Pfad (.webp, .png …). */
+        function isCwStandaloneImageLine(line) {
+            const s = String(line || '').trim();
+            if (!s || /\s/.test(s)) return false;
+            if (/^https?:\/\/.+\.(?:webp|png|jpe?g|gif|svg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            if (/^[a-z0-9_./-]+\.(?:webp|png|jpe?g|gif|svg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            return false;
+        }
+
+        /** Eine Zeile nur Audio-URL oder relativer Pfad (.wav, .mp3 …). */
+        function isCwStandaloneSfxLine(line) {
+            const s = String(line || '').trim();
+            if (!s || /\s/.test(s)) return false;
+            if (/^https?:\/\/.+\.(?:wav|mp3|m4a|aac|opus)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            if (/^[a-z0-9_./-]+\.(?:wav|mp3|m4a|aac|opus)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
             return false;
         }
 
@@ -1270,8 +1553,44 @@
                     continue;
                 }
 
+                if (/^%bild(https?:\/\/)/i.test(line)) {
+                    current.push({
+                        kind: 'media-image',
+                        src: line.replace(/^%bild/i, '').trim(),
+                    });
+                    continue;
+                }
+                if (/^%bild\b/i.test(line)) {
+                    const rest = line.replace(/^%bild\s*/i, '').trim();
+                    current.push({ kind: 'media-image', src: rest });
+                    continue;
+                }
+
+                if (/^%sound(https?:\/\/)/i.test(line)) {
+                    current.push({
+                        kind: 'sfx',
+                        src: line.replace(/^%sound/i, '').trim(),
+                    });
+                    continue;
+                }
+                if (/^%sound\b/i.test(line)) {
+                    const rest = line.replace(/^%sound\s*/i, '').trim();
+                    current.push({ kind: 'sfx', src: rest });
+                    continue;
+                }
+
                 if (isCwStandaloneVideoLine(line)) {
                     current.push({ kind: 'media-video', src: line.trim() });
+                    continue;
+                }
+
+                if (isCwStandaloneImageLine(line)) {
+                    current.push({ kind: 'media-image', src: line.trim() });
+                    continue;
+                }
+
+                if (isCwStandaloneSfxLine(line)) {
+                    current.push({ kind: 'sfx', src: line.trim() });
                     continue;
                 }
 
@@ -1451,6 +1770,11 @@
                     if (cwNoMod && (e.key === 's' || e.key === 'S')) {
                         e.preventDefault();
                         beginCwPlayAllSections();
+                        return;
+                    }
+                    if (cwNoMod && (e.key === 'm' || e.key === 'M')) {
+                        e.preventDefault();
+                        toggleIntroAmbientMuted();
                         return;
                     }
                 }
