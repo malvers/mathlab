@@ -424,19 +424,36 @@
             animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
             z-index: 1;
         }
+        #catching-words-panel .cw-stack.cw-stack-fullscreen-mode {
+            transform: none !important;
+            top: 0 !important;
+            height: 100vh !important;
+            justify-content: center !important;
+        }
         #catching-words-panel .cw-media-wrap.cw-media-fast {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.25s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-            /* Random rotation between -10deg and 10deg, random translate to scatter them */
-            transform: translate(calc(-50% + (var(--rand-x, 0.5) - 0.5) * 50vw), calc(-50% + (var(--rand-y, 0.5) - 0.5) * 50vh)) scale(0.85) rotate(calc(-10deg + 20deg * var(--rand-rot, 0.5)));
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            filter: none;
+            opacity: 1;
+            animation: none;
+            transform: none;
         }
         #catching-words-panel .cw-media-wrap.cw-media-fast .cw-media-img {
-            max-height: min(65vh, 700px);
-            max-width: min(85vw, 1200px);
-            border-radius: 8px;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0;
+            object-fit: cover;
+            object-position: top left;
+            transition: opacity 0.8s ease-in-out;
         }
         #catching-words-panel .cw-media-video,
         #catching-words-panel .cw-media-img {
@@ -1132,11 +1149,7 @@
                 wrap.className = 'cw-media-wrap';
                 if (entry.fast) {
                     wrap.classList.add('cw-media-fast');
-                    wrap.style.setProperty('--rand-rot', Math.random());
-                    // Biased towards center for first few, then more scattered
-                    const spread = Math.min(1, cwSpawnRoundIndex / 10);
-                    wrap.style.setProperty('--rand-x', 0.5 + (Math.random() - 0.5) * spread);
-                    wrap.style.setProperty('--rand-y', 0.5 + (Math.random() - 0.5) * spread);
+                    playStack.classList.add('cw-stack-fullscreen-mode');
                 }
                 wrap.style.zIndex = String(cwSpawnRoundIndex);
                 let settled = false;
@@ -1401,7 +1414,7 @@
             if (cwSpawnRoundIndex > 0) {
                 const prevEntry = cwSequence[cwSpawnRoundIndex - 1];
                 if (prevEntry && prevEntry.fast) {
-                    delay = 100; // Fast spawn for screenshots
+                    delay = 1200; // Slower spawn for screenshots
                 }
             }
             
@@ -1436,7 +1449,10 @@
                 }
             });
             cwActiveSfxSet.clear();
-            if (stack) stack.innerHTML = '';
+            if (stack) {
+                stack.innerHTML = '';
+                stack.classList.remove('cw-stack-fullscreen-mode');
+            }
         }
 
         function startCatchingWords() {
@@ -1627,13 +1643,16 @@
 
                 if (/^%screenshots/i.test(line)) {
                     // Inject all screenshots in rapid succession
-                    const screenshots = ["transformationen.png", "heart3d.png", "beweisinwinkellsumme.png", "dividieren.png", "fermatpunkt.png", "coolsquares.png", "potenzlabor.png", "winkelpuzzle.png", "gleichungssysteme.png", "logikspiel2.png", "lissajous.png", "gleichschenkligesDreieck.png", "pythagoras.png", "uhrzeitwinkel.png", "winkellabor.png", "butterfly.png", "orbitals.png", "winkelsumme.png", "cmaes.png", "ausgleichsgerade.png", "parabellabor.png", "fibonacci.png", "subtraktion.png", "coordinatensystemtester.png", "multiplikation.png", "litchi3d.png", "cmaes_java.png", "differentiallabor.png", "triangulierer.png", "binomischeslabor.png", "steigung.png", "pythagorasbeweis.png", "mandelbrot_deep.png", "integralreaktor.png", "winkelsumme3d.png", "addition.png", "eulergerade.png", "galtonboard.png", "fourier.png"];
+                    let screenshots = ["transformationen.png", "beweisinwinkellsumme.png", "dividieren.png", "fermatpunkt.png", "coolsquares.png", "potenzlabor.png", "winkelpuzzle.png", "gleichungssysteme.png", "logikspiel2.png", "lissajous.png", "gleichschenkligesDreieck.png", "pythagoras.png", "uhrzeitwinkel.png", "winkellabor.png", "butterfly.png", "orbitals.png", "winkelsumme.png", "cmaes.png", "ausgleichsgerade.png", "parabellabor.png", "fibonacci.png", "subtraktion.png", "coordinatensystemtester.png", "multiplikation.png", "litchi3d.png", "cmaes_java.png", "differentiallabor.png", "triangulierer.png", "binomischeslabor.png", "steigung.png", "pythagorasbeweis.png", "mandelbrot_deep.png", "integralreaktor.png", "winkelsumme3d.png", "addition.png", "eulergerade.png", "galtonboard.png", "fourier.png"];
                     
                     // Shuffle array
                     for (let i = screenshots.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [screenshots[i], screenshots[j]] = [screenshots[j], screenshots[i]];
                     }
+                    
+                    // Always put heart3d.png last for debugging/consistency
+                    screenshots.push("heart3d.png");
                     
                     screenshots.forEach(file => {
                         current.push({ kind: 'media-image', src: 'resources/screenshots/' + file, fast: true });
