@@ -33,6 +33,43 @@
         html {
             background-color: var(--space-bg);
             height: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
+        }
+
+        html::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                180deg,
+                rgba(78, 92, 118, 0.95) 0%,
+                rgba(52, 64, 86, 0.92) 100%
+            );
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        html::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+                180deg,
+                rgba(92, 108, 134, 0.98) 0%,
+                rgba(68, 82, 108, 0.95) 100%
+            );
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
+        html::-webkit-scrollbar-corner {
+            background: transparent;
         }
 
         body {
@@ -114,8 +151,8 @@
         }
 
         .launcher-grid {
-            width: 95%;
-            max-width: 1000px;
+            width: 100%;
+            max-width: none;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px; /* Genug Platz gegen Clash */
@@ -315,13 +352,15 @@
         }
 
         /*
-         * Labor-Scan + Universe-Galaxy (wie index.html)
-         * Höhe des Buttons = gemessene Höhe von .search-input (JS), nicht Flex-Stretch/Bild-Höhe.
+         * Labor-Scan + Universe-Galaxy — gleiche Außenmaße wie index.html (#tool-view / Themen-Raster)
          */
         .search-scan-row {
-            width: 95%;
-            max-width: 1000px;
-            margin: 12px auto 18px auto;
+            width: min(1123px, calc(100vw - 24px));
+            max-width: 1123px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 20px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -334,6 +373,23 @@
         .search-scan-row #search-mount {
             flex: 1;
             min-width: 0;
+        }
+
+        /* Suchfeld wie index (.search-bar-inner), DOM bleibt CyberUI.createSearch */
+        .tools-panel #search-mount .search-input {
+            border-radius: 20px;
+            padding: 12px 50px 12px 55px;
+            background: rgba(8, 18, 40, 0.72);
+            border: 1px solid rgba(0, 210, 255, 0.42);
+            box-shadow:
+                0 6px 24px rgba(0, 0, 0, 0.35),
+                0 0 18px rgba(0, 210, 255, 0.14);
+        }
+
+        .tools-panel #search-mount .search-input:focus {
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
         }
 
         .universe-galaxy-btn {
@@ -402,8 +458,8 @@
         /* Gemeinsame Spalte = „Panel“; Schließen sitzt in der rechten oberen Ecke */
         .tools-panel {
             position: relative;
-            width: 95%;
-            max-width: 1000px;
+            width: min(1123px, calc(100vw - 24px));
+            max-width: 1123px;
             margin: 0 auto;
             z-index: 2;
             box-sizing: border-box;
@@ -417,8 +473,8 @@
             margin-right: 0;
         }
         .tools-panel .search-scan-row {
-            margin-top: 12px;
-            margin-bottom: 18px;
+            margin-top: 20px;
+            margin-bottom: 30px;
         }
         .tools-panel #sidebar-header {
             width: 100% !important;

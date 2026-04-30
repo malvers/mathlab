@@ -261,16 +261,21 @@
                 background: rgba(0, 210, 255, 0.05);
             }
 
-            /* Branding Logo (Right-pinned Master Header) */
+            /* Gradient-Text: Box nur so breit wie Inhalt — sonst wirkt der Gradient wie ein breiter cyan Balken */
             .canvas-branding {
                 position: fixed;
-                top: 10px; 
-                right: 25px; 
+                top: 10px;
+                right: 25px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
                 text-align: right;
-                pointer-events: auto; /* Updated to allow fullscreen click */
+                pointer-events: auto;
                 z-index: 99999;
                 animation: branding-fade-in 1.2s ease-out forwards;
-                max-width: 70%;
+                width: max-content;
+                max-width: min(92vw, 560px);
+                box-sizing: border-box;
                 transition: top 0.3s ease, right 0.3s ease;
                 cursor: pointer;
             }
@@ -280,9 +285,15 @@
                 font-size: calc(11px + 11px * var(--header-scale));
                 margin: 0 !important;
                 letter-spacing: calc(1px + 2.5px * var(--header-scale));
+                align-self: flex-end;
+                width: max-content;
+                max-width: 100%;
+                display: block;
                 background: linear-gradient(to right, var(--branding-blue), var(--branding-white), var(--branding-purple));
                 -webkit-background-clip: text;
+                background-clip: text;
                 -webkit-text-fill-color: transparent;
+                color: transparent;
                 filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
                 text-transform: uppercase;
                 line-height: 1.1;
@@ -304,6 +315,10 @@
                 transition: font-size 0.2s ease;
                 line-height: 1.1;
                 font-weight: 400;
+                align-self: flex-end;
+                width: max-content;
+                max-width: 100%;
+                display: block;
             }
 
             @media (max-width: 1024px) {

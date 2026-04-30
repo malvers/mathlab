@@ -5,6 +5,9 @@ function isChecked(id) {
     return el ? el.checked : false;
 }
 
+const splitter = document.getElementById('main-splitter');
+const infoPanel = document.getElementById('info-panel');
+
 document.getElementById('variant-select').addEventListener('change', function(e) {
     currentVariant = parseInt(e.target.value);
     const v = variants[currentVariant];
@@ -81,19 +84,21 @@ function applyStep() {
 }
 
 window.addEventListener('resize', () => {
-    infoPanel.style.width = '';
-    infoPanel.style.minWidth = '';
-    infoPanel.style.height = '';
-    infoPanel.style.flex = '';
-    document.getElementById('canvas-container').style.height = '';
+    if (infoPanel) {
+        infoPanel.style.width = '';
+        infoPanel.style.minWidth = '';
+        infoPanel.style.height = '';
+        infoPanel.style.flex = '';
+    }
+    const cc = document.getElementById('canvas-container');
+    if (cc) cc.style.height = '';
     draw();
 });
 updateUI();
 draw();
+requestAnimationFrame(() => draw());
 
 // --- SPLITTER LOGIK ---
-const splitter = document.getElementById('main-splitter');
-const infoPanel = document.getElementById('info-panel');
 let isSplitting = false;
 
 if (splitter) {
@@ -113,9 +118,11 @@ if (splitter) {
             let newPercentage = (e.clientY / window.innerHeight) * 100;
             newPercentage = Math.max(50, Math.min(newPercentage, 90));
             document.getElementById('canvas-container').style.height = `${newPercentage}vh`;
-            infoPanel.style.height = `auto`; // rely on flex
-            infoPanel.style.flex = `1 1 0%`; // let CSS do the layout
-        } else {
+            if (infoPanel) {
+                infoPanel.style.height = `auto`; // rely on flex
+                infoPanel.style.flex = `1 1 0%`; // let CSS do the layout
+            }
+        } else if (infoPanel) {
             const newWidth = e.clientX;
             const clampedWidth = Math.max(250, Math.min(newWidth, window.innerWidth * 0.5));
             infoPanel.style.width = `${clampedWidth}px`;
