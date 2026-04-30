@@ -71,6 +71,49 @@
             to { transform: scale(1.2); opacity: 0.6; }
         }
 
+        .intro-playback-controls {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2500;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            opacity: 0.2;
+            transition: opacity 0.3s ease;
+        }
+        .intro-playback-controls:hover {
+            opacity: 1;
+        }
+        .intro-playback-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .intro-playback-btn:hover {
+            color: #00d2ff;
+            transform: scale(1.1);
+        }
+        .intro-playback-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        
         .intro-top-actions {
             position: fixed;
             top: 30px;
@@ -523,6 +566,27 @@
 
     <div class="glow-sphere"></div>
 
+    <div class="intro-playback-controls" aria-label="Wiedergabe-Steuerung">
+        <button type="button" class="intro-playback-btn" onclick="stepCwSection(-1)" title="Vorheriger Abschnitt (←)">
+            <svg viewBox="0 0 24 24">
+                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
+            </svg>
+        </button>
+        <button type="button" class="intro-playback-btn" id="intro-play-pause-btn" onclick="toggleCatchingWordsPause()" title="Pause / Play (Leertaste)">
+            <svg id="icon-pause" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+            <svg id="icon-play" viewBox="0 0 24 24" style="display:none">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        </button>
+        <button type="button" class="intro-playback-btn" onclick="stepCwSection(1)" title="Nächster Abschnitt (→)">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
+            </svg>
+        </button>
+    </div>
+
     <div class="intro-top-actions">
         <button type="button" class="fs-toggle" id="intro-ambient-btn" onclick="toggleIntroAmbientMuted()" title="Ambient-Sound (Standard aus · Klick aktiviert und wird gespeichert)" aria-label="Ambient-Sound ein oder aus">
             <svg id="intro-ambient-icon-on" viewBox="0 0 24 24" aria-hidden="true">
@@ -646,6 +710,7 @@
         let cwSequence = cwSections[0];
         let cwAnimSec = 8;
         let cwSpawnMs = 700;
+        let cwFastSpawnMs = 1200;
         let cwSpawnTimer = null;
         let cwRunning = false;
         let cwSpawnRoundIndex = 0;
@@ -769,6 +834,9 @@
                 if (typeof s.cwSpawnMs === 'number' && Number.isFinite(s.cwSpawnMs)) {
                     cwSpawnMs = Math.round(Math.max(400, Math.min(2000, s.cwSpawnMs)));
                 }
+                if (typeof s.cwFastSpawnMs === 'number' && Number.isFinite(s.cwFastSpawnMs)) {
+                    cwFastSpawnMs = Math.round(Math.max(200, Math.min(3000, s.cwFastSpawnMs)));
+                }
                 if (typeof s.cwDebugHud === 'boolean') {
                     cwDebugHudVisible = s.cwDebugHud;
                 }
@@ -789,6 +857,7 @@
                         bgBrightness: bgVideoBrightness,
                         cwAnimSec,
                         cwSpawnMs,
+                        cwFastSpawnMs,
                         cwDebugHud: cwDebugHudVisible,
                         introAmbMuted,
                     })
@@ -937,8 +1006,9 @@
                 hud.textContent = [
                     secLine + '  ·  Play-all ' + (cwPlayAllActive ? 'an' : 'aus'),
                     'Flug (Keyframe): ' + cwAnimSec.toFixed(1) + ' s',
-                    'Spawn-Takt:      ' + cwSpawnMs + ' ms',
+                    'Spawn-Takt:      ' + cwSpawnMs + ' ms (SS: ' + cwFastSpawnMs + ' ms)',
                     '↑ schneller · ↓ langsamer  (±0,1 s · ±10 ms)',
+                    '⇧↑ / ⇧↓  SS-Takt schneller / langsamer (±50 ms)',
                     'h · d  Video heller / dunkler',
                     'Beim Laden: automatisch Play-all (alle #‑Sections wie S)',
                     '%stop in Script/.txt beendet Play-all',
@@ -949,10 +1019,14 @@
             }
         }
 
-        function nudgeCwMotion(isUpFaster) {
+        function nudgeCwMotion(isUpFaster, isShift) {
             const dir = isUpFaster ? 1 : -1;
-            cwAnimSec = Math.round(Math.max(4, Math.min(18, cwAnimSec - dir * 0.1)) * 10) / 10;
-            cwSpawnMs = Math.round(Math.max(400, Math.min(2000, cwSpawnMs - dir * 10)));
+            if (isShift) {
+                cwFastSpawnMs = Math.round(Math.max(200, Math.min(3000, cwFastSpawnMs - dir * 50)));
+            } else {
+                cwAnimSec = Math.round(Math.max(4, Math.min(18, cwAnimSec - dir * 0.1)) * 10) / 10;
+                cwSpawnMs = Math.round(Math.max(400, Math.min(2000, cwSpawnMs - dir * 10)));
+            }
             syncCwMotionVars();
             saveIntroPersistedPrefs();
         }
@@ -1050,6 +1124,14 @@
             const stack = document.getElementById('cw-stack');
             if (!stack) return;
             cwPaused = !cwPaused;
+            
+            const iconPause = document.getElementById('icon-pause');
+            const iconPlay = document.getElementById('icon-play');
+            if (iconPause && iconPlay) {
+                iconPause.style.display = cwPaused ? 'none' : 'block';
+                iconPlay.style.display = cwPaused ? 'block' : 'none';
+            }
+            
             if (cwPaused) {
                 if (cwSpawnTimer) {
                     clearTimeout(cwSpawnTimer);
@@ -1181,7 +1263,12 @@
                 img.decoding = 'async';
                 img.addEventListener('load', () => {
                     img.classList.add('cw-media-img-visible');
-                    markImgSettled();
+                    if (entry.fast) {
+                        // For fast screenshots, wait until the transition finishes before marking settled
+                        setTimeout(markImgSettled, 800);
+                    } else {
+                        markImgSettled();
+                    }
                 });
                 img.addEventListener('error', () => {
                     wrap.innerHTML = '';
@@ -1414,7 +1501,7 @@
             if (cwSpawnRoundIndex > 0) {
                 const prevEntry = cwSequence[cwSpawnRoundIndex - 1];
                 if (prevEntry && prevEntry.fast) {
-                    delay = 1200; // Slower spawn for screenshots
+                    delay = cwFastSpawnMs; // Slower spawn for screenshots, adjustable
                 }
             }
             
@@ -1818,7 +1905,7 @@
                     const goDown = e.code === 'ArrowDown' || e.key === 'ArrowDown';
                     if (goUp || goDown) {
                         e.preventDefault();
-                        nudgeCwMotion(goUp);
+                        nudgeCwMotion(goUp, e.shiftKey);
                         return;
                     }
                     if (
