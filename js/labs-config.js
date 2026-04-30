@@ -16,7 +16,8 @@
  * JG 9:  parabellabor (zusätzlich zu JG 8–9 bei Pythagoras/Potenz)
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
- * uni (zusätzlich): lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
+ * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
+ * top5 (Hub-Kachel): fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linse)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
@@ -458,7 +459,7 @@ const LABS_DATA = [
         "description": "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen und rekonstruiere sie. Verstehe die Magie der Frequenzanalyse interaktiv.",
         "tagline": "Fourier-Reihen / Harmonik / Epizykel",
         "icon": "🎻",
-        "category": "fun geometrie hot highlight grade11 grade12 uni",
+        "category": "fun geometrie hot highlight grade11 grade12 uni top5",
         "keywords": "fourier musik note epicycles kreise geometrie harmonik transformation",
         "color": "blue"
     },
@@ -539,7 +540,7 @@ const LABS_DATA = [
             <rect x="70" y="51" width="12" height="26" fill="rgba(255,159,59,0.9)" />
             <line x1="18" y1="77" x2="84" y2="77" stroke="rgba(190,235,255,0.8)" stroke-width="1" />
         </svg>`,
-        "category": "fun highlight hot grade8",
+        "category": "fun highlight hot grade8 top5",
         "keywords": "galton board nagelbrett wahrscheinlichkeit zufall binomialverteilung histogramm simulation",
         "color": "blue"
     },
@@ -555,7 +556,7 @@ const LABS_DATA = [
             <ellipse cx="50" cy="50" rx="10" ry="34" fill="none" stroke="var(--neon-purple)" stroke-width="1.4" transform="rotate(30 50 50)" />
             <path d="M 50 20 Q 62 40 50 50 Q 38 40 50 20 M 50 50 Q 62 60 50 80 Q 38 60 50 50" fill="none" stroke="var(--neon-green)" stroke-width="1.2" />
         </svg>`,
-        "category": "highlight hot grade11 grade12 oberstufe fun uni",
+        "category": "highlight hot grade11 grade12 oberstufe fun uni top5",
         "keywords": "atom orbital kugelflächenfunktion kff harmonische ylm wahrscheinlichkeit 3d quanten chemie physik d orbital",
         "color": "blue"
     },
@@ -575,7 +576,7 @@ const LABS_DATA = [
             <line x1="60" y1="72" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.2" opacity="0.85" />
             <circle cx="92" cy="50" r="3" fill="#ffcc00" style="filter: drop-shadow(0 0 6px #ffcc00);" />
         </svg>`,
-        "category": "hot highlight fun grade10 grade11 grade12 uni",
+        "category": "hot highlight fun grade10 grade11 grade12 uni top5",
         "keywords": "linse opti lens optik strahlen brennpunkt cmaes evolution premium standalone symmetrie refraktion",
         "color": "blue"
     },
@@ -635,7 +636,7 @@ const LABS_DATA = [
             <circle cx="76" cy="38" r="2.4" fill="#adff2f" opacity="0.8"/>
             <circle cx="48" cy="48" r="3" fill="#050b18" stroke="#e2e8f0" stroke-width="0.9"/>
         </svg>`,
-        "category": "fraktale highlight hot grade11 grade12 oberstufe uni",
+        "category": "fraktale highlight hot grade11 grade12 oberstufe uni top5",
         "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",
         "color": "purple"
     },

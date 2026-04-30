@@ -19,7 +19,6 @@ Labore
 # 
 60pt
 5 Programmiersprachen 
-involviert ...
 40pt
 hypertext markup language
 cascading styles sheets
