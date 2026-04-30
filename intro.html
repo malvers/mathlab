@@ -71,11 +71,19 @@
             to { transform: scale(1.2); opacity: 0.6; }
         }
 
-        .fs-toggle {
+        .intro-top-actions {
             position: fixed;
             top: 30px;
             right: 30px;
             z-index: 2500;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fs-toggle {
+            position: static;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
@@ -104,6 +112,98 @@
             fill: none;
             stroke: currentColor;
             stroke-width: 2;
+        }
+
+        .intro-back-btn {
+            box-sizing: border-box;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            opacity: 0.35;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .intro-back-btn:hover {
+            opacity: 1;
+            border-color: rgba(255, 160, 160, 0.55);
+            background: rgba(255, 80, 80, 0.12);
+            box-shadow: 0 0 22px rgba(255, 120, 140, 0.35);
+            transform: scale(1.08);
+        }
+        .intro-back-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+        }
+
+        .intro-section-nav {
+            position: fixed;
+            left: 18px;
+            right: 18px;
+            bottom: 20px;
+            z-index: 2600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            gap: 12px;
+        }
+        .intro-section-btn {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(15, 23, 42, 0.72);
+            color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: lowercase;
+            cursor: pointer;
+            opacity: 0.42;
+            transition:
+                opacity 0.25s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.2s ease;
+            box-shadow: 0 0 14px rgba(0, 210, 255, 0.08);
+        }
+        .intro-section-btn:hover:not(:disabled) {
+            opacity: 1;
+            border-color: rgba(0, 210, 255, 0.55);
+            box-shadow: 0 0 22px rgba(0, 210, 255, 0.35);
+            transform: translateY(-1px);
+        }
+        .intro-section-btn:disabled {
+            opacity: 0.22;
+            cursor: not-allowed;
+            transform: none;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+        }
+        .intro-section-btn svg {
+            flex-shrink: 0;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         #catching-words-panel {
@@ -199,6 +299,35 @@
             transform: scale(0.9);
             letter-spacing: 12px;
         }
+        @keyframes cinematic-fade-in-cw-emoji {
+            0% {
+                opacity: 0;
+                transform: scale(0.08);
+            }
+            40% {
+                opacity: 0.65;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(0.92);
+            }
+        }
+        #catching-words-panel .falling-word.cw-emoji {
+            font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', emoji;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: unset;
+            animation-name: cinematic-fade-in-cw-emoji;
+        }
+        #catching-words-panel .falling-word.cw-emoji.cw-settled {
+            letter-spacing: 0 !important;
+            transform: scale(0.92);
+        }
         #catching-words-panel .falling-word.caught {
             animation: cw-caught 0.38s ease-out forwards;
         }
@@ -267,6 +396,62 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.18);
         }
 
+        #catching-words-panel .cw-media-wrap {
+            position: relative;
+            flex: 0 0 auto;
+            align-self: center;
+            width: min(92vw, 960px);
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 0 28px rgba(0, 210, 255, 0.35),
+                0 0 56px rgba(157, 80, 187, 0.18),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+            opacity: 0;
+            transform: translateY(18px) scale(0.96);
+            filter: blur(6px);
+            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            z-index: 1;
+        }
+        #catching-words-panel .cw-media-video {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: min(46vh, 520px);
+            vertical-align: middle;
+            background: #000;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.75s ease-out;
+        }
+        #catching-words-panel .cw-media-video.cw-media-video-visible {
+            opacity: 1;
+        }
+        #catching-words-panel .cw-coverr-fallback-msg {
+            margin: 0 0 10px;
+            padding: 0 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: rgba(200, 220, 245, 0.88);
+            text-align: center;
+            max-width: 36rem;
+        }
+        #catching-words-panel .cw-media-fallback-link {
+            display: inline-flex;
+            align-self: center;
+            padding: 12px 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            color: var(--neon-blue);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
         .cw-debug-hud {
             position: fixed;
             left: 12px;
@@ -297,11 +482,18 @@
 
     <div class="glow-sphere"></div>
 
-    <button class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
-        <svg viewBox="0 0 24 24">
-            <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </button>
+    <div class="intro-top-actions">
+        <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <a href="index.html" class="intro-back-btn" title="Zurück zum Mathe-Labor" aria-label="Schließen und zurück zum Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </a>
+    </div>
 
     <div id="catching-words-panel" aria-hidden="false">
         <div class="cw-play" id="cw-play">
@@ -309,6 +501,22 @@
         </div>
     </div>
 
+    <nav class="intro-section-nav" id="intro-section-nav" aria-label="Abschnitt wechseln">
+        <button type="button" id="cw-nav-prev" class="intro-section-btn" onclick="stepCwSection(-1)" title="Zurück (←)">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 6L8 12l6 6"/>
+            </svg>
+            <span>zurück</span>
+        </button>
+        <button type="button" id="cw-nav-next" class="intro-section-btn" onclick="stepCwSection(1)" title="Vor (→)">
+            <span>vor</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 6l6 6-6 6"/>
+            </svg>
+        </button>
+    </nav>
+
+    <script src="resources/dramaturgie-inline.js"></script>
     <script src="js/ui.js?v=4"></script>
     <script>
         try {
@@ -422,6 +630,10 @@
             for (let j = 0; j < portals.length; j++) {
                 if (!portals[j].classList.contains('cw-portal-settled')) return false;
             }
+            const mediaWraps = stack.querySelectorAll('.cw-media-wrap');
+            for (let k = 0; k < mediaWraps.length; k++) {
+                if (!mediaWraps[k].classList.contains('cw-media-settled')) return false;
+            }
             return true;
         }
 
@@ -451,14 +663,15 @@
         }
 
         const INTRO_PREFS_KEY = 'docalvers.intro.prefs';
-        const INTRO_PREFS_VERSION = 1;
+        const INTRO_PREFS_VERSION = 2;
 
         function loadIntroPersistedPrefs() {
             try {
                 const raw = localStorage.getItem(INTRO_PREFS_KEY);
                 if (!raw) return;
                 const s = JSON.parse(raw);
-                if (!s || typeof s !== 'object' || s.v !== INTRO_PREFS_VERSION) return;
+                if (!s || typeof s !== 'object') return;
+                if (s.v !== 1 && s.v !== INTRO_PREFS_VERSION) return;
                 if (typeof s.bgBrightness === 'number' && Number.isFinite(s.bgBrightness)) {
                     bgVideoBrightness = Math.max(
                         BG_VIDEO_BRIGHTNESS_MIN,
@@ -470,6 +683,9 @@
                 }
                 if (typeof s.cwSpawnMs === 'number' && Number.isFinite(s.cwSpawnMs)) {
                     cwSpawnMs = Math.round(Math.max(400, Math.min(2000, s.cwSpawnMs)));
+                }
+                if (typeof s.cwDebugHud === 'boolean') {
+                    cwDebugHudVisible = s.cwDebugHud;
                 }
             } catch (err) {
                 /* file:// oder private mode */
@@ -485,6 +701,7 @@
                         bgBrightness: bgVideoBrightness,
                         cwAnimSec,
                         cwSpawnMs,
+                        cwDebugHud: cwDebugHudVisible,
                     })
                 );
             } catch (err) {
@@ -494,19 +711,45 @@
 
         loadIntroPersistedPrefs();
 
+        function syncCwDebugHudDom() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            let hud = document.getElementById('cw-debug-hud');
+            if (cwDebugHudVisible) {
+                if (!hud) {
+                    hud = document.createElement('div');
+                    hud.id = 'cw-debug-hud';
+                    hud.className = 'cw-debug-hud';
+                    hud.setAttribute('aria-live', 'polite');
+                    document.body.appendChild(hud);
+                }
+                hud.classList.add('visible');
+            } else if (hud) {
+                hud.classList.remove('visible');
+            }
+            syncCwMotionVars();
+        }
+
+        syncCwDebugHudDom();
+
         function syncCwMotionVars() {
             const panel = document.getElementById('catching-words-panel');
             if (panel) panel.style.setProperty('--cw-anim-sec', String(cwAnimSec));
             const hud = document.getElementById('cw-debug-hud');
             if (hud && hud.classList.contains('visible')) {
+                const secLine =
+                    cwSections.length > 0
+                        ? 'Abschnitt ' + (cwSectionIndex + 1) + ' / ' + cwSections.length
+                        : 'Abschnitt —';
                 hud.textContent = [
+                    secLine + '  ·  Play-all ' + (cwPlayAllActive ? 'an' : 'aus'),
                     'Flug (Keyframe): ' + cwAnimSec.toFixed(1) + ' s',
                     'Spawn-Takt:      ' + cwSpawnMs + ' ms',
                     '↑ schneller · ↓ langsamer  (±0,1 s · ±10 ms)',
                     'h · d  Video heller / dunkler',
-                    '%stop in .txt beendet S‑Play-all',
-                    'S  Play-all: Wechsel wenn Section fertig animiert',
-                    '⌘D  Debug ein/aus',
+                    'Beim Laden: automatisch Play-all (alle #‑Sections wie S)',
+                    '%stop in Script/.txt beendet Play-all',
+                    'S  Play-all neu ab Abschnitt 1 · Wechsel wenn Section fertig animiert',
+                    '⌘D  Debug ein/aus (bleibt gespeichert)',
                 ].join('\n');
             }
         }
@@ -522,16 +765,8 @@
         function toggleCwDebugHud() {
             if (!document.body.classList.contains('mode-catching-words')) return;
             cwDebugHudVisible = !cwDebugHudVisible;
-            let hud = document.getElementById('cw-debug-hud');
-            if (!hud) {
-                hud = document.createElement('div');
-                hud.id = 'cw-debug-hud';
-                hud.className = 'cw-debug-hud';
-                hud.setAttribute('aria-live', 'polite');
-                document.body.appendChild(hud);
-            }
-            hud.classList.toggle('visible', cwDebugHudVisible);
-            syncCwMotionVars();
+            syncCwDebugHudDom();
+            saveIntroPersistedPrefs();
         }
 
         function handleCwSectionSpawnExhausted() {
@@ -546,6 +781,7 @@
         function stopCwPlayAllFromScript() {
             cwPlayAllActive = false;
             clearCwPlayAllTimer();
+            syncCwMotionVars();
         }
 
         function beginCwPlayAllSections() {
@@ -578,7 +814,20 @@
             } else {
                 cwPlayAllActive = false;
                 stopCatchingWords();
+                syncCwMotionVars();
             }
+        }
+
+        function syncIntroSectionNav() {
+            const prev = document.getElementById('cw-nav-prev');
+            const next = document.getElementById('cw-nav-next');
+            if (!prev || !next) return;
+            const n = cwSections.length;
+            const i = cwSectionIndex;
+            const multi = n > 1;
+            prev.disabled = !multi || i <= 0;
+            next.disabled = !multi || i >= n - 1;
+            syncCwMotionVars();
         }
 
         function stepCwSection(delta) {
@@ -611,12 +860,22 @@
                     clearTimeout(cwSpawnTimer);
                     cwSpawnTimer = null;
                 }
-                stack.querySelectorAll('.falling-word, .cw-portal-btn').forEach((el) => {
+                stack.querySelectorAll('.falling-word, .cw-portal-btn, .cw-media-wrap').forEach((el) => {
                     el.style.animationPlayState = 'paused';
                 });
+                stack.querySelectorAll('.cw-media-video').forEach((v) => {
+                    try {
+                        v.pause();
+                    } catch (err) {
+                        /* ignore */
+                    }
+                });
             } else {
-                stack.querySelectorAll('.falling-word, .cw-portal-btn').forEach((el) => {
+                stack.querySelectorAll('.falling-word, .cw-portal-btn, .cw-media-wrap').forEach((el) => {
                     if (!el.classList.contains('caught')) el.style.animationPlayState = 'running';
+                });
+                stack.querySelectorAll('.cw-media-video').forEach((v) => {
+                    v.play().catch(() => {});
                 });
                 scheduleCwSpawn();
             }
@@ -654,6 +913,177 @@
                     a.classList.add('cw-portal-settled');
                 });
                 playStack.appendChild(a);
+                return;
+            }
+
+            if (entry.kind === 'media-video') {
+                const wrap = document.createElement('div');
+                wrap.className = 'cw-media-wrap';
+                wrap.style.zIndex = String(cwSpawnRoundIndex);
+                const rawSrc = String(entry.src || '').trim();
+                let settled = false;
+                function markMediaSettled() {
+                    if (settled) return;
+                    settled = true;
+                    wrap.classList.add('cw-media-settled');
+                    if (cwPlayAllActive) runCwPlayAllSectionCompletionWatch();
+                }
+
+                function sanitizeCwVideoUrl(u) {
+                    const s = String(u || '').trim();
+                    if (!s) return '';
+                    if (/^javascript:/i.test(s)) return '';
+                    return s;
+                }
+
+                function normalizeCoverrFetchedHtml(html) {
+                    return String(html || '').replace(/\\\//g, '/');
+                }
+
+                function extractCoverrHeroMp4(html) {
+                    const h = normalizeCoverrFetchedHtml(html);
+                    const heroChunk = h.split(/\bRelated Free\b|\bMore Free\b|\bExplore iStock\b/i)[0];
+                    const resolutions = ['1080p', '720p', '480p', '360p'];
+                    for (let ri = 0; ri < resolutions.length; ri++) {
+                        const res = resolutions[ri];
+                        const re = new RegExp(
+                            `https://cdn\\.coverr\\.co/videos/[^"'\\s<>]+/${res}\\.mp4`,
+                            'i'
+                        );
+                        const m = heroChunk.match(re);
+                        if (m) return m[0];
+                    }
+                    const fb = h.match(
+                        /https:\/\/cdn\.coverr\.co\/videos\/[^"'\\\s<>]+\/1080p\.mp4/i
+                    );
+                    return fb ? fb[0] : null;
+                }
+
+                function fetchCoverrPageHtml(pageUrl) {
+                    const direct = () =>
+                        fetch(pageUrl, { credentials: 'omit', mode: 'cors' }).then((r) =>
+                            r.ok ? r.text() : Promise.reject()
+                        );
+                    const viaProxy = () =>
+                        fetch(
+                            'https://api.allorigins.win/raw?url=' + encodeURIComponent(pageUrl),
+                            { credentials: 'omit', mode: 'cors' }
+                        ).then((r) => (r.ok ? r.text() : Promise.reject()));
+                    return direct().catch(() => viaProxy());
+                }
+
+                function attachCoverrFallbackExternal(pageUrl) {
+                    wrap.innerHTML = '';
+                    const p = document.createElement('p');
+                    p.className = 'cw-coverr-fallback-msg';
+                    p.textContent =
+                        'Nur die Videodatei — keine eingebettete Coverr-Webseite. Tipp: Intro über http://localhost öffnen (nicht file://) oder MP4 nach resources/ legen.';
+                    const a = document.createElement('a');
+                    a.className = 'cw-media-fallback-link';
+                    a.href = pageUrl;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = 'Clip auf Coverr öffnen';
+                    wrap.appendChild(p);
+                    wrap.appendChild(a);
+                    markMediaSettled();
+                }
+
+                function attachDirectVideo(url) {
+                    wrap.innerHTML = '';
+                    const v = document.createElement('video');
+                    v.className = 'cw-media-video';
+                    v.setAttribute('playsinline', '');
+                    v.controls = true;
+                    v.muted = true;
+                    v.loop = true;
+                    v.autoplay = true;
+                    v.preload = 'metadata';
+                    function revealAndSettle() {
+                        v.classList.add('cw-media-video-visible');
+                        markMediaSettled();
+                    }
+                    v.addEventListener('error', () => {
+                        wrap.innerHTML = '';
+                        const a = document.createElement('a');
+                        a.className = 'cw-media-fallback-link';
+                        a.href = rawSrc;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        a.textContent = 'Video-Link öffnen';
+                        wrap.appendChild(a);
+                        markMediaSettled();
+                    });
+                    v.addEventListener('loadeddata', revealAndSettle);
+                    wrap.appendChild(v);
+                    v.src = url;
+                    if (v.readyState >= 2) revealAndSettle();
+                    setTimeout(() => {
+                        if (!settled) markMediaSettled();
+                    }, 14000);
+                }
+
+                const srcSafe = sanitizeCwVideoUrl(rawSrc);
+                const isCoverrPage =
+                    /^https?:\/\/(?:www\.)?coverr\.co\/videos\//i.test(srcSafe);
+
+                playStack.appendChild(wrap);
+
+                if (!srcSafe) {
+                    attachDirectVideo('resources/galay20.mp4');
+                    return;
+                }
+
+                if (isCoverrPage) {
+                    fetchCoverrPageHtml(srcSafe)
+                        .then((html) => {
+                            const mp4 = extractCoverrHeroMp4(html);
+                            wrap.innerHTML = '';
+                            if (mp4) attachDirectVideo(mp4);
+                            else attachCoverrFallbackExternal(srcSafe);
+                        })
+                        .catch(() => {
+                            wrap.innerHTML = '';
+                            attachCoverrFallbackExternal(srcSafe);
+                        });
+                    return;
+                }
+
+                attachDirectVideo(srcSafe);
+                return;
+            }
+
+            if (entry.kind === 'emoji') {
+                const glyph = String(entry.text || '').trim();
+                if (!glyph) return;
+                const fontPt = entry.fontSizePt;
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'falling-word cw-emoji';
+                el.textContent = glyph;
+                el.style.zIndex = String(cwSpawnRoundIndex);
+                if (fontPt != null && Number.isFinite(fontPt))
+                    el.style.setProperty('font-size', fontPt + 'pt', 'important');
+
+                playStack.appendChild(el);
+
+                el.addEventListener('animationend', (ev) => {
+                    if (!ev.animationName || ev.animationName.indexOf('cinematic-fade-in-cw-emoji') === -1) return;
+                    if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
+                    el.classList.add('cw-settled');
+                });
+
+                function onCatchEmoji(e) {
+                    e.preventDefault();
+                    if (!cwRunning || el.classList.contains('caught')) return;
+                    el.classList.add('caught');
+                    setTimeout(() => el.remove(), 380);
+                }
+                el.addEventListener('click', onCatchEmoji);
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    onCatchEmoji(e);
+                }, { passive: false });
                 return;
             }
 
@@ -726,6 +1156,7 @@
 
             spawnCwWord();
             scheduleCwSpawn();
+            syncIntroSectionNav();
         }
 
         function normalizeCwLine(raw) {
@@ -738,10 +1169,13 @@
          * Sections (←/→): neuer Abschnitt bei jeder #‑Zeile (# allein, # Kommentar oder # 60pt in einer Zeile).
          * Größe: «# 60pt» oder eigene Zeile nur «60pt» / «200pt» (gilt für folgende Wörter bis zur nächsten Größenzeile).
          * Zeilen, die mit «//» beginnen: Kommentar (ignorieren).
+         * Video: «%video URL» — auch «%videohttps://…» ohne Leerzeichen. Reine Zeile nur mit Coverr- oder .mp4/.webm-URL zählt ebenfalls als Video (Paste ohne %video).
+         * Coverr-Seite: MP4 aus der Seite (Hero vor „Related“), nur HTML5-Video — keine Coverr-Navigation im iframe.
+         * Ohne URL: «%video» → resources/galay20.mp4
          * Navigation: «%button» → Button nach index.html; «%button index» / «%button orbitals.html»; optional Beschriftung:
          * «%button orbitals.html Orbitale». Ein einzelnes Wort, das kein Ziel ist (z. B. «%button TOLL»), wird nur als Text auf index verlinkt.
-         * «%stop» beendet den S‑Play-all-Lauf (keine automatischen Abschnittswechsel mehr), die laufende Section spielt normal weiter.
-         * S: alle Abschnitte von #1 an nacheinander — Wechsel erst, wenn alle Wörter eingeflogen sind (oder erwischt) und %button-Animationen fertig sind; kurze Pause; letzter Abschnitt Stopp. ←/→ / Drop brechen ab.
+         * Emoji: «%emoji 😎» oder «%emoji😎» — wirkt wie ein Schlagwort, ohne Textverlauf (farbiges Emoji).
+         * S (und Standard beim Laden): alle Abschnitte von #1 an nacheinander — Wechsel erst, wenn alle Wörter eingeflogen sind (oder erwischt) und %button-Animationen fertig sind; kurze Pause; letzter Abschnitt Stopp. ←/→ / Drop brechen ab.
          */
         function isCwNavTargetToken(t) {
             const s = String(t || '').trim();
@@ -768,6 +1202,16 @@
             const h = String(href || '').toLowerCase().split(/[?#]/)[0];
             if (h === 'index.html' || h.endsWith('/index.html')) return 'ZUM INDEX';
             return 'WEITER';
+        }
+
+        /** Coverr-Seite oder direkte Mediendatei — wird nicht als Fließtext gerendert. */
+        function isCwStandaloneVideoLine(line) {
+            const s = String(line || '').trim();
+            if (!s || /\s/.test(s)) return false;
+            if (/^https?:\/\/(?:www\.)?coverr\.co\/videos\/./i.test(s)) return true;
+            if (/^https?:\/\/.+\.(?:mp4|webm|ogg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            if (/^[a-z0-9_./-]+\.(?:mp4|webm|ogg)(\?[^#]*)?(?:#.*)?$/i.test(s)) return true;
+            return false;
         }
 
         function parseCwSections(text) {
@@ -810,6 +1254,38 @@
                     continue;
                 }
 
+                if (/^%video(https?:\/\/)/i.test(line)) {
+                    current.push({
+                        kind: 'media-video',
+                        src: line.replace(/^%video/i, '').trim(),
+                    });
+                    continue;
+                }
+                if (/^%video\b/i.test(line)) {
+                    const rest = line.replace(/^%video\s*/i, '').trim();
+                    current.push({
+                        kind: 'media-video',
+                        src: rest,
+                    });
+                    continue;
+                }
+
+                if (isCwStandaloneVideoLine(line)) {
+                    current.push({ kind: 'media-video', src: line.trim() });
+                    continue;
+                }
+
+                if (/^%emoji/i.test(line)) {
+                    const rest = line.replace(/^%emoji/i, '').trim();
+                    if (rest)
+                        current.push({
+                            kind: 'emoji',
+                            text: rest,
+                            fontSizePt: currentPt,
+                        });
+                    continue;
+                }
+
                 if (/^%button\b/i.test(line)) {
                     const rest = line.replace(/^%button\s*/i, '').trim();
                     if (!rest) {
@@ -844,14 +1320,23 @@
 
         function applyCwSequenceFromText(text) {
             const sections = parseCwSections(text);
-            if (!sections.length) return;
-            cwPlayAllActive = false;
-            clearCwPlayAllTimer();
-            stopCatchingWords();
+            if (!sections.length) return false;
             cwSections = sections;
-            cwSectionIndex = 0;
-            cwSequence = cwSections[0];
-            startCatchingWords();
+            beginCwPlayAllSections();
+            return true;
+        }
+
+        function loadIntroDramaturgie() {
+            const inline =
+                typeof window.__INTRO_DRAMATURGIE_TXT === 'string' ? window.__INTRO_DRAMATURGIE_TXT : '';
+            if (inline.trim() && applyCwSequenceFromText(inline)) return;
+
+            fetch('resources/dramaturgie.txt', { cache: 'no-store' })
+                .then((r) => (r.ok ? r.text() : Promise.reject()))
+                .then((text) => {
+                    if (!applyCwSequenceFromText(text)) beginCwPlayAllSections();
+                })
+                .catch(() => beginCwPlayAllSections());
         }
 
         function readDroppedFiles(files, cb) {
@@ -984,7 +1469,7 @@
 
         syncCwMotionVars();
         syncBgVideoBrightness();
-        startCatchingWords();
+        loadIntroDramaturgie();
     </script>
 </body>
 </html>
