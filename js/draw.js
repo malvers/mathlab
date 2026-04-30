@@ -7,25 +7,37 @@ function draw() {
     const isMobile = window.innerWidth <= 1100;
 
     // 1. CANVAS SETUP & PLATZBERECHNUNG
-    // Wir fragen direkt den Container, wie groß das CSS ihn gemacht hat!
-    const containerRect = canvas.parentElement.getBoundingClientRect();
-    const expBox = document.getElementById('explanation-box');
-
-    let canvasW = containerRect.width;
-    let canvasH = containerRect.height;
+    const parent = canvas.parentElement;
+    
+    // Fallback auf window.innerWidth minus sidebar (380px), falls Flex/Parent nicht greift
+    let canvasW = parent.clientWidth;
+    if (!canvasW || canvasW < 10) {
+        canvasW = isMobile ? window.innerWidth : (window.innerWidth - 380);
+    }
+    
+    let canvasH = parent.clientHeight;
+    if (!canvasH || canvasH < 10) {
+        canvasH = window.innerHeight;
+    }
 
     // Zieht die Erklärbox auf dem Tablet/Handy vom Zeichenplatz ab
     if (isMobile && expBox && expBox.style.display !== 'none') {
         canvasH -= expBox.offsetHeight;
     }
 
+    canvasW = Math.max(1, canvasW);
+    canvasH = Math.max(1, canvasH);
+
     // Setzt die innere Schärfe (Retina) und die äußere Höhe
-    canvas.width = canvasW * dpr;
-    canvas.height = canvasH * dpr;
+    canvas.width = Math.max(1, canvasW * dpr);
+    canvas.height = Math.max(1, canvasH * dpr);
+    canvas.style.width = canvasW + 'px';
     canvas.style.height = canvasH + 'px';
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, canvasW, canvasH);
+    // Hier war #050b18 hart codiert, das überdeckt den schönen Verlauf von #main-content.
+    // Wir lassen den Canvas transparent, damit der Radial-Gradient von #main-content durchscheint!
 
     // 2. VARIANTEN & FARBEN
     const v = variants[currentVariant];
@@ -51,7 +63,8 @@ function draw() {
     const o25 = 25 * scale, o55 = 55 * scale, o65 = 65 * scale, o85 = 85 * scale;
 
     // 4. PUNKTE BERECHNEN
-    let centerX = isMobile ? (canvasW / 2) : ((canvasW - 380) / 2);
+    // Nur Hauptbereich (ohne Sidebar) — keine 380px mehr abziehen
+    let centerX = canvasW / 2;
     centerX = Math.max(centerX, baseWidth / 2 + 20);
 
     const A = { x: centerX - baseWidth/2, y: canvasH - bottomPadding };

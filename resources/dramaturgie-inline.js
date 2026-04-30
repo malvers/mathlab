@@ -14,7 +14,7 @@ von Dr. Michael R. Alvers
 60pt
 Interaktive Mathematik
 Labore
-
+%screenshots
 
 # 
 60pt

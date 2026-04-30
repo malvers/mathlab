@@ -88,6 +88,22 @@
             border-radius: 6px;
             cursor: pointer;
         }
+
+        /* Flex: Hauptbereich nutzt die volle Restbreite (Canvas/Rechte-Kante-Artefakte vermeiden) */
+        #main-content {
+            min-width: 0;
+            flex: 1 1 auto;
+            position: relative;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+        }
     </style>
   <script>
     MathJax = {
@@ -100,7 +116,7 @@
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 
-<<body>
+<body>
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
 
@@ -210,16 +226,15 @@
     <script src="js/config.js"></script>
     <script src="js/geometry.js"></script>
     <script src="js/explanations.js"></script>
-    <script src="js/draw.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/events.js"></script>
+    <script src="js/draw.js?v=langley10"></script>
+    <script src="js/main.js?v=langley10"></script>
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js?v=4"></script>
     <script>
+        if (typeof CyberBranding !== 'undefined') CyberBranding.DEV_MODE = false;
         CyberUI.init();
-        // Initialize Branding
         CyberBranding.init({
             useExternalStyles: true,
             title: "Doc Alvers Mathe-Labor",
