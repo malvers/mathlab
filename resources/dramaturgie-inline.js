@@ -34,7 +34,7 @@ Programmzeilen
 
 #
 für Euch!
-%bild resources/kids.webp
+%picture resources/kids.webp
 %sound resources/kids.wav
 //%video https://coverr.co/videos/welcome-back-to-school-classrooms-first-lesson
 

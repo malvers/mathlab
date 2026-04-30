@@ -424,6 +424,20 @@
             animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
             z-index: 1;
         }
+        #catching-words-panel .cw-media-wrap.cw-media-fast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.25s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+            /* Random rotation between -10deg and 10deg, random translate to scatter them */
+            transform: translate(calc(-50% + (var(--rand-x, 0.5) - 0.5) * 50vw), calc(-50% + (var(--rand-y, 0.5) - 0.5) * 50vh)) scale(0.85) rotate(calc(-10deg + 20deg * var(--rand-rot, 0.5)));
+        }
+        #catching-words-panel .cw-media-wrap.cw-media-fast .cw-media-img {
+            max-height: min(65vh, 700px);
+            max-width: min(85vw, 1200px);
+            border-radius: 8px;
+        }
         #catching-words-panel .cw-media-video,
         #catching-words-panel .cw-media-img {
             display: block;
@@ -1113,9 +1127,17 @@
                 return;
             }
 
-            if (entry.kind === 'media-image') {
+                if (entry.kind === 'media-image') {
                 const wrap = document.createElement('div');
                 wrap.className = 'cw-media-wrap';
+                if (entry.fast) {
+                    wrap.classList.add('cw-media-fast');
+                    wrap.style.setProperty('--rand-rot', Math.random());
+                    // Biased towards center for first few, then more scattered
+                    const spread = Math.min(1, cwSpawnRoundIndex / 10);
+                    wrap.style.setProperty('--rand-x', 0.5 + (Math.random() - 0.5) * spread);
+                    wrap.style.setProperty('--rand-y', 0.5 + (Math.random() - 0.5) * spread);
+                }
                 wrap.style.zIndex = String(cwSpawnRoundIndex);
                 let settled = false;
                 function markImgSettled() {
@@ -1374,11 +1396,20 @@
                 handleCwSectionSpawnExhausted();
                 return;
             }
+            
+            let delay = cwSpawnMs;
+            if (cwSpawnRoundIndex > 0) {
+                const prevEntry = cwSequence[cwSpawnRoundIndex - 1];
+                if (prevEntry && prevEntry.fast) {
+                    delay = 100; // Fast spawn for screenshots
+                }
+            }
+            
             cwSpawnTimer = setTimeout(() => {
                 if (!cwRunning || cwPaused) return;
                 spawnCwWord();
                 scheduleCwSpawn();
-            }, cwSpawnMs);
+            }, delay);
         }
 
         function syncCwStackVerticalAlign() {
@@ -1438,7 +1469,7 @@
          * Navigation: «%button» → Button nach index.html; «%button index» / «%button orbitals.html»; optional Beschriftung:
          * «%button orbitals.html Orbitale». Ein einzelnes Wort, das kein Ziel ist (z. B. «%button TOLL»), wird nur als Text auf index verlinkt.
          * Sound: «%sound pfad» — WAV/MP3/OGG/M4A (z. B. resources/kids.wav); eine Zeile nur mit Ton-URL/Pfad zählt ebenso.
-         * Bild: «%bild pfad» oder «%bildhttps://…» — lokaler Pfad (z. B. resources/kids.webp) oder URL; WebP/JPEG/PNG/GIF/SVG.
+         * Bild: «%picture pfad» oder «%picturehttps://…» — lokaler Pfad (z. B. resources/kids.webp) oder URL; WebP/JPEG/PNG/GIF/SVG.
          * Emoji: «%emoji 😎» oder «%emoji😎» — wirkt wie ein Schlagwort, ohne Textverlauf (farbiges Emoji).
          * S (und Standard beim Laden): alle Abschnitte von #1 an nacheinander — Wechsel erst, wenn alle Wörter eingeflogen sind (oder erwischt) und %button-Animationen fertig sind; kurze Pause; letzter Abschnitt Stopp. ←/→ / Drop brechen ab.
          */
@@ -1553,15 +1584,15 @@
                     continue;
                 }
 
-                if (/^%bild(https?:\/\/)/i.test(line)) {
+                if (/^%picture(https?:\/\/)/i.test(line)) {
                     current.push({
                         kind: 'media-image',
-                        src: line.replace(/^%bild/i, '').trim(),
+                        src: line.replace(/^%picture/i, '').trim(),
                     });
                     continue;
                 }
-                if (/^%bild\b/i.test(line)) {
-                    const rest = line.replace(/^%bild\s*/i, '').trim();
+                if (/^%picture\b/i.test(line)) {
+                    const rest = line.replace(/^%picture\s*/i, '').trim();
                     current.push({ kind: 'media-image', src: rest });
                     continue;
                 }
@@ -1591,6 +1622,22 @@
 
                 if (isCwStandaloneSfxLine(line)) {
                     current.push({ kind: 'sfx', src: line.trim() });
+                    continue;
+                }
+
+                if (/^%screenshots/i.test(line)) {
+                    // Inject all screenshots in rapid succession
+                    const screenshots = ["transformationen.png", "heart3d.png", "beweisinwinkellsumme.png", "dividieren.png", "fermatpunkt.png", "coolsquares.png", "potenzlabor.png", "winkelpuzzle.png", "gleichungssysteme.png", "logikspiel2.png", "lissajous.png", "gleichschenkligesDreieck.png", "pythagoras.png", "uhrzeitwinkel.png", "winkellabor.png", "butterfly.png", "orbitals.png", "winkelsumme.png", "cmaes.png", "ausgleichsgerade.png", "parabellabor.png", "fibonacci.png", "subtraktion.png", "coordinatensystemtester.png", "multiplikation.png", "litchi3d.png", "cmaes_java.png", "differentiallabor.png", "triangulierer.png", "binomischeslabor.png", "steigung.png", "pythagorasbeweis.png", "mandelbrot_deep.png", "integralreaktor.png", "winkelsumme3d.png", "addition.png", "eulergerade.png", "galtonboard.png", "fourier.png"];
+                    
+                    // Shuffle array
+                    for (let i = screenshots.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [screenshots[i], screenshots[j]] = [screenshots[j], screenshots[i]];
+                    }
+                    
+                    screenshots.forEach(file => {
+                        current.push({ kind: 'media-image', src: 'resources/screenshots/' + file, fast: true });
+                    });
                     continue;
                 }
 
