@@ -1787,7 +1787,10 @@
             };
 
             const titleEl = document.getElementById('view-title');
-            if (titleEl) titleEl.innerText = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
+            if (titleEl) {
+                const rawTitle = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
+                titleEl.innerText = rawTitle.toUpperCase();
+            }
 
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
