@@ -130,7 +130,7 @@
                 education: "EDUCATION",
                 games: "Games",
                 lgs: "Equation Systems",
-                pythagoras: "Pythagoras",
+                pythagoras: "Pythagorean Theorem",
                 triangles: "Triangles",
                 arithmetic: "Basic Arithmetic",
                 hot_stuff: "Hot stuff",
@@ -203,7 +203,17 @@
                 "cool-squares": { title: "Cool Squares", description: "The ultimate geometric proof. Follow the spiral of squares." },
                 "fibonacci": { title: "Fibonacci Lab", description: "Explore the golden spiral and organic growth patterns." },
                 "fermatpunkt": { title: "Fermat Point", description: "Find the point with the minimal sum of distances to the vertices." },
-                "gleichungssysteme": { title: "LSE Lab", description: "Explore Linear Systems of Equations visually through lines." }
+                "gleichungssysteme": { title: "LSE Lab", description: "Explore Linear Systems of Equations visually through lines." },
+                "pythagoras": { title: "Pythagoras", description: "Discover the Pythagorean theorem through interactive area comparisons." },
+                "pythagorasbeweis": { title: "Pythagoras Proof", description: "Geometric proof of the Pythagorean theorem by area decomposition." },
+                "gleichschenkligesDreieck": { title: "Isosceles Triangle", description: "Calculate special triangles and their properties interactively." },
+                "eulergerade": { title: "Euler Feuerbach and Napoleon", description: "The fascinating geometry of the triangle: Euler line and Feuerbach circle." },
+                "easyhard": { title: "Geometry Puzzle", description: "A challenging geometric riddle. Determine the missing angle." },
+                "winkelsumme": { title: "Polygon Lab", description: "Calculate the sum of angles in any n-gon." },
+                "beweisinwinkellsumme": { title: "Interior Angle Proof", description: "Why is the sum of angles in a triangle always 180°? The proof step by step." },
+                "butterfly": { title: "Butterfly Curve", description: "A fascinating transcendental curve defined by polar coordinates." },
+                "heart3d": { title: "3D Heart Surface", description: "Visualization of an implicit 3D surface behind the mathematical heart." },
+                "litchi3d": { title: "3D Litchi Lab", description: "Explore complex 3D surface mathematics interactively." }
             }
         },
         es: {
@@ -279,7 +289,7 @@
                 "subtraktion": { title: "Resta Escrita", description: "Entrene la resta escrita con acarreo paso a paso." },
                 "multiplikation": { title: "Multiplicación Escrita", description: "Visualiza la multiplicación escrita paso a paso." },
                 "dividieren": { title: "División Escrita", description: "Domine la división escrita con el laboratorio interactivo ULTRA." },
-                "cmaes": { title: "Optimización de Superficies", description: "CMA-ES en tiempo real: mejora evolutiva de polígonos cerrados y contornos libres." },
+                "cmaes": { title: "Optimización de Superficies", description: "CMA-ES in tiempo real: mejora evolutiva de polígonos cerrados y contornos libres." },
                 "transformationen": { title: "Congruencia", description: "Explore la rotación, traslación y escalado de un triángulo de forma interactiva." },
                 "winkelsumme3d": { title: "Suma de Ángulos 3D", description: "Experimente la suma de ángulos en el espacio 3D. Visualización dinámica." },
                 "ausgleichsgerade": { title: "Línea de Ajuste", description: "Encuentre la mejor línea a través de una nube de puntos. Entienda la regresión." },
@@ -289,15 +299,25 @@
                 "parabellabor": { title: "Parábolas", description: "Manipulación de funciones cuadráticas. Entienda la influencia de los parámetros." },
                 "potenzlabor": { title: "Laboratorio de Potencias", description: "Explore el comportamiento de las funciones de potencia y raíz de forma interactiva." },
                 "steigung": { title: "Laboratorio de Pendientes", description: "Entienda la pendiente en cualquier punto de una curva. Base del análisis." },
-                "winkellabor": { title: "Laboratorio de Ángulos", description: "Investigación interactiva de sumas de ángulos und tipos de triángulos." },
+                "winkellabor": { title: "Laboratorio de Ángulos", description: "Investigación interactiva de sumas de ángulos y tipos de triángulos." },
                 "uhrzeitwinkel": { title: "Laboratorio de Reloj de Ángulos", description: "Examine el ángulo entre las manecillas del reloj en cualquier momento del día." },
                 "logikspiel": { title: "Puzzle de Números", description: "¡Conviértase en un maestro de la matriz! Resuelva cuadrículas de números complejas." },
                 "integralreaktor": { title: "Integrales", description: "La energía del área. Visualice sumas de Riemann y métodos de aproximación." },
-                "lissajous": { title: "Lissajous", description: "Superposition of two harmonic oscillations: frequency and phase." },
+                "lissajous": { title: "Lissajous", description: "Superposición de dos oscilaciones armónicas: frecuencia y fase." },
                 "cool-squares": { title: "Cuadrados Geniales", description: "La prueba geométrica definitiva. Siga la espiral de cuadrados." },
                 "fibonacci": { title: "Laboratorio Fibonacci", description: "Explore la espiral dorada y los patrones de crecimiento orgánico." },
                 "fermatpunkt": { title: "Punto de Fermat", description: "Encuentre el punto con la suma mínima de distancias a los vértices." },
-                "gleichungssysteme": { title: "Laboratorio de SLE", description: "Explore sistemas de ecuaciones lineales visualmente a través de líneas." }
+                "gleichungssysteme": { title: "Laboratorio de SLE", description: "Explore sistemas de ecuaciones lineales visualmente a través de líneas." },
+                "pythagoras": { title: "Pitágoras", description: "Descubra el teorema de Pitágoras a través de comparaciones interactivas de áreas." },
+                "pythagorasbeweis": { title: "Prueba de Pitágoras", description: "Prueba geométrica del teorema de Pitágoras mediante descomposición de áreas." },
+                "gleichschenkligesDreieck": { title: "Triángulo Isósceles", description: "Calcule triángulos especiales y sus propiedades de forma interactiva." },
+                "eulergerade": { title: "Euler Feuerbach y Napoleon", description: "La fascinante geometría del triángulo: recta de Euler y círculo de Feuerbach." },
+                "easyhard": { title: "Puzzle de Geometría", description: "Un acertijo geométrico desafiante. Determine el ángulo que falta." },
+                "winkelsumme": { title: "Laboratorio de Polígonos", description: "Calcule la suma de los ángulos en cualquier n-ágono." },
+                "beweisinwinkellsumme": { title: "Prueba del Ángulo Interior", description: "¿Por qué la suma de los ángulos de un triángulo es siempre 180°? La prueba paso a paso." },
+                "butterfly": { title: "Curva de Mariposa", description: "Una fascinante curva trascendente definida por coordenadas polares." },
+                "heart3d": { title: "Superficie de Corazón 3D", description: "Visualización de una superficie 3D implícita detrás del corazón matemático." },
+                "litchi3d": { title: "Laboratorio de Litchi 3D", description: "Explore interactivamente las complejas matemáticas de superficies 3D." }
             }
         }
     };
