@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Credits | Doc Alvers</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap" rel="stylesheet">
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-credits.js"></script>
   <style>
     :root { --space-bg: #050b18; --neon-blue: #00d2ff; --text-main: #ffffff; }
     
@@ -32,7 +34,7 @@
         max-width: 700px; width: 90%; line-height: 1.6;
         max-height: 70vh; overflow-y: auto;
     }
-    h1 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); letter-spacing: 2px; margin-top: 5px; }
+    h1 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); letter-spacing: 2px; margin-top: -12px; }
     ul { list-style: none; padding: 0; margin: 24px 0 0; }
     li { margin-bottom: 0.6rem; padding-left: 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.6rem; }
     li:last-child { border-bottom: none; }
@@ -47,6 +49,7 @@
         backdrop-filter: blur(10px);
         display: inline-block; margin-bottom: 10px; padding: 10px 20px; 
         border: 1px solid var(--neon-blue); border-radius: 20px; color: var(--neon-blue); 
+        font-family: 'Orbitron', sans-serif; font-size: 0.75rem; letter-spacing: 1px;
         font-weight: bold; transition: 0.3s; 
     }
     .back-btn:hover { background: var(--neon-blue); color: black; }
@@ -54,44 +57,51 @@
 </head>
 <body>
 <div class="content-box">
-  <a href="index.html" class="back-btn" style="margin-top: 0; margin-bottom: 20px;">zurück</a>
-  <h1>CREDITS</h1>
-  <p style="opacity:0.75;font-size:0.9rem;margin-top:-8px;">Genutzte oder erwähnte KI‑ und Medienwerkzeuge (ohne vollständige Ansprüche).</p>
+  <a href="index.html" class="back-btn" id="btn-back" style="margin-top: 0; margin-bottom: 10px;">...</a>
+  <h1 id="title-credits">...</h1>
+  <p id="subtitle-credits" style="opacity:0.75;font-size:0.9rem;margin-top:-8px;">...</p>
   <ul>
     <li>
       <strong><a href="https://cursor.com" target="_blank" rel="noopener noreferrer">Cursor</a></strong>
-      <div class="meta">KI‑gestützter Editor / IDE für Entwicklung mit eingebauten Agenten.</div>
+      <div class="meta" id="desc-cursor">...</div>
     </li>
     <li>
       <strong><a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">Gemini</a></strong>
-      <div class="meta">Googles multimodales KI‑Modell (Chat, Reasoning, Tools).</div>
+      <div class="meta" id="desc-gemini">...</div>
     </li>
     <li>
       <strong><a href="https://openai.com/codex" target="_blank" rel="noopener noreferrer">Codex</a></strong>
-      <div class="meta">OpenAI Codex: Coding‑Agent / CLI für automatisierte Programmieraufgaben.</div>
+      <div class="meta" id="desc-codex">...</div>
     </li>
     <li>
       <strong><a href="https://runwayml.com" target="_blank" rel="noopener noreferrer">Runway</a></strong>
-      <div class="meta">KI‑Plattform für Video (Gen‑4 u. a.), Bild und Audio.</div>
+      <div class="meta" id="desc-runway">...</div>
     </li>
     <li>
       <strong><a href="https://ideogram.ai" target="_blank" rel="noopener noreferrer">Ideogram</a></strong>
-      <div class="meta">KI‑Bildgenerator, oft mit gut lesbarem Text im Bild.</div>
+      <div class="meta" id="desc-ideogram">...</div>
     </li>
     <li>
       <strong><a href="https://www.stanford.edu" target="_blank" rel="noopener noreferrer">Stanford University</a></strong>
-      <div class="meta">
-        Auf der <strong>Universität</strong>-Themenkachel das Stanford-<strong>Cardinal-Block-S</strong> (Baum im „S“, Cardinal <code>#8c1515</code>) —
-        Grafik aus <a href="https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>; Marke <strong>Stanford University</strong>.
-        Marken- und Nutzungsregeln: <a href="https://identity.stanford.edu" target="_blank" rel="noopener noreferrer">identity.stanford.edu</a>
-      </div>
+      <div class="meta" id="desc-stanford">...</div>
     </li>
   </ul>
-
 </div>
 <script src="js/ui.js?v=4"></script>
 <script>
   CyberUI.init();
+  window.addEventListener('load', () => {
+    document.title = CyberI18n.get('credits.title') + " | Doc Alvers";
+    document.getElementById('btn-back').innerHTML = CyberI18n.get('credits.back');
+    document.getElementById('title-credits').innerHTML = CyberI18n.get('credits.title');
+    document.getElementById('subtitle-credits').innerHTML = CyberI18n.get('credits.subtitle');
+    document.getElementById('desc-cursor').innerHTML = CyberI18n.get('credits.cursor_desc');
+    document.getElementById('desc-gemini').innerHTML = CyberI18n.get('credits.gemini_desc');
+    document.getElementById('desc-codex').innerHTML = CyberI18n.get('credits.codex_desc');
+    document.getElementById('desc-runway').innerHTML = CyberI18n.get('credits.runway_desc');
+    document.getElementById('desc-ideogram').innerHTML = CyberI18n.get('credits.ideogram_desc');
+    document.getElementById('desc-stanford').innerHTML = CyberI18n.get('credits.stanford_desc');
+  });
 </script>
 </body>
 </html>
