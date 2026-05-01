@@ -40,6 +40,7 @@
     <script src="js/cyber-canvas.js"></script>
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script>
@@ -58,8 +59,8 @@
             // 1. Initialize Branding
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "EULERGERADE & GEOMETRIE"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.euler')
             });
 
             // 2. Initialize UI Engine
@@ -80,37 +81,37 @@
                 cbFermat: false
             };
 
-            CyberUI.createCard('ui-container', 'KONSTRUKTION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('euler.construction'), `
                 <div id="base-opts" class="cyber-control-group" style="display:flex; flex-direction:column; gap:6px;"></div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCheckbox('base-opts', 'Eulergerade', state.cbEuler, (v) => state.cbEuler = v, '#ffffff');
-            CyberUI.createCheckbox('base-opts', 'Feuerbach-Kreis', state.cbFeuerbach, (v) => state.cbFeuerbach = v, 'var(--neon-blue)');
-            CyberUI.createCheckbox('base-opts', 'Umkreis', state.cbUmkreis, (v) => state.cbUmkreis = v, 'var(--neon-green)');
-            CyberUI.createCheckbox('base-opts', 'Inkreis', state.cbInkreis, (v) => state.cbInkreis = v, 'var(--neon-yellow)');
+            CyberUI.createCheckbox('base-opts', CyberI18n.get('euler.euler_line'), state.cbEuler, (v) => state.cbEuler = v, '#ffffff');
+            CyberUI.createCheckbox('base-opts', CyberI18n.get('euler.feuerbach'), state.cbFeuerbach, (v) => state.cbFeuerbach = v, 'var(--neon-blue)');
+            CyberUI.createCheckbox('base-opts', CyberI18n.get('euler.circumcircle'), state.cbUmkreis, (v) => state.cbUmkreis = v, 'var(--neon-green)');
+            CyberUI.createCheckbox('base-opts', CyberI18n.get('euler.incircle'), state.cbInkreis, (v) => state.cbInkreis = v, 'var(--neon-yellow)');
 
-            CyberUI.createCard('ui-container', 'HILFSLINIEN', `
+            CyberUI.createCard('ui-container', CyberI18n.get('euler.help_lines'), `
                 <div id="detail-opts" class="cyber-control-group" style="display:flex; flex-direction:column; gap:6px;"></div>
             `, 'var(--neon-purple)');
 
-            CyberUI.createCheckbox('detail-opts', 'Höhen (H)', state.hH, (v) => state.hH = v, 'var(--neon-pink)');
-            CyberUI.createCheckbox('detail-opts', 'Seitenhalb. (S)', state.hS, (v) => state.hS = v, 'var(--neon-purple)');
-            CyberUI.createCheckbox('detail-opts', 'Winkelhalb. (I)', state.hI, (v) => state.hI = v, 'var(--neon-yellow)');
-            CyberUI.createCheckbox('detail-opts', 'Fermat / Napoleon', state.cbFermat, (v) => state.cbFermat = v, '#ffa500');
+            CyberUI.createCheckbox('detail-opts', CyberI18n.get('euler.altitudes'), state.hH, (v) => state.hH = v, 'var(--neon-pink)');
+            CyberUI.createCheckbox('detail-opts', CyberI18n.get('euler.medians'), state.hS, (v) => state.hS = v, 'var(--neon-purple)');
+            CyberUI.createCheckbox('detail-opts', CyberI18n.get('euler.bisectors'), state.hI, (v) => state.hI = v, 'var(--neon-yellow)');
+            CyberUI.createCheckbox('detail-opts', CyberI18n.get('euler.fermat'), state.cbFermat, (v) => state.cbFermat = v, '#ffa500');
 
             const statsHTML = `
                 <div class="stats-grid">
                     <div class="stats-card" style="border-left: 3px solid var(--neon-pink); padding-bottom:10px;">
-                        <span class="stats-label">Ratio HS / SU</span>
+                        <span class="stats-label">${CyberI18n.get('euler.ratio')}</span>
                         <span id="txt-ratio" class="stats-val" style="color:var(--neon-pink);">0.00</span>
                     </div>
                     <div class="stats-card" style="border-left: 3px solid var(--neon-yellow); padding-bottom:10px;">
-                        <span class="stats-label">Inkreis-R</span>
+                        <span class="stats-label">${CyberI18n.get('euler.incircle_radius')}</span>
                         <span id="txt-rIn" class="stats-val" style="color:var(--neon-yellow);">0 px</span>
                     </div>
                 </div>
             `;
-            CyberUI.createCard('stats-container', 'ANALYSE', statsHTML, 'var(--neon-yellow)');
+            CyberUI.createCard('stats-container', CyberI18n.get('euler.analysis'), statsHTML, 'var(--neon-yellow)');
 
             // 4. Initialize CyberCanvas
             CyberCanvasInstance.init('main-canvas', {
@@ -213,14 +214,14 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 const cc = CyberCanvasInstance;
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
-                    { label: 'Konstruktion Reset', onclick: () => { 
+                    { label: CyberI18n.get('euler.reset_construction'), onclick: () => { 
                         points = [{ x: -5, y: -4 }, { x: 5, y: -4 }, { x: 0, y: 5 }];
                     }},
-                    { label: 'Ansicht Reset', onclick: () => cc.resetView(-10, 10) },
+                    { label: CyberI18n.get('ui.reset_view'), onclick: () => cc.resetView(-10, 10) },
                     { divider: true },
-                    { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => cc.showGrid = v },
-                    { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => cc.showAxes = v },
-                    { label: 'Beschriftung', checked: cc.showLabels, onchange: (v) => cc.showLabels = v }
+                    { label: CyberI18n.get('ui.show_grid'), checked: cc.showGrid, onchange: (v) => cc.showGrid = v },
+                    { label: CyberI18n.get('ui.show_axes'), checked: cc.showAxes, onchange: (v) => cc.showAxes = v },
+                    { label: CyberI18n.get('ui.show_labels'), checked: cc.showLabels, onchange: (v) => cc.showLabels = v }
                 ]);
             };
 

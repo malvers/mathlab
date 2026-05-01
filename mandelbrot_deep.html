@@ -270,6 +270,7 @@
     </script>
     <script src="js/branding/briefings.js?v=542"></script>
     <script src="js/branding/overlays.js?v=542"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=542"></script>
     <script src="js/ui.js?v=542"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
@@ -428,7 +429,7 @@
             if (window.__forloopMandelbrotDeepInit) return;
             window.__forloopMandelbrotDeepInit = true;
             try {
-                CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "FRAKTALE · MANDELBROT & JULIA" });
+                CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: CyberI18n.get('fractal.title') });
             } catch (e) {
                 console.warn('CyberBranding.init', e);
             }
@@ -688,52 +689,52 @@
                 requestAnimationFrame(render);
             }
 
-            CyberUI.createCard('ui-container', 'LABOR-MODUS', `
+            CyberUI.createCard('ui-container', CyberI18n.get('fractal.mode'), `
                 <div class="fraktal-seg-row">
-                    <button type="button" id="btn-mode-m" class="fraktal-seg-btn">MANDELBROT</button>
-                    <button type="button" id="btn-mode-j" class="fraktal-seg-btn">JULIA-MENGE</button>
+                    <button type="button" id="btn-mode-m" class="fraktal-seg-btn">${CyberI18n.get('fractal.mandelbrot')}</button>
+                    <button type="button" id="btn-mode-j" class="fraktal-seg-btn">${CyberI18n.get('fractal.julia')}</button>
                 </div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('ui-container', 'FRAKTAL-PARAMETER', `
+            CyberUI.createCard('ui-container', CyberI18n.get('fractal.params'), `
                 <div id="jx-mount"></div>
                 <div id="jy-mount" style="margin-top:2px;"></div>
                 <div id="iter-mount" style="margin-top:2px;"></div>
                 <div id="fraktal-readouts-mount" class="stats-grid fraktal-readouts">
                     <div class="stats-card">
-                        <span class="stats-label">DETAILGRAD</span>
+                        <span class="stats-label">${CyberI18n.get('fractal.detail')}</span>
                         <span id="readout-detail" class="stats-val">256</span>
                     </div>
                     <div class="stats-card">
-                        <span class="stats-label">ZOOMFAKTOR</span>
+                        <span class="stats-label">${CyberI18n.get('fractal.zoom')}</span>
                         <span id="readout-zoom" class="stats-val">1,000</span>
                     </div>
                     <div class="stats-card">
-                        <span class="stats-label">ARITHMETIK</span>
+                        <span class="stats-label">${CyberI18n.get('fractal.arithmetic')}</span>
                         <span id="readout-prec" class="stats-val">Float32 / Pixel</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createSlider('jx-mount', 'REAL-TEIL (C_re)', -2000, 2000, -800, 1, (v) => {
+            CyberUI.createSlider('jx-mount', CyberI18n.get('fractal.real'), -2000, 2000, -800, 1, (v) => {
                 abortResetAnim();
                 juliaX = v / 1000;
             }, 'var(--neon-blue)');
 
-            CyberUI.createSlider('jy-mount', 'IMAGINÄR-TEIL (C_im)', -2000, 2000, 156, 1, (v) => {
+            CyberUI.createSlider('jy-mount', CyberI18n.get('fractal.imaginary'), -2000, 2000, 156, 1, (v) => {
                 abortResetAnim();
                 juliaY = v / 1000;
             }, 'var(--neon-blue)');
 
-            CyberUI.createSlider('iter-mount', 'MAX. ITERATIONEN', 32, 256, 256, 1, (v) => {
+            CyberUI.createSlider('iter-mount', CyberI18n.get('fractal.iterations'), 32, 256, 256, 1, (v) => {
                 abortResetAnim();
                 maxIter = parseInt(v, 10);
             }, 'var(--neon-blue)');
 
-            CyberUI.createCard('ui-container', 'NAVIGATION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('fractal.navigation'), `
                 <div class="fraktal-seg-row">
-                    <button type="button" id="btn-flight" class="fraktal-seg-btn">START FLIGHT</button>
-                    <button type="button" id="btn-reset" class="fraktal-seg-btn">RESET</button>
+                    <button type="button" id="btn-flight" class="fraktal-seg-btn">${CyberI18n.get('fractal.flight_start')}</button>
+                    <button type="button" id="btn-reset" class="fraktal-seg-btn">${CyberI18n.get('fractal.reset')}</button>
                 </div>
             `, 'var(--neon-blue)');
 
@@ -759,7 +760,7 @@
             if (btnFlightEl) {
                 btnFlightEl.onclick = () => {
                     isFlight = !isFlight;
-                    btnFlightEl.innerText = isFlight ? 'STOP FLIGHT' : 'START FLIGHT';
+                    btnFlightEl.innerText = isFlight ? CyberI18n.get('fractal.flight_stop') : CyberI18n.get('fractal.flight_start');
                     btnFlightEl.classList.toggle('is-active', isFlight);
                     if (isFlight) {
                         flightSnapshot = {
