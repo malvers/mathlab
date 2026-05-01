@@ -122,7 +122,7 @@
             position: fixed;
             top: 30px;
             right: 30px;
-            z-index: 2500;
+            z-index: 10000;
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -560,9 +560,73 @@
         .cw-debug-hud.visible {
             display: block;
         }
+
+        #intro-start-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 11, 24, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+        
+        @keyframes pulseGlowAnim {
+            0% {
+                filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+                transform: scale(1);
+            }
+            50% {
+                filter: drop-shadow(0 0 35px rgba(0, 210, 255, 1));
+                transform: scale(1.08);
+            }
+            100% {
+                filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+                transform: scale(1);
+            }
+        }
+
+        #intro-start-overlay svg {
+            width: 120px;
+            height: 120px;
+            fill: rgba(0, 210, 255, 0.8);
+            filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.5));
+            transition: transform 0.3s ease, fill 0.3s ease, filter 0.3s ease;
+            animation: pulseGlowAnim 2s infinite ease-in-out;
+        }
+
+        #intro-start-overlay .play-text {
+            margin-top: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: rgba(0, 210, 255, 0.8);
+            text-transform: uppercase;
+            animation: pulseGlowAnim 2s infinite ease-in-out;
+        }
+        
+        #intro-ambient-btn.is-playing {
+            opacity: 1;
+        }
+        #intro-ambient-btn.is-playing svg {
+            animation: pulseGlowAnim 2s infinite ease-in-out;
+            color: rgba(0, 210, 255, 1);
+        }
     </style>
 </head>
 <body class="mode-catching-words">
+
+    <div id="intro-start-overlay">
+        <svg viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <div class="play-text">PLAY</div>
+    </div>
 
     <video id="bg-video" autoplay loop muted playsinline>
         <source src="resources/galay20.mp4" type="video/mp4">
@@ -887,7 +951,14 @@
             const btn = document.getElementById('intro-ambient-btn');
             const onIc = document.getElementById('intro-ambient-icon-on');
             const offIc = document.getElementById('intro-ambient-icon-off');
-            if (btn) btn.setAttribute('aria-pressed', introAmbMuted ? 'false' : 'true');
+            if (btn) {
+                btn.setAttribute('aria-pressed', introAmbMuted ? 'false' : 'true');
+                if (!introAmbMuted) {
+                    btn.classList.add('is-playing');
+                } else {
+                    btn.classList.remove('is-playing');
+                }
+            }
             if (onIc && offIc) {
                 onIc.style.display = introAmbMuted ? 'none' : 'block';
                 offIc.style.display = introAmbMuted ? 'block' : 'none';
@@ -950,29 +1021,7 @@
                 const p = bgAudioObj.play();
                 if (p !== undefined) {
                     p.catch((e) => {
-                        console.warn("Browser blocked autoplay!", e);
-                        
-                        // Debug-Hinweis für dich:
-                        const warnDiv = document.createElement('div');
-                        warnDiv.style.position = 'fixed';
-                        warnDiv.style.top = '10px';
-                        warnDiv.style.right = '10px';
-                        warnDiv.style.background = 'rgba(255, 0, 0, 0.8)';
-                        warnDiv.style.color = 'white';
-                        warnDiv.style.padding = '10px';
-                        warnDiv.style.borderRadius = '5px';
-                        warnDiv.style.zIndex = '9999';
-                        warnDiv.innerHTML = '<b>Autoplay blockiert!</b><br>Klicke irgendwo, um Audio zu starten.';
-                        document.body.appendChild(warnDiv);
-
-                        const playOnInteract = () => {
-                            if (!introAmbMuted) bgAudioObj.play().catch(() => {});
-                            warnDiv.remove(); // Nachricht wieder ausblenden
-                            document.removeEventListener('pointerdown', playOnInteract, true);
-                            document.removeEventListener('keydown', playOnInteract, true);
-                        };
-                        document.addEventListener('pointerdown', playOnInteract, true);
-                        document.addEventListener('keydown', playOnInteract, true);
+                        console.warn("Autoplay was blocked, but should not be since it is user initiated now.", e);
                     });
                 }
             }
@@ -1014,28 +1063,7 @@
         }
 
         loadIntroPersistedPrefs();
-        syncBgAudio();
         syncIntroAmbientBtn();
-
-        (function hookIntroAmbientFirstGesture() {
-            function detach() {
-                document.body.removeEventListener('pointerdown', onPtr, true);
-                document.body.removeEventListener('keydown', onKey, true);
-            }
-            function onPtr(e) {
-                if (e.target && e.target.closest && e.target.closest('#intro-ambient-btn')) return;
-                syncBgAudio();
-                unlockIntroAmbientAudio();
-                detach();
-            }
-            function onKey() {
-                syncBgAudio();
-                unlockIntroAmbientAudio();
-                detach();
-            }
-            document.body.addEventListener('pointerdown', onPtr, { capture: true });
-            document.body.addEventListener('keydown', onKey, { capture: true });
-        })();
 
         function syncCwDebugHudDom() {
             if (!document.body.classList.contains('mode-catching-words')) return;
@@ -2134,7 +2162,20 @@
 
         syncCwMotionVars();
         syncBgVideoBrightness();
-        loadIntroDramaturgie();
+        
+        const startOverlay = document.getElementById('intro-start-overlay');
+        if (startOverlay) {
+            startOverlay.addEventListener('click', () => {
+                startOverlay.style.opacity = '0';
+                setTimeout(() => startOverlay.remove(), 500);
+                
+                syncBgAudio();
+                if (!introAmbMuted) {
+                    unlockIntroAmbientAudio();
+                }
+                loadIntroDramaturgie();
+            });
+        }
     </script>
 </body>
 </html>
