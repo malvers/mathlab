@@ -2003,6 +2003,500 @@ const CyberI18n = {
                 bumps: "Intensité des épines",
                 shape: "Facteur de forme (Y)"
             }
+        },
+        it: {
+            ui: {
+                next: "AVANTI",
+                prev: "INDIETRO",
+                reset: "RESET LABORATORIO",
+                step: "PASSO",
+                coach_title: "Doc Alvers Laboratorio",
+                logic_game: "Puzzle Numerico",
+                angle_lab: "Laboratorio degli Angoli",
+                pythagoras: "Dimostrazione di Pitagora",
+                angle_sum: "Lab Somma degli Angoli",
+                transformation: "Trasformazioni",
+                parabola: "Lab Parabola",
+                regression: "Lab Statistica",
+                euler: "Retta di Eulero",
+                summand: "Addendo",
+                description: "DESCRIZIONE DEI PASSI",
+                minuend: "Minuendo",
+                subtrahend: "Sottraendo",
+                factor1: "Fattore 1 (Moltiplicando)",
+                factor2: "Fattore 2 (Moltiplicatore)",
+                dividend: "Dividendo",
+                divisor: "Divisore",
+                fine_mode: "Passo dopo passo",
+                show_axes: "Mostra assi",
+                show_labels: "Etichette assi",
+                show_telemetry: "Coordinate",
+                toggle_menu: "Cambia menu"
+            },
+            euler: {
+                construction: "COSTRUZIONE",
+                euler_line: "Retta di Eulero",
+                feuerbach: "Cerchio di Feuerbach",
+                circumcircle: "Circonferenza Circoscritta",
+                incircle: "Circonferenza Inscritta",
+                help_lines: "LINEE GUIDA",
+                altitudes: "Altezze (H)",
+                medians: "Mediane (S)",
+                bisectors: "Bisettrici (I)",
+                fermat: "Fermat / Napoleone",
+                analysis: "ANALISI",
+                ratio: "Rapporto HS / SU",
+                incircle_radius: "Raggio Inscritto",
+                reset_construction: "Reset Costruzione"
+            },
+            lgs: {
+                system_title: "SISTEMA DI EQUAZIONI",
+                formal_system: "SISTEMA FORMALE",
+                intersection: "INTERSEZIONE S",
+                notation: "NOTAZIONE",
+                magnet_snap: "MAGNETE",
+                new_task: "NUOVO COMPITO",
+                view_reset: "RESET VISTA",
+                mode_normal: "NORMALE",
+                mode_mirrored: "SPECCHIATO",
+                mode_scaled: "SCALATO (sY)",
+                mode_implicit_a: "IMPLICITO A",
+                mode_implicit_b: "IMPLICITO B",
+                mode_random: "MIX CASUALE",
+                no_solution: "Parallelo / Nessuna soluzione"
+            },
+            binom: {
+                proof_title: "Dimostrazione 1° Formula Binomiale",
+                division: "DIVISIONE",
+                p_value: "VALORE P",
+                tip: "Suggerimento: Trascina il punto centrale!",
+                analytics: "ANALITICA",
+                total: "TOTALE"
+            },
+            integral: {
+                title: "CALCOLO INTEGRALE",
+                active_formula: "FORMULA INTEGRALE ATTIVA",
+                area_under_curve: "AREA SOTTO LA CURVA",
+                error: "ERRORE",
+                limit_a: "Limite a",
+                limit_b: "Limite b",
+                precision_n: "Precisione n",
+                mode_analytical: "ANALITICA",
+                mode_bars: "BARRE",
+                waiting: "In attesa di dati..."
+            },
+            diff: {
+                title: "CALCOLO DIFFERENZIALE",
+                functionality: "FUNZIONALITÀ",
+                point_pos: "Posizione del Punto (x₀)",
+                visualization: "VISUALIZZAZIONE",
+                deriv_1: "1° Derivata f'(x)",
+                deriv_2: "2° Derivata f''(x)",
+                analysis: "ANALISI",
+                slope: "Pendenza f'(x₀)",
+                curvature: "Curvatura f''(x₀)",
+                reset_point: "Reset Punto (x₀)"
+            },
+            power: {
+                title: "Funzioni Potenza e Radice",
+                parameters: "PARAMETRI",
+                exponent: "ESPONENTE (N)",
+                x_pos: "POSIZIONE X",
+                analytics: "ANALITICA"
+            },
+            cmaes: {
+                title: "OTTIMIZZAZIONE SUPERFICI",
+                circle_mission: "OTTIMIZZAZIONE CERCHIO",
+                lens_mission: "OTTIMIZZAZIONE LENTE",
+                controls: "CONTROLLI",
+                telemetry: "DATI DI EVOLUZIONE",
+                generation: "GENERAZIONE",
+                fitness: "FITNESS",
+                perimeter: "PERIMETRO",
+                area: "AREA",
+                start: "START",
+                reset: "RESET",
+                pause: "PAUSA",
+                resume: "RIPRENDI",
+                max_gen: "MAX 5000",
+                view_circle: "OTTIMIZZAZIONE: CERCHIO"
+            },
+            fourier: {
+                title: "ANALISI DI FOURIER",
+                select_shape: "SELEZIONA FORMA",
+                shape_note: "NOTA MUSICALE",
+                shape_square: "QUADRATO",
+                shape_heart: "CUORE",
+                circles: "CERCHI",
+                speed: "VELOCITÀ",
+                show_circles: "MOSTRA CERCHI",
+                tracking: "TELECAMERA DI TRACCIAMENTO",
+                auto_evolve: "AUTO-EVOLUZIONE",
+                stop_evolution: "FERMA L'EVOLUZIONE",
+                start_evolution: "AVVIA AUTO-EVOLUZIONE"
+            },
+            galton: {
+                title: "MACCHINA DI GALTON",
+                balls_total: "PALLINE TOTALI",
+                controls: "CONTROLLI",
+                bins: "Colonne",
+                interval: "Intervallo (ms)",
+                speed: "Velocità di volo",
+                slow: "lento",
+                fast: "veloce",
+                ball_count: "Numero di palline",
+                stop: "STOP",
+                play: "PLAY",
+                reset: "RESET",
+                rows: "Righe",
+                balls_active: "Palline attive",
+                spawn_ms: "Spawn (ms)"
+            },
+            lissajous: {
+                title: "LISSAJOUS · CURVE PARAMETRICHE",
+                parameters: "PARAMETRI",
+                view_2d: "Curva 2D",
+                view_3d: "Pendolo 3D",
+                amp_a: "Ampiezza A",
+                amp_b: "Ampiezza B",
+                freq_x: "ωₓ (Pulsazione)",
+                freq_y: "ωᵧ (Pulsazione)",
+                phase: "Fase δ (Gradi)",
+                path_span: "Lunghezza percorso (× Periodi)",
+                curve_color: "Colore Curva (Tonalità)",
+                simulation: "SIMULAZIONE",
+                stop: "STOP",
+                reset: "RESET",
+                view_3d_desc: "Prospettiva centrale · piano xz · Sospensione analoga alla sovrapposizione"
+            },
+            steigung: {
+                title: "FUNZIONI LINEARI",
+                function: "FUNZIONE",
+                slope_m: "PENDENZA M",
+                intercept_n: "INTERCETTA Y",
+                zero_x0: "RADICE X₀",
+                parameters: "PARAMETRI",
+                slope_m_long: "PENDENZA DELLA RETTA M",
+                tri_pos: "POSIZIONE TRIANGOLO (X)",
+                tri_width: "LARGHEZZA TRIANGOLO (ΔX)",
+                reset_lab: "Reset Laboratorio"
+            },
+            pyth: {
+                title: "PITAGORA GENERALE",
+                construction: "COSTRUZIONE",
+                choose_mode: "SCEGLI MODALITÀ",
+                mode_quad: "Quadrati",
+                mode_semi: "Semicerchi",
+                mode_tri: "Triangoli Equilateri",
+                mode_star: "Crazy Star 🌟",
+                mode_pacman: "Pac-Man Mode 🕹️",
+                reset: "RESET LABORATORIO",
+                analytics: "ANALISI: AREE",
+                area_sum: "SOMMA DELLE AREE [A₁ + A₂]",
+                large_area: "AREA GRANDE [A₃]"
+            },
+            fermat: {
+                title: "MINIMIZZAZIONE PUNTO DI FERMAT",
+                dist_f: "DISTANZA FERMAT (F)",
+                dist_p: "DISTANZA PUNTO (P)",
+                diff: "DIFFERENZA (Δ)",
+                system: "SISTEMA DEL PUNTO DI FERMAT",
+                show_tri: "MOSTRA TRIANGOLI AUSILIARI",
+                comp_p: "PUNTO DI CONFRONTO P"
+            },
+            clock: {
+                title: "ANGOLO TRA LE LANCETTE",
+                time_control: "CONTROLLO DEL TEMPO",
+                angle_alpha: "Angolo α",
+                angle_beta: "Angolo β"
+            },
+            sum: {
+                title: "DIMOSTRAZIONE SOMMA ANGOLI INTERNI",
+                coords: "COORDINATE",
+                parallel_point: "Parallela per il punto:",
+                proof: "DIMOSTRAZIONE MATEMATICA",
+                pivot_point: "Al punto di rotazione:",
+                internal_angles: "Angoli interni del triangolo:"
+            },
+            puzzle: {
+                title: "PUZZLE DEGLI ANGOLI",
+                wedge_angle: "ANGOLO DEL CUNEO (°)",
+                dist_a: "DISTANZA A",
+                dist_b: "DISTANZA B",
+                dist_c: "DISTANZA C",
+                dist_d: "DISTANZA D",
+                given_blue: "DATO (BLU)",
+                solution_red: "SOLUZIONE (ROSSO)",
+                steps_yellow: "PASSAGGI INTERMEDI (GIALLO)",
+                reset: "RESET LABORATORIO"
+            },
+            fractal: {
+                title: "FRATTALI · MANDELBROT & JULIA",
+                mode: "MODALITÀ LAB",
+                mandelbrot: "MANDELBROT",
+                julia: "INSIEME DI JULIA",
+                params: "PARAMETRI FRATTALI",
+                detail: "LIVELLO DI DETTAGLIO",
+                zoom: "FATTORE DI ZOOM",
+                arithmetic: "ARITMETICA",
+                real: "PARTE REALE (C_re)",
+                imaginary: "PARTE IMMAGINARIA (C_im)",
+                iterations: "MAX. ITERAZIONI",
+                navigation: "NAVIGAZIONE",
+                flight_start: "AVVIA VOLO",
+                flight_stop: "FERMA VOLO",
+                reset: "RESET"
+            },
+            stats: {
+                analytics: "ANALITICA",
+                correlation: "Correlazione (r)",
+                slope: "PENDENZA (m)",
+                y_intercept: "INTERCETTA Y (n)",
+                error_analysis: "ANALISI DELL'ERRORE",
+                std_dev: "Deviazione Standard (SD)",
+                chaos_points: "PUNTI CASUALI",
+                points_near: "AVVICINA PUNTI",
+                points_far: "ALLONTANA PUNTI",
+                mission_title: "MISSIONE: LAB STATISTICA",
+                mission_desc: "Benvenuto nell'unità di analisi della Regressione Lineare. Analizza la correlazione spostando i punti dati.",
+                admin_ctrl: "CONTROLLO TECNICO (ADMIN)",
+                admin_ctx: "Menu contestuale: clic destro per griglia, assi e telemetria.",
+                admin_keys: "Tastiera: Frecce (Su/Giù) per scalare i residui.",
+                admin_manip: "Manipolazione: Usa i pulsanti laterali per generare caos."
+            },
+            parabola: {
+                eq_title: "EQUAZIONE DELLA FUNZIONE",
+                vertex_form: "FORMA DEL VERTICE",
+                standard_form: "FORMA STANDARD",
+                roots: "RADICI (ZERI)",
+                roots_none: "NESSUNA RADICE REALE",
+                vertex_point: "VERTICE S",
+                parameter_a: "PARAMETRO A",
+                stretch_a: "Dilatazione a",
+                shift_d: "Traslazione d (x)",
+                shift_e: "Traslazione e (y)",
+                vertex_label: "VERTICE"
+            },
+            angle3d: {
+                fold: "PIEGATURA",
+                offset: "Spostamento Orizzontale",
+                fold_btn: "PIEGA",
+                rotate_btn: "ROTAZIONE",
+                sum_title: "TEOREMA DEGLI ANGOLI 3D",
+                sum_eq: "SOMMA DEGLI ANGOLI",
+                tetrahedron: "Piegatura del Tetraedro"
+            },
+            transform: {
+                rotation: "ROTAZIONE",
+                scale: "SCALA",
+                mirror_axis: "RIFLESSIONE ASSE",
+                mirror_point: "RIFLESSIONE PUNTO",
+                urbild: "PREIMMAGINE (INIZIO)",
+                hl_lock: "BLOCCA AIUTI",
+                measurements: "MISURAZIONI",
+                congruent: "CONGRUENTE",
+                not_congruent: "NON CONGRUENTE",
+                transversal_short: "TRASM.",
+                parallels_short: "PARALL."
+            },
+            polygon: {
+                sum_interior: "SOMMA DEGLI ANGOLI INTERNI",
+                angle_protocol: "PROTOCOLLO DEGLI ANGOLI",
+                angle_label: "ANGOLO {n}",
+                vertices: "VERTICI",
+                vertex_short: "{n}V"
+            },
+            proof: {
+                target_area: "Area Bersaglio [ABCD]",
+                triangle_sum: "Somma Triangoli",
+                tria_on: "TRIANGOLAZIONE ON",
+                tria_off: "TRIANGOLAZIONE OFF",
+                reset_proof: "RESET",
+                area_cm2: "AREA CM²",
+                sum_sigma: "SOMMA Σ",
+                tria_deactive: "TRIANGOLAZIONE DISATTIVATA",
+                out_of_bounds: "FUORI DAI LIMITI",
+                collision: "COLLISIONE RILEVATA"
+            },
+            geometry: {
+                angle_analysis: "ANALISI DEGLI ANGOLI",
+                lab_control: "CONTROLLO LAB",
+                supp_sum: "SOMMA ANGOLI SUPPLEMENTARI",
+                parallel_on: "PARALLELE: ON",
+                parallel_off: "PARALLELE: OFF",
+                transversal: "TRASVERSALE",
+                parallels: "PARALLELE",
+                step_width: "LARGHEZZA PASSO: {deg}°"
+            },
+            logic: {
+                instruction_sum: "Somma i numeri per farli coincidere con i totali indicati.",
+                instruction_prod: "Moltiplica i numeri per farli coincidere con i totali indicati.",
+                mission_status: "STATO MISSIONE",
+                level: "LIVELLO",
+                moves: "MOSSE",
+                time: "TEMPO",
+                mode: "MODALITÀ DI CALCOLO",
+                protocol_select: "SELEZIONA PROTOCOLLO",
+                protocol_restart: "RIAVVIA PROTOCOLLO",
+                hint_request: "RICHIEDI SUGGERIMENTO",
+                hint_title: "PROTOCOLLO SUGGERIMENTI",
+                confirm: "CONFERMA",
+                cancel: "ANNULLA",
+                solved: "PROTOCOLLO RISOLTO!",
+                next_protocol: "PROSSIMO PROTOCOLLO"
+            },
+            units: {
+                ones: "unità",
+                tens: "decine",
+                hundreds: "centinaia",
+                thousands: "migliaia"
+            },
+            arithmetic: {
+                add: {
+                    title: "ADDIZIONE IN COLONNA",
+                    ready: "Pronto per addizionare {a} e {b}. Calcolo da destra a sinistra.",
+                    focus: "Guardiamo le {unit}.",
+                    calc: "Addizione {d1} + {d2} {c} = {sum}.",
+                    carry: "Scriviamo {digit} e riportiamo {newCarry}.",
+                    complete: "Calcolo completato! Il risultato è {result}."
+                },
+                sub: {
+                    title: "SOTTRAZIONE IN COLONNA",
+                    ready: "Pronto per la sottrazione: {a} - {b}.",
+                    borrow: "Prendiamo in prestito 10 perché {d1} è minore di {d2}.",
+                    calc: "Calcolo ({d1} + 10) - {d2} = {result}.",
+                    complete: "Calcolo completato! Il risultato è {result}."
+                },
+                mult: {
+                    title: "MOLTIPLICAZIONE IN COLONNA",
+                    ready: "Pronto per la moltiplicazione: {a} · {b}.",
+                    digit_step: "Moltiplichiamo {d} per {factor}.",
+                    row_done: "La moltiplicazione per {d} è completata. Tutti i risultati parziali di questa riga sono calcolati.",
+                    carry_init: "Per questa posizione, prendiamo il riporto di {c} dal calcolo precedente.",
+                    carry_add: "Aggiungiamo il riporto: {prod} + {c} = {final}.",
+                    complete: "Moltiplicazione completata! Il risultato è {result}."
+                },
+                div: {
+                    title: "DIVISIONE IN COLONNA",
+                    ready: "Pronto per la divisione: {a} : {b}.",
+                    collect: "Controllo: {b} sta nel {val}? No, prendiamo la cifra successiva.",
+                    fit: "Quante volte {b} sta nel {val}? Ci sta {q} volte. {q} × {b} = {prod}.",
+                    bring_down: "Abbassiamo la cifra successiva {d}. Il nuovo numero è {newVal}.",
+                    rem: "Il resto di {rem} viene annotato.",
+                    complete: "Divisione completata! Il risultato è {result}."
+                }
+            },
+            coolsquares: {
+                title: "LA DIMOSTRAZIONE DEFINITIVA DEL QUADRATO",
+                proportions: "PROPORZIONI",
+                side_a: "Lato Centrale a",
+                show_labels: "Mostra Etichette",
+                gap_x: "Spazio x",
+                result_y: "Risultato y",
+                area_green: "Area Verde"
+            },
+            fibonacci: {
+                title: "SPIRALE DI FIBONACCI",
+                step: "Passo",
+                spiral: "Quarti di cerchio (Spirale)",
+                squares: "Bordi dei quadrati"
+            },
+            orbitals: {
+                title: "Orbitali Atomici",
+                parameters: "PARAMETRI",
+                orbital: "Orbitale",
+                resolution: "Risoluzione (Griglia)",
+                specular: "Speculare (Luminosità)",
+                opacity: "Opacità",
+                prob_cloud: "Nuvola di Probabilità",
+                prob_sq: "|Y|²",
+                prob_desc: "(Superficie disatt.)",
+                rotation: "ROTAZIONE AUTO (SPAZIO)",
+                help_btn: "AIUTO TASTIERA",
+                help_title: "Scorciatoie da Tastiera",
+                help_prev_next: "Orbitale precedente / successivo",
+                help_res: "Risoluzione: ±1 per tasto, con Shift ±10",
+                help_space_esc: "Rotazione auto (Spazio) · Indietro (Esc)",
+                help_digits: "Risoluzione: Selezione rapida (cifre)",
+                help_toggle: "Mostra/Nascondi aiuto",
+                help_mouse: "Trackball: ruota sx · rotella / centro zoom · sposta dx",
+                orbital_suffix: "ORBITALE"
+            },
+            coord: {
+                title: "Coord-Tester | ULTRA v5.3.8",
+                subtitle: "TESTER SISTEMA DI COORDINATE",
+                controls: "CONTROLLO DI PROIEZIONE",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "Triangolo Isoscele | ULTRA v5.3.8",
+                subtitle: "TRIANGOLO ISOSCELE",
+                invalid: "⚠️ NESSUN TRIANGOLO POSSIBILE",
+                perimeter: "PERIMETRO",
+                base: "BASE",
+                leg: "LATO",
+                base_length: "LUNGHEZZA DELLA BASE",
+                note: "NOTA: Un triangolo esiste solo per b < 4,0."
+            },
+            triangulierer: {
+                title: "TRIANGOLAZIONE DI DELAUNAY",
+                triangle: "TRIANGOLO",
+                area: "AREA",
+                sum: "SOMMA Σ",
+                controls: "CONTROLLI",
+                multi_mode: "Modalità Selezione Multipla",
+                delete_selection: "Elimina Selezione",
+                target_area: "Area Bersaglio",
+                sum_delta: "Somma Δ"
+            },
+            langley: {
+                title: "QUADRILATERO DI LANGLEY",
+                subtitle: "Geometria e Trigonometria",
+                all_on_off: "TUTTO ON/OFF",
+                phase1: "Fase 1: Triangolo Destro",
+                phase2: "Fase 2: Triangolo Sinistro",
+                phase3: "Fase 3: Angoli Interni",
+                phase4: "Fase 4: Il Mistero",
+                phase5_geo: "Fase 5: Soluzione Geometrica",
+                phase5_tri: "Fase 5: Soluzione Trigonometrica",
+                step: "PASSO",
+                variant_classic: "1. Classica (BAC=70°, ABD=60°)",
+                variant_v2: "2. Variante (BAC=60°, ABD=50°)",
+                variant_v3: "3. Variante (BAC=50°, ABD=60°)",
+                briefing_title: "BRIEFING MISSIONE",
+                briefing_text: "Analizza il quadrilatero di Langley attraverso la costruzione passo dopo passo degli angoli."
+            },
+            butterfly: {
+                title: "LABORATORIO FARFALLA",
+                animation: "MOTORE DI ANIMAZIONE",
+                speed: "Velocità",
+                hue: "Tonalità di base",
+                pause: "PAUSA",
+                play: "PLAY",
+                glow: "GLOW",
+                reset: "RESET",
+                params: "PARAMETRI CURVA",
+                exp_amp: "Amp Exp",
+                cos_amp: "Amp Cos",
+                cos_freq: "Freq Cos",
+                sin_amp: "Amp Sin",
+                sin_div: "Div Sin",
+                ctx_reset: "Reset animazione",
+                ctx_glow: "Effetto Glow ON/OFF"
+            },
+            heart3d: {
+                title: "SUPERFICIE CUORE 3D | EQUAZIONE DI TAUBIN",
+                sdf_control: "CONTROLLO SDF",
+                stretch: "Fattore di Stiramento (A)",
+                modulation: "Modulazione di Superficie (B)"
+            },
+            litchi3d: {
+                title: "LITCHI 3D | GEOMETRIA PROCEDURALE",
+                ripeness: "Maturazione della Frutta",
+                bumps: "Intensità delle Spine",
+                shape: "Fattore di Forma (Y)"
+            }
         }
     },
 
@@ -2034,10 +2528,10 @@ const CyberI18n = {
 (function() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-        if (['de', 'en', 'es', 'fr'].includes(lang.toLowerCase())) {
-            CyberI18n.current = lang.toLowerCase();
-        }
+                    const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
+                    if (['de', 'en', 'es', 'fr', 'it'].includes(lang.toLowerCase())) {
+                        CyberI18n.current = lang.toLowerCase();
+                    }
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }

@@ -439,6 +439,114 @@
                 "stanford-portal": { title: "Université Stanford", description: "Université de recherche d'élite dans la Silicon Valley : recherche de pointe, idées ouvertes et culture de campus." },
                 "happy-birthday-ulf": { title: "Joyeux Anniversaire Ulf!", description: "Une surprise mathématique pour l'anniversaire. Célébrez avec Doc Alvers!" }
             }
+        },
+        it: {
+            admin_gate: {
+                title: "VERIFICA AUTORIZZAZIONE",
+                pwd_placeholder: "Password",
+                access: "ACCESSO",
+                cancel: "ANNULLA"
+            },
+            ui: {
+                coffee_title: "Offri un Cyber-Caffè",
+                about_title: "Intro Cinematografica — Doc Alvers",
+                qr_title: "Codice QR di questa pagina",
+                sound_title: "Suono Ambientale",
+                search_placeholder: "AVVIA SCANSIONE DEL LABORATORIO...",
+                mission_start: "Avvia Missione",
+                all_tools: "Tutti gli Strumenti",
+                education: "EDUCAZIONE",
+                games: "Giochi",
+                lgs: "Sistemi di Equazioni",
+                pythagoras: "Pitagora",
+                triangles: "Triangoli",
+                arithmetic: "Aritmetica di Base",
+                hot_stuff: "In evidenza",
+                fun: "Divertimento",
+                functions: "Funzioni",
+                highlights: "Punti salienti",
+                fraktale: "Frattali",
+                university: "Università",
+                themes_count: "Temi",
+                grade_title: "Grado",
+                grade_uni: "Uni",
+                grade_uni_tip: "Università · laboratori particolarmente complessi (Analisi, Fisica, Frattali, …)",
+                grade_back_tip: "Torna alla selezione dei temi",
+                universe_tip: "Universe · Galleria di laboratori nello spazio",
+                credits: "CREDITI",
+                impressum: "NOTE LEGALI"
+            },
+            contact: {
+                title: "Contatto",
+                desc: "Hai domande, feedback o idee per nuovi moduli di laboratorio? Attendo ogni tuo messaggio – che si tratti di matematica, concetti didattici o collaborazione tecnica.",
+                close: "CHIUDI"
+            },
+            qr: {
+                title: "Codice QR",
+                desc: "Scansiona con il tuo telefono – porta questa pagina con te."
+            },
+            donate: {
+                title: "Offri un Cyber-Caffè",
+                desc: "Ti piacciono i laboratori interattivi e vuoi supportare lo sviluppo del Cyber-Laboratorio? Apprezzo ogni caffè virtuale che mi tiene sveglio a programmare di notte! ☕️🚀",
+                paypal: "DONA ORA CON PayPal"
+            },
+            header: {
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "MATEMATICA INTERATTIVA",
+                author: "di Dr. Michael R. Alvers"
+            },
+            view: {
+                back_title: "Indietro",
+                title: "VISTA DEL LABORATORIO"
+            },
+            admin: {
+                active: "MODALITÀ EDITORIALE ATTIVA",
+                export: "Esporta Modifiche",
+                exit: "Esci"
+            },
+            labs: {
+                "fourier": { title: "Trasformata di Fourier", description: "La musica della matematica. Scomponi forme complesse in oscillazioni circolari armoniche." },
+                "mandelbrot-deep": { title: "Frattali", description: "Insiemi di Mandelbrot e Julia nel WebGL shader: zoom profondo e spostamento." },
+                "atomorbitale": { title: "Orbitali Atomici", description: "Armoniche sferiche Y_ℓ^m in 3D: nuvole di probabilità e numeri quantici." },
+                "galtonboard": { title: "Macchina di Galton", description: "Simulazione interattiva della distribuzione normale. Osserva la formazione della curva a campana dal vivo." },
+                "opti-lens": { title: "Ottimizzazione Lente", description: "Ottimizzazione evolutiva della lente (CMA-ES): simulazione dei raggi in tempo reale." },
+                "addition": { title: "Addizione in Colonna", description: "Impara l'addizione in colonna passo dopo passo. Visualizza la struttura delle colonne." },
+                "subtraktion": { title: "Sottrazione in Colonna", description: "Allenati con la sottrazione in colonna con prestito passo dopo passo." },
+                "multiplikation": { title: "Moltiplicazione in Colonna", description: "Visualizza la moltiplicazione in colonna passo dopo passo." },
+                "dividieren": { title: "Divisione in Colonna", description: "Padroneggia la divisione in colonna con il laboratorio interattivo ULTRA." },
+                "cmaes": { title: "Ottimizzazione Superfici", description: "CMA-ES in tempo reale: miglioramento evolutivo di poligoni chiusi e contorni liberi." },
+                "transformationen": { title: "Congruenza", description: "Esplora la rotazione, traslazione e ridimensionamento di un triangolo in modo interattivo." },
+                "winkelsumme3d": { title: "Somme Angoli 3D", description: "Sperimenta la somma degli angoli nello spazio 3D. Visualizzazione dinamica." },
+                "ausgleichsgerade": { title: "Retta di Adattamento", description: "Trova la retta migliore attraverso una nuvola di punti. Comprendi la regressione." },
+                "binomischeslabor": { title: "1° Formula Binomiale", description: "Visualizza le formule binomiali geometricamente mediante scomposizione di aree." },
+                "triangulierer": { title: "Delaunay", description: "Algoritmi di triangolazione. Genera maglie triangolari ottimali." },
+                "differentiallabor": { title: "Lab Differenziale", description: "Padroneggia il calcolo differenziale. Relazione tra la funzione e la derivata." },
+                "parabellabor": { title: "Parabole", description: "Manipolazione delle funzioni quadratiche. Comprendi l'influenza dei parametri." },
+                "potenzlabor": { title: "Lab delle Potenze", description: "Esplora il comportamento delle funzioni di potenza e radice in modo interattivo." },
+                "steigung": { title: "Lab delle Pendenze", description: "Comprendi la pendenza in qualsiasi punto di una curva. Base dell'analisi." },
+                "winkellabor": { title: "Lab degli Angoli", description: "Indagine interattiva delle somme degli angoli e dei tipi di triangoli." },
+                "uhrzeitwinkel": { title: "Lab dell'Orologio", description: "Esamina l'angolo tra le lancette dell'orologio a qualsiasi ora." },
+                "logikspiel": { title: "Puzzle Numerico", description: "Diventa un maestro della matrice! Risolvi complesse griglie di numeri." },
+                "integralreaktor": { title: "Integrali", description: "L'energia dell'area. Visualizza le somme di Riemann e i metodi di approssimazione." },
+                "lissajous": { title: "Lissajous", description: "Sovrapposizione di due oscillazioni armoniche: frequenza e fase." },
+                "cool-squares": { title: "Cool Squares", description: "La dimostrazione geometrica definitiva. Segui la spirale dei quadrati." },
+                "fibonacci": { title: "Lab Fibonacci", description: "Esplora la spirale aurea e i modelli di crescita organica." },
+                "fermatpunkt": { title: "Punto di Fermat", description: "Trova il punto con la somma minima delle distanze dai vertici." },
+                "gleichungssysteme": { title: "Lab SLE", description: "Esplora visivamente i sistemi di equazioni lineari attraverso le rette." },
+                "pythagoras": { title: "Pitagora", description: "Scopri il teorema di Pitagora attraverso confronti interattivi di aree." },
+                "pythagorasbeweis": { title: "Dimostrazione Pitagora", description: "Dimostrazione geometrica del teorema di Pitagora tramite scomposizione di aree." },
+                "gleichschenkligesDreieck": { title: "Triangolo Isoscele", description: "Calcola triangoli speciali e le loro proprietà in modo interattivo." },
+                "eulergerade": { title: "Euler Feuerbach e Napoleone", description: "L'affascinante geometria del triangolo: retta di Eulero e cerchio di Feuerbach." },
+                "easyhard": { title: "Rompicapo Geometrico", description: "Un puzzle geometrico impegnativo. Determina l'angolo mancante." },
+                "winkelsumme": { title: "Lab dei Poligoni", description: "Calcola la somma degli angoli in qualsiasi n-agono." },
+                "beweisinwinkellsumme": { title: "Dimostrazione Angolo Interno", description: "Perché la somma degli angoli di un triangolo è sempre 180°? La dimostrazione passo dopo passo." },
+                "butterfly": { title: "Curva a Farfalla", description: "Un'affascinante curva trascendente definita da coordinate polari." },
+                "heart3d": { title: "Superficie Cuore 3D", description: "Visualizzazione di una superficie 3D implicita dietro il cuore matematico." },
+                "litchi3d": { title: "Lab Litchi 3D", description: "Esplora in modo interattivo la complessa matematica delle superfici 3D." },
+                "cinematic-intro": { title: "Intro Cinematografica", description: "Vivi il lancio monumentale nel laboratorio del Doc Alvers. Identità visiva ULTRA v5.3.8." },
+                "stanford-portal": { title: "Università di Stanford", description: "Università di ricerca d'élite nella Silicon Valley: ricerca all'avanguardia, idee aperte e cultura del campus." },
+                "happy-birthday-ulf": { title: "Buon Compleanno Ulf!", description: "Una sorpresa matematica per il compleanno. Festeggia con Doc Alvers!" }
+            }
         }
     };
 
