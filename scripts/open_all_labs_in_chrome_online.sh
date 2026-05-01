@@ -1,17 +1,20 @@
 #!/bin/bash
-# ULTRA v6.7.0 - Lab Multi-Launcher
-# Öffnet alle Labore in Google Chrome (lokal als file://).
-# Alle Labs als Tabs in genau einem neuen Fenster (ein AppleScript, Fenster-Referenz w).
+# ULTRA v6.7.0 - Lab Multi-Launcher (Online)
+# Öffnet dieselben Labore wie open_all_labs_in_chrome.sh, aber als HTTPS-URLs.
 #
-# Gegenstück Online: open_all_labs_in_chrome_online.sh
+# Standard: https://docalvers.de — alle Labs als Tabs in genau einem neuen Fenster
+# (ein AppleScript-Lauf, Fenster-Referenz w — nicht „front window“ pro Tab).
+#
+#   export FORLOOP_LABS_BASE_URL='https://staging.example.com'  # optional
+#   ./open_all_labs_in_chrome_online.sh
 
 set -euo pipefail
 
 BASE_DIR="/Users/malvers/IdeaProjects/forloop/HTML"
+BASE_URL="${FORLOOP_LABS_BASE_URL:-https://docalvers.de}"
 
-file_uri_from_path() {
-    python3 -c 'import pathlib, sys; print(pathlib.Path(sys.argv[1]).resolve().as_uri())' "$1"
-}
+BASE_URL="${BASE_URL%/}"
+BASE_DIR="${BASE_DIR%/}"
 
 chrome_open_all_urls_one_window() {
     [[ $# -gt 0 ]] || return 0
@@ -27,13 +30,15 @@ chrome_open_all_urls_one_window() {
 end run' -- "$@"
 }
 
-echo "Starte ULTRA v6.7.0 Suite in Google Chrome (inkl. Standalone-Labs)..."
+echo "Starte ULTRA v6.7.0 Suite in Google Chrome (Online · BASE_URL=$BASE_URL)..."
 echo "Ein neues Fenster, alle Labs darin als Tabs."
 
 urls=()
 while read -r f; do
-    echo "  → $(basename "$f")"
-    urls+=("$(file_uri_from_path "$f")")
+    rel="${f#"$BASE_DIR"/}"
+    url="$BASE_URL/$rel"
+    echo "  → $url"
+    urls+=("$url")
 done < <(find "$BASE_DIR" -name "*.html" ! -name "index.html" ! -name "impressum.html" ! -path "*/scripts/*")
 
 if [[ ${#urls[@]} -eq 0 ]]; then
@@ -43,4 +48,4 @@ fi
 
 chrome_open_all_urls_one_window "${urls[@]}"
 
-echo "Alle Labore (inkl. Standalone) wurden in einem Chrome-Fenster gestartet! 🚀"
+echo "Alle Labore wurden in einem Chrome-Fenster geöffnet."

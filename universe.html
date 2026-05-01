@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | <script>document.write(CyberI18n.get('ui.universe_title') || 'Universe')</script></title>
+    <title>docalvers | Universe</title>
     <script src="js/i18n.js"></script>
+    <script>
+        (function () {
+            try {
+                if (typeof CyberI18n !== 'undefined' && CyberI18n.get) {
+                    var u = CyberI18n.get('ui.universe_title');
+                    if (typeof u === 'string' && u && u !== 'ui.universe_title') {
+                        document.title = 'docalvers | ' + u;
+                    }
+                }
+            } catch (e) {}
+        })();
+    </script>
     <style>
         body {
             margin: 0;
@@ -112,6 +124,7 @@
             text-transform: uppercase;
             border: 1px solid rgba(0, 210, 255, 0.2);
         }
+    </style>
 
     <!-- nav-btn from branding.styles.extracted.css (the true central style) -->
     <style>

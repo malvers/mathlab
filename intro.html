@@ -266,7 +266,7 @@
             inset: 0;
             z-index: 100;
             overflow: visible;
-            --cw-anim-sec: 8;
+            --cw-anim-sec: 4;
         }
         #catching-words-panel .cw-play {
             position: absolute;
@@ -602,22 +602,28 @@
             text-underline-offset: 4px;
         }
 
+        /* ⌘D Debug: über der unteren Abschnitts-Leiste (intro-section-nav), nicht beschneiden */
         .cw-debug-hud {
             position: fixed;
-            left: 12px;
-            bottom: 56px;
+            left: 10px;
+            right: 10px;
+            bottom: max(82px, calc(76px + env(safe-area-inset-bottom, 0px)));
             z-index: 10001;
             font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
             font-size: 11px;
             line-height: 1.45;
             color: rgba(185, 235, 255, 0.95);
-            background: rgba(5, 15, 30, 0.9);
+            background: rgba(5, 15, 30, 0.92);
             border: 1px solid rgba(0, 210, 255, 0.4);
             border-radius: 8px;
             padding: 8px 11px;
-            pointer-events: none;
+            pointer-events: auto;
             white-space: pre-line;
             display: none;
+            max-height: min(40vh, 320px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
         }
         .cw-debug-hud.visible {
             display: block;
@@ -845,7 +851,7 @@
         let cwSections = [CW_SEQUENCE_DEFAULT.map((text) => ({ text, fontSizePt: null }))];
         let cwSectionIndex = 0;
         let cwSequence = cwSections[0];
-        let cwAnimSec = 8;
+        let cwAnimSec = 4;
         let cwSpawnMs = 700;
         let cwFastSpawnMs = 1200;
         let cwSpawnTimer = null;
@@ -1183,6 +1189,7 @@
                     hud.id = 'cw-debug-hud';
                     hud.className = 'cw-debug-hud';
                     hud.setAttribute('aria-live', 'polite');
+                    hud.setAttribute('aria-label', 'Intro Debug · Fußzeile');
                     document.body.appendChild(hud);
                 }
                 hud.classList.add('visible');

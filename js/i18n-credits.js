@@ -40,6 +40,39 @@
             ideogram_desc: "Generador de imágenes de IA, a menudo con texto altamente legible en las imágenes.",
             stanford_desc: "En el mosaico del tema <strong>Universidad</strong>, el <strong>Cardinal Block S</strong> de Stanford (árbol en la \"S\", Cardinal <code>#8c1515</code>) — Imagen de <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; Marca <strong>Stanford University</strong>. Reglas de marca y uso: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
             back: "volver"
+        },
+        fr: {
+            title: "CRÉDITS",
+            subtitle: "Outils d’IA et médias utilisés ou mentionnés (liste non exhaustive).",
+            cursor_desc: "Éditeur / IDE assisté par IA pour le développement avec agents intégrés.",
+            gemini_desc: "Modèle IA multimodal de Google (Chat, Raisonnement, Outils).",
+            codex_desc: "OpenAI Codex : agent de code / CLI pour tâches de programmation automatisées.",
+            runway_desc: "Plateforme IA pour la vidéo (Gen-4, etc.), l’image et l’audio.",
+            ideogram_desc: "Générateur d’images IA, souvent avec texte très lisible dans l’image.",
+            stanford_desc: "Sur la tuile thème <strong>Université</strong>, le <strong>Cardinal Block S</strong> de Stanford (arbre dans le « S », Cardinal <code>#8c1515</code>) — Image <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a> ; marque <strong>Stanford University</strong>. Règles : <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "retour"
+        },
+        it: {
+            title: "CREDITI",
+            subtitle: "Strumenti di IA e media usati o menzionati (elenco non esaustivo).",
+            cursor_desc: "Editor / IDE con IA per lo sviluppo con agenti integrati.",
+            gemini_desc: "Modello IA multimodale di Google (Chat, Ragionamento, Strumenti).",
+            codex_desc: "OpenAI Codex: agente di programmazione / CLI per attività automatizzate.",
+            runway_desc: "Piattaforma IA per video (Gen-4 ecc.), immagine e audio.",
+            ideogram_desc: "Generatore di immagini IA, spesso con testo molto leggibile.",
+            stanford_desc: "Sulla tessera <strong>Università</strong>, lo Stanford <strong>Cardinal Block S</strong> (albero nella « S », Cardinal <code>#8c1515</code>) — Immagine da <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; marchio <strong>Stanford University</strong>. Regole: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "indietro"
+        },
+        pt: {
+            title: "CRÉDITOS",
+            subtitle: "Ferramentas de IA e mídia usadas ou mencionadas (lista não exaustiva).",
+            cursor_desc: "Editor / IDE com IA para desenvolvimento com agentes integrados.",
+            gemini_desc: "Modelo de IA multimodal do Google (Chat, Raciocínio, Ferramentas).",
+            codex_desc: "OpenAI Codex: agente de código / CLI para tarefas automatizadas.",
+            runway_desc: "Plataforma de IA para vídeo (Gen-4 etc.), imagem e áudio.",
+            ideogram_desc: "Gerador de imagens por IA, muitas vezes com texto bem legível.",
+            stanford_desc: "No ladrilho <strong>Universidade</strong>, o Stanford <strong>Cardinal Block S</strong> (árvore no « S », Cardinal <code>#8c1515</code>) — Imagem de <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; marca <strong>Stanford University</strong>. Regras: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "voltar"
         }
     };
 
