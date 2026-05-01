@@ -19,7 +19,9 @@ Labore
 
 #
 120pt
-5 Sprachen
+6 Sprachen
+20
+and counting
 40pt
 deutsch
 englisch
