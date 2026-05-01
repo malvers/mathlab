@@ -67,6 +67,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -173,8 +174,8 @@
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         useExternalStyles: true,
-                        title: "Doc Alvers Mathe-Labor",
-                        subtitle: "PARABEL-LABOR"
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('ui.parabola')
                     });
                 }
                 
@@ -182,30 +183,30 @@
                     CyberUI.init();
                     
                     // Card 1: FUNKTIONSGLEICHUNG
-                    CyberUI.createCard('parameters-container', 'FUNKTIONSGLEICHUNG', `
+                    CyberUI.createCard('parameters-container', CyberI18n.get('parabola.eq_title'), `
                         <div style="margin-bottom: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHEITELPUNKTFORM</span>
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.vertex_form')}</span>
                             <div id="eq-vertex" class="math-glow"></div>
                         </div>
                         <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NORMALFORM</span>
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.standard_form')}</span>
                             <div id="eq-normal" class="math-glow"></div>
                         </div>
                         <div id="eq-roots-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NULLSTELLEN</span>
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.roots')}</span>
                             <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
                         </div>
                     `, 'var(--neon-blue)', { collapsible: false });
 
                     // Card 2: STEUERUNG
-                    CyberUI.createCard('parameters-container', 'SCHEITELPUNKT & PARAMETER', `
+                    CyberUI.createCard('parameters-container', CyberI18n.get('geometry.lab_control'), `
                         <div class="stats-grid">
                             <div>
-                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">SCHEITELPUNKT S</span>
+                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('parabola.vertex_point')}</span>
                                 <div id="latex-vertex" style="min-height: 2rem;"></div>
                             </div>
                             <div>
-                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">PARAMETER A</span>
+                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('parabola.parameter_a')}</span>
                                 <div id="latex-a" style="min-height: 2rem;"></div>
                             </div>
                         </div>
@@ -213,27 +214,27 @@
                         <div style="display: flex; flex-direction: column; gap: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                             <div>
                                 <div class="label-row">
-                                    <span>Streckung a</span>
+                                    <span>${CyberI18n.get('parabola.stretch_a')}</span>
                                     <span id="label-slider-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-yellow);">1.00</span>
                                 </div>
                                 <input type="range" id="slider-a" min="-4" max="4" step="0.05" value="1">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>Verschiebung d (x)</span>
+                                    <span>${CyberI18n.get('parabola.shift_d')}</span>
                                     <span id="label-slider-d" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">0.00</span>
                                 </div>
                                 <input type="range" id="slider-d" min="-10" max="10" step="0.1" value="0">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>Verschiebung e (y)</span>
+                                    <span>${CyberI18n.get('parabola.shift_e')}</span>
                                     <span id="label-slider-e" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">0.00</span>
                                 </div>
                                 <input type="range" id="slider-e" min="-10" max="10" step="0.1" value="0">
                             </div>
                             
-                            <button class="cyber-button" onclick="resetView()" style="width: 100%; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">LABOR ZURÜCKSETZEN</button>
+                            <button class="cyber-button" onclick="resetView()" style="width: 100%; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">${CyberI18n.get('ui.reset')}</button>
                         </div>
                     `, 'var(--neon-purple)', { collapsible: false });
                 }
@@ -400,7 +401,7 @@
 
             // Draw handles LAST so they are on top
             drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
-            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", "STRECKUNG", "top-right");
+            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", CyberI18n.get('parabola.vertex_label'), "top-right");
 
             updateUI();
         }
@@ -463,7 +464,7 @@
                 } else if (Math.abs(disc) < 0.0001) {
                     katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
                 } else {
-                    katex.render(`\\text{keine reellen Nullstellen}`, rootsTarget, { throwOnError: false });
+                    katex.render(`\\text{${CyberI18n.get('parabola.roots_none')}}`, rootsTarget, { throwOnError: false });
                 }
             }
         }

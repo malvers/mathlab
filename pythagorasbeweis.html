@@ -92,13 +92,13 @@
                     <thead>
                         <tr>
                             <th># ID</th>
-                            <th style="text-align:right;">${CyberI18n.get('proof.area_cm2')}</th>
+                            <th id="head-area" style="text-align:right;"></th>
                         </tr>
                     </thead>
                     <tbody id="log-body"></tbody>
                     <tfoot>
                         <tr class="hud-sum-row">
-                            <td class="hud-sum-label">${CyberI18n.get('proof.sum_sigma')}</td>
+                            <td id="label-sum-sigma" class="hud-sum-label"></td>
                             <td id="hud-sum-total" class="hud-sum-val">0,00 cm²</td>
                         </tr>
                     </tfoot>
@@ -129,6 +129,12 @@
             subtitle: CyberI18n.get('ui.pythagoras')
         });
         CyberUI.init();
+        
+        // Static HUD Injection
+        const headArea = document.getElementById('head-area');
+        const labelSum = document.getElementById('label-sum-sigma');
+        if(headArea) headArea.innerText = CyberI18n.get('proof.area_cm2');
+        if(labelSum) labelSum.innerText = CyberI18n.get('proof.sum_sigma');
 
         // 2. Constants & State (PRESERVED)
         const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');

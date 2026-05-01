@@ -61,6 +61,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -74,8 +75,8 @@
         // 1. Branding & UI Init
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "3D-INNENWINKELSATZ"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('angle3d.sum_title')
         });
         CyberUI.init();
 
@@ -184,22 +185,22 @@
 
         // 3. Build UI Cards
         function setupUI() {
-            CyberUI.createCard('ui-container', 'ANIMATION & ENGINE', `
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.lab_control'), `
                 <div id="anim-sliders"></div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                    <button id="btn-auto-fold" class="cyber-btn" onclick="toggleAutoFold()">FALTEN</button>
-                    <button id="btn-auto-rotate" class="cyber-btn" onclick="toggleAutoRotate()">ROTATION</button>
+                    <button id="btn-auto-fold" class="cyber-btn" onclick="toggleAutoFold()">${CyberI18n.get('angle3d.fold_btn')}</button>
+                    <button id="btn-auto-rotate" class="cyber-btn" onclick="toggleAutoRotate()">${CyberI18n.get('angle3d.rotate_btn')}</button>
                 </div>
-                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, 'var(--neon-blue)');
 
-            CyberUI.createSlider('anim-sliders', 'Faltung', 0, 3, currentFold, 0.01, (v) => updateFold(v));
+            CyberUI.createSlider('anim-sliders', CyberI18n.get('angle3d.fold'), 0, 3, currentFold, 0.01, (v) => updateFold(v));
             // Store reference to slider inputs manually for animation sync
             foldSliderId = document.querySelector('#anim-sliders input[type="range"]').id;
 
-            CyberUI.createSlider('anim-sliders', 'Horizontaler Versatz', -1.5, 1.5, currentSkew, 0.01, (v) => rebuild(v));
+            CyberUI.createSlider('anim-sliders', CyberI18n.get('angle3d.offset'), -1.5, 1.5, currentSkew, 0.01, (v) => rebuild(v));
 
-            CyberUI.createCard('ui-container', 'WINKELSUMME', `
+            CyberUI.createCard('ui-container', CyberI18n.get('angle3d.sum_eq'), `
                 <div class="angle-row">
                     <span id="vA" style="color:var(--neon-orange)">0°</span>
                     <span style="opacity:0.4">+</span>
@@ -261,7 +262,4 @@
         setupUI(); rebuild(0.5); animate();
     </script>
 </body>
-</html>
-y>
-
 </html>
