@@ -424,12 +424,16 @@
         footer {
             margin-top: auto;
             padding: 20px;
+            padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
             font-family: 'Orbitron', sans-serif;
             font-size: 0.65rem;
             letter-spacing: 2px;
-            opacity: 0.5;
+            opacity: 0.72;
             text-align: center;
             width: 100%;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            color: rgba(245, 243, 255, 0.88);
         }
 
         footer a {
@@ -441,6 +445,7 @@
 
         footer a:hover {
             color: var(--neon-blue);
+            opacity: 1;
         }
 
         /* Description using Inter for readability */
@@ -1270,6 +1275,25 @@
             border-color: #00d2ff !important;
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
+
+        .contact-modal-legal {
+            margin: 18px 0 0;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+        }
+
+        .contact-modal-legal a {
+            color: var(--neon-blue);
+            text-decoration: none;
+        }
+
+        .contact-modal-legal a:hover {
+            text-decoration: underline;
+        }
         .lang-flag.active {
             color: #00d2ff;
             border-color: #00d2ff !important;
@@ -1419,6 +1443,11 @@
             <p id="contact-desc">Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um
                 Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
             <a href="mailto:michael.r.alvers@gmail.com" class="contact-email">michael.r.alvers@gmail.com</a>
+            <div class="contact-modal-legal">
+                <a href="credits.html" id="contact-link-credits">CREDITS</a>
+                <span aria-hidden="true"> · </span>
+                <a href="impressum.html" id="contact-link-impressum">IMPRESSUM</a>
+            </div>
             <button class="contact-close" id="contact-close"
                 onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
@@ -1647,7 +1676,7 @@
         </div>
     </div>
 
-    <footer>
+    <footer role="contentinfo" aria-label="Fußzeile">
         &copy; 2026 DR. MICHAEL R. ALVERS
         <a href="credits.html" id="footer-credits">CREDITS</a>
         <a href="impressum.html" id="footer-impressum">IMPRESSUM</a>
@@ -1899,11 +1928,15 @@
         }
 
         function updateToolCount() {
+            if (typeof LABS_DATA === 'undefined') return;
             const count = LABS_DATA.length;
             const subtitle = document.getElementById('dynamic-subtitle');
-            if (subtitle) {
-                subtitle.innerHTML = `${count} INTERAKTIVE MATHEMATIK-WERKZEUGE`;
-            }
+            if (!subtitle) return;
+            const tagline =
+                typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function'
+                    ? CyberI18n.get('index.header.subtitle') || 'INTERAKTIVE MATHEMATIK'
+                    : 'INTERAKTIVE MATHEMATIK';
+            subtitle.textContent = `${count} · ${tagline}`;
         }
 
         function updateThemesCount() {
@@ -2235,6 +2268,14 @@
         // UI Icons Tooltips
         if (document.getElementById('btn-coffee')) document.getElementById('btn-coffee').title = CyberI18n.get('index.ui.coffee_title');
         if (document.getElementById('btn-about')) document.getElementById('btn-about').title = CyberI18n.get('index.ui.about_title');
+        if (document.getElementById('contact-link-credits')) {
+            document.getElementById('contact-link-credits').textContent =
+                CyberI18n.get('index.ui.credits') || 'CREDITS';
+        }
+        if (document.getElementById('contact-link-impressum')) {
+            document.getElementById('contact-link-impressum').textContent =
+                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+        }
         if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
         if (document.getElementById('sound-toggle')) document.getElementById('sound-toggle').title = CyberI18n.get('index.ui.sound_title');
         
@@ -2256,7 +2297,7 @@
         /* if (h1 && h1.childNodes[0]) {
              h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
         } */
-        if (document.getElementById('dynamic-subtitle')) document.getElementById('dynamic-subtitle').innerHTML = CyberI18n.get('index.header.subtitle');
+        updateToolCount();
         if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
         
         // Views
@@ -2289,7 +2330,14 @@
         if (document.getElementById('themes-tile-uni')) document.getElementById('themes-tile-uni').title = CyberI18n.get('index.ui.grade_uni_tip');
         
         // Footer
-        if (document.getElementById('footer-credits')) document.getElementById('footer-credits').innerHTML = CyberI18n.get('credits.title');
+        if (document.getElementById('footer-credits')) {
+            document.getElementById('footer-credits').textContent =
+                CyberI18n.get('index.ui.credits') || 'CREDITS';
+        }
+        if (document.getElementById('footer-impressum')) {
+            document.getElementById('footer-impressum').textContent =
+                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+        }
         
         // Admin
         if (document.getElementById('admin-status')) document.getElementById('admin-status').innerHTML = CyberI18n.get('index.admin.active');
