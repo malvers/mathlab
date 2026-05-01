@@ -34,7 +34,7 @@ JAVA
 
 # 
 200pt
-30.000
+%loc
 60pt
 Programmzeilen
 
