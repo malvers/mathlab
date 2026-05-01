@@ -644,6 +644,7 @@
         </button>
     </nav>
 
+    <script src="resources/loc.js"></script>
     <script src="resources/dramaturgie-inline.js"></script>
     <script src="js/ui.js?v=4"></script>
     <script>
@@ -1756,6 +1757,8 @@
         }
 
         function parseCwSections(text) {
+            const locText = (typeof window.__CURRENT_LOC !== 'undefined') ? window.__CURRENT_LOC : "40.000+";
+            text = String(text || '').replace(/%loc/gi, locText);
             const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\n|\r/);
             const hashWithPt = /^\s*#\s*(\d+(?:\.\d+)?)\s*pt\b/i;
             const standalonePt = /^\s*(\d+(?:\.\d+)?)\s*pt\s*$/i;
