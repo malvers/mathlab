@@ -2124,6 +2124,11 @@
                     }
                     if (noChord && e.key === ' ') {
                         e.preventDefault();
+                        const overlay = document.getElementById('intro-start-overlay');
+                        if (overlay && overlay.parentNode) {
+                            overlay.click();
+                            return;
+                        }
                         toggleCatchingWordsPause();
                         return;
                     }
@@ -2168,6 +2173,12 @@
                 }
                 if (e.key.toLowerCase() === 'f') toggleFullscreen();
                 if (e.code === 'Space' || e.key === ' ') {
+                    const overlay = document.getElementById('intro-start-overlay');
+                    if (overlay && overlay.parentNode) {
+                        e.preventDefault();
+                        overlay.click();
+                        return;
+                    }
                     if (document.body.classList.contains('mode-catching-words')) {
                         e.preventDefault();
                         toggleCatchingWordsPause();

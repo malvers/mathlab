@@ -67,7 +67,7 @@ das crazy!
 %emoji 😎
 %button zurück
 
-#80pt
+#140pt
 docalvers.de
 %stop
 
