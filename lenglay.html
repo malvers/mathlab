@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.add.title'))</script></title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* AUTHORITY LAYOUT INJECTION (Fixes Git Corruption) */
+        :root {
+            --side-width: 350px;
+            --branding-blue: #00d2ff;
+            --neon-blue: #00d2ff;
+            --deep-bg: #050b18;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--deep-bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #explanation-box {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 320px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 18px;
+            z-index: 100;
+        }
+
+        .exp-title {
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+        }
+
+        .exp-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #side-panel {
+            width: var(--side-width);
+            min-width: var(--side-width);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+        }
+
+        #math-coach-box {
+            position: absolute;
+            width: 380px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        #math-coach-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .coach-title {
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coach-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d2ff;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .coach-math-highlight {
+            color: #ffde00;
+            font-weight: bold;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron' !important;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
+        }
+
+        .stats-val {
+            font-size: 1.1rem;
+        }
+
+        /* Spinner (Pfeile) ausblenden */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .cyber-select {
+            background-image: none !important;
+        }
+    </style>
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div id="explanation-box">
+                <div class="exp-title" id="exp-title">MISSION BRIEFING</div>
+                <div class="exp-text" id="exp-text">Analysieren Sie das Langley-Viereck durch schrittweise Winkelkonstruktion.</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js?v=4"></script>
+    <script>
+        if (typeof CyberBranding !== 'undefined') CyberBranding.DEV_MODE = false;
+        CyberUI.init();
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: "Doc Alvers Mathe-Labor",
+            subtitle: "Langley - Geometrie & Trigonometrie"
+        });
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', 'Variante', `
+                <select id="variant-select" class="cyber-select">
+                    <option value="0">1. Klassisch (BAC=70°, ABD=60°)</option>
+                    <option value="1">2. Variante (BAC=60°, ABD=50°)</option>
+                    <option value="2">3. Variante (BAC=50°, ABD=60°)</option>
+                </select>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Steuerung', `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label class="cyber-checkbox-wrapper">
+                        <input type="checkbox" id="cb_all" class="cyber-checkbox" checked>
+                        <span class="cyber-label" style="font-weight: 600;">ALLE AN/AUS</span>
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span id="step-counter" style="font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue);">0/18</span>
+                        <button id="btn_prev" class="cyber-btn" style="padding: 5px 10px; min-width: auto;" disabled>◀</button>
+                        <button id="btn_next" class="cyber-btn" style="padding: 5px 10px; min-width: auto;">▶</button>
+                    </div>
+                </div>
+            `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Phase 1: Rechtes Dreieck', `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">1.</span> Basis AB</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BAC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">2.</span> ∠BAC = <span id="txt_BAC" style="color: #00f2ff;">70°</span></span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">3.</span> Diagonale AC</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ACB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">4.</span> ∠ACB = <span id="txt_ACB" style="color: #a855f7;">30°</span></span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ABC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">5.</span> ∠ABC = <span id="txt_ABC">80°</span></span></label>
+                </div>
+            `, '#00f2ff');
+
+            CyberUI.createCard('ui-container', 'Phase 2: Linkes Dreieck', `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">6.</span> Schenkel AD</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ABD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">7.</span> ∠ABD = <span id="txt_ABD" style="color: #22c55e;">60°</span></span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">8.</span> Diagonale BD</span></label>
+                </div>
+            `, '#22c55e');
+
+            CyberUI.createCard('ui-container', 'Phase 3: Innere Winkel', `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DBC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">9.</span> ∠DBC = <span id="txt_DBC">20°</span></span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_ADB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">10.</span> ∠ADB = <span id="txt_ADB">40°</span></span></label>
+                </div>
+            `, '#ffffff');
+
+            CyberUI.createCard('ui-container', 'Phase 4: Das Rätsel', `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_CD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">11.</span> Linie CD</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DCA" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">12.</span> ∠DCA = <span style="color: #ef4444;">?</span></span></label>
+                </div>
+            `, '#ef4444');
+
+            CyberUI.createCard('ui-container', 'Phase 5: Lösung', `
+                <div id="phase5-geo" style="display: flex; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_DE" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> Verlängerung zu E</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AEB" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">14.</span> ∠AEB = 20°</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_EP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> Symmetrieachse EP</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_P" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">16.</span> Punkt P</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_AEP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">17.</span> ∠AEP = 10°</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_BEP" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">18.</span> ∠BEP = 10°</span></label>
+                </div>
+                <div id="phase5-tri" style="display: none; flex-direction: column; gap: 8px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">13.</span> ΔABD (Sinussatz)</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_ABC" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">14.</span> ΔABC (Sinussatz)</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cb_tri_BCD" class="cyber-checkbox"><span class="cyber-label"><span style="color: rgba(255,255,255,0.4); width: 20px; display: inline-block; font-family: 'Orbitron'; font-size: 0.65rem;">15.</span> ΔBCD & Lösung</span></label>
+                </div>
+            `, '#eab308');
+            
+            // Hidden inputs required by main.js
+            document.getElementById('ui-container').insertAdjacentHTML('beforeend', `
+                <input type="checkbox" id="cb_BC" style="display:none;">
+                <input type="checkbox" id="cb_calc_all" style="display:none;">
+                <input type="checkbox" id="cb_DAC" style="display:none;">
+                <input type="checkbox" id="cb_BAD" style="display:none;">
+                <input type="checkbox" id="cb_F" style="display:none;">
+            `);
+        }
+
+        setupUI();
+
+        // Wait for main.js to load, then trigger the "ALLE AN/AUS" checkbox
+        window.addEventListener('load', () => {
+            const cbAll = document.getElementById('cb_all');
+            if (cbAll) {
+                cbAll.checked = true;
+                // Dispatch change event so main.js picks it up
+                cbAll.dispatchEvent(new Event('change'));
+            }
+            
+            // Trigger initial draw and resize
+            if (typeof draw === 'function') {
+                window.dispatchEvent(new Event('resize'));
+                draw();
+            }
+        });
+    </script>
+    <script src="js/config.js"></script>
+    <script src="js/geometry.js"></script>
+    <script src="js/explanations.js"></script>
+    <script src="js/draw.js?v=langley10"></script>
+    <script src="js/main.js?v=langley10"></script>
+</body>
+
+</html>

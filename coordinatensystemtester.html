@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coord-Tester | ULTRA v5.3.8</title>
+    <script src="js/i18n.js"></script>
+    <title>docalvers | Ultra v6.7.0</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
@@ -36,7 +37,7 @@
 </head>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" id="nav-toggle">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -83,25 +84,29 @@
         window.addEventListener('load', () => {
             // 1. Initialize Branding
             CyberBranding.init({
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "COORD-SYSTEM TESTER",
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('coord.subtitle'),
                 useExternalStyles: true
             });
+
+            document.title = "docalvers | " + CyberI18n.get('coord.title');
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) navToggle.title = CyberI18n.get('ui.toggle_menu');
 
             // 2. Initialize UI Engine
             CyberUI.init();
 
             // 3. Create Navigation & Control Cards
-            CyberUI.createCard('parameters-container', 'PROJEKTIONS-STEUERUNG', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('coord.controls'), `
                 <div id="function-checks" class="cyber-control-group"></div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCheckbox('function-checks', 'f(x) = -x²', true, (val) => {
+            CyberUI.createCheckbox('function-checks', CyberI18n.get('coord.func1'), true, (val) => {
                 state.showX2 = val;
                 draw();
             });
 
-            CyberUI.createCheckbox('function-checks', 'g(x) = x⁻²', true, (val) => {
+            CyberUI.createCheckbox('function-checks', CyberI18n.get('coord.func2'), true, (val) => {
                 state.showXi2 = val;
                 draw();
             });
@@ -129,7 +134,7 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
                     {
-                        label: 'Ansicht zurücksetzen',
+                        label: CyberI18n.get('lgs.view_reset'),
                         onclick: () => {
                             CyberCanvasInstance.resetView(-10, 10);
                             draw();
@@ -137,7 +142,7 @@
                     },
                     { divider: true },
                     {
-                        label: 'Achsen an',
+                        label: CyberI18n.get('ui.show_axes'),
                         checked: CyberCanvasInstance.showAxes,
                         onchange: (val) => {
                             CyberCanvasInstance.showAxes = val;
@@ -145,7 +150,7 @@
                         }
                     },
                     {
-                        label: 'Achsenbeschriftung',
+                        label: CyberI18n.get('ui.show_labels'),
                         checked: CyberCanvasInstance.showLabels,
                         onchange: (val) => {
                             CyberCanvasInstance.showLabels = val;
@@ -153,7 +158,7 @@
                         }
                     },
                     {
-                        label: 'Koordinaten',
+                        label: CyberI18n.get('ui.show_telemetry'),
                         checked: CyberCanvasInstance.showTelemetry,
                         onchange: (val) => {
                             CyberCanvasInstance.showTelemetry = val;

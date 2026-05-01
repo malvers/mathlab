@@ -8,63 +8,92 @@ function isChecked(id) {
 const splitter = document.getElementById('main-splitter');
 const infoPanel = document.getElementById('info-panel');
 
-document.getElementById('variant-select').addEventListener('change', function(e) {
-    currentVariant = parseInt(e.target.value);
-    const v = variants[currentVariant];
+const variantSelect = document.getElementById('variant-select');
+if (variantSelect) {
+    variantSelect.addEventListener('change', function(e) {
+        currentVariant = parseInt(e.target.value);
+        const v = variants[currentVariant];
 
-    document.getElementById('txt_BAC').innerText = v.BAC + "°";
-    document.getElementById('txt_ACB').innerText = v.ACB + "°";
-    document.getElementById('txt_ABD').innerText = v.ABD + "°";
-    document.getElementById('txt_ABC').innerText = (180 - v.BAC - v.ACB) + "°";
-    document.getElementById('txt_DBC').innerText = ((180 - v.BAC - v.ACB) - v.ABD) + "°";
-    document.getElementById('txt_ADB').innerText = (180 - v.BAD - v.ABD) + "°";
+        ['txt_BAC', 'txt_ACB', 'txt_ABD', 'txt_ABC', 'txt_DBC', 'txt_ADB'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id === 'txt_BAC') el.innerText = v.BAC + "°";
+                if (id === 'txt_ACB') el.innerText = v.ACB + "°";
+                if (id === 'txt_ABD') el.innerText = v.ABD + "°";
+                if (id === 'txt_ABC') el.innerText = (180 - v.BAC - v.ACB) + "°";
+                if (id === 'txt_DBC') el.innerText = ((180 - v.BAC - v.ACB) - v.ABD) + "°";
+                if (id === 'txt_ADB') el.innerText = (180 - v.BAD - v.ABD) + "°";
+            }
+        });
 
-    if (currentVariant === 0) {
-        document.getElementById('phase5-geo').style.display = 'block';
-        document.getElementById('phase5-tri').style.display = 'none';
-        storyline = storylineGeo;
-    } else {
-        document.getElementById('phase5-geo').style.display = 'none';
-        document.getElementById('phase5-tri').style.display = 'block';
-        storyline = storylineTri;
-    }
+        const phase5Geo = document.getElementById('phase5-geo');
+        const phase5Tri = document.getElementById('phase5-tri');
 
-    currentStep = storyline.length;
-    applyStep();
-});
+        if (currentVariant === 0) {
+            if (phase5Geo) phase5Geo.style.display = 'block';
+            if (phase5Tri) phase5Tri.style.display = 'none';
+            storyline = storylineGeo;
+        } else {
+            if (phase5Geo) phase5Geo.style.display = 'none';
+            if (phase5Tri) phase5Tri.style.display = 'block';
+            storyline = storylineTri;
+        }
 
-document.getElementById('btn_next').addEventListener('click', () => { if (currentStep < storyline.length) { currentStep++; applyStep(); } });
-document.getElementById('btn_prev').addEventListener('click', () => { if (currentStep > 0) { currentStep--; applyStep(); } });
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'ArrowRight') document.getElementById('btn_next').click();
-    else if (event.key === 'ArrowLeft') document.getElementById('btn_prev').click();
-});
-
-document.getElementById('cb_all').addEventListener('change', function(e) {
-    currentStep = e.target.checked ? storyline.length : 0;
-    applyStep();
-});
-
-document.getElementById('cb_calc_all').addEventListener('change', function(e) {
-    const isChecked = e.target.checked;
-    ['cb_DAC', 'cb_ABC', 'cb_DBC', 'cb_ADB', 'cb_AEB', 'cb_AEP', 'cb_BEP'].forEach(id => {
-        if(document.getElementById(id)) document.getElementById(id).checked = isChecked;
+        currentStep = storyline.length;
+        applyStep();
     });
-    draw();
+}
+
+const btnNext = document.getElementById('btn_next');
+if (btnNext) btnNext.addEventListener('click', () => { if (currentStep < storyline.length) { currentStep++; applyStep(); } });
+
+const btnPrev = document.getElementById('btn_prev');
+if (btnPrev) btnPrev.addEventListener('click', () => { if (currentStep > 0) { currentStep--; applyStep(); } });
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowRight' && btnNext) btnNext.click();
+    else if (event.key === 'ArrowLeft' && btnPrev) btnPrev.click();
 });
 
-document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => { cb.addEventListener('change', draw); });
+const cbAll = document.getElementById('cb_all');
+if (cbAll) {
+    cbAll.addEventListener('change', function(e) {
+        currentStep = e.target.checked ? storyline.length : 0;
+        applyStep();
+    });
+}
+
+const cbCalcAll = document.getElementById('cb_calc_all');
+if (cbCalcAll) {
+    cbCalcAll.addEventListener('change', function(e) {
+        const isChecked = e.target.checked;
+        ['cb_DAC', 'cb_ABC', 'cb_DBC', 'cb_ADB', 'cb_AEB', 'cb_AEP', 'cb_BEP'].forEach(id => {
+            if(document.getElementById(id)) document.getElementById(id).checked = isChecked;
+        });
+        draw();
+    });
+}
+
+document.querySelectorAll('.cyber-checkbox').forEach(cb => { cb.addEventListener('change', draw); });
 
 function updateUI() {
-    document.getElementById('btn_prev').disabled = (currentStep === 0);
-    document.getElementById('btn_next').disabled = (currentStep === storyline.length);
-    document.getElementById('step-counter').innerText = `${currentStep}/${storyline.length}`;
-    document.getElementById('cb_all').checked = (currentStep === storyline.length);
-    updateExplanation();
+    const btnPrev = document.getElementById('btn_prev');
+    if (btnPrev) btnPrev.disabled = (currentStep === 0);
+    
+    const btnNext = document.getElementById('btn_next');
+    if (btnNext) btnNext.disabled = (currentStep === storyline.length);
+    
+    const stepCounter = document.getElementById('step-counter');
+    if (stepCounter) stepCounter.innerText = `${currentStep}/${storyline.length}`;
+    
+    const cbAll = document.getElementById('cb_all');
+    if (cbAll) cbAll.checked = (currentStep === storyline.length);
+    
+    if (typeof updateExplanation === 'function') updateExplanation();
 }
 
 function applyStep() {
-    document.querySelectorAll('.calc-box input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.cyber-checkbox').forEach(cb => cb.checked = false);
 
     ['cb_BAD', 'cb_F', 'cb_DAC', 'cb_BC'].forEach(id => {
         if(document.getElementById(id)) document.getElementById(id).checked = false;
@@ -74,10 +103,21 @@ function applyStep() {
         if (index < currentStep && document.getElementById(id)) document.getElementById(id).checked = true;
     });
 
-    if (document.getElementById('cb_ABC').checked) document.getElementById('cb_BC').checked = true;
-    if (document.getElementById('cb_AD').checked) document.getElementById('cb_BAD').checked = true;
-    if (document.getElementById('cb_BD').checked) document.getElementById('cb_F').checked = true;
-    if (document.getElementById('cb_ADB').checked) document.getElementById('cb_DAC').checked = true;
+    const cbABC = document.getElementById('cb_ABC');
+    const cbBC = document.getElementById('cb_BC');
+    if (cbABC && cbABC.checked && cbBC) cbBC.checked = true;
+    
+    const cbAD = document.getElementById('cb_AD');
+    const cbBAD = document.getElementById('cb_BAD');
+    if (cbAD && cbAD.checked && cbBAD) cbBAD.checked = true;
+    
+    const cbBD = document.getElementById('cb_BD');
+    const cbF = document.getElementById('cb_F');
+    if (cbBD && cbBD.checked && cbF) cbF.checked = true;
+    
+    const cbADB = document.getElementById('cb_ADB');
+    const cbDAC = document.getElementById('cb_DAC');
+    if (cbADB && cbADB.checked && cbDAC) cbDAC.checked = true;
 
     updateUI();
     draw();

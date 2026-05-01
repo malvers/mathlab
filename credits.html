@@ -7,6 +7,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap" rel="stylesheet">
   <style>
     :root { --space-bg: #050b18; --neon-blue: #00d2ff; --text-main: #ffffff; }
+    
+    /* Scrollbar Styling (Match Index) */
+    .content-box::-webkit-scrollbar { width: 11px; height: 11px; }
+    .content-box::-webkit-scrollbar-track { background: rgba(40, 48, 68, 0.72); border-radius: 999px; margin: 6px 0; }
+    .content-box::-webkit-scrollbar-thumb { 
+        background: linear-gradient(180deg, rgba(78, 92, 118, 0.95) 0%, rgba(52, 64, 86, 0.92) 100%); 
+        border-radius: 999px; border: 2px solid rgba(34, 42, 58, 0.85); box-shadow: 0 0 8px rgba(0, 0, 0, 0.35); 
+    }
+    .content-box::-webkit-scrollbar-thumb:hover { 
+        background: linear-gradient(180deg, rgba(92, 108, 134, 0.98) 0%, rgba(68, 82, 108, 0.95) 100%); 
+    }
+
     body {
         margin: 0; font-family: 'Inter', sans-serif; background-color: var(--space-bg);
         background-image: linear-gradient(rgba(5, 11, 24, 0.8), rgba(5, 11, 24, 0.8)),
@@ -16,23 +28,33 @@
     }
     .content-box {
         background: rgba(255, 255, 255, 0.05); border-radius: 20px; backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; margin: 60px 0;
+        border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px 40px 40px; margin: 60px 0;
         max-width: 700px; width: 90%; line-height: 1.6;
+        max-height: 70vh; overflow-y: auto;
     }
-    h1 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); letter-spacing: 2px; }
+    h1 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); letter-spacing: 2px; margin-top: 5px; }
     ul { list-style: none; padding: 0; margin: 24px 0 0; }
-    li { margin-bottom: 1.15rem; padding-left: 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1rem; }
+    li { margin-bottom: 0.6rem; padding-left: 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.6rem; }
     li:last-child { border-bottom: none; }
     li strong a { color: var(--neon-blue); text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 0.06em; }
     li strong a:hover { text-decoration: underline; }
     .meta { font-size: 0.9rem; opacity: 0.88; margin-top: 0.35rem; }
     .meta a { color: var(--neon-blue); word-break: break-all; }
-    .back-btn { display: inline-block; margin-top: 30px; padding: 10px 20px; border: 1px solid var(--neon-blue); border-radius: 20px; color: var(--neon-blue); font-weight: bold; transition: 0.3s; }
+    .back-btn { 
+        position: sticky; top: -25px; z-index: 10;
+        float: right;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        display: inline-block; margin-bottom: 10px; padding: 10px 20px; 
+        border: 1px solid var(--neon-blue); border-radius: 20px; color: var(--neon-blue); 
+        font-weight: bold; transition: 0.3s; 
+    }
     .back-btn:hover { background: var(--neon-blue); color: black; }
   </style>
 </head>
 <body>
 <div class="content-box">
+  <a href="index.html" class="back-btn" style="margin-top: 0; margin-bottom: 20px;">zurück</a>
   <h1>CREDITS</h1>
   <p style="opacity:0.75;font-size:0.9rem;margin-top:-8px;">Genutzte oder erwähnte KI‑ und Medienwerkzeuge (ohne vollständige Ansprüche).</p>
   <ul>
@@ -66,7 +88,6 @@
     </li>
   </ul>
 
-  <a href="index.html" class="back-btn">zurück</a>
 </div>
 <script src="js/ui.js?v=4"></script>
 <script>

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gleichschenkliges Dreieck | ULTRA v5.3.8</title>
+    <script src="js/i18n.js"></script>
+    <title>docalvers | Ultra v6.7.0</title>
 
     <!-- Core Engine -->
     <link rel="stylesheet"
@@ -90,7 +91,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" id="nav-toggle">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -102,7 +103,7 @@
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
-        <div id="warning-box">⚠️ KEIN DREIECK MÖGLICH</div>
+        <div id="warning-box">⚠️ <span id="warning-text"></span></div>
     </aside>
 
     <main id="main-content">
@@ -344,7 +345,7 @@
             graphCtx.fillStyle = "white";
             graphCtx.font = "bold 13px Orbitron";
             graphCtx.textAlign = "right";
-            graphCtx.fillText("BASIS", xAxisEnd, toY(0) + 35);
+            graphCtx.fillText(CyberI18n.get('iso_tri.base'), xAxisEnd, toY(0) + 35);
 
             // Y-Axis (SCHENKEL)
             graphCtx.strokeStyle = "#00d2ff";
@@ -360,7 +361,7 @@
             // Label Y (SCHENKEL)
             graphCtx.fillStyle = "white";
             graphCtx.textAlign = "center";
-            graphCtx.fillText("SCHENKEL", toX(0), yAxisEnd - 15);
+            graphCtx.fillText(CyberI18n.get('iso_tri.leg'), toX(0), yAxisEnd - 15);
 
             // Function
             graphCtx.lineWidth = 3;
@@ -380,10 +381,16 @@
 
         // --- Initialization ---
         window.addEventListener('load', () => {
+            document.title = "docalvers | " + CyberI18n.get('iso_tri.title');
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) navToggle.title = CyberI18n.get('ui.toggle_menu');
+            const warningText = document.getElementById('warning-text');
+            if (warningText) warningText.innerText = CyberI18n.get('iso_tri.invalid');
+
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "GLEICHSCHENKLIGES DREIECK"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('iso_tri.subtitle')
             });
             CyberUI.init();
 
@@ -391,17 +398,17 @@
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <div class="stats-grid">
                         <div class="stats-subcard" style="border-left-color: #9d50bb;">
-                            <span class="stats-label" id="label-u" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">UMFANG</span>
+                            <span class="stats-label" id="label-u" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.perimeter')}</span>
                             <span class="stats-val" style="color:white;">8,00 cm</span>
                         </div>
                     </div>
                     <div class="stats-grid">
                         <div class="stats-subcard" style="border-left-color: #9d50bb;">
-                            <span class="stats-label" id="label-b" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">BASIS</span>
+                            <span class="stats-label" id="label-b" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.base')}</span>
                             <span id="val-b" class="stats-val" style="color: #9d50bb;">2,00</span>
                         </div>
                         <div class="stats-subcard" style="border-left-color: #00d2ff;">
-                            <span class="stats-label" id="label-s" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">SCHENKEL</span>
+                            <span class="stats-label" id="label-s" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.leg')}</span>
                             <span id="val-s" class="stats-val" style="color: #00d2ff;">3,00</span>
                         </div>
                     </div>
@@ -411,11 +418,11 @@
             CyberUI.createCard('ui-container', '', `
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <div class="label-row">
-                        <span id="label-b-control" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem; color: rgba(255,255,255,0.8);">BASISLÄNGE</span>
+                        <span id="label-b-control" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem; color: rgba(255,255,255,0.8);">${CyberI18n.get('iso_tri.base_length')}</span>
                     </div>
                     <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2" oninput="updateMath(this.value)">
                     <div style="font-size: 0.8rem; opacity: 0.7; font-family: Orbitron; padding-top: 5px;">
-                        HINWEIS: Ein Dreieck existiert nur für b < 4,0.
+                        ${CyberI18n.get('iso_tri.note')}
                     </div>
                 </div>
             `, '#00d2ff');
