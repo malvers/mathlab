@@ -116,7 +116,7 @@ class CyberUI {
             <div class="cyber-modal cyber-modal--neon" onclick="event.stopPropagation()">
                 <h3 class="cyber-modal-adopt-title">${t('ui.contact_lab_modal_title')}</h3>
                 <p>${t('ui.contact_lab_modal_body')}</p>
-                <a href="mailto:michael.r.alvers@gmail.com"
+                <a href="mailto:info@docalvers.de"
                    class="cyber-modal-email-btn">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>

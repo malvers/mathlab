@@ -82,7 +82,7 @@
 
             const subject = encodeURIComponent(`Support-Anfrage: ${filename}`);
             const body = encodeURIComponent(`Hallo Doc Alvers,\n\nAnfrage und/oder Feedback:\n${text}\n\nDiagnose (Details):\n${meta}\n\nGesendet von docalvers.de.`);
-            window.location.href = `mailto:michael.r.alvers@gmail.com?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:info@docalvers.de?subject=${subject}&body=${body}`;
         },
 
         async copyReportToClipboard(filename, meta) {
