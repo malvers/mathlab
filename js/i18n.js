@@ -33,7 +33,11 @@ const CyberI18n = {
                 factor2: "Faktor 2 (Multiplikator)",
                 dividend: "Dividend",
                 divisor: "Divisor",
-                fine_mode: "Schrittweise"
+                fine_mode: "Schrittweise",
+                show_axes: "Achsen an",
+                show_labels: "Achsenbeschriftung",
+                show_telemetry: "Koordinaten",
+                toggle_menu: "Menü umschalten"
             },
             euler: {
                 construction: "KONSTRUKTION",
@@ -442,6 +446,23 @@ const CyberI18n = {
                 help_mouse: "Trackball: links drehen · Rad / Mitte zoom · rechts schwenken",
                 orbital_suffix: "ORBITAL"
             },
+            coord: {
+                title: "Coord-Tester | ULTRA v5.3.8",
+                subtitle: "COORD-SYSTEM TESTER",
+                controls: "PROJEKTIONS-STEUERUNG",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "Gleichschenkliges Dreieck | ULTRA v5.3.8",
+                subtitle: "GLEICHSCHENKLIGES DREIECK",
+                invalid: "⚠️ KEIN DREIECK MÖGLICH",
+                perimeter: "UMFANG",
+                base: "BASIS",
+                leg: "SCHENKEL",
+                base_length: "BASISLÄNGE",
+                note: "HINWEIS: Ein Dreieck existiert nur für b < 4,0."
+            },
             triangulierer: {
                 title: "DELAUNAY TRIANGULIERUNG",
                 triangle: "DREIECK",
@@ -524,7 +545,11 @@ const CyberI18n = {
                 factor2: "Factor 2 (Multiplier)",
                 dividend: "Dividend",
                 divisor: "Divisor",
-                fine_mode: "Step-by-step"
+                fine_mode: "Step-by-step",
+                show_axes: "Show Axes",
+                show_labels: "Show Labels",
+                show_telemetry: "Coordinates",
+                toggle_menu: "Toggle Menu"
             },
             euler: {
                 construction: "CONSTRUCTION",
@@ -915,6 +940,23 @@ const CyberI18n = {
                 help_mouse: "Trackball: left rotate · wheel / middle zoom · right pan",
                 orbital_suffix: "ORBITAL"
             },
+            coord: {
+                title: "Coord-Tester | ULTRA v5.3.8",
+                subtitle: "COORD-SYSTEM TESTER",
+                controls: "PROJECTION CONTROL",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "Isosceles Triangle | ULTRA v5.3.8",
+                subtitle: "ISOSCELES TRIANGLE",
+                invalid: "⚠️ NO TRIANGLE POSSIBLE",
+                perimeter: "PERIMETER",
+                base: "BASE",
+                leg: "LEG",
+                base_length: "BASE LENGTH",
+                note: "NOTE: A triangle only exists for b < 4.0."
+            },
             triangulierer: {
                 title: "DELAUNAY TRIANGULATION",
                 triangle: "TRIANGLE",
@@ -997,7 +1039,11 @@ const CyberI18n = {
                 factor2: "Factor 2 (Multiplicador)",
                 dividend: "Dividendo",
                 divisor: "Divisor",
-                fine_mode: "Paso a paso"
+                fine_mode: "Paso a paso",
+                show_axes: "Mostrar ejes",
+                show_labels: "Etiquetas de ejes",
+                show_telemetry: "Coordenadas",
+                toggle_menu: "Cambiar menú"
             },
             euler: {
                 construction: "CONSTRUCCIÓN",
@@ -1387,6 +1433,23 @@ const CyberI18n = {
                 help_toggle: "Mostrar/Ocultar ayuda",
                 help_mouse: "Trackball: girar izq. · rueda / centro zoom · desplazar der.",
                 orbital_suffix: "ORBITAL"
+            },
+            coord: {
+                title: "Coord-Tester | ULTRA v5.3.8",
+                subtitle: "COORD-SYSTEM TESTER",
+                controls: "CONTROL DE PROYECCIÓN",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "Triángulo Isósceles | ULTRA v5.3.8",
+                subtitle: "TRIÁNGULO ISÓSCELES",
+                invalid: "⚠️ NO ES POSIBLE EL TRIÁNGULO",
+                perimeter: "PERÍMETRO",
+                base: "BASE",
+                leg: "LATERAL",
+                base_length: "LONGITUD DE LA BASE",
+                note: "NOTA: Un triángulo solo existe para b < 4,0."
             },
             triangulierer: {
                 title: "TRIANGULACIÓN DE DELAUNAY",

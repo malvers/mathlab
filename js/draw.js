@@ -1,6 +1,7 @@
 // js/draw.js
 
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+const expBox = document.getElementById('explanation-box');
 
 function draw() {
     const dpr = window.devicePixelRatio || 1;
