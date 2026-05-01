@@ -2528,11 +2528,12 @@ const CyberI18n = {
 (function() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
-                    const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-                    if (['de', 'en', 'es', 'fr', 'it'].includes(lang.toLowerCase())) {
-                        CyberI18n.current = lang.toLowerCase();
-                    }
+        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
+        if (['de', 'en', 'es', 'fr', 'it'].includes(lang.toLowerCase())) {
+            CyberI18n.current = lang.toLowerCase();
+        }
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }
 })();
+
