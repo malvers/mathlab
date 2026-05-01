@@ -113,40 +113,59 @@
             border: 1px solid rgba(0, 210, 255, 0.2);
         }
 
-    /* nav-btn from branding.styles.extracted.css (the true central style) */
-    .nav-btn {
-        background: rgba(15, 23, 42, 0.85) !important;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(0, 210, 255, 0.3) !important;
-        color: white !important;
-        border-radius: 10px;
-        cursor: pointer;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 42px !important;
-        height: 42px !important;
-        min-height: 42px !important;
-        box-sizing: border-box;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        text-decoration: none !important;
-        padding: 0;
-        outline: none;
-    }
-    .nav-btn svg {
-        width: 20px !important;
-        height: 20px !important;
-        stroke: currentColor;
-        stroke-width: 2.5;
-        display: block !important;
-    }
-    .nav-btn:hover {
-        transform: translateY(-2px) scale(1.05);
-        background: rgba(0, 210, 255, 0.2) !important;
-        border-color: var(--branding-blue) !important;
-        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
+    <!-- btn-back from index.html (the true central style) -->
+    <style>
+        .btn-back {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid #00d2ff !important;
+            /* Offizieller Branding-Akzent */
+            border-radius: 12px;
+            color: white !important;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            padding: 0;
+            outline: none;
+            text-decoration: none;
+        }
 
+        .btn-back::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: #00d2ff !important;
+            background: rgba(0, 210, 255, 0.3) !important;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+            color: white !important;
+        }
+
+        .btn-back:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-back span {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
         /* overrides for close button specifically */
         #universe-close-focus.visible {
             display: flex !important;
@@ -168,22 +187,22 @@
     <div class="glow-sphere"></div>
     <div id="thumb-plane" aria-live="polite"></div>
 
-    <button type="button" id="universe-close-focus" class="nav-btn" style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); z-index: 10; width: 24px !important; height: 24px !important; border-radius: 50%; min-height: 24px !important; display: none !important;"
+    <button type="button" id="universe-close-focus" class="btn-back" style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); z-index: 10; width: 24px !important; height: 24px !important; border-radius: 50%; min-height: 24px !important; display: none !important;"
         title="Esc" aria-label="Close">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width: 12px !important; height: 12px !important;">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
     </button>
 
-    <button type="button" class="nav-btn" style="position: fixed; top: 30px; left: 30px; z-index: 50000;" onclick="window.location.href='index.html'" title="Zurück zum Portal" aria-label="Zurück zum Portal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <button type="button" class="btn-back" style="position: fixed; top: 30px; left: 30px; z-index: 50000;" onclick="window.location.href='index.html'" title="Zurück zum Portal" aria-label="Zurück zum Portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
     </button>
 
-    <button type="button" class="nav-btn" id="fs-btn" style="position: fixed; top: 30px; right: 30px; z-index: 50000;" onclick="toggleFullscreen()" title="Fullscreen (F)">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <button type="button" class="btn-back" id="fs-btn" style="position: fixed; top: 30px; right: 30px; z-index: 50000;" onclick="toggleFullscreen()" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;">
             <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6"/>
         </svg>
     </button>

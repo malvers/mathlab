@@ -7,31 +7,6 @@
     <title>Mathematik interaktiv by Dr. Michael R. Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
         rel="stylesheet">
-    <script src="js/i18n.js"></script>
-    <script src="js/i18n-index.js"></script>
-    <script>
-        function setLanguage(lang) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('lang', lang);
-            window.location.href = url.toString();
-        }
-
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang') || 'de';
-            if (['de', 'en', 'es'].includes(lang.toLowerCase())) {
-                CyberI18n.current = lang.toLowerCase();
-                console.log("Language set to:", CyberI18n.current);
-            }
-            
-            // Set active class on load
-            window.addEventListener('DOMContentLoaded', () => {
-                const currentLang = CyberI18n.current;
-                const btn = document.querySelector(`.lang-flag[onclick="setLanguage('${currentLang}')"]`);
-                if (btn) btn.classList.add('active');
-            });
-        })();
-    </script>
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="stylesheet" href="js/index-portal-tokens.css">
     <link rel="stylesheet" href="js/index-ui.css">
@@ -1246,32 +1221,6 @@
             letter-spacing: 2px;
         }
 
-        .admin-gate-box i.contact-close:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.8);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* --- Language Flag Button Fixes --- */
-        .lang-flag {
-            min-width: 50px;
-            height: 44px;
-            filter: grayscale(0.1);
-            transition: all 0.3s ease;
-            font-size: 1.5rem !important;
-        }
-        .lang-flag:hover {
-            filter: grayscale(0);
-            transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-        }
-        .lang-flag.active {
-            filter: grayscale(0);
-            border-color: #00d2ff;
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
-            background: rgba(0, 210, 255, 0.15);
-        }
-
         .admin-gate-box input {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1342,18 +1291,18 @@
     <!-- Admin Gate Modal (Custom Prompt) -->
     <div id="admin-gate">
         <div class="admin-gate-box">
-            <h3 id="gate-title">BERECHTIGUNG PRÜFEN</h3>
+            <h3>BERECHTIGUNG PRÜFEN</h3>
             <input type="password" id="gate-pwd" placeholder="Passwort" autocomplete="current-password"
                 aria-label="Passwort Eingabe" onkeydown="if(event.key==='Enter') verifyGate()">
-            <button class="btn-access" id="gate-access" onclick="verifyGate()">ACCESS</button>
+            <button class="btn-access" onclick="verifyGate()">ACCESS</button>
             <br>
-            <button class="btn-cancel" id="gate-cancel" onclick="closeGate()">ABBRECHEN</button>
+            <button class="btn-cancel" onclick="closeGate()">ABBRECHEN</button>
         </div>
     </div>
 
     <!-- Kaffee: eigenständig oben links -->
     <div style="position: fixed; top: 25px; left: 25px; z-index: 1000;">
-        <div class="contact-btn btn-donate" id="btn-coffee" onclick="document.getElementById('donate-overlay').classList.add('open')"
+        <div class="contact-btn btn-donate" onclick="document.getElementById('donate-overlay').classList.add('open')"
             title="Cyber-Kaffee spendieren"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1366,27 +1315,20 @@
         </div>
     </div>
 
-    <!-- Language Switcher: oben mittig -->
-    <div style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1000;">
-        <button onclick="setLanguage('de')" class="contact-btn lang-flag" title="Deutsch" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇩🇪</button>
-        <button onclick="setLanguage('en')" class="contact-btn lang-flag" title="English" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇬🇧</button>
-        <button onclick="setLanguage('es')" class="contact-btn lang-flag" title="Español" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇪🇸</button>
-    </div>
-
     <!-- Top Action Buttons -->
     <div style="position: fixed; top: 25px; right: 25px; display: flex; gap: 15px; z-index: 1000;">
         <!-- About → Cinematic Intro -->
-        <a href="intro.html" class="contact-btn" id="btn-about" style="position: static;" title="Cinematic Intro — Doc Alvers">
+        <a href="intro.html" class="contact-btn" style="position: static;" title="Cinematic Intro — Doc Alvers">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M12 16v-4"></path>
                 <path d="M12 8h.01"></path>
             </svg>
-            <span id="txt-about">ABOUT</span>
+            ABOUT
         </a>
 
         <!-- QR-Code dieser Seite -->
-        <div class="contact-btn" id="btn-qr" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
+        <div class="contact-btn" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1407,11 +1349,11 @@
     <!-- Kontakt Modal -->
     <div id="contact-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
         <div class="contact-modal" onclick="event.stopPropagation()">
-            <h3 id="contact-title">Kontakt</h3>
-            <p id="contact-desc">Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um
+            <h3>Kontakt</h3>
+            <p>Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um
                 Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
             <a href="mailto:michael.r.alvers@gmail.com" class="contact-email">michael.r.alvers@gmail.com</a>
-            <button class="contact-close" id="contact-close"
+            <button class="contact-close"
                 onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
     </div>
@@ -1419,29 +1361,29 @@
     <!-- QR-Modal -->
     <div id="qr-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
         <div class="contact-modal" onclick="event.stopPropagation()" style="max-width: 420px; text-align: center;">
-            <h3 id="qr-title">QR-Code</h3>
-            <p id="qr-desc">Scanne mit dem Handy – diese Seite zum Mitnehmen.</p>
+            <h3>QR-Code</h3>
+            <p>Scanne mit dem Handy – diese Seite zum Mitnehmen.</p>
             <img id="qr-overlay-img" width="240" height="240" alt=""
                 style="display:block;margin:0 auto 16px;border-radius:12px;background:#fff;padding:8px;box-sizing:content-box;">
             <p id="qr-overlay-url"
                 style="font-size:0.75rem;word-break:break-all;opacity:0.85;margin:0 0 20px;font-family:ui-monospace,system-ui,monospace;"></p>
-            <button type="button" class="contact-close" id="qr-close" onclick="document.getElementById('qr-overlay').classList.remove('open')">SCHLIESSEN</button>
+            <button type="button" class="contact-close" onclick="document.getElementById('qr-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
     </div>
 
     <!-- Donate Modal -->
     <div id="donate-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
         <div class="contact-modal" onclick="event.stopPropagation()">
-            <h3 id="donate-title" style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">Cyber-Kaffee Spendieren</h3>
-            <p id="donate-desc">Dir gefallen die interaktiven Labore und du möchtest die Weiterentwicklung des Cyber-Labors unterstützen? Ich freue mich über jeden virtuellen Kaffee, der mich nachts beim Coden wachhält! ☕️🚀</p>
+            <h3 style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">Cyber-Kaffee Spendieren</h3>
+            <p>Dir gefallen die interaktiven Labore und du möchtest die Weiterentwicklung des Cyber-Labors unterstützen? Ich freue mich über jeden virtuellen Kaffee, der mich nachts beim Coden wachhält! ☕️🚀</p>
             <a href="https://www.paypal.com/donate/?business=michael.r.alvers@gmail.com&no_recurring=1&currency_code=EUR" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; padding: 15px; border-radius: 8px; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 1rem; margin: 25px 0 15px 0; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);" onmouseover="this.style.background='rgba(255, 215, 0, 0.2)'; this.style.boxShadow='0 0 25px rgba(255, 215, 0, 0.4)';" onmouseout="this.style.background='rgba(255, 215, 0, 0.1)'; this.style.boxShadow='0 0 15px rgba(255, 215, 0, 0.2)';">
                 <svg viewBox="0 0 24 24" width="22" height="22" style="margin-top:-2px;">
                     <path fill="#00457C" d="M20.067 8.478c-.492-3.269-3.111-4.721-7.01-4.721H6.848a1.05 1.05 0 0 0-1.042.88L3.25 20.893c-.033.208.13.393.342.393h3.585a.99.99 0 0 0 .984-.836l.72-4.57c.063-.4.401-.699.807-.699h1.764c3.513 0 6.071-1.633 6.643-5.263.15-.953.07-1.71-.247-2.316l.22.876z"/>
                     <path fill="#0079C1" d="M19.467 8.162c-.183-.497-.478-.91-.861-1.246-.826-.723-2.222-1.002-4.004-1.002h-4.32a.965.965 0 0 0-.958.81l-2.457 15.61c-.031.196.12.366.319.366h3.42a.91.91 0 0 0 .905-.769l.79-5.01c.058-.368.369-.643.743-.643h1.62c3.23 0 5.584-1.503 6.112-4.843.197-1.25.044-2.274-.309-3.273z"/>
                 </svg>
-                <span id="donate-paypal">JETZT SPENDEN MIT PayPal</span>
+                JETZT SPENDEN MIT PayPal
             </a>
-            <button class="contact-close" id="donate-close"
+            <button class="contact-close"
                 onclick="document.getElementById('donate-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
     </div>
@@ -1458,17 +1400,17 @@
 
     <header>
         <div class="header-content">
-            <h1 id="header-title">Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers
+            <h1>Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers
                 Mathe-Labor</h1>
             <div class="subtitle" id="dynamic-subtitle">INTERAKTIVE MATHEMATIK</div>
-            <div class="author-attribution" id="header-author">von Dr. Michael R. Alvers</div>
+            <div class="author-attribution">von Dr. Michael R. Alvers</div>
         </div>
     </header>
 
     <!-- Unterseiten (Labor-Liste): Zurück + Bereichstitel über Labor-Scan -->
     <div id="tool-subchrome" class="hidden">
         <div class="back-nav">
-            <button type="button" class="btn-back" id="view-btn-back" onclick="backFromToolView()" title="Zurück"
+            <button type="button" class="btn-back" onclick="backFromToolView()" title="Zurück"
                 aria-label="Zurück">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round" style="width:22px; height:22px;">
@@ -1483,7 +1425,7 @@
     <!-- Labor-Scan + Universe (Galaxy) -->
     <div class="search-scan-row">
         <div id="search-mount"></div>
-        <a href="universe.html" class="universe-galaxy-btn" id="btn-universe" title="Universe · Labor-Galerie im Weltraum"
+        <a href="universe.html" class="universe-galaxy-btn" title="Universe · Labor-Galerie im Weltraum"
             aria-label="Universe · Labor-Galerie öffnen">
             <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
                 alt="" width="400" height="400" loading="lazy" decoding="async">
@@ -1493,7 +1435,7 @@
     <div id="grade-view">
         <div id="index-jahrgang-block">
         <div class="view-section">
-            <button type="button" class="btn-back" id="grade-btn-back" onclick="showGrades()" title="Zurück zur Themenauswahl"
+            <button type="button" class="btn-back" onclick="showGrades()" title="Zurück zur Themenauswahl"
                 aria-label="Zurück zur Themenauswahl">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round" style="width:22px; height:22px;" aria-hidden="true">
@@ -1501,7 +1443,7 @@
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
             </button>
-            <h2 id="txt-grade">Jahrgang</h2>
+            <h2>Jahrgang</h2>
             <div class="line"></div>
         </div>
         <div class="grade-grid" id="jahrgang-grid">
@@ -1531,9 +1473,9 @@
                 <h3>12</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card active jahrgang-portal-tile"
-                data-jg-category="uni" id="grade-tile-uni"
+                data-jg-category="uni"
                 title="Universität · besonders komplexe Labore (Analysis, Physik, Fraktale, …)" aria-label="Universität: komplexe Labore anzeigen">
-                <h3 id="txt-uni">Uni</h3>
+                <h3>Uni</h3>
             </a>
         </div>
         <p id="jahrgang-grid-debug-unique" class="jahrgang-grid-debug-unique" aria-label="Debug: eindeutige Labs JG- und Uni-Kacheln"></p>
@@ -1541,12 +1483,11 @@
 
         <div id="index-themes-block">
         <div class="view-section" style="margin-top: 8px;">
-            <h2><span id="themes-count">0</span> <span id="txt-themes">Themen</span></h2>
+            <h2><span id="themes-count">0</span> Themen</h2>
             <div class="line"></div>
         </div>
         <div class="grade-grid">
             <a href="javascript:void(0)" onclick="showFilter('top5')" class="card grade-card category-card active"
-                id="themes-tile-top5"
                 title="Fourier · Fraktale · Atomorbitale · Galton Board · Linsenoptimierung"
                 aria-label="TOP 5: Auswahl Lieblings-Labs">
                 <div class="card-icon card-icon--top5" aria-hidden="true">
@@ -1556,47 +1497,46 @@
             </a>
             <a href="javascript:void(0)" onclick="showFilter('highlight')" class="card grade-card category-card active">
                 <div class="card-icon">💎</div>
-                <h3 id="txt-highlights">Highlights</h3>
+                <h3>Highlights</h3>
             </a>
             <!-- Master-Link zur Mission Control -->
             <a href="tools.html" class="card grade-card category-card active">
                 <div class="card-icon">🚀</div>
-                <h3 id="txt-all-tools">Alle Werkzeuge</h3>
+                <h3>Alle Werkzeuge</h3>
             </a>
             <a href="javascript:void(0)" onclick="showEducationJahrgang()" class="card grade-card category-card active"
-                id="themes-tile-education"
                 title="Jahrgänge · EDUCATION" aria-label="EDUCATION: Jahrgangs-Kacheln anzeigen">
                 <div class="card-icon">🎓</div>
-                <h3 id="txt-education">EDUCATION</h3>
+                <h3>EDUCATION</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
                 <div class="card-icon">🎮</div>
-                <h3 id="txt-games">Spiele</h3>
+                <h3>Spiele</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('lgs')" class="card grade-card category-card active">
                 <div class="card-icon">⚖️</div>
-                <h3 id="txt-lgs">Gleichungssysteme</h3>
+                <h3>Gleichungssysteme</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('pythagoras')"
                 class="card grade-card category-card active">
                 <div class="card-icon">📐</div>
-                <h3 id="txt-pythagoras">Pythagoras</h3>
+                <h3>Pythagoras</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('dreiecke')" class="card grade-card category-card active">
                 <div class="card-icon">🔺</div>
-                <h3 id="txt-triangles">Dreiecke</h3>
+                <h3>Dreiecke</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('arithmetik')" class="card grade-card category-card active">
                 <div class="card-icon">🧮</div>
-                <h3 id="txt-arithmetic">Grundrechenarten</h3>
+                <h3>Grundrechenarten</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('hot')" class="card grade-card category-card active">
                 <div class="card-icon">🔥</div>
-                <h3 id="txt-hot">Hot stuff</h3>
+                <h3>Hot stuff</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
                 <div class="card-icon">😊</div>
-                <h3 id="txt-fun">Fun</h3>
+                <h3>Fun</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('funktionen')"
                 class="card grade-card category-card active">
@@ -1613,10 +1553,9 @@
                         </defs>
                     </svg>
                 </div>
-                <h3 id="txt-functions">Funktionen</h3>
+                <h3>Funktionen</h3>
             </a>
             <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card category-card active category-card--stanford-brand"
-                id="themes-tile-uni"
                 title="Universität · komplexe Labore (Analysis, Physik, …)" aria-label="Universität: Uni-Labore anzeigen">
                 <div class="card-icon category-card__stanford-mark" aria-hidden="true">
                     <svg class="stanford-uni-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 162 248.022" focusable="false">
@@ -1627,7 +1566,7 @@
                         </g>
                     </svg>
                 </div>
-                <h3 id="txt-university">Universität</h3>
+                <h3>Universität</h3>
             </a>
         </div>
         </div>
@@ -1641,14 +1580,14 @@
 
     <footer>
         &copy; 2026 DR. MICHAEL R. ALVERS
-        <a href="credits.html" id="footer-credits">CREDITS</a>
-        <a href="impressum.html" id="footer-impressum">IMPRESSUM</a>
+        <a href="credits.html">CREDITS</a>
+        <a href="impressum.html">IMPRESSUM</a>
     </footer>
 
     <div class="admin-controls" id="admin-panel">
-        <div style="color: var(--neon-orange); font-size: 0.8rem; margin-bottom: 5px;" id="admin-status">REDAKTIONS-MODUS AKTIV</div>
-        <button class="btn-admin" id="admin-export" onclick="exportChanges()">Änderungen Exportieren</button>
-        <button class="btn-admin" id="admin-exit" style="background: #333; color: #999;" onclick="toggleAdminMode()">Beenden</button>
+        <div style="color: var(--neon-orange); font-size: 0.8rem; margin-bottom: 5px;">REDAKTIONS-MODUS AKTIV</div>
+        <button class="btn-admin" onclick="exportChanges()">Änderungen Exportieren</button>
+        <button class="btn-admin" style="background: #333; color: #999;" onclick="toggleAdminMode()">Beenden</button>
     </div>
 
     <!-- Configuration Load -->
@@ -1687,27 +1626,14 @@
             container.innerHTML = LABS_DATA.map(lab => {
                 const ext = /^https?:\/\//i.test(lab.href);
                 const linkAttrs = ext ? ' target="_blank" rel="noopener noreferrer"' : '';
-                
-                // Localization
-                const titleKey = `index.labs.${lab.id}.title`;
-                const descKey = `index.labs.${lab.id}.description`;
-                
-                let title = CyberI18n.get(titleKey);
-                if (title === titleKey) title = lab.title; // Fallback if key not found
-                
-                let description = CyberI18n.get(descKey);
-                if (description === descKey) description = lab.description; // Fallback if key not found
-                
-                const missionStart = CyberI18n.get('index.ui.mission_start') || "Mission Start";
-                
                 return `
                 <a href="${lab.href}"${linkAttrs} class="card" data-category="${lab.category}" data-keywords="${lab.keywords}">
                     <div class="card-icon">
                         ${lab.icon}
                     </div>
-                    <h3>${title}</h3>
-                    <p class="card-desc">${description}</p>
-                    <div class="btn">${missionStart}</div>
+                    <h3>${lab.title}</h3>
+                    <p class="card-desc">${lab.description}</p>
+                    <div class="btn">Mission Start</div>
                 </a>`;
             }).join('');
         }
@@ -1721,8 +1647,6 @@
                 const title = tool.querySelector('h3').innerText.toLowerCase();
                 const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
                 const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
-                
-                // Also search in keywords and categories
                 const categories = tool.getAttribute('data-category').toLowerCase();
                 const catParts = categories.split(/\s+/).filter(Boolean);
                 const catHit = categories.includes(q) || (q === 'university' && catParts.includes('uni'));
@@ -1744,8 +1668,7 @@
 
         // Centralized Search Engine Hook
         CyberUI.init();
-        const searchHint = CyberI18n.get('index.ui.search_placeholder') || "LABOR-SCAN STARTEN...";
-        CyberUI.createSearch('search-mount', searchHint, (val) => {
+        CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
             filterLabs(val);
         });
 
@@ -1809,33 +1732,16 @@
             const categoryToken = (filter === 'university' || filter === 'uni') ? 'uni' : filter;
 
             const titles = {
-                'grade5': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 5',
-                'grade6': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 6',
-                'grade7': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 7',
-                'grade8': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 8',
-                'grade9': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 9',
-                'grade10': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 10',
-                'grade11': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 11',
-                'grade12': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 12',
-                'fun': CyberI18n.get('index.ui.fun'),
-                'lgs': CyberI18n.get('index.ui.lgs'),
-                'pythagoras': CyberI18n.get('index.ui.pythagoras'),
-                'dreiecke': CyberI18n.get('index.ui.triangles'),
-                'arithmetik': CyberI18n.get('index.ui.arithmetic'),
-                'hot': CyberI18n.get('index.ui.hot_stuff'),
-                'funktionen': CyberI18n.get('index.ui.functions'),
-                'highlight': CyberI18n.get('index.ui.highlights'),
-                'top5': 'TOP 5',
-                'fraktale': CyberI18n.get('index.ui.fraktale'),
-                'uni': CyberI18n.get('index.ui.university'),
-                'university': CyberI18n.get('index.ui.university')
+                'grade5': 'JAHRGANG 5', 'grade6': 'JAHRGANG 6', 'grade7': 'JAHRGANG 7', 'grade8': 'JAHRGANG 8',
+                'grade9': 'JAHRGANG 9', 'grade10': 'JAHRGANG 10', 'grade11': 'JAHRGANG 11', 'grade12': 'JAHRGANG 12',
+                'fun': 'SPIELE & FUN', 'lgs': 'GLEICHUNGSSYSTEME', 'pythagoras': 'PYTHAGORAS',
+                'dreiecke': 'DREIECKE', 'arithmetik': 'GRUNDRECHENARTEN', 'hot': 'HOT STUFF', 'funktionen': 'FUNKTIONEN',
+                'highlight': 'HIGHLIGHTS', 'top5': 'TOP 5', 'fraktale': 'Fraktale',
+                'uni': 'UNIVERSITÄT', 'university': 'UNIVERSITÄT'
             };
 
             const titleEl = document.getElementById('view-title');
-            if (titleEl) {
-                const rawTitle = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
-                titleEl.innerText = rawTitle.toUpperCase();
-            }
+            if (titleEl) titleEl.innerText = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
 
             const tools = document.querySelectorAll('#tool-container .card');
             let visibleCount = 0;
@@ -2201,7 +2107,7 @@
         window.addEventListener('load', () => {
             if (typeof CyberBranding !== 'undefined') {
                 CyberBranding.init({
-                    title: CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor",
+                    title: "Doc Alvers Mathe-Labor",
                     subtitle: "MISSION CONTROL",
                     skipCanvasBranding: true,
                     skipNavigation: true
@@ -2212,81 +2118,6 @@
                 });
             }
         });
-    </script>
-    <script>
-    window.addEventListener('load', () => {
-        // Page Title
-        document.title = (CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor") + " | " + (CyberI18n.get('index.header.author') || "Dr. Michael R. Alvers");
-        
-        // Admin Gate
-        if (document.getElementById('gate-title')) document.getElementById('gate-title').innerHTML = CyberI18n.get('index.admin_gate.title');
-        if (document.getElementById('gate-pwd')) document.getElementById('gate-pwd').placeholder = CyberI18n.get('index.admin_gate.pwd_placeholder');
-        if (document.getElementById('gate-access')) document.getElementById('gate-access').innerHTML = CyberI18n.get('index.admin_gate.access');
-        if (document.getElementById('gate-cancel')) document.getElementById('gate-cancel').innerHTML = CyberI18n.get('index.admin_gate.cancel');
-        
-        // UI Icons Tooltips
-        if (document.getElementById('btn-coffee')) document.getElementById('btn-coffee').title = CyberI18n.get('index.ui.coffee_title');
-        if (document.getElementById('btn-about')) document.getElementById('btn-about').title = CyberI18n.get('index.ui.about_title');
-        if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
-        if (document.getElementById('sound-toggle')) document.getElementById('sound-toggle').title = CyberI18n.get('index.ui.sound_title');
-        
-        // Modals
-        if (document.getElementById('contact-title')) document.getElementById('contact-title').innerHTML = CyberI18n.get('index.contact.title');
-        if (document.getElementById('contact-desc')) document.getElementById('contact-desc').innerHTML = CyberI18n.get('index.contact.desc');
-        if (document.getElementById('contact-close')) document.getElementById('contact-close').innerHTML = CyberI18n.get('index.contact.close');
-        if (document.getElementById('qr-title')) document.getElementById('qr-title').innerHTML = CyberI18n.get('index.qr.title');
-        if (document.getElementById('qr-desc')) document.getElementById('qr-desc').innerHTML = CyberI18n.get('index.qr.desc');
-        if (document.getElementById('qr-close')) document.getElementById('qr-close').innerHTML = CyberI18n.get('index.contact.close');
-        if (document.getElementById('donate-title')) document.getElementById('donate-title').innerHTML = CyberI18n.get('index.donate.title');
-        if (document.getElementById('donate-desc')) document.getElementById('donate-desc').innerHTML = CyberI18n.get('index.donate.desc');
-        if (document.getElementById('donate-paypal')) document.getElementById('donate-paypal').innerHTML = CyberI18n.get('index.donate.paypal');
-        if (document.getElementById('donate-close')) document.getElementById('donate-close').innerHTML = CyberI18n.get('index.contact.close');
-        
-        // Header
-        const h1 = document.getElementById('header-title');
-        if (h1 && h1.childNodes[0]) {
-             h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
-        }
-        if (document.getElementById('dynamic-subtitle')) document.getElementById('dynamic-subtitle').innerHTML = CyberI18n.get('index.header.subtitle');
-        if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
-        
-        // Views
-        if (document.getElementById('view-btn-back')) document.getElementById('view-btn-back').title = CyberI18n.get('index.view.back_title');
-        if (document.getElementById('view-title')) document.getElementById('view-title').innerHTML = CyberI18n.get('index.view.title');
-        if (document.getElementById('btn-universe')) document.getElementById('btn-universe').title = CyberI18n.get('index.ui.universe_tip');
-        if (document.getElementById('grade-btn-back')) document.getElementById('grade-btn-back').title = CyberI18n.get('index.ui.grade_back_tip');
-        if (document.getElementById('txt-grade')) document.getElementById('txt-grade').innerHTML = CyberI18n.get('index.ui.grade_title');
-        if (document.getElementById('txt-uni')) document.getElementById('txt-uni').innerHTML = CyberI18n.get('index.ui.grade_uni');
-        if (document.getElementById('grade-tile-uni')) document.getElementById('grade-tile-uni').title = CyberI18n.get('index.ui.grade_uni_tip');
-        
-        // Themes
-        if (document.getElementById('txt-themes')) document.getElementById('txt-themes').innerHTML = CyberI18n.get('index.ui.themes_count');
-        if (document.getElementById('themes-tile-top5')) document.getElementById('themes-tile-top5').title = CyberI18n.get('index.ui.themes_top5_title');
-        if (document.getElementById('txt-highlights')) document.getElementById('txt-highlights').innerHTML = CyberI18n.get('index.ui.highlights');
-        if (document.getElementById('txt-all-tools')) document.getElementById('txt-all-tools').innerHTML = CyberI18n.get('index.ui.all_tools');
-        if (document.getElementById('themes-tile-education')) document.getElementById('themes-tile-education').title = CyberI18n.get('index.ui.education');
-        if (document.getElementById('txt-education')) document.getElementById('txt-education').innerHTML = CyberI18n.get('index.ui.education');
-        
-        // Categories
-        if (document.getElementById('txt-games')) document.getElementById('txt-games').innerHTML = CyberI18n.get('index.ui.games');
-        if (document.getElementById('txt-lgs')) document.getElementById('txt-lgs').innerHTML = CyberI18n.get('index.ui.lgs');
-        if (document.getElementById('txt-pythagoras')) document.getElementById('txt-pythagoras').innerHTML = CyberI18n.get('index.ui.pythagoras');
-        if (document.getElementById('txt-triangles')) document.getElementById('txt-triangles').innerHTML = CyberI18n.get('index.ui.triangles');
-        if (document.getElementById('txt-arithmetic')) document.getElementById('txt-arithmetic').innerHTML = CyberI18n.get('index.ui.arithmetic');
-        if (document.getElementById('txt-hot')) document.getElementById('txt-hot').innerHTML = CyberI18n.get('index.ui.hot_stuff');
-        if (document.getElementById('txt-fun')) document.getElementById('txt-fun').innerHTML = CyberI18n.get('index.ui.fun');
-        if (document.getElementById('txt-functions')) document.getElementById('txt-functions').innerHTML = CyberI18n.get('index.ui.functions');
-        if (document.getElementById('txt-university')) document.getElementById('txt-university').innerHTML = CyberI18n.get('index.ui.university');
-        if (document.getElementById('themes-tile-uni')) document.getElementById('themes-tile-uni').title = CyberI18n.get('index.ui.grade_uni_tip');
-        
-        // Footer
-        if (document.getElementById('footer-credits')) document.getElementById('footer-credits').innerHTML = CyberI18n.get('credits.title');
-        
-        // Admin
-        if (document.getElementById('admin-status')) document.getElementById('admin-status').innerHTML = CyberI18n.get('index.admin.active');
-        if (document.getElementById('admin-export')) document.getElementById('admin-export').innerHTML = CyberI18n.get('index.admin.export');
-        if (document.getElementById('admin-exit')) document.getElementById('admin-exit').innerHTML = CyberI18n.get('index.admin.exit');
-    });
     </script>
 </body>
 
