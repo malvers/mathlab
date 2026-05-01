@@ -54,6 +54,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -92,50 +93,50 @@
             // 1. Branding
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "KONGRUENZ"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.transformation')
             });
 
             // 2. UI Engine & Cards
             CyberUI.init();
 
-            CyberUI.createCard('parameters-container', 'TRANSFORMATION', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('ui.transformation'), `
                 <div style="display:flex; flex-direction:column; gap:15px;">
                     <div>
                         <div style="display:flex; justify-content:space-between; font-family:Orbitron; font-size:0.6rem; color:var(--neon-blue); margin-bottom:5px;">
-                            <span>ROTATION</span>
+                            <span>${CyberI18n.get('transform.rotation')}</span>
                             <span id="label-rot" style="color:white;">0°</span>
                         </div>
                         <input type="range" id="slider-rot" min="-360" max="360" value="0" style="width:100%; accent-color:var(--neon-blue);">
                     </div>
                     <div>
                         <div style="display:flex; justify-content:space-between; font-family:Orbitron; font-size:0.6rem; color:var(--neon-blue); margin-bottom:5px;">
-                            <span>SKALIERUNG</span>
+                            <span>${CyberI18n.get('transform.scale')}</span>
                             <span id="label-scale" style="color:white;">1.0x</span>
                         </div>
                         <input type="range" id="slider-scale" min="10" max="300" value="100" style="width:100%; accent-color:var(--neon-blue);">
                     </div>
                     <div style="display:flex; gap:10px; margin-top:5px;">
-                        <button id="btn-mirror-v" onclick="toggleMirror()" class="cyber-btn" style="flex:1; border-color:#ff4d4d; color:#ff4d4d; font-size:0.55rem; padding:8px;">ACHSE SPIEGELN</button>
-                        <button id="btn-mirror-p" onclick="togglePointMirror()" class="cyber-btn" style="flex:1; border-color:#ff0055; color:#ff0055; font-size:0.55rem; padding:8px;">PUNKT SPIEGELN</button>
+                        <button id="btn-mirror-v" onclick="toggleMirror()" class="cyber-btn" style="flex:1; border-color:#ff4d4d; color:#ff4d4d; font-size:0.55rem; padding:8px;">${CyberI18n.get('transform.mirror_axis')}</button>
+                        <button id="btn-mirror-p" onclick="togglePointMirror()" class="cyber-btn" style="flex:1; border-color:#ff0055; color:#ff0055; font-size:0.55rem; padding:8px;">${CyberI18n.get('transform.mirror_point')}</button>
                     </div>
                 </div>
             `);
 
-            CyberUI.createCard('parameters-container', 'DARSTELLUNG', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('geometry.lab_control'), `
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <input type="checkbox" id="check-helpers" checked style="display:none;">
                     <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron;">
-                        <input type="checkbox" id="check-start" checked> URBILD (START)
+                        <input type="checkbox" id="check-start" checked> ${CyberI18n.get('transform.urbild')}
                     </label>
                     <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron; color:var(--neon-pink);">
-                        <input type="checkbox" id="check-hl-lock"> HL FIXIEREN
+                        <input type="checkbox" id="check-hl-lock"> ${CyberI18n.get('transform.hl_lock')}
                     </label>
                     <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:0.75rem; font-family:Orbitron; color:#adff2f;">
-                        <input type="checkbox" id="check-measurements" style="accent-color:#adff2f;"> MESSWERTE
+                        <input type="checkbox" id="check-measurements" style="accent-color:#adff2f;"> ${CyberI18n.get('transform.measurements')}
                     </label>
                 </div>
-                <button onclick="resetLab()" class="cyber-btn" style="width:100%; margin-top:15px; font-size:0.7rem;">Labor Reset</button>
+                <button onclick="resetLab()" class="cyber-btn" style="width:100%; margin-top:15px; font-size:0.7rem;">${CyberI18n.get('ui.reset')}</button>
             `);
 
             // 3. Canvas & Input
@@ -282,7 +283,7 @@
 
             cc.onContextMenu = (e) => {
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
-                    { label: 'Labor Reset', onclick: () => resetLab() },
+                    { label: CyberI18n.get('ui.reset'), onclick: () => resetLab() },
                     { label: 'Ansicht Reset', onclick: () => cc.resetView(-7, 7) },
                     { divider: true },
                     {
@@ -618,7 +619,7 @@
                 // Text
                 ctx.font = "bold 24px Orbitron";
                 ctx.textAlign = "left";
-                ctx.fillText(isCongruent ? "KONGRUENT" : "NICHT KONGRUENT", bx + 105, by + boxH / 2);
+                ctx.fillText(isCongruent ? CyberI18n.get('transform.congruent') : CyberI18n.get('transform.not_congruent'), bx + 105, by + boxH / 2);
 
                 ctx.restore();
             }

@@ -171,6 +171,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -203,36 +204,36 @@
                     if (typeof CyberUI !== 'undefined') {
                         CyberUI.init();
                         
-                        CyberUI.createCard('parameters-container', 'ANALYTIK', `
+                        CyberUI.createCard('parameters-container', CyberI18n.get('stats.analytics'), `
                             <div class="stat-card" style="margin-bottom:10px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:5px; display:block;">Korrelation (r)</span>
+                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:5px; display:block;">${CyberI18n.get('stats.correlation')}</span>
                                 <div id="r-display" style="font-family:Orbitron; font-size:1.8rem; font-weight:bold; color:var(--neon-purple); text-shadow:0 0 15px var(--neon-purple);">+0.00</div>
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                                  <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">SLOPE (m)</span>
+                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.slope')}</span>
                                     <div id="m-val" style="font-family:Orbitron; font-size:1.2rem; font-weight:bold; color:var(--neon-blue);">0.00</div>
                                 </div>
                                 <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">Y-INT (n)</span>
+                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.y_intercept')}</span>
                                     <div id="n-val" style="font-family:Orbitron; font-size:1.2rem; font-weight:bold; color:var(--neon-blue);">0.00</div>
                                 </div>
                             </div>
                         `);
 
-                        CyberUI.createCard('parameters-container', 'FEHLER-ANALYSE', `
+                        CyberUI.createCard('parameters-container', CyberI18n.get('stats.error_analysis'), `
                             <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); display:block;">Standardabweichung (SD)</span>
+                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.std_dev')}</span>
                                 <div id="sd-val" style="font-family:Orbitron; font-size:1.4rem; font-weight:bold; color:white;">0.0000</div>
                             </div>
                         `);
 
-                        CyberUI.createCard('parameters-container', 'STEUERUNG', `
+                        CyberUI.createCard('parameters-container', CyberI18n.get('geometry.lab_control'), `
                             <div style="display:flex; flex-direction:column; gap:10px;">
-                                <button class="cyber-btn" onclick="generateChaos()" style="width:100%; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; font-family:Orbitron; cursor:pointer;">ZUFALLS-PUNKTE</button>
-                                <button class="cyber-btn" onclick="shiftResiduals(0.9)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">PUNKTE NÄHER</button>
-                                <button class="cyber-btn" onclick="shiftResiduals(1.1)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">PUNKTE WEITER</button>
-                                <button class="cyber-btn" onclick="clearPoints()" style="width:100%; border:1px solid var(--neon-pink); color:var(--neon-pink); border-radius:8px; font-family:Orbitron; cursor:pointer;">LABOR RESET</button>
+                                <button class="cyber-btn" onclick="generateChaos()" style="width:100%; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.chaos_points')}</button>
+                                <button class="cyber-btn" onclick="shiftResiduals(0.9)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.points_near')}</button>
+                                <button class="cyber-btn" onclick="shiftResiduals(1.1)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.points_far')}</button>
+                                <button class="cyber-btn" onclick="clearPoints()" style="width:100%; border:1px solid var(--neon-pink); color:var(--neon-pink); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('ui.reset')}</button>
                             </div>
                         `);
                     }
@@ -245,18 +246,18 @@
                     if (typeof CyberBranding !== 'undefined') {
                         CyberBranding.init({
                             useExternalStyles: true,
-                            title: "Doc Alvers Mathe-Labor",
-                            subtitle: "LINEARE REGRESSION",
+                            title: CyberI18n.get('ui.coach_title'),
+                            subtitle: CyberI18n.get('stats.mission_title'),
                             briefing: `
-                                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">MISSION: STATISTIK-LABOR</h3>
-                                Willkommen in der Analyseeinheit für Lineare Regression. Analysiere den Zusammenhang zwischen Datenpunkten durch Setzen und Verschieben im Koordinatensystem.
+                                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">${CyberI18n.get('stats.mission_title')}</h3>
+                                ${CyberI18n.get('stats.mission_desc')}
                                 
                                 <div class="admin-info">
-                                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">TECHNISCHE KONTROLLE (ADMIN ONLY)</h4>
+                                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">${CyberI18n.get('stats.admin_ctrl')}</h4>
                                     <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
-                                        <li><b>Kontextmenü:</b> Rechtsklick für Gitter, Achsen und Telemetrie.</li>
-                                        <li><b>Tastatur:</b> Pfeiltasten (Oben/Unten) zum Skalieren der Residuen.</li>
-                                        <li><b>Manipulation:</b> Sidebar-Buttons für Chaos-Generierung und Residuen-Shift nutzen.</li>
+                                        <li><b>${CyberI18n.get('stats.admin_ctx')}</b></li>
+                                        <li><b>${CyberI18n.get('stats.admin_keys')}</b></li>
+                                        <li><b>${CyberI18n.get('stats.admin_manip')}</b></li>
                                     </ul>
                                 </div>
                             `
@@ -275,11 +276,11 @@
                         if (typeof CyberUI === 'undefined') return;
                         CyberUI.showContextMenu(e.clientX, e.clientY, [
                             {
-                                label: 'Labor zurücksetzen',
+                                label: CyberI18n.get('ui.reset'),
                                 onclick: () => { points = []; update(); }
                             },
                             {
-                                label: 'Zufalls-Daten',
+                                label: CyberI18n.get('stats.chaos_points'),
                                 onclick: () => generateChaos()
                             },
                             { divider: true },
