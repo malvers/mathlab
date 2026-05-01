@@ -20,7 +20,7 @@ Labore
 #
 120pt
 6 Sprachen
-20
+20pt
 and counting
 40pt
 deutsch
@@ -28,6 +28,7 @@ englisch
 spanisch
 französisch
 italienisch
+portugiesisch
 
 #
 // es werden alle screenshots gezeigt
@@ -65,5 +66,9 @@ das crazy!
 180pt
 %emoji 😎
 %button zurück
+
+#80pt
+docalvers.de
 %stop
+
 `.trim();
