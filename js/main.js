@@ -78,10 +78,24 @@ document.querySelectorAll('.cyber-checkbox').forEach(cb => { cb.addEventListener
 
 function updateUI() {
     const btnPrev = document.getElementById('btn_prev');
-    if (btnPrev) btnPrev.disabled = (currentStep === 0);
+    if (btnPrev) {
+        if (btnPrev.tagName === 'BUTTON') {
+            btnPrev.disabled = (currentStep === 0);
+        } else {
+            btnPrev.style.opacity = (currentStep === 0) ? '0.5' : '1';
+            btnPrev.style.pointerEvents = (currentStep === 0) ? 'none' : 'auto';
+        }
+    }
     
     const btnNext = document.getElementById('btn_next');
-    if (btnNext) btnNext.disabled = (currentStep === storyline.length);
+    if (btnNext) {
+        if (btnNext.tagName === 'BUTTON') {
+            btnNext.disabled = (currentStep === storyline.length);
+        } else {
+            btnNext.style.opacity = (currentStep === storyline.length) ? '0.5' : '1';
+            btnNext.style.pointerEvents = (currentStep === storyline.length) ? 'none' : 'auto';
+        }
+    }
     
     const stepCounter = document.getElementById('step-counter');
     if (stepCounter) stepCounter.innerText = `${currentStep}/${storyline.length}`;

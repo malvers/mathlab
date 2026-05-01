@@ -182,10 +182,6 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
-
-        .cyber-select {
-            background-image: none !important;
-        }
     </style>
     <script>
     MathJax = {
@@ -231,6 +227,15 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js?v=4"></script>
     <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof draw === 'function') draw();
+            }, 400);
+        }
+
         if (typeof CyberBranding !== 'undefined') CyberBranding.DEV_MODE = false;
         CyberUI.init();
         CyberBranding.init({
@@ -249,15 +254,18 @@
             `, '#00d2ff');
 
             CyberUI.createCard('ui-container', 'Steuerung', `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label class="cyber-checkbox-wrapper">
-                        <input type="checkbox" id="cb_all" class="cyber-checkbox" checked>
-                        <span class="cyber-label" style="font-weight: 600;">ALLE AN/AUS</span>
-                    </label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span id="step-counter" style="font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue);">0/18</span>
-                        <button id="btn_prev" class="cyber-btn" style="padding: 5px 10px; min-width: auto;" disabled>◀</button>
-                        <button id="btn_next" class="cyber-btn" style="padding: 5px 10px; min-width: auto;">▶</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    ${CyberUI.createCheckbox('cb_all', 'ALLE AN/AUS', true)}
+                    <span id="step-counter" style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--neon-blue);">0/18</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stats-card" id="btn_prev" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-val" style="font-size:1.4rem;">◀</span>
+                    </div>
+                    <div class="stats-card" id="btn_next" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">WEITER</span>
+                        <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
             `, '#00d2ff');
