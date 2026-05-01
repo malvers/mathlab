@@ -11,6 +11,7 @@
     <script src="js/i18n-index.js"></script>
     <script>
         function setLanguage(lang) {
+            localStorage.setItem('cyber-lab-lang', lang);
             const url = new URL(window.location.href);
             url.searchParams.set('lang', lang);
             window.location.href = url.toString();
@@ -18,7 +19,7 @@
 
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang') || 'de';
+            const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
             if (['de', 'en', 'es'].includes(lang.toLowerCase())) {
                 CyberI18n.current = lang.toLowerCase();
                 console.log("Language set to:", CyberI18n.current);
@@ -924,7 +925,7 @@
         .back-nav {
             width: 95%;
             max-width: 1123px;
-            margin: 5px auto 20px auto;
+            margin: 25px auto 20px auto;
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -1254,22 +1255,26 @@
 
         /* --- Language Flag Button Fixes --- */
         .lang-flag {
-            min-width: 50px;
-            height: 44px;
-            filter: grayscale(0.1);
+            min-width: 44px;
+            height: 38px;
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 20px !important;
+            backdrop-filter: blur(15px);
             transition: all 0.3s ease;
-            font-size: 1.5rem !important;
+            font-size: 1.2rem !important;
+            filter: brightness(1.1);
         }
         .lang-flag:hover {
-            filter: grayscale(0);
+            filter: brightness(1.3);
             transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
         }
         .lang-flag.active {
-            filter: grayscale(0);
-            border-color: #00d2ff;
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
-            background: rgba(0, 210, 255, 0.15);
+            background: rgba(0, 210, 255, 0.25) !important;
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 35px rgba(0, 210, 255, 0.9);
+            filter: brightness(1.4);
         }
 
         .admin-gate-box input {
@@ -2244,9 +2249,10 @@
         
         // Header
         const h1 = document.getElementById('header-title');
-        if (h1 && h1.childNodes[0]) {
+        // Do not translate the main title name
+        /* if (h1 && h1.childNodes[0]) {
              h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
-        }
+        } */
         if (document.getElementById('dynamic-subtitle')) document.getElementById('dynamic-subtitle').innerHTML = CyberI18n.get('index.header.subtitle');
         if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
         

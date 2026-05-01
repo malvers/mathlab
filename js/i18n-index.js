@@ -167,7 +167,7 @@
                 paypal: "DONATE NOW WITH PayPal"
             },
             header: {
-                title: "Doc Alvers Math Lab",
+                title: "Doc Alvers Mathe-Labor",
                 subtitle: "INTERACTIVE MATHEMATICS",
                 author: "by Dr. Michael R. Alvers"
             },
@@ -275,7 +275,7 @@
                 paypal: "DONAR AHORA CON PayPal"
             },
             header: {
-                title: "Doc Alvers Laboratorio de Mates",
+                title: "Doc Alvers Mathe-Labor",
                 subtitle: "MATEMÁTICAS INTERACTIVAS",
                 author: "por Dr. Michael R. Alvers"
             },

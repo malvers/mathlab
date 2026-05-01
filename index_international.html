@@ -13,7 +13,7 @@
         // Language Selector via URL Param (?lang=de|en|es)
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang');
+            const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
             if (lang && ['de', 'en', 'es'].includes(lang.toLowerCase())) {
                 CyberI18n.current = lang.toLowerCase();
                 console.log("Language set to:", CyberI18n.current);
@@ -2199,9 +2199,10 @@
         
         // Header
         const h1 = document.getElementById('header-title');
-        if (h1 && h1.childNodes[0]) {
+        // Do not translate the main title name
+        /* if (h1 && h1.childNodes[0]) {
              h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
-        }
+        } */
         if (document.getElementById('dynamic-subtitle')) document.getElementById('dynamic-subtitle').innerHTML = CyberI18n.get('index.header.subtitle');
         if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
         
