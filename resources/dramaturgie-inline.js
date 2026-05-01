@@ -21,7 +21,7 @@ Labore
 120pt
 6 Sprachen
 20pt
-and counting
+%purplepulsating and counting
 40pt
 deutsch
 englisch
@@ -67,7 +67,7 @@ das crazy!
 %emoji 😎
 %button zurück
 
-#140pt
+#120pt
 docalvers.de
 %stop
 
