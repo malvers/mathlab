@@ -50,6 +50,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -76,8 +77,8 @@
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         useExternalStyles: true,
-                        title: "Doc Alvers Mathe-Labor",
-                        subtitle: "LINEARE FUNKTIONEN"
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('steigung.title')
                     });
                 }
 
@@ -85,39 +86,39 @@
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
                     
-                    CyberUI.createCard('parameters-container', 'FUNKTION', `
+                    CyberUI.createCard('parameters-container', CyberI18n.get('steigung.function'), `
                         <div id="eq-main" class="math-glow" style="text-align:left; margin-bottom:2px; padding-left:5px; font-size:1.3rem;"></div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
-                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">STEIGUNG M</div>
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.slope_m')}</div>
                                 <div id="latex-m" class="val-display" style="font-size:1.1rem;"></div>
                             </div>
                             <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
-                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">Y-ABSCHNITT N</div>
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.intercept_n')}</div>
                                 <div id="latex-n" class="val-display" style="font-size:1.1rem;"></div>
                             </div>
                             <div style="text-align:left; padding-left:5px;">
-                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">NULLSTELLE X₀</div>
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.zero_x0')}</div>
                                 <div id="latex-x0" class="val-display" style="font-size:1.1rem;"></div>
                             </div>
                         </div>
                     `);
 
-                    CyberUI.createCard('parameters-container', 'PARAMETER', `
+                    CyberUI.createCard('parameters-container', CyberI18n.get('steigung.parameters'), `
                         <div style="display:flex; flex-direction:column; gap:15px;">
                             <div>
-                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">GERADEN-STEIGUNG M</div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.slope_m_long')}</div>
                                 <input type="range" id="m-slider" min="-5" max="5" step="0.05" value="1" style="width:100%; accent-color:var(--neon-blue);">
                             </div>
                             <div>
-                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">DREIECK POSITION (X)</div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.tri_pos')}</div>
                                 <input type="range" id="x-slider" min="-10" max="10" step="0.5" value="1" style="width:100%; accent-color:var(--neon-blue);">
                             </div>
                             <div>
-                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">DREIECK BREITE (ΔX)</div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.tri_width')}</div>
                                 <input type="range" id="size-slider" min="0.5" max="10" step="0.5" value="2" style="width:100%; accent-color:var(--neon-blue);">
                             </div>
-                            <button onclick="resetView()" class="cyber-btn" style="width:100%; margin-top:10px;">Labor Zurücksetzen</button>
+                            <button onclick="resetView()" class="cyber-btn" style="width:100%; margin-top:10px;">${CyberI18n.get('steigung.reset_lab')}</button>
                         </div>
                     `);
 
@@ -142,13 +143,13 @@
                 // 5. Context Menu (Standard)
                 cc.onContextMenu = (e) => {
                     CyberUI.showContextMenu(e.clientX, e.clientY, [
-                        { label: 'Labor Reset', onclick: () => resetLabor() },
-                        { label: 'Ansicht Reset', onclick: () => { cc.resetView(-5, 10); draw(); } },
+                        { label: CyberI18n.get('steigung.reset_lab'), onclick: () => resetLabor() },
+                        { label: CyberI18n.get('lgs.view_reset'), onclick: () => { cc.resetView(-5, 10); draw(); } },
                         { divider: true },
-                        { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; draw(); } },
-                        { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; draw(); } },
-                        { label: 'Achsenbeschriftung', checked: cc.showLabels, onchange: (v) => { cc.showLabels = v; draw(); } },
-                        { label: 'Koordinaten', checked: cc.showTelemetry, onchange: (v) => { cc.showTelemetry = v; cc.updateTelemetryDOM(); } }
+                        { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; draw(); } },
+                        { label: CyberI18n.get('angle3d.axes'), checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; draw(); } },
+                        { label: CyberI18n.get('angle3d.labels'), checked: cc.showLabels, onchange: (v) => { cc.showLabels = v; draw(); } },
+                        { label: CyberI18n.get('fractal.telemetry'), checked: cc.showTelemetry, onchange: (v) => { cc.showTelemetry = v; cc.updateTelemetryDOM(); } }
                     ]);
                 };
                 cc.canvas.addEventListener('mousedown', e => {

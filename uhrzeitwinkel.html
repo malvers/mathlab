@@ -149,6 +149,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script>
@@ -166,8 +167,8 @@
             // 1. Branding & Briefing
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "WINKEL ZWISCHEN ZEIGERN FÜR EINE ZEIT"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('clock.title')
             });
 
             CyberUI.init();
@@ -246,8 +247,8 @@
 
                     // 4. UI Stats Sync (Rounded)
                     CyberUI.updateStatsGrid('data-container', [
-                        { label: 'Winkel α', value: diff + '°', color: 'var(--neon-blue)' },
-                        { label: 'Winkel β', value: beta + '°', color: '#ff8800' }
+                        { label: CyberI18n.get('clock.angle_alpha'), value: diff + '°', color: 'var(--neon-blue)' },
+                        { label: CyberI18n.get('clock.angle_beta'), value: beta + '°', color: '#ff8800' }
                     ]);
 
                     // 5. High-Precision SVG Arcs
@@ -327,10 +328,10 @@
             window.addEventListener('touchend', endDrag);
 
             // 5. UI Layout Deployment
-            CyberUI.createCard('ui-container', 'ZEITSTEUERUNG', '<div id="slider-mount"></div>', 'var(--neon-blue)');
+            CyberUI.createCard('ui-container', CyberI18n.get('clock.time_control'), '<div id="slider-mount"></div>', 'var(--neon-blue)');
             CyberUI.createStatsGrid('data-container', [
-                { label: 'Winkel α', value: '0°', color: 'var(--neon-blue)' },
-                { label: 'Winkel β', value: '360°', color: '#ff8800' }
+                { label: CyberI18n.get('clock.angle_alpha'), value: '0°', color: 'var(--neon-blue)' },
+                { label: CyberI18n.get('clock.angle_beta'), value: '360°', color: '#ff8800' }
             ]);
 
             CyberUI.createSlider('slider-mount', '', 0, 719, 0, 1, (val) => {

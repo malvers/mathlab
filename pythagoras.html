@@ -61,6 +61,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -74,8 +75,8 @@
         // 1. Branding & UI Init
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "ALLGEMEINER PYTHAGORAS"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('pyth.title')
         });
         CyberUI.init();
 
@@ -94,27 +95,27 @@
 
         // 2. Build UI Cards
         function setupUI() {
-            CyberUI.createCard('ui-container', 'KONSTRUKTION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('pyth.construction'), `
                 <div style="margin-bottom:15px;">
-                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px; font-family:Orbitron;">WÄHLE MODUS</div>
+                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px; font-family:Orbitron;">${CyberI18n.get('pyth.choose_mode')}</div>
                     <select id="mode-select" class="cyber-select" style="width:100%;" onchange="updateMode(this.value)">
-                        <option value="quadrat">Quadrate</option>
-                        <option value="halbkreis">Halbkreise</option>
-                        <option value="dreieck">Gleichseitige Dreiecke</option>
-                        <option value="stern">Crazy Star 🌟</option>
-                        <option value="pacman">Pac-Man Mode 🕹️</option>
+                        <option value="quadrat">${CyberI18n.get('pyth.mode_quad')}</option>
+                        <option value="halbkreis">${CyberI18n.get('pyth.mode_semi')}</option>
+                        <option value="dreieck">${CyberI18n.get('pyth.mode_tri')}</option>
+                        <option value="stern">${CyberI18n.get('pyth.mode_star')}</option>
+                        <option value="pacman">${CyberI18n.get('pyth.mode_pacman')}</option>
                     </select>
                 </div>
-                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('pyth.reset')}</button>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('ui-container', 'ANALYSE: FLÄCHEN', `
+            CyberUI.createCard('ui-container', CyberI18n.get('pyth.analytics'), `
                 <div class="pyth-stat">
-                    <div class="pyth-label">FLÄCHEN-SUMME [A₁ + A₂]</div>
+                    <div class="pyth-label">${CyberI18n.get('pyth.area_sum')}</div>
                     <div id="result-text" class="pyth-val" style="color:var(--neon-amber);">0.00</div>
                 </div>
                 <div class="pyth-stat">
-                    <div class="pyth-label">GROSSE FLÄCHE [A₃]</div>
+                    <div class="pyth-label">${CyberI18n.get('pyth.large_area')}</div>
                     <div id="check-text" class="pyth-val" style="color:var(--neon-orange);">0.00</div>
                 </div>
             `, 'var(--neon-purple)');

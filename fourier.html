@@ -50,6 +50,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -68,8 +69,8 @@
         const COLORS = ["#ff7eb9", "#7afbff", "#fff970", "#ff7eb9", "#7afbff", "#fff970"];
 
         CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "FOURIER-ANALYSE",
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('fourier.title'),
             useExternalStyles: true
         });
         CyberUI.init();
@@ -156,11 +157,11 @@
             CyberUI.createCard('ui-container', null, `
                 <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; padding: 0;">
                     <div class="cyber-control-group" style="margin: 0 !important; padding: 0;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">FORM WÄHLEN</label>
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">${CyberI18n.get('fourier.select_shape')}</label>
                         <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width: 100%; margin: 0; box-sizing: border-box;">
-                            <option value="NOTE">MUSIKNOTE</option>
-                            <option value="QUADRAT">QUADRAT</option>
-                            <option value="HERZ">HERZ</option>
+                            <option value="NOTE">${CyberI18n.get('fourier.shape_note')}</option>
+                            <option value="QUADRAT">${CyberI18n.get('fourier.shape_square')}</option>
+                            <option value="HERZ">${CyberI18n.get('fourier.shape_heart')}</option>
                         </select>
                     </div>
 
@@ -173,34 +174,34 @@
                         </div>
                         <div class="cyber-label" style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 4px;">
                             <span id="n-value" style="color: var(--neon-blue);">2</span>
-                            <span>KREISE</span>
+                            <span>${CyberI18n.get('fourier.circles')}</span>
                         </div>
                         <input type="range" id="n-input" min="2" max="1000" value="2" oninput="updateParams()" 
                                style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
                     
                     <div class="cyber-control-group" style="margin: 10px 0 0 0 !important; padding: 0; overflow: visible;">
-                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">GESCHWINDIGKEIT</label>
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">${CyberI18n.get('fourier.speed')}</label>
                         <input type="range" id="speed-input" min="1" max="500" value="100" 
                                style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
                     </div>
 
                     <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; user-select: none;">
                         <input type="checkbox" id="circles-checkbox" checked onchange="toggleCircles()" style="cursor: pointer;">
-                        KREISE ANZEIGEN
+                        ${CyberI18n.get('fourier.show_circles')}
                     </label>
 
                     <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 5px; cursor: pointer; user-select: none;">
                         <input type="checkbox" id="tracking-checkbox" onchange="toggleTracking()" style="cursor: pointer;">
-                        VERFOLGERKAMERA
+                        ${CyberI18n.get('fourier.tracking')}
                     </label>
                     
                     <div style="display: flex; gap: 8px; width: 100%;">
-                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 2; border-color: #ffd700; color: #ffd700; margin: 0; padding: 4px;">PAUSE</button>
-                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0; padding: 4px;">RESET</button>
+                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 2; border-color: #ffd700; color: #ffd700; margin: 0; padding: 4px;">${CyberI18n.get('cmaes.pause')}</button>
+                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0; padding: 4px;">${CyberI18n.get('cmaes.reset')}</button>
                     </div>
                     
-                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #adff2f; color: #adff2f; box-shadow: 0 0 15px rgba(173, 255, 47, 0.2); padding: 4px;">AUTO-EVOLUTION</button>
+                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #adff2f; color: #adff2f; box-shadow: 0 0 15px rgba(173, 255, 47, 0.2); padding: 4px;">${CyberI18n.get('fourier.auto_evolve')}</button>
                 </div>
             `, BRAND_BLUE);
         }
@@ -218,7 +219,7 @@
         function updatePauseButton() {
             const btn = document.getElementById('pause-btn');
             if (btn) {
-                btn.innerText = paused ? "PLAY" : "PAUSE";
+                btn.innerText = paused ? CyberI18n.get('galton.play') : CyberI18n.get('cmaes.pause');
                 btn.style.borderColor = paused ? "var(--neon-blue)" : "#ffd700";
                 btn.style.color = paused ? "var(--neon-blue)" : "#ffd700";
                 btn.style.boxShadow = paused ? "0 0 15px rgba(0, 210, 255, 0.2)" : "0 0 15px rgba(255, 215, 0, 0.3)";
@@ -325,7 +326,7 @@
         function updateEvolveButton() {
             const btn = document.getElementById('evolve-btn');
             if (btn) {
-                btn.innerText = isEvolving ? "EVOLUTION STOPPEN" : "AUTO-EVOLUTION STARTEN";
+                btn.innerText = isEvolving ? CyberI18n.get('fourier.stop_evolution') : CyberI18n.get('fourier.start_evolution');
                 btn.style.borderColor = "#adff2f";
                 btn.style.color = "#adff2f";
                 btn.style.boxShadow = isEvolving ? "0 0 20px rgba(173, 255, 47, 0.4)" : "0 0 15px rgba(173, 255, 47, 0.2)";
@@ -642,20 +643,20 @@
         }        // --- CONTEXT MENU (ULTRA STYLE) ---
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
-                { label: 'Ansicht Reset', onclick: resetView },
+                { label: CyberI18n.get('lgs.view_reset'), onclick: resetView },
                 { divider: true },
                 {
-                    label: 'Verfolgerkamera',
+                    label: CyberI18n.get('fourier.tracking'),
                     checked: isTracking,
                     onchange: (v) => {
                         isTracking = v;
                         updateTrackingUI();
                     }
                 },
-                { label: 'Kreise anzeigen', checked: showEpicycles, onchange: (v) => showEpicycles = v },
-                { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.showLabels = v; cc.needsRedraw = true; } },
-                { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
-                { label: 'Telemetrie', checked: cc.showTelemetry, onchange: (v) => cc.showTelemetry = v }
+                { label: CyberI18n.get('fourier.show_circles'), checked: showEpicycles, onchange: (v) => showEpicycles = v },
+                { label: CyberI18n.get('angle3d.axes'), checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.showLabels = v; cc.needsRedraw = true; } },
+                { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
+                { label: CyberI18n.get('fractal.telemetry'), checked: cc.showTelemetry, onchange: (v) => cc.showTelemetry = v }
             ]);
         };
 
