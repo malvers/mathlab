@@ -38,7 +38,12 @@ const CyberI18n = {
                 show_axes: "Achsen an",
                 show_labels: "Achsenbeschriftung",
                 show_telemetry: "Koordinaten",
-                toggle_menu: "Menü umschalten"
+                toggle_menu: "Menü umschalten",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "Wir brauchen Menschen, die sich für ein Labor verantwortlich fühlen und immer mal wieder testen, ob alles noch passt. Wir würden uns sehr über Deine Mithilfe freuen!",
+                contact_lab_email_cta: "E-Mail",
+                contact_lab_close: "SCHLIESSEN"
             },
             euler: {
                 construction: "KONSTRUKTION",
@@ -278,10 +283,16 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c aus Real-/Imaginär-Schiebern; Orbit startet bei z₀ = Mittelpunkt der Fraktal-Ansicht.",
                 orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
                 orbit_grid: "Gitterlinien",
-                orbit_steps_arrows: "Orbit-Schritte: {n} (↑/↓ nur hier; Shift = größere Schritte)",
-                orbit_connector_lines: "Verbindungslinien (Orbit)",
+                orbit_legs_arrows: "Schenkel-Budget (max.): {n} (↑/↓ nur Orbit-Ansicht; Shift = größere Schritte)",
+                orbit_legs_escape_trunc: "→ gezeichnet: {shown} von max. {budget} (Abbruch bei Flucht |z|²>4)",
+                orbit_connector_lines: "Zwischenpunkt-Kreise auf dem Orbit (Schenkel immer sichtbar)",
                 orbit_scan_hint: "Leertaste: zeilenweise von oben nach unten — kleine orangene Punkte ≈ Orbit bleibt begrenzt; unten automatisches Ende. Nochmal Leertaste während Scan: abbrechen und löschen.",
-                orbit_scan_running: "→ Scan läuft (oben → unten)"
+                orbit_scan_running: "→ Scan läuft (oben → unten)",
+                orbit_stable_points_label: "Stabile Punkte",
+                orbit_hud_toggle: "⌘D / Strg+D: HUD ein/aus",
+                orbit_hud_stopwatch_idle: "Stoppuhr:\n—",
+                orbit_hud_stopwatch_running: "Stoppuhr:\n{t}",
+                orbit_hud_stopwatch_latched: "Stoppuhr:\n{t}\n(Pause oder Scan fertig)"
             },
             stats: {
                 analytics: "ANALYTIK",
@@ -562,7 +573,12 @@ const CyberI18n = {
                 show_axes: "Show Axes",
                 show_labels: "Show Labels",
                 show_telemetry: "Coordinates",
-                toggle_menu: "Toggle Menu"
+                toggle_menu: "Toggle Menu",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "We need people who feel responsible for a lab and check now and then that everything still works. We would really appreciate your help!",
+                contact_lab_email_cta: "Email",
+                contact_lab_close: "CLOSE"
             },
             euler: {
                 construction: "CONSTRUCTION",
@@ -784,10 +800,16 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: fixed c from sliders; orbit starts at z₀ = fractal view center.",
                 orbit_drag_hint: "Drag point c (Mandelbrot; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
                 orbit_grid: "Grid lines",
-                orbit_steps_arrows: "Orbit steps: {n} (↑/↓ orbit view only; Shift = bigger steps)",
-                orbit_connector_lines: "Orbit connector lines",
+                orbit_legs_arrows: "Leg budget (max.): {n} (↑/↓ orbit view only; Shift = bigger steps)",
+                orbit_legs_escape_trunc: "→ drawn: {shown} of {budget} max (stopped at escape |z|²>4)",
+                orbit_connector_lines: "Vertex dots along orbit (legs always drawn)",
                 orbit_scan_hint: "Space: scan row by row top→bottom — fine orange dots ≈ bounded orbit; stops at bottom. Space during scan: cancel & clear.",
-                orbit_scan_running: "→ Scanning (top→bottom)"
+                orbit_scan_running: "→ Scanning (top→bottom)",
+                orbit_stable_points_label: "Stable points",
+                orbit_hud_toggle: "⌘D / Ctrl+D: toggle HUD",
+                orbit_hud_stopwatch_idle: "Stopwatch:\n—",
+                orbit_hud_stopwatch_running: "Stopwatch:\n{t}",
+                orbit_hud_stopwatch_latched: "Stopwatch:\n{t}\n(paused / finished)"
             },
             stats: {
                 analytics: "ANALYTICS",
@@ -1068,7 +1090,12 @@ const CyberI18n = {
                 show_axes: "Mostrar ejes",
                 show_labels: "Etiquetas de ejes",
                 show_telemetry: "Coordenadas",
-                toggle_menu: "Cambiar menú"
+                toggle_menu: "Cambiar menú",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "Buscamos personas que se sientan responsables de un laboratorio y de vez en cuando comprueben que todo sigue funcionando bien. ¡Te agradeceríamos mucho tu ayuda!",
+                contact_lab_email_cta: "Correo",
+                contact_lab_close: "CERRAR"
             },
             euler: {
                 construction: "CONSTRUCCIÓN",
@@ -1290,10 +1317,16 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c con controles; órbita desde z₀ = centro de la vista fractal.",
                 orbit_drag_hint: "Arrastra c (Mandelbrot, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
                 orbit_grid: "Cuadrícula",
-                orbit_steps_arrows: "Pasos de órbita: {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
-                orbit_connector_lines: "Líneas entre puntos (órbita)",
+                orbit_legs_arrows: "Tramos de órbita (máx.): {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
+                orbit_legs_escape_trunc: "→ dibujados: {shown} de {budget} máx. (escape |z|²>4)",
+                orbit_connector_lines: "Puntos en la órbita (los tramos siempre visibles)",
                 orbit_scan_hint: "Espacio: filas de arriba abajo — puntos finos naranja ≈ órbita acotada; termina abajo. Espacio durante: cancelar y borrar.",
-                orbit_scan_running: "→ Escaneando (arriba→abajo)"
+                orbit_scan_running: "→ Escaneando (arriba→abajo)",
+                orbit_stable_points_label: "Puntos estables",
+                orbit_hud_toggle: "⌘D / Ctrl+D: mostrar u ocultar HUD",
+                orbit_hud_stopwatch_idle: "Cronómetro:\n—",
+                orbit_hud_stopwatch_running: "Cronómetro:\n{t}",
+                orbit_hud_stopwatch_latched: "Cronómetro:\n{t}\n(pausa / fin)"
             },
             stats: {
                 analytics: "ANALÍTICA",
@@ -1574,7 +1607,12 @@ const CyberI18n = {
                 show_axes: "Afficher les axes",
                 show_labels: "Étiquettes d'axes",
                 show_telemetry: "Coordonnées",
-                toggle_menu: "Changer de menu"
+                toggle_menu: "Changer de menu",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "Il nous faut des personnes qui se sentent responsables d’un laboratoire et vérifient de temps en temps que tout fonctionne encore bien. Nous serions très heureux de votre aide !",
+                contact_lab_email_cta: "E-mail",
+                contact_lab_close: "FERMER"
             },
             euler: {
                 construction: "CONSTRUCTION",
@@ -1796,10 +1834,16 @@ const CyberI18n = {
                 orbit_help_jl: "Julia : c depuis les curseurs ; orbite depuis z₀ = centre de la vue fractale.",
                 orbit_drag_hint: "Glisser le point c (Mandelbrot, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
                 orbit_grid: "Quadrillage",
-                orbit_steps_arrows: "Étapes d’orbite : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
-                orbit_connector_lines: "Segments entre les points (orbite)",
+                orbit_legs_arrows: "Segments d’orbite (max.) : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
+                orbit_legs_escape_trunc: "→ tracés : {shown}/{budget} max (arrêt si évasion |z|²>4)",
+                orbit_connector_lines: "Pastilles sur l’orbite (segments toujours visibles)",
                 orbit_scan_hint: "Espace : lignes du haut vers le bas — petits points orange ≈ orbite bornée ; fin en bas. Espace pendant : annuler et effacer.",
-                orbit_scan_running: "→ Scan (haut→bas)"
+                orbit_scan_running: "→ Scan (haut→bas)",
+                orbit_stable_points_label: "Points stables",
+                orbit_hud_toggle: "⌘D / Ctrl+D : afficher/masquer le HUD",
+                orbit_hud_stopwatch_idle: "Chronomètre :\n—",
+                orbit_hud_stopwatch_running: "Chronomètre :\n{t}",
+                orbit_hud_stopwatch_latched: "Chronomètre :\n{t}\n(pause / terminé)"
             },
             stats: {
                 analytics: "ANALYTIQUE",
@@ -2080,7 +2124,12 @@ const CyberI18n = {
                 show_axes: "Mostra assi",
                 show_labels: "Etichette assi",
                 show_telemetry: "Coordinate",
-                toggle_menu: "Cambia menu"
+                toggle_menu: "Cambia menu",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "Cerchiamo persone che si sentano responsabili di un laboratorio e ogni tanto verifichino che tutto funzioni ancora bene. Ci farebbe molto piacere avere il tuo aiuto!",
+                contact_lab_email_cta: "E-mail",
+                contact_lab_close: "CHIUDI"
             },
             euler: {
                 construction: "COSTRUZIONE",
@@ -2302,10 +2351,16 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c dagli slider; orbita da z₀ = centro della vista frattale.",
                 orbit_drag_hint: "Trascina c (Mandelbrot, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
                 orbit_grid: "Griglia",
-                orbit_steps_arrows: "Passi orbita: {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
-                orbit_connector_lines: "Segmenti tra i punti (orbita)",
+                orbit_legs_arrows: "Segmenti orbita (max.): {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
+                orbit_legs_escape_trunc: "→ disegnati: {shown}/{budget} max (stop a fuga |z|²>4)",
+                orbit_connector_lines: "Punti sull’orbita (segmenti sempre visibili)",
                 orbit_scan_hint: "Barra spaziale: righe dall’alto in basso — puntini arancioni ≈ orbita limitata; si ferma in basso. Spazio durante: annulla e cancella.",
-                orbit_scan_running: "→ Scansione (alto→basso)"
+                orbit_scan_running: "→ Scansione (alto→basso)",
+                orbit_stable_points_label: "Punti stabili",
+                orbit_hud_toggle: "⌘D / Ctrl+D: HUD on/off",
+                orbit_hud_stopwatch_idle: "Cronometro:\n—",
+                orbit_hud_stopwatch_running: "Cronometro:\n{t}",
+                orbit_hud_stopwatch_latched: "Cronometro:\n{t}\n(pausa / fine)"
             },
             stats: {
                 analytics: "ANALITICA",
@@ -2586,7 +2641,12 @@ pt: {
                 show_axes: "Mostrar Eixos",
                 show_labels: "Mostrar Rótulos",
                 show_telemetry: "Coordenadas",
-                toggle_menu: "Alternar Menu"
+                toggle_menu: "Alternar Menu",
+                adopt_contact_btn_title: "Adopt a lab!",
+                contact_lab_modal_title: "Adopt a lab!",
+                contact_lab_modal_body: "Precisamos de pessoas que se sintam responsáveis por um laboratório e, de vez em quando, confirmem que tudo continua a funcionar bem. Ficaríamos muito gratos pela tua ajuda!",
+                contact_lab_email_cta: "E-mail",
+                contact_lab_close: "FECHAR"
             },
             euler: {
                 construction: "CONSTRUÇÃO",
@@ -2808,10 +2868,16 @@ pt: {
                 orbit_help_jl: "Julia: c nos sliders; órbita a partir de z₀ = centro da vista fractal.",
                 orbit_drag_hint: "Arraste c (Mandelbrot, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
                 orbit_grid: "Grade",
-                orbit_steps_arrows: "Passos da órbita: {n} (↑/↓ só vista órbita; Shift passos maiores)",
-                orbit_connector_lines: "Linhas entre pontos (órbita)",
+                orbit_legs_arrows: "Segmentos da órbita (máx.): {n} (↑/↓ só vista órbita; Shift passos maiores)",
+                orbit_legs_escape_trunc: "→ desenhados: {shown}/{budget} máx. (escape |z|²>4)",
+                orbit_connector_lines: "Pontos na órbita (segmentos sempre visíveis)",
                 orbit_scan_hint: "Espaço: linhas de cima para baixo — pontos finos laranja ≈ órbita limitada; para em baixo. Espaço durante: cancelar e limpar.",
-                orbit_scan_running: "→ Varrendo (topo→base)"
+                orbit_scan_running: "→ Varrendo (topo→base)",
+                orbit_stable_points_label: "Pontos estáveis",
+                orbit_hud_toggle: "⌘D / Ctrl+D: alternar HUD",
+                orbit_hud_stopwatch_idle: "Cronômetro:\n—",
+                orbit_hud_stopwatch_running: "Cronômetro:\n{t}",
+                orbit_hud_stopwatch_latched: "Cronômetro:\n{t}\n(pausa / fim)"
             },
             stats: {
                 analytics: "ANALÍTICA",
