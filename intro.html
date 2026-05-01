@@ -73,7 +73,7 @@
 
         .intro-playback-controls {
             position: fixed;
-            top: 30px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 2500;
@@ -81,23 +81,26 @@
             flex-direction: row;
             align-items: center;
             gap: 16px;
-            background: rgba(15, 23, 42, 0.5);
-            padding: 8px 16px;
+            background: rgba(15, 23, 42, 0.75);
+            padding: 12px 24px;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            opacity: 0.2;
-            transition: opacity 0.3s ease;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+            backdrop-filter: blur(12px);
+            opacity: 0.6;
+            transition: all 0.3s ease;
         }
         .intro-playback-controls:hover {
             opacity: 1;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
+            border-color: rgba(0, 210, 255, 0.6);
         }
         .intro-playback-btn {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.85);
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -106,11 +109,12 @@
         }
         .intro-playback-btn:hover {
             color: #00d2ff;
-            transform: scale(1.1);
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.6));
         }
         .intro-playback-btn svg {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             fill: currentColor;
         }
         
@@ -567,22 +571,33 @@
     <div class="glow-sphere"></div>
 
     <div class="intro-playback-controls" aria-label="Wiedergabe-Steuerung">
-        <button type="button" class="intro-playback-btn" onclick="stepCwSection(-1)" title="Vorheriger Abschnitt (←)">
+        <button type="button" id="top-nav-prev" class="intro-playback-btn" onclick="introFastBackward()" title="Vorheriger Abschnitt / Langsamer (<<)">
             <svg viewBox="0 0 24 24">
-                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
+                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" fill="currentColor" stroke="none"/>
+            </svg>
+        </button>
+        <button type="button" class="intro-playback-btn" onclick="stepCwItem(-1)" title="Ein Bild zurück">
+            <svg viewBox="0 0 24 24">
+                <path d="M16 18V6l-8.5 6 8.5 6z" fill="currentColor" stroke="none"/>
             </svg>
         </button>
         <button type="button" class="intro-playback-btn" id="intro-play-pause-btn" onclick="toggleCatchingWordsPause()" title="Pause / Play (Leertaste)">
             <svg id="icon-pause" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                <rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect>
+                <rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect>
             </svg>
             <svg id="icon-play" viewBox="0 0 24 24" style="display:none">
-                <path d="M8 5v14l11-7z"/>
+                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"></polygon>
             </svg>
         </button>
-        <button type="button" class="intro-playback-btn" onclick="stepCwSection(1)" title="Nächster Abschnitt (→)">
+        <button type="button" class="intro-playback-btn" onclick="stepCwItem(1)" title="Ein Bild vor">
             <svg viewBox="0 0 24 24">
-                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
+                <path d="M8 18l8.5-6L8 6v12z" fill="currentColor" stroke="none"/>
+            </svg>
+        </button>
+        <button type="button" id="top-nav-next" class="intro-playback-btn" onclick="introFastForward()" title="Nächster Abschnitt / Schneller (>>)">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="currentColor" stroke="none"/>
             </svg>
         </button>
     </div>
@@ -614,7 +629,7 @@
         </div>
     </div>
 
-    <nav class="intro-section-nav" id="intro-section-nav" aria-label="Abschnitt wechseln">
+    <nav class="intro-section-nav" id="intro-section-nav" aria-label="Abschnitt wechseln" style="display: none;">
         <button type="button" id="cw-nav-prev" class="intro-section-btn" onclick="stepCwSection(-1)" title="Zurück (←)">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M14 6L8 12l6 6"/>
@@ -1074,11 +1089,7 @@
                 cwPlayAllTimer = setTimeout(() => {
                     cwPlayAllTimer = null;
                     if (!cwPlayAllActive || !document.body.classList.contains('mode-catching-words')) return;
-                    cwSectionIndex += 1;
-                    cwSequence = cwSections[cwSectionIndex] || [];
-                    syncCwStackVerticalAlign();
-                    stopCatchingWords();
-                    startCatchingWords();
+                    stepCwSection('auto');
                 }, CW_PLAY_ALL_GAP_MS);
             } else {
                 cwPlayAllActive = false;
@@ -1094,15 +1105,110 @@
             const n = cwSections.length;
             const i = cwSectionIndex;
             const multi = n > 1;
+            
+            // Also sync the top playback controls
+            const topPrev = document.getElementById('top-nav-prev');
+            const topNext = document.getElementById('top-nav-next');
+            if (topPrev && topNext) {
+                topPrev.style.opacity = (!multi || i <= 0) ? '0.3' : '1';
+                topPrev.style.pointerEvents = (!multi || i <= 0) ? 'none' : 'auto';
+                
+                topNext.style.opacity = (!multi || i >= n - 1) ? '0.3' : '1';
+                topNext.style.pointerEvents = (!multi || i >= n - 1) ? 'none' : 'auto';
+            }
+            
+            // Center controls over the canvas during screenshots (offset by half sidebar width)
+            const controls = document.querySelector('.intro-playback-controls');
+            if (controls) {
+                const isFastMedia = cwSequence && cwSequence.some(e => e.fast);
+                if (isFastMedia) {
+                    controls.style.left = '50%'; // Keep it centered in the window
+                } else {
+                    controls.style.left = '50%'; // Keep it centered in the window
+                }
+            }
+
             prev.disabled = !multi || i <= 0;
             next.disabled = !multi || i >= n - 1;
             syncCwMotionVars();
         }
 
+        function stepCwItem(delta) {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            if (!cwPaused) toggleCatchingWordsPause(); // Pause if not already paused
+            
+            cwPlayAllActive = false; // Stop auto-advancing sections when single stepping
+            clearCwPlayAllTimer();
+            
+            const stack = document.getElementById('cw-stack');
+            if (!stack) return;
+            
+            const isFastMedia = cwSequence && cwSequence.some(e => e.fast);
+            if (!isFastMedia) {
+                stepCwSection(delta);
+                return;
+            }
+            
+            if (delta === -1) {
+                if (cwSpawnRoundIndex > 0) {
+                    cwSpawnRoundIndex--;
+                    if (stack.lastElementChild) {
+                        stack.removeChild(stack.lastElementChild);
+                    }
+                }
+            } else if (delta === 1) {
+                if (cwSpawnRoundIndex < cwSequence.length) {
+                    spawnCwWord();
+                }
+            }
+        }
+
+        function introFastForward() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            const isFastMedia = cwSequence && cwSequence.some(e => e.fast);
+            if (isFastMedia) {
+                cwFastSpawnMs = 200;
+                syncCwDebugHudDom();
+                saveIntroPersistedPrefs();
+                cwPlayAllActive = true; // Resume auto-advancing
+                if (cwPaused) toggleCatchingWordsPause();
+                else {
+                    // Force immediate next frame
+                    if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
+                    scheduleCwSpawn();
+                }
+            } else {
+                stepCwSection(1);
+            }
+        }
+
+        function introFastBackward() {
+            if (!document.body.classList.contains('mode-catching-words')) return;
+            const isFastMedia = cwSequence && cwSequence.some(e => e.fast);
+            if (isFastMedia) {
+                cwFastSpawnMs = 1200;
+                syncCwDebugHudDom();
+                saveIntroPersistedPrefs();
+                cwPlayAllActive = true; // Resume auto-advancing
+                if (cwPaused) toggleCatchingWordsPause();
+                else {
+                    if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
+                    scheduleCwSpawn();
+                }
+            } else {
+                stepCwSection(-1);
+            }
+        }
+
         function stepCwSection(delta) {
             if (!document.body.classList.contains('mode-catching-words')) return;
-            cwPlayAllActive = false;
-            clearCwPlayAllTimer();
+            // Only stop play-all if we manually clicked a button/key, not if it's just advancing
+            if (delta !== 'auto') {
+                cwPlayAllActive = false;
+                clearCwPlayAllTimer();
+            }
+            const actualDelta = delta === 'auto' ? 1 : delta;
+            
             if (cwSections.length === 0) return;
             if (cwSections.length === 1) {
                 cwSectionIndex = 0;
@@ -1111,7 +1217,7 @@
                 startCatchingWords();
                 return;
             }
-            const next = Math.max(0, Math.min(cwSections.length - 1, cwSectionIndex + delta));
+            const next = Math.max(0, Math.min(cwSections.length - 1, cwSectionIndex + actualDelta));
             if (next === cwSectionIndex) return;
             cwSectionIndex = next;
             cwSequence = cwSections[cwSectionIndex];
@@ -1155,6 +1261,7 @@
                     }
                 });
             } else {
+                cwPlayAllActive = true; // Resume auto-advancing sections when unpausing
                 stack.querySelectorAll('.falling-word, .cw-portal-btn, .cw-media-wrap').forEach((el) => {
                     if (!el.classList.contains('caught')) el.style.animationPlayState = 'running';
                 });
@@ -1175,13 +1282,18 @@
                 handleCwSectionSpawnExhausted();
                 return;
             }
-            if (!cwRunning || cwPaused) return;
+            if (!cwRunning) return;
 
             const entry = cwSequence[cwSpawnRoundIndex];
             cwSpawnRoundIndex += 1;
 
             if (entry.kind === 'stop-play-all') {
                 stopCwPlayAllFromScript();
+                return;
+            }
+
+            if (entry.kind === 'pause') {
+                // Just let the scheduleCwSpawn handle the delay for the next item
                 return;
             }
 
@@ -1502,6 +1614,8 @@
                 const prevEntry = cwSequence[cwSpawnRoundIndex - 1];
                 if (prevEntry && prevEntry.fast) {
                     delay = cwFastSpawnMs; // Slower spawn for screenshots, adjustable
+                } else if (prevEntry && prevEntry.kind === 'pause') {
+                    delay = prevEntry.ms; // Custom pause duration
                 }
             }
             
@@ -1515,7 +1629,9 @@
         function syncCwStackVerticalAlign() {
             const stack = document.getElementById('cw-stack');
             if (!stack) return;
-            stack.classList.toggle('cw-stack-centered', Array.isArray(cwSequence) && cwSequence.length <= 1);
+            // Count actual visible items (ignore pauses, navs, stops)
+            const visibleItems = Array.isArray(cwSequence) ? cwSequence.filter(e => e.kind !== 'pause' && e.kind !== 'stop-play-all' && e.kind !== 'nav').length : 0;
+            stack.classList.toggle('cw-stack-centered', visibleItems <= 1);
         }
 
         function stopCatchingWords() {
@@ -1546,6 +1662,14 @@
             if (cwRunning) return;
             cwRunning = true;
             cwPaused = false;
+            
+            const iconPause = document.getElementById('icon-pause');
+            const iconPlay = document.getElementById('icon-play');
+            if (iconPause && iconPlay) {
+                iconPause.style.display = 'block';
+                iconPlay.style.display = 'none';
+            }
+            
             cwSpawnRoundIndex = 0;
             const stack = document.getElementById('cw-stack');
             if (stack) stack.innerHTML = '';
@@ -1784,6 +1908,15 @@
                     continue;
                 }
 
+                const pauseMatch = line.match(/^%pause\s+(\d+)/i);
+                if (pauseMatch) {
+                    const ms = parseInt(pauseMatch[1], 10);
+                    if (!isNaN(ms) && ms > 0) {
+                        current.push({ kind: 'pause', ms: ms });
+                    }
+                    continue;
+                }
+
                 current.push({ text: line, fontSizePt: currentPt });
             }
             flush();
@@ -1890,6 +2023,11 @@
                     if (noChord && (e.key === 'd' || e.key === 'D')) {
                         e.preventDefault();
                         nudgeBgVideoBrightness(false);
+                        return;
+                    }
+                    if (noChord && e.key === ' ') {
+                        e.preventDefault();
+                        toggleCatchingWordsPause();
                         return;
                     }
                 }
