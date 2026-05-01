@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Schriftliche Division | docalvers</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.div.title'))</script></title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -163,7 +163,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" title="${CyberI18n.get('ui.toggle_menu') || 'Toggle Menu'}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -181,8 +181,8 @@
         <div id="canvas-container">
             <div class="cyber-grid"></div>
             <div id="math-coach-box">
-                <div class="coach-title">BESCHREIBUNG DER SCHRITTE</div>
-                <div id="coach-content" class="coach-message">Initialisiere Analyse...</div>
+                <div class="coach-title"><script>document.write(CyberI18n.get('ui.description'))</script></div>
+                <div id="coach-content" class="coach-message">...</div>
             </div>
             <canvas id="canvas"></canvas>
         </div>
@@ -228,11 +228,11 @@
         function setupUI() {
             CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.div.title'), `
                 <div class="cyber-control-group">
-                    <label class="cyber-label">DIVIDEND (Zahl 1)</label>
+                    <label class="cyber-label">${CyberI18n.get('ui.dividend')}</label>
                     <input type="number" id="div-input" class="cyber-select" value="${dividend}" onchange="updateValues()">
                 </div>
                 <div class="cyber-control-group" style="margin-top:25px;">
-                    <label class="cyber-label">DIVISOR (Zahl 2)</label>
+                    <label class="cyber-label">${CyberI18n.get('ui.divisor')}</label>
                     <input type="number" id="dsor-input" class="cyber-select" value="${divisor}" onchange="updateValues()">
                 </div>
                 <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
@@ -578,11 +578,11 @@
                 if (!step) return;
                 
                 if (step.type === 'collect') {
-                    message = `Checking: Does ${divisor} fit into <span class="coach-math-highlight">${step.currentPart}</span>? No, so we take the next digit.`;
+                    message = CyberI18n.get('arithmetic.div.collect', { b: divisor, val: `<span class="coach-math-highlight">${step.currentPart}</span>` });
                 } else if (step.type === 'divide') {
-                    message = CyberI18n.get('arithmetic.div.fit', { b: divisor, val: `<span class="coach-math-highlight">${step.partVal}</span>` }) + `<br>It fits <span class="coach-math-highlight">${step.qDigit}</span> times.<br>${step.qDigit} &times; ${divisor} = ${step.product}.`;
+                    message = CyberI18n.get('arithmetic.div.fit', { b: divisor, val: `<span class="coach-math-highlight">${step.partVal}</span>`, q: step.qDigit, prod: step.product });
                 } else if (step.type === 'bringDown') {
-                    message = `Bringing down the next digit <span class="coach-math-highlight">${step.digit}</span>. New number is ${step.newVal}.`;
+                    message = CyberI18n.get('arithmetic.div.bring_down', { d: `<span class="coach-math-highlight">${step.digit}</span>`, newVal: step.newVal });
                 } else if (step.type === 'final') {
                     message = `<b>${CyberI18n.get('arithmetic.div.complete', { result: `<span class="coach-math-highlight">${step.quotient}</span>` })}</b>${step.remainder > 0 ? ' with ' + CyberI18n.get('arithmetic.div.rem', { rem: step.remainder }) : ''}.`;
                 }

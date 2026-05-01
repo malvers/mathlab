@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Fibonacci</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('fibonacci.title'))</script></title>
+    <script src="js/i18n.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -45,7 +46,7 @@
 </head>
 <body>
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" title="${CyberI18n.get('ui.toggle_menu') || 'Toggle Menu'}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -315,30 +316,30 @@
                 if (!el) return;
                 const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
                 const val = fib[Math.max(0, Math.min(targetStep - 1, fib.length - 1))];
-                el.textContent = `Schritt ${targetStep}/20  |  Fibonacci: ${val}`;
+                el.textContent = `${CyberI18n.get('fibonacci.step')} ${targetStep}/20  |  Fibonacci: ${val}`;
             }
 
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "FIBONACCI"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('fibonacci.title')
             });
 
             CyberUI.init();
             CyberUI.createCard("ui-container", "DB", `
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div id="fib-step-label" class="cyber-number" style="font-size:0.8rem; color:var(--branding-orange);">Schritt 7/20</div>
+                    <div id="fib-step-label" class="cyber-number" style="font-size:0.8rem; color:var(--branding-orange);">...</div>
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
                         <input type="checkbox" id="fib-spiral" ${showSpiral ? 'checked' : ''}>
-                        <span>Viertelkreise (Spirale)</span>
+                        <span>${CyberI18n.get('fibonacci.spiral')}</span>
                     </label>
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
                         <input type="checkbox" id="fib-squares" ${showSquares ? 'checked' : ''}>
-                        <span>Quadrat-Grenzlinien</span>
+                        <span>${CyberI18n.get('fibonacci.squares')}</span>
                     </label>
                     <div style="display:flex; gap:8px;">
-                        <button id="fib-prev" class="cyber-btn" style="flex:1;">ZURÜCK</button>
-                        <button id="fib-next" class="cyber-btn" style="flex:1;">VOR</button>
+                        <button id="fib-prev" class="cyber-btn" style="flex:1;">${CyberI18n.get('ui.prev')}</button>
+                        <button id="fib-next" class="cyber-btn" style="flex:1;">${CyberI18n.get('ui.next')}</button>
                     </div>
                 </div>
             `, "#ff9d00");

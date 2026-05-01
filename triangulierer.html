@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Triangulierer | ULTRA v5.3.8</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('triangulierer.title'))</script></title>
+    <script src="js/i18n.js"></script>
     
     <!-- Core Engine -->
     <link rel="stylesheet" href="css/style.css">
@@ -107,7 +108,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -126,12 +127,12 @@
         <div id="equation-hud">
             <table class="hud-table">
                 <thead>
-                    <tr><th>DREIECK</th><th style="text-align:right">FLÄCHE</th></tr>
+                    <tr><th><script>document.write(CyberI18n.get('triangulierer.triangle'))</script></th><th style="text-align:right"><script>document.write(CyberI18n.get('triangulierer.area'))</script></th></tr>
                 </thead>
                 <tbody id="hud-body"></tbody>
                 <tfoot>
                     <tr class="hud-sum-row">
-                        <td style="padding-top:10px;">SUMME Σ</td>
+                        <td style="padding-top:10px;"><script>document.write(CyberI18n.get('triangulierer.sum'))</script></td>
                         <td id="hud-sum-val" class="hud-sum-val">0,00 cm²</td>
                     </tr>
                 </tfoot>
@@ -157,8 +158,8 @@
             // 1. Branding
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "DELAUNAY TRIANGULIERUNG"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('triangulierer.title')
             });
 
             // 2. Delaunay Engine
@@ -265,8 +266,8 @@
                     });
 
                     CyberUI.updateStatsGrid('data-container', [
-                        { label: 'Zielbereich', value: '100,00 cm²', color: 'var(--neon-orange)' },
-                        { label: 'Summe Δ', value: totalArea.toFixed(2).replace('.',',') + ' cm²', color: 'var(--neon-blue)' }
+                        { label: CyberI18n.get('triangulierer.target_area'), value: '100,00 cm²', color: 'var(--neon-orange)' },
+                        { label: CyberI18n.get('triangulierer.sum_delta'), value: totalArea.toFixed(2).replace('.',',') + ' cm²', color: 'var(--neon-blue)' }
                     ]);
 
                     // Sync Delete Button State
@@ -378,10 +379,10 @@
             };
 
             // UI Buttons
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
-                <button class="cyber-btn" onclick="window.toggleM()">Mehrfach-Modus</button>
-                <button class="cyber-btn btn-delete" id="btn-delete-points" onclick="window.delS()">Auswahl löschen</button>
-                <button class="cyber-btn" onclick="window.resP()">Labor Reset</button>
+            CyberUI.createCard('ui-container', CyberI18n.get('triangulierer.controls'), `
+                <button class="cyber-btn" onclick="window.toggleM()">${CyberI18n.get('triangulierer.multi_mode')}</button>
+                <button class="cyber-btn btn-delete" id="btn-delete-points" onclick="window.delS()">${CyberI18n.get('triangulierer.delete_selection')}</button>
+                <button class="cyber-btn" onclick="window.resP()">${CyberI18n.get('ui.reset')}</button>
             `, 'var(--neon-blue)');
 
             window.toggleM = () => { multiMode = !multiMode; render(); };

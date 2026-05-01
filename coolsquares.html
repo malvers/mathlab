@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>docalvers | Cool Squares - The Proof</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('coolsquares.title'))</script></title>
+    <script src="js/i18n.js"></script>
     <!-- Prioritize Orbitron -->
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
@@ -78,8 +79,8 @@
 
         window.addEventListener('load', () => {
             CyberBranding.init({
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "DER ULTIMATIVE QUADRAT-BEWEIS",
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('coolsquares.title'),
                 useExternalStyles: true
             });
 
@@ -192,10 +193,10 @@
             function update() {
                 draw();
                 CyberUI.updateStatsGrid('data-container', [
-                    { label: 'Input a', value: a, color: '#ffcc00' },
-                    { label: 'Lücke x', value: x, color: '#9d50bb' },
-                    { label: 'Ergebnis y', value: 4 * a, color: '#a3be64' },
-                    { label: 'Fläche Grün', value: 16 * a * a, color: 'white' }
+                    { label: CyberI18n.get('coolsquares.side_a'), value: a, color: '#ffcc00' },
+                    { label: CyberI18n.get('coolsquares.gap_x'), value: x, color: '#9d50bb' },
+                    { label: CyberI18n.get('coolsquares.result_y'), value: 4 * a, color: '#a3be64' },
+                    { label: CyberI18n.get('coolsquares.area_green'), value: 16 * a * a, color: 'white' }
                 ]);
             }
 
@@ -206,8 +207,8 @@
             });
             window.dispatchEvent(new Event('resize'));
 
-            CyberUI.createCard('ui-container', 'PROPORTIONEN', '<div id="sliders"></div>', 'var(--neon-blue)');
-            CyberUI.createSlider('sliders', 'Zentral-Seite a', 1, 40, 1, 1, (val) => {
+            CyberUI.createCard('ui-container', CyberI18n.get('coolsquares.proportions'), '<div id="sliders"></div>', 'var(--neon-blue)');
+            CyberUI.createSlider('sliders', CyberI18n.get('coolsquares.side_a'), 1, 40, 1, 1, (val) => {
                 a = parseInt(val);
                 update();
             }, '#ffcc00');
@@ -217,7 +218,7 @@
                     <div id="label-toggle-box" style="width:20px; height:20px; border:2px solid var(--neon-blue); border-radius:4px; display:flex; justify-content:center; align-items:center;">
                         <div id="label-toggle-check" style="width:10px; height:10px; background:var(--neon-blue); display:block;"></div>
                     </div>
-                    <span style="font-family:Orbitron; font-size:0.8rem; color:white; letter-spacing:1px;">Labels einblenden</span>
+                    <span style="font-family:Orbitron; font-size:0.8rem; color:white; letter-spacing:1px;">${CyberI18n.get('coolsquares.show_labels')}</span>
                 </div>
             `;
             document.getElementById('sliders').insertAdjacentHTML('beforeend', labelToggleHtml);

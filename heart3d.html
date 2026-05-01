@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | 3D Heart Surface</title>
+    <script src="js/i18n.js"></script>
     <!-- KaTeX CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -59,8 +60,8 @@
             // 1. Branding & Mission
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "3D HEART SURFACE | TAUBIN-GLEICHUNG"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('heart3d.title')
             });
 
             CyberUI.init();
@@ -216,14 +217,14 @@
             animate();
             
             // 5. UI Standardization
-            CyberUI.createCard('ui-container', 'SDF KONTROLLE', '<div id="slider-box-a"></div><div id="slider-box-b"></div>', 'var(--neon-pink)');
+            CyberUI.createCard('ui-container', CyberI18n.get('heart3d.sdf_control'), '<div id="slider-box-a"></div><div id="slider-box-b"></div>', 'var(--neon-pink)');
 
-            CyberUI.createSlider('slider-box-a', 'Stauchungs-Faktor (A)', 0.1, 10.0, 5.0, 0.1, (val) => {
+            CyberUI.createSlider('slider-box-a', CyberI18n.get('heart3d.stretch'), 0.1, 10.0, 5.0, 0.1, (val) => {
                 raymarchMaterial.uniforms.u_A.value = val;
                 updateEquation();
             }, 'var(--neon-blue)');
 
-            CyberUI.createSlider('slider-box-b', 'Oberflächen-Modulation (B)', 0.0, 0.3, 0.025, 0.005, (val) => {
+            CyberUI.createSlider('slider-box-b', CyberI18n.get('heart3d.modulation'), 0.0, 0.3, 0.025, 0.005, (val) => {
                 raymarchMaterial.uniforms.u_B.value = val;
                 updateEquation();
             }, 'var(--neon-orange)');

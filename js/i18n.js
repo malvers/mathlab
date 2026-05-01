@@ -24,7 +24,16 @@ const CyberI18n = {
                 transformation: "Transformationen",
                 parabola: "Parabel-Labor",
                 regression: "Statistik-Labor",
-                euler: "Euler-Gerade"
+                euler: "Euler-Gerade",
+                summand: "Summand",
+                description: "BESCHREIBUNG DER SCHRITTE",
+                minuend: "Minuend",
+                subtrahend: "Subtrahend",
+                factor1: "Faktor 1 (Multiplikand)",
+                factor2: "Faktor 2 (Multiplikator)",
+                dividend: "Dividend",
+                divisor: "Divisor",
+                fine_mode: "Schrittweise"
             },
             euler: {
                 construction: "KONSTRUKTION",
@@ -382,15 +391,114 @@ const CyberI18n = {
                     title: "SCHRIFTLICHE MULTIPLIKATION",
                     ready: "Bereit für die Multiplikation: {a} · {b}.",
                     digit_step: "Wir multiplizieren {d} mit {factor}.",
+                    row_done: "Multiplikation mit {d} ist abgeschlossen. Alle Teilergebnisse dieser Zeile sind berechnet.",
+                    carry_init: "Für diese Position nehmen wir den Übertrag von {c} aus der vorherigen Teilrechnung.",
+                    carry_add: "Addition des Übertrags: {prod} + {c} = {final}.",
                     complete: "Multiplikation abgeschlossen! Das Ergebnis ist {result}."
                 },
                 div: {
                     title: "SCHRIFTLICHE DIVISION",
                     ready: "Bereit für die Division: {a} : {b}.",
-                    fit: "Wie oft passt {b} in {val}?",
+                    collect: "Prüfung: Passt {b} in {val}? Nein, wir nehmen die nächste Ziffer dazu.",
+                    fit: "Wie oft passt {b} in {val}? Es passt {q} mal. {q} × {b} = {prod}.",
+                    bring_down: "Nächste Ziffer {d} wird heruntergeholt. Neue Zahl ist {newVal}.",
                     rem: "Rest {rem} wird notiert.",
                     complete: "Division abgeschlossen! Das Ergebnis ist {result}."
                 }
+            },
+            coolsquares: {
+                title: "DER ULTIMATIVE QUADRAT-BEWEIS",
+                proportions: "PROPORTIONEN",
+                side_a: "Zentral-Seite a",
+                show_labels: "Labels einblenden",
+                gap_x: "Lücke x",
+                result_y: "Ergebnis y",
+                area_green: "Fläche Grün"
+            },
+            fibonacci: {
+                title: "FIBONACCI SPIRALE",
+                step: "Schritt",
+                spiral: "Viertelkreise (Spirale)",
+                squares: "Quadrat-Grenzlinien"
+            },
+            orbitals: {
+                title: "Atomorbitale",
+                parameters: "PARAMETER",
+                orbital: "Orbital",
+                resolution: "Auflösung (Gitter)",
+                specular: "Specular (Glanz)",
+                opacity: "Opacity (Deckkraft)",
+                prob_cloud: "Wahrscheinlichkeitswolke",
+                prob_sq: "|Y|²",
+                prob_desc: "(Fläche aus)",
+                rotation: "AUTO-ROTATION (LEERTASTE)",
+                help_btn: "TASTATURHILFE",
+                help_title: "Tastaturkürzel",
+                help_prev_next: "Vorheriges / nächstes Orbital",
+                help_res: "Auflösung: ±1 pro Tastendruck, mit Shift jeweils ±10",
+                help_space_esc: "Auto-Rotation (Leertaste) · Zurück (Esc)",
+                help_digits: "Auflösung: Schnellwahl (Ziffern)",
+                help_toggle: "Hilfe ein- und ausblenden",
+                help_mouse: "Trackball: links drehen · Rad / Mitte zoom · rechts schwenken",
+                orbital_suffix: "ORBITAL"
+            },
+            triangulierer: {
+                title: "DELAUNAY TRIANGULIERUNG",
+                triangle: "DREIECK",
+                area: "FLÄCHE",
+                sum: "SUMME Σ",
+                controls: "STEUERUNG",
+                multi_mode: "Mehrfach-Modus",
+                delete_selection: "Auswahl löschen",
+                target_area: "Zielbereich",
+                sum_delta: "Summe Δ"
+            },
+            langley: {
+                title: "LANGLEY VIERECK",
+                subtitle: "Geometrie & Trigonometrie",
+                all_on_off: "ALLE AN/AUS",
+                phase1: "Phase 1: Rechtes Dreieck",
+                phase2: "Phase 2: Linkes Dreieck",
+                phase3: "Phase 3: Innere Winkel",
+                phase4: "Phase 4: Das Rätsel",
+                phase5_geo: "Phase 5: Geometrische Lösung",
+                phase5_tri: "Phase 5: Trigonometrische Lösung",
+                step: "SCHRITT",
+                variant_classic: "1. Klassisch (BAC=70°, ABD=60°)",
+                variant_v2: "2. Variante (BAC=60°, ABD=50°)",
+                variant_v3: "3. Variante (BAC=50°, ABD=60°)",
+                briefing_title: "MISSION BRIEFING",
+                briefing_text: "Analysieren Sie das Langley-Viereck durch schrittweise Winkelkonstruktion."
+            },
+            butterfly: {
+                title: "SCHMETTERLINGS-LABOR",
+                animation: "ANIMATION ENGINE",
+                speed: "Geschwindigkeit",
+                hue: "Basis-Farbton",
+                pause: "PAUSE",
+                play: "PLAY",
+                glow: "GLOW",
+                reset: "RESET",
+                params: "KURVEN-PARAMETER",
+                exp_amp: "Exp Amp",
+                cos_amp: "Cos Amp",
+                cos_freq: "Cos Freq",
+                sin_amp: "Sin Amp",
+                sin_div: "Sin Div",
+                ctx_reset: "Animation zurücksetzen",
+                ctx_glow: "Glow Effekt AN/AUS"
+            },
+            heart3d: {
+                title: "3D HEART SURFACE | TAUBIN-GLEICHUNG",
+                sdf_control: "SDF KONTROLLE",
+                stretch: "Stauchungs-Faktor (A)",
+                modulation: "Oberflächen-Modulation (B)"
+            },
+            litchi3d: {
+                title: "3D LITCHI | PROZEDURALE GEOMETRIE",
+                ripeness: "Frucht-Reife",
+                bumps: "Stachel-Intensität",
+                shape: "Form-Faktor (Y)"
             }
         },
         en: {
@@ -407,7 +515,16 @@ const CyberI18n = {
                 transformation: "Transformations",
                 parabola: "Parabola Lab",
                 regression: "Statistics Lab",
-                euler: "Euler Line"
+                euler: "Euler Line",
+                summand: "Summand",
+                description: "STEP DESCRIPTION",
+                minuend: "Minuend",
+                subtrahend: "Subtrahend",
+                factor1: "Factor 1 (Multiplicand)",
+                factor2: "Factor 2 (Multiplier)",
+                dividend: "Dividend",
+                divisor: "Divisor",
+                fine_mode: "Step-by-step"
             },
             euler: {
                 construction: "CONSTRUCTION",
@@ -747,15 +864,114 @@ const CyberI18n = {
                     title: "WRITTEN MULTIPLICATION",
                     ready: "Ready for multiplication: {a} · {b}.",
                     digit_step: "Multiplying {d} by {factor}.",
+                    row_done: "Multiplication with {d} is finished. All partial results of this row are calculated.",
+                    carry_init: "For this position, we take the carry of {c} from the previous partial calculation.",
+                    carry_add: "Adding the carry: {prod} + {c} = {final}.",
                     complete: "Multiplication finished! The result is {result}."
                 },
                 div: {
                     title: "WRITTEN DIVISION",
                     ready: "Ready for division: {a} : {b}.",
-                    fit: "How many times does {b} fit into {val}?",
+                    collect: "Checking: Does {b} fit into {val}? No, so we take the next digit.",
+                    fit: "How many times does {b} fit into {val}? It fits {q} times. {q} × {b} = {prod}.",
+                    bring_down: "Bringing down the next digit {d}. New number is {newVal}.",
                     rem: "Remainder {rem} is noted.",
                     complete: "Division finished! The result is {result}."
                 }
+            },
+            coolsquares: {
+                title: "THE ULTIMATE SQUARE PROOF",
+                proportions: "PROPORTIONS",
+                side_a: "Central Side a",
+                show_labels: "Show Labels",
+                gap_x: "Gap x",
+                result_y: "Result y",
+                area_green: "Green Area"
+            },
+            fibonacci: {
+                title: "FIBONACCI SPIRAL",
+                step: "Step",
+                spiral: "Quarter Circles (Spiral)",
+                squares: "Square Boundaries"
+            },
+            orbitals: {
+                title: "Atomic Orbitals",
+                parameters: "PARAMETERS",
+                orbital: "Orbital",
+                resolution: "Resolution (Grid)",
+                specular: "Specular (Shininess)",
+                opacity: "Opacity",
+                prob_cloud: "Probability Cloud",
+                prob_sq: "|Y|²",
+                prob_desc: "(Surface off)",
+                rotation: "AUTO-ROTATION (SPACE)",
+                help_btn: "KEYBOARD HELP",
+                help_title: "Keyboard Shortcuts",
+                help_prev_next: "Previous / next orbital",
+                help_res: "Resolution: ±1 per key, with Shift ±10",
+                help_space_esc: "Auto-rotation (Space) · Reset (Esc)",
+                help_digits: "Resolution: Quick select (digits)",
+                help_toggle: "Toggle help panel",
+                help_mouse: "Trackball: left rotate · wheel / middle zoom · right pan",
+                orbital_suffix: "ORBITAL"
+            },
+            triangulierer: {
+                title: "DELAUNAY TRIANGULATION",
+                triangle: "TRIANGLE",
+                area: "AREA",
+                sum: "SUM Σ",
+                controls: "CONTROLS",
+                multi_mode: "Multi-Select Mode",
+                delete_selection: "Delete Selection",
+                target_area: "Target Area",
+                sum_delta: "Sum Δ"
+            },
+            langley: {
+                title: "LANGLEY ADVENTURE",
+                subtitle: "Geometry & Trigonometry",
+                all_on_off: "ALL ON/OFF",
+                phase1: "Phase 1: Right Triangle",
+                phase2: "Phase 2: Left Triangle",
+                phase3: "Phase 3: Inner Angles",
+                phase4: "Phase 4: The Mystery",
+                phase5_geo: "Phase 5: Geometric Solution",
+                phase5_tri: "Phase 5: Trigonometric Solution",
+                step: "STEP",
+                variant_classic: "1. Classic (BAC=70°, ABD=60°)",
+                variant_v2: "2. Variant (BAC=60°, ABD=50°)",
+                variant_v3: "3. Variant (BAC=50°, ABD=60°)",
+                briefing_title: "MISSION BRIEFING",
+                briefing_text: "Analyze the Langley quadrilateral through step-by-step angle construction."
+            },
+            butterfly: {
+                title: "BUTTERFLY LABORATORY",
+                animation: "ANIMATION ENGINE",
+                speed: "Speed",
+                hue: "Base Hue",
+                pause: "PAUSE",
+                play: "PLAY",
+                glow: "GLOW",
+                reset: "RESET",
+                params: "CURVE PARAMETERS",
+                exp_amp: "Exp Amp",
+                cos_amp: "Cos Amp",
+                cos_freq: "Cos Freq",
+                sin_amp: "Sin Amp",
+                sin_div: "Sin Div",
+                ctx_reset: "Reset Animation",
+                ctx_glow: "Glow Effect ON/OFF"
+            },
+            heart3d: {
+                title: "3D HEART SURFACE | TAUBIN EQUATION",
+                sdf_control: "SDF CONTROL",
+                stretch: "Stretch Factor (A)",
+                modulation: "Surface Modulation (B)"
+            },
+            litchi3d: {
+                title: "3D LITCHI | PROCEDURAL GEOMETRY",
+                ripeness: "Fruit Ripeness",
+                bumps: "Spike Intensity",
+                shape: "Shape Factor (Y)"
             }
         },
         es: {
@@ -772,7 +988,16 @@ const CyberI18n = {
                 transformation: "Transformaciones",
                 parabola: "Laboratorio de Parábolas",
                 regression: "Laboratorio de Estadística",
-                euler: "Recta de Euler"
+                euler: "Recta de Euler",
+                summand: "Sumando",
+                description: "DESCRIPCIÓN DE PASOS",
+                minuend: "Minuendo",
+                subtrahend: "Subtrahendo",
+                factor1: "Factor 1 (Multiplicando)",
+                factor2: "Factor 2 (Multiplicador)",
+                dividend: "Dividendo",
+                divisor: "Divisor",
+                fine_mode: "Paso a paso"
             },
             euler: {
                 construction: "CONSTRUCCIÓN",
@@ -1112,15 +1337,114 @@ const CyberI18n = {
                     title: "MULTIPLICACIÓN ESCRITA",
                     ready: "Listo para multiplicar: {a} · {b}.",
                     digit_step: "Multiplicamos {d} por {factor}.",
+                    row_done: "La multiplicación con {d} ha terminado. Se calculan todos los resultados parciales de esta fila.",
+                    carry_init: "Para esta posición, tomamos el acarreo de {c} del cálculo parcial anterior.",
+                    carry_add: "Sumando el acarreo: {prod} + {c} = {final}.",
                     complete: "¡Multiplicación finalizada! El resultado es {result}."
                 },
                 div: {
                     title: "DIVISIÓN ESCRITA",
                     ready: "Listo para dividir: {a} : {b}.",
-                    fit: "¿Cuántas veces cabe {b} en {val}?",
+                    collect: "Comprobando: ¿Cabe {b} en {val}? No, así que tomamos el siguiente dígito.",
+                    fit: "¿Cuántas veces cabe {b} en {val}? Cabe {q} veces. {q} × {b} = {prod}.",
+                    bring_down: "Bajando el siguiente dígito {d}. El nuevo número es {newVal}.",
                     rem: "Se anota el resto {rem}.",
                     complete: "¡División finalizada! El resultado es {result}."
                 }
+            },
+            coolsquares: {
+                title: "LA PRUEBA DEFINITIVA DEL CUADRADO",
+                proportions: "PROPORCIONES",
+                side_a: "Lado Central a",
+                show_labels: "Mostrar Etiquetas",
+                gap_x: "Hueco x",
+                result_y: "Resultado y",
+                area_green: "Área Verde"
+            },
+            fibonacci: {
+                title: "ESPIRAL DE FIBONACCI",
+                step: "Paso",
+                spiral: "Arcos (Espiral)",
+                squares: "Líneas de Cuadrado"
+            },
+            orbitals: {
+                title: "Orbitales Atómicos",
+                parameters: "PARÁMETROS",
+                orbital: "Orbital",
+                resolution: "Resolución (Malla)",
+                specular: "Especular (Brillo)",
+                opacity: "Opacidad",
+                prob_cloud: "Nube de Probabilidad",
+                prob_sq: "|Y|²",
+                prob_desc: "(Superficie desc.)",
+                rotation: "AUTO-ROTATION (ESPACIO)",
+                help_btn: "AYUDA DE TECLADO",
+                help_title: "Atajos de Teclado",
+                help_prev_next: "Orbital anterior / siguiente",
+                help_res: "Resolución: ±1 por tecla, con Shift ±10",
+                help_space_esc: "Auto-rotación (Espacio) · Volver (Esc)",
+                help_digits: "Resolución: Selección rápida (dígitos)",
+                help_toggle: "Mostrar/Ocultar ayuda",
+                help_mouse: "Trackball: girar izq. · rueda / centro zoom · desplazar der.",
+                orbital_suffix: "ORBITAL"
+            },
+            triangulierer: {
+                title: "TRIANGULACIÓN DE DELAUNAY",
+                triangle: "TRIÁNGULO",
+                area: "ÁREA",
+                sum: "SUMA Σ",
+                controls: "CONTROLES",
+                multi_mode: "Modo Selección Múltiple",
+                delete_selection: "Borrar Selección",
+                target_area: "Área Objetivo",
+                sum_delta: "Suma Δ"
+            },
+            langley: {
+                title: "CUADRILÁTERO DE LANGLEY",
+                subtitle: "Geometría y Trigonometría",
+                all_on_off: "TODO ON/OFF",
+                phase1: "Fase 1: Triángulo Derecho",
+                phase2: "Fase 2: Triángulo Izquierdo",
+                phase3: "Fase 3: Ángulos Interiores",
+                phase4: "Fase 4: El Misterio",
+                phase5_geo: "Fase 5: Solución Geométrica",
+                phase5_tri: "Fase 5: Solución Trigonométrica",
+                step: "PASO",
+                variant_classic: "1. Clásico (BAC=70°, ABD=60°)",
+                variant_v2: "2. Variante (BAC=60°, ABD=50°)",
+                variant_v3: "3. Variante (BAC=50°, ABD=60°)",
+                briefing_title: "RESUMEN DE LA MISIÓN",
+                briefing_text: "Analice el cuadrilátero de Langley mediante la construcción de ángulos paso a paso."
+            },
+            butterfly: {
+                title: "LABORATORIO DE MARIPOSAS",
+                animation: "MOTOR DE ANIMACIÓN",
+                speed: "Velocidad",
+                hue: "Tono Base",
+                pause: "PAUSA",
+                play: "PLAY",
+                glow: "GLOW",
+                reset: "RESET",
+                params: "PARÁMETROS DE CURVA",
+                exp_amp: "Amp Exp",
+                cos_amp: "Amp Cos",
+                cos_freq: "Freq Cos",
+                sin_amp: "Amp Sin",
+                sin_div: "Div Sin",
+                ctx_reset: "Reiniciar animación",
+                ctx_glow: "Efecto Glow ON/OFF"
+            },
+            heart3d: {
+                title: "SUPERFICIE CORAZÓN 3D | ECUACIÓN DE TAUBIN",
+                sdf_control: "CONTROL SDF",
+                stretch: "Factor de Estiramiento (A)",
+                modulation: "Modulación de Superficie (B)"
+            },
+            litchi3d: {
+                title: "LITCHI 3D | GEOMETRÍA PROCEDIMENTAL",
+                ripeness: "Madurez de Fruta",
+                bumps: "Intensidad de Espinas",
+                shape: "Factor de Forma (Y)"
             }
         }
     },

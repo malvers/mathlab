@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Litchi-Labor | ULTRA v5.3.8</title>
+    <title>docalvers | 3D Litchi-Labor</title>
+    <script src="js/i18n.js"></script>
     <!-- KaTeX CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -61,8 +62,8 @@
             // 1. Branding & Mission
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "3D LITCHI | PROZEDURALE GEOMETRIE"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('litchi3d.title')
             });
 
             CyberUI.init();
@@ -232,19 +233,19 @@
             animate();
 
             // 5. UI Standardization
-            CyberUI.createCard('ui-container', 'SDF KONTROLLE', '<div id="s-reife"></div><div id="s-bumps"></div><div id="s-shape"></div>', 'var(--neon-red)');
+            CyberUI.createCard('ui-container', CyberI18n.get('heart3d.sdf_control'), '<div id="s-reife"></div><div id="s-bumps"></div><div id="s-shape"></div>', 'var(--neon-red)');
 
-            CyberUI.createSlider('s-reife', 'Frucht-Reife', 0.5, 2.0, 1.0, 0.01, (v) => {
+            CyberUI.createSlider('s-reife', CyberI18n.get('litchi3d.ripeness'), 0.5, 2.0, 1.0, 0.01, (v) => {
                 raymarchMaterial.uniforms.u_Reife.value = v;
                 updateEquation();
             }, 'var(--neon-pink)');
 
-            CyberUI.createSlider('s-bumps', 'Stachel-Intensität', 0.0, 0.15, 0.05, 0.001, (v) => {
+            CyberUI.createSlider('s-bumps', CyberI18n.get('litchi3d.bumps'), 0.0, 0.15, 0.05, 0.001, (v) => {
                 raymarchMaterial.uniforms.u_Bumps.value = v;
                 updateEquation();
             }, 'var(--neon-orange)');
 
-            CyberUI.createSlider('s-shape', 'Form-Faktor (Y)', 0.8, 1.8, 1.2, 0.01, (v) => {
+            CyberUI.createSlider('s-shape', CyberI18n.get('litchi3d.shape'), 0.8, 1.8, 1.2, 0.01, (v) => {
                 raymarchMaterial.uniforms.u_Shape.value = v;
                 updateEquation();
             }, 'var(--neon-red)');

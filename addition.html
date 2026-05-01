@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Schriftliche Addition | docalvers</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.add.title'))</script></title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -165,7 +165,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -183,8 +183,8 @@
         <div id="canvas-container">
             <div class="cyber-grid"></div>
             <div id="math-coach-box">
-                <div class="coach-title">BESCHREIBUNG DER SCHRITTE</div>
-                <div id="coach-content" class="coach-message">Initialisiere Analyse...</div>
+                <div class="coach-title"><script>document.write(CyberI18n.get('ui.description'))</script></div>
+                <div id="coach-content" class="coach-message">...</div>
             </div>
             <canvas id="canvas"></canvas>
         </div>
@@ -192,6 +192,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -208,8 +209,8 @@
 
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "SCHRIFTLICHE ADDITION"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.add.title')
         });
         CyberUI.init();
 
@@ -224,26 +225,26 @@
         let stepSequence = [];
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'ADDITION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.add.title'), `
                 <div class="cyber-control-group">
-                    <label class="cyber-label">SUMMAND 1</label>
+                    <label class="cyber-label">${CyberI18n.get('ui.summand')} 1</label>
                     <input type="number" id="s1-input" class="cyber-select" value="${summand1}" max="9999999" onchange="updateNumbers()">
                 </div>
                 <div class="cyber-control-group" style="margin-top:25px;">
-                    <label class="cyber-label">SUMMAND 2</label>
+                    <label class="cyber-label">${CyberI18n.get('ui.summand')} 2</label>
                     <input type="number" id="s2-input" class="cyber-select" value="${summand2}" max="9999999" onchange="updateNumbers()">
                 </div>
-                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, BRAND_BLUE);
 
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
                 <div class="stats-grid">
                     <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">WEITER</span>
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">◀</span>
                     </div>
                     <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
@@ -443,19 +444,34 @@
         function updateMessages() {
             const coach = document.getElementById('coach-content');
             if (currentStep === -1) {
-                coach.innerHTML = "Bereit für die Addition. Wir rechnen von rechts nach links.";
+                coach.innerHTML = CyberI18n.get('arithmetic.add.ready', { a: `<span class='coach-math-highlight'>${summand1}</span>`, b: `<span class='coach-math-highlight'>${summand2}</span>` });
                 return;
             }
             const step = stepSequence[currentStep];
             if (step.type === 'focus') {
-                coach.innerHTML = `Wir betrachten die nächste Stelle.`;
+                let unitKey = "units.ones";
+                if (step.col === 1) unitKey = "units.tens";
+                if (step.col === 2) unitKey = "units.hundreds";
+                if (step.col >= 3) unitKey = "units.thousands";
+                coach.innerHTML = CyberI18n.get('arithmetic.add.focus', { unit: `<span class='coach-math-highlight'>${CyberI18n.get(unitKey)}</span>` });
             } else if (step.type === 'calculate') {
-                const sum = step.d1 + step.d2 + step.oldCarry;
-                coach.innerHTML = `<span class='coach-math-highlight'>${step.d1} + ${step.d2} + ${step.oldCarry} = ${sum}</span>.<br>Notiere ${step.resultDigit}, Übertrag ${step.newCarry}.`;
+                coach.innerHTML = CyberI18n.get('arithmetic.add.calc', { 
+                    d1: `<b style="color:#ffde00">${step.d1}</b>`, 
+                    d2: `<b style="color:#ffde00">${step.d2}</b>`, 
+                    c: step.oldCarry > 0 ? `+ <b style="color:#ffde00">${step.oldCarry}</b>` : '', 
+                    sum: `<span class='coach-math-highlight'>${step.d1 + step.d2 + step.oldCarry}</span>` 
+                }) + "<br><br>" + 
+                CyberI18n.get('arithmetic.add.carry', { 
+                    digit: `<span class='coach-math-highlight'>${step.resultDigit}</span>`, 
+                    newCarry: step.newCarry > 0 ? `<b style="color:#ffde00">${step.newCarry}</b>` : '0' 
+                });
             } else if (step.type === 'final-carry') {
-                coach.innerHTML = `Der letzte Übertrag von <span class='coach-math-highlight'>${step.carry}</span> wird notiert.`;
+                coach.innerHTML = CyberI18n.get('arithmetic.add.carry', { 
+                    digit: '', 
+                    newCarry: `<span class='coach-math-highlight'>${step.carry}</span>` 
+                });
             } else if (step.type === 'complete') {
-                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Das Ergebnis ist <span class='coach-math-highlight'>" + (summand1 + summand2) + "</span>.";
+                coach.innerHTML = `<b>${CyberI18n.get('arithmetic.add.complete', { result: `<span class='coach-math-highlight'>${summand1 + summand2}</span>` })}</b>`;
             }
         }
 
