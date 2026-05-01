@@ -24,12 +24,14 @@ Labore
 
 # 
 60pt
-5 Programmiersprachen 
+7 Programmiersprachen 
 40pt
 hypertext markup language
 cascading styles sheets
+type script
 java script
 python
+JSON
 JAVA
 
 # 

@@ -10,14 +10,27 @@
     <script src="js/i18n.js"></script>
     <script src="js/i18n-index.js"></script>
     <script>
-        // Language Selector via URL Param (?lang=de|en|es)
+        function setLanguage(lang) {
+            localStorage.setItem('cyber-lab-lang', lang);
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-            if (lang && ['de', 'en', 'es', 'fr'].includes(lang.toLowerCase())) {
+            if (lang && ['de', 'en', 'es', 'fr', 'it'].includes(lang.toLowerCase())) {
                 CyberI18n.current = lang.toLowerCase();
                 console.log("Language set to:", CyberI18n.current);
             }
+            
+            // Set active class on load
+            window.addEventListener('DOMContentLoaded', () => {
+                const currentLang = CyberI18n.current;
+                const btn = document.querySelector(`.lang-flag[onclick="setLanguage('${currentLang}')"]`);
+                if (btn) btn.classList.add('active');
+            });
         })();
     </script>
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
@@ -1326,6 +1339,15 @@
                 <line x1="14" y1="1" x2="14" y2="4"></line>
             </svg>
         </div>
+    </div>
+
+    <!-- Language Switcher: oben mittig -->
+    <div style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1000;">
+        <button onclick="setLanguage('de')" class="contact-btn lang-flag" title="Deutsch" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇩🇪</button>
+        <button onclick="setLanguage('en')" class="contact-btn lang-flag" title="English" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇬🇧</button>
+        <button onclick="setLanguage('fr')" class="contact-btn lang-flag" title="Français" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇫🇷</button>
+        <button onclick="setLanguage('es')" class="contact-btn lang-flag" title="Español" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇪🇸</button>
+        <button onclick="setLanguage('it')" class="contact-btn lang-flag" title="Italiano" style="position: static; padding: 0 10px; width: auto; justify-content: center;">🇮🇹</button>
     </div>
 
     <!-- Top Action Buttons -->
