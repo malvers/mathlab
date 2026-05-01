@@ -15,9 +15,9 @@
  * JG 8–9: potenzlabor, pythagoras, pythagorasbeweis
  * JG 9:  parabellabor (zusätzlich zu JG 8–9 bei Pythagoras/Potenz)
  * JG 10–12: cmaes, opti-lens
- * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
- * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel): fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
+ * JG 11–12: integralreaktor, fourier, mandelbrot-html, atomorbitale, differentiallabor
+ * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-html, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
+ * top5 (Hub-Kachel): fourier, mandelbrot-html (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
@@ -445,14 +445,25 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
-        "id": "mandelbrot-deep",
-        "href": "mandelbrot_deep.html",
-        "title": "Fraktale",
-        "description": "Mandelbrot- und Julia-Menge im WebGL-Shader: Iteration z²+c, Tiefenzoom und Pan an der fraktalen Grenze, optionaler Flight-Modus.",
-        "tagline": "Mandelbrot / Julia / Komplexe Ebene",
+        "id": "mandelbrot-deep-zoomlab",
+        "href": "mandelbrot_deep_zoomlab.html",
+        "title": "Fraktale · Zoom-Lab",
+        "description": "Mandelbrot/Julia wie im Fraktale-Labor, mit delta-gestütztem Rad-/Trackpad-Zoom, Pinch-Zoom auf Touch und automatisch erhöhten Iterationen bei sehr hohem Zoom.",
+        "tagline": "Sanfter Zoom · Touch · Auto-Detail",
         "icon": LAB_ICONS["mandelbrot-deep"],
-        "category": "fraktale highlight hot grade11 grade12 oberstufe uni top5",
-        "keywords": "mandelbrot julia fraktal fractal deep zoom webgl komplex iteration chaos",
+        "category": "fraktale grade11 grade12 oberstufe uni experimental",
+        "keywords": "mandelbrot julia zoom trackpad pinch touch iterations webgl",
+        "color": "purple"
+    },
+    {
+        "id": "mandelbrot-html",
+        "href": "mandelbrot.html",
+        "title": "Fraktale · Mandelbrot & Julia",
+        "description": "Mandelbrot- und Julia-Mengen in der komplexen Ebene: Escapingzeit-Dynamik der Abbildung z↦z²+c als GPU-gestützte Iteration im Fragment-Shader; parametrisierte Exploration von c mit adaptiver Iterationstiefe entlang der fraktalen Randstruktur.",
+        "tagline": "Komplexe Dynamik · Escapingzeit · Julia/Mandelbrot",
+        "icon": LAB_ICONS["mandelbrot-deep"],
+        "category": "fraktale highlight hot grade11 grade12 oberstufe uni top5 experimental",
+        "keywords": "mandelbrot julia fractal escapingzeit komplexe ebene webgl dynamik chaos grenzmenge",
         "color": "purple"
     },
     {
