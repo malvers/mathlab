@@ -603,7 +603,7 @@
     </div>
 
     <div class="intro-top-actions">
-        <button type="button" class="fs-toggle" id="intro-ambient-btn" onclick="toggleIntroAmbientMuted()" title="Ambient-Sound (Standard aus · Klick aktiviert und wird gespeichert)" aria-label="Ambient-Sound ein oder aus">
+        <button type="button" class="fs-toggle" id="intro-ambient-btn" onclick="toggleIntroAmbientMuted()" title="Musik & Ambient-Sound (Standard an · Klick deaktiviert und wird gespeichert)" aria-label="Musik & Ambient-Sound ein oder aus">
             <svg id="intro-ambient-icon-on" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
             </svg>
@@ -823,13 +823,13 @@
         }
 
         const INTRO_PREFS_KEY = 'docalvers.intro.prefs';
-        const INTRO_PREFS_VERSION = 3;
+        const INTRO_PREFS_VERSION = 4;
         const INTRO_AMBIENT_MASTER_GAIN = 0.085;
 
         let introAmbCtx = null;
         let introAmbMaster = null;
         let introAmbGraphBuilt = false;
-        let introAmbMuted = true;
+        let introAmbMuted = false;
 
         function loadIntroPersistedPrefs() {
             try {
@@ -882,8 +882,6 @@
                 /* quota / private mode */
             }
         }
-
-        loadIntroPersistedPrefs();
 
         function syncIntroAmbientBtn() {
             const btn = document.getElementById('intro-ambient-btn');
@@ -939,6 +937,47 @@
             introAmbMaster.gain.setValueAtTime(introAmbMuted ? 0 : INTRO_AMBIENT_MASTER_GAIN, t);
         }
 
+        let bgAudioObj = new Audio('resources/friendly_small.wav');
+        bgAudioObj.preload = 'auto';
+        bgAudioObj.loop = true;
+        bgAudioObj.volume = 0.5;
+
+        function syncBgAudio() {
+            if (introAmbMuted) {
+                bgAudioObj.pause();
+            } else {
+                bgAudioObj.volume = 0.5;
+                const p = bgAudioObj.play();
+                if (p !== undefined) {
+                    p.catch((e) => {
+                        console.warn("Browser blocked autoplay!", e);
+                        
+                        // Debug-Hinweis für dich:
+                        const warnDiv = document.createElement('div');
+                        warnDiv.style.position = 'fixed';
+                        warnDiv.style.top = '10px';
+                        warnDiv.style.right = '10px';
+                        warnDiv.style.background = 'rgba(255, 0, 0, 0.8)';
+                        warnDiv.style.color = 'white';
+                        warnDiv.style.padding = '10px';
+                        warnDiv.style.borderRadius = '5px';
+                        warnDiv.style.zIndex = '9999';
+                        warnDiv.innerHTML = '<b>Autoplay blockiert!</b><br>Klicke irgendwo, um Audio zu starten.';
+                        document.body.appendChild(warnDiv);
+
+                        const playOnInteract = () => {
+                            if (!introAmbMuted) bgAudioObj.play().catch(() => {});
+                            warnDiv.remove(); // Nachricht wieder ausblenden
+                            document.removeEventListener('pointerdown', playOnInteract, true);
+                            document.removeEventListener('keydown', playOnInteract, true);
+                        };
+                        document.addEventListener('pointerdown', playOnInteract, true);
+                        document.addEventListener('keydown', playOnInteract, true);
+                    });
+                }
+            }
+        }
+
         function applyIntroAmbientGainRamp() {
             if (!introAmbMaster || !introAmbCtx) return;
             const t = introAmbCtx.currentTime;
@@ -949,6 +988,7 @@
 
         async function unlockIntroAmbientAudio() {
             if (introAmbMuted) return;
+            
             buildIntroAmbientGraph();
             if (!introAmbCtx) return;
             try {
@@ -961,6 +1001,9 @@
 
         function toggleIntroAmbientMuted() {
             introAmbMuted = !introAmbMuted;
+            
+            syncBgAudio();
+            
             if (!introAmbMuted) {
                 unlockIntroAmbientAudio();
             } else {
@@ -970,6 +1013,8 @@
             saveIntroPersistedPrefs();
         }
 
+        loadIntroPersistedPrefs();
+        syncBgAudio();
         syncIntroAmbientBtn();
 
         (function hookIntroAmbientFirstGesture() {
@@ -979,10 +1024,12 @@
             }
             function onPtr(e) {
                 if (e.target && e.target.closest && e.target.closest('#intro-ambient-btn')) return;
+                syncBgAudio();
                 unlockIntroAmbientAudio();
                 detach();
             }
             function onKey() {
+                syncBgAudio();
                 unlockIntroAmbientAudio();
                 detach();
             }
