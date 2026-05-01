@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="forloop.mandelbrot-deep.panel" content="553">
+    <meta name="forloop.mandelbrot.panel" content="554">
     <title>Fraktale · Mandelbrot & Julia | Doc Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -198,6 +198,11 @@
             text-shadow: 0 0 12px rgba(255, 170, 100, 0.32);
             line-height: 1.2 !important;
         }
+
+        /* CyberBranding legt .canvas-branding mit pointer-events:auto über den Plot — Maus erreichte den Canvas nicht. */
+        #main-content .canvas-branding {
+            pointer-events: none !important;
+        }
     </style>
 </head>
 
@@ -253,7 +258,7 @@
             }
             int iter = 0;
             bool escaped = false;
-            for (int k = 0; k < 512; k++) {
+            for (int k = 0; k < 768; k++) {
                 if (k >= u_max_iter) break;
                 if (dot(z, z) > 4.0) { escaped = true; iter = k; break; }
                 z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
@@ -275,11 +280,14 @@
     <script src="js/ui.js?v=542"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
-        function toggleSidebar() {
+(function () {
+        'use strict';
+
+        window.toggleSidebar = function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
-        }
+        };
 
         /** Mandelbrot/Julia: komplexe Iteration (gleiche Logik wie im Fragment-Shader). */
         function renderMbFractalFormula() {
@@ -300,7 +308,9 @@
          * - <style> ans Ende von document.body (nach cyber-ui-dynamic im <head>).
          * - Nach Frames/Timeouts erneut (falls Module später noch Styles nachladen).
          */
-        function injectMandelbrotDeepPanelAuthority() {
+        const FRACTAL_PANEL_STYLE_ID = 'mandelbrot-html-panel-authority';
+
+        function injectFractalPanelAuthority() {
             const panel = document.getElementById('side-panel');
             if (panel) {
                 panel.style.setProperty('background', 'rgba(10, 20, 36, 0.75)', 'important');
@@ -309,7 +319,7 @@
                 panel.style.setProperty('backdrop-filter', 'blur(28px)', 'important');
             }
 
-            const id = 'mandelbrot-deep-panel-authority';
+            const id = FRACTAL_PANEL_STYLE_ID;
             let el = document.getElementById(id);
             if (!el) {
                 el = document.createElement('style');
@@ -415,19 +425,19 @@
             document.body.appendChild(el);
         }
 
-        function scheduleMandelbrotDeepPanelAuthority() {
-            injectMandelbrotDeepPanelAuthority();
+        function scheduleFractalPanelAuthority() {
+            injectFractalPanelAuthority();
             requestAnimationFrame(() => {
-                injectMandelbrotDeepPanelAuthority();
-                queueMicrotask(injectMandelbrotDeepPanelAuthority);
+                injectFractalPanelAuthority();
+                queueMicrotask(injectFractalPanelAuthority);
             });
-            setTimeout(injectMandelbrotDeepPanelAuthority, 50);
-            setTimeout(injectMandelbrotDeepPanelAuthority, 250);
+            setTimeout(injectFractalPanelAuthority, 50);
+            setTimeout(injectFractalPanelAuthority, 250);
         }
 
         window.addEventListener('load', () => {
-            if (window.__forloopMandelbrotDeepInit) return;
-            window.__forloopMandelbrotDeepInit = true;
+            if (window.__forloopMandelbrotHtmlInit) return;
+            window.__forloopMandelbrotHtmlInit = true;
             try {
                 CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: CyberI18n.get('fractal.title') });
             } catch (e) {
@@ -438,13 +448,31 @@
             } catch (e) {
                 console.warn('CyberUI.init', e);
             }
-            scheduleMandelbrotDeepPanelAuthority();
+            scheduleFractalPanelAuthority();
             renderMbFractalFormula();
             const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
             if (!gl) return;
-            const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, document.getElementById('vs').text); gl.compileShader(vs);
-            const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, document.getElementById('fs').text); gl.compileShader(fs);
-            const prg = gl.createProgram(); gl.attachShader(prg, vs); gl.attachShader(prg, fs); gl.linkProgram(prg); gl.useProgram(prg);
+
+            function compileShader(type, elementId) {
+                const src = document.getElementById(elementId).text;
+                const sh = gl.createShader(type);
+                gl.shaderSource(sh, src);
+                gl.compileShader(sh);
+                return sh;
+            }
+
+            function linkShaderProgram(vsId, fsId) {
+                const vs = compileShader(gl.VERTEX_SHADER, vsId);
+                const fs = compileShader(gl.FRAGMENT_SHADER, fsId);
+                const prg = gl.createProgram();
+                gl.attachShader(prg, vs);
+                gl.attachShader(prg, fs);
+                gl.linkProgram(prg);
+                gl.useProgram(prg);
+                return prg;
+            }
+
+            const prg = linkShaderProgram('vs', 'fs');
             const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
             const pos = gl.getAttribLocation(prg, 'position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
             const uRes = gl.getUniformLocation(prg, 'u_res'), uCenter = gl.getUniformLocation(prg, 'u_center'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uJuliaC = gl.getUniformLocation(prg, 'u_julia_c'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
@@ -452,8 +480,7 @@
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
             const DEF_JULIA_X = -0.8, DEF_JULIA_Y = 0.156;
             const DEF_MAX_ITER = 256;
-            const DEF_SLIDER_JX = -800, DEF_SLIDER_JY = 156, DEF_SLIDER_ITER = 256;
-            const GPU_MATH_LABEL = 'Float32 / Pixel';
+            const GPU_MATH_LABEL = 'Float32 · Mandelbrot · Rad / Pinch';
             let maxIter = DEF_MAX_ITER, time = 0, isFlight = false;
             let mode = 'JULIA';
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
@@ -469,13 +496,57 @@
             let flightMouseCanvasX = null;
             let flightMouseCanvasY = null;
 
+            /** Bitmap-Pixel unter Cursor — gleiches Koordinatensystem wie canvas.width/height (HiDPI-fest). */
+            function canvasPixelFromClient(clientX, clientY) {
+                const rect = canvas.getBoundingClientRect();
+                const sx = canvas.width / Math.max(1, rect.width);
+                const sy = canvas.height / Math.max(1, rect.height);
+                return {
+                    mx: (clientX - rect.left) * sx,
+                    my: (clientY - rect.top) * sy,
+                };
+            }
+
+            /** Auto-Boost der Iteration bei hohem Zoom (nur Rendering; Slider bleibt Mindestwert). */
+            let lastEffectiveMaxIter = DEF_MAX_ITER;
+
+            /** Zwei-Finger-Zoom (Touch): Ankerpunkt unter Mittelfinger-Mitte */
+            let pinchStartDist = 0;
+            let pinchStartZoom = 1;
+            let pinchAnchor = null;
+
             function easeOutCubic(t) {
                 const u = 1 - t;
                 return 1 - u * u * u;
             }
 
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+            }
+
             function lerp(a, b, t) {
                 return a + (b - a) * t;
+            }
+
+            /** Punkt in ℂ unter Canvas-Pixel — konsistent mit Shader (uv·sc, sc = 3/zoom). */
+            function focalPlaneUnderCanvasPixel(mx, my, cw, ch, zoomVal, cx, cy) {
+                const s = Math.min(cw, ch);
+                if (s <= 0 || !Number.isFinite(zoomVal) || zoomVal <= 0) return { fX: cx, fY: cy };
+                const k = 3 / (s * zoomVal);
+                return {
+                    fX: cx + (mx - cw / 2) * k,
+                    fY: cy - (my - ch / 2) * k,
+                };
+            }
+
+            /** Neues Center nach Zoom, sodass (fX,fY) unter demselben Pixel bleibt (Pointer-Zoom). */
+            function centerKeepingFocalPlane(mx, my, cw, ch, zoomNew, fX, fY) {
+                const s = Math.min(cw, ch);
+                const k = 3 / (s * zoomNew);
+                return {
+                    cx: fX - (mx - cw / 2) * k,
+                    cy: fY + (my - ch / 2) * k,
+                };
             }
 
             function clampZoom(z) {
@@ -488,7 +559,7 @@
                 isFlight = false;
                 const bf = document.querySelector('#side-panel #btn-flight');
                 if (bf) {
-                    bf.innerText = 'START FLIGHT';
+                    bf.innerText = CyberI18n.get('fractal.flight_start');
                     bf.classList.remove('is-active');
                 }
             }
@@ -536,15 +607,11 @@
                 if (disp) disp.textContent = str;
             }
 
-            /** Während Flight: Blickzentrum = komplexer Punkt unter dem Cursor (wie Zoom-Fokus). */
-            function applyFlightMouseToCenter(w, h) {
-                const s = Math.min(w, h);
-                const mx = flightMouseCanvasX != null ? flightMouseCanvasX : w / 2;
-                const my = flightMouseCanvasY != null ? flightMouseCanvasY : h / 2;
-                const vx = centerX + ((mx - w / 2) / s / zoom) * 3;
-                const vy = centerY - ((my - h / 2) / s / zoom) * 3;
-                centerX = vx;
-                centerY = vy;
+            function onFlightMouseSync(e) {
+                if (!isFlight) return;
+                const p = canvasPixelFromClient(e.clientX, e.clientY);
+                flightMouseCanvasX = p.mx;
+                flightMouseCanvasY = p.my;
             }
 
             function tickResetAnim() {
@@ -553,18 +620,30 @@
                 const rawT = Math.min(1, (performance.now() - resetAnim.t0) / dur);
                 const f = resetAnim.from;
                 const to = resetAnim.to;
-                const e = easeOutCubic(rawT);
-                centerX = lerp(f.cx, to.cx, e);
-                centerY = lerp(f.cy, to.cy, e);
+                /** Zoom: ease-out. Bei starkem seitlichen Versatz Pan zeitlich entkoppeln (ease-in-out),
+                 * sonst wirken Center und Log-Zoom gekoppelt wie ein Wisch durch irrelevante Regionen. */
+                const ez = easeOutCubic(rawT);
+                const sCan = Math.min(canvas.width, canvas.height);
+                const z0 = Math.max(1e-300, f.zoom);
+                const z1 = Math.max(1e-300, to.zoom);
+                const zMid = Math.sqrt(z0 * z1);
+                const cell = 3 / (zMid * Math.max(1, sCan));
+                const nd = Math.hypot(canvas.width, canvas.height) / (2 * Math.max(1, sCan));
+                const viewDiagC = cell * nd;
+                const dc = Math.hypot(to.cx - f.cx, to.cy - f.cy);
+                const tinyPan = dc < viewDiagC * 0.065;
+                const ep = tinyPan ? ez : easeInOutCubic(rawT);
+                centerX = lerp(f.cx, to.cx, ep);
+                centerY = lerp(f.cy, to.cy, ep);
                 if (f.zoom > 0 && to.zoom > 0 && Number.isFinite(f.zoom) && Number.isFinite(to.zoom)) {
-                    zoom = Math.exp(lerp(Math.log(f.zoom), Math.log(to.zoom), e));
+                    zoom = Math.exp(lerp(Math.log(f.zoom), Math.log(to.zoom), ez));
                 } else {
-                    zoom = lerp(f.zoom, to.zoom, e);
+                    zoom = lerp(f.zoom, to.zoom, ez);
                 }
                 zoom = clampZoom(zoom);
-                juliaX = lerp(f.jx, to.jx, e);
-                juliaY = lerp(f.jy, to.jy, e);
-                maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, e))));
+                juliaX = lerp(f.jx, to.jx, ep);
+                juliaY = lerp(f.jy, to.jy, ep);
+                maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, ep))));
                 updateSliderMountVisual('jx-mount', juliaX * 1000);
                 updateSliderMountVisual('jy-mount', juliaY * 1000);
                 updateSliderMountVisual('iter-mount', maxIter);
@@ -599,7 +678,12 @@
                 const d = document.getElementById('readout-detail');
                 const zEl = document.getElementById('readout-zoom');
                 const p = document.getElementById('readout-prec');
-                if (d) d.textContent = String(maxIter);
+                if (d) {
+                    d.textContent =
+                        lastEffectiveMaxIter > maxIter
+                            ? `${maxIter}→${lastEffectiveMaxIter}`
+                            : String(maxIter);
+                }
                 if (zEl) zEl.textContent = formatZoomFactor(zoom);
                 if (p) p.textContent = GPU_MATH_LABEL;
             }
@@ -616,7 +700,7 @@
                 }
                 const bf = document.querySelector('#side-panel #btn-flight');
                 if (bf) {
-                    bf.innerText = 'START FLIGHT';
+                    bf.innerText = CyberI18n.get('fractal.flight_start');
                     bf.classList.remove('is-active');
                 }
                 zoom = clampZoom(zoom);
@@ -655,31 +739,43 @@
                 zoom = clampZoom(zoom);
                 if (resetAnim) tickResetAnim();
                 else if (isFlight) {
-                    applyFlightMouseToCenter(canvas.width, canvas.height);
+                    /* Auto-Zoom wie Rad-Zoom: gleicher Weltpunkt unter dem Cursor bleibt stabil (flightMouse = Pointer). */
+                    const cw = canvas.width;
+                    const ch = canvas.height;
+                    const s = Math.min(cw, ch);
+                    const mx = flightMouseCanvasX != null ? flightMouseCanvasX : cw / 2;
+                    const my = flightMouseCanvasY != null ? flightMouseCanvasY : ch / 2;
+
                     if (zoom >= ZOOM_MAX) {
                         zoom = ZOOM_MAX;
                         stopFlightUi();
-                    } else {
+                    } else if (s > 0 && Number.isFinite(zoom) && zoom > 0) {
                         const u = zoomDepthLogUnit(zoom);
                         const head = 1 - u;
-                        const nextZoom = zoom * (1 + 0.005 * head);
-                        if (nextZoom >= ZOOM_MAX) {
-                            zoom = ZOOM_MAX;
-                            stopFlightUi();
-                        } else {
-                            zoom = nextZoom;
-                        }
+                        const zoomBefore = zoom;
+                        let nextZoom = zoom * (1 + 0.005 * head);
+                        if (nextZoom >= ZOOM_MAX) nextZoom = ZOOM_MAX;
+                        zoom = clampZoom(nextZoom);
+                        const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, cw, ch, zoomBefore, centerX, centerY);
+                        const nc = centerKeepingFocalPlane(mx, my, cw, ch, zoom, fX, fY);
+                        centerX = nc.cx;
+                        centerY = nc.cy;
+                        if (zoom >= ZOOM_MAX) stopFlightUi();
                     }
+                    zoom = clampZoom(zoom);
                 }
                 zoom = clampZoom(zoom);
                 if (isFlight && zoom >= ZOOM_MAX) stopFlightUi();
                 time += 0.01;
 
                 zoom = clampZoom(zoom);
+                const depthU = zoomDepthLogUnit(zoom);
+                const boost = Math.floor((512 - maxIter) * 0.9 * depthU);
+                lastEffectiveMaxIter = Math.min(512, Math.max(32, maxIter + boost));
                 gl.uniform2f(uRes, canvas.width, canvas.height);
                 gl.uniform2f(uCenter, centerX, centerY);
                 gl.uniform1f(uZoom, zoom);
-                gl.uniform1i(uMaxIter, maxIter);
+                gl.uniform1i(uMaxIter, lastEffectiveMaxIter);
                 gl.uniform2f(uJuliaC, juliaX, juliaY);
                 gl.uniform1f(uTime, time);
                 gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
@@ -774,54 +870,134 @@
                     }
                 };
             }
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / Math.max(1, rect.width);
-                const scaleY = canvas.height / Math.max(1, rect.height);
-                flightMouseCanvasX = (e.clientX - rect.left) * scaleX;
-                flightMouseCanvasY = (e.clientY - rect.top) * scaleY;
+            window.addEventListener('keydown', (e) => {
+                if (e.code !== 'Space' && e.key !== ' ') return;
+                const t = e.target;
+                if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+                if (t && t.closest && t.closest('button')) return;
+                e.preventDefault();
+                btnFlightEl?.click();
             });
-            canvas.addEventListener('mouseleave', () => {
-                const w = canvas.width, h = canvas.height;
-                if (w > 0 && h > 0) {
-                    flightMouseCanvasX = w / 2;
-                    flightMouseCanvasY = h / 2;
-                }
+            window.addEventListener('mousemove', onFlightMouseSync, { passive: true });
+            window.addEventListener('pointermove', onFlightMouseSync, { passive: true });
+            canvas.addEventListener('mousemove', (e) => {
+                const p = canvasPixelFromClient(e.clientX, e.clientY);
+                flightMouseCanvasX = p.mx;
+                flightMouseCanvasY = p.my;
             });
             document.getElementById('btn-reset').onclick = () => resetView();
-            let isDrag = false, lX, lY;
+            let isDrag = false;
+            let dragLastCanvas = null;
             canvas.onmousedown = (e) => {
                 abortResetAnim();
                 if (isFlight) return;
-                isDrag = true; lX = e.clientX; lY = e.clientY;
+                isDrag = true;
+                dragLastCanvas = canvasPixelFromClient(e.clientX, e.clientY);
             };
             window.onmousemove = (e) => {
                 if (isFlight) return;
-                if (!isDrag) return;
-                const dx = e.clientX - lX, dy = e.clientY - lY, s = Math.min(canvas.width, canvas.height);
+                if (!isDrag || !dragLastCanvas) return;
+                const cur = canvasPixelFromClient(e.clientX, e.clientY);
+                const dx = cur.mx - dragLastCanvas.mx;
+                const dy = cur.my - dragLastCanvas.my;
+                dragLastCanvas = cur;
+                const s = Math.min(canvas.width, canvas.height);
                 centerX -= (dx / s / zoom) * 3;
                 centerY += (dy / s / zoom) * 3;
-                lX = e.clientX; lY = e.clientY;
             };
-            window.onmouseup = () => isDrag = false;
-            canvas.onwheel = (e) => {
-                e.preventDefault();
+            window.onmouseup = () => {
+                isDrag = false;
+                dragLastCanvas = null;
+            };
+
+            /**
+             * Rad / Trackpad: zoom proportional zu deltaY (sanfter als fester Faktor pro Event).
+             * ctrlKey ≈ Pinch-Zoom unter macOS; deltaMode berücksichtigt Zeilen-/Seiten-Raster.
+             */
+            canvas.addEventListener(
+                'wheel',
+                (e) => {
+                    e.preventDefault();
+                    abortResetAnim();
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    const { mx, my } = canvasPixelFromClient(e.clientX, e.clientY);
+                    if (isFlight) {
+                        flightMouseCanvasX = mx;
+                        flightMouseCanvasY = my;
+                    }
+                    const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, w, h, zoom, centerX, centerY);
+
+                    let dz = -e.deltaY;
+                    if (e.deltaMode === 1) dz *= 16;
+                    else if (e.deltaMode === 2) dz *= Math.max(320, Math.min(w, h)) / 12;
+
+                    let sensitivity = e.shiftKey ? 0.00032 : 0.00105;
+                    if (e.ctrlKey) sensitivity *= 1.45;
+
+                    const damp = deepZoomWheelDamp(zoom);
+                    let factor = Math.exp(dz * sensitivity * damp);
+
+                    const cap = e.shiftKey ? 1.018 : e.ctrlKey ? 1.11 : 1.092;
+                    factor = Math.max(1 / cap, Math.min(cap, factor));
+
+                    zoom *= factor;
+                    zoom = clampZoom(zoom);
+                    const nc = centerKeepingFocalPlane(mx, my, w, h, zoom, fX, fY);
+                    centerX = nc.cx;
+                    centerY = nc.cy;
+                },
+                { passive: false }
+            );
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length !== 2) return;
                 abortResetAnim();
-                const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left, my = e.clientY - rect.top, s = Math.min(canvas.width, canvas.height);
-                const fX = centerX + ((mx - canvas.width / 2) / s / zoom) * 3;
-                const fY = centerY - ((my - canvas.height / 2) / s / zoom) * 3;
-                let zM = e.shiftKey ? 1.002 : 1.015;
-                if (e.deltaY > 0) zM = 1.0 / zM;
-                const damp = deepZoomWheelDamp(zoom);
-                if (damp < 1) zM = Math.exp(Math.log(zM) * damp);
-                zoom *= zM;
-                zoom = clampZoom(zoom);
-                centerX = fX - ((mx - canvas.width / 2) / s / zoom) * 3;
-                centerY = fY + ((my - canvas.height / 2) / s / zoom) * 3;
-            };
+                const a = e.touches[0];
+                const b = e.touches[1];
+                pinchStartDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+                if (pinchStartDist < 8) return;
+                pinchStartZoom = zoom;
+                const cx = (a.clientX + b.clientX) / 2;
+                const cy = (a.clientY + b.clientY) / 2;
+                const w = canvas.width;
+                const h = canvas.height;
+                const { mx, my } = canvasPixelFromClient(cx, cy);
+                pinchAnchor = {
+                    mx,
+                    my,
+                    ...focalPlaneUnderCanvasPixel(mx, my, w, h, zoom, centerX, centerY),
+                };
+            }, { passive: true });
+
+            canvas.addEventListener(
+                'touchmove',
+                (e) => {
+                    if (e.touches.length !== 2 || !pinchAnchor || pinchStartDist < 8) return;
+                    e.preventDefault();
+                    const a = e.touches[0];
+                    const b = e.touches[1];
+                    const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+                    let ratio = d / pinchStartDist;
+                    ratio = Math.max(0.25, Math.min(4, ratio));
+                    zoom = clampZoom(pinchStartZoom * ratio);
+                    const { mx, my, fX, fY } = pinchAnchor;
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    const nc = centerKeepingFocalPlane(mx, my, w, h, zoom, fX, fY);
+                    centerX = nc.cx;
+                    centerY = nc.cy;
+                },
+                { passive: false }
+            );
+
+            canvas.addEventListener('touchend', () => {
+                pinchAnchor = null;
+                pinchStartDist = 0;
+            });
             render();
         });
+})();
     </script>
 </body>
 
