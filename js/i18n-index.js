@@ -76,7 +76,7 @@
             },
             labs: {
                 "fourier": { title: "Fourier-Transformation", description: "Die Musik der Mathematik. Zerlege komplexe Formen in harmonische Kreisschwingungen." },
-                "mandelbrot-deep": { title: "Fraktale", description: "Mandelbrot- und Julia-Menge im WebGL-Shader: Tiefenzoom und Pan an der fraktalen Grenze." },
+                "mandelbrot-deep": { title: "Fraktale", description: "Mandelbrot- und Julia-Mengen in der komplexen Ebene: Escapingzeit-Dynamik der Abbildung z↦z²+c als GPU-gestützte Iteration im Fragment-Shader; parametrisierte Exploration von c mit adaptiver Iterationstiefe entlang der fraktalen Randstruktur." },
                 "atomorbitale": { title: "Atomorbitale", description: "Kugelflächenfunktionen Y_ℓ^m in 3D: Wahrscheinlichkeitswolken und Quantenzahlen." },
                 "galtonboard": { title: "Galton Board", description: "Interaktive Simulation der Normalverteilung. Beobachte wie die Glockenkurve entsteht." },
                 "opti-lens": { title: "Linsenoptimierung", description: "Evolutionäre Linsenoptimierung (CMA-ES): Echtzeit-Strahlsimulation und Fokus-Suche." },
@@ -185,7 +185,7 @@
             },
             labs: {
                 "fourier": { title: "Fourier Transform", description: "The music of mathematics. Decompose complex shapes into harmonic circular oscillations." },
-                "mandelbrot-deep": { title: "Fractals", description: "Mandelbrot and Julia sets in WebGL shader: deep zoom and pan at the fractal boundary." },
+                "mandelbrot-deep": { title: "Fractals", description: "Mandelbrot and Julia sets in the complex plane: escape-time dynamics of z↦z²+c via GPU fragment-shader iteration; parametric exploration of c with adaptive iteration depth along the fractal boundary." },
                 "atomorbitale": { title: "Atomic Orbitals", description: "Spherical harmonics Y_ℓ^m in 3D: probability clouds and quantum numbers." },
                 "galtonboard": { title: "Galton Board", description: "Interactive simulation of normal distribution. Watch the bell curve emerge live." },
                 "opti-lens": { title: "Lens Optimization", description: "Evolutionary lens optimization (CMA-ES): real-time ray simulation and focus search." },
@@ -294,7 +294,7 @@
             },
             labs: {
                 "fourier": { title: "Transformada de Fourier", description: "La música de las matemáticas. Descomponga formas complejas en oscilaciones circulares armónicas." },
-                "mandelbrot-deep": { title: "Fractales", description: "Conjuntos de Mandelbrot y Julia en shader WebGL: zoom profundo y desplazamiento." },
+                "mandelbrot-deep": { title: "Fractales", description: "Conjuntos de Mandelbrot y Julia en el plano complejo: dinámica de tiempo de escape de z↦z²+c mediante iteración en shader de fragmentos en GPU; exploración paramétrica de c con profundidad adaptativa en la frontera fractal." },
                 "atomorbitale": { title: "Orbitales Atómicos", description: "Armónicos esféricos Y_ℓ^m in 3D: nubes de probabilidad y números cuánticos." },
                 "galtonboard": { title: "Tablero de Galton", description: "Simulación interactiva de la distribución normal. Observe la curva de campana en vivo." },
                 "opti-lens": { title: "Optimización de Lentes", description: "Optimización evolutiva de lentes (CMA-ES): simulación de rayos en tiempo real." },
@@ -403,7 +403,7 @@
             },
             labs: {
                 "fourier": { title: "Transformée de Fourier", description: "La musique des mathématiques. Décomposez des formes complexes en oscillations circulaires harmoniques." },
-                "mandelbrot-deep": { title: "Fractales", description: "Ensembles de Mandelbrot et Julia dans un shader WebGL : zoom profond et déplacement." },
+                "mandelbrot-deep": { title: "Fractales", description: "Ensembles de Mandelbrot et Julia dans le plan complexe : dynamique en temps d'échappement de z↦z²+c via itération GPU en shader fragmentaire ; exploration paramétrique de c et profondeur d'itération adaptive au voisinage de la frontière fractale." },
                 "atomorbitale": { title: "Orbitales Atomiques", description: "Harmoniques sphériques Y_ℓ^m en 3D : nuages de probabilité et nombres quantiques." },
                 "galtonboard": { title: "Planche de Galton", description: "Simulation interactive de la distribution normale. Observez la courbe en cloche se former en direct." },
                 "opti-lens": { title: "Optimisation de Lentille", description: "Optimisation évolutive de lentille (CMA-ES) : simulation de rayons en temps réel." },
@@ -512,7 +512,7 @@
             },
             labs: {
                 "fourier": { title: "Trasformata di Fourier", description: "La musica della matematica. Scomponi forme complesse in oscillazioni circolari armoniche." },
-                "mandelbrot-deep": { title: "Frattali", description: "Insiemi di Mandelbrot e Julia nel WebGL shader: zoom profondo e spostamento." },
+                "mandelbrot-deep": { title: "Frattali", description: "Insiemi di Mandelbrot e Julia nel piano complesso: dinamica del tempo di fuga di z↦z²+c tramite iterazione su GPU nel fragment shader; esplorazione parametrica di c con profondità di iterazione adattiva lungo il contorno frattale." },
                 "atomorbitale": { title: "Orbitali Atomici", description: "Armoniche sferiche Y_ℓ^m in 3D: nuvole di probabilità e numeri quantici." },
                 "galtonboard": { title: "Macchina di Galton", description: "Simulazione interattiva della distribuzione normale. Osserva la formazione della curva a campana dal vivo." },
                 "opti-lens": { title: "Ottimizzazione Lente", description: "Ottimizzazione evolutiva della lente (CMA-ES): simulazione dei raggi in tempo reale." },
@@ -621,7 +621,7 @@ pt: {
             },
             labs: {
                 "fourier": { title: "Transformada de Fourier", description: "A música da matemática. Decomponha formas complexas em oscilações." },
-                "mandelbrot-deep": { title: "Fractais", description: "Conjuntos de Mandelbrot e Julia: zoom profundo." },
+                "mandelbrot-deep": { title: "Fractais", description: "Conjuntos de Mandelbrot e Julia no plano complexo: dinâmica de tempo de escape de z↦z²+c por iteração em shader de fragmentos na GPU; exploração paramétrica de c com profundidade adaptativa na fronteira fractal." },
                 "atomorbitale": { title: "Orbitais Atômicos", description: "Harmônicos esféricos Y_ℓ^m em 3D." },
                 "galtonboard": { title: "Tábua de Galton", description: "Simulação interativa da distribuição normal." },
                 "opti-lens": { title: "Otimização de Lentes", description: "Otimização evolutiva de lentes (CMA-ES)." },
