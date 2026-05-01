@@ -67,8 +67,11 @@ das crazy!
 %emoji 😎
 %button zurück
 
-#120pt
+#
+%cwstack left
+120pt
 docalvers.de
+
 %stop
 
 `.trim();

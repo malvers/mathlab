@@ -305,6 +305,21 @@
             transform: translateY(-50%);
             justify-content: center;
         }
+        /* Intro-Ende: Domain zweizeilig, linksbündig; Prefix horizontal auf TLD-Breite angeglichen */
+        #catching-words-panel .cw-stack.cw-stack-align-left {
+            align-items: flex-start;
+            padding-left: clamp(20px, 7vw, 140px);
+            padding-right: clamp(12px, 4vw, 48px);
+            box-sizing: border-box;
+        }
+        #catching-words-panel .cw-stack-align-left .falling-word {
+            align-self: flex-start;
+            text-align: left;
+            transform-origin: left center;
+        }
+        #catching-words-panel .cw-stack-align-left .falling-word.cw-domain-prefix.cw-settled {
+            transform: scale(0.9) scaleX(var(--cw-brand-scalex, 1));
+        }
         /* Schlagwort: Orbitron-Gradient, Endgröße scale 0.9 */
         #catching-words-panel .falling-word {
             position: relative;
@@ -384,6 +399,53 @@
         }
         #catching-words-panel .falling-word.caught {
             animation: cw-caught 0.38s ease-out forwards;
+        }
+        /* %purplepulsating … — Violett + deutlich pulsierender Glow (text-shadow + drop-shadow) */
+        @keyframes cw-purple-pulse-glow {
+            0%,
+            100% {
+                text-shadow:
+                    0 0 6px rgba(255, 255, 255, 0.35),
+                    0 0 14px rgba(157, 80, 187, 0.95),
+                    0 0 28px rgba(157, 80, 187, 0.55),
+                    0 0 42px rgba(192, 132, 252, 0.25);
+                filter: drop-shadow(0 0 10px rgba(157, 80, 187, 0.65));
+            }
+            50% {
+                text-shadow:
+                    0 0 10px rgba(255, 230, 255, 0.55),
+                    0 0 24px rgba(224, 179, 255, 1),
+                    0 0 48px rgba(157, 80, 187, 0.85),
+                    0 0 72px rgba(192, 132, 252, 0.45);
+                filter:
+                    drop-shadow(0 0 22px rgba(224, 179, 255, 0.95))
+                    drop-shadow(0 0 38px rgba(157, 80, 187, 0.55));
+            }
+        }
+        #catching-words-panel .falling-word.cw-purple-pulse {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: #d8b4fe !important;
+            text-transform: none;
+            text-shadow:
+                0 0 12px rgba(157, 80, 187, 0.9),
+                0 0 26px rgba(192, 132, 252, 0.45);
+            filter: drop-shadow(0 0 12px rgba(157, 80, 187, 0.7));
+            /* Einflug + Glow-Puls parallel (nach Einflug übernimmt .cw-settled nur noch den Puls) */
+            animation-name: cinematic-fade-in-cw, cw-purple-pulse-glow;
+            animation-duration: calc(var(--cw-anim-sec) * 1s), 1.85s;
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1), ease-in-out;
+            animation-iteration-count: 1, infinite;
+            animation-fill-mode: forwards, none;
+        }
+        #catching-words-panel .falling-word.cw-purple-pulse.cw-settled {
+            opacity: 1 !important;
+            transform: scale(0.9);
+            letter-spacing: 12px;
+            /* schlägt .cw-settled { animation: none } zuverlässig */
+            animation: cw-purple-pulse-glow 1.85s ease-in-out infinite !important;
         }
         @keyframes cw-caught {
             to {
@@ -709,7 +771,7 @@
     </nav>
 
     <script src="resources/loc.js"></script>
-    <script src="resources/dramaturgie-inline.js?v=2"></script>
+    <script src="resources/dramaturgie-inline.js?v=3"></script>
     <script src="js/ui.js?v=4"></script>
     <script>
         try {
@@ -794,6 +856,10 @@
         let cwPlayAllActive = false;
         let cwPlayAllTimer = null;
         let cwPlayAllCompletionRaf = null;
+        /** Debug-HUD: Zeit von Play-all-Start bis `%stop` */
+        let cwDbgSwStart = null;
+        let cwDbgSwLatchMs = null;
+        let cwDbgSwRafId = null;
         const CW_PLAY_ALL_GAP_MS = 320;
         const cwActiveSfxSet = new Set();
         const CW_SFX_FADE_OUT_SEC = 1.15;
@@ -1060,6 +1126,54 @@
         loadIntroPersistedPrefs();
         syncIntroAmbientBtn();
 
+        function cwDbgClearStopwatchIdle() {
+            if (cwDbgSwRafId != null) {
+                cancelAnimationFrame(cwDbgSwRafId);
+                cwDbgSwRafId = null;
+            }
+            cwDbgSwStart = null;
+            cwDbgSwLatchMs = null;
+        }
+
+        function cwDbgStartStopwatch() {
+            if (cwDbgSwRafId != null) {
+                cancelAnimationFrame(cwDbgSwRafId);
+                cwDbgSwRafId = null;
+            }
+            cwDbgSwStart = performance.now();
+            cwDbgSwLatchMs = null;
+            cwDbgScheduleSwTick();
+        }
+
+        function cwDbgScheduleSwTick() {
+            if (cwDbgSwRafId != null) cancelAnimationFrame(cwDbgSwRafId);
+            function tick() {
+                syncCwMotionVars();
+                const hud = document.getElementById('cw-debug-hud');
+                const visible = hud && hud.classList.contains('visible');
+                if (
+                    cwDbgSwStart != null &&
+                    cwDbgSwLatchMs == null &&
+                    cwRunning &&
+                    visible
+                ) {
+                    cwDbgSwRafId = requestAnimationFrame(tick);
+                } else {
+                    cwDbgSwRafId = null;
+                }
+            }
+            const hud = document.getElementById('cw-debug-hud');
+            if (
+                cwDbgSwStart != null &&
+                cwDbgSwLatchMs == null &&
+                cwRunning &&
+                hud &&
+                hud.classList.contains('visible')
+            ) {
+                cwDbgSwRafId = requestAnimationFrame(tick);
+            }
+        }
+
         function syncCwDebugHudDom() {
             if (!document.body.classList.contains('mode-catching-words')) return;
             let hud = document.getElementById('cw-debug-hud');
@@ -1089,7 +1203,20 @@
                     cwSections.length > 0
                         ? 'Abschnitt ' + (cwSectionIndex + 1) + ' / ' + cwSections.length
                         : 'Abschnitt —';
-                hud.textContent = [
+                let swLine = null;
+                if (cwDbgSwLatchMs != null) {
+                    swLine =
+                        'Stopuhr → %stop: ' +
+                        (cwDbgSwLatchMs / 1000).toFixed(2) +
+                        ' s (bei %stop eingefroren)';
+                } else if (cwDbgSwStart != null) {
+                    swLine =
+                        'Stopuhr → %stop: ' +
+                        ((performance.now() - cwDbgSwStart) / 1000).toFixed(2) +
+                        ' s (läuft …)';
+                }
+                const head = swLine ? [swLine, ''] : [];
+                hud.textContent = head.concat([
                     secLine + '  ·  Play-all ' + (cwPlayAllActive ? 'an' : 'aus'),
                     'Flug (Keyframe): ' + cwAnimSec.toFixed(1) + ' s',
                     'Spawn-Takt:      ' + cwSpawnMs + ' ms (SS: ' + cwFastSpawnMs + ' ms)',
@@ -1101,7 +1228,7 @@
                     'S  Play-all neu ab Abschnitt 1 · Wechsel wenn Section fertig animiert',
                     '⌘D  Debug ein/aus (bleibt gespeichert)',
                     'M · Ambient ein/aus (Standard aus · bleibt gespeichert)',
-                ].join('\n');
+                ]).join('\n');
             }
         }
 
@@ -1121,6 +1248,7 @@
             if (!document.body.classList.contains('mode-catching-words')) return;
             cwDebugHudVisible = !cwDebugHudVisible;
             syncCwDebugHudDom();
+            cwDbgScheduleSwTick();
             saveIntroPersistedPrefs();
         }
 
@@ -1157,6 +1285,13 @@
         }
 
         function stopCwPlayAllFromScript() {
+            if (cwDbgSwStart != null && cwDbgSwLatchMs == null) {
+                cwDbgSwLatchMs = performance.now() - cwDbgSwStart;
+            }
+            if (cwDbgSwRafId != null) {
+                cancelAnimationFrame(cwDbgSwRafId);
+                cwDbgSwRafId = null;
+            }
             cwPlayAllActive = false;
             clearCwPlayAllTimer();
             syncCwMotionVars();
@@ -1173,6 +1308,7 @@
             syncCwStackVerticalAlign();
             stopCatchingWords();
             startCatchingWords();
+            cwDbgStartStopwatch();
         }
 
         function tryAdvanceCwPlayAllAfterCurrentSectionSpawnDone() {
@@ -1180,7 +1316,10 @@
             clearCwPlayAllTimer();
             if (cwSectionIndex < cwSections.length - 1) {
                 const stack = document.getElementById('cw-stack');
-                if (stack) stack.innerHTML = '';
+                if (stack) {
+                    stack.innerHTML = '';
+                    stack.classList.remove('cw-stack-align-left');
+                }
                 cwPlayAllTimer = setTimeout(() => {
                     cwPlayAllTimer = null;
                     if (!cwPlayAllActive || !document.body.classList.contains('mode-catching-words')) return;
@@ -1188,6 +1327,7 @@
                 }, CW_PLAY_ALL_GAP_MS);
             } else {
                 cwPlayAllActive = false;
+                cwDbgClearStopwatchIdle();
                 stopCatchingWords();
                 syncCwMotionVars();
             }
@@ -1233,6 +1373,7 @@
             if (!cwPaused) toggleCatchingWordsPause(); // Pause if not already paused
             
             cwPlayAllActive = false; // Stop auto-advancing sections when single stepping
+            cwDbgClearStopwatchIdle();
             clearCwPlayAllTimer();
             
             const stack = document.getElementById('cw-stack');
@@ -1300,6 +1441,7 @@
             // Only stop play-all if we manually clicked a button/key, not if it's just advancing
             if (delta !== 'auto') {
                 cwPlayAllActive = false;
+                cwDbgClearStopwatchIdle();
                 clearCwPlayAllTimer();
             }
             const actualDelta = delta === 'auto' ? 1 : delta;
@@ -1389,6 +1531,13 @@
 
             if (entry.kind === 'pause') {
                 // Just let the scheduleCwSpawn handle the delay for the next item
+                return;
+            }
+
+            if (entry.kind === 'stack-layout') {
+                const align = String(entry.align || 'center').toLowerCase();
+                if (align === 'left') playStack.classList.add('cw-stack-align-left');
+                else playStack.classList.remove('cw-stack-align-left');
                 return;
             }
 
@@ -1674,7 +1823,11 @@
 
             const el = document.createElement('button');
             el.type = 'button';
-            el.className = 'falling-word';
+            const labNorm = String(label || '').trim();
+            let domainExtra = '';
+            if (/^docalvers\.?$/i.test(labNorm)) domainExtra = ' cw-domain-prefix';
+            else if (/^de$/i.test(labNorm)) domainExtra = ' cw-domain-tld';
+            el.className = 'falling-word' + (entry.purplePulse ? ' cw-purple-pulse' : '') + domainExtra;
             el.textContent = label;
             el.style.zIndex = String(cwSpawnRoundIndex);
             if (fontPt != null && Number.isFinite(fontPt)) el.style.setProperty('font-size', fontPt + 'pt', 'important');
@@ -1685,6 +1838,9 @@
                 if (!ev.animationName || ev.animationName.indexOf('cinematic-fade-in') === -1) return;
                 if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
                 el.classList.add('cw-settled');
+                if (el.classList.contains('cw-domain-tld')) {
+                    scheduleCwBrandWidthAlign();
+                }
             });
 
             function onCatch(e) {
@@ -1695,6 +1851,24 @@
             }
             el.addEventListener('click', onCatch);
             el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
+        }
+
+        function scheduleCwBrandWidthAlign() {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const stack = document.getElementById('cw-stack');
+                    if (!stack || !stack.classList.contains('cw-stack-align-left')) return;
+                    const tld = stack.querySelector('.cw-domain-tld.cw-settled');
+                    const pre = stack.querySelector('.cw-domain-prefix.cw-settled');
+                    if (!tld || !pre) return;
+                    const tw = tld.getBoundingClientRect().width;
+                    const pw = pre.getBoundingClientRect().width;
+                    if (pw <= 0 || tw <= 0) return;
+                    let sx = tw / pw;
+                    sx = Math.min(Math.max(sx, 0.12), 3);
+                    pre.style.setProperty('--cw-brand-scalex', sx.toFixed(4));
+                });
+            });
         }
 
         function scheduleCwSpawn() {
@@ -1725,7 +1899,16 @@
             const stack = document.getElementById('cw-stack');
             if (!stack) return;
             // Count actual visible items (ignore pauses, navs, stops, sfx)
-            const visibleItems = Array.isArray(cwSequence) ? cwSequence.filter(e => e.kind !== 'pause' && e.kind !== 'stop-play-all' && e.kind !== 'nav' && e.kind !== 'sfx').length : 0;
+            const visibleItems = Array.isArray(cwSequence)
+                ? cwSequence.filter(
+                      (e) =>
+                          e.kind !== 'pause' &&
+                          e.kind !== 'stop-play-all' &&
+                          e.kind !== 'nav' &&
+                          e.kind !== 'sfx' &&
+                          e.kind !== 'stack-layout'
+                  ).length
+                : 0;
             stack.classList.toggle('cw-stack-centered', visibleItems <= 1);
         }
 
@@ -1750,6 +1933,7 @@
             if (stack) {
                 stack.innerHTML = '';
                 stack.classList.remove('cw-stack-fullscreen-mode');
+                stack.classList.remove('cw-stack-align-left');
             }
         }
 
@@ -2005,12 +2189,29 @@
                     continue;
                 }
 
+                const purpleLine =
+                    line.match(/^%purplepulsating\s*(.*)$/i) || line.match(/^%purplepulsation\s*(.*)$/i);
+                if (purpleLine) {
+                    const rest = String(purpleLine[1] || '').trim();
+                    if (rest) {
+                        current.push({ text: rest, fontSizePt: currentPt, purplePulse: true });
+                    }
+                    continue;
+                }
+
                 const pauseMatch = line.match(/^%pause\s+(\d+)/i);
                 if (pauseMatch) {
                     const ms = parseInt(pauseMatch[1], 10);
                     if (!isNaN(ms) && ms > 0) {
                         current.push({ kind: 'pause', ms: ms });
                     }
+                    continue;
+                }
+
+                if (/^%cwstack\b/i.test(line)) {
+                    const rest = line.replace(/^%cwstack\s*/i, '').trim().toLowerCase();
+                    const align = rest === 'left' ? 'left' : 'center';
+                    current.push({ kind: 'stack-layout', align });
                     continue;
                 }
 
