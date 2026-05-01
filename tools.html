@@ -8,6 +8,8 @@
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-index.js"></script>
     <!-- Central Branding & UI Engine -->
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
@@ -534,7 +536,7 @@
     </video>
 
     <div class="tools-panel">
-    <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zur Labor-Auswahl (Esc)"
+    <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zurück"
         aria-label="Werkzeug-Übersicht schließen und zur Labor-Auswahl">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
             stroke-width="2.2" stroke-linecap="round">
@@ -543,7 +545,7 @@
     </a>
     <header>
         <div class="header-content">
-            <h1>Doc Alvers Mathe-Labor</h1>
+            <h1 id="main-title">Doc Alvers Mathe-Labor</h1>
             <div class="subtitle" id="dynamic-subtitle">WERKZEUGE AUF EINEN BLICK</div>
         </div>
     </header>
@@ -551,7 +553,7 @@
     <!-- Labor-Scan + Universe (Galaxy) -->
     <div class="search-scan-row">
         <div id="search-mount"></div>
-        <a href="universe.html" class="universe-galaxy-btn" title="Universe · Labor-Galerie im Weltraum"
+        <a href="universe.html" class="universe-galaxy-btn" id="universe-btn" title="Universe · Labor-Galerie im Weltraum"
             aria-label="Universe · Labor-Galerie öffnen">
             <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
                 alt="" width="400" height="400" loading="lazy" decoding="async">
@@ -577,6 +579,13 @@
     <script src="js/labs-config.js"></script>
 
     <script>
+        // Init I18n BEFORE doing any UI stuff
+        const urlParams = new URLSearchParams(window.location.search);
+        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
+        if (CyberI18n && CyberI18n.translations[lang]) {
+            CyberI18n.current = lang;
+        }
+
         function renderLauncher(filterText = "") {
             const grid = document.getElementById('launcher-grid');
             if (!grid) return;
@@ -594,7 +603,8 @@
             const count = filteredData.length;
             const subtitle = document.getElementById('dynamic-subtitle');
             if (subtitle) {
-                subtitle.innerHTML = filterText === "" ? `${count} WERKZEUGE AUF EINEN BLICK` : `${count} TREFFER GEFUNDEN`;
+                const baseText = CyberI18n.get('index.ui.all_tools') || "WERKZEUGE AUF EINEN BLICK";
+                subtitle.innerHTML = filterText === "" ? `${count} ${baseText}` : `${count} TREFFER GEFUNDEN`;
             }
 
             if (count === 0) {
@@ -605,17 +615,22 @@
             // Separate Intro from the rest to keep it at top (Priority 1)
             const intro = filteredData.find(lab => lab.id === 'cinematic-intro');
             const otherLabs = filteredData.filter(lab => lab.id !== 'cinematic-intro')
-                                          .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+                                          .sort((a, b) => {
+                                              const titleA = CyberI18n.get('index.labs.' + a.id + '.title') || a.title || "";
+                                              const titleB = CyberI18n.get('index.labs.' + b.id + '.title') || b.title || "";
+                                              return titleA.localeCompare(titleB);
+                                          });
             
             const sortedLabs = intro ? [intro, ...otherLabs] : otherLabs;
 
             grid.innerHTML = sortedLabs.map(lab => {
                 const muteChrome = lab.id === 'mandelbrot-deep' ? ' tool-button--mute-chrome' : '';
+                const locTitle = CyberI18n.get('index.labs.' + lab.id + '.title') || lab.title;
                 return `
                 <a href="${lab.href}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">
                     <div class="tool-icon">${lab.icon}</div>
                     <div class="tool-info">
-                        <div class="tool-name">${lab.title}</div>
+                        <div class="tool-name">${locTitle}</div>
                     </div>
                     <div class="external-icon">↗</div>
                 </a>
@@ -628,7 +643,8 @@
         // Initialize launcher and UI
         CyberUI.init();
         
-        CyberUI.createSearch('search-mount', 'LABOR-SCAN STARTEN...', (val) => {
+        const searchHint = CyberI18n.get('index.ui.search_placeholder') || 'LABOR-SCAN STARTEN...';
+        CyberUI.createSearch('search-mount', searchHint, (val) => {
             renderLauncher(val);
         });
 
@@ -671,9 +687,17 @@
         }
 
         // Use Central Branding for consistent navigation & QR feature
+        const mainTitleText = CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor";
+        const subtitleText = `${toolCount} ${CyberI18n.get('index.ui.all_tools') || "WERKZEUGE AUF EINEN BLICK"}`;
+        
+        document.getElementById('main-title').textContent = mainTitleText;
+        document.title = mainTitleText;
+        if (document.getElementById('tools-hub-close')) document.getElementById('tools-hub-close').title = CyberI18n.get('index.view.back_title') || "Zurück";
+        if (document.getElementById('universe-btn')) document.getElementById('universe-btn').title = CyberI18n.get('index.ui.universe_tip') || "Universe";
+
         CyberBranding.init({
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: `${toolCount} WERKZEUGE AUF EINEN BLICK`,
+            title: mainTitleText,
+            subtitle: subtitleText,
             useExternalStyles: true,
             skipCanvasBranding: true
         });
