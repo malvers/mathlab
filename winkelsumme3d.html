@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Winkelsumme | ULTRA v5.3.8</title>
+    <title>docalvers | 3D Winkelsumme</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -39,7 +39,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" id="rail-toggle-btn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -79,6 +79,10 @@
             subtitle: CyberI18n.get('angle3d.sum_title')
         });
         CyberUI.init();
+        
+        // Localize rail tooltip
+        const railBtn = document.getElementById('rail-toggle-btn');
+        if (railBtn) railBtn.title = CyberI18n.get('geometry.lab_control');
 
         const container = document.getElementById('canvas-container');
         const COLORS = { alpha: 0xff8800, beta: 0x4ade80, gamma: 0xff4444 };

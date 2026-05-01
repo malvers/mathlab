@@ -23,6 +23,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Atomorbitale</title>
+    <script src="js/i18n.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" href="resources/favicon.png">
@@ -428,7 +429,7 @@
 </head>
 <body>
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+        <div class="nav-btn" onclick="toggleSidebar()" id="rail-toggle-btn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -442,17 +443,17 @@
 
         <div class="orbital-panel-scroll" aria-label="Kugelflächen — Steuerung">
             <div class="instrument-card kff-param-card">
-                <div class="instrument-title" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);">PARAMETER</div>
+                <div class="instrument-title" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.parameters'))</script></div>
                 <div class="card-content">
                     <div class="cyber-control-group kff-orbital-row">
                         <div class="label-row">
-                            <span>Orbital</span>
+                            <span><script>document.write(CyberI18n.get('orbitals.orbital'))</script></span>
                         </div>
                         <div class="kff-orbital-dropdown cyber-dropdown" id="kff-orbital-root">
                             <button type="button" class="cyber-select kff-orbital-trigger" id="orbital-trigger" style="width: 100%; font-family: 'Orbitron', sans-serif !important;" aria-haspopup="listbox" aria-expanded="false" aria-controls="orbital-dropdown-panel" aria-label="Orbital wählen">
                                 <span class="kff-orbital-trigger-inner" id="orbital-trigger-line">
                                     <span class="kff-orbital-y" id="orbital-trigger-y">Y0,0</span>
-                                    <span class="kff-orbital-tag">ORBITAL</span>
+                                    <span class="kff-orbital-tag"><script>document.write(CyberI18n.get('orbitals.orbital_suffix'))</script></span>
                                 </span>
                             </button>
                             <div class="dropdown-panel kff-orbital-panel" id="orbital-dropdown-panel" role="listbox" aria-labelledby="orbital-trigger" hidden></div>
@@ -460,21 +461,21 @@
                     </div>
                     <div class="cyber-control-group">
                         <div class="label-row">
-                            <label for="resolution">Auflösung (Gitter)</label>
+                            <label for="resolution"><script>document.write(CyberI18n.get('orbitals.resolution'))</script></label>
                             <span id="resolution-value" class="range-value">180</span>
                         </div>
                         <input id="resolution" class="cyber-slider" type="range" min="10" max="1000" value="180" step="1" style="--accent: #00d2ff" />
                     </div>
                     <div class="cyber-control-group">
                         <div class="label-row">
-                            <label for="specular">Specular</label>
+                            <label for="specular"><script>document.write(CyberI18n.get('orbitals.specular'))</script></label>
                             <span id="specular-value" class="range-value">32</span>
                         </div>
                         <input id="specular" class="cyber-slider" type="range" min="1" max="256" value="32" step="1" style="--accent: #00d2ff" />
                     </div>
                     <div class="cyber-control-group">
                         <div class="label-row">
-                            <label for="opacity">Opacity</label>
+                            <label for="opacity"><script>document.write(CyberI18n.get('orbitals.opacity'))</script></label>
                             <span id="opacity-value" class="range-value">1.00</span>
                         </div>
                         <input id="opacity" class="cyber-slider" type="range" min="0.1" max="1" value="1" step="0.05" style="--accent: #00d2ff" />
@@ -491,12 +492,12 @@
                             >
                                 <span class="kff-prob-switch-knob" aria-hidden="true"></span>
                             </button>
-                            <span class="kff-prob-cloud-text">Wahrscheinlichkeitswolke <span class="kff-prob-sq" title="Ein: nur |Y|²-Punkte. Aus: nur Kugelfläche (getrennte Modi).">|Y|²</span> (Fläche aus)</span>
+                            <span class="kff-prob-cloud-text"><script>document.write(CyberI18n.get('orbitals.prob_cloud'))</script> <span class="kff-prob-sq" title="Ein: nur |Y|²-Punkte. Aus: nur Kugelfläche (getrennte Modi).">|Y|²</span> <script>document.write(CyberI18n.get('orbitals.prob_desc'))</script></span>
                         </div>
                     </div>
                     <div class="kff-side-btns">
-                        <button type="button" class="cyber-btn" id="toggle-rotate" style="border-color: rgba(0, 210, 255, 0.4);">AUTO-ROTATION (LEERTASTE)</button>
-                        <button type="button" class="cyber-btn" id="help-toggle" style="border-color: rgba(0, 210, 255, 0.4);">TASTATURHILFE</button>
+                        <button type="button" class="cyber-btn" id="toggle-rotate" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.rotation'))</script></button>
+                        <button type="button" class="cyber-btn" id="help-toggle" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.help_btn'))</script></button>
                     </div>
                 </div>
             </div>
@@ -507,13 +508,13 @@
                         <div class="kff-help-keys">
                             <kbd>↑</kbd><span class="kff-help-sep">/</span><kbd>↓</kbd>
                         </div>
-                        <p class="kff-help-txt">Vorheriges / nächstes Orbital</p>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_prev_next'))</script></p>
                     </li>
                     <li>
                         <div class="kff-help-keys">
                             <kbd>←</kbd><span class="kff-help-sep">/</span><kbd>→</kbd>
                         </div>
-                        <p class="kff-help-txt">Auflösung: ±1 pro Tastendruck, mit <kbd>Shift</kbd> jeweils ±10</p>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_res'))</script></p>
                     </li>
                     <li>
                         <div class="kff-help-keys">
@@ -521,21 +522,21 @@
                             <span class="kff-help-sep">·</span>
                             <kbd>Esc</kbd>
                         </div>
-                        <p class="kff-help-txt">Auto-Rotation (Leertaste) · Zurück (Esc)</p>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_space_esc'))</script></p>
                     </li>
                     <li>
                         <div class="kff-help-keys">
                             <kbd>1</kbd><span class="kff-help-sep">–</span><kbd>9</kbd><span class="kff-help-sep">/</span><kbd>0</kbd>
                         </div>
-                        <p class="kff-help-txt">Auflösung: Schnellwahl (Ziffern)</p>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_digits'))</script></p>
                     </li>
                     <li>
                         <div class="kff-help-keys">
                             <kbd>H</kbd>
                         </div>
                         <div>
-                            <p class="kff-help-txt">Hilfe ein- und ausblenden</p>
-                            <p class="kff-help-meta">Trackball: links drehen · Rad / Mitte zoom · rechts schwenken</p>
+                            <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_toggle'))</script></p>
+                            <p class="kff-help-meta"><script>document.write(CyberI18n.get('orbitals.help_mouse'))</script></p>
                         </div>
                     </li>
                 </ul>
@@ -633,14 +634,16 @@
         }
 
         function orbitalSelectOptionText(orbitalId) {
-          return `${orbitalYPart(orbitalId)} ORBITAL`;
+          return `${orbitalYPart(orbitalId)} ${CyberI18n.get('orbitals.orbital_suffix')}`;
         }
 
         function updateOrbitalTriggerLine() {
           const yEl = document.getElementById("orbital-trigger-y");
+          const tagEl = document.querySelector("#orbital-trigger .kff-orbital-tag");
           if (!yEl) return;
           const id = ORBITAL_TYPES[state.orbitalIndex].id;
           yEl.textContent = orbitalYPart(id);
+          if (tagEl) tagEl.textContent = CyberI18n.get('orbitals.orbital_suffix');
         }
 
         function setOrbitalDropdownOpen(open) {
@@ -1540,12 +1543,14 @@
         window.addEventListener("load", () => {
             if (typeof CyberUI !== "undefined") {
                 CyberUI.init();
+                const railBtn = document.getElementById('rail-toggle-btn');
+                if (railBtn) railBtn.title = CyberI18n.get('geometry.lab_control');
             }
             if (typeof CyberBranding !== "undefined") {
                 CyberBranding.init({
                     useExternalStyles: true,
-                    title: "Doc Alvers Mathe-Labor",
-                    subtitle: "ATOMORBITALE"
+                    title: CyberI18n.get('ui.coach_title'),
+                    subtitle: CyberI18n.get('orbitals.title')
                 });
             }
         });

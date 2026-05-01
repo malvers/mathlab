@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Universe | docalvers ULTRA</title>
+    <title>docalvers | <script>document.write(CyberI18n.get('ui.universe_title') || 'Universe')</script></title>
+    <script src="js/i18n.js"></script>
     <style>
         body {
             margin: 0;
@@ -158,10 +159,9 @@
             height: 8px;
         }
 
-        .fs-toggle {
+        .fs-toggle, .close-page-btn, .back-center-btn {
             position: fixed;
             top: 30px;
-            right: 30px;
             z-index: 50000;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -179,12 +179,31 @@
             padding: 0;
             outline: none;
         }
-        .fs-toggle:hover {
+        .fs-toggle {
+            right: 30px;
+        }
+        .close-page-btn {
+            right: 84px;
+        }
+        .back-center-btn {
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            padding: 0 24px;
+            border-radius: 22px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            gap: 8px;
+        }
+        .fs-toggle:hover, .close-page-btn:hover, .back-center-btn:hover {
             opacity: 1;
             background: rgba(255, 255, 255, 0.1);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
         }
-        .fs-toggle svg {
+        .fs-toggle svg, .close-page-btn svg, .back-center-btn svg {
             width: 20px;
             height: 20px;
             fill: none;
@@ -203,13 +222,23 @@
     <div id="thumb-plane" aria-live="polite"></div>
 
     <button type="button" id="universe-close-focus" class="universe-close-x"
-        title="Ansicht schließen (Esc)" aria-label="Labor-Ansicht schließen">
+        title="Esc" aria-label="Close">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
     </button>
 
-    <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Vollbild (F)" aria-label="Vollbild umschalten (Taste F)">
+    <button type="button" class="back-center-btn" onclick="window.location.href='index.html'" title="Zurück zum Portal" aria-label="Zurück zum Portal">
+        ZURÜCK
+    </button>
+
+    <button type="button" class="close-page-btn" onclick="window.location.href='index.html'" title="Schließen" aria-label="Zurück zum Portal">
+        <svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+    </button>
+
+    <button type="button" class="fs-toggle" id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen (F)">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
