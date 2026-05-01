@@ -610,6 +610,11 @@
             animation: none;
             transform: none;
         }
+        /* Schnelle Screenshot-Reihe: keine Überblendung — sonst wirkt „Flackern“ (Altbild durchscheint). */
+        #catching-words-panel .cw-media-wrap.cw-media-fast.cw-media-fast-past {
+            visibility: hidden;
+            pointer-events: none;
+        }
         #catching-words-panel .cw-media-wrap.cw-media-fast .cw-media-img {
             width: 100vw;
             height: 100vh;
@@ -618,7 +623,7 @@
             border-radius: 0;
             object-fit: cover;
             object-position: top left;
-            transition: opacity 0.8s ease-in-out;
+            transition: none;
         }
         #catching-words-panel .cw-media-video,
         #catching-words-panel .cw-media-img {
@@ -1726,6 +1731,9 @@
                 if (entry.fast) {
                     wrap.classList.add('cw-media-fast');
                     playStack.classList.add('cw-stack-fullscreen-mode');
+                    playStack.querySelectorAll('.cw-media-wrap.cw-media-fast').forEach((w) => {
+                        w.classList.add('cw-media-fast-past');
+                    });
                 }
                 wrap.style.zIndex = String(cwSpawnRoundIndex);
                 let settled = false;
@@ -1753,7 +1761,7 @@
                 const img = document.createElement('img');
                 img.className = 'cw-media-img';
                 img.alt = '';
-                img.loading = 'lazy';
+                img.loading = entry.fast ? 'eager' : 'lazy';
                 img.decoding = 'async';
                 img.addEventListener('load', () => {
                     img.classList.add('cw-media-img-visible');
