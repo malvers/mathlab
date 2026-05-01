@@ -1,8 +1,10 @@
 /** Preloaded dramaturgie for file:// (fetch often fails); mirror resources/dramaturgie.txt if you add it. */
 window.__INTRO_DRAMATURGIE_TXT = `
-#
-120pt
+
+# 
+80pt
 DOC ALVERS 
+120pt
 MATHE-
 LABORE
 16pt
@@ -16,7 +18,9 @@ Interaktive Mathematik
 Labore
 
 // es werden alle screenshots gezeigt
+%pause 500
 %screenshots
+%pause 500
 
 # 
 60pt
@@ -36,7 +40,7 @@ Programmzeilen
 
 #
 für Euch!
-%picture resources/kids.webp
+%picture resources/kids.jpeg
 %sound resources/kids.wav
 //%video https://coverr.co/videos/welcome-back-to-school-classrooms-first-lesson
 
