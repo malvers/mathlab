@@ -67,6 +67,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script>
@@ -85,9 +86,9 @@
             // 1. Branding & UI Init
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "WINKEL AN GESCHNITTENEN PARALLELEN",
-                headerId: "sidebar-header" // Explicitly target the sidebar header
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.angle_lab'),
+                headerId: "sidebar-header" 
             });
             CyberUI.init();
 
@@ -108,7 +109,7 @@
             let parallelOffsetRel = 0.2;
 
             // 3. UI System
-            CyberUI.createCard('ui-container', 'WINKEL-ANALYSE', `
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.angle_analysis'), `
                 <div class="angle-stat" style="padding: 15px 0;">
                     <span style="color:var(--neon-blue); font-size: 2.2rem; font-weight: bold; font-family: 'Outfit', sans-serif; text-shadow: 0 0 15px var(--neon-blue);">α</span>
                     <span id="disp-alpha" class="angle-val" style="color:var(--neon-blue); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
@@ -118,7 +119,7 @@
                     <span id="disp-beta" class="angle-val" style="color:var(--neon-amber); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-amber);">0.0°</span>
                 </div>
                 <div class="angle-sum-area">
-                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">NEBENWINKEL-SUMME</div>
+                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('geometry.supp_sum')}</div>
                     <div class="angle-val" style="font-size:1.1rem;">
                         <span id="sum-a" style="color:var(--neon-blue);">0.0°</span> + 
                         <span id="sum-b" style="color:var(--neon-amber);">0.0°</span> = 180.0°
@@ -126,16 +127,16 @@
                 </div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('ui-container', 'LABOR-STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.lab_control'), `
                 <div class="cyber-control-group">
-                    <button class="cyber-btn primary" id="btn-toggle" style="width:100%; margin-bottom:8px;">PARALLELEN: AN</button>
-                    <button class="cyber-btn" id="btn-reset" style="width:100%; opacity:0.7;">LABOR RESET</button>
+                    <button class="cyber-btn primary" id="btn-toggle" style="width:100%; margin-bottom:8px;">${isParallel ? CyberI18n.get('geometry.parallel_on') : CyberI18n.get('geometry.parallel_off')}</button>
+                    <button class="cyber-btn" id="btn-reset" style="width:100%; opacity:0.7;">${CyberI18n.get('ui.reset')}</button>
                 </div>
                 
                 <div style="margin-top:20px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); letter-spacing:1px;">
-                        <span>TRANSVERSALE</span>
-                        <span>PARALLELEN</span>
+                        <span>${CyberI18n.get('geometry.transversal')}</span>
+                        <span>${CyberI18n.get('geometry.parallels')}</span>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
                         <button class="cyber-btn compact" id="btn-rot-t-l">↺</button>
@@ -144,7 +145,7 @@
                         <button class="cyber-btn compact" id="btn-rot-b-r">↻</button>
                     </div>
                 </div>
-                <div style="text-align:center; font-size:0.75rem; font-weight:bold; margin-top:15px; font-family:Orbitron; letter-spacing:1px; color:var(--neon-blue); opacity:0.8;">SCHRITTWEITE: 5.0°</div>
+                <div style="text-align:center; font-size:0.75rem; font-weight:bold; margin-top:15px; font-family:Orbitron; letter-spacing:1px; color:var(--neon-blue); opacity:0.8;">${CyberI18n.get('geometry.step_width', { deg: '5.0' })}</div>
             `);
 
             function rotateTransversal(deg) {
@@ -190,7 +191,7 @@
 
             document.getElementById('btn-toggle').onclick = () => {
                 isParallel = !isParallel;
-                document.getElementById('btn-toggle').innerText = isParallel ? "PARALLELEN: AN" : "PARALLELEN: AUS";
+                document.getElementById('btn-toggle').innerText = isParallel ? CyberI18n.get('geometry.parallel_on') : CyberI18n.get('geometry.parallel_off');
                 document.getElementById('btn-toggle').classList.toggle('active', isParallel);
             };
             document.getElementById('btn-reset').onclick = () => {

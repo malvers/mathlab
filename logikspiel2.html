@@ -330,18 +330,18 @@
                     style="background: rgba(10, 30, 15, 0.95); border: 2px solid var(--neon-green); border-radius: 16px; padding: 40px 60px; text-align: center;">
                     <div
                         style="font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon-green); letter-spacing: 4px;">
-                        PROTOKOLL GELÖST!</div>
-                    <button class="btn-next" onclick="nextLevel()">NÄCHSTES PROTOKOLL</button>
+                        ${CyberI18n.get('logic.solved')}</div>
+                    <button class="btn-next" onclick="nextLevel()">${CyberI18n.get('logic.next_protocol')}</button>
                 </div>
             </div>
 
             <div id="hint-overlay">
-                <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">HILFE-PROTOKOLL</h3>
+                <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">${CyberI18n.get('logic.hint_title')}</h3>
                 <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;"></div>
                 <input type="number" id="hint-input" class="hint-input">
                 <div style="display: flex; gap: 10px;">
-                    <button class="cyber-btn" onclick="checkHintAnswer()">BESTÄTIGEN</button>
-                    <button class="cyber-btn" onclick="closeHint()">ABBRECHEN</button>
+                    <button class="cyber-btn" onclick="checkHintAnswer()">${CyberI18n.get('logic.confirm')}</button>
+                    <button class="cyber-btn" onclick="closeHint()">${CyberI18n.get('logic.cancel')}</button>
                 </div>
             </div>
         </div>
@@ -349,6 +349,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script src="js/guard.js"></script>
@@ -367,8 +368,8 @@
             // UNTERTITEL IN ZAHLEN-PUZZLE GEÄNDERT
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "Zahlen Puzzle"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.logic_game')
             });
             CyberUI.init();
             setupStats();
@@ -379,22 +380,22 @@
 
         // SIDEBAR SETUP (ZÜGE GANZ OBEN)
         function setupStats() {
-            CyberUI.createCard('game-stats', 'MISSION STATUS', `
+            CyberUI.createCard('game-stats', CyberI18n.get('logic.mission_status'), `
                 <div style="display: flex; flex-direction: column; gap: 18px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">LEVEL</span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.level')}</span>
                         <span id="stat-level" style="font-family: Orbitron; font-size: 1.4rem; color: var(--neon-blue);">01</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">ZÜGE</span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.moves')}</span>
                         <span id="stat-moves" style="font-family: Orbitron; font-size: 1.4rem;">0</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">ZEIT</span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.time')}</span>
                         <span id="stat-time" style="font-family: Orbitron; font-size: 1.4rem;">00:00</span>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <span style="font-size: 0.7rem; opacity: 0.5; font-family:Orbitron;">RECHEN-MODUS</span>
+                        <span style="font-size: 0.7rem; opacity: 0.5; font-family:Orbitron;">${CyberI18n.get('logic.mode')}</span>
                         <div class="mode-toggle">
                             <button id="btn-sum" class="mode-btn active" onclick="setMode('sum')">ADD (+)</button>
                             <button id="btn-prod" class="mode-btn" onclick="setMode('prod')">MUL (X)</button>
@@ -405,17 +406,17 @@
 
             CyberUI.createCard('game-stats', '', `
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label class="cyber-label">PROTOKOLL-AUSWAHL</label>
+                    <label class="cyber-label">${CyberI18n.get('logic.protocol_select')}</label>
                     <select class="cyber-select" onchange="changeLevel(this.value)" style="width: 100%;">
-                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">LEVEL ${(i + 1).toString().padStart(2, '0')}</option>`).join('')}
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${CyberI18n.get('logic.level')} ${(i + 1).toString().padStart(2, '0')}</option>`).join('')}
                     </select>
                 </div>
             `, 'var(--neon-green)');
 
-            CyberUI.createCard('game-stats', 'STEUERUNG', `
+            CyberUI.createCard('game-stats', CyberI18n.get('ui.step'), `
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">PROTOKOLL NEUSTART</button>
-                    <button class="cyber-btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">HILFE ANFORDERN</button>
+                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">${CyberI18n.get('logic.protocol_restart')}</button>
+                    <button class="cyber-btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">${CyberI18n.get('logic.hint_request')}</button>
                 </div>
             `, 'var(--neon-orange)');
         }
@@ -431,7 +432,7 @@
         function initGame() {
             gridSize = currentLevel <= 3 ? 3 : (currentLevel <= 7 ? 4 : 5);
             const instr = document.getElementById('instruction-header');
-            instr.innerText = gameMode === 'sum' ? "Addiere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt." : "Multipliziere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt.";
+            instr.innerText = gameMode === 'sum' ? CyberI18n.get('logic.instruction_sum') : CyberI18n.get('logic.instruction_prod');
             generatePuzzle(); renderGrid(); updateValidation();
             document.getElementById('stat-level').textContent = currentLevel.toString().padStart(2, '0');
             document.getElementById('stat-moves').textContent = moves;
