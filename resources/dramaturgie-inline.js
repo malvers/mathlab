@@ -17,6 +17,17 @@ von Dr. Michael R. Alvers
 Interaktive Mathematik
 Labore
 
+#
+120pt
+5 Sprachen
+40pt
+deutsch
+englisch
+spanisch
+französisch
+italienisch
+
+#
 // es werden alle screenshots gezeigt
 %pause 500
 %screenshots
