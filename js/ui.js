@@ -1509,6 +1509,9 @@ class CyberUI {
                 const checkboxWrapper = this.createCheckbox(null, item.label, item.checked, (val) => {
                     if (item.onchange) item.onchange(val);
                 });
+                /* Sonst schließt der Fenster-mousedown-Dismiss das Menü oft vor checkbox.change */
+                checkboxWrapper.addEventListener('mousedown', (ev) => ev.stopPropagation());
+                checkboxWrapper.addEventListener('click', (ev) => ev.stopPropagation());
                 menu.appendChild(checkboxWrapper);
             } else {
                 // Action Item (No Checkbox)

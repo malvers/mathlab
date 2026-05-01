@@ -184,8 +184,10 @@
             padding: 10px 18px;
             background: rgba(6, 14, 28, 0.9);
             border-radius: 12px;
-            border: 0.5px solid rgba(0, 210, 255, 0.55);
-            box-shadow: 0 0 14px rgba(0, 210, 255, 0.12);
+            border: 0.5px solid rgba(242, 187, 68, 0.48);
+            box-shadow:
+                0 0 16px rgba(242, 187, 68, 0.14),
+                0 0 22px rgba(0, 210, 255, 0.08);
         }
 
         #canvas-container .mb-fractal-formula-box .katex-display {
@@ -194,9 +196,53 @@
 
         #canvas-container #mb-fractal-formula-tex .katex {
             font-size: 1.38rem !important;
-            color: #ffc49a !important;
-            text-shadow: 0 0 12px rgba(255, 170, 100, 0.32);
+            color: #f2bb44 !important;
+            text-shadow:
+                0 0 14px rgba(242, 187, 68, 0.42),
+                0 0 26px rgba(255, 228, 170, 0.18);
             line-height: 1.2 !important;
+        }
+
+        /* Haupt-WebGL: bei Orbit-Ansicht ausblenden (CyberCanvas liegt obenauf) */
+        #canvas-container #canvas.mb-fractal-view-hidden {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .orbit-view-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            background: #050b18;
+        }
+
+        .orbit-view-wrap[hidden] {
+            display: none !important;
+        }
+
+        #orbit-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .orbit-hud {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            max-width: min(92vw, 520px);
+            padding: 10px 14px;
+            box-sizing: border-box;
+            font-family: Outfit, system-ui, sans-serif;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            color: rgba(220, 235, 250, 0.92);
+            background: rgba(6, 14, 28, 0.88);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 210, 255, 0.28);
+            pointer-events: none;
+            z-index: 5;
         }
 
         /* CyberBranding legt .canvas-branding mit pointer-events:auto über den Plot — Maus erreichte den Canvas nicht. */
@@ -223,6 +269,10 @@
     <main id="main-content">
         <div id="canvas-container">
             <canvas id="canvas"></canvas>
+            <div id="orbit-view-wrap" class="orbit-view-wrap" hidden aria-hidden="true">
+                <canvas id="orbit-canvas"></canvas>
+                <div id="orbit-hud" class="orbit-hud"></div>
+            </div>
             <div class="mb-fractal-formula-overlay" aria-hidden="true">
                 <div class="mb-fractal-formula-box">
                     <div id="mb-fractal-formula-tex"></div>
@@ -278,7 +328,8 @@
     <script src="js/branding/overlays.js?v=542"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=542"></script>
-    <script src="js/ui.js?v=542"></script>
+    <script src="js/ui.js?v=543"></script>
+    <script src="js/cyber-canvas.js"></script>
     <script src="js/forloop-canvas-png.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
@@ -300,7 +351,7 @@
                 katex.render(tex, el, { throwOnError: false, displayMode: true });
             } else {
                 el.textContent = 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
-                el.style.cssText = 'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#ffc49a;text-align:center;';
+                el.style.cssText = 'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#f2bb44;text-align:center;text-shadow:0 0 12px rgba(242,187,68,0.4);';
             }
         }
 
@@ -453,7 +504,248 @@
             scheduleFractalPanelAuthority();
             renderMbFractalFormula();
             const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+            /** Standard: Orbit-Ebene (CyberCanvas); FRACTAL = WebGL-Ansicht */
+            let mainPlane = 'ORBIT';
+            let orbitRedrawTimer = null;
+            let fractalRenderPaused = true;
+            /** Orbit-Ebene: 'c' | 'z0' | null — Punkt ziehen vs. Pan */
+            let orbitCanvasDrag = null;
+            const ORBIT_DRAW_STEPS_MIN = 1;
+            const ORBIT_DRAW_STEPS_MAX = 56;
+            /** Anzahl gezeichneter Orbit-Schritte (↑/↓ nur in Orbit-Ansicht) */
+            let orbitDrawStepsCap = 22;
+            /** Verbindungslinien zwischen Orbit-Punkten */
+            let orbitShowConnectorLines = true;
+
+            /** Orbit-Ansicht Leertaste: Raster über sichtbare Ebene; orange = Orbit bleibt begrenzt */
+            let orbitScanActive = false;
+            let orbitScanCols = 32;
+            let orbitScanRows = 32;
+            let orbitScanIx = 0;
+            let orbitScanIy = 0;
+            let orbitScanProbeCx = 0;
+            let orbitScanProbeCy = 0;
+            /** Laufende Scan-Zelle entlang Pfad — alle N Schritte Overlay-Bitmap neu */
+            let orbitScanVisitSerial = 0;
+            const orbitScanStableHits = [];
+            const orbitScanStableKeys = new Set();
+            /** Eigenes RAF während Scan — CyberCanvas setzt nach Render immer needsRedraw=false */
+            let orbitScanAnimRaf = null;
+            /** Bitmap nur alle N Raster-Schritte neu aus Hits zeichnen (alle Hits bleiben erhalten) */
+            let orbitScanHitsCanvas = null;
+            let orbitScanHitsCtx = null;
+            /** Oberes und unteres Viertel der Orbit-Ansicht wird nicht abgetastet */
+            const ORBIT_SCAN_Y_MARGIN_FRAC = 0.25;
+            /** Overlay-Bitmap neu rendern alle N Scan-Schritte */
+            const ORBIT_SCAN_OVERLAY_REBUILD_EVERY_STEPS = 4;
+
+            const LS_MB_MAIN_PLANE = 'forloop.mandelbrot.mainPlane';
+            const LS_MB_ORBIT_STEPS = 'forloop.mandelbrot.orbitDrawStepsCap';
+            const LS_MB_ORBIT_LINES = 'forloop.mandelbrot.orbitShowConnectorLines';
+
+            function persistMandelbrotMainPlane() {
+                try {
+                    localStorage.setItem(LS_MB_MAIN_PLANE, mainPlane);
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            function persistMandelbrotOrbitSteps() {
+                try {
+                    localStorage.setItem(LS_MB_ORBIT_STEPS, String(orbitDrawStepsCap));
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            function persistMandelbrotOrbitConnectorLines() {
+                try {
+                    localStorage.setItem(LS_MB_ORBIT_LINES, orbitShowConnectorLines ? '1' : '0');
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            /** Liest gespeicherte Orbit-Schritte; Rückgabe: gespeicherte Ansicht oder null */
+            function loadMandelbrotPersist() {
+                try {
+                    const steps = localStorage.getItem(LS_MB_ORBIT_STEPS);
+                    if (steps != null) {
+                        const n = parseInt(steps, 10);
+                        if (Number.isFinite(n)) {
+                            orbitDrawStepsCap = Math.max(
+                                ORBIT_DRAW_STEPS_MIN,
+                                Math.min(ORBIT_DRAW_STEPS_MAX, n)
+                            );
+                        }
+                    }
+                    const plane = localStorage.getItem(LS_MB_MAIN_PLANE);
+                    const lines = localStorage.getItem(LS_MB_ORBIT_LINES);
+                    if (lines === '0') orbitShowConnectorLines = false;
+                    else if (lines === '1') orbitShowConnectorLines = true;
+                    return plane === 'FRACTAL' || plane === 'ORBIT' ? plane : null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
             if (!gl) return;
+
+            function orbitProbeBounded(cr, ci, z0x, z0y, maxSteps) {
+                let zx = z0x;
+                let zy = z0y;
+                for (let i = 0; i < maxSteps; i++) {
+                    if (zx * zx + zy * zy > 4) return false;
+                    const nx = zx * zx - zy * zy + cr;
+                    const ny = 2 * zx * zy + ci;
+                    zx = nx;
+                    zy = ny;
+                }
+                return zx * zx + zy * zy <= 4;
+            }
+
+            function orbitScanRebuildGrid(cc) {
+                const cellPx = 1;
+                orbitScanCols = Math.min(560, Math.max(32, Math.floor(cc.width / cellPx)));
+                const fullRows = Math.min(560, Math.max(32, Math.floor(cc.height / cellPx)));
+                const chop = Math.floor(fullRows * ORBIT_SCAN_Y_MARGIN_FRAC);
+                orbitScanRows = Math.max(4, fullRows - 2 * chop);
+                orbitScanIx = 0;
+                orbitScanIy = 0;
+                orbitScanStableHits.length = 0;
+                orbitScanStableKeys.clear();
+                orbitScanVisitSerial = 0;
+                orbitScanProbeCx = cc.view.minX;
+                const vy = cc.view.maxY - cc.view.minY;
+                orbitScanProbeCy = cc.view.maxY - ORBIT_SCAN_Y_MARGIN_FRAC * vy;
+                rebuildOrbitScanStableHitsLayer(cc);
+            }
+
+            function ensureOrbitScanHitsLayer(cc) {
+                if (
+                    !orbitScanHitsCanvas ||
+                    orbitScanHitsCanvas.width !== cc.width ||
+                    orbitScanHitsCanvas.height !== cc.height
+                ) {
+                    orbitScanHitsCanvas = document.createElement('canvas');
+                    orbitScanHitsCanvas.width = cc.width;
+                    orbitScanHitsCanvas.height = cc.height;
+                    orbitScanHitsCtx = orbitScanHitsCanvas.getContext('2d');
+                    return true;
+                }
+                return false;
+            }
+
+            /** Neuzeichnen aller stabilen Punkte auf die Overlay-Bitmap */
+            function rebuildOrbitScanStableHitsLayer(cc) {
+                ensureOrbitScanHitsLayer(cc);
+                const hctx = orbitScanHitsCtx;
+                const cvs = orbitScanHitsCanvas;
+                if (!hctx || !cvs) return;
+                hctx.clearRect(0, 0, cvs.width, cvs.height);
+                if (!orbitScanStableHits.length) return;
+                const rrGlow = 1.52;
+                const rrCore = 0.92;
+                hctx.save();
+                hctx.beginPath();
+                hctx.fillStyle = 'rgba(252, 224, 158, 0.52)';
+                for (let hi = 0; hi < orbitScanStableHits.length; hi++) {
+                    const p = orbitScanStableHits[hi];
+                    const px = cc.mapX(p.x);
+                    const py = cc.mapY(p.y);
+                    hctx.moveTo(px + rrGlow, py);
+                    hctx.arc(px, py, rrGlow, 0, Math.PI * 2);
+                }
+                hctx.fill();
+                hctx.beginPath();
+                hctx.fillStyle = 'rgba(242, 187, 68, 0.96)';
+                for (let hi = 0; hi < orbitScanStableHits.length; hi++) {
+                    const p = orbitScanStableHits[hi];
+                    const px = cc.mapX(p.x);
+                    const py = cc.mapY(p.y);
+                    hctx.moveTo(px + rrCore, py);
+                    hctx.arc(px, py, rrCore, 0, Math.PI * 2);
+                }
+                hctx.fill();
+                hctx.restore();
+            }
+
+            function orbitScanPixelToComplex(cc) {
+                const vx = cc.view.maxX - cc.view.minX;
+                const vy = cc.view.maxY - cc.view.minY;
+                const nx = Math.max(1, orbitScanCols - 1);
+                const ny = Math.max(1, orbitScanRows - 1);
+                const tx = orbitScanIx / nx;
+                const ty = orbitScanIy / ny;
+                const yDown = ORBIT_SCAN_Y_MARGIN_FRAC + ty * (1 - 2 * ORBIT_SCAN_Y_MARGIN_FRAC);
+                return {
+                    sx: cc.view.minX + tx * vx,
+                    sy: cc.view.maxY - yDown * vy,
+                };
+            }
+
+            function orbitScanFinishComplete() {
+                orbitScanActive = false;
+                stopOrbitScanAnim();
+                const c2 = typeof CyberCanvasInstance !== 'undefined' ? CyberCanvasInstance : null;
+                if (c2?.isInitialized) {
+                    rebuildOrbitScanStableHitsLayer(c2);
+                    c2.needsRedraw = true;
+                }
+            }
+
+            /** Pro Zeile links → rechts, Zeilen von oben (Bild) nach unten; am Ende automatisch stoppen */
+            function orbitScanAdvanceTopDown() {
+                orbitScanIx++;
+                if (orbitScanIx >= orbitScanCols) {
+                    orbitScanIx = 0;
+                    orbitScanIy++;
+                }
+                if (orbitScanIy >= orbitScanRows) {
+                    orbitScanFinishComplete();
+                }
+            }
+
+            function stopOrbitScanAnim() {
+                if (orbitScanAnimRaf != null) {
+                    cancelAnimationFrame(orbitScanAnimRaf);
+                    orbitScanAnimRaf = null;
+                }
+            }
+
+            function orbitScanAnimTick() {
+                orbitScanAnimRaf = null;
+                if (!orbitScanActive || mainPlane !== 'ORBIT') return;
+                const cc = typeof CyberCanvasInstance !== 'undefined' ? CyberCanvasInstance : null;
+                if (!cc?.isInitialized) return;
+                drawOrbitPlane();
+                if (orbitScanActive && mainPlane === 'ORBIT') {
+                    orbitScanAnimRaf = requestAnimationFrame(orbitScanAnimTick);
+                }
+            }
+
+            function startOrbitScanAnim() {
+                stopOrbitScanAnim();
+                orbitScanAnimRaf = requestAnimationFrame(orbitScanAnimTick);
+            }
+
+            function toggleOrbitScan() {
+                const cc = typeof CyberCanvasInstance !== 'undefined' ? CyberCanvasInstance : null;
+                if (!cc?.isInitialized || mainPlane !== 'ORBIT') return;
+                orbitScanActive = !orbitScanActive;
+                if (orbitScanActive) {
+                    orbitScanRebuildGrid(cc);
+                    startOrbitScanAnim();
+                } else {
+                    stopOrbitScanAnim();
+                    orbitScanStableHits.length = 0;
+                    orbitScanStableKeys.clear();
+                    rebuildOrbitScanStableHitsLayer(cc);
+                }
+                cc.needsRedraw = true;
+                drawOrbitPlane();
+            }
 
             function compileShader(type, elementId) {
                 const src = document.getElementById(elementId).text;
@@ -572,6 +864,387 @@
                     bf.innerText = CyberI18n.get('fractal.flight_start');
                     bf.classList.remove('is-active');
                 }
+            }
+
+            function stopOrbitRedrawLoop() {
+                if (orbitRedrawTimer != null) {
+                    clearInterval(orbitRedrawTimer);
+                    orbitRedrawTimer = null;
+                }
+            }
+
+            function teardownOrbitCyberCanvas() {
+                stopOrbitRedrawLoop();
+                stopOrbitScanAnim();
+                orbitScanActive = false;
+                orbitScanStableHits.length = 0;
+                orbitScanStableKeys.clear();
+                orbitScanHitsCanvas = null;
+                orbitScanHitsCtx = null;
+                orbitCanvasDrag = null;
+                if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                    CyberCanvasInstance.cleanup();
+                }
+            }
+
+            function startOrbitRedrawLoop() {
+                stopOrbitRedrawLoop();
+                orbitRedrawTimer = setInterval(() => {
+                    if (mainPlane === 'ORBIT' && typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                        CyberCanvasInstance.needsRedraw = true;
+                    }
+                }, 160);
+            }
+
+            function syncOrbitHud() {
+                const el = document.getElementById('orbit-hud');
+                if (!el) return;
+                const hint = mode === 'MANDELBROT' ? CyberI18n.get('fractal.orbit_help_mb') : CyberI18n.get('fractal.orbit_help_jl');
+                let detail;
+                if (mode === 'MANDELBROT') {
+                    detail = `c = ${centerX.toFixed(5)} ${centerY >= 0 ? '+' : ''} ${centerY.toFixed(5)}i · z₀ = 0`;
+                } else {
+                    detail = `c = ${juliaX.toFixed(5)} ${juliaY >= 0 ? '+' : ''} ${juliaY.toFixed(5)}i · z₀ = ${centerX.toFixed(5)} ${centerY >= 0 ? '+' : ''} ${centerY.toFixed(5)}i`;
+                }
+                let hudBase = `${hint}\n\n${detail}\n\n${CyberI18n.get('fractal.orbit_drag_hint')}\n\n${CyberI18n.get('fractal.orbit_steps_arrows', { n: orbitDrawStepsCap })}\n\n${CyberI18n.get('fractal.orbit_scan_hint')}`;
+                if (orbitScanActive) hudBase += `\n${CyberI18n.get('fractal.orbit_scan_running')}`;
+                el.textContent = hudBase;
+            }
+
+            function drawOrbitPlane() {
+                const cc = CyberCanvasInstance;
+                if (!cc.isInitialized || mainPlane !== 'ORBIT') return;
+                cc.drawGrid({
+                    vignette: false,
+                    mainColor: 'rgba(0, 210, 255, 0.42)',
+                    gridColor: 'rgba(255, 255, 255, 0.045)',
+                });
+                const ctx = cc.ctx;
+
+                function strokeCircleRadius(R, strokeStyle, dashed) {
+                    const ox = cc.mapX(0);
+                    const oy = cc.mapY(0);
+                    const pxPerUnit = cc.width / (cc.view.maxX - cc.view.minX);
+                    const rad = R * pxPerUnit;
+                    if (rad <= 0.5) return;
+                    ctx.save();
+                    ctx.strokeStyle = strokeStyle;
+                    ctx.lineWidth = 0.85;
+                    ctx.setLineDash(dashed ? [7, 5] : []);
+                    ctx.beginPath();
+                    ctx.arc(ox, oy, rad, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                strokeCircleRadius(1, 'rgba(255,255,255,0.38)', true);
+                strokeCircleRadius(2, 'rgba(0, 210, 255, 0.42)', true);
+
+                let z0x;
+                let z0y;
+                let cr;
+                let ci;
+                if (mode === 'MANDELBROT') {
+                    z0x = 0;
+                    z0y = 0;
+                    cr = centerX;
+                    ci = centerY;
+                } else {
+                    z0x = centerX;
+                    z0y = centerY;
+                    cr = juliaX;
+                    ci = juliaY;
+                }
+
+                const pts = [];
+                let zx = z0x;
+                let zy = z0y;
+                /** ↑/↓ in Orbit-Ansicht steuern orbitDrawStepsCap */
+                const cap = Math.max(ORBIT_DRAW_STEPS_MIN, Math.min(ORBIT_DRAW_STEPS_MAX, orbitDrawStepsCap));
+                for (let i = 0; i < cap; i++) {
+                    pts.push({ x: zx, y: zy });
+                    if (zx * zx + zy * zy > 4) break;
+                    const nx = zx * zx - zy * zy + cr;
+                    const ny = 2 * zx * zy + ci;
+                    zx = nx;
+                    zy = ny;
+                }
+
+                const orbitStroke = 'rgba(255, 196, 154, 0.72)';
+                const nSeg = pts.length - 1;
+                if (orbitShowConnectorLines) {
+                    for (let i = 0; i < nSeg; i++) {
+                        const t = nSeg <= 1 ? 1 : i / (nSeg - 1);
+                        ctx.strokeStyle = orbitStroke;
+                        ctx.lineWidth = 0.55 + t * 1.35;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(cc.mapX(pts[i].x), cc.mapY(pts[i].y));
+                        ctx.lineTo(cc.mapX(pts[i + 1].x), cc.mapY(pts[i + 1].y));
+                        ctx.stroke();
+                    }
+                }
+
+                const ni = Math.max(1, pts.length - 1);
+                const epsNear = 1e-10;
+                if (orbitShowConnectorLines) {
+                    ctx.fillStyle = 'rgba(255, 196, 154, 0.82)';
+                    pts.forEach((p, i) => {
+                        if (i === 0) return;
+                        const dc = (p.x - cr) * (p.x - cr) + (p.y - ci) * (p.y - ci);
+                        if (dc < epsNear) return;
+                        const px = cc.mapX(p.x);
+                        const py = cc.mapY(p.y);
+                        const tr = ni <= 0 ? 1 : i / ni;
+                        const r = 1.35 + tr * 1.55;
+                        ctx.beginPath();
+                        ctx.arc(px, py, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+
+                function drawHandle(mx, my, isDraggable) {
+                    const px = cc.mapX(mx);
+                    const py = cc.mapY(my);
+                    ctx.save();
+                    ctx.fillStyle = isDraggable ? '#e53935' : 'rgba(160, 175, 198, 0.72)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(px, py, isDraggable ? 6.5 : 4.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                drawHandle(cr, ci, true);
+                if (mode === 'JULIA') {
+                    drawHandle(z0x, z0y, true);
+                } else {
+                    drawHandle(0, 0, false);
+                }
+
+                ctx.font = 'bold 12px Orbitron,sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillStyle = 'rgba(255,255,255,0.92)';
+                ctx.fillText('c', cc.mapX(cr) + 9, cc.mapY(ci) - 7);
+                if (mode === 'JULIA') {
+                    ctx.fillText('z₀', cc.mapX(z0x) + 9, cc.mapY(z0y) + 17);
+                } else {
+                    ctx.fillText('z₀', cc.mapX(0) + 9, cc.mapY(0) + 17);
+                }
+
+                const resizedScanLayer = ensureOrbitScanHitsLayer(cc);
+                if (resizedScanLayer && orbitScanStableHits.length) rebuildOrbitScanStableHitsLayer(cc);
+
+                if (orbitScanActive) {
+                    const scanIters = Math.min(176, Math.max(56, maxIter));
+                    const stepsPf = 104;
+                    for (let s = 0; s < stepsPf && orbitScanActive; s++) {
+                        const { sx, sy } = orbitScanPixelToComplex(cc);
+                        orbitScanProbeCx = sx;
+                        orbitScanProbeCy = sy;
+                        let stab;
+                        if (mode === 'MANDELBROT') {
+                            stab = orbitProbeBounded(sx, sy, 0, 0, scanIters);
+                        } else {
+                            stab = orbitProbeBounded(juliaX, juliaY, sx, sy, scanIters);
+                        }
+                        const cellKey = orbitScanIx + ',' + orbitScanIy;
+                        if (stab && !orbitScanStableKeys.has(cellKey)) {
+                            orbitScanStableKeys.add(cellKey);
+                            orbitScanStableHits.push({ x: sx, y: sy });
+                        }
+                        orbitScanVisitSerial++;
+                        if (orbitScanVisitSerial % ORBIT_SCAN_OVERLAY_REBUILD_EVERY_STEPS === 0) {
+                            rebuildOrbitScanStableHitsLayer(cc);
+                        }
+                        orbitScanAdvanceTopDown();
+                    }
+                }
+
+                if (
+                    orbitScanStableHits.length &&
+                    orbitScanHitsCanvas &&
+                    orbitScanHitsCanvas.width === cc.width &&
+                    orbitScanHitsCanvas.height === cc.height
+                ) {
+                    if (!orbitScanActive) rebuildOrbitScanStableHitsLayer(cc);
+                    ctx.drawImage(orbitScanHitsCanvas, 0, 0);
+                }
+
+                if (orbitScanActive) {
+                    const px = cc.mapX(orbitScanProbeCx);
+                    const py = cc.mapY(orbitScanProbeCy);
+                    ctx.save();
+                    const g = ctx.createRadialGradient(px, py, 0, px, py, 13);
+                    g.addColorStop(0, 'rgba(255, 249, 232, 0.98)');
+                    g.addColorStop(0.26, 'rgba(248, 215, 125, 0.95)');
+                    g.addColorStop(0.55, 'rgba(242, 187, 68, 0.72)');
+                    g.addColorStop(1, 'rgba(217, 158, 42, 0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 13, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 239, 205, 0.96)';
+                    ctx.lineWidth = 1.35;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 4.2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                syncOrbitHud();
+            }
+
+            function setupOrbitCyberCanvas() {
+                teardownOrbitCyberCanvas();
+                CyberCanvasInstance.init('orbit-canvas', {}, {
+                    showTelemetry: false,
+                    showAxes: true,
+                    showLabels: true,
+                    showGrid: false,
+                });
+                CyberCanvasInstance.resetView(-1.55, 1.55);
+                CyberCanvasInstance.onResize = drawOrbitPlane;
+
+                function orbitPickDragTarget(mx, my) {
+                    let cr;
+                    let ci;
+                    let z0x_;
+                    let z0y_;
+                    if (mode === 'MANDELBROT') {
+                        z0x_ = 0;
+                        z0y_ = 0;
+                        cr = centerX;
+                        ci = centerY;
+                    } else {
+                        z0x_ = centerX;
+                        z0y_ = centerY;
+                        cr = juliaX;
+                        ci = juliaY;
+                    }
+                    const pxPerUnit = CyberCanvasInstance.width / (CyberCanvasInstance.view.maxX - CyberCanvasInstance.view.minX);
+                    const tol = 14 / pxPerUnit;
+                    const dc = Math.hypot(mx - cr, my - ci);
+                    const dz = Math.hypot(mx - z0x_, my - z0y_);
+                    if (mode === 'MANDELBROT') {
+                        return dc < tol ? 'c' : null;
+                    }
+                    if (dc < tol && dz < tol) return dc <= dz ? 'c' : 'z0';
+                    if (dc < tol) return 'c';
+                    if (dz < tol) return 'z0';
+                    return null;
+                }
+
+                CyberCanvasInstance.onMouseDown = (pos) => {
+                    orbitCanvasDrag = orbitPickDragTarget(pos.x, pos.y);
+                    if (orbitCanvasDrag) CyberCanvasInstance.allowPan = false;
+                };
+                CyberCanvasInstance.onMouseMove = (pos) => {
+                    if (!orbitCanvasDrag) return;
+                    if (orbitCanvasDrag === 'c') {
+                        if (mode === 'MANDELBROT') {
+                            centerX = pos.x;
+                            centerY = pos.y;
+                        } else {
+                            juliaX = pos.x;
+                            juliaY = pos.y;
+                        }
+                    } else {
+                        centerX = pos.x;
+                        centerY = pos.y;
+                    }
+                    CyberCanvasInstance.needsRedraw = true;
+                };
+                CyberCanvasInstance.onMouseUp = () => {
+                    if (orbitCanvasDrag) {
+                        orbitCanvasDrag = null;
+                        CyberCanvasInstance.allowPan = true;
+                    }
+                };
+
+                CyberCanvasInstance.onContextMenu = (e) => {
+                    CyberUI.showContextMenu(e.clientX, e.clientY, [
+                        {
+                            label: CyberI18n.get('fractal.reset'),
+                            onclick: () => {
+                                CyberCanvasInstance.resetView(-1.55, 1.55);
+                                CyberCanvasInstance.needsRedraw = true;
+                            },
+                        },
+                        { divider: true },
+                        {
+                            label: CyberI18n.get('ui.show_axes'),
+                            checked: CyberCanvasInstance.showAxes,
+                            onchange: (v) => {
+                                CyberCanvasInstance.showAxes = v;
+                                CyberCanvasInstance.needsRedraw = true;
+                            },
+                        },
+                        {
+                            label: CyberI18n.get('ui.show_labels'),
+                            checked: CyberCanvasInstance.showLabels,
+                            onchange: (v) => {
+                                CyberCanvasInstance.showLabels = v;
+                                CyberCanvasInstance.needsRedraw = true;
+                            },
+                        },
+                        {
+                            label: CyberI18n.get('fractal.orbit_grid'),
+                            checked: CyberCanvasInstance.showGrid,
+                            onchange: (v) => {
+                                CyberCanvasInstance.showGrid = v;
+                                CyberCanvasInstance.needsRedraw = true;
+                            },
+                        },
+                        {
+                            label: CyberI18n.get('fractal.orbit_connector_lines'),
+                            checked: orbitShowConnectorLines,
+                            onchange: (v) => {
+                                orbitShowConnectorLines = !!v;
+                                persistMandelbrotOrbitConnectorLines();
+                                CyberCanvasInstance.needsRedraw = true;
+                                drawOrbitPlane();
+                            },
+                        },
+                    ]);
+                };
+                CyberCanvasInstance.needsRedraw = true;
+                startOrbitRedrawLoop();
+            }
+
+            function setMainPlane(next) {
+                if (next !== 'FRACTAL' && next !== 'ORBIT') return;
+                mainPlane = next;
+                const ow = document.getElementById('orbit-view-wrap');
+                const bf = document.getElementById('btn-plane-fractal');
+                const bo = document.getElementById('btn-plane-orbit');
+                if (next === 'FRACTAL') {
+                    fractalRenderPaused = false;
+                    teardownOrbitCyberCanvas();
+                    canvas.classList.remove('mb-fractal-view-hidden');
+                    if (ow) {
+                        ow.hidden = true;
+                        ow.setAttribute('aria-hidden', 'true');
+                    }
+                    if (bf) bf.classList.add('is-active');
+                    if (bo) bo.classList.remove('is-active');
+                    window.dispatchEvent(new Event('resize'));
+                } else {
+                    fractalRenderPaused = true;
+                    if (isFlight) stopFlightUi();
+                    canvas.classList.add('mb-fractal-view-hidden');
+                    if (ow) {
+                        ow.hidden = false;
+                        ow.setAttribute('aria-hidden', 'false');
+                    }
+                    if (bf) bf.classList.remove('is-active');
+                    if (bo) bo.classList.add('is-active');
+                    setupOrbitCyberCanvas();
+                }
+                persistMandelbrotMainPlane();
             }
 
             /** 0 bei zoom≈1, 1 bei ZOOM_MAX — Tiefenmaß in Log-Skala */
@@ -789,6 +1462,7 @@
 
             function render(now) {
                 requestAnimationFrame(render);
+                if (fractalRenderPaused) return;
                 const ts = typeof now === 'number' ? now : performance.now();
 
                 if (lastRenderFrameTs !== 0 && ts - lastRenderFrameTs < RENDER_FRAME_MS) return;
@@ -837,6 +1511,11 @@
                 <div class="fraktal-seg-row">
                     <button type="button" id="btn-mode-m" class="fraktal-seg-btn">${CyberI18n.get('fractal.mandelbrot')}</button>
                     <button type="button" id="btn-mode-j" class="fraktal-seg-btn">${CyberI18n.get('fractal.julia')}</button>
+                </div>
+                <div style="margin:14px 0 6px;font-size:0.65rem;letter-spacing:0.14em;color:rgba(180,210,235,0.82);">${CyberI18n.get('fractal.display')}</div>
+                <div class="fraktal-seg-row">
+                    <button type="button" id="btn-plane-fractal" class="fraktal-seg-btn">${CyberI18n.get('fractal.plane_fractal')}</button>
+                    <button type="button" id="btn-plane-orbit" class="fraktal-seg-btn is-active">${CyberI18n.get('fractal.plane_orbit')}</button>
                 </div>
             `, 'var(--neon-blue)');
 
@@ -905,9 +1584,13 @@
                 document.getElementById('btn-mode-j').classList.remove('is-active');
             }
 
+            document.getElementById('btn-plane-fractal').onclick = () => setMainPlane('FRACTAL');
+            document.getElementById('btn-plane-orbit').onclick = () => setMainPlane('ORBIT');
+
             const btnFlightEl = document.querySelector('#side-panel #btn-flight');
             if (btnFlightEl) {
                 btnFlightEl.onclick = () => {
+                    if (mainPlane !== 'FRACTAL') return;
                     isFlight = !isFlight;
                     btnFlightEl.innerText = isFlight ? CyberI18n.get('fractal.flight_stop') : CyberI18n.get('fractal.flight_start');
                     btnFlightEl.classList.toggle('is-active', isFlight);
@@ -950,6 +1633,21 @@
 
                 if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
                     if (inField) return;
+                    if (mainPlane === 'ORBIT') {
+                        e.preventDefault();
+                        const step = e.shiftKey ? 4 : 2;
+                        orbitDrawStepsCap += e.code === 'ArrowUp' ? step : -step;
+                        orbitDrawStepsCap = Math.max(
+                            ORBIT_DRAW_STEPS_MIN,
+                            Math.min(ORBIT_DRAW_STEPS_MAX, orbitDrawStepsCap)
+                        );
+                        persistMandelbrotOrbitSteps();
+                        if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                            CyberCanvasInstance.needsRedraw = true;
+                        }
+                        return;
+                    }
+                    if (mainPlane !== 'FRACTAL') return;
                     e.preventDefault();
                     applyKeyedZoom(e.code === 'ArrowUp');
                     return;
@@ -957,6 +1655,13 @@
 
                 if (e.code !== 'Space' && e.key !== ' ') return;
                 if (inField) return;
+                if (mainPlane === 'ORBIT') {
+                    if (e.repeat) return;
+                    e.preventDefault();
+                    toggleOrbitScan();
+                    return;
+                }
+                if (mainPlane !== 'FRACTAL') return;
                 if (t && t.closest && t.closest('button')) return;
                 e.preventDefault();
                 btnFlightEl?.click();
@@ -1097,6 +1802,8 @@
                 pinchAnchor = null;
                 pinchStartDist = 0;
             });
+            const startPlane = loadMandelbrotPersist();
+            setMainPlane(startPlane === 'FRACTAL' ? 'FRACTAL' : 'ORBIT');
             render();
         });
 })();
