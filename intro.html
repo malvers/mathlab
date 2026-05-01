@@ -778,37 +778,44 @@
 
     <script src="resources/loc.js"></script>
     <script>
-        (function () {
+        /** Sprache für Dramaturgie — gleiche Codes wie CyberI18n (de, en, es, fr, it, pt). */
+        window.resolveIntroDramaturgieLang = function () {
             var SUPPORTED = { de: 1, en: 1, es: 1, fr: 1, it: 1, pt: 1 };
-            function pickLang() {
-                try {
-                    var q = new URLSearchParams(location.search).get('lang');
-                    if (q) {
-                        var ql = String(q).trim().slice(0, 2).toLowerCase();
-                        if (SUPPORTED[ql]) return ql;
-                    }
-                } catch (e) {}
-                try {
-                    var lsCyber = localStorage.getItem('cyber-lab-lang');
-                    if (lsCyber) {
-                        var lc = String(lsCyber).trim().toLowerCase().slice(0, 2);
-                        if (SUPPORTED[lc]) return lc;
-                    }
-                } catch (e) {}
-                try {
-                    var lsIntro = localStorage.getItem('intro-dramaturgie-lang');
-                    if (lsIntro && SUPPORTED[lsIntro]) return lsIntro;
-                } catch (e) {}
-                var nav = (navigator.language || 'de').slice(0, 2).toLowerCase();
-                return SUPPORTED[nav] ? nav : 'de';
+            function normalize(tag) {
+                if (!tag) return '';
+                var s = String(tag).trim().replace(/_/g, '-').toLowerCase();
+                var two = s.slice(0, 2);
+                return SUPPORTED[two] ? two : '';
             }
-            window.__INTRO_DRAMATURGIE_LANG = pickLang();
-            document.write(
-                '<script src="resources/dramaturgie-inline.' +
-                    window.__INTRO_DRAMATURGIE_LANG +
-                    '.js?v=4"><\/script>'
-            );
-        })();
+            try {
+                var qRaw = new URLSearchParams(location.search).get('lang');
+                var fromQ = normalize(qRaw);
+                if (fromQ) {
+                    try {
+                        localStorage.setItem('cyber-lab-lang', fromQ);
+                    } catch (e) {}
+                    return fromQ;
+                }
+            } catch (e) {}
+            try {
+                var lsCyber = localStorage.getItem('cyber-lab-lang');
+                var fromCyber = normalize(lsCyber);
+                if (fromCyber) return fromCyber;
+            } catch (e) {}
+            try {
+                var lsIntro = localStorage.getItem('intro-dramaturgie-lang');
+                if (lsIntro && SUPPORTED[lsIntro]) return lsIntro;
+            } catch (e) {}
+            var list =
+                navigator.languages && navigator.languages.length
+                    ? navigator.languages
+                    : [navigator.language || 'de'];
+            for (var i = 0; i < list.length; i++) {
+                var cand = normalize(list[i]);
+                if (cand) return cand;
+            }
+            return 'de';
+        };
     </script>
     <script src="js/ui.js?v=4"></script>
     <script>
@@ -2269,16 +2276,68 @@
         }
 
         function loadIntroDramaturgie() {
-            const inline =
-                typeof window.__INTRO_DRAMATURGIE_TXT === 'string' ? window.__INTRO_DRAMATURGIE_TXT : '';
-            if (inline.trim() && applyCwSequenceFromText(inline)) return;
+            var lang =
+                typeof window.resolveIntroDramaturgieLang === 'function'
+                    ? window.resolveIntroDramaturgieLang()
+                    : 'de';
+            window.__INTRO_DRAMATURGIE_LANG = lang;
+            var bundleUrl = 'resources/dramaturgie-inline.' + lang + '.js?v=5';
 
-            fetch('resources/dramaturgie.txt', { cache: 'no-store' })
-                .then((r) => (r.ok ? r.text() : Promise.reject()))
-                .then((text) => {
-                    if (!applyCwSequenceFromText(text)) beginCwPlayAllSections();
+            function applyLoaded() {
+                var inline =
+                    typeof window.__INTRO_DRAMATURGIE_TXT === 'string'
+                        ? window.__INTRO_DRAMATURGIE_TXT
+                        : '';
+                if (inline.trim() && applyCwSequenceFromText(inline)) return Promise.resolve();
+
+                return fetch('resources/dramaturgie.txt', { cache: 'no-store' })
+                    .then(function (r) {
+                        return r.ok ? r.text() : Promise.reject();
+                    })
+                    .then(function (text) {
+                        if (!applyCwSequenceFromText(text)) beginCwPlayAllSections();
+                    })
+                    .catch(function () {
+                        beginCwPlayAllSections();
+                    });
+            }
+
+            function loadViaScriptTag() {
+                return new Promise(function (resolve, reject) {
+                    var s = document.createElement('script');
+                    s.src = bundleUrl;
+                    s.async = false;
+                    s.onload = function () {
+                        resolve();
+                    };
+                    s.onerror = function () {
+                        reject(new Error('dramaturgie script'));
+                    };
+                    document.head.appendChild(s);
+                });
+            }
+
+            try {
+                delete window.__INTRO_DRAMATURGIE_TXT;
+            } catch (e) {}
+
+            return fetch(bundleUrl, { cache: 'no-store' })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('dramaturgie fetch');
+                    return res.text();
                 })
-                .catch(() => beginCwPlayAllSections());
+                .then(function (code) {
+                    (0, eval)(code);
+                })
+                .catch(function () {
+                    return loadViaScriptTag();
+                })
+                .then(function () {
+                    return applyLoaded();
+                })
+                .catch(function () {
+                    beginCwPlayAllSections();
+                });
         }
 
         function readDroppedFiles(files, cb) {
@@ -2438,12 +2497,14 @@
             startOverlay.addEventListener('click', () => {
                 startOverlay.style.opacity = '0';
                 setTimeout(() => startOverlay.remove(), 500);
-                
+
                 syncBgAudio();
                 if (!introAmbMuted) {
                     unlockIntroAmbientAudio();
                 }
-                loadIntroDramaturgie();
+                loadIntroDramaturgie().catch(function () {
+                    beginCwPlayAllSections();
+                });
             });
         }
     </script>
