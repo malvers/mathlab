@@ -16,7 +16,7 @@ const CyberI18n = {
                 prev: "ZURÜCK",
                 reset: "LABOR RESET",
                 step: "SCHRITT",
-                coach_title: "Math Coach"
+                coach_title: "Doc Alvers Mathe-Labor"
             },
             units: {
                 ones: "Einer",
@@ -61,7 +61,7 @@ const CyberI18n = {
                 prev: "BACK",
                 reset: "RESET LAB",
                 step: "STEP",
-                coach_title: "Math Coach"
+                coach_title: "Doc Alvers Mathe-Labor"
             },
             units: {
                 ones: "ones",
@@ -106,7 +106,7 @@ const CyberI18n = {
                 prev: "VOLVER",
                 reset: "REINICIAR",
                 step: "PASO",
-                coach_title: "Entrenador de Mates"
+                coach_title: "Doc Alvers Laboratorio"
             },
             units: {
                 ones: "unidades",

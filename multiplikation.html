@@ -191,6 +191,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -205,8 +206,8 @@
         // 1. Branding & UI Init
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "SCHRIFTLICHE MULTIPLIKATION"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.mult.title')
         });
         CyberUI.init();
 
@@ -229,7 +230,7 @@
         let stepSequence = []; // Linearized steps for fine mode or row mode
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'MULTIPLIKATION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.mult.title'), `
                 <div class="cyber-control-group">
                     <label class="cyber-label">FAKTOR 1 (Multiplikand)</label>
                     <input type="number" id="f1-input" class="cyber-select" value="${factor1}" onchange="updateFactors()" oninput="if(this.value.length > 7) this.value = this.value.slice(0, 7)" max="9999999">
@@ -239,7 +240,7 @@
                     <input type="number" id="f2-input" class="cyber-select" value="${factor2}" onchange="updateFactors()" oninput="if(this.value.length > 7) this.value = this.value.slice(0, 7)" max="9999999">
                 </div>
                 <div style="margin-top:30px;" id="mode-toggle-container"></div>
-                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, BRAND_BLUE);
 
             CyberUI.createCheckbox('mode-toggle-container', 'Schrittweise', fineMode, (val) => {
@@ -247,14 +248,14 @@
                 resetSteps();
             }, '#ffde00');
 
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
                 <div class="stats-grid">
                     <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">WEITER</span>
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">◀</span>
                     </div>
                     <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
@@ -636,7 +637,7 @@
             let message = "";
 
             if (currentStep === -1) {
-                message = `Willkommen im Multiplikations-Labor. Wir berechnen <span class="coach-math-highlight">${factor1} &times; ${factor2}</span>. Klicke auf WEITER, um den ersten Schritt zu starten.`;
+                message = CyberI18n.get('arithmetic.mult.ready', { a: factor1, b: factor2 });
             } else {
                 const step = stepSequence[currentStep];
                 const f1Str = String(factor1);
@@ -646,27 +647,27 @@
 
                 if (step.type === 'row' || step.type === 'row-complete') {
                     const digit = f2Str[step.rowIndex];
-                    message = `Die Multiplikation mit der Ziffer <b style="color:${color}">${digit}</b> ist abgeschlossen. Alle Teilergebnisse dieser Zeile wurden berechnet.`;
+                    message = `Multiplikation with <b style="color:${color}">${digit}</b> is finished. All partial results of this row are calculated.`;
                 } else if (step.type === 'digit-init') {
-                    message = `Für diese Stelle übernehmen wir den Übertrag von <span class="coach-math-highlight">${step.carryValue}</span> aus der vorherigen Teilrechnung.`;
+                    message = `For this position, we take the carry of <span class="coach-math-highlight">${step.carryValue}</span> from the previous partial calculation.`;
                 } else if (step.type === 'digit-multiply') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
                     const prod = fDigit * mDigit;
-                    message = `Wir multiplizieren <b style="color:${color}">${mDigit}</b> mit <b style="color:${color}">${fDigit}</b>. Das ergibt <span class="coach-math-highlight">${prod}</span>. Der Übertrag von <b style="color:${BRAND_BLUE}">${step.carryValue}</b> wird im nächsten Schritt addiert.`;
+                    message = CyberI18n.get('arithmetic.mult.digit_step', { d: `<b style="color:${color}">${mDigit}</b>`, factor: `<b style="color:${color}">${fDigit}</b>` }) + `<br>Product: <span class="coach-math-highlight">${prod}</span>.`;
                 } else if (step.type === 'digit-final') {
                     const mDigit = parseInt(f2Str[step.mIdx]);
                     const fDigit = parseInt(f1Str[step.f1Idx]);
                     const prod = fDigit * mDigit;
                     const final = prod + step.carryValue;
-                    message = `Jetzt addieren wir den Übertrag:<br><span class="coach-math-highlight">${prod} + ${step.carryValue} = ${final}</span>.<br>Die Ziffer <b style="color:${color}">${final % 10}</b> wird notiert, der Rest wird als neuer Übertrag mitgenommen.`;
+                    message = `Adding the carry: <span class="coach-math-highlight">${prod} + ${step.carryValue} = ${final}</span>.`;
                 } else if (step.type === 'final') {
-                    message = `<b>Berechnung abgeschlossen!</b> Wir haben alle Teilprodukte addiert. Das finale Ergebnis ist <span class="coach-math-highlight">${factor1 * factor2}</span>.`;
+                    message = `<b>${CyberI18n.get('arithmetic.mult.complete', { result: `<span class="coach-math-highlight">${factor1 * factor2}</span>` })}</b>`;
                 }
             }
 
             coachContent.innerHTML = message;
-            if (info) info.innerHTML = message; // Keep sidebar in sync just in case
+            if (info) info.innerHTML = message; 
         }
 
         window.onresize = init;

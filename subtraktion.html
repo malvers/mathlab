@@ -192,6 +192,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -209,8 +210,8 @@
 
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "SCHRIFTLICHE SUBTRAKTION"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.sub.title')
         });
         CyberUI.init();
 
@@ -225,7 +226,7 @@
         let stepSequence = [];
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'SUBTRAKTION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.sub.title'), `
                 <div class="cyber-control-group">
                     <label class="cyber-label">MINUEND</label>
                     <input type="number" id="s1-input" class="cyber-select" value="${minuend}" max="9999999" onchange="updateNumbers()">
@@ -234,17 +235,17 @@
                     <label class="cyber-label">SUBTRAHEND</label>
                     <input type="number" id="s2-input" class="cyber-select" value="${subtrahend}" max="9999999" onchange="updateNumbers()">
                 </div>
-                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, BRAND_BLUE);
 
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
                 <div class="stats-grid">
                     <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">WEITER</span>
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">◀</span>
                     </div>
                     <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
@@ -457,23 +458,27 @@
         function updateMessages() {
             const coach = document.getElementById('coach-content');
             if (currentStep === -1) {
-                coach.innerHTML = "Bereit für die Subtraktion von <span class='coach-math-highlight'>" + minuend + "</span> und <span class='coach-math-highlight'>" + subtrahend + "</span>. Wir rechnen von rechts nach links.";
+                coach.innerHTML = CyberI18n.get('arithmetic.sub.ready', { a: `<span class='coach-math-highlight'>${minuend}</span>`, b: `<span class='coach-math-highlight'>${subtrahend}</span>` });
                 return;
             }
 
             const step = stepSequence[currentStep];
             if (step.type === 'focus') {
-                const unit = step.col === 0 ? "Einerstelle" : (step.col === 1 ? "Zehnerstelle" : (step.col === 2 ? "Hunderterstelle" : "nächste Stelle"));
-                coach.innerHTML = `Wir betrachten die <span class='coach-math-highlight'>${unit}</span>.`;
+                let unitKey = "units.ones";
+                if (step.col === 1) unitKey = "units.tens";
+                if (step.col === 2) unitKey = "units.hundreds";
+                if (step.col >= 3) unitKey = "units.thousands";
+                coach.innerHTML = CyberI18n.get('arithmetic.add.focus', { unit: `<span class='coach-math-highlight'>${CyberI18n.get(unitKey)}</span>` });
             } else if (step.type === 'calculate') {
                 const subTotal = step.d2 + step.oldCarry;
                 if (step.d1 >= subTotal) {
-                    coach.innerHTML = `Wir rechnen an dieser Stelle:<br><span class='coach-math-highlight'>${step.d1} - ${subTotal} = ${step.resultDigit}</span>.<br><br>Wir notieren die <span class='coach-math-highlight'>${step.resultDigit}</span>. Kein Übertrag nötig.`;
+                    coach.innerHTML = CyberI18n.get('arithmetic.sub.calc', { d1: step.d1, d2: subTotal, result: step.resultDigit });
                 } else {
-                    coach.innerHTML = `Da <b style="color:#ffde00">${step.d1}</b> kleiner ist als <b style="color:#ffde00">${subTotal}</b>, leihen wir uns eine 10:<br><span class='coach-math-highlight'>1${step.d1} - ${subTotal} = ${step.resultDigit}</span>.<br><br>Wir notieren <span class='coach-math-highlight'>${step.resultDigit}</span> und setzen einen <b>Übertrag von 1</b> für die nächste Spalte.`;
+                    coach.innerHTML = CyberI18n.get('arithmetic.sub.borrow', { d1: step.d1, d2: subTotal }) + "<br><br>" +
+                                    CyberI18n.get('arithmetic.sub.calc', { d1: step.d1 + 10, d2: subTotal, result: step.resultDigit });
                 }
             } else if (step.type === 'complete') {
-                coach.innerHTML = "<b>Berechnung abgeschlossen!</b> Alle Spalten wurden subtrahiert. Das finale Ergebnis ist <span class='coach-math-highlight'>" + (minuend - subtrahend) + "</span>.";
+                coach.innerHTML = `<b>${CyberI18n.get('arithmetic.sub.complete', { result: `<span class='coach-math-highlight'>${minuend - subtrahend}</span>` })}</b>`;
             }
         }
 
