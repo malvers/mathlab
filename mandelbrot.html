@@ -279,6 +279,7 @@
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=542"></script>
     <script src="js/ui.js?v=542"></script>
+    <script src="js/forloop-canvas-png.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
 (function () {
@@ -451,7 +452,7 @@
             }
             scheduleFractalPanelAuthority();
             renderMbFractalFormula();
-            const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl');
+            const canvas = document.getElementById('canvas'), gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
             if (!gl) return;
 
             function compileShader(type, elementId) {
@@ -742,6 +743,50 @@
                 if (br) br.disabled = true;
             }
 
+            const arrowPngSaver = ForloopCanvasPng.createSequentialCanvasPngSaver(canvas, {
+                stem: 'mandelbrot-zoom-step',
+            });
+
+            function drawFractalOnly() {
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.useProgram(prg);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.enableVertexAttribArray(pos);
+                gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+                gl.uniform2f(uRes, canvas.width, canvas.height);
+                gl.uniform2f(uCenter, centerX, centerY);
+                gl.uniform1f(uZoom, zoom);
+                gl.uniform1i(uMaxIter, lastEffectiveMaxIter);
+                gl.uniform2f(uJuliaC, juliaX, juliaY);
+                gl.uniform1f(uTime, time);
+                gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            }
+
+            async function captureScreenshotAfterArrowZoom() {
+                await arrowPngSaver.captureNext();
+            }
+
+            /**
+             * Ein Zoom-Schritt wie Auto-Flight: gleiche rel = 0.005·TICK·head, head = 1 − zoomDepthLogUnit.
+             * zoomIn false → exakt invers zum selben rel (ein Flug-Tick zurück).
+             */
+            function stepZoomFlightLike(mx, my, cw, ch, zoomIn) {
+                const zb = clampZoom(zoom);
+                if (cw <= 0 || ch <= 0 || !Number.isFinite(zb) || zb <= 0) return;
+                const u = zoomDepthLogUnit(zb);
+                const head = 1 - u;
+                const rel = 0.005 * TICK_VS_LEGACY_60HZ * head;
+                const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, cw, ch, zb, centerX, centerY);
+                let next = zoomIn ? zb * (1 + rel) : zb / (1 + rel);
+                if (zoomIn && next >= ZOOM_MAX) next = ZOOM_MAX;
+                zoom = clampZoom(next);
+                const nc = centerKeepingFocalPlane(mx, my, cw, ch, zoom, fX, fY);
+                centerX = nc.cx;
+                centerY = nc.cy;
+            }
+
             function render(now) {
                 requestAnimationFrame(render);
                 const ts = typeof now === 'number' ? now : performance.now();
@@ -765,16 +810,7 @@
                         zoom = ZOOM_MAX;
                         stopFlightUi();
                     } else if (s > 0 && Number.isFinite(zoom) && zoom > 0) {
-                        const u = zoomDepthLogUnit(zoom);
-                        const head = 1 - u;
-                        const zoomBefore = zoom;
-                        let nextZoom = zoom * (1 + 0.005 * TICK_VS_LEGACY_60HZ * head);
-                        if (nextZoom >= ZOOM_MAX) nextZoom = ZOOM_MAX;
-                        zoom = clampZoom(nextZoom);
-                        const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, cw, ch, zoomBefore, centerX, centerY);
-                        const nc = centerKeepingFocalPlane(mx, my, cw, ch, zoom, fX, fY);
-                        centerX = nc.cx;
-                        centerY = nc.cy;
+                        stepZoomFlightLike(mx, my, cw, ch, true);
                         if (zoom >= ZOOM_MAX) stopFlightUi();
                     }
                     zoom = clampZoom(zoom);
@@ -793,15 +829,7 @@
 
                 time += 0.004 * TICK_VS_LEGACY_60HZ;
 
-                gl.uniform2f(uRes, canvas.width, canvas.height);
-                gl.uniform2f(uCenter, centerX, centerY);
-                gl.uniform1f(uZoom, zoom);
-                gl.uniform1i(uMaxIter, lastEffectiveMaxIter);
-                gl.uniform2f(uJuliaC, juliaX, juliaY);
-                gl.uniform1f(uTime, time);
-                gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
-
-                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                drawFractalOnly();
                 syncFraktalReadouts();
             }
 
@@ -854,6 +882,9 @@
                     <button type="button" id="btn-flight" class="fraktal-seg-btn">${CyberI18n.get('fractal.flight_start')}</button>
                     <button type="button" id="btn-reset" class="fraktal-seg-btn">${CyberI18n.get('fractal.reset')}</button>
                 </div>
+                <div class="fraktal-seg-row" style="margin-top:8px;">
+                    <button type="button" id="btn-screenshot-folder" class="fraktal-seg-btn">PNG-Ordner (z. B. Desktop)</button>
+                </div>
             `, 'var(--neon-blue)');
 
             document.getElementById('btn-mode-m').onclick = () => {
@@ -891,6 +922,27 @@
                         isDrag = false;
                     }
                 };
+            }
+
+            const btnScreenshotFolder = document.getElementById('btn-screenshot-folder');
+            if (btnScreenshotFolder) {
+                if (typeof window.showDirectoryPicker !== 'function') {
+                    btnScreenshotFolder.disabled = true;
+                    btnScreenshotFolder.title =
+                        'Chrome/Edge über http://localhost: ohne Ordnerpicker nur Browser-Download → meist Ordner „Downloads“.';
+                } else {
+                    btnScreenshotFolder.title =
+                        'Ordner wählen (Dialog startet am Desktop). Ohne Auswahl landen ↑/↓-PNG im Download-Ordner.';
+                    btnScreenshotFolder.addEventListener('click', async () => {
+                        try {
+                            await arrowPngSaver.pickWritableFolder();
+                            btnScreenshotFolder.textContent = 'PNG-Ordner ✓ (Desktop o.ä.)';
+                            btnScreenshotFolder.classList.add('is-active');
+                        } catch (e) {
+                            if (e.name !== 'AbortError') console.warn('Ordnerwahl', e);
+                        }
+                    });
+                }
             }
             window.addEventListener('keydown', (e) => {
                 const t = e.target;
@@ -953,17 +1005,11 @@
                     flightMouseCanvasX = mx;
                     flightMouseCanvasY = my;
                 }
-                const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, w, h, zoom, centerX, centerY);
-                /* Dieselbe relative Schrittweite wie Flight pro Tick: (1 + 0.005·TICK_VS_LEGACY_60HZ·head) */
-                const u = zoomDepthLogUnit(zoom);
-                const head = 1 - u;
-                const rel = 0.005 * TICK_VS_LEGACY_60HZ * head;
-                const factor = zoomIn ? (1 + rel) : 1 / (1 + rel);
-                zoom *= factor;
-                zoom = clampZoom(zoom);
-                const nc = centerKeepingFocalPlane(mx, my, w, h, zoom, fX, fY);
-                centerX = nc.cx;
-                centerY = nc.cy;
+                stepZoomFlightLike(mx, my, w, h, zoomIn);
+
+                /* Ein Bild mit neuem Zoom — gleicher Pixelinhalt wie nächster Frame */
+                drawFractalOnly();
+                void captureScreenshotAfterArrowZoom();
             }
 
             /**
