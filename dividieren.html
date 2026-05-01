@@ -190,6 +190,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -204,8 +205,8 @@
         // 1. Branding & UI Init
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "SCHRIFTLICHE DIVISION"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.div.title')
         });
         CyberUI.init();
 
@@ -225,7 +226,7 @@
         let width, height, dpr;
 
         function setupUI() {
-            CyberUI.createCard('ui-container', 'DIVISION', `
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.div.title'), `
                 <div class="cyber-control-group">
                     <label class="cyber-label">DIVIDEND (Zahl 1)</label>
                     <input type="number" id="div-input" class="cyber-select" value="${dividend}" onchange="updateValues()">
@@ -234,17 +235,17 @@
                     <label class="cyber-label">DIVISOR (Zahl 2)</label>
                     <input type="number" id="dsor-input" class="cyber-select" value="${divisor}" onchange="updateValues()">
                 </div>
-                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, BRAND_BLUE);
 
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
                 <div class="stats-grid">
                     <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">WEITER</span>
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">◀</span>
                     </div>
                     <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
-                        <span class="stats-label">ZURÜCK</span>
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
                         <span class="stats-val" style="font-size:1.4rem;">▶</span>
                     </div>
                 </div>
@@ -571,19 +572,19 @@
 
             let message = "";
             if (currentStep === -1) {
-                message = `Willkommen im Divisions-Labor. Wir berechnen <span class="coach-math-highlight">${dividend} : ${divisor}</span>. Klicke auf WEITER, um zu starten.`;
+                message = CyberI18n.get('arithmetic.div.ready', { a: dividend, b: divisor });
             } else {
                 const step = stepSequence[currentStep];
                 if (!step) return;
                 
                 if (step.type === 'collect') {
-                    message = `Wir prüfen: Passt die ${divisor} in die <span class="coach-math-highlight">${step.currentPart}</span>? Nein, also nehmen wir die nächste Ziffer dazu.`;
+                    message = `Checking: Does ${divisor} fit into <span class="coach-math-highlight">${step.currentPart}</span>? No, so we take the next digit.`;
                 } else if (step.type === 'divide') {
-                    message = `Wie oft passt die ${divisor} in die <span class="coach-math-highlight">${step.partVal}</span>?<br>Sie passt genau <span class="coach-math-highlight">${step.qDigit}</span> mal hinein.<br>Wir rechnen: ${step.qDigit} &times; ${divisor} = ${step.product}.`;
+                    message = CyberI18n.get('arithmetic.div.fit', { b: divisor, val: `<span class="coach-math-highlight">${step.partVal}</span>` }) + `<br>It fits <span class="coach-math-highlight">${step.qDigit}</span> times.<br>${step.qDigit} &times; ${divisor} = ${step.product}.`;
                 } else if (step.type === 'bringDown') {
-                    message = `Wir holen die nächste Ziffer <span class="coach-math-highlight">${step.digit}</span> herunter. Die neue Zahl ist ${step.newVal}.`;
+                    message = `Bringing down the next digit <span class="coach-math-highlight">${step.digit}</span>. New number is ${step.newVal}.`;
                 } else if (step.type === 'final') {
-                    message = `<b>Berechnung abgeschlossen!</b> Das Ergebnis ist <span class="coach-math-highlight">${step.quotient}</span>${step.remainder > 0 ? ' mit Rest ' + step.remainder : ''}.`;
+                    message = `<b>${CyberI18n.get('arithmetic.div.complete', { result: `<span class="coach-math-highlight">${step.quotient}</span>` })}</b>${step.remainder > 0 ? ' with ' + CyberI18n.get('arithmetic.div.rem', { rem: step.remainder }) : ''}.`;
                 }
             }
 
