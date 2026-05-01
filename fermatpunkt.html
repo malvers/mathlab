@@ -141,6 +141,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script>
@@ -154,8 +155,8 @@
             // 1. Branding
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "FERMAT-PUNKT MINIMIERUNG"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('fermat.title')
             });
 
             CyberUI.init();
@@ -339,12 +340,12 @@
                 const pDist = (dist(pts.P, pts.A) + dist(pts.P, pts.B) + dist(pts.P, pts.C)) * scale;
                 
                 const stats = [
-                    { label: 'DISTANZ FERMAT (F)', value: sumDist.toFixed(1) + ' cm', color: 'var(--neon-purple)' }
+                    { label: CyberI18n.get('fermat.dist_f'), value: sumDist.toFixed(1) + ' cm', color: 'var(--neon-purple)' }
                 ];
                 if (showP) {
                     const delta = Math.max(0, pDist - sumDist);
-                    stats.push({ label: 'DISTANZ PUNKT (P)', value: pDist.toFixed(1) + ' cm', color: '#ff9d00' });
-                    stats.push({ label: 'DIFFERENZ (Δ)', value: '+' + delta.toFixed(1) + ' cm', color: '#ff3366' });
+                    stats.push({ label: CyberI18n.get('fermat.dist_p'), value: pDist.toFixed(1) + ' cm', color: '#ff9d00' });
+                    stats.push({ label: CyberI18n.get('fermat.diff'), value: '+' + delta.toFixed(1) + ' cm', color: '#ff3366' });
                 }
                 CyberUI.updateStatsGrid('data-container', stats);
             }
@@ -418,13 +419,13 @@
             window.addEventListener('touchend', endDrag);
 
             // UI Setup
-            CyberUI.createCard('ui-container', 'FERMAT-PUNKT SYSTEM', `
+            CyberUI.createCard('ui-container', CyberI18n.get('fermat.system'), `
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: rgba(255,136,0,0.05); border-radius: 4px; border: 1px solid rgba(255,136,0,0.2);">
-                    <span style="font-size: 0.75rem; color: #ff8800; font-family: 'Orbitron'; text-transform: uppercase;">HILFSDREIECKE ANZEIGEN</span>
+                    <span style="font-size: 0.75rem; color: #ff8800; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('fermat.show_tri')}</span>
                     <input type="checkbox" id="const-toggle" style="cursor: pointer;" onchange="window.toggleConst(this.checked)">
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px; background: rgba(255,157,0,0.05); border-radius: 4px; border: 1px solid rgba(255,157,0,0.2);">
-                    <span style="font-size: 0.75rem; color: #ff9d00; font-family: 'Orbitron'; text-transform: uppercase;">VERGLEICHS-PUNKT P</span>
+                    <span style="font-size: 0.75rem; color: #ff9d00; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('fermat.comp_p')}</span>
                     <input type="checkbox" id="p-toggle" checked style="cursor: pointer;" onchange="window.toggleP(this.checked)">
                 </div>
             `, 'var(--neon-purple)');
@@ -440,9 +441,9 @@
             };
 
             CyberUI.createStatsGrid('data-container', [
-                { label: 'DISTANZ FERMAT (F)', value: '0.0 cm', color: 'var(--neon-purple)' },
-                { label: 'DISTANZ PUNKT (P)', value: '0.0 cm', color: '#ff9d00' },
-                { label: 'DIFFERENZ (Δ)', value: '+0.0 cm', color: '#ff3366' }
+                { label: CyberI18n.get('fermat.dist_f'), value: '0.0 cm', color: 'var(--neon-purple)' },
+                { label: CyberI18n.get('fermat.dist_p'), value: '0.0 cm', color: '#ff9d00' },
+                { label: CyberI18n.get('fermat.diff'), value: '+0.0 cm', color: '#ff3366' }
             ]);
 
             draw();

@@ -151,7 +151,7 @@
 
     <main id="main-content">
         <div id="balls-counter">
-            <div id="balls-counter-label">ANZAHL ALLER KUGELN</div>
+            <div id="balls-counter-label">${CyberI18n.get('galton.balls_total')}</div>
             <div id="balls-counter-widget" class="cyber-number-widget"></div>
         </div>
         <div id="board-wrap"><canvas id="board"></canvas></div>
@@ -159,6 +159,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script>
@@ -640,50 +641,50 @@
                     textShadow: "0 0 10px rgba(255, 170, 95, 0.55)"
                 });
                 CyberUI.updateStatsGrid("data-container", [
-                    { label: "Reihen", value: sim.rows, color: "#00d2ff" },
-                    { label: "Kugeln aktiv", value: sim.balls.length, color: "#ffd36a" },
-                    { label: "Spawn (ms)", value: sim.spawnIntervalMs, color: "#adff2f" }
+                    { label: CyberI18n.get('galton.rows'), value: sim.rows, color: "#00d2ff" },
+                    { label: CyberI18n.get('galton.balls_active'), value: sim.balls.length, color: "#ffd36a" },
+                    { label: CyberI18n.get('galton.spawn_ms'), value: sim.spawnIntervalMs, color: "#adff2f" }
                 ]);
                 requestAnimationFrame(loop);
             }
 
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "GALTON BOARD"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('galton.title')
             });
 
             CyberUI.init();
 
-            CyberUI.createCard("ui-container", "STEUERUNG", `
+            CyberUI.createCard("ui-container", CyberI18n.get('galton.controls'), `
                 <div id="controls" style="display:flex; flex-direction:column; gap:16px;">
                     <div>
                         <div class="label-row">
-                            <span>Bins</span>
+                            <span>${CyberI18n.get('galton.bins')}</span>
                             <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.rows + 1}</span>
                         </div>
                         <input type="range" id="slider-rows" min="11" max="29" value="${sim.rows + 1}" step="2">
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Austrittsintervall (ms)</span>
+                            <span>${CyberI18n.get('galton.interval')}</span>
                             <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.spawnIntervalMs}</span>
                         </div>
                         <input type="range" id="slider-spawn" min="10" max="1000" value="${sim.spawnIntervalMs}" step="10">
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Fluggeschwindigkeit</span>
+                            <span>${CyberI18n.get('galton.speed')}</span>
                             <span style="display:flex; justify-content:space-between; width:120px; font-size:0.72rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45); letter-spacing:0.4px;">
-                                <span>langsam</span>
-                                <span>schnell</span>
+                                <span>${CyberI18n.get('galton.slow')}</span>
+                                <span>${CyberI18n.get('galton.fast')}</span>
                             </span>
                         </div>
                         <input type="range" id="slider-speed" min="0.04" max="5.0" value="${sim.flightSpeed}" step="0.04">
                     </div>
                     <div>
                         <div class="label-row">
-                            <span>Anzahl Kugeln</span>
+                            <span>${CyberI18n.get('galton.ball_count')}</span>
                             <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.maxBalls}</span>
                         </div>
                         <input type="range" id="slider-maxballs" min="1" max="500" value="${sim.maxBalls}" step="1">
@@ -705,7 +706,7 @@
             const btnPlayPause = document.getElementById("btn-play-pause");
 
             function updatePlayPauseButton() {
-                btnPlayPause.textContent = sim.running ? "STOP" : "PLAY";
+                btnPlayPause.textContent = sim.running ? CyberI18n.get('galton.stop') : CyberI18n.get('galton.play');
                 btnPlayPause.classList.toggle("running", sim.running);
             }
 

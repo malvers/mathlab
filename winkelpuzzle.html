@@ -52,6 +52,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -77,35 +78,35 @@
                         <div style="display: flex; flex-direction: column; gap: 20px;">
                             <div>
                                 <div class="label-row">
-                                    <span>KEIL-WINKEL (°)</span>
+                                    <span>${CyberI18n.get('puzzle.wedge_angle')}</span>
                                     <span id="label-wedge" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">39°</span>
                                 </div>
                                 <input type="range" id="slider-wedge" min="10" max="80" value="39">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>ABSTAND A</span>
+                                    <span>${CyberI18n.get('puzzle.dist_a')}</span>
                                     <span id="label-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">15.0</span>
                                 </div>
                                 <input type="range" id="slider-a" min="10" max="25" value="15" step="0.1">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>ABSTAND B</span>
+                                    <span>${CyberI18n.get('puzzle.dist_b')}</span>
                                     <span id="label-b" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">6.8</span>
                                 </div>
                                 <input type="range" id="slider-b" min="1" max="9.9" value="6.8" step="0.1">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>ABSTAND C</span>
+                                    <span>${CyberI18n.get('puzzle.dist_c')}</span>
                                     <span id="label-c" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">13.0</span>
                                 </div>
                                 <input type="range" id="slider-c" min="10" max="25" value="13" step="0.1">
                             </div>
                             <div>
                                 <div class="label-row">
-                                    <span>ABSTAND D</span>
+                                    <span>${CyberI18n.get('puzzle.dist_d')}</span>
                                     <span id="label-d" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">7.1</span>
                                 </div>
                                 <input type="range" id="slider-d" min="1" max="9.9" value="7.1" step="0.1">
@@ -113,17 +114,17 @@
                             <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                                 <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #00d2ff; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 12px;">
                                     <input type="checkbox" id="check-blue" style="width: 18px; height: 18px; accent-color: #00d2ff;" checked>
-                                    GEGEBENE (BLAU)
+                                    ${CyberI18n.get('puzzle.given_blue')}
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #ff0055; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 12px;">
                                     <input type="checkbox" id="check-red" style="width: 18px; height: 18px; accent-color: #ff0055;">
-                                    LÖSUNG (ROT)
+                                    ${CyberI18n.get('puzzle.solution_red')}
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #ffcc00; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 20px;">
                                     <input type="checkbox" id="check-yellow" style="width: 18px; height: 18px; accent-color: #ffcc00;">
-                                    ZWISCHENSCHRITTE (GELB)
+                                    ${CyberI18n.get('puzzle.steps_yellow')}
                                 </label>
-                                <button class="cyber-btn" onclick="resetLab()">LABOR ZURÜCKSETZEN</button>
+                                <button class="cyber-btn" onclick="resetLab()">${CyberI18n.get('puzzle.reset')}</button>
                             </div>
                         </div>
                     `, 'var(--neon-blue)', { collapsible: false });
@@ -136,8 +137,8 @@
 
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
-                        title: "Doc Alvers Mathe-Labor",
-                        subtitle: "WINKEL PUZZLE",
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('puzzle.title'),
                         useExternalStyles: true
                     });
                 }

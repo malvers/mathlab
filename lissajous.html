@@ -227,6 +227,7 @@
     <script src="js/cyber-canvas.js"></script>
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
@@ -311,7 +312,7 @@
         function syncAnimateButton() {
             const b = document.getElementById('btn-animate');
             if (!b) return;
-            b.textContent = state.animate ? 'STOPP' : 'SIMULATION';
+            b.textContent = state.animate ? CyberI18n.get('lissajous.stop') : CyberI18n.get('lissajous.simulation');
             b.classList.toggle('is-active', state.animate);
         }
 
@@ -549,7 +550,7 @@
             ctx.fillStyle = 'rgba(200, 225, 255, 0.55)';
             ctx.font = '11px Orbitron, sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('Zentralperspektive · xz-Ebene · Aufhängung nur Analog zur Überlagerung', 14, h - 14);
+            ctx.fillText(CyberI18n.get('lissajous.view_3d_desc'), 14, h - 14);
 
             ctx.restore();
         }
@@ -610,15 +611,15 @@
         window.addEventListener('load', () => {
             CyberBranding.init({
                 useExternalStyles: true,
-                title: 'Doc Alvers Mathe-Labor',
-                subtitle: 'LISSAJOUS · PARAMETRISCHE KURVEN'
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('lissajous.title')
             });
             CyberUI.init();
 
-            CyberUI.createCard('ui-container', 'PARAMETER', `
+            CyberUI.createCard('ui-container', CyberI18n.get('lissajous.parameters'), `
                 <div id="grp-view" class="lissajous-view-row" role="group" aria-label="Ansicht">
-                    <button type="button" id="btn-view-curve" class="lissajous-view-btn" title="Lissajous-Kurve in der Ebene (wie bisher)">2D Kurve</button>
-                    <button type="button" id="btn-view-pendulum" class="lissajous-view-btn is-active" title="Gedankliche 3D-Ansicht · Stab zur Bahn (Analog)">3D Pendel</button>
+                    <button type="button" id="btn-view-curve" class="lissajous-view-btn">${CyberI18n.get('lissajous.view_2d')}</button>
+                    <button type="button" id="btn-view-pendulum" class="lissajous-view-btn is-active">${CyberI18n.get('lissajous.view_3d')}</button>
                 </div>
                 <div id="grp-amp"></div>
                 <div id="grp-freq"></div>
@@ -626,46 +627,46 @@
                 <div id="grp-span"></div>
                 <div id="grp-color"></div>
                 <div id="grp-actions">
-                    <button type="button" id="btn-animate" title="Simulation — Kurve periodisch entlang t">SIMULATION</button>
-                    <button type="button" id="btn-reset-view" title="Ansicht und Zoom zurücksetzen">RESET</button>
+                    <button type="button" id="btn-animate">${CyberI18n.get('lissajous.simulation')}</button>
+                    <button type="button" id="btn-reset-view">${CyberI18n.get('lissajous.reset')}</button>
                 </div>
             `, '#00d2ff');
 
-            CyberUI.createSlider('grp-amp', 'Amplitude A', 0.4, 2.6, state.A, 0.05, (v) => {
+            CyberUI.createSlider('grp-amp', CyberI18n.get('lissajous.amp_a'), 0.4, 2.6, state.A, 0.05, (v) => {
                 state.A = v;
                 touchParameterWhileIdle();
                 draw();
             }, '#ff9a5c');
-            CyberUI.createSlider('grp-amp', 'Amplitude B', 0.4, 2.6, state.B, 0.05, (v) => {
+            CyberUI.createSlider('grp-amp', CyberI18n.get('lissajous.amp_b'), 0.4, 2.6, state.B, 0.05, (v) => {
                 state.B = v;
                 touchParameterWhileIdle();
                 draw();
             }, '#7fdcff');
 
-            CyberUI.createSlider('grp-freq', 'ωₓ (Kreisfrequenz)', 1, 16, state.wx, 1, (v) => {
+            CyberUI.createSlider('grp-freq', CyberI18n.get('lissajous.freq_x'), 1, 16, state.wx, 1, (v) => {
                 state.wx = Math.round(v);
                 touchParameterWhileIdle();
                 draw();
             }, '#ff9a5c');
-            CyberUI.createSlider('grp-freq', 'ωᵧ (Kreisfrequenz)', 1, 16, state.wy, 1, (v) => {
+            CyberUI.createSlider('grp-freq', CyberI18n.get('lissajous.freq_y'), 1, 16, state.wy, 1, (v) => {
                 state.wy = Math.round(v);
                 touchParameterWhileIdle();
                 draw();
             }, '#7fdcff');
 
-            CyberUI.createSlider('grp-phase', 'Phase δ (Grad)', 0, 359, state.deltaDeg, 1, (v) => {
+            CyberUI.createSlider('grp-phase', CyberI18n.get('lissajous.phase'), 0, 359, state.deltaDeg, 1, (v) => {
                 state.deltaDeg = Math.round(v);
                 touchParameterWhileIdle();
                 draw();
             }, '#00d2ff');
 
-            CyberUI.createSlider('grp-span', 'Pfad-Umfang (× Perioden)', 0.25, 6, state.cycles, 0.05, (v) => {
+            CyberUI.createSlider('grp-span', CyberI18n.get('lissajous.path_span'), 0.25, 6, state.cycles, 0.05, (v) => {
                 state.cycles = v;
                 touchParameterWhileIdle();
                 draw();
             }, '#00d2ff');
 
-            CyberUI.createSlider('grp-color', 'Kurvenfarbe (Hue)', 0, 330, state.curveHue, 1, (v) => {
+            CyberUI.createSlider('grp-color', CyberI18n.get('lissajous.curve_color'), 0, 330, state.curveHue, 1, (v) => {
                 state.curveHue = Math.round(v);
                 touchParameterWhileIdle();
                 draw();
@@ -754,22 +755,22 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
                     {
-                        label: 'RESET',
+                        label: CyberI18n.get('lissajous.reset'),
                         onclick: () => applyResetCurveAndView()
                     },
                     { divider: true },
                     {
-                        label: 'Achsen',
+                        label: CyberI18n.get('angle3d.axes'),
                         checked: CyberCanvasInstance.showAxes,
                         onchange: (v) => { CyberCanvasInstance.showAxes = v; draw(); }
                     },
                     {
-                        label: 'Gitternetz',
+                        label: CyberI18n.get('angle3d.grid'),
                         checked: CyberCanvasInstance.showGrid,
                         onchange: (v) => { CyberCanvasInstance.showGrid = v; draw(); }
                     },
                     {
-                        label: 'Achsenbeschriftung',
+                        label: CyberI18n.get('angle3d.labels'),
                         checked: CyberCanvasInstance.showLabels,
                         onchange: (v) => { CyberCanvasInstance.showLabels = v; draw(); }
                     }

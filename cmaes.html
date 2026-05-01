@@ -40,6 +40,7 @@
 
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/ui.js?v=539"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -57,7 +58,7 @@
         const BRAND_BLUE = "#00d2ff";
         const GOLDEN = "#ffd700";
 
-        CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: "FLÄCHENOPTIMIERUNG" });
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: CyberI18n.get('cmaes.title') });
         CyberUI.init();
 
         const cc = CyberCanvasInstance;
@@ -108,8 +109,8 @@
 
         function setMission(m) {
             activeMission = m;
-            const subtitle = m === 'CIRCLE' ? "OPTIMIERUNG KREIS" : "OPTIMIERUNG LINSE";
-            CyberBranding.init({ useExternalStyles: true, title: "Doc Alvers Mathe-Labor", subtitle: subtitle });
+            const subtitle = m === 'CIRCLE' ? CyberI18n.get('cmaes.circle_mission') : CyberI18n.get('cmaes.lens_mission');
+            CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: subtitle });
 
             const bKey = m === 'CIRCLE' ? 'cmaes_circle' : 'cmaes_lens';
             const rawB = window.CyberBriefings && window.CyberBriefings[bKey];
@@ -126,11 +127,11 @@
 
         function setupUI() {
             // CONTROLS
-            CyberUI.createCard('ui-container', 'STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('cmaes.controls'), `
                 <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                     <div style="display: flex; gap: 8px; width: 100%;">
-                        <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">START</button>
-                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">RESET</button>
+                        <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">${CyberI18n.get('cmaes.start')}</button>
+                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">${CyberI18n.get('cmaes.reset')}</button>
                     </div>
                     <div style="display: flex; gap: 8px; width: 100%;">
                         <button class="cyber-btn" onclick="stepEvolution(1)" style="flex: 1; border-color: #ffd700; color: #ffd700; height: 40px; font-size: 11px;">STEP 1</button>
@@ -140,23 +141,23 @@
             `);
 
             // TELEMETRIE
-            CyberUI.createCard('ui-container', 'EVOLUTIONSDATEN', `
+            CyberUI.createCard('ui-container', CyberI18n.get('cmaes.telemetry'), `
                 <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
                     <div class="telemetry-item">
-                        <div class="telemetry-label">GENERATION</div>
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.generation')}</div>
                         <div id="widget-gen" class="cyber-number-widget"></div>
                     </div>
                     <div class="telemetry-item">
-                        <div class="telemetry-label">FITNESS</div>
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.fitness')}</div>
                         <div id="widget-fit" class="cyber-number-widget"></div>
                     </div>
                     <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; margin: 5px 0;">
                     <div class="telemetry-item">
-                        <div class="telemetry-label">UMFANG</div>
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.perimeter')}</div>
                         <div id="widget-umfang" class="cyber-number-widget"></div>
                     </div>
                     <div class="telemetry-item">
-                        <div class="telemetry-label">FLÄCHE</div>
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.area')}</div>
                         <div id="widget-flaeche" class="cyber-number-widget"></div>
                     </div>
                 </div>
@@ -177,7 +178,7 @@
             }
             paused = !paused;
             const btn = document.getElementById('start-btn');
-            if (btn) btn.innerText = paused ? "RESUME" : "PAUSE";
+            if (btn) btn.innerText = paused ? CyberI18n.get('cmaes.resume') : CyberI18n.get('cmaes.pause');
         }
 
         function resetOptimization() {
@@ -192,7 +193,7 @@
             }
 
             const btn = document.getElementById('start-btn');
-            if (btn) btn.innerText = "START";
+            if (btn) btn.innerText = CyberI18n.get('cmaes.start');
             cc.needsRedraw = true;
             updateTelemetry();
         }
@@ -254,7 +255,7 @@
                 if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
                     paused = true;
                     const btn = document.getElementById('start-btn');
-                    if (btn) btn.innerText = "MAX 5000";
+                    if (btn) btn.innerText = CyberI18n.get('cmaes.max_gen');
                 }
                 let steps = 1;
                 if (generation >= 2000) steps = 100;
@@ -264,7 +265,7 @@
                     if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
                         paused = true;
                         const btn = document.getElementById('start-btn');
-                        if (btn) btn.innerText = "MAX 5000";
+                        if (btn) btn.innerText = CyberI18n.get('cmaes.max_gen');
                         break;
                     }
                     evolve();
@@ -313,10 +314,10 @@
 
         cc.onContextMenu = (e) => {
             CyberUI.showContextMenu(e.clientX, e.clientY, [
-                { label: 'Ansicht Reset', onclick: () => cc.resetView(-4, 4) },
+                { label: CyberI18n.get('lgs.view_reset'), onclick: () => cc.resetView(-4, 4) },
                 { divider: true },
-                { label: 'OPTIMIERUNG: KREIS', onclick: () => setMission('CIRCLE') },
-                { label: 'Gitter', checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
+                { label: CyberI18n.get('cmaes.view_circle'), onclick: () => setMission('CIRCLE') },
+                { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
             ]);
         };
 
