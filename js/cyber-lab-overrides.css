@@ -381,3 +381,41 @@ body {
     padding-left: 22px !important;
     text-shadow: 0 0 10px #00d2ff !important;
 }
+
+/* --- Mini-Rail Kontakt-Herz (CyberUI.injectContactHeartButton) --- */
+#mini-rail .nav-btn.adopt-contact-btn svg {
+    overflow: visible;
+}
+
+@keyframes cyber-adopt-heart-pulse {
+    0%, 100% {
+        stroke: #ffffff;
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.35));
+    }
+    42% {
+        stroke: #00d2ff;
+        transform: scale(1.14);
+        filter: drop-shadow(0 0 14px rgba(0, 210, 255, 1)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.45));
+    }
+    58% {
+        stroke: #00d2ff;
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.55));
+    }
+}
+
+#mini-rail .nav-btn.adopt-contact-btn svg .adopt-heart-path {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: cyber-adopt-heart-pulse 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mini-rail .nav-btn.adopt-contact-btn svg .adopt-heart-path {
+        animation: none;
+        stroke: #ffffff;
+        transform: none;
+        filter: none;
+    }
+}

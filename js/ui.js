@@ -16,6 +16,12 @@ class CyberUI {
 
         // Robust injection: retry until mini-rail is found
         const tryInject = () => {
+            const rail = document.getElementById('mini-rail');
+            if (!rail) {
+                setTimeout(tryInject, 100);
+                return;
+            }
+            CyberUI.injectContactHeartButton();
             if (CyberUI.injectCoffeeButton()) {
                 console.log("☕ Cyber-Coffee injected.");
             } else {
@@ -23,7 +29,8 @@ class CyberUI {
             }
         };
         tryInject();
-        
+
+        this.injectContactLabModal();
         // Inject the global donate modal structure
         this.injectDonateModal();
         this.installAppScreenshot();
@@ -66,6 +73,72 @@ class CyberUI {
 
         miniRail.appendChild(coffeeBtn);
         return true;
+    }
+
+    /** Kontakt (Herz) in der Mini-Rail — öffnet cyan-styled Modal mit mailto (kein Spendendialog). */
+    static injectContactHeartButton() {
+        const miniRail = document.getElementById('mini-rail');
+        if (!miniRail) return false;
+        if (miniRail.querySelector('.adopt-contact-btn')) return true;
+
+        const title = CyberI18n.get('ui.adopt_contact_btn_title');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nav-btn adopt-contact-btn';
+        btn.title = title;
+        btn.setAttribute('aria-label', title);
+        btn.onclick = () => CyberUI.showContactLabModal();
+        btn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="22" height="22">
+                <path class="adopt-heart-path" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2C10.5 3.5 9.26 3 7.5 3A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"></path>
+            </svg>
+        `;
+
+        const coffee = miniRail.querySelector('.coffee-btn');
+        if (coffee) {
+            miniRail.insertBefore(btn, coffee);
+        } else {
+            miniRail.appendChild(btn);
+        }
+        return true;
+    }
+
+    static injectContactLabModal() {
+        if (document.getElementById('cyber-contact-lab-overlay')) return;
+
+        const t = (key) => CyberI18n.get(key);
+        const overlay = document.createElement('div');
+        overlay.id = 'cyber-contact-lab-overlay';
+        overlay.className = 'cyber-overlay';
+        overlay.onclick = () => CyberUI.hideContactLabModal();
+
+        overlay.innerHTML = `
+            <div class="cyber-modal cyber-modal--neon" onclick="event.stopPropagation()">
+                <h3 class="cyber-modal-adopt-title">${t('ui.contact_lab_modal_title')}</h3>
+                <p>${t('ui.contact_lab_modal_body')}</p>
+                <a href="mailto:michael.r.alvers@gmail.com"
+                   class="cyber-modal-email-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    ${t('ui.contact_lab_email_cta')}
+                </a>
+                <button type="button" class="cyber-modal-close" onclick="CyberUI.hideContactLabModal()">${t('ui.contact_lab_close')}</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
+
+    static showContactLabModal() {
+        const overlay = document.getElementById('cyber-contact-lab-overlay');
+        if (overlay) overlay.classList.add('open');
+    }
+
+    static hideContactLabModal() {
+        const overlay = document.getElementById('cyber-contact-lab-overlay');
+        if (overlay) overlay.classList.remove('open');
     }
 
     static injectDonateModal() {
@@ -1096,6 +1169,52 @@ class CyberUI {
                 background: rgba(255, 255, 255, 0.05);
                 color: rgba(255, 255, 255, 0.8);
                 border-color: rgba(255, 255, 255, 0.4);
+            }
+
+            /* Kontakt-Modal (Lab Mini-Rail Herz): Cyan wie Hover, nicht Gold wie Spendendialog */
+            .cyber-modal.cyber-modal--neon {
+                border: 1px solid rgba(0, 210, 255, 0.38);
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 210, 255, 0.14);
+            }
+            .cyber-modal.cyber-modal--neon h3.cyber-modal-adopt-title {
+                margin-top: 0;
+                margin-bottom: 22px;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 700;
+                font-size: clamp(1.55rem, 4.8vw, 2.05rem);
+                letter-spacing: 0.14em;
+                line-height: 1.25;
+                text-transform: uppercase;
+                background: linear-gradient(to right, var(--neon-blue, #00d2ff), #ffffff, var(--neon-purple, #9d50bb));
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                color: transparent;
+                filter: drop-shadow(0 0 18px rgba(0, 210, 255, 0.35)) drop-shadow(0 0 28px rgba(157, 80, 187, 0.22));
+            }
+            .cyber-modal-email-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                margin: 8px 0 10px 0;
+                padding: 15px 18px;
+                border-radius: 10px;
+                background: rgba(0, 210, 255, 0.08);
+                border: 1px solid #00d2ff;
+                color: #00d2ff;
+                text-decoration: none;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.95rem;
+                letter-spacing: 1px;
+                transition: all 0.25s ease;
+                box-shadow: 0 0 18px rgba(0, 210, 255, 0.22);
+            }
+            .cyber-modal-email-btn:hover {
+                background: rgba(0, 210, 255, 0.18);
+                box-shadow: 0 0 28px rgba(0, 210, 255, 0.45);
+                color: #9cecff;
+                border-color: #9cecff;
             }
         `;
         document.head.appendChild(style);
