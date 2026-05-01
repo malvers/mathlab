@@ -33,6 +33,7 @@
                 fun: "Fun",
                 functions: "Funktionen",
                 highlights: "Highlights",
+                fraktale: "Fraktale",
                 university: "Universität",
                 themes_count: "Themen",
                 grade_title: "Jahrgang",
@@ -109,7 +110,10 @@
                 "beweisinwinkellsumme": { title: "Beweis Innenwinkelsatz", description: "Warum beträgt die Winkelsumme im Dreieck immer 180°? Der Beweis Schritt für Schritt." },
                 "butterfly": { title: "Schmetterlingskurve", description: "Eine faszinierende transzendente Kurve, definiert durch Polarkoordinaten." },
                 "heart3d": { title: "3D Heart Surface", description: "Visualisierung einer impliziten 3D-Fläche hinter dem mathematischen Herzen." },
-                "litchi3d": { title: "3D Litchi Labor", description: "Komplexe 3D-Oberflächenmathematik interaktiv erkunden." }
+                "litchi3d": { title: "3D Litchi Labor", description: "Komplexe 3D-Oberflächenmathematik interaktiv erkunden." },
+                "cinematic-intro": { title: "Cinematic Intro", description: "Erlebe den monumentalen Start in das Doc Alvers Labor. ULTRA v5.3.8 Visual Identity." },
+                "stanford-portal": { title: "Stanford University", description: "Elite-Forschungsuni im Silicon Valley: Spitzenforschung, offene Ideen und Campus-Kultur." },
+                "happy-birthday-ulf": { title: "Happy Birthday Ulf!", description: "Eine mathematische Überraschung zum Geburtstag. Feier mit Doc Alvers!" }
             }
         },
         en: {
@@ -137,6 +141,7 @@
                 fun: "Fun",
                 functions: "Functions",
                 highlights: "Highlights",
+                fraktale: "Fractals",
                 university: "University",
                 themes_count: "Themes",
                 grade_title: "Grade",
@@ -213,7 +218,10 @@
                 "beweisinwinkellsumme": { title: "Interior Angle Proof", description: "Why is the sum of angles in a triangle always 180°? The proof step by step." },
                 "butterfly": { title: "Butterfly Curve", description: "A fascinating transcendental curve defined by polar coordinates." },
                 "heart3d": { title: "3D Heart Surface", description: "Visualization of an implicit 3D surface behind the mathematical heart." },
-                "litchi3d": { title: "3D Litchi Lab", description: "Explore complex 3D surface mathematics interactively." }
+                "litchi3d": { title: "3D Litchi Lab", description: "Explore complex 3D surface mathematics interactively." },
+                "cinematic-intro": { title: "Cinematic Intro", description: "Experience the monumental start into Doc Alvers' lab. ULTRA v5.3.8 Visual Identity." },
+                "stanford-portal": { title: "Stanford University", description: "Elite research university in Silicon Valley: top research, open ideas and campus culture." },
+                "happy-birthday-ulf": { title: "Happy Birthday Ulf!", description: "A mathematical surprise for the birthday. Celebrate with Doc Alvers!" }
             }
         },
         es: {
@@ -241,6 +249,7 @@
                 fun: "Diversión",
                 functions: "Funciones",
                 highlights: "Destacados",
+                fraktale: "Fractales",
                 university: "Universidad",
                 themes_count: "Temas",
                 grade_title: "Año",
@@ -317,7 +326,10 @@
                 "beweisinwinkellsumme": { title: "Prueba del Ángulo Interior", description: "¿Por qué la suma de los ángulos de un triángulo es siempre 180°? La prueba paso a paso." },
                 "butterfly": { title: "Curva de Mariposa", description: "Una fascinante curva trascendente definida por coordenadas polares." },
                 "heart3d": { title: "Superficie de Corazón 3D", description: "Visualización de una superficie 3D implícita detrás del corazón matemático." },
-                "litchi3d": { title: "Laboratorio de Litchi 3D", description: "Explore interactivamente las complejas matemáticas de superficies 3D." }
+                "litchi3d": { title: "Laboratorio de Litchi 3D", description: "Explore interactivamente las complejas matemáticas de superficies 3D." },
+                "cinematic-intro": { title: "Intro Cinemática", description: "Experimente el monumental comienzo del laboratorio del Doc Alvers. Identidad visual ULTRA v5.3.8." },
+                "stanford-portal": { title: "Stanford University", description: "Universidad de investigación de élite en Silicon Valley: investigación de vanguardia, ideas abiertas y cultura de campus." },
+                "happy-birthday-ulf": { title: "¡Feliz Cumpleaños Ulf!", description: "Una sorpresa matemática para el cumpleaños. ¡Celebra con el Doc Alvers!" }
             }
         }
     };
