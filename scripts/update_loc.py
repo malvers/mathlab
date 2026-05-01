@@ -3,7 +3,7 @@ import os
 def calculate_loc():
     total_lines = 0
     # Verzeichnisse, die ignoriert werden sollen
-    ignore_dirs = {'.venv', '.git', 'node_modules', '__pycache__'}
+    ignore_dirs = {'.venv', '.git', 'node_modules', '__pycache__', 'test_env', '.venv-screenshot', '.idea'}
     # Dateiendungen, die gezählt werden sollen
     valid_extensions = {'.html', '.js', '.css', '.py', '.ts', '.java', '.json', '.md'}
 
