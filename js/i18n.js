@@ -2029,3 +2029,16 @@ const CyberI18n = {
         return result;
     }
 };
+
+// Auto-detect language from URL or localStorage
+(function() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
+        if (['de', 'en', 'es', 'fr'].includes(lang.toLowerCase())) {
+            CyberI18n.current = lang.toLowerCase();
+        }
+    } catch (e) {
+        console.warn("Language auto-detect failed:", e);
+    }
+})();
