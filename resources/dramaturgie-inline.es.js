@@ -1,4 +1,4 @@
-/** Preloaded dramaturgie for file:// (fetch often fails); mirror resources/dramaturgie.txt if you add it. */
+/** Intro dramaturgy — Spanish (sync structure with dramaturgie-inline.de.js). */
 window.__INTRO_DRAMATURGIE_TXT = `
 
 # 
@@ -8,37 +8,37 @@ DOC ALVERS
 MATHE-
 LABORE
 16pt
-von Dr. Michael R. Alvers
+por el Dr. Michael R. Alvers
 
 #
 200pt
 38 
 60pt
-Interaktive Mathematik
-Labore
+Matemática interactiva
+laboratorios
 
 #
 120pt
-6 Sprachen
+6 idiomas
 20pt
 %purplepulsating and counting
 40pt
-deutsch
-englisch
-spanisch
-französisch
-italienisch
-portugiesisch
+alemán
+inglés
+español
+francés
+italiano
+portugués
 
 #
-// es werden alle screenshots gezeigt
+// se muestran todas las capturas
 %pause 500
 %screenshots
 %pause 500
 
 # 
 60pt
-7 Programmiersprachen 
+7 lenguajes de programación 
 40pt
 hypertext markup language
 cascading styles sheets
@@ -52,20 +52,20 @@ JAVA
 200pt
 %loc
 60pt
-Programmzeilen
+líneas de código
 
 #
-für Euch!
+¡Para vosotros!
 %picture resources/kids.jpeg
 %sound resources/kids.wav
 //%video https://coverr.co/videos/welcome-back-to-school-classrooms-first-lesson
 
 #
 100pt
-das crazy!
+¡una locura!
 180pt
 %emoji 😎
-%button zurück
+%button volver
 
 #
 %cwstack left
