@@ -140,6 +140,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -164,24 +165,24 @@
         window.addEventListener('load', () => {
             // 1. Initialize Branding
             CyberBranding.init({
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "Beweis 1. Binomische Formel",
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('binom.proof_title'),
                 useExternalStyles: true
             });
 
             // 2. Build Sidebar via CyberUI
             CyberUI.init();
             
-            CyberUI.createCard('parameters-container', 'AUFTEILUNG', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('binom.division'), `
                 <div class="area-item" style="color:#ffcc00;">
-                    <span style="font-family:Orbitron; font-size:0.8rem;">P-WERT</span>
+                    <span style="font-family:Orbitron; font-size:0.8rem;">${CyberI18n.get('binom.p_value')}</span>
                     <span id="val-p" class="stat-val">7.00</span>
                 </div>
                 <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:#ffcc00; width:100%;">
-                <p style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px; font-family:Outfit;">Tipp: Ziehe den Mittelpunkt im Quadrat!</p>
+                <p style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px; font-family:Outfit;">${CyberI18n.get('binom.tip')}</p>
             `, '#ffcc00'); // Gold accent for P-Adjustment
 
-            CyberUI.createCard('parameters-container', 'ANALYTIK', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('binom.analytics'), `
                 <div class="area-list">
                     <div class="area-item" style="color:#ffcc00;">
                         <span id="lbl-side-p2"></span>
@@ -197,7 +198,7 @@
                     </div>
                     <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 12px 0;">
                     <div class="area-item" style="color:white; font-size:1.1rem;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">GESAMT</span>
+                        <span style="font-family:Orbitron; font-size:0.8rem;">${CyberI18n.get('binom.total')}</span>
                         <span id="stat-total" class="stat-val">100.00</span>
                     </div>
                 </div>
@@ -418,7 +419,4 @@
         window.addEventListener('resize', resize);
     </script>
 </body>
-</html>
-</body>
-
 </html>

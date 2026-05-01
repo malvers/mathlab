@@ -47,6 +47,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-canvas.js"></script>
@@ -128,48 +129,48 @@
                 if (typeof CyberBranding !== 'undefined') {
                     CyberBranding.init({
                         useExternalStyles: true,
-                        title: "Doc Alvers Mathe-Labor",
-                        subtitle: "GLEICHUNGSSYSTEME"
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('lgs.system_title')
                     });
                 }
                 
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
                     
-                    CyberUI.createCard('parameters-container', 'GLEICHUNGSSYSTEM', `
+                    CyberUI.createCard('parameters-container', CyberI18n.get('lgs.system_title'), `
                         <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.1);">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 10px; display: block;">FORMALES SYSTEM</span>
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 10px; display: block;">${CyberI18n.get('lgs.formal_system')}</span>
                             <div id="eq-formal-gs" class="math-glow" style="font-size: 1.4rem; text-align: left; padding-left: 0; margin-left: -2px;"></div>
                         </div>
                         <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; background: rgba(0, 210, 255, 0.05); padding: 10px; border-radius: 4px; margin-bottom: 15px;">
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">SCHNITTPUNKT S</span>
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('lgs.intersection')}</span>
                             <div id="eq-sp" class="math-glow" style="color: var(--neon-green); font-weight: bold;"></div>
                         </div>
                         <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-bottom: 15px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">NOTATION</span>
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('lgs.notation')}</span>
                             <div id="scramble-dropdown-container" style="width: 100%;"></div>
                         </div>
                         <div id="magnet-snap-container" style="margin-bottom: 15px;"></div>
                         <div style="display: flex; gap: 10px; margin-top: 5px;">
-                            <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">NEUE AUFGABE</button>
-                            <button class="cyber-button" onclick="resetView()" style="flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">VIEW RESET</button>
+                            <button class="cyber-button" onclick="generateRandomTask()" style="flex: 1; background: rgba(255, 157, 0, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">${CyberI18n.get('lgs.new_task')}</button>
+                            <button class="cyber-button" onclick="resetView()" style="flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">${CyberI18n.get('lgs.view_reset')}</button>
                         </div>
                     `, 'var(--neon-blue)', { collapsible: false });
                     
                     const scrambleOptions = [
-                        { id: "0", label: `<span class="math-part" data-tex="y=..">y=..</span> <span class="desc-part">NORMAL</span>` },
-                        { id: "1", label: `<span class="math-part" data-tex="..=y">..=y</span> <span class="desc-part">GESPIEGELT</span>` },
-                        { id: "2", label: `<span class="math-part" data-tex="sy=..">sy=..</span> <span class="desc-part">SKALIERT (sY)</span>` },
-                        { id: "3", label: `<span class="math-part" data-tex="mx-y">mx-y</span> <span class="desc-part">IMPLIZIT A</span>` },
-                        { id: "4", label: `<span class="math-part" data-tex="y-mx">y-mx</span> <span class="desc-part">IMPLIZIT B</span>` },
-                        { id: "5", label: `<span class="math-part" data-tex="?\\!">?\\!</span> <span class="desc-part">ZUFALL MIX</span>` }
+                        { id: "0", label: `<span class="math-part" data-tex="y=..">y=..</span> <span class="desc-part">${CyberI18n.get('lgs.mode_normal')}</span>` },
+                        { id: "1", label: `<span class="math-part" data-tex="..=y">..=y</span> <span class="desc-part">${CyberI18n.get('lgs.mode_mirrored')}</span>` },
+                        { id: "2", label: `<span class="math-part" data-tex="sy=..">sy=..</span> <span class="desc-part">${CyberI18n.get('lgs.mode_scaled')}</span>` },
+                        { id: "3", label: `<span class="math-part" data-tex="mx-y">mx-y</span> <span class="desc-part">${CyberI18n.get('lgs.mode_implicit_a')}</span>` },
+                        { id: "4", label: `<span class="math-part" data-tex="y-mx">y-mx</span> <span class="desc-part">${CyberI18n.get('lgs.mode_implicit_b')}</span>` },
+                        { id: "5", label: `<span class="math-part" data-tex="?\\!">?\\!</span> <span class="desc-part">${CyberI18n.get('lgs.mode_random')}</span>` }
                     ];
 
                     CyberUI.createDropdown('scramble-dropdown-container', scrambleOptions, (val) => {
                         window.setScrambleLevel(val);
                     }, String(scrambleLevel));
                     
-                    CyberUI.createCheckbox('magnet-snap-container', 'MAGNET-SNAP', snapToGrid, (val) => {
+                    CyberUI.createCheckbox('magnet-snap-container', CyberI18n.get('lgs.magnet_snap'), snapToGrid, (val) => {
                         snapToGrid = val;
                         saveSettings();
                     }, '#94a3b8');
@@ -263,25 +264,25 @@
                 cc.onContextMenu = (e) => {
                     if (typeof CyberUI !== 'undefined' && CyberUI.showContextMenu) {
                         CyberUI.showContextMenu(e.clientX, e.clientY, [
-                            { label: 'Labor Reset', onclick: () => window.resetView() },
+                            { label: CyberI18n.get('ui.reset'), onclick: () => window.resetView() },
                             { divider: true },
                             {
-                                label: 'Gitter anzeigen',
+                                label: CyberI18n.get('ui.show_grid'),
                                 checked: cc.showGrid,
                                 onchange: (val) => { cc.showGrid = val; draw(); }
                             },
                             {
-                                label: 'Achsen anzeigen',
+                                label: CyberI18n.get('ui.show_axes'),
                                 checked: cc.showAxes,
                                 onchange: (val) => { cc.showAxes = val; draw(); }
                             },
                             {
-                                label: 'Achsenbeschriftung',
+                                label: CyberI18n.get('ui.show_labels'),
                                 checked: cc.showLabels,
                                 onchange: (val) => { cc.showLabels = val; draw(); }
                             },
                             {
-                                label: 'Koordinaten',
+                                label: CyberI18n.get('ui.show_telemetry'),
                                 checked: cc.showTelemetry,
                                 onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); }
                             }
@@ -593,7 +594,7 @@
                 const spY = clean(sp.y);
                 katex.render(`S(${spX.toFixed(2)} \\mid ${spY.toFixed(2)})`, document.getElementById('eq-sp'), { throwOnError: false });
             } else {
-                document.getElementById('eq-sp').innerText = "Parallel / Keine Lösung";
+                document.getElementById('eq-sp').innerText = CyberI18n.get('lgs.no_solution');
             }
         }
     </script>
