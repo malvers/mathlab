@@ -564,7 +564,7 @@
         #intro-start-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(5, 11, 24, 0.2);
+            background: rgba(5, 11, 24, 0.05);
             backdrop-filter: blur(10px);
             z-index: 9999;
             display: flex;
@@ -601,7 +601,7 @@
 
         #intro-start-overlay .play-text {
             margin-top: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Orbitron', sans-serif;
             font-size: 24px;
             font-weight: 600;
             letter-spacing: 4px;
@@ -778,11 +778,6 @@
 
         /* —— Catching Words: Reihenfolge per .txt/.md (Zeile = Eintrag) oder Drop von Text —— */
         const CW_SEQUENCE_DEFAULT = Object.freeze([
-            '1. Zeile',
-            '2. Zeile',
-            '3. Zeile',
-            '4. Zeile',
-            '5. Zeile',
         ]);
         /** Jede Zeile mit # beginnt eine neue Section; folgende Wörter gehören dazu (inkl. # 20pt …). ←/→ wechseln die Section. */
         let cwSections = [CW_SEQUENCE_DEFAULT.map((text) => ({ text, fontSizePt: null }))];
@@ -1138,10 +1133,34 @@
             if (cwPlayAllActive) runCwPlayAllSectionCompletionWatch();
         }
 
+        function fadeOutBgMusic() {
+            if (introAmbMaster && introAmbCtx) {
+                const t = introAmbCtx.currentTime;
+                introAmbMaster.gain.cancelScheduledValues(t);
+                introAmbMaster.gain.setTargetAtTime(0, t, 4.0);
+            }
+            
+            let vol = bgAudioObj.volume;
+            const fadeAudio = setInterval(() => {
+                vol -= 0.01;
+                if (vol <= 0) {
+                    bgAudioObj.volume = 0;
+                    bgAudioObj.pause();
+                    clearInterval(fadeAudio);
+                } else {
+                    bgAudioObj.volume = vol;
+                }
+            }, 80);
+            
+            const btn = document.getElementById('intro-ambient-btn');
+            if (btn) btn.classList.remove('is-playing');
+        }
+
         function stopCwPlayAllFromScript() {
             cwPlayAllActive = false;
             clearCwPlayAllTimer();
             syncCwMotionVars();
+            fadeOutBgMusic();
         }
 
         function beginCwPlayAllSections() {
