@@ -270,7 +270,18 @@ const CyberI18n = {
                 navigation: "NAVIGATION",
                 flight_start: "START FLIGHT",
                 flight_stop: "STOP FLIGHT",
-                reset: "RESET"
+                reset: "RESET",
+                display: "ANSICHT",
+                plane_fractal: "FRAKTAL",
+                plane_orbit: "ORBIT",
+                orbit_help_mb: "Orbit z_{n+1}=z_n²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 (typ. Escape-Schranke).",
+                orbit_help_jl: "Julia: c aus Real-/Imaginär-Schiebern; Orbit startet bei z₀ = Mittelpunkt der Fraktal-Ansicht.",
+                orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
+                orbit_grid: "Gitterlinien",
+                orbit_steps_arrows: "Orbit-Schritte: {n} (↑/↓ nur hier; Shift = größere Schritte)",
+                orbit_connector_lines: "Verbindungslinien (Orbit)",
+                orbit_scan_hint: "Leertaste: zeilenweise von oben nach unten — kleine orangene Punkte ≈ Orbit bleibt begrenzt; unten automatisches Ende. Nochmal Leertaste während Scan: abbrechen und löschen.",
+                orbit_scan_running: "→ Scan läuft (oben → unten)"
             },
             stats: {
                 analytics: "ANALYTIK",
@@ -765,7 +776,18 @@ const CyberI18n = {
                 navigation: "NAVIGATION",
                 flight_start: "START FLIGHT",
                 flight_stop: "STOP FLIGHT",
-                reset: "RESET"
+                reset: "RESET",
+                display: "VIEW",
+                plane_fractal: "FRACTAL",
+                plane_orbit: "ORBIT",
+                orbit_help_mb: "Iteration z_{n+1}=z_n²+c from z₀=0 with c at the center of the fractal view. Circles |z|=1 and |z|=2 (escape radius).",
+                orbit_help_jl: "Julia: fixed c from sliders; orbit starts at z₀ = fractal view center.",
+                orbit_drag_hint: "Drag point c (Mandelbrot; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
+                orbit_grid: "Grid lines",
+                orbit_steps_arrows: "Orbit steps: {n} (↑/↓ orbit view only; Shift = bigger steps)",
+                orbit_connector_lines: "Orbit connector lines",
+                orbit_scan_hint: "Space: scan row by row top→bottom — fine orange dots ≈ bounded orbit; stops at bottom. Space during scan: cancel & clear.",
+                orbit_scan_running: "→ Scanning (top→bottom)"
             },
             stats: {
                 analytics: "ANALYTICS",
@@ -1260,7 +1282,18 @@ const CyberI18n = {
                 navigation: "NAVEGACIÓN",
                 flight_start: "INICIAR VUELO",
                 flight_stop: "DETENER VUELO",
-                reset: "REINICIAR"
+                reset: "REINICIAR",
+                display: "VISTA",
+                plane_fractal: "FRACTAL",
+                plane_orbit: "ÓRBITA",
+                orbit_help_mb: "Órbita z_{n+1}=z_n²+c con z₀=0; c = centro de la vista fractal. Círculos |z|=1 y |z|=2 (radio de escape).",
+                orbit_help_jl: "Julia: c con controles; órbita desde z₀ = centro de la vista fractal.",
+                orbit_drag_hint: "Arrastra c (Mandelbrot, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
+                orbit_grid: "Cuadrícula",
+                orbit_steps_arrows: "Pasos de órbita: {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
+                orbit_connector_lines: "Líneas entre puntos (órbita)",
+                orbit_scan_hint: "Espacio: filas de arriba abajo — puntos finos naranja ≈ órbita acotada; termina abajo. Espacio durante: cancelar y borrar.",
+                orbit_scan_running: "→ Escaneando (arriba→abajo)"
             },
             stats: {
                 analytics: "ANALÍTICA",
@@ -1755,7 +1788,18 @@ const CyberI18n = {
                 navigation: "NAVIGATION",
                 flight_start: "DÉMARRER VOL",
                 flight_stop: "ARRÊTER VOL",
-                reset: "RÉINITIALISER"
+                reset: "RÉINITIALISER",
+                display: "VUE",
+                plane_fractal: "FRACTAL",
+                plane_orbit: "ORBITES",
+                orbit_help_mb: "Orbite z_{n+1}=z_n²+c avec z₀=0 ; c = centre de la vue. Cercles |z|=1 et |z|=2 (rayon d'évasion).",
+                orbit_help_jl: "Julia : c depuis les curseurs ; orbite depuis z₀ = centre de la vue fractale.",
+                orbit_drag_hint: "Glisser le point c (Mandelbrot, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
+                orbit_grid: "Quadrillage",
+                orbit_steps_arrows: "Étapes d’orbite : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
+                orbit_connector_lines: "Segments entre les points (orbite)",
+                orbit_scan_hint: "Espace : lignes du haut vers le bas — petits points orange ≈ orbite bornée ; fin en bas. Espace pendant : annuler et effacer.",
+                orbit_scan_running: "→ Scan (haut→bas)"
             },
             stats: {
                 analytics: "ANALYTIQUE",
@@ -2250,7 +2294,18 @@ const CyberI18n = {
                 navigation: "NAVIGAZIONE",
                 flight_start: "AVVIA VOLO",
                 flight_stop: "FERMA VOLO",
-                reset: "RESET"
+                reset: "RESET",
+                display: "VISTA",
+                plane_fractal: "FRATTALE",
+                plane_orbit: "ORBITA",
+                orbit_help_mb: "Orbita z_{n+1}=z_n²+c con z₀=0; c = centro della vista. Cerchi |z|=1 e |z|=2 (raggio di fuga).",
+                orbit_help_jl: "Julia: c dagli slider; orbita da z₀ = centro della vista frattale.",
+                orbit_drag_hint: "Trascina c (Mandelbrot, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
+                orbit_grid: "Griglia",
+                orbit_steps_arrows: "Passi orbita: {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
+                orbit_connector_lines: "Segmenti tra i punti (orbita)",
+                orbit_scan_hint: "Barra spaziale: righe dall’alto in basso — puntini arancioni ≈ orbita limitata; si ferma in basso. Spazio durante: annulla e cancella.",
+                orbit_scan_running: "→ Scansione (alto→basso)"
             },
             stats: {
                 analytics: "ANALITICA",
@@ -2745,7 +2800,18 @@ pt: {
                 navigation: "NAVIGATION",
                 flight_start: "INICIAR VÔO",
                 flight_stop: "STOP FLIGHT",
-                reset: "REINICIAR"
+                reset: "REINICIAR",
+                display: "VISÃO",
+                plane_fractal: "FRACTAL",
+                plane_orbit: "ÓRBITA",
+                orbit_help_mb: "Órbita z_{n+1}=z_n²+c com z₀=0; c = centro da vista. Círculos |z|=1 e |z|=2 (escape).",
+                orbit_help_jl: "Julia: c nos sliders; órbita a partir de z₀ = centro da vista fractal.",
+                orbit_drag_hint: "Arraste c (Mandelbrot, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
+                orbit_grid: "Grade",
+                orbit_steps_arrows: "Passos da órbita: {n} (↑/↓ só vista órbita; Shift passos maiores)",
+                orbit_connector_lines: "Linhas entre pontos (órbita)",
+                orbit_scan_hint: "Espaço: linhas de cima para baixo — pontos finos laranja ≈ órbita limitada; para em baixo. Espaço durante: cancelar e limpar.",
+                orbit_scan_running: "→ Varrendo (topo→base)"
             },
             stats: {
                 analytics: "ANALÍTICA",

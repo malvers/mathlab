@@ -188,10 +188,28 @@ const CyberBranding = {
         document.head.appendChild(script);
     },
 
+    ensureBriefingModuleLoaded() {
+        // We always try to load i18n-descriptions.js as it contains the translated content.
+        if (this._briefingLoadRequested) return;
+
+        const script = document.createElement("script");
+        script.src = "js/branding/i18n-descriptions.js";
+        script.async = true;
+        script.dataset.cyberBrandingBriefing = "1";
+        script.onerror = () => {
+            this._briefingLoadRequested = false;
+            console.warn("CyberBranding: failed to load js/branding/i18n-descriptions.js.");
+        };
+
+        this._briefingLoadRequested = true;
+        document.head.appendChild(script);
+    },
+
     init(config = {}) {
         this.ensureCoreModuleLoaded();
         this.ensureNavModuleLoaded();
         this.ensureOverlaysModuleLoaded();
+        this.ensureBriefingModuleLoaded();
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
             brandingCore.init.call(this, config);
@@ -620,10 +638,27 @@ const CyberBranding = {
 
     showBriefing: function () {
         const moduleKey = getBriefingModuleKey();
+        const currentLang = (window.CyberI18n && window.CyberI18n.current) || 'de';
 
         const pageBrief = this.briefingContent != null && String(this.briefingContent).trim() !== "";
-        if (!pageBrief && window.CyberBriefings && window.CyberBriefings[moduleKey]) {
-            this.briefingContent = this.formatBriefingText(window.CyberBriefings[moduleKey]);
+        if (!pageBrief && window.CyberBriefings) {
+            let content = null;
+            // Case 1: New i18n structure { "de": { "key": "..." }, "en": { ... } }
+            if (window.CyberBriefings[currentLang] && window.CyberBriefings[currentLang][moduleKey]) {
+                content = window.CyberBriefings[currentLang][moduleKey];
+            } 
+            // Case 2: Fallback to 'de' in new structure
+            else if (window.CyberBriefings['de'] && window.CyberBriefings['de'][moduleKey]) {
+                content = window.CyberBriefings['de'][moduleKey];
+            }
+            // Case 3: Old flat structure { "key": "..." }
+            else if (window.CyberBriefings[moduleKey] && typeof window.CyberBriefings[moduleKey] === 'string') {
+                content = window.CyberBriefings[moduleKey];
+            }
+
+            if (content) {
+                this.briefingContent = this.formatBriefingText(content);
+            }
         }
 
         if (!this.briefingContent) {
