@@ -62,6 +62,7 @@
     <script src="https://cdn.jsdelivr.net/npm/earcut/dist/earcut.min.js"></script>
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -76,8 +77,8 @@
         // 1. Branding & UI Init
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "WINKELSUMME IN POLYGONEN"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('ui.angle_sum')
         });
         CyberUI.init();
 
@@ -95,18 +96,18 @@
 
         // 2. Build UI Cards
         function setupUI() {
-            CyberUI.createCard('ui-container', 'LABOR-STEUERUNG', `
+            CyberUI.createCard('ui-container', CyberI18n.get('polygon.vertices'), `
                 <div class="corner-grid" id="btn-container"></div>
-                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">LABOR RESET</button>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('ui-container', 'WINKEL-ANALYSE', `
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.angle_analysis'), `
                 <div class="stat-card" style="text-align:center;">
-                    <span class="stats-label">INNENWINKELSUMME</span>
+                    <span class="stats-label">${CyberI18n.get('polygon.sum_interior')}</span>
                     <div id="sum-val" class="stats-val" style="font-size:2.4rem !important; text-shadow:0 0 20px rgba(255,255,255,0.3);">0°</div>
                 </div>
                 <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; margin-top: 10px;">
-                    <span class="stats-label">WINKEL-PROTOKOLL</span>
+                    <span class="stats-label">${CyberI18n.get('polygon.angle_protocol')}</span>
                     <div id="math-log"></div>
                 </div>
             `, 'var(--neon-purple)');
@@ -121,7 +122,7 @@
             for (let i = 3; i <= 10; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'cyber-btn' + (i === nEcken ? ' active' : '');
-                btn.innerText = i + "E";
+                btn.innerText = CyberI18n.get('polygon.vertex_short', { n: i });
                 btn.onclick = () => { nEcken = i; updateButtons(); initPolygon(i); };
                 btnContainer.appendChild(btn);
             }
@@ -191,7 +192,7 @@
                 ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
                 ctx.restore();
 
-                logHtml += `<div class="log-entry"><span style="color:${color}">WINKEL ${i+1}</span><span>${deg.toFixed(1)}°</span></div>`;
+                logHtml += `<div class="log-entry"><span style="color:${color}">${CyberI18n.get('polygon.angle_label', { n: i+1 })}</span><span>${deg.toFixed(1)}°</span></div>`;
             }
 
             // Polygon Umriss

@@ -92,13 +92,13 @@
                     <thead>
                         <tr>
                             <th># ID</th>
-                            <th style="text-align:right;">FLÄCHE CM²</th>
+                            <th style="text-align:right;">${CyberI18n.get('proof.area_cm2')}</th>
                         </tr>
                     </thead>
                     <tbody id="log-body"></tbody>
                     <tfoot>
                         <tr class="hud-sum-row">
-                            <td class="hud-sum-label">SUMME Σ</td>
+                            <td class="hud-sum-label">${CyberI18n.get('proof.sum_sigma')}</td>
                             <td id="hud-sum-total" class="hud-sum-val">0,00 cm²</td>
                         </tr>
                     </tfoot>
@@ -110,6 +110,7 @@
 
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -124,8 +125,8 @@
         // 1. Branding & UI Initialization
         CyberBranding.init({
             useExternalStyles: true,
-            title: "Doc Alvers Mathe-Labor",
-            subtitle: "PYTHAGORAS-BEWEIS"
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('ui.pythagoras')
         });
         CyberUI.init();
 
@@ -147,23 +148,23 @@
 
         // 3. UI Card Setup
         function setupUI() {
-            CyberUI.createCard('parameters-container', 'LABOR-STATUS', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('logic.mission_status'), `
                 <div class="stats-grid">
                     <div class="stats-subcard" style="border-left-color: var(--neon-orange);">
-                        <span class="stats-label">Zielfläche [ABCD]</span>
+                        <span class="stats-label">${CyberI18n.get('proof.target_area')}</span>
                         <span id="target-area" class="stats-val" style="color: var(--neon-orange);">0,00 cm²</span>
                     </div>
                     <div class="stats-subcard" style="border-left-color: var(--neon-purple);">
-                        <span class="stats-label">Summe Dreiecke</span>
+                        <span class="stats-label">${CyberI18n.get('proof.triangle_sum')}</span>
                         <span id="blue-sum" class="stats-val" style="color: var(--neon-purple);">0,00 cm²</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createCard('parameters-container', 'STEUERUNG', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('logic.cancel'), `
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button id="btn-toggle-tria" class="cyber-btn" onclick="toggleTria()">TRIANGULIERUNG AN</button>
-                    <button id="btn-reset" class="cyber-btn" onclick="resetLab()" style="border-color:var(--neon-blue); color:var(--neon-blue);">BEWEIS RESET</button>
+                    <button id="btn-toggle-tria" class="cyber-btn" onclick="toggleTria()">${showTria ? CyberI18n.get('proof.tria_on') : CyberI18n.get('proof.tria_off')}</button>
+                    <button id="btn-reset" class="cyber-btn" onclick="resetLab()" style="border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('proof.reset_proof')}</button>
                 </div>
             `, 'var(--neon-blue)');
         }
@@ -173,10 +174,10 @@
             showTria = !showTria;
             const btn = document.getElementById('btn-toggle-tria');
             if (showTria) {
-                btn.innerText = "TRIANGULIERUNG AN";
+                btn.innerText = CyberI18n.get('proof.tria_on');
                 btn.classList.remove('off');
             } else {
-                btn.innerText = "TRIANGULIERUNG AUS";
+                btn.innerText = CyberI18n.get('proof.tria_off');
                 btn.classList.add('off');
             }
             draw();
@@ -276,11 +277,11 @@
                     }
                 }
             } else if (!showTria) {
-                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; opacity:0.3;">TRIANGULIERUNG DEAKTIVIERT</td></tr>`;
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; opacity:0.3;">${CyberI18n.get('proof.tria_deactive')}</td></tr>`;
             } else if (isOutOfBounds) {
-                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">AUßERHALB DES RAHMENS</td></tr>`;
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">${CyberI18n.get('proof.out_of_bounds')}</td></tr>`;
             } else if (anyCollision) {
-                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">KOLLISION ERKANNT</td></tr>`;
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">${CyberI18n.get('proof.collision')}</td></tr>`;
             }
 
             const logBody = document.getElementById('log-body');

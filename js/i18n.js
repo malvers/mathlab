@@ -1,6 +1,6 @@
 /**
  * CYBER-LABOR GLOBAL i18n DICTIONARY
- * Supports: Addition, Subtraction, Multiplication, Division
+ * Supports: Addition, Subtraction, Multiplication, Division, Logic, Geometry, Proof, Polygon
  * Languages: DE (German), EN (English), ES (Spanish)
  */
 
@@ -16,7 +16,57 @@ const CyberI18n = {
                 prev: "ZURÜCK",
                 reset: "LABOR RESET",
                 step: "SCHRITT",
-                coach_title: "Doc Alvers Mathe-Labor"
+                coach_title: "Doc Alvers Mathe-Labor",
+                logic_game: "Zahlen-Puzzle",
+                angle_lab: "Winkel-Labor",
+                pythagoras: "Pythagoras-Beweis",
+                angle_sum: "Winkelsumme-Labor"
+            },
+            polygon: {
+                sum_interior: "INNENWINKELSUMME",
+                angle_protocol: "WINKEL-PROTOKOLL",
+                angle_label: "WINKEL {n}",
+                vertices: "ECKEN",
+                vertex_short: "{n}E"
+            },
+            proof: {
+                target_area: "Zielfläche [ABCD]",
+                triangle_sum: "Summe Dreiecke",
+                tria_on: "TRIANGULIERUNG AN",
+                tria_off: "TRIANGULIERUNG AUS",
+                reset_proof: "BEWEIS RESET",
+                area_cm2: "FLÄCHE CM²",
+                sum_sigma: "SUMME Σ",
+                tria_deactive: "TRIANGULIERUNG DEAKTIVIERT",
+                out_of_bounds: "AUẞERHALB DES RAHMENS",
+                collision: "KOLLISION ERKANNT"
+            },
+            geometry: {
+                angle_analysis: "WINKEL-ANALYSE",
+                lab_control: "LABOR-STEUERUNG",
+                supp_sum: "NEBENWINKEL-SUMME",
+                parallel_on: "PARALLELEN: AN",
+                parallel_off: "PARALLELEN: AUS",
+                transversal: "TRANSVERSALE",
+                parallels: "PARALLELEN",
+                step_width: "SCHRITTWEITE: {deg}°"
+            },
+            logic: {
+                instruction_sum: "Addiere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt.",
+                instruction_prod: "Multipliziere die Zahlen, so dass die Zahl neben den Zeilen und unter den Spalten rauskommt.",
+                mission_status: "MISSIONS-STATUS",
+                level: "LEVEL",
+                moves: "ZÜGE",
+                time: "ZEIT",
+                mode: "RECHEN-MODUS",
+                protocol_select: "PROTOKOLL-AUSWAHL",
+                protocol_restart: "PROTOKOLL NEUSTART",
+                hint_request: "HILFE ANFORDERN",
+                hint_title: "HILFE-PROTOKOLL",
+                confirm: "BESTÄTIGEN",
+                cancel: "ABBRECHEN",
+                solved: "PROTOKOLL GELÖST!",
+                next_protocol: "NÄCHSTES PROTOKOLL"
             },
             units: {
                 ones: "Einer",
@@ -61,7 +111,57 @@ const CyberI18n = {
                 prev: "BACK",
                 reset: "RESET LAB",
                 step: "STEP",
-                coach_title: "Doc Alvers Mathe-Labor"
+                coach_title: "Doc Alvers Math Lab",
+                logic_game: "Number Puzzle",
+                angle_lab: "Angle Lab",
+                pythagoras: "Pythagoras Proof",
+                angle_sum: "Angle Sum Lab"
+            },
+            polygon: {
+                sum_interior: "INTERIOR ANGLE SUM",
+                angle_protocol: "ANGLE PROTOCOL",
+                angle_label: "ANGLE {n}",
+                vertices: "VERTICES",
+                vertex_short: "{n}V"
+            },
+            proof: {
+                target_area: "Target Area [ABCD]",
+                triangle_sum: "Triangle Sum",
+                tria_on: "TRIANGULATION ON",
+                tria_off: "TRIANGULATION OFF",
+                reset_proof: "RESET PROOF",
+                area_cm2: "AREA CM²",
+                sum_sigma: "SUM Σ",
+                tria_deactive: "TRIANGULATION DISABLED",
+                out_of_bounds: "OUT OF BOUNDS",
+                collision: "COLLISION DETECTED"
+            },
+            geometry: {
+                angle_analysis: "ANGLE ANALYSIS",
+                lab_control: "LAB CONTROL",
+                supp_sum: "SUPPLEMENTARY ANGLE SUM",
+                parallel_on: "PARALLELS: ON",
+                parallel_off: "PARALLELS: OFF",
+                transversal: "TRANSVERSAL",
+                parallels: "PARALLELS",
+                step_width: "STEP WIDTH: {deg}°"
+            },
+            logic: {
+                instruction_sum: "Add the numbers so that they match the totals next to the rows and below the columns.",
+                instruction_prod: "Multiply the numbers so that they match the totals next to the rows and below the columns.",
+                mission_status: "MISSION STATUS",
+                level: "LEVEL",
+                moves: "MOVES",
+                time: "TIME",
+                mode: "CALCULATION MODE",
+                protocol_select: "PROTOCOL SELECTION",
+                protocol_restart: "RESTART PROTOCOL",
+                hint_request: "REQUEST HINT",
+                hint_title: "HINT PROTOCOL",
+                confirm: "CONFIRM",
+                cancel: "CANCEL",
+                solved: "PROTOCOL SOLVED!",
+                next_protocol: "NEXT PROTOCOL"
             },
             units: {
                 ones: "ones",
@@ -106,7 +206,57 @@ const CyberI18n = {
                 prev: "VOLVER",
                 reset: "REINICIAR",
                 step: "PASO",
-                coach_title: "Doc Alvers Laboratorio"
+                coach_title: "Doc Alvers Laboratorio",
+                logic_game: "Rompecabezas Numérico",
+                angle_lab: "Laboratorio de Ángulos",
+                pythagoras: "Prueba de Pitágoras",
+                angle_sum: "Laboratorio de Suma de Ángulos"
+            },
+            polygon: {
+                sum_interior: "SUMA DE ÁNGULOS INTERIORES",
+                angle_protocol: "PROTOCOLO DE ÁNGULOS",
+                angle_label: "ÁNGULO {n}",
+                vertices: "VÉRTICES",
+                vertex_short: "{n}V"
+            },
+            proof: {
+                target_area: "Área Objetivo [ABCD]",
+                triangle_sum: "Suma de Triángulos",
+                tria_on: "TRIANGULACIÓN ACTIVADA",
+                tria_off: "TRIANGULACIÓN DESACTIVADA",
+                reset_proof: "REINICIAR PRUEBA",
+                area_cm2: "ÁREA CM²",
+                sum_sigma: "SUMA Σ",
+                tria_deactive: "TRIANGULACIÓN DESACTIVADA",
+                out_of_bounds: "FUERA DE LÍMITES",
+                collision: "COLISIÓN DETECTADA"
+            },
+            geometry: {
+                angle_analysis: "ANÁLISIS DE ÁNGULOS",
+                lab_control: "CONTROL DEL LABORATORIO",
+                supp_sum: "SUMA DE ÁNGULOS SUPLEMENTARIOS",
+                parallel_on: "PARALELAS: ACTIVADO",
+                parallel_off: "PARALELAS: DESACTIVADO",
+                transversal: "TRANSVERSAL",
+                parallels: "PARALELAS",
+                step_width: "ANCHO DE PASO: {deg}°"
+            },
+            logic: {
+                instruction_sum: "Suma los números para que coincidan con los totales al lado de las filas y debajo de las columnas.",
+                instruction_prod: "Multiplica los números para que coincidan con los totales al lado de las filas y debajo de las columnas.",
+                mission_status: "ESTADO DE LA MISIÓN",
+                level: "NIVEL",
+                moves: "MOVIMIENTOS",
+                time: "TIEMPO",
+                mode: "MODO DE CÁLCULO",
+                protocol_select: "SELECCIÓN DE PROTOCOLO",
+                protocol_restart: "REINICIAR PROTOCOLO",
+                hint_request: "SOLICITAR PISTA",
+                hint_title: "PROTOCOLO DE PISTA",
+                confirm: "CONFIRMAR",
+                cancel: "CANCELAR",
+                solved: "¡PROTOCOLO RESUELTO!",
+                next_protocol: "SIGUIENTE PROTOCOLO"
             },
             units: {
                 ones: "unidades",
@@ -161,9 +311,11 @@ const CyberI18n = {
         }
 
         // Replace placeholders
-        Object.keys(replacements).forEach(placeholder => {
-            result = result.replace(`{${placeholder}}`, replacements[placeholder]);
-        });
+        if (typeof result === 'string') {
+            Object.keys(replacements).forEach(placeholder => {
+                result = result.replace(`{${placeholder}}`, replacements[placeholder]);
+            });
+        }
 
         return result;
     }
