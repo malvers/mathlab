@@ -21,15 +21,22 @@
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
             if (['de', 'en', 'es', 'fr', 'it', 'pt'].includes(lang.toLowerCase())) {
-                CyberI18n.current = lang.toLowerCase();
+                const resolved = lang.toLowerCase();
+                CyberI18n.current = resolved;
+                try {
+                    localStorage.setItem('cyber-lab-lang', resolved);
+                } catch (e) {}
                 console.log("Language set to:", CyberI18n.current);
             }
-            
-            // Set active class on load
+
             window.addEventListener('DOMContentLoaded', () => {
                 const currentLang = CyberI18n.current;
                 const btn = document.querySelector(`.lang-flag[onclick="setLanguage('${currentLang}')"]`);
                 if (btn) btn.classList.add('active');
+                const about = document.getElementById('btn-about');
+                if (about) {
+                    about.href = 'intro.html?lang=' + encodeURIComponent(currentLang || 'de');
+                }
             });
         })();
     </script>
@@ -39,6 +46,7 @@
     <!-- Branding-Styles: fixe Position für Titel + Nav (.floating), sonst erscheinen sie unten im Fluss. -->
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/index-tool-view-tiles.css">
+    <link rel="stylesheet" href="js/labor-scan-search.css">
     <script src="js/ui.js?v=4"></script>
     <style>
         /* Page-spezifisches Layout; Portal-Kachel-Tokens → js/index-portal-tokens.css */

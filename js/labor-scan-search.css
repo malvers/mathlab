@@ -1,0 +1,97 @@
+/**
+ * Labor-Scan — CyberUI.createSearch (#search-mount)
+ * Gemeinsames Aussehen für index.html und tools.html (nicht inline duplizieren).
+ */
+@keyframes labor-scan-mount-fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#search-mount .search-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    animation: labor-scan-mount-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#search-mount .search-input {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 12px 50px 12px 55px;
+    background: rgba(8, 18, 40, 0.72);
+    border: 1px solid rgba(0, 210, 255, 0.42);
+    box-shadow:
+        0 6px 24px rgba(0, 0, 0, 0.35),
+        0 0 18px rgba(0, 210, 255, 0.14);
+    font-size: 1.1rem;
+    color: white;
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+}
+
+#search-mount .search-input:focus {
+    border-color: var(--neon-blue, #00d2ff);
+    background: rgba(0, 210, 255, 0.05);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+}
+
+#search-mount .search-input::placeholder {
+    color: rgba(185, 226, 255, 0.82);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.86rem;
+}
+
+#search-mount .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+    opacity: 0.95;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.45));
+}
+
+#search-mount .search-input:focus + .search-icon {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--neon-blue, #00d2ff));
+}
+
+#search-mount .clear-search-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 5px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.4rem;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+#search-mount .clear-search-btn:hover {
+    background: rgba(255, 0, 0, 0.2);
+    border-color: #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
