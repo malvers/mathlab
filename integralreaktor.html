@@ -19,6 +19,7 @@
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/math-library.js"></script>
     <script src="js/ui.js?v=539"></script>
@@ -110,15 +111,15 @@
         <div class="instrument-card">
             <div class="dashboard-grid">
                 <div class="dashboard-stat">
-                    <div class="stat-meta">AKTIVE INTEGRAL-FORMEL</div>
-                    <div id="formula-display">Warte auf Daten...</div>
+                    <div class="stat-meta">${CyberI18n.get('integral.active_formula')}</div>
+                    <div id="formula-display">${CyberI18n.get('integral.waiting')}</div>
                 </div>
                 <div class="dashboard-stat">
-                    <div class="stat-meta">FLÄCHE UNTER DER KURVE</div>
+                    <div class="stat-meta">${CyberI18n.get('integral.area_under_curve')}</div>
                     <div id="integral-value" class="cyber-number" style="color: var(--neon-blue);">0.000</div>
                 </div>
                 <div class="dashboard-stat">
-                    <div class="stat-meta">FEHLER</div>
+                    <div class="stat-meta">${CyberI18n.get('integral.error')}</div>
                     <div id="error-display" class="cyber-number">0.0%</div>
                 </div>
             </div>
@@ -148,8 +149,8 @@
             // 1. Initialize Branding
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "DOC ALVERS MATHE-LABOR",
-                subtitle: "INTEGRALRECHNUNG"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('integral.title')
             });
 
             // 2. Initialize UI Components
@@ -162,7 +163,7 @@
                     
                     <div>
                         <div class="label-row">
-                            <span id="label-param-a">Grenze a</span>
+                            <span id="label-param-a">${CyberI18n.get('integral.limit_a')}</span>
                             <span id="val-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">-2.0</span>
                         </div>
                         <input type="range" id="param-a" min="-5" max="5" step="0.1" value="-2" oninput="updateEngine()">
@@ -170,7 +171,7 @@
 
                     <div>
                         <div class="label-row">
-                            <span id="label-param-b">Grenze b</span>
+                            <span id="label-param-b">${CyberI18n.get('integral.limit_b')}</span>
                             <span id="val-b" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">2.0</span>
                         </div>
                         <input type="range" id="param-b" min="-5" max="5" step="0.1" value="2" oninput="updateEngine()">
@@ -178,7 +179,7 @@
 
                     <div>
                         <div class="label-row">
-                            <span id="label-param-n">Präzision n</span>
+                            <span id="label-param-n">${CyberI18n.get('integral.precision_n')}</span>
                             <span id="val-n" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">10</span>
                         </div>
                         <input type="range" id="param-n" min="4" max="100" step="1" value="10" oninput="updateEngine()">
@@ -186,8 +187,8 @@
 
                     <div>
                         <div class="mode-selector">
-                            <button class="mode-btn active" onclick="setMode('exact')">ANALYTISCH</button>
-                            <button class="mode-btn" onclick="setMode('balken')">BALKEN</button>
+                            <button class="mode-btn active" onclick="setMode('exact')">${CyberI18n.get('integral.mode_analytical')}</button>
+                            <button class="mode-btn" onclick="setMode('balken')">${CyberI18n.get('integral.mode_bars')}</button>
                         </div>
                     </div>
                 </div>

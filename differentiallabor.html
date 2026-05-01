@@ -45,6 +45,7 @@
     <script src="js/cyber-canvas.js"></script>
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
     <script src="js/math-library.js"></script>
     <script src="js/formula.js"></script>
@@ -63,8 +64,8 @@
             // Module Engine Initialization
             CyberBranding.init({
                 useExternalStyles: true,
-                title: "Doc Alvers Mathe-Labor",
-                subtitle: "DIFFERENTIALRECHNUNG"
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('diff.title')
             });
 
             CyberUI.init();
@@ -87,33 +88,33 @@
             };
 
             // UI Setup
-            CyberUI.createCard('parameters-container', 'FUNKTIONALITÄT', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.functionality'), `
                 <div id="function-selector-container"></div>
                 <div id="x0-slider-container"></div>
             `, 'var(--neon-blue)');
 
-            CyberUI.createSlider('x0-slider-container', 'Punkt-Position (x₀)', -5, 5, x0, 0.01, updateX0, 'var(--neon-blue)');
+            CyberUI.createSlider('x0-slider-container', CyberI18n.get('diff.point_pos'), -5, 5, x0, 0.01, updateX0, 'var(--neon-blue)');
 
-            CyberUI.createCard('parameters-container', 'VISUALISIERUNG', `
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.visualization'), `
                 <div id="view-opts" style="display:flex; flex-direction:column; gap:6px;"></div>
             `, 'var(--neon-orange)');
 
-            CyberUI.createCheckbox('view-opts', "1. Ableitung f'(x)", showDerivative, (v) => { showDerivative = v; draw(); }, 'var(--neon-orange)');
-            CyberUI.createCheckbox('view-opts', "2. Ableitung f''(x)", showDerivative, (v) => { showSecondDeriv = v; draw(); }, 'var(--neon-green)');
+            CyberUI.createCheckbox('view-opts', CyberI18n.get('diff.deriv_1'), showDerivative, (v) => { showDerivative = v; draw(); }, 'var(--neon-orange)');
+            CyberUI.createCheckbox('view-opts', CyberI18n.get('diff.deriv_2'), showDerivative, (v) => { showSecondDeriv = v; draw(); }, 'var(--neon-green)');
 
             const statsHTML = `
                 <div class="stats-grid">
                     <div class="stats-card" style="border-left: 3px solid var(--neon-purple); padding-bottom:10px;">
-                        <span class="stats-label">Steigung f'(x₀)</span>
+                        <span class="stats-label">${CyberI18n.get('diff.slope')}</span>
                         <span id="val-m" class="stats-val" style="color:var(--neon-purple);">0.00</span>
                     </div>
                     <div class="stats-card" style="border-left: 3px solid var(--neon-green); padding-bottom:10px;">
-                        <span class="stats-label">Krümmung f''(x₀)</span>
+                        <span class="stats-label">${CyberI18n.get('diff.curvature')}</span>
                         <span id="val-ddm" class="stats-val" style="color:var(--neon-green);">0.00</span>
                     </div>
                 </div>
             `;
-            CyberUI.createCard('parameters-container', 'ANALYSE', statsHTML, 'var(--neon-yellow)');
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.analysis'), statsHTML, 'var(--neon-yellow)');
 
             // Initialize Dropdown
             CyberUI.createDropdown('function-selector-container', MathLibrary.getAll(), (id) => {
@@ -264,13 +265,10 @@
             CyberCanvasInstance.onContextMenu = (e) => {
                 const cc = CyberCanvasInstance;
                 CyberUI.showContextMenu(e.clientX, e.clientY, [
-                    { label: 'Punkt Reset (x₀)', onclick: () => updateX0(1.0) },
-                    { label: 'Ansicht Reset', onclick: () => cc.resetView(-8, 8) },
+                    { label: CyberI18n.get('diff.reset_point'), onclick: () => updateX0(1.0) },
+                    { label: CyberI18n.get('lgs.view_reset'), onclick: () => cc.resetView(-8, 8) },
                     { divider: true },
-                    { label: 'Gitter anzeigen', checked: cc.showGrid, onchange: (v) => cc.showGrid = v },
-                    { label: 'Achsen anzeigen', checked: cc.showAxes, onchange: (v) => cc.showAxes = v },
-                    { label: 'Achsenbeschriftung', checked: cc.showLabels, onchange: (v) => cc.showLabels = v },
-                    { label: 'Koordinaten', checked: cc.showTelemetry, onchange: (v) => { cc.showTelemetry = v; cc.updateTelemetryDOM(); } }
+                    { label: CyberI18n.get('ui.reset'), onclick: () => location.reload() }
                 ]);
             };
 
