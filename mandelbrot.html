@@ -265,9 +265,10 @@
             }
             if (escaped) {
                 float sn = float(iter) - log2(max(1.0, log2(length(z))));
-                float r = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + u_time * 0.5);
-                float g = 0.5 + 0.5 * cos(2.0 + sn * 0.15 + u_time * 0.5);
-                float b = 0.5 + 0.5 * cos(1.0 + sn * 0.15 + u_time * 0.5);
+                /* Langsame Farbmodulation: weniger Shimmer/Flicker beim Zoomen als mit starkem u_time-Koeffizienten */
+                float r = 0.5 + 0.5 * cos(3.0 + sn * 0.15 + u_time * 0.12);
+                float g = 0.5 + 0.5 * cos(2.0 + sn * 0.15 + u_time * 0.12);
+                float b = 0.5 + 0.5 * cos(1.0 + sn * 0.15 + u_time * 0.12);
                 color = vec3(r, g, b);
             }
             gl_FragColor = vec4(color, 1.0);
@@ -509,6 +510,14 @@
 
             /** Auto-Boost der Iteration bei hohem Zoom (nur Rendering; Slider bleibt Mindestwert). */
             let lastEffectiveMaxIter = DEF_MAX_ITER;
+            /** Geglättet gegen Flackern: Ziel-Iteration springt nicht mehr jedes Frame ganzzahlig mit zoomDepth. */
+            let smoothEffectiveMaxIter = DEF_MAX_ITER;
+            /** Gesamte Simulation + GPU-Zyklus bei dieser Rate (vorher implizit ~Display-Hz). */
+            const TARGET_RENDER_FPS = 30;
+            const RENDER_FRAME_MS = 1000 / TARGET_RENDER_FPS;
+            /** Flight-/Tau-/Zeitschritt relativ zur früheren ~60Hz-Schleife ausgleichen. */
+            const TICK_VS_LEGACY_60HZ = 60 / TARGET_RENDER_FPS;
+            let lastRenderFrameTs = 0;
 
             /** Zwei-Finger-Zoom (Touch): Ankerpunkt unter Mittelfinger-Mitte */
             let pinchStartDist = 0;
@@ -733,7 +742,13 @@
                 if (br) br.disabled = true;
             }
 
-            function render() {
+            function render(now) {
+                requestAnimationFrame(render);
+                const ts = typeof now === 'number' ? now : performance.now();
+
+                if (lastRenderFrameTs !== 0 && ts - lastRenderFrameTs < RENDER_FRAME_MS) return;
+                lastRenderFrameTs = ts;
+
                 const w = canvas.clientWidth, h = canvas.clientHeight;
                 if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
                 zoom = clampZoom(zoom);
@@ -753,7 +768,7 @@
                         const u = zoomDepthLogUnit(zoom);
                         const head = 1 - u;
                         const zoomBefore = zoom;
-                        let nextZoom = zoom * (1 + 0.005 * head);
+                        let nextZoom = zoom * (1 + 0.005 * TICK_VS_LEGACY_60HZ * head);
                         if (nextZoom >= ZOOM_MAX) nextZoom = ZOOM_MAX;
                         zoom = clampZoom(nextZoom);
                         const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, cw, ch, zoomBefore, centerX, centerY);
@@ -766,12 +781,18 @@
                 }
                 zoom = clampZoom(zoom);
                 if (isFlight && zoom >= ZOOM_MAX) stopFlightUi();
-                time += 0.01;
 
                 zoom = clampZoom(zoom);
                 const depthU = zoomDepthLogUnit(zoom);
-                const boost = Math.floor((512 - maxIter) * 0.9 * depthU);
-                lastEffectiveMaxIter = Math.min(512, Math.max(32, maxIter + boost));
+                const boostF = (512 - maxIter) * 0.9 * depthU;
+                const targetIter = Math.min(512, Math.max(32, maxIter + boostF));
+                const tau = 0.14 * TICK_VS_LEGACY_60HZ;
+                smoothEffectiveMaxIter += (targetIter - smoothEffectiveMaxIter) * tau;
+                smoothEffectiveMaxIter = Math.min(512, Math.max(32, smoothEffectiveMaxIter));
+                lastEffectiveMaxIter = Math.round(smoothEffectiveMaxIter);
+
+                time += 0.004 * TICK_VS_LEGACY_60HZ;
+
                 gl.uniform2f(uRes, canvas.width, canvas.height);
                 gl.uniform2f(uCenter, centerX, centerY);
                 gl.uniform1f(uZoom, zoom);
@@ -782,7 +803,6 @@
 
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
                 syncFraktalReadouts();
-                requestAnimationFrame(render);
             }
 
             CyberUI.createCard('ui-container', CyberI18n.get('fractal.mode'), `
@@ -825,6 +845,8 @@
             CyberUI.createSlider('iter-mount', CyberI18n.get('fractal.iterations'), 32, 256, 256, 1, (v) => {
                 abortResetAnim();
                 maxIter = parseInt(v, 10);
+                const u = zoomDepthLogUnit(zoom);
+                smoothEffectiveMaxIter = Math.min(512, Math.max(32, maxIter + (512 - maxIter) * 0.9 * u));
             }, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', CyberI18n.get('fractal.navigation'), `
@@ -871,9 +893,18 @@
                 };
             }
             window.addEventListener('keydown', (e) => {
-                if (e.code !== 'Space' && e.key !== ' ') return;
                 const t = e.target;
-                if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+                const inField = t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]');
+
+                if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+                    if (inField) return;
+                    e.preventDefault();
+                    applyKeyedZoom(e.code === 'ArrowUp');
+                    return;
+                }
+
+                if (e.code !== 'Space' && e.key !== ' ') return;
+                if (inField) return;
                 if (t && t.closest && t.closest('button')) return;
                 e.preventDefault();
                 btnFlightEl?.click();
@@ -909,6 +940,31 @@
                 isDrag = false;
                 dragLastCanvas = null;
             };
+
+            /** Pfeil hoch/runter: Zoom wie Rad (deltaY), Punkt unter Cursor/Mitte bleibt stabil. */
+            function applyKeyedZoom(zoomIn) {
+                abortResetAnim();
+                const w = canvas.width;
+                const h = canvas.height;
+                if (w <= 0 || h <= 0) return;
+                let mx = flightMouseCanvasX != null ? flightMouseCanvasX : w / 2;
+                let my = flightMouseCanvasY != null ? flightMouseCanvasY : h / 2;
+                if (isFlight) {
+                    flightMouseCanvasX = mx;
+                    flightMouseCanvasY = my;
+                }
+                const { fX, fY } = focalPlaneUnderCanvasPixel(mx, my, w, h, zoom, centerX, centerY);
+                /* Dieselbe relative Schrittweite wie Flight pro Tick: (1 + 0.005·TICK_VS_LEGACY_60HZ·head) */
+                const u = zoomDepthLogUnit(zoom);
+                const head = 1 - u;
+                const rel = 0.005 * TICK_VS_LEGACY_60HZ * head;
+                const factor = zoomIn ? (1 + rel) : 1 / (1 + rel);
+                zoom *= factor;
+                zoom = clampZoom(zoom);
+                const nc = centerKeepingFocalPlane(mx, my, w, h, zoom, fX, fY);
+                centerX = nc.cx;
+                centerY = nc.cy;
+            }
 
             /**
              * Rad / Trackpad: zoom proportional zu deltaY (sanfter als fester Faktor pro Event).
