@@ -56,6 +56,28 @@
             }
         }
 
+        /* Domain-Zeile „docalvers.xx“: Endgröße 1:1 zur Dramaturgie (pt), kein scale(0.9) wie andere Schlagworte */
+        @keyframes cinematic-fade-in-cw-domain {
+            0% {
+                opacity: 0;
+                transform: scale(0.05);
+                letter-spacing: 80px;
+            }
+            40% {
+                opacity: 0.6;
+            }
+            99.5% {
+                opacity: 1;
+                transform: scale(1);
+                letter-spacing: normal;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                letter-spacing: normal;
+            }
+        }
+
         .glow-sphere {
             position: absolute;
             width: 600px;
@@ -305,7 +327,7 @@
             transform: translateY(-50%);
             justify-content: center;
         }
-        /* Intro-Ende: Domain zweizeilig, linksbündig; Prefix horizontal auf TLD-Breite angeglichen */
+        /* Intro-Ende: linksbündig; keine automatische Breiten-/scaleX-Anpassung mehr */
         #catching-words-panel .cw-stack.cw-stack-align-left {
             align-items: flex-start;
             padding-left: clamp(20px, 7vw, 140px);
@@ -317,8 +339,38 @@
             text-align: left;
             transform-origin: left center;
         }
-        #catching-words-panel .cw-stack-align-left .falling-word.cw-domain-prefix.cw-settled {
-            transform: scale(0.9) scaleX(var(--cw-brand-scalex, 1));
+        /* „docalvers.de“: drei Spans — nur Script-font-size (pt), keine Teil-Skalierung */
+        #catching-words-panel .falling-word.cw-domain-host {
+            display: inline-flex;
+            flex-direction: row;
+            align-items: baseline;
+            flex-wrap: nowrap;
+            gap: 0;
+            animation-name: cinematic-fade-in-cw-domain;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: unset !important;
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.7));
+        }
+        #catching-words-panel .falling-word.cw-domain-host .cw-domain-inner {
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #catching-words-panel .falling-word.cw-domain-host .cw-domain-dot {
+            font-size: 1em;
+            opacity: 0.9;
+            padding: 0 0.03em;
+            align-self: center;
+        }
+        #catching-words-panel .falling-word.cw-domain-host .cw-domain-tld {
+            font-size: 1em;
+            line-height: 1;
+            letter-spacing: normal;
         }
         /* Schlagwort: Orbitron-Gradient, Endgröße scale 0.9 */
         #catching-words-panel .falling-word {
@@ -367,6 +419,10 @@
             opacity: 1;
             transform: scale(0.9);
             letter-spacing: 12px;
+        }
+        #catching-words-panel .falling-word.cw-domain-host.cw-settled {
+            transform: none;
+            letter-spacing: normal;
         }
         @keyframes cinematic-fade-in-cw-emoji {
             0% {
@@ -642,6 +698,25 @@
             cursor: pointer;
             transition: opacity 0.5s ease;
         }
+
+        #intro-start-overlay .intro-start-overlay-main {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(1rem, 5vw, 2.75rem);
+            width: min(92vw, 640px);
+            padding: 0 clamp(0.5rem, 2vw, 1rem);
+            box-sizing: border-box;
+        }
+
+        #intro-start-overlay .intro-start-play-block {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: clamp(0.65rem, 2.5vw, 1.1rem);
+            flex-shrink: 0;
+        }
         
         @keyframes pulseGlowAnim {
             0% {
@@ -658,9 +733,21 @@
             }
         }
 
+        #intro-start-overlay .intro-duration-side {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.35rem, 3.8vw, 2rem);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            color: rgba(0, 210, 255, 0.78);
+            text-align: right;
+            white-space: nowrap;
+            animation: pulseGlowAnim 2s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
         #intro-start-overlay svg {
-            width: 120px;
-            height: 120px;
+            width: clamp(88px, 20vw, 132px);
+            height: clamp(88px, 20vw, 132px);
             fill: rgba(0, 210, 255, 0.8);
             filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.5));
             transition: transform 0.3s ease, fill 0.3s ease, filter 0.3s ease;
@@ -668,11 +755,11 @@
         }
 
         #intro-start-overlay .play-text {
-            margin-top: 16px;
+            margin: 0;
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
+            font-size: clamp(1.55rem, 5vw, 2.35rem);
             font-weight: 600;
-            letter-spacing: 4px;
+            letter-spacing: 0.28em;
             color: rgba(0, 210, 255, 0.8);
             text-transform: uppercase;
             animation: pulseGlowAnim 2s infinite ease-in-out;
@@ -690,10 +777,15 @@
 <body class="mode-catching-words">
 
     <div id="intro-start-overlay">
-        <svg viewBox="0 0 24 24">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        <div class="play-text">PLAY</div>
+        <div class="intro-start-overlay-main">
+            <div class="intro-start-play-block">
+                <div class="play-text">PLAY</div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </div>
+            <div class="intro-duration-side" aria-hidden="true">66 seconds</div>
+        </div>
     </div>
 
     <video id="bg-video" autoplay loop muted playsinline>
@@ -1870,11 +1962,24 @@
             const el = document.createElement('button');
             el.type = 'button';
             const labNorm = String(label || '').trim();
-            let domainExtra = '';
-            if (/^docalvers\.?$/i.test(labNorm)) domainExtra = ' cw-domain-prefix';
-            else if (/^de$/i.test(labNorm)) domainExtra = ' cw-domain-tld';
-            el.className = 'falling-word' + (entry.purplePulse ? ' cw-purple-pulse' : '') + domainExtra;
-            el.textContent = label;
+            const domainHost = labNorm.match(/^docalvers\.([a-z]{2})$/i);
+
+            if (domainHost) {
+                const tld = domainHost[1].toLowerCase();
+                el.className = 'falling-word cw-domain-host' + (entry.purplePulse ? ' cw-purple-pulse' : '');
+                [['docalvers', 'cw-domain-prefix'], ['.', 'cw-domain-dot'], [tld, 'cw-domain-tld']].forEach(([txt, cls]) => {
+                    const span = document.createElement('span');
+                    span.className = 'cw-domain-inner ' + cls;
+                    span.textContent = txt;
+                    el.appendChild(span);
+                });
+            } else {
+                let domainExtra = '';
+                if (/^docalvers\.?$/i.test(labNorm)) domainExtra = ' cw-domain-prefix';
+                else if (/^de$/i.test(labNorm)) domainExtra = ' cw-domain-tld';
+                el.className = 'falling-word' + (entry.purplePulse ? ' cw-purple-pulse' : '') + domainExtra;
+                el.textContent = label;
+            }
             el.style.zIndex = String(cwSpawnRoundIndex);
             if (fontPt != null && Number.isFinite(fontPt)) el.style.setProperty('font-size', fontPt + 'pt', 'important');
 
@@ -1884,9 +1989,7 @@
                 if (!ev.animationName || ev.animationName.indexOf('cinematic-fade-in') === -1) return;
                 if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
                 el.classList.add('cw-settled');
-                if (el.classList.contains('cw-domain-tld')) {
-                    scheduleCwBrandWidthAlign();
-                }
+                el.querySelectorAll('.cw-domain-inner').forEach((s) => s.classList.add('cw-settled'));
             });
 
             function onCatch(e) {
@@ -1897,24 +2000,6 @@
             }
             el.addEventListener('click', onCatch);
             el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
-        }
-
-        function scheduleCwBrandWidthAlign() {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    const stack = document.getElementById('cw-stack');
-                    if (!stack || !stack.classList.contains('cw-stack-align-left')) return;
-                    const tld = stack.querySelector('.cw-domain-tld.cw-settled');
-                    const pre = stack.querySelector('.cw-domain-prefix.cw-settled');
-                    if (!tld || !pre) return;
-                    const tw = tld.getBoundingClientRect().width;
-                    const pw = pre.getBoundingClientRect().width;
-                    if (pw <= 0 || tw <= 0) return;
-                    let sx = tw / pw;
-                    sx = Math.min(Math.max(sx, 0.12), 3);
-                    pre.style.setProperty('--cw-brand-scalex', sx.toFixed(4));
-                });
-            });
         }
 
         function scheduleCwSpawn() {
