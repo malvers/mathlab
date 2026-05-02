@@ -1,13 +1,13 @@
 /**
- * Canvas → PNG: Download oder File System Access API (Ordner).
- * Nutzung: Labs mit preserveDrawingBuffer oder nach explizitem redraw.
+ * Canvas → PNG: download or File System Access API (folder).
+ * Usage: labs with preserveDrawingBuffer or after an explicit redraw.
  */
 (function (global) {
     'use strict';
 
     /**
      * @param {HTMLCanvasElement} canvas
-     * @param {string} filename z. B. mandelbrot-zoom-step-0001.png
+     * @param {string} filename e.g. mandelbrot-zoom-step-0001.png
      * @param {FileSystemDirectoryHandle|null} dirHandle
      * @returns {Promise<boolean>}
      */
@@ -61,7 +61,7 @@
                 return seq;
             },
             /**
-             * @param {Pick<FilePickerOptions, 'startIn'|'id'>} [pickerOpts] Chromium: z. B. startIn überschreiben
+             * @param {Pick<FilePickerOptions, 'startIn'|'id'>} [pickerOpts] Chromium: optional overrides e.g. for startIn
              */
             async pickWritableFolder(pickerOpts) {
                 if (typeof global.showDirectoryPicker !== 'function') return null;
@@ -77,7 +77,7 @@
                 return dirHandle;
             },
             /**
-             * @param {string} [customStem] überschreibt stem nur für diesen Schuss
+             * @param {string} [customStem] overrides stem for this capture only
              */
             async captureNext(customStem) {
                 seq += 1;

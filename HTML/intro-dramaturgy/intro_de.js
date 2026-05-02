@@ -5,6 +5,8 @@
  *
  * In dramaturgy text only: line «#notranslate» = following section (until next #)
  * is not translated / copied from this file for other languages (same as a # section break).
+ *
+ * @locale de
  */
 window.__INTRO_DRAMATURGIE_TXT = `
 

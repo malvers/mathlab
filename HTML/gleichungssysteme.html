@@ -417,7 +417,7 @@
             const ctx = cc.ctx;
             const color = varColor(line.color);
             
-            // Unendliche Gerade berechnen
+            // Infinite line through handles (extend for drawing)
             const dx = line.p2.x - line.p1.x;
             const dy = line.p2.y - line.p1.y;
             
@@ -425,7 +425,7 @@
             ctx.strokeStyle = color;
             ctx.lineWidth = 3;
             
-            if (Math.abs(dx) < 0.001) { // Vertikale Gerade
+            if (Math.abs(dx) < 0.001) { // Vertical line
                 ctx.moveTo(cc.mapX(line.p1.x), cc.mapY(-200));
                 ctx.lineTo(cc.mapX(line.p1.x), cc.mapY(200));
             } else {
@@ -436,7 +436,7 @@
             }
             ctx.stroke();
 
-            // Griffe zeichnen
+            // Draw handles
             drawHandle(line.p1.x, line.p1.y, color);
             drawHandle(line.p2.x, line.p2.y, color);
         }
@@ -566,11 +566,11 @@
                                 right = `${leadSign}${absM}x ${bSign} ${absB}`;
                             }
                     }
-                    // Im Scramble Mode keine Ausrichtung am = (einfacher String)
+                    // Scramble mode: one string, no '=' column alignment
                     if (scrambleLevel > 0) {
                         return `\\textcolor{${color}}{${left} = ${right}}`;
                     }
-                    // Im Normal-Modus: Ausrichtung ohne extra Padding
+                    // Normal mode: split alignment columns (no extra padding)
                     return `\\textcolor{${color}}{${left}} & \\textcolor{${color}}{{}= ${right}}`;
                 };
 

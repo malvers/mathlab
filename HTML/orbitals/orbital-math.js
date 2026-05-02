@@ -1,6 +1,6 @@
 /**
- * Kugelflächenfunktionen — Logik aus orbits/Orbital.java (getValueAtPhiAndTheta).
- * Konvention: phi ∈ [0, π], theta ∈ [0, 2π]; x = sin(theta)cos(phi), y = sin(theta)sin(phi), z = cos(theta).
+ * Spherical harmonics — logic from orbits/Orbital.java (getValueAtPhiAndTheta).
+ * Convention: phi ∈ [0, π], theta ∈ [0, 2π]; x = sin(theta)cos(phi), y = sin(theta)sin(phi), z = cos(theta).
  */
 
 export const ORBITAL_TYPES = [

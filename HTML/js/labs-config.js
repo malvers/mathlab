@@ -376,7 +376,7 @@ const LABS_DATA = [
         "color": "green"
     },
     /*
-     * Happy-Birthday-Kachel (Cyber-Cake): temporär aus — happybirthday.html per direktem Link weiter nutzbar.
+     * Happy-birthday tile (Cyber-Cake): temporarily disabled — happybirthday.html remains reachable via direct URL.
     {
         "id": "happy-birthday-ulf",
         "href": "happybirthday.html?name=Ulf",
