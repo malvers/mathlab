@@ -1,7 +1,7 @@
 /**
  * Reference dramaturgy (German). Maintain narrative content only in this file.
  * Translations: intro-dramaturgy/intro_<lang>.js — sync after edits here.
- * Open intro: ?lang=en (also es, fr, it, pt, sw, tr). Else browser language or de.
+ * Open intro: ?lang=en (also es, fr, it, pt, nl, sw, tr). Else browser language or de.
  *
  * In dramaturgy text only: line «#notranslate» = following section (until next #)
  * is not translated / copied from this file for other languages (same as a # section break).
