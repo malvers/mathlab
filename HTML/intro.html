@@ -11,6 +11,10 @@
             --neon-purple: #9d50bb;
         }
 
+        html {
+            background: #050b18;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -22,6 +26,10 @@
             color: white;
         }
 
+        body.mode-catching-words {
+            background: transparent;
+        }
+
         #bg-video {
             position: fixed;
             top: 0;
@@ -29,7 +37,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: -1;
+            z-index: 0;
             pointer-events: none;
             filter: brightness(0.62);
         }
@@ -93,29 +101,63 @@
             to { transform: scale(1.2); opacity: 0.6; }
         }
 
-        .intro-playback-controls {
+        /* Playback pill + ambient / fullscreen / close — one row, centered */
+        .intro-top-bar {
             position: fixed;
             top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 2500;
+            z-index: 10000;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px 12px;
+            max-width: calc(100vw - 24px);
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        .intro-top-bar > * {
+            pointer-events: auto;
+        }
+
+        .intro-playback-controls {
+            position: relative;
             display: flex;
             flex-direction: row;
             align-items: center;
             gap: 10px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.92);
             padding: 6px 14px;
             border-radius: 999px;
             border: 1px solid rgba(0, 210, 255, 0.3);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
             backdrop-filter: blur(12px);
-            opacity: 0.6;
+            opacity: 0.92;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
         .intro-playback-controls:hover {
             opacity: 1;
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
             border-color: rgba(0, 210, 255, 0.6);
+        }
+
+        /* Kein gemeinsamer Kasten — einzelne Flächen siehe .intro-top-bar .fs-toggle / .intro-back-btn */
+        .intro-top-actions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            opacity: 1;
         }
         .intro-playback-btn {
             background: none;
@@ -139,88 +181,61 @@
             height: 24px;
             fill: currentColor;
         }
-        
-        .intro-top-actions {
-            position: fixed;
-            top: 22px;
-            right: 22px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-        }
 
-        .fs-toggle {
-            position: static;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            opacity: 0.3;
-            transition: all 0.3s ease;
+        /* Pro Button: gleiches Surface wie .intro-playback-controls (Rand, HG, Glow) — ohne gemeinsame äußere Pill. */
+        .intro-top-bar .fs-toggle,
+        .intro-top-bar .intro-back-btn {
+            box-sizing: border-box;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            margin: 0;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0.92;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
             outline: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
         }
-        .fs-toggle:hover {
+        .intro-top-bar .fs-toggle:hover,
+        .intro-top-bar .intro-back-btn:hover {
             opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            transform: scale(1.1);
+            border-color: rgba(0, 210, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            transform: scale(1.06);
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.5));
         }
-        .fs-toggle svg {
-            width: 20px;
-            height: 20px;
-            fill: none;
+        .intro-top-bar .fs-toggle svg {
+            width: 22px;
+            height: 22px;
             stroke: currentColor;
             stroke-width: 2;
         }
-
-        #intro-ambient-btn svg {
-            width: 20px;
-            height: 20px;
+        .intro-top-bar #intro-ambient-btn svg {
+            width: 22px;
+            height: 22px;
             fill: currentColor;
             stroke: none;
         }
 
-        .intro-back-btn {
-            box-sizing: border-box;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            opacity: 0.35;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .intro-back-btn:hover {
-            opacity: 1;
-            border-color: rgba(255, 160, 160, 0.55);
-            background: rgba(255, 80, 80, 0.12);
-            box-shadow: 0 0 22px rgba(255, 120, 140, 0.35);
-            transform: scale(1.08);
-        }
-        .intro-back-btn svg {
-            width: 18px;
-            height: 18px;
+        .intro-top-bar .intro-back-btn svg {
+            width: 22px;
+            height: 22px;
             stroke: currentColor;
             stroke-width: 2.2;
             stroke-linecap: round;
+            fill: none;
         }
 
         .intro-section-nav {
@@ -243,7 +258,7 @@
             padding: 10px 18px;
             border-radius: 999px;
             border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(15, 23, 42, 0.72);
+            background: rgba(15, 23, 42, 0.9);
             color: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             font-family: 'Orbitron', sans-serif;
@@ -252,7 +267,7 @@
             letter-spacing: 0.14em;
             text-transform: lowercase;
             cursor: pointer;
-            opacity: 0.42;
+            opacity: 0.78;
             transition:
                 opacity 0.25s ease,
                 border-color 0.25s ease,
@@ -267,7 +282,7 @@
             transform: translateY(-1px);
         }
         .intro-section-btn:disabled {
-            opacity: 0.22;
+            opacity: 0.38;
             cursor: not-allowed;
             transform: none;
             border-color: rgba(255, 255, 255, 0.08);
@@ -290,8 +305,10 @@
             overflow: visible;
             --cw-anim-sec: 4;
             --cw-ss-crossfade: 1.25s;
-            /* Opaque stage: otherwise background video flashes through during opacity transitions
-               and between fullscreen screenshots (transparent panel). */
+            /* Dimmed video shows through; solid again during fullscreen screenshot runs (see :has). */
+            background-color: rgba(5, 11, 24, 0.62);
+        }
+        #catching-words-panel:has(.cw-stack.cw-stack-fullscreen-mode) {
             background-color: #050b18;
         }
         #catching-words-panel .cw-play {
@@ -814,6 +831,8 @@
         
         #intro-ambient-btn.is-playing {
             opacity: 1;
+            border-color: rgba(0, 210, 255, 0.55);
+            box-shadow: 0 0 26px rgba(0, 210, 255, 0.28);
         }
         #intro-ambient-btn.is-playing svg {
             animation: pulseGlowAnim 2s infinite ease-in-out;
@@ -841,7 +860,8 @@
 
     <div class="glow-sphere"></div>
 
-    <div class="intro-playback-controls" aria-label="Wiedergabe-Steuerung">
+    <div class="intro-top-bar" aria-label="Intro-Steuerung">
+        <div class="intro-playback-controls" aria-label="Wiedergabe-Steuerung">
         <button type="button" id="top-nav-prev" class="intro-playback-btn" onclick="introFastBackward()" title="Vorheriger Abschnitt / Langsamer (<<)">
             <svg viewBox="0 0 24 24">
                 <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" fill="currentColor" stroke="none"/>
@@ -871,9 +891,9 @@
                 <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="currentColor" stroke="none"/>
             </svg>
         </button>
-    </div>
+        </div>
 
-    <div class="intro-top-actions">
+        <div class="intro-top-actions">
         <button type="button" class="fs-toggle" id="intro-ambient-btn" onclick="toggleIntroAmbientMuted()" title="Musik & Ambient-Sound (Standard an · Klick deaktiviert und wird gespeichert)" aria-label="Musik & Ambient-Sound ein oder aus">
             <svg id="intro-ambient-icon-on" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
@@ -892,6 +912,7 @@
                 <path d="M18 6L6 18M6 6l12 12"/>
             </svg>
         </a>
+        </div>
     </div>
 
     <div id="catching-words-panel" aria-hidden="false">
@@ -1112,7 +1133,7 @@
             const pr = parseFloat(cs.paddingRight) || 0;
             const availW = Math.max(64, play.clientWidth - pl - pr);
             const playRect = play.getBoundingClientRect();
-            const controlsEl = document.querySelector('.intro-playback-controls');
+            const controlsEl = document.querySelector('.intro-top-bar') || document.querySelector('.intro-playback-controls');
             const ctrlBottom = controlsEl ? controlsEl.getBoundingClientRect().bottom : playRect.top;
             const GAP_BELOW_CONTROLS = 12;
             const bandTopGlobal = Math.max(playRect.top + ptp, ctrlBottom + GAP_BELOW_CONTROLS);
@@ -1743,15 +1764,11 @@
                 topNext.style.pointerEvents = (!multi || i >= n - 1) ? 'none' : 'auto';
             }
             
-            // Center controls over the canvas during screenshots (offset by half sidebar width)
-            const controls = document.querySelector('.intro-playback-controls');
-            if (controls) {
-                const isFastMedia = cwSequence && cwSequence.some(e => e.fast);
-                if (isFastMedia) {
-                    controls.style.left = '50%'; // Keep it centered in the window
-                } else {
-                    controls.style.left = '50%'; // Keep it centered in the window
-                }
+            // Whole top bar (playback + ambient / fullscreen / close) stays window-centered
+            const bar = document.querySelector('.intro-top-bar');
+            if (bar) {
+                bar.style.left = '50%';
+                bar.style.transform = 'translateX(-50%)';
             }
 
             prev.disabled = !multi || i <= 0;
