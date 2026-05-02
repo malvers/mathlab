@@ -20,8 +20,9 @@
         (function() {
             window.addEventListener('DOMContentLoaded', () => {
                 const currentLang = CyberI18n.current;
-                const btn = document.querySelector(`.lang-flag[onclick="setLanguage('${currentLang}')"]`);
-                if (btn) btn.classList.add('active');
+                document.querySelectorAll('.index-lang-switcher .lang-flag').forEach((el) => {
+                    el.classList.toggle('active', el.getAttribute('data-lang') === currentLang);
+                });
                 const about = document.getElementById('btn-about');
                 if (about) {
                     about.href = 'intro.html?lang=' + encodeURIComponent(currentLang || 'de');
@@ -29,6 +30,16 @@
                 const toolsHub = document.getElementById('portal-link-tools');
                 if (toolsHub) {
                     toolsHub.href = 'tools.html?lang=' + encodeURIComponent(currentLang || 'de');
+                }
+                const langRow = document.querySelector('.index-lang-switcher');
+                if (langRow) {
+                    langRow.addEventListener('keydown', (e) => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                        const el = e.target.closest('.lang-flag[data-lang]');
+                        if (!el) return;
+                        e.preventDefault();
+                        setLanguage(el.getAttribute('data-lang'));
+                    });
                 }
             });
         })();
@@ -1259,24 +1270,81 @@
             border-color: rgba(255, 255, 255, 0.4);
         }
 
-        /* --- Language Flag Button Fixes --- */
-        .lang-flag {
-            min-width: 56px;
-            height: 48px;
-            padding: 0 14px !important;
-            background: rgba(15, 23, 42, 0.85) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 24px !important;
-            backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
-            font-size: 1.75rem !important;
-            line-height: 1;
-            filter: brightness(1.1);
+        /* --- Index Mission Control: nur Flaggen; aktive Sprache glüht --- */
+        @keyframes lang-flag-active-glow {
+            0%,
+            100% {
+                filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 16px rgba(255, 255, 255, 0.45))
+                    drop-shadow(0 0 28px rgba(240, 248, 255, 0.22));
+            }
+            50% {
+                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 26px rgba(255, 255, 255, 0.62))
+                    drop-shadow(0 0 40px rgba(245, 250, 255, 0.32));
+            }
         }
-        .lang-flag:hover {
-            color: #00d2ff;
-            border-color: #00d2ff !important;
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+
+        .index-lang-switcher .lang-flag {
+            box-sizing: border-box;
+            width: auto;
+            height: auto;
+            min-width: unset;
+            padding: 4px !important;
+            margin: 0;
+            display: inline-flex;
+            user-select: none;
+            align-items: center;
+            justify-content: center;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 10px !important;
+            backdrop-filter: none;
+            transition:
+                opacity 0.25s ease,
+                transform 0.25s ease,
+                filter 0.25s ease;
+            font-size: 1.65rem !important;
+            line-height: 1;
+            cursor: pointer;
+            font-family: inherit;
+            color: inherit;
+            opacity: 0.70;
+            filter: none;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .index-lang-switcher .lang-flag:hover:not(.active) {
+            opacity: 0.96;
+            filter: none;
+            transform: scale(1.06);
+        }
+
+        .index-lang-switcher .lang-flag:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.85);
+            outline-offset: 3px;
+            opacity: 1;
+            filter: grayscale(0);
+        }
+
+        .index-lang-switcher .lang-flag.active {
+            opacity: 1;
+            filter: none;
+            transform: scale(1.12);
+            animation: lang-flag-active-glow 2.4s ease-in-out infinite;
+            pointer-events: auto;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        .index-lang-switcher .lang-flag.active:hover {
+            animation: lang-flag-active-glow 2.4s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .index-lang-switcher .lang-flag.active {
+                animation: none;
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 22px rgba(255, 255, 255, 0.42));
+            }
         }
 
         .contact-modal-legal {
@@ -1296,12 +1364,6 @@
 
         .contact-modal-legal a:hover {
             text-decoration: underline;
-        }
-        .lang-flag.active {
-            color: #00d2ff;
-            border-color: #00d2ff !important;
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
-            background: rgba(0, 210, 255, 0.1) !important;
         }
 
         .admin-gate-box input {
@@ -1398,15 +1460,15 @@
         </div>
     </div>
 
-    <!-- Language Switcher: oben mittig -->
-    <div style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1000;">
-        <button onclick="setLanguage('de')" class="contact-btn lang-flag" title="Deutsch" style="position: static; width: auto; justify-content: center;">🇩🇪</button>
-        <button onclick="setLanguage('es')" class="contact-btn lang-flag" title="Español" style="position: static; width: auto; justify-content: center;">🇪🇸</button>
-        <button onclick="setLanguage('en')" class="contact-btn lang-flag" title="English" style="position: static; width: auto; justify-content: center;">🇬🇧</button>
-        <button onclick="setLanguage('it')" class="contact-btn lang-flag" title="Italiano" style="position: static; width: auto; justify-content: center;">🇮🇹</button>
-        <button onclick="setLanguage('fr')" class="contact-btn lang-flag" title="Français" style="position: static; width: auto; justify-content: center;">🇫🇷</button>
-        <button onclick="setLanguage('pt')" class="contact-btn lang-flag" title="Português" style="position: static; width: auto; justify-content: center;">🇵🇹</button>
-        <button onclick="setLanguage('sw')" class="contact-btn lang-flag" title="Kiswahili" style="position: static; width: auto; justify-content: center;">🇰🇪</button>
+    <!-- Language Switcher: Test ohne <button> — nur Flaggen (role="button" + Tab/Enter/Leertaste) -->
+    <div class="index-lang-switcher" style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: min(96vw, 520px); z-index: 1000;">
+        <span role="button" tabindex="0" data-lang="de" onclick="setLanguage('de')" class="lang-flag" title="Deutsch">🇩🇪</span>
+        <span role="button" tabindex="0" data-lang="es" onclick="setLanguage('es')" class="lang-flag" title="Español">🇪🇸</span>
+        <span role="button" tabindex="0" data-lang="en" onclick="setLanguage('en')" class="lang-flag" title="English">🇬🇧</span>
+        <span role="button" tabindex="0" data-lang="it" onclick="setLanguage('it')" class="lang-flag" title="Italiano">🇮🇹</span>
+        <span role="button" tabindex="0" data-lang="fr" onclick="setLanguage('fr')" class="lang-flag" title="Français">🇫🇷</span>
+        <span role="button" tabindex="0" data-lang="pt" onclick="setLanguage('pt')" class="lang-flag" title="Português">🇵🇹</span>
+        <span role="button" tabindex="0" data-lang="sw" onclick="setLanguage('sw')" class="lang-flag" title="Kiswahili">🇰🇪</span>
     </div>
 
     <!-- Top Action Buttons -->

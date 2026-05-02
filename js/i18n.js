@@ -3720,6 +3720,26 @@ pt: {
         }
     },
 
+    /**
+     * Unterdrückt Chrome/Edge „Seite übersetzen?“ — Labs sind bereits per CyberI18n mehrsprachig;
+     * sonst mischt sich der Browser (z. B. bei lang≠ erkanntem Text).
+     */
+    suppressBrowserTranslatePrompt: function () {
+        try {
+            const html = document.documentElement;
+            html.setAttribute('translate', 'no');
+            html.classList.add('notranslate');
+            if (!document.querySelector('meta[name="google"][content="notranslate"]')) {
+                const meta = document.createElement('meta');
+                meta.setAttribute('name', 'google');
+                meta.setAttribute('content', 'notranslate');
+                document.head.insertBefore(meta, document.head.firstChild);
+            }
+        } catch (e) {
+            /* ignore */
+        }
+    },
+
     // Helper to get a translation
     get: function (key, replacements = {}) {
         const parts = key.split('.');
@@ -3754,6 +3774,7 @@ pt: {
 (function () {
     try {
         CyberI18n.resolveLanguageFromEnvironment();
+        CyberI18n.suppressBrowserTranslatePrompt();
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }

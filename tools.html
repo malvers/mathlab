@@ -720,9 +720,10 @@
             window.addEventListener('pointerdown', tryPlay, { once: true });
         }
 
-        const headerTitleRaw = CyberI18n.get('index.header.title');
         const mainTitleText =
-            headerTitleRaw === 'index.header.title' ? 'Doc Alvers Mathe-Labor' : headerTitleRaw;
+            typeof CyberI18n !== 'undefined' && typeof CyberI18n.getBrandMastheadTitle === 'function'
+                ? CyberI18n.getBrandMastheadTitle()
+                : 'Doc Alvers Mathe-Labor';
         const docTitleRaw = CyberI18n.get('index.ui.tools_doc_title');
         const docTitle =
             docTitleRaw === 'index.ui.tools_doc_title' ? mainTitleText : docTitleRaw;
