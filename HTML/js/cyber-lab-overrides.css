@@ -1,0 +1,451 @@
+/* @AI-READONLY: CUSTOM UI OVERRIDES FOR CMA-ES LABORATORY */
+/**
+ * Sidebar-Collapsible & Mini-Rail System v1.0
+ * Standardizes the YouTube-style navigation and high-fidelity telemetry.
+ */
+
+:root {
+    /* Top edge of hamburger / sidebar nav row — same reference height as typical canvas overlays (formulas, HUD, ~14px top-left) */
+    --cyber-nav-band-top: 14px;
+}
+
+#mini-rail {
+    width: 66px;
+    height: 100vh;
+    background: rgba(5, 10, 20, 0.95);
+    border-right: 1px solid rgba(0, 210, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--cyber-nav-band-top) 0 22px 0;
+    z-index: 2000;
+    backdrop-filter: blur(25px);
+    border-right: none; /* Border is handled dynamically */
+}
+
+#side-panel.collapsed ~ #mini-rail, 
+#side-panel.collapsed + #mini-rail,
+#side-panel.collapsed {
+    /* When collapsed, we might need a border on the rail */
+}
+
+/* The 'Clean Line' Logic */
+#mini-rail {
+    border-right: 1px solid rgba(0, 210, 255, 0.2);
+}
+
+#side-panel:not(.collapsed) {
+    border-left: none !important;
+    margin-left: -1px; /* Overlap the mini-rail border for a single line */
+}
+
+/* --- NAVIGATION COMPRESSION FOR 350px --- */
+#side-panel .cyber-nav,
+#sidebar-header .cyber-nav {
+    display: flex !important;
+    justify-content: center !important;
+    /* 6×52px + gaps must fit ~336px sidebar inner width — otherwise wrap (? onto second line) */
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    /* No extra top spacing — top edge comes from #side-panel padding + this variable */
+    margin: 0 0 8px 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Global: no forced 80px header slot (cyber-layout); height = nav row */
+/* Parameter/instrument card ~3px closer under sidebar nav (was 4px gap) */
+#sidebar-header {
+    min-height: 0 !important;
+    margin-bottom: 1px !important;
+}
+
+#side-panel .cyber-nav .nav-btn,
+#sidebar-header .cyber-nav .nav-btn {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+}
+
+#side-panel { 
+    width: 350px !important; 
+    min-width: 350px !important; /* Overriding the base layout's min-width */
+    height: 100vh; 
+    background: rgba(10, 15, 26, 0.98); 
+    display: flex; 
+    flex-direction: column; 
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    position: relative;
+    z-index: 1500;
+    border-right: 1px solid rgba(0, 210, 255, 0.2);
+    padding: var(--cyber-nav-band-top) 7px 7px !important;
+}
+
+#side-panel.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    border-right: none !important;
+}
+
+#mini-rail .nav-btn {
+    width: 52px !important;
+    height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #fff !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(0, 210, 255, 0.3) !important;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+#mini-rail .nav-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(0, 210, 255, 0.2) !important;
+    border-color: #00d2ff !important;
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.5) !important;
+}
+
+/* Stroke width like coffee cup (1.5); overrides cyber-layout .nav-btn svg (2.8) */
+#mini-rail .nav-btn svg {
+    width: 26px !important;
+    height: 26px !important;
+    stroke-width: 1.5 !important;
+    filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3)) !important;
+}
+
+/* Language (flag): mini-rail + optional cyber-nav in #sidebar-header — CyberUI */
+#mini-rail .nav-btn-lang-display,
+#sidebar-header .cyber-nav .nav-btn-lang-display {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    font: inherit !important;
+    appearance: none !important;
+}
+#mini-rail .nav-btn-lang-display .rail-lang-flag,
+#sidebar-header .cyber-nav .nav-btn-lang-display .rail-lang-flag {
+    font-size: 1.48rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.35));
+}
+
+#side-panel .cyber-nav .nav-btn svg,
+#sidebar-header .cyber-nav .nav-btn svg {
+    width: 26px !important;
+    height: 26px !important;
+    stroke-width: 1.5 !important;
+}
+
+#ui-container,
+#parameters-container,
+#parameter-container { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    width: 100% !important; 
+    padding: 0 !important; /* Panel padding is handled by #side-panel */
+    box-sizing: border-box;
+}
+
+body { 
+    background-color: #050b18; 
+    margin: 0; 
+    overflow: hidden; 
+    display: flex; 
+    width: 100vw; 
+    height: 100vh; 
+}
+
+#main-content { 
+    flex: 1; 
+    position: relative; 
+    background: transparent; 
+    overflow: hidden; 
+}
+
+#canvas-container { 
+    width: 100%; 
+    height: 100%; 
+    position: relative; 
+}
+
+#canvas { 
+    display: block; 
+    flex-grow: 1; 
+}
+
+.telemetry-item { 
+    margin-bottom: 4px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+}
+
+.telemetry-label { 
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem; 
+    color: rgba(255, 255, 255, 0.4); 
+    letter-spacing: 2px; 
+    margin-bottom: 2px; 
+    text-transform: uppercase; 
+}
+
+/* Global UI Font Override */
+#ui-container, button, select, .cyber-btn { 
+    font-family: 'Orbitron', sans-serif !important; 
+}
+
+/* --- HIGH-FIDELITY TELEMETRY --- */
+.cyber-number-widget {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-height: 36px !important;
+    width: auto !important;
+}
+
+.cyber-digit-box {
+    display: flex !important;
+    width: 20px !important;
+    height: 32px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 1.4rem !important;
+    font-weight: bold !important;
+    color: #00d2ff !important; /* var(--neon-blue) replacement */
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.6) !important;
+}
+
+.cyber-digit-box.separator {
+    width: 10px !important;
+    opacity: 0.8 !important;
+}
+
+/* --- DROPDOWN UI (ULTRA STABLE) --- */
+.instrument-card, .card-content { 
+    overflow: visible !important; 
+} 
+
+/* WebKit: slider-runnable-track often fails to composite over backdrop-filter; isolate promotes a stable paint layer */
+#side-panel input[type="range"] {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+#side-panel input[type="range"]::-webkit-slider-runnable-track {
+    -webkit-transform: translateZ(0);
+}
+
+.cyber-dropdown { 
+    width: 100%; 
+    margin-bottom: 5px; 
+    position: relative; 
+}
+
+.dropdown-trigger { 
+    background: #0a1329 !important; 
+    border: 1px solid #00d2ff !important; 
+    color: #fff !important; 
+    padding: 12px 15px !important;
+    border-radius: 12px !important;
+    font-family: 'Orbitron' !important; 
+    font-size: 0.8rem !important; 
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1) !important;
+}
+
+.dropdown-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: #050b18 !important;
+    border: 1px solid #00d2ff !important;
+    border-radius: 12px !important;
+    z-index: 9999999 !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,1), 0 0 30px rgba(0, 210, 255, 0.2) !important;
+    overflow: hidden !important;
+}
+
+.dropdown-option {
+    padding: 14px 18px !important;
+    cursor: pointer !important;
+    font-family: 'Orbitron' !important;
+    font-size: 0.75rem !important;
+    color: rgba(255,255,255,0.8) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+/* --- FOURIER SPECIFIC OVERRIDES --- */
+#top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(5, 11, 24, 0.8) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.component-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    pointer-events: none;
+}
+
+.component-label {
+    font-family: 'Orbitron';
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    position: absolute;
+    top: -15px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.drawing-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.2);
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.cyber-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(10, 20, 40, 0.2) 0%, #000 100%);
+    pointer-events: none;
+}
+
+#formula-overlay {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    color: white;
+    font-size: 1.8rem;
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+    pointer-events: none;
+    user-select: none;
+    background: rgba(10, 15, 25, 0.6);
+    padding: 10px 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    font-family: 'Outfit', sans-serif;
+}
+
+#n-telemetry {
+    position: absolute;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 126px;
+    font-weight: 700;
+    display: block;
+    text-align: right;
+    background: linear-gradient(180deg, #ffffff 0%, #fff970 20%, #ffd700 60%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
+    pointer-events: none;
+    user-select: none;
+    z-index: 9999;
+    opacity: 0.9;
+}
+
+.dropdown-option:hover {
+    background: rgba(0, 210, 255, 0.3) !important;
+    color: #fff !important;
+    padding-left: 22px !important;
+    text-shadow: 0 0 10px #00d2ff !important;
+}
+
+/* --- Mini-Rail Kontakt-Herz (CyberUI.injectContactHeartButton) --- */
+#mini-rail .nav-btn.adopt-contact-btn svg {
+    overflow: visible;
+}
+
+@keyframes cyber-adopt-heart-pulse {
+    0%, 100% {
+        stroke: #ffffff;
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.35));
+    }
+    42% {
+        stroke: #00d2ff;
+        transform: scale(1.14);
+        filter: drop-shadow(0 0 14px rgba(0, 210, 255, 1)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.45));
+    }
+    58% {
+        stroke: #00d2ff;
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.55));
+    }
+}
+
+#mini-rail .nav-btn.adopt-contact-btn svg .adopt-heart-path {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: cyber-adopt-heart-pulse 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mini-rail .nav-btn.adopt-contact-btn svg .adopt-heart-path {
+        animation: none;
+        stroke: #ffffff;
+        transform: none;
+        filter: none;
+    }
+}

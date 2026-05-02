@@ -1,0 +1,323 @@
+/* @AI-READONLY: CENTRAL LAYOUT AUTHORITY - DO NOT MODIFY WITHOUT EXPLICIT USER COMMAND */
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --space-bg: #050b18;
+    --neon-blue: #00d2ff;
+    --neon-pink: #ff00ff;
+    --neon-purple: #9d50bb;
+    --neon-green: #adff2f;
+    --neon-orange: #ff8c00;
+    --glass: rgba(15, 23, 42, 0.6);
+    --glass-bright: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--space-bg);
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
+
+/* --- SIDE PANEL (SIDEBAR) --- */
+#side-panel {
+    width: 380px;
+    min-width: 380px;
+    background: var(--glass);
+    backdrop-filter: blur(25px);
+    border: none;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100vh;
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+#sidebar-header {
+    width: 100%;
+    min-height: 80px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- MAIN CONTENT AREA --- */
+#main-content {
+    flex-grow: 1;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+}
+
+#canvas-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#canvas-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/* --- CYBER TELEMETRY PANE (GLOBAL MAUSPANE) --- */
+.cyber-telemetry-pane {
+    position: absolute;
+    top: 120px;
+    right: 25px;
+    pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: tele-fade-in 1.2s ease-out;
+}
+
+.telemetry-card {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 210, 255, 0.25);
+    border-radius: 14px;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 210, 255, 0.1);
+}
+
+.telemetry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    min-width: 140px;
+}
+
+.telemetry-row .label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+}
+
+.telemetry-row .value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neon-blue);
+    text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+    min-width: 60px;
+    text-align: right;
+}
+
+@keyframes tele-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* --- NAVIGATION BUTTONS (GOLD STANDARD AUTHORITY) --- */
+.nav-buttons,
+.cyber-nav {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 8px !important;
+    margin: 5px 0 5px 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1000;
+}
+
+.nav-btn {
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 210, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    box-sizing: border-box;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.nav-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(0, 210, 255, 0.2) !important;
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+}
+
+.nav-btn svg {
+    width: 26px !important;
+    height: 26px !important;
+    stroke-width: 2.8 !important;
+    display: block !important;
+    filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.cyber-nav.floating {
+    position: fixed !important;
+    top: 25px !important;
+    left: 85px !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: none !important;
+    z-index: 2001 !important;
+}
+
+
+/* --- DASHBOARD ELEMENTS --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+/* Global High-Tech Typography (Orbitron Engine) */
+.cyber-number,
+.stat-meta,
+.stat-label,
+.cyber-label,
+.label-row span:first-child,
+.label-row > label {
+    font-family: 'Orbitron', sans-serif !important;
+}
+
+.cyber-number {
+    letter-spacing: 1.5px;
+}
+
+/* --- SLIDERS --- */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    max-width: 100%;
+    background: transparent;
+    outline: none;
+    padding: 12px 0;
+    margin: 0;
+    cursor: pointer;
+    min-height: 28px;
+}
+
+/* Track styles (WebKit) */
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 3px;
+    border: none;
+    transition: background 0.3s ease;
+}
+
+/* Thumb styles */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border: 2.5px solid var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--neon-blue);
+    margin-top: -4px;
+    /* (6px track / 2) - (14px thumb / 2) = -4px */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+/* Track + thumb (Firefox) */
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 3px;
+    border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border: 2px solid var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--neon-blue);
+}
+
+input[type="range"]:focus-visible {
+    outline: 2px solid rgba(0, 210, 255, 0.45);
+    outline-offset: 4px;
+}
+
+/* --- MODEST COMPACT SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-blue);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes ui-card-fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

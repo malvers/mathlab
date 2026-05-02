@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.add.title'))</script></title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* AUTHORITY LAYOUT INJECTION (Fixes Git Corruption) */
+        :root {
+            --side-width: 350px;
+            --branding-blue: #00d2ff;
+            --neon-blue: #00d2ff;
+            --deep-bg: #050b18;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--deep-bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #side-panel {
+            width: var(--side-width);
+            min-width: var(--side-width);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+        }
+
+        #math-coach-box {
+            position: absolute;
+            width: 380px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        #math-coach-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .coach-title {
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coach-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d2ff;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .coach-math-highlight {
+            color: #ffde00;
+            font-weight: bold;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron' !important;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
+        }
+
+        .stats-val {
+            font-size: 1.1rem;
+        }
+
+        /* Spinner (Pfeile) ausblenden */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .cyber-select {
+            background-image: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title"><script>document.write(CyberI18n.get('ui.description'))</script></div>
+                <div id="coach-content" class="coach-message">...</div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+            }, 400);
+        }
+        // 1. Branding & UI Init
+        const BRAND_BLUE = "#00d2ff";
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.add.title')
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // State
+        let summand1 = 1234567;
+        let summand2 = 7654321;
+        let currentStep = -1;
+        let stepSequence = [];
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.add.title'), `
+                <div class="cyber-control-group">
+                    <label class="cyber-label">${CyberI18n.get('ui.summand')} 1</label>
+                    <input type="number" id="s1-input" class="cyber-select" value="${summand1}" max="9999999" onchange="updateNumbers()">
+                </div>
+                <div class="cyber-control-group" style="margin-top:25px;">
+                    <label class="cyber-label">${CyberI18n.get('ui.summand')} 2</label>
+                    <input type="number" id="s2-input" class="cyber-select" value="${summand2}" max="9999999" onchange="updateNumbers()">
+                </div>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
+            `, BRAND_BLUE);
+
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
+                <div class="stats-grid">
+                    <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
+                        <span class="stats-val" style="font-size:1.4rem;">◀</span>
+                    </div>
+                    <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
+                        <span class="stats-val" style="font-size:1.4rem;">▶</span>
+                    </div>
+                </div>
+                <div id="step-info" style="margin-top:15px; font-family:'Orbitron'; font-size:0.7rem; color:rgba(255,255,255,0.7); min-height:80px; border-left:2px solid var(--neon-blue); padding-left:12px; display:none;">
+                </div>
+            `, '#ff9d00');
+        }
+
+        function buildStepSequence() {
+            stepSequence = [];
+            const s1Str = String(summand1);
+            const s2Str = String(summand2);
+            const maxLen = Math.max(s1Str.length, s2Str.length);
+
+            let carry = 0;
+            for (let i = 0; i < maxLen; i++) {
+                stepSequence.push({ type: 'focus', col: i });
+                const d1 = parseInt(s1Str[s1Str.length - 1 - i] || 0);
+                const d2 = parseInt(s2Str[s2Str.length - 1 - i] || 0);
+                const sum = d1 + d2 + carry;
+                const resultDigit = sum % 10;
+                const nextCarry = Math.floor(sum / 10);
+
+                stepSequence.push({
+                    type: 'calculate', col: i, d1, d2, oldCarry: carry, resultDigit: resultDigit, newCarry: nextCarry
+                });
+                carry = nextCarry;
+            }
+            if (carry > 0) {
+                stepSequence.push({ type: 'final-carry', carry: carry, col: maxLen });
+            }
+            stepSequence.push({ type: 'complete' });
+        }
+
+        function updateNumbers() {
+            let v1 = parseInt(document.getElementById('s1-input').value) || 0;
+            let v2 = parseInt(document.getElementById('s2-input').value) || 0;
+
+            if (v1 > 9999999) v1 = 9999999;
+            if (v2 > 9999999) v2 = 9999999;
+
+            document.getElementById('s1-input').value = v1;
+            document.getElementById('s2-input').value = v2;
+
+            summand1 = v1;
+            summand2 = v2;
+            resetSteps();
+        }
+
+        function resetSteps() {
+            currentStep = -1;
+            buildStepSequence();
+            draw();
+        }
+
+        function nextStep() {
+            if (currentStep < stepSequence.length - 1) {
+                currentStep++;
+                draw();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > -1) {
+                currentStep--;
+                draw();
+            }
+        }
+
+        function init() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            buildStepSequence();
+            draw();
+        }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            ctx.clearRect(0, 0, width, height);
+
+            const s1Str = String(summand1);
+            const s2Str = String(summand2);
+            const maxCols = Math.max(s1Str.length, s2Str.length) + 1;
+
+            // Advanced Adaptive Scaling (Safe-Fit)
+            const maxCharsContent = maxCols;
+            const totalLines = 4;
+            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5);
+            const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
+
+            ctx.font = `bold ${fontSize}px Orbitron`;
+            ctx.textBaseline = 'middle';
+            const charWidth = fontSize * 0.85;
+            const rowHeight = fontSize * 1.5;
+
+            // Ensemble Centering Logic
+            const coachBox = document.getElementById('math-coach-box');
+            const coachWidth = 380;
+            const gap = 40;
+            const calcWidth = maxCols * charWidth;
+            const ensembleWidth = calcWidth + gap + coachWidth;
+            const ensembleStartX = (width - ensembleWidth) / 2;
+
+            const startX = ensembleStartX + (maxCols - 1) * charWidth;
+            const startY = height / 2 - rowHeight * 1.4;
+
+            if (coachBox) {
+                coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
+                coachBox.style.top = `${height / 2 - 100}px`;
+                coachBox.classList.add('visible');
+            }
+
+            const step = currentStep >= 0 ? stepSequence[currentStep] : null;
+
+            ctx.textAlign = 'center';
+
+            // Row 1
+            for (let i = 0; i < s1Str.length; i++) {
+                const isFocused = step && step.col === i && step.type !== 'complete';
+                ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
+                if (isFocused) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
+                ctx.fillText(s1Str[s1Str.length - 1 - i], startX - i * charWidth, startY);
+                if (isFocused) ctx.restore();
+            }
+
+            // Row 2 (with +)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = `${fontSize}px Orbitron`;
+            const plusCol = Math.max(s1Str.length, s2Str.length);
+            ctx.fillText('+', startX - plusCol * charWidth, startY + rowHeight);
+
+            ctx.font = `bold ${fontSize}px Orbitron`;
+            for (let i = 0; i < s2Str.length; i++) {
+                const isFocused = step && step.col === i && step.type !== 'complete';
+                ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
+                if (isFocused) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
+                ctx.fillText(s2Str[s2Str.length - 1 - i], startX - i * charWidth, startY + rowHeight);
+                if (isFocused) ctx.restore();
+            }
+
+            // Separator
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#888888';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(startX - plusCol * charWidth - charWidth * 0.5, startY + rowHeight * 1.6);
+            ctx.lineTo(startX + charWidth * 0.5, startY + rowHeight * 1.6);
+            ctx.stroke();
+
+            // 3. Draw Results & Carries
+            for (let i = 0; i <= currentStep; i++) {
+                const s = stepSequence[i];
+                if (s.type === 'calculate') {
+                    ctx.font = `bold ${fontSize}px Orbitron`;
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(s.resultDigit, startX - s.col * charWidth, startY + rowHeight * 2.2);
+
+                    if (s.newCarry > 0) {
+                        ctx.save();
+                        ctx.font = `bold ${fontSize * 0.35}px Orbitron`;
+                        const isCurrent = (i === currentStep);
+                        ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
+                        if (isCurrent) { ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
+                        ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidth, startY + rowHeight * 1.45);
+                        ctx.restore();
+                    }
+                } else if (s.type === 'final-carry') {
+                    ctx.font = `bold ${fontSize}px Orbitron`;
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(s.carry, startX - s.col * charWidth, startY + rowHeight * 2.2);
+                }
+            }
+
+            // Doppelte Unterstreichung
+            if (step && step.type === 'complete') {
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#888888';
+                ctx.lineWidth = 2;
+                const lineY1 = startY + rowHeight * 2.7;
+                const lineY2 = startY + rowHeight * 2.8;
+                const lineStartX = startX - plusCol * charWidth - charWidth * 0.5;
+                const lineEndX = startX + charWidth * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(lineStartX, lineY1); ctx.lineTo(lineEndX, lineY1);
+                ctx.moveTo(lineStartX, lineY2); ctx.lineTo(lineEndX, lineY2);
+                ctx.stroke();
+            }
+            updateMessages();
+        }
+
+        function updateMessages() {
+            const coach = document.getElementById('coach-content');
+            if (currentStep === -1) {
+                coach.innerHTML = CyberI18n.get('arithmetic.add.ready', { a: `<span class='coach-math-highlight'>${summand1}</span>`, b: `<span class='coach-math-highlight'>${summand2}</span>` });
+                return;
+            }
+            const step = stepSequence[currentStep];
+            if (step.type === 'focus') {
+                let unitKey = "units.ones";
+                if (step.col === 1) unitKey = "units.tens";
+                if (step.col === 2) unitKey = "units.hundreds";
+                if (step.col >= 3) unitKey = "units.thousands";
+                coach.innerHTML = CyberI18n.get('arithmetic.add.focus', { unit: `<span class='coach-math-highlight'>${CyberI18n.get(unitKey)}</span>` });
+            } else if (step.type === 'calculate') {
+                coach.innerHTML = CyberI18n.get('arithmetic.add.calc', { 
+                    d1: `<b style="color:#ffde00">${step.d1}</b>`, 
+                    d2: `<b style="color:#ffde00">${step.d2}</b>`, 
+                    c: step.oldCarry > 0 ? `+ <b style="color:#ffde00">${step.oldCarry}</b>` : '', 
+                    sum: `<span class='coach-math-highlight'>${step.d1 + step.d2 + step.oldCarry}</span>` 
+                }) + "<br><br>" + 
+                CyberI18n.get('arithmetic.add.carry', { 
+                    digit: `<span class='coach-math-highlight'>${step.resultDigit}</span>`, 
+                    newCarry: step.newCarry > 0 ? `<b style="color:#ffde00">${step.newCarry}</b>` : '0' 
+                });
+            } else if (step.type === 'final-carry') {
+                coach.innerHTML = CyberI18n.get('arithmetic.add.carry', { 
+                    digit: '', 
+                    newCarry: `<span class='coach-math-highlight'>${step.carry}</span>` 
+                });
+            } else if (step.type === 'complete') {
+                coach.innerHTML = `<b>${CyberI18n.get('arithmetic.add.complete', { result: `<span class='coach-math-highlight'>${summand1 + summand2}</span>` })}</b>`;
+            }
+        }
+
+        window.onresize = init;
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') nextStep();
+            if (e.key === 'ArrowRight') prevStep();
+        });
+        setupUI();
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>

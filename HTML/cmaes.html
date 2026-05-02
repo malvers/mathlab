@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flächenoptimierung (CMA-ES) | docalvers</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+</head>
+
+<body>
+    <!-- Mini Rail (YouTube Style) -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/cmaes-logic.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            // Grid must reflow after sidebar animation
+            setTimeout(() => {
+                cc.resize();
+                cc.needsRedraw = true;
+            }, 400);
+        }
+        const BRAND_BLUE = "#00d2ff";
+        const GOLDEN = "#ffd700";
+
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: CyberI18n.get('cmaes.title') });
+        CyberUI.init();
+
+        const cc = CyberCanvasInstance;
+        cc.init('canvas', { minX: -8, maxX: 8, minY: -4, maxY: 4 }, {
+            showTelemetry: false, showGrid: true, showAxes: true, showLabels: true, allowPan: false, allowZoom: true
+        });
+        const ctx = cc.ctx;
+
+        // State
+        let activeMission = 'CIRCLE';
+        let es = null;
+        let generation = 0;
+        let fitness = 0;
+        let sigma = 0.02;
+        let paused = true;
+        let targetPerimeter = 0;
+        let populationSize = 10;
+        let targetFocusX = 5.2;
+        let blockPoints = [];
+        const FIXED_POINT_INDEX = 0;
+        let draggedPoint = null;
+        const dragRadius = 15;
+        const CIRCLE_MAX_GENERATIONS = 5000;
+
+        function initPoints() {
+            const points = [];
+            const N = 20;
+            if (activeMission === 'CIRCLE') {
+                for (let i = 0; i < N; i++) {
+                    const angle = (i / N) * Math.PI * 2;
+                    const r = 0.8 + Math.random() * 1.2;
+                    points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
+                }
+            } else {
+                const w = 1.0, h = 3.6;
+                const ppsSide = 23, ppsTop = 1;
+                // Left
+                for (let i = 0; i < ppsSide; i++) points.push({ x: -w / 2, y: -h / 2 + (i / ppsSide) * h });
+                // Top (Corner only)
+                for (let i = 0; i < ppsTop; i++) points.push({ x: -w / 2 + (i / ppsTop) * w, y: h / 2 });
+                // Right
+                for (let i = 0; i < ppsSide; i++) points.push({ x: w / 2, y: h / 2 - (i / ppsSide) * h });
+                // Bottom (Corner only)
+                for (let i = 0; i < ppsTop; i++) points.push({ x: w / 2 - (i / ppsTop) * w, y: -h / 2 });
+            }
+            return points;
+        }
+
+        function setMission(m) {
+            activeMission = m;
+            const subtitle = m === 'CIRCLE' ? CyberI18n.get('cmaes.circle_mission') : CyberI18n.get('cmaes.lens_mission');
+            CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: subtitle });
+
+            const bKey = m === 'CIRCLE' ? 'cmaes_circle' : 'cmaes_lens';
+            const rawB = window.CyberBriefings && window.CyberBriefings[bKey];
+            CyberBranding.setBriefing(rawB ? CyberBranding.formatBriefingText(rawB) : '');
+
+            if (m === 'CIRCLE') {
+                cc.showAxes = true; cc.showLabels = true;
+            } else {
+                cc.showAxes = false; cc.showLabels = false;
+            }
+            cc.needsRedraw = true;
+            resetOptimization();
+        }
+
+        function setupUI() {
+            // CONTROLS
+            CyberUI.createCard('ui-container', CyberI18n.get('cmaes.controls'), `
+                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button id="start-btn" class="cyber-btn" onclick="toggleOptimization()" style="flex: 2; border-color: #adff2f; color: #adff2f; height: 60px;">${CyberI18n.get('cmaes.start')}</button>
+                        <button class="cyber-btn" onclick="resetOptimization()" style="flex: 1; border-color: var(--neon-blue); color: var(--neon-blue); height: 60px;">${CyberI18n.get('cmaes.reset')}</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button class="cyber-btn" onclick="stepEvolution(1)" style="flex: 1; border-color: #ffd700; color: #ffd700; height: 40px; font-size: 11px;">STEP 1</button>
+                        <button class="cyber-btn" onclick="stepEvolution(10)" style="flex: 1; border-color: #ffa500; color: #ffa500; height: 40px; font-size: 11px;">STEP 10</button>
+                    </div>
+                </div>
+            `);
+
+            // TELEMETRIE
+            CyberUI.createCard('ui-container', CyberI18n.get('cmaes.telemetry'), `
+                <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.generation')}</div>
+                        <div id="widget-gen" class="cyber-number-widget"></div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.fitness')}</div>
+                        <div id="widget-fit" class="cyber-number-widget"></div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; margin: 5px 0;">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.perimeter')}</div>
+                        <div id="widget-umfang" class="cyber-number-widget"></div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">${CyberI18n.get('cmaes.area')}</div>
+                        <div id="widget-flaeche" class="cyber-number-widget"></div>
+                    </div>
+                </div>
+            `);
+
+            setMission('CIRCLE');
+        }
+
+        function toggleOptimization() {
+            if (paused && !es) {
+                es = new ESLens(blockPoints, activeMission, {
+                    optiMode: 0x10, // Mirror mode
+                    targetFocusX: targetFocusX,
+                    sigma: sigma,
+                    popSize: populationSize
+                });
+                targetPerimeter = es.targetPerimeter;
+            }
+            paused = !paused;
+            const btn = document.getElementById('start-btn');
+            if (btn) btn.innerText = paused ? CyberI18n.get('cmaes.resume') : CyberI18n.get('cmaes.pause');
+        }
+
+        function resetOptimization() {
+            generation = 0; paused = true; es = null;
+            blockPoints = initPoints();
+
+            // Initiale Fitness berechnen (nicht 0!)
+            if (activeMission === 'CIRCLE') {
+                fitness = -CMAESLogic.getArea(blockPoints);
+            } else {
+                fitness = -CMAESLogic.getLensFitness(blockPoints, targetFocusX);
+            }
+
+            const btn = document.getElementById('start-btn');
+            if (btn) btn.innerText = CyberI18n.get('cmaes.start');
+            cc.needsRedraw = true;
+            updateTelemetry();
+        }
+
+        function updateTelemetry() {
+            CyberUI.updateNumberWidget('widget-gen', generation, 0, 1);
+            CyberUI.updateNumberWidget('widget-fit', Math.abs(fitness), 4, 1);
+            CyberUI.updateNumberWidget('widget-umfang', CMAESLogic.getPerimeter(blockPoints), 2, 1);
+            CyberUI.updateNumberWidget('widget-flaeche', CMAESLogic.getArea(blockPoints), 2, 1);
+        }
+
+        function animate() {
+            cc.drawGrid({ glow: true });
+            if (blockPoints.length > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(blockPoints[0].x), cc.mapY(blockPoints[0].y));
+                for (let i = 1; i < blockPoints.length; i++) ctx.lineTo(cc.mapX(blockPoints[i].x), cc.mapY(blockPoints[i].y));
+                ctx.closePath();
+                ctx.fillStyle = activeMission === 'LENS' ? "rgba(0, 210, 255, 0.25)" : "rgba(0, 210, 255, 0.15)";
+                ctx.fill();
+                ctx.strokeStyle = BRAND_BLUE; ctx.lineWidth = 2; ctx.stroke();
+
+                if (activeMission === 'LENS') {
+                    const fx = cc.mapX(targetFocusX), fy = cc.mapY(0);
+                    ctx.strokeStyle = GOLDEN; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy); ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10); ctx.stroke();
+                    const rayCount = 25; const hTotal = 3.6; const segH = hTotal / rayCount;
+                    for (let i = 0; i < rayCount; i++) {
+                        const sY = -hTotal / 2 + (i + 0.5) * segH;
+                        const ray = simulateVisualRay(-10, sY, blockPoints);
+                        if (ray) {
+                            // Incoming (Solid Yellow)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,215,0,0.9)"; ctx.setLineDash([]); ctx.lineWidth = 2;
+                            ctx.moveTo(cc.mapX(-10), cc.mapY(sY)); ctx.lineTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.stroke();
+
+                            // Inside (Solid Cyan)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(0,210,255,0.9)"; ctx.setLineDash([]); ctx.lineWidth = 2;
+                            ctx.moveTo(cc.mapX(ray.entry.x), cc.mapY(ray.entry.y)); ctx.lineTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y)); ctx.stroke();
+
+                            // Outgoing (Solid Gold)
+                            ctx.beginPath(); ctx.strokeStyle = "rgba(255,215,0,0.9)"; ctx.lineWidth = 2;
+                            ctx.moveTo(cc.mapX(ray.exit.x), cc.mapY(ray.exit.y));
+                            ctx.lineTo(cc.mapX(ray.exit.x + ray.rayOut.x * 20), cc.mapY(ray.exit.y + ray.rayOut.y * 20)); ctx.stroke();
+                        }
+                    }
+                }
+                blockPoints.forEach((p, idx) => {
+                    const sx = cc.mapX(p.x), sy = cc.mapY(p.y), r = 3;
+                    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
+                    // Draw all sample points in red
+                    ctx.fillStyle = "#ff4444";
+                    ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 1; ctx.stroke();
+                });
+                ctx.restore();
+            }
+            if (!paused) {
+                if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
+                    paused = true;
+                    const btn = document.getElementById('start-btn');
+                    if (btn) btn.innerText = CyberI18n.get('cmaes.max_gen');
+                }
+                let steps = 1;
+                if (generation >= 2000) steps = 100;
+                else if (generation >= 500) steps = 50;
+
+                for (let i = 0; i < steps; i++) {
+                    if (activeMission === 'CIRCLE' && generation >= CIRCLE_MAX_GENERATIONS) {
+                        paused = true;
+                        const btn = document.getElementById('start-btn');
+                        if (btn) btn.innerText = CyberI18n.get('cmaes.max_gen');
+                        break;
+                    }
+                    evolve();
+                }
+            }
+            updateTelemetry();
+            requestAnimationFrame(animate);
+        }
+
+        function simulateVisualRay(startX, startY, points) {
+            const dir = { x: 1, y: 0 }, nL = 1.5;
+            const ent = CMAESLogic.findIntersection(startX, startY, dir.x, dir.y, points);
+            if (!ent) return null;
+            const norm1 = CMAESLogic.getNormal(ent.edgeIndex, points);
+            const dot1 = norm1.x * dir.x + norm1.y * dir.y;
+            const rIn = CMAESLogic.refract(dir, dot1 > 0 ? { x: -norm1.x, y: -norm1.y } : norm1, 1.0, nL);
+            if (!rIn) return null;
+            const exi = CMAESLogic.findIntersection(ent.x + rIn.x * 1e-7, ent.y + rIn.y * 1e-7, rIn.x, rIn.y, points);
+            if (!exi) return null;
+            const norm2 = CMAESLogic.getNormal(exi.edgeIndex, points);
+            const dot2 = norm2.x * rIn.x + norm2.y * rIn.y;
+            const rOut = CMAESLogic.refract(rIn, dot2 < 0 ? { x: -norm2.x, y: -norm2.y } : norm2, nL, 1.0);
+            if (!rOut) return null;
+            return { entry: ent, exit: exi, rayOut: rOut };
+        }
+
+        function evolve() {
+            if (!es) return;
+            blockPoints = es.step();
+            fitness = es.bestFitness;
+            generation = es.generation;
+        }
+
+        function handleDragStart(pos, e) {
+            let closest = null, minDist = dragRadius;
+            blockPoints.forEach(p => {
+                const d = Math.hypot(cc.mapX(p.x) - (e.clientX - cc.canvas.getBoundingClientRect().left), cc.mapY(p.y) - (e.clientY - cc.canvas.getBoundingClientRect().top));
+                if (d < minDist) { minDist = d; closest = p; }
+            });
+            if (closest) { draggedPoint = closest; cc.canvas.style.cursor = 'grabbing'; }
+        }
+        function handleDragMove(pos, e) {
+            if (draggedPoint) { draggedPoint.x = pos.x; draggedPoint.y = pos.y; cc.needsRedraw = true; }
+        }
+        function handleDragEnd() { draggedPoint = null; cc.canvas.style.cursor = 'default'; }
+
+        cc.onContextMenu = (e) => {
+            CyberUI.showContextMenu(e.clientX, e.clientY, [
+                { label: CyberI18n.get('lgs.view_reset'), onclick: () => cc.resetView(-4, 4) },
+                { divider: true },
+                { label: CyberI18n.get('cmaes.view_circle'), onclick: () => setMission('CIRCLE') },
+                { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } }
+            ]);
+        };
+
+        function stepEvolution(count = 1) {
+            if (!es) {
+                es = new ESLens(blockPoints, activeMission, {
+                    optiMode: 0x10,
+                    targetFocusX: targetFocusX,
+                    sigma: sigma,
+                    popSize: populationSize
+                });
+            }
+            for (let i = 0; i < count; i++) {
+                evolve();
+            }
+            updateTelemetry();
+            cc.needsRedraw = true;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            if (e.key === '1') stepEvolution(1);
+            if (e.key === '0') stepEvolution(10);
+            if (e.key === ' ') toggleOptimization();
+        });
+
+        window.onload = () => {
+            setupUI();
+            cc.onMouseDown = handleDragStart; cc.onMouseMove = handleDragMove; cc.onMouseUp = handleDragEnd;
+            animate();
+        };
+    </script>
+</body>
+
+</html>

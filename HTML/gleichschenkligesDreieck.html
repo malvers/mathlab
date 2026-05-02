@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="js/i18n.js"></script>
+    <title>docalvers | Ultra v6.7.0</title>
+
+    <!-- Core Engine -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <!-- Branding & UI -->
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .canvas-container {
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #tri-container {
+            flex: 1;
+        }
+
+        #graph-container {
+            flex: 1;
+        }
+
+        #graph-container.collapsed {
+            flex: 0 0 50px;
+        }
+
+        .panel-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            color: var(--neon-blue);
+            transition: all 0.3s;
+        }
+
+        .panel-toggle:hover {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+        }
+
+        #warning-box {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid #ff3333;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            display: none;
+            text-align: center;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            color: #ff3333;
+            animation: cyber-glow-red 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" id="nav-toggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="warning-box">⚠️ <span id="warning-text"></span></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container" style="display: flex; flex-direction: column; gap: 20px; padding: 20px;">
+            <div id="tri-container" class="canvas-container">
+                <canvas id="triCanvas"></canvas>
+            </div>
+
+            <div id="graph-container" class="canvas-container">
+                <div class="panel-toggle" onclick="toggleGraph()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" id="toggle-icon">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <canvas id="graphCanvas"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof resize === 'function') resize();
+            }, 400);
+        }
+        // --- State Management ---
+        const state = {
+            u: 8.0,
+            b: 2.0,
+            s: 3.0,
+            isValid: true
+        };
+
+        function toggleGraph() {
+            const container = document.getElementById('graph-container');
+            const icon = document.getElementById('toggle-icon');
+            container.classList.toggle('collapsed');
+            icon.style.transform = container.classList.contains('collapsed') ? 'rotate(180deg)' : 'rotate(0deg)';
+            setTimeout(resize, 600);
+        }
+
+        // --- Math & Logic ---
+        function updateMath(newB) {
+            state.b = parseFloat(newB);
+            state.s = (state.u - state.b) / 2;
+            state.isValid = (state.s > state.b / 2) && (state.b > 0.05);
+
+            // Update UI
+            const bVal = document.getElementById('val-b');
+            const sVal = document.getElementById('val-s');
+            const warn = document.getElementById('warning-box');
+
+            if (bVal) bVal.innerText = state.b.toFixed(2).replace('.', ',');
+            if (sVal) sVal.innerText = state.s.toFixed(2).replace('.', ',');
+            if (warn) warn.style.display = state.isValid ? 'none' : 'block';
+
+            draw();
+        }
+
+        // --- Canvas Initialization ---
+        const triCanvas = document.getElementById('triCanvas');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const triCtx = triCanvas.getContext('2d');
+        const graphCtx = graphCanvas.getContext('2d');
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            [triCanvas, graphCanvas].forEach(c => {
+                const rect = c.parentNode.getBoundingClientRect();
+                c.width = rect.width * dpr;
+                c.height = rect.height * dpr;
+                c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+            });
+            draw();
+        }
+
+        function draw() {
+            drawTriangle();
+            drawGraph();
+        }
+
+        function drawTriangle() {
+            const rect = triCanvas.getBoundingClientRect();
+            triCtx.clearRect(0, 0, rect.width, rect.height);
+
+            const cx = rect.width / 2;
+            const pxScale = Math.min(rect.width / 10, rect.height / 7);
+
+            let h = 0;
+            if (state.s > state.b / 2) h = Math.sqrt(state.s * state.s - (state.b / 2) * (state.b / 2));
+            const cy = rect.height / 2 + (h * pxScale) / 2.5;
+
+            const pSpitze = { x: cx, y: cy - h * pxScale };
+            const pLinks = { x: cx - (state.b / 2) * pxScale, y: cy };
+            const pRechts = { x: cx + (state.b / 2) * pxScale, y: cy };
+
+            // Draw Base Line First (Subtle Guide)
+            triCtx.lineWidth = 1;
+            triCtx.strokeStyle = "rgba(255,255,255,0.1)";
+            triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
+
+            if (state.isValid) {
+                // Glow Effects
+                triCtx.shadowBlur = 20;
+
+                // Legs (Blue)
+                triCtx.strokeStyle = "#00d2ff";
+                triCtx.shadowColor = "#00d2ff";
+                triCtx.lineWidth = 3;
+                triCtx.beginPath();
+                triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pSpitze.x, pSpitze.y);
+                triCtx.lineTo(pRechts.x, pRechts.y);
+                triCtx.stroke();
+
+                // Base (Purple)
+                triCtx.strokeStyle = "#9d50bb";
+                triCtx.shadowColor = "#9d50bb";
+                triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
+                triCtx.shadowBlur = 0;
+
+                // Labels
+                triCtx.fillStyle = "white";
+                triCtx.font = "14px Orbitron";
+                triCtx.textAlign = "center";
+                triCtx.fillText(state.s.toFixed(2).replace('.', ','), (pLinks.x + pSpitze.x) / 2 - 15, (pLinks.y + pSpitze.y) / 2);
+                triCtx.fillText(state.s.toFixed(2).replace('.', ','), (pRechts.x + pSpitze.x) / 2 + 15, (pRechts.y + pSpitze.y) / 2);
+                triCtx.fillText(state.b.toFixed(2).replace('.', ','), cx, cy + 30);
+            } else {
+                // Invalid State - Sophisticated visual feedback
+                const legLen = state.s * pxScale;
+                
+                if (state.b <= 0.05) {
+                    // Needle State: Basis is 0, schenkel are pressed into a vertical vertical line
+                    triCtx.lineWidth = 4;
+                    triCtx.strokeStyle = "#ff3333";
+                    triCtx.shadowBlur = 25; triCtx.shadowColor = "#ff3333";
+                    triCtx.beginPath();
+                    triCtx.moveTo(cx, cy);
+                    triCtx.lineTo(cx, cy - legLen);
+                    triCtx.stroke();
+                    triCtx.shadowBlur = 0;
+                } else {
+                    // Flat Collapse State: Basis is too wide (b >= 4.0)
+                    // Base (Purple) representing the full distance b
+                    triCtx.lineWidth = 3;
+                    triCtx.strokeStyle = "#9d50bb";
+                    triCtx.shadowBlur = 20; triCtx.shadowColor = "#9d50bb";
+                    triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pRechts.x, pRechts.y); triCtx.stroke();
+
+                    // 1. Draw the collapsing legs (Blue)
+                    triCtx.lineWidth = 3;
+                    triCtx.strokeStyle = "#00d2ff";
+                    triCtx.shadowColor = "#00d2ff";
+                    triCtx.beginPath(); triCtx.moveTo(pLinks.x, pLinks.y); triCtx.lineTo(pLinks.x + legLen, pLinks.y); triCtx.stroke();
+                    triCtx.beginPath(); triCtx.moveTo(pRechts.x, pRechts.y); triCtx.lineTo(pRechts.x - legLen, pRechts.y); triCtx.stroke();
+                    
+                    // 2. Draw the GAP in the middle (Purple)
+                    triCtx.strokeStyle = "#9d50bb";
+                    triCtx.shadowColor = "#9d50bb";
+                    triCtx.shadowBlur = 20;
+                    triCtx.lineWidth = 3;
+                    triCtx.beginPath(); 
+                    triCtx.moveTo(pLinks.x + legLen, pLinks.y); 
+                    triCtx.lineTo(pRechts.x - legLen, pRechts.y); 
+                    triCtx.stroke();
+                    
+                    triCtx.shadowBlur = 0;
+                }
+            }
+        }
+
+        function drawGraph() {
+            const container = document.getElementById('graph-container');
+            if (container && container.classList.contains('collapsed')) {
+                // Clear and don't draw if collapsed
+                graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+                return;
+            }
+
+            const rect = graphCanvas.getBoundingClientRect();
+            graphCtx.clearRect(0, 0, rect.width, rect.height);
+            const pad = 60;
+            const gw = rect.width - pad * 2;
+            const gh = rect.height - pad * 2;
+            const toX = (val) => pad + (val / 8.5) * gw;
+            const toY = (val) => rect.height - pad - (val / 4.5) * gh;
+
+            // Grid & Ticks
+            graphCtx.lineWidth = 0.5;
+            graphCtx.font = "10px Orbitron";
+            graphCtx.textAlign = "center";
+            graphCtx.textBaseline = "top";
+            
+            for (let i = 0; i <= 8; i++) {
+                // Grid Line
+                graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(4.5)); graphCtx.stroke();
+                
+                // Tick & Number
+                graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(0) + 5); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+                graphCtx.fillText(i, toX(i), toY(0) + 8);
+            }
+            
+            graphCtx.textAlign = "right";
+            graphCtx.textBaseline = "middle";
+            for (let i = 0; i <= 4; i++) {
+                // Grid Line
+                graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
+                
+                // Tick & Number
+                graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
+                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(0) - 5, toY(i)); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
+                graphCtx.fillText(i, toX(0) - 8, toY(i));
+            }
+
+            // Axes with Arrows
+            graphCtx.lineWidth = 2;
+            
+            // X-Axis (Basis b)
+            graphCtx.strokeStyle = "#9d50bb";
+            const xAxisEnd = toX(8.2);
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(xAxisEnd, toY(0)); graphCtx.stroke();
+            // Arrowhead X
+            graphCtx.beginPath();
+            graphCtx.moveTo(xAxisEnd, toY(0));
+            graphCtx.lineTo(xAxisEnd - 10, toY(0) - 5);
+            graphCtx.lineTo(xAxisEnd - 10, toY(0) + 5);
+            graphCtx.fillStyle = "#9d50bb";
+            graphCtx.fill();
+            // Label X (BASIS)
+            graphCtx.fillStyle = "white";
+            graphCtx.font = "bold 13px Orbitron";
+            graphCtx.textAlign = "right";
+            graphCtx.fillText(CyberI18n.get('iso_tri.base'), xAxisEnd, toY(0) + 35);
+
+            // Y-Axis (SCHENKEL)
+            graphCtx.strokeStyle = "#00d2ff";
+            const yAxisEnd = toY(4.2);
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), yAxisEnd); graphCtx.stroke();
+            // Arrowhead Y
+            graphCtx.beginPath();
+            graphCtx.moveTo(toX(0), yAxisEnd);
+            graphCtx.lineTo(toX(0) - 5, yAxisEnd + 10);
+            graphCtx.lineTo(toX(0) + 5, yAxisEnd + 10);
+            graphCtx.fillStyle = "#00d2ff";
+            graphCtx.fill();
+            // Label Y (SCHENKEL)
+            graphCtx.fillStyle = "white";
+            graphCtx.textAlign = "center";
+            graphCtx.fillText(CyberI18n.get('iso_tri.leg'), toX(0), yAxisEnd - 15);
+
+            // Function
+            graphCtx.lineWidth = 3;
+            graphCtx.shadowBlur = 10;
+            graphCtx.strokeStyle = "#39FF14"; graphCtx.shadowColor = "#39FF14";
+            graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(4)); graphCtx.lineTo(toX(4), toY(2)); graphCtx.stroke();
+            graphCtx.strokeStyle = "#ff3333"; graphCtx.shadowColor = "#ff3333";
+            graphCtx.beginPath(); graphCtx.moveTo(toX(4), toY(2)); graphCtx.lineTo(toX(8), toY(0)); graphCtx.stroke();
+            graphCtx.shadowBlur = 0;
+
+            // Current Point
+            graphCtx.fillStyle = "white";
+            graphCtx.shadowBlur = 15; graphCtx.shadowColor = "white";
+            graphCtx.beginPath(); graphCtx.arc(toX(state.b), toY(state.s), 5, 0, Math.PI * 2); graphCtx.fill();
+            graphCtx.shadowBlur = 0;
+        }
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            document.title = "docalvers | " + CyberI18n.get('iso_tri.title');
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) navToggle.title = CyberI18n.get('ui.toggle_menu');
+            const warningText = document.getElementById('warning-text');
+            if (warningText) warningText.innerText = CyberI18n.get('iso_tri.invalid');
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('iso_tri.subtitle')
+            });
+            CyberUI.init();
+
+            CyberUI.createCard('ui-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="stats-grid">
+                        <div class="stats-subcard" style="border-left-color: #9d50bb;">
+                            <span class="stats-label" id="label-u" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.perimeter')}</span>
+                            <span class="stats-val" style="color:white;">8,00 cm</span>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stats-subcard" style="border-left-color: #9d50bb;">
+                            <span class="stats-label" id="label-b" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.base')}</span>
+                            <span id="val-b" class="stats-val" style="color: #9d50bb;">2,00</span>
+                        </div>
+                        <div class="stats-subcard" style="border-left-color: #00d2ff;">
+                            <span class="stats-label" id="label-s" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem;">${CyberI18n.get('iso_tri.leg')}</span>
+                            <span id="val-s" class="stats-val" style="color: #00d2ff;">3,00</span>
+                        </div>
+                    </div>
+                </div>
+            `, '#9d50bb');
+
+            CyberUI.createCard('ui-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="label-row">
+                        <span id="label-b-control" style="font-family: Orbitron; letter-spacing: 2px; font-size: 0.95rem; color: rgba(255,255,255,0.8);">${CyberI18n.get('iso_tri.base_length')}</span>
+                    </div>
+                    <input type="range" id="b-slider" min="0" max="8" step="0.01" value="2" oninput="updateMath(this.value)">
+                    <div style="font-size: 0.8rem; opacity: 0.7; font-family: Orbitron; padding-top: 5px;">
+                        ${CyberI18n.get('iso_tri.note')}
+                    </div>
+                </div>
+            `, '#00d2ff');
+
+            setTimeout(() => {
+                resize();
+                // removed KaTeX overriding for label-u, label-b, label-s
+            }, 100);
+        });
+
+        window.addEventListener('resize', resize);
+    </script>
+</body>
+
+</html>

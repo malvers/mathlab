@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.div.title'))</script></title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
+        #canvas-container {
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+            overflow: hidden;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        #math-coach-box {
+            position: absolute;
+            width: 350px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.05);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(0);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+
+        #math-coach-box.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .coach-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: #00d2ff;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coach-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d2ff;
+        }
+
+        .coach-message {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .coach-math-highlight {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #ffde00;
+        }
+
+        /* UI Refinements */
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
+        }
+
+        .stats-val {
+            font-size: 1.1rem !important;
+        }
+
+        /* Perfekte vertikale Ausrichtung */
+        .cyber-card-title {
+            text-align: left !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-bottom: 12px !important;
+            display: block;
+            text-align: left !important;
+        }
+
+        /* Spacing & Scaling Refinements */
+        .cyber-control-group {
+            margin-bottom: 35px !important;
+        }
+
+        /* Reine Input-Felder (Vorsichtig!) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            text-align: left !important;
+            padding: 15px 20px !important;
+            font-size: 1.2rem !important;
+            background: rgba(0, 210, 255, 0.05) !important;
+            border: 1px solid rgba(0, 210, 255, 0.2) !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 12px;
+        }
+        
+        .cyber-select {
+            background-image: none !important;
+        }
+        
+        .cyber-select::after {
+            display: none !important; 
+        }
+
+        /* Title alignment fix for CyberUI cards */
+        .cyber-card-header {
+            padding-left: 0 !important;
+            margin-bottom: 20px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title"><script>document.write(CyberI18n.get('ui.description'))</script></div>
+                <div id="coach-content" class="coach-message">...</div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+            }, 400);
+        }
+        // 1. Branding & UI Init
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('arithmetic.div.title')
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        const BRAND_BLUE = "#00d2ff";
+        const BRAND_GOLD = "#ffde00";
+        const BRAND_NEON_GREEN = "#00ff00";
+
+        let dividend = 1234567;
+        let divisor = 25;
+        let currentStep = -1;
+        let stepSequence = [];
+
+        let width, height, dpr;
+
+        function setupUI() {
+            CyberUI.createCard('ui-container', CyberI18n.get('arithmetic.div.title'), `
+                <div class="cyber-control-group">
+                    <label class="cyber-label">${CyberI18n.get('ui.dividend')}</label>
+                    <input type="number" id="div-input" class="cyber-select" value="${dividend}" onchange="updateValues()">
+                </div>
+                <div class="cyber-control-group" style="margin-top:25px;">
+                    <label class="cyber-label">${CyberI18n.get('ui.divisor')}</label>
+                    <input type="number" id="dsor-input" class="cyber-select" value="${divisor}" onchange="updateValues()">
+                </div>
+                <button class="cyber-btn" onclick="resetSteps()" style="width:100%; margin-top:20px; border-color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
+            `, BRAND_BLUE);
+
+            CyberUI.createCard('ui-container', CyberI18n.get('ui.step'), `
+                <div class="stats-grid">
+                    <div class="stats-card" onclick="nextStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">${CyberI18n.get('ui.next')}</span>
+                        <span class="stats-val" style="font-size:1.4rem;">◀</span>
+                    </div>
+                    <div class="stats-card" onclick="prevStep()" style="cursor:pointer; text-align:center;">
+                        <span class="stats-label">${CyberI18n.get('ui.prev')}</span>
+                        <span class="stats-val" style="font-size:1.4rem;">▶</span>
+                    </div>
+                </div>
+            `, '#ff9d00');
+        }
+
+        function updateValues() {
+            dividend = parseInt(document.getElementById('div-input').value) || 0;
+            divisor = parseInt(document.getElementById('dsor-input').value) || 1;
+            resetSteps();
+        }
+
+        function buildStepSequence() {
+            stepSequence = [];
+            const dStr = String(dividend);
+            const div = divisor;
+            
+            let currentRemainder = 0;
+            let quotient = "";
+
+            // Find initial part of dividend
+            let i = 0;
+            let part = "";
+            while (i < dStr.length && (parseInt(part + dStr[i]) < div)) {
+                part += dStr[i];
+                stepSequence.push({ 
+                    type: 'collect', 
+                    digitIdx: i, 
+                    currentPart: part
+                });
+                i++;
+            }
+            
+            if (i < dStr.length) {
+                part += dStr[i];
+                let firstVal = parseInt(part);
+                let qDigit = Math.floor(firstVal / div);
+                let product = qDigit * div;
+                let remainder = firstVal - product;
+
+                stepSequence.push({
+                    type: 'divide',
+                    digitIdx: i,
+                    partStr: part,
+                    partVal: firstVal,
+                    qDigit: qDigit,
+                    product: product,
+                    remainder: remainder
+                });
+
+                quotient += qDigit;
+                currentRemainder = remainder;
+                i++;
+
+                while (i < dStr.length) {
+                    let nextDigit = dStr[i];
+                    let nextVal = parseInt(String(currentRemainder) + nextDigit);
+                    
+                    stepSequence.push({
+                        type: 'bringDown',
+                        digitIdx: i,
+                        digit: nextDigit,
+                        prevRemainder: currentRemainder,
+                        newVal: nextVal
+                    });
+
+                    let qDigit = Math.floor(nextVal / div);
+                    let product = qDigit * div;
+                    let remainder = nextVal - product;
+
+                    stepSequence.push({
+                        type: 'divide',
+                        digitIdx: i,
+                        partStr: String(nextVal),
+                        partVal: nextVal,
+                        qDigit: qDigit,
+                        product: product,
+                        remainder: remainder
+                    });
+
+                    quotient += qDigit;
+                    currentRemainder = remainder;
+                    i++;
+                }
+
+                stepSequence.push({
+                    type: 'final',
+                    quotient: quotient,
+                    remainder: currentRemainder
+                });
+            }
+        }
+
+        function resetSteps() {
+            currentStep = -1;
+            buildStepSequence();
+            draw();
+        }
+
+        function nextStep() {
+            if (currentStep < stepSequence.length - 1) {
+                currentStep++;
+                draw();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > -1) {
+                currentStep--;
+                draw();
+            }
+        }
+
+        function init() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            width = rect.width; height = rect.height;
+            canvas.width = width * dpr; canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            buildStepSequence();
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            const dStr = String(dividend);
+            const divStr = String(divisor);
+            const resStr = String(Math.floor(dividend / divisor));
+
+            // 1. GRID METRICS (ULTRA Scaling)
+            const maxChars = Math.max(dStr.length + divStr.length + resStr.length + 5, 12);
+            const totalLines = (dStr.length * 2) + 2; 
+            
+            const fontSizeWidth = (width * 0.96) / (maxChars * 0.85);
+            const fontSizeHeight = (height * 0.95) / (totalLines * 1.3);
+            const fontSize = Math.min(fontSizeWidth, fontSizeHeight, 140); 
+            
+            ctx.font = `bold ${fontSize}px Orbitron`;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+
+            const charWidth = fontSize * 0.85; 
+            const rowHeight = fontSize * 1.4;
+
+            // 2. ENSEMBLE CENTERING
+            const coachBox = document.getElementById('math-coach-box');
+            const coachWidth = 380;
+            const gap = 40;
+            const totalCalcWidth = maxChars * charWidth;
+            const canShowCoachBesideCalc = !!coachBox && (width >= (totalCalcWidth + gap + coachWidth + 80));
+            const ensembleTotalWidth = canShowCoachBesideCalc ? (totalCalcWidth + gap + coachWidth) : totalCalcWidth;
+            const ensembleStartX = (width - ensembleTotalWidth) / 2;
+
+            const startX = ensembleStartX + charWidth * 0.5;
+            const startY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5 + 150;
+
+            // Positioning Helpers
+            const getColX = (c) => startX + c * charWidth;
+            const getRowY = (r) => startY + r * rowHeight;
+
+            // Position Coach Box
+            if (coachBox) {
+                coachBox.style.display = 'block';
+                if (canShowCoachBesideCalc) {
+                    const boxLeft = Math.floor(ensembleStartX + totalCalcWidth + gap);
+                    coachBox.style.left = `${boxLeft}px`;
+                } else {
+                    // Keep the coach box visible as overlay on small screens
+                    const overlayLeft = Math.max(20, width - coachWidth - 20);
+                    coachBox.style.left = `${overlayLeft}px`;
+                }
+            }
+
+            const step = currentStep >= 0 ? stepSequence[currentStep] : null;
+
+            // --- HELPER: Draw Number Digit-by-Digit ---
+            const drawNumber = (num, colEnd, row, color, isRightAligned = true) => {
+                const s = String(num);
+                ctx.fillStyle = color;
+                for (let i = 0; i < s.length; i++) {
+                    const charX = isRightAligned ? 
+                        getColX(colEnd - (s.length - 1 - i)) : 
+                        getColX(colEnd + i);
+                    ctx.fillText(s[i], charX, getRowY(row));
+                }
+            };
+
+            // --- 1. BASE EQUATION (Row 0) ---
+            // Dividend
+            for (let i = 0; i < dStr.length; i++) {
+                ctx.fillStyle = (step && step.digitIdx === i) ? BRAND_GOLD : BRAND_BLUE;
+                ctx.fillText(dStr[i], getColX(i), getRowY(0));
+            }
+
+            // Operator and Result
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            const opCol = dStr.length;
+            ctx.fillText(` : ${divStr} = `, getColX(opCol) - charWidth*0.2, getRowY(0));
+
+            // Result (Quotient)
+            if (step) {
+                const qStr = (step.type === 'final') ? step.quotient : 
+                            stepSequence.slice(0, currentStep + 1).filter(s => s.type === 'divide').map(s => s.qDigit).join('');
+                
+                const qStartCol = opCol + divStr.length + 2.1; // Perfectly symmetric after " : 25 = "
+                drawNumber(qStr, qStartCol, 0, BRAND_GOLD, false);
+                
+                if (step.type === 'final' && step.remainder > 0) {
+                   ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                   ctx.font = `bold ${fontSize * 0.5}px Orbitron`;
+                   ctx.fillText(` REST ${step.remainder}`, getColX(qStartCol + qStr.length), getRowY(0));
+                   ctx.font = `bold ${fontSize}px Orbitron`;
+                }
+            }
+
+            ctx.textAlign = 'center';
+
+            // BRACKET (Over Row 0)
+            if (step && (step.type === 'collect' || step.type === 'divide')) {
+                const partLen = step.type === 'collect' ? step.currentPart.length : step.partStr.length;
+                const partStartIdx = step.type === 'collect' ? 0 : step.digitIdx - partLen + 1;
+                
+                ctx.strokeStyle = BRAND_GOLD;
+                ctx.lineWidth = 4;
+                const bLeft = getColX(partStartIdx) - charWidth * 0.45;
+                const bWidth = partLen * charWidth - charWidth * 0.1;
+                const bTop = getRowY(0) - fontSize * 0.75;
+                
+                ctx.beginPath();
+                ctx.moveTo(bLeft, bTop + 15);
+                ctx.lineTo(bLeft, bTop);
+                ctx.lineTo(bLeft + bWidth, bTop);
+                ctx.lineTo(bLeft + bWidth, bTop + 15);
+                ctx.stroke();
+            }
+
+            // --- 2. VERTICAL CALCULATION ---
+            if (step) {
+                let currentRow = 1;
+                let activeSteps = stepSequence.slice(0, currentStep + 1);
+                let lastOperationY = getRowY(0);
+
+                activeSteps.forEach((s) => {
+                    if (s.type === 'divide') {
+                        // 1. SUBTRACTION ROW
+                        const colEnd = s.digitIdx;
+                        
+                        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                        ctx.fillText('-', getColX(colEnd - String(s.product).length), getRowY(currentRow));
+                        drawNumber(s.product, colEnd, currentRow, 'white');
+                        
+                        // Line
+                        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(getColX(colEnd - String(s.product).length) - charWidth*0.4, getRowY(currentRow) + fontSize/1.8);
+                        ctx.lineTo(getColX(colEnd) + charWidth*0.4, getRowY(currentRow) + fontSize/1.8);
+                        ctx.stroke();
+                        
+                        currentRow++; // Move to Remainder Row
+                        
+                        // 2. REMAINDER ROW
+                        drawNumber(s.remainder, colEnd, currentRow, (s === step) ? BRAND_BLUE : 'rgba(0, 210, 255, 0.4)');
+                        lastOperationY = getRowY(currentRow);
+                    } else if (s.type === 'bringDown') {
+                        // Digit added to the CURRENT remainder row
+                        const colPos = s.digitIdx;
+                        ctx.fillStyle = BRAND_GOLD;
+                        ctx.fillText(s.digit, getColX(colPos), getRowY(currentRow));
+                        
+                        // Bring-down line (Light Grey)
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(getColX(colPos), getRowY(0) + fontSize/2 + 5);
+                        ctx.lineTo(getColX(colPos), getRowY(currentRow) - fontSize/2 - 5);
+                        ctx.stroke();
+                        lastOperationY = getRowY(currentRow);
+                        
+                        currentRow++; // NEXT product goes to next row
+                    }
+                });
+
+            }
+
+            // --- 3. POSITION COACH BOX (After content is updated for correct height) ---
+            updateStepInfo();
+
+            if (coachBox) {
+                const boxHeight = coachBox.offsetHeight;
+                // Determine target Y based on active step
+                let targetY = getRowY(0);
+                if (step) {
+                    // Find lastOperationY from the loop above
+                    let currentRow = 1;
+                    let activeSteps = stepSequence.slice(0, currentStep + 1);
+                    let opY = getRowY(0);
+                    activeSteps.forEach((s) => {
+                        if (s.type === 'divide') {
+                            currentRow++; // Move to remainder row
+                            opY = getRowY(currentRow);
+                        } else if (s.type === 'bringDown') {
+                            opY = getRowY(currentRow);
+                            currentRow++;
+                        }
+                    });
+                    targetY = opY;
+                }
+                const minTop = 20 + boxHeight / 2;
+                const maxTop = height - 20 - boxHeight / 2;
+                const clampedY = Math.max(minTop, Math.min(maxTop, targetY));
+                coachBox.style.top = `${clampedY - boxHeight / 2}px`;
+            }
+        }
+
+        function updateStepInfo() {
+            const coach = document.getElementById('math-coach-box');
+            const content = document.getElementById('coach-content');
+            const info = document.getElementById('step-info');
+            if (!coach || !content) return;
+
+            let message = "";
+            if (currentStep === -1) {
+                message = CyberI18n.get('arithmetic.div.ready', { a: dividend, b: divisor });
+            } else {
+                const step = stepSequence[currentStep];
+                if (!step) return;
+                
+                if (step.type === 'collect') {
+                    message = CyberI18n.get('arithmetic.div.collect', { b: divisor, val: `<span class="coach-math-highlight">${step.currentPart}</span>` });
+                } else if (step.type === 'divide') {
+                    message = CyberI18n.get('arithmetic.div.fit', { b: divisor, val: `<span class="coach-math-highlight">${step.partVal}</span>`, q: step.qDigit, prod: step.product });
+                } else if (step.type === 'bringDown') {
+                    message = CyberI18n.get('arithmetic.div.bring_down', { d: `<span class="coach-math-highlight">${step.digit}</span>`, newVal: step.newVal });
+                } else if (step.type === 'final') {
+                    message = `<b>${CyberI18n.get('arithmetic.div.complete', { result: `<span class="coach-math-highlight">${step.quotient}</span>` })}</b>${step.remainder > 0 ? ' with ' + CyberI18n.get('arithmetic.div.rem', { rem: step.remainder }) : ''}.`;
+                }
+            }
+
+            coach.classList.add('visible');
+            content.innerHTML = message;
+            if (info) info.innerHTML = message;
+        }
+
+        window.onresize = init;
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') nextStep();
+            if (e.key === 'ArrowRight') prevStep();
+        });
+
+        setupUI();
+        document.fonts.ready.then(() => { setTimeout(init, 100); });
+    </script>
+</body>
+
+</html>

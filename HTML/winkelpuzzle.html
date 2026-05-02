@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winkel Puzzle - Cyber-Labor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            position: relative;
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        button.cyber-btn {
+            background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 12px; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; letter-spacing: 1px;
+            cursor: pointer; border-radius: 4px; transition: all 0.3s ease; text-transform: uppercase; width: 100%;
+        }
+        button.cyber-btn:hover { background: rgba(0, 210, 255, 0.2); box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <div id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof draw === 'function') draw();
+            }, 400);
+        }
+        window.addEventListener('load', () => {
+            let cc = null;
+            let params = { wedge: 39, dA: 15.0, dB: 6.8, dC: 13.0, dD: 7.1 };
+            
+            function init() {
+                if (typeof CyberCanvas === 'undefined') return;
+                if (typeof CyberUI !== 'undefined') {
+                    CyberUI.init();
+                    
+                    CyberUI.createCard('parameters-container', '', `
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('puzzle.wedge_angle')}</span>
+                                    <span id="label-wedge" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">39°</span>
+                                </div>
+                                <input type="range" id="slider-wedge" min="10" max="80" value="39">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('puzzle.dist_a')}</span>
+                                    <span id="label-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">15.0</span>
+                                </div>
+                                <input type="range" id="slider-a" min="10" max="25" value="15" step="0.1">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('puzzle.dist_b')}</span>
+                                    <span id="label-b" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">6.8</span>
+                                </div>
+                                <input type="range" id="slider-b" min="1" max="9.9" value="6.8" step="0.1">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('puzzle.dist_c')}</span>
+                                    <span id="label-c" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">13.0</span>
+                                </div>
+                                <input type="range" id="slider-c" min="10" max="25" value="13" step="0.1">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('puzzle.dist_d')}</span>
+                                    <span id="label-d" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">7.1</span>
+                                </div>
+                                <input type="range" id="slider-d" min="1" max="9.9" value="7.1" step="0.1">
+                            </div>
+                            <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #00d2ff; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 12px;">
+                                    <input type="checkbox" id="check-blue" style="width: 18px; height: 18px; accent-color: #00d2ff;" checked>
+                                    ${CyberI18n.get('puzzle.given_blue')}
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #ff0055; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 12px;">
+                                    <input type="checkbox" id="check-red" style="width: 18px; height: 18px; accent-color: #ff0055;">
+                                    ${CyberI18n.get('puzzle.solution_red')}
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; color: #ffcc00; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 20px;">
+                                    <input type="checkbox" id="check-yellow" style="width: 18px; height: 18px; accent-color: #ffcc00;">
+                                    ${CyberI18n.get('puzzle.steps_yellow')}
+                                </label>
+                                <button class="cyber-btn" onclick="resetLab()">${CyberI18n.get('puzzle.reset')}</button>
+                            </div>
+                        </div>
+                    `, 'var(--neon-blue)', { collapsible: false });
+                }
+
+                cc = new CyberCanvas();
+                // We use a wider view area since points go up to 15-20 units away from V
+                cc.init('canvas', { minX: -20, maxX: 10, minY: -10, maxY: 10 }, { allowZoom: false, allowPan: false });
+                cc.onResize = () => draw();
+
+                if (typeof CyberBranding !== 'undefined') {
+                    CyberBranding.init({
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('puzzle.title'),
+                        useExternalStyles: true
+                    });
+                }
+
+                ['wedge', 'a', 'b', 'c', 'd'].forEach(id => {
+                    const slider = document.getElementById('slider-' + id);
+                    slider.oninput = (e) => {
+                        params['d' + id.toUpperCase()] = parseFloat(e.target.value);
+                        if (id === 'wedge') params.wedge = parseFloat(e.target.value);
+                        document.getElementById('label-' + id).innerText = e.target.value + (id === 'wedge' ? '°' : '');
+                        draw();
+                    };
+                });
+
+                ['check-blue', 'check-red', 'check-yellow'].forEach(id => {
+                    document.getElementById(id).onchange = draw;
+                });
+
+                draw();
+            }
+
+            window.resetLab = () => {
+                document.getElementById('slider-wedge').value = 39;
+                document.getElementById('slider-a').value = 15;
+                document.getElementById('slider-b').value = 6.8;
+                document.getElementById('slider-c').value = 13;
+                document.getElementById('slider-d').value = 7.1;
+                // trigger events manually
+                ['wedge', 'a', 'b', 'c', 'd'].forEach(id => document.getElementById('slider-' + id).dispatchEvent(new Event('input')));
+                document.getElementById('check-blue').checked = true;
+                document.getElementById('check-red').checked = false;
+                document.getElementById('check-yellow').checked = false;
+                draw();
+            };
+
+            function intersect(p1, p2, p3, p4) {
+                const d = (p1.x - p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x - p4.x);
+                if (d === 0) return null;
+                const t = ((p1.x - p3.x)*(p3.y - p4.y) - (p1.y - p3.y)*(p3.x - p4.x)) / d;
+                return {
+                    x: p1.x + t * (p2.x - p1.x),
+                    y: p1.y + t * (p2.y - p1.y)
+                };
+            }
+
+            function getAngleBetween(dir1, dir2) {
+                let a1 = Math.atan2(dir1.y, dir1.x);
+                let a2 = Math.atan2(dir2.y, dir2.x);
+                let diff = Math.abs(a1 - a2) * 180 / Math.PI;
+                if (diff > 180) diff = 360 - diff;
+                return diff;
+            }
+
+            function drawArcLabel(ctx, pt, dir1, dir2, radius, label, color, isBold = false, fontSize = 22, showArc = true) {
+                let a1 = Math.atan2(dir1.y, dir1.x);
+                let a2 = Math.atan2(dir2.y, dir2.x);
+                
+                let diff = a2 - a1;
+                if (diff > Math.PI) diff -= 2*Math.PI;
+                if (diff < -Math.PI) diff += 2*Math.PI;
+
+                // Always draw the acute/internal angle
+                const end = a1 + diff;
+                const ccw = diff > 0; 
+
+                if (showArc) {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(cc.mapX(pt.x), cc.mapY(pt.y), radius, -a1, -end, ccw); // Canvas Y inverted
+                    ctx.stroke();
+                }
+
+                let midA = a1 + diff/2;
+                let textRadius = radius + 25;
+                let tx = cc.mapX(pt.x) + Math.cos(midA) * textRadius; 
+                let ty = cc.mapY(pt.y) - Math.sin(midA) * textRadius; // Minus because Y inverted
+                
+                ctx.fillStyle = color;
+                if (label === 'α' || label === 'β' || label === 'γ') {
+                    ctx.font = 'italic ' + (isBold ? 'bold ' : '') + (fontSize + 2) + 'px "Times New Roman", serif';
+                } else {
+                    ctx.font = (isBold ? 'bold ' + fontSize + 'px ' : fontSize + 'px ') + 'Orbitron, sans-serif';
+                }
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+
+                ctx.fillStyle = color;
+                ctx.fillText(label, tx, ty);
+            }
+
+            function drawLineExt(ctx, p1, p2) {
+                // Extend the line visually
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const len = Math.hypot(dx, dy);
+                const ex = dx / len * 30;
+                const ey = dy / len * 30;
+                
+                ctx.beginPath();
+                ctx.moveTo(cc.mapX(p1.x - ex), cc.mapY(p1.y - ey));
+                ctx.lineTo(cc.mapX(p2.x + ex), cc.mapY(p2.y + ey));
+                ctx.stroke();
+            }
+
+            function draw() {
+                if (!cc || !cc.isInitialized) return;
+                const ctx = cc.ctx;
+                ctx.clearRect(0, 0, cc.canvas.width, cc.canvas.height);
+
+                const V = { x: 5, y: 0 };
+                const t1 = (180 - params.wedge/2) * Math.PI / 180;
+                const t2 = (180 + params.wedge/2) * Math.PI / 180;
+
+                const dir1 = { x: Math.cos(t1), y: Math.sin(t1) };
+                const dir2 = { x: Math.cos(t2), y: Math.sin(t2) };
+
+                const A = { x: V.x + params.dA * dir1.x, y: V.y + params.dA * dir1.y };
+                const B = { x: V.x + params.dB * dir1.x, y: V.y + params.dB * dir1.y };
+                const C = { x: V.x + params.dC * dir2.x, y: V.y + params.dC * dir2.y };
+                const D = { x: V.x + params.dD * dir2.x, y: V.y + params.dD * dir2.y };
+
+                const E = intersect(B, C, A, D);
+
+                // --- Draw Lines ---
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.lineWidth = 3;
+                drawLineExt(ctx, A, V); // L1
+                drawLineExt(ctx, C, V); // L2
+                drawLineExt(ctx, C, B); // L3
+                drawLineExt(ctx, A, D); // L4
+
+                // --- Calculate Angles ---
+                const vA = { x: A.x - V.x, y: A.y - V.y };
+                const vD = { x: D.x - V.x, y: D.y - V.y };
+                const val39 = getAngleBetween(vA, vD);
+
+                const v1_left = dir1;
+                const v1_right = {x: -dir1.x, y: -dir1.y};
+                const v2_left = dir2;
+                const v2_right = {x: -dir2.x, y: -dir2.y};
+                const vL4_down = { x: D.x - A.x, y: D.y - A.y };
+                const vL4_up = { x: A.x - D.x, y: A.y - D.y };
+                const vL3_up = { x: B.x - C.x, y: B.y - C.y };
+                const vL3_down = { x: C.x - B.x, y: C.y - B.y };
+
+                // Gamma at A (vertically opposite to V-A-D interior -> Away from B and Away from D)
+                const valGamma = getAngleBetween(v1_left, vL4_up);
+                
+                // 112 at B (Away from V and Away from C)
+                const val112 = getAngleBetween(v1_left, vL3_up);
+
+                // Alpha at C (Interior V-C-B -> To V and To B)
+                const valAlpha = getAngleBetween(v2_right, vL3_up);
+
+                // 116 at D (Vertically opposite to interior -> Away from V and Away from A)
+                const val116 = getAngleBetween(v2_left, vL4_down);
+
+                // Beta at E (Facing Right -> between Top-Right and Bottom-Right)
+                const valBeta = getAngleBetween(vL3_up, vL4_down);
+
+                // --- Calculate Intermediate Educational Angles ---
+                const vB_to_V = { x: -v1_left.x, y: -v1_left.y };
+                const vB_to_C = { x: -vL3_up.x, y: -vL3_up.y };
+                const valIntB_V = getAngleBetween(vB_to_V, vB_to_C); // 112 interior
+
+                const vD_to_V = { x: -v2_left.x, y: -v2_left.y };
+                const vD_to_A = vL4_up;
+                const valIntD_V = getAngleBetween(vD_to_V, vD_to_A); // 116 interior
+
+                const vA_to_E = vL4_down;
+                const vA_to_B = vB_to_V; 
+                const valIntA = getAngleBetween(vA_to_B, vA_to_E); // 25 interior
+
+                const vB_to_E = vB_to_C; 
+                const vB_to_A = v1_left; 
+                const valIntB_E = getAngleBetween(vB_to_A, vB_to_E); // 68 interior
+
+                let vE_to_A = null, vE_to_B = null, valIntE = null;
+                if (E) {
+                    vE_to_A = { x: A.x - E.x, y: A.y - E.y };
+                    vE_to_B = { x: B.x - E.x, y: B.y - E.y };
+                    valIntE = getAngleBetween(vE_to_A, vE_to_B); // 87 interior
+                }
+
+                // --- Render Angles ---
+                const givenColor = "#00d2ff"; // Blue for given
+                const varColor = "#ff0055"; // Pink for variables
+                const interColor = "#ffcc00"; // Yellow for intermediates
+
+                if (document.getElementById('check-blue').checked) {
+                    // 39° wedge
+                    drawArcLabel(ctx, V, vA, vD, 44, val39.toFixed(0) + "°", givenColor, false, 16, false);
+                    // 112°
+                    drawArcLabel(ctx, B, v1_left, vL3_up, 44, val112.toFixed(0) + "°", givenColor, false, 16, false);
+                    // 116°
+                    drawArcLabel(ctx, D, v2_left, vL4_down, 44, val116.toFixed(0) + "°", givenColor, false, 16, false);
+                }
+
+                const showRedSolution = document.getElementById('check-red').checked;
+                // Gamma
+                drawArcLabel(ctx, A, v1_left, vL4_up, 44, showRedSolution ? valGamma.toFixed(0) + "°" : "γ", varColor, false, 16, showRedSolution);
+                // Alpha
+                drawArcLabel(ctx, C, v2_right, vL3_up, 44, showRedSolution ? valAlpha.toFixed(0) + "°" : "α", varColor, false, 16, showRedSolution);
+                // Beta
+                if (E) {
+                    drawArcLabel(ctx, E, vL3_up, vL4_down, 44, showRedSolution ? valBeta.toFixed(0) + "°" : "β", varColor, false, 16, showRedSolution);
+                }
+
+                if (document.getElementById('check-yellow').checked) {
+                    // Render exactly all missing angles (Yellow)
+                    // Interior angles vertically opposite to givens
+                    drawArcLabel(ctx, B, vB_to_V, vB_to_C, 44, valIntB_V.toFixed(0) + "°", interColor, false, 16);
+                    drawArcLabel(ctx, D, vD_to_V, vD_to_A, 44, valIntD_V.toFixed(0) + "°", interColor, false, 16);
+                    
+                    // Adjacent angles forming straight lines
+                    drawArcLabel(ctx, B, vB_to_A, vB_to_E, 44, valIntB_E.toFixed(0) + "°", interColor, false, 16); // 68
+                    const valIntD_C = getAngleBetween(v2_left, vL4_up);
+                    drawArcLabel(ctx, D, v2_left, vL4_up, 44, valIntD_C.toFixed(0) + "°", interColor, false, 16); // 64
+
+                    // Internal angles matching calculation variables
+                    drawArcLabel(ctx, A, vA_to_B, vA_to_E, 44, valIntA.toFixed(0) + "°", interColor, false, 16); // 25 interior
+                    
+                    // Nebenwinkel (NW)
+                    const valNWA = 180 - Math.abs(valIntA);
+                    drawArcLabel(ctx, A, vA_to_B, vL4_up, 44, valNWA.toFixed(0) + "°", interColor, false, 16); // 155 NW am Punkt A
+
+                    const valNWC = 180 - Math.abs(valAlpha);
+                    drawArcLabel(ctx, C, v2_left, vL3_up, 44, valNWC.toFixed(0) + "°", interColor, false, 16); // 151 NW am Punkt C
+                    
+                    const vL3_down = { x: -vL3_up.x, y: -vL3_up.y };
+                    drawArcLabel(ctx, C, v2_left, vL3_down, 44, valAlpha.toFixed(0) + "°", interColor, false, 16); // vertically opposite to Alpha
+
+                    if (E && valIntE !== null) {
+                        drawArcLabel(ctx, E, vE_to_A, vE_to_B, 44, valIntE.toFixed(0) + "°", interColor, false, 16); // 87 interior top
+                        const vE_to_C = { x: C.x - E.x, y: C.y - E.y };
+                        const vE_to_D = { x: D.x - E.x, y: D.y - E.y };
+                        drawArcLabel(ctx, E, vE_to_C, vE_to_D, 44, valIntE.toFixed(0) + "°", interColor, false, 16); // 87 interior bottom
+                    }
+                }
+
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>

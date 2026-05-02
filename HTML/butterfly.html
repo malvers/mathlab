@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Schmetterlings-Labor</title>
+    <script src="js/i18n.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #equation-panel {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            pointer-events: none;
+            text-align: center;
+            width: fit-content;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(15px);
+            padding: 15px 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .katex-display {
+            margin: 0 !important;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        #main-content {
+            background: radial-gradient(circle at 50% 50%, #0a1226 0%, #050b18 100%);
+        }
+
+        /* Local OVERRIDE for compact 3-column grid */
+        .compact-btn {
+            letter-spacing: 0px !important;
+            padding: 8px 2px !important;
+            font-size: 0.65rem !important;
+            min-height: 42px !important;
+        }
+    </style>
+</head>
+
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="parameters-container">
+            <!-- Animation Controls -->
+            <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); margin-bottom:15px;">
+                <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:12px; letter-spacing:1px;"><script>document.write(CyberI18n.get('butterfly.animation'))</script></span>
+                
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.speed'))</script> <span style="color:var(--neon-blue);" id="val-speed">3.5</span></div>
+                    <input type="range" id="speed" min="0" max="10" step="0.1" value="3.5">
+                </div>
+
+                <div class="control-group">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.hue'))</script> <span style="color:var(--neon-blue);" id="val-hue">180</span></div>
+                    <input type="range" id="hue" min="0" max="360" step="1" value="180">
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:15px;">
+                    <button id="btn-toggle" class="cyber-btn compact-btn"><script>document.write(CyberI18n.get('butterfly.pause'))</script></button>
+                    <button id="btn-glow" class="cyber-btn compact-btn" style="border-color:var(--neon-pink); color:var(--neon-pink);"><script>document.write(CyberI18n.get('butterfly.glow'))</script></button>
+                    <button id="btn-reset" class="cyber-btn compact-btn"><script>document.write(CyberI18n.get('butterfly.reset'))</script></button>
+                </div>
+            </section>
+
+            <!-- Parameter Optimization -->
+            <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.08);">
+                <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:12px; letter-spacing:1px;"><script>document.write(CyberI18n.get('butterfly.params'))</script></span>
+
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-pink); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.exp_amp'))</script> <span id="val-eA">1.0</span></div>
+                    <input type="range" id="p-eA" min="0.1" max="2.5" step="0.1" value="1.0" style="accent-color:var(--neon-pink);">
+                </div>
+
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_amp'))</script> <span id="val-cA">2.0</span></div>
+                    <input type="range" id="p-cA" min="0.1" max="4.0" step="0.1" value="2.0" style="accent-color:var(--neon-green);">
+                </div>
+
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_freq'))</script> <span id="val-cF">4</span></div>
+                    <input type="range" id="p-cF" min="1" max="12" step="1" value="4" style="accent-color:var(--neon-green);">
+                </div>
+
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_amp'))</script> <span id="val-sA">1.0</span></div>
+                    <input type="range" id="p-sA" min="0.1" max="3.0" step="0.1" value="1.0" style="accent-color:var(--neon-orange);">
+                </div>
+
+                <div class="control-group">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_div'))</script> <span id="val-sD">24</span></div>
+                    <input type="range" id="p-sD" min="1" max="48" step="1" value="24" style="accent-color:var(--neon-orange);">
+                </div>
+            </section>
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div id="equation-panel"></div>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        /**
+         * BUTTERFLY CURVE LABORATORY - ULTRA v5.3.8 REWRITE
+         * Premium High-Fidelity Mathematical Exploration Engine.
+         */
+        window.addEventListener('load', () => {
+            // 1. Module Initialization
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('butterfly.title')
+            });
+            CyberUI.init();
+            
+            // Central Canvas Setup - Locked Viewport
+            CyberCanvasInstance.init('canvas', {
+                    minX: -6.5,
+                    maxX: 6.5,
+                    minY: -6.5,
+                    maxY: 6.5
+                }, {
+                    showLabels: true,
+                    showGrid: true,
+                    allowPan: false,
+                    allowZoom: false
+            });
+
+            // 2. Local State Engine
+            const state = {
+                currentTheta: 0,
+                isPlaying: true,
+                showGlow: true, // Performance toggle
+                lastTime: performance.now(),
+                params: {
+                    eA: 1.0,
+                    cA: 2.0,
+                    cF: 4,
+                    sA: 1.0,
+                    sD: 24,
+                    speed: 3.5,
+                    hue: 180
+                }
+            };
+
+            // 3. Right-Click Context Menu Implementation
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: CyberI18n.get('butterfly.ctx_reset'),
+                        onclick: () => { state.currentTheta = 0; }
+                    },
+                    {
+                        label: CyberI18n.get('butterfly.ctx_glow'),
+                        checked: state.showGlow,
+                        onchange: (val) => { state.showGlow = val; }
+                    },
+                    { divider: true },
+                    {
+                        label: CyberI18n.get('transform.measurements'),
+                        checked: CyberCanvasInstance.showGrid,
+                        onchange: (val) => { CyberCanvasInstance.showGrid = val; }
+                    }
+                ]);
+            };
+
+            // 3. UI Binding
+            const el = {
+                eA: document.getElementById('p-eA'),
+                cA: document.getElementById('p-cA'),
+                cF: document.getElementById('p-cF'),
+                sA: document.getElementById('p-sA'),
+                sD: document.getElementById('p-sD'),
+                speed: document.getElementById('speed'),
+                hue: document.getElementById('hue'),
+                toggle: document.getElementById('btn-toggle'),
+                glow: document.getElementById('btn-glow'),
+                reset: document.getElementById('btn-reset'),
+                displays: {
+                    eA: document.getElementById('val-eA'),
+                    cA: document.getElementById('val-cA'),
+                    cF: document.getElementById('val-cF'),
+                    sA: document.getElementById('val-sA'),
+                    sD: document.getElementById('val-sD'),
+                    speed: document.getElementById('val-speed'),
+                    hue: document.getElementById('val-hue')
+                }
+            };
+
+            function syncUI() {
+                state.params.eA = parseFloat(el.eA.value);
+                state.params.cA = parseFloat(el.cA.value);
+                state.params.cF = parseInt(el.cF.value);
+                state.params.sA = parseFloat(el.sA.value);
+                state.params.sD = parseInt(el.sD.value);
+                state.params.speed = parseFloat(el.speed.value);
+                state.params.hue = parseInt(el.hue.value);
+
+                for (let key in state.params) {
+                    if (el.displays[key]) el.displays[key].innerText = state.params[key];
+                }
+                updateFormula();
+            }
+
+            function updateFormula() {
+                const sD = state.params.sD;
+                // Fay's Butterfly Curve Formula
+                const latex = `r = \\color{#f472b6}{${state.params.eA.toFixed(1)} e^{\\sin(\\theta)}} - \\color{#4ade80}{${state.params.cA.toFixed(1)} \\cos(${state.params.cF}\\theta)} + \\color{#fbbf24}{${state.params.sA.toFixed(1)} \\sin^5\\left(\\frac{2\\theta - \\pi}{${sD}}\\right)}`;
+                katex.render(latex, document.getElementById('equation-panel'), { displayMode: true });
+            }
+
+            [el.eA, el.cA, el.cF, el.sA, el.sD, el.speed, el.hue].forEach(input => {
+                input.addEventListener('input', syncUI);
+            });
+
+            el.toggle.onclick = () => {
+                state.isPlaying = !state.isPlaying;
+                el.toggle.innerText = state.isPlaying ? CyberI18n.get('butterfly.pause') : CyberI18n.get('butterfly.play');
+            };
+
+            el.glow.onclick = () => {
+                state.showGlow = !state.showGlow;
+                el.glow.style.borderColor = state.showGlow ? "var(--neon-pink)" : "rgba(255,255,255,0.1)";
+                el.glow.style.color = state.showGlow ? "var(--neon-pink)" : "rgba(255,255,255,0.4)";
+            };
+
+            el.reset.onclick = () => {
+                state.currentTheta = 0;
+                CyberCanvasInstance.resetView(-6.5, 6.5);
+            };
+
+            // 4. Mathematics of the Wing
+            function getPolarPos(theta) {
+                const { eA, cA, cF, sA, sD } = state.params;
+                // Apply subtle breathing to the amplitudes
+                const pulse = state.kineticPulse || 0;
+                const r = (eA + pulse) * Math.exp(Math.sin(theta)) - (cA + pulse) * Math.cos(cF * theta) + sA * Math.pow(Math.sin((2 * theta - Math.PI) / sD), 5);
+                return {
+                    x: r * Math.cos(theta),
+                    y: r * Math.sin(theta)
+                };
+            }
+
+            // 5. High-End Rendering (Neon Bloom)
+            function drawButterfly() {
+                const ctx = CyberCanvasInstance.ctx;
+                const maxSteps = state.params.sD * Math.PI; // Full period
+                const drawLimit = Math.min(state.currentTheta, maxSteps);
+                const step = 0.02;
+
+                if (drawLimit <= 0) return;
+
+                // --- PASS 1: BLOOM (Glow Layer) - OPTIONAL for Performance ---
+                if (state.showGlow) {
+                    ctx.save();
+                    ctx.lineWidth = 8;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.shadowBlur = 8; // Reduced from 25 for performance
+                    ctx.shadowColor = `hsl(${state.params.hue}, 100%, 50%)`;
+                    ctx.strokeStyle = `hsla(${state.params.hue}, 100%, 50%, 0.12)`;
+
+                    ctx.beginPath();
+                    for (let t = 0; t <= drawLimit; t += step) {
+                        const pt = getPolarPos(t);
+                        const px = CyberCanvasInstance.mapX(pt.x);
+                        const py = CyberCanvasInstance.mapY(pt.y);
+                        if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // --- PASS 2: CORE (Sharp Layer + Dynamic Hue) ---
+                ctx.save();
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                const chunkSize = 40;
+                let chunkCounter = 0;
+                
+                ctx.beginPath();
+                for (let t = 0; t <= drawLimit; t += step) {
+                    const pt = getPolarPos(t);
+                    const px = CyberCanvasInstance.mapX(pt.x);
+                    const py = CyberCanvasInstance.mapY(pt.y);
+                    
+                    if (t === 0) {
+                        ctx.moveTo(px, py);
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                    
+                    chunkCounter++;
+                    if (chunkCounter >= chunkSize || t + step > drawLimit) {
+                        const hue = (state.params.hue + t * 5) % 360;
+                        ctx.strokeStyle = `hsl(${hue}, 100%, 75%)`;
+                        ctx.stroke();
+                        
+                        if (t + step <= drawLimit) {
+                            ctx.beginPath();
+                            ctx.moveTo(px, py);
+                        }
+                        chunkCounter = 0;
+                    }
+                }
+                ctx.restore();
+
+                // --- PASS 3: CHROMATIC PULSE (Current Point) ---
+                if (drawLimit < maxSteps) {
+                    const headPt = getPolarPos(drawLimit);
+                    ctx.fillStyle = "#fff";
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = "#fff";
+                    ctx.beginPath();
+                    ctx.arc(CyberCanvasInstance.mapX(headPt.x), CyberCanvasInstance.mapY(headPt.y), 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 6. Master Loop
+            function mainLoop() {
+                const now = performance.now();
+                const dt = (now - state.lastTime) / 1000;
+                state.lastTime = now;
+
+                if (state.isPlaying) {
+                    state.currentTheta += state.params.speed * dt;
+                    // Sublte Breathing Effect (Kinetic Pulse)
+                    state.kineticPulse = Math.sin(now / 1500) * 0.05;
+                }
+
+                // Initial Clear & Grid Logic via CyberCanvas
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true,
+                    mainColor: 'rgba(0, 210, 255, 0.4)'
+                });
+
+                // Render the Mathematics
+                drawButterfly();
+
+                requestAnimationFrame(mainLoop);
+            }
+
+            // Fire it up
+            syncUI();
+            mainLoop();
+        });
+    </script>
+</body>
+
+</html>

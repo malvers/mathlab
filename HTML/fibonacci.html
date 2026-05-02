@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | <script>document.write(CyberI18n.get('fibonacci.title'))</script></title>
+    <script src="js/i18n.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+            flex: 1;
+        }
+
+        #stage-wrap {
+            width: 100%;
+            height: 100%;
+            min-height: min(70vh, 560px);
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #stage {
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="stage-wrap"><canvas id="stage"></canvas></div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById("side-panel");
+            panel.classList.toggle("collapsed");
+            setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+            }, 400);
+        }
+
+        window.addEventListener("load", () => {
+            const canvas = document.getElementById("stage");
+            const ctx = canvas.getContext("2d");
+            let targetStep = 7;
+            let currentStep = 7;
+            let viewUnitPx = 0;
+            let viewOffsetX = 0;
+            let viewOffsetY = 0;
+            let showSpiral = true;
+            let showSquares = true;
+            let mouseRGB = "RGB: -";
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+
+            const SETTINGS_KEY = "fibonacci-settings-v2";
+
+            function saveSettings() {
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                        targetStep,
+                        showSpiral,
+                        showSquares,
+                        zenMode: localStorage.getItem("zen-mode") === "true"
+                    }));
+                } catch (e) {}
+            }
+
+            function loadSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    if (parsed.targetStep !== undefined) {
+                        targetStep = Math.max(1, Math.min(20, parsed.targetStep));
+                        currentStep = targetStep;
+                    }
+                    if (parsed.showSpiral !== undefined) showSpiral = parsed.showSpiral;
+                    if (parsed.showSquares !== undefined) showSquares = parsed.showSquares;
+                    if (parsed.zenMode !== undefined) {
+                        localStorage.setItem("zen-mode", parsed.zenMode);
+                    }
+                } catch (e) {}
+            }
+
+            loadSettings();
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = Math.max(640, Math.floor(rect.width));
+                canvas.height = Math.max(420, Math.floor(rect.height));
+                // Reset view to snap on resize
+                viewUnitPx = 0; 
+                drawFibonacciTo13();
+            }
+
+            const SQUARE_STROKE = "rgb(0, 0, 40)";
+
+            function buildFibonacciSquares(stepLimit) {
+                const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
+                const squares = [];
+                
+                let x = 0; let y = 0;
+                let minX = 0; let minY = 0; let maxX = 1; let maxY = 1;
+
+                // Classic sequence: Right, Down, Left, Up
+                const dirs = ["right", "down", "left", "up"];
+
+                for (let i = 0; i < stepLimit; i++) {
+                    const s = fib[i];
+                    if (i > 0) {
+                        const dir = dirs[(i - 1) % 4];
+                        if (i === 1) { x = 1; y = 0; } // Special case for the second 1×1 square
+                        else {
+                            if (dir === "right") { x = maxX; y = maxY - s; }
+                            else if (dir === "down") { x = maxX - s; y = maxY; }
+                            else if (dir === "left") { x = minX - s; y = minY; }
+                            else if (dir === "up") { x = minX; y = minY - s; }
+                        }
+                    }
+
+                    // Arc geometry: center and angles for seamless joins
+                    let cx, cy, a0, a1;
+                    const phase = i % 4;
+                    if (i === 0) { cx = x + 1; cy = y + 1; a0 = Math.PI; a1 = 1.5 * Math.PI; }
+                    else if (phase === 1) { cx = x; cy = y + s; a0 = 1.5 * Math.PI; a1 = 2 * Math.PI; }
+                    else if (phase === 2) { cx = x; cy = y; a0 = 0; a1 = 0.5 * Math.PI; }
+                    else if (phase === 3) { cx = x + s; cy = y; a0 = 0.5 * Math.PI; a1 = Math.PI; }
+                    else if (phase === 0) { cx = x + s; cy = y + s; a0 = Math.PI; a1 = 1.5 * Math.PI; }
+
+                    squares.push({ x, y, s, arc: { cx, cy, a0, a1 } });
+                    
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x + s);
+                    maxY = Math.max(maxY, y + s);
+                }
+
+                return { squares, minX, minY, maxX, maxY };
+            }
+
+            function drawFibonacciTo13() {
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                // 1. Compute target layout
+                const layout = buildFibonacciSquares(Math.round(targetStep));
+                const unitW = Math.max(1e-6, layout.maxX - layout.minX);
+                const unitH = Math.max(1e-6, layout.maxY - layout.minY);
+                const pad = 80;
+                
+                const rawUnit = Math.min((w - pad * 2) / unitW, (h - pad * 2) / unitH);
+                const targetUnitPx =
+                    Number.isFinite(rawUnit) && rawUnit > 0 ? rawUnit : 1;
+                const targetOffsetX = (w - unitW * targetUnitPx) / 2 - layout.minX * targetUnitPx;
+                const targetOffsetY = (h - unitH * targetUnitPx) / 2 - layout.minY * targetUnitPx;
+
+                // 2. Smooth interpolation (zoom & pan) — snap immediately on startup or invalid state
+                if (viewUnitPx === 0 || !Number.isFinite(viewUnitPx) || !Number.isFinite(viewOffsetX)) {
+                    viewUnitPx = targetUnitPx;
+                    viewOffsetX = targetOffsetX;
+                    viewOffsetY = targetOffsetY;
+                }
+
+                viewUnitPx += (targetUnitPx - viewUnitPx) * 0.1;
+                viewOffsetX += (targetOffsetX - viewOffsetX) * 0.1;
+                viewOffsetY += (targetOffsetY - viewOffsetY) * 0.1;
+
+                if (!Number.isFinite(viewUnitPx) || viewUnitPx <= 0) {
+                    viewUnitPx = targetUnitPx;
+                    viewOffsetX = targetOffsetX;
+                    viewOffsetY = targetOffsetY;
+                }
+
+                // Zen: hide chrome only, keep drawing the pattern (“empty fullscreen” was confusing)
+                if (localStorage.getItem("zen-mode") === "true") {
+                    const sp = document.getElementById("side-panel");
+                    const nav = document.getElementById("mini-rail");
+                    if (sp) sp.style.display = "none";
+                    if (nav) nav.style.display = "none";
+                } else {
+                    const sp = document.getElementById("side-panel");
+                    const nav = document.getElementById("mini-rail");
+                    if (sp) sp.style.display = "flex";
+                    if (nav) nav.style.display = "flex";
+                }
+
+                ctx.save();
+
+                // 3. Draw squares
+                layout.squares.forEach((sq, i) => {
+                    const arc = sq.arc;
+                    const qX = viewOffsetX + sq.x * viewUnitPx;
+                    const qY = viewOffsetY + sq.y * viewUnitPx;
+                    const qS = sq.s * viewUnitPx;
+
+                    // World-space arc endpoints for the square gradient
+                    const cx = viewOffsetX + arc.cx * viewUnitPx;
+                    const cy = viewOffsetY + arc.cy * viewUnitPx;
+                    const r = sq.s * viewUnitPx;
+                    const x1 = cx + r * Math.cos(arc.a0);
+                    const y1 = cy + r * Math.sin(arc.a0);
+                    const x2 = cx + r * Math.cos(arc.a1);
+                    const y2 = cy + r * Math.sin(arc.a1);
+
+                    // Gradient from hue step i to i+1
+                    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+                    const l1 = 45 + (i * 2.5);
+                    const l2 = 45 + ((i + 1) * 2.5);
+                    grad.addColorStop(0, `hsl(37, 100%, ${l1}%)`);
+                    grad.addColorStop(1, `hsl(37, 100%, ${l2}%)`);
+
+                    ctx.fillStyle = grad;
+                    // Tiny overlap (0.5–1px) avoids seam artifacts along edges
+                    ctx.fillRect(qX - 0.5, qY - 0.5, qS + 1, qS + 1);
+
+                    if (showSquares) {
+                        ctx.strokeStyle = SQUARE_STROKE;
+                        ctx.lineWidth = 0.75;
+                        ctx.strokeRect(qX, qY, qS, qS);
+                    }
+                });
+
+                // 4. Draw spiral (dark blue accent)
+                if (showSpiral) {
+                    ctx.strokeStyle = SQUARE_STROKE;
+                    layout.squares.forEach((sq, i) => {
+                        // Constant, ultra-fine stroke for a crisp spiral
+                        ctx.lineWidth = Math.max(0.8, viewUnitPx / 60);
+
+                        const arc = sq.arc;
+                        const cx = viewOffsetX + arc.cx * viewUnitPx;
+                        const cy = viewOffsetY + arc.cy * viewUnitPx;
+                        const r = sq.s * viewUnitPx;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r, arc.a0, arc.a1);
+                        ctx.stroke();
+                    });
+                }
+
+                ctx.restore();
+
+                // 6. Color dashboard (swatch + numeric RGB)
+                try {
+                    const pixel = ctx.getImageData(lastMouseX, lastMouseY, 1, 1).data;
+                    const rgbStr = `${pixel[0]}, ${pixel[1]}, ${pixel[2]}`;
+                    const sampledColor = `rgb(${rgbStr})`;
+                    
+                    // Background panel
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                    ctx.fillRect(10, 10, 180, 50);
+                    
+                    // Swatch
+                    ctx.fillStyle = sampledColor;
+                    ctx.fillRect(15, 15, 40, 40);
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                    ctx.strokeRect(15, 15, 40, 40);
+                    
+                    // RGB readout beside swatch
+                    ctx.fillStyle = "var(--branding-orange)";
+                    ctx.font = "12px Orbitron";
+                    ctx.textAlign = "left";
+                    ctx.fillText("RGB:", 65, 30);
+                    ctx.fillStyle = "white";
+                    ctx.fillText(rgbStr, 65, 48);
+                } catch (err) {}
+
+                // 7. Animation Loop
+                if (Math.abs(targetUnitPx - viewUnitPx) > 0.1 || Math.abs(targetOffsetX - viewOffsetX) > 0.1) {
+                    requestAnimationFrame(drawFibonacciTo13);
+                }
+            }
+
+            function updateStepLabel() {
+                const el = document.getElementById("fib-step-label");
+                if (!el) return;
+                const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
+                const val = fib[Math.max(0, Math.min(targetStep - 1, fib.length - 1))];
+                el.textContent = `${CyberI18n.get('fibonacci.step')} ${targetStep}/20  |  Fibonacci: ${val}`;
+            }
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('fibonacci.title')
+            });
+
+            CyberUI.init();
+            CyberUI.createCard("ui-container", "DB", `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div id="fib-step-label" class="cyber-number" style="font-size:0.8rem; color:var(--branding-orange);">...</div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
+                        <input type="checkbox" id="fib-spiral" ${showSpiral ? 'checked' : ''}>
+                        <span>${CyberI18n.get('fibonacci.spiral')}</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#ccc; cursor:pointer;">
+                        <input type="checkbox" id="fib-squares" ${showSquares ? 'checked' : ''}>
+                        <span>${CyberI18n.get('fibonacci.squares')}</span>
+                    </label>
+                    <div style="display:flex; gap:8px;">
+                        <button id="fib-prev" class="cyber-btn" style="flex:1;">${CyberI18n.get('ui.prev')}</button>
+                        <button id="fib-next" class="cyber-btn" style="flex:1;">${CyberI18n.get('ui.next')}</button>
+                    </div>
+                </div>
+            `, "#ff9d00");
+
+            document.getElementById("fib-spiral").addEventListener("change", (e) => {
+                showSpiral = e.target.checked;
+                saveSettings();
+                drawFibonacciTo13();
+            });
+            document.getElementById("fib-squares").addEventListener("change", (e) => {
+                showSquares = e.target.checked;
+                saveSettings();
+                drawFibonacciTo13();
+            });
+
+            document.getElementById("fib-prev").addEventListener("click", () => {
+                targetStep = Math.max(1, targetStep - 1);
+                updateStepLabel();
+                saveSettings();
+                drawFibonacciTo13();
+            });
+            document.getElementById("fib-next").addEventListener("click", () => {
+                targetStep = Math.min(20, targetStep + 1);
+                updateStepLabel();
+                saveSettings();
+                drawFibonacciTo13();
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowLeft") {
+                    targetStep = Math.max(1, targetStep - 1);
+                    updateStepLabel();
+                    saveSettings();
+                    drawFibonacciTo13();
+                } else if (e.key === "ArrowRight") {
+                    targetStep = Math.min(20, targetStep + 1);
+                    updateStepLabel();
+                    saveSettings();
+                    drawFibonacciTo13();
+                } else if (e.key.toLowerCase() === "h") {
+                    // Zen-Modus Toggle (H wie Hide)
+                    const isZen = localStorage.getItem("zen-mode") === "true";
+                    localStorage.setItem("zen-mode", !isZen);
+                    saveSettings();
+                    drawFibonacciTo13();
+                }
+            });
+
+            canvas.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                lastMouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                lastMouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+                drawFibonacciTo13(); // Trigger redraw for new mouse position
+            });
+
+            updateStepLabel();
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Differential-Labor | docalvers</title>
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <div id="main-content">
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/math-library.js"></script>
+    <script src="js/formula.js"></script>
+    <script src="js/ui.js?v=539"></script>
+
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof resize === 'function') resize();
+            }, 400);
+        }
+        window.addEventListener('load', () => {
+            // Module Engine Initialization
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('diff.title')
+            });
+
+            CyberUI.init();
+
+
+            // Math Logic
+            let currentFunc = MathLibrary.get('kubisch');
+            let x0 = 1.0;
+            let showDerivative = false;
+            let showSecondDeriv = false;
+
+            // UI Setup
+            // x0 State
+            const updateX0 = (val) => {
+                x0 = val;
+                draw();
+                // If the slider update comes from canvas, we might need to sync the slider UI
+                const slider = document.querySelector('.cyber-slider[id^="slider-"]');
+                if (slider && parseFloat(slider.value) !== x0) slider.value = x0;
+            };
+
+            // UI Setup
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.functionality'), `
+                <div id="function-selector-container"></div>
+                <div id="x0-slider-container"></div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createSlider('x0-slider-container', CyberI18n.get('diff.point_pos'), -5, 5, x0, 0.01, updateX0, 'var(--neon-blue)');
+
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.visualization'), `
+                <div id="view-opts" style="display:flex; flex-direction:column; gap:6px;"></div>
+            `, 'var(--neon-orange)');
+
+            CyberUI.createCheckbox('view-opts', CyberI18n.get('diff.deriv_1'), showDerivative, (v) => { showDerivative = v; draw(); }, 'var(--neon-orange)');
+            CyberUI.createCheckbox('view-opts', CyberI18n.get('diff.deriv_2'), showDerivative, (v) => { showSecondDeriv = v; draw(); }, 'var(--neon-green)');
+
+            const statsHTML = `
+                <div class="stats-grid">
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-purple); padding-bottom:10px;">
+                        <span class="stats-label">${CyberI18n.get('diff.slope')}</span>
+                        <span id="val-m" class="stats-val" style="color:var(--neon-purple);">0.00</span>
+                    </div>
+                    <div class="stats-card" style="border-left: 3px solid var(--neon-green); padding-bottom:10px;">
+                        <span class="stats-label">${CyberI18n.get('diff.curvature')}</span>
+                        <span id="val-ddm" class="stats-val" style="color:var(--neon-green);">0.00</span>
+                    </div>
+                </div>
+            `;
+            CyberUI.createCard('parameters-container', CyberI18n.get('diff.analysis'), statsHTML, 'var(--neon-yellow)');
+
+            // Initialize Dropdown
+            CyberUI.createDropdown('function-selector-container', MathLibrary.getAll(), (id) => {
+                currentFunc = MathLibrary.get(id);
+                draw();
+            }, currentFunc.id);
+
+            // Force KaTeX render on initial trigger once katex is ready
+            setTimeout(() => {
+                if (window.katex) {
+                    document.querySelectorAll('.math-part[data-tex]').forEach(mp => {
+                        if (mp.dataset.tex) katex.render(mp.dataset.tex, mp, { throwOnError: false });
+                    });
+                }
+            }, 300);
+
+            CyberFormula.init({ anchorId: 'canvas-container' });
+
+            // Initialize CyberCanvas
+            CyberCanvasInstance.init('main-canvas', {
+                minX: -8,
+                maxX: 8,
+                minY: -6,
+                maxY: 6
+            });
+
+            function resize() {
+                CyberCanvasInstance.resize();
+                draw();
+            }
+
+            // Bind resize event
+            CyberCanvasInstance.onResize = () => draw();
+
+            // State management
+            function getNeonColor(name) {
+                return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#ffffff';
+            }
+
+            function drawGraph(f, color, thickness = 3, shadow = true) {
+                const ctx = CyberCanvasInstance.ctx;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = thickness;
+
+                if (shadow) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = color;
+                }
+
+                ctx.beginPath();
+                const width = CyberCanvasInstance.width;
+                const dpr = window.devicePixelRatio || 1;
+
+                for (let px = 0; px <= width; px++) {
+                    const x = CyberCanvasInstance.unmapX(px);
+                    const y = f(x);
+                    const py = CyberCanvasInstance.mapY(y);
+
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            function drawTangent() {
+                const ctx = CyberCanvasInstance.ctx;
+                const y0 = currentFunc.f(x0);
+                const m = currentFunc.df(x0);
+
+                const L = 5.0;
+                const halfL = L / 2;
+                const angle = Math.atan(m);
+                const dx = Math.cos(angle) * halfL;
+                const dy = Math.sin(angle) * halfL;
+
+                ctx.strokeStyle = getNeonColor('--neon-purple');
+                ctx.lineWidth = 4;
+
+                const p1x = CyberCanvasInstance.mapX(x0 - dx);
+                const p1y = CyberCanvasInstance.mapY(y0 - dy);
+                const p2x = CyberCanvasInstance.mapX(x0 + dx);
+                const p2y = CyberCanvasInstance.mapY(y0 + dy);
+
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = getNeonColor('--neon-purple');
+                ctx.beginPath();
+                ctx.moveTo(p1x, p1y);
+                ctx.lineTo(p2x, p2y);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Draw point
+                const p0x = CyberCanvasInstance.mapX(x0);
+                const p0y = CyberCanvasInstance.mapY(y0);
+                ctx.fillStyle = "white";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "white";
+                ctx.beginPath();
+                ctx.arc(p0x, p0y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            function draw() {
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true
+                });
+
+                if (showDerivative) {
+                    drawGraph(currentFunc.df, getNeonColor('--neon-orange'), 2, false);
+                }
+
+                if (showSecondDeriv) {
+                    drawGraph(currentFunc.ddf, getNeonColor('--neon-green'), 2, false);
+                }
+
+                drawGraph(currentFunc.f, getNeonColor('--neon-blue'), 3, false);
+                drawTangent();
+
+                // Update analysis values
+                const m = currentFunc.df(x0);
+                const ddm = currentFunc.ddf(x0);
+                document.getElementById('val-m').innerText = m.toFixed(2);
+                document.getElementById('val-ddm').innerText = ddm.toFixed(2);
+
+                if (window.CyberFormula) CyberFormula.set(currentFunc.tex);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); 
+
+            // Custom interaction on canvas
+            let isDragging = false;
+            CyberCanvasInstance.canvas.addEventListener('mousedown', (e) => { isDragging = true; handleInteraction(e); });
+            window.addEventListener('mousemove', (e) => { if (isDragging) handleInteraction(e); });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            function handleInteraction(e) {
+                const rect = CyberCanvasInstance.canvas.getBoundingClientRect();
+                const posX = e.clientX - rect.left;
+                const mathX = CyberCanvasInstance.unmapX(posX);
+                updateX0(Math.max(-5, Math.min(5, mathX)));
+            }
+
+            // 5. Context Menu (Standard)
+            CyberCanvasInstance.onContextMenu = (e) => {
+                const cc = CyberCanvasInstance;
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    { label: CyberI18n.get('diff.reset_point'), onclick: () => updateX0(1.0) },
+                    { label: CyberI18n.get('lgs.view_reset'), onclick: () => cc.resetView(-8, 8) },
+                    { divider: true },
+                    { label: CyberI18n.get('ui.reset'), onclick: () => location.reload() }
+                ]);
+            };
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+
+</html>

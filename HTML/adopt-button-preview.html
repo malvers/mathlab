@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adopt / Friend — gleicher Chrome wie Mini-Rail</title>
+    <!-- Exakt dieselbe Kaskade wie z.B. steigung.html -->
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <style>
+        /*
+         * Nur für diese Preview-Seite:
+         * Mini-Rail bleibt 1:1 aus cyber-lab-overrides (HG, Blur, Rand, Padding).
+         * Nur SVG-Augen beim Smile.
+         */
+        #mini-rail.preview-demo .nav-btn svg .eye {
+            fill: currentColor;
+            stroke: none !important;
+        }
+
+        /*
+         * Herz-Pfad (Glyph): sichtbarer „Heartbeat“ — Hover-Farbe #00d2ff,
+         * nicht den ganzen .nav-btn (der kämpft mit !important).
+         */
+        #mini-rail.preview-demo .nav-btn-adopt-pulse svg {
+            overflow: visible;
+        }
+
+        @keyframes adopt-heart-glyph-pulse {
+            0%, 100% {
+                stroke: #ffffff;
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.35));
+            }
+            42% {
+                stroke: #00d2ff;
+                transform: scale(1.14);
+                filter: drop-shadow(0 0 14px rgba(0, 210, 255, 1)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.45));
+            }
+            58% {
+                stroke: #00d2ff;
+                transform: scale(1.06);
+                filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.55));
+            }
+        }
+
+        #mini-rail.preview-demo .nav-btn-adopt-pulse svg .adopt-heart-path {
+            transform-origin: center;
+            transform-box: fill-box;
+            animation: adopt-heart-glyph-pulse 3.4s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #mini-rail.preview-demo .nav-btn-adopt-pulse svg .adopt-heart-path {
+                animation: none;
+                stroke: #ffffff;
+                transform: none;
+                filter: none;
+            }
+        }
+
+        .preview-caption {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: min(92vw, 520px);
+            text-align: center;
+            font-family: system-ui, sans-serif;
+            font-size: 0.7rem;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.38);
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        .preview-caption code {
+            font-size: 0.68rem;
+            color: rgba(0, 210, 255, 0.65);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini-rail like in the lab: full height, bg rgba(5,10,20,0.95), blur, border-right -->
+    <nav id="mini-rail" class="preview-demo" aria-label="Preview">
+        <button type="button" class="nav-btn nav-btn-adopt-pulse" title="Adopt / fördern" aria-label="Lab fördern — adoptieren">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path class="adopt-heart-path" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2C10.5 3.5 9.26 3 7.5 3A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"></path>
+            </svg>
+        </button>
+
+        <button type="button" class="nav-btn" title="Be friend" aria-label="Be friend — Community">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9.25"></circle>
+                <path d="M7.5 13.25c.9 1.35 2.25 2.15 4.5 2.15s3.6-.8 4.5-2.15"></path>
+                <circle class="eye" cx="9" cy="9.75" r="0.85"></circle>
+                <circle class="eye" cx="15" cy="9.75" r="0.85"></circle>
+            </svg>
+        </button>
+
+        <!-- Referenz: Mini-Rail-Coffee — CyberUI.injectCoffeeButton() in js/ui.js -->
+        <div class="nav-btn coffee-btn" title="Mini-Rail: Cyber-Kaffee (Referenz)" aria-hidden="true"
+            style="color:#ffd700;border-color:rgba(255,215,0,0.3);text-decoration:none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <!-- Wie Labor: body flex + #main-content (in Overrides transparent → zeigt #050b18) -->
+    <main id="main-content" aria-hidden="true"></main>
+
+    <p class="preview-caption">
+        <strong>Zwei „Coffee“-Buttons:</strong>
+        (1) <strong>Index-Hub</strong> — <code>index.html</code> · <code>#btn-coffee</code> · <code>contact-btn</code>
+        (Pill, 38px — <code>js/index-ui.css</code>).
+        (2) <strong>Mini-Rail</strong> — <code>CyberUI.injectCoffeeButton()</code> in <code>js/ui.js</code>:
+        <code>.nav-btn.coffee-btn</code>, <strong>Gold</strong> per Inline-Style.
+        <br><br>
+        Hintergrund links = echtes <code>#mini-rail</code> (<code>js/cyber-lab-overrides.css</code>);
+        rechts = <code>#main-content</code> wie im Labor (<code>#050b18</code> durchscheinend).
+        Adopt &amp; Friend = Cyan wie Hamburger.
+    </p>
+</body>
+</html>

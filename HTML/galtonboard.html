@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Galton Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #board-wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #board {
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        #balls-counter {
+            position: absolute;
+            top: 16px;
+            left: 120px;
+            transform: translateX(-50%);
+            z-index: 12;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        #balls-counter-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: rgba(190, 230, 255, 0.9);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #balls-counter-widget .cyber-digit-box {
+            color: #ffb866;
+            text-shadow: 0 0 10px rgba(255, 170, 95, 0.55);
+            font-size: 2.8rem;
+            width: 32px;
+            height: 48px;
+        }
+
+        #balls-counter-widget .cyber-digit-box.separator {
+            width: 10px;
+        }
+
+        /* Restore previous local slider styling */
+        #controls input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+            outline: none;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        #controls input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+        }
+
+        #controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border: 2.5px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-blue);
+            margin-top: -5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #controls input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        #controls input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            border: none;
+        }
+
+        #controls input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border: 2.5px solid var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-blue);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #btn-play-pause.running {
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.55), inset 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="balls-counter">
+            <div id="balls-counter-label">${CyberI18n.get('galton.balls_total')}</div>
+            <div id="balls-counter-widget" class="cyber-number-widget"></div>
+        </div>
+        <div id="board-wrap"><canvas id="board"></canvas></div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById("side-panel");
+            panel.classList.toggle("collapsed");
+            setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+            }, 400);
+        }
+
+        window.addEventListener("load", () => {
+            const canvas = document.getElementById("board");
+            const ctx = canvas.getContext("2d");
+
+            const sim = {
+                running: true,
+                rows: 18,
+                spawnIntervalMs: 50,
+                flightSpeed: 1.0,
+                ballRadius: 4.3,
+                gravity: 0.16,
+                drag: 0.998,
+                maxBalls: 200,
+                balls: [],
+                pegs: [],
+                bins: [],
+                lastSpawn: 0,
+                droppedCount: 0,
+                explorerEvery: 60,
+                binColumns: 4,
+                rowY: [],
+                spacingX: 42,
+                centerX: 0,
+                binTopY: 0,
+                binBaseY: 0,
+                pegTopY: 0,
+                pegBottomY: 0
+            };
+            const SETTINGS_KEY = "galtonboard-slider-settings-v2";
+
+            function clamp(value, min, max) {
+                return Math.min(max, Math.max(min, value));
+            }
+
+            function normalizeRowsForOddBins(rowsValue) {
+                let bins = Math.round(rowsValue) + 1;
+                bins = Math.round(clamp(bins, 11, 29));
+                if (bins % 2 === 0) bins = Math.min(29, bins + 1);
+                return bins - 1;
+            }
+
+            function loadSliderSettings() {
+                try {
+                    const raw = localStorage.getItem(SETTINGS_KEY);
+                    if (!raw) return;
+                    const parsed = JSON.parse(raw);
+                    if (!parsed || typeof parsed !== "object") return;
+                    if (Number.isFinite(parsed.rows)) sim.rows = normalizeRowsForOddBins(parsed.rows);
+                    if (Number.isFinite(parsed.spawnIntervalMs)) sim.spawnIntervalMs = Math.round(clamp(parsed.spawnIntervalMs, 10, 1000));
+                    if (Number.isFinite(parsed.flightSpeed)) sim.flightSpeed = clamp(parsed.flightSpeed, 0.04, 5.0);
+                    if (Number.isFinite(parsed.maxBalls)) sim.maxBalls = Math.round(clamp(parsed.maxBalls, 1, 500));
+                } catch (err) {
+                    // Ignore invalid local storage content.
+                }
+            }
+
+            function saveSliderSettings() {
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                        rows: sim.rows,
+                        spawnIntervalMs: sim.spawnIntervalMs,
+                        flightSpeed: sim.flightSpeed,
+                        maxBalls: sim.maxBalls
+                    }));
+                } catch (err) {
+                    // Ignore persistence errors (private mode/storage limits).
+                }
+            }
+
+            loadSliderSettings();
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = Math.max(640, Math.floor(rect.width));
+                canvas.height = Math.max(420, Math.floor(rect.height));
+                rebuildBoard();
+            }
+
+            function rebuildBoard() {
+                const w = canvas.width;
+                const h = canvas.height;
+                const rows = sim.rows;
+                const binBaseY = h - 40; // 40px above bottom edge
+                const binHeight = h * 0.25; // 25% of total height
+                const binTop = binBaseY - binHeight;
+                sim.binBaseY = binBaseY;
+                sim.binTopY = binTop;
+
+                const pegTop = 40; // 40px below top edge
+                const pegBottom = Math.max(pegTop + 40, binTop - 40); // 40px gap above bins
+                sim.pegTopY = pegTop;
+                sim.pegBottomY = pegBottom;
+                const spacingY = (pegBottom - pegTop) / Math.max(1, rows - 1);
+                const maxPegCount = rows + 1;
+                const spacingX = Math.min(56, (w - 130) / (maxPegCount + 2));
+                sim.spacingX = spacingX;
+                const centerX = w * 0.5;
+                sim.centerX = centerX;
+                sim.rowY = [];
+
+                sim.pegs = [];
+                for (let r = 0; r < rows; r++) {
+                    const count = r + 1;
+                    const startX = centerX - ((count - 1) * spacingX) / 2;
+                    const y = pegTop + r * spacingY;
+                    sim.rowY.push(y);
+                    for (let i = 0; i < count; i++) {
+                        sim.pegs.push({
+                            x: startX + i * spacingX,
+                            y,
+                            r: 4.3
+                        });
+                    }
+                }
+                // Keep balls exactly as large as pegs.
+                if (sim.pegs.length) sim.ballRadius = sim.pegs[0].r;
+
+                const binCount = rows + 1;
+                const totalW = binCount * spacingX;
+                const left = centerX - totalW / 2;
+                sim.bins = new Array(binCount).fill(0).map((_, i) => ({
+                    x: left + i * spacingX,
+                    w: spacingX,
+                    count: 0,
+                    top: binTop
+                }));
+                updateCounterPosition();
+            }
+
+            function updateCounterPosition() {
+                const counter = document.getElementById("balls-counter");
+                if (!counter) return;
+                const anchorX = sim.bins.length ? sim.bins[0].x + 95 : 115;
+                counter.style.left = `${Math.round(anchorX)}px`;
+            }
+
+            function pickEmptyBinIndex() {
+                const empty = [];
+                for (let i = 0; i < sim.bins.length; i++) {
+                    if (sim.bins[i].count === 0) empty.push(i);
+                }
+                if (empty.length === 0) return null;
+                return empty[Math.floor(Math.random() * empty.length)];
+            }
+
+            function spawnBall(targetTurns = null) {
+                if (sim.balls.length >= sim.maxBalls) return;
+                sim.balls.push({
+                    x: canvas.width * 0.5 + (Math.random() - 0.5) * 8,
+                    y: -sim.ballRadius * 3,
+                    vx: 0,
+                    vy: 0,
+                    settled: false,
+                    fading: false,
+                    countedInBin: false,
+                    alpha: 1,
+                    fadeTargetX: null,
+                    binIndex: -1,
+                    rowIndex: 0,
+                    rightTurns: 0,
+                    targetX: canvas.width * 0.5,
+                    targetTurns,
+                    segment: null
+                });
+            }
+
+            function updateBall(ball) {
+                if (ball.dead) return;
+                if (ball.fading) {
+                    const speed = sim.flightSpeed;
+                    if (ball.fadeTargetX !== null && ball.fadeTargetX !== undefined) {
+                        ball.x += (ball.fadeTargetX - ball.x) * 0.2;
+                    }
+                    // Keep moving into the bin while fading.
+                    ball.vx *= Math.pow(0.92, Math.max(0.5, speed * 20));
+                    ball.vy += sim.gravity * 0.45 * speed;
+                    ball.vy *= Math.pow(sim.drag, Math.max(0.5, speed * 20));
+                    ball.x += ball.vx * speed;
+                    ball.y += ball.vy * speed;
+                    const floorY = sim.binBaseY - sim.ballRadius;
+                    if (ball.y > floorY) ball.y = floorY;
+                    ball.alpha = Math.max(0, ball.alpha - 0.045);
+                    if (ball.alpha <= 0.001) ball.dead = true;
+                    return;
+                }
+                if (ball.settled) return;
+                const speed = sim.flightSpeed;
+                const pegRadius = sim.pegs.length ? sim.pegs[0].r : 7;
+                // Fly clearly over peg tops: top edge + half peg radius clearance.
+                const overPegOffset = pegRadius * 1.5;
+                const rowFlyY = (rowIdx) => sim.rowY[rowIdx] - overPegOffset;
+
+                // If a peg-to-peg segment exists, follow a slight curved arc.
+                if (ball.segment) {
+                    ball.segment.t += Math.max(0.002, speed * 0.045);
+                    const seg = ball.segment;
+                    const u = Math.min(1, seg.t);
+                    const omt = 1 - u;
+                    // Quadratic curve: clear, controllable "light arc" from peg to peg.
+                    ball.x = (omt * omt) * seg.fromX + (2 * omt * u) * seg.ctrlX + (u * u) * seg.toX;
+                    ball.y = (omt * omt) * seg.fromY + (2 * omt * u) * seg.ctrlY + (u * u) * seg.toY;
+                    if (u >= 1) ball.segment = null;
+                } else {
+                    // Pre-entry from spawn to first peg row.
+                    ball.vy += sim.gravity * speed;
+                    ball.vx += (ball.targetX - ball.x) * 0.01 * speed;
+                    ball.vx *= Math.pow(0.82, speed);
+                    ball.vy *= Math.pow(sim.drag, speed);
+                    ball.x += ball.vx * speed;
+                    ball.y += ball.vy * speed;
+                }
+
+                // Screen walls.
+                if (ball.x < sim.ballRadius) {
+                    ball.x = sim.ballRadius;
+                    ball.vx = Math.abs(ball.vx) * 0.6;
+                } else if (ball.x > canvas.width - sim.ballRadius) {
+                    ball.x = canvas.width - sim.ballRadius;
+                    ball.vx = -Math.abs(ball.vx) * 0.6;
+                }
+
+                // Galton principle: each row decision is exactly 50/50.
+                while (ball.rowIndex < sim.rowY.length && ball.y >= rowFlyY(ball.rowIndex)) {
+                    const r = ball.rowIndex;
+                    // Snap to the current row's over-peg flight line.
+                    const pegX = sim.centerX - (r * sim.spacingX) * 0.5 + ball.rightTurns * sim.spacingX;
+                    ball.x = pegX;
+                    ball.y = rowFlyY(r);
+                    ball.segment = null;
+
+                    let goRight;
+                    if (ball.targetTurns === null || ball.targetTurns === undefined) {
+                        goRight = Math.random() < 0.5;
+                    } else {
+                        // For "explorer balls": steer probabilistically to a specific bin.
+                        const remaining = sim.rows - ball.rowIndex;
+                        const needRight = ball.targetTurns - ball.rightTurns;
+                        if (needRight <= 0) goRight = false;
+                        else if (needRight >= remaining) goRight = true;
+                        else goRight = Math.random() < (needRight / remaining);
+                    }
+                    if (goRight) ball.rightTurns += 1;
+                    const nextR = r + 1;
+                    const nextPegX = sim.centerX - (nextR * sim.spacingX) * 0.5 + ball.rightTurns * sim.spacingX;
+                    ball.targetX = nextPegX;
+                    // Build one explicit curved segment to next peg center.
+                    if (nextR < sim.rowY.length) {
+                        const fromY = rowFlyY(r);
+                        const toY = rowFlyY(nextR);
+                        const ctrlX = (pegX + nextPegX) * 0.5 + (goRight ? 1 : -1) * Math.max(6, sim.spacingX * 0.28);
+                        const ctrlY = fromY + (toY - fromY) * 0.55;
+                        ball.segment = {
+                            fromX: pegX,
+                            fromY,
+                            toX: nextPegX,
+                            toY,
+                            ctrlX,
+                            ctrlY,
+                            t: 0,
+                            dir: goRight ? 1 : -1
+                        };
+                    } else {
+                        // Last decision goes toward the corresponding bin center.
+                        const targetBinIndex = Math.max(0, Math.min(sim.bins.length - 1, ball.rightTurns));
+                        const b = sim.bins[targetBinIndex];
+                        const binCenterX = b.x + b.w * 0.5;
+                        const fromY = rowFlyY(r);
+                        const toY = sim.binBaseY - sim.ballRadius - 1;
+                        const ctrlX = (pegX + binCenterX) * 0.5 + (goRight ? 1 : -1) * Math.max(4, sim.spacingX * 0.18);
+                        const ctrlY = fromY + (toY - fromY) * 0.45;
+                        ball.segment = {
+                            fromX: pegX,
+                            fromY,
+                            toX: binCenterX,
+                            toY,
+                            ctrlX,
+                            ctrlY,
+                            t: 0,
+                            dir: goRight ? 1 : -1
+                        };
+                    }
+                    ball.rowIndex += 1;
+                }
+
+                // Start fading at the top of the corresponding histogram bar.
+                if (ball.y >= sim.binTopY - sim.ballRadius) {
+                    const idx = Math.max(0, Math.min(sim.bins.length - 1, ball.rightTurns));
+                    if (idx >= 0) {
+                        const maxCount = Math.max(1, ...sim.bins.map((bn) => bn.count));
+                        const binHeightPx = sim.binBaseY - sim.binTopY;
+                        const currentCount = sim.bins[idx].count;
+                        const barH = (currentCount / maxCount) * (binHeightPx - 12);
+                        const barTopY = sim.binBaseY - barH - sim.ballRadius;
+                        if (ball.y >= barTopY) {
+                            if (!ball.countedInBin) {
+                                sim.bins[idx].count += 1;
+                                ball.countedInBin = true;
+                            }
+                            // Distribute fading balls across multiple lanes in each bin.
+                            const laneCount = Math.max(1, sim.binColumns | 0);
+                            const lane = currentCount % laneCount;
+                            const lanePad = Math.max(2, sim.ballRadius * 0.75);
+                            const usableW = Math.max(sim.ballRadius * 2, sim.bins[idx].w - lanePad * 2);
+                            const laneStep = laneCount > 1 ? usableW / (laneCount - 1) : 0;
+                            ball.fadeTargetX = sim.bins[idx].x + lanePad + lane * laneStep;
+                            ball.segment = null;
+                            ball.binIndex = idx;
+                            ball.settled = true;
+                            ball.fading = true;
+                        }
+                    }
+                }
+            }
+
+            function draw() {
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                // Pegs.
+                for (let i = 0; i < sim.pegs.length; i++) {
+                    const p = sim.pegs[i];
+                    const pg = ctx.createRadialGradient(
+                        p.x - p.r * 0.35,
+                        p.y - p.r * 0.35,
+                        Math.max(0.4, p.r * 0.2),
+                        p.x,
+                        p.y,
+                        p.r
+                    );
+                    pg.addColorStop(0, "#f4fbff");
+                    pg.addColorStop(0.35, "#b7eaff");
+                    pg.addColorStop(0.72, "#66c8ec");
+                    pg.addColorStop(1, "#2a8eb3");
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = pg;
+                    ctx.shadowColor = "rgba(74, 207, 255, 0.28)";
+                    ctx.shadowBlur = 5;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = "rgba(205, 244, 255, 0.5)";
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+
+                    // Tiny metallic highlight spot for a pin-head feel.
+                    ctx.beginPath();
+                    ctx.arc(p.x - p.r * 0.38, p.y - p.r * 0.38, Math.max(0.6, p.r * 0.22), 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+                    ctx.fill();
+                }
+
+                // Bin area and bars.
+                const binHeightPx = sim.binBaseY - sim.binTopY;
+                const binLeft = sim.bins.length ? sim.bins[0].x : 0;
+                const binRight = sim.bins.length ? (sim.bins[sim.bins.length - 1].x + sim.bins[sim.bins.length - 1].w) : w;
+                const binWidth = Math.max(0, binRight - binLeft);
+                const binBg = ctx.createLinearGradient(0, sim.binTopY, 0, sim.binBaseY);
+                // Top very bright blue, bottom still bright blue.
+                binBg.addColorStop(0, "rgba(248, 253, 255, 0.50)");
+                binBg.addColorStop(1, "rgba(58, 150, 230, 0.45)");
+                ctx.fillStyle = binBg;
+                ctx.fillRect(binLeft, sim.binTopY, binWidth, binHeightPx);
+                // Subtle cyan glow line at the bin top edge (only inside bin area).
+                ctx.fillStyle = "rgba(214, 248, 255, 0.6)";
+                ctx.fillRect(binLeft, sim.binTopY, binWidth, 1);
+
+                // Ensure a single hit does not instantly produce a full-height bar.
+                const maxCount = Math.max(2, ...sim.bins.map(b => b.count));
+                for (let i = 0; i < sim.bins.length; i++) {
+                    const b = sim.bins[i];
+                    const barH = (b.count / maxCount) * (binHeightPx - 12);
+                    const barX = b.x + 2;
+                    const barW = Math.max(3, b.w - 4);
+                    const barY = sim.binBaseY - barH;
+                    const grad = ctx.createLinearGradient(barX, sim.binBaseY, barX, barY);
+                    grad.addColorStop(0, "#ff7a1a");
+                    grad.addColorStop(0.55, "#ff9f3b");
+                    grad.addColorStop(1, "#ffd08a");
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = "rgba(255, 159, 59, 0.45)";
+                    ctx.shadowBlur = 10;
+                    ctx.fillRect(barX, barY, barW, barH);
+
+                    // Thin bright cap line for a cleaner "active" look.
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "rgba(255, 235, 190, 0.9)";
+                    ctx.fillRect(barX, barY, barW, 1.5);
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+                    ctx.strokeRect(b.x, sim.binTopY, b.w, binHeightPx);
+
+                    // Count label under each bin.
+                    let binLabelFontPx = Math.max(7, Math.min(15, Math.floor(b.w * 0.44)));
+                    const labelText = String(b.count);
+                    ctx.font = `${binLabelFontPx}px Orbitron`;
+                    const maxLabelWidth = Math.max(6, b.w - 4);
+                    const measured = ctx.measureText(labelText).width;
+                    if (measured > maxLabelWidth) {
+                        const scaled = Math.floor(binLabelFontPx * (maxLabelWidth / measured));
+                        binLabelFontPx = Math.max(6, scaled);
+                        ctx.font = `${binLabelFontPx}px Orbitron`;
+                    }
+                    ctx.fillStyle = b.count > 0 ? "#ffb866" : "rgba(220, 232, 245, 0.7)";
+                    ctx.textAlign = "center";
+                    ctx.fillText(labelText, b.x + b.w * 0.5, sim.binBaseY + binLabelFontPx + 5);
+                }
+
+                // Balls.
+                for (let i = 0; i < sim.balls.length; i++) {
+                    const b = sim.balls[i];
+                    const r = sim.ballRadius;
+                    ctx.save();
+                    ctx.globalAlpha = b.alpha === undefined ? 1 : b.alpha;
+                    const g = ctx.createRadialGradient(
+                        b.x - r * 0.35,
+                        b.y - r * 0.35,
+                        Math.max(0.4, r * 0.25),
+                        b.x,
+                        b.y,
+                        r
+                    );
+                    g.addColorStop(0, "#ffe3bf");
+                    g.addColorStop(0.35, "#ffb866");
+                    g.addColorStop(1, "#ff7a1a");
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+                    ctx.fillStyle = g;
+                    ctx.shadowColor = "rgba(255, 150, 50, 0.45)";
+                    ctx.shadowBlur = 7;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = "rgba(255, 233, 198, 0.45)";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+            }
+
+            function resetStats() {
+                sim.balls = [];
+                for (let i = 0; i < sim.bins.length; i++) sim.bins[i].count = 0;
+                sim.droppedCount = 0;
+            }
+
+            function loop(ts) {
+                if (sim.running && sim.balls.length < sim.maxBalls && ts - sim.lastSpawn >= sim.spawnIntervalMs) {
+                    sim.lastSpawn = ts;
+                    let targetTurns = null;
+                    if (sim.droppedCount > 0 && sim.droppedCount % sim.explorerEvery === 0) {
+                        targetTurns = pickEmptyBinIndex();
+                    }
+                    spawnBall(targetTurns);
+                    sim.droppedCount += 1;
+                }
+
+                if (sim.running) {
+                    for (let i = 0; i < sim.balls.length; i++) updateBall(sim.balls[i]);
+                    sim.balls = sim.balls.filter((b) => !b.dead);
+                }
+                draw();
+                CyberUI.updateNumberWidget("balls-counter-widget", sim.droppedCount, 0, 3, {
+                    fontSize: "3.2rem",
+                    digitWidth: "36px",
+                    digitHeight: "54px",
+                    separatorWidth: "12px",
+                    color: "#ffb866",
+                    textShadow: "0 0 10px rgba(255, 170, 95, 0.55)"
+                });
+                CyberUI.updateStatsGrid("data-container", [
+                    { label: CyberI18n.get('galton.rows'), value: sim.rows, color: "#00d2ff" },
+                    { label: CyberI18n.get('galton.balls_active'), value: sim.balls.length, color: "#ffd36a" },
+                    { label: CyberI18n.get('galton.spawn_ms'), value: sim.spawnIntervalMs, color: "#adff2f" }
+                ]);
+                requestAnimationFrame(loop);
+            }
+
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('galton.title')
+            });
+
+            CyberUI.init();
+
+            CyberUI.createCard("ui-container", CyberI18n.get('galton.controls'), `
+                <div id="controls" style="display:flex; flex-direction:column; gap:16px;">
+                    <div>
+                        <div class="label-row">
+                            <span>${CyberI18n.get('galton.bins')}</span>
+                            <span id="label-rows" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.rows + 1}</span>
+                        </div>
+                        <input type="range" id="slider-rows" min="11" max="29" value="${sim.rows + 1}" step="2">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>${CyberI18n.get('galton.interval')}</span>
+                            <span id="label-spawn" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.spawnIntervalMs}</span>
+                        </div>
+                        <input type="range" id="slider-spawn" min="10" max="1000" value="${sim.spawnIntervalMs}" step="10">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>${CyberI18n.get('galton.speed')}</span>
+                            <span style="display:flex; justify-content:space-between; width:120px; font-size:0.72rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45); letter-spacing:0.4px;">
+                                <span>${CyberI18n.get('galton.slow')}</span>
+                                <span>${CyberI18n.get('galton.fast')}</span>
+                            </span>
+                        </div>
+                        <input type="range" id="slider-speed" min="0.04" max="5.0" value="${sim.flightSpeed}" step="0.04">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>${CyberI18n.get('galton.ball_count')}</span>
+                            <span id="label-maxballs" class="cyber-number" style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${sim.maxBalls}</span>
+                        </div>
+                        <input type="range" id="slider-maxballs" min="1" max="500" value="${sim.maxBalls}" step="1">
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <button id="btn-play-pause" class="cyber-btn" style="flex:1;">STOP</button>
+                        <button id="btn-reset" class="cyber-btn" style="flex:1; border-color:#ffcc00; color:#ffcc00;">RESET</button>
+                    </div>
+                </div>
+            `, "var(--neon-blue)");
+
+            const sliderRows = document.getElementById("slider-rows");
+            const sliderSpawn = document.getElementById("slider-spawn");
+            const sliderSpeed = document.getElementById("slider-speed");
+            const sliderMaxBalls = document.getElementById("slider-maxballs");
+            const labelRows = document.getElementById("label-rows");
+            const labelSpawn = document.getElementById("label-spawn");
+            const labelMaxBalls = document.getElementById("label-maxballs");
+            const btnPlayPause = document.getElementById("btn-play-pause");
+
+            function updatePlayPauseButton() {
+                btnPlayPause.textContent = sim.running ? CyberI18n.get('galton.stop') : CyberI18n.get('galton.play');
+                btnPlayPause.classList.toggle("running", sim.running);
+            }
+
+            sliderRows.addEventListener("input", (e) => {
+                const bins = parseInt(e.target.value, 10);
+                sim.rows = bins - 1;
+                labelRows.textContent = bins;
+                resetStats();
+                rebuildBoard();
+                saveSliderSettings();
+            });
+
+            sliderSpawn.addEventListener("input", (e) => {
+                sim.spawnIntervalMs = parseInt(e.target.value, 10);
+                labelSpawn.textContent = sim.spawnIntervalMs;
+                saveSliderSettings();
+            });
+
+            sliderSpeed.addEventListener("input", (e) => {
+                sim.flightSpeed = parseFloat(e.target.value);
+                saveSliderSettings();
+            });
+
+            sliderMaxBalls.addEventListener("input", (e) => {
+                sim.maxBalls = parseInt(e.target.value, 10);
+                labelMaxBalls.textContent = sim.maxBalls;
+                saveSliderSettings();
+            });
+
+            updatePlayPauseButton();
+            btnPlayPause.addEventListener("click", () => {
+                sim.running = !sim.running;
+                updatePlayPauseButton();
+            });
+            document.getElementById("btn-reset").addEventListener("click", () => resetStats());
+
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+            requestAnimationFrame(loop);
+        });
+    </script>
+</body>
+</html>

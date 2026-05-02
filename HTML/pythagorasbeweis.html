@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pythagoras Beweis | ULTRA v5.3.8</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .stats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .stats-subcard {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 15px;
+            border-radius: 12px;
+            border-left: 3px solid var(--neon-blue);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stats-label { font-family: 'Orbitron'; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .stats-val { font-family: 'Orbitron'; font-size: 1.15rem; font-weight: bold; }
+
+        /* Math Log Styling / Table Restoration */
+        #btn-toggle-tria.off { opacity: 0.5; border-style: dashed; }
+
+        /* HUD Table Restoration (Triangulierer Style) */
+        #equation-hud {
+            position: absolute;
+            top: 50%;
+            right: 40px;
+            transform: translateY(-50%);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            padding: 20px;
+            border-radius: 16px;
+            font-family: 'Orbitron';
+            color: white;
+            z-index: 50;
+            min-width: 260px;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .hud-table th { text-align: left; color: var(--neon-blue); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; font-size: 0.6rem; letter-spacing: 1px; }
+        .hud-table td { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hud-table .row-id { color: var(--neon-blue); font-weight: bold; }
+        .hud-table .row-val { text-align: right; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.8); }
+        
+        .hud-sum-row { border-top: 2px solid var(--neon-purple); color: var(--neon-purple); font-weight: bold; font-size: 0.85rem; }
+        .hud-sum-label { padding-top: 10px !important; }
+        .hud-sum-val { text-align: right; padding-top: 10px !important; color: var(--neon-green); }
+    </style>
+    <script src="https://unpkg.com/earcut@2.2.4/dist/earcut.min.js"></script>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="equation-hud">
+                <table class="hud-table">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th id="head-area" style="text-align:right;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-body"></tbody>
+                    <tfoot>
+                        <tr class="hud-sum-row">
+                            <td id="label-sum-sigma" class="hud-sum-label"></td>
+                            <td id="hud-sum-total" class="hud-sum-val">0,00 cm²</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof resetLab === 'function') resetLab();
+            }, 400);
+        }
+        // 1. Branding & UI Initialization
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('ui.pythagoras')
+        });
+        CyberUI.init();
+        
+        // Static HUD Injection
+        const headArea = document.getElementById('head-area');
+        const labelSum = document.getElementById('label-sum-sigma');
+        if(headArea) headArea.innerText = CyberI18n.get('proof.area_cm2');
+        if(labelSum) labelSum.innerText = CyberI18n.get('proof.sum_sigma');
+
+        // 2. Constants & State (PRESERVED)
+        const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('canvas-container');
+        const units = 7;
+
+        const neonPurple = "#9d50bb";
+        const neonBlue   = "#00d2ff";
+        const neonPink   = "#ff0055";
+        const neonOrange = "#ff8800";
+        const neonGreen  = "#4ade80";
+
+        let sWidth, pxToCmFactor, aPx;
+        let ox, oy, triangles = [], anchors = [], selectedTri = null;
+        let dragging = false, rotating = false, lastMouse = {x:0, y:0}, anyCollision = false;
+        let showTria = true;
+
+        // 3. UI Card Setup
+        function setupUI() {
+            CyberUI.createCard('parameters-container', CyberI18n.get('logic.mission_status'), `
+                <div class="stats-grid">
+                    <div class="stats-subcard" style="border-left-color: var(--neon-orange);">
+                        <span class="stats-label">${CyberI18n.get('proof.target_area')}</span>
+                        <span id="target-area" class="stats-val" style="color: var(--neon-orange);">0,00 cm²</span>
+                    </div>
+                    <div class="stats-subcard" style="border-left-color: var(--neon-purple);">
+                        <span class="stats-label">${CyberI18n.get('proof.triangle_sum')}</span>
+                        <span id="blue-sum" class="stats-val" style="color: var(--neon-purple);">0,00 cm²</span>
+                    </div>
+                </div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('parameters-container', CyberI18n.get('logic.cancel'), `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="btn-toggle-tria" class="cyber-btn" onclick="toggleTria()">${showTria ? CyberI18n.get('proof.tria_on') : CyberI18n.get('proof.tria_off')}</button>
+                    <button id="btn-reset" class="cyber-btn" onclick="resetLab()" style="border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('proof.reset_proof')}</button>
+                </div>
+            `, 'var(--neon-blue)');
+        }
+
+        // 4. Core math logic (unchanged)
+        function toggleTria() {
+            showTria = !showTria;
+            const btn = document.getElementById('btn-toggle-tria');
+            if (showTria) {
+                btn.innerText = CyberI18n.get('proof.tria_on');
+                btn.classList.remove('off');
+            } else {
+                btn.innerText = CyberI18n.get('proof.tria_off');
+                btn.classList.add('off');
+            }
+            draw();
+        }
+
+        function resetLab() {
+            if (!wrapper || wrapper.clientHeight < 10) {
+                 // Try again if layout is not ready
+                 setTimeout(resetLab, 100);
+                 return;
+            }
+
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = wrapper.clientWidth * dpr;
+            canvas.height = wrapper.clientHeight * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const canvasW = wrapper.clientWidth;
+            const canvasH = wrapper.clientHeight;
+
+            sWidth = Math.min(600, canvasW * 0.8, canvasH * 0.8);
+            pxToCmFactor = units / sWidth;
+
+            ox = (canvasW - sWidth) / 2;
+            oy = (canvasH - sWidth) / 2;
+            aPx = sWidth * (3 / 7);
+
+            anchors = [{id:'D',x:ox+aPx,y:oy},{id:'A',x:ox+sWidth,y:oy+aPx},{id:'B',x:ox+sWidth-aPx,y:oy+sWidth},{id:'C',x:ox,y:oy+sWidth-aPx}];
+
+            triangles = [
+                { pts: [{x:ox+aPx, y:oy}, {x:ox, y:oy}, {x:ox, y:oy+sWidth-aPx}], color: neonBlue },
+                { pts: [{x:ox+sWidth, y:oy+aPx}, {x:ox+sWidth, y:oy}, {x:ox+aPx, y:oy}], color: neonGreen },
+                { pts: [{x:ox+sWidth-aPx, y:oy+sWidth}, {x:ox+sWidth, y:oy+sWidth}, {x:ox+sWidth, y:oy+aPx}], color: neonOrange },
+                { pts: [{x:ox, y:oy+sWidth-aPx}, {x:ox, y:oy+sWidth}, {x:ox+sWidth-aPx, y:oy+sWidth}], color: neonPurple }
+            ];
+
+            // Re-position HUD dynamically
+            const hud = document.getElementById('equation-hud');
+            if (hud) {
+                hud.style.left = (ox + sWidth + 40) + 'px';
+                hud.style.right = 'auto';
+            }
+
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let yellowTotal = 0, logHtml = "";
+            let isOutOfBounds = false;
+            for (let t of triangles) {
+                for (let p of t.pts) {
+                    if (p.x < ox - 1.0 || p.x > ox + sWidth + 1.0 || p.y < oy - 1.0 || p.y > oy + sWidth + 1.0) {
+                        isOutOfBounds = true; break;
+                    }
+                }
+                if (isOutOfBounds) break;
+            }
+
+            if (showTria && !anyCollision && !isOutOfBounds) {
+                let vertices = [], holeIndices = [];
+                vertices.push(ox, oy, ox+sWidth, oy, ox+sWidth, oy+sWidth, ox, oy+sWidth);
+                triangles.forEach(t => {
+                    holeIndices.push(vertices.length / 2);
+                    const cx = (t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3, cy = (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3;
+                    const f = 0.9999;
+                    vertices.push(cx + (t.pts[0].x - cx) * f, cy + (t.pts[0].y - cy) * f);
+                    vertices.push(cx + (t.pts[1].x - cx) * f, cy + (t.pts[1].y - cy) * f);
+                    vertices.push(cx + (t.pts[2].x - cx) * f, cy + (t.pts[2].y - cy) * f);
+                });
+
+                const mesh = earcut(vertices, holeIndices);
+                let triCount = 1;
+
+                for (let i = 0; i < mesh.length; i += 3) {
+                    const i1 = mesh[i] * 2, i2 = mesh[i+1] * 2, i3 = mesh[i+2] * 2;
+                    const p1 = {x: vertices[i1], y: vertices[i1+1]}, p2 = {x: vertices[i2], y: vertices[i2+1]}, p3 = {x: vertices[i3], y: vertices[i3+1]};
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = "rgba(0, 210, 255, 0.15)";
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; ctx.lineWidth = 0.8;
+                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.closePath();
+                    ctx.fill(); ctx.stroke();
+
+                    const areaPx = Math.abs(p1.x*(p2.y - p3.y) + p2.x*(p3.y - p1.y) + p3.x*(p1.y - p2.y)) / 2;
+                    const areaCm = areaPx * (pxToCmFactor**2);
+
+                    if (areaCm > 0.01) {
+                        yellowTotal += areaCm;
+                        const midX = (p1.x + p2.x + p3.x) / 3, midY = (p1.y + p2.y + p3.y) / 3;
+                        ctx.font = "bold 11px Orbitron";
+                        ctx.shadowBlur = 4; ctx.shadowColor = "black";
+                        ctx.fillStyle = "white"; 
+                        ctx.fillText(triCount.toString().padStart(2,'0'), midX, midY);
+                        ctx.shadowBlur = 0;
+                        logHtml += `<tr><td class="row-id">${triCount.toString().padStart(2,'0')}</td><td class="row-val">${areaCm.toFixed(2)}</td></tr>`;
+                        triCount++;
+                    }
+                }
+            } else if (!showTria) {
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; opacity:0.3;">${CyberI18n.get('proof.tria_deactive')}</td></tr>`;
+            } else if (isOutOfBounds) {
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">${CyberI18n.get('proof.out_of_bounds')}</td></tr>`;
+            } else if (anyCollision) {
+                logHtml = `<tr><td colspan="2" style="text-align:center; padding:20px; color:#ff4444;">${CyberI18n.get('proof.collision')}</td></tr>`;
+            }
+
+            const logBody = document.getElementById('log-body');
+            if(logBody) logBody.innerHTML = logHtml;
+
+            const sumElement = document.getElementById('blue-sum');
+            const hudSum = document.getElementById('hud-sum-total');
+            const totalStr = yellowTotal.toFixed(2).replace('.',',') + " cm²";
+            const totalCol = showTria ? "var(--neon-green)" : "rgba(255,255,255,0.2)";
+            
+            if(sumElement) {
+                sumElement.innerText = totalStr;
+                sumElement.style.color = totalCol;
+            }
+            if(hudSum) {
+                hudSum.innerText = totalStr;
+                hudSum.style.color = totalCol;
+            }
+
+            triangles.forEach((t) => {
+                ctx.beginPath(); ctx.moveTo(t.pts[0].x, t.pts[0].y); ctx.lineTo(t.pts[1].x, t.pts[1].y); ctx.lineTo(t.pts[2].x, t.pts[2].y); ctx.closePath();
+                ctx.shadowBlur = 12; 
+                ctx.shadowColor = t.collision ? "red" : (t === selectedTri ? "white" : t.color);
+                ctx.fillStyle = t.collision ? "rgba(255,0,0,0.6)" : (t === selectedTri ? "rgba(255,255,255,0.9)" : t.color + "E6");
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.lineWidth = 0.5; ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.stroke();
+
+                t.pts.forEach((p) => {
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+                    ctx.fillStyle = "#1e293b"; ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1; ctx.stroke();
+                });
+                
+                // Right angle corner
+                const p0 = t.pts[0], p1 = t.pts[1], p2 = t.pts[2];
+                const size = 12;
+                const d1x = (p0.x - p1.x) / Math.hypot(p0.x - p1.x, p0.y - p1.y), d1y = (p0.y - p1.y) / Math.hypot(p0.x - p1.x, p0.y - p1.y);
+                const d2x = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y), d2y = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                ctx.shadowBlur = 0; ctx.lineWidth = 0.8; ctx.strokeStyle = "white";
+                ctx.beginPath();
+                ctx.moveTo(p1.x + d1x * size, p1.y + d1y * size);
+                ctx.lineTo(p1.x + d1x * size + d2x * size, p1.y + d1y * size + d2y * size);
+                ctx.lineTo(p1.x + d2x * size, p1.y + d2y * size);
+                ctx.stroke();
+            });
+
+            ctx.shadowBlur = 20; ctx.shadowColor = "white";
+            ctx.strokeStyle = "white"; ctx.lineWidth = 1.5; ctx.strokeRect(ox, oy, sWidth, sWidth);
+            ctx.shadowBlur = 0;
+            anchors.forEach(a => {
+                ctx.fillStyle = "rgba(30, 41, 59, 0.4)"; ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; ctx.lineWidth = 1; ctx.stroke();
+            });
+
+            const tArea = Math.pow(Math.hypot(anchors[0].x - anchors[1].x, anchors[0].y - anchors[1].y), 2) * (pxToCmFactor**2);
+            const targetEl = document.getElementById('target-area');
+            if(targetEl) targetEl.innerText = tArea.toFixed(2).replace('.',',') + " cm²";
+        }
+
+        function checkCollisions() {
+            anyCollision = false; triangles.forEach(t => t.collision = false);
+            for (let i=0; i<triangles.length; i++) {
+                for (let j=i+1; j<triangles.length; j++) {
+                    if (triIntersect(triangles[i].pts, triangles[j].pts)) {
+                        triangles[i].collision = true; triangles[j].collision = true; anyCollision = true;
+                    }
+                }
+            }
+        }
+        function triIntersect(t1, t2) { return checkSAT(t1, t2) && checkSAT(t2, t1); }
+        function checkSAT(t1, t2) {
+            for (let i=0; i<3; i++) {
+                const p1=t1[i], p2=t1[(i+1)%3], n={x:p2.y-p1.y, y:p1.x-p2.x};
+                let min1=Infinity, max1=-Infinity, min2=Infinity, max2=-Infinity;
+                t1.forEach(p=>{const pr=p.x*n.x+p.y*n.y; min1=Math.min(min1,pr); max1=Math.max(max1,pr);});
+                t2.forEach(p=>{const pr=p.x*n.x+p.y*n.y; min2=Math.min(min2,pr); max2=Math.max(max2,pr);});
+                if (max1 < min2+0.1 || max2 < min1+0.1) return false;
+            }
+            return true;
+        }
+
+        canvas.onpointerdown = e => {
+            const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
+            let found = false; rotating = false; dragging = false;
+            for (let t of triangles) {
+                for (let p of t.pts) { if (Math.hypot(p.x-x, p.y-y) < 15) { selectedTri = t; rotating = true; found = true; break; } }
+                if (found) break;
+            }
+            if (!found) {
+                for (let t of triangles) {
+                    const p = t.pts;
+                    const area = 0.5 *(-p[1].y*p[2].x + p[0].y*(-p[1].x + p[2].x) + p[0].x*(p[1].y - p[2].y) + p[1].x*p[2].y);
+                    const s = 1/(2*area)*(p[0].y*p[2].x - p[0].x*p[2].y + (p[2].y - p[0].y)*x + (p[0].x - p[2].x)*y);
+                    const t_ = 1/(2*area)*(p[0].x*p[1].y - p[0].y*p[1].x + (p[0].y - p[1].y)*x + (p[1].x - p[0].x)*y);
+                    if (s >= 0 && t_ >= 0 && (s + t_) <= 1) { selectedTri = t; dragging = true; found = true; break; }
+                }
+            }
+            if (!found) selectedTri = null;
+            lastMouse = {x, y}; draw();
+        };
+
+        canvas.onpointermove = e => {
+            if(!selectedTri) return;
+            const r = canvas.getBoundingClientRect(), x = (e.clientX-r.left), y = (e.clientY-r.top);
+            const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3, cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
+            if (dragging) {
+                const dx = x - lastMouse.x, dy = y - lastMouse.y;
+                selectedTri.pts.forEach(p => { p.x += dx; p.y += dy; });
+            } else if (rotating) {
+                const angle = Math.atan2(y - cY, x - cX) - Math.atan2(lastMouse.y - cY, lastMouse.x - cX);
+                selectedTri.pts.forEach(p => {
+                    const dx = p.x - cX, dy = p.y - cY;
+                    p.x = cX + dx * Math.cos(angle) - dy * Math.sin(angle);
+                    p.y = cY + dx * Math.sin(angle) + dy * Math.cos(angle);
+                });
+            }
+            checkCollisions(); lastMouse = {x, y}; draw();
+        };
+
+        window.onpointerup = () => {
+            if (selectedTri) {
+                const cX = (selectedTri.pts[0].x+selectedTri.pts[1].x+selectedTri.pts[2].x)/3, cY = (selectedTri.pts[0].y+selectedTri.pts[1].y+selectedTri.pts[2].y)/3;
+                if (rotating) {
+                    let edgeAngle = Math.atan2(selectedTri.pts[1].y - selectedTri.pts[0].y, selectedTri.pts[1].x - selectedTri.pts[0].x);
+                    let snapAngle = Math.round(edgeAngle / (Math.PI/2)) * (Math.PI/2);
+                    if (Math.abs(edgeAngle - snapAngle) < 0.1) {
+                        let correction = snapAngle - edgeAngle;
+                        selectedTri.pts.forEach(p => {
+                            const dx = p.x - cX, dy = p.y - cY;
+                            p.x = cX + dx * Math.cos(correction) - dy * Math.sin(correction);
+                            p.y = cY + dx * Math.sin(correction) + dy * Math.cos(correction);
+                        });
+                    }
+                } else if (dragging) {
+                    let snapDist = 10, snapOffset = {x: 0, y: 0}, snapped = false;
+                    let targets = [ {x: ox, y: oy}, {x: ox+sWidth, y: oy}, {x: ox, y: oy+sWidth}, {x: ox+sWidth, y: oy+sWidth} ];
+                    triangles.forEach(t => { if (t !== selectedTri) targets.push(...t.pts); });
+                    for (let p of selectedTri.pts) {
+                        for (let tp of targets) {
+                            if (Math.hypot(p.x - tp.x, p.y - tp.y) < snapDist) {
+                                snapOffset.x = tp.x - p.x; snapOffset.y = tp.y - p.y; snapped = true; break;
+                            }
+                        }
+                        if (snapped) break;
+                    }
+                    if (!snapped) {
+                        for (let p of selectedTri.pts) {
+                            if (Math.abs(p.x - ox) < snapDist) { snapOffset.x = ox - p.x; snapped = true; }
+                            else if (Math.abs(p.x - (ox+sWidth)) < snapDist) { snapOffset.x = (ox+sWidth) - p.x; snapped = true; }
+                            if (Math.abs(p.y - oy) < snapDist) { snapOffset.y = oy - p.y; snapped = true; }
+                            else if (Math.abs(p.y - (oy+sWidth)) < snapDist) { snapOffset.y = (oy+sWidth) - p.y; snapped = true; }
+                            if(snapped) break;
+                        }
+                    }
+                    if (snapped) selectedTri.pts.forEach(p => { p.x += snapOffset.x; p.y += snapOffset.y; });
+                }
+            }
+            dragging = rotating = false; checkCollisions(); draw();
+        };
+
+        window.onresize = resetLab;
+        
+        // Final Initialization Sequence
+        setupUI();
+        
+        // Delay reset to ensure layout has settled (sidebar width etc.)
+        setTimeout(resetLab, 50);
+    </script>
+</body>
+</html>
