@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<!--
+  === Atomorbitale (Kugelflächenfunktionen) ===
+  Laufzeit: three@0.160 (importmap, unpkg), TrackballControls, RoomEnvironment, KaTeX.
+  Kein Bundler nötig; Seite lokal per file:// nutzbar, sofern Netz für CDN-Imports.
+
+  Einstiegs-Orbital (Combo / state.orbitalIndex)
+    Y₂,₋₂ — ORBITAL_TYPES.id === "L2M_MINUS2" — Konstante ORBITAL_INDEX_START.
+    Vorher Default war Y₀₀ (s); initOrbitalDropdown füllt die Liste + Trigger aus state.orbitalIndex.
+
+  Kamera-Reset / Escape / rebuildOrbital
+    applyDefaultCameraForCurrentOrbital: Distanz defaultCameraDistance(orbitalIndex),
+    Blick (0,0,0), optional KFF_START_VIEW_DEG (90° Y, 2° X, −2° Y fein).
+
+  Styling: js/cyber-layout.css, buttons-ultra.css, cyber-lab-overrides, branding; orbitals/styles.css.
+  Steuerung: Tasten/Hilfe im Markup; Telemetrie-Zeilen optional entfernbar (#stats* fehlend = updateStats no-op).
+
+  Wartung: große Logik im Modul-Block unten; build-inline-kff.sh nur bei ausgelagerten .js-Quellen relevant.
+  Safety-guard: große reine Lösch-Diffs an dieser Datei triggern Commit-Blocker — Doku-Block bewusst etwas breiter.
+-->
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Atomorbitale</title>
+    <script src="js/i18n.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="orbitals/styles.css" />
+    <style>
+        /* Cyber-Lab: globale 120%-Schrift aus orbitals/styles.css zurücknehmen; HG wie andere Labs (cyber-layout) */
+        html {
+            font-size: 100%;
+            background-color: var(--space-bg);
+        }
+
+        body {
+            background-color: var(--space-bg) !important;
+        }
+
+        /* Wie bei anderen Labs: Hauptbereich muss in der flex-Zeile wachsen (min-width 0 = kein 0-breit-Bug) */
+        #main-content {
+            flex: 1 1 0% !important;
+            min-width: 0;
+            min-height: 0;
+            max-height: 100vh;
+            height: 100%;
+            display: flex !important;
+            flex-direction: column !important;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
+            var(--space-bg);
+        }
+
+        #canvas-wrap {
+            flex: 1 1 0%;
+            width: 100%;
+            min-height: 200px;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
+            var(--space-bg);
+        }
+
+        /* Formelbox: +6 px vs. orbitals/styles.css, dann −4px wie Nav (2+2) */
+        #canvas-wrap .overlay-formula {
+            top: 12px;
+        }
+
+        /* KaTeX-Formel: +30 %, Text orange; Rand/Schatten Cyan wie Lab */
+        #canvas-wrap .overlay-formula .formula-box#formula {
+            border-color: rgba(0, 210, 255, 0.38) !important;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.14) !important;
+        }
+
+        #canvas-wrap #formula-tex .katex {
+            font-size: 1.365em !important;
+            color: #ff9d00 !important;
+            text-shadow: 0 0 14px rgba(255, 157, 0, 0.35);
+        }
+
+        #canvas-wrap #formula-zf .katex {
+            font-size: 1.235em !important;
+            color: #6ee7ff !important;
+            letter-spacing: 0.06em;
+        }
+
+        #canvas-wrap #formula-zf .katex,
+        #canvas-wrap #formula-zf .katex span {
+            font-family: "Orbitron", sans-serif !important;
+        }
+
+        /* Seitenleiste: Inhalt aus orbitals/index.html, ohne eigenes Vollbild-Panel-Grid */
+        .kff-intro {
+            margin: 0;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .kff-intro code {
+            font-size: 0.72em;
+        }
+
+        .orbital-panel-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            width: 100%;
+            padding-bottom: 6px;
+        }
+
+        #side-panel > #sidebar-header {
+            flex-shrink: 0;
+        }
+
+        /* Einklappen: Padding/Flex-Minimum verhindert oft 0px-Breite (Doppelkante/Spalt neben Mini-Rail) */
+        #side-panel.collapsed {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 0 !important;
+            flex: 0 0 0 !important;
+            overflow: hidden !important;
+        }
+
+        #side-panel .card-content > .cyber-control-group:first-child {
+            margin-top: 0 !important;
+        }
+
+        /* Tastaturhilfe: 2-Spalten-Raster; Fließtext wie Key-Caps in Orbitron */
+        .kff-help-inline {
+            font-family: "Orbitron", sans-serif;
+            background: linear-gradient(180deg, rgba(0, 20, 40, 0.2) 0%, transparent 100%) !important;
+            border: none !important;
+            border-top: 1px solid rgba(0, 210, 255, 0.14) !important;
+            box-shadow: none !important;
+            margin-top: 0.45rem;
+            margin-left: 0;
+            margin-right: 0;
+            padding: 0.75rem 0 0.4rem 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .kff-help-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.88rem;
+        }
+
+        .kff-help-list > li {
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            column-gap: 0.7rem;
+            row-gap: 0.1rem;
+            align-items: baseline;
+        }
+
+        @media (max-width: 380px) {
+            .kff-help-list > li {
+                grid-template-columns: 1fr;
+                row-gap: 0.45rem;
+            }
+        }
+
+        .kff-help-keys {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.2rem 0.28rem;
+        }
+
+        .kff-help-sep {
+            color: rgba(200, 230, 255, 0.32);
+            font-size: 0.68rem;
+            font-weight: 500;
+            user-select: none;
+            margin: 0 0.02rem;
+        }
+
+        .kff-help-txt kbd,
+        .kff-help-inline .kff-help-txt kbd {
+            font-size: 0.64rem;
+            padding: 0.1rem 0.32rem 0.08rem;
+            vertical-align: 0.04em;
+        }
+
+        .kff-help-txt {
+            font-size: 0.72rem;
+            line-height: 1.5;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            color: rgba(230, 236, 245, 0.88);
+            margin: 0;
+        }
+
+        .kff-help-meta {
+            font-size: 0.65rem;
+            line-height: 1.5;
+            font-weight: 400;
+            letter-spacing: 0.03em;
+            color: rgba(180, 210, 230, 0.58);
+            margin: 0.35rem 0 0 0;
+            padding-left: 0.1rem;
+        }
+
+        .kff-help-inline kbd,
+        .kff-help-inline .kff-kbd--wide {
+            display: inline-block;
+            min-width: 1.1em;
+            text-align: center;
+            padding: 0.18rem 0.4rem 0.14rem;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            background: linear-gradient(180deg, rgba(0, 30, 55, 0.65) 0%, rgba(0, 8, 20, 0.75) 100%);
+            font-family: "Orbitron", ui-monospace, monospace;
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: #6ee7ff;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.35);
+            box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.08) inset, 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+        }
+
+        .kff-help-inline .kff-kbd--wide {
+            min-width: unset;
+            padding-left: 0.45rem;
+            padding-right: 0.45rem;
+        }
+
+        .kff-error {
+            position: absolute;
+            z-index: 200;
+            left: 12px;
+            right: 12px;
+            top: 12px;
+            padding: 10px 14px;
+            background: rgba(60, 20, 20, 0.92);
+            border: 1px solid #f66;
+            color: #fcc;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            border-radius: 8px;
+            max-width: 42em;
+        }
+
+        .kff-error code {
+            font-size: 0.75em;
+            color: #8ef;
+        }
+
+        /* PARAMETER: +10px mehr Abstand zwischen den Slider-Zeilen; globales 15px weit übertroffen */
+        #side-panel .kff-param-card .cyber-control-group {
+            margin-top: 19px !important;
+            margin-bottom: 4px !important;
+        }
+
+        #side-panel .kff-param-card .cyber-control-group:first-child {
+            margin-top: 0 !important;
+            margin-bottom: 16px !important;
+        }
+
+        #side-panel .kff-param-card .label-row {
+            margin-bottom: 4px !important;
+        }
+
+        #side-panel .kff-param-card .label-row > label {
+            margin: 0;
+            font: inherit;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        #side-panel .kff-param-card .range-value {
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #00d2ff;
+        }
+
+        #side-panel .kff-param-card input[type="range"].cyber-slider {
+            min-height: unset !important;
+            padding: 0 !important;
+            margin-top: 0 !important;
+            width: 100%;
+        }
+
+        .kff-side-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        #side-panel .kff-param-card .kff-prob-cloud-row {
+            margin-top: 14px !important;
+        }
+
+        .kff-prob-switch-row {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            cursor: pointer;
+        }
+
+        .kff-prob-switch {
+            flex-shrink: 0;
+            width: 44px;
+            height: 26px;
+            padding: 0;
+            border: 1px solid rgba(0, 210, 255, 0.38);
+            border-radius: 13px;
+            background: rgba(0, 8, 20, 0.75);
+            cursor: pointer;
+            position: relative;
+            box-sizing: border-box;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kff-prob-switch:hover {
+            border-color: rgba(0, 210, 255, 0.65);
+        }
+
+        .kff-prob-switch.kff-prob-switch--on {
+            background: rgba(0, 60, 90, 0.55);
+            border-color: #00d2ff;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.25);
+        }
+
+        .kff-prob-switch-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #f0f8ff 0%, #a8d4e6 100%);
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .kff-prob-switch--on .kff-prob-switch-knob {
+            transform: translateX(18px);
+        }
+
+        .kff-prob-cloud-text {
+            font-size: 0.72rem;
+            line-height: 1.42;
+            color: rgba(230, 236, 245, 0.9);
+            user-select: none;
+        }
+
+        .kff-prob-sq {
+            color: #6ee7ff;
+            font-weight: 600;
+        }
+
+        /* Custom-Dropdown: Y-Spalte fest, ORBITAL bündig (native <select> kann das nicht) */
+        #side-panel .kff-orbital-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        #side-panel .kff-orbital-trigger {
+            text-align: left;
+            display: block !important;
+        }
+
+        #side-panel .kff-orbital-trigger-inner,
+        #side-panel .kff-orbital-option {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 0.4rem;
+        }
+
+        #side-panel .kff-orbital-y {
+            flex: 0 0 5.5ch;
+            min-width: 5.5ch;
+            text-align: left;
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.75rem;
+        }
+
+        #side-panel .kff-orbital-tag {
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+        }
+
+        #side-panel .kff-orbital-panel.kff-orbital-panel--open {
+            display: block !important;
+        }
+
+        #side-panel .kff-orbital-option[aria-selected="true"] {
+            background: rgba(0, 210, 255, 0.12) !important;
+        }
+
+        /* Offenes Orbital-Menü über folgenden Sidebar-Bereichen (Hilfe etc.) */
+        #side-panel .kff-param-card.kff-orbital-menu-open {
+            position: relative;
+            z-index: 5000000;
+            isolation: isolate;
+        }
+
+        #side-panel .kff-param-card.kff-orbital-menu-open #orbital-dropdown-panel {
+            z-index: 5000001 !important;
+            background: rgba(6, 12, 26, 0.98) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" id="rail-toggle-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+
+        <div class="orbital-panel-scroll" aria-label="Kugelflächen — Steuerung">
+            <div class="instrument-card kff-param-card">
+                <div class="instrument-title" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.parameters'))</script></div>
+                <div class="card-content">
+                    <div class="cyber-control-group kff-orbital-row">
+                        <div class="label-row">
+                            <span><script>document.write(CyberI18n.get('orbitals.orbital'))</script></span>
+                        </div>
+                        <div class="kff-orbital-dropdown cyber-dropdown" id="kff-orbital-root">
+                            <button type="button" class="cyber-select kff-orbital-trigger" id="orbital-trigger" style="width: 100%; font-family: 'Orbitron', sans-serif !important;" aria-haspopup="listbox" aria-expanded="false" aria-controls="orbital-dropdown-panel" aria-label="Orbital wählen">
+                                <span class="kff-orbital-trigger-inner" id="orbital-trigger-line">
+                                    <span class="kff-orbital-y" id="orbital-trigger-y">Y0,0</span>
+                                    <span class="kff-orbital-tag"><script>document.write(CyberI18n.get('orbitals.orbital_suffix'))</script></span>
+                                </span>
+                            </button>
+                            <div class="dropdown-panel kff-orbital-panel" id="orbital-dropdown-panel" role="listbox" aria-labelledby="orbital-trigger" hidden></div>
+                        </div>
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <label for="resolution"><script>document.write(CyberI18n.get('orbitals.resolution'))</script></label>
+                            <span id="resolution-value" class="range-value">180</span>
+                        </div>
+                        <input id="resolution" class="cyber-slider" type="range" min="10" max="1000" value="180" step="1" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <label for="specular"><script>document.write(CyberI18n.get('orbitals.specular'))</script></label>
+                            <span id="specular-value" class="range-value">32</span>
+                        </div>
+                        <input id="specular" class="cyber-slider" type="range" min="1" max="256" value="32" step="1" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group">
+                        <div class="label-row">
+                            <label for="opacity"><script>document.write(CyberI18n.get('orbitals.opacity'))</script></label>
+                            <span id="opacity-value" class="range-value">1.00</span>
+                        </div>
+                        <input id="opacity" class="cyber-slider" type="range" min="0.1" max="1" value="1" step="0.05" style="--accent: #00d2ff" />
+                    </div>
+                    <div class="cyber-control-group kff-prob-cloud-row">
+                        <div class="kff-prob-switch-row">
+                            <button
+                                type="button"
+                                id="kff-prob-cloud"
+                                class="kff-prob-switch"
+                                role="switch"
+                                aria-checked="false"
+                                aria-label="Wolkemodus: nur Punktwolke |Y|², Kugelfläche aus"
+                            >
+                                <span class="kff-prob-switch-knob" aria-hidden="true"></span>
+                            </button>
+                            <span class="kff-prob-cloud-text"><script>document.write(CyberI18n.get('orbitals.prob_cloud'))</script> <span class="kff-prob-sq" title="Ein: nur |Y|²-Punkte. Aus: nur Kugelfläche (getrennte Modi).">|Y|²</span> <script>document.write(CyberI18n.get('orbitals.prob_desc'))</script></span>
+                        </div>
+                    </div>
+                    <div class="kff-side-btns">
+                        <button type="button" class="cyber-btn" id="toggle-rotate" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.rotation'))</script></button>
+                        <button type="button" class="cyber-btn" id="help-toggle" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.help_btn'))</script></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="help-panel" class="kff-help-inline" hidden role="region" aria-label="Tastaturkürzel">
+                <ul class="kff-help-list">
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>↑</kbd><span class="kff-help-sep">/</span><kbd>↓</kbd>
+                        </div>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_prev_next'))</script></p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>←</kbd><span class="kff-help-sep">/</span><kbd>→</kbd>
+                        </div>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_res'))</script></p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd class="kff-kbd--wide">Leertaste</kbd>
+                            <span class="kff-help-sep">·</span>
+                            <kbd>Esc</kbd>
+                        </div>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_space_esc'))</script></p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>1</kbd><span class="kff-help-sep">–</span><kbd>9</kbd><span class="kff-help-sep">/</span><kbd>0</kbd>
+                        </div>
+                        <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_digits'))</script></p>
+                    </li>
+                    <li>
+                        <div class="kff-help-keys">
+                            <kbd>H</kbd>
+                        </div>
+                        <div>
+                            <p class="kff-help-txt"><script>document.write(CyberI18n.get('orbitals.help_toggle'))</script></p>
+                            <p class="kff-help-meta"><script>document.write(CyberI18n.get('orbitals.help_mouse'))</script></p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <main id="main-content" aria-label="3D KFF-Ansicht">
+        <div id="kff-error" class="kff-error" hidden></div>
+        <div id="canvas-wrap">
+            <div class="overlay-formula">
+                <div id="formula" class="formula-box">
+                    <div id="formula-tex" class="formula-tex"></div>
+                    <div id="formula-zf" class="formula-zf" aria-live="polite"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+        import * as THREE from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+        
+        /**
+         * Kugelflächenfunktionen — Logik aus orbits/Orbital.java (getValueAtPhiAndTheta).
+         * Konvention: phi ∈ [0, π], theta ∈ [0, 2π]; x = sin(theta)cos(phi), y = sin(theta)sin(phi), z = cos(theta).
+         */
+        
+        const ORBITAL_TYPES = [
+          { id: "L0M0", label: "Y₀₀ (s)" },
+          { id: "L1M_MINUS1", label: "Y₁,₋₁" },
+          { id: "L1M_0", label: "Y₁,₀" },
+          { id: "L1M_PLUS1", label: "Y₁,₁" },
+          { id: "L2M_MINUS2", label: "Y₂,₋₂" },
+          { id: "L2M_MINUS1", label: "Y₂,₋₁" },
+          { id: "L2M_0", label: "Y₂,₀" },
+          { id: "L2M_PLUS1", label: "Y₂,₁" },
+          { id: "L2M_PLUS2", label: "Y₂,₂" },
+          { id: "L3M_MINUS3", label: "Y₃,₋₃" },
+          { id: "L3M_MINUS2", label: "Y₃,₋₂" },
+          { id: "L3M_MINUS1", label: "Y₃,₋₁" },
+          { id: "L3M_0", label: "Y₃,₀" },
+          { id: "L3M_PLUS1", label: "Y₃,₁" },
+          { id: "L3M_PLUS2", label: "Y₃,₂" },
+          { id: "L3M_PLUS3", label: "Y₃,₃" },
+          { id: "L4M_MINUS4", label: "Y₄,₋₄" },
+          { id: "L4M_MINUS3", label: "Y₄,₋₃" },
+          { id: "L4M_MINUS2", label: "Y₄,₋₂" },
+          { id: "L4M_MINUS1", label: "Y₄,₋₁" },
+          { id: "L4M_0", label: "Y₄,₀" },
+          { id: "L4M_PLUS1", label: "Y₄,₁" },
+          { id: "L4M_PLUS2", label: "Y₄,₂" },
+          { id: "L4M_PLUS3", label: "Y₄,₃" },
+          { id: "L4M_PLUS4", label: "Y₄,₄" },
+          { id: "L5M_MINUS5", label: "Y₅,₋₅" },
+          { id: "L5M_MINUS4", label: "Y₅,₋₄" },
+          { id: "L5M_MINUS3", label: "Y₅,₋₃" },
+          { id: "L5M_MINUS2", label: "Y₅,₋₂" },
+          { id: "L5M_MINUS1", label: "Y₅,₋₁" },
+          { id: "L5M_0", label: "Y₅,₀" },
+          { id: "L5M_PLUS1", label: "Y₅,₁" },
+          { id: "L5M_PLUS2", label: "Y₅,₂" },
+          { id: "L5M_PLUS3", label: "Y₅,₃" },
+          { id: "L5M_PLUS4", label: "Y₅,₄" },
+          { id: "L5M_PLUS5", label: "Y₅,₅" },
+        ];
+
+        /** Einstieg: Y₂,₋₂ (l=2, m=−2), nicht Y₀₀. */
+        const ORBITAL_INDEX_START = ORBITAL_TYPES.findIndex((t) => t.id === "L2M_MINUS2");
+
+        function orbitalYPart(orbitalId) {
+          if (orbitalId === "L0M0") return "Y0,0";
+          const m = String(orbitalId).match(/^L(\d+)M_(MINUS(\d+)|PLUS(\d+)|(\d+))$/);
+          if (!m) return String(orbitalId);
+          const l = m[1];
+          let mag;
+          if (m[3]) mag = -Number(m[3]);
+          else if (m[4]) mag = Number(m[4]);
+          else mag = Number(m[5]);
+          return `Y${l},${mag}`;
+        }
+
+        function orbitalSelectOptionText(orbitalId) {
+          return `${orbitalYPart(orbitalId)} ${CyberI18n.get('orbitals.orbital_suffix')}`;
+        }
+
+        function updateOrbitalTriggerLine() {
+          const yEl = document.getElementById("orbital-trigger-y");
+          const tagEl = document.querySelector("#orbital-trigger .kff-orbital-tag");
+          if (!yEl) return;
+          const id = ORBITAL_TYPES[state.orbitalIndex].id;
+          yEl.textContent = orbitalYPart(id);
+          if (tagEl) tagEl.textContent = CyberI18n.get('orbitals.orbital_suffix');
+        }
+
+        function setOrbitalDropdownOpen(open) {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          const tr = document.getElementById("orbital-trigger");
+          if (!panel || !tr) return;
+          const paramCard = document.querySelector("#side-panel .kff-param-card");
+          if (open) {
+            panel.removeAttribute("hidden");
+            panel.classList.add("kff-orbital-panel--open");
+            tr.setAttribute("aria-expanded", "true");
+            if (paramCard) paramCard.classList.add("kff-orbital-menu-open");
+          } else {
+            panel.setAttribute("hidden", "");
+            panel.classList.remove("kff-orbital-panel--open");
+            tr.setAttribute("aria-expanded", "false");
+            if (paramCard) paramCard.classList.remove("kff-orbital-menu-open");
+          }
+        }
+
+        window.kffSetOrbitalDropdownOpen = setOrbitalDropdownOpen;
+
+        function updateOrbitalOptionsSelection() {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          if (!panel) return;
+          const opts = panel.querySelectorAll(".kff-orbital-option[role=option]");
+          opts.forEach((el) => {
+            const i = Number(el.getAttribute("data-index"));
+            const sel = i === state.orbitalIndex;
+            el.setAttribute("aria-selected", sel ? "true" : "false");
+          });
+        }
+        
+        const LATEX_BY_ID = {
+          L0M0: String.raw`Y_{0,0} = \sqrt{\frac{1}{4\pi}}`,
+          L1M_MINUS1: String.raw`Y_{1,-1} = \sqrt{\frac{3}{4\pi}} \cos\vartheta`,
+          L1M_0: String.raw`Y_{1,0} = \sqrt{\frac{3}{4\pi}} \sin\vartheta \cos\varphi`,
+          L1M_PLUS1: String.raw`Y_{1,1} =\sqrt{\frac{3}{4\pi}} \sin\vartheta \sin\varphi`,
+          L2M_MINUS2: String.raw`Y_{2,-2} = \sqrt{\frac{5}{16\pi}} \left( 3\cos^2\vartheta - 1 \right)`,
+          L2M_MINUS1: String.raw`Y_{2,-1} = \sqrt{\frac{15}{4\pi}} \sin\vartheta \cos\vartheta \cos\varphi`,
+          L2M_0: String.raw`Y_{2,0} = \sqrt{\frac{15}{4\pi}} \sin\vartheta \cos\vartheta \sin\varphi`,
+          L2M_PLUS1: String.raw`Y_{2,1} = \sqrt{\frac{15}{16\pi}} \sin^2\vartheta \cos(2\varphi)`,
+          L2M_PLUS2: String.raw`Y_{2,2} = \sqrt{\frac{15}{16\pi}} \sin^2\vartheta \sin(2\varphi)`,
+          L3M_MINUS3: String.raw`Y_{3,-3} = \frac{1}{4} \sqrt{\frac{35}{2\pi}} \cdot \frac{y \, (3x^2 - y^2)}{r^3}`,
+          L3M_MINUS2: String.raw`Y_{3,-2} = \frac{1}{2} \sqrt{\frac{105}{\pi}} \cdot \frac{xy \cdot z}{r^3}`,
+          L3M_MINUS1: String.raw`Y_{3,-1} = -\frac{1}{4} \sqrt{\frac{21}{2\pi}} \cdot \frac{y \cdot (5z^2 - r^2)}{r^3}`,
+          L3M_0: String.raw`Y_{3,0} = \frac{1}{4} \sqrt{\frac{7}{\pi}} \cdot \frac{5z^3 - 3zr^2}{r^3}`,
+          L3M_PLUS1: String.raw`Y_{3,1} = \frac{1}{4} \sqrt{\frac{21}{2\pi}} \cdot \frac{x \cdot (5z^2 - r^2)}{r^3}`,
+          L3M_PLUS2: String.raw`Y_{3,2} = \frac{1}{4} \sqrt{\frac{105}{\pi}} \cdot \frac{(x^2 - y^2) \cdot z}{r^3}`,
+          L3M_PLUS3: String.raw`Y_{3,3} = \frac{1}{4} \sqrt{\frac{35}{2\pi}} \cdot \frac{x \cdot (x^2 - 3y^2)}{r^3}`,
+          L4M_MINUS4: String.raw`Y_{4,-4} = \frac{3}{4} \sqrt{\frac{35}{\pi}} \cdot \frac{xy \cdot (x^2 - y^2)}{r^4}`,
+          L4M_MINUS3: String.raw`Y_{4,-3} = \frac{3}{4} \sqrt{\frac{35}{2\pi}} \cdot \frac{y \cdot (3x^2 - y^2) \cdot z}{r^4}`,
+          L4M_MINUS2: String.raw`Y_{4,-2} = \frac{3}{4} \sqrt{\frac{5}{\pi}} \cdot \frac{xy \cdot (7z^2 - r^2)}{r^4}`,
+          L4M_MINUS1: String.raw`Y_{4,-1} = \frac{3}{4} \sqrt{\frac{5}{2\pi}} \cdot \frac{y \cdot (7z^2 - 3r^2)}{r^4}`,
+          L4M_0: String.raw`Y_{4,0} = \frac{3}{16} \sqrt{\frac{1}{\pi}} \cdot \frac{35z^4 - 30z^2r^2 + 3r^4}{r^4}`,
+          L4M_PLUS1: String.raw`Y_{4,1} = \frac{3}{4} \sqrt{\frac{5}{2\pi}} \cdot \frac{x \cdot (7z^2 - 3r^2)}{r^4}`,
+          L4M_PLUS2: String.raw`Y_{4,2} = \frac{3}{8} \sqrt{\frac{5}{\pi}} \cdot \frac{(x^2 - y^2) \cdot (7z^2 - r^2)}{r^4}`,
+          L4M_PLUS3: String.raw`Y_{4,3} = \frac{3}{4} \sqrt{\frac{35}{2\pi}} \cdot \frac{x \cdot (x^2 - 3y^2) \cdot z}{r^4}`,
+          L4M_PLUS4: String.raw`Y_{4,4} = \frac{3}{16} \sqrt{\frac{35}{\pi}} \cdot \frac{x^2 \cdot (x^2 - 3y^2) - y^2 \cdot (3x^2 - y^2)}{r^4}`,
+          L5M_MINUS5: String.raw`Y_{5,-5} = \frac{3}{16} \sqrt{\frac{77}{\pi}} \cdot \frac{xy \cdot (x^2 - y^2)}{r^5}`,
+          L5M_MINUS4: String.raw`Y_{5,-4} = \frac{3}{4} \sqrt{\frac{385}{2\pi}} \cdot \frac{xy \cdot z \cdot (3x^2 - y^2)}{r^5}`,
+          L5M_MINUS3: String.raw`Y_{5,-3} = \frac{1}{16} \sqrt{\frac{385}{\pi}} \cdot \frac{y \cdot (5z^2 - r^2) \cdot (3x^2 - y^2)}{r^5}`,
+          L5M_MINUS2: String.raw`Y_{5,-2} = \frac{3}{8} \sqrt{\frac{1155}{\pi}} \cdot \frac{xy \cdot (7z^2 - 3r^2)}{r^5}`,
+          L5M_MINUS1: String.raw`Y_{5,-1} = \frac{3}{8} \sqrt{\frac{165}{\pi}} \cdot \frac{y \cdot (35z^3 - 30zr^2 + 3r^4)}{r^5}`,
+          L5M_0: String.raw`Y_{5,0} = \frac{3}{16} \sqrt{\frac{11}{\pi}} \cdot \frac{63z^5 - 70z^3r^2 + 15zr^4}{r^5}`,
+          L5M_PLUS1: String.raw`Y_{5,1} = \frac{3}{8} \sqrt{\frac{165}{\pi}} \cdot \frac{x \cdot (35z^3 - 30zr^2 + 3r^4)}{r^5}`,
+          L5M_PLUS2: String.raw`Y_{5,2} = \frac{3}{8} \sqrt{\frac{1155}{\pi}} \cdot \frac{(x^2 - y^2) \cdot (7z^2 - 3r^2)}{r^5}`,
+          L5M_PLUS3: String.raw`Y_{5,3} = \frac{1}{16} \sqrt{\frac{385}{\pi}} \cdot \frac{x \cdot (5z^2 - r^2) \cdot (3x^2 - y^2)}{r^5}`,
+          L5M_PLUS4: String.raw`Y_{5,4} = \frac{3}{4} \sqrt{\frac{385}{2\pi}} \cdot \frac{xy \cdot z \cdot (3x^2 - y^2)}{r^5}`,
+          L5M_PLUS5: String.raw`Y_{5,5} = \frac{3}{16} \sqrt{\frac{77}{\pi}} \cdot \frac{xy \cdot (x^2 - y^2)}{r^5}`,
+        };
+        
+        function getLatexForOrbital(orbitalId) {
+          return LATEX_BY_ID[orbitalId] ?? "";
+        }
+        
+        function polarToCartesian(r, phi, theta) {
+          const x = r * Math.sin(theta) * Math.cos(phi);
+          const y = r * Math.sin(theta) * Math.sin(phi);
+          const z = r * Math.cos(theta);
+          return [x, y, z];
+        }
+        
+        /**
+         * @param {string} orbitType - ORBITAL_TYPES[].id
+         * @param {number} phi
+         * @param {number} theta
+         */
+        function getValueAtPhiAndTheta(orbitType, phi, theta) {
+          const PI = Math.PI;
+          let r = 1.0;
+          const xyz = polarToCartesian(r, phi, theta);
+          const x = xyz[0];
+          const y = xyz[1];
+          const z = xyz[2];
+        
+          switch (orbitType) {
+            case "L0M0":
+              return Math.sqrt(1.0 / (4.0 * PI));
+            case "L1M_MINUS1":
+              return Math.sqrt(3.0 / (4.0 * PI)) * Math.cos(theta);
+            case "L1M_0":
+              return Math.sqrt(3.0 / (4.0 * PI)) * Math.sin(theta) * Math.cos(phi);
+            case "L1M_PLUS1":
+              return Math.sqrt(3.0 / (4.0 * PI)) * Math.sin(theta) * Math.sin(phi);
+            case "L2M_MINUS2":
+              return Math.sqrt(5.0 / (16.0 * PI)) * (3.0 * Math.pow(Math.cos(theta), 2.0) - 1.0);
+            case "L2M_MINUS1":
+              return Math.sqrt(15 / (4 * PI)) * (Math.sin(theta) * Math.cos(theta) * Math.cos(phi));
+            case "L2M_0":
+              return Math.sqrt(15 / (4 * PI)) * (Math.sin(theta) * Math.cos(theta) * Math.sin(phi));
+            case "L2M_PLUS1":
+              return Math.sqrt(15 / (16 * PI)) * (Math.pow(Math.sin(theta), 2) * Math.cos(2 * phi));
+            case "L2M_PLUS2":
+              return Math.sqrt(15 / (16 * PI)) * (Math.pow(Math.sin(theta), 2) * Math.sin(2 * phi));
+            case "L3M_MINUS3":
+              return 0.25 * Math.sqrt(35.0 / (2 * PI)) * (y * (3.0 * Math.pow(x, 2.0) - Math.pow(y, 2.0)) / Math.pow(r, 3.0));
+            case "L3M_MINUS2":
+              return 0.5 * Math.sqrt(105.0 / PI) * (x * y * z) / Math.pow(r, 3.0);
+            case "L3M_MINUS1":
+              return 0.25 * Math.sqrt(21.0 / (2 * PI)) * (y * (5 * Math.pow(y, 2) - Math.pow(r, 2)) / Math.pow(r, 3));
+            case "L3M_0":
+              return 0.25 * Math.sqrt(7.0 / PI) * (5.0 * Math.pow(y, 3.0) - 3.0 * y * Math.pow(r, 2.0)) / Math.pow(r, 3.0);
+            case "L3M_PLUS1":
+              return (1.0 / 4) * Math.sqrt(21.0 / (2 * Math.PI)) * (x * (5 * Math.pow(z, 2) - Math.pow(r, 2))) / Math.pow(r, 3);
+            case "L3M_PLUS2":
+              return (1.0 / 4) * Math.sqrt(105.0 / Math.PI) * ((Math.pow(x, 2) - Math.pow(y, 2)) * xyz[0]) / Math.pow(r, 3);
+            case "L3M_PLUS3":
+              return (1.0 / 4) * Math.sqrt(35.0 / (2 * Math.PI)) * (x * (Math.pow(x, 2) - 3 * Math.pow(y, 2))) / Math.pow(r, 3);
+            case "L4M_MINUS4":
+              return (3.0 / 4) * Math.sqrt(35.0 / Math.PI) * (x * y * (Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 4);
+            case "L4M_MINUS3":
+              return (3.0 / 4) * Math.sqrt(35.0 / (2 * Math.PI)) * (y * (3 * Math.pow(x, 2) - Math.pow(y, 2)) * z) / Math.pow(r, 4);
+            case "L4M_MINUS2":
+              return (3.0 / 4) * Math.sqrt(5.0 / Math.PI) * (x * y * (7 * Math.pow(z, 2) - Math.pow(r, 2))) / Math.pow(r, 4);
+            case "L4M_MINUS1":
+              return (3.0 / 4) * Math.sqrt(5.0 / (2 * Math.PI)) * (y * (7 * Math.pow(z, 2) - 3 * Math.pow(r, 2))) / Math.pow(r, 4);
+            case "L4M_0":
+              return (3.0 / 16) * Math.sqrt(1.0 / Math.PI) * (35 * Math.pow(z, 4) - 30 * Math.pow(z, 2) * Math.pow(r, 2) + 3 * Math.pow(r, 4)) / Math.pow(r, 4);
+            case "L4M_PLUS1":
+              return (3.0 / 4) * Math.sqrt(5.0 / (2 * Math.PI)) * (x * (7 * Math.pow(z, 2) - 3 * Math.pow(r, 2))) / Math.pow(r, 4);
+            case "L4M_PLUS2":
+              return (3.0 / 8) * Math.sqrt(5.0 / Math.PI) * ((Math.pow(x, 2) - Math.pow(y, 2)) * (7 * Math.pow(z, 2) - Math.pow(r, 2))) / Math.pow(r, 4);
+            case "L4M_PLUS3":
+              return (3.0 / 4) * Math.sqrt(35.0 / (2 * Math.PI)) * (x * (Math.pow(x, 2) - 3 * Math.pow(y, 2)) * z) / Math.pow(r, 4);
+            case "L4M_PLUS4":
+              return (3.0 / 16) * Math.sqrt(35.0 / Math.PI) * ((Math.pow(x, 2) * (Math.pow(x, 2) - 3 * Math.pow(y, 2))) - (Math.pow(y, 2) * (3 * Math.pow(x, 2) - Math.pow(y, 2)))) / Math.pow(r, 4);
+            case "L5M_MINUS5":
+              return (3.0 / 16) * Math.sqrt(77.0 / Math.PI) * (x * y * (Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            case "L5M_MINUS4":
+              return (3.0 / 4) * Math.sqrt(385.0 / (2 * Math.PI)) * (x * y * z * (3 * Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            case "L5M_MINUS3":
+              return (1.0 / 16) * Math.sqrt(385.0 / Math.PI) * (y * (5 * Math.pow(z, 2) - Math.pow(r, 2)) * (3 * Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            case "L5M_MINUS2":
+              return (3.0 / 8) * Math.sqrt(1155.0 / Math.PI) * (x * y * (7 * Math.pow(z, 2) - 3 * Math.pow(r, 2))) / Math.pow(r, 5);
+            case "L5M_MINUS1":
+              return (3.0 / 8) * Math.sqrt(165.0 / Math.PI) * (y * (35 * Math.pow(z, 3) - 30 * z * Math.pow(r, 2) + 3 * Math.pow(r, 4))) / Math.pow(r, 5);
+            case "L5M_0":
+              return (3.0 / 16) * Math.sqrt(11.0 / Math.PI) * (63 * Math.pow(z, 5) - 70 * Math.pow(z, 3) * Math.pow(r, 2) + 15 * z * Math.pow(r, 4)) / Math.pow(r, 5);
+            case "L5M_PLUS1":
+              return (3.0 / 8) * Math.sqrt(165.0 / Math.PI) * (x * (35 * Math.pow(z, 3) - 30 * z * Math.pow(r, 2) + 3 * Math.pow(r, 4))) / Math.pow(r, 5);
+            case "L5M_PLUS2":
+              return (3.0 / 8) * Math.sqrt(1155.0 / Math.PI) * ((Math.pow(x, 2) - Math.pow(y, 2)) * (7 * Math.pow(z, 2) - 3 * Math.pow(r, 2))) / Math.pow(r, 5);
+            case "L5M_PLUS3":
+              return (1.0 / 16) * Math.sqrt(385.0 / Math.PI) * (x * (5 * Math.pow(z, 2) - Math.pow(r, 2)) * (3 * Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            case "L5M_PLUS4":
+              return (3.0 / 4) * Math.sqrt(385.0 / (2 * Math.PI)) * (x * y * z * (3 * Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            case "L5M_PLUS5":
+              return (3.0 / 16) * Math.sqrt(77.0 / Math.PI) * (x * y * (Math.pow(x, 2) - Math.pow(y, 2))) / Math.pow(r, 5);
+            default:
+              throw new Error("Unknown orbital: " + orbitType);
+          }
+        }
+        
+        const autoRotateClock = new THREE.Clock();
+        
+        const SCALE = 130;
+        /** Wahrscheinlichkeitswolke: Stichproben-Ziel, Dichte ∝ |Y|², radial um den Ursprung. */
+        const PROB_CLOUD_TARGET = 200000;
+        const PROB_CLOUD_MAX_ATT = 28000000;
+        /* Wolke: r = t·(√p+ε)·SCALE·Faktor; p=|Y|² ⇒ √p=|Y| — gleicher Faktor wie Fläche (r=|Y|·SCALE), sonst wirkte ~2,4× zu weit draußen. */
+        const PROB_CLOUD_RADIAL = 1.0;
+
+        /** Referenz-Kameradistanz; 1.0× = diese Distanz (Standardansicht: Orbital gut sichtbar groß). */
+        const BASE_REF_CAMERA_DISTANCE = 480;
+        /** Einstiegsansicht: zuerst 90° horizontal (Blick in die XZ-Ebene), dann +2° um X, −2° um Y. */
+        const KFF_START_VIEW_DEG = { horizontal: 90, tiltX: 2, tiltY: -2 };
+        const KFF_VIEW_AXIS = {
+          Y: new THREE.Vector3(0, 1, 0),
+          X: new THREE.Vector3(1, 0, 0),
+        };
+        /** … Y₄,₀ 1,7; Y₄,±₁ 0,7 (|Y| gleich für ±m); Y₄,₋₂ Y₄,₋₃ 2,3; Y₄,₋₄ 2,1; L=3-Defaults: Y₃,₋₁ 0,75; Y₃,₀ 1,9; Y₃,₁ 2,5; Y₃,₃ 2,3; … bis Y₃,₋₂: 2,4; sonst 1,0. */
+        const ZOOM_DEFAULT_BIS_L3M_MINUS2 = 2.4;
+        const ZOOM_DEFAULT_L3M_MINUS1 = 0.75;
+        const ZOOM_DEFAULT_L3M_0 = 1.9;
+        const ZOOM_DEFAULT_L3M_PLUS1 = 2.5;
+        const ZOOM_DEFAULT_L3M_PLUS3 = 2.3;
+        const ZOOM_DEFAULT_L4M_MINUS4 = 2.1;
+        const ZOOM_DEFAULT_L4M_MINUS3 = 2.3;
+        const ZOOM_DEFAULT_L4M_MINUS2 = 2.3;
+        const ZOOM_DEFAULT_L4M_MINUS1 = 0.7;
+        const ZOOM_DEFAULT_L4M_0 = 1.7;
+        /** Y₅,₋₁: starker Rückzug (sonst riesig im Bild); nötig: Kamera weit / hohe maxDistance. */
+        const ZOOM_DEFAULT_L5M_MINUS1 = 0.05;
+        const ORBITAL_INDEX_BIS_L3M_MINUS2 = ORBITAL_TYPES.findIndex((t) => t.id === "L3M_MINUS2");
+        const ORBITAL_INDEX_L3M_MINUS1 = ORBITAL_TYPES.findIndex((t) => t.id === "L3M_MINUS1");
+        const ORBITAL_INDEX_L3M_0 = ORBITAL_TYPES.findIndex((t) => t.id === "L3M_0");
+        const ORBITAL_INDEX_L3M_PLUS1 = ORBITAL_TYPES.findIndex((t) => t.id === "L3M_PLUS1");
+        const ORBITAL_INDEX_L3M_PLUS3 = ORBITAL_TYPES.findIndex((t) => t.id === "L3M_PLUS3");
+        const ORBITAL_INDEX_L4M_MINUS4 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_MINUS4");
+        const ORBITAL_INDEX_L4M_MINUS3 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_MINUS3");
+        const ORBITAL_INDEX_L4M_MINUS2 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_MINUS2");
+        const ORBITAL_INDEX_L4M_MINUS1 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_MINUS1");
+        const ORBITAL_INDEX_L4M_PLUS1 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_PLUS1");
+        const ORBITAL_INDEX_L4M_0 = ORBITAL_TYPES.findIndex((t) => t.id === "L4M_0");
+        const ORBITAL_INDEX_L5M_MINUS1 = ORBITAL_TYPES.findIndex((t) => t.id === "L5M_MINUS1");
+        
+        function defaultCameraDistance(orbitalIndex) {
+          if (ORBITAL_INDEX_BIS_L3M_MINUS2 >= 0 && orbitalIndex <= ORBITAL_INDEX_BIS_L3M_MINUS2) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_BIS_L3M_MINUS2;
+          }
+          if (ORBITAL_INDEX_L3M_MINUS1 >= 0 && orbitalIndex === ORBITAL_INDEX_L3M_MINUS1) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L3M_MINUS1;
+          }
+          if (ORBITAL_INDEX_L3M_0 >= 0 && orbitalIndex === ORBITAL_INDEX_L3M_0) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L3M_0;
+          }
+          if (ORBITAL_INDEX_L3M_PLUS1 >= 0 && orbitalIndex === ORBITAL_INDEX_L3M_PLUS1) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L3M_PLUS1;
+          }
+          if (ORBITAL_INDEX_L3M_PLUS3 >= 0 && orbitalIndex === ORBITAL_INDEX_L3M_PLUS3) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L3M_PLUS3;
+          }
+          if (ORBITAL_INDEX_L4M_MINUS4 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_MINUS4) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_MINUS4;
+          }
+          if (ORBITAL_INDEX_L4M_MINUS3 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_MINUS3) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_MINUS3;
+          }
+          if (ORBITAL_INDEX_L4M_MINUS2 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_MINUS2) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_MINUS2;
+          }
+          if (ORBITAL_INDEX_L4M_MINUS1 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_MINUS1) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_MINUS1;
+          }
+          if (ORBITAL_INDEX_L4M_PLUS1 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_PLUS1) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_MINUS1;
+          }
+          if (ORBITAL_INDEX_L4M_0 >= 0 && orbitalIndex === ORBITAL_INDEX_L4M_0) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L4M_0;
+          }
+          if (ORBITAL_INDEX_L5M_MINUS1 >= 0 && orbitalIndex === ORBITAL_INDEX_L5M_MINUS1) {
+            return BASE_REF_CAMERA_DISTANCE / ZOOM_DEFAULT_L5M_MINUS1;
+          }
+          return BASE_REF_CAMERA_DISTANCE;
+        }
+        
+        function applyDefaultCameraForCurrentOrbital() {
+          if (!camera || !controls) return;
+          const d = defaultCameraDistance(state.orbitalIndex);
+          const v = new THREE.Vector3(0, 0, d);
+          v.applyAxisAngle(KFF_VIEW_AXIS.Y, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.horizontal));
+          v.applyAxisAngle(KFF_VIEW_AXIS.X, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.tiltX));
+          v.applyAxisAngle(KFF_VIEW_AXIS.Y, THREE.MathUtils.degToRad(KFF_START_VIEW_DEG.tiltY));
+          camera.up.set(0, 1, 0);
+          camera.position.copy(v);
+          controls.target.set(0, 0, 0);
+          camera.lookAt(controls.target);
+          controls.update();
+        }
+        /** Pos. Phase: Cyan; neg. Phase bleibt Gold (#f9c247) */
+        const PHASE_POS = new THREE.Color(0x06b6d4);
+        const PHASE_NEG = new THREE.Color(0xf9c247);
+        const PHASE_NODE = new THREE.Color(0xe1eaf6);
+        const state = {
+          orbitalIndex: ORBITAL_INDEX_START >= 0 ? ORBITAL_INDEX_START : 0,
+          resolution: 180,
+          specular: 32,
+          opacity: 1,
+          autoRotate: true,
+          /** Wolkemodus: Punktwolke |Y|² an, Kugelfläche aus (umschaltbar). */
+          showProbabilityCloud: false,
+          ambientOn: true,
+          pointLightOn: true,
+        };
+        
+        let lastFormulaZfKatex = "";
+        
+        let scene, camera, renderer, controls;
+        let meshGroup, orbitalMesh;
+        /** Wahrscheinlichkeitswolke |Y|²; mit Wolkemodus ist die Fläche ausgeblendet. */
+        let probabilityCloud = null;
+        let ambientLight;
+        /** Punktlichter an der Kamera: wandern nicht getrennt von der Blickrichtung (kein „mitdrehendes“ Studio-Licht in der Welt). */
+        let pointLight, pointFillLight;
+        let pmremGenerator;
+        
+        /** Regler „Specular“: hoher Wert → glatter / mehr Glanz (niedrigere roughness). */
+        function roughnessFromSpecular(s) {
+          const t = (Math.max(1, Math.min(256, s)) - 1) / 255;
+          return THREE.MathUtils.lerp(0.5, 0.07, t);
+        }
+        
+        function createOrbitalMaterial() {
+          return new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            vertexColors: true,
+            roughness: roughnessFromSpecular(state.specular),
+            metalness: 0.06,
+            clearcoat: 0.72,
+            clearcoatRoughness: 0.16,
+            envMapIntensity: 0.58,
+            transparent: state.opacity < 1,
+            opacity: state.opacity,
+            side: THREE.FrontSide,
+          });
+        }
+        
+        function vertexColorForSample(orbitalId, val, target) {
+          const a = Math.abs(val);
+          if (a < 1e-14) {
+            return target.copy(PHASE_NODE);
+          }
+          return target.copy(val > 0 ? PHASE_POS : PHASE_NEG);
+        }
+        
+        function buildGeometry(orbitalId, resolution) {
+          const PI = Math.PI;
+          const twoPI = 2 * PI;
+          /** Polarwinkel θ ∈ [0,π] von der z-Achse, Azimut φ ∈ [0,2π) — wie in polarToCartesian / Y_lm. */
+          const rows = resolution + 1;
+          const cols = resolution;
+          const positions = new Float32Array(rows * cols * 3);
+          const colors = new Float32Array(rows * cols * 3);
+          const tmpCol = new THREE.Color();
+        
+          let p = 0;
+          let ci = 0;
+          for (let i = 0; i <= resolution; i++) {
+            const theta = (i / resolution) * PI;
+            for (let j = 0; j < cols; j++) {
+              const phi = (j / cols) * twoPI;
+              const val = getValueAtPhiAndTheta(orbitalId, phi, theta);
+              const r = Math.abs(val);
+              const x = r * Math.sin(theta) * Math.cos(phi);
+              const y = r * Math.sin(theta) * Math.sin(phi);
+              const z = r * Math.cos(theta);
+              positions[p++] = x * SCALE;
+              positions[p++] = y * SCALE;
+              positions[p++] = z * SCALE;
+              vertexColorForSample(orbitalId, val, tmpCol);
+              colors[ci++] = tmpCol.r;
+              colors[ci++] = tmpCol.g;
+              colors[ci++] = tmpCol.b;
+            }
+          }
+        
+          const indices = [];
+          for (let i = 0; i < resolution; i++) {
+            for (let j = 0; j < resolution; j++) {
+              const p1 = i * cols + j;
+              const p2 = i * cols + ((j + 1) % cols);
+              const p3 = (i + 1) * cols + j;
+              const p4 = (i + 1) * cols + ((j + 1) % cols);
+              indices.push(p1, p3, p2, p2, p3, p4);
+            }
+          }
+        
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+          geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+          geo.setIndex(indices);
+          geo.computeVertexNormals();
+          return geo;
+        }
+
+        function estimateProbDensityMax(orbitalId) {
+          const n = 72;
+          let maxP = 0;
+          const PI = Math.PI;
+          for (let i = 0; i <= n; i++) {
+            const theta = (i / n) * PI;
+            for (let j = 0; j < n; j++) {
+              const phi = (j / n) * 2 * PI;
+              const v = getValueAtPhiAndTheta(orbitalId, phi, theta);
+              const p = v * v;
+              if (p > maxP) maxP = p;
+            }
+          }
+          return maxP > 1e-20 ? maxP : 1e-20;
+        }
+
+        function pushProbCloudSample(orbitalId, phi, theta, sinT, cosT, p, val, pos, cols, tmpC) {
+          const t = 0.1 + 0.9 * Math.pow(Math.random(), 0.5);
+          /* +ε nur gegen numerische Null; zu groß flacht „leere“ Richtungen auf. */
+          const rLen = t * (Math.sqrt(p) + 0.001) * SCALE * PROB_CLOUD_RADIAL;
+          const x = rLen * sinT * Math.cos(phi);
+          const y = rLen * sinT * Math.sin(phi);
+          const z = rLen * cosT;
+          pos.push(x, y, z);
+          vertexColorForSample(orbitalId, val, tmpC);
+          cols.push(tmpC.r, tmpC.g, tmpC.b);
+        }
+
+        /**
+         * Punktwolke: Richtung gleichverteilt auf S², Annahme ∝ p=|Y|² (Verwerfung gegen pMax) → Dichte ∝ |Y|².
+         * Keine Auffüll-Gitter-Phase: die hätte p zu locker gewichtet und wirkte „gleichverteilt“.
+         */
+        function buildProbabilityCloud(orbitalId) {
+          const pMax = estimateProbDensityMax(orbitalId);
+          const pos = [];
+          const cols = [];
+          const tmpC = new THREE.Color();
+          const twoPI = 2 * Math.PI;
+          let attempts = 0;
+          while (pos.length / 3 < PROB_CLOUD_TARGET && attempts < PROB_CLOUD_MAX_ATT) {
+            attempts++;
+            const u = Math.random();
+            const v = Math.random();
+            const cosT = 2 * u - 1;
+            const sinT = Math.sqrt(Math.max(0, 1 - cosT * cosT));
+            const phi = v * twoPI;
+            const th = Math.acos(cosT);
+            const val = getValueAtPhiAndTheta(orbitalId, phi, th);
+            const p = val * val;
+            if (Math.random() * pMax > p) continue;
+            pushProbCloudSample(orbitalId, phi, th, sinT, cosT, p, val, pos, cols, tmpC);
+          }
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pos), 3));
+          geo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cols), 3));
+          const mat = new THREE.PointsMaterial({
+            size: 0.12,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: Math.min(0.55, 0.28 + state.opacity * 0.22),
+            depthWrite: false,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+          });
+          const pts = new THREE.Points(geo, mat);
+          pts.renderOrder = 1;
+          return pts;
+        }
+
+        function disposeProbabilityCloud() {
+          if (probabilityCloud) {
+            probabilityCloud.geometry.dispose();
+            probabilityCloud.material.dispose();
+            if (meshGroup) meshGroup.remove(probabilityCloud);
+            probabilityCloud = null;
+          }
+        }
+
+        function refreshProbabilityCloud() {
+          disposeProbabilityCloud();
+          if (!state.showProbabilityCloud || !meshGroup) return;
+          probabilityCloud = buildProbabilityCloud(ORBITAL_TYPES[state.orbitalIndex].id);
+          meshGroup.add(probabilityCloud);
+        }
+
+        function syncProbCloudSwitchUi() {
+          const btn = document.getElementById("kff-prob-cloud");
+          if (!btn) return;
+          const on = state.showProbabilityCloud;
+          btn.classList.toggle("kff-prob-switch--on", on);
+          btn.setAttribute("aria-checked", on ? "true" : "false");
+        }
+
+        /** Wolkemodus an: nur Punktwolke; Fläche per `visible` aus (Mesh bleibt für schnelles Umschalten). */
+        function applyOrbitalSurfaceVisibilityForCloudMode() {
+          if (orbitalMesh) orbitalMesh.visible = !state.showProbabilityCloud;
+        }
+
+        function disposeMesh() {
+          if (orbitalMesh) {
+            orbitalMesh.geometry.dispose();
+            orbitalMesh.material.dispose();
+            meshGroup.remove(orbitalMesh);
+            orbitalMesh = null;
+          }
+        }
+        
+        function rebuildOrbital() {
+          const id = ORBITAL_TYPES[state.orbitalIndex].id;
+          disposeMesh();
+          const geo = buildGeometry(id, state.resolution);
+          const mat = createOrbitalMaterial();
+          orbitalMesh = new THREE.Mesh(geo, mat);
+          meshGroup.add(orbitalMesh);
+          refreshProbabilityCloud();
+          applyOrbitalSurfaceVisibilityForCloudMode();
+          applyDefaultCameraForCurrentOrbital();
+          renderFormula(id);
+          updateStats();
+          updateOrbitalTriggerLine();
+          updateOrbitalOptionsSelection();
+        }
+        
+        function renderFormula(orbitalId) {
+          const el = document.getElementById("formula-tex");
+          if (!el) return;
+          const tex = getLatexForOrbital(orbitalId);
+          if (window.katex) {
+            try {
+              katex.render(tex, el, {
+                throwOnError: false,
+                displayMode: true,
+              });
+            } catch {
+              el.textContent = tex;
+            }
+          } else {
+            el.textContent = tex;
+          }
+        }
+        
+        /** Zoomzeile per KaTeX unter der Gleichung: \( \text{ZOOM}~… \). */
+        function renderFormulaZfKatex() {
+          const el = document.getElementById("formula-zf");
+          if (!el) return;
+          const zf = cameraZoomFactor();
+          const zfDe = zf.toFixed(2).replace(".", ",");
+          const tex = `\\text{ZOOM}~\\text{${zfDe}}`;
+          if (tex === lastFormulaZfKatex) return;
+          lastFormulaZfKatex = tex;
+          if (window.katex) {
+            try {
+              katex.render(tex, el, { throwOnError: false, displayMode: true });
+            } catch {
+              el.textContent = `ZOOM ${zfDe}`;
+            }
+          } else {
+            el.textContent = `ZOOM ${zfDe}`;
+          }
+        }
+        
+        function cameraDistance() {
+          if (!camera || !controls) return defaultCameraDistance(state.orbitalIndex);
+          return camera.position.distanceTo(controls.target);
+        }
+        
+        function cameraZoomFactor() {
+          const d = cameraDistance();
+          if (d < 1e-6) return 1;
+          return BASE_REF_CAMERA_DISTANCE / d;
+        }
+        
+        function resetCameraView() {
+          if (!camera || !controls) return;
+          applyDefaultCameraForCurrentOrbital();
+        }
+        
+        function updateStats() {
+          renderFormulaZfKatex();
+          const zoomEl = document.getElementById("stats-zoom");
+          const metaEl = document.getElementById("stats");
+          if (!zoomEl && !metaEl) return;
+        
+          const d = cameraDistance();
+          const zf = cameraZoomFactor();
+          const zoomText = `Zoomfaktor ${zf.toFixed(2)}× · Referenz ${BASE_REF_CAMERA_DISTANCE} · Distanz ${d.toFixed(0)} · nur Bildschirmansicht, kein Maßstab und nicht vergleichbar mit Lehrbuch- oder anderen Abbildungen.`;
+        
+          if (zoomEl) zoomEl.textContent = zoomText;
+        
+          if (!orbitalMesh) {
+            if (metaEl) metaEl.textContent = "";
+            return;
+          }
+        
+          const geo = orbitalMesh.geometry;
+          const pos = geo.getAttribute("position");
+          const idx = geo.getIndex();
+          const verts = pos ? pos.count : 0;
+          const tris = idx ? idx.count / 3 : 0;
+          const id = ORBITAL_TYPES[state.orbitalIndex].id;
+          const nCloud =
+            state.showProbabilityCloud && probabilityCloud
+              ? probabilityCloud.geometry.getAttribute("position")?.count ?? 0
+              : 0;
+          const rest = [
+            orbitalSelectOptionText(id),
+            `Auflösung: ${state.resolution}`,
+            `Punkte: ${verts.toLocaleString()}`,
+            `Dreiecke: ${Math.floor(tris).toLocaleString()}`,
+            nCloud > 0 ? `Wolke: ${nCloud.toLocaleString()}` : null,
+            `Specular: ${state.specular}`,
+            `Opacity: ${state.opacity.toFixed(2)}`,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+        
+          if (metaEl) metaEl.textContent = rest;
+        }
+        
+        function initThree() {
+          const container = document.getElementById("canvas-wrap");
+          scene = new THREE.Scene();
+          /* Kein Vollflächen-Farbfilm: gleicher Radial-Gradient auf #canvas-wrap sichtbar (wie Lab-CSS) */
+          scene.background = null;
+        
+          camera = new THREE.PerspectiveCamera(44, container.clientWidth / container.clientHeight, 0.1, 15000);
+          camera.position.set(0, 0, BASE_REF_CAMERA_DISTANCE);
+        
+          /* preserveDrawingBuffer: Cmd+Shift+S-Screenshot (CyberUI) liest das Canvas aus */
+          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+          renderer.setClearColor(0x000000, 0);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          renderer.setSize(container.clientWidth, container.clientHeight);
+          renderer.outputColorSpace = THREE.SRGBColorSpace;
+          renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          renderer.toneMappingExposure = 1.12;
+          container.appendChild(renderer.domElement);
+        
+          pmremGenerator = new THREE.PMREMGenerator(renderer);
+          pmremGenerator.compileEquirectangularShader();
+          const envScene = new RoomEnvironment(renderer);
+          scene.environment = pmremGenerator.fromScene(envScene, 0.04).texture;
+          envScene.dispose();
+        
+          controls = new TrackballControls(camera, renderer.domElement);
+          controls.rotateSpeed = 1.3;
+          controls.zoomSpeed = 1.05;
+          controls.panSpeed = 0.32;
+          controls.staticMoving = false;
+          controls.dynamicDampingFactor = 0.14;
+          controls.minDistance = 140;
+          controls.maxDistance = 12000;
+          controls.target.set(0, 0, 0);
+        
+          meshGroup = new THREE.Group();
+          scene.add(meshGroup);
+        
+          ambientLight = new THREE.AmbientLight(0xf9f6ff, 0.48);
+          scene.add(ambientLight);
+        
+          pointLight = new THREE.PointLight(0xf9c247, 2.0, 0, 0);
+          pointLight.position.set(0, 55, 250);
+          camera.add(pointLight);
+        
+          pointFillLight = new THREE.PointLight(0xe1eaf6, 1.15, 0, 0);
+          pointFillLight.position.set(-110, 40, 200);
+          camera.add(pointFillLight);
+        
+          scene.add(new THREE.HemisphereLight(0xe1eaf6, 0x0a0d18, 0.36));
+        
+          window.addEventListener("resize", onResize);
+        }
+        
+        function onResize() {
+          const container = document.getElementById("canvas-wrap");
+          if (!container || !camera || !renderer) return;
+          const w = container.clientWidth;
+          const h = container.clientHeight;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+          if (controls) controls.handleResize();
+        }
+        
+        function syncLights() {
+          ambientLight.visible = state.ambientOn;
+          if (pointLight) pointLight.visible = state.pointLightOn;
+          if (pointFillLight) pointFillLight.visible = state.pointLightOn;
+        }
+        
+        function tick() {
+          requestAnimationFrame(tick);
+          const dt = autoRotateClock.getDelta();
+          if (state.autoRotate && meshGroup) {
+            meshGroup.rotation.y += dt * 0.5;
+          }
+          controls.update();
+          updateStats();
+          renderer.render(scene, camera);
+        }
+        
+        function initOrbitalDropdown() {
+          const panel = document.getElementById("orbital-dropdown-panel");
+          if (!panel) return;
+          panel.innerHTML = "";
+          ORBITAL_TYPES.forEach((t, i) => {
+            const row = document.createElement("div");
+            row.className = "dropdown-option kff-orbital-option";
+            row.setAttribute("role", "option");
+            row.setAttribute("data-index", String(i));
+            row.setAttribute("tabindex", "-1");
+            row.innerHTML = `<span class="kff-orbital-y">${orbitalYPart(t.id)}</span><span class="kff-orbital-tag">ORBITAL</span>`;
+            row.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const idx = Number(row.getAttribute("data-index"));
+              if (state.orbitalIndex === idx) {
+                setOrbitalDropdownOpen(false);
+                return;
+              }
+              state.orbitalIndex = idx;
+              updateOrbitalOptionsSelection();
+              updateOrbitalTriggerLine();
+              setOrbitalDropdownOpen(false);
+              rebuildOrbital();
+            });
+            panel.appendChild(row);
+          });
+          updateOrbitalOptionsSelection();
+          updateOrbitalTriggerLine();
+
+          const root = document.getElementById("kff-orbital-root");
+          if (root && !root.dataset.kffWired) {
+            root.dataset.kffWired = "1";
+            root.addEventListener("click", (e) => e.stopPropagation());
+            const tr0 = document.getElementById("orbital-trigger");
+            if (tr0) {
+              tr0.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const panelEl = document.getElementById("orbital-dropdown-panel");
+                const nowOpen = panelEl && !panelEl.hasAttribute("hidden");
+                setOrbitalDropdownOpen(!nowOpen);
+              });
+            }
+            document.addEventListener("click", () => setOrbitalDropdownOpen(false));
+          }
+        }
+        
+        function wireUi() {
+          const res = document.getElementById("resolution");
+          const resVal = document.getElementById("resolution-value");
+          res.addEventListener("input", () => {
+            state.resolution = Math.max(10, Math.min(1000, Number(res.value)));
+            resVal.textContent = String(state.resolution);
+            rebuildOrbital();
+          });
+        
+          document.getElementById("specular").addEventListener("input", (e) => {
+            state.specular = Math.max(1, Math.min(256, Number(e.target.value)));
+            document.getElementById("specular-value").textContent = String(state.specular);
+            if (orbitalMesh) {
+              orbitalMesh.material.roughness = roughnessFromSpecular(state.specular);
+              orbitalMesh.material.needsUpdate = true;
+            }
+            updateStats();
+          });
+        
+          document.getElementById("opacity").addEventListener("input", (e) => {
+            state.opacity = Math.max(0.1, Math.min(1, Number(e.target.value)));
+            document.getElementById("opacity-value").textContent = state.opacity.toFixed(2);
+            if (orbitalMesh) {
+              orbitalMesh.material.opacity = state.opacity;
+              orbitalMesh.material.transparent = state.opacity < 1;
+              orbitalMesh.material.needsUpdate = true;
+            }
+            if (probabilityCloud && probabilityCloud.material) {
+              probabilityCloud.material.opacity = Math.min(0.55, 0.28 + state.opacity * 0.22);
+            }
+            updateStats();
+          });
+
+          const probRow = document.querySelector(".kff-prob-switch-row");
+          if (probRow) {
+            probRow.addEventListener("click", (e) => {
+              e.stopPropagation();
+              if (typeof window.kffSetOrbitalDropdownOpen === "function") {
+                window.kffSetOrbitalDropdownOpen(false);
+              }
+              state.showProbabilityCloud = !state.showProbabilityCloud;
+              syncProbCloudSwitchUi();
+              refreshProbabilityCloud();
+              applyOrbitalSurfaceVisibilityForCloudMode();
+              updateStats();
+            });
+          }
+          syncProbCloudSwitchUi();
+        
+          document.getElementById("toggle-rotate").addEventListener("click", () => {
+            state.autoRotate = !state.autoRotate;
+          });
+        
+          document.getElementById("help-toggle").addEventListener("click", () => {
+            const panel = document.getElementById("help-panel");
+            panel.hidden = !panel.hidden;
+          });
+        
+          window.addEventListener("keydown", (ev) => {
+            if (ev.target.matches("input, select, textarea")) return;
+            if (ev.code === "Space" && ev.target instanceof HTMLButtonElement) return;
+            switch (ev.code) {
+              case "ArrowUp": {
+                ev.preventDefault();
+                state.orbitalIndex = (state.orbitalIndex + 1) % ORBITAL_TYPES.length;
+                rebuildOrbital();
+                break;
+              }
+              case "ArrowDown": {
+                ev.preventDefault();
+                state.orbitalIndex = (state.orbitalIndex - 1 + ORBITAL_TYPES.length) % ORBITAL_TYPES.length;
+                rebuildOrbital();
+                break;
+              }
+              case "ArrowLeft": {
+                ev.preventDefault();
+                const step = ev.shiftKey ? 10 : 1;
+                state.resolution = Math.max(10, state.resolution - step);
+                document.getElementById("resolution").value = String(state.resolution);
+                document.getElementById("resolution-value").textContent = String(state.resolution);
+                rebuildOrbital();
+                break;
+              }
+              case "ArrowRight": {
+                ev.preventDefault();
+                const step = ev.shiftKey ? 10 : 1;
+                state.resolution = Math.min(1000, state.resolution + step);
+                document.getElementById("resolution").value = String(state.resolution);
+                document.getElementById("resolution-value").textContent = String(state.resolution);
+                rebuildOrbital();
+                break;
+              }
+              case "Space": {
+                ev.preventDefault();
+                state.autoRotate = !state.autoRotate;
+                break;
+              }
+              case "Escape": {
+                setOrbitalDropdownOpen(false);
+                meshGroup.rotation.set(0, 0, 0);
+                state.autoRotate = false;
+                resetCameraView();
+                break;
+              }
+              case "Digit1":
+              case "Digit2":
+              case "Digit3":
+              case "Digit4":
+              case "Digit5":
+              case "Digit6":
+              case "Digit7":
+              case "Digit8":
+              case "Digit9": {
+                const n = Number(ev.code.replace("Digit", ""));
+                state.resolution = n * 100;
+                document.getElementById("resolution").value = String(state.resolution);
+                document.getElementById("resolution-value").textContent = String(state.resolution);
+                rebuildOrbital();
+                break;
+              }
+              case "Digit0": {
+                state.resolution = 10;
+                document.getElementById("resolution").value = "10";
+                document.getElementById("resolution-value").textContent = "10";
+                rebuildOrbital();
+                break;
+              }
+              case "KeyH": {
+                const panel = document.getElementById("help-panel");
+                panel.hidden = !panel.hidden;
+                break;
+              }
+              default:
+                break;
+            }
+          });
+        }
+        
+        try {
+          initOrbitalDropdown();
+          wireUi();
+          initThree();
+          document.getElementById("resolution").value = String(state.resolution);
+          document.getElementById("resolution-value").textContent = String(state.resolution);
+          document.getElementById("specular").value = String(state.specular);
+          document.getElementById("specular-value").textContent = String(state.specular);
+          document.getElementById("opacity").value = String(state.opacity);
+          document.getElementById("opacity-value").textContent = state.opacity.toFixed(2);
+          syncLights();
+          rebuildOrbital();
+          tick();
+          window.dispatchEvent(new Event("resize"));
+        } catch (e) {
+          const el = document.getElementById("kff-error");
+          if (el) {
+            el.hidden = false;
+            el.innerHTML = "<strong>KFF konnte nicht starten.</strong><br>Prüfe die Netzwerkverbindung (Three.js) oder die Konsole." + "<br><br><small style=\"opacity:0.85\">" + (e && e.message ? e.message : String(e)) + "</small>";
+          }
+          console.error(e);
+        }
+    </script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById("side-panel");
+            panel.classList.toggle("collapsed");
+            if (panel.classList.contains("collapsed") && typeof window.kffSetOrbitalDropdownOpen === "function") {
+                window.kffSetOrbitalDropdownOpen(false);
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+            }, 400);
+        }
+
+        window.addEventListener("load", () => {
+            if (typeof CyberUI !== "undefined") {
+                CyberUI.init();
+                const railBtn = document.getElementById('rail-toggle-btn');
+                if (railBtn) railBtn.title = CyberI18n.get('geometry.lab_control');
+            }
+            if (typeof CyberBranding !== "undefined") {
+                CyberBranding.init({
+                    useExternalStyles: true,
+                    title: CyberI18n.get('ui.coach_title'),
+                    subtitle: CyberI18n.get('orbitals.title')
+                });
+            }
+        });
+    </script>
+</body>
+</html>

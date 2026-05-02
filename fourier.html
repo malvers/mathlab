@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fourier Labor | docalvers</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+</head>
+
+<body class="compact-ui">
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="top-bar">
+                <!-- Injected via JS to match 2-row layout -->
+            </div>
+            <div class="cyber-grid"></div>
+            <div id="formula-overlay"></div>
+            <div id="n-telemetry">2</div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/fourier-logic.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                if (window.cc) cc.resize();
+            }, 400);
+        }
+
+        const BRAND_BLUE = "#00d2ff";
+        const GOLDEN = "#ffd700";
+        const COLORS = ["#ff7eb9", "#7afbff", "#fff970", "#ff7eb9", "#7afbff", "#fff970"];
+
+        CyberBranding.init({
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('fourier.title'),
+            useExternalStyles: true
+        });
+        CyberUI.init();
+
+        // --- CYBER CANVAS INTEGRATION ---
+        const cc = CyberCanvasInstance;
+        cc.init('canvas', { minX: -600, maxX: 600, minY: -600, maxY: 600 }, {
+            showTelemetry: false,
+            showGrid: false,
+            showAxes: false,
+            showLabels: false,
+            allowPan: true,
+            allowZoom: true,
+            maxRangeY: 1200
+        });
+        const ctx = cc.ctx;
+
+        // State
+        let time = 0;
+        let path = [];
+        let historicalPaths = [];
+        let fourierZ = [];
+        let currentShapePoints = [];
+        let paused = false;
+        let isTracking = false;
+        let showEpicycles = true;
+        let isEvolving = false;
+        let evolutionIndex = 0;
+        const evolutionSteps = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000];
+
+        // High-Tech SVG Path Sampler - Flipped and Centered for Math Y-Up
+        function sampleSVGPath(pathData, density, targetScale = 10) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const pathEl = document.createElementNS(svgNS, "path");
+            pathEl.setAttribute("d", pathData);
+            const length = pathEl.getTotalLength();
+            const rawPoints = [];
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+            for (let i = 0; i < density; i++) {
+                const p = pathEl.getPointAtLength((i / density) * length);
+                const x = p.x;
+                const y = -p.y; // Flip Y for Math-Up
+                rawPoints.push({ x, y });
+
+                minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+            }
+
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+
+            // Center at origin and scale
+            return rawPoints.map(p => ({
+                x: (p.x - centerX) * targetScale,
+                y: (p.y - centerY) * targetScale
+            }));
+        }
+
+        // Enhanced Path Generators
+        function generateSquare(size, density) {
+            const path = [];
+            for (let i = 0; i < density; i++) path.push({ x: -size + (2 * size * i) / density, y: size }); // Top
+            for (let i = 0; i < density; i++) path.push({ x: size, y: size - (2 * size * i) / density }); // Right
+            for (let i = 0; i < density; i++) path.push({ x: size - (2 * size * i) / density, y: -size }); // Bottom
+            for (let i = 0; i < density; i++) path.push({ x: -size, y: -size + (2 * size * i) / density }); // Left
+            return path;
+        }
+
+        // Authoritative path from resources/note.svg
+        const NOTE_SVG = "M31.68,6.16c-1.92-3.3-10.6-4-11.58-4.09L19,2V22.29a5.88,5.88,0,0,0-.81-.55,8.33,8.33,0,0,0-6.53-.41c-4.12,1.33-6.77,5.13-5.91,8.47a5.33,5.33,0,0,0,2.66,3.32,7.48,7.48,0,0,0,3.61.88A9.54,9.54,0,0,0,15,33.52c3.7-1.19,6.2-4.37,6.06-7.42,0,0,0,0,0,0V8.49c1,.12,2.37.33,3.82.64a11.17,11.17,0,0,1,4.06,1.46c1,.66.38,1.9.33,2a11.8,11.8,0,0,1-1.66,2,1,1,0,0,0,1.33,1.49C29.15,15.85,34.5,11,31.68,6.16Z";
+        // SVG Path for a Heart
+        const HEART_SVG = "M 0,60 C -40,60 -80,20 -80,-30 C -80,-80 -40,-110 0,-70 C 40,-110 80,-80 80,-30 C 80,20 40,60 0,60";
+
+        const SHAPES = {
+            "QUADRAT": generateSquare(150, 250),
+            "NOTE": sampleSVGPath(NOTE_SVG, 1000),
+            "HERZ": sampleSVGPath(HEART_SVG, 1000)
+        };
+
+        // Simulation Controls
+        function setupUI() {
+            CyberUI.createCard('ui-container', null, `
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; padding: 0;">
+                    <div class="cyber-control-group" style="margin: 0 !important; padding: 0;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">${CyberI18n.get('fourier.select_shape')}</label>
+                        <select id="shape-select" class="cyber-select" onchange="updateParams()" style="width: 100%; margin: 0; box-sizing: border-box;">
+                            <option value="NOTE">${CyberI18n.get('fourier.shape_note')}</option>
+                            <option value="QUADRAT">${CyberI18n.get('fourier.shape_square')}</option>
+                            <option value="HERZ">${CyberI18n.get('fourier.shape_heart')}</option>
+                        </select>
+                    </div>
+
+                    <div class="cyber-control-group" style="margin: 5px 0 0 0 !important; padding: 0; overflow: visible;">
+                        <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                            <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
+                            <button id="btn-n-down" class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
+                            <button id="btn-n-up" class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
+                            <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
+                        </div>
+                        <div class="cyber-label" style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 4px;">
+                            <span id="n-value" style="color: var(--neon-blue);">2</span>
+                            <span>${CyberI18n.get('fourier.circles')}</span>
+                        </div>
+                        <input type="range" id="n-input" min="2" max="1000" value="2" oninput="updateParams()" 
+                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="cyber-control-group" style="margin: 10px 0 0 0 !important; padding: 0; overflow: visible;">
+                        <label class="cyber-label" style="display: block; margin-bottom: 4px; padding: 0;">${CyberI18n.get('fourier.speed')}</label>
+                        <input type="range" id="speed-input" min="1" max="500" value="100" 
+                               style="width: 100%; margin: 0; padding: 0; display: block; box-sizing: border-box;">
+                    </div>
+
+                    <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="circles-checkbox" checked onchange="toggleCircles()" style="cursor: pointer;">
+                        ${CyberI18n.get('fourier.show_circles')}
+                    </label>
+
+                    <label class="cyber-label" style="display: flex; align-items: center; gap: 10px; margin-top: 5px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="tracking-checkbox" onchange="toggleTracking()" style="cursor: pointer;">
+                        ${CyberI18n.get('fourier.tracking')}
+                    </label>
+                    
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button id="pause-btn" class="cyber-btn" onclick="togglePause()" style="flex: 2; border-color: #ffd700; color: #ffd700; margin: 0; padding: 4px;">${CyberI18n.get('cmaes.pause')}</button>
+                        <button class="cyber-btn" onclick="manualReset()" style="flex: 1; border-color: var(--neon-blue); margin: 0; padding: 4px;">${CyberI18n.get('cmaes.reset')}</button>
+                    </div>
+                    
+                    <button id="evolve-btn" class="cyber-btn" onclick="startEvolution()" style="width: 100%; margin-top: 8px; border-color: #adff2f; color: #adff2f; box-shadow: 0 0 15px rgba(173, 255, 47, 0.2); padding: 4px;">${CyberI18n.get('fourier.auto_evolve')}</button>
+                </div>
+            `, BRAND_BLUE);
+        }
+
+        function togglePause() {
+            if (paused && time >= Math.PI * 2) {
+                // Restart cycle if finished
+                time = 0;
+                path = [];
+            }
+            paused = !paused;
+            updatePauseButton();
+        }
+
+        function updatePauseButton() {
+            const btn = document.getElementById('pause-btn');
+            if (btn) {
+                btn.innerText = paused ? CyberI18n.get('galton.play') : CyberI18n.get('cmaes.pause');
+                btn.style.borderColor = paused ? "var(--neon-blue)" : "#ffd700";
+                btn.style.color = paused ? "var(--neon-blue)" : "#ffd700";
+                btn.style.boxShadow = paused ? "0 0 15px rgba(0, 210, 255, 0.2)" : "0 0 15px rgba(255, 215, 0, 0.3)";
+            }
+        }
+
+        function updateParams() {
+            const nInput = document.getElementById('n-input');
+            const nValue = document.getElementById('n-value');
+            if (nInput && nValue) {
+                let val = parseInt(nInput.value);
+
+                // FORCE SNAP TO evolutionSteps
+                const closest = evolutionSteps.reduce((prev, curr) =>
+                    Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+
+                val = closest;
+                nInput.value = val;
+                nValue.innerText = val;
+
+                // Dynamic Button UI (Next/Prev labels)
+                const btnDown = document.getElementById('btn-n-down');
+                const btnUp = document.getElementById('btn-n-up');
+                if (btnDown && btnUp) {
+                    let idx = evolutionSteps.indexOf(val);
+                    let nextVal = (idx < evolutionSteps.length - 1) ? evolutionSteps[idx + 1] : val;
+                    let prevVal = (idx > 0) ? evolutionSteps[idx - 1] : val;
+
+                    btnDown.innerText = (val > prevVal) ? `-${val - prevVal}` : "-0";
+                    btnUp.innerText = (nextVal > val) ? `+${nextVal - val}` : "+0";
+                }
+
+                // Update DOM Telemetry
+                const tele = document.getElementById('n-telemetry');
+                if (tele) {
+                    tele.innerText = val;
+                    tele.style.opacity = showEpicycles ? "0.9" : "0";
+                }
+            }
+            updateFormula();
+            const shapeKey = document.getElementById('shape-select')?.value || "NOTE";
+            init(shapeKey);
+        }
+
+        function updateFormula() {
+            const num = parseInt(document.getElementById('n-input')?.value || 2);
+            if (window.katex) {
+                // SUM LIMIT is now GOLDEN (#ffd700) to match telemetry
+                const formula = "{ \\color{#ffd700} f(t) } = \\sum_{{\\color{#aaddff} n}=1}^{\\color{#ffd700} " + num + "} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
+                katex.render(formula, document.getElementById('formula-overlay'), {
+                    throwOnError: false,
+                    trust: true
+                });
+            }
+        }
+
+        function adjustN(delta) {
+            const nInput = document.getElementById('n-input');
+            if (!nInput) return;
+
+            let currentVal = parseInt(nInput.value);
+            let idx = evolutionSteps.indexOf(currentVal);
+            if (idx === -1) {
+                idx = evolutionSteps.reduce((prev, curr, i) =>
+                    Math.abs(curr - currentVal) < Math.abs(evolutionSteps[prev] - currentVal) ? i : prev, 0);
+            }
+
+            // Map delta to index steps: +/- 1 -> 1 index, +/- 10 -> 5 indices
+            let indexJump = (Math.abs(delta) >= 10) ? 5 : 1;
+            if (delta < 0) indexJump *= -1;
+
+            let newIdx = Math.max(0, Math.min(evolutionSteps.length - 1, idx + indexJump));
+            nInput.value = evolutionSteps[newIdx];
+            updateParams();
+        }
+
+        function resetSim() {
+            time = 0;
+            path = [];
+        }
+
+        function manualReset() {
+            isEvolving = false;
+            historicalPaths = [];
+            updateEvolveButton();
+            resetSim();
+            resetView();
+        }
+
+        function startEvolution() {
+            isEvolving = !isEvolving;
+            if (isEvolving) {
+                evolutionIndex = 0;
+                adjustNTo(evolutionSteps[evolutionIndex]);
+                time = 0;
+                path = [];
+                paused = false;
+                const pBtn = document.getElementById('pause-btn');
+                if (pBtn) { pBtn.innerText = "PAUSE"; pBtn.style.borderColor = "#adff2f"; }
+            }
+            updateEvolveButton();
+        }
+
+        function updateEvolveButton() {
+            const btn = document.getElementById('evolve-btn');
+            if (btn) {
+                btn.innerText = isEvolving ? CyberI18n.get('fourier.stop_evolution') : CyberI18n.get('fourier.start_evolution');
+                btn.style.borderColor = "#adff2f";
+                btn.style.color = "#adff2f";
+                btn.style.boxShadow = isEvolving ? "0 0 20px rgba(173, 255, 47, 0.4)" : "0 0 15px rgba(173, 255, 47, 0.2)";
+            }
+        }
+
+        function adjustNTo(val) {
+            const input = document.getElementById('n-input');
+            if (input) {
+                input.value = val;
+                updateParams();
+            }
+        }
+
+        function init(shapeKey = "NOTE") {
+            const dpr = window.devicePixelRatio || 1;
+            const width = cc.width;
+            const height = cc.height;
+
+            resetSim();
+
+            const targetPath = SHAPES[shapeKey];
+            if (!targetPath || targetPath.length === 0) return;
+
+            // --- AUTO-CENTERING LOGIC ---
+            // 1. Calculate Bounding Box for Normalization
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            targetPath.forEach(p => {
+                if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+            });
+            const avgX = (minX + maxX) / 2;
+            const avgY = (minY + maxY) / 2;
+            const range = Math.max(maxX - minX, maxY - minY, 1);
+
+            // Normalize all shapes to a consistent visual footprint (~550px)
+            const targetSize = 550;
+            const dynScale = targetSize / range;
+
+            const z = [];
+            currentShapePoints = [];
+            for (let i = 0; i < targetPath.length; i++) {
+                // 2. Center and apply Dynamic Normalization
+                const scaledX = (targetPath[i].x - avgX) * dynScale;
+                const scaledY = (targetPath[i].y - avgY) * dynScale;
+                z.push({ re: scaledX, im: scaledY });
+                currentShapePoints.push({ x: scaledX, y: scaledY });
+            }
+            fourierZ = dft(z);
+
+            // Only start animate if it's not already running
+            if (!window.animating) {
+                window.animating = true;
+                animate();
+            }
+        }
+
+        function animate() {
+            if (!paused) {
+                const speed = parseFloat(document.getElementById('speed-input')?.value || 20);
+                const dtTotal = speed / 4000;
+
+                // Sub-sampling: calculate more points per frame at higher speeds
+                const subSteps = Math.max(1, Math.ceil(speed / 50));
+                const dt = dtTotal / subSteps;
+                const num = parseInt(document.getElementById('n-input')?.value || fourierZ.length);
+
+                for (let s = 0; s < subSteps; s++) {
+                    time += dt;
+
+                    // Calculate current tip position
+                    let worldTipX = 0, worldTipY = 0;
+                    for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
+                        const { amp, freq, phase } = fourierZ[i];
+                        worldTipX += amp * Math.cos(freq * time + phase);
+                        worldTipY += amp * Math.sin(freq * time + phase);
+                    }
+                    path.unshift({ x: worldTipX, y: worldTipY });
+                    if (path.length > 5000) path.pop();
+
+                    if (time >= Math.PI * 2) {
+                        time = Math.PI * 2;
+
+                        const isAtFinalStep = isEvolving && evolutionIndex >= evolutionSteps.length - 1;
+
+                        // Auto-hide circles ONLY at the absolute end of the whole evolution
+                        if (isAtFinalStep) {
+                            showEpicycles = false;
+                            const cb = document.getElementById('circles-checkbox');
+                            if (cb) cb.checked = false;
+                        }
+
+                        if (isEvolving) {
+                            historicalPaths.push([...path]);
+                            evolutionIndex++;
+                            if (evolutionIndex < evolutionSteps.length) {
+                                adjustNTo(evolutionSteps[evolutionIndex]);
+                                time = 0;
+                                path = [];
+                            } else {
+                                isEvolving = false;
+                                paused = true;
+                                updateEvolveButton();
+                            }
+                        } else {
+                            paused = true;
+                            updatePauseButton();
+                        }
+                        break;
+                    }
+                }
+            }
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        function drawVector(ctx, x1, y1, x2, y2, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const headlen = 8;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawEpicycles(x, y, fourier, isChain = true) {
+            const num = parseInt(document.getElementById('n-input')?.value || fourier.length);
+            const scale = cc.scale;
+            for (let i = 0; i < Math.min(fourier.length, num); i++) {
+                let prevx = x;
+                let prevy = y;
+                let freq = fourier[i].freq;
+                let radius = fourier[i].amp * scale;
+                let phase = fourier[i].phase;
+                const angle = freq * time + phase;
+                x += radius * Math.cos(angle);
+                y += radius * Math.sin(angle);
+
+                if (isChain) {
+                    const color = COLORS[i % COLORS.length];
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(prevx, prevy, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    drawVector(ctx, prevx, prevy, x, y, color);
+                }
+            }
+            return { x, y };
+        }
+
+        function draw() {
+            cc.drawGrid({ vignette: true });
+
+            // 1. Draw Top Bar (Telemetry)
+            const topBar = document.getElementById('top-bar');
+            if (topBar) {
+                topBar.style.display = cc.showTelemetry ? 'grid' : 'none';
+                if (cc.showTelemetry && topBar.innerHTML === '') {
+                    const freqs = [-3, -2, 2, 3, -1, 0, 1];
+                    freqs.forEach(f => {
+                        const div = document.createElement('div');
+                        div.className = 'component-circle';
+                        div.innerHTML = `<div class="component-label">${f}</div><canvas id="comp-${f}" width="80" height="80"></canvas>`;
+                        topBar.appendChild(div);
+                    });
+                }
+            }
+
+            const freqs = [-3, -2, 2, 3, -1, 0, 1];
+            freqs.forEach((f, idx) => {
+                const c = document.getElementById(`comp-${f}`);
+                if (!c) return;
+                const cctx = c.getContext('2d');
+                cctx.clearRect(0, 0, 80, 80);
+                const component = fourierZ.find(z => z.freq === f);
+                if (component) {
+                    const color = COLORS[idx % COLORS.length];
+                    const radius = Math.min(30, component.amp * 0.5 + 8);
+                    cctx.strokeStyle = color;
+                    cctx.beginPath(); cctx.arc(40, 40, radius, 0, Math.PI * 2); cctx.stroke();
+                    const vx = 40 + radius * Math.cos(f * time + component.phase);
+                    const vy = 40 + radius * Math.sin(f * time + component.phase);
+                    drawVector(cctx, 40, 40, vx, vy, color);
+                }
+            });
+
+            // 2. Reference Drawing (Dotted Overlay)
+            ctx.save();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            for (let i = 0; i < currentShapePoints.length; i++) {
+                ctx.lineTo(cc.mapX(currentShapePoints[i].x), cc.mapY(currentShapePoints[i].y));
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+
+            // 3. Main Fourier Drawing (Trace First, Then Epicycles on Top)
+            ctx.save();
+            const scale = cc.scale;
+            const num = parseInt(document.getElementById('n-input')?.value || fourierZ.length);
+
+            // 3a. Draw Historical Paths (Faint background)
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = "rgba(255, 215, 0, 0.3)";
+            historicalPaths.forEach(hPath => {
+                ctx.beginPath();
+                for (let i = 0; i < hPath.length; i++) {
+                    ctx.lineTo(cc.mapX(hPath[i].x), cc.mapY(hPath[i].y));
+                }
+                ctx.stroke();
+            });
+
+            // 3b. Trace (GOLD) with High-End Glow
+            if (path.length > 0) {
+                ctx.save();
+                ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+                // Layer 1: Outer Glow
+                ctx.strokeStyle = GOLDEN;
+                ctx.lineWidth = 6;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = GOLDEN;
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                for (let i = 0; i < path.length; i++) {
+                    ctx.lineTo(cc.mapX(path[i].x), cc.mapY(path[i].y));
+                }
+                ctx.stroke();
+
+                // Layer 2: Bright Core
+                ctx.lineWidth = 2.5;
+                ctx.shadowBlur = 5;
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = "#fff970"; // Brighter yellow core
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            // --- AUTO-TRACKING LOGIC (Using current tip) ---
+            if (isTracking && path.length > 0) {
+                const tip = path[0];
+                const currentX = (cc.view.minX + cc.view.maxX) / 2;
+                const currentY = (cc.view.minY + cc.view.maxY) / 2;
+
+                const dx = (tip.x - currentX) * 0.1;
+                const dy = (tip.y - currentY) * 0.1;
+
+                cc.view.minX += dx;
+                cc.view.maxX += dx;
+                cc.view.minY += dy;
+                cc.view.maxY += dy;
+            }
+
+            // 3b. Epicycles (Mapped correctly to World-Space)
+            let worldX = 0;
+            let worldY = 0;
+            for (let i = 0; i < Math.min(fourierZ.length, num); i++) {
+                const prevX = cc.mapX(worldX);
+                const prevY = cc.mapY(worldY);
+
+                const { amp, freq, phase } = fourierZ[i];
+                const angle = freq * time + phase;
+
+                worldX += amp * Math.cos(angle);
+                worldY += amp * Math.sin(angle);
+
+                const curX = cc.mapX(worldX);
+                const curY = cc.mapY(worldY);
+                const radius = amp * scale;
+
+                // DRAW CIRCLE (World-Space Polygon Method)
+                const color = COLORS[i % COLORS.length];
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                const segments = 64;
+                for (let s = 0; s <= segments; s++) {
+                    const theta = (s / segments) * Math.PI * 2;
+                    // Calculate point in WORLD SPACE first, then MAP it
+                    const wx = worldX + amp * Math.cos(theta);
+                    const wy = worldY + amp * Math.sin(theta);
+                    const sx = cc.mapX(wx);
+                    const sy = cc.mapY(wy);
+
+                    if (s === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                }
+
+                if (showEpicycles) {
+                    ctx.stroke();
+                    // DRAW VECTOR (Colored)
+                    drawVector(ctx, prevX, prevY, curX, curY, color);
+                }
+            }
+
+            if (path.length > 5000) path.pop();
+            ctx.restore();
+        }        // --- CONTEXT MENU (ULTRA STYLE) ---
+        cc.onContextMenu = (e) => {
+            CyberUI.showContextMenu(e.clientX, e.clientY, [
+                { label: CyberI18n.get('lgs.view_reset'), onclick: resetView },
+                { divider: true },
+                {
+                    label: CyberI18n.get('fourier.tracking'),
+                    checked: isTracking,
+                    onchange: (v) => {
+                        isTracking = v;
+                        updateTrackingUI();
+                    }
+                },
+                { label: CyberI18n.get('fourier.show_circles'), checked: showEpicycles, onchange: (v) => showEpicycles = v },
+                { label: CyberI18n.get('angle3d.axes'), checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; cc.showLabels = v; cc.needsRedraw = true; } },
+                { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; cc.needsRedraw = true; } },
+                { label: CyberI18n.get('fractal.telemetry'), checked: cc.showTelemetry, onchange: (v) => cc.showTelemetry = v }
+            ]);
+        };
+
+        function resetView() {
+            cc.resetView(-600, 600);
+        }
+
+        function clearPath() {
+            path = [];
+        }
+
+        function toggleTracking() {
+            const cb = document.getElementById('tracking-checkbox');
+            if (cb) {
+                isTracking = cb.checked;
+            } else {
+                isTracking = !isTracking;
+            }
+            updateTrackingUI();
+        }
+
+        function updateTrackingUI() {
+            const cb = document.getElementById('tracking-checkbox');
+            if (cb) cb.checked = isTracking;
+
+            // Sync status text if it exists (for legacy support or telemetry)
+            const status = document.getElementById('tracking-status');
+            if (status) {
+                status.innerText = isTracking ? "ON" : "OFF";
+                status.style.color = isTracking ? "var(--neon-green)" : "var(--neon-blue)";
+            }
+        }
+
+        function toggleCircles() {
+            const cb = document.getElementById('circles-checkbox');
+            if (cb) {
+                showEpicycles = cb.checked;
+            } else {
+                // Fallback for context menu if UI checkbox is not found
+                showEpicycles = !showEpicycles;
+            }
+        }
+
+        function toggleAxes() {
+            cc.showAxes = !cc.showAxes;
+            cc.needsRedraw = true;
+        }
+
+        function toggleGrid() {
+            cc.showGrid = !cc.showGrid;
+            cc.needsRedraw = true;
+        }
+
+        function toggleTele() {
+            cc.showTelemetry = !cc.showTelemetry;
+        }
+
+
+
+        // --- EVENT SHIELD & TRACKING CONTROL ---
+        cc.canvas.addEventListener('mousedown', (e) => {
+            // Stop tracking on manual interaction
+            if (isTracking) {
+                isTracking = false;
+                updateTrackingUI();
+            }
+
+            if (e.button === 2) {
+                e.stopPropagation();
+            }
+        }, true);
+
+        // Auto-enable tracking on zoom
+        cc.canvas.addEventListener('wheel', () => {
+            if (!isTracking) {
+                isTracking = true;
+                updateTrackingUI();
+            }
+        }, { passive: true });
+        cc.onResize = () => draw();
+        setupUI();
+        document.fonts.ready.then(() => {
+            init("NOTE");
+            updateFormula();
+        });
+    </script>
+</body>
+
+</html>

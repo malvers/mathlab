@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematik interaktiv by Dr. Michael R. Alvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
+        rel="stylesheet">
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-index.js"></script>
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('cyber-lab-lang', lang);
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        (function() {
+            window.addEventListener('DOMContentLoaded', () => {
+                const currentLang = CyberI18n.current;
+                document.querySelectorAll('.index-lang-switcher .lang-flag').forEach((el) => {
+                    el.classList.toggle('active', el.getAttribute('data-lang') === currentLang);
+                });
+                const about = document.getElementById('btn-about');
+                if (about) {
+                    about.href = 'intro.html?lang=' + encodeURIComponent(currentLang || 'de');
+                }
+                const toolsHub = document.getElementById('portal-link-tools');
+                if (toolsHub) {
+                    toolsHub.href = 'tools.html?lang=' + encodeURIComponent(currentLang || 'de');
+                }
+                const langRow = document.querySelector('.index-lang-switcher');
+                if (langRow) {
+                    langRow.addEventListener('keydown', (e) => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                        const el = e.target.closest('.lang-flag[data-lang]');
+                        if (!el) return;
+                        e.preventDefault();
+                        setLanguage(el.getAttribute('data-lang'));
+                    });
+                }
+            });
+        })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="stylesheet" href="js/index-portal-tokens.css">
+    <link rel="stylesheet" href="js/index-ui.css">
+    <!-- Branding-Styles: fixe Position für Titel + Nav (.floating), sonst erscheinen sie unten im Fluss. -->
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/index-tool-view-tiles.css">
+    <link rel="stylesheet" href="js/labor-scan-search.css">
+    <script src="js/ui.js?v=4"></script>
+    <style>
+        /* Page-spezifisches Layout; Portal-Kachel-Tokens → js/index-portal-tokens.css */
+
+        html {
+            background-color: var(--space-bg);
+            scrollbar-width: thin;
+            /* Daumen | Schiene — gedämpfter Daumen, hellere Schiene */
+            scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
+        }
+
+        /* Scrollbar Chromium / Safari / Edge */
+        html::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                180deg,
+                rgba(78, 92, 118, 0.95) 0%,
+                rgba(52, 64, 86, 0.92) 100%
+            );
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        html::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+                180deg,
+                rgba(92, 108, 134, 0.98) 0%,
+                rgba(68, 82, 108, 0.95) 100%
+            );
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
+        html::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: transparent;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /*
+         * Mission Control: Kaffee oben links; rechts ABOUT→intro.html, QR, Kontakt. padding nur für die feste Aktionszeile rechts oben.
+         */
+        body.cyber-hub {
+            padding-top: 56px;
+            box-sizing: border-box;
+        }
+
+        /* Echter Content über dem Planet-Overlay (z-index 0), sonst Übermalen durch 🪐/🛸. */
+        body.cyber-hub > header,
+        body.cyber-hub > #tool-subchrome,
+        body.cyber-hub > .search-scan-row,
+        body.cyber-hub > #grade-view,
+        body.cyber-hub > #tool-view,
+        body.cyber-hub > footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        body.cyber-hub > header .header-content {
+            max-width: min(1123px, calc(100vw - 24px));
+            padding: 0 12px;
+            box-sizing: border-box;
+        }
+
+        body.cyber-hub > header .subtitle {
+            letter-spacing: clamp(1px, 1.2vw, 6px);
+            line-height: 1.35;
+        }
+
+        body.cyber-hub > header h1,
+        body.cyber-hub > header .subtitle {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        /* Hub: kein zweites „Canvas“-Branding (Titel oben rechts); Startseite hat eigene Hero-Zeile. */
+        body.cyber-hub .canvas-branding {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* Kein Kurz-Briefing-Button auf Mission Control (wie tools.html). */
+        body.cyber-hub .cyber-nav .nav-btn[title="Beschreibung anzeigen"] {
+            display: none !important;
+        }
+
+        /* Index: keine feste CyberNav — Styles nur noch für andere Seiten mit .cyber-hub ignorierbar. */
+        body.cyber-hub.index-mission .cyber-nav.floating {
+            display: none !important;
+        }
+
+        /* Legacy Stars disabled for new Galaxy Video Backdrop 
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(white, rgba(255, 255, 255, .3) 1px, transparent 20px),
+                radial-gradient(white, rgba(255, 255, 255, .2) 1px, transparent 30px);
+            background-size: 400px 400px, 250px 250px;
+            background-position: 0 0, 40px 60px;
+            animation: starsMove 150s linear infinite;
+            z-index: -1;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        */
+
+        @keyframes starsMove {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-1000px);
+            }
+        }
+
+        /* --- VIDEO & AUDIO BACKGROUND --- */
+        #bg-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: -3;
+            /* Tiefste Ebene */
+            object-fit: cover;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(5, 11, 24, 0.65), rgba(5, 11, 24, 0.8));
+            z-index: -2;
+            /* Über dem Video, unter den Sternen (-1) und Content (0) */
+            pointer-events: none;
+        }
+
+        @keyframes starsMove {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-1000px);
+            }
+        }
+
+        header {
+            padding: 18px 0;
+            text-align: center;
+            background: transparent;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .header-content {
+            width: 95%;
+            max-width: 1123px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 8vw, 3.15rem);
+            margin: 0;
+            letter-spacing: clamp(1px, 1vw, 3.2px);
+            line-height: 1.2;
+            background: var(--header-title-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px var(--neon-blue));
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: clamp(2px, 2vw, 8px);
+            margin-top: 8px;
+            color: var(--neon-blue);
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            opacity: 0.9;
+        }
+
+        .author-attribution {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 3px;
+            opacity: 0.9;
+            margin-top: 10px;
+            color: #f5f3ff;
+            /* Ultra Bright Lavender */
+            text-transform: uppercase;
+        }
+
+        /* --- PLANET FLYBY EFFECT (ULTRA CRAZY) --- */
+        /* Hinter festem UI-Content, damit Hero/Scan/Cards nicht überdeckt werden */
+        #planet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .flying-planet {
+            position: absolute;
+            font-size: 45px;
+            opacity: 0;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
+            will-change: transform, opacity;
+            z-index: 0;
+        }
+
+        /* Objekte starten in der Bildschirmmitte und fliegen radial nach außen (--dx/--dy Relativvektor) */
+        @keyframes planet-flyby {
+            0% {
+                transform: translate(-50%, -50%) translate(0px, 0px) scale(0.15) rotate(0deg);
+                opacity: 0;
+            }
+
+            12% {
+                opacity: 0.85;
+            }
+
+            88% {
+                opacity: 0.85;
+                transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.88), calc(var(--dy) * 0.88)) scale(2.1) rotate(calc(var(--rot) * 0.88));
+            }
+
+            100% {
+                transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(2.4) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+
+        /* --- CONTAINER OPTIMIERUNG --- */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            justify-content: center;
+            gap: 30px;
+            max-width: 1123px;
+            /* Exakt 4-Kachel Breite */
+            width: 95%;
+            margin: 0 auto;
+            padding: 20px 0 60px 0;
+        }
+
+        /* --- CARD UPGRADE: CYBER-PORTAL --- */
+        .card {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            color: white;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 18px 20px;
+            min-height: 180px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            background: rgba(15, 23, 42, 0.6);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 35px rgba(0, 210, 255, 0.3), inset 0 0 15px rgba(0, 210, 255, 0.1);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 70px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.92rem;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .card:hover h3 {
+            color: white;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 8px 25px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 30px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            background: rgba(0, 210, 255, 0.05);
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+        }
+
+        .card:hover .btn {
+            background: var(--neon-blue);
+            color: black;
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--neon-blue);
+            border-color: white;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            opacity: 0.72;
+            text-align: center;
+            width: 100%;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            color: rgba(245, 243, 255, 0.88);
+        }
+
+        footer a {
+            color: inherit;
+            text-decoration: none;
+            margin-left: 15px;
+            transition: 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--neon-blue);
+            opacity: 1;
+        }
+
+        /* Description using Inter for readability */
+        .card-desc {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.65);
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .view-section {
+            width: 95%;
+            max-width: 1123px;
+            /* Harmonisiert mit 4-Kachel Grid */
+            margin: 10px auto 5px auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .view-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            /* Signifikant größer */
+            letter-spacing: 5px;
+            /* Spaciger */
+            margin: 0;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            white-space: nowrap;
+        }
+
+        .view-section .line {
+            flex-grow: 1;
+            height: 2px;
+            background: linear-gradient(to right, var(--neon-blue), rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        #grade-view,
+        #tool-view,
+        #tool-subchrome {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* --- GRADE & THEME CARDS --- */
+        .grade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(218px, 262px));
+            justify-content: center;
+            gap: 25px;
+            max-width: 1123px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 15px 0;
+            /* Mehr Padding im Grid */
+        }
+
+        /* Spezial-Grid: Klassen 5–12 + Uni */
+        #jahrgang-grid {
+            grid-template-columns: repeat(9, 1fr);
+            width: 100%;
+            max-width: none;
+            gap: 10px;
+        }
+
+        /* Jahrgang-Hub: eine Reihe Portal-Kacheln (wie Index-Themen), kein Verlauf */
+        #jahrgang-grid > .card.grade-card::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile {
+            justify-content: center;
+            border-radius: var(--hub-tile-radius);
+            border: var(--hub-tile-border);
+            background: var(--portal-hub-tile-bg);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--hub-tile-shadow);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+            flex-direction: column;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile::before {
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile::after {
+            content: none !important;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:hover,
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile.active:hover {
+            transform: translateY(-3px);
+            filter: none;
+            background: var(--portal-hub-tile-bg-hover);
+            border: var(--hub-tile-border-hover);
+            box-shadow: var(--hub-tile-shadow-hover);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile h3 {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.1rem, 2.85vw, 1.62rem);
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            line-height: 1.05;
+            text-transform: none;
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            filter: none;
+            text-shadow: none;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(1) h3 {
+            color: var(--neon-blue);
+            -webkit-text-fill-color: var(--neon-blue);
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(2) h3 {
+            color: #44e1ff;
+            -webkit-text-fill-color: #44e1ff;
+            text-shadow: 0 0 12px rgba(68, 225, 255, 0.35);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(3) h3 {
+            color: #7ae8ff;
+            -webkit-text-fill-color: #7ae8ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(4) h3 {
+            color: #b3f0ff;
+            -webkit-text-fill-color: #b3f0ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(5) h3 {
+            color: #cde0ff;
+            -webkit-text-fill-color: #cde0ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(6) h3 {
+            color: #d4c4ff;
+            -webkit-text-fill-color: #d4c4ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(7) h3 {
+            color: #c4a3ff;
+            -webkit-text-fill-color: #c4a3ff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(8) h3 {
+            color: #b77eff;
+            -webkit-text-fill-color: #b77eff;
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile:nth-child(9) h3 {
+            color: var(--neon-purple);
+            -webkit-text-fill-color: var(--neon-purple);
+            text-shadow: 0 0 12px rgba(157, 80, 187, 0.45);
+        }
+
+        #jahrgang-grid > .card.grade-card.jahrgang-portal-tile .jahrgang-portal-tile__lab-count {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(0.45rem, 1.15vw, 0.62rem);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.42);
+            line-height: 1.15;
+            margin-top: 7px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .jahrgang-grid-debug-unique {
+            font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+            font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+            color: rgba(255, 180, 100, 0.85);
+            letter-spacing: 0.04em;
+            margin: 10px 0 0 0;
+            padding: 6px 10px;
+            text-align: center;
+            border: 1px dashed rgba(255, 180, 100, 0.35);
+            border-radius: 8px;
+            background: rgba(20, 12, 8, 0.35);
+            line-height: 1.35;
+        }
+
+        /* EDUCATION: Jahrgänge einblenden, Themen ausblenden */
+        #index-jahrgang-block {
+            display: none;
+        }
+
+        #grade-view.grade-view--edu-only #index-jahrgang-block {
+            display: block;
+        }
+
+        #grade-view.grade-view--edu-only #index-themes-block {
+            display: none;
+        }
+
+        /* EDUCATION: Labor-Scan + Universe-Kachel ausblenden */
+        body.cyber-hub:has(#grade-view.grade-view--edu-only) > .search-scan-row {
+            display: none;
+        }
+
+        /* Unterseiten: großen Hero-Header ausblenden (Labor-Scan unter Zurück-Zeile) */
+        body.cyber-hub.index-mission:has(#tool-subchrome:not(.hidden)) > header,
+        body.cyber-hub.index-mission:has(#grade-view.grade-view--edu-only) > header {
+            display: none !important;
+        }
+
+        /* Jahrgang (EDUCATION): gleiche Zeilenbreite, Zurück links */
+        #index-jahrgang-block .view-section {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        #index-jahrgang-block .view-section .btn-back {
+            flex-shrink: 0;
+        }
+
+        /* „N Themen“ bündig links wie das Raster (kein 95 %-Inset der Section-Headline) */
+        #index-themes-block > .view-section {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+            align-self: stretch;
+            box-sizing: border-box;
+        }
+
+        #index-themes-block > .view-section h2 {
+            text-align: left;
+        }
+
+        /* Themen-Hub: fest 4 Kacheln pro Reihe, volle Hub-Breite */
+        #index-themes-block .grade-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            margin-right: 0;
+            gap: 20px;
+            justify-content: start;
+        }
+
+        @media (max-width: 720px) {
+            #index-themes-block .grade-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .card.grade-card {
+            min-height: 80px;
+            justify-content: center;
+            border: none;
+            background: linear-gradient(135deg, var(--c1, var(--neon-blue)), var(--c2, var(--neon-blue)));
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.category-card {
+            min-height: 131px;
+        }
+
+        .card.grade-card.active {
+            opacity: 1;
+            box-shadow: 0 0 35px var(--c1);
+        }
+
+        .card.grade-card.active:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 60px var(--c1), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            filter: brightness(1.15);
+            z-index: 10;
+        }
+
+        /* Glanz-Effekt für die soliden Kacheln */
+        .card.grade-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.6s;
+            pointer-events: none;
+        }
+
+        .card.grade-card:hover::after {
+            left: 100%;
+        }
+
+        .card.grade-card .card-icon {
+            margin-bottom: 0;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card.grade-card svg {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 10px var(--c1));
+        }
+
+        .card.grade-card.active {
+            opacity: 1;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Themen-Kacheln: dunkle Portal-Karten, eine durchgängige weiße Überschrift */
+        /* grade-card dient nur Layout/JS — kein JG-Gradient-Glanz (::before/::after), kein Icon-Scale, kein active-Hover-Filter */
+        #index-themes-block .card.category-card::before,
+        #index-themes-block .card.category-card::after {
+            content: none !important;
+        }
+
+        #index-themes-block .card.category-card:hover::before {
+            opacity: 0 !important;
+        }
+
+        #index-themes-block .card.category-card .card-icon {
+            flex-grow: 0;
+            margin-bottom: 10px;
+        }
+
+        #index-themes-block .card.category-card:hover .card-icon {
+            transform: none !important;
+        }
+
+        #index-themes-block .card.category-card:hover,
+        #index-themes-block .card.category-card.active:hover {
+            filter: none;
+            z-index: auto;
+        }
+
+        #index-themes-block .card.category-card {
+            border-radius: var(--hub-tile-radius);
+            border: var(--hub-tile-border);
+            background: var(--portal-hub-tile-bg);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--hub-tile-shadow);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+            text-align: center;
+        }
+
+        #index-themes-block .card.category-card:hover {
+            background: var(--portal-hub-tile-bg-hover);
+            border: var(--hub-tile-border-hover);
+            box-shadow: var(--hub-tile-shadow-hover);
+            transform: translateY(-3px);
+        }
+
+        #index-themes-block .card.category-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.8rem, 2.15vw, 0.96rem);
+            font-weight: 600;
+            letter-spacing: 0.11em;
+            line-height: 1.35;
+            margin: 10px 0 0 0;
+            text-align: center;
+            text-transform: uppercase;
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            background: none;
+            background-clip: border-box;
+            -webkit-background-clip: border-box;
+            text-shadow: none;
+        }
+
+        #index-themes-block .card.category-card:hover h3 {
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+            background: none;
+            text-shadow: none;
+        }
+
+        #index-themes-block .card.category-card.category-card--stanford-brand .card-icon.category-card__stanford-mark {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
+            margin-bottom: 8px;
+        }
+
+        #index-themes-block .card.category-card.category-card--stanford-brand svg.stanford-uni-mark {
+            display: block;
+            width: 50px;
+            height: auto;
+            max-height: 76px;
+            flex-shrink: 0;
+            filter: brightness(1.22) contrast(1.08) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.55));
+        }
+
+        #index-themes-block .card.category-card.category-card--stanford-brand:hover svg.stanford-uni-mark {
+            filter: brightness(1.28) contrast(1.1) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+        }
+
+        #index-themes-block .card.category-card .card-icon.card-icon--top5 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
+            margin-top: 20px;
+        }
+
+        #index-themes-block .card.category-card .card-icon.card-icon--top5 img {
+            width: auto;
+            height: auto;
+            max-width: 96.777px;
+            max-height: 81.497px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 14px rgba(255, 200, 80, 0.35));
+        }
+
+        #index-themes-block .card.category-card:hover .card-icon.card-icon--top5 img {
+            filter: drop-shadow(0 6px 20px rgba(255, 210, 100, 0.48));
+        }
+
+        #index-themes-block .card.category-card .card-icon.card-icon--funktionen svg {
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.22));
+        }
+
+        #index-themes-block .card.category-card:hover .card-icon.card-icon--funktionen svg {
+            filter: drop-shadow(0 0 14px rgba(0, 210, 255, 0.38));
+        }
+
+        /* Locked Logik für JG-Kacheln (Deutlich inaktiv) */
+        #jahrgang-grid .card.grade-card.locked {
+            filter: grayscale(1) brightness(0.6);
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .grade-grid:last-of-type .card.grade-card.locked {
+            opacity: 0.25;
+            filter: grayscale(1);
+        }
+
+        .grade-grid:last-of-type .card.grade-card.locked {
+            opacity: 0.25;
+            filter: grayscale(1);
+        }
+
+        /* --- BACK BUTTON (Inspired by Branding Buttons) --- */
+        .back-nav {
+            width: 95%;
+            max-width: 1123px;
+            margin: 25px auto 20px auto;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 30px;
+        }
+
+        #view-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin: 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
+        }
+
+        .btn-back {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid #00d2ff !important;
+            /* Offizieller Branding-Akzent */
+            border-radius: 12px;
+            color: white !important;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .btn-back::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: #00d2ff !important;
+            background: rgba(0, 210, 255, 0.3) !important;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+            color: white !important;
+        }
+
+        .btn-back:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-back span {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-bar-container {
+            width: 95%;
+            max-width: 1123px;
+            /* Harmonisiert mit 4-Kachel Grid */
+            margin: 20px auto;
+            position: relative;
+            z-index: 100;
+        }
+
+        .search-bar-inner {
+            display: flex;
+            align-items: center;
+            background: rgba(8, 18, 40, 0.72);
+            border: 1px solid rgba(0, 210, 255, 0.42);
+            border-radius: 20px;
+            /* Harmonisiert mit Kacheln */
+            padding: 5px 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 0 18px rgba(0, 210, 255, 0.14);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar-inner:focus-within {
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+
+        .search-bar-inner svg {
+            color: var(--neon-blue);
+            margin-right: 15px;
+            opacity: 0.95;
+        }
+
+        #search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+        }
+
+        #search-input::placeholder {
+            color: rgba(185, 226, 255, 0.78);
+        }
+
+        .clear-search {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 2.5rem;
+            /* Markant größer */
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .clear-search:hover {
+            color: var(--neon-blue);
+            transform: scale(1.2);
+        }
+
+        /*
+         * Labor-Scan + Universe-Galaxy — gleiche äußere Breite wie Themen-Kacheln
+         */
+        .search-scan-row,
+        #grade-view > #index-themes-block,
+        #grade-view > #index-jahrgang-block {
+            width: min(1123px, calc(100vw - 24px));
+            max-width: 1123px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        .search-scan-row {
+            margin: 20px auto 30px auto;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .search-scan-row #search-mount {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .universe-galaxy-btn {
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            width: clamp(42px, 7.5vw, 68px);
+            position: relative;
+            overflow: hidden;
+            align-self: center;
+            height: 56px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.55);
+            box-shadow:
+                0 8px 26px rgba(0, 0, 0, 0.38),
+                0 0 18px rgba(0, 210, 255, 0.14);
+            transition: box-shadow 0.22s ease, border-color 0.22s ease;
+            padding: 0;
+            background: #070d18;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            line-height: 0;
+        }
+
+        .universe-galaxy-btn:hover {
+            border-color: rgba(0, 210, 255, 0.9);
+            box-shadow:
+                0 0 28px rgba(0, 210, 255, 0.35),
+                0 10px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .universe-galaxy-btn:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 3px;
+        }
+
+        .universe-galaxy-btn img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        @media (max-width: 520px) {
+            .search-scan-row {
+                gap: 10px;
+            }
+
+            .universe-galaxy-btn {
+                width: clamp(36px, 14vw, 56px);
+            }
+        }
+
+        /* --- ADMIN MODE STYLES --- */
+        body.admin-mode .card h3[contenteditable="true"],
+        body.admin-mode .card .card-desc[contenteditable="true"] {
+            border: 1px dashed rgba(0, 210, 255, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(0, 210, 255, 0.05);
+            outline: none;
+            cursor: text;
+        }
+
+        body.admin-mode .card h3[contenteditable="true"]:focus,
+        body.admin-mode .card .card-desc[contenteditable="true"]:focus {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .admin-controls {
+            display: none;
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 1000;
+            background: rgba(5, 11, 24, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--neon-orange);
+            box-shadow: 0 0 20px rgba(255, 157, 0, 0.3);
+            backdrop-filter: blur(10px);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body.admin-mode .admin-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-admin {
+            background: var(--neon-orange);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .admin-toggle-link {
+            opacity: 0.5;
+            cursor: pointer;
+            margin-left: 20px;
+            transition: opacity 0.3s;
+        }
+
+        .admin-toggle-link:hover {
+            opacity: 1;
+            color: var(--neon-orange);
+        }
+
+        /* --- ADMIN GATE MODAL --- */
+        #admin-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 11, 24, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #admin-gate.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .admin-gate-box {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--neon-blue);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .admin-gate-box h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .admin-gate-box i.contact-close:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* --- Index Mission Control: nur Flaggen; aktive Sprache glüht --- */
+        @keyframes lang-flag-active-glow {
+            0%,
+            100% {
+                filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 16px rgba(255, 255, 255, 0.45))
+                    drop-shadow(0 0 28px rgba(240, 248, 255, 0.22));
+            }
+            50% {
+                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 26px rgba(255, 255, 255, 0.62))
+                    drop-shadow(0 0 40px rgba(245, 250, 255, 0.32));
+            }
+        }
+
+        .index-lang-switcher .lang-flag {
+            box-sizing: border-box;
+            width: auto;
+            height: auto;
+            min-width: unset;
+            padding: 4px !important;
+            margin: 0;
+            display: inline-flex;
+            user-select: none;
+            align-items: center;
+            justify-content: center;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 10px !important;
+            backdrop-filter: none;
+            transition:
+                opacity 0.25s ease,
+                transform 0.25s ease,
+                filter 0.25s ease;
+            font-size: 1.65rem !important;
+            line-height: 1;
+            cursor: pointer;
+            font-family: inherit;
+            color: inherit;
+            opacity: 0.70;
+            filter: none;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .index-lang-switcher .lang-flag:hover:not(.active) {
+            opacity: 0.96;
+            filter: none;
+            transform: scale(1.06);
+        }
+
+        .index-lang-switcher .lang-flag:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.85);
+            outline-offset: 3px;
+            opacity: 1;
+            filter: grayscale(0);
+        }
+
+        .index-lang-switcher .lang-flag.active {
+            opacity: 1;
+            filter: none;
+            transform: scale(1.12);
+            animation: lang-flag-active-glow 2.4s ease-in-out infinite;
+            pointer-events: auto;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        .index-lang-switcher .lang-flag.active:hover {
+            animation: lang-flag-active-glow 2.4s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .index-lang-switcher .lang-flag.active {
+                animation: none;
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 22px rgba(255, 255, 255, 0.42));
+            }
+        }
+
+        .contact-modal-legal {
+            margin: 18px 0 0;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+        }
+
+        .contact-modal-legal a {
+            color: var(--neon-blue);
+            text-decoration: none;
+        }
+
+        .contact-modal-legal a:hover {
+            text-decoration: underline;
+        }
+
+        .admin-gate-box input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .admin-gate-box input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+
+        .admin-gate-box .btn-access {
+            background: var(--neon-blue);
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .admin-gate-box .btn-access:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .admin-gate-box .btn-cancel {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body class="cyber-hub index-mission">
+    <div id="planet-overlay"></div>
+
+    <!-- Video Background (Galaxy) -->
+    <!-- Nutze ein lokales Video 'galaxy.mp4' in deinem Ordner! Poster dient als Fallback. -->
+    <video id="bg-video" autoplay loop muted playsinline
+        poster="https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop">
+        <source src="resources/galay20.mp4" type="video/mp4">
+    </video>
+
+    <!-- Dunkles Overlay über dem Video für perfekten Kontrast -->
+    <div id="bg-overlay"></div>
+
+    <!-- Ambient Audio Loop -->
+    <audio id="bg-audio" loop>
+        <source src="resources/ambient.wav" type="audio/wav">
+    </audio>
+
+    <!-- Admin Gate Modal (Custom Prompt) -->
+    <div id="admin-gate">
+        <div class="admin-gate-box">
+            <h3 id="gate-title">BERECHTIGUNG PRÜFEN</h3>
+            <input type="password" id="gate-pwd" placeholder="Passwort" autocomplete="current-password"
+                aria-label="Passwort Eingabe" onkeydown="if(event.key==='Enter') verifyGate()">
+            <button class="btn-access" id="gate-access" onclick="verifyGate()">ACCESS</button>
+            <br>
+            <button class="btn-cancel" id="gate-cancel" onclick="closeGate()">ABBRECHEN</button>
+        </div>
+    </div>
+
+    <!-- Kaffee: eigenständig oben links -->
+    <div style="position: fixed; top: 25px; left: 25px; z-index: 1000;">
+        <div class="contact-btn btn-donate" id="btn-coffee" onclick="document.getElementById('donate-overlay').classList.add('open')"
+            title="Cyber-Kaffee spendieren"
+            style="position: static; padding: 0; width: 38px; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Language Switcher: Test ohne <button> — nur Flaggen (role="button" + Tab/Enter/Leertaste) -->
+    <div class="index-lang-switcher" style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: min(96vw, 520px); z-index: 1000;">
+        <span role="button" tabindex="0" data-lang="de" onclick="setLanguage('de')" class="lang-flag" title="Deutsch">🇩🇪</span>
+        <span role="button" tabindex="0" data-lang="es" onclick="setLanguage('es')" class="lang-flag" title="Español">🇪🇸</span>
+        <span role="button" tabindex="0" data-lang="en" onclick="setLanguage('en')" class="lang-flag" title="English">🇬🇧</span>
+        <span role="button" tabindex="0" data-lang="it" onclick="setLanguage('it')" class="lang-flag" title="Italiano">🇮🇹</span>
+        <span role="button" tabindex="0" data-lang="fr" onclick="setLanguage('fr')" class="lang-flag" title="Français">🇫🇷</span>
+        <span role="button" tabindex="0" data-lang="pt" onclick="setLanguage('pt')" class="lang-flag" title="Português">🇵🇹</span>
+        <span role="button" tabindex="0" data-lang="sw" onclick="setLanguage('sw')" class="lang-flag" title="Kiswahili">🇰🇪</span>
+    </div>
+
+    <!-- Top Action Buttons -->
+    <div style="position: fixed; top: 25px; right: 25px; display: flex; gap: 15px; z-index: 1000;">
+        <!-- About → Cinematic Intro -->
+        <a href="intro.html" class="contact-btn" id="btn-about" style="position: static;" title="Cinematic Intro — Doc Alvers">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+            </svg>
+            <span id="txt-about">ABOUT</span>
+        </a>
+
+        <!-- QR-Code dieser Seite -->
+        <div class="contact-btn" id="btn-qr" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
+            style="position: static; padding: 0; width: 38px; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>
+                <path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path>
+            </svg>
+        </div>
+
+        <!-- Kontakt Button (nur Icon) -->
+        <div class="contact-btn" onclick="document.getElementById('contact-overlay').classList.add('open')" style="position: static; padding: 0; width: 38px; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0;">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Kontakt Modal -->
+    <div id="contact-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
+        <div class="contact-modal" onclick="event.stopPropagation()">
+            <h3 id="contact-title">Kontakt</h3>
+            <p id="contact-desc">Du hast Fragen, Feedback oder Ideen für neue Labormodule? Ich freue mich über jede Nachricht – ob es um
+                Mathematik, didaktische Konzepte oder technische Zusammenarbeit geht.</p>
+            <a href="mailto:info@docalvers.de" class="contact-email">info@docalvers.de</a>
+            <div class="contact-modal-legal">
+                <a href="credits.html" id="contact-link-credits">CREDITS</a>
+                <span aria-hidden="true"> · </span>
+                <a href="impressum.html" id="contact-link-impressum">IMPRESSUM</a>
+            </div>
+            <button class="contact-close" id="contact-close"
+                onclick="document.getElementById('contact-overlay').classList.remove('open')">SCHLIESSEN</button>
+        </div>
+    </div>
+
+    <!-- QR-Modal -->
+    <div id="qr-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
+        <div class="contact-modal" onclick="event.stopPropagation()" style="max-width: 420px; text-align: center;">
+            <h3 id="qr-title">QR-Code</h3>
+            <p id="qr-desc">Scanne mit dem Handy – diese Seite zum Mitnehmen.</p>
+            <img id="qr-overlay-img" width="240" height="240" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22/%3E"
+                style="display:block;margin:0 auto 16px;border-radius:12px;background:#fff;padding:8px;box-sizing:content-box;">
+            <p id="qr-overlay-url"
+                style="font-size:0.75rem;word-break:break-all;opacity:0.85;margin:0 0 20px;font-family:ui-monospace,system-ui,monospace;"></p>
+            <button type="button" class="contact-close" id="qr-close" onclick="document.getElementById('qr-overlay').classList.remove('open')">SCHLIESSEN</button>
+        </div>
+    </div>
+
+    <!-- Donate Modal -->
+    <div id="donate-overlay" class="contact-overlay" onclick="this.classList.remove('open')">
+        <div class="contact-modal" onclick="event.stopPropagation()">
+            <h3 id="donate-title" style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">Cyber-Kaffee Spendieren</h3>
+            <p id="donate-desc">Dir gefallen die interaktiven Labore und du möchtest die Weiterentwicklung des Cyber-Labors unterstützen? Ich freue mich über jeden virtuellen Kaffee, der mich nachts beim Coden wachhält! ☕️🚀</p>
+            <a href="https://www.paypal.com/donate/?business=michael.r.alvers@gmail.com&no_recurring=1&currency_code=EUR" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; padding: 15px; border-radius: 8px; text-decoration: none; font-family: 'Orbitron', sans-serif; font-size: 1rem; margin: 25px 0 15px 0; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);" onmouseover="this.style.background='rgba(255, 215, 0, 0.2)'; this.style.boxShadow='0 0 25px rgba(255, 215, 0, 0.4)';" onmouseout="this.style.background='rgba(255, 215, 0, 0.1)'; this.style.boxShadow='0 0 15px rgba(255, 215, 0, 0.2)';">
+                <svg viewBox="0 0 24 24" width="22" height="22" style="margin-top:-2px;">
+                    <path fill="#00457C" d="M20.067 8.478c-.492-3.269-3.111-4.721-7.01-4.721H6.848a1.05 1.05 0 0 0-1.042.88L3.25 20.893c-.033.208.13.393.342.393h3.585a.99.99 0 0 0 .984-.836l.72-4.57c.063-.4.401-.699.807-.699h1.764c3.513 0 6.071-1.633 6.643-5.263.15-.953.07-1.71-.247-2.316l.22.876z"/>
+                    <path fill="#0079C1" d="M19.467 8.162c-.183-.497-.478-.91-.861-1.246-.826-.723-2.222-1.002-4.004-1.002h-4.32a.965.965 0 0 0-.958.81l-2.457 15.61c-.031.196.12.366.319.366h3.42a.91.91 0 0 0 .905-.769l.79-5.01c.058-.368.369-.643.743-.643h1.62c3.23 0 5.584-1.503 6.112-4.843.197-1.25.044-2.274-.309-3.273z"/>
+                </svg>
+                <span id="donate-paypal">JETZT SPENDEN MIT PayPal</span>
+            </a>
+            <button class="contact-close" id="donate-close"
+                onclick="document.getElementById('donate-overlay').classList.remove('open')">SCHLIESSEN</button>
+        </div>
+    </div>
+
+    <!-- Sound Controller floating rechts unten -->
+    <div id="sound-toggle" class="sound-toggle" title="Ambient Sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 18V5l12-3v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="15" r="3" />
+        </svg>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <h1 id="header-title">Doc <span onclick="toggleAdminMode(event)" style="cursor: default; user-select: none;">A</span>lvers
+                Mathe-Labor</h1>
+            <div class="subtitle" id="dynamic-subtitle">INTERAKTIVE MATHEMATIK</div>
+            <div class="author-attribution" id="header-author">von Dr. Michael R. Alvers</div>
+        </div>
+    </header>
+
+    <!-- Unterseiten (Labor-Liste): Zurück + Bereichstitel über Labor-Scan -->
+    <div id="tool-subchrome" class="hidden">
+        <div class="back-nav">
+            <button type="button" class="btn-back" id="view-btn-back" onclick="backFromToolView()" title="Zurück"
+                aria-label="Zurück">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:22px; height:22px;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 id="view-title">LABOR-ANSICHT</h2>
+        </div>
+    </div>
+
+    <!-- Labor-Scan + Universe (Galaxy) -->
+    <div class="search-scan-row">
+        <div id="search-mount"></div>
+        <a href="universe.html" class="universe-galaxy-btn" id="btn-universe" title="Universe · Labor-Galerie im Weltraum"
+            aria-label="Universe · Labor-Galerie öffnen">
+            <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
+                alt="" width="400" height="400" loading="lazy" decoding="async">
+        </a>
+    </div>
+
+    <div id="grade-view">
+        <div id="index-jahrgang-block">
+        <div class="view-section">
+            <button type="button" class="btn-back" id="grade-btn-back" onclick="showGrades()" title="Zurück zur Themenauswahl"
+                aria-label="Zurück zur Themenauswahl">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:22px; height:22px;" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2 id="txt-grade">Jahrgang</h2>
+            <div class="line"></div>
+        </div>
+        <div class="grade-grid" id="jahrgang-grid">
+            <a href="javascript:void(0)" onclick="showFilter('grade5')" class="card grade-card active jahrgang-portal-tile"
+                data-jg-category="grade5" aria-label="Jahrgang 5">
+                <h3>5</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade6')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade6" aria-label="Jahrgang 6">
+                <h3>6</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade7')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade7" aria-label="Jahrgang 7">
+                <h3>7</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade8')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade8" aria-label="Jahrgang 8">
+                <h3>8</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade9')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade9" aria-label="Jahrgang 9">
+                <h3>9</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade10')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade10" aria-label="Jahrgang 10">
+                <h3>10</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade11')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade11" aria-label="Jahrgang 11">
+                <h3>11</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('grade12')" class="card grade-card active jahrgang-portal-tile" data-jg-category="grade12" aria-label="Jahrgang 12">
+                <h3>12</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card active jahrgang-portal-tile"
+                data-jg-category="uni" id="grade-tile-uni"
+                title="Universität · besonders komplexe Labore (Analysis, Physik, Fraktale, …)" aria-label="Universität: komplexe Labore anzeigen">
+                <h3 id="txt-uni">Uni</h3>
+            </a>
+        </div>
+        <p id="jahrgang-grid-debug-unique" class="jahrgang-grid-debug-unique" aria-label="Debug: eindeutige Labs JG- und Uni-Kacheln"></p>
+        </div>
+
+        <div id="index-themes-block">
+        <div class="view-section" style="margin-top: 8px;">
+            <h2><span id="themes-count">0</span> <span id="txt-themes">Themen</span></h2>
+            <div class="line"></div>
+        </div>
+        <div class="grade-grid">
+            <a href="javascript:void(0)" onclick="showFilter('top5')" class="card grade-card category-card active"
+                id="themes-tile-top5"
+                title="Fourier · Fraktale · Atomorbitale · Galton Board · Linsenoptimierung"
+                aria-label="TOP 5: Auswahl Lieblings-Labs">
+                <div class="card-icon card-icon--top5" aria-hidden="true">
+                    <img src="resources/top5-badge.png" alt="" style="width: 92px; height: 92px;" loading="lazy" decoding="async">
+                </div>
+                <h3>TOP 5</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('highlight')" class="card grade-card category-card active">
+                <div class="card-icon">💎</div>
+                <h3 id="txt-highlights">Highlights</h3>
+            </a>
+            <!-- Master-Link zur Mission Control -->
+            <a href="tools.html" id="portal-link-tools" class="card grade-card category-card active">
+                <div class="card-icon">🚀</div>
+                <h3 id="txt-all-tools">Alle Werkzeuge</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showEducationJahrgang()" class="card grade-card category-card active"
+                id="themes-tile-education"
+                title="Jahrgänge · EDUCATION" aria-label="EDUCATION: Jahrgangs-Kacheln anzeigen">
+                <div class="card-icon">🎓</div>
+                <h3 id="txt-education">EDUCATION</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
+                <div class="card-icon">🎮</div>
+                <h3 id="txt-games">Spiele</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('lgs')" class="card grade-card category-card active">
+                <div class="card-icon">⚖️</div>
+                <h3 id="txt-lgs">Gleichungssysteme</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('pythagoras')"
+                class="card grade-card category-card active">
+                <div class="card-icon">📐</div>
+                <h3 id="txt-pythagoras">Pythagoras</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('dreiecke')" class="card grade-card category-card active">
+                <div class="card-icon">🔺</div>
+                <h3 id="txt-triangles">Dreiecke</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('arithmetik')" class="card grade-card category-card active">
+                <div class="card-icon">🧮</div>
+                <h3 id="txt-arithmetic">Grundrechenarten</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('hot')" class="card grade-card category-card active">
+                <div class="card-icon">🔥</div>
+                <h3 id="txt-hot">Hot stuff</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('fun')" class="card grade-card category-card active">
+                <div class="card-icon">😊</div>
+                <h3 id="txt-fun">Fun</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('funktionen')"
+                class="card grade-card category-card active">
+                <div class="card-icon card-icon--funktionen" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" width="44" height="44" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M10 40h30M10 12v28" stroke="rgba(0,210,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M14 16h24M14 24h24M14 32h24M18 14v24m8-24v24m8-24v24" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+                        <path d="M12 36c6-14 14-22 24-18s10 12 4 18" stroke="url(#fnTileGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="fnTileGrad" x1="12" y1="36" x2="40" y2="14" gradientUnits="userSpaceOnUse">
+                                <stop offset="0" stop-color="#00d2ff"/>
+                                <stop offset="1" stop-color="#c084fc"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h3 id="txt-functions">Funktionen</h3>
+            </a>
+            <a href="javascript:void(0)" onclick="showFilter('university')" class="card grade-card category-card active category-card--stanford-brand"
+                id="themes-tile-uni"
+                title="Universität · komplexe Labore (Analysis, Physik, …)" aria-label="Universität: Uni-Labore anzeigen">
+                <div class="card-icon category-card__stanford-mark" aria-hidden="true">
+                    <svg class="stanford-uni-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 162 248.022" focusable="false">
+                        <g fill-rule="nonzero">
+                            <path fill="#8c1515" d="m35.872 1.1236-34.558 33.832v90.907l30.041 30.665h13.776c-0.33541 0.92261-0.77516 2.3452 0.18119 3.7375 1.0401 1.5433 2.835 1.5433 3.5228 1.5433 0.80522 0 1.9291-0.10059 3.6571-0.33551h0.02027s0.72132 0.64079-1.4762 1.3621c-1.8117 0.63746-3.3919 1.6909-3.912 3.5025-0.03436 0.13399-0.04703 0.27196-0.08053 0.38918h-45.716l-0.013433 46.465 34.558 33.953h90.887l34.558-33.905v-87.077l-30.047-30.618h-25.478c-0.0172 0-0.0403-0.0134-0.0403-0.0134-1.1239-0.67099-2.2781-1.3789-3.3349-2.0667l-0.38917-0.24828-0.0671-0.04026c-0.57036-0.35214-1.1709-0.78508-1.8251-1.3554-0.57036-0.45294-1.0434-0.90584-1.3957-1.3085l-0.10066-0.10066c-0.67099-0.70459-1.2581-1.3789-1.7111-1.966 3.9756 1.1407 8.3071 1.4292 10.387 1.4963h0.24828c0.13399 0 0.27196 0.02027 0.38918 0.02027l0.18116 0.0134c0.50323 0.03436 0.88907 0.11712 1.1407 0.20129 0.26842 0.10049 0.5066 0.22159 0.72469 0.32208l1.0736 0.40261c0.25165 0.06699 0.52 0.08053 0.80522 0.08053 1.5601 0 3.0195-0.93941 3.6904-2.4156 0.21816-0.50327 0.5536-1.5064 0.30195-2.8316l45.442 0.03367v-50.76l-34.551-33.886h-90.887z"/>
+                            <path fill="#fff" d="m157.19 36.804-32.1-31.487h-87.55l-32.108 31.436v87.382l27.628 28.182 17.815 0.0172c-1.9963 1.7949-2.6169 3.6569-2.9357 4.5628-0.68775 1.9962-1.4091 2.5665 4.8479 1.6943 1.9795-0.28515 5.5862-1.5601 7.2803-2.7008 1.6607-1.1407 4.9484-0.21816 4.6633 2.2479-1.5433 3.7743-5.502 6.1397-9.2768 6.6095-8.6893 1.0904-4.9317 4.3279-4.9317 4.3279 0.95619 0.65426 1.644 1.2917 2.1305 1.8621h-4.2273v-0.0172h-42.978l-0.017178 40.478 32.091 31.537h87.567l32.09-31.487v-83.539l-27.628-28.148h-22.327c-1.7781-1.1911-4.177-2.5163-6.3578-3.9421 0-0.01718 0-0.01718-0.0172-0.01718-0.83874-0.48647-1.6607-1.0903-2.4491-1.7781-0.65421-0.52001-1.2413-1.0736-1.7446-1.6272-1.9291-2.013-3.3717-4.1099-3.7576-5.0829-0.72133-1.7781-0.55355-4.026 1.0736-3.1034 4.1267 2.3821 10.904 2.835 13.42 2.9189 0.28515 0 2.3149 0.2349 2.8014 0.38564 0.50322 0.20141 1.2749 0.57034 1.2749 0.57034 1.0233 0.43614 2.8685-0.97294 0.73812-3.5731-0.55359-0.88907-1.3923-1.9124-2.3821-2.9524h47.354v-44.756"/>
+                            <path fill="#8c1515" transform="matrix(.80001 0 0 .80001 -.00065308 0)" d="m48.988 11.889l-37.05 36.297v104.79l31.537 32.17h29.607c5.053-2.22 6.123-2.03 7.527-4.86 0.21-0.45 0.418-1.75 0.44-3.02 0.063-0.36 0.693-4.18-1.153-3.25-3.166 1.59-9.562-2.61-14.343-0.11-4.781 2.47-1.279-3.27-0.608-4.26 0 0 2.558-3.37 6.416-5.6 0.147-0.08 0.273-0.16 0.377-0.25 0.378-0.21 0.756-0.39 1.155-0.58 2.935-1.37 11.3-6.94 12.81-8.68 0.902-1.01 2.496-3.32 2.559-4.6 0.272-1.11 0.483-2.87-0.586-3.56-1.594-1.05-2.874 1-5.369 2.12-2.496 1.11-4.383 1.57-6.606 1.65-2.138 0.07-4.193-0.75-5.472-0.56-1.28 0.21-2.035-0.76 0.314-3.13 1.069-1.07 1.532-1.55 2.035-1.91 5.578-3.58 10.589-3.62 13.399-9.98 0 0 2.181-5.7-2.034-3.27-2.306 1.34-3.564 3.27-10.17 3.27-6.584 0-9.164 3.13-10.275 4.49 0 0-4.486 6.27-3.375-2.52 1.133-8.76 2.83-13.23 6.961-16.65 3.564-2.93 12.412-6.87 15.6-11.21 1.635-1.62 5.746-6.32 3.355-10.299-1.007-1.678-3.459 2.669-5.996 3.229-2.894 0.76-6.563 1.7-9.373 1.13-3.481-0.69-5.704 0.63-7.004 1.22s-3.754-1.28-0.756-4.698c4.026-4.592 13.757-10.588 20.299-14.174 0.902-0.378 3.102-1.342 5.115-2.621 0.042-0.022 0.084-0.043 0.106-0.043 0.503-0.231 1.237-0.672 1.656-1.238 1.426-1.196 2.412-2.536 2.076-3.899-0.293-1.237-0.903-1.657-2.832-1.867-1.53-0.147-4.066 1.636-6.205 1.469-3.271-0.273-8.074 0.481-6.48-1.846 1.488-2.16 3.899-3.545 4.591-3.922 1.342-0.608 3.146-1.404 5.809-2.6 4.173-1.887 3.585-6.625 1.971-6.792-2.517-0.273-9.31 1.906-4.53-3.545 0 0 2.266-2.285 4.551-3.774 1.803-1.048 3.292-1.447 5.074-2.098 1.112-0.398 4.028-2.977-2.892-3.25 0 0-3.859 0.105-3.125-1.677 0.608-1.174 4.006-3.313 4.006-3.313s2.724-1.867 3.836-2.978c1.069-1.028 1.824-1.845 1.761-2.768-0.042-1.048-2.768-2.348-3.922-3.816-0.817-1.049-0.125-1.425 0.336-1.551 0.252-0.041 0.546-0.084 0.903-0.084 2.809 0.021 3.606-2.789 5.246-10.086 0.48-2.181 0.52-2.641 1.23-2.662 0.07 0 0.11 0.021 0.15 0.021 0 0 0.69 3.69 1.7 7.821 0.86 2.285 1.8 3.25 3.46 3.228 0.33 0 0.63 0.041 0.88 0.084 0.46 0.126 1.17 0.505 0.33 1.553-0.63 0.818-2.51 2.139-2.66 2.936-0.54 2.264 1.62 3.082 3.82 3.25 3.12 0.209 1.82 2.159-1.55 4.654-3.25 2.411 5.07 7.57 5.07 7.57 4.74 3.67 1.36 4.612 0.4 5.137-0.97 0.503-3.63 2.139-0.97 3.187 2.69 1.028 6.38 4.739 6.38 4.739 4.76 5.451-2.02 3.293-4.53 3.545-1.62 0.167-2.2 4.926 1.97 6.793 6.35 2.872 7.76 3.355 10 5.033 4.19 3.103 1.97 5.745-3.27 4.822 0 0-3.35-0.838-5.7-0.377-1.47 0.273-2.48 0.608-3.17 0.965-0.36 0.545-1.19 2.704 6.1 4.947 3.48 1.09 7.8 3.713 11.64 6.711l59.81-0.062-0.01-48.457-37.05-36.338h-105.3zm90.312 118.05c1.72 2.85 2.72 6.58 3.46 12.06 0.02 3.29-4.32 1.69-5.73 0.83-0.98-0.67-2.28-1.29-3.96-1.69-3.17-0.76-10.71-4.07-12.77-4.81-2.1-0.77-3.63 0.78-3.88 1.37h0.02c-0.54 1 0.57 3.02 0.57 3.02 2.96 6.71 8.41 6.35 14.4 10.65 8.24 5.87 3.84 7.11 2.14 6.23-1.67-0.9-4.44-0.34-4.44-0.34-6.65 1.83-8.64-0.94-12.54-1.97-3.88-1.05-0.69 3.78 0.71 5.39 1.49 1.74 9.88 7.32 12.79 8.68 6.36 2.96 9.67 7.76 11.64 13.86 1.87 5.77-0.17 4.51-1.68 3.8-1.51-0.72-1.95-2.27-5.7-2.18-3.77 0.08-5.89-0.19-8.58-2.31-0.71-0.55-1.28-1.18-1.76-1.7-0.04-0.02-0.06-0.04-0.08-0.06-2.58-1.97-2.08 4.57-1.55 5.64 1.86 3.75 3.12 2.22 13.86 7.95 5.09 2.72 6.29 6.37 6.83 7.9 0.86 2.48 1.74 3.19-6.06 2.1-2.49-0.34-6.98-1.93-9.12-3.38-2.05-1.42-6.18-0.27-5.81 2.81 1.93 4.72 6.88 7.68 11.6 8.26 4.13 0.53 6 1.43 6.75 2.35 2.26 2.58-1.93 6.36-1.93 6.36-2.1 2.43 0.17 5.28 1.72 6.12 2.52 1.28 7.4 4.21 9.02 8.41 8.47 21.8 0.27 15.55-3.74 13.06-4.02-2.5-11.68-8.91-18.66-8.35-6.98 0.55-9.31 0.93-13.46-2.37-4.13-3.29-3.73 2.04-3.73 2.04v26.29c0.25 5.89 1.34 11.51 6.02 16.27 3.83 3.93 6.75 3.19 12.16 9.8 2.49 3.04 10.63 6.31 16.06 6.37l10.42 0.02 37.05-36.34v-100.04l-31.51-32.1h-20.53zm-127.34 88.97l-0.021 43.09 37.05 36.36h11.91c11.198-0.55 15.391-9.23 18.788-14.57 2.558-4.05 7.088-7.49 9.961-10.43 3.04-3.08 3.586-10.13 3.669-17.76v-15.93l0.022 0.16v-3.81h0.021v-2.54h0.002v-0.59-6.87c0-1.6-1.845-1.72-5.871 2.64-4.047 4.34-10.819 3.98-14.74 4.34-3.921 0.35-15.202 6.23-18.432 10.44-1.992 2.62-4.823 0.46-3.67-4.7h-0.042c0.545-2.32 1.551-5.45 3.166-9.58 2.222-5.76 10.568-9.14 10.568-9.14s0.86-0.38 1.615-1.11h-53.996z"/>
+                        </g>
+                    </svg>
+                </div>
+                <h3 id="txt-university">Universität</h3>
+            </a>
+        </div>
+        </div>
+    </div>
+
+    <div id="tool-view" class="hidden">
+        <div class="container" id="tool-container">
+            <!-- Cards will be rendered dynamically from js/labs-config.js -->
+        </div>
+    </div>
+
+    <footer role="contentinfo" aria-label="Fußzeile">
+        &copy; 2026 DR. MICHAEL R. ALVERS
+        <a href="credits.html" id="footer-credits">CREDITS</a>
+        <a href="impressum.html" id="footer-impressum">IMPRESSUM</a>
+    </footer>
+
+    <div class="admin-controls" id="admin-panel">
+        <div style="color: var(--neon-orange); font-size: 0.8rem; margin-bottom: 5px;" id="admin-status">REDAKTIONS-MODUS AKTIV</div>
+        <button class="btn-admin" id="admin-export" onclick="exportChanges()">Änderungen Exportieren</button>
+        <button class="btn-admin" id="admin-exit" style="background: #333; color: #999;" onclick="toggleAdminMode()">Beenden</button>
+    </div>
+
+    <!-- Configuration Load -->
+    <script src="js/labs-icons.js"></script>
+    <script src="js/labs-config.js"></script>
+
+    <!-- JavaScript für Sound-Toggle und Autoplay-Fallback -->
+    <script>
+        const bgAudio = document.getElementById('bg-audio');
+        const soundToggle = document.getElementById('sound-toggle');
+        let isPlaying = false;
+
+        soundToggle.addEventListener('click', () => {
+            if (!isPlaying) {
+                bgAudio.volume = 0.5;
+                bgAudio.play().then(() => {
+                    soundToggle.classList.add('playing');
+                    isPlaying = true;
+                }).catch(error => {
+                    console.error('Audio play failed:', error);
+                    alert("Fehler beim Abspielen von 'ambient.wav'.");
+                });
+            } else {
+                bgAudio.pause();
+                soundToggle.classList.remove('playing');
+                isPlaying = false;
+            }
+        });
+
+        // --- DYNAMIC RENDERING ---
+        function renderCards() {
+            const container = document.getElementById('tool-container');
+            if (!container) return;
+
+            // Render All Tools (Filtered View); externe URLs (http/https) in neuem Tab
+            container.innerHTML = LABS_DATA.map(lab => {
+                const ext = /^https?:\/\//i.test(lab.href);
+                const linkAttrs = ext ? ' target="_blank" rel="noopener noreferrer"' : '';
+                
+                // Localization
+                const titleKey = `index.labs.${lab.id}.title`;
+                const descKey = `index.labs.${lab.id}.description`;
+                
+                let title = CyberI18n.get(titleKey);
+                if (title === titleKey) title = lab.title; // Fallback if key not found
+                
+                let description = CyberI18n.get(descKey);
+                if (description === descKey) description = lab.description; // Fallback if key not found
+                
+                const missionStart = CyberI18n.get('index.ui.mission_start') || "Mission Start";
+                
+                return `
+                <a href="${lab.href}"${linkAttrs} class="card" data-category="${lab.category}" data-keywords="${lab.keywords}">
+                    <div class="card-icon">
+                        ${lab.icon}
+                    </div>
+                    <h3>${title}</h3>
+                    <p class="card-desc">${description}</p>
+                    <div class="btn">${missionStart}</div>
+                </a>`;
+            }).join('');
+        }
+
+        // --- SEARCH LOGIC (ULTRA-SCAN INTEGRATED) ---
+        function filterLabs(val) {
+            const tools = document.querySelectorAll('#tool-container .card');
+            const q = val.toLowerCase().trim();
+
+            tools.forEach(tool => {
+                const title = tool.querySelector('h3').innerText.toLowerCase();
+                const desc = tool.querySelector('.card-desc') ? tool.querySelector('.card-desc').innerText.toLowerCase() : "";
+                const keywords = tool.getAttribute('data-keywords') ? tool.getAttribute('data-keywords').toLowerCase() : "";
+                
+                // Also search in keywords and categories
+                const categories = tool.getAttribute('data-category').toLowerCase();
+                const catParts = categories.split(/\s+/).filter(Boolean);
+                const catHit = categories.includes(q) || (q === 'university' && catParts.includes('uni'));
+
+                if (title.includes(q) || desc.includes(q) || keywords.includes(q) || catHit) {
+                    tool.style.display = 'flex';
+                } else {
+                    tool.style.display = 'none';
+                }
+            });
+
+            if (q.length > 0) {
+                document.getElementById('grade-view').classList.add('hidden');
+                setLabToolLayerVisible(true);
+            } else {
+                showGrades();
+            }
+        }
+
+        // Centralized Search Engine Hook
+        CyberUI.init();
+        const searchHint = CyberI18n.get('index.ui.search_placeholder') || "LABOR-SCAN STARTEN...";
+        CyberUI.createSearch('search-mount', searchHint, (val) => {
+            filterLabs(val);
+        });
+
+        (function syncUniverseGalaxyBtnHeight() {
+            const btn = document.querySelector('.search-scan-row .universe-galaxy-btn');
+            function sync() {
+                const inp = document.querySelector('#search-mount .search-input');
+                const wrap = document.querySelector('#search-mount .search-container');
+                if (!inp || !btn) return;
+                const hInp = inp.getBoundingClientRect().height;
+                const hWrap = wrap ? wrap.getBoundingClientRect().height : 0;
+                const base = Math.max(hInp, hWrap);
+                const px = Math.ceil(base) + 2;
+                btn.style.height = Math.max(36, px) + 'px';
+            }
+            sync();
+            requestAnimationFrame(sync);
+            window.addEventListener('resize', () => requestAnimationFrame(sync));
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => requestAnimationFrame(sync));
+            }
+            if (typeof ResizeObserver !== 'undefined') {
+                const ro = new ResizeObserver(() => sync());
+                const inp = document.querySelector('#search-mount .search-input');
+                const wrap = document.querySelector('#search-mount .search-container');
+                if (inp) ro.observe(inp);
+                if (wrap) ro.observe(wrap);
+            }
+        })();
+
+        function setLabToolLayerVisible(visible) {
+            ['tool-view', 'tool-subchrome'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', !visible);
+            });
+        }
+
+        function showEducationJahrgang(updateHash = true) {
+            setLabToolLayerVisible(false);
+            const gv = document.getElementById('grade-view');
+            gv.classList.remove('hidden');
+            gv.classList.add('grade-view--edu-only');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const block = document.getElementById('index-jahrgang-block');
+            if (block) {
+                requestAnimationFrame(() => block.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            }
+            if (updateHash) {
+                window.location.hash = 'education';
+            }
+        }
+
+        function showFilter(filter, updateHash = true) {
+            // Ensure cards are rendered before filtering
+            if (document.querySelectorAll('#tool-container .card').length === 0) renderCards();
+
+            const gvEl = document.getElementById('grade-view');
+            gvEl.classList.remove('grade-view--edu-only');
+
+            /** Route `university` / `uni` → category token `uni` in labs-config (High-End-Labs). */
+            const categoryToken = (filter === 'university' || filter === 'uni') ? 'uni' : filter;
+
+            const titles = {
+                'grade5': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 5',
+                'grade6': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 6',
+                'grade7': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 7',
+                'grade8': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 8',
+                'grade9': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 9',
+                'grade10': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 10',
+                'grade11': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 11',
+                'grade12': (CyberI18n.get('index.ui.grade_title') || 'GRADE') + ' 12',
+                'fun': CyberI18n.get('index.ui.fun'),
+                'lgs': CyberI18n.get('index.ui.lgs'),
+                'pythagoras': CyberI18n.get('index.ui.pythagoras'),
+                'dreiecke': CyberI18n.get('index.ui.triangles'),
+                'arithmetik': CyberI18n.get('index.ui.arithmetic'),
+                'hot': CyberI18n.get('index.ui.hot_stuff'),
+                'funktionen': CyberI18n.get('index.ui.functions'),
+                'highlight': CyberI18n.get('index.ui.highlights'),
+                'top5': 'TOP 5',
+                'fraktale': CyberI18n.get('index.ui.fraktale'),
+                'uni': CyberI18n.get('index.ui.university'),
+                'university': CyberI18n.get('index.ui.university')
+            };
+
+            const titleEl = document.getElementById('view-title');
+            if (titleEl) {
+                const rawTitle = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
+                titleEl.innerText = rawTitle.toUpperCase();
+            }
+
+            const tools = document.querySelectorAll('#tool-container .card');
+            let visibleCount = 0;
+
+            tools.forEach(tool => {
+                const categories = tool.getAttribute('data-category').split(' ');
+                if (categories.includes(categoryToken)) {
+                    tool.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    tool.style.display = 'none';
+                }
+            });
+
+            document.getElementById('grade-view').classList.add('hidden');
+            setLabToolLayerVisible(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (updateHash) {
+                const hashOut = (filter === 'uni' || filter === 'university') ? 'university' : filter;
+                window.location.hash = hashOut;
+            }
+        }
+
+        function showGrades(updateHash = true) {
+            setLabToolLayerVisible(false);
+            const gv = document.getElementById('grade-view');
+            gv.classList.remove('hidden');
+            gv.classList.remove('grade-view--edu-only');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (updateHash) {
+                window.location.hash = '';
+            }
+        }
+
+        /** Zurück: Browser-Verlauf (vorheriger Hash — z. B. #education nach Jahrgangsklick). */
+        function backFromToolView() {
+            window.history.back();
+        }
+
+        function handleHash() {
+            const hash = window.location.hash.substring(1);
+            if (hash === 'education') {
+                showEducationJahrgang(false);
+            } else if (hash === 'uni') {
+                showFilter('university', false);
+            } else if (hash) {
+                showFilter(hash, false);
+            } else {
+                showGrades(false);
+            }
+        }
+
+        function updateToolCount() {
+            if (typeof LABS_DATA === 'undefined') return;
+            const count = LABS_DATA.length;
+            const subtitle = document.getElementById('dynamic-subtitle');
+            if (!subtitle) return;
+            const tagline =
+                typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function'
+                    ? CyberI18n.get('index.header.subtitle') || 'INTERAKTIVE MATHEMATIK'
+                    : 'INTERAKTIVE MATHEMATIK';
+            subtitle.textContent = `${count} · ${tagline}`;
+        }
+
+        function updateThemesCount() {
+            const countEl = document.getElementById('themes-count');
+            if (!countEl) return;
+            const themeCards = document.querySelectorAll('#index-themes-block .category-card');
+            countEl.innerText = themeCards.length;
+        }
+
+        function countLabsInCategory(categoryToken) {
+            if (typeof LABS_DATA === 'undefined') return 0;
+            return LABS_DATA.filter(lab => {
+                const cats = String(lab.category || '').trim().split(/\s+/).filter(Boolean);
+                return cats.includes(categoryToken);
+            }).length;
+        }
+
+        /** Tokens der Jahrgangszeile + Uni (wie data-jg-category), für Union-Zählung. */
+        const JG_UNI_HUB_TOKENS = ['grade5', 'grade6', 'grade7', 'grade8', 'grade9', 'grade10', 'grade11', 'grade12', 'uni'];
+
+        /**
+         * Eindeutige Lab-Kacheln: jedes `id` höchstens einmal, wenn mindestens ein JG- oder uni-Token in category.
+         * `columnSum` = Summe der Spaltenzähler (Labs mit mehreren Tags zählen mehrfach).
+         * `excludedIds` = in LABS_DATA, aber ohne grade5–12/uni (z. B. nur „hot“).
+         */
+        function countUniqueLabsJahrgangUniDebug() {
+            if (typeof LABS_DATA === 'undefined') {
+                return { union: 0, columnSum: 0, excludedIds: [], totalAll: 0 };
+            }
+            const tokenSet = new Set(JG_UNI_HUB_TOKENS);
+            const ids = new Set();
+            const excludedIds = [];
+            for (const lab of LABS_DATA) {
+                const cats = String(lab.category || '').trim().split(/\s+/).filter(Boolean);
+                if (cats.some(c => tokenSet.has(c))) ids.add(lab.id);
+                else excludedIds.push(lab.id);
+            }
+            const columnSum = JG_UNI_HUB_TOKENS.reduce((s, t) => s + countLabsInCategory(t), 0);
+            return { union: ids.size, columnSum, excludedIds, totalAll: LABS_DATA.length };
+        }
+
+        function updateJahrgangGridDebugUnique() {
+            const el = document.getElementById('jahrgang-grid-debug-unique');
+            if (!el) return;
+            const { union, columnSum, excludedIds, totalAll } = countUniqueLabsJahrgangUniDebug();
+            const extra = excludedIds.length
+                ? ` · exkl. (kein JG/Uni-Tag): ${excludedIds.join(', ')} — gleich Header ${totalAll} = ${union} + ${excludedIds.length}`
+                : '';
+            el.textContent = `[debug] eindeutige Labs (JG 5–12 + Uni): ${union} · Σ Spalten: ${columnSum}${extra}`;
+        }
+
+        function updateJahrgangLabCounts() {
+            const grid = document.getElementById('jahrgang-grid');
+            if (!grid) return;
+            grid.querySelectorAll('.jahrgang-portal-tile[data-jg-category]').forEach(tile => {
+                const token = tile.getAttribute('data-jg-category');
+                const n = countLabsInCategory(token);
+                let el = tile.querySelector('.jahrgang-portal-tile__lab-count');
+                if (!el) {
+                    el = document.createElement('span');
+                    el.className = 'jahrgang-portal-tile__lab-count';
+                    tile.appendChild(el);
+                }
+                el.textContent = `${n} Labs`;
+                const laborePhrase = n === 1 ? '1 Labor' : `${n} Labore`;
+                const baseAria = tile.getAttribute('aria-label') || '';
+                const prefix = token === 'uni' ? 'Universität' : baseAria.replace(/,.*$/, '');
+                tile.setAttribute('aria-label', `${prefix}, ${laborePhrase}`);
+            });
+            updateJahrgangGridDebugUnique();
+        }
+
+        // --- ADMIN ACCESS LOGIC ---
+        let adminActive = false;
+
+        function toggleAdminMode(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            if (!adminActive) {
+                openGate();
+            } else {
+                deactivateAdmin();
+            }
+        }
+
+        function openGate() {
+            const gate = document.getElementById('admin-gate');
+            const input = document.getElementById('gate-pwd');
+            gate.classList.add('visible');
+            input.value = "";
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeGate() {
+            document.getElementById('admin-gate').classList.remove('visible');
+        }
+
+        function openIndexQrOverlay() {
+            const url = window.location.href;
+            const img = document.getElementById('qr-overlay-img');
+            const urlEl = document.getElementById('qr-overlay-url');
+            if (img) {
+                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=' + encodeURIComponent(url);
+                img.alt = 'QR-Code für diese Seite';
+            }
+            if (urlEl) urlEl.textContent = url;
+            document.getElementById('qr-overlay').classList.add('open');
+        }
+
+        // --- CRYPTO SECURITY (SHA-256) ---
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function verifyGate() {
+            const pwdInput = document.getElementById('gate-pwd');
+            const pwd = pwdInput.value;
+            const hash = await sha256(pwd);
+
+            const targetHash = "3b421a36c686d295d84c48f434faa21430d55ef34b8a0c9ec39ca2f84b5d2a66";
+
+            if (hash === targetHash) {
+                closeGate();
+                activateAdmin();
+            } else {
+                alert("ZUGRIFF VERWEIGERT.");
+                pwdInput.value = "";
+                pwdInput.focus();
+            }
+        }
+
+        function activateAdmin() {
+            adminActive = true;
+            document.body.classList.add('admin-mode');
+            updateAdminUI();
+            console.log("REDAKTIONS-MODUS AKTIV");
+        }
+
+        function deactivateAdmin() {
+            adminActive = false;
+            document.body.classList.remove('admin-mode');
+            updateAdminUI();
+            console.log("REDAKTIONS-MODUS BEENDET");
+        }
+
+        function updateAdminUI() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3');
+                const desc = card.querySelector('.card-desc');
+
+                if (title) title.contentEditable = adminActive;
+                if (desc) desc.contentEditable = adminActive;
+
+                // Prevent navigation when editing
+                if (adminActive) {
+                    if (!card.hasAttribute('data-old-href')) {
+                        card.setAttribute('data-old-href', card.getAttribute('href') || "");
+                    }
+                    card.removeAttribute('href');
+                    card.style.cursor = 'default';
+                } else {
+                    if (card.hasAttribute('data-old-href')) {
+                        card.setAttribute('href', card.getAttribute('data-old-href'));
+                    }
+                    card.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        function exportChanges() {
+            const cards = document.querySelectorAll('#tool-container .card');
+
+            // Generate a fresh LABS_DATA output based on UI edits
+            const updatedData = LABS_DATA.map(lab => {
+                const card = document.querySelector(`.card[data-old-href="${lab.href}"], .card[href="${lab.href}"]`);
+                if (card) {
+                    return {
+                        ...lab,
+                        title: card.querySelector('h3').innerText,
+                        description: card.querySelector('.card-desc').innerText
+                    };
+                }
+                return lab;
+            });
+
+            const json = JSON.stringify(updatedData, null, 4);
+
+            // Show in a modal for easy copy-paste
+            const gate = document.getElementById('admin-gate');
+            const box = gate.querySelector('.admin-gate-box');
+
+            box.innerHTML = `
+                <h3>EXPORT KONFIGURATION</h3>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 15px;">
+                    Kopiere diesen Code und füge ihn im Chat ein.
+                </p>
+                <textarea id="export-area" readonly style="width:100%; height:250px; background:rgba(0,0,0,0.5); color:#00d2ff; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; font-family:monospace; font-size:0.8rem; margin-bottom:15px; resize:none;">${json}</textarea>
+                <button class="btn-access" onclick="copyExport()">CODE KOPIEREN</button>
+                <br>
+                <button class="btn-cancel" onclick="location.reload()">FERTIG</button>
+            `;
+            gate.classList.add('visible');
+        }
+
+        function copyExport() {
+            const area = document.getElementById('export-area');
+            area.select();
+            document.execCommand('copy');
+            const btn = document.querySelector('.btn-access');
+            btn.innerHTML = "KOPIERT! ✅";
+            btn.style.background = "#adff2f";
+            setTimeout(() => {
+                btn.innerHTML = "CODE KOPIEREN";
+                btn.style.background = "var(--neon-blue)";
+            }, 2000);
+        }
+
+        // Initialization
+        renderCards();
+        handleHash();
+        updateToolCount();
+        updateThemesCount();
+        updateJahrgangLabCounts();
+
+        // High-Quality Video Slowdown (ULTRA 5.3.8)
+        const bgVid = document.getElementById('bg-video');
+        if (bgVid) bgVid.playbackRate = 0.5;
+
+        window.addEventListener('hashchange', handleHash);
+        /* --- SPIELWIESE: Saturn & UFO nacheinander aus der Mitte, nie doppelt hintereinander --- */
+        const playgroundSprites = ['🪐', '🛸', '🚀', '🛰️', '☄️', '🌙', '🌍', '🌠', '⭐', '🌟', '🌌', '☀️', '🌕', '🌑', '✨'];
+        const overlay = document.getElementById('planet-overlay');
+        let lastFlyingSprite = null;
+
+        function pickNextSprite() {
+            if (playgroundSprites.length < 2) return playgroundSprites[0];
+            let next;
+            do {
+                next = playgroundSprites[Math.floor(Math.random() * playgroundSprites.length)];
+            } while (next === lastFlyingSprite);
+            return next;
+        }
+
+        function scheduleNextFlyby(delayMs) {
+            setTimeout(spawnPlanet, delayMs);
+        }
+
+        function spawnPlanet() {
+            if (!overlay) return;
+            if (document.hidden) {
+                scheduleNextFlyby(2500);
+                return;
+            }
+
+            const sprite = pickNextSprite();
+            lastFlyingSprite = sprite;
+
+            const planet = document.createElement('div');
+            planet.className = 'flying-planet';
+            planet.textContent = sprite;
+
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.max(window.innerWidth, window.innerHeight) * 0.85;
+            const dx = Math.cos(angle) * dist;
+            const dy = Math.sin(angle) * dist;
+
+            const rot = (Math.random() - 0.5) * 520;
+            const duration = 22 + Math.random() * 38;
+
+            planet.style.left = `${window.innerWidth / 2}px`;
+            planet.style.top = `${window.innerHeight / 2}px`;
+            planet.style.setProperty('--dx', `${dx}px`);
+            planet.style.setProperty('--dy', `${dy}px`);
+            planet.style.setProperty('--rot', `${rot}deg`);
+            planet.style.animation = `planet-flyby ${duration}s linear forwards`;
+
+            overlay.appendChild(planet);
+            setTimeout(() => {
+                planet.remove();
+                scheduleNextFlyby(4200 + Math.random() * 5000);
+            }, duration * 1000);
+        }
+
+        scheduleNextFlyby(1200);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && overlay && overlay.querySelectorAll('.flying-planet').length === 0) {
+                scheduleNextFlyby(800);
+            }
+        });
+
+    </script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            if (typeof CyberBranding !== 'undefined') {
+                CyberBranding.init({
+                    title: CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor",
+                    subtitle: "MISSION CONTROL",
+                    skipCanvasBranding: true,
+                    skipNavigation: true
+                });
+                queueMicrotask(() => {
+                    document.querySelectorAll(".canvas-branding").forEach((el) => el.remove());
+                    document.querySelectorAll("body > .cyber-nav").forEach((el) => el.remove());
+                });
+            }
+        });
+    </script>
+    <script>
+    window.addEventListener('load', () => {
+        // Page Title
+        document.title = (CyberI18n.get('index.header.title') || "Doc Alvers Mathe-Labor") + " | " + (CyberI18n.get('index.header.author') || "Dr. Michael R. Alvers");
+        
+        // Admin Gate
+        if (document.getElementById('gate-title')) document.getElementById('gate-title').innerHTML = CyberI18n.get('index.admin_gate.title');
+        if (document.getElementById('gate-pwd')) document.getElementById('gate-pwd').placeholder = CyberI18n.get('index.admin_gate.pwd_placeholder');
+        if (document.getElementById('gate-access')) document.getElementById('gate-access').innerHTML = CyberI18n.get('index.admin_gate.access');
+        if (document.getElementById('gate-cancel')) document.getElementById('gate-cancel').innerHTML = CyberI18n.get('index.admin_gate.cancel');
+        
+        // UI Icons Tooltips
+        if (document.getElementById('btn-coffee')) document.getElementById('btn-coffee').title = CyberI18n.get('index.ui.coffee_title');
+        if (document.getElementById('btn-about')) document.getElementById('btn-about').title = CyberI18n.get('index.ui.about_title');
+        if (document.getElementById('contact-link-credits')) {
+            document.getElementById('contact-link-credits').textContent =
+                CyberI18n.get('index.ui.credits') || 'CREDITS';
+        }
+        if (document.getElementById('contact-link-impressum')) {
+            document.getElementById('contact-link-impressum').textContent =
+                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+        }
+        if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
+        if (document.getElementById('sound-toggle')) document.getElementById('sound-toggle').title = CyberI18n.get('index.ui.sound_title');
+        
+        // Modals
+        if (document.getElementById('contact-title')) document.getElementById('contact-title').innerHTML = CyberI18n.get('index.contact.title');
+        if (document.getElementById('contact-desc')) document.getElementById('contact-desc').innerHTML = CyberI18n.get('index.contact.desc');
+        if (document.getElementById('contact-close')) document.getElementById('contact-close').innerHTML = CyberI18n.get('index.contact.close');
+        if (document.getElementById('qr-title')) document.getElementById('qr-title').innerHTML = CyberI18n.get('index.qr.title');
+        if (document.getElementById('qr-desc')) document.getElementById('qr-desc').innerHTML = CyberI18n.get('index.qr.desc');
+        if (document.getElementById('qr-close')) document.getElementById('qr-close').innerHTML = CyberI18n.get('index.contact.close');
+        if (document.getElementById('donate-title')) document.getElementById('donate-title').innerHTML = CyberI18n.get('index.donate.title');
+        if (document.getElementById('donate-desc')) document.getElementById('donate-desc').innerHTML = CyberI18n.get('index.donate.desc');
+        if (document.getElementById('donate-paypal')) document.getElementById('donate-paypal').innerHTML = CyberI18n.get('index.donate.paypal');
+        if (document.getElementById('donate-close')) document.getElementById('donate-close').innerHTML = CyberI18n.get('index.contact.close');
+        
+        // Header
+        const h1 = document.getElementById('header-title');
+        // Do not translate the main title name
+        /* if (h1 && h1.childNodes[0]) {
+             h1.childNodes[0].nodeValue = (CyberI18n.get('index.header.title') || "Doc Alvers ").replace("Mathe-Labor", "");
+        } */
+        updateToolCount();
+        if (document.getElementById('header-author')) document.getElementById('header-author').innerHTML = CyberI18n.get('index.header.author');
+        
+        // Views
+        if (document.getElementById('view-btn-back')) document.getElementById('view-btn-back').title = CyberI18n.get('index.view.back_title');
+        if (document.getElementById('view-title')) document.getElementById('view-title').innerHTML = CyberI18n.get('index.view.title');
+        if (document.getElementById('btn-universe')) document.getElementById('btn-universe').title = CyberI18n.get('index.ui.universe_tip');
+        if (document.getElementById('grade-btn-back')) document.getElementById('grade-btn-back').title = CyberI18n.get('index.ui.grade_back_tip');
+        if (document.getElementById('txt-grade')) document.getElementById('txt-grade').innerHTML = CyberI18n.get('index.ui.grade_title');
+        if (document.getElementById('txt-uni')) document.getElementById('txt-uni').innerHTML = CyberI18n.get('index.ui.grade_uni');
+        if (document.getElementById('grade-tile-uni')) document.getElementById('grade-tile-uni').title = CyberI18n.get('index.ui.grade_uni_tip');
+        
+        // Themes
+        if (document.getElementById('txt-themes')) document.getElementById('txt-themes').innerHTML = CyberI18n.get('index.ui.themes_count');
+        if (document.getElementById('themes-tile-top5')) document.getElementById('themes-tile-top5').title = CyberI18n.get('index.ui.themes_top5_title');
+        if (document.getElementById('txt-highlights')) document.getElementById('txt-highlights').innerHTML = CyberI18n.get('index.ui.highlights');
+        if (document.getElementById('txt-all-tools')) document.getElementById('txt-all-tools').innerHTML = CyberI18n.get('index.ui.all_tools');
+        if (document.getElementById('themes-tile-education')) document.getElementById('themes-tile-education').title = CyberI18n.get('index.ui.education');
+        if (document.getElementById('txt-education')) document.getElementById('txt-education').innerHTML = CyberI18n.get('index.ui.education');
+        
+        // Categories
+        if (document.getElementById('txt-games')) document.getElementById('txt-games').innerHTML = CyberI18n.get('index.ui.games');
+        if (document.getElementById('txt-lgs')) document.getElementById('txt-lgs').innerHTML = CyberI18n.get('index.ui.lgs');
+        if (document.getElementById('txt-pythagoras')) document.getElementById('txt-pythagoras').innerHTML = CyberI18n.get('index.ui.pythagoras');
+        if (document.getElementById('txt-triangles')) document.getElementById('txt-triangles').innerHTML = CyberI18n.get('index.ui.triangles');
+        if (document.getElementById('txt-arithmetic')) document.getElementById('txt-arithmetic').innerHTML = CyberI18n.get('index.ui.arithmetic');
+        if (document.getElementById('txt-hot')) document.getElementById('txt-hot').innerHTML = CyberI18n.get('index.ui.hot_stuff');
+        if (document.getElementById('txt-fun')) document.getElementById('txt-fun').innerHTML = CyberI18n.get('index.ui.fun');
+        if (document.getElementById('txt-functions')) document.getElementById('txt-functions').innerHTML = CyberI18n.get('index.ui.functions');
+        if (document.getElementById('txt-university')) document.getElementById('txt-university').innerHTML = CyberI18n.get('index.ui.university');
+        if (document.getElementById('themes-tile-uni')) document.getElementById('themes-tile-uni').title = CyberI18n.get('index.ui.grade_uni_tip');
+        
+        // Footer
+        if (document.getElementById('footer-credits')) {
+            document.getElementById('footer-credits').textContent =
+                CyberI18n.get('index.ui.credits') || 'CREDITS';
+        }
+        if (document.getElementById('footer-impressum')) {
+            document.getElementById('footer-impressum').textContent =
+                CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+        }
+        
+        // Admin
+        if (document.getElementById('admin-status')) document.getElementById('admin-status').innerHTML = CyberI18n.get('index.admin.active');
+        if (document.getElementById('admin-export')) document.getElementById('admin-export').innerHTML = CyberI18n.get('index.admin.export');
+        if (document.getElementById('admin-exit')) document.getElementById('admin-exit').innerHTML = CyberI18n.get('index.admin.exit');
+    });
+    </script>
+</body>
+
+</html>

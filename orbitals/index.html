@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbitale — Web</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <h1>Atomorbitale</h1>
+        <p class="sub">
+          Oberfläche <code>r = |Y_l^m(θ,φ)|</code> wie in der JavaFX-Version — gerendert mit
+          <a href="https://threejs.org/" style="color: var(--accent)">Three.js</a>.
+        </p>
+
+        <label class="field">
+          Orbital
+          <select id="orbital-select" aria-label="Orbital wählen"></select>
+        </label>
+
+        <label class="field">
+          <span class="row">
+            Auflösung (Gitter)
+            <span id="resolution-value" class="range-value">180</span>
+          </span>
+          <input id="resolution" type="range" min="10" max="1000" value="180" step="1" />
+        </label>
+
+        <label class="field">
+          <span class="row">
+            Specular (Shininess)
+            <span id="specular-value" class="range-value">32</span>
+          </span>
+          <input id="specular" type="range" min="1" max="256" value="32" step="1" />
+        </label>
+
+        <label class="field">
+          <span class="row">
+            Opacity
+            <span id="opacity-value" class="range-value">1.00</span>
+          </span>
+          <input id="opacity" type="range" min="0.1" max="1" value="1" step="0.05" />
+        </label>
+
+        <label class="row">
+          <input id="toggle-ambient" type="checkbox" checked />
+          Umgebungslicht
+        </label>
+        <label class="row">
+          <input id="toggle-point" type="checkbox" checked />
+          Punktlicht
+        </label>
+
+        <button type="button" id="toggle-rotate">Auto-Rotation (Leertaste)</button>
+        <button type="button" id="help-toggle">Tastaturhilfe</button>
+
+        <div id="help-panel" hidden>
+          <p><kbd>↑</kbd> / <kbd>↓</kbd> vorheriges / nächstes Orbital</p>
+          <p><kbd>←</kbd> / <kbd>→</kbd> Auflösung (−1 / +1, mit <kbd>Shift</kbd> ±10)</p>
+          <p><kbd>Leertaste</kbd> Auto-Rotation (aus) · <kbd>Esc</kbd> Orbital+Kamera zurück</p>
+          <p><kbd>1</kbd>–<kbd>9</kbd> Auflösung 100–900 · <kbd>0</kbd> sehr niedrig (10)</p>
+          <p>
+            <kbd>H</kbd> Hilfe ·
+            <strong>Trackball:</strong> links drehen · Rad / Mitte Zoom · Rechts Schwenk — Faktor unten + ZOOM in der Formel
+          </p>
+        </div>
+      </aside>
+
+      <main id="canvas-wrap" aria-label="3D-Ansicht">
+        <div class="overlay-formula">
+          <div id="formula" class="formula-box">
+            <div id="formula-tex" class="formula-tex"></div>
+            <div id="formula-zf" class="formula-zf" aria-live="polite"></div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <p class="footer-zoom" id="stats-zoom"></p>
+        <p class="footer-meta" id="stats"></p>
+      </footer>
+    </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

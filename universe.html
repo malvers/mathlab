@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Universe</title>
+    <script src="js/i18n.js"></script>
+    <script>
+        (function () {
+            try {
+                if (typeof CyberI18n !== 'undefined' && CyberI18n.get) {
+                    var u = CyberI18n.get('ui.universe_title');
+                    if (typeof u === 'string' && u && u !== 'ui.universe_title') {
+                        document.title = 'docalvers | ' + u;
+                    }
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #050b18;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .glow-sphere {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            width: 600px;
+            height: 600px;
+            margin-left: -300px;
+            margin-top: -300px;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+            animation: pulse-glow 8s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-glow {
+            from { transform: scale(1); opacity: 0.3; }
+            to { transform: scale(1.2); opacity: 0.55; }
+        }
+
+        #thumb-plane {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .universe-thumb {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: min(46vw, 374px);
+            pointer-events: auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.12);
+            will-change: transform, opacity;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            outline: none;
+        }
+
+        .universe-thumb:focus-visible {
+            box-shadow: 0 0 0 3px #00d2ff, 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Innen: abgerundeter Ausschnitt; außen: Kachel darf Schließen-Button nach außen zeigen */
+        .universe-thumb__media {
+            overflow: hidden;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .universe-thumb.universe-thumb--focused {
+            overflow: visible;
+        }
+
+        .universe-thumb img {
+            display: block;
+            width: 100%;
+            height: auto;
+            vertical-align: middle;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .universe-thumb__placeholder {
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 14px;
+            box-sizing: border-box;
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92));
+            color: #7dd3fc;
+            font-size: clamp(0.7rem, 2.2vw, 0.88rem);
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-align: center;
+            text-transform: uppercase;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+        }
+    </style>
+
+    <!-- nav-btn from branding.styles.extracted.css (the true central style) -->
+    <style>
+        .nav-btn {
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 210, 255, 0.3) !important;
+            color: white !important;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 42px !important;
+            height: 42px !important;
+            min-height: 42px !important;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none !important;
+            position: relative;
+            padding: 0;
+            outline: none;
+        }
+
+        .nav-btn svg {
+            width: 20px !important;
+            height: 20px !important;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            display: block !important;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            background: rgba(0, 210, 255, 0.2) !important;
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        /* overrides for close button specifically */
+        #universe-close-focus.visible {
+            display: flex !important;
+        }
+        #universe-close-focus {
+            width: 24px !important;
+            height: 24px !important;
+            min-height: 24px !important;
+            border-radius: 50% !important;
+        }
+        #universe-close-focus svg {
+            width: 12px !important;
+            height: 12px !important;
+        }
+        #universe-close-focus:hover {
+            background: rgba(220, 38, 38, 0.35) !important;
+            border-color: #ff5050 !important;
+            box-shadow: 0 0 15px rgba(255, 80, 80, 0.4) !important;
+            transform: translate(50%, -50%) scale(1.1) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="bg-video" autoplay loop muted playsinline>
+        <source src="resources/galay20.mp4" type="video/mp4">
+    </video>
+
+    <div class="glow-sphere"></div>
+    <div id="thumb-plane" aria-live="polite"></div>
+
+    <button type="button" id="universe-close-focus" class="nav-btn" style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); z-index: 10; display: none !important;"
+        title="Esc" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+    </button>
+
+    <button type="button" class="nav-btn" style="position: fixed; top: 30px; left: 30px; z-index: 50000;" onclick="window.location.href='index.html'" title="Zurück zum Portal" aria-label="Zurück zum Portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <button type="button" class="nav-btn" id="fs-btn" style="position: fixed; top: 30px; right: 30px; z-index: 50000;" onclick="toggleFullscreen()" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6"/>
+        </svg>
+    </button>
+
+    <script>
+        const SCREENSHOT_BASE = 'resources/screenshots/';
+        /**
+         * Redaktionelle Auswahl für diese Galerie (Dateiname „universe“ = Kosmos-Optik, nicht `uni`).
+         * Das Config-Token `uni` in labs-config.js bedeutet Universität/komplex — steuert diese Seite nicht.
+         * PNGs unter resources/screenshots/ (fehlend → Platzhalter).
+         */
+        const UNIVERSE_LABS = [
+            { href: 'orbitals.html', file: 'orbitals.png', label: 'ATOMORBITALE' },
+            { href: 'cmaes.html', file: 'cmaes.png', label: 'FLÄCHENOPTIMIERUNG' },
+            { href: 'differentiallabor.html', file: 'differentiallabor.png', label: 'DIFFERENTIAL-LABOR' },
+            { href: 'fourier.html', file: 'fourier.png', label: 'FOURIER-TRANSFORMATION' },
+            { href: 'mandelbrot.html', file: 'mandelbrot_deep.png', label: 'FRAKTALE' },
+            { href: 'integralreaktor.html', file: 'integralreaktor.png', label: 'INTEGRALE' },
+            { href: 'LensStandalone/cmaes_java.html', file: 'cmaes_java.png', label: 'LINSENOPTIMIERUNG' },
+            { href: 'lissajous.html', file: 'lissajous.png', label: 'LISSAJOUS' },
+            { href: 'galtonboard.html', file: 'galtonboard.png', label: 'GALTON BOARD' },
+            { href: 'butterfly.html', file: 'butterfly.png', label: 'SCHMETTERLINGSKURVE' },
+            { href: 'heart3d.html', file: 'heart3d.png', label: '3D HERZ' },
+            { href: 'litchi3d.html', file: 'litchi3d.png', label: '3D LITSCHI' },
+            { href: 'transformationen.html', file: 'transformationen.png', label: 'KONGRUENZ' },
+            { href: 'winkelsumme3d.html', file: 'winkelsumme3d.png', label: '3D WINKELSUMME' },
+            { href: 'ausgleichsgerade.html', file: 'ausgleichsgerade.png', label: 'REGRESSION' },
+            { href: 'binomischeslabor.html', file: 'binomischeslabor.png', label: 'BINOMISCHE FORMEL' },
+            { href: 'triangulierer.html', file: 'triangulierer.png', label: 'DELAUNAY' },
+            { href: 'eulergerade.html', file: 'eulergerade.png', label: 'EULER & FEUERBACH' },
+            { href: 'easyhard.html', file: 'easyhard.png', label: 'LANGLEY RÄTSEL' },
+            { href: 'gleichschenkligesDreieck.html', file: 'gleichschenkligesDreieck.png', label: 'GLEICHSCHENKLIGES DREIECK' },
+            { href: 'parabellabor.html', file: 'parabellabor.png', label: 'PARABELN' },
+            { href: 'winkelsumme.html', file: 'winkelsumme.png', label: 'POLYGON-LABOR' },
+            { href: 'potenzlabor.html', file: 'potenzlabor.png', label: 'POTENZEN' },
+            { href: 'pythagorasbeweis.html', file: 'pythagorasbeweis.png', label: 'PYTHAGORAS BEWEIS' },
+            { href: 'pythagoras.html', file: 'pythagoras.png', label: 'PYTHAGORAS' },
+            { href: 'steigung.html', file: 'steigung.png', label: 'STEIGUNG' },
+            { href: 'winkellabor.html', file: 'winkellabor.png', label: 'WINKEL-LABOR' },
+            { href: 'uhrzeitwinkel.html', file: 'uhrzeitwinkel.png', label: 'WINKEL-UHR' },
+            { href: 'beweisinwinkellsumme.html', file: 'beweisinwinkellsumme.png', label: 'INNENWINKELSATZ' },
+            { href: 'logikspiel2.html', file: 'logikspiel2.png', label: 'ZAHLEN-PUZZLE' },
+            { href: 'coolsquares.html', file: 'coolsquares.png', label: 'COOL SQUARES' },
+            { href: 'fibonacci.html', file: 'fibonacci.png', label: 'FIBONACCI' },
+            { href: 'fermatpunkt.html', file: 'fermatpunkt.png', label: 'FERMAT-PUNKT' },
+            { href: 'gleichungssysteme.html', file: 'gleichungssysteme.png', label: 'LGS LABOR' },
+            { href: 'addition.html', file: 'addition.png', label: 'ADDITION' },
+            { href: 'subtraktion.html', file: 'subtraktion.png', label: 'SUBTRAKTION' },
+            { href: 'multiplikation.html', file: 'multiplikation.png', label: 'MULTIPLIKATION' },
+            { href: 'dividieren.html', file: 'dividieren.png', label: 'DIVISION' },
+            { href: 'winkelpuzzle.html', file: 'winkelpuzzle.png', label: 'WINKEL-PUZZLE' },
+            { href: 'coordinatensystemtester.html', file: 'coordinatensystemtester.png', label: 'KOORDINATENSYSTEM' }
+        ];
+        let universeAnimPaused = false;
+        let universeFocusedObj = null;
+
+        function setUniverseCloseVisible(show) {
+            const b = document.getElementById('universe-close-focus');
+            if (b) b.classList.toggle('visible', !!show);
+        }
+
+        function releaseUniverseFocus() {
+            const o = universeFocusedObj;
+            if (!o) return;
+            o.frozen = false;
+            o.isFocused = false;
+            o.isDragging = false;
+            o.alwaysOnTop = false;
+            o.el.style.boxShadow = '';
+            o.el.classList.remove('universe-thumb--focused');
+            universeFocusedObj = null;
+            const b = document.getElementById('universe-close-focus');
+            if (b && b.parentElement !== document.body) {
+                document.body.appendChild(b);
+            }
+            setUniverseCloseVisible(false);
+        }
+
+        window.addEventListener('load', () => {
+            const video = document.getElementById('bg-video');
+            if (video) video.playbackRate = 0.5;
+            initUniverseThumbs();
+        });
+
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const isFullScreen = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement || doc.webkitIsFullScreen;
+            if (!isFullScreen) {
+                if (docEl.requestFullscreen) docEl.requestFullscreen();
+                else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+            } else {
+                if (doc.exitFullscreen) doc.exitFullscreen();
+                else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+                else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+                else if (doc.msExitFullscreen) doc.msExitFullscreen();
+            }
+        }
+
+        document.getElementById('universe-close-focus')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            releaseUniverseFocus();
+        }, true);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape' && universeFocusedObj) {
+                e.preventDefault();
+                releaseUniverseFocus();
+                return;
+            }
+            const plainF = (e.code === 'KeyF' || e.key.toLowerCase() === 'f')
+                && !e.ctrlKey && !e.metaKey && !e.altKey;
+            if (plainF) {
+                const el = e.target;
+                if (el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]')) return;
+                e.preventDefault();
+                toggleFullscreen();
+            }
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                universeAnimPaused = !universeAnimPaused;
+            }
+        });
+
+        function initUniverseThumbs() {
+            const plane = document.getElementById('thumb-plane');
+            if (!plane) return;
+
+            const pool = UNIVERSE_LABS.length ? UNIVERSE_LABS.slice() : [];
+            if (pool.length === 0) return;
+
+            const WANT_VISIBLE = Math.min(6, pool.length);
+            const maxLive     = Math.min(pool.length, 16);
+            const active      = [];
+                let spawnAcc      = 0;
+                const spawnEveryMs = () => 1200 + Math.random() * 1500;
+                let nextSpawnIn   = spawnEveryMs();
+
+                const SCALE_FACTOR = 6;
+                const scaleMax     = 0.92 * SCALE_FACTOR;
+
+                function angleDelta(a, b) {
+                    let d = Math.abs(a - b);
+                    if (d > Math.PI) d = Math.PI * 2 - d;
+                    return d;
+                }
+
+                function pickSpawnAngle(minRad) {
+                    for (let attempt = 0; attempt < 140; attempt++) {
+                        const ang = Math.random() * Math.PI * 2;
+                        let ok = true;
+                        for (const o of active) {
+                            if (angleDelta(ang, o.angle) < minRad) { ok = false; break; }
+                        }
+                        if (ok) return ang;
+                    }
+                    return Math.random() * Math.PI * 2;
+                }
+
+                let deck = [];
+
+                function pickUnusedLab() {
+                    // Falls der Stapel leer ist, neu füllen und mischen
+                    if (deck.length === 0) {
+                        deck = [...pool];
+                        // Fisher-Yates Shuffle
+                        for (let i = deck.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [deck[i], deck[j]] = [deck[j], deck[i]];
+                        }
+                    }
+
+                    const used = new Set(active.map(o => o.href));
+                    // Suche das erste Labor im Stapel, das gerade NICHT sichtbar ist
+                    for (let i = 0; i < deck.length; i++) {
+                        if (!used.has(deck[i].href)) {
+                            return deck.splice(i, 1)[0];
+                        }
+                    }
+
+                    // Falls wirklich ALLES aus dem Pool gerade sichtbar ist (unwahrscheinlich bei 15 Labs)
+                    return null;
+                }
+
+                function spawnOne(lab) {
+                    if (!lab) return;
+                    const diag = Math.hypot(window.innerWidth, window.innerHeight);
+                    const killDist = diag * 0.96 + 220;
+
+                    const minSep = active.length > 14 ? 0.28 : active.length > 8 ? 0.34 : 0.4;
+                    const angle  = pickSpawnAngle(minSep);
+                    const speed  = 28 + Math.random() * 42;
+
+                    const a = document.createElement('a');
+                    a.className = 'universe-thumb';
+                    a.href = lab.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                    const media = document.createElement('div');
+                    media.className = 'universe-thumb__media';
+                    const im = document.createElement('img');
+                    im.src = SCREENSHOT_BASE + lab.file;
+                    im.alt = lab.label || '';
+                    im.decoding = 'async';
+                    im.draggable = false;
+                    im.addEventListener('error', () => {
+                        im.remove();
+                        if (media.querySelector('.universe-thumb__placeholder')) return;
+                        const ph = document.createElement('div');
+                        ph.className = 'universe-thumb__placeholder';
+                        ph.textContent = lab.label || 'HIGH END';
+                        media.appendChild(ph);
+                    }, { once: true });
+                    media.appendChild(im);
+                    a.appendChild(media);
+                    plane.appendChild(a);
+
+                    const obj = {
+                        el:      a,
+                        angle,
+                        depth:   0,
+                        vDepth:  speed / killDist,
+                        targetX: Math.cos(angle) * killDist,
+                        targetY: Math.sin(angle) * killDist,
+                        href:    lab.href,
+                        frozen:  false,
+                        alwaysOnTop: false,
+                        isDragging: false,
+                        isFocused: false
+                    };
+                    active.push(obj);
+
+                    a.addEventListener('click', (e) => {
+                        if (!obj.isFocused) {
+                            e.preventDefault();
+                            return;
+                        }
+                        e.preventDefault();
+                        releaseUniverseFocus();
+                    });
+                    a.addEventListener('pointerdown', (e) => {
+                        obj.frozen    = true;
+                        obj.ptrStartX = e.clientX;
+                        obj.ptrStartY = e.clientY;
+                        obj.dragStartX = obj.targetX * obj.depth;
+                        obj.dragStartY = obj.targetY * obj.depth;
+                        obj.isDragging = true;
+                        a.style.boxShadow = '0 0 30px rgba(0,210,255,0.7), 0 12px 40px rgba(0,0,0,0.55)';
+                        a.style.opacity = '1';
+                        a.style.zIndex = '20000';
+                        obj.alwaysOnTop = true;
+                        a.setPointerCapture(e.pointerId);
+                        e.preventDefault();
+                    });
+
+                    a.addEventListener('pointermove', (e) => {
+                        if (!obj.isDragging || obj.depth <= 0) return;
+                        const curX = obj.dragStartX + (e.clientX - obj.ptrStartX);
+                        const curY = obj.dragStartY + (e.clientY - obj.ptrStartY);
+                        obj.targetX = curX / obj.depth;
+                        obj.targetY = curY / obj.depth;
+                        const sc = obj.depth * scaleMax;
+                        const opacity = 1; // Fade verschwindet beim Halten
+                        a.style.transform = `translate(-50%,-50%) translate(${curX.toFixed(1)}px,${curY.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+                        a.style.opacity = opacity.toFixed(3);
+                        a.style.zIndex = '20000';
+                    });
+
+                    a.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        if (universeFocusedObj && universeFocusedObj !== obj) {
+                            releaseUniverseFocus();
+                        }
+                        obj.frozen = true;
+                        obj.alwaysOnTop = true;
+                        obj.depth = 0.5;
+                        obj.targetX = 0;
+                        obj.isFocused = true;
+                        const sc = obj.depth * scaleMax;
+                        a.style.transform = `translate(-50%,-50%) translate(0,0) scale(${sc.toFixed(4)})`;
+                        a.style.opacity = '1';
+                        a.style.zIndex = '20000';
+                        a.style.boxShadow = '0 0 40px rgba(0,210,255,0.8), 0 20px 60px rgba(0,0,0,0.6)';
+                        a.classList.add('universe-thumb--focused');
+                        universeFocusedObj = obj;
+                        const closeBtn = document.getElementById('universe-close-focus');
+                        if (closeBtn) a.appendChild(closeBtn);
+                        setUniverseCloseVisible(true);
+                    });
+
+                    const resume = () => {
+                        if (obj.isFocused) {
+                            obj.isDragging = false;
+                            return;
+                        }
+                        if (obj.frozen) {
+                            obj.frozen = false;
+                            obj.isDragging = false;
+                            a.style.boxShadow = '';
+                        }
+                    };
+                    window.addEventListener('pointerup', resume);
+                    window.addEventListener('pointercancel', resume);
+                }
+
+                let last = performance.now();
+                function tick(now) {
+                    let dt = 0;
+                    if (!universeAnimPaused) { dt = Math.min(48, now - last) / 1000; last = now; }
+
+                    spawnAcc += dt * 1000;
+                    // Am Anfang 500ms Takt bis WANT_VISIBLE erreicht ist, danach Zufall
+                    const currentInterval = (active.length < WANT_VISIBLE) ? 500 : nextSpawnIn;
+
+                    if (active.length < maxLive && spawnAcc >= currentInterval) {
+                        const l = pickUnusedLab();
+                        if (l) { spawnOne(l); spawnAcc = 0; nextSpawnIn = spawnEveryMs(); }
+                    }
+                    for (let i = active.length - 1; i >= 0; i--) {
+                        const o = active[i]; if (o.frozen) continue;
+                        o.depth += o.vDepth * dt;
+                        const sc = o.depth * scaleMax;
+                        const px = o.targetX * o.depth;
+                        const py = o.targetY * o.depth;
+                        const opacity = o.depth > 0.5 ? Math.max(0, 1 - (o.depth - 0.5) / 0.1) : 1;
+                        o.el.style.transform = `translate(-50%,-50%) translate(${px.toFixed(1)}px,${py.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+                        o.el.style.opacity = opacity.toFixed(3);
+                        o.el.style.zIndex = o.alwaysOnTop ? '20000' : String(10000 + Math.round(o.depth * 1000));
+                        o.el.style.pointerEvents = (o.depth < 0.03 || opacity < 0.1) ? 'none' : 'auto';
+                        if (o.depth > 1.1) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); active.splice(i, 1); }
+                    }
+                    requestAnimationFrame(tick);
+                }
+                    requestAnimationFrame(tick);
+        }
+    </script>
+</body>
+</html>

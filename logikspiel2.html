@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zahlen-Puzzle | ULTRA v5.3.8</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+
+    <style>
+        :root {
+            --cell-bg: rgba(15, 23, 42, 0.6);
+            --cell-border: rgba(0, 210, 255, 0.2);
+            --neon-blue: #00d2ff;
+            --neon-green: #adff2f;
+            --neon-red: #ff4d4d;
+            --neon-orange: #ffaa00;
+            --neon-gold: #ffcc00;
+            --cell-size: 130px;
+            --board-gap: 15px;
+            --bg-dark: #050b18;
+        }
+
+        /* --- BASIS LAYOUT --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.15) 0%, transparent 85%);
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* --- ANWEISUNG LINKS OBEN --- */
+        #instruction-header {
+            position: absolute;
+            top: 14px; /* y -2 */
+            left: 36px; /* x -20 */
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            text-align: left;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1.4;
+            max-width: 500px;
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            pointer-events: none;
+            margin: 0;
+            z-index: 100;
+        }
+
+        /* Nav-Icons fixieren, damit sie nicht im Mini-Rail kleben */
+        .cyber-nav.floating {
+            left: 85px !important;
+            top: 25px !important;
+        }
+
+        #game-board {
+            position: relative;
+            padding: 40px;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: board-in 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+        }
+
+        @keyframes board-in {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid-container {
+            display: grid;
+            gap: var(--board-gap);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background: var(--cell-bg);
+            border: 2px solid var(--cell-border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .cell:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .cell.active {
+            border-color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.1);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .cell.hinted {
+            color: var(--neon-gold);
+            text-shadow: 0 0 15px var(--neon-gold);
+            border-color: var(--neon-gold);
+            background: rgba(255, 204, 0, 0.05);
+            cursor: default;
+        }
+
+        /* Nackte Zielzahlen am Rand */
+        .sum-target {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            color: rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: var(--cell-size);
+            height: var(--cell-size);
+            transition: all 0.4s ease;
+        }
+
+        .sum-target.solved {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* FLACHER SWITCH IN DER SIDEBAR */
+        .mode-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 2px;
+            padding: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 210, 255, 0.12);
+            color: var(--neon-blue);
+        }
+
+        /* --- VOLLSTÄNDIGE RESPONSIVE QUERIES --- */
+        @media (max-width: 1200px) {
+            :root {
+                --cell-size: 100px;
+                --board-gap: 10px;
+            }
+
+            .cell {
+                font-size: 2.8rem;
+            }
+
+            .sum-target {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            /* Overrides handle the sidebar standard */
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --cell-size: 80px;
+                --board-gap: 8px;
+            }
+
+            .cell {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* VICTORY OVERLAY */
+        .win-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 20px;
+        }
+
+        .win-overlay.active {
+            display: flex;
+        }
+
+        .btn-next {
+            background: var(--neon-green);
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        /* HINT OVERLAY */
+        #hint-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 11, 24, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        #hint-overlay.active {
+            display: flex;
+        }
+
+        .hint-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            padding: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            width: 120px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .cyber-label {
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            color: var(--neon-blue);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="game-stats"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="instruction-header"></div>
+
+        <div id="game-board">
+            <div class="grid-container" id="grid"></div>
+
+            <div class="win-overlay" id="win-screen">
+                <div
+                    style="background: rgba(10, 30, 15, 0.95); border: 2px solid var(--neon-green); border-radius: 16px; padding: 40px 60px; text-align: center;">
+                    <div
+                        style="font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon-green); letter-spacing: 4px;">
+                        ${CyberI18n.get('logic.solved')}</div>
+                    <button class="btn-next" onclick="nextLevel()">${CyberI18n.get('logic.next_protocol')}</button>
+                </div>
+            </div>
+
+            <div id="hint-overlay">
+                <h3 style="font-family: Orbitron; color: #ffcc00; letter-spacing: 3px;">${CyberI18n.get('logic.hint_title')}</h3>
+                <div id="hint-task" style="font-family: Orbitron; font-size: 2rem; color: white;"></div>
+                <input type="number" id="hint-input" class="hint-input">
+                <div style="display: flex; gap: 10px;">
+                    <button class="cyber-btn" onclick="checkHintAnswer()">${CyberI18n.get('logic.confirm')}</button>
+                    <button class="cyber-btn" onclick="closeHint()">${CyberI18n.get('logic.cancel')}</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script src="js/guard.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        // --- VOLLSTÄNDIGE GAME ENGINE ---
+        let gameMode = 'sum', gridSize = 3, grid = [], solvedGrid = [], hintedCells = [], targetRows = [], targetCols = [], currentLevel = 1, moves = 0, startTime = Date.now(), currentHintAnswer = null;
+
+        window.addEventListener('load', () => {
+            // UNTERTITEL IN ZAHLEN-PUZZLE GEÄNDERT
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.logic_game')
+            });
+            CyberUI.init();
+            setupStats();
+            initGame();
+            setInterval(updateTimer, 1000);
+            document.getElementById('hint-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkHintAnswer(); });
+        });
+
+        // SIDEBAR SETUP (ZÜGE GANZ OBEN)
+        function setupStats() {
+            CyberUI.createCard('game-stats', CyberI18n.get('logic.mission_status'), `
+                <div style="display: flex; flex-direction: column; gap: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.level')}</span>
+                        <span id="stat-level" style="font-family: Orbitron; font-size: 1.4rem; color: var(--neon-blue);">01</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.moves')}</span>
+                        <span id="stat-moves" style="font-family: Orbitron; font-size: 1.4rem;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; opacity: 0.6; font-family:Orbitron;">${CyberI18n.get('logic.time')}</span>
+                        <span id="stat-time" style="font-family: Orbitron; font-size: 1.4rem;">00:00</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <span style="font-size: 0.7rem; opacity: 0.5; font-family:Orbitron;">${CyberI18n.get('logic.mode')}</span>
+                        <div class="mode-toggle">
+                            <button id="btn-sum" class="mode-btn active" onclick="setMode('sum')">ADD (+)</button>
+                            <button id="btn-prod" class="mode-btn" onclick="setMode('prod')">MUL (X)</button>
+                        </div>
+                    </div>
+                </div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('game-stats', '', `
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label class="cyber-label">${CyberI18n.get('logic.protocol_select')}</label>
+                    <select class="cyber-select" onchange="changeLevel(this.value)" style="width: 100%;">
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${CyberI18n.get('logic.level')} ${(i + 1).toString().padStart(2, '0')}</option>`).join('')}
+                    </select>
+                </div>
+            `, 'var(--neon-green)');
+
+            CyberUI.createCard('game-stats', CyberI18n.get('ui.step'), `
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="cyber-btn" style="width:100%; border-color: var(--neon-orange); color: var(--neon-orange);" onclick="resetPuzzle()">${CyberI18n.get('logic.protocol_restart')}</button>
+                    <button class="cyber-btn" style="width:100%; border-color: #ffcc00; color: #ffcc00;" onclick="requestHint()">${CyberI18n.get('logic.hint_request')}</button>
+                </div>
+            `, 'var(--neon-orange)');
+        }
+
+        function setMode(mode) { gameMode = mode; document.getElementById('btn-sum').classList.toggle('active', mode === 'sum'); document.getElementById('btn-prod').classList.toggle('active', mode === 'prod'); resetPuzzle(); }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const m = Math.floor(elapsed / 60).toString().padStart(2, '0'), s = (elapsed % 60).toString().padStart(2, '0');
+            if (document.getElementById('stat-time')) document.getElementById('stat-time').textContent = `${m}:${s}`;
+        }
+
+        function initGame() {
+            gridSize = currentLevel <= 3 ? 3 : (currentLevel <= 7 ? 4 : 5);
+            const instr = document.getElementById('instruction-header');
+            instr.innerText = gameMode === 'sum' ? CyberI18n.get('logic.instruction_sum') : CyberI18n.get('logic.instruction_prod');
+            generatePuzzle(); renderGrid(); updateValidation();
+            document.getElementById('stat-level').textContent = currentLevel.toString().padStart(2, '0');
+            document.getElementById('stat-moves').textContent = moves;
+            document.getElementById('win-screen').classList.remove('active');
+            document.getElementById('hint-overlay').classList.remove('active');
+        }
+
+        function generatePuzzle() {
+            let startVal = (gameMode === 'sum') ? 0 : 1;
+            grid = Array(gridSize).fill(startVal).map(() => Array(gridSize).fill(startVal));
+            solvedGrid = Array(gridSize).fill(startVal).map(() => Array(gridSize).fill(startVal));
+            hintedCells = Array(gridSize).fill(false).map(() => Array(gridSize).fill(false));
+            targetRows = Array(gridSize).fill((gameMode === 'sum' ? 0 : 1));
+            targetCols = Array(gridSize).fill((gameMode === 'sum' ? 0 : 1));
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const val = (gameMode === 'sum') ? Math.floor(Math.random() * 10) : (Math.floor(Math.random() * 5) + 1);
+                    solvedGrid[r][c] = val;
+                    if (gameMode === 'sum') { targetRows[r] += val; targetCols[c] += val; }
+                    else { targetRows[r] *= val; targetCols[c] *= val; }
+                }
+            }
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('grid'); container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${gridSize}, var(--cell-size)) auto`;
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + (hintedCells[r][c] ? ' hinted' : '');
+                    cell.textContent = grid[r][c];
+                    cell.onclick = () => {
+                        if (hintedCells[r][c]) return;
+                        if (gameMode === 'sum') grid[r][c] = (grid[r][c] + 1) % 10; else grid[r][c] = grid[r][c] >= 9 ? 1 : grid[r][c] + 1;
+                        cell.textContent = grid[r][c];
+                        moves++; document.getElementById('stat-moves').textContent = moves;
+                        cell.classList.add('active'); setTimeout(() => cell.classList.remove('active'), 200);
+                        if (updateValidation()) document.getElementById('win-screen').classList.add('active');
+                    };
+                    container.appendChild(cell);
+                }
+                // Target-Zahlen REIN NUMERISCH
+                const rT = document.createElement('div'); rT.className = 'sum-target'; rT.id = `row-target-${r}`; rT.textContent = targetRows[r]; container.appendChild(rT);
+            }
+            for (let c = 0; c < gridSize; c++) {
+                const cT = document.createElement('div'); cT.className = 'sum-target'; cT.id = `col-target-${c}`; cT.textContent = targetCols[c]; container.appendChild(cT);
+            }
+        }
+
+        function updateValidation() {
+            let win = true;
+            for (let r = 0; r < gridSize; r++) {
+                const res = (gameMode === 'sum') ? grid[r].reduce((a, b) => a + b, 0) : grid[r].reduce((a, b) => a * b, 1);
+                const el = document.getElementById(`row-target-${r}`);
+                if (res === targetRows[r]) el.classList.add('solved'); else { el.classList.remove('solved'); win = false; }
+            }
+            for (let c = 0; c < gridSize; c++) {
+                let res = (gameMode === 'sum') ? 0 : 1;
+                for (let r = 0; r < gridSize; r++) { if (gameMode === 'sum') res += grid[r][c]; else res *= grid[r][c]; }
+                const el = document.getElementById(`col-target-${c}`);
+                if (res === targetCols[c]) el.classList.add('solved'); else { el.classList.remove('solved'); win = false; }
+            }
+            return win;
+        }
+
+        // HILFE LOGIK
+        function requestHint() {
+            const a = Math.floor(Math.random() * 15) + 5; const b = Math.floor(Math.random() * 10);
+            currentHintAnswer = a + b; document.getElementById('hint-task').textContent = `${a} + ${b} = ?`;
+            document.getElementById('hint-input').value = ''; document.getElementById('hint-overlay').classList.add('active');
+            setTimeout(() => document.getElementById('hint-input').focus(), 100);
+        }
+
+        function checkHintAnswer() { if (parseInt(document.getElementById('hint-input').value) === currentHintAnswer) { closeHint(); revealHint(); } }
+
+        function revealHint() {
+            let cand = [];
+            for (let r = 0; r < gridSize; r++) for (let c = 0; c < gridSize; c++) if (!hintedCells[r][c] && grid[r][c] !== solvedGrid[r][c]) cand.push({ r, c });
+            if (cand.length > 0) {
+                const t = cand[Math.floor(Math.random() * cand.length)];
+                grid[t.r][t.c] = solvedGrid[t.r][t.c]; hintedCells[t.r][t.c] = true;
+                renderGrid(); updateValidation();
+            }
+        }
+
+        function closeHint() { document.getElementById('hint-overlay').classList.remove('active'); }
+        function changeLevel(v) { currentLevel = parseInt(v); moves = 0; resetPuzzle(); }
+        function resetPuzzle() { startTime = Date.now(); initGame(); }
+        function nextLevel() { currentLevel++; moves = 0; resetPuzzle(); }
+
+        CyberGuard.init(1024);
+    </script>
+</body>
+
+</html>

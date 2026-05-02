@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/i18n.js"></script>
+    <title>docalvers | Ultra v6.7.0</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+
+    <!-- Project Styles -->
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    
+    <style>
+        /* Local overrides for the tester */
+        #main-content {
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+
+        /* BRUTE FORCE LAYOUT FIX: Force vertical stack for settings groups */
+        .cyber-control-group {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            width: 100% !important;
+        }
+    </style>
+</head>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" id="nav-toggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;">
+            <!-- Branding injected here -->
+        </header>
+
+        <div id="parameters-container">
+            <!-- Initially Empty as requested -->
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        /**
+         * COORDINATE SYSTEM TESTER - ULTRA v5.3.8
+         * A dedicated environment to stress-test and refine the CyberCanvas engine.
+         */
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init({
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('coord.subtitle'),
+                useExternalStyles: true
+            });
+
+            document.title = "docalvers | " + CyberI18n.get('coord.title');
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) navToggle.title = CyberI18n.get('ui.toggle_menu');
+
+            // 2. Initialize UI Engine
+            CyberUI.init();
+
+            // 3. Create Navigation & Control Cards
+            CyberUI.createCard('parameters-container', CyberI18n.get('coord.controls'), `
+                <div id="function-checks" class="cyber-control-group"></div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCheckbox('function-checks', CyberI18n.get('coord.func1'), true, (val) => {
+                state.showX2 = val;
+                draw();
+            });
+
+            CyberUI.createCheckbox('function-checks', CyberI18n.get('coord.func2'), true, (val) => {
+                state.showXi2 = val;
+                draw();
+            });
+
+
+            // 4. Initialize CyberCanvas
+            CyberCanvasInstance.init('main-canvas', {
+                minY: -10,
+                maxY: 10
+            }, {
+                showLabels: true,    // Achsenbeschriftung an
+                showTelemetry: false // Koordinaten aus
+            });
+
+            // 5. State Management
+            const state = {
+                showX2: true,
+                showXi2: true
+            };
+
+            // 6. Bind Redraw
+            CyberCanvasInstance.onResize = () => draw();
+
+            // 7. Bind Context Menu (Right Click)
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: CyberI18n.get('lgs.view_reset'),
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-10, 10);
+                            draw();
+                        }
+                    },
+                    { divider: true },
+                    {
+                        label: CyberI18n.get('ui.show_axes'),
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showAxes = val;
+                            draw();
+                        }
+                    },
+                    {
+                        label: CyberI18n.get('ui.show_labels'),
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showLabels = val;
+                            draw();
+                        }
+                    },
+                    {
+                        label: CyberI18n.get('ui.show_telemetry'),
+                        checked: CyberCanvasInstance.showTelemetry,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showTelemetry = val;
+                        }
+                    }
+                ]);
+            };
+
+            function draw() {
+                // Clear and draw standard grid
+                CyberCanvasInstance.drawGrid({
+                    vignette: true,
+                    glow: true,
+                    mainColor: 'rgba(0, 210, 255, 0.4)'
+                });
+
+                const ctx = CyberCanvasInstance.ctx;
+                
+                // Plot f(x) = -x^2
+                if (state.showX2) {
+                    drawFunction(x => -(x * x), '#ff9d00');
+                }
+
+                // Plot g(x) = x^-2
+                if (state.showXi2) {
+                    drawFunction(x => 1 / (x * x), '#9d50bb', true);
+                }
+            }
+
+            function drawFunction(fn, color, handleBreak = false) {
+                const ctx = CyberCanvasInstance.ctx;
+                const isDragging = CyberCanvasInstance.isDragging;
+                
+                // MEHR RECHNEN: Sub-Pixel Sampling für maximale Glätte
+                // Bei Drag erhöhen wir die Performance, im Stillstand die Präzision
+                const step = isDragging ? 1 : 0.5; 
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = color;
+                
+                ctx.beginPath();
+                let first = true;
+                const threshold = 2000;
+                let lastY = null;
+
+                for (let px = 0; px <= CyberCanvasInstance.width; px += step) {
+                    const x = CyberCanvasInstance.unmapX(px);
+                    const y = fn(x);
+                    
+                    const isValid = !isNaN(y) && isFinite(y) && Math.abs(y) <= threshold;
+
+                    if (isValid) {
+                        // ADAPTIVE SUBDIVISION
+                        if (!first && lastY !== null && Math.abs(y - lastY) > 20) {
+                            const lastX = CyberCanvasInstance.unmapX(px - step);
+                            for (let s = 1; s < 10; s++) {
+                                const subX = lastX + (x - lastX) * (s / 10);
+                                const subY = fn(subX);
+                                if (!isNaN(subY) && isFinite(subY) && Math.abs(subY) <= threshold) {
+                                    ctx.lineTo(CyberCanvasInstance.mapX(subX), CyberCanvasInstance.mapY(subY));
+                                }
+                            }
+                        }
+
+                        const py = CyberCanvasInstance.mapY(y);
+                        if (first) {
+                            ctx.moveTo(px, py);
+                            first = false;
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                        lastY = y;
+                    } else {
+                        first = true;
+                        lastY = null;
+                    }
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            // Initial Draw
+            draw();
+        });
+    </script>
+</body>
+</html>

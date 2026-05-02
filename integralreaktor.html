@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integral-Reaktor | ULTRA v5.3.8</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <!-- Branding & UI Engines -->
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/math-library.js"></script>
+    <script src="js/ui.js?v=539"></script>
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Essential structure only; all branding/padding comes from cyber-layout.css */
+        #reactor-canvas {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dashboard-stat {
+            padding-bottom: 5px;
+        }
+
+        .dashboard-stat:last-child {
+            border-bottom: none;
+        }
+
+        #formula-display {
+            font-size: 2.2rem;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+        }
+
+        #integral-value,
+        #error-display {
+            font-size: 1.25rem;
+        }
+
+        #error-display {
+            color: #ffcc00;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--neon-blue);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+
+        <div class="instrument-card">
+            <div class="dashboard-grid">
+                <div class="dashboard-stat">
+                    <div class="stat-meta" id="stat-meta-formula"></div>
+                    <div id="formula-display"></div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="stat-meta" id="stat-meta-area"></div>
+                    <div id="integral-value" class="cyber-number" style="color: var(--neon-blue);">0.000</div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="stat-meta" id="stat-meta-error"></div>
+                    <div id="error-display" class="cyber-number">0.0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="parameters-container">
+            <!-- Cards will be injected here via JS -->
+        </div>
+    </aside>
+
+    <main id="main-content">
+        <canvas id="reactor-canvas"></canvas>
+    </main>
+
+    <!-- Logic -->
+    <script src="js/cyber-canvas.js"></script>
+    <script src="js/integral-engine.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        window.addEventListener('load', () => {
+            document.getElementById('stat-meta-formula').textContent = CyberI18n.get('integral.active_formula') || "AKTIVE INTEGRAL-FORMEL";
+            document.getElementById('formula-display').textContent = CyberI18n.get('integral.waiting') || "Warte auf Daten...";
+            document.getElementById('stat-meta-area').textContent = CyberI18n.get('integral.area_under_curve') || "FLÄCHE UNTER DER KURVE";
+            document.getElementById('stat-meta-error').textContent = CyberI18n.get('integral.error') || "FEHLER";
+
+            // 1. Initialize Branding
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title') || "DOC ALVERS MATHE-LABOR",
+                subtitle: CyberI18n.get('integral.title') || "INTEGRALRECHNUNG"
+            });
+
+            // 2. Initialize UI Components
+            CyberUI.init();
+
+            // 3. Create Parameter Controls
+            CyberUI.createCard('parameters-container', '', `
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <div id="func-select-container" style="margin-bottom: 5px; padding-bottom: 5px;"></div>
+                    
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-a">${CyberI18n.get('integral.limit_a') || "Grenze a"}</span>
+                            <span id="val-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">-2.0</span>
+                        </div>
+                        <input type="range" id="param-a" min="-5" max="5" step="0.1" value="-2" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-b">${CyberI18n.get('integral.limit_b') || "Grenze b"}</span>
+                            <span id="val-b" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">2.0</span>
+                        </div>
+                        <input type="range" id="param-b" min="-5" max="5" step="0.1" value="2" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="label-row">
+                            <span id="label-param-n">${CyberI18n.get('integral.precision_n') || "Präzision n"}</span>
+                            <span id="val-n" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">10</span>
+                        </div>
+                        <input type="range" id="param-n" min="4" max="100" step="1" value="10" oninput="updateEngine()">
+                    </div>
+
+                    <div>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" onclick="setMode('exact')">${CyberI18n.get('integral.mode_analytical') || "ANALYTISCH"}</button>
+                            <button class="mode-btn" onclick="setMode('balken')">${CyberI18n.get('integral.mode_bars') || "BALKEN"}</button>
+                        </div>
+                    </div>
+                </div>
+            `, 'var(--neon-blue)', { collapsible: false });
+
+
+
+            // 5. Initialize Engine
+            initEngine();
+
+            CyberUI.createDropdown('func-select-container', MathLibrary.getAll(), (id) => {
+                state.func = id;
+                updateEngine();
+            }, 'parabel');
+
+            setTimeout(() => {
+                updateEngine();
+                CyberBranding.renderMath("label-param-a", "a");
+                CyberBranding.renderMath("label-param-b", "b");
+                CyberBranding.renderMath("label-param-n", "n");
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

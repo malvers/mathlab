@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potenz-Labor | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .formula-tag {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 1.15rem;
+            pointer-events: none;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            white-space: nowrap;
+            transition: transform 0.1s ease;
+        }
+        #tag-pow { border-color: var(--neon-blue); color: var(--neon-blue); z-index: 210; }
+        #tag-root { border-color: var(--neon-orange); color: var(--neon-orange); z-index: 205; }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="mainCanvas"></canvas>
+            <div id="tag-pow" class="formula-tag"></div>
+            <div id="tag-root" class="formula-tag"></div>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        let nSlider, xSlider, tagPow, tagRoot;
+        let valX, valPow, valRoot;
+
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+
+        let n = 2;
+        let mouseX = 0.5;
+        let isHovering = true; 
+
+        // Color palette for curves
+        const colors = [
+            '#ff3333', '#ff8800', '#ffdd00', '#33ff33', '#00ffdd', 
+            '#00d2ff', '#3388ff', '#9d50bb', '#ff33bb', '#ff0055'
+        ];
+
+        window.addEventListener('load', () => {
+            // 1. Initialize Branding
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('power.title')
+            });
+
+            // 2. Build Sidebar via CyberUI
+            CyberUI.init();
+            
+            CyberUI.createCard('parameters-container', CyberI18n.get('power.parameters'), `
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <div>
+                        <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('power.exponent')}</div>
+                        <input type="range" id="n-slider" min="1" max="10" step="1" value="2" style="width:100%; accent-color:var(--neon-blue);">
+                    </div>
+                    <div>
+                        <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('power.x_pos')}</div>
+                        <input type="range" id="x-slider" min="0" max="1" step="0.001" value="0.5" style="width:100%; accent-color:var(--neon-blue);">
+                    </div>
+                </div>
+            `);
+
+            CyberUI.createCard('parameters-container', CyberI18n.get('power.analytics'), `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.7rem; color:rgba(255,255,255,0.5); font-family:Orbitron;">X</span>
+                        <span id="val-x" style="font-family:Orbitron; font-weight:bold; color:white;">0,500</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.7rem; color:rgba(0,210,255,0.6); font-family:Orbitron;">x^n</span>
+                        <span id="val-pow" style="font-family:Orbitron; font-weight:bold; color:var(--neon-blue);">0,250</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.7rem; color:rgba(255,136,0,0.6); font-family:Orbitron;">root(x,n)</span>
+                        <span id="val-root" style="font-family:Orbitron; font-weight:bold; color:var(--neon-orange);">0,707</span>
+                    </div>
+                </div>
+            `);
+
+            // Grab references
+            nSlider = document.getElementById('n-slider');
+            xSlider = document.getElementById('x-slider');
+            valX = document.getElementById('val-x');
+            valPow = document.getElementById('val-pow');
+            valRoot = document.getElementById('val-root');
+            tagPow = document.getElementById('tag-pow');
+            tagRoot = document.getElementById('tag-root');
+
+            nSlider.addEventListener('input', (e) => {
+                n = parseInt(e.target.value);
+                draw();
+            });
+
+            xSlider.addEventListener('input', (e) => {
+                mouseX = parseFloat(e.target.value);
+                isHovering = true;
+                draw();
+            });
+
+            resize();
+        });
+
+        function resize() {
+            if (!canvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentNode.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + "px";
+            canvas.style.height = rect.height + "px";
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            draw();
+        }
+
+        function draw() {
+            if (!ctx) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            const pad = 80;
+            const size = Math.min(rect.width-pad*2, rect.height-pad*2);
+            const ox = (rect.width - size) / 2;
+            const oy = (rect.height - size) / 2 + size;
+
+            const toX = (val) => ox + val * size;
+            const toY = (val) => oy - val * size;
+
+            const p = Math.pow(mouseX, n);
+            const r = Math.pow(mouseX, 1/n);
+            const formattedX = mouseX.toFixed(3).replace('.', ',');
+            const formattedP = p.toFixed(3).replace('.', ',');
+            const formattedR = r.toFixed(3).replace('.', ',');
+
+            if(valX) valX.innerText = formattedX;
+            if(valPow) valPow.innerText = formattedP;
+            if(valRoot) valRoot.innerText = formattedR;
+
+            if (typeof katex !== 'undefined') {
+                if(tagPow) katex.render(`y = x^{${n}} = ${formattedP}`, tagPow, { throwOnError: false });
+                if(tagRoot && n !== 1) katex.render(`y = \\sqrt[${n}]{x} = ${formattedR}`, tagRoot, { throwOnError: false });
+            }
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<=10; i++) {
+                const step = i/10;
+                ctx.beginPath(); ctx.moveTo(toX(step), oy); ctx.lineTo(toX(step), oy - size); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(ox, toY(step)); ctx.lineTo(ox + size, toY(step)); ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + size + 15, oy); ctx.stroke();
+            drawArrowhead(ctx, ox + size + 15, oy, 0); 
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy - size - 15); ctx.stroke();
+            drawArrowhead(ctx, ox, oy - size - 15, -Math.PI/2); 
+
+            // Labels
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '14px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('0', ox - 15, oy + 15);
+            ctx.fillText('1', ox + size, oy + 25);
+            ctx.textAlign = 'right';
+            ctx.fillText('1', ox - 15, oy - size);
+
+            // Curves
+            for(let i=2; i<=10; i++) {
+                const isCurrent = (i === n);
+                ctx.lineWidth = isCurrent ? 3.5 : 1.4;
+                ctx.strokeStyle = varColor('--neon-blue');
+                ctx.globalAlpha = isCurrent ? 1.0 : 0.12;
+                if(isCurrent) { ctx.shadowBlur = 12; ctx.shadowColor = varColor('--neon-blue'); }
+                drawCurve(ctx, i, toX, toY);
+                ctx.shadowBlur = 0;
+
+                ctx.strokeStyle = varColor('--neon-orange');
+                ctx.globalAlpha = isCurrent ? 1.0 : 0.12;
+                if(isCurrent) { ctx.shadowBlur = 12; ctx.shadowColor = varColor('--neon-orange'); }
+                drawCurve(ctx, 1/i, toX, toY);
+                ctx.shadowBlur = 0;
+            }
+
+            // n=1
+            const isN1 = (n === 1);
+            ctx.lineWidth = isN1 ? 4.0 : 1.6;
+            ctx.strokeStyle = isN1 ? varColor('--neon-blue') : 'rgba(255,255,255,0.2)';
+            ctx.globalAlpha = 1.0;
+            drawCurve(ctx, 1, toX, toY);
+
+            // Interaction
+            if(isHovering) {
+                const px = toX(mouseX);
+                const py_pow = toY(p);
+                const py_root = toY(r);
+                drawPoint(ctx, px, py_pow, varColor('--neon-blue'));
+                drawPoint(ctx, px, py_root, varColor('--neon-orange'));
+
+                tagPow.style.display = 'block';
+                tagPow.style.left = (px + 15) + 'px';
+                tagPow.style.top = (py_pow - 45) + 'px';
+                if(n === 1) tagRoot.style.display = 'none';
+                else {
+                    tagRoot.style.display = 'block';
+                    tagRoot.style.left = (px + 15) + 'px';
+                    tagRoot.style.top = (py_root - 45) + 'px';
+                }
+            }
+        }
+
+        function drawCurve(c, exp, tx, ty) {
+            c.beginPath();
+            for(let x=0; x<=1.01; x+=0.01) {
+                const y = Math.pow(x, exp);
+                if(x===0) c.moveTo(tx(x), ty(y));
+                else c.lineTo(tx(x), ty(y));
+            }
+            c.stroke();
+        }
+
+        function drawPoint(c, x, y, color) {
+            c.fillStyle = color;
+            c.shadowBlur = 12; c.shadowColor = color;
+            c.beginPath(); c.arc(x, y, 4.5, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'white'; c.lineWidth = 1.5; c.stroke();
+            c.shadowBlur = 0;
+        }
+
+        function drawArrowhead(ctx, x, y, angle) {
+            const size = 10;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size, -size/2);
+            ctx.lineTo(-size, size/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function varColor(name) {
+            const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            return val || (name.includes('blue') ? '#00d2ff' : '#ff8800');
+        }
+
+        window.addEventListener('resize', resize);
+    </script>
+</body>
+</html>

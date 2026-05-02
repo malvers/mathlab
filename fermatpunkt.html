@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Fermat-Punkt Labor</title>
+    <!-- Fonts & Tools -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(0,210,255,0.02) 0%, transparent 70%);
+        }
+
+        #fermat-canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 800px;
+            filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.1));
+            user-select: none;
+            overflow: visible;
+        }
+
+        .vertex {
+            fill: rgba(0, 210, 255, 0.2);
+            stroke: var(--neon-blue);
+            stroke-width: 2;
+            cursor: grab;
+            transition: fill 0.2s, stroke-width 0.2s;
+        }
+        
+        .vertex:hover {
+            fill: rgba(0, 210, 255, 0.5);
+            stroke-width: 3;
+        }
+
+        .vertex.dragging {
+            cursor: grabbing;
+            fill: var(--neon-blue);
+            filter: drop-shadow(0 0 10px var(--neon-blue));
+        }
+
+        .fermat-point {
+            fill: var(--neon-purple);
+            stroke: #fff;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 15px var(--neon-purple));
+        }
+
+        .triangle-edge {
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+            stroke-linejoin: round;
+            fill: rgba(0, 210, 255, 0.05);
+        }
+
+        .construction-line {
+            stroke: rgba(255, 136, 0, 0.6);
+            stroke-width: 1.5;
+            stroke-dasharray: 6 4;
+        }
+
+        .construction-triangle {
+            stroke: rgba(255, 136, 0, 0.4);
+            stroke-width: 1;
+            fill: rgba(255, 136, 0, 0.05);
+        }
+
+        .fermat-connector {
+            stroke: var(--neon-purple);
+            stroke-width: 2;
+            opacity: 0.8;
+            stroke-dasharray: 4 2;
+        }
+        
+        .p-connector {
+            stroke: rgba(255, 157, 0, 0.8);
+            stroke-width: 1.5;
+            stroke-dasharray: 4 4;
+        }
+
+        .node-label {
+            font-family: 'Orbitron';
+            font-size: 16px;
+            font-weight: bold;
+            fill: #fff;
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 0 5px #000, 0 0 10px #000;
+        }
+
+        #data-container .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+    </style>
+</head>
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="data-container" style="margin-bottom: 20px;"></div>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <svg id="fermat-canvas" viewBox="0 0 600 600">
+            <!-- Layers -->
+            <g id="layer-construction"></g>
+            <g id="layer-main"></g>
+            <g id="layer-hud"></g>
+            
+            <!-- Interactive Points -->
+            <circle id="pt-A" class="vertex" cx="0" cy="0" r="6" />
+            <circle id="pt-B" class="vertex" cx="0" cy="0" r="6" />
+            <circle id="pt-C" class="vertex" cx="0" cy="0" r="6" />
+            <circle id="pt-P" class="vertex" cx="0" cy="0" r="6" style="fill: rgba(255,157,0,0.2); stroke: #ff9d00;" />
+            
+            <circle id="pt-F" class="fermat-point" cx="0" cy="0" r="4" style="pointer-events: none;" />
+        </svg>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
+        }
+
+        window.addEventListener('load', () => {
+            // 1. Branding
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('fermat.title')
+            });
+
+            CyberUI.init();
+
+            // Settings
+            let showConstruction = false;
+            let showP = true;
+
+            // Geometry State (Initiale schöne Position)
+            const pts = {
+                A: { x: 300, y: 150 },
+                B: { x: 150, y: 400 },
+                C: { x: 450, y: 400 },
+                P: { x: 350, y: 250 }
+            };
+
+            const canvas = document.getElementById('fermat-canvas');
+            const nodes = {
+                A: document.getElementById('pt-A'),
+                B: document.getElementById('pt-B'),
+                C: document.getElementById('pt-C'),
+                P: document.getElementById('pt-P')
+            };
+            const fNode = document.getElementById('pt-F');
+            
+            const layers = {
+                construction: document.getElementById('layer-construction'),
+                main: document.getElementById('layer-main'),
+                hud: document.getElementById('layer-hud')
+            };
+
+            // Math Tools
+            const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+            const isInside = (p, a, b, c) => {
+                const area = (p1, p2, p3) => Math.abs((p1.x*(p2.y - p3.y) + p2.x*(p3.y - p1.y) + p3.x*(p1.y - p2.y)) / 2);
+                const A = area(a, b, c);
+                const A1 = area(p, b, c);
+                const A2 = area(a, p, c);
+                const A3 = area(a, b, p);
+                return Math.abs(A - (A1 + A2 + A3)) < 0.5;
+            };
+
+            const getAngle = (p1, p2, p3) => {
+                const a = dist(p2, p3);
+                const b = dist(p1, p3);
+                const c = dist(p1, p2);
+                if(a === 0 || c === 0) return 0;
+                let val = (a*a + c*c - b*b) / (2*a*c);
+                val = Math.max(-1, Math.min(1, val));
+                return Math.acos(val) * 180 / Math.PI;
+            };
+
+            // Schnittpunkt zweier Linien (p1-p2 und p3-p4)
+            const intersect = (p1, p2, p3, p4) => {
+                const denom = (p1.x - p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x - p4.x);
+                if (Math.abs(denom) < 0.001) return null;
+                const px = ((p1.x*p2.y - p1.y*p2.x)*(p3.x - p4.x) - (p1.x - p2.x)*(p3.x*p4.y - p3.y*p4.x)) / denom;
+                const py = ((p1.x*p2.y - p1.y*p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x*p4.y - p3.y*p4.x)) / denom;
+                return {x: px, y: py};
+            };
+
+            // Dritter Punkt eines gleichseitigen Dreiecks (nach außen gerichtet)
+            const getEquilateralPoint = (p1, p2, pRef) => {
+                const mid = { x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2 };
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const len = dist(p1, p2);
+                if (len === 0) return {x: mid.x, y: mid.y};
+                const h = len * Math.sqrt(3) / 2;
+                
+                const n1 = { x: -dy / len, y: dx / len };
+                const n2 = { x: dy / len, y: -dx / len };
+                
+                const tp1 = { x: mid.x + n1.x * h, y: mid.y + n1.y * h };
+                const tp2 = { x: mid.x + n2.x * h, y: mid.y + n2.y * h };
+                
+                return dist(tp1, pRef) > dist(tp2, pRef) ? tp1 : tp2;
+            };
+
+            function createSVGElement(tag, attrs) {
+                const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+                for (let k in attrs) el.setAttribute(k, attrs[k]);
+                return el;
+            }
+
+            function draw() {
+                layers.construction.innerHTML = '';
+                layers.main.innerHTML = '';
+                layers.hud.innerHTML = '';
+
+                // Sync UI Nodes
+                nodes.A.setAttribute('cx', pts.A.x); nodes.A.setAttribute('cy', pts.A.y);
+                nodes.B.setAttribute('cx', pts.B.x); nodes.B.setAttribute('cy', pts.B.y);
+                nodes.C.setAttribute('cx', pts.C.x); nodes.C.setAttribute('cy', pts.C.y);
+                nodes.P.setAttribute('cx', pts.P.x); nodes.P.setAttribute('cy', pts.P.y);
+
+                // Math Computation
+                const alpha = getAngle(pts.B, pts.A, pts.C);
+                const beta = getAngle(pts.A, pts.B, pts.C);
+                const gamma = getAngle(pts.A, pts.C, pts.B);
+
+                let F;
+                let exception = false;
+                if (alpha >= 120) { F = {...pts.A}; exception = true; }
+                else if (beta >= 120) { F = {...pts.B}; exception = true; }
+                else if (gamma >= 120) { F = {...pts.C}; exception = true; }
+                else {
+                    const Ap = getEquilateralPoint(pts.B, pts.C, pts.A);
+                    const Bp = getEquilateralPoint(pts.A, pts.C, pts.B);
+                    const Cp = getEquilateralPoint(pts.A, pts.B, pts.C);
+
+                    if (showConstruction) {
+                        layers.construction.appendChild(createSVGElement("polygon", {
+                            points: `${pts.B.x},${pts.B.y} ${pts.C.x},${pts.C.y} ${Ap.x},${Ap.y}`,
+                            class: "construction-triangle"
+                        }));
+                        layers.construction.appendChild(createSVGElement("polygon", {
+                            points: `${pts.A.x},${pts.A.y} ${pts.C.x},${pts.C.y} ${Bp.x},${Bp.y}`,
+                            class: "construction-triangle"
+                        }));
+                        layers.construction.appendChild(createSVGElement("polygon", {
+                            points: `${pts.A.x},${pts.A.y} ${pts.B.x},${pts.B.y} ${Cp.x},${Cp.y}`,
+                            class: "construction-triangle"
+                        }));
+
+                        layers.construction.appendChild(createSVGElement("line", {
+                            x1: pts.A.x, y1: pts.A.y, x2: Ap.x, y2: Ap.y, class: "construction-line"
+                        }));
+                        layers.construction.appendChild(createSVGElement("line", {
+                            x1: pts.B.x, y1: pts.B.y, x2: Bp.x, y2: Bp.y, class: "construction-line"
+                        }));
+                        layers.construction.appendChild(createSVGElement("line", {
+                            x1: pts.C.x, y1: pts.C.y, x2: Cp.x, y2: Cp.y, class: "construction-line"
+                        }));
+                    }
+
+                    // Intersection of AA' and BB' yields F
+                    F = intersect(pts.A, Ap, pts.B, Bp);
+                    if (!F) F = {x: (pts.A.x + pts.B.x + pts.C.x)/3, y: (pts.A.y + pts.B.y + pts.C.y)/3}; // Fallback Schwerpunkt
+                }
+
+                // Draw Main Triangle
+                layers.main.appendChild(createSVGElement("polygon", {
+                    points: `${pts.A.x},${pts.A.y} ${pts.B.x},${pts.B.y} ${pts.C.x},${pts.C.y}`,
+                    class: "triangle-edge"
+                }));
+
+                // Draw P Connectors (behind F connectors)
+                if (showP) {
+                    nodes.P.style.display = 'block';
+                    layers.main.appendChild(createSVGElement("line", { x1: pts.P.x, y1: pts.P.y, x2: pts.A.x, y2: pts.A.y, class: "p-connector" }));
+                    layers.main.appendChild(createSVGElement("line", { x1: pts.P.x, y1: pts.P.y, x2: pts.B.x, y2: pts.B.y, class: "p-connector" }));
+                    layers.main.appendChild(createSVGElement("line", { x1: pts.P.x, y1: pts.P.y, x2: pts.C.x, y2: pts.C.y, class: "p-connector" }));
+                    layers.hud.appendChild(createSVGElement("text", { x: pts.P.x + 15, y: pts.P.y - 10, class: "node-label", style: "fill: #ff9d00;" })).textContent = "P";
+                } else {
+                    nodes.P.style.display = 'none';
+                }
+
+                // Draw Fermat Connectors
+                layers.main.appendChild(createSVGElement("line", { x1: F.x, y1: F.y, x2: pts.A.x, y2: pts.A.y, class: "fermat-connector" }));
+                layers.main.appendChild(createSVGElement("line", { x1: F.x, y1: F.y, x2: pts.B.x, y2: pts.B.y, class: "fermat-connector" }));
+                layers.main.appendChild(createSVGElement("line", { x1: F.x, y1: F.y, x2: pts.C.x, y2: pts.C.y, class: "fermat-connector" }));
+
+                // Update Fermat Point UI
+                fNode.setAttribute('cx', F.x);
+                fNode.setAttribute('cy', F.y);
+                
+                // Labels
+                const offset = 22;
+                layers.hud.appendChild(createSVGElement("text", { x: pts.A.x, y: pts.A.y - offset, class: "node-label", "text-anchor": "middle" })).textContent = "A";
+                layers.hud.appendChild(createSVGElement("text", { x: pts.B.x - offset, y: pts.B.y + offset, class: "node-label", "text-anchor": "middle" })).textContent = "B";
+                layers.hud.appendChild(createSVGElement("text", { x: pts.C.x + offset, y: pts.C.y + offset, class: "node-label", "text-anchor": "middle" })).textContent = "C";
+                layers.hud.appendChild(createSVGElement("text", { x: F.x + 15, y: F.y - 15, class: "node-label", style: "fill: var(--neon-purple);" })).textContent = "F";
+
+                // Sidebar Data Update
+                const dAB = dist(pts.A, pts.B);
+                const scale = dAB > 0 ? 10 / dAB : 1;
+
+                const sumDist = (dist(F, pts.A) + dist(F, pts.B) + dist(F, pts.C)) * scale;
+                const pDist = (dist(pts.P, pts.A) + dist(pts.P, pts.B) + dist(pts.P, pts.C)) * scale;
+                
+                const stats = [
+                    { label: CyberI18n.get('fermat.dist_f'), value: sumDist.toFixed(1) + ' cm', color: 'var(--neon-purple)' }
+                ];
+                if (showP) {
+                    const delta = Math.max(0, pDist - sumDist);
+                    stats.push({ label: CyberI18n.get('fermat.dist_p'), value: pDist.toFixed(1) + ' cm', color: '#ff9d00' });
+                    stats.push({ label: CyberI18n.get('fermat.diff'), value: '+' + delta.toFixed(1) + ' cm', color: '#ff3366' });
+                }
+                CyberUI.updateStatsGrid('data-container', stats);
+            }
+
+            // Drag Interaction
+            let activeDrag = null;
+            function getMouseCoords(e) {
+                const pt = canvas.createSVGPoint();
+                if (e.touches && e.touches.length > 0) {
+                    pt.x = e.touches[0].clientX; pt.y = e.touches[0].clientY;
+                } else {
+                    pt.x = e.clientX; pt.y = e.clientY;
+                }
+                return pt.matrixTransform(canvas.getScreenCTM().inverse());
+            }
+
+            const startDrag = (id) => (e) => {
+                activeDrag = id;
+                nodes[id].classList.add('dragging');
+                e.preventDefault();
+            };
+
+            const doDrag = (e) => {
+                if (!activeDrag) return;
+                const coords = getMouseCoords(e);
+                
+                // 1. Ränder-Kollision
+                let nx = Math.max(25, Math.min(575, coords.x));
+                let ny = Math.max(25, Math.min(575, coords.y));
+                
+                // 2. Punkt-Punkt-Kollision (A, B, C, P)
+                const minDist = 35;
+                for (let id in pts) {
+                    if (id === activeDrag) continue;
+                    if (id === 'P' && !showP) continue; // P ignorieren wenn ausgeblendet
+                    if (dist({x: nx, y: ny}, pts[id]) < minDist) return; // Bewegung blockieren
+                }
+                
+                // 3. P-In-Triangle Kollision (P darf das Dreieck nicht verlassen)
+                if (activeDrag === 'P') {
+                    if (!isInside({x: nx, y: ny}, pts.A, pts.B, pts.C)) return;
+                }
+                
+                // 4. Eckpunkt-Kollision (Verhindert, dass Ecken so bewegt werden, dass P "rausfliegt")
+                if (activeDrag === 'A' || activeDrag === 'B' || activeDrag === 'C') {
+                    const nextPts = { ...pts };
+                    nextPts[activeDrag] = { x: nx, y: ny };
+                    if (!isInside(pts.P, nextPts.A, nextPts.B, nextPts.C)) return;
+                }
+
+                pts[activeDrag].x = nx;
+                pts[activeDrag].y = ny;
+                draw();
+            };
+
+            const endDrag = () => {
+                if (activeDrag) {
+                    nodes[activeDrag].classList.remove('dragging');
+                    activeDrag = null;
+                }
+            };
+
+            ['A', 'B', 'C', 'P'].forEach(id => {
+                nodes[id].addEventListener('mousedown', startDrag(id));
+                nodes[id].addEventListener('touchstart', startDrag(id), { passive: false });
+            });
+
+            window.addEventListener('mousemove', doDrag);
+            window.addEventListener('touchmove', doDrag, { passive: false });
+            window.addEventListener('mouseup', endDrag);
+            window.addEventListener('touchend', endDrag);
+
+            // UI Setup
+            CyberUI.createCard('ui-container', CyberI18n.get('fermat.system'), `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: rgba(255,136,0,0.05); border-radius: 4px; border: 1px solid rgba(255,136,0,0.2);">
+                    <span style="font-size: 0.75rem; color: #ff8800; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('fermat.show_tri')}</span>
+                    <input type="checkbox" id="const-toggle" style="cursor: pointer;" onchange="window.toggleConst(this.checked)">
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px; background: rgba(255,157,0,0.05); border-radius: 4px; border: 1px solid rgba(255,157,0,0.2);">
+                    <span style="font-size: 0.75rem; color: #ff9d00; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('fermat.comp_p')}</span>
+                    <input type="checkbox" id="p-toggle" checked style="cursor: pointer;" onchange="window.toggleP(this.checked)">
+                </div>
+            `, 'var(--neon-purple)');
+
+            window.toggleConst = (val) => {
+                showConstruction = val;
+                draw();
+            };
+            
+            window.toggleP = (val) => {
+                showP = val;
+                draw();
+            };
+
+            CyberUI.createStatsGrid('data-container', [
+                { label: CyberI18n.get('fermat.dist_f'), value: '0.0 cm', color: 'var(--neon-purple)' },
+                { label: CyberI18n.get('fermat.dist_p'), value: '0.0 cm', color: '#ff9d00' },
+                { label: CyberI18n.get('fermat.diff'), value: '+0.0 cm', color: '#ff3366' }
+            ]);
+
+            draw();
+        });
+    </script>
+</body>
+</html>

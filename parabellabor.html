@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Parabel-Labor | ULTRA v5.3.8</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        #canvas-latex-vertex {
+            position: absolute;
+            pointer-events: none;
+            color: white;
+            z-index: 5;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            text-shadow: 0 0 10px black, 0 0 5px var(--neon-blue);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .math-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <div id="main-content">
+        <div id="canvas-container">
+            <div id="canvas-latex-vertex"></div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        console.log("🚀 Parabel-Labor: Booting...");
+        let cc = null;
+        let paraA = 1, paraD = 0, paraE = 0;
+        let draggedHandle = null;
+
+        function varColor(name) {
+            const val = getComputedStyle(document.documentElement).getPropertyValue(name.replace('var(', '').replace(')', '')).trim();
+            return val || "#00d2ff";
+        }
+
+        // Named hooks for re-binding on reset
+        const onMouseDownHook = (pos) => {
+            if (!cc || !cc.canvas) return false;
+            
+            const px = cc.mapX(pos.x);
+            const py = cc.mapY(pos.y);
+            
+            const vX = cc.mapX(paraD);
+            const vY = cc.mapY(paraE);
+            const hX = cc.mapX(paraD + 1);
+            const hY = cc.mapY(paraA + paraE);
+
+            if (Math.hypot(vX - px, vY - py) < 30) {
+                draggedHandle = "vertex";
+                cc.allowPan = false;
+                return true; 
+            }
+            if (Math.hypot(hX - px, hY - py) < 30) {
+                draggedHandle = "a";
+                cc.allowPan = false;
+                return true; 
+            }
+            return false;
+        };
+
+        const onMouseMoveHook = (pos) => {
+            if (!draggedHandle || !cc) return false;
+            
+            if (draggedHandle === "vertex") {
+                paraD = Math.round(pos.x * 10) / 10;
+                paraE = Math.round(pos.y * 10) / 10;
+            } else if (draggedHandle === "a") {
+                paraA = pos.y - paraE;
+            }
+            syncSliders();
+            draw();
+            return true; 
+        };
+
+        const onMouseUpHook = () => {
+            if (draggedHandle) {
+                draggedHandle = null;
+                if (cc) cc.allowPan = true;
+                return true;
+            }
+            return false;
+        };
+
+        const onContextMenuHook = (e) => {
+            if (typeof CyberUI !== 'undefined' && CyberUI.showContextMenu) {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    { label: 'Labor Reset', onclick: () => window.resetView() },
+                    { divider: true },
+                    {
+                        label: 'Gitter anzeigen',
+                        checked: cc.showGrid,
+                        onchange: (val) => { cc.showGrid = val; draw(); }
+                    },
+                    {
+                        label: 'Achsen anzeigen',
+                        checked: cc.showAxes,
+                        onchange: (val) => { cc.showAxes = val; draw(); }
+                    },
+                    {
+                        label: 'Achsenbeschriftung',
+                        checked: cc.showLabels,
+                        onchange: (val) => { cc.showLabels = val; draw(); }
+                    },
+                    {
+                        label: 'Koordinaten',
+                        checked: cc.showTelemetry,
+                        onchange: (val) => { cc.showTelemetry = val; cc.updateTelemetryDOM(); }
+                    }
+                ]);
+            }
+        };
+
+        window.addEventListener('load', () => {
+            console.log("📦 DOM Load complete. Initializing components...");
+            
+            try {
+                if (typeof CyberBranding !== 'undefined') {
+                    CyberBranding.init({
+                        useExternalStyles: true,
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('ui.parabola')
+                    });
+                }
+                
+                if (typeof CyberUI !== 'undefined') {
+                    CyberUI.init();
+                    
+                    // Card 1: FUNKTIONSGLEICHUNG
+                    CyberUI.createCard('parameters-container', CyberI18n.get('parabola.eq_title'), `
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.vertex_form')}</span>
+                            <div id="eq-vertex" class="math-glow"></div>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.standard_form')}</span>
+                            <div id="eq-normal" class="math-glow"></div>
+                        </div>
+                        <div id="eq-roots-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.roots')}</span>
+                            <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
+                        </div>
+                    `, 'var(--neon-blue)', { collapsible: false });
+
+                    // Card 2: STEUERUNG
+                    CyberUI.createCard('parameters-container', CyberI18n.get('geometry.lab_control'), `
+                        <div class="stats-grid">
+                            <div>
+                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('parabola.vertex_point')}</span>
+                                <div id="latex-vertex" style="min-height: 2rem;"></div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase;">${CyberI18n.get('parabola.parameter_a')}</span>
+                                <div id="latex-a" style="min-height: 2rem;"></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('parabola.stretch_a')}</span>
+                                    <span id="label-slider-a" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-yellow);">1.00</span>
+                                </div>
+                                <input type="range" id="slider-a" min="-4" max="4" step="0.05" value="1">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('parabola.shift_d')}</span>
+                                    <span id="label-slider-d" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">0.00</span>
+                                </div>
+                                <input type="range" id="slider-d" min="-10" max="10" step="0.1" value="0">
+                            </div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('parabola.shift_e')}</span>
+                                    <span id="label-slider-e" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-blue);">0.00</span>
+                                </div>
+                                <input type="range" id="slider-e" min="-10" max="10" step="0.1" value="0">
+                            </div>
+                            
+                            <button class="cyber-button" onclick="resetView()" style="width: 100%; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: all 0.3s ease;">${CyberI18n.get('ui.reset')}</button>
+                        </div>
+                    `, 'var(--neon-purple)', { collapsible: false });
+                }
+
+                // Bind Sliders
+                ['a', 'd', 'e'].forEach(id => {
+                    const el = document.getElementById('slider-' + id);
+                    if (el) {
+                        el.oninput = (e) => {
+                            const val = parseFloat(e.target.value);
+                            if (id === 'a') paraA = val;
+                            if (id === 'd') paraD = val;
+                            if (id === 'e') paraE = val;
+                            syncSliders();
+                            draw();
+                        };
+                    }
+                });
+
+                // Init Canvas Engine
+                cc = new CyberCanvas();
+                cc.init('canvas', { minX: -6, maxX: 6, minY: -4, maxY: 6 });
+                cc.onResize = () => draw();
+
+                // Attach interaction hooks
+                cc.onMouseDown = onMouseDownHook;
+                cc.onMouseMove = onMouseMoveHook;
+                cc.onMouseUp = onMouseUpHook;
+                cc.onContextMenu = onContextMenuHook;
+
+                console.log("✅ Engine ready. Starting first render...");
+                syncSliders();
+                draw();
+
+            } catch (err) {
+                console.error("❌ Fatal Init Error:", err);
+            }
+        });
+
+        // -------------------------------------
+        // GLOBALS AND RENDER LOOP
+        // -------------------------------------
+        window.resetView = () => {
+            console.log("♻️ Resetting View...");
+            paraA = 1; paraD = 0; paraE = 0;
+            if (cc) {
+                cc.view = { minX: -6, maxX: 6, minY: -4, maxY: 6 };
+                cc.isInitialized = false; 
+                cc.init('canvas', cc.view);
+                cc.onResize = () => draw();
+                cc.onMouseDown = onMouseDownHook;
+                cc.onMouseMove = onMouseMoveHook;
+                cc.onMouseUp = onMouseUpHook;
+                cc.onContextMenu = onContextMenuHook;
+                cc.showLabels = true;
+            }
+            syncSliders();
+            draw();
+        };
+
+        function syncSliders() {
+            const sA = document.getElementById('slider-a');
+            const sD = document.getElementById('slider-d');
+            const sE = document.getElementById('slider-e');
+            if (sA) sA.value = paraA;
+            if (sD) sD.value = paraD;
+            if (sE) sE.value = paraE;
+
+            const lA = document.getElementById('label-slider-a');
+            const lD = document.getElementById('label-slider-d');
+            const lE = document.getElementById('label-slider-e');
+            if (lA) lA.innerText = paraA.toFixed(2);
+            if (lD) lD.innerText = paraD.toFixed(2);
+            if (lE) lE.innerText = paraE.toFixed(2);
+        }
+
+        function drawParabola(ctx) {
+            ctx.beginPath();
+            ctx.strokeStyle = varColor('--neon-purple');
+            ctx.lineWidth = 4;
+
+            const startX = cc.view.minX;
+            const endX = cc.view.maxX;
+            const step = (endX - startX) / 150;
+
+            let first = true;
+            for (let x = startX; x <= endX; x += step) {
+                const y = paraA * Math.pow(x - paraD, 2) + paraE;
+                if (first) {
+                    ctx.moveTo(cc.mapX(x), cc.mapY(y));
+                    first = false;
+                } else {
+                    ctx.lineTo(cc.mapX(x), cc.mapY(y));
+                }
+            }
+            ctx.stroke();
+
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = varColor('--neon-purple');
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawHandle(ctx, mathX, mathY, color, label, position = "top-right", isHandle = true) {
+            const px = cc.mapX(mathX);
+            const py = cc.mapY(mathY);
+
+            if (isHandle) {
+                ctx.beginPath();
+                ctx.arc(px, py, 12, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fill();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            if (label) {
+                ctx.font = "bold 12px Orbitron";
+                ctx.fillStyle = color;
+                ctx.textAlign = "center";
+
+                let offX = 0, offY = 0;
+                if (position === "bottom") { offY = 30; }
+                else if (position === "top") { offY = -30; }
+                else if (position === "top-right") { offX = 50; offY = -20; }
+                else if (position === "smart-vertex") {
+                    offY = -35; 
+                    if (Math.abs(mathX) < 0.2) offX = 45; 
+                }
+
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "black";
+                ctx.fillText(label, px + offX, py + offY);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function draw() {
+            if (!cc || !cc.isInitialized) return;
+            const ctx = cc.ctx;
+            ctx.clearRect(0, 0, cc.canvas.width, cc.canvas.height);
+
+            cc.drawGrid();
+
+            drawParabola(ctx);
+
+            // --- DRAW ROOTS ON CANVAS ---
+            const disc = -paraE / paraA;
+            const green = "#4ade80"; // varColor('--neon-green')
+            if (disc > 0) {
+                const x1 = paraD - Math.sqrt(disc);
+                const x2 = paraD + Math.sqrt(disc);
+                drawHandle(ctx, x1, 0, green, "x1", "bottom", false);
+                drawHandle(ctx, x2, 0, green, "x2", "bottom", false);
+            } else if (Math.abs(disc) < 0.0001) {
+                drawHandle(ctx, paraD, 0, green, "x0", "bottom", false);
+            }
+
+            // Draw handles LAST so they are on top
+            drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
+            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", CyberI18n.get('parabola.vertex_label'), "top-right");
+
+            updateUI();
+        }
+
+        function updateUI() {
+            if (typeof katex === 'undefined') return;
+
+            const latexSpan = document.getElementById('canvas-latex-vertex');
+            if (latexSpan) {
+                const px = cc.mapX(paraD);
+                const py = cc.mapY(paraE);
+                let offX = 0, offY = -35;
+                if (Math.abs(paraD) < 0.2) offX = 45;
+
+                latexSpan.style.left = (px + offX) + "px";
+                latexSpan.style.top = (py + offY) + "px";
+                latexSpan.style.transform = "translate(-50%, -50%)";
+            }
+
+            const vertexStr = `S(${paraD.toFixed(2)} \\mid ${paraE.toFixed(2)})`;
+            const vTarget = document.getElementById('latex-vertex');
+            if (vTarget) katex.render(`\\textcolor{#00d2ff}{${vertexStr}}`, vTarget, { throwOnError: false });
+            if (latexSpan) katex.render(`\\textcolor{#00d2ff}{${vertexStr}}`, latexSpan, { throwOnError: false });
+            
+            const aTarget = document.getElementById('latex-a');
+            if (aTarget) katex.render(`\\textcolor{#faff00}{a = ${paraA.toFixed(2)}}`, aTarget, { throwOnError: false });
+
+            const dSign = paraD >= 0 ? "-" : "+";
+            const dVal = Math.abs(paraD).toFixed(2);
+            const eSign = paraE >= 0 ? "+" : "-";
+            const eVal = Math.abs(paraE).toFixed(2);
+            
+            const vertexLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, (x ${dSign} \\textcolor{#00d2ff}{${dVal}})^2 ${eSign} \\textcolor{#00d2ff}{${eVal}}`;
+            const eqV = document.getElementById('eq-vertex');
+            if (eqV) katex.render(vertexLatex, eqV, { throwOnError: false });
+
+            const b = -2 * paraA * paraD;
+            const c = (paraA * paraD * paraD) + paraE;
+            const bSign = b >= 0 ? "+" : "-";
+            const bVal = Math.abs(b).toFixed(2);
+            const cSign = c >= 0 ? "+" : "-";
+            const cVal = Math.abs(c).toFixed(2);
+            
+            const normalLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, x^2 ${bSign} \\textcolor{#00d2ff}{${bVal}} \\, x ${cSign} ${cVal}`;
+            const eqN = document.getElementById('eq-normal');
+            if (eqN) katex.render(normalLatex, eqN, { throwOnError: false });
+
+            // --- NULLSTELLEN CALCULATION ---
+            const rootsContainer = document.getElementById('eq-roots-container');
+            const rootsTarget = document.getElementById('eq-roots');
+            
+            if (rootsContainer && rootsTarget) {
+                rootsContainer.style.display = 'block';
+                const disc = -paraE / paraA;
+                
+                if (disc > 0) {
+                    const x1 = paraD - Math.sqrt(disc);
+                    const x2 = paraD + Math.sqrt(disc);
+                    katex.render(`x_1 = ${x1.toFixed(2)}, \\quad x_2 = ${x2.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                } else if (Math.abs(disc) < 0.0001) {
+                    katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                } else {
+                    katex.render(`\\text{${CyberI18n.get('parabola.roots_none')}}`, rootsTarget, { throwOnError: false });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pythagoras-Labor | ULTRA v5.3.8</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+
+        /* Custom Stats Styling for CyberUI Card integration */
+        .pyth-stat {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .pyth-label {
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .pyth-val {
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        // 1. Branding & UI Init
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('pyth.title')
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        let a_px = 120, b_px = 160;
+        let draggingA = false, draggingB = false;
+        let ox = 0, oy = 0;
+        let mode = 'quadrat';
+
+        const COLORS = {
+            A: "#00d2ff", B: "#ff00ff", C: "#ffd700"
+        };
+
+        // 2. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', CyberI18n.get('pyth.construction'), `
+                <div style="margin-bottom:15px;">
+                    <div style="font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px; font-family:Orbitron;">${CyberI18n.get('pyth.choose_mode')}</div>
+                    <select id="mode-select" class="cyber-select" style="width:100%;" onchange="updateMode(this.value)">
+                        <option value="quadrat">${CyberI18n.get('pyth.mode_quad')}</option>
+                        <option value="halbkreis">${CyberI18n.get('pyth.mode_semi')}</option>
+                        <option value="dreieck">${CyberI18n.get('pyth.mode_tri')}</option>
+                        <option value="stern">${CyberI18n.get('pyth.mode_star')}</option>
+                        <option value="pacman">${CyberI18n.get('pyth.mode_pacman')}</option>
+                    </select>
+                </div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('pyth.reset')}</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('ui-container', CyberI18n.get('pyth.analytics'), `
+                <div class="pyth-stat">
+                    <div class="pyth-label">${CyberI18n.get('pyth.area_sum')}</div>
+                    <div id="result-text" class="pyth-val" style="color:var(--neon-amber);">0.00</div>
+                </div>
+                <div class="pyth-stat">
+                    <div class="pyth-label">${CyberI18n.get('pyth.large_area')}</div>
+                    <div id="check-text" class="pyth-val" style="color:var(--neon-orange);">0.00</div>
+                </div>
+            `, 'var(--neon-purple)');
+        }
+
+        function updateMode(val) {
+            mode = val;
+            draw();
+        }
+
+        function drawShape(pStart, pEnd, type, color) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.shadowBlur = 40; ctx.shadowColor = color;
+            ctx.globalAlpha = 0.65;
+            ctx.beginPath();
+
+            let dx = pEnd.x - pStart.x;
+            let dy = pEnd.y - pStart.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let nx = -dy / dist;
+            let ny = dx / dist;
+
+            if (type === 'quadrat') {
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.lineTo(pEnd.x + nx * dist, pEnd.y + ny * dist);
+                ctx.lineTo(pStart.x + nx * dist, pStart.y + ny * dist);
+            } else if (type === 'halbkreis') {
+                let centerX = (pStart.x + pEnd.x) / 2; let centerY = (pStart.y + pEnd.y) / 2;
+                let angle = Math.atan2(dy, dx);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.arc(centerX, centerY, dist / 2, angle, angle + Math.PI, false);
+            } else if (type === 'dreieck') {
+                let h = (dist * Math.sqrt(3)) / 2;
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.lineTo((pStart.x + pEnd.x) / 2 + nx * h, (pStart.y + pEnd.y) / 2 + ny * h);
+            } else if (type === 'stern') {
+                let steps = 10; ctx.moveTo(pStart.x, pStart.y);
+                for (let i = 1; i < steps; i++) {
+                    let t = i / steps; let currX = pStart.x + t * dx; let currY = pStart.y + t * dy;
+                    let h = (i % 2 === 0) ? (dist * 0.2) : (dist * 0.7);
+                    if (i === 5) h *= 1.2;
+                    ctx.lineTo(currX + nx * h, currY + ny * h);
+                }
+                ctx.lineTo(pEnd.x, pEnd.y);
+            } else if (type === 'pacman') {
+                let centerX = (pStart.x + pEnd.x) / 2; let centerY = (pStart.y + pEnd.y) / 2;
+                let angle = Math.atan2(dy, dx);
+                ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y);
+                ctx.arc(centerX + nx * dist * 0.1, centerY + ny * dist * 0.1, dist / 2, angle + 0.3, angle + Math.PI - 0.3, false);
+                ctx.lineTo(centerX + nx * dist * 0.1, centerY + ny * dist * 0.1);
+            }
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+
+        function draw() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            ox = rect.width * 0.35; oy = rect.height * 0.60;
+            const A = { x: ox, y: oy - a_px }, B = { x: ox + b_px, y: oy }, C = { x: ox, y: oy };
+
+            drawShape(A, C, mode, COLORS.A);
+            drawShape(C, B, mode, COLORS.B);
+            drawShape(B, A, mode, COLORS.C);
+
+            // Zentrumsdreieck
+            ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.07)"; ctx.fill();
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; ctx.lineWidth = 2; ctx.stroke();
+            
+            // Rechter Winkel Symbol
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.2)"; 
+            ctx.strokeRect(ox, oy - 15, 15, 15);
+
+            // Analysis
+            let cmFactor = 40; let valA = a_px / cmFactor, valB = b_px / cmFactor;
+            let factor = 1;
+            if (mode === 'halbkreis') factor = Math.PI / 8;
+            if (mode === 'dreieck') factor = Math.sqrt(3) / 4;
+            if (mode === 'stern') factor = 0.45;
+            if (mode === 'pacman') factor = 0.34;
+
+            let areaA = factor * Math.pow(valA, 2), areaB = factor * Math.pow(valB, 2), areaSum = areaA + areaB;
+
+            const resText = document.getElementById('result-text');
+            const checkText = document.getElementById('check-text');
+            if(resText) resText.innerHTML = `<span style="color:${COLORS.A}">${areaA.toFixed(2)}</span> + <span style="color:${COLORS.B}">${areaB.toFixed(2)}</span> = <span style="color:var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">${areaSum.toFixed(2)}</span>`;
+            if(checkText) checkText.innerHTML = `<span style="color:${COLORS.C}">A₃ = ${areaSum.toFixed(2)}</span>`;
+
+            // Canvas Labels
+            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillText(valA.toFixed(2), ox - 25, oy - a_px / 2);
+            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 25);
+            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + b_px / 2 + 20, oy - a_px / 2 - 20);
+
+            // Handles
+            const drawH = (p, color) => {
+                ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+            };
+            drawH(A, COLORS.A); drawH(B, COLORS.B);
+        }
+
+        function resetLab() {
+            a_px = 120; b_px = 160; draw();
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        canvas.onpointerdown = e => {
+            const pos = getPos(e);
+            if (Math.hypot(pos.x - (ox + b_px), pos.y - oy) < 40) draggingB = true;
+            if (Math.hypot(pos.x - ox, pos.y - (oy - a_px)) < 40) draggingA = true;
+            if (draggingA || draggingB) canvas.setPointerCapture(e.pointerId);
+        };
+
+        canvas.onpointermove = e => {
+            if (!draggingA && !draggingB) return;
+            const pos = getPos(e);
+            if (draggingA) a_px = Math.max(40, oy - pos.y);
+            if (draggingB) b_px = Math.max(40, pos.x - ox);
+            draw();
+        };
+
+        canvas.onpointerup = e => {
+            draggingA = draggingB = false;
+            canvas.releasePointerCapture(e.pointerId);
+        };
+
+        window.onresize = draw;
+        setupUI();
+        setTimeout(draw, 50);
+    </script>
+</body>
+</html>

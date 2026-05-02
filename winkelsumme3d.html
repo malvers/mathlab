@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | 3D Winkelsumme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .angle-sum-display {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            color: var(--neon-blue);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            margin-top: 10px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+        .angle-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .angle-row #vC {
+            color: var(--neon-red) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" id="rail-toggle-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container"></div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        // 1. Branding & UI Init
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('angle3d.sum_title')
+        });
+        CyberUI.init();
+        
+        // Localize rail tooltip
+        const railBtn = document.getElementById('rail-toggle-btn');
+        if (railBtn) railBtn.title = CyberI18n.get('geometry.lab_control');
+
+        const container = document.getElementById('canvas-container');
+        const COLORS = { alpha: 0xff8800, beta: 0x4ade80, gamma: 0xff4444 };
+        
+        let isAutoFolding = false, foldDir = 1, pauseFrames = 0;
+        let currentFold = 0, currentSkew = 0.5;
+        let foldSliderId = null;
+
+        // 2. Setup Three.js Engine
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 3, 13);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, precision: 'highp' });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 1, 0);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        keyLight.position.set(5, 10, 5);
+        scene.add(keyLight);
+        scene.add(new THREE.HemisphereLight(0x00d2ff, 0x9d50bb, 0.6));
+
+        const paperMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, side: THREE.DoubleSide, roughness: 0.2, metalness: 0.1, clearcoat: 0.5, emissive: 0x111111, transparent: true, opacity: 0.8 });
+        const tubeMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.2 });
+
+        const mainGroup = new THREE.Group();
+        mainGroup.position.y = -1.5;
+        scene.add(mainGroup);
+
+        const groups = { center: new THREE.Group(), top: new THREE.Group(), left: new THREE.Group(), right: new THREE.Group() };
+        Object.values(groups).forEach(g => mainGroup.add(g));
+
+        function createTubes(points, radius = 0.006) {
+            const group = new THREE.Group();
+            for (let i = 0; i < points.length; i++) {
+                const p1 = points[i], p2 = points[(i + 1) % points.length];
+                const tube = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, p1.distanceTo(p2), 8), tubeMat);
+                tube.position.copy(p1.clone().add(p2).multiplyScalar(0.5));
+                tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
+                group.add(tube);
+            }
+            return group;
+        }
+
+        function createArc(origin, start, span, color) {
+            const mesh = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32, start, span), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.95, depthTest: false }));
+            mesh.position.copy(origin); mesh.position.z = 0.01; mesh.renderOrder = 999;
+            return mesh;
+        }
+
+        function rebuild(cX) {
+            currentSkew = cX;
+            Object.values(groups).forEach(g => { while(g.children.length > 0) g.remove(g.children[0]); });
+            const A = new THREE.Vector3(-2.8, 0, 0), B = new THREE.Vector3(2.8, 0, 0), C = new THREE.Vector3(cX, 4.5, 0), F = new THREE.Vector3(cX, 0, 0);
+            const angA = Math.acos(B.clone().sub(A).normalize().dot(C.clone().sub(A).normalize()));
+            const angB = Math.acos(A.clone().sub(B).normalize().dot(C.clone().sub(B).normalize()));
+            const angG = Math.acos(A.clone().sub(C).normalize().dot(B.clone().sub(C).normalize()));
+
+            const vA = document.getElementById('vA'), vB = document.getElementById('vB'), vC = document.getElementById('vC');
+            if(vA) vA.innerText = Math.round(angA * 180 / Math.PI) + "°";
+            if(vB) vB.innerText = Math.round(angB * 180 / Math.PI) + "°";
+            if(vC) vC.innerText = (180 - Math.round(angA * 180 / Math.PI) - Math.round(angB * 180 / Math.PI)) + "°";
+
+            const M_AC = A.clone().add(C).multiplyScalar(0.5), M_BC = B.clone().add(C).multiplyScalar(0.5);
+            const H1 = new THREE.Vector3((A.x + F.x) / 2, 0, 0), H2 = new THREE.Vector3((B.x + F.x) / 2, 0, 0);
+
+            const addPart = (g, pts) => {
+                const shape = new THREE.Shape(); shape.moveTo(pts[0].x, pts[0].y);
+                for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].y);
+                g.add(new THREE.Mesh(new THREE.ShapeGeometry(shape), paperMat)); g.add(createTubes(pts));
+            };
+
+            addPart(groups.center, [H1, H2, M_BC, M_AC]);
+            groups.top.position.set(0, 2.25, 0);
+            addPart(groups.top, [M_AC.clone().sub(new THREE.Vector3(0, 2.25, 0)), M_BC.clone().sub(new THREE.Vector3(0, 2.25, 0)), C.clone().sub(new THREE.Vector3(0, 2.25, 0))]);
+            groups.top.add(createArc(C.clone().sub(new THREE.Vector3(0, 2.25, 0)), Math.atan2(-2.25, M_AC.x - C.x), angG, COLORS.gamma));
+
+            groups.left.position.set(H1.x, 0, 0);
+            addPart(groups.left, [A.clone().sub(H1), new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 2.25, 0)]);
+            groups.left.add(createArc(A.clone().sub(H1), 0, angA, COLORS.alpha));
+
+            groups.right.position.set(H2.x, 0, 0);
+            addPart(groups.right, [new THREE.Vector3(0, 0, 0), B.clone().sub(H2), new THREE.Vector3(0, 2.25, 0)]);
+            groups.right.add(createArc(B.clone().sub(H2), Math.PI - angB, angB, COLORS.beta));
+            updateFold(currentFold);
+        }
+
+        function updateFold(val) {
+            currentFold = val;
+            groups.top.rotation.x = Math.PI * Math.max(0, Math.min(1, val));
+            groups.left.rotation.y = Math.PI * Math.max(0, Math.min(1, val - 1));
+            groups.right.rotation.y = -Math.PI * Math.max(0, Math.min(1, val - 2));
+            groups.top.position.z = 0.006 * Math.max(0, Math.min(1, val));
+            groups.left.position.z = 0.012 * Math.max(0, Math.min(1, val - 1));
+            groups.right.position.z = 0.018 * Math.max(0, Math.min(1, val - 2));
+        }
+
+        // 3. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.lab_control'), `
+                <div id="anim-sliders"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                    <button id="btn-auto-fold" class="cyber-btn" onclick="toggleAutoFold()">${CyberI18n.get('angle3d.fold_btn')}</button>
+                    <button id="btn-auto-rotate" class="cyber-btn" onclick="toggleAutoRotate()">${CyberI18n.get('angle3d.rotate_btn')}</button>
+                </div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createSlider('anim-sliders', CyberI18n.get('angle3d.fold'), 0, 3, currentFold, 0.01, (v) => updateFold(v));
+            // Store reference to slider inputs manually for animation sync
+            foldSliderId = document.querySelector('#anim-sliders input[type="range"]').id;
+
+            CyberUI.createSlider('anim-sliders', CyberI18n.get('angle3d.offset'), -1.5, 1.5, currentSkew, 0.01, (v) => rebuild(v));
+
+            CyberUI.createCard('ui-container', CyberI18n.get('angle3d.sum_eq'), `
+                <div class="angle-row">
+                    <span id="vA" style="color:var(--neon-orange)">0°</span>
+                    <span style="opacity:0.4">+</span>
+                    <span id="vB" style="color:var(--neon-green)">0°</span>
+                    <span style="opacity:0.4">+</span>
+                    <span id="vC">0°</span>
+                </div>
+                <div class="angle-sum-display">= 180°</div>
+            `, 'var(--neon-purple)');
+        }
+
+        function toggleAutoFold() {
+            const btn = document.getElementById('btn-auto-fold');
+            isAutoFolding = !isAutoFolding;
+            btn.classList.toggle('active', isAutoFolding);
+        }
+
+        function toggleAutoRotate() {
+            const btn = document.getElementById('btn-auto-rotate');
+            controls.autoRotate = !controls.autoRotate;
+            btn.classList.toggle('active', controls.autoRotate);
+        }
+
+        function resetLab() {
+            currentFold = 0; currentSkew = 0.5; rebuild(0.5); updateFold(0);
+            camera.position.set(0, 2, 12); controls.target.set(0, 0, 0);
+            isAutoFolding = false; controls.autoRotate = false;
+            document.querySelectorAll('.cyber-btn').forEach(b => b.classList.remove('active'));
+            // Update Sliders in UI if possible (CyberUI sliders are tricky to update externally without a ref, we'll just reload UI for simplicity if needed or accept visual lag)
+            location.reload(); 
+        }
+
+        function animate() {
+            requestAnimationFrame(animate); controls.update();
+            if (isAutoFolding) {
+                if (pauseFrames > 0) { pauseFrames--; } else {
+                    currentFold += (0.015 * foldDir);
+                    if (currentFold >= 3) { currentFold = 3; foldDir = -1; pauseFrames = 100; }
+                    else if (currentFold <= 0) { currentFold = 0; foldDir = 1; pauseFrames = 100; }
+                    updateFold(currentFold);
+                    // Update slider visual
+                    const slider = document.getElementById(foldSliderId);
+                    if(slider) {
+                        slider.value = currentFold;
+                        const display = document.getElementById('val-' + foldSliderId);
+                        if(display) display.innerText = currentFold.toFixed(2);
+                    }
+                }
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.onresize = () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        };
+
+        setupUI(); rebuild(0.5); animate();
+    </script>
+</body>
+</html>
