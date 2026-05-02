@@ -1,7 +1,7 @@
-/** Intro dramaturgy — Kiswahili (synchronize structure with dramaturgie-inline.en.js). */
+/** Intro dramaturgy — Kiswahili (sync structure with dramaturgie-inline.de.js). */
 window.__INTRO_DRAMATURGIE_TXT = `
 
-# 
+#notranslate
 80pt
 DOC ALVERS 
 120pt
@@ -22,7 +22,7 @@ zinazoingiliana
 lugha 7
 20pt
 %purplepulsating endelea kuongezeka
-40pt
+30pt
 Kijerumani
 Kiingereza
 Kihispania
@@ -39,7 +39,7 @@ Kiswahili
 
 # 
 60pt
-lugha 7 za programu 
+teknolojia 7
 40pt
 hypertext markup language
 cascading styles sheets
@@ -59,18 +59,19 @@ mistari ya msimbo
 Kwako!
 %picture resources/kids.jpeg
 %sound resources/kids.wav
+//%video https://coverr.co/videos/welcome-back-to-school-classrooms-first-lesson
 
 #
 100pt
 ni la kushangaza!
 180pt
 %emoji 😎
+%button nyuma
 
 #
 %cwstack left
 120pt
 docalvers.de
-%button nyuma
 
 %stop
 

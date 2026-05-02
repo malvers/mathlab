@@ -2,10 +2,13 @@
  * Referenz-Dramaturgie (Deutsch). Du pflegst nur diese Datei inhaltlich.
  * Übersetzungen: dramaturgie-inline.<lang>.js — nach Änderungen hier syncen lassen.
  * Aufruf intro: ?lang=en (auch es, fr, it, pt). Sonst Browser-Sprache oder de.
+ *
+ * Nur im Dramaturgie-Text: Zeile «#notranslate» = folgender Abschnitt (bis zur nächsten #)
+ * bei anderen Sprachen nicht übersetzen / aus dieser Datei übernehmen (Verhalten wie Abschnittswechsel #).
  */
 window.__INTRO_DRAMATURGIE_TXT = `
 
-# 
+#notranslate
 80pt
 DOC ALVERS 
 120pt

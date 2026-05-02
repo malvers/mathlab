@@ -1,7 +1,7 @@
 /** Intro dramaturgy — English (sync structure with dramaturgie-inline.de.js). */
 window.__INTRO_DRAMATURGIE_TXT = `
 
-# 
+#notranslate
 80pt
 DOC ALVERS 
 120pt
@@ -22,7 +22,7 @@ labs
 7 languages
 20pt
 %purplepulsating and counting
-40pt
+30pt
 German
 English
 Spanish
@@ -39,7 +39,7 @@ Swahili
 
 # 
 60pt
-7 programming languages 
+7 technologies
 40pt
 hypertext markup language
 cascading styles sheets
@@ -66,12 +66,12 @@ For you!
 that's crazy!
 180pt
 %emoji 😎
+%button back
 
 #
 %cwstack left
 120pt
 docalvers.de
-%button back
 
 %stop
 
