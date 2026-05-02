@@ -50,7 +50,7 @@ class CyberUI {
     }
 
     /** Unterstützte Labor-Sprachen — Reihenfolge beim Klick durchschalten */
-    static CYBER_LANG_ORDER = ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'];
+    static CYBER_LANG_ORDER = ['de', 'en', 'es', 'fr', 'it', 'pt', 'nl', 'sw'];
 
     static CYBER_LANG_FLAGS = {
         de: '🇩🇪',
@@ -59,6 +59,7 @@ class CyberUI {
         fr: '🇫🇷',
         it: '🇮🇹',
         pt: '🇵🇹',
+        nl: '🇳🇱',
         sw: '🇰🇪',
     };
 

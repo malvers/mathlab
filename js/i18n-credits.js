@@ -74,6 +74,17 @@
             stanford_desc: "No ladrilho <strong>Universidade</strong>, o Stanford <strong>Cardinal Block S</strong> (árvore no « S », Cardinal <code>#8c1515</code>) — Imagem de <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; marca <strong>Stanford University</strong>. Regras: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
             back: "voltar"
         },
+        nl: {
+            title: "CREDITS",
+            subtitle: "Gebruikte of genoemde AI- en mediatools (geen volledige lijst).",
+            cursor_desc: "AI-gestuurde editor / IDE voor ontwikkeling met ingebouwde agents.",
+            gemini_desc: "Googles multimodale AI (chat, redeneren, tools).",
+            codex_desc: "OpenAI Codex: code-agent / CLI voor geautomatiseerde programmeertaaken.",
+            runway_desc: "AI-platform voor video (o.a. Gen-4), beeld en audio.",
+            ideogram_desc: "AI-beeldgenerator, vaak met goed leesbare tekst in afbeeldingen.",
+            stanford_desc: "Op de tegel <strong>Universiteit</strong> het Stanford-<strong>Cardinal Block S</strong> (boom in de „S”, Cardinal <code>#8c1515</code>) — Afbeelding van <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; merk <strong>Stanford University</strong>. Merk- en gebruiksregels: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "terug"
+        },
         sw: {
             title: "SHUKRANI",
             subtitle: "Zana za AI na media zilizotumiwa au kutajwa (orodha siyo kamili).",
