@@ -73,6 +73,17 @@
             ideogram_desc: "Gerador de imagens por IA, muitas vezes com texto bem legível.",
             stanford_desc: "No ladrilho <strong>Universidade</strong>, o Stanford <strong>Cardinal Block S</strong> (árvore no « S », Cardinal <code>#8c1515</code>) — Imagem de <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; marca <strong>Stanford University</strong>. Regras: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
             back: "voltar"
+        },
+        sw: {
+            title: "SHUKRANI",
+            subtitle: "Zana za AI na media zilizotumiwa au kutajwa (orodha siyo kamili).",
+            cursor_desc: "Hariri / IDE yenye AI na mawakala waliojengewa ndani.",
+            gemini_desc: "Mfano wa AI wa Google anayebaini maumbo mbalimbali (Chat, mantiki, zana).",
+            codex_desc: "OpenAI Codex: wakala wa uandishi wa programu / CLI kwa kazi zilizojiendesha.",
+            runway_desc: "Jukwaa la AI kwa video (Gen-4 n.k.), picha na sauti.",
+            ideogram_desc: "Jenereta ya picha za AI, mara nyingi na maandishi yanayosomeka vizuri.",
+            stanford_desc: "Kwenye kadi ya <strong>Chuo kikuu</strong>, nembo ya Stanford <strong>Cardinal Block S</strong> (mti katika „S“, Cardinal <code>#8c1515</code>) — Picha kutoka <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; chapa <strong>Stanford University</strong>. Sheria: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "rudi"
         }
     };
 

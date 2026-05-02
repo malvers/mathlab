@@ -19,7 +19,7 @@ labs
 
 #
 120pt
-6 languages
+7 languages
 20pt
 %purplepulsating and counting
 40pt
@@ -29,6 +29,7 @@ Spanish
 French
 Italian
 Portuguese
+Swahili
 
 #
 // all screenshots are shown

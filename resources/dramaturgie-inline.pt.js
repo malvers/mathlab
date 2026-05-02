@@ -19,7 +19,7 @@ laboratórios
 
 #
 120pt
-6 idiomas
+7 idiomas
 20pt
 %purplepulsating and counting
 40pt
@@ -29,6 +29,7 @@ espanhol
 francês
 italiano
 português
+suaíli
 
 #
 // todas as capturas de ecrã são mostradas

@@ -1,7 +1,7 @@
 /**
  * CYBER-LABOR GLOBAL i18n DICTIONARY
  * Supports: Addition, Subtraction, Multiplication, Division, Logic, Geometry, Proof, Polygon
- * Languages: DE (German), EN (English), ES (Spanish)
+ * Languages: DE, EN, ES, FR, IT, PT, SW (Kiswahili)
  */
 
 const CyberI18n = {
@@ -286,9 +286,15 @@ const CyberI18n = {
                 orbit_legs_arrows: "Schenkel-Budget (max.): {n} (↑/↓ nur Orbit-Ansicht; Shift = größere Schritte)",
                 orbit_legs_escape_trunc: "→ gezeichnet: {shown} von max. {budget} (Abbruch bei Flucht |z|²>4)",
                 orbit_connector_lines: "Zwischenpunkt-Kreise auf dem Orbit (Schenkel immer sichtbar)",
+                orbit_hide_legs_while_scan:
+                    "Beim Raster-Scan Orbit-Schenkel ausblenden (Polylinie + Zwischenpunkt-Kreise)",
                 orbit_scan_hint: "Leertaste: zeilenweise von oben nach unten — kleine orangene Punkte ≈ Orbit bleibt begrenzt; unten automatisches Ende. Nochmal Leertaste während Scan: abbrechen und löschen.",
                 orbit_scan_running: "→ Scan läuft (oben → unten)",
                 orbit_stable_points_label: "Stabile Punkte",
+                orbit_scan_julia_outside_mb_note:
+                    "Dieses c liegt außerhalb der Mandelbrot-Menge: Die gefüllte Julia-Menge ist hier extrem dünn (Cantor-Staub). Auf einem Pixel-Raster trifft man fast nie ein Start-z₀ mit dauerhaft beschränktem Orbit — N≈0 ist erwartbar.\nZum Vergleich: Mandelbrot-Modus und Scan zeigen viele gelbe c-Treffer.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Hinweis: Julia-c außerhalb M → Raster-Treffer selten (N≈0). Mandelbrot-Scan zeigt gelbe Punkte.",
                 orbit_hud_toggle: "⌘D / Strg+D: HUD ein/aus",
                 orbit_hud_stopwatch_idle: "Stoppuhr:\n—",
                 orbit_hud_stopwatch_running: "Stoppuhr:\n{t}",
@@ -803,9 +809,14 @@ const CyberI18n = {
                 orbit_legs_arrows: "Leg budget (max.): {n} (↑/↓ orbit view only; Shift = bigger steps)",
                 orbit_legs_escape_trunc: "→ drawn: {shown} of {budget} max (stopped at escape |z|²>4)",
                 orbit_connector_lines: "Vertex dots along orbit (legs always drawn)",
+                orbit_hide_legs_while_scan: "Hide orbit legs during grid scan (polyline + vertex dots)",
                 orbit_scan_hint: "Space: scan row by row top→bottom — fine orange dots ≈ bounded orbit; stops at bottom. Space during scan: cancel & clear.",
                 orbit_scan_running: "→ Scanning (top→bottom)",
                 orbit_stable_points_label: "Stable points",
+                orbit_scan_julia_outside_mb_note:
+                    "This c is outside the Mandelbrot set: the filled Julia set here is extremely thin (Cantor dust). A pixel grid almost never lands on a starting z₀ whose orbit stays bounded — N≈0 is expected.\nTry Mandelbrot mode + scan for many yellow c hits.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Note: Julia c outside M → sparse raster hits (N≈0). Mandelbrot scan shows yellow dots.",
                 orbit_hud_toggle: "⌘D / Ctrl+D: toggle HUD",
                 orbit_hud_stopwatch_idle: "Stopwatch:\n—",
                 orbit_hud_stopwatch_running: "Stopwatch:\n{t}",
@@ -1320,9 +1331,14 @@ const CyberI18n = {
                 orbit_legs_arrows: "Tramos de órbita (máx.): {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
                 orbit_legs_escape_trunc: "→ dibujados: {shown} de {budget} máx. (escape |z|²>4)",
                 orbit_connector_lines: "Puntos en la órbita (los tramos siempre visibles)",
+                orbit_hide_legs_while_scan: "Ocultar los segmentos de la órbita durante el barrido",
                 orbit_scan_hint: "Espacio: filas de arriba abajo — puntos finos naranja ≈ órbita acotada; termina abajo. Espacio durante: cancelar y borrar.",
                 orbit_scan_running: "→ Escaneando (arriba→abajo)",
                 orbit_stable_points_label: "Puntos estables",
+                orbit_scan_julia_outside_mb_note:
+                    "Este c está fuera del conjunto de Mandelbrot: el Julia lleno aquí es muy fino (polvo de Cantor). Una rejilla de píxeles casi nunca da un z₀ inicial con órbita acotada — N≈0 es normal.\nModo Mandelbrot + escaneo muestra muchos puntos amarillos en c.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Julia con c fuera de M → pocos aciertos (N≈0). El escaneo Mandelbrot muestra puntos amarillos.",
                 orbit_hud_toggle: "⌘D / Ctrl+D: mostrar u ocultar HUD",
                 orbit_hud_stopwatch_idle: "Cronómetro:\n—",
                 orbit_hud_stopwatch_running: "Cronómetro:\n{t}",
@@ -1837,9 +1853,14 @@ const CyberI18n = {
                 orbit_legs_arrows: "Segments d’orbite (max.) : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
                 orbit_legs_escape_trunc: "→ tracés : {shown}/{budget} max (arrêt si évasion |z|²>4)",
                 orbit_connector_lines: "Pastilles sur l’orbite (segments toujours visibles)",
+                orbit_hide_legs_while_scan: "Masquer les segments d’orbite pendant le balayage",
                 orbit_scan_hint: "Espace : lignes du haut vers le bas — petits points orange ≈ orbite bornée ; fin en bas. Espace pendant : annuler et effacer.",
                 orbit_scan_running: "→ Scan (haut→bas)",
                 orbit_stable_points_label: "Points stables",
+                orbit_scan_julia_outside_mb_note:
+                    "Ce c est hors de l’ensemble de Mandelbrot : le Julia rempli est ici très fin (poussière de Cantor). Une grille de pixels tombe rarement sur un z₀ de départ à orbite bornée — N≈0 est attendu.\nMode Mandelbrot + scan donne de nombreux points jaunes sur c.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Julia avec c hors M → peu de hits (N≈0). Scan Mandelbrot : points jaunes.",
                 orbit_hud_toggle: "⌘D / Ctrl+D : afficher/masquer le HUD",
                 orbit_hud_stopwatch_idle: "Chronomètre :\n—",
                 orbit_hud_stopwatch_running: "Chronomètre :\n{t}",
@@ -2354,9 +2375,14 @@ const CyberI18n = {
                 orbit_legs_arrows: "Segmenti orbita (max.): {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
                 orbit_legs_escape_trunc: "→ disegnati: {shown}/{budget} max (stop a fuga |z|²>4)",
                 orbit_connector_lines: "Punti sull’orbita (segmenti sempre visibili)",
+                orbit_hide_legs_while_scan: "Nascondere gli segmenti dell’orbita durante la scansione",
                 orbit_scan_hint: "Barra spaziale: righe dall’alto in basso — puntini arancioni ≈ orbita limitata; si ferma in basso. Spazio durante: annulla e cancella.",
                 orbit_scan_running: "→ Scansione (alto→basso)",
                 orbit_stable_points_label: "Punti stabili",
+                orbit_scan_julia_outside_mb_note:
+                    "Questo c è fuori dall’insieme di Mandelbrot: il Julia riempito è molto sottile (polvere di Cantor). Una griglia di pixel quasi mai colpisce uno z₀ iniziale con orbita limitata — N≈0 è normale.\nModalità Mandelbrot + scansione mostra molti punti gialli su c.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Julia con c fuori da M → pochi punti (N≈0). Scan Mandelbrot: punti gialli.",
                 orbit_hud_toggle: "⌘D / Ctrl+D: HUD on/off",
                 orbit_hud_stopwatch_idle: "Cronometro:\n—",
                 orbit_hud_stopwatch_running: "Cronometro:\n{t}",
@@ -2871,9 +2897,14 @@ pt: {
                 orbit_legs_arrows: "Segmentos da órbita (máx.): {n} (↑/↓ só vista órbita; Shift passos maiores)",
                 orbit_legs_escape_trunc: "→ desenhados: {shown}/{budget} máx. (escape |z|²>4)",
                 orbit_connector_lines: "Pontos na órbita (segmentos sempre visíveis)",
+                orbit_hide_legs_while_scan: "Ocultar pernas da órbita durante a varredura",
                 orbit_scan_hint: "Espaço: linhas de cima para baixo — pontos finos laranja ≈ órbita limitada; para em baixo. Espaço durante: cancelar e limpar.",
                 orbit_scan_running: "→ Varrendo (topo→base)",
                 orbit_stable_points_label: "Pontos estáveis",
+                orbit_scan_julia_outside_mb_note:
+                    "Este c está fora do conjunto de Mandelbrot: o Julia preenchido aqui é muito fino (poeira de Cantor). Uma grelha de pixels quase nunca acerta um z₀ inicial com órbita limitada — N≈0 é esperado.\nModo Mandelbrot + varredura mostra muitos pontos amarelos em c.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Julia com c fora de M → poucos acertos (N≈0). Varredura Mandelbrot mostra pontos amarelos.",
                 orbit_hud_toggle: "⌘D / Ctrl+D: alternar HUD",
                 orbit_hud_stopwatch_idle: "Cronômetro:\n—",
                 orbit_hud_stopwatch_running: "Cronômetro:\n{t}",
@@ -3129,6 +3160,527 @@ pt: {
                 bumps: "Spike Intensity",
                 shape: "Shape Factor (Y)"
             }
+        },
+        sw: {
+
+            ui: {
+                next: "INAYOFUATA",
+                prev: "NYUMA",
+                reset: "WEKA UPYA MAABARA",
+                step: "HATUA",
+                coach_title: "Maabara ya Hisabati — Doc Alvers",
+                universe_title: "Ulimwengu · Matunzio ya Maabara",
+                logic_game: "Puzzle ya Nambari",
+                angle_lab: "Maabara ya Pembe",
+                pythagoras: "Uthibitisho wa Pythagoras",
+                angle_sum: "Maabara ya Jumla ya Pembe",
+                transformation: "Mabadiliko",
+                parabola: "Maabara ya Parabola",
+                regression: "Maabara ya Takwimu",
+                euler: "Mstari wa Euler",
+                summand: "Kijumlishi",
+                description: "MAELEZO YA HATUA",
+                minuend: "Minuend",
+                subtrahend: "Subtrahend",
+                factor1: "Kipengele cha 1 (Njia nyingi)",
+                factor2: "Kipengele cha 2 (Kuzidisha)",
+                dividend: "Gawio",
+                divisor: "Kigawanyiko",
+                fine_mode: "Hatua kwa hatua",
+                show_axes: "Onyesha Vishoka",
+                show_labels: "Onyesha Lebo",
+                show_telemetry: "Kuratibu",
+                toggle_menu: "Geuza Menyu",
+                adopt_contact_btn_title: "Kupitisha maabara!",
+                contact_lab_modal_title: "Kupitisha maabara!",
+                contact_lab_modal_body: "Tunahitaji watu ambao wanahisi kuwajibika kwa maabara na kuangalia mara kwa mara kwamba kila kitu bado kinafanya kazi. Tutashukuru sana msaada wako!",
+                contact_lab_email_cta: "Barua pepe",
+                contact_lab_close: "FUNGA"
+            },
+            euler: {
+                construction: "UJENZI",
+                euler_line: "Mstari wa Euler",
+                feuerbach: "Mzunguko wa Feuerbach",
+                circumcircle: "Mduara",
+                incircle: "Mviringo",
+                help_lines: "MISTARI YA USAIDIZI",
+                altitudes: "Miinuko (H)",
+                medians: "Wastani (S)",
+                bisectors: "Sehemu mbili (I)",
+                fermat: "Fermat / Napoleon",
+                analysis: "UCHAMBUZI",
+                ratio: "Uwiano HS / SU",
+                incircle_radius: "Mviringo-R",
+                reset_construction: "Weka upya Ujenzi"
+            },
+            lgs: {
+                system_title: "MIFUMO YA MLINGANYO",
+                formal_system: "MFUMO RASMI",
+                intersection: "INTERSECTION S",
+                notation: "TAARIFA",
+                magnet_snap: "MAGNET SNAP",
+                new_task: "KAZI MPYA",
+                view_reset: "TAZAMA UPYA",
+                mode_normal: "KAWAIDA",
+                mode_mirrored: "KIIOO (KIOANI)",
+                mode_scaled: "IMEPIGWA (sY)",
+                mode_implicit_a: "DHAHIRI A",
+                mode_implicit_b: "HALISI B",
+                mode_random: "NAFASI MCHANGANYIKO",
+                no_solution: "Sambamba / Hakuna Suluhisho"
+            },
+            binom: {
+                proof_title: "Uthibitisho wa Mfumo wa 1 wa Binomial",
+                division: "MGAWANYIKO",
+                p_value: "P-VALUE",
+                tip: "Kidokezo: Buruta sehemu ya katikati kwenye mraba!",
+                analytics: "UCHAMBUZI",
+                total: "JUMLA"
+            },
+            integral: {
+                title: "MAKALKULI YA INTEGRALI",
+                active_formula: "FORMULA HALISI YA INTEGRALI",
+                area_under_curve: "ENEO LILILO CHINI YA MJIKO",
+                error: "HITILAFU",
+                limit_a: "Kikomo a",
+                limit_b: "Kikomo b",
+                precision_n: "Usahihi n",
+                mode_analytical: "UCHAMBUZI",
+                mode_bars: "BAA",
+                waiting: "Inasubiri data..."
+            },
+            diff: {
+                title: "MAKALKULI YA TOFAUTI",
+                functionality: "UTEKELEZAJI",
+                point_pos: "Nafasi ya pointi (x₀)",
+                visualization: "MUONEKANO",
+                deriv_1: "Tofauti ya 1 f'(x)",
+                deriv_2: "Tofauti ya 2 f''(x)",
+                analysis: "UCHAMBUZI",
+                slope: "Mteremko f'(x₀)",
+                curvature: "Mviringo f''(x₀)",
+                reset_point: "Weka upya pointi (x₀)"
+            },
+            power: {
+                title: "Nguvu & Mizizi Kazi",
+                parameters: "VIGEZO",
+                exponent: "KIELELEZO (N)",
+                x_pos: "X-POSITION",
+                analytics: "UCHAMBUZI"
+            },
+            cmaes: {
+                title: "Uboreshaji wa ENEO",
+                circle_mission: "Uboreshaji wa DUARA",
+                lens_mission: "UBORESHAJI WA LENZI",
+                controls: "VIDHIBITI",
+                telemetry: "DATA YA MABADILIKO",
+                generation: "KIZAZI",
+                fitness: "USAFI",
+                perimeter: "PERIMETER",
+                area: "ENEO",
+                start: "ANZA",
+                reset: "WEKA UPYA",
+                pause: "SIMAMA",
+                resume: "ENDELEA",
+                max_gen: "MAX 5000",
+                view_circle: "UBORESHAJI: DUARA"
+            },
+            fourier: {
+                title: "UCHAMBUZI NNE",
+                select_shape: "CHAGUA SURA",
+                shape_note: "KUMBUKA YA MUZIKI",
+                shape_square: "UWANJA",
+                shape_heart: "MOYO",
+                circles: "DUARA",
+                speed: "KASI",
+                show_circles: "ONYESHA MIDUARA",
+                tracking: "KAMERA YA KUFUATILIA",
+                auto_evolve: "MALEZI-OTOKEO",
+                stop_evolution: "ACHA MABADILIKO",
+                start_evolution: "ANZA MAENDELEO KIOTOmatiki"
+            },
+            galton: {
+                title: "BODI YA GALTON",
+                balls_total: "MIPIRA JUMLA",
+                controls: "VIDHIBITI",
+                bins: "Mapipa",
+                interval: "Muda wa Spawn (ms)",
+                speed: "Kasi ya Ndege",
+                slow: "polepole",
+                fast: "haraka",
+                ball_count: "Hesabu ya Mpira",
+                stop: "SIMAMA",
+                play: "CHEZA",
+                reset: "WEKA UPYA",
+                rows: "Safu",
+                balls_active: "Mipira Inayotumika",
+                spawn_ms: "Spawn (ms)"
+            },
+            lissajous: {
+                title: "LISSAJOUS · PARAMETRIC CURVES",
+                parameters: "VIGEZO",
+                view_2d: "Mviringo wa 2D",
+                view_3d: "Pendulum ya 3D",
+                amp_a: "Amplitude A",
+                amp_b: "Amplitude B",
+                freq_x: "ωₓ (Masafa ya Angular)",
+                freq_y: "ωᵧ (Marudio ya Angular)",
+                phase: "Awamu δ (Shahada)",
+                path_span: "Muda wa Njia (× Vipindi)",
+                curve_color: "Rangi ya Mviringo (Hue)",
+                simulation: "KUIGA",
+                stop: "SIMAMA",
+                reset: "WEKA UPYA",
+                view_3d_desc: "Mtazamo wa kati · xz-ndege · Kusimamishwa kunafanana na nafasi ya juu zaidi"
+            },
+            steigung: {
+                title: "KAZI LINEAR",
+                function: "KAZI",
+                slope_m: "Mteremko M",
+                intercept_n: "Y-INTERCEPT N",
+                zero_x0: "MZIZI X₀",
+                parameters: "VIGEZO",
+                slope_m_long: "Mteremko wa MISTARI M",
+                tri_pos: "NAFASI YA TRIANGLE (X)",
+                tri_width: "UPANA WA TRIANGLE (ΔX)",
+                reset_lab: "Weka Upya Maabara"
+            },
+            pyth: {
+                title: "PYTHAGORAS JUMLA",
+                construction: "UJENZI",
+                choose_mode: "CHAGUA MODE",
+                mode_quad: "Viwanja",
+                mode_semi: "Nusu duara",
+                mode_tri: "Pembetatu za Equilateral",
+                mode_star: "Crazy Star 🌟",
+                mode_pacman: "Hali ya Pac-Man 🕹️",
+                reset: "WEKA UPYA MAABARA",
+                analytics: "UCHAMBUZI: MAENEO",
+                area_sum: "AREA SUM [A₁ + A₂]",
+                large_area: "ENEO KUBWA [A₃]"
+            },
+            fermat: {
+                title: "FERMAT POINT MINIMIZATION",
+                dist_f: "UMBALI WA FERMAT (F)",
+                dist_p: "POINT DISTANCE (P)",
+                diff: "TOFAUTI (Δ)",
+                system: "FERMAT POINT SYSTEM",
+                show_tri: "ONYESHA PEMBE ZA UJENZI",
+                comp_p: "HOJA YA KULINGANISHA P"
+            },
+            clock: {
+                title: "ANGLE KATI YA MIKONO",
+                time_control: "KUDHIBITI MUDA",
+                angle_alpha: "Pembe α",
+                angle_beta: "Pembe β"
+            },
+            sum: {
+                title: "UTHIBITISHO WA SUM WA ANGLE YA NDANI",
+                coords: "INARATIBU",
+                parallel_point: "Sambamba kupitia hatua:",
+                proof: "UTHIBITISHO WA KIhisabati",
+                pivot_point: "Katika hatua ya egemeo:",
+                internal_angles: "Pembe za ndani katika pembetatu:"
+            },
+            puzzle: {
+                title: "ANGLE PUZZLE",
+                wedge_angle: "ANGLE YA KABARI (°)",
+                dist_a: "UMBALI A",
+                dist_b: "UMBALI B",
+                dist_c: "UMBALI C",
+                dist_d: "DISTANCE D",
+                given_blue: "IMEPEWA (BLUU)",
+                solution_red: "SULUHISHO (NYEKUNDU)",
+                steps_yellow: "HATUA ZA KATI (MANJANO)",
+                reset: "WEKA UPYA MAABARA"
+            },
+            fractal: {
+                title: "FRACTALS · MANDELBROT & JULIA",
+                mode: "HALI YA MAABABU",
+                mandelbrot: "MANDELBROT",
+                julia: "JULIA SET",
+                params: "VIGEZO VYA FRACTAL",
+                detail: "KIWANGO CHA MAELEZO",
+                zoom: "ZOOM FACTOR",
+                arithmetic: "HERI",
+                real: "SEHEMU HALISI (C_re)",
+                imaginary: "SEHEMU YA FIKIRI (C_im)",
+                iterations: "MAX. MAELEZO",
+                navigation: "USAFIRI",
+                flight_start: "ANZA NDEGE",
+                flight_stop: "ACHA NDEGE",
+                reset: "WEKA UPYA",
+                display: "TAZAMA",
+                plane_fractal: "FRACTAL",
+                plane_orbit: "OBITI",
+                orbit_help_mb: "Iteration z_{n+1}=z_n²+c kutoka z₀=0 na c katikati ya mwonekano wa fractal. Miduara |z|=1 na |z|=2 (radius ya kutoroka).",
+                orbit_help_jl: "Julia: fasta c kutoka sliders; obiti inaanzia z₀ = kituo cha kutazama fractal.",
+                orbit_drag_hint: "Buruta sehemu c (Mandelbrot; sawa na kituo cha kutazama) au z₀ (Julia). Vinginevyo panua/kuza ndege.",
+                orbit_grid: "Mistari ya gridi ya taifa",
+                orbit_legs_arrows: "Bajeti ya mguu (kiwango cha juu zaidi): 0 (↑/↓ mwonekano wa obiti pekee; Shift = hatua kubwa zaidi)",
+                orbit_legs_escape_trunc: "→ imetolewa: 0 kati ya 1 upeo (iliyosimamishwa kwa kutoroka |z|²>4)",
+                orbit_connector_lines: "Dots za kipeo kwenye obiti (miguu huchorwa kila wakati)",
+                orbit_hide_legs_while_scan: "Ficha miguu ya obiti wakati wa kuchanganua gridi ya taifa (polyline + dots za vertex)",
+                orbit_scan_hint: "Nafasi: changanua safu kwa safu juu→chini - nukta nzuri za chungwa ≈ obiti iliyo na mipaka; huacha chini. Nafasi wakati wa kuchanganua: ghairi na ufute.",
+                orbit_scan_running: "→ Kuchanganua (juu→chini)",
+                orbit_stable_points_label: "Pointi thabiti",
+                orbit_scan_julia_outside_mb_note: "C hii iko nje ya seti ya Mandelbrot: seti ya Julia iliyojaa hapa ni nyembamba sana (Cantor dust). Gridi ya pikseli karibu kamwe haitatua kwenye z₀ ya kuanzia ambayo mzunguko wake hukaa kwa mipaka - N≈0 inatarajiwa.\nJaribu hali ya Mandelbrot + changanua ili upate vibao vingi vya njano c.",
+                orbit_scan_julia_outside_mb_hud: "Kumbuka: Julia c nje ya M → vibonzo vichache (N≈0). Uchanganuzi wa Mandelbrot unaonyesha vitone vya manjano.",
+                orbit_hud_toggle: "⌘D / Ctrl+D: geuza HUD",
+                orbit_hud_stopwatch_idle: "Saa ya kupimia:\n-",
+                orbit_hud_stopwatch_running: "Saa ya kupimia:\n0",
+                orbit_hud_stopwatch_latched: "Saa ya kupimia:\n0\n(imesitishwa / imekamilika)"
+            },
+            stats: {
+                analytics: "UCHAMBUZI",
+                correlation: "Uwiano (r)",
+                slope: "Mteremko (m)",
+                y_intercept: "Y-INT (n)",
+                error_analysis: "UCHAMBUZI WA KOSA",
+                std_dev: "Mkengeuko wa Kawaida (SD)",
+                chaos_points: "MAMBO YA NAFASI",
+                points_near: "MAMBO YA KARIBU",
+                points_far: "HOJA ZAIDI",
+                mission_title: "MISSION: TAKWIMU LAB",
+                mission_desc: "Karibu kwenye kitengo cha uchambuzi wa Regression ya Linear. Chambua uwiano kati ya pointi za data kwa kuziweka na kuzisogeza kwenye mfumo wa kuratibu.",
+                admin_ctrl: "UDHIBITI WA KITAALAM (ADMIN PEKEE)",
+                admin_ctx: "Menyu ya Muktadha: Bofya kulia kwa gridi ya taifa, shoka, na telemetry.",
+                admin_keys: "Kibodi: Vitufe vya vishale (Juu/Chini) ili kuongeza mabaki.",
+                admin_manip: "Udanganyifu: Tumia vitufe vya utepe kwa ajili ya kuzalisha machafuko na mabadiliko ya mabaki."
+            },
+            parabola: {
+                eq_title: "EQUATION YA KAZI",
+                vertex_form: "UMBO LA VERTEX",
+                standard_form: "FOMU YA SANIFU",
+                roots: "MIZIZI (ZEROS)",
+                roots_none: "HAKUNA MIZIZI HALISI",
+                vertex_point: "VERTEX S",
+                parameter_a: "PARAMETER A",
+                stretch_a: "Kunyoosha a",
+                shift_d: "Shift d (x)",
+                shift_e: "Shift e (y)",
+                vertex_label: "VERTEX"
+            },
+            angle3d: {
+                fold: "KUFUNGA",
+                offset: "Mlalo Offset",
+                fold_btn: "FUNGA",
+                rotate_btn: "MZUNGUKO",
+                sum_title: "THEOREM YA ANGLE YA NDANI YA 3D",
+                sum_eq: "ANGLE SUM",
+                tetrahedron: "Kukunja kwa Tetrahedron"
+            },
+            transform: {
+                rotation: "MZUNGUKO",
+                scale: "KIPINDI",
+                mirror_axis: "mhimili wa KIOO",
+                mirror_point: "MIRROR POINT",
+                urbild: "PREIMAGE (ANZA)",
+                hl_lock: "KUFUNGA WASAIDIZI",
+                measurements: "VIPIMO",
+                congruent: "CONGRENT",
+                not_congruent: "HAIKUBALI",
+                transversal_short: "TRANSV.",
+                parallels_short: "SAMBAMBA."
+            },
+            polygon: {
+                sum_interior: "SUM YA ANGLE YA NDANI",
+                angle_protocol: "ANGLE PROTOCOL",
+                angle_label: "ANGLE 0",
+                vertices: "VITA",
+                vertex_short: "0V"
+            },
+            proof: {
+                target_area: "Eneo Lengwa [ABCD]",
+                triangle_sum: "Jumla ya Pembetatu",
+                tria_on: "KUWASHWA KWENYE",
+                tria_off: "TRIANGULATION ZIMZIMA",
+                reset_proof: "WEKA USHAHIDI UPYA",
+                area_cm2: "ENEO CM²",
+                sum_sigma: "SUM Σ",
+                tria_deactive: "TRIANGULATION AMEZIMWA",
+                out_of_bounds: "NJE YA MIPAKA",
+                collision: "MGOGORO UMEGUNDULIWA"
+            },
+            geometry: {
+                angle_analysis: "UCHAMBUZI WA ANGE",
+                lab_control: "UDHIBITI WA MAABARA",
+                supp_sum: "NYONGEZA SUM",
+                parallel_on: "Sambamba: WASHA",
+                parallel_off: "Sambamba: IMEZIMWA",
+                transversal: "UHAMISHO",
+                parallels: "SAANA",
+                step_width: "UPAANA WA HATUA: 0°"
+            },
+            logic: {
+                instruction_sum: "Ongeza nambari ili zilingane na jumla karibu na safu na chini ya safuwima.",
+                instruction_prod: "Zidisha nambari ili zilingane na jumla karibu na safu na chini ya safuwima.",
+                mission_status: "HALI YA UTUME",
+                level: "NGAZI",
+                moves: "HUHAMA",
+                time: "MUDA",
+                mode: "HALI YA HESABU",
+                protocol_select: "UCHAGUZI WA PROTOCOL",
+                protocol_restart: "ANZA UPYA PROTOKALI",
+                hint_request: "OMBA DONDOO",
+                hint_title: "DOKEZO PROTOCOL",
+                confirm: "THIBITISHA",
+                cancel: "GHAIRI",
+                solved: "PROTOKALI IMETATUMWA!",
+                next_protocol: "ITIFAKI INAYOFUATA"
+            },
+            units: {
+                ones: "wale",
+                tens: "makumi",
+                hundreds: "mamia",
+                thousands: "maelfu"
+            },
+            arithmetic: {
+                add: {
+                    title: "NYONGEZA YA MAANDISHI",
+                    ready: "Tayari kuongeza 0 na 1. Kuhesabu kutoka kulia kwenda kushoto.",
+                    focus: "Kuangalia 0.",
+                    calc: "Kuongeza 0 + 1 2 = 3.",
+                    carry: "Kuandika 0 na kubeba 1.",
+                    complete: "Hesabu imekamilika! Matokeo yake ni 0."
+                },
+                sub: {
+                    title: "KUONDOA KWA MAANDISHI",
+                    ready: "Tayari kwa kutoa: 0 - 1.",
+                    borrow: "Kukopa 10 kwa sababu 0 ni ndogo kuliko 1.",
+                    calc: "Kukokotoa (0 + 10) - 1 = 2.",
+                    complete: "Hesabu imekamilika! Matokeo yake ni 0."
+                },
+                mult: {
+                    title: "KUZIDISHA KWA MAANDISHI",
+                    ready: "Tayari kwa kuzidisha: 0 · 1.",
+                    digit_step: "Kuzidisha 0 kwa 1.",
+                    row_done: "Kuzidisha kwa 0 kumekamilika. Matokeo yote ya sehemu ya safu mlalo hii yanakokotolewa.",
+                    carry_init: "Kwa nafasi hii, tunachukua 0 kutoka kwa hesabu ya awali ya sehemu.",
+                    carry_add: "Kuongeza kubeba: 0 + 1 = 2.",
+                    complete: "Kuzidisha kumekamilika! Matokeo yake ni 0."
+                },
+                div: {
+                    title: "Mgawanyiko WA MAANDISHI",
+                    ready: "Tayari kwa mgawanyiko: 0 : 1.",
+                    collect: "Kuangalia: Je 0 inalingana na 1? Hapana, kwa hivyo tunachukua nambari inayofuata.",
+                    fit: "0 inalingana na 1 mara ngapi? Inafaa mara 2. 3 × 4 = 5.",
+                    bring_down: "Inaleta chini tarakimu inayofuata 0. Nambari mpya ni 1.",
+                    rem: "Salio 0 imebainishwa.",
+                    complete: "Mgawanyiko umekamilika! Matokeo yake ni 0."
+                }
+            },
+            coolsquares: {
+                title: "UTHIBITISHO WA MWISHO WA MRABA",
+                proportions: "Uwiano",
+                side_a: "Upande wa kati a",
+                show_labels: "Onyesha Lebo",
+                gap_x: "Pengo x",
+                result_y: "Matokeo y",
+                area_green: "Eneo la Kijani"
+            },
+            fibonacci: {
+                title: "FIBONACCI SPIRAL",
+                step: "Hatua",
+                spiral: "Miduara ya Robo (Spiral)",
+                squares: "Mipaka ya Mraba"
+            },
+            orbitals: {
+                title: "Obiti za Atomiki",
+                parameters: "VIGEZO",
+                orbital: "Orbital",
+                resolution: "Azimio (Gridi)",
+                specular: "Maalum (Kung'aa)",
+                opacity: "Uwazi",
+                prob_cloud: "Uwezekano wa Wingu",
+                prob_sq: "|Y|²",
+                prob_desc: "(Uso umezimwa)",
+                rotation: "KUZUNGUSHA KIOtomatiki (NAFASI)",
+                help_btn: "MSAADA WA KIBODI",
+                help_title: "Njia za mkato za Kibodi",
+                help_prev_next: "Iliyotangulia / inayofuata ya obiti",
+                help_res: "Azimio: ±1 kwa kila kitufe, na Shift ±10",
+                help_space_esc: "Kuzungusha kiotomatiki (Nafasi) · Weka upya (Esc)",
+                help_digits: "Azimio: Chagua haraka (nambari)",
+                help_toggle: "Geuza kidirisha cha usaidizi",
+                help_mouse: "Trackball: zungusha kushoto · gurudumu/kuza katikati · sufuria ya kulia",
+                orbital_suffix: "OBITALI"
+            },
+            coord: {
+                title: "Coord-Tester | ULTRA v5.3.8",
+                subtitle: "COORD-SYSTEM TEST",
+                controls: "UDHIBITI WA MRADI",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "Pembetatu ya Isosceles | ULTRA v5.3.8",
+                subtitle: "TRIANGE YA ISOSCELES",
+                invalid: "⚠️ HAKUNA PETU INAYOWEZEKANA",
+                perimeter: "PERIMETER",
+                base: "MSINGI",
+                leg: "MGUU",
+                base_length: "UREFU WA MSINGI",
+                note: "KUMBUKA: Pembetatu ipo kwa b <4.0 pekee."
+            },
+            triangulierer: {
+                title: "KUCHELEWA TRIANGULATION",
+                triangle: "TRIANGLE",
+                area: "ENEO",
+                sum: "SUM Σ",
+                controls: "VIDHIBITI",
+                multi_mode: "Hali ya Uteuzi Wengi",
+                delete_selection: "Futa Uteuzi",
+                target_area: "Eneo Lengwa",
+                sum_delta: "Jumla Δ"
+            },
+            langley: {
+                title: "LANGLEY ADVENTURE",
+                subtitle: "Jiometri na Trigonometry",
+                all_on_off: "ZOTE ZIMWA/ZIMWA",
+                phase1: "Awamu ya 1: Pembetatu ya kulia",
+                phase2: "Awamu ya 2: Pembetatu ya Kushoto",
+                phase3: "Awamu ya 3: Pembe za ndani",
+                phase4: "Awamu ya 4: Siri",
+                phase5_geo: "Awamu ya 5: Suluhisho la kijiometri",
+                phase5_tri: "Awamu ya 5: Suluhisho la Trigonometric",
+                step: "HATUA",
+                variant_classic: "1. Ya kawaida (BAC=70°, ABD=60°)",
+                variant_v2: "2. Lahaja (BAC=60°, ABD=50°)",
+                variant_v3: "3. Lahaja (BAC=50°, ABD=60°)",
+                briefing_title: "UFUPISHO WA UTUME",
+                briefing_text: "Changanua pembe nne ya Langley kupitia ujenzi wa pembe ya hatua kwa hatua."
+            },
+            butterfly: {
+                title: "MAABARA YA KIPEPEO",
+                animation: "INJINI YA UHUISHAJI",
+                speed: "Kasi",
+                hue: "Hue ya msingi",
+                pause: "SIMAMA",
+                play: "CHEZA",
+                glow: "ANGAZA",
+                reset: "WEKA UPYA",
+                params: "VIGEZO VILIVYO",
+                exp_amp: "Muda wa Amp",
+                cos_amp: "Cos Amp",
+                cos_freq: "Cos Freq",
+                sin_amp: "Amp ya sine",
+                sin_div: "Ugavi wa sine",
+                ctx_reset: "Weka upya Uhuishaji",
+                ctx_glow: "Athari ya Mwangaza IMEWASHA/ZIMWA"
+            },
+            heart3d: {
+                title: "USO WA MOYO WA 3D | TAUBIN EQUATION",
+                sdf_control: "UDHIBITI WA SDF",
+                stretch: "Kipengele cha Kunyoosha (A)",
+                modulation: "Urekebishaji wa uso (B)"
+            },
+            litchi3d: {
+                title: "3D LITCHI | JIOMETRI YA UTARATIBU",
+                ripeness: "Ukomavu wa Matunda",
+                bumps: "Kiwango cha Mwiba",
+                shape: "Kipengele cha Umbo (Y)"
+            }
         }
     },
 
@@ -3161,7 +3713,7 @@ pt: {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-        if (['de', 'en', 'es', 'fr', 'it', 'pt'].includes(lang.toLowerCase())) {
+        if (['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'].includes(lang.toLowerCase())) {
             CyberI18n.current = lang.toLowerCase();
         }
     } catch (e) {

@@ -19,7 +19,7 @@ laboratori
 
 #
 120pt
-6 lingue
+7 lingue
 20pt
 %purplepulsating and counting
 40pt
@@ -29,6 +29,7 @@ spagnolo
 francese
 italiano
 portoghese
+swahili
 
 #
 // vengono mostrate tutte le schermate
