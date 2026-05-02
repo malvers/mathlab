@@ -289,6 +289,10 @@
             z-index: 100;
             overflow: visible;
             --cw-anim-sec: 4;
+            --cw-ss-crossfade: 1.25s;
+            /* Undurchsichtige Bühne: sonst scheint bei Opacity-Animationen und zwischen
+               Fullscreen-Screens kurz das HG-Video durch (transparentes Panel). */
+            background-color: #050b18;
         }
         #catching-words-panel .cw-play {
             position: absolute;
@@ -300,7 +304,11 @@
         }
         #catching-words-panel.cw-drag-over {
             box-shadow: inset 0 0 0 3px rgba(0, 210, 255, 0.45);
-            background: rgba(0, 210, 255, 0.04);
+            background-color: rgba(5, 11, 24, 0.96);
+            background-image: linear-gradient(
+                rgba(0, 210, 255, 0.06),
+                rgba(0, 210, 255, 0.06)
+            );
         }
         /* Mehrzeilig: oben verankert (kein Aufwärts-Sprung). Ein Schlagwort: vertikal zentriert. */
         #catching-words-panel .cw-stack {
@@ -551,7 +559,7 @@
             white-space: nowrap;
             opacity: 0;
             transform: translateY(18px) scale(0.94);
-            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.72s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
             transition:
                 border-color 0.25s ease,
                 box-shadow 0.25s ease,
@@ -568,6 +576,8 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.18);
         }
 
+        /* Medien: erst laden, dann ein eineinziges cw-portal-in auf dem Wrapper (wie früher optisch,
+           aber ohne leeren unscharfen Rahmen und ohne Parent×Child-Opacity). */
         #catching-words-panel .cw-media-wrap {
             position: relative;
             flex: 0 0 auto;
@@ -584,10 +594,27 @@
                 0 0 56px rgba(157, 80, 187, 0.18),
                 inset 0 0 0 1px rgba(255, 255, 255, 0.12);
             opacity: 0;
-            transform: translateY(18px) scale(0.96);
-            filter: blur(6px);
-            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.42s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(18px) scale(0.94);
+            filter: blur(8px);
+            animation: none;
             z-index: 1;
+        }
+        #catching-words-panel .cw-media-wrap.cw-media-show {
+            animation: cw-portal-in calc(var(--cw-anim-sec) * 0.72s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        #catching-words-panel .cw-media-wrap.cw-media-fallback-visible {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+            animation: none !important;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #catching-words-panel .cw-media-wrap.cw-media-show {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+                filter: none !important;
+            }
         }
         #catching-words-panel .cw-stack.cw-stack-fullscreen-mode {
             transform: none !important;
@@ -606,15 +633,30 @@
             border-radius: 0;
             box-shadow: none;
             filter: none;
-            opacity: 1;
+            opacity: 0;
+            visibility: visible;
             animation: none;
             transform: none;
+            transition: opacity var(--cw-ss-crossfade, 1.25s) cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
         }
-        /* Schnelle Screenshot-Reihe: keine Überblendung — sonst wirkt „Flackern“ (Altbild durchscheint). */
+        #catching-words-panel .cw-media-wrap.cw-media-fast.cw-media-fast-on {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* Nach Ausblendung: aus dem Stack „entsorgen“, kein weiteres Repaint */
         #catching-words-panel .cw-media-wrap.cw-media-fast.cw-media-fast-past {
             visibility: hidden;
             pointer-events: none;
+            opacity: 0;
+            transition: none;
         }
+        @media (prefers-reduced-motion: reduce) {
+            #catching-words-panel .cw-media-wrap.cw-media-fast {
+                transition: none !important;
+            }
+        }
+        /* Schnelle Screenshot-Reihe: Crossfade (opacity) zwischen aufeinanderfolgenden Vollbildern */
         #catching-words-panel .cw-media-wrap.cw-media-fast .cw-media-img {
             width: 100vw;
             height: 100vh;
@@ -635,11 +677,6 @@
             vertical-align: middle;
             background: transparent;
             object-fit: contain;
-            opacity: 0;
-            transition: opacity 0.75s ease-out;
-        }
-        #catching-words-panel .cw-media-video.cw-media-video-visible,
-        #catching-words-panel .cw-media-img.cw-media-img-visible {
             opacity: 1;
         }
         #catching-words-panel .cw-coverr-fallback-msg {
@@ -1725,15 +1762,50 @@
                 return;
             }
 
-                if (entry.kind === 'media-image') {
+            if (entry.kind === 'media-image') {
                 const wrap = document.createElement('div');
                 wrap.className = 'cw-media-wrap';
+                function buryOtherFastPastInstant() {
+                    playStack.querySelectorAll('.cw-media-wrap.cw-media-fast').forEach((w) => {
+                        if (w !== wrap && !w.classList.contains('cw-media-fast-past')) {
+                            w.classList.remove('cw-media-fast-on');
+                            w.classList.add('cw-media-fast-past');
+                        }
+                    });
+                }
+                function crossfadeFastScreenshots() {
+                    const fadeMs = 1550;
+                    playStack.querySelectorAll('.cw-media-wrap.cw-media-fast').forEach((w) => {
+                        if (w === wrap || w.classList.contains('cw-media-fast-past')) return;
+                        if (!w.classList.contains('cw-media-fast-on')) {
+                            w.classList.add('cw-media-fast-past');
+                            return;
+                        }
+                        w.classList.remove('cw-media-fast-on');
+                        const bury = () => {
+                            w.classList.add('cw-media-fast-past');
+                        };
+                        const onTe = (ev) => {
+                            if (ev.target !== w || ev.propertyName !== 'opacity') return;
+                            w.removeEventListener('transitionend', onTe);
+                            clearTimeout(tid);
+                            bury();
+                        };
+                        w.addEventListener('transitionend', onTe);
+                        const tid = setTimeout(() => {
+                            w.removeEventListener('transitionend', onTe);
+                            bury();
+                        }, fadeMs);
+                    });
+                    requestAnimationFrame(() => {
+                        wrap.classList.add('cw-media-fast-on');
+                    });
+                }
                 if (entry.fast) {
                     wrap.classList.add('cw-media-fast');
                     playStack.classList.add('cw-stack-fullscreen-mode');
-                    playStack.querySelectorAll('.cw-media-wrap.cw-media-fast').forEach((w) => {
-                        w.classList.add('cw-media-fast-past');
-                    });
+                    /* Früher: alle Past sofort visibility:hidden → Lücke bis das neue Bild da ist
+                       (HG-Video / Schwarz-Flash). Alte Screens bleiben bis load sichtbar (darunter). */
                 }
                 wrap.style.zIndex = String(cwSpawnRoundIndex);
                 let settled = false;
@@ -1762,18 +1834,41 @@
                 img.className = 'cw-media-img';
                 img.alt = '';
                 img.loading = entry.fast ? 'eager' : 'lazy';
-                img.decoding = 'async';
+                img.decoding = entry.fast ? 'async' : 'sync';
                 img.addEventListener('load', () => {
-                    img.classList.add('cw-media-img-visible');
                     if (entry.fast) {
-                        // For fast screenshots, wait until the transition finishes before marking settled
-                        setTimeout(markImgSettled, 800);
-                    } else {
-                        markImgSettled();
+                        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                            buryOtherFastPastInstant();
+                            wrap.classList.add('cw-media-fast-on');
+                        } else {
+                            crossfadeFastScreenshots();
+                        }
+                        setTimeout(markImgSettled, 1650);
+                        return;
                     }
+                    requestAnimationFrame(() => {
+                        wrap.classList.add('cw-media-show');
+                        let done = false;
+                        const finish = () => {
+                            if (done) return;
+                            done = true;
+                            markImgSettled();
+                        };
+                        const onAnim = (ev) => {
+                            if (ev.target !== wrap) return;
+                            if (!ev.animationName || ev.animationName.indexOf('cw-portal-in') === -1)
+                                return;
+                            wrap.removeEventListener('animationend', onAnim);
+                            finish();
+                        };
+                        wrap.addEventListener('animationend', onAnim);
+                        setTimeout(finish, 4000);
+                    });
                 });
                 img.addEventListener('error', () => {
+                    if (entry.fast) buryOtherFastPastInstant();
                     wrap.innerHTML = '';
+                    wrap.classList.add('cw-media-fallback-visible');
                     if (rawSrc) {
                         const a = document.createElement('a');
                         a.className = 'cw-media-fallback-link';
@@ -1788,7 +1883,10 @@
                 wrap.appendChild(img);
                 img.src = rawSrc;
                 setTimeout(() => {
-                    if (!settled) markImgSettled();
+                    if (!settled) {
+                        if (entry.fast) buryOtherFastPastInstant();
+                        markImgSettled();
+                    }
                 }, 12000);
                 return;
             }
@@ -1851,6 +1949,7 @@
 
                 function attachCoverrFallbackExternal(pageUrl) {
                     wrap.innerHTML = '';
+                    wrap.classList.add('cw-media-fallback-visible');
                     const p = document.createElement('p');
                     p.className = 'cw-coverr-fallback-msg';
                     p.textContent =
@@ -1876,12 +1975,32 @@
                     v.loop = true;
                     v.autoplay = true;
                     v.preload = 'metadata';
+                    let revealOnce = false;
                     function revealAndSettle() {
-                        v.classList.add('cw-media-video-visible');
-                        markMediaSettled();
+                        if (revealOnce) return;
+                        revealOnce = true;
+                        requestAnimationFrame(() => {
+                            wrap.classList.add('cw-media-show');
+                            let done = false;
+                            const finish = () => {
+                                if (done) return;
+                                done = true;
+                                markMediaSettled();
+                            };
+                            const onAnim = (ev) => {
+                                if (ev.target !== wrap) return;
+                                if (!ev.animationName || ev.animationName.indexOf('cw-portal-in') === -1)
+                                    return;
+                                wrap.removeEventListener('animationend', onAnim);
+                                finish();
+                            };
+                            wrap.addEventListener('animationend', onAnim);
+                            setTimeout(finish, 4000);
+                        });
                     }
                     v.addEventListener('error', () => {
                         wrap.innerHTML = '';
+                        wrap.classList.add('cw-media-fallback-visible');
                         const a = document.createElement('a');
                         a.className = 'cw-media-fallback-link';
                         a.href = rawSrc;

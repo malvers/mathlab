@@ -283,11 +283,9 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c aus Real-/Imaginär-Schiebern; Orbit startet bei z₀ = Mittelpunkt der Fraktal-Ansicht.",
                 orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
                 orbit_grid: "Gitterlinien",
+                orbit_leg_polyline: "Orbit: Schenkel, Zwischenpunkt-Kreise + Punkt c",
                 orbit_legs_arrows: "Schenkel-Budget (max.): {n} (↑/↓ nur Orbit-Ansicht; Shift = größere Schritte)",
                 orbit_legs_escape_trunc: "→ gezeichnet: {shown} von max. {budget} (Abbruch bei Flucht |z|²>4)",
-                orbit_connector_lines: "Zwischenpunkt-Kreise auf dem Orbit (Schenkel immer sichtbar)",
-                orbit_hide_legs_while_scan:
-                    "Beim Raster-Scan Orbit-Schenkel ausblenden (Polylinie + Zwischenpunkt-Kreise)",
                 orbit_scan_hint: "Leertaste: zeilenweise von oben nach unten — kleine orangene Punkte ≈ Orbit bleibt begrenzt; unten automatisches Ende. Nochmal Leertaste während Scan: abbrechen und löschen.",
                 orbit_scan_running: "→ Scan läuft (oben → unten)",
                 orbit_stable_points_label: "Stabile Punkte",
@@ -806,10 +804,9 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: fixed c from sliders; orbit starts at z₀ = fractal view center.",
                 orbit_drag_hint: "Drag point c (Mandelbrot; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
                 orbit_grid: "Grid lines",
+                orbit_leg_polyline: "Orbit: segments, vertex dots + point c",
                 orbit_legs_arrows: "Leg budget (max.): {n} (↑/↓ orbit view only; Shift = bigger steps)",
                 orbit_legs_escape_trunc: "→ drawn: {shown} of {budget} max (stopped at escape |z|²>4)",
-                orbit_connector_lines: "Vertex dots along orbit (legs always drawn)",
-                orbit_hide_legs_while_scan: "Hide orbit legs during grid scan (polyline + vertex dots)",
                 orbit_scan_hint: "Space: scan row by row top→bottom — fine orange dots ≈ bounded orbit; stops at bottom. Space during scan: cancel & clear.",
                 orbit_scan_running: "→ Scanning (top→bottom)",
                 orbit_stable_points_label: "Stable points",
@@ -1328,10 +1325,9 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c con controles; órbita desde z₀ = centro de la vista fractal.",
                 orbit_drag_hint: "Arrastra c (Mandelbrot, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
                 orbit_grid: "Cuadrícula",
+                orbit_leg_polyline: "Órbita: tramos, puntos intermedios + punto c",
                 orbit_legs_arrows: "Tramos de órbita (máx.): {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
                 orbit_legs_escape_trunc: "→ dibujados: {shown} de {budget} máx. (escape |z|²>4)",
-                orbit_connector_lines: "Puntos en la órbita (los tramos siempre visibles)",
-                orbit_hide_legs_while_scan: "Ocultar los segmentos de la órbita durante el barrido",
                 orbit_scan_hint: "Espacio: filas de arriba abajo — puntos finos naranja ≈ órbita acotada; termina abajo. Espacio durante: cancelar y borrar.",
                 orbit_scan_running: "→ Escaneando (arriba→abajo)",
                 orbit_stable_points_label: "Puntos estables",
@@ -1850,10 +1846,9 @@ const CyberI18n = {
                 orbit_help_jl: "Julia : c depuis les curseurs ; orbite depuis z₀ = centre de la vue fractale.",
                 orbit_drag_hint: "Glisser le point c (Mandelbrot, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
                 orbit_grid: "Quadrillage",
+                orbit_leg_polyline: "Orbite : segments, pastilles + point c",
                 orbit_legs_arrows: "Segments d’orbite (max.) : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
                 orbit_legs_escape_trunc: "→ tracés : {shown}/{budget} max (arrêt si évasion |z|²>4)",
-                orbit_connector_lines: "Pastilles sur l’orbite (segments toujours visibles)",
-                orbit_hide_legs_while_scan: "Masquer les segments d’orbite pendant le balayage",
                 orbit_scan_hint: "Espace : lignes du haut vers le bas — petits points orange ≈ orbite bornée ; fin en bas. Espace pendant : annuler et effacer.",
                 orbit_scan_running: "→ Scan (haut→bas)",
                 orbit_stable_points_label: "Points stables",
@@ -2372,10 +2367,9 @@ const CyberI18n = {
                 orbit_help_jl: "Julia: c dagli slider; orbita da z₀ = centro della vista frattale.",
                 orbit_drag_hint: "Trascina c (Mandelbrot, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
                 orbit_grid: "Griglia",
+                orbit_leg_polyline: "Orbita: segmenti, puntini intermedi + punto c",
                 orbit_legs_arrows: "Segmenti orbita (max.): {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
                 orbit_legs_escape_trunc: "→ disegnati: {shown}/{budget} max (stop a fuga |z|²>4)",
-                orbit_connector_lines: "Punti sull’orbita (segmenti sempre visibili)",
-                orbit_hide_legs_while_scan: "Nascondere gli segmenti dell’orbita durante la scansione",
                 orbit_scan_hint: "Barra spaziale: righe dall’alto in basso — puntini arancioni ≈ orbita limitata; si ferma in basso. Spazio durante: annulla e cancella.",
                 orbit_scan_running: "→ Scansione (alto→basso)",
                 orbit_stable_points_label: "Punti stabili",
@@ -2894,10 +2888,9 @@ pt: {
                 orbit_help_jl: "Julia: c nos sliders; órbita a partir de z₀ = centro da vista fractal.",
                 orbit_drag_hint: "Arraste c (Mandelbrot, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
                 orbit_grid: "Grade",
+                orbit_leg_polyline: "Órbita: segmentos, pontos intermediários + ponto c",
                 orbit_legs_arrows: "Segmentos da órbita (máx.): {n} (↑/↓ só vista órbita; Shift passos maiores)",
                 orbit_legs_escape_trunc: "→ desenhados: {shown}/{budget} máx. (escape |z|²>4)",
-                orbit_connector_lines: "Pontos na órbita (segmentos sempre visíveis)",
-                orbit_hide_legs_while_scan: "Ocultar pernas da órbita durante a varredura",
                 orbit_scan_hint: "Espaço: linhas de cima para baixo — pontos finos laranja ≈ órbita limitada; para em baixo. Espaço durante: cancelar e limpar.",
                 orbit_scan_running: "→ Varrendo (topo→base)",
                 orbit_stable_points_label: "Pontos estáveis",
@@ -3417,10 +3410,9 @@ pt: {
                 orbit_help_jl: "Julia: fasta c kutoka sliders; obiti inaanzia z₀ = kituo cha kutazama fractal.",
                 orbit_drag_hint: "Buruta sehemu c (Mandelbrot; sawa na kituo cha kutazama) au z₀ (Julia). Vinginevyo panua/kuza ndege.",
                 orbit_grid: "Mistari ya gridi ya taifa",
+                orbit_leg_polyline: "Obiti: mistari, nukta za kati + pointi c",
                 orbit_legs_arrows: "Bajeti ya mguu (kiwango cha juu zaidi): 0 (↑/↓ mwonekano wa obiti pekee; Shift = hatua kubwa zaidi)",
                 orbit_legs_escape_trunc: "→ imetolewa: 0 kati ya 1 upeo (iliyosimamishwa kwa kutoroka |z|²>4)",
-                orbit_connector_lines: "Dots za kipeo kwenye obiti (miguu huchorwa kila wakati)",
-                orbit_hide_legs_while_scan: "Ficha miguu ya obiti wakati wa kuchanganua gridi ya taifa (polyline + dots za vertex)",
                 orbit_scan_hint: "Nafasi: changanua safu kwa safu juu→chini - nukta nzuri za chungwa ≈ obiti iliyo na mipaka; huacha chini. Nafasi wakati wa kuchanganua: ghairi na ufute.",
                 orbit_scan_running: "→ Kuchanganua (juu→chini)",
                 orbit_stable_points_label: "Pointi thabiti",
@@ -3684,6 +3676,43 @@ pt: {
         }
     },
 
+    /** URL ?lang= → localStorage → Browser-Sprache → de; schreibt cyber-lab-lang (Best-Effort). */
+    resolveLanguageFromEnvironment: function () {
+        const supported = ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'];
+        const norm = function (s) {
+            if (s == null || s === '') return '';
+            const t = String(s).trim().replace(/_/g, '-').toLowerCase();
+            return t.length >= 2 ? t.slice(0, 2) : '';
+        };
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            let pick = norm(urlParams.get('lang'));
+            if (!supported.includes(pick)) {
+                pick = norm(localStorage.getItem('cyber-lab-lang'));
+            }
+            if (!supported.includes(pick)) {
+                const list =
+                    navigator.languages && navigator.languages.length
+                        ? navigator.languages
+                        : [navigator.language || ''];
+                for (let i = 0; i < list.length; i++) {
+                    const two = norm(list[i]);
+                    if (supported.includes(two)) {
+                        pick = two;
+                        break;
+                    }
+                }
+            }
+            if (!supported.includes(pick)) pick = 'de';
+            this.current = pick;
+            try {
+                localStorage.setItem('cyber-lab-lang', pick);
+            } catch (e) {}
+        } catch (e) {
+            console.warn('Language resolve failed:', e);
+        }
+    },
+
     // Helper to get a translation
     get: function (key, replacements = {}) {
         const parts = key.split('.');
@@ -3705,17 +3734,19 @@ pt: {
         }
 
         return result;
+    },
+
+    /** Floating canvas masthead (coach line): always German, independent of UI language */
+    getBrandMastheadTitle: function () {
+        const ui = this.translations && this.translations.de && this.translations.de.ui;
+        return (ui && ui.coach_title) || "Doc Alvers Mathe-Labor";
     }
 };
 
-// Auto-detect language from URL or localStorage
-(function() {
+// Auto-detect language from URL, localStorage, or browser
+(function () {
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-        if (['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'].includes(lang.toLowerCase())) {
-            CyberI18n.current = lang.toLowerCase();
-        }
+        CyberI18n.resolveLanguageFromEnvironment();
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }

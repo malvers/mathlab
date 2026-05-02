@@ -228,6 +228,16 @@ body {
     overflow: visible !important; 
 } 
 
+/* WebKit: slider-runnable-track often fails to composite over backdrop-filter; isolate promotes a stable paint layer */
+#side-panel input[type="range"] {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+#side-panel input[type="range"]::-webkit-slider-runnable-track {
+    -webkit-transform: translateZ(0);
+}
+
 .cyber-dropdown { 
     width: 100%; 
     margin-bottom: 5px; 

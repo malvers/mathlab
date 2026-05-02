@@ -18,17 +18,6 @@
         }
 
         (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-            if (['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'].includes(lang.toLowerCase())) {
-                const resolved = lang.toLowerCase();
-                CyberI18n.current = resolved;
-                try {
-                    localStorage.setItem('cyber-lab-lang', resolved);
-                } catch (e) {}
-                console.log("Language set to:", CyberI18n.current);
-            }
-
             window.addEventListener('DOMContentLoaded', () => {
                 const currentLang = CyberI18n.current;
                 const btn = document.querySelector(`.lang-flag[onclick="setLanguage('${currentLang}')"]`);
@@ -36,6 +25,10 @@
                 const about = document.getElementById('btn-about');
                 if (about) {
                     about.href = 'intro.html?lang=' + encodeURIComponent(currentLang || 'de');
+                }
+                const toolsHub = document.getElementById('portal-link-tools');
+                if (toolsHub) {
+                    toolsHub.href = 'tools.html?lang=' + encodeURIComponent(currentLang || 'de');
                 }
             });
         })();
@@ -1607,7 +1600,7 @@
                 <h3 id="txt-highlights">Highlights</h3>
             </a>
             <!-- Master-Link zur Mission Control -->
-            <a href="tools.html" class="card grade-card category-card active">
+            <a href="tools.html" id="portal-link-tools" class="card grade-card category-card active">
                 <div class="card-icon">🚀</div>
                 <h3 id="txt-all-tools">Alle Werkzeuge</h3>
             </a>
