@@ -8,7 +8,7 @@ DOC ALVERS
 MATHE-
 LABORE
 16pt
-par le Dr Michael R. Alvers
+le Dr Michael R. Alvers
 
 #
 200pt

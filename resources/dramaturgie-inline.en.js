@@ -8,7 +8,7 @@ DOC ALVERS
 MATH
 LABS
 16pt
-by Dr. Michael R. Alvers
+Dr. Michael R. Alvers
 
 #
 200pt

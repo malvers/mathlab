@@ -14,24 +14,32 @@ class CyberUI {
             message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
         });
 
-        // Robust injection: retry until mini-rail is found
+        // Mini-Rail (Labs): Sprache + Kontakt + Coffee. Ohne Rail aber mit #sidebar-header (Tools, …): Sprache in der Cyber-Nav-Zeile.
         const tryInject = () => {
             const rail = document.getElementById('mini-rail');
-            if (!rail) {
+            if (rail) {
+                if (!CyberUI.injectMiniRailLangButton()) {
+                    setTimeout(tryInject, 100);
+                    return;
+                }
+                CyberUI.applyMiniRailMenuLabel();
+                CyberUI.injectContactHeartButton();
+                if (CyberUI.injectCoffeeButton()) {
+                    console.log("☕ Cyber-Coffee injected.");
+                } else {
+                    setTimeout(tryInject, 100);
+                }
+                return;
+            }
+
+            const sidebarHeader = document.getElementById('sidebar-header');
+            if (sidebarHeader) {
+                if (CyberUI.injectIntegratedCyberNavLangButton()) return;
                 setTimeout(tryInject, 100);
                 return;
             }
-            if (!CyberUI.injectMiniRailLangButton()) {
-                setTimeout(tryInject, 100);
-                return;
-            }
-            CyberUI.applyMiniRailMenuLabel();
-            CyberUI.injectContactHeartButton();
-            if (CyberUI.injectCoffeeButton()) {
-                console.log("☕ Cyber-Coffee injected.");
-            } else {
-                setTimeout(tryInject, 100);
-            }
+
+            /* z. B. index.html: weder Rail noch Sidebar-Nav — nichts zu injizieren */
         };
         tryInject();
 
@@ -54,7 +62,7 @@ class CyberUI {
         sw: '🇰🇪',
     };
 
-    /** Mini-Rail: Flagge der aktiven Sprache; Klick → nächste Sprache, Reload mit ?lang= */
+    /** Mini-Rail: eine Flagge; Klick → nächste Sprache (?lang= + Reload). */
     static injectMiniRailLangButton() {
         const miniRail = document.getElementById('mini-rail');
         if (!miniRail) return false;
@@ -83,7 +91,38 @@ class CyberUI {
             miniRail.appendChild(btn);
         }
 
-        CyberUI.syncMiniRailLangButton();
+        CyberUI.syncCyberLangDisplayButtons();
+        return true;
+    }
+
+    /**
+     * #sidebar-header .cyber-nav (z. B. tools.html): gleicher Sprach-Toggle wie Mini-Rail.
+     */
+    static injectIntegratedCyberNavLangButton() {
+        const nav = document.querySelector('#sidebar-header .cyber-nav');
+        if (!nav || nav.querySelector('.nav-btn-lang-display')) return !!nav;
+        if (typeof CyberI18n === 'undefined' || typeof CyberI18n.current !== 'string') return false;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nav-btn nav-btn-lang-display';
+        btn.onclick = () => CyberUI.cycleCyberLabLang();
+
+        const span = document.createElement('span');
+        span.className = 'rail-lang-flag';
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = '🌐';
+        btn.appendChild(span);
+
+        const homeBtn = nav.querySelector('a.nav-btn[href="index.html"], a.nav-btn[href*="index.html"]');
+        const anchor = homeBtn || nav.querySelector('.nav-btn');
+        if (anchor && anchor.parentNode === nav) {
+            nav.insertBefore(btn, anchor.nextSibling);
+        } else {
+            nav.appendChild(btn);
+        }
+
+        CyberUI.syncCyberLangDisplayButtons();
         return true;
     }
 
@@ -102,17 +141,20 @@ class CyberUI {
         window.location.href = u.toString();
     }
 
-    static syncMiniRailLangButton() {
-        const btn = document.getElementById('rail-lang-display-btn');
-        if (!btn || typeof CyberI18n === 'undefined') return;
+    static syncCyberLangDisplayButtons() {
+        if (typeof CyberI18n === 'undefined') return;
         const code = CyberI18n.current;
         const flag = CyberUI.CYBER_LANG_FLAGS[code] || '🌐';
-        const span = btn.querySelector('.rail-lang-flag');
-        if (span) span.textContent = flag;
         const hint = CyberI18n.get('ui.mini_rail_lang_title');
         const titleBase = hint && hint !== 'ui.mini_rail_lang_title' ? hint : 'Language';
-        btn.title = `${titleBase} · ${code.toUpperCase()}`;
-        btn.setAttribute('aria-label', `${titleBase} (${code})`);
+
+        document.querySelectorAll('.nav-btn-lang-display').forEach((btn) => {
+            const span = btn.querySelector('.rail-lang-flag');
+            if (span) span.textContent = flag;
+            btn.title = `${titleBase} · ${code.toUpperCase()}`;
+            btn.setAttribute('aria-label', `${titleBase} (${code})`);
+        });
+
         document.documentElement.lang = code === 'sw' ? 'sw' : code;
     }
 

@@ -8,7 +8,7 @@ DOC ALVERS
 MAABARA
 YA HISABATI
 16pt
-na Dk. Michael R. Alvers
+Dk. Michael R. Alvers
 
 #
 200pt
