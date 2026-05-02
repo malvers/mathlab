@@ -131,10 +131,6 @@
             min-width: 0;
         }
 
-        #side-panel .fraktal-readouts .stats-card:last-child:nth-child(3) {
-            grid-column: 1 / -1;
-        }
-
         #side-panel .fraktal-readouts .stats-val {
             font-size: 0.72rem;
             line-height: 1.25;
@@ -162,22 +158,53 @@
             margin-bottom: 2px !important;
         }
 
-        /* KaTeX-Overlay: Position über dem Canvas */
+        /* Box 1 (KaTeX |z²|/N): links; Box 2 (stabiles c): Plot-Mitte — gemeinsame Zeile, volle Breite */
         .mb-fractal-formula-overlay {
             position: absolute;
-            left: 14px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: none;
+            transform: none;
             top: var(--cyber-nav-band-top, 14px);
             z-index: 6;
             pointer-events: none;
-            max-width: min(92vw, 920px);
             box-sizing: border-box;
         }
 
         .mb-fractal-formula-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: stretch;
-            flex-wrap: wrap;
+            width: 100%;
+            min-height: 52px;
             gap: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Gleiche Zeilenhöhe (stretch); KaTeX-Box links in linker Spalte */
+        .mb-fractal-formula-row > .mb-fractal-formula-box:not(.mb-fractal-stable-panel) {
+            grid-column: 1;
+            justify-self: start;
+            align-self: stretch;
+            margin-left: clamp(12px, 2.5vw, 28px);
+            display: flex;
+            align-items: center;
+        }
+
+        /* Stabiles c: mittige Spalte (zentriert im Plot) */
+        .mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel {
+            grid-column: 2;
+            justify-self: center;
+            align-self: stretch;
+            transform: none;
+            display: flex;
+            align-items: center;
+        }
+
+        /* display:flex oben gewinnt sonst gegen [hidden] → leere Box mit Rand blieb sichtbar */
+        .mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel[hidden] {
+            display: none !important;
         }
 
         .mb-fractal-stable-panel .mb-fractal-stable-inner {
@@ -192,14 +219,26 @@
             box-sizing: border-box;
         }
 
-        .mb-fractal-stable-panel .cyber-number-widget {
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
+        .mb-fractal-formula-row #mb-fractal-stable-panel .mb-fractal-stable-inner {
+            height: 100%;
+            min-height: 0;
+        }
+
+        /* Overrides globales cyber-lab-overrides.css (justify-content:flex-start !important) */
+        .mb-fractal-stable-panel #mb-fractal-stable-widget.cyber-number-widget {
+            justify-content: center !important;
+            width: fit-content !important;
             max-width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            width: fit-content;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+        }
+
+        /* cyber-lab-overrides: Ziffern sonst cyan !important — festes Gold nur fürs obere Panel */
+        .mb-fractal-stable-panel #mb-fractal-stable-widget .cyber-digit-box {
+            color: #f2bb44 !important;
+            text-shadow: 0 0 12px rgba(242, 187, 68, 0.48) !important;
         }
 
         #mb-fractal-stable-widget {
@@ -216,6 +255,19 @@
             text-shadow: 0 0 12px rgba(0, 210, 255, 0.38);
             line-height: 1.2;
             max-width: 11rem;
+        }
+
+        .mb-fractal-stable-note {
+            font-family: Orbitron, system-ui, sans-serif;
+            font-size: 0.47rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            line-height: 1.35;
+            color: rgba(186, 214, 235, 0.92);
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.22);
+            max-width: min(17rem, 86vw);
+            margin-top: 2px;
+            white-space: pre-line;
         }
         /* KaTeX: gut lesbar; min. wie Button-Höhe, Kasten wächst mit Formel */
         .mb-fractal-formula-box {
@@ -236,6 +288,92 @@
 
         #canvas-container .mb-fractal-formula-box .katex-display {
             margin: 0 !important;
+        }
+
+        /* Orbit |z²|/N: kompakter Kasten; N fest bei ~54 % Breite (nah an |z²|, weniger „Leerraum“) */
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
+            box-sizing: border-box;
+            width: clamp(260px, 32vw, 340px);
+            min-width: clamp(260px, 32vw, 340px);
+            max-width: clamp(260px, 32vw, 340px);
+            min-height: 52px;
+            padding: 8px 12px;
+            flex-shrink: 0;
+            justify-content: flex-start;
+            align-items: center;
+            contain: layout style;
+        }
+
+        /* FRACTAL: kompakte Box um die Hauptzeile (kein extraleerer Platz wie bei Orbit-|z²|/N-Kachel) */
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner {
+            box-sizing: border-box;
+            width: fit-content;
+            max-width: min(560px, 92vw);
+            min-width: 0;
+            min-height: 52px;
+            padding: 8px 14px;
+            flex-shrink: 0;
+            justify-content: flex-start;
+            align-items: center;
+            contain: layout style;
+        }
+
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics #mb-fractal-formula-tex,
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            min-height: 2.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Orbit/Scan: |z²| links; N bei fester Horizontalposition (~Mitte zweiter Teil der Box) */
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+            #mb-fractal-formula-tex.mb-fractal-mz-split {
+            position: relative;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-z2 {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-n {
+            position: absolute;
+            left: 54%;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* FRACTAL-Hauptzeile linksbündig, Breite folgt KaTeX */
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex:not(.mb-fractal-mz-split) {
+            justify-content: flex-start;
+            text-align: left;
+            width: auto;
+            min-width: 0;
+        }
+
+        #canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics .katex-display,
+        #canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner .katex-display {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        #canvas-container
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner
+            #mb-fractal-formula-tex:not(.mb-fractal-mz-split)
+            .katex-display {
+            margin-left: 0 !important;
+            margin-right: auto !important;
         }
 
         #canvas-container #mb-fractal-formula-tex .katex {
@@ -294,6 +432,35 @@
             display: none;
         }
 
+        .orbit-hud-stable {
+            margin-top: 0.35em;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .orbit-hud-stable--zero {
+            color: #e53935;
+            text-shadow: 0 0 10px rgba(229, 57, 53, 0.42);
+        }
+
+        .orbit-hud-stable--hits {
+            color: #f2bb44;
+            text-shadow: 0 0 10px rgba(242, 187, 68, 0.42);
+        }
+
+        /* Lag-Hinweis nur im Orbit-HUD (nicht in der Sidebar) */
+        .orbit-hud-lag {
+            font-size: 0.72em;
+            font-weight: 500;
+            color: rgba(160, 175, 198, 0.92);
+            letter-spacing: 0.03em;
+        }
+
+        .orbit-hud-lag--warn {
+            color: #ffb74d;
+            text-shadow: 0 0 8px rgba(255, 183, 77, 0.38);
+        }
+
         /* CyberBranding legt .canvas-branding mit pointer-events:auto über den Plot — Maus erreichte den Canvas nicht. */
         #main-content .canvas-branding {
             pointer-events: none !important;
@@ -324,13 +491,14 @@
             </div>
             <div class="mb-fractal-formula-overlay" aria-hidden="true">
                 <div class="mb-fractal-formula-row">
-                    <div class="mb-fractal-formula-box">
+                    <div id="mb-fractal-formula-panel" class="mb-fractal-formula-box">
                         <div id="mb-fractal-formula-tex"></div>
                     </div>
                     <div id="mb-fractal-stable-panel" class="mb-fractal-formula-box mb-fractal-stable-panel" hidden>
                         <div class="mb-fractal-stable-inner">
                             <span id="mb-fractal-stable-label" class="mb-fractal-stable-label"></span>
                             <div id="mb-fractal-stable-widget" class="cyber-number-widget" aria-live="polite"></div>
+                            <div id="mb-fractal-stable-note" class="mb-fractal-stable-note" hidden></div>
                         </div>
                     </div>
                 </div>
@@ -387,7 +555,6 @@
     <script src="js/branding.js?v=542"></script>
     <script src="js/ui.js?v=543"></script>
     <script src="js/cyber-canvas.js"></script>
-    <script src="js/forloop-canvas-png.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
 (function () {
@@ -507,9 +674,6 @@
     padding: 12px !important;
     align-items: stretch !important;
 }
-#side-panel .fraktal-readouts .stats-card:last-child:nth-child(3) {
-    grid-column: 1 / -1 !important;
-}
 #side-panel .fraktal-readouts .stats-label {
     font-size: 0.55rem !important;
     margin-bottom: 4px !important;
@@ -563,11 +727,20 @@
             /** Zuletzt gezeichnete Schenkel vs. Budget — für HUD-Hinweis bei Escape vor Ende des Budgets */
             let orbitLastActualLegs = -1;
             let orbitLastLegBudget = -1;
+            /** \|z\|² am letzten Orbit-Punkt (Leg-Modus), −1 vor erstem drawOrbitPlane */
+            let orbitLastLegEndR2 = -1;
             let mbFormulaOverlayCacheKey = '';
             /** Verbindungslinien zwischen Orbit-Punkten */
             let orbitShowConnectorLines = true;
+            /** Beim Raster-Scan Orbit-Polylinie (+ Zwischenpunkt-Kreise) ausblenden — Schalter Kontextmenü Orbit */
+            let orbitHideLegsWhileScanning = true;
 
-            /** Orbit-Ansicht Leertaste: Raster über sichtbare Ebene; orange = Orbit bleibt begrenzt */
+            /** Letzter synchronisierter Fraktal-Ausschnitt (w|h|cx|cy|zoom) — Orbit-View nur bei Änderung an WebGL angleichen (sonst zerstört jedes Redraw das Orbit-Zoomen). */
+            let orbitFractalViewportSyncKey = '';
+            /** Geglättete Laufzeit von drawOrbitPlane (ms) — Lag-Zeile nur im Orbit-HUD */
+            let orbitHudFrameMsSmooth = 0;
+
+            /** Orbit-Ansicht Leertaste: Raster — nur gelbe Punkte = stabiler Orbit unter Scan-Tiefe. */
             let orbitScanActive = false;
             let orbitScanCols = 32;
             let orbitScanRows = 32;
@@ -575,22 +748,19 @@
             let orbitScanIy = 0;
             let orbitScanProbeCx = 0;
             let orbitScanProbeCy = 0;
-            /** Laufende Scan-Zelle; alle N Schritte neue Hits auf Overlay nachzeichnen */
+            /** HUD \|z\|²-Wert zum letzten Scan-Schritt (Escape-R² bzw. finales R² — nicht nur \|c\|², damit keine Rot/Gelb-Grenze bei \|c\|=2 flimmert). */
+            let orbitScanHudMagR2 = 0;
+            /** Laufende Scan-Zelle (Fortschritt innerhalb eines Frames). */
             let orbitScanVisitSerial = 0;
             const orbitScanStableHits = [];
             const orbitScanStableKeys = new Set();
-            /** Eigenes RAF während Scan — CyberCanvas setzt nach Render immer needsRedraw=false */
+            /** Eigenes RAF während Scan — CyberCanvas setzt nach Render oft needsRedraw=false */
             let orbitScanAnimRaf = null;
-            /** Overlay-Bitmap: während Scan nur neue Hits nachzeichnen; voller Neuaufbau bei Resize/Pan */
-            let orbitScanHitsCanvas = null;
-            let orbitScanHitsCtx = null;
-            /** Bereits auf orbitScanHitsCanvas gezeichnete Einträge [0 .. count) — voller Rebuild setzt 0 */
-            let orbitScanOverlayPaintedCount = 0;
-            /** Raster über volle Orbit-Höhe (MB und Julia). */
-            /** Alle N Raster-Schritte: neue stabile Punkte auf die Overlay-Bitmap malen */
-            const ORBIT_SCAN_OVERLAY_REBUILD_EVERY_STEPS = 10;
-            /** Julia: noch gebunden nach diesen Schritten → voller Probe (nie stabil ohne weiteres Budget). */
-            const ORBIT_SCAN_JULIA_QUICK_ESCAPE_ITERS = 14;
+            const ORBIT_SCAN_DOT_GOLD = 'rgba(242, 187, 68, 0.94)';
+            /** Julia: Kurzprobe vor vollem Budget — gleiche Escape-Schwelle wie Orbit-Zeichnung */
+            const ORBIT_SCAN_JULIA_QUICK_ESCAPE_ITERS = 24;
+            /** \|z\|²-Grenze wie Schenkelplot (orbitStablePath); vermeidet „nie stabil“ durch Float-Rauschen */
+            const ORBIT_SCAN_ESC_R2 = 4 + 1e-10;
 
             const LS_MB_MAIN_PLANE = 'forloop.mandelbrot.mainPlane';
             const LS_MB_ORBIT_HUD_VISIBLE = 'forloop.mandelbrot.orbitHudVisible';
@@ -598,6 +768,7 @@
             /** Legacy: früher „Schritt-Obergrenze“ (= Schenkel + 1 Punkt); wird beim Laden migriert */
             const LS_MB_ORBIT_STEPS_LEGACY = 'forloop.mandelbrot.orbitDrawStepsCap';
             const LS_MB_ORBIT_LINES = 'forloop.mandelbrot.orbitShowConnectorLines';
+            const LS_MB_ORBIT_HIDE_LEGS_SCAN = 'forloop.mandelbrot.orbitHideLegsWhileScan';
             const LS_MB_MODE = 'forloop.mandelbrot.mode';
             const LS_MB_CENTER_X = 'forloop.mandelbrot.centerX';
             const LS_MB_CENTER_Y = 'forloop.mandelbrot.centerY';
@@ -629,19 +800,25 @@
                 return Math.max(ORBIT_LEG_MIN, Math.min(ORBIT_LEG_MAX, x));
             }
 
-            /** Obere KaTeX-Box: FRACTAL = klassisch; ORBIT+Scan = |z|² am Rasterpunkt + Treffer N; sonst Orbit-Iterationszeile + Budget. */
+            /** Obere KaTeX-Box: FRACTAL = klassisch; ORBIT Leg-Modus = |z²| am Endpunkt + Schenkel-N; Scan = gleiche Zeile am Rasterpunkt + Trefferzahl */
             function syncMbFractalFormulaOverlay() {
+                const formulaPanel = document.getElementById('mb-fractal-formula-panel');
+                if (formulaPanel) {
+                    formulaPanel.classList.toggle('mb-fractal-formula-panel--orbit-metrics', mainPlane === 'ORBIT');
+                    formulaPanel.classList.toggle('mb-fractal-formula-panel--fractal-banner', mainPlane === 'FRACTAL');
+                }
                 const el = document.getElementById('mb-fractal-formula-tex');
                 if (!el) return;
                 let cacheKey;
                 if (mainPlane === 'FRACTAL') {
                     cacheKey = 'F';
                 } else if (mainPlane === 'ORBIT' && orbitScanActive) {
-                    const pr2 =
-                        orbitScanProbeCx * orbitScanProbeCx + orbitScanProbeCy * orbitScanProbeCy;
-                    cacheKey = `OS:${Math.round(pr2 * 1e6)}:${orbitScanStableHits.length}`;
+                    cacheKey = `OS:${Math.round(orbitScanHudMagR2 * 1e6)}:${orbitScanStableHits.length}`;
                 } else if (mainPlane === 'ORBIT') {
-                    cacheKey = `O:${clampOrbitLegCount(orbitLegCount)}:${orbitLastActualLegs}:${orbitLastLegBudget}`;
+                    const r2Show =
+                        orbitLastLegEndR2 >= 0 && Number.isFinite(orbitLastLegEndR2) ? orbitLastLegEndR2 : -1;
+                    const nLeg = orbitLastActualLegs;
+                    cacheKey = `OL:${Math.round(Math.max(0, r2Show) * 1000)}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}`;
                 } else {
                     cacheKey = 'X';
                 }
@@ -650,61 +827,70 @@
 
                 const base = 'z_{n+1} = z_n^{2} + c';
 
-                if (mainPlane === 'ORBIT' && orbitScanActive) {
-                    const pr2 =
-                        orbitScanProbeCx * orbitScanProbeCx + orbitScanProbeCy * orbitScanProbeCy;
-                    const rStr = pr2.toFixed(2);
-                    const nHits = orbitScanStableHits.length;
-                    const texScan =
-                        '\\left\\lvert z\\right\\rvert^{2} = ' +
-                        rStr +
-                        ' \\quad N = ' +
-                        String(nHits);
-                    if (typeof katex !== 'undefined') {
-                        katex.render(texScan, el, { throwOnError: false, displayMode: true });
-                    } else {
-                        el.textContent = `|z|² = ${rStr}    N = ${nHits}`;
-                        el.style.cssText =
-                            'font-family:Orbitron,sans-serif;font-size:1.22rem;line-height:1.25;color:#f2bb44;text-align:center;text-shadow:0 0 12px rgba(242,187,68,0.4);';
+                /** Gemeinsames Layout wie Scan-Zeile; Werte aus Leg-Polylinie bzw. Raster-Treffer — rot wenn \|z\|²>4 wie Plot */
+                function renderMzSquaredLine(rStr, nPartStr, r2Numeric) {
+                    let hex = '#f2bb44';
+                    let shadow = '0 0 12px rgba(242,187,68,0.4)';
+                    if (Number.isFinite(r2Numeric)) {
+                        if (r2Numeric > ORBIT_SCAN_ESC_R2) {
+                            hex = '#e53935';
+                            shadow = '0 0 12px rgba(229,57,53,0.38)';
+                        }
+                    } else if (rStr === '—') {
+                        hex = '#94a3b8';
+                        shadow = '0 0 8px rgba(148,163,184,0.22)';
                     }
+                    el.classList.add('mb-fractal-mz-split');
+                    el.innerHTML =
+                        '<span class="mb-fractal-mz-z2"></span><span class="mb-fractal-mz-n"></span>';
+                    const z2Wrap = el.querySelector('.mb-fractal-mz-z2');
+                    const nWrap = el.querySelector('.mb-fractal-mz-n');
+                    const texZ2 =
+                        '\\textcolor{' +
+                        hex +
+                        '}{\\left\\lvert z^{2}\\right\\rvert = ' +
+                        rStr +
+                        '}';
+                    const texN = '\\textcolor{' + hex + '}{N = ' + nPartStr + '}';
+                    if (typeof katex !== 'undefined') {
+                        katex.render(texZ2, z2Wrap, { throwOnError: false, displayMode: false });
+                        katex.render(texN, nWrap, { throwOnError: false, displayMode: false });
+                    } else {
+                        z2Wrap.textContent = '|z²| = ' + rStr;
+                        nWrap.textContent = 'N = ' + nPartStr;
+                        el.style.cssText =
+                            'font-family:Orbitron,sans-serif;font-size:1.22rem;line-height:1.25;color:' +
+                            hex +
+                            ';text-shadow:' +
+                            shadow +
+                            ';';
+                    }
+                }
+
+                if (mainPlane === 'ORBIT' && orbitScanActive) {
+                    const rStr = orbitScanHudMagR2.toFixed(2);
+                    const nHits = orbitScanStableHits.length;
+                    renderMzSquaredLine(rStr, String(nHits), orbitScanHudMagR2);
                     return;
                 }
 
                 if (mainPlane === 'ORBIT') {
-                    const nb = clampOrbitLegCount(orbitLegCount);
-                    let tex = `${base}\\quad N_{\\max}=${nb}`;
-                    if (
-                        orbitLastLegBudget > 0 &&
-                        orbitLastActualLegs >= 0 &&
-                        orbitLastActualLegs < orbitLastLegBudget
-                    ) {
-                        tex += `\\,,\\; N=${orbitLastActualLegs}`;
-                    }
-                    if (typeof katex !== 'undefined') {
-                        katex.render(tex, el, { throwOnError: false, displayMode: true });
-                    } else {
-                        let plain = `z_{n+1} = z_n² + c    N_max=${nb}`;
-                        if (
-                            orbitLastLegBudget > 0 &&
-                            orbitLastActualLegs >= 0 &&
-                            orbitLastActualLegs < orbitLastLegBudget
-                        ) {
-                            plain += `    N=${orbitLastActualLegs}`;
-                        }
-                        el.textContent = plain;
-                        el.style.cssText =
-                            'font-family:Orbitron,sans-serif;font-size:1.22rem;line-height:1.25;color:#f2bb44;text-align:center;text-shadow:0 0 12px rgba(242,187,68,0.4);';
-                    }
+                    const r2Ok = orbitLastLegEndR2 >= 0 && Number.isFinite(orbitLastLegEndR2);
+                    const rStr = r2Ok ? orbitLastLegEndR2.toFixed(2) : '—';
+                    const nStr =
+                        orbitLastActualLegs >= 0 ? String(orbitLastActualLegs) : '—';
+                    renderMzSquaredLine(rStr, nStr, r2Ok ? orbitLastLegEndR2 : NaN);
                     return;
                 }
 
+                el.classList.remove('mb-fractal-mz-split');
                 const texFull = `${base}\\quad z_n,\\, c \\in \\mathbb{C}`;
                 if (typeof katex !== 'undefined') {
                     katex.render(texFull, el, { throwOnError: false, displayMode: true });
                 } else {
                     el.textContent = 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
                     el.style.cssText =
-                        'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#f2bb44;text-align:center;text-shadow:0 0 12px rgba(242,187,68,0.4);';
+                        'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#f2bb44;text-align:left;text-shadow:0 0 12px rgba(242,187,68,0.4);';
                 }
             }
 
@@ -719,6 +905,14 @@
             function persistMandelbrotOrbitConnectorLines() {
                 try {
                     localStorage.setItem(LS_MB_ORBIT_LINES, orbitShowConnectorLines ? '1' : '0');
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            function persistMandelbrotOrbitHideLegsWhileScan() {
+                try {
+                    localStorage.setItem(LS_MB_ORBIT_HIDE_LEGS_SCAN, orbitHideLegsWhileScanning ? '1' : '0');
                 } catch (e) {
                     /* ignore */
                 }
@@ -747,6 +941,9 @@
                     const lines = localStorage.getItem(LS_MB_ORBIT_LINES);
                     if (lines === '0') orbitShowConnectorLines = false;
                     else if (lines === '1') orbitShowConnectorLines = true;
+                    const hl = localStorage.getItem(LS_MB_ORBIT_HIDE_LEGS_SCAN);
+                    if (hl === '0') orbitHideLegsWhileScanning = false;
+                    else if (hl === '1') orbitHideLegsWhileScanning = true;
                     return plane === 'FRACTAL' || plane === 'ORBIT' ? plane : null;
                 } catch (e) {
                     return null;
@@ -755,51 +952,45 @@
 
             if (!gl) return;
 
-            /** Stabiler Punkt nach maxSteps mit |z|² ≤ 4; sonst stable: false. finalR2 nur bei stable. */
+            /** Stabiler Punkt nach maxSteps mit |z|² ≤ 4; sonst stable: false. escapeR2 = \|z\|² beim Überschreiten der Grenze (HUD). */
             function orbitProbeStableWithFinalR2(cr, ci, z0x, z0y, maxSteps) {
                 let zx = z0x;
                 let zy = z0y;
                 for (let i = 0; i < maxSteps; i++) {
-                    if (zx * zx + zy * zy > 4) return { stable: false };
+                    const r2 = zx * zx + zy * zy;
+                    if (r2 > ORBIT_SCAN_ESC_R2) return { stable: false, escapeR2: r2 };
                     const nx = zx * zx - zy * zy + cr;
                     const ny = 2 * zx * zy + ci;
                     zx = nx;
                     zy = ny;
                 }
                 const r2 = zx * zx + zy * zy;
-                if (r2 > 4) return { stable: false };
+                if (r2 > ORBIT_SCAN_ESC_R2) return { stable: false, escapeR2: r2 };
                 return { stable: true, finalR2: r2 };
             }
 
-            /** Mandelbrot-Scan mit z₀=0: \|c\|²>4 ⇒ Außenbereich ohne langen Probe-Lauf. */
+            /** Mandelbrot-Scan mit z₀=0: \|c\|² oberhalb Grenze ⇒ sofort Außenbereich (Theorem \|c\|≤2). */
             function orbitMbScanCheapExterior(cx, cy) {
-                return cx * cx + cy * cy > 4;
+                return cx * cx + cy * cy > ORBIT_SCAN_ESC_R2;
             }
 
-            /** Julia: wenige Iterationen genügt zum Entkommen ⇒ keine stabilen Hits; sonst voller Probe. */
-            function orbitJuliaQuickExterior(cr, ci, z0x, z0y, quickSteps) {
+            /** Julia: Kurzprobe — escaped mit \|z\|² beim ersten Schritt > 4 (Scan-HUD). */
+            function orbitJuliaQuickExteriorResult(cr, ci, z0x, z0y, quickSteps) {
                 const q = quickSteps != null ? quickSteps : ORBIT_SCAN_JULIA_QUICK_ESCAPE_ITERS;
                 let zx = z0x;
                 let zy = z0y;
                 for (let i = 0; i < q; i++) {
-                    if (zx * zx + zy * zy > 4) return true;
+                    const r2 = zx * zx + zy * zy;
+                    if (r2 > ORBIT_SCAN_ESC_R2) return { escaped: true, escapeR2: r2 };
                     const nx = zx * zx - zy * zy + cr;
                     const ny = 2 * zx * zy + ci;
                     zx = nx;
                     zy = ny;
                 }
-                return false;
+                return { escaped: false };
             }
 
-            /** Einfärbung: r² nah 4 → helleres Gold (Grenznähe), klein → dunkler Bernstein. */
-            function orbitScanHitFillFromFinalR2(r2) {
-                const t = Math.min(1, Math.max(0, Math.sqrt(r2 / 4)));
-                const r = Math.round(155 + 95 * t);
-                const g = Math.round(115 + 95 * t);
-                const b = Math.round(28 + 58 * t);
-                return `rgba(${r},${g},${b},0.96)`;
-            }
-
+            /** Scan-Gitter: eine Probe pro Bildschirm-Pixel-Spalte/Zeile (begrenzt). */
             function orbitScanMeasureGrid(cc) {
                 const cellPx = 1;
                 const cols = Math.min(900, Math.max(36, Math.floor(cc.width / cellPx)));
@@ -819,67 +1010,35 @@
                 orbitScanVisitSerial = 0;
                 orbitScanProbeCx = cc.view.minX;
                 orbitScanProbeCy = cc.view.maxY;
-                rebuildOrbitScanStableHitsLayer(cc);
+                orbitScanHudMagR2 =
+                    orbitScanProbeCx * orbitScanProbeCx + orbitScanProbeCy * orbitScanProbeCy;
+            }
+
+            /** Stabile Scan-Treffer — kleine Gold-Marker (die wandernde Sonde sieht wie c aus). */
+            function drawOrbitScanStableHits(cc, ctx) {
+                const n = orbitScanStableHits.length;
+                if (n <= 0) return;
+                ctx.save();
+                ctx.fillStyle = ORBIT_SCAN_DOT_GOLD;
+                const rrCore = 2;
+                const w = rrCore * 2;
+                for (let i = 0; i < n; i++) {
+                    const p = orbitScanStableHits[i];
+                    const px = Math.round(cc.mapX(p.x));
+                    const py = Math.round(cc.mapY(p.y));
+                    ctx.fillRect(px - rrCore, py - rrCore, w, w);
+                }
+                ctx.restore();
             }
 
             function orbitScanClearAndRestartGrid(cc) {
                 stopOrbitScanAnim();
                 if (orbitScanActive) orbitHudOnScanStopped();
                 orbitScanActive = false;
+                syncMbOrbitStableCountPanel();
                 if (!cc?.isInitialized) return;
                 orbitScanRebuildGrid(cc);
                 cc.needsRedraw = true;
-            }
-
-            function ensureOrbitScanHitsLayer(cc) {
-                if (
-                    !orbitScanHitsCanvas ||
-                    orbitScanHitsCanvas.width !== cc.width ||
-                    orbitScanHitsCanvas.height !== cc.height
-                ) {
-                    orbitScanHitsCanvas = document.createElement('canvas');
-                    orbitScanHitsCanvas.width = cc.width;
-                    orbitScanHitsCanvas.height = cc.height;
-                    orbitScanHitsCtx = orbitScanHitsCanvas.getContext('2d');
-                    orbitScanOverlayPaintedCount = 0;
-                    return true;
-                }
-                return false;
-            }
-
-            /** Nur neue Hits seit letztem Paint (Scan läuft ~konstant pro Rebuild-Schritt). */
-            function appendOrbitScanStableHitsLayer(cc) {
-                ensureOrbitScanHitsLayer(cc);
-                const hctx = orbitScanHitsCtx;
-                const cvs = orbitScanHitsCanvas;
-                if (!hctx || !cvs) return;
-                const n = orbitScanStableHits.length;
-                const start = orbitScanOverlayPaintedCount;
-                if (start >= n) return;
-                const rrCore = 0.92;
-                hctx.save();
-                for (let hi = start; hi < n; hi++) {
-                    const p = orbitScanStableHits[hi];
-                    const px = cc.mapX(p.x);
-                    const py = cc.mapY(p.y);
-                    const w = rrCore * 2;
-                    const r2 = typeof p.finalR2 === 'number' ? p.finalR2 : 2;
-                    hctx.fillStyle = orbitScanHitFillFromFinalR2(r2);
-                    hctx.fillRect(px - rrCore, py - rrCore, w, w);
-                }
-                hctx.restore();
-                orbitScanOverlayPaintedCount = n;
-            }
-
-            /** Voller Neuaufbau (Resize, Pan, Abbruch, Ende). */
-            function rebuildOrbitScanStableHitsLayer(cc) {
-                ensureOrbitScanHitsLayer(cc);
-                const hctx = orbitScanHitsCtx;
-                const cvs = orbitScanHitsCanvas;
-                if (!hctx || !cvs) return;
-                hctx.clearRect(0, 0, cvs.width, cvs.height);
-                orbitScanOverlayPaintedCount = 0;
-                appendOrbitScanStableHitsLayer(cc);
             }
 
             function orbitScanPixelToComplex(cc) {
@@ -900,9 +1059,9 @@
                 orbitScanActive = false;
                 orbitHudOnScanStopped();
                 stopOrbitScanAnim();
+                syncMbOrbitStableCountPanel();
                 const c2 = typeof CyberCanvasInstance !== 'undefined' ? CyberCanvasInstance : null;
                 if (c2?.isInitialized) {
-                    appendOrbitScanStableHitsLayer(c2);
                     c2.needsRedraw = true;
                     drawOrbitPlane();
                 }
@@ -949,25 +1108,23 @@
                 orbitScanActive = !orbitScanActive;
                 if (orbitScanActive) {
                     if (orbitScanIy >= orbitScanRows) {
-                        /* Voller Durchlauf beendet — ohne RESET kein Neustart */
-                        orbitScanActive = false;
-                    } else {
-                        const lay = orbitScanMeasureGrid(cc);
-                        const dimsOk = lay.cols === orbitScanCols && lay.rows === orbitScanRows;
-                        const midProgress =
-                            orbitScanIx > 0 ||
-                            orbitScanIy > 0 ||
-                            orbitScanStableHits.length > 0 ||
-                            orbitScanVisitSerial > 0;
-                        if (!dimsOk || !midProgress) {
-                            orbitScanRebuildGrid(cc);
-                        } else {
-                            orbitScanProbeCx = cc.view.minX;
-                            orbitScanProbeCy = cc.view.maxY;
-                        }
-                        startOrbitScanAnim();
-                        orbitHudOnScanStarted();
+                        orbitScanRebuildGrid(cc);
                     }
+                    const lay = orbitScanMeasureGrid(cc);
+                    const dimsOk = lay.cols === orbitScanCols && lay.rows === orbitScanRows;
+                    const midProgress =
+                        orbitScanIx > 0 ||
+                        orbitScanIy > 0 ||
+                        orbitScanStableHits.length > 0 ||
+                        orbitScanVisitSerial > 0;
+                    if (!dimsOk || !midProgress) {
+                        orbitScanRebuildGrid(cc);
+                    } else {
+                        orbitScanProbeCx = cc.view.minX;
+                        orbitScanProbeCy = cc.view.maxY;
+                    }
+                    startOrbitScanAnim();
+                    orbitHudOnScanStarted();
                 } else {
                     stopOrbitScanAnim();
                     orbitHudOnScanStopped();
@@ -1003,7 +1160,6 @@
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
             const DEF_JULIA_X = -0.8, DEF_JULIA_Y = 0.156;
             const DEF_MAX_ITER = 256;
-            const GPU_MATH_LABEL = 'Float32 · Mandelbrot · Rad / Pinch';
             let maxIter = DEF_MAX_ITER, time = 0, isFlight = false;
             let mode = 'JULIA';
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
@@ -1070,6 +1226,33 @@
                 };
             }
 
+            /**
+             * Orbit-CyberCanvas an WebGL-Fragment-Shader angleichen:
+             * uv = (FragCoord − ½res) / min(res), z/c = center + uv·(3/zoom).
+             * @param {boolean} [force] — true: Kontextmenü-Reset; sonst nur bei geändertem Ausschnitt.
+             */
+            function syncOrbitCyberCanvasViewFromFractal(force) {
+                const cc = CyberCanvasInstance;
+                if (!cc?.isInitialized) return;
+                const w = Math.max(1, canvas.clientWidth || canvas.width || 1);
+                const h = Math.max(1, canvas.clientHeight || canvas.height || 1);
+                const zm = clampZoom(zoom);
+                const key = [w, h, centerX, centerY, zm].join('|');
+                if (!force && key === orbitFractalViewportSyncKey) return;
+                orbitFractalViewportSyncKey = key;
+                const sc = 3 / zm;
+                const minS = Math.min(w, h);
+                const uvXMin = (0.5 - 0.5 * w) / minS;
+                const uvXMax = (w - 0.5 - 0.5 * w) / minS;
+                const uvYMin = (0.5 - 0.5 * h) / minS;
+                const uvYMax = (h - 0.5 - 0.5 * h) / minS;
+                cc.view.minX = centerX + uvXMin * sc;
+                cc.view.maxX = centerX + uvXMax * sc;
+                cc.view.minY = centerY + uvYMin * sc;
+                cc.view.maxY = centerY + uvYMax * sc;
+                cc.needsRedraw = true;
+            }
+
             /** Neues Center nach Zoom, sodass (fX,fY) unter demselben Pixel bleibt (Pointer-Zoom). */
             function centerKeepingFocalPlane(mx, my, cw, ch, zoomNew, fX, fY) {
                 const s = Math.min(cw, ch);
@@ -1112,6 +1295,24 @@
                 }, 350);
             }
 
+            /** Mandelbrot: WebGL-Mitte = REAL/IMAG-Schieber; Julia: Schieber = fixes c (Shader unabhängig). */
+            function syncMbFractalCenterFromJuliaSliders() {
+                if (mode !== 'MANDELBROT') return;
+                centerX = juliaX;
+                centerY = juliaY;
+            }
+
+            function syncMbJuliaSlidersFromFractalCenter() {
+                if (mode !== 'MANDELBROT') return;
+                const nx = Math.round(centerX * 1000);
+                const ny = Math.round(centerY * 1000);
+                if (Math.round(juliaX * 1000) === nx && Math.round(juliaY * 1000) === ny) return;
+                juliaX = nx / 1000;
+                juliaY = ny / 1000;
+                updateSliderMountVisual('jx-mount', nx);
+                updateSliderMountVisual('jy-mount', ny);
+            }
+
             function stopFlightUi() {
                 isFlight = false;
                 const bf = document.querySelector('#side-panel #btn-flight');
@@ -1119,6 +1320,7 @@
                     bf.innerText = CyberI18n.get('fractal.flight_start');
                     bf.classList.remove('is-active');
                 }
+                syncMbJuliaSlidersFromFractalCenter();
                 persistMandelbrotFractalState();
             }
 
@@ -1214,12 +1416,11 @@
                 orbitHudResetStopwatchState();
                 orbitScanStableHits.length = 0;
                 orbitScanStableKeys.clear();
-                orbitScanHitsCanvas = null;
-                orbitScanHitsCtx = null;
-                orbitScanOverlayPaintedCount = 0;
                 orbitCanvasDrag = null;
                 orbitLastActualLegs = -1;
                 orbitLastLegBudget = -1;
+                orbitLastLegEndR2 = -1;
+                orbitHudFrameMsSmooth = 0;
                 if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                     CyberCanvasInstance.cleanup();
                 }
@@ -1232,6 +1433,14 @@
                         CyberCanvasInstance.needsRedraw = true;
                     }
                 }, 160);
+            }
+
+            function orbitHudEscapeHtml(s) {
+                return String(s)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
             }
 
             function syncOrbitHud() {
@@ -1267,48 +1476,72 @@
                     })}`;
                 }
                 if (orbitScanActive) hudBase += `\n${CyberI18n.get('fractal.orbit_scan_running')}`;
-                el.textContent = hudBase;
+                const bodyHtml = hudBase.split('\n').map((ln) => orbitHudEscapeHtml(ln)).join('<br>');
+                const lagWarnMs = 48;
+                let lagHtml = '';
+                if (orbitHudFrameMsSmooth >= 0.5) {
+                    const lagCls =
+                        orbitHudFrameMsSmooth >= lagWarnMs ? 'orbit-hud-lag orbit-hud-lag--warn' : 'orbit-hud-lag';
+                    lagHtml = `<br><span class="${lagCls}">${orbitHudFrameMsSmooth.toFixed(0)} ms · Bild</span>`;
+                }
+                if (orbitScanActive) {
+                    const nHits = orbitScanStableHits.length;
+                    const stableCls = nHits === 0 ? 'orbit-hud-stable--zero' : 'orbit-hud-stable--hits';
+                    const lab = CyberI18n.get('fractal.orbit_stable_points_label');
+                    el.innerHTML =
+                        bodyHtml +
+                        lagHtml +
+                        `<br><span class="orbit-hud-stable ${stableCls}">${orbitHudEscapeHtml(lab)}: ${nHits}</span>`;
+                } else {
+                    el.innerHTML = bodyHtml + lagHtml;
+                }
             }
 
             function syncMbOrbitStableCountPanel() {
                 const panel = document.getElementById('mb-fractal-stable-panel');
                 const labelEl = document.getElementById('mb-fractal-stable-label');
                 const widgetMount = document.getElementById('mb-fractal-stable-widget');
+                const noteEl = document.getElementById('mb-fractal-stable-note');
                 if (!panel || !widgetMount) return;
                 if (mainPlane !== 'ORBIT' || !orbitScanActive) {
                     panel.hidden = true;
+                    if (noteEl) {
+                        noteEl.textContent = '';
+                        noteEl.hidden = true;
+                    }
                     return;
                 }
                 panel.hidden = false;
                 const n = orbitScanStableHits.length;
+                const digitStyle = {
+                    fontSize: '1.22rem',
+                    digitWidth: '17px',
+                    digitHeight: '30px',
+                    separatorWidth: '8px',
+                };
                 if (typeof CyberUI !== 'undefined' && typeof CyberUI.updateNumberWidget === 'function') {
-                    CyberUI.updateNumberWidget(
-                        'mb-fractal-stable-widget',
-                        n,
-                        0,
-                        6,
-                        {
-                            color: '#f2bb44',
-                            textShadow: '0 0 12px rgba(242, 187, 68, 0.48)',
-                            fontSize: '1.22rem',
-                            digitWidth: '17px',
-                            digitHeight: '30px',
-                            separatorWidth: '8px',
-                        }
-                    );
+                    CyberUI.updateNumberWidget('mb-fractal-stable-widget', n, 0, 1, digitStyle);
                 } else {
                     widgetMount.textContent = String(n);
+                    widgetMount.style.color = '';
+                    widgetMount.style.textShadow = '';
                 }
                 if (labelEl) labelEl.textContent = CyberI18n.get('fractal.orbit_stable_points_label');
+                if (noteEl) {
+                    noteEl.textContent = '';
+                    noteEl.hidden = true;
+                }
             }
 
             function drawOrbitPlane() {
                 const cc = CyberCanvasInstance;
                 if (!cc.isInitialized || mainPlane !== 'ORBIT') return;
+                const orbitDrawT0 = performance.now();
+                syncOrbitCyberCanvasViewFromFractal(false);
                 cc.drawGrid({
                     vignette: false,
                     mainColor: 'rgba(0, 210, 255, 0.42)',
-                    gridColor: 'rgba(255, 255, 255, 0.045)',
+                    gridColor: 'rgba(255, 255, 255, 0.095)',
                 });
                 const ctx = cc.ctx;
 
@@ -1368,6 +1601,7 @@
                 /** Escape wie Shader: |z|² > 4 → instabil (rot); bis Ende im Scheibe gelb wie stabiles HUD-Gold. */
                 const lp = pts[pts.length - 1];
                 const r2Last = lp.x * lp.x + lp.y * lp.y;
+                orbitLastLegEndR2 = r2Last;
                 const orbitStablePath = r2Last <= 4 + 1e-10;
                 const orbitStroke = orbitStablePath
                     ? 'rgba(242, 187, 68, 0.94)'
@@ -1377,22 +1611,25 @@
                     : 'rgba(229, 57, 53, 0.88)';
 
                 const nSeg = pts.length - 1;
-                /** Schenkel immer zeichnen — Schalter nur für Zwischenpunkt-Marker (s. Kontextmenü). */
-                for (let i = 0; i < nSeg; i++) {
-                    const t = nSeg <= 1 ? 1 : i / (nSeg - 1);
-                    ctx.strokeStyle = orbitStroke;
-                    ctx.lineWidth = Math.max(1.2, 0.65 + t * 1.45);
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(cc.mapX(pts[i].x), cc.mapY(pts[i].y));
-                    ctx.lineTo(cc.mapX(pts[i + 1].x), cc.mapY(pts[i + 1].y));
-                    ctx.stroke();
+                const legsHiddenForScan = orbitScanActive && orbitHideLegsWhileScanning;
+                /** Schenkel — beim Scan optional aus (Schalter Kontextmenü). */
+                if (!legsHiddenForScan) {
+                    for (let i = 0; i < nSeg; i++) {
+                        const t = nSeg <= 1 ? 1 : i / (nSeg - 1);
+                        ctx.strokeStyle = orbitStroke;
+                        ctx.lineWidth = Math.max(1.2, 0.65 + t * 1.45);
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(cc.mapX(pts[i].x), cc.mapY(pts[i].y));
+                        ctx.lineTo(cc.mapX(pts[i + 1].x), cc.mapY(pts[i + 1].y));
+                        ctx.stroke();
+                    }
                 }
 
                 const ni = Math.max(1, pts.length - 1);
                 const epsNear = 1e-10;
-                if (orbitShowConnectorLines) {
+                if (orbitShowConnectorLines && !legsHiddenForScan) {
                     ctx.fillStyle = orbitDotFill;
                     pts.forEach((p, i) => {
                         if (i === 0) return;
@@ -1422,7 +1659,9 @@
                     ctx.restore();
                 }
 
-                drawHandle(cr, ci, true);
+                if (!orbitScanActive) {
+                    drawHandle(cr, ci, true);
+                }
                 if (mode === 'JULIA') {
                     drawHandle(z0x, z0y, true);
                 } else {
@@ -1432,94 +1671,84 @@
                 ctx.font = 'bold 12px Orbitron,sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                ctx.fillText('c', cc.mapX(cr) + 9, cc.mapY(ci) - 7);
+                if (!orbitScanActive) {
+                    ctx.fillText('c', cc.mapX(cr) + 9, cc.mapY(ci) - 7);
+                }
                 if (mode === 'JULIA') {
                     ctx.fillText('z₀', cc.mapX(z0x) + 9, cc.mapY(z0y) + 17);
                 } else {
                     ctx.fillText('z₀', cc.mapX(0) + 9, cc.mapY(0) + 17);
                 }
 
-                const resizedScanLayer = ensureOrbitScanHitsLayer(cc);
-                if (resizedScanLayer && orbitScanStableHits.length) rebuildOrbitScanStableHitsLayer(cc);
-
                 if (orbitScanActive) {
-                    const scanIters = Math.min(176, Math.max(56, maxIter));
+                    const scanIters = Math.min(8192, fractalShaderTargetMaxIter());
                     const stepsPf = 132;
                     for (let s = 0; s < stepsPf && orbitScanActive && orbitScanIy < orbitScanRows; ) {
                         const { sx, sy } = orbitScanPixelToComplex(cc);
                         orbitScanProbeCx = sx;
                         orbitScanProbeCy = sy;
+                        let hudMagR2 = sx * sx + sy * sy;
                         let probe;
                         if (mode === 'MANDELBROT') {
-                            if (orbitMbScanCheapExterior(sx, sy)) probe = { stable: false };
-                            else probe = orbitProbeStableWithFinalR2(sx, sy, 0, 0, scanIters);
-                        } else if (orbitJuliaQuickExterior(juliaX, juliaY, sx, sy)) {
-                            probe = { stable: false };
+                            if (orbitMbScanCheapExterior(sx, sy)) {
+                                probe = { stable: false };
+                            } else {
+                                probe = orbitProbeStableWithFinalR2(sx, sy, 0, 0, scanIters);
+                                if (probe.stable) hudMagR2 = probe.finalR2;
+                                else hudMagR2 = probe.escapeR2 ?? hudMagR2;
+                            }
                         } else {
-                            probe = orbitProbeStableWithFinalR2(juliaX, juliaY, sx, sy, scanIters);
+                            const jq = orbitJuliaQuickExteriorResult(juliaX, juliaY, sx, sy);
+                            if (jq.escaped) {
+                                probe = { stable: false };
+                                hudMagR2 = jq.escapeR2 ?? hudMagR2;
+                            } else {
+                                probe = orbitProbeStableWithFinalR2(juliaX, juliaY, sx, sy, scanIters);
+                                if (probe.stable) hudMagR2 = probe.finalR2;
+                                else hudMagR2 = probe.escapeR2 ?? hudMagR2;
+                            }
                         }
+                        orbitScanHudMagR2 = hudMagR2;
                         const cellKey = orbitScanIx + ',' + orbitScanIy;
                         if (probe.stable && !orbitScanStableKeys.has(cellKey)) {
                             orbitScanStableKeys.add(cellKey);
                             orbitScanStableHits.push({ x: sx, y: sy, finalR2: probe.finalR2 });
                         }
                         orbitScanVisitSerial++;
-                        if (orbitScanVisitSerial % ORBIT_SCAN_OVERLAY_REBUILD_EVERY_STEPS === 0) {
-                            appendOrbitScanStableHitsLayer(cc);
-                        }
                         orbitScanAdvanceTopDown();
                         s++;
 
                         while (
+                            mode === 'MANDELBROT' &&
                             s < stepsPf &&
                             orbitScanActive &&
                             orbitScanIy < orbitScanRows
                         ) {
                             const p = orbitScanPixelToComplex(cc);
-                            const cheapDead =
-                                mode === 'MANDELBROT'
-                                    ? orbitMbScanCheapExterior(p.sx, p.sy)
-                                    : orbitJuliaQuickExterior(juliaX, juliaY, p.sx, p.sy);
+                            const cheapDead = orbitMbScanCheapExterior(p.sx, p.sy);
                             if (!cheapDead) break;
                             orbitScanProbeCx = p.sx;
                             orbitScanProbeCy = p.sy;
+                            orbitScanHudMagR2 = p.sx * p.sx + p.sy * p.sy;
                             orbitScanVisitSerial++;
-                            if (orbitScanVisitSerial % ORBIT_SCAN_OVERLAY_REBUILD_EVERY_STEPS === 0) {
-                                appendOrbitScanStableHitsLayer(cc);
-                            }
                             orbitScanAdvanceTopDown();
                             s++;
                         }
                     }
                 }
 
-                if (
-                    orbitScanStableHits.length &&
-                    orbitScanHitsCanvas &&
-                    orbitScanHitsCanvas.width === cc.width &&
-                    orbitScanHitsCanvas.height === cc.height
-                ) {
-                    if (!orbitScanActive) rebuildOrbitScanStableHitsLayer(cc);
-                    ctx.drawImage(orbitScanHitsCanvas, 0, 0);
-                }
+                drawOrbitScanStableHits(cc, ctx);
 
                 if (orbitScanActive) {
                     const px = cc.mapX(orbitScanProbeCx);
                     const py = cc.mapY(orbitScanProbeCy);
                     ctx.save();
-                    const g = ctx.createRadialGradient(px, py, 0, px, py, 13);
-                    g.addColorStop(0, 'rgba(255, 249, 232, 0.98)');
-                    g.addColorStop(0.26, 'rgba(248, 215, 125, 0.95)');
-                    g.addColorStop(0.55, 'rgba(242, 187, 68, 0.72)');
-                    g.addColorStop(1, 'rgba(217, 158, 42, 0)');
-                    ctx.fillStyle = g;
+                    ctx.fillStyle = '#e53935';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+                    ctx.lineWidth = 1.2;
                     ctx.beginPath();
-                    ctx.arc(px, py, 13, 0, Math.PI * 2);
+                    ctx.arc(px, py, 6.5, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.strokeStyle = 'rgba(255, 239, 205, 0.96)';
-                    ctx.lineWidth = 1.35;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 4.2, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.restore();
                 }
@@ -1527,17 +1756,22 @@
                 syncOrbitHud();
                 syncMbOrbitStableCountPanel();
                 syncMbFractalFormulaOverlay();
+                const orbitDrawDt = performance.now() - orbitDrawT0;
+                orbitHudFrameMsSmooth =
+                    orbitHudFrameMsSmooth > 0
+                        ? orbitHudFrameMsSmooth * 0.82 + orbitDrawDt * 0.18
+                        : orbitDrawDt;
             }
 
             function setupOrbitCyberCanvas() {
                 teardownOrbitCyberCanvas();
+                orbitFractalViewportSyncKey = '';
                 CyberCanvasInstance.init('orbit-canvas', {}, {
                     showTelemetry: false,
                     showAxes: true,
                     showLabels: true,
-                    showGrid: false,
+                    showGrid: true,
                 });
-                CyberCanvasInstance.resetView(-1.55, 1.55);
                 CyberCanvasInstance.onResize = drawOrbitPlane;
 
                 function orbitPickDragTarget(mx, my) {
@@ -1561,7 +1795,11 @@
                     const dc = Math.hypot(mx - cr, my - ci);
                     const dz = Math.hypot(mx - z0x_, my - z0y_);
                     if (mode === 'MANDELBROT') {
+                        if (orbitScanActive) return null;
                         return dc < tol ? 'c' : null;
+                    }
+                    if (orbitScanActive) {
+                        return dz < tol ? 'z0' : null;
                     }
                     if (dc < tol && dz < tol) return dc <= dz ? 'c' : 'z0';
                     if (dc < tol) return 'c';
@@ -1579,9 +1817,15 @@
                         if (mode === 'MANDELBROT') {
                             centerX = pos.x;
                             centerY = pos.y;
+                            juliaX = centerX;
+                            juliaY = centerY;
+                            updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
+                            updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                         } else {
                             juliaX = pos.x;
                             juliaY = pos.y;
+                            updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
+                            updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                         }
                     } else {
                         centerX = pos.x;
@@ -1590,13 +1834,22 @@
                     CyberCanvasInstance.needsRedraw = true;
                 };
                 CyberCanvasInstance.onMouseUp = () => {
-                    if (orbitCanvasDrag) {
-                        orbitCanvasDrag = null;
-                        CyberCanvasInstance.allowPan = true;
-                        updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
-                        updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
-                        schedulePersistMandelbrotFractalState();
+                    if (!orbitCanvasDrag) return;
+                    const was = orbitCanvasDrag;
+                    orbitCanvasDrag = null;
+                    CyberCanvasInstance.allowPan = true;
+                    if (was === 'c') {
+                        if (mode === 'MANDELBROT') {
+                            juliaX = centerX;
+                            juliaY = centerY;
+                            updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
+                            updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
+                        } else {
+                            updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
+                            updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
+                        }
                     }
+                    schedulePersistMandelbrotFractalState();
                 };
 
                 CyberCanvasInstance.onContextMenu = (e) => {
@@ -1604,7 +1857,7 @@
                         {
                             label: CyberI18n.get('fractal.reset'),
                             onclick: () => {
-                                CyberCanvasInstance.resetView(-1.55, 1.55);
+                                syncOrbitCyberCanvasViewFromFractal(true);
                                 orbitScanClearAndRestartGrid(CyberCanvasInstance);
                             },
                         },
@@ -1639,6 +1892,16 @@
                             onchange: (v) => {
                                 orbitShowConnectorLines = !!v;
                                 persistMandelbrotOrbitConnectorLines();
+                                CyberCanvasInstance.needsRedraw = true;
+                                drawOrbitPlane();
+                            },
+                        },
+                        {
+                            label: CyberI18n.get('fractal.orbit_hide_legs_while_scan'),
+                            checked: orbitHideLegsWhileScanning,
+                            onchange: (v) => {
+                                orbitHideLegsWhileScanning = !!v;
+                                persistMandelbrotOrbitHideLegsWhileScan();
                                 CyberCanvasInstance.needsRedraw = true;
                                 drawOrbitPlane();
                             },
@@ -1689,6 +1952,16 @@
             function zoomDepthLogUnit(z) {
                 if (!Number.isFinite(z) || z <= 1) return 0;
                 return Math.min(1, Math.log(z) / Math.log(ZOOM_MAX));
+            }
+
+            /**
+             * Iterations-Ziel wie im Fraktal-Shader (targetIter vor Glättung): maxIter + Zoom-Boost.
+             * Bei ORBIT läuft render() nicht — smoothEffectiveMaxIter wäre eingefroren; Scan/Cheap-Probes nutzen stattdessen diesen Wert.
+             */
+            function fractalShaderTargetMaxIter() {
+                const depthU = zoomDepthLogUnit(zoom);
+                const boostF = (512 - maxIter) * 0.9 * depthU;
+                return Math.min(512, Math.max(32, Math.round(maxIter + boostF)));
             }
 
             /**
@@ -1762,8 +2035,13 @@
                     zoom = lerp(f.zoom, to.zoom, ez);
                 }
                 zoom = clampZoom(zoom);
-                juliaX = lerp(f.jx, to.jx, ep);
-                juliaY = lerp(f.jy, to.jy, ep);
+                if (mode === 'MANDELBROT') {
+                    juliaX = centerX;
+                    juliaY = centerY;
+                } else {
+                    juliaX = lerp(f.jx, to.jx, ep);
+                    juliaY = lerp(f.jy, to.jy, ep);
+                }
                 maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, ep))));
                 updateSliderMountVisual('jx-mount', juliaX * 1000);
                 updateSliderMountVisual('jy-mount', juliaY * 1000);
@@ -1805,7 +2083,6 @@
             function syncFraktalReadouts() {
                 const d = document.getElementById('readout-detail');
                 const zEl = document.getElementById('readout-zoom');
-                const p = document.getElementById('readout-prec');
                 if (d) {
                     d.textContent =
                         lastEffectiveMaxIter > maxIter
@@ -1813,7 +2090,6 @@
                             : String(maxIter);
                 }
                 if (zEl) zEl.textContent = formatZoomFactor(zoom);
-                if (p) p.textContent = GPU_MATH_LABEL;
             }
 
             function syncModeButtonsFromState() {
@@ -1842,16 +2118,24 @@
                         cx: flightSnapshot.cx,
                         cy: flightSnapshot.cy,
                         zoom: flightSnapshot.zoom,
-                        jx: flightSnapshot.jx,
-                        jy: flightSnapshot.jy,
-                        mi: flightSnapshot.mi
+                        jx: mode === 'MANDELBROT' ? flightSnapshot.cx : flightSnapshot.jx,
+                        jy: mode === 'MANDELBROT' ? flightSnapshot.cy : flightSnapshot.jy,
+                        mi: flightSnapshot.mi,
                     };
                     clearFlightSnapshotOnDone = true;
                 } else {
                     to = (mode === 'JULIA')
                         ? { cx: DEF_JL_CENTER_X, cy: DEF_JL_CENTER_Y, zoom: DEF_JL_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER }
-                        : { cx: DEF_MB_CENTER_X, cy: DEF_MB_CENTER_Y, zoom: DEF_MB_ZOOM, jx: DEF_JULIA_X, jy: DEF_JULIA_Y, mi: DEF_MAX_ITER };
+                        : {
+                              cx: DEF_MB_CENTER_X,
+                              cy: DEF_MB_CENTER_Y,
+                              zoom: DEF_MB_ZOOM,
+                              jx: DEF_MB_CENTER_X,
+                              jy: DEF_MB_CENTER_Y,
+                              mi: DEF_MAX_ITER,
+                          };
                 }
+                if (mode === 'MANDELBROT') syncMbJuliaSlidersFromFractalCenter();
                 const from = { cx: centerX, cy: centerY, zoom, jx: juliaX, jy: juliaY, mi: maxIter };
                 resetAnim = {
                     t0: performance.now(),
@@ -1866,10 +2150,6 @@
                     orbitScanClearAndRestartGrid(CyberCanvasInstance);
                 }
             }
-
-            const arrowPngSaver = ForloopCanvasPng.createSequentialCanvasPngSaver(canvas, {
-                stem: 'mandelbrot-zoom-step',
-            });
 
             function drawFractalOnly() {
                 gl.viewport(0, 0, canvas.width, canvas.height);
@@ -1886,10 +2166,6 @@
                 gl.uniform1f(uTime, time);
                 gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
-            }
-
-            async function captureScreenshotAfterArrowZoom() {
-                await arrowPngSaver.captureNext();
             }
 
             /**
@@ -1954,6 +2230,8 @@
 
                 time += 0.004 * TICK_VS_LEGACY_60HZ;
 
+                if (mode === 'MANDELBROT' && isFlight) syncMbJuliaSlidersFromFractalCenter();
+
                 drawFractalOnly();
                 syncFraktalReadouts();
                 if (isFlight) schedulePersistMandelbrotFractalState();
@@ -1984,22 +2262,20 @@
                         <span class="stats-label">${CyberI18n.get('fractal.zoom')}</span>
                         <span id="readout-zoom" class="stats-val">1,000</span>
                     </div>
-                    <div class="stats-card">
-                        <span class="stats-label">${CyberI18n.get('fractal.arithmetic')}</span>
-                        <span id="readout-prec" class="stats-val">Float32 / Pixel</span>
-                    </div>
                 </div>
             `, 'var(--neon-blue)');
 
             CyberUI.createSlider('jx-mount', CyberI18n.get('fractal.real'), -2000, 2000, -800, 1, (v) => {
                 abortResetAnim();
                 juliaX = v / 1000;
+                syncMbFractalCenterFromJuliaSliders();
                 persistMandelbrotFractalState();
             }, 'var(--neon-blue)');
 
             CyberUI.createSlider('jy-mount', CyberI18n.get('fractal.imaginary'), -2000, 2000, 156, 1, (v) => {
                 abortResetAnim();
                 juliaY = v / 1000;
+                syncMbFractalCenterFromJuliaSliders();
                 persistMandelbrotFractalState();
             }, 'var(--neon-blue)');
 
@@ -2016,13 +2292,11 @@
                     <button type="button" id="btn-flight" class="fraktal-seg-btn">${CyberI18n.get('fractal.flight_start')}</button>
                     <button type="button" id="btn-reset" class="fraktal-seg-btn">${CyberI18n.get('fractal.reset')}</button>
                 </div>
-                <div class="fraktal-seg-row" style="margin-top:8px;">
-                    <button type="button" id="btn-screenshot-folder" class="fraktal-seg-btn">PNG-Ordner (z. B. Desktop)</button>
-                </div>
             `, 'var(--neon-blue)');
 
             document.getElementById('btn-mode-m').onclick = () => {
                 mode = 'MANDELBROT';
+                syncMbFractalCenterFromJuliaSliders();
                 syncModeButtonsFromState();
                 persistMandelbrotFractalState();
             };
@@ -2045,8 +2319,12 @@
                     btnFlightEl.classList.toggle('is-active', isFlight);
                     if (isFlight) {
                         flightSnapshot = {
-                            cx: centerX, cy: centerY, zoom: clampZoom(zoom),
-                            jx: juliaX, jy: juliaY, mi: maxIter
+                            cx: centerX,
+                            cy: centerY,
+                            zoom: clampZoom(zoom),
+                            jx: mode === 'MANDELBROT' ? centerX : juliaX,
+                            jy: mode === 'MANDELBROT' ? centerY : juliaY,
+                            mi: maxIter,
                         };
                         const w = canvas.width, h = canvas.height;
                         flightMouseCanvasX = w > 0 ? w / 2 : null;
@@ -2058,26 +2336,6 @@
                 };
             }
 
-            const btnScreenshotFolder = document.getElementById('btn-screenshot-folder');
-            if (btnScreenshotFolder) {
-                if (typeof window.showDirectoryPicker !== 'function') {
-                    btnScreenshotFolder.disabled = true;
-                    btnScreenshotFolder.title =
-                        'Chrome/Edge über http://localhost: ohne Ordnerpicker nur Browser-Download → meist Ordner „Downloads“.';
-                } else {
-                    btnScreenshotFolder.title =
-                        'Ordner wählen (Dialog startet am Desktop). Ohne Auswahl landen ↑/↓-PNG im Download-Ordner.';
-                    btnScreenshotFolder.addEventListener('click', async () => {
-                        try {
-                            await arrowPngSaver.pickWritableFolder();
-                            btnScreenshotFolder.textContent = 'PNG-Ordner ✓ (Desktop o.ä.)';
-                            btnScreenshotFolder.classList.add('is-active');
-                        } catch (e) {
-                            if (e.name !== 'AbortError') console.warn('Ordnerwahl', e);
-                        }
-                    });
-                }
-            }
             /** true nur bei echten Text-/Zahl-Eingaben — nicht bei range-Slidern (↑/↓ sonst vom Browser „geschluckt“). */
             function keyboardTypingCapturesArrows(target) {
                 if (!target || !target.closest) return false;
@@ -2118,7 +2376,6 @@
                             orbitLegCount += arrowUp ? step : -step;
                             orbitLegCount = clampOrbitLegCount(orbitLegCount);
                             persistMandelbrotOrbitLeg();
-                            syncMbFractalFormulaOverlay();
                             if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                                 CyberCanvasInstance.needsRedraw = true;
                             }
@@ -2173,7 +2430,10 @@
                 centerY += (dy / s / zoom) * 3;
             };
             window.onmouseup = () => {
-                if (isDrag) schedulePersistMandelbrotFractalState();
+                if (isDrag) {
+                    syncMbJuliaSlidersFromFractalCenter();
+                    schedulePersistMandelbrotFractalState();
+                }
                 isDrag = false;
                 dragLastCanvas = null;
             };
@@ -2204,10 +2464,9 @@
                     flightMouseCanvasY = my;
                 }
                 stepZoomFlightLike(mx, my, w, h, zoomIn);
+                syncMbJuliaSlidersFromFractalCenter();
 
-                /* Ein Bild mit neuem Zoom — gleicher Pixelinhalt wie nächster Frame */
                 drawFractalOnly();
-                void captureScreenshotAfterArrowZoom();
                 schedulePersistMandelbrotFractalState();
             }
 
@@ -2247,6 +2506,7 @@
                     const nc = centerKeepingFocalPlane(mx, my, w, h, zoom, fX, fY);
                     centerX = nc.cx;
                     centerY = nc.cy;
+                    syncMbJuliaSlidersFromFractalCenter();
                     schedulePersistMandelbrotFractalState();
                 },
                 { passive: false }
@@ -2297,7 +2557,10 @@
                 const hadPinch = pinchAnchor != null && pinchStartDist >= 8;
                 pinchAnchor = null;
                 pinchStartDist = 0;
-                if (hadPinch) schedulePersistMandelbrotFractalState();
+                if (hadPinch) {
+                    syncMbJuliaSlidersFromFractalCenter();
+                    schedulePersistMandelbrotFractalState();
+                }
             });
 
             function loadMandelbrotFractalPersist() {
@@ -2339,6 +2602,7 @@
                     updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
                     updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                     updateSliderMountVisual('iter-mount', maxIter);
+                    if (mode === 'MANDELBROT') syncMbFractalCenterFromJuliaSliders();
                     syncFraktalReadouts();
                 } catch (e) {
                     /* ignore */

@@ -644,15 +644,16 @@ const CyberBranding = {
         if (!pageBrief && window.CyberBriefings) {
             let content = null;
             // Case 1: New i18n structure { "de": { "key": "..." }, "en": { ... } }
-            if (window.CyberBriefings[currentLang] && window.CyberBriefings[currentLang][moduleKey]) {
-                content = window.CyberBriefings[currentLang][moduleKey];
-            } 
-            // Case 2: Fallback to 'de' in new structure
-            else if (window.CyberBriefings['de'] && window.CyberBriefings['de'][moduleKey]) {
-                content = window.CyberBriefings['de'][moduleKey];
+            // Prefer current language, then English (e.g. Kiswahili UI + EN briefings), then German.
+            const tryLangs = [currentLang, 'en', 'de'];
+            for (let i = 0; i < tryLangs.length && content == null; i++) {
+                const L = tryLangs[i];
+                if (window.CyberBriefings[L] && window.CyberBriefings[L][moduleKey]) {
+                    content = window.CyberBriefings[L][moduleKey];
+                }
             }
             // Case 3: Old flat structure { "key": "..." }
-            else if (window.CyberBriefings[moduleKey] && typeof window.CyberBriefings[moduleKey] === 'string') {
+            if (!content && window.CyberBriefings[moduleKey] && typeof window.CyberBriefings[moduleKey] === 'string') {
                 content = window.CyberBriefings[moduleKey];
             }
 

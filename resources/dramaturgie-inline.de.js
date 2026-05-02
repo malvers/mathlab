@@ -23,7 +23,7 @@ Labore
 
 #
 120pt
-6 Sprachen
+7 Sprachen
 20pt
 %purplepulsating and counting
 40pt
@@ -33,6 +33,7 @@ spanisch
 französisch
 italienisch
 portugiesisch
+kiswahili
 
 #
 // es werden alle screenshots gezeigt
