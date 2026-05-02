@@ -1499,6 +1499,7 @@
                 if (stack) {
                     stack.innerHTML = '';
                     stack.classList.remove('cw-stack-align-left');
+                    stack.classList.remove('cw-stack-fullscreen-mode');
                 }
                 cwPlayAllTimer = setTimeout(() => {
                     cwPlayAllTimer = null;
@@ -1835,7 +1836,10 @@
                 img.alt = '';
                 img.loading = entry.fast ? 'eager' : 'lazy';
                 img.decoding = entry.fast ? 'async' : 'sync';
-                img.addEventListener('load', () => {
+                let imgLifecycleDone = false;
+                function onImgLoadOk() {
+                    if (imgLifecycleDone) return;
+                    imgLifecycleDone = true;
                     if (entry.fast) {
                         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                             buryOtherFastPastInstant();
@@ -1864,8 +1868,11 @@
                         wrap.addEventListener('animationend', onAnim);
                         setTimeout(finish, 4000);
                     });
-                });
+                }
+                img.addEventListener('load', onImgLoadOk);
                 img.addEventListener('error', () => {
+                    if (imgLifecycleDone) return;
+                    imgLifecycleDone = true;
                     if (entry.fast) buryOtherFastPastInstant();
                     wrap.innerHTML = '';
                     wrap.classList.add('cw-media-fallback-visible');
@@ -1882,6 +1889,13 @@
                 });
                 wrap.appendChild(img);
                 img.src = rawSrc;
+                /* Aus Cache / bereits decodiert: load feuert in manchen Engines nicht zuverlässig —
+                   ohne markImgSettled bleibt Play-all nach dem letzten Screenshot (heart3d) stehen. */
+                Promise.resolve().then(() => {
+                    if (!imgLifecycleDone && img.complete && img.naturalWidth > 0) {
+                        onImgLoadOk();
+                    }
+                });
                 setTimeout(() => {
                     if (!settled) {
                         if (entry.fast) buryOtherFastPastInstant();
@@ -2493,7 +2507,7 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
-            var bundleUrl = 'resources/dramaturgie-inline.' + lang + '.js?v=5';
+            var bundleUrl = 'resources/dramaturgie-inline.' + lang + '.js?v=7';
 
             function applyLoaded() {
                 var inline =

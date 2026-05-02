@@ -493,11 +493,27 @@
         #main-content .canvas-branding {
             pointer-events: none !important;
         }
+
+        /* Mini-Rail: aktuelle Sprache (nur Flagge) */
+        #mini-rail .nav-btn-lang-display {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            line-height: 1 !important;
+            font: inherit;
+            appearance: none;
+        }
+        #mini-rail .nav-btn-lang-display .rail-lang-flag {
+            font-size: 1.48rem;
+            line-height: 1;
+            filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.35));
+        }
     </style>
 </head>
 
 <body>
-    <nav id="mini-rail">
+    <nav id="mini-rail" aria-label="Navigation">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -505,6 +521,14 @@
                 <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
         </div>
+        <button
+            type="button"
+            class="nav-btn nav-btn-lang-display"
+            id="rail-lang-display-btn"
+            onclick="cycleMbCyberLabLang()"
+        >
+            <span class="rail-lang-flag" aria-hidden="true">🌐</span>
+        </button>
     </nav>
     <aside id="side-panel">
         <header id="sidebar-header"></header>
@@ -592,6 +616,36 @@
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 400);
+        };
+
+        const MB_CYBER_LANG_ORDER = ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'];
+        const MB_CYBER_LANG_FLAGS = { de: '🇩🇪', en: '🇬🇧', es: '🇪🇸', fr: '🇫🇷', it: '🇮🇹', pt: '🇵🇹', sw: '🇹🇿' };
+
+        window.cycleMbCyberLabLang = function cycleMbCyberLabLang() {
+            const cur = CyberI18n.current;
+            let idx = MB_CYBER_LANG_ORDER.indexOf(cur);
+            if (idx < 0) idx = 0;
+            const next = MB_CYBER_LANG_ORDER[(idx + 1) % MB_CYBER_LANG_ORDER.length];
+            try {
+                localStorage.setItem('cyber-lab-lang', next);
+            } catch (e) {
+                /* ignore */
+            }
+            const u = new URL(window.location.href);
+            u.searchParams.set('lang', next);
+            window.location.href = u.toString();
+        };
+
+        window.syncMbRailLangBtn = function syncMbRailLangBtn() {
+            const btn = document.getElementById('rail-lang-display-btn');
+            if (!btn) return;
+            const code = CyberI18n.current;
+            const flag = MB_CYBER_LANG_FLAGS[code] || '🌐';
+            const span = btn.querySelector('.rail-lang-flag');
+            if (span) span.textContent = flag;
+            btn.title = `${CyberI18n.get('ui.mini_rail_lang_title')} · ${code.toUpperCase()}`;
+            btn.setAttribute('aria-label', `${CyberI18n.get('ui.mini_rail_lang_title')} (${code})`);
+            document.documentElement.lang = code === 'sw' ? 'sw' : code;
         };
 
         /** Formelzeile wird in DOMContentLoaded via syncMbFractalFormulaOverlay() gesetzt (kennt mainPlane / Orbit-Budget). */
@@ -734,6 +788,7 @@
             } catch (e) {
                 console.warn('CyberBranding.init', e);
             }
+            syncMbRailLangBtn();
             try {
                 CyberUI.init();
             } catch (e) {
@@ -1488,6 +1543,10 @@
                     detail = `c = ${juliaX.toFixed(5)} ${juliaY >= 0 ? '+' : ''} ${juliaY.toFixed(5)}i · z₀ = ${centerX.toFixed(5)} ${centerY >= 0 ? '+' : ''} ${centerY.toFixed(5)}i`;
                 }
                 let hudBase = `${hudHead}${hint}\n${detail}\n${CyberI18n.get('fractal.orbit_drag_hint')}\n${CyberI18n.get('fractal.orbit_legs_arrows', { n: orbitLegCount })}\n${CyberI18n.get('fractal.orbit_scan_hint')}`;
+                const effIterTarget = fractalShaderTargetMaxIter();
+                if (effIterTarget > maxIter) {
+                    hudBase += `\n${CyberI18n.get('fractal.detail')}: ${maxIter}→${effIterTarget}`;
+                }
                 if (
                     orbitLastLegBudget > 0 &&
                     orbitLastActualLegs >= 0 &&
@@ -2099,10 +2158,8 @@
                 const d = document.getElementById('readout-detail');
                 const zEl = document.getElementById('readout-zoom');
                 if (d) {
-                    d.textContent =
-                        lastEffectiveMaxIter > maxIter
-                            ? `${maxIter}→${lastEffectiveMaxIter}`
-                            : String(maxIter);
+                    /* Nur Basis-Schieber in der Sidebar; Zoom-Boost nur im Orbit-HUD (syncOrbitHud). */
+                    d.textContent = String(maxIter);
                 }
                 if (zEl) zEl.textContent = formatZoomFactor(zoom);
             }
