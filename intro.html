@@ -1297,6 +1297,13 @@
                 unlockIntroAmbientAudio();
             } else {
                 applyIntroAmbientGainRamp();
+                cwActiveSfxSet.forEach((snd) => {
+                    try {
+                        snd.pause();
+                    } catch (err) {
+                        /* ignore */
+                    }
+                });
             }
             syncIntroAmbientBtn();
             saveIntroPersistedPrefs();
@@ -1743,7 +1750,7 @@
             if (entry.kind === 'sfx') {
                 let rawSrc = String(entry.src || '').trim();
                 if (/^javascript:/i.test(rawSrc)) rawSrc = '';
-                if (rawSrc) {
+                if (rawSrc && !introAmbMuted) {
                     try {
                         const snd = new Audio(rawSrc);
                         snd.preload = 'auto';
@@ -2507,7 +2514,7 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
-            var bundleUrl = 'resources/dramaturgie-inline.' + lang + '.js?v=7';
+            var bundleUrl = 'resources/dramaturgie-inline.' + lang + '.js?v=8';
 
             function applyLoaded() {
                 var inline =
