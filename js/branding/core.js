@@ -21,6 +21,12 @@
                 if (config.skipNavigation === true) skipNavigation = true;
             }
 
+            title =
+                typeof global.CyberI18n !== "undefined" &&
+                typeof global.CyberI18n.getBrandMastheadTitle === "function"
+                    ? global.CyberI18n.getBrandMastheadTitle()
+                    : "Doc Alvers Mathe-Labor";
+
             this._skipNavigation = skipNavigation;
 
             console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);

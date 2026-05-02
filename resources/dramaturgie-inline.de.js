@@ -26,7 +26,7 @@ Labore
 7 Sprachen
 20pt
 %purplepulsating and counting
-40pt
+30pt
 deutsch
 englisch
 spanisch
@@ -43,7 +43,7 @@ kiswahili
 
 # 
 60pt
-7 Programmiersprachen 
+7 Technologien 
 40pt
 hypertext markup language
 cascading styles sheets

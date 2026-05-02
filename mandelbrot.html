@@ -290,18 +290,34 @@
             margin: 0 !important;
         }
 
-        /* Orbit |z²|/N: kompakter Kasten; N fest bei ~54 % Breite (nah an |z²|, weniger „Leerraum“) */
+        /* Orbit |z²|/N: Glas-Kapsel; N fest bei ~54 % Breite */
         #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
             box-sizing: border-box;
-            width: clamp(260px, 32vw, 340px);
-            min-width: clamp(260px, 32vw, 340px);
-            max-width: clamp(260px, 32vw, 340px);
+            width: clamp(268px, 34vw, 368px);
+            min-width: clamp(268px, 34vw, 368px);
+            max-width: clamp(268px, 34vw, 368px);
             min-height: 52px;
-            padding: 8px 12px;
+            padding: 11px 26px;
             flex-shrink: 0;
             justify-content: flex-start;
             align-items: center;
             contain: layout style;
+            border-radius: 999px;
+            background: linear-gradient(
+                165deg,
+                rgba(16, 28, 52, 0.94) 0%,
+                rgba(7, 14, 30, 0.86) 48%,
+                rgba(10, 22, 42, 0.92) 100%
+            );
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(242, 187, 68, 0.45);
+            box-shadow:
+                0 0 0 1px rgba(0, 210, 255, 0.12) inset,
+                0 1px 0 rgba(255, 255, 255, 0.05) inset,
+                0 12px 36px rgba(0, 0, 0, 0.58),
+                0 0 32px rgba(0, 210, 255, 0.14),
+                0 0 52px rgba(242, 187, 68, 0.09);
         }
 
         /* FRACTAL: kompakte Box um die Hauptzeile (kein extraleerer Platz wie bei Orbit-|z²|/N-Kachel) */
@@ -383,6 +399,18 @@
                 0 0 14px rgba(242, 187, 68, 0.42),
                 0 0 26px rgba(255, 228, 170, 0.18);
             line-height: 1.2 !important;
+        }
+
+        #canvas-container
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+            #mb-fractal-formula-tex
+            .katex {
+            font-size: 1.34rem !important;
+            text-shadow:
+                0 0 20px rgba(242, 187, 68, 0.38),
+                0 0 38px rgba(0, 210, 255, 0.14),
+                0 1px 2px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35));
         }
 
         /* Haupt-WebGL: bei Orbit-Ansicht ausblenden (CyberCanvas liegt obenauf) */
@@ -730,11 +758,8 @@
             /** \|z\|² am letzten Orbit-Punkt (Leg-Modus), −1 vor erstem drawOrbitPlane */
             let orbitLastLegEndR2 = -1;
             let mbFormulaOverlayCacheKey = '';
-            /** Verbindungslinien zwischen Orbit-Punkten */
-            let orbitShowConnectorLines = true;
-            /** Beim Raster-Scan Orbit-Polylinie (+ Zwischenpunkt-Kreise) ausblenden — Schalter Kontextmenü Orbit */
-            let orbitHideLegsWhileScanning = true;
-
+            /** Polylinie z_k→z_{k+1} (Schenkel); Kontextmenü Orbit */
+            let orbitShowLegPolyline = true;
             /** Letzter synchronisierter Fraktal-Ausschnitt (w|h|cx|cy|zoom) — Orbit-View nur bei Änderung an WebGL angleichen (sonst zerstört jedes Redraw das Orbit-Zoomen). */
             let orbitFractalViewportSyncKey = '';
             /** Geglättete Laufzeit von drawOrbitPlane (ms) — Lag-Zeile nur im Orbit-HUD */
@@ -767,8 +792,7 @@
             const LS_MB_ORBIT_LEG = 'forloop.mandelbrot.orbitLegCount';
             /** Legacy: früher „Schritt-Obergrenze“ (= Schenkel + 1 Punkt); wird beim Laden migriert */
             const LS_MB_ORBIT_STEPS_LEGACY = 'forloop.mandelbrot.orbitDrawStepsCap';
-            const LS_MB_ORBIT_LINES = 'forloop.mandelbrot.orbitShowConnectorLines';
-            const LS_MB_ORBIT_HIDE_LEGS_SCAN = 'forloop.mandelbrot.orbitHideLegsWhileScan';
+            const LS_MB_ORBIT_LEG_POLYLINE = 'forloop.mandelbrot.orbitShowLegPolyline';
             const LS_MB_MODE = 'forloop.mandelbrot.mode';
             const LS_MB_CENTER_X = 'forloop.mandelbrot.centerX';
             const LS_MB_CENTER_Y = 'forloop.mandelbrot.centerY';
@@ -902,17 +926,9 @@
                 }
             }
 
-            function persistMandelbrotOrbitConnectorLines() {
+            function persistMandelbrotOrbitLegPolyline() {
                 try {
-                    localStorage.setItem(LS_MB_ORBIT_LINES, orbitShowConnectorLines ? '1' : '0');
-                } catch (e) {
-                    /* ignore */
-                }
-            }
-
-            function persistMandelbrotOrbitHideLegsWhileScan() {
-                try {
-                    localStorage.setItem(LS_MB_ORBIT_HIDE_LEGS_SCAN, orbitHideLegsWhileScanning ? '1' : '0');
+                    localStorage.setItem(LS_MB_ORBIT_LEG_POLYLINE, orbitShowLegPolyline ? '1' : '0');
                 } catch (e) {
                     /* ignore */
                 }
@@ -938,12 +954,9 @@
                     }
                     if (migratedLegacyLeg) persistMandelbrotOrbitLeg();
                     const plane = localStorage.getItem(LS_MB_MAIN_PLANE);
-                    const lines = localStorage.getItem(LS_MB_ORBIT_LINES);
-                    if (lines === '0') orbitShowConnectorLines = false;
-                    else if (lines === '1') orbitShowConnectorLines = true;
-                    const hl = localStorage.getItem(LS_MB_ORBIT_HIDE_LEGS_SCAN);
-                    if (hl === '0') orbitHideLegsWhileScanning = false;
-                    else if (hl === '1') orbitHideLegsWhileScanning = true;
+                    const legPoly = localStorage.getItem(LS_MB_ORBIT_LEG_POLYLINE);
+                    if (legPoly === '0') orbitShowLegPolyline = false;
+                    else if (legPoly === '1') orbitShowLegPolyline = true;
                     return plane === 'FRACTAL' || plane === 'ORBIT' ? plane : null;
                 } catch (e) {
                     return null;
@@ -1159,7 +1172,11 @@
             const DEF_MB_CENTER_X = 0, DEF_MB_CENTER_Y = 0, DEF_MB_ZOOM = 1;
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
             const DEF_JULIA_X = -0.8, DEF_JULIA_Y = 0.156;
-            const DEF_MAX_ITER = 256;
+            const DEF_MAX_ITER = 500;
+            /** Schieber „Max. Iterationen“ — Shader-Schleife bis 768; JS-Zoom-Boost weiterhin bei MB_ITER_EFFECTIVE_CAP */
+            const MB_ITER_SLIDER_MIN = 32;
+            const MB_ITER_SLIDER_MAX = 500;
+            const MB_ITER_EFFECTIVE_CAP = 512;
             let maxIter = DEF_MAX_ITER, time = 0, isFlight = false;
             let mode = 'JULIA';
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
@@ -1280,7 +1297,7 @@
                     localStorage.setItem(LS_MB_JULIA_Y, String(juliaY));
                     localStorage.setItem(
                         LS_MB_MAX_ITER,
-                        String(Math.max(32, Math.min(256, Math.round(maxIter))))
+                        String(Math.max(MB_ITER_SLIDER_MIN, Math.min(MB_ITER_SLIDER_MAX, Math.round(maxIter))))
                     );
                 } catch (e) {
                     /* ignore */
@@ -1322,6 +1339,12 @@
                 }
                 syncMbJuliaSlidersFromFractalCenter();
                 persistMandelbrotFractalState();
+            }
+
+            function syncFlightButtonForMainPlane() {
+                const bf = document.querySelector('#side-panel #btn-flight');
+                if (!bf) return;
+                bf.disabled = mainPlane === 'ORBIT';
             }
 
             function stopOrbitRedrawLoop() {
@@ -1478,12 +1501,11 @@
                 if (orbitScanActive) hudBase += `\n${CyberI18n.get('fractal.orbit_scan_running')}`;
                 const bodyHtml = hudBase.split('\n').map((ln) => orbitHudEscapeHtml(ln)).join('<br>');
                 const lagWarnMs = 48;
-                let lagHtml = '';
-                if (orbitHudFrameMsSmooth >= 0.5) {
-                    const lagCls =
-                        orbitHudFrameMsSmooth >= lagWarnMs ? 'orbit-hud-lag orbit-hud-lag--warn' : 'orbit-hud-lag';
-                    lagHtml = `<br><span class="${lagCls}">${orbitHudFrameMsSmooth.toFixed(0)} ms · Bild</span>`;
-                }
+                const msReady = orbitHudFrameMsSmooth >= 0.5;
+                const lagCls =
+                    msReady && orbitHudFrameMsSmooth >= lagWarnMs ? 'orbit-hud-lag orbit-hud-lag--warn' : 'orbit-hud-lag';
+                const msTxt = msReady ? orbitHudFrameMsSmooth.toFixed(0) : '…';
+                const lagHtml = `<br><span class="${lagCls}">${msTxt} ms · Bild</span>`;
                 if (orbitScanActive) {
                     const nHits = orbitScanStableHits.length;
                     const stableCls = nHits === 0 ? 'orbit-hud-stable--zero' : 'orbit-hud-stable--hits';
@@ -1611,9 +1633,7 @@
                     : 'rgba(229, 57, 53, 0.88)';
 
                 const nSeg = pts.length - 1;
-                const legsHiddenForScan = orbitScanActive && orbitHideLegsWhileScanning;
-                /** Schenkel — beim Scan optional aus (Schalter Kontextmenü). */
-                if (!legsHiddenForScan) {
+                if (orbitShowLegPolyline) {
                     for (let i = 0; i < nSeg; i++) {
                         const t = nSeg <= 1 ? 1 : i / (nSeg - 1);
                         ctx.strokeStyle = orbitStroke;
@@ -1629,7 +1649,7 @@
 
                 const ni = Math.max(1, pts.length - 1);
                 const epsNear = 1e-10;
-                if (orbitShowConnectorLines && !legsHiddenForScan) {
+                if (orbitShowLegPolyline) {
                     ctx.fillStyle = orbitDotFill;
                     pts.forEach((p, i) => {
                         if (i === 0) return;
@@ -1659,7 +1679,7 @@
                     ctx.restore();
                 }
 
-                if (!orbitScanActive) {
+                if (orbitShowLegPolyline) {
                     drawHandle(cr, ci, true);
                 }
                 if (mode === 'JULIA') {
@@ -1671,7 +1691,7 @@
                 ctx.font = 'bold 12px Orbitron,sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                if (!orbitScanActive) {
+                if (orbitShowLegPolyline) {
                     ctx.fillText('c', cc.mapX(cr) + 9, cc.mapY(ci) - 7);
                 }
                 if (mode === 'JULIA') {
@@ -1753,14 +1773,14 @@
                     ctx.restore();
                 }
 
-                syncOrbitHud();
-                syncMbOrbitStableCountPanel();
-                syncMbFractalFormulaOverlay();
                 const orbitDrawDt = performance.now() - orbitDrawT0;
                 orbitHudFrameMsSmooth =
                     orbitHudFrameMsSmooth > 0
                         ? orbitHudFrameMsSmooth * 0.82 + orbitDrawDt * 0.18
                         : orbitDrawDt;
+                syncOrbitHud();
+                syncMbOrbitStableCountPanel();
+                syncMbFractalFormulaOverlay();
             }
 
             function setupOrbitCyberCanvas() {
@@ -1796,9 +1816,13 @@
                     const dz = Math.hypot(mx - z0x_, my - z0y_);
                     if (mode === 'MANDELBROT') {
                         if (orbitScanActive) return null;
+                        if (!orbitShowLegPolyline) return null;
                         return dc < tol ? 'c' : null;
                     }
                     if (orbitScanActive) {
+                        return dz < tol ? 'z0' : null;
+                    }
+                    if (!orbitShowLegPolyline) {
                         return dz < tol ? 'z0' : null;
                     }
                     if (dc < tol && dz < tol) return dc <= dz ? 'c' : 'z0';
@@ -1887,21 +1911,11 @@
                             },
                         },
                         {
-                            label: CyberI18n.get('fractal.orbit_connector_lines'),
-                            checked: orbitShowConnectorLines,
+                            label: CyberI18n.get('fractal.orbit_leg_polyline'),
+                            checked: orbitShowLegPolyline,
                             onchange: (v) => {
-                                orbitShowConnectorLines = !!v;
-                                persistMandelbrotOrbitConnectorLines();
-                                CyberCanvasInstance.needsRedraw = true;
-                                drawOrbitPlane();
-                            },
-                        },
-                        {
-                            label: CyberI18n.get('fractal.orbit_hide_legs_while_scan'),
-                            checked: orbitHideLegsWhileScanning,
-                            onchange: (v) => {
-                                orbitHideLegsWhileScanning = !!v;
-                                persistMandelbrotOrbitHideLegsWhileScan();
+                                orbitShowLegPolyline = !!v;
+                                persistMandelbrotOrbitLegPolyline();
                                 CyberCanvasInstance.needsRedraw = true;
                                 drawOrbitPlane();
                             },
@@ -1946,6 +1960,7 @@
                 persistMandelbrotMainPlane();
                 syncMbOrbitStableCountPanel();
                 syncMbFractalFormulaOverlay();
+                syncFlightButtonForMainPlane();
             }
 
             /** 0 bei zoom≈1, 1 bei ZOOM_MAX — Tiefenmaß in Log-Skala */
@@ -1960,8 +1975,8 @@
              */
             function fractalShaderTargetMaxIter() {
                 const depthU = zoomDepthLogUnit(zoom);
-                const boostF = (512 - maxIter) * 0.9 * depthU;
-                return Math.min(512, Math.max(32, Math.round(maxIter + boostF)));
+                const boostF = (MB_ITER_EFFECTIVE_CAP - maxIter) * 0.9 * depthU;
+                return Math.min(MB_ITER_EFFECTIVE_CAP, Math.max(MB_ITER_SLIDER_MIN, Math.round(maxIter + boostF)));
             }
 
             /**
@@ -2042,7 +2057,7 @@
                     juliaX = lerp(f.jx, to.jx, ep);
                     juliaY = lerp(f.jy, to.jy, ep);
                 }
-                maxIter = Math.max(32, Math.min(256, Math.round(lerp(f.mi, to.mi, ep))));
+                maxIter = Math.max(MB_ITER_SLIDER_MIN, Math.min(MB_ITER_SLIDER_MAX, Math.round(lerp(f.mi, to.mi, ep))));
                 updateSliderMountVisual('jx-mount', juliaX * 1000);
                 updateSliderMountVisual('jy-mount', juliaY * 1000);
                 updateSliderMountVisual('iter-mount', maxIter);
@@ -2060,8 +2075,8 @@
                     setRangeInMount('iter-mount', to.mi);
                     const uDone = zoomDepthLogUnit(zoom);
                     smoothEffectiveMaxIter = Math.min(
-                        512,
-                        Math.max(32, maxIter + (512 - maxIter) * 0.9 * uDone)
+                        MB_ITER_EFFECTIVE_CAP,
+                        Math.max(MB_ITER_SLIDER_MIN, maxIter + (MB_ITER_EFFECTIVE_CAP - maxIter) * 0.9 * uDone)
                     );
                     lastEffectiveMaxIter = Math.round(smoothEffectiveMaxIter);
                     persistMandelbrotFractalState();
@@ -2076,8 +2091,8 @@
             }
 
             function formatZoomFactor(z) {
-                if (!Number.isFinite(z) || z <= 0) return '1,000';
-                return z.toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+                if (!Number.isFinite(z) || z <= 0) return '1';
+                return Math.round(z).toLocaleString('de-DE', { maximumFractionDigits: 0 });
             }
 
             function syncFraktalReadouts() {
@@ -2221,11 +2236,11 @@
 
                 zoom = clampZoom(zoom);
                 const depthU = zoomDepthLogUnit(zoom);
-                const boostF = (512 - maxIter) * 0.9 * depthU;
-                const targetIter = Math.min(512, Math.max(32, maxIter + boostF));
+                const boostF = (MB_ITER_EFFECTIVE_CAP - maxIter) * 0.9 * depthU;
+                const targetIter = Math.min(MB_ITER_EFFECTIVE_CAP, Math.max(MB_ITER_SLIDER_MIN, maxIter + boostF));
                 const tau = 0.14 * TICK_VS_LEGACY_60HZ;
                 smoothEffectiveMaxIter += (targetIter - smoothEffectiveMaxIter) * tau;
-                smoothEffectiveMaxIter = Math.min(512, Math.max(32, smoothEffectiveMaxIter));
+                smoothEffectiveMaxIter = Math.min(MB_ITER_EFFECTIVE_CAP, Math.max(MB_ITER_SLIDER_MIN, smoothEffectiveMaxIter));
                 lastEffectiveMaxIter = Math.round(smoothEffectiveMaxIter);
 
                 time += 0.004 * TICK_VS_LEGACY_60HZ;
@@ -2256,11 +2271,11 @@
                 <div id="fraktal-readouts-mount" class="stats-grid fraktal-readouts">
                     <div class="stats-card">
                         <span class="stats-label">${CyberI18n.get('fractal.detail')}</span>
-                        <span id="readout-detail" class="stats-val">256</span>
+                        <span id="readout-detail" class="stats-val">500</span>
                     </div>
                     <div class="stats-card">
                         <span class="stats-label">${CyberI18n.get('fractal.zoom')}</span>
-                        <span id="readout-zoom" class="stats-val">1,000</span>
+                        <span id="readout-zoom" class="stats-val">1</span>
                     </div>
                 </div>
             `, 'var(--neon-blue)');
@@ -2279,17 +2294,20 @@
                 persistMandelbrotFractalState();
             }, 'var(--neon-blue)');
 
-            CyberUI.createSlider('iter-mount', CyberI18n.get('fractal.iterations'), 32, 256, 256, 1, (v) => {
+            CyberUI.createSlider('iter-mount', CyberI18n.get('fractal.iterations'), MB_ITER_SLIDER_MIN, MB_ITER_SLIDER_MAX, DEF_MAX_ITER, 1, (v) => {
                 abortResetAnim();
                 maxIter = parseInt(v, 10);
                 const u = zoomDepthLogUnit(zoom);
-                smoothEffectiveMaxIter = Math.min(512, Math.max(32, maxIter + (512 - maxIter) * 0.9 * u));
+                smoothEffectiveMaxIter = Math.min(
+                    MB_ITER_EFFECTIVE_CAP,
+                    Math.max(MB_ITER_SLIDER_MIN, maxIter + (MB_ITER_EFFECTIVE_CAP - maxIter) * 0.9 * u)
+                );
                 persistMandelbrotFractalState();
             }, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', CyberI18n.get('fractal.navigation'), `
                 <div class="fraktal-seg-row">
-                    <button type="button" id="btn-flight" class="fraktal-seg-btn">${CyberI18n.get('fractal.flight_start')}</button>
+                    <button type="button" id="btn-flight" class="fraktal-seg-btn" disabled>${CyberI18n.get('fractal.flight_start')}</button>
                     <button type="button" id="btn-reset" class="fraktal-seg-btn">${CyberI18n.get('fractal.reset')}</button>
                 </div>
             `, 'var(--neon-blue)');
@@ -2389,6 +2407,7 @@
 
                     if (e.code !== 'Space' && e.key !== ' ') return;
                     if (inField) return;
+                    if (t && t.closest && t.closest('button')) return;
                     if (mainPlane === 'ORBIT') {
                         if (e.repeat) return;
                         e.preventDefault();
@@ -2396,7 +2415,6 @@
                         return;
                     }
                     if (mainPlane !== 'FRACTAL') return;
-                    if (t && t.closest && t.closest('button')) return;
                     e.preventDefault();
                     btnFlightEl?.click();
                 },
@@ -2589,12 +2607,12 @@
                     const jy = rf(LS_MB_JULIA_Y, juliaY);
                     juliaX = Math.max(-2, Math.min(2, jx));
                     juliaY = Math.max(-2, Math.min(2, jy));
-                    maxIter = ri(LS_MB_MAX_ITER, maxIter, 32, 256);
+                    maxIter = ri(LS_MB_MAX_ITER, maxIter, MB_ITER_SLIDER_MIN, MB_ITER_SLIDER_MAX);
 
                     const u = zoomDepthLogUnit(zoom);
                     smoothEffectiveMaxIter = Math.min(
-                        512,
-                        Math.max(32, maxIter + (512 - maxIter) * 0.9 * u)
+                        MB_ITER_EFFECTIVE_CAP,
+                        Math.max(MB_ITER_SLIDER_MIN, maxIter + (MB_ITER_EFFECTIVE_CAP - maxIter) * 0.9 * u)
                     );
                     lastEffectiveMaxIter = Math.round(smoothEffectiveMaxIter);
 

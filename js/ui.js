@@ -21,6 +21,7 @@ class CyberUI {
                 setTimeout(tryInject, 100);
                 return;
             }
+            CyberUI.applyMiniRailMenuLabel();
             CyberUI.injectContactHeartButton();
             if (CyberUI.injectCoffeeButton()) {
                 console.log("☕ Cyber-Coffee injected.");
@@ -34,6 +35,18 @@ class CyberUI {
         // Inject the global donate modal structure
         this.injectDonateModal();
         this.installAppScreenshot();
+    }
+
+    /** Sidebar hamburger: HTML placeholders are often DE/EN; sync to active CyberI18n. */
+    static applyMiniRailMenuLabel() {
+        const rail = document.getElementById('mini-rail');
+        if (!rail || typeof CyberI18n === 'undefined' || typeof CyberI18n.get !== 'function') return;
+        const label = CyberI18n.get('ui.toggle_menu');
+        if (!label || label === 'ui.toggle_menu') return;
+        rail.querySelectorAll('.nav-btn[onclick*="toggleSidebar"]').forEach((el) => {
+            el.setAttribute('title', label);
+            el.setAttribute('aria-label', label);
+        });
     }
 
     static injectCoffeeButton() {
@@ -992,22 +1005,51 @@ class CyberUI {
             }
             .cyber-slider {
                 -webkit-appearance: none;
+                appearance: none;
                 width: 100%;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 2px;
-                outline: none;
+                max-width: 100%;
+                min-height: 28px;
+                padding: 10px 0;
                 margin: 8px 0;
+                background: transparent;
+                border-radius: 0;
+                outline: none;
+                cursor: pointer;
+            }
+            .cyber-slider::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.22);
+                border-radius: 3px;
+                border: none;
             }
             .cyber-slider::-webkit-slider-thumb {
                 -webkit-appearance: none;
+                appearance: none;
                 width: 16px;
                 height: 16px;
                 background: var(--accent, var(--neon-blue));
                 border-radius: 50%;
                 cursor: pointer;
                 box-shadow: 0 0 10px var(--accent, var(--neon-blue));
-                transition: all 0.2s ease;
+                margin-top: -5px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .cyber-slider::-moz-range-track {
+                width: 100%;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.22);
+                border-radius: 3px;
+                border: none;
+            }
+            .cyber-slider::-moz-range-thumb {
+                width: 16px;
+                height: 16px;
+                background: var(--accent, var(--neon-blue));
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 0 10px var(--accent, var(--neon-blue));
             }
             .cyber-slider::-webkit-slider-thumb:hover {
                 transform: scale(1.2);
@@ -1630,7 +1672,6 @@ class CyberUI {
                 });
                 /* Sonst schließt der Fenster-mousedown-Dismiss das Menü oft vor checkbox.change */
                 checkboxWrapper.addEventListener('mousedown', (ev) => ev.stopPropagation());
-                checkboxWrapper.addEventListener('click', (ev) => ev.stopPropagation());
                 menu.appendChild(checkboxWrapper);
             } else {
                 // Action Item (No Checkbox)

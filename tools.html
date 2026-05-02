@@ -534,8 +534,7 @@
     </video>
 
     <div class="tools-panel">
-    <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zurück"
-        aria-label="Werkzeug-Übersicht schließen und zur Labor-Auswahl">
+    <a href="index.html" class="tools-hub-close" id="tools-hub-close" title="Zurück" aria-label="">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
             stroke-width="2.2" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -551,8 +550,8 @@
     <!-- Labor-Scan + Universe (Galaxy) -->
     <div class="search-scan-row">
         <div id="search-mount"></div>
-        <a href="universe.html" class="universe-galaxy-btn" id="universe-btn" title="Universe · Labor-Galerie im Weltraum"
-            aria-label="Universe · Labor-Galerie öffnen">
+        <a href="universe.html" class="universe-galaxy-btn" id="universe-btn" title=""
+            aria-label="">
             <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&amp;w=600&amp;auto=format&amp;fit=crop"
                 alt="" width="400" height="400" loading="lazy" decoding="async">
         </a>
@@ -568,7 +567,7 @@
     </div>
     </div>
 
-    <footer role="contentinfo" aria-label="Fußzeile">
+    <footer role="contentinfo" id="tools-footer" aria-label="">
         &copy; 2026 DR. MICHAEL R. ALVERS
         <a href="credits.html" id="footer-credits">CREDITS</a>
         <a href="impressum.html" id="footer-impressum">IMPRESSUM</a>
@@ -579,11 +578,30 @@
     <script src="js/labs-config.js"></script>
 
     <script>
-        // Init I18n BEFORE doing any UI stuff
+        // Sprache: übernimmt CyberI18n.current aus i18n.js (inkl. Browser-Sprache). Nur ?lang= in der URL überschreibt.
         const urlParams = new URLSearchParams(window.location.search);
-        const lang = urlParams.get('lang') || localStorage.getItem('cyber-lab-lang') || 'de';
-        if (CyberI18n && CyberI18n.translations[lang]) {
-            CyberI18n.current = lang;
+        const qLang = urlParams.get('lang');
+        if (qLang) {
+            const L = String(qLang).toLowerCase();
+            if (CyberI18n && ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'].includes(L) && CyberI18n.translations[L]) {
+                CyberI18n.current = L;
+                try {
+                    localStorage.setItem('cyber-lab-lang', L);
+                } catch (e) {}
+            }
+        }
+
+        function toolsLangSuffix() {
+            const L = typeof CyberI18n !== 'undefined' ? CyberI18n.current : '';
+            if (!L || !['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'].includes(L)) return '';
+            return 'lang=' + encodeURIComponent(L);
+        }
+
+        function withLang(href) {
+            if (!href || /^https?:\/\//i.test(href)) return href;
+            const q = toolsLangSuffix();
+            if (!q) return href;
+            return href + (href.includes('?') ? '&' : '?') + q;
         }
 
         function renderLauncher(filterText = "") {
@@ -607,12 +625,21 @@
                     (typeof CyberI18n !== 'undefined' && CyberI18n.get('index.ui.tools_subtitle_word')) ||
                     'Werkzeuge';
                 const safeWord = word === 'index.ui.tools_subtitle_word' ? 'Werkzeuge' : word;
-                subtitle.textContent =
-                    filterText === '' ? `${count} ${safeWord}` : `${count} TREFFER GEFUNDEN`;
+                if (filterText === '') {
+                    subtitle.textContent = `${count} ${safeWord}`;
+                } else {
+                    const hitsRaw = CyberI18n.get('index.ui.tools_filter_hits');
+                    const hitsPhrase = hitsRaw === 'index.ui.tools_filter_hits' ? 'TREFFER GEFUNDEN' : hitsRaw;
+                    subtitle.textContent = `${count} ${hitsPhrase}`;
+                }
             }
 
             if (count === 0) {
-                grid.innerHTML = `<div class="no-results">Keine Treffer für "${filterText}"</div>`;
+                const nrRaw = CyberI18n.get('index.ui.tools_no_results', { query: filterText });
+                const noRes = nrRaw === 'index.ui.tools_no_results'
+                    ? `Keine Treffer für „${filterText}“`
+                    : nrRaw;
+                grid.innerHTML = `<div class="no-results">${noRes}</div>`;
                 return 0;
             }
 
@@ -622,7 +649,9 @@
                                           .sort((a, b) => {
                                               const titleA = CyberI18n.get('index.labs.' + a.id + '.title') || a.title || "";
                                               const titleB = CyberI18n.get('index.labs.' + b.id + '.title') || b.title || "";
-                                              return titleA.localeCompare(titleB);
+                                              return titleA.localeCompare(titleB, CyberI18n.current || undefined, {
+                                                  sensitivity: 'base'
+                                              });
                                           });
             
             const sortedLabs = intro ? [intro, ...otherLabs] : otherLabs;
@@ -630,8 +659,9 @@
             grid.innerHTML = sortedLabs.map(lab => {
                 const muteChrome = lab.id === 'mandelbrot-deep' ? ' tool-button--mute-chrome' : '';
                 const locTitle = CyberI18n.get('index.labs.' + lab.id + '.title') || lab.title;
+                const toolHref = withLang(lab.href);
                 return `
-                <a href="${lab.href}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">
+                <a href="${toolHref}" target="_blank" class="tool-button color-${lab.color || 'blue'}${muteChrome}">
                     <div class="tool-icon">${lab.icon}</div>
                     <div class="tool-info">
                         <div class="tool-name">${locTitle}</div>
@@ -690,17 +720,39 @@
             window.addEventListener('pointerdown', tryPlay, { once: true });
         }
 
-        // Use Central Branding for consistent navigation & QR feature
-        const mainTitleText = "Doc Alvers Mathe-Labor";
+        const headerTitleRaw = CyberI18n.get('index.header.title');
+        const mainTitleText =
+            headerTitleRaw === 'index.header.title' ? 'Doc Alvers Mathe-Labor' : headerTitleRaw;
+        const docTitleRaw = CyberI18n.get('index.ui.tools_doc_title');
+        const docTitle =
+            docTitleRaw === 'index.ui.tools_doc_title' ? mainTitleText : docTitleRaw;
         const toolsWord =
             (typeof CyberI18n !== 'undefined' && CyberI18n.get('index.ui.tools_subtitle_word')) || 'Werkzeuge';
         const subtitleText =
             `${toolCount} ${toolsWord === 'index.ui.tools_subtitle_word' ? 'Werkzeuge' : toolsWord}`;
 
-        document.getElementById('main-title').textContent = mainTitleText;
-        document.title = mainTitleText;
-        if (document.getElementById('tools-hub-close')) document.getElementById('tools-hub-close').title = CyberI18n.get('index.view.back_title') || "Zurück";
-        if (document.getElementById('universe-btn')) document.getElementById('universe-btn').title = CyberI18n.get('index.ui.universe_tip') || "Universe";
+        const mainTitleEl = document.getElementById('main-title');
+        if (mainTitleEl) mainTitleEl.textContent = mainTitleText;
+        document.title = docTitle;
+        const closeEl = document.getElementById('tools-hub-close');
+        if (closeEl) {
+            closeEl.href = withLang('index.html');
+            closeEl.title = CyberI18n.get('index.view.back_title') || 'Zurück';
+            const closeAria = CyberI18n.get('index.ui.tools_close_aria');
+            if (closeAria !== 'index.ui.tools_close_aria') closeEl.setAttribute('aria-label', closeAria);
+        }
+        const universeBtn = document.getElementById('universe-btn');
+        if (universeBtn) {
+            universeBtn.href = withLang('universe.html');
+            universeBtn.title = CyberI18n.get('index.ui.universe_tip') || 'Universe';
+            const uAria = CyberI18n.get('index.ui.tools_universe_aria');
+            if (uAria !== 'index.ui.tools_universe_aria') universeBtn.setAttribute('aria-label', uAria);
+        }
+        const footEl = document.getElementById('tools-footer');
+        if (footEl) {
+            const fAria = CyberI18n.get('index.ui.tools_footer_aria');
+            if (fAria !== 'index.ui.tools_footer_aria') footEl.setAttribute('aria-label', fAria);
+        }
 
         CyberBranding.init({
             title: mainTitleText,
@@ -711,15 +763,21 @@
 
         const fc = document.getElementById('footer-credits');
         const fi = document.getElementById('footer-impressum');
-        if (fc) fc.textContent = CyberI18n.get('index.ui.credits') || 'CREDITS';
-        if (fi) fi.textContent = CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+        if (fc) {
+            fc.textContent = CyberI18n.get('index.ui.credits') || 'CREDITS';
+            fc.href = withLang('credits.html');
+        }
+        if (fi) {
+            fi.textContent = CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
+            fi.href = withLang('impressum.html');
+        }
 
         document.addEventListener('keydown', (e) => {
             if (e.code !== 'Escape') return;
             const t = e.target;
             if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
             e.preventDefault();
-            window.location.href = 'index.html';
+            window.location.href = withLang('index.html');
         });
     </script>
 </body>

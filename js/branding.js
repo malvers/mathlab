@@ -232,6 +232,12 @@ const CyberBranding = {
             if (config.skipNavigation === true) skipNavigation = true;
         }
 
+        title =
+            typeof CyberI18n !== "undefined" &&
+            typeof CyberI18n.getBrandMastheadTitle === "function"
+                ? CyberI18n.getBrandMastheadTitle()
+                : "Doc Alvers Mathe-Labor";
+
         this._skipNavigation = skipNavigation;
 
         console.log(`CyberBranding v5.3.8 Initialized | ${title} : ${subtitle}`);
