@@ -310,13 +310,18 @@
                 rgba(0, 210, 255, 0.06)
             );
         }
-        /* Multi-line: anchored at top (no upward jump). Single keyword: vertically centered */
+        /* Stacked lines: --cw-stack-pad-top + flex-start so line 1 never shifts when more lines spawn;
+           --cw-fit-scale shrinks when content exceeds .cw-play (probe uses same settled metrics). */
         #catching-words-panel .cw-stack {
             position: absolute;
             left: 0;
             right: 0;
-            top: clamp(96px, 14vh, 180px);
-            transform: none;
+            top: 0;
+            --cw-fit-scale: 1;
+            --cw-stack-pad-top: 0px;
+            margin-top: var(--cw-stack-pad-top);
+            transform: scale(var(--cw-fit-scale, 1));
+            transform-origin: top center;
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
@@ -326,17 +331,16 @@
             max-width: none;
             box-sizing: border-box;
             gap: 24px;
-            padding: 0 6px;
+            padding: 0 clamp(6px, 2vw, 16px);
             isolation: isolate;
             overflow: visible;
         }
-        #catching-words-panel .cw-stack.cw-stack-centered {
-            top: 50%;
-            transform: translateY(-50%);
-            justify-content: center;
-        }
-        /* Intro end: left-aligned; no automatic width/scaleX adjustment */
         #catching-words-panel .cw-stack.cw-stack-align-left {
+            top: clamp(96px, 14vh, 180px);
+            margin-top: 0;
+            transform: scale(var(--cw-fit-scale, 1));
+            transform-origin: top center;
+            justify-content: flex-start;
             align-items: flex-start;
             padding-left: clamp(20px, 7vw, 140px);
             padding-right: clamp(12px, 4vw, 48px);
@@ -619,6 +623,7 @@
         #catching-words-panel .cw-stack.cw-stack-fullscreen-mode {
             transform: none !important;
             top: 0 !important;
+            margin-top: 0 !important;
             height: 100vh !important;
             justify-content: center !important;
         }
@@ -911,6 +916,8 @@
     </nav>
 
     <script src="resources/loc.js"></script>
+    <script src="js/labs-icons.js"></script>
+    <script src="js/labs-config.js"></script>
     <script>
         /** Intro dramaturgy language — same codes as CyberI18n (de, en, es, fr, it, pt, sw, tr). */
         window.resolveIntroDramaturgieLang = function () {
@@ -1025,6 +1032,201 @@
         let cwSectionIndex = 0;
         let cwSequence = cwSections[0];
         let cwAnimSec = 4;
+        /** Layout constants — match settled .falling-word / .cw-emoji (#catching-words-panel). */
+        const CW_STACK_LAYOUT_GAP_PX = 24;
+        const CW_WORD_LINE_HEIGHT = 1.12;
+        const CW_WORD_SETTLED_LETTER_PX = 12;
+        const CW_WORD_SETTLED_SCALE = 0.9;
+        const CW_EMOJI_SETTLED_SCALE = 0.92;
+
+        /** Debounced: re-run anticipation fit (e.g. window resize). */
+        let cwStackFitRaf = null;
+        function scheduleCwStackFit() {
+            if (cwStackFitRaf != null) cancelAnimationFrame(cwStackFitRaf);
+            cwStackFitRaf = requestAnimationFrame(() => {
+                cwStackFitRaf = null;
+                if (cwRunning && Array.isArray(cwSequence)) precomputeCwStackFitFromSequence(cwSequence);
+            });
+        }
+
+        function cwSequenceHasFastFullscreenMedia(seq) {
+            if (!Array.isArray(seq)) return false;
+            return seq.some(
+                (e) => e && e.fast && (e.kind === 'media-image' || e.kind === 'media-video')
+            );
+        }
+
+        function collectCwMeasurePlan(seq) {
+            let alignLeft = false;
+            const items = [];
+            for (let i = 0; i < seq.length; i++) {
+                const e = seq[i];
+                if (!e) continue;
+                if (e.kind === 'stack-layout') {
+                    alignLeft = String(e.align || '').toLowerCase() === 'left';
+                    continue;
+                }
+                if (e.kind === 'pause' || e.kind === 'stop-play-all' || e.kind === 'sfx') continue;
+                if (e.kind === 'nav') {
+                    items.push({ t: 'nav', label: String(e.label || 'LINK') });
+                    continue;
+                }
+                if (e.kind === 'emoji') {
+                    items.push({ t: 'emoji', text: String(e.text || '').trim(), pt: e.fontSizePt });
+                    continue;
+                }
+                if (e.kind === 'media-image' || e.kind === 'media-video') {
+                    items.push({ t: 'media', fast: !!e.fast });
+                    continue;
+                }
+                if (e.text != null && String(e.text).trim() !== '') {
+                    const lab = String(e.text).trim();
+                    const isDomain = /^docalvers\.[a-z]{2}$/i.test(lab);
+                    items.push({ t: 'text', text: lab, pt: e.fontSizePt, isDomain: !!isDomain });
+                }
+            }
+            return { alignLeft, items };
+        }
+
+        function precomputeCwStackFitFromSequence(sequence) {
+            const stack = document.getElementById('cw-stack');
+            const play = stack && stack.closest('.cw-play');
+            if (!stack || !play || !document.body.classList.contains('mode-catching-words')) return;
+            if (stack.classList.contains('cw-stack-fullscreen-mode') || cwSequenceHasFastFullscreenMedia(sequence)) {
+                stack.style.setProperty('--cw-fit-scale', '1');
+                stack.style.removeProperty('--cw-stack-pad-top');
+                return;
+            }
+
+            const plan = collectCwMeasurePlan(sequence);
+            if (!plan.items.length) {
+                stack.style.setProperty('--cw-fit-scale', '1');
+                stack.style.removeProperty('--cw-stack-pad-top');
+                return;
+            }
+
+            const cs = getComputedStyle(play);
+            const ptp = parseFloat(cs.paddingTop) || 0;
+            const pbp = parseFloat(cs.paddingBottom) || 0;
+            const pl = parseFloat(cs.paddingLeft) || 0;
+            const pr = parseFloat(cs.paddingRight) || 0;
+            const availW = Math.max(64, play.clientWidth - pl - pr);
+            const playRect = play.getBoundingClientRect();
+            const controlsEl = document.querySelector('.intro-playback-controls');
+            const ctrlBottom = controlsEl ? controlsEl.getBoundingClientRect().bottom : playRect.top;
+            const GAP_BELOW_CONTROLS = 12;
+            const bandTopGlobal = Math.max(playRect.top + ptp, ctrlBottom + GAP_BELOW_CONTROLS);
+            const bandBottomGlobal = playRect.bottom - pbp;
+            const stageH = Math.max(64, bandBottomGlobal - bandTopGlobal);
+            const margin = Math.max(16, Math.min(28, Math.round(stageH * 0.04)));
+            const sidePad = Math.max(6, Math.min(16, Math.round(availW * 0.02)));
+            const innerMaxW = Math.max(80, availW - sidePad * 2);
+
+            const probe = document.createElement('div');
+            probe.setAttribute('data-cw-fit-probe', '1');
+            probe.style.cssText = [
+                'position:fixed',
+                'left:-99999px',
+                'top:0',
+                'visibility:hidden',
+                'pointer-events:none',
+                'z-index:-1',
+                'box-sizing:border-box',
+                'display:flex',
+                'flex-direction:column',
+                'flex-wrap:nowrap',
+                'gap:' + CW_STACK_LAYOUT_GAP_PX + 'px',
+                'align-items:' + (plan.alignLeft ? 'flex-start' : 'center'),
+                'width:' + availW + 'px',
+                'padding:0 ' + sidePad + 'px',
+            ].join(';');
+
+            for (let j = 0; j < plan.items.length; j++) {
+                const item = plan.items[j];
+                if (item.t === 'text') {
+                    const ptSz0 = item.pt != null && Number.isFinite(item.pt) ? item.pt : 80;
+                    const effPt = item.isDomain ? ptSz0 : ptSz0 * CW_WORD_SETTLED_SCALE;
+                    const row = document.createElement('div');
+                    row.style.cssText =
+                        'font-family:Orbitron,sans-serif;font-weight:700;line-height:' +
+                        CW_WORD_LINE_HEIGHT +
+                        ';white-space:nowrap;width:max-content;max-width:' +
+                        innerMaxW +
+                        'px;overflow:hidden;text-overflow:clip;text-transform:' +
+                        (item.isDomain ? 'none' : 'uppercase') +
+                        ';letter-spacing:' +
+                        (item.isDomain ? 'normal' : CW_WORD_SETTLED_LETTER_PX + 'px') +
+                        ';font-size:' +
+                        effPt +
+                        'pt;';
+                    row.textContent = item.text;
+                    probe.appendChild(row);
+                } else if (item.t === 'emoji') {
+                    const ptSz0 = item.pt != null && Number.isFinite(item.pt) ? item.pt : 80;
+                    const effPt = ptSz0 * CW_EMOJI_SETTLED_SCALE;
+                    const row = document.createElement('div');
+                    row.style.cssText =
+                        "font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',emoji,sans-serif;font-weight:400;" +
+                        'line-height:1;white-space:nowrap;font-size:' +
+                        effPt +
+                        'pt;';
+                    row.textContent = item.text;
+                    probe.appendChild(row);
+                } else if (item.t === 'nav') {
+                    const row = document.createElement('div');
+                    row.textContent = item.label;
+                    row.style.cssText =
+                        'display:inline-flex;font-family:Orbitron,sans-serif;font-size:1.05rem;font-weight:600;' +
+                        'letter-spacing:0.28em;text-indent:0.28em;text-transform:uppercase;' +
+                        'padding:1rem 2.4rem;border:2px solid rgba(0,210,255,0.9);box-sizing:border-box;white-space:nowrap;';
+                    probe.appendChild(row);
+                } else if (item.t === 'media') {
+                    if (item.fast) continue;
+                    const mh = Math.min(Math.round(stageH * 0.46), 520);
+                    const mw = Math.min(960, Math.round(availW * 0.92));
+                    const row = document.createElement('div');
+                    row.style.cssText = 'width:' + mw + 'px;height:' + mh + 'px;flex-shrink:0;';
+                    probe.appendChild(row);
+                }
+            }
+
+            document.body.appendChild(probe);
+            const h = probe.scrollHeight;
+            let w = probe.scrollWidth;
+            try {
+                probe.querySelectorAll(':scope > *').forEach((el) => {
+                    const ow = el.offsetWidth;
+                    if (ow > w) w = ow;
+                });
+            } catch (err) {
+                const kids = probe.querySelectorAll('div');
+                for (let k = 0; k < kids.length; k++) {
+                    try {
+                        const ow = kids[k].offsetWidth;
+                        if (ow > w) w = ow;
+                    } catch (e2) {}
+                }
+            }
+            document.body.removeChild(probe);
+
+            if (h < 2 || w < 2) {
+                stack.style.setProperty('--cw-fit-scale', '1');
+                stack.style.removeProperty('--cw-stack-pad-top');
+                return;
+            }
+            let s = Math.min(1, (stageH - margin) / h, (availW - margin) / w);
+            s = Math.max(0.18, Math.min(1, s));
+            const scaledH = s * h;
+            if (stack.classList.contains('cw-stack-align-left')) {
+                stack.style.removeProperty('--cw-stack-pad-top');
+            } else {
+                const playContentTopGlobal = playRect.top;
+                const padTop = Math.max(0, bandTopGlobal - playContentTopGlobal + (stageH - scaledH) / 2);
+                stack.style.setProperty('--cw-stack-pad-top', padTop + 'px');
+            }
+            stack.style.setProperty('--cw-fit-scale', String(s));
+        }
+
         let cwSpawnMs = 700;
         let cwFastSpawnMs = 1200;
         let cwSpawnTimer = null;
@@ -1492,7 +1694,6 @@
             cwPlayAllActive = true;
             cwSectionIndex = 0;
             cwSequence = cwSections[0] || [];
-            syncCwStackVerticalAlign();
             stopCatchingWords();
             startCatchingWords();
             cwDbgStartStopwatch();
@@ -1507,6 +1708,8 @@
                     stack.innerHTML = '';
                     stack.classList.remove('cw-stack-align-left');
                     stack.classList.remove('cw-stack-fullscreen-mode');
+                    stack.style.setProperty('--cw-fit-scale', '1');
+                    stack.style.removeProperty('--cw-stack-pad-top');
                 }
                 cwPlayAllTimer = setTimeout(() => {
                     cwPlayAllTimer = null;
@@ -1726,6 +1929,7 @@
                 const align = String(entry.align || 'center').toLowerCase();
                 if (align === 'left') playStack.classList.add('cw-stack-align-left');
                 else playStack.classList.remove('cw-stack-align-left');
+                precomputeCwStackFitFromSequence(cwSequence);
                 return;
             }
 
@@ -1812,6 +2016,7 @@
                 if (entry.fast) {
                     wrap.classList.add('cw-media-fast');
                     playStack.classList.add('cw-stack-fullscreen-mode');
+                    playStack.style.removeProperty('--cw-stack-pad-top');
                     /* Previously: all past frames visibility:hidden at once → gap until new image loads
                        (bg video / black flash). Old screenshots stay visible until load (underneath). */
                 }
@@ -2175,20 +2380,7 @@
         }
 
         function syncCwStackVerticalAlign() {
-            const stack = document.getElementById('cw-stack');
-            if (!stack) return;
-            // Count actual visible items (ignore pauses, navs, stops, sfx)
-            const visibleItems = Array.isArray(cwSequence)
-                ? cwSequence.filter(
-                      (e) =>
-                          e.kind !== 'pause' &&
-                          e.kind !== 'stop-play-all' &&
-                          e.kind !== 'nav' &&
-                          e.kind !== 'sfx' &&
-                          e.kind !== 'stack-layout'
-                  ).length
-                : 0;
-            stack.classList.toggle('cw-stack-centered', visibleItems <= 1);
+            if (cwRunning && Array.isArray(cwSequence)) precomputeCwStackFitFromSequence(cwSequence);
         }
 
         function stopCatchingWords() {
@@ -2213,6 +2405,8 @@
                 stack.innerHTML = '';
                 stack.classList.remove('cw-stack-fullscreen-mode');
                 stack.classList.remove('cw-stack-align-left');
+                stack.style.removeProperty('--cw-fit-scale');
+                stack.style.removeProperty('--cw-stack-pad-top');
             }
         }
 
@@ -2230,8 +2424,12 @@
             
             cwSpawnRoundIndex = 0;
             const stack = document.getElementById('cw-stack');
-            if (stack) stack.innerHTML = '';
-            syncCwStackVerticalAlign();
+            if (stack) {
+                stack.innerHTML = '';
+                stack.style.removeProperty('--cw-fit-scale');
+                stack.style.removeProperty('--cw-stack-pad-top');
+            }
+            precomputeCwStackFitFromSequence(cwSequence);
 
             spawnCwWord();
             scheduleCwSpawn();
@@ -2247,6 +2445,7 @@
          /**
          * Sections (←/→): new section at each # line (# alone, # comment, or # 60pt on one line).
          * Size: «# 60pt» or its own line «60pt» / «200pt» (applies to following words until the next size line).
+         * Count: «#numberlabs» — expands to LABS_DATA.length (intro loads js/labs-config.js); fallback 38 if missing.
          * Lines starting with «//»: comment (ignore).
          * Video: «%video URL» — also «%videohttps://…» without space. A lone line with only a Coverr or .mp4/.webm URL counts as video (paste without %video).
          * Coverr page: extract MP4 from page (hero before “Related”), HTML5 video only — no Coverr UI in iframe.
@@ -2313,6 +2512,12 @@
             return false;
         }
 
+        /** Lab count for intro dramaturgy — line «#numberlabs» (after optional # 200pt …). */
+        function getCwIntroNumberlabsCount() {
+            if (typeof LABS_DATA !== 'undefined' && Array.isArray(LABS_DATA)) return LABS_DATA.length;
+            return 38;
+        }
+
         function parseCwSections(text) {
             const locText = (typeof window.__CURRENT_LOC !== 'undefined') ? window.__CURRENT_LOC : "40.000+";
             text = String(text || '').replace(/%loc/gi, locText);
@@ -2341,6 +2546,13 @@
                         flush();
                         const v = parseFloat(mHash[1]);
                         currentPt = Number.isFinite(v) ? v : null;
+                        continue;
+                    }
+                    if (/^\s*#\s*numberlabs\s*$/i.test(line)) {
+                        current.push({
+                            text: String(getCwIntroNumberlabsCount()),
+                            fontSizePt: currentPt,
+                        });
                         continue;
                     }
                     flush();
@@ -2638,6 +2850,11 @@
                 if (plain) applyCwSequenceFromText(plain);
             });
         }
+
+        (function initCwStackAutoFit() {
+            if (!document.getElementById('cw-stack')) return;
+            window.addEventListener('resize', () => scheduleCwStackFit(), { passive: true });
+        })();
 
         document.addEventListener(
             'keydown',

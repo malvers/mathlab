@@ -12,7 +12,7 @@ Dr. Michael R. Alvers
 
 #
 200pt
-38 
+#numberlabs
 60pt
 Matemática interactiva
 laboratorios
