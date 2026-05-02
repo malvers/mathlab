@@ -2,7 +2,7 @@
  * ULTRA v6.7.0 - Internationalized Briefing Data Registry
  *
  * This file holds detailed lab descriptions in multiple languages.
- * Supported languages: DE, EN, ES, FR, IT, PT, SW (Kiswahili — lab descriptions initially same as EN)
+ * Supported languages: DE, EN, ES, FR, IT, PT, SW (Kiswahili), TR — lab descriptions SW/TR initially same as EN
  */
 window.CyberBriefings = {
     "de": {
@@ -2476,7 +2476,7 @@ Design ULTRA com navegação de marca.`
     }
 };
 
-// Kiswahili: gleiche Lab-Texte wie Englisch (vermeidet stillen Fallback auf DE in Briefings).
-if (typeof window.CyberBriefings !== "undefined" && window.CyberBriefings.en && !window.CyberBriefings.sw) {
-    window.CyberBriefings.sw = { ...window.CyberBriefings.en };
+// Türkçe: Lab-Metin wie Englisch (kein stilles DE-Fallback in Briefings).
+if (typeof window.CyberBriefings !== "undefined" && window.CyberBriefings.en && !window.CyberBriefings.tr) {
+    window.CyberBriefings.tr = { ...window.CyberBriefings.en };
 }

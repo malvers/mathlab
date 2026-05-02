@@ -757,7 +757,7 @@ pt: {
                 paypal: "CHANGIA SASA KWA PayPal"
             },
             header: {
-                title: "Maabara ya Hisabati — Doc Alvers",
+                title: "Doc Alvers Mathe-Labor",
                 subtitle: "HISABATI INGILIANO",
                 author: "na Dk. Michael R. Alvers"
             },
@@ -812,6 +812,121 @@ pt: {
                 "cinematic-intro": { title: "Utangulizi wa Sinema", description: "Furahia mwanzo mkubwa katika maabara ya Doc Alvers. ULTRA v5.3.8 Utambulisho Unaoonekana." },
                 "stanford-portal": { title: "Chuo Kikuu cha Stanford", description: "Chuo kikuu cha utafiti wa wasomi huko Silicon Valley: utafiti wa juu, maoni wazi na utamaduni wa chuo kikuu." },
                 "happy-birthday-ulf": { title: "Heri ya Siku ya Kuzaliwa Ulf!", description: "Mshangao wa hisabati kwa siku ya kuzaliwa. Sherehekea pamoja na Doc Alvers!" }
+            }
+        },
+        tr: {
+            admin_gate: {
+                title: "YETKİLENDİRMEYİ KONTROL EDİN",
+                pwd_placeholder: "Şifre",
+                access: "ERİŞİM",
+                cancel: "İPTAL"
+            },
+            ui: {
+                coffee_title: "Siber Kahve Satın Alın",
+                about_title: "Sinematik Giriş — Doc Alvers",
+                qr_title: "Bu sayfanın QR Kodu",
+                sound_title: "Ortam Sesi",
+                search_placeholder: "LABORATUVAR TARAMASINI BAŞLATIN...",
+                mission_start: "Görevi Başlat",
+                all_tools: "Tüm Araçlar",
+                tools_subtitle_word: "Araçlar",
+                tools_filter_hits: "EŞLEŞMELER BULUNDU",
+                tools_no_results: "\"{query}\" için eşleşme yok",
+                tools_close_aria: "Araçlara genel bakışı kapatın ve laboratuvar seçimine dönün",
+                tools_footer_aria: "Altbilgi",
+                tools_universe_aria: "Açık Evren · uzaydaki laboratuvar galerisi",
+                tools_doc_title: "Siber Laboratuvar | Görev Kontrolü",
+                education: "EĞİTİM",
+                games: "Oyunlar",
+                lgs: "Denklem Sistemleri",
+                pythagoras: "Pisagor Teoremi",
+                triangles: "Üçgenler",
+                arithmetic: "Temel Aritmetik",
+                hot_stuff: "Sıcak şeyler",
+                fun: "Eğlenceli",
+                functions: "İşlevler",
+                highlights: "Öne Çıkanlar",
+                fraktale: "Fraktallar",
+                university: "Üniversite",
+                themes_count: "Temalar",
+                grade_title: "Sınıf",
+                grade_uni: "Üni",
+                grade_uni_tip: "Üniversite · özellikle karmaşık laboratuvarlar (Analiz, Fizik, Fraktallar, …)",
+                grade_back_tip: "Tema seçimine geri dön",
+                universe_tip: "Evren · Uzaydaki laboratuvar galerisi",
+                credits: "KREDİLER",
+                impressum: "KÜNYE"
+            },
+            contact: {
+                title: "İletişim",
+                desc: "Yeni laboratuvar modülleri için sorularınız, geri bildirimleriniz veya fikirleriniz mi var? İster matematikle, ister didaktik kavramlarla, ister teknik işbirliğiyle ilgili olsun, her mesajı sabırsızlıkla bekliyorum.",
+                close: "KAPAT"
+            },
+            qr: {
+                title: "QR Kodu",
+                desc: "Telefonunuzla tarayın; bu sayfayı yanınıza alın."
+            },
+            donate: {
+                title: "Siber Kahve Satın Alın",
+                desc: "İnteraktif laboratuvarları beğeniyor musunuz ve Siber Laboratuvarın daha da geliştirilmesini desteklemek mi istiyorsunuz? Geceleri kod yazarken beni uyanık tutan her sanal kahveyi takdir ediyorum! ☕️🚀",
+                paypal: "ŞİMDİ PayPal İLE BAĞIŞ YAPIN"
+            },
+            header: {
+                title: "Doc Alvers Mathe-Labor",
+                subtitle: "İNTERAKTİF MATEMATİK",
+                author: "Dr. Michael R. Alvers"
+            },
+            view: {
+                back_title: "Geri",
+                title: "LABORATUVAR GÖRÜNÜMÜ"
+            },
+            admin: {
+                active: "EDİTÖR MODU AKTİF",
+                export: "Değişiklikleri Dışa Aktar",
+                exit: "Çıkış"
+            },
+            labs: {
+                "fourier": { title: "Fourier Dönüşümü", description: "Matematiğin müziği. Karmaşık şekilleri harmonik dairesel salınımlara ayrıştırın." },
+                "mandelbrot-deep": { title: "Fraktallar", description: "Mandelbrot ve Julia karmaşık düzlemi ortaya koyuyor: GPU parça gölgelendirici yinelemesi aracılığıyla z↦z²+c'nin kaçış zamanı dinamikleri; Fraktal sınır boyunca uyarlanabilir yineleme derinliği ile c'nin parametrik keşfi." },
+                "atomorbitale": { title: "Atomik Orbitaller", description: "3 boyutlu küresel harmonikler Y_ℓ^m: olasılık bulutları ve kuantum sayıları." },
+                "galtonboard": { title: "Galton Kurulu", description: "Normal dağılımın etkileşimli simülasyonu. Çan eğrisinin ortaya çıkışını canlı izleyin." },
+                "opti-lens": { title: "Mercek Optimizasyonu", description: "Evrimsel lens optimizasyonu (CMA-ES): gerçek zamanlı ışın simülasyonu ve odak arama." },
+                "addition": { title: "Yazılı Ek", description: "Yazılı eklemeyi adım adım öğrenin. Sütun yapısını görselleştirir." },
+                "subtraktion": { title: "Yazılı Çıkarma", description: "Adım adım ödünç alma ile yazılı çıkarma işlemini eğitin." },
+                "multiplikation": { title: "Yazılı Çarpma", description: "Yazılı çarpma işlemini adım adım görselleştirir." },
+                "dividieren": { title: "Yazılı Bölüm", description: "Etkileşimli ULTRA laboratuvarıyla yazılı bölümde ustalaşın." },
+                "cmaes": { title: "Yüzey Optimizasyonu", description: "Gerçek zamanlı CMA-ES: kapalı çokgenlerin ve serbest biçimli konturların evrimsel gelişimi." },
+                "transformationen": { title: "Uyumluluk", description: "Bir üçgenin dönüşünü, ötelenmesini ve ölçeklenmesini etkileşimli olarak keşfedin." },
+                "winkelsumme3d": { title: "3D Açı Toplamı", description: "3 boyutlu uzayda açıların toplamını deneyimleyin. Dinamik görselleştirme." },
+                "ausgleichsgerade": { title: "En Uygun Çizgi", description: "Bir nokta bulutu boyunca en iyi çizgiyi bulun. Doğrusal regresyonu anlayın." },
+                "binomischeslabor": { title: "1. Binom Formülü", description: "Alan ayrıştırması yoluyla binom formüllerini geometrik olarak görselleştirin." },
+                "triangulierer": { title: "Delaunay", description: "Üçgenleme algoritmaları. Optimum üçgen ağlar oluşturun." },
+                "differentiallabor": { title: "Diferansiyel Laboratuvarı", description: "Ana diferansiyel hesabı. Fonksiyon ve türev arasındaki ilişki." },
+                "parabellabor": { title: "Paraboller", description: "İkinci dereceden fonksiyonların manipülasyonu. Parametrelerin etkisini anlayın." },
+                "potenzlabor": { title: "Güç Laboratuvarı", description: "Güç ve kök işlevlerinin davranışını etkileşimli olarak keşfedin." },
+                "steigung": { title: "Şev Laboratuvarı", description: "Bir eğrinin herhangi bir noktasındaki eğimi anlayın. Analizin temeli." },
+                "winkellabor": { title: "Açı Laboratuvarı", description: "Açı toplamları ve üçgen türlerinin etkileşimli incelenmesi." },
+                "uhrzeitwinkel": { title: "Açı-Saat Laboratuvarı", description: "Günün herhangi bir saatinde saatin ibreleri arasındaki açıyı inceleyin." },
+                "logikspiel": { title: "Sayı Bulmaca", description: "Matrisin ustası olun! Karmaşık sayı ızgaralarını çözün." },
+                "integralreaktor": { title: "İntegraller", description: "Bölgenin enerjisi. Riemann toplamlarını ve yaklaşım yöntemlerini görselleştirin." },
+                "lissajous": { title: "Lissajous", description: "İki harmonik salınımın süperpozisyonu: frekans ve faz." },
+                "cool-squares": { title: "Soğuk Kareler", description: "Nihai geometrik kanıt. Karelerden oluşan spirali takip edin." },
+                "fibonacci": { title: "Fibonacci Laboratuvarı", description: "Altın sarmalı ve organik büyüme modellerini keşfedin." },
+                "fermatpunkt": { title: "Fermat Noktası", description: "Köşelere olan mesafelerin toplamı en az olan noktayı bulun." },
+                "gleichungssysteme": { title: "LSE Laboratuvarı", description: "Doğrusal Denklem Sistemlerini çizgiler aracılığıyla görsel olarak keşfedin." },
+                "pythagoras": { title: "Pisagor", description: "Etkileşimli alan karşılaştırmaları yoluyla Pisagor teoremini keşfedin." },
+                "pythagorasbeweis": { title: "Pisagor Kanıtı", description: "Pisagor teoreminin alan ayrıştırmasıyla geometrik kanıtı." },
+                "gleichschenkligesDreieck": { title: "İkizkenar Üçgen", description: "Özel üçgenleri ve özelliklerini etkileşimli olarak hesaplayın." },
+                "eulergerade": { title: "Euler Feuerbach ve Napolyon", description: "Üçgenin büyüleyici geometrisi: Euler çizgisi ve Feuerbach çemberi." },
+                "easyhard": { title: "Geometri Bulmacası", description: "Zorlu bir geometrik bilmece. Eksik açıyı belirleyin." },
+                "winkelsumme": { title: "Poligon Laboratuvarı", description: "Herhangi bir n-gendeki açıların toplamını hesaplayın." },
+                "beweisinwinkellsumme": { title: "İç Açı Kanıtı", description: "Bir üçgende açıların toplamı neden her zaman 180°'dir? Adım adım kanıt." },
+                "butterfly": { title: "Kelebek Eğrisi", description: "Kutupsal koordinatlarla tanımlanan büyüleyici bir aşkın eğri." },
+                "heart3d": { title: "3D Kalp Yüzeyi", description: "Matematiksel kalbin arkasında örtülü bir 3 boyutlu yüzeyin görselleştirilmesi." },
+                "litchi3d": { title: "3D Litchi Laboratuvarı", description: "Karmaşık 3 boyutlu yüzey matematiğini etkileşimli olarak keşfedin." },
+                "cinematic-intro": { title: "Sinematik Giriş", description: "Doc Alvers laboratuvarına anıtsal bir başlangıç ​​yapın. ULTRA v5.3.8 Görsel Kimlik." },
+                "stanford-portal": { title: "Stanford Üniversitesi", description: "Silikon Vadisi'ndeki seçkin araştırma üniversitesi: üst düzeyde araştırma, açık fikirler ve kampüs kültürü." },
+                "happy-birthday-ulf": { title: "Doğum günün kutlu olsun Ulf!", description: "Doğum günü için matematiksel bir sürpriz. Doc Alvers ile kutlayın!" }
             }
         }
     };

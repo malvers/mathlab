@@ -84,6 +84,17 @@
             ideogram_desc: "Jenereta ya picha za AI, mara nyingi na maandishi yanayosomeka vizuri.",
             stanford_desc: "Kwenye kadi ya <strong>Chuo kikuu</strong>, nembo ya Stanford <strong>Cardinal Block S</strong> (mti katika „S“, Cardinal <code>#8c1515</code>) — Picha kutoka <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; chapa <strong>Stanford University</strong>. Sheria: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
             back: "rudi"
+        },
+        tr: {
+            title: "KREDİLER",
+            subtitle: "Kullanılan veya bahsedilen yapay zeka ve medya araçları (tam liste değildir).",
+            cursor_desc: "Yerleşik ajanlarla geliştirme için yapay zekâ destekli düzenleyici / IDE.",
+            gemini_desc: "Google’ın çok modlu yapay zekâ modeli (Sohbet, Akıl yürütme, Araçlar).",
+            codex_desc: "OpenAI Codex: Otomatik programlama görevleri için kodlama ajanı / CLI.",
+            runway_desc: "Video (Gen-4 vb.), görüntü ve ses için yapay zekâ platformu.",
+            ideogram_desc: "Yapay zekâ görüntü oluşturucu; görsellerde genelde okunaklı metin.",
+            stanford_desc: "<strong>Üniversite</strong> temasındaki kutuda Stanford <strong>Cardinal Block S</strong> logosu („S“ içinde ağaç, Cardinal <code>#8c1515</code>) — Görsel: <a href=\"https://commons.wikimedia.org/wiki/File:Stanford_Cardinal_logo.svg\" target=\"_blank\" rel=\"noopener noreferrer\">Wikimedia Commons</a>; marka <strong>Stanford University</strong>. Kurallar: <a href=\"https://identity.stanford.edu\" target=\"_blank\" rel=\"noopener noreferrer\">identity.stanford.edu</a>",
+            back: "geri"
         }
     };
 

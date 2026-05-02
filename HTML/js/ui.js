@@ -50,7 +50,7 @@ class CyberUI {
     }
 
     /** Supported lab languages — order when cycling on click */
-    static CYBER_LANG_ORDER = ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw'];
+    static CYBER_LANG_ORDER = ['de', 'en', 'es', 'fr', 'it', 'pt', 'sw', 'tr'];
 
     static CYBER_LANG_FLAGS = {
         de: '🇩🇪',
@@ -60,6 +60,7 @@ class CyberUI {
         it: '🇮🇹',
         pt: '🇵🇹',
         sw: '🇰🇪',
+        tr: '🇹🇷',
     };
 
     /** Mini-rail: one flag; click → next language (?lang= + reload). */
