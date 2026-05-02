@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | <script>document.write(CyberI18n.get('coolsquares.title'))</script></title>
+    <script src="js/i18n.js"></script>
+    <!-- Prioritize Orbitron -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Force Orbitron Everywhere */
+        * {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #geometry-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas#squareCanvas {
+            max-width: 95%;
+            max-height: 95%;
+            filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.1));
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="geometry-container">
+            <canvas id="squareCanvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=538"></script>
+    <script src="js/branding/overlays.js?v=538"></script>
+    <script src="js/branding.js?v=538"></script>
+    <script src="js/ui.js?v=538"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('side-panel').classList.toggle('collapsed');
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('coolsquares.title'),
+                useExternalStyles: true
+            });
+
+            CyberUI.init();
+
+            const canvas = document.getElementById('squareCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let a = 1; // Start with a=1 as requested
+            const x = 5;
+            let showLabels = true;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const y = 4 * a;
+                const s1 = x + a;
+                const s2 = x + 2 * a;
+                const s3 = x + 3 * a;
+                const s4 = x + 4 * a;
+
+                const totalW = s4 + y;
+                const totalH = s4 + a + s2;
+
+                const padding = 240;
+                const scale = Math.min((canvas.width - padding) / totalW, (canvas.height - padding) / totalH);
+
+                const offsetX = (canvas.width - totalW * scale) / 2;
+                const offsetY = (canvas.height - totalH * scale) / 2;
+                const spineX = offsetX + s4 * scale;
+
+                const squares = [
+                    { id: 'S4', w: s4, h: s4, x: 0, y: 0, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 4a` },
+                    { id: 'G', w: y, h: y, x: s4, y: 0, color: "#84cc16", stroke: "#84cc16", area: (y * y).toFixed(0), txt: "white", label: `y = 4a` },
+                    { id: 'O', w: a, h: a, x: s4 - a, y: s4, color: "#ffcc00", stroke: "#ffcc00", area: (a * a).toFixed(0), txt: "black" },
+                    { id: 'S1', w: s1, h: s1, x: s4, y: y, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + a` },
+                    { id: 'S3', w: s3, h: s3, x: s4 - a - s3, y: s4, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 3a` },
+                    { id: 'S2', w: s2, h: s2, x: s4 - a, y: s4 + a, color: "rgba(0, 210, 255, 0.15)", stroke: "rgba(0, 210, 255, 0.4)", label: `x + 2a` }
+                ];
+
+                squares.forEach(s => {
+                    const rx = offsetX + s.x * scale;
+                    const ry = offsetY + s.y * scale;
+                    const rw = s.w * scale;
+                    const rh = s.h * scale;
+
+                    ctx.fillStyle = s.color;
+                    ctx.fillRect(rx, ry, rw, rh);
+                    ctx.strokeStyle = s.stroke || "rgba(255,255,255,0.2)";
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(rx, ry, rw, rh);
+
+                    if (s.area !== undefined) {
+                        ctx.fillStyle = s.txt;
+                        ctx.font = 'bold 22px Orbitron';
+                        ctx.textAlign = "center";
+                        ctx.fillText(s.area, rx + rw / 2, ry + rh / 2 + 8);
+                    }
+
+                    if (showLabels && s.label) {
+                        ctx.fillStyle = "#00d2ff";
+                        ctx.font = 'bold 18px Orbitron';
+                        if (s.id === 'S4') {
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - 30);
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh / 2 + 8);
+                        }
+                        if (s.id === 'G') {
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - 30);
+                            ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh / 2 + 8);
+                        }
+                        if (s.id === 'S1') { ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh / 2 + 8); }
+                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + 55); }
+                        if (s.id === 'S3') {
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh / 2 + 8);
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + 55);
+                        }
+                    }
+                });
+
+                const spineY_green_bottom = y * scale;
+                const spineY_orange_top = s4 * scale;
+
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#9d50bb";
+                ctx.moveTo(spineX, offsetY + spineY_green_bottom);
+                ctx.lineTo(spineX, offsetY + spineY_orange_top);
+                ctx.stroke();
+
+                ctx.font = 'bold 22px Orbitron';
+                ctx.fillStyle = "#9d50bb";
+                ctx.textAlign = "left";
+                ctx.fillText(`x`, spineX + 20, offsetY + (spineY_green_bottom + spineY_orange_top) / 2 + 8);
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#ff8c00";
+                ctx.moveTo(spineX, offsetY + spineY_orange_top);
+                ctx.lineTo(spineX, offsetY + spineY_orange_top + a * scale);
+                ctx.stroke();
+
+                ctx.textAlign = "left";
+                ctx.fillText(`a = ${a}`, spineX + 20, offsetY + spineY_orange_top + (a / 2) * scale + 8);
+
+                ctx.fillStyle = "white";
+                ctx.textAlign = "right";
+                ctx.fillText(`y = ${y}`, spineX - 30, offsetY + (y / 2) * scale + 8);
+            }
+
+            function update() {
+                draw();
+                CyberUI.updateStatsGrid('data-container', [
+                    { label: CyberI18n.get('coolsquares.side_a'), value: a, color: '#ffcc00' },
+                    { label: CyberI18n.get('coolsquares.gap_x'), value: x, color: '#9d50bb' },
+                    { label: CyberI18n.get('coolsquares.result_y'), value: 4 * a, color: '#a3be64' },
+                    { label: CyberI18n.get('coolsquares.area_green'), value: 16 * a * a, color: 'white' }
+                ]);
+            }
+
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                draw();
+            });
+            window.dispatchEvent(new Event('resize'));
+
+            CyberUI.createCard('ui-container', CyberI18n.get('coolsquares.proportions'), '<div id="sliders"></div>', 'var(--neon-blue)');
+            CyberUI.createSlider('sliders', CyberI18n.get('coolsquares.side_a'), 1, 40, 1, 1, (val) => {
+                a = parseInt(val);
+                update();
+            }, '#ffcc00');
+
+            const labelToggleHtml = `
+                <div class="control-group" style="margin-top:20px; display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="window.toggleLabels()">
+                    <div id="label-toggle-box" style="width:20px; height:20px; border:2px solid var(--neon-blue); border-radius:4px; display:flex; justify-content:center; align-items:center;">
+                        <div id="label-toggle-check" style="width:10px; height:10px; background:var(--neon-blue); display:block;"></div>
+                    </div>
+                    <span style="font-family:Orbitron; font-size:0.8rem; color:white; letter-spacing:1px;">${CyberI18n.get('coolsquares.show_labels')}</span>
+                </div>
+            `;
+            document.getElementById('sliders').insertAdjacentHTML('beforeend', labelToggleHtml);
+
+            window.toggleLabels = function () {
+                showLabels = !showLabels;
+                document.getElementById('label-toggle-check').style.display = showLabels ? 'block' : 'none';
+                update();
+            };
+
+            if (document.fonts) {
+                document.fonts.ready.then(() => {
+                    update();
+                });
+            } else {
+                setTimeout(update, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>

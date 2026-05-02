@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Steigungs-Labor | docalvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .math-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            font-size: 1.1em;
+        }
+        
+        #eq-main { font-size: 1.5rem; margin-top: 5px; }
+        .val-display { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: white; }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof draw === 'function') draw();
+            }, 400);
+        }
+        // --- CORE ENGINE ---
+        let cc = null;
+        let m = 1.0, n = 2.0;
+        let triX = 1.0, triSize = 2.0;
+        let dragMode = 0;
+
+        function startLabor() {
+            try {
+                if (typeof CyberCanvas === 'undefined') return;
+
+                // 1. Initialize Branding
+                if (typeof CyberBranding !== 'undefined') {
+                    CyberBranding.init({
+                        useExternalStyles: true,
+                        title: CyberI18n.get('ui.coach_title'),
+                        subtitle: CyberI18n.get('steigung.title')
+                    });
+                }
+
+                // 2. Initialize UI Engine
+                if (typeof CyberUI !== 'undefined') {
+                    CyberUI.init();
+                    
+                    CyberUI.createCard('parameters-container', CyberI18n.get('steigung.function'), `
+                        <div id="eq-main" class="math-glow" style="text-align:left; margin-bottom:2px; padding-left:5px; font-size:1.3rem;"></div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.slope_m')}</div>
+                                <div id="latex-m" class="val-display" style="font-size:1.1rem;"></div>
+                            </div>
+                            <div style="text-align:left; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.intercept_n')}</div>
+                                <div id="latex-n" class="val-display" style="font-size:1.1rem;"></div>
+                            </div>
+                            <div style="text-align:left; padding-left:5px;">
+                                <div style="font-size:0.55rem; color:rgba(255,255,255,0.4); font-family:Orbitron; letter-spacing:1px; margin-bottom:2px;">${CyberI18n.get('steigung.zero_x0')}</div>
+                                <div id="latex-x0" class="val-display" style="font-size:1.1rem;"></div>
+                            </div>
+                        </div>
+                    `);
+
+                    CyberUI.createCard('parameters-container', CyberI18n.get('steigung.parameters'), `
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.slope_m_long')}</div>
+                                <input type="range" id="m-slider" min="-5" max="5" step="0.05" value="1" style="width:100%; accent-color:var(--neon-blue);">
+                            </div>
+                            <div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.tri_pos')}</div>
+                                <input type="range" id="x-slider" min="-10" max="10" step="0.5" value="1" style="width:100%; accent-color:var(--neon-blue);">
+                            </div>
+                            <div>
+                                <div style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('steigung.tri_width')}</div>
+                                <input type="range" id="size-slider" min="0.5" max="10" step="0.5" value="2" style="width:100%; accent-color:var(--neon-blue);">
+                            </div>
+                            <button onclick="resetView()" class="cyber-btn" style="width:100%; margin-top:10px;">${CyberI18n.get('steigung.reset_lab')}</button>
+                        </div>
+                    `);
+
+                    // Re-bind slider events
+                    document.getElementById('m-slider').oninput = e => { m = parseFloat(e.target.value); draw(); };
+                    document.getElementById('x-slider').oninput = e => { triX = parseFloat(e.target.value); draw(); };
+                    document.getElementById('size-slider').oninput = e => { triSize = parseFloat(e.target.value); draw(); };
+                }
+
+                cc = new CyberCanvas();
+                const canvasEl = document.getElementById('canvas');
+                if (!canvasEl) return;
+
+                cc.init('canvas', { minY: -10, maxY: 10 }, { showTelemetry: false, showLabels: true, allowPan: false });
+                cc.onResize = () => draw();
+
+                // --- FULL VIEWPORT LOCK (Zoom & Pan) ---
+                cc.canvas.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+                cc.canvas.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+                // --- INTERACTION SETUP ---
+                // 5. Context Menu (Standard)
+                cc.onContextMenu = (e) => {
+                    CyberUI.showContextMenu(e.clientX, e.clientY, [
+                        { label: CyberI18n.get('steigung.reset_lab'), onclick: () => resetLabor() },
+                        { label: CyberI18n.get('lgs.view_reset'), onclick: () => { cc.resetView(-5, 10); draw(); } },
+                        { divider: true },
+                        { label: CyberI18n.get('angle3d.grid'), checked: cc.showGrid, onchange: (v) => { cc.showGrid = v; draw(); } },
+                        { label: CyberI18n.get('angle3d.axes'), checked: cc.showAxes, onchange: (v) => { cc.showAxes = v; draw(); } },
+                        { label: CyberI18n.get('angle3d.labels'), checked: cc.showLabels, onchange: (v) => { cc.showLabels = v; draw(); } },
+                        { label: CyberI18n.get('fractal.telemetry'), checked: cc.showTelemetry, onchange: (v) => { cc.showTelemetry = v; cc.updateTelemetryDOM(); } }
+                    ]);
+                };
+                cc.canvas.addEventListener('mousedown', e => {
+                    const rect = cc.canvas.getBoundingClientRect();
+                    const px = e.clientX - rect.left;
+                    const py = e.clientY - rect.top;
+
+                    const mH = { x: cc.mapX(5.0), y: cc.mapY(m * 5.0 + n) };
+                    if (Math.hypot(mH.x - px, mH.y - py) < 30) { dragMode = 2; return; }
+
+                    const nH = { x: cc.mapX(0), y: cc.mapY(n) };
+                    if (Math.hypot(nH.x - px, nH.y - py) < 30) { dragMode = 1; return; }
+                });
+
+                window.addEventListener('mousemove', e => {
+                    if (!dragMode) return;
+                    const rect = cc.canvas.getBoundingClientRect();
+                    const mathX = cc.unmapX(e.clientX - rect.left);
+                    const mathY = cc.unmapY(e.clientY - rect.top);
+
+                    if (dragMode === 1) { n = mathY - m * mathX; }
+                    else if (dragMode === 2) { m = (mathY - n) / 5.0; syncSliders(); }
+                    draw();
+                });
+
+                window.addEventListener('mouseup', () => dragMode = 0);
+
+                syncSliders();
+                draw();
+            } catch (e) {
+                console.error("Init failure:", e);
+            }
+        }
+
+        function resetView() {
+            m = 1.0; n = 2.0; triX = 1.0; triSize = 2.0;
+            if (cc) cc.resetView(-10, 10);
+            syncSliders();
+            draw();
+        }
+
+        function syncSliders() {
+            const mS = document.getElementById('m-slider');
+            const xS = document.getElementById('x-slider');
+            const sS = document.getElementById('size-slider');
+            if (mS) mS.value = m;
+            if (xS) xS.value = triX;
+            if (sS) sS.value = triSize;
+        }
+
+        function draw() {
+            if (!cc || !cc.ctx) return;
+            cc.drawGrid({ glow: true, vignette: true });
+            const ctx = cc.ctx;
+
+            const xL = cc.view.minX, xR = cc.view.maxX;
+            const pL = { x: cc.mapX(xL), y: cc.mapY(m * xL + n) };
+            const pR = { x: cc.mapX(xR), y: cc.mapY(m * xR + n) };
+
+            ctx.strokeStyle = "#00d2ff";
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(0, 210, 255, 0.5)";
+            ctx.beginPath(); ctx.moveTo(pL.x, pL.y); ctx.lineTo(pR.x, pR.y); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            const pA = { x: cc.mapX(triX), y: cc.mapY(m * triX + n) };
+            const pB = { x: cc.mapX(triX + triSize), y: cc.mapY(m * triX + n) };
+            const pC = { x: cc.mapX(triX + triSize), y: cc.mapY(m * (triX + triSize) + n) };
+
+            ctx.fillStyle = "rgba(157, 80, 187, 0.2)";
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.closePath(); ctx.fill();
+
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = "#9d50bb";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.lineTo(pC.x, pC.y); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = "bold 13px Orbitron";
+            ctx.fillStyle = "#9d50bb";
+            ctx.textAlign = "center";
+            ctx.fillText(`Δx = ${triSize.toFixed(1)}`, pA.x + (pB.x - pA.x) / 2, pA.y + 20);
+            ctx.textAlign = "left";
+            ctx.fillText(`Δy = ${(m * triSize).toFixed(2)}`, pC.x + 10, pA.y + (pC.y - pA.y) / 2);
+
+            drawHandle(cc.mapX(0), cc.mapY(n), "#ff0055", `n = ${n.toFixed(2)}`);
+            drawHandle(cc.mapX(5.0), cc.mapY(m * 5.0 + n), "#9d50bb", "m");
+
+            const x0 = Math.abs(m) > 0.001 ? -n / m : null;
+            if (x0 !== null) {
+                drawHandle(cc.mapX(x0), cc.mapY(0), "#39FF14", `x₀ = ${x0.toFixed(2)}`);
+            }
+            updateUI();
+        }
+
+        function drawHandle(px, py, color, label) {
+            const ctx = cc.ctx;
+            ctx.shadowBlur = 10; ctx.shadowColor = color;
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            if (label) {
+                ctx.font = "bold 12px Orbitron";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(label, px, py - 20);
+            }
+        }
+
+        function updateUI() {
+            if (typeof katex !== 'undefined') {
+                const x0 = Math.abs(m) > 0.001 ? -n / m : null;
+                const mEl = document.getElementById('latex-m'), nEl = document.getElementById('latex-n'), xEl = document.getElementById('latex-x0'), eqEl = document.getElementById('eq-main');
+                if (mEl) katex.render(`\\textcolor{#9d50bb}{m = ${m.toFixed(2)}}`, mEl);
+                if (nEl) katex.render(`\\textcolor{#ff0055}{n = ${n.toFixed(2)}}`, nEl);
+                if (xEl) katex.render(`\\textcolor{#39FF14}{x_0 = ${x0 !== null ? x0.toFixed(2) : "---"}}`, xEl);
+                if (eqEl) {
+                    const nSign = n >= 0 ? "+" : "-", nVal = Math.abs(n).toFixed(2);
+                    katex.render(`f(x) = \\textcolor{#9d50bb}{${m.toFixed(2)}} \\cdot x ${nSign} \\textcolor{#ff0055}{${nVal}}`, eqEl);
+                }
+            }
+        }
+
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startLabor);
+        } else {
+            startLabor();
+        }
+    </script>
+</body>
+
+</html>

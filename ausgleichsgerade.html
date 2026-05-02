@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Statistik-Labor</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Inter:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .cyber-telemetry-pane {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .telemetry-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 210, 255, 0.1);
+            min-width: 140px;
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 4px;
+        }
+
+        .telemetry-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .telemetry-row .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: rgba(0, 210, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .telemetry-row .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: white;
+            font-variant-numeric: tabular-nums;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 1.5px;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+            text-transform: uppercase;
+        }
+
+        .stat-card {
+            background: var(--glass-bright);
+            padding: 12px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 210, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-label {
+            font-family: 'Orbitron';
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-value.highlight-pink {
+            color: var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        .stat-value.highlight-blue {
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        .stat-value.highlight-purple {
+            color: var(--neon-purple);
+            text-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        .m-n-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="parameters-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof update === 'function') update();
+            }, 400);
+        }
+        /**
+         * CYBER-REGRESSION LABORATORY - ULTRA v5.3.8
+         * Full Engine Integration with Real-Time Analytics.
+         */
+        window.addEventListener('load', () => {
+            // --- CORE ENGINE ---
+            let cc = null;
+            let points = [];
+            let selectedPoint = null;
+            let showSD = true;
+
+            function startLabor() {
+                try {
+                    if (typeof CyberCanvas === 'undefined') return;
+
+                    // Initialize UI Engine
+                    // Initialize UI Engine
+                    if (typeof CyberUI !== 'undefined') {
+                        CyberUI.init();
+                        
+                        CyberUI.createCard('parameters-container', CyberI18n.get('stats.analytics'), `
+                            <div class="stat-card" style="margin-bottom:10px; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:5px; display:block;">${CyberI18n.get('stats.correlation')}</span>
+                                <div id="r-display" style="font-family:Orbitron; font-size:1.8rem; font-weight:bold; color:var(--neon-purple); text-shadow:0 0 15px var(--neon-purple);">+0.00</div>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                 <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.slope')}</span>
+                                    <div id="m-val" style="font-family:Orbitron; font-size:1.2rem; font-weight:bold; color:var(--neon-blue);">0.00</div>
+                                </div>
+                                <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                                    <span style="font-family:Orbitron; font-size:0.6rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.y_intercept')}</span>
+                                    <div id="n-val" style="font-family:Orbitron; font-size:1.2rem; font-weight:bold; color:var(--neon-blue);">0.00</div>
+                                </div>
+                            </div>
+                        `);
+
+                        CyberUI.createCard('parameters-container', CyberI18n.get('stats.error_analysis'), `
+                            <div class="stat-card" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                                <span style="font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); display:block;">${CyberI18n.get('stats.std_dev')}</span>
+                                <div id="sd-val" style="font-family:Orbitron; font-size:1.4rem; font-weight:bold; color:white;">0.0000</div>
+                            </div>
+                        `);
+
+                        CyberUI.createCard('parameters-container', CyberI18n.get('geometry.lab_control'), `
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <button class="cyber-btn" onclick="generateChaos()" style="width:100%; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.chaos_points')}</button>
+                                <button class="cyber-btn" onclick="shiftResiduals(0.9)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.points_near')}</button>
+                                <button class="cyber-btn" onclick="shiftResiduals(1.1)" style="width:100%; border:1px solid var(--neon-blue); color:var(--neon-blue); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('stats.points_far')}</button>
+                                <button class="cyber-btn" onclick="clearPoints()" style="width:100%; border:1px solid var(--neon-pink); color:var(--neon-pink); border-radius:8px; font-family:Orbitron; cursor:pointer;">${CyberI18n.get('ui.reset')}</button>
+                            </div>
+                        `);
+                    }
+
+                    cc = new CyberCanvas();
+                    const canvasEl = document.getElementById('canvas');
+                    if (!canvasEl) return;
+
+                    // Branding
+                    if (typeof CyberBranding !== 'undefined') {
+                        CyberBranding.init({
+                            useExternalStyles: true,
+                            title: CyberI18n.get('ui.coach_title'),
+                            subtitle: CyberI18n.get('stats.mission_title'),
+                            briefing: `
+                                <h3 style="color:var(--neon-blue); font-family:Orbitron; margin-bottom:10px;">${CyberI18n.get('stats.mission_title')}</h3>
+                                ${CyberI18n.get('stats.mission_desc')}
+                                
+                                <div class="admin-info">
+                                    <h4 style="color:var(--neon-blue); font-family:Orbitron; font-size:0.8rem; margin:0 0 5px 0;">${CyberI18n.get('stats.admin_ctrl')}</h4>
+                                    <ul style="margin:0; padding-left:18px; font-size:0.85rem; opacity:0.9;">
+                                        <li><b>${CyberI18n.get('stats.admin_ctx')}</b></li>
+                                        <li><b>${CyberI18n.get('stats.admin_keys')}</b></li>
+                                        <li><b>${CyberI18n.get('stats.admin_manip')}</b></li>
+                                    </ul>
+                                </div>
+                            `
+                        });
+                    }
+
+                    cc.init('canvas', { minY: -7, maxY: 7 }, { showTelemetry: false, showLabels: true, allowPan: false });
+                    cc.onResize = () => update();
+
+                    // --- FULL VIEWPORT LOCK (Zoom & Pan) ---
+                    cc.canvas.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+                    cc.canvas.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+                    // --- INTERACTION SETUP ---
+                    cc.onContextMenu = (e) => {
+                        if (typeof CyberUI === 'undefined') return;
+                        CyberUI.showContextMenu(e.clientX, e.clientY, [
+                            {
+                                label: CyberI18n.get('ui.reset'),
+                                onclick: () => { points = []; update(); }
+                            },
+                            {
+                                label: CyberI18n.get('stats.chaos_points'),
+                                onclick: () => generateChaos()
+                            },
+                            { divider: true },
+                            {
+                                label: 'Gitter anzeigen',
+                                checked: cc.showGrid,
+                                onchange: (val) => { cc.showGrid = val; update(); }
+                            },
+                            {
+                                label: 'Achsen anzeigen',
+                                checked: cc.showAxes,
+                                onchange: (val) => { cc.showAxes = val; update(); }
+                            },
+                            {
+                                label: 'Achsenbeschriftung',
+                                checked: cc.showLabels,
+                                onchange: (val) => { cc.showLabels = val; update(); }
+                            },
+                            {
+                                label: 'Koordinaten',
+                                checked: cc.showTelemetry,
+                                onchange: (val) => {
+                                    cc.showTelemetry = val;
+                                    if (val && !cc.telePane) cc.injectTelemetryPane();
+                                }
+                            }
+                        ]);
+                    };
+
+                    cc.canvas.addEventListener('mousedown', startAction);
+                    window.addEventListener('mousemove', moveAction);
+                    window.addEventListener('mouseup', endAction);
+
+                    cc.canvas.addEventListener('touchstart', (e) => { startAction(e.touches[0]); e.preventDefault(); }, { passive: false });
+                    window.addEventListener('touchmove', (e) => { moveAction(e.touches[0]); e.preventDefault(); }, { passive: false });
+                    window.addEventListener('touchend', endAction);
+
+                    // --- KEYBOARD SHORTCUTS ---
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === "ArrowUp") shiftResiduals(0.9);
+                        if (e.key === "ArrowDown") shiftResiduals(1.1);
+                    });
+
+                    // Initial Data
+                    generateChaos();
+                } catch (e) {
+                    console.error("Cyber-Labor Initialization Failed:", e);
+                }
+            }
+
+            // --- INPUT HANDLING ---
+            function getCoords(e) {
+                const rect = cc.canvas.getBoundingClientRect();
+                return {
+                    x: cc.unmapX(e.clientX - rect.left),
+                    y: cc.unmapY(e.clientY - rect.top)
+                };
+            }
+
+            function startAction(e) {
+                const { x, y } = getCoords(e);
+                selectedPoint = null;
+                for (let p of points) {
+                    const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
+                    const hitRadius = (cc.view.maxX - cc.view.minX) / 35;
+                    if (dist < hitRadius) { selectedPoint = p; break; }
+                }
+                if (!selectedPoint) { selectedPoint = { x, y }; points.push(selectedPoint); }
+                update();
+            }
+
+            function moveAction(e) {
+                if (selectedPoint) {
+                    const { x, y } = getCoords(e);
+                    selectedPoint.x = x;
+                    selectedPoint.y = y;
+                    update();
+                }
+            }
+
+            function endAction() { selectedPoint = null; }
+
+            // --- GLOBAL METHODS ---
+            window.generateChaos = () => {
+                points = [];
+                const rangeX = cc.view.maxX - cc.view.minX;
+                const baseM = (Math.random() - 0.5) * 1.5;
+                const baseN = (Math.random() - 0.5) * 1.5;
+                for (let i = 0; i < 20; i++) {
+                    const x = cc.view.minX + 2 + Math.random() * (rangeX - 4);
+                    const y = baseM * x + baseN + (normalRandom() * 1.2);
+                    points.push({ x, y: y });
+                }
+                update();
+            };
+
+            window.clearPoints = () => { points = []; update(); };
+
+            window.shiftResiduals = (factor) => {
+                if (points.length < 2) return;
+                const stats = calculateStats();
+                points.forEach(p => {
+                    const yPred = stats.m * p.x + stats.n;
+                    const residual = p.y - yPred;
+                    p.y = yPred + (residual * factor);
+                });
+                update();
+            };
+
+            function normalRandom() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            // --- ANALYTICS & RENDERING ---
+            function update() {
+                const stats = calculateStats();
+                draw(stats);
+                document.getElementById('r-display').innerText = (stats.r >= 0 ? "+" : "") + stats.r.toFixed(2);
+                document.getElementById('m-val').innerText = stats.m.toFixed(2);
+                document.getElementById('n-val').innerText = stats.n.toFixed(2);
+                document.getElementById('sd-val').innerText = stats.sd.toFixed(2);
+            }
+
+            function calculateStats() {
+                const n = points.length;
+                if (n < 2) return { r: 0, m: 0, n: 0, sd: 0 };
+                let sX = 0, sY = 0, sXY = 0, sX2 = 0, sY2 = 0;
+                for (let p of points) {
+                    sX += p.x; sY += p.y; sXY += p.x * p.y;
+                    sX2 += p.x * p.x; sY2 += p.y * p.y;
+                }
+                const numR = n * sXY - sX * sY;
+                const denR = Math.sqrt((n * sX2 - sX * sX) * (n * sY2 - sY * sY));
+                const r = denR !== 0 ? numR / denR : 0;
+                const denM = (n * sX2 - sX * sX);
+                const m = denM !== 0 ? numR / denM : 0;
+                const n_val = (sY / n) - m * (sX / n);
+                let sumSqRes = 0;
+                for (let p of points) sumSqRes += Math.pow(p.y - (m * p.x + n_val), 2);
+                const sd = n > 2 ? Math.sqrt(sumSqRes / (n - 2)) : 0;
+                return { r, m, n: n_val, sd };
+            }
+
+            function draw(stats) {
+                cc.drawGrid({ vignette: true, glow: true, mainColor: 'rgba(0, 210, 255, 0.4)' });
+                const ctx = cc.ctx;
+
+                if (points.length >= 3 && stats.sd > 0 && showSD) {
+                    const minX = cc.view.minX - 5;
+                    const maxX = cc.view.maxX + 5;
+                    ctx.fillStyle = "rgba(0, 210, 255, 0.1)";
+                    ctx.beginPath();
+                    ctx.moveTo(cc.mapX(minX), cc.mapY(stats.m * minX + stats.n + stats.sd));
+                    ctx.lineTo(cc.mapX(maxX), cc.mapY(stats.m * maxX + stats.n + stats.sd));
+                    ctx.lineTo(cc.mapX(maxX), cc.mapY(stats.m * maxX + stats.n - stats.sd));
+                    ctx.lineTo(cc.mapX(minX), cc.mapY(stats.m * minX + stats.n - stats.sd));
+                    ctx.fill();
+                }
+
+                if (points.length >= 2) {
+                    const minX = cc.view.minX - 5;
+                    const maxX = cc.view.maxX + 5;
+                    ctx.strokeStyle = "#ff0055";
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = "#ff0055";
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.moveTo(cc.mapX(minX), cc.mapY(stats.m * minX + stats.n));
+                    ctx.lineTo(cc.mapX(maxX), cc.mapY(stats.m * maxX + stats.n));
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                points.forEach(p => {
+                    const px = cc.mapX(p.x);
+                    const py = cc.mapY(p.y);
+                    ctx.fillStyle = (p === selectedPoint) ? "#fff" : "#9d50bb";
+                    ctx.shadowColor = (p === selectedPoint) ? "#fff" : "#9d50bb";
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+            }
+
+            // --- START ---
+            startLabor();
+        });
+    </script>
+</body>
+
+</html>

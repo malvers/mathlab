@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="js/i18n.js"></script>
+    <title>docalvers | Ultra v6.7.0</title>
+    
+    <!-- Core Engine -->
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 5px;
+        }
+
+        .cyber-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cyber-btn:hover {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-active {
+            border-color: var(--neon-blue) !important;
+            color: var(--neon-blue) !important;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .btn-delete {
+            background: rgba(251, 255, 0, 0.1) !important;
+            color: #fbff00 !important;
+            border-color: #fbff00 !important;
+        }
+        .btn-delete:hover:not(:disabled) {
+            background: #fbff00 !important;
+            color: black !important; /* Better contrast on bright yellow */
+        }
+        .cyber-btn:disabled {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            cursor: not-allowed;
+            box-shadow: none !important;
+            filter: grayscale(1);
+        }
+
+        /* HUD Table */
+        #equation-hud {
+            position: absolute;
+            /* Positions are now handled dynamically in JavaScript */
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            font-family: 'Orbitron';
+            color: white;
+            pointer-events: auto;
+            z-index: 50;
+            min-width: 240px;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease-out; /* Smooth transition on resize */
+        }
+
+        .hud-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .hud-table th { text-align: left; color: var(--neon-blue); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .hud-table td { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hud-sum-row { border-top: 2px solid var(--neon-blue); color: var(--neon-blue); font-weight: bold; font-size: 0.9rem; }
+        .hud-sum-val { text-align: right; padding-top: 10px !important; }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            filter: drop-shadow(0 0 30px rgba(0, 210, 255, 0.15));
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+        <div id="data-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="equation-hud">
+            <table class="hud-table">
+                <thead>
+                    <tr><th><script>document.write(CyberI18n.get('triangulierer.triangle'))</script></th><th style="text-align:right"><script>document.write(CyberI18n.get('triangulierer.area'))</script></th></tr>
+                </thead>
+                <tbody id="hud-body"></tbody>
+                <tfoot>
+                    <tr class="hud-sum-row">
+                        <td style="padding-top:10px;"><script>document.write(CyberI18n.get('triangulierer.sum'))</script></td>
+                        <td id="hud-sum-val" class="hud-sum-val">0,00 cm²</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <canvas id="canvas"></canvas>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof resetPoints === 'function') resetPoints();
+            }, 400);
+        }
+        window.addEventListener('load', () => {
+            // 1. Branding
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('triangulierer.title')
+            });
+
+            // 2. Delaunay Engine
+            class Delaunay {
+                static from(points) {
+                    if (points.length < 3) return [];
+                    const minX = Math.min(...points.map(p => p[0])), minY = Math.min(...points.map(p => p[1]));
+                    const maxX = Math.max(...points.map(p => p[0])), maxY = Math.max(...points.map(p => p[1]));
+                    const dx = maxX - minX, dy = maxY - minY, dmax = Math.max(dx, dy);
+                    const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+                    const st = [[midX - 20 * dmax, midY - dmax], [midX + 20 * dmax, midY - dmax], [midX, midY + 20 * dmax]];
+                    let triangles = [{p: [st[0], st[1], st[2]], circum: this.getCircum(st[0], st[1], st[2])}];
+                    for (let p of points) {
+                        let badTris = [], polygon = [];
+                        for (let j = 0; j < triangles.length; j++) {
+                            if (Math.hypot(triangles[j].circum.x - p[0], triangles[j].circum.y - p[1]) < triangles[j].circum.r - 0.0001) badTris.push(j);
+                        }
+                        for (let j of badTris) {
+                            const edges = [[triangles[j].p[0], triangles[j].p[1]], [triangles[j].p[1], triangles[j].p[2]], [triangles[j].p[2], triangles[j].p[0]]];
+                            for (let e of edges) {
+                                if (!badTris.some(o => o !== j && triangles[o].p.some(p1 => p1[0]===e[0][0] && p1[1]===e[0][1]) && triangles[o].p.some(p2 => p2[0]===e[1][0] && p2[1]===e[1][1]))) polygon.push(e);
+                            }
+                        }
+                        badTris.sort((a, b) => b - a).forEach(idx => triangles.splice(idx, 1));
+                        polygon.forEach(e => { const c = this.getCircum(e[0], e[1], p); if (c) triangles.push({p: [e[0], e[1], p], circum: c}); });
+                    }
+                    return triangles.filter(t => !t.p.some(tp => st.some(sp => tp[0]===sp[0] && tp[1]===sp[1])));
+                }
+                static getCircum(p1, p2, p3) {
+                    const x1 = p1[0], y1 = p1[1], x2 = p2[0], y2 = p2[1], x3 = p3[0], y3 = p3[1];
+                    const D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+                    if (Math.abs(D) < 0.1) return null;
+                    const cx = ((x1*x1+y1*y1)*(y2-y3) + (x2*x2+y2*y2)*(y3-y1) + (x3*x3+y3*y3)*(y1-y2)) / D;
+                    const cy = ((x1*x1+y1*y1)*(x3-x2) + (x2*x2+y2*y2)*(x1-x3) + (x3*x3+y3*y3)*(x2-x1)) / D;
+                    return {x: cx, y: cy, r: Math.hypot(x1 - cx, y1 - cy)};
+                }
+            }
+
+            // 3. State & Logic
+            CyberUI.init();
+            const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+            let points = [], selectedIndices = new Set(), draggedIdx = -1;
+            let ox, oy, sWidth, multiMode = false, requestID = null;
+            let longPressTimer = null;
+            const units = 10;
+
+            function render() {
+                if (requestID) cancelAnimationFrame(requestID);
+                requestID = requestAnimationFrame(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const pxToCm = units / sWidth;
+                    const triangles = Delaunay.from(points);
+                    
+                    // Draw Reference Square
+                    ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth = 1;
+                    ctx.strokeRect(ox, oy, sWidth, sWidth);
+
+                    // Dimension Labels
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "15px Orbitron";
+                    ctx.textAlign = "center";
+                    ctx.fillText("10 cm", ox + sWidth/2, oy - 15);
+                    ctx.save();
+                    ctx.translate(ox - 20, oy + sWidth/2);
+                    ctx.rotate(-Math.PI/2);
+                    ctx.fillText("10 cm", 0, 0);
+                    ctx.restore();
+
+                    let totalArea = 0;
+                    const hudBody = document.getElementById('hud-body');
+                    const hudSumVal = document.getElementById('hud-sum-val');
+                    if (hudBody) hudBody.innerHTML = '';
+
+                    triangles.forEach((tri, idx) => {
+                        const p = tri.p;
+                        const area = Math.abs((p[0][0]*(p[1][1]-p[2][1]) + p[1][0]*(p[2][1]-p[0][1]) + p[2][0]*(p[0][1]-p[1][1])) / 2) * (pxToCm**2);
+                        totalArea += area;
+
+                        ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
+                        ctx.fillStyle = "rgba(0, 210, 255, 0.05)"; ctx.fill();
+                        ctx.strokeStyle = "rgba(0, 210, 255, 0.2)"; ctx.stroke();
+                        
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.3)"; ctx.font = "bold 9px Orbitron"; ctx.textAlign = "center";
+                        ctx.fillText(String(idx+1).padStart(2,'0'), (p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3 + 3);
+
+                        if (hudBody) { 
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td>${String(idx+1).padStart(2,'0')}</td><td style="text-align:right">${area.toFixed(2).replace('.',',')}</td>`;
+                            hudBody.appendChild(row);
+                        }
+                    });
+
+                    if (hudSumVal) hudSumVal.innerText = totalArea.toFixed(2).replace('.',',') + ' cm²';
+
+                    points.forEach((p, i) => {
+                        const isSel = selectedIndices.has(i), isEdge = i < 4;
+                        ctx.beginPath(); ctx.arc(p[0], p[1], isEdge ? 3 : (isSel ? 6 : 4), 0, Math.PI*2);
+                        if (isSel) {
+                            ctx.shadowBlur = 15; ctx.shadowColor = "var(--neon-blue)";
+                            ctx.fillStyle = "#ffffff";
+                        } else {
+                            ctx.fillStyle = isEdge ? "rgba(255,255,255,0.15)" : (i === draggedIdx ? "#ffffff" : "var(--neon-blue)");
+                        }
+                        ctx.fill(); ctx.shadowBlur = 0;
+                    });
+
+                    CyberUI.updateStatsGrid('data-container', [
+                        { label: CyberI18n.get('triangulierer.target_area'), value: '100,00 cm²', color: 'var(--neon-orange)' },
+                        { label: CyberI18n.get('triangulierer.sum_delta'), value: totalArea.toFixed(2).replace('.',',') + ' cm²', color: 'var(--neon-blue)' }
+                    ]);
+
+                    // Sync Delete Button State
+                    const btnDel = document.getElementById('btn-delete-points');
+                    if (btnDel) btnDel.disabled = (selectedIndices.size === 0);
+                });
+            }
+
+            function resetPoints() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = document.getElementById('main-content').getBoundingClientRect();
+                canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                sWidth = Math.min(rect.height * 0.8, rect.width * 0.6, 600);
+                ox = (rect.width - sWidth) / 3; oy = (rect.height - sWidth) / 2;
+                points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
+                selectedIndices.clear();
+                for (let i = 0; i < 6; i++) points.push([ox + 50 + Math.random()*(sWidth-100), oy + 50 + Math.random()*(sWidth-100)]);
+                
+                // Update HUD Position: Top-Left of Table to Top-Right of Square
+                const hud = document.getElementById('equation-hud');
+                if (hud) {
+                    hud.style.top = oy + 'px';
+                    hud.style.left = (ox + sWidth + 30) + 'px';
+                }
+
+                render();
+            }
+
+            // Interaction
+            let dragStartPos = { x: 0, y: 0 };
+            let initialPointsMapping = new Map();
+
+            canvas.onpointerdown = e => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                dragStartPos = { x, y };
+
+                let hit = -1;
+                for (let i = 4; i < points.length; i++) {
+                    if (Math.hypot(points[i][0]-x, points[i][1]-y) < 20) { hit = i; break; }
+                }
+
+                if (hit !== -1) {
+                    draggedIdx = hit;
+                    
+                    // Improved Multi-Select Logic (Toggle)
+                    if (e.shiftKey || multiMode) {
+                        if (selectedIndices.has(hit)) selectedIndices.delete(hit);
+                        else selectedIndices.add(hit);
+                    } else {
+                        // Single-select mode: isolated selection
+                        selectedIndices.clear();
+                        selectedIndices.add(hit);
+                    }
+
+                    // Snapshot formation
+                    initialPointsMapping.clear();
+                    selectedIndices.forEach(idx => {
+                        initialPointsMapping.set(idx, [...points[idx]]);
+                    });
+
+                    if (longPressTimer) clearTimeout(longPressTimer);
+                    longPressTimer = setTimeout(() => {
+                        if (Math.hypot(x - dragStartPos.x, y - dragStartPos.y) < 5) {
+                            if (!multiMode) window.toggleM();
+                            render();
+                        }
+                    }, 600);
+                } else {
+                    // Clicking empty space always clears selection unless Shift is held
+                    if (!e.shiftKey) selectedIndices.clear();
+                }
+                render();
+            };
+
+            window.onpointermove = e => {
+                if (draggedIdx === -1) return;
+                if (longPressTimer) clearTimeout(longPressTimer);
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                const dx = x - dragStartPos.x, dy = y - dragStartPos.y;
+
+                // Move formation as a group
+                initialPointsMapping.forEach((initPos, idx) => {
+                    points[idx] = [
+                        Math.max(ox, Math.min(ox + sWidth, initPos[0] + dx)),
+                        Math.max(oy, Math.min(oy + sWidth, initPos[1] + dy))
+                    ];
+                });
+                render();
+            };
+
+            window.onpointerup = e => {
+                if (longPressTimer) clearTimeout(longPressTimer);
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+                if (draggedIdx === -1 && Math.hypot(x - dragStartPos.x, y - dragStartPos.y) < 5) {
+                    if (x >= ox && x <= ox + sWidth && y >= oy && y <= oy + sWidth) {
+                        points.push([x, y]);
+                    }
+                }
+                draggedIdx = -1;
+                initialPointsMapping.clear();
+                render();
+            };
+
+            // UI Buttons
+            CyberUI.createCard('ui-container', CyberI18n.get('triangulierer.controls'), `
+                <button class="cyber-btn" onclick="window.toggleM()">${CyberI18n.get('triangulierer.multi_mode')}</button>
+                <button class="cyber-btn btn-delete" id="btn-delete-points" onclick="window.delS()">${CyberI18n.get('triangulierer.delete_selection')}</button>
+                <button class="cyber-btn" onclick="window.resP()">${CyberI18n.get('ui.reset')}</button>
+            `, 'var(--neon-blue)');
+
+            window.toggleM = () => { multiMode = !multiMode; render(); };
+            window.delS = () => { points = points.filter((_, i) => i < 4 || !selectedIndices.has(i)); selectedIndices.clear(); render(); };
+            window.resP = resetPoints;
+
+            window.addEventListener('resize', resetPoints);
+            resetPoints();
+        });
+    </script>
+</body>
+</html>

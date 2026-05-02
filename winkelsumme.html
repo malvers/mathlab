@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Winkelsumme-Labor | ULTRA v5.3.8</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-spezifische Anpassungen */
+        /* Custom Log Styling for CyberUI Card integration */
+        #math-log {
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+        }
+
+        .corner-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/earcut/dist/earcut.min.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+            }, 400);
+        }
+        // 1. Branding & UI Init
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: CyberI18n.get('ui.angle_sum')
+        });
+        CyberUI.init();
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        const neonColors = ["#00d2ff", "#4ade80", "#ffde00", "#f472b6", "#9d50bb", "#00ffa2", "#ff8800"];
+        
+        let width, height, dpr;
+        let points = [];
+        let nEcken = 3;
+        let dragIdx = -1;
+        const BOGEN_RAD = 50;
+
+        // 2. Build UI Cards
+        function setupUI() {
+            CyberUI.createCard('ui-container', CyberI18n.get('polygon.vertices'), `
+                <div class="corner-grid" id="btn-container"></div>
+                <button class="cyber-btn" onclick="resetLab()" style="width:100%; border-color:var(--neon-blue); color:var(--neon-blue);">${CyberI18n.get('ui.reset')}</button>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.angle_analysis'), `
+                <div class="stat-card" style="text-align:center;">
+                    <span class="stats-label">${CyberI18n.get('polygon.sum_interior')}</span>
+                    <div id="sum-val" class="stats-val" style="font-size:2.4rem !important; text-shadow:0 0 20px rgba(255,255,255,0.3);">0°</div>
+                </div>
+                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; margin-top: 10px;">
+                    <span class="stats-label">${CyberI18n.get('polygon.angle_protocol')}</span>
+                    <div id="math-log"></div>
+                </div>
+            `, 'var(--neon-purple)');
+
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const btnContainer = document.getElementById('btn-container');
+            if(!btnContainer) return;
+            btnContainer.innerHTML = '';
+            for (let i = 3; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'cyber-btn' + (i === nEcken ? ' active' : '');
+                btn.innerText = CyberI18n.get('polygon.vertex_short', { n: i });
+                btn.onclick = () => { nEcken = i; updateButtons(); initPolygon(i); };
+                btnContainer.appendChild(btn);
+            }
+        }
+
+        function init() {
+            dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            width = rect.width; height = rect.height;
+            canvas.width = width * dpr; canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            initPolygon(nEcken);
+        }
+
+        function resetLab() {
+            initPolygon(nEcken);
+        }
+
+        function initPolygon(n) {
+            points = [];
+            const cx = width / 2, cy = height * 0.45;
+            const radius = Math.min(width, height) * 0.22;
+            for (let i = 0; i < n; i++) {
+                const a = (2 * Math.PI * i) / n - Math.PI / 2;
+                points.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) });
+            }
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Raster
+            ctx.strokeStyle = "rgba(255,255,255,0.03)"; ctx.lineWidth = 1;
+            for(let x=0; x<width; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,height); ctx.stroke(); }
+            for(let y=0; y<height; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(width,y); ctx.stroke(); }
+
+            const n = points.length;
+            let logHtml = "";
+            let totalDeg = 0;
+            let winkelWerte = [];
+
+            // Orientierung
+            let area = 0;
+            for(let i=0; i<n; i++) area += (points[i].x * points[(i+1)%n].y) - (points[(i+1)%n].x * points[i].y);
+            const isCW = area < 0;
+
+            // Winkel
+            for (let i = 0; i < n; i++) {
+                const P = points[i], prev = points[(i + n - 1) % n], next = points[(i + 1) % n];
+                const a1 = Math.atan2(prev.y - P.y, prev.x - P.x);
+                const a2 = Math.atan2(next.y - P.y, next.x - P.x);
+                let diff = a2 - a1;
+                if (isCW) { while (diff < 0) diff += Math.PI * 2; }
+                else { while (diff > 0) diff -= Math.PI * 2; }
+
+                const deg = Math.abs(diff) * 180 / Math.PI;
+                winkelWerte.push(Math.abs(diff));
+                totalDeg += deg;
+
+                const color = neonColors[i % neonColors.length];
+                ctx.save();
+                ctx.shadowBlur = 15; ctx.shadowColor = color;
+                ctx.fillStyle = color + "33";
+                ctx.beginPath(); ctx.moveTo(P.x, P.y); ctx.arc(P.x, P.y, BOGEN_RAD, a1, a1 + diff, !isCW); ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+                ctx.restore();
+
+                logHtml += `<div class="log-entry"><span style="color:${color}">${CyberI18n.get('polygon.angle_label', { n: i+1 })}</span><span>${deg.toFixed(1)}°</span></div>`;
+            }
+
+            // Polygon Umriss
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+            for(let i=1; i<n; i++) ctx.lineTo(points[i].x, points[i].y);
+            ctx.closePath(); ctx.stroke();
+
+            // Beweis (Addition an der Geraden)
+            const gY = height * 0.85, gX = width / 2;
+            const lineLen = 280;
+            ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(gX - lineLen, gY); ctx.lineTo(gX + lineLen, gY); ctx.stroke();
+
+            let currentStart = Math.PI;
+            winkelWerte.forEach((w, i) => {
+                const color = neonColors[i % neonColors.length];
+                ctx.save();
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color + "60";
+                ctx.beginPath(); ctx.moveTo(gX, gY); ctx.arc(gX, gY, BOGEN_RAD * 1.6, currentStart, currentStart - w, true); ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.5; ctx.stroke();
+                ctx.restore();
+                currentStart -= w;
+            });
+
+            // Handles
+            points.forEach((p, idx) => {
+                const color = neonColors[idx % neonColors.length];
+                ctx.save();
+                ctx.shadowBlur = 10; ctx.shadowColor = color;
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+                ctx.restore();
+            });
+
+            // Update UI
+            const sumValEl = document.getElementById('sum-val');
+            const mathLogEl = document.getElementById('math-log');
+            if(sumValEl) sumValEl.innerText = Math.round(totalDeg) + "°";
+            if(mathLogEl) mathLogEl.innerHTML = logHtml;
+        }
+
+        // Interaktion
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        canvas.onpointerdown = e => {
+            const pos = getPos(e);
+            dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 30);
+            if(dragIdx !== -1) canvas.setPointerCapture(e.pointerId);
+        };
+
+        canvas.onpointermove = e => {
+            if (dragIdx === -1) return;
+            const pos = getPos(e);
+            
+            // 1. Ränder-Kollision
+            const margin = 30;
+            let nx = Math.max(margin, Math.min(width - margin, pos.x));
+            let ny = Math.max(margin, Math.min(height - margin, pos.y));
+            
+            // 2. Punkt-Punkt-Kollision
+            const minDist = 35;
+            for(let i=0; i<points.length; i++) {
+                if(i === dragIdx) continue;
+                if(Math.hypot(points[i].x - nx, points[i].y - ny) < minDist) return;
+            }
+
+            // 3. Selbst-Schnitt-Kollision (Kein "Überkreuzen" erlauben)
+            const n = points.length;
+            const testPoints = [...points];
+            testPoints[dragIdx] = { x: nx, y: ny };
+
+            const intersects = (p1, p2, p3, p4) => {
+                const det = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+                if (det === 0) return false;
+                const lambda = ((p4.y - p3.y) * (p4.x - p1.x) + (p3.x - p4.x) * (p4.y - p1.y)) / det;
+                const gamma = ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) / det;
+                return (0.01 < lambda && lambda < 0.99) && (0.01 < gamma && gamma < 0.99);
+            };
+
+            // Prüfe alle Kanten gegen alle anderen Kanten
+            let hasIntersection = false;
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 2; j < n; j++) {
+                    if (i === 0 && j === n - 1) continue;
+                    if (intersects(testPoints[i], testPoints[(i + 1) % n], testPoints[j], testPoints[(j + 1) % n])) {
+                        hasIntersection = true;
+                        break;
+                    }
+                }
+                if (hasIntersection) break;
+            }
+
+            if (!hasIntersection) {
+                points[dragIdx] = { x: nx, y: ny };
+                draw();
+            }
+        };
+
+        canvas.onpointerup = e => {
+            dragIdx = -1;
+            canvas.releasePointerCapture(e.pointerId);
+        };
+
+        window.onresize = init;
+        setupUI();
+        init();
+
+    </script>
+</body>
+
+</html>ml>

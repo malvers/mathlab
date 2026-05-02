@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Winkel-Labor | ULTRA v5.3.8</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <style>
+        /* Beweis-Farben */
+        :root {
+            --color-alpha: #00d2ff;
+            --color-beta: #ffde00;
+        }
+
+        .angle-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .angle-val {
+            font-family: 'Orbitron';
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .angle-sum-area {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/branding/briefings.js?v=539"></script>
+    <script src="js/branding/overlays.js?v=539"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js?v=539"></script>
+    <script src="js/ui.js?v=539"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 400);
+        }
+        /**
+         * WINKEL-LABORATORY - ULTRA v5.3.8
+         * High-Precision Angle Analysis Engine.
+         */
+        window.addEventListener('load', () => {
+            // 1. Branding & UI Init
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: CyberI18n.get('ui.angle_lab'),
+                headerId: "sidebar-header" 
+            });
+            CyberUI.init();
+
+            // 2. State & Math Engine
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height, scale;
+            let isParallel = true;
+            let draggedPoint = null;
+
+            const COLORS = {
+                A: "#00d2ff", B: "#ffde00",
+                TRANS: "#666666", BASE: "#666666"
+            };
+
+            let g1 = { p1: { rx: 0.2, ry: 0.2, x: 0, y: 0 }, p2: { rx: 0.8, ry: 0.8, x: 0, y: 0 } };
+            let g2 = { p1: { rx: 0.1, ry: 0.4, x: 0, y: 0 }, p2: { rx: 0.9, ry: 0.4, x: 0, y: 0 } };
+            let parallelOffsetRel = 0.2;
+
+            // 3. UI System
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.angle_analysis'), `
+                <div class="angle-stat" style="padding: 15px 0;">
+                    <span style="color:var(--neon-blue); font-size: 2.2rem; font-weight: bold; font-family: 'Outfit', sans-serif; text-shadow: 0 0 15px var(--neon-blue);">α</span>
+                    <span id="disp-alpha" class="angle-val" style="color:var(--neon-blue); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-blue);">0.0°</span>
+                </div>
+                <div class="angle-stat" style="padding: 15px 0; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                    <span style="color:var(--neon-amber); font-size: 2.2rem; font-weight: bold; font-family: 'Outfit', sans-serif; text-shadow: 0 0 15px var(--neon-amber);">β</span>
+                    <span id="disp-beta" class="angle-val" style="color:var(--neon-amber); font-size: 2.4rem; text-shadow: 0 0 15px var(--neon-amber);">0.0°</span>
+                </div>
+                <div class="angle-sum-area">
+                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:5px;">${CyberI18n.get('geometry.supp_sum')}</div>
+                    <div class="angle-val" style="font-size:1.1rem;">
+                        <span id="sum-a" style="color:var(--neon-blue);">0.0°</span> + 
+                        <span id="sum-b" style="color:var(--neon-amber);">0.0°</span> = 180.0°
+                    </div>
+                </div>
+            `, 'var(--neon-blue)');
+
+            CyberUI.createCard('ui-container', CyberI18n.get('geometry.lab_control'), `
+                <div class="cyber-control-group">
+                    <button class="cyber-btn primary" id="btn-toggle" style="width:100%; margin-bottom:8px;">${isParallel ? CyberI18n.get('geometry.parallel_on') : CyberI18n.get('geometry.parallel_off')}</button>
+                    <button class="cyber-btn" id="btn-reset" style="width:100%; opacity:0.7;">${CyberI18n.get('ui.reset')}</button>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-family:Orbitron; font-size:0.65rem; color:rgba(255,255,255,0.4); letter-spacing:1px;">
+                        <span>${CyberI18n.get('geometry.transversal')}</span>
+                        <span>${CyberI18n.get('geometry.parallels')}</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+                        <button class="cyber-btn compact" id="btn-rot-t-l">↺</button>
+                        <button class="cyber-btn compact" id="btn-rot-t-r">↻</button>
+                        <button class="cyber-btn compact" id="btn-rot-b-l">↺</button>
+                        <button class="cyber-btn compact" id="btn-rot-b-r">↻</button>
+                    </div>
+                </div>
+                <div style="text-align:center; font-size:0.75rem; font-weight:bold; margin-top:15px; font-family:Orbitron; letter-spacing:1px; color:var(--neon-blue); opacity:0.8;">${CyberI18n.get('geometry.step_width', { deg: '5.0' })}</div>
+            `);
+
+            function rotateTransversal(deg) {
+                const inter1 = getIntersection(g1.p1, g1.p2, g2.p1, g2.p2);
+                // Rotate around intersection or center of line if parallel
+                const pivot = inter1 || { x: (g1.p1.x + g1.p2.x) / 2, y: (g1.p1.y + g1.p2.y) / 2 };
+                const rad = deg * Math.PI / 180;
+
+                const rotP = (p) => {
+                    const dx = p.x - pivot.x, dy = p.y - pivot.y;
+                    const nx = dx * Math.cos(rad) - dy * Math.sin(rad) + pivot.x;
+                    const ny = dx * Math.sin(rad) + dy * Math.cos(rad) + pivot.y;
+                    p.x = nx; p.y = ny;
+                    p.rx = nx / width; p.ry = ny / height;
+                };
+
+                rotP(g1.p1); rotP(g1.p2);
+                draw();
+            }
+
+            function rotateBaseLine(deg) {
+                const pivot = { x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 };
+                const rad = deg * Math.PI / 180;
+
+                const rotP = (p) => {
+                    const dx = p.x - pivot.x, dy = p.y - pivot.y;
+                    const nx = dx * Math.cos(rad) - dy * Math.sin(rad) + pivot.x;
+                    const ny = dx * Math.sin(rad) + dy * Math.cos(rad) + pivot.y;
+                    p.x = nx; p.y = ny;
+                    p.rx = nx / width; p.ry = ny / height;
+                };
+
+                rotP(g2.p1); rotP(g2.p2);
+                draw();
+            }
+
+            function updateUI(alpha, beta) {
+                document.getElementById('disp-alpha').innerText = alpha.toFixed(1) + "°";
+                document.getElementById('disp-beta').innerText = beta.toFixed(1) + "°";
+                document.getElementById('sum-a').innerText = alpha.toFixed(1) + "°";
+                document.getElementById('sum-b').innerText = beta.toFixed(1) + "°";
+            }
+
+            document.getElementById('btn-toggle').onclick = () => {
+                isParallel = !isParallel;
+                document.getElementById('btn-toggle').innerText = isParallel ? CyberI18n.get('geometry.parallel_on') : CyberI18n.get('geometry.parallel_off');
+                document.getElementById('btn-toggle').classList.toggle('active', isParallel);
+            };
+            document.getElementById('btn-reset').onclick = () => {
+                g1.p1.rx = 0.2; g1.p1.ry = 0.2; g1.p2.rx = 0.8; g1.p2.ry = 0.8;
+                g2.p1.rx = 0.1; g2.p1.ry = 0.4; g2.p2.rx = 0.9; g2.p2.ry = 0.4;
+                parallelOffsetRel = 0.2;
+                resize();
+            };
+            document.getElementById('btn-rot-t-l').onclick = () => rotateTransversal(-5);
+            document.getElementById('btn-rot-t-r').onclick = () => rotateTransversal(5);
+            document.getElementById('btn-rot-b-l').onclick = () => rotateBaseLine(-5);
+            document.getElementById('btn-rot-b-r').onclick = () => rotateBaseLine(5);
+
+            // 4. Rendering & Logic
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                width = rect.width; height = rect.height;
+                scale = Math.max(0.6, Math.min(1.2, width / 1000));
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr; canvas.height = height * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => { p.x = p.rx * width; p.y = p.ry * height; });
+                draw();
+            }
+
+            function getIntersection(p1, p2, p3, p4) {
+                const denom = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+                if (denom === 0) return null;
+                const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denom;
+                return { x: p1.x + ua * (p2.x - p1.x), y: p1.y + ua * (p2.y - p1.y) };
+            }
+
+            function drawLine(p1, p2, color, opacity = 1) {
+                ctx.save();
+                ctx.beginPath();
+                const dx = p2.x - p1.x, dy = p2.y - p1.y;
+                ctx.moveTo(p1.x - dx * 10, p1.y - dy * 10);
+                ctx.lineTo(p2.x + dx * 10, p2.y + dy * 10);
+                ctx.strokeStyle = color; ctx.globalAlpha = opacity;
+                ctx.lineWidth = 1.5 * scale; ctx.stroke();
+                ctx.restore();
+            }
+
+            function drawColoredAngle(p, startAngle, endAngle, color, label) {
+                const arcRad = 60 * scale; const fontSize = Math.max(12, 16 * scale);
+                ctx.save();
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, arcRad, startAngle, endAngle); ctx.lineTo(p.x, p.y); ctx.closePath();
+                ctx.fillStyle = color + "e6"; // 90% opacity
+                ctx.fill();
+                ctx.strokeStyle = color; ctx.lineWidth = 2 * scale; ctx.stroke();
+
+                let midAngle = (startAngle + endAngle) / 2;
+                if (Math.abs(endAngle - startAngle) > Math.PI) midAngle += Math.PI;
+                const lx = p.x + Math.cos(midAngle) * (arcRad + 25 * scale);
+                const ly = p.y + Math.sin(midAngle) * (arcRad + 25 * scale);
+
+                ctx.fillStyle = "white"; ctx.font = `bold ${fontSize}px Orbitron`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(label, lx, ly);
+                ctx.restore();
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                // Grid
+                ctx.strokeStyle = "rgba(255,255,255,0.02)";
+                for (let i = 0; i < Math.max(width, height); i += 50) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke();
+                }
+
+                drawLine(g2.p1, g2.p2, COLORS.BASE);
+
+                // --- PHYSICS UPDATE: Normal Vector for true Parallelism ---
+                const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                const len2 = Math.hypot(dx2, dy2);
+                const nx = -dy2 / len2, ny = dx2 / len2; // Normal Vector
+                const po = parallelOffsetRel * height;
+
+                const g3 = {
+                    p1: { x: g2.p1.x + nx * po, y: g2.p1.y + ny * po },
+                    p2: { x: g2.p2.x + nx * po, y: g2.p2.y + ny * po }
+                };
+
+                if (isParallel) drawLine(g3.p1, g3.p2, COLORS.BASE, 0.5);
+                drawLine(g1.p1, g1.p2, COLORS.TRANS);
+
+                const inter1 = getIntersection(g1.p1, g1.p2, g2.p1, g2.p2);
+                if (inter1) {
+                    const a_trans = Math.atan2(g1.p1.y - inter1.y, g1.p1.x - inter1.x);
+                    const a_base = Math.atan2(g2.p2.y - g2.p1.y, g2.p2.x - g2.p1.x);
+                    let alphaRad = a_base - a_trans; while (alphaRad < 0) alphaRad += Math.PI * 2;
+                    const alphaDeg = (alphaRad * 180 / Math.PI) % 180;
+                    updateUI(alphaDeg, 180 - alphaDeg);
+
+                    const drawAngles = (p, labels) => {
+                        const v1 = Math.atan2(g1.p1.y - p.y, g1.p1.x - p.x);
+                        const v2 = Math.atan2(g2.p2.y - g2.p1.y, g2.p2.x - g2.p1.x);
+                        const v3 = v1 + Math.PI, v4 = v2 + Math.PI;
+                        const sorted = [v1, v2, v3, v4].sort((a, b) => {
+                            let d = a - b; while (d < -Math.PI) d += Math.PI * 2; while (d > Math.PI) d -= Math.PI * 2; return d;
+                        });
+                        for (let i = 0; i < 4; i++) {
+                            const st = sorted[i], en = sorted[(i + 1) % 4];
+                            let diff = en - st; while (diff < 0) diff += Math.PI * 2;
+                            const isGroupA = Math.abs(diff * 180 / Math.PI - alphaDeg) < 1;
+                            drawColoredAngle(p, st, en, isGroupA ? COLORS.A : COLORS.B, `${labels[i]}=${(diff * 180 / Math.PI).toFixed(1)}°`);
+                        }
+                    };
+                    drawAngles(inter1, ["α", "β", "γ", "δ"]);
+                    if (isParallel) {
+                        const inter2 = getIntersection(g1.p1, g1.p2, g3.p1, g3.p2);
+                        if (inter2) drawAngles(inter2, ["α'", "β'", "γ'", "δ'"]);
+                    }
+                }
+
+                const drawHandle = (p, color) => {
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 8 * scale, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+                    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+                };
+                [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => drawHandle(p, COLORS.BASE));
+                if (isParallel) {
+                    const midG3 = { x: (g3.p1.x + g3.p2.x) / 2, y: (g3.p1.y + g3.p2.y) / 2 };
+                    drawHandle(midG3, COLORS.BASE);
+                }
+            }
+
+            canvas.onpointerdown = e => {
+                const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                const hitZone = 35 * scale;
+                [g1.p1, g1.p2, g2.p1, g2.p2].forEach(p => { if (Math.hypot(p.x - x, p.y - y) < hitZone) draggedPoint = p; });
+                if (isParallel && !draggedPoint) {
+                    // Smart Hit detection for the shifted parallel handle
+                    const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                    const len2 = Math.hypot(dx2, dy2);
+                    const nx = -dy2 / len2, ny = dx2 / len2;
+                    const po = parallelOffsetRel * height;
+                    const midG3 = { x: (g2.p1.x + g2.p2.x) / 2 + nx * po, y: (g2.p1.y + g2.p2.y) / 2 + ny * po };
+                    if (Math.hypot(midG3.x - x, midG3.y - y) < hitZone) draggedPoint = "offset";
+                }
+            };
+            window.onpointermove = e => {
+                if (!draggedPoint) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.max(0, Math.min(width, e.clientX - rect.left));
+                const y = Math.max(0, Math.min(height, e.clientY - rect.top));
+                if (draggedPoint === "offset") {
+                    // Project movement onto normal vector for smooth offset control
+                    const dx2 = g2.p2.x - g2.p1.x, dy2 = g2.p2.y - g2.p1.y;
+                    const len2 = Math.hypot(dx2, dy2);
+                    const nx = -dy2 / len2, ny = dx2 / len2;
+                    const midBase = { x: (g2.p1.x + g2.p2.x) / 2, y: (g2.p1.y + g2.p2.y) / 2 };
+                    const dist = (x - midBase.x) * nx + (y - midBase.y) * ny;
+                    parallelOffsetRel = dist / height;
+                }
+                else { draggedPoint.x = x; draggedPoint.y = y; draggedPoint.rx = x / width; draggedPoint.ry = y / height; }
+                draw();
+            };
+            window.onpointerup = () => draggedPoint = null;
+            window.onresize = resize;
+            resize();
+        });
+    </script>
+</body>
+
+</html>
