@@ -3,37 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Linsenoptimierung | Evolution Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=22">
-    <style>
-        .controls-hint {
-            margin-top: 20px !important;
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            gap: 10px !important;
-            padding: 15px 0 0 0 !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        .hint {
-            font-size: 8px !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            text-align: center !important;
-            flex: 1 !important;
-        }
-
-        .hint span {
-            color: #ffcc00 !important;
-            display: block !important;
-            width: auto !important;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=31">
 </head>
 
 <body>
@@ -54,8 +31,10 @@
                 <div class="canvas-subtitle">Optimierung einer Linse mit Covarianz Matrix Adaptions Evolutionsstrategie</div>
             </div>
 
-            <!-- Telemetry Sidebar -->
-            <aside id="telemetry">
+            <!-- Bottom HUD: Telemetrie + Steuerung, gemeinsam skaliert -->
+            <div id="lens-ui-dock">
+                <div class="lens-ui-dock-inner">
+                    <aside id="telemetry">
                 <div class="glass-card">
                     <h3>EVOLUTION DATA</h3>
                     <div class="data-grid">
@@ -122,10 +101,9 @@
                     </div>
                 </div>
 
-            </aside>
+                </aside>
 
-            <!-- Bottom Control Bar -->
-            <footer id="control-bar">
+                    <footer id="control-bar">
                 <div class="btn-group">
                     <button id="btn-play" class="action-btn primary">
                         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -134,17 +112,23 @@
                         START
                     </button>
                     <button id="btn-reset" class="action-btn">RESET</button>
-                    <button id="btn-reset-view" class="action-btn">RESET VIEW</button>
+                    <button id="btn-reset-view" type="button" class="action-btn"
+                        aria-label="Ansicht zurücksetzen"><span class="btn-rv-full">RESET VIEW</span><span
+                            class="btn-rv-compact">RV</span></button>
                 </div>
-                <div class="slider-group">
-                    <label>REFRACTION</label>
-                    <input type="range" id="slider-n" min="1.05" max="2.0" step="0.01" value="1.60">
+                <div class="slider-row" aria-label="Parameter">
+                    <div class="slider-group">
+                        <label>REFRACTION</label>
+                        <input type="range" id="slider-n" min="1.05" max="2.0" step="0.01" value="1.60">
+                    </div>
+                    <div class="slider-group">
+                        <label>SIGMA</label>
+                        <input type="range" id="slider-sigma" min="0.01" max="0.5" step="0.01" value="0.1">
+                    </div>
                 </div>
-                <div class="slider-group">
-                    <label>SIGMA</label>
-                    <input type="range" id="slider-sigma" min="0.01" max="0.5" step="0.01" value="0.1">
+                </footer>
                 </div>
-            </footer>
+            </div>
         </main>
     </div>
 
@@ -153,7 +137,7 @@
     <script>
         CyberUI.init();
     </script>
-    <script src="cmaes_java.js?v=18"></script>
+    <script src="cmaes_java.js?v=20"></script>
 </body>
 
 </html>
