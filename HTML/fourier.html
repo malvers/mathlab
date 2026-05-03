@@ -44,10 +44,15 @@
             z-index: 100;
             pointer-events: none;
             left: 50%;
+            right: auto;
             bottom: clamp(10px, 3vmin, 44px);
             transform: translateX(-50%);
+            /* Schlank an die Formel, aber oben capped und auf schmalen Views volle Breite nutzbar */
+            display: inline-flex;
+            justify-content: center;
+            align-items: stretch;
             width: max-content;
-            max-width: min(960px, calc(100% - clamp(7rem, min(18vmin, 24vw), 16rem)));
+            max-width: min(580px, calc(100% - clamp(28px, 6vw, 56px)));
             box-sizing: border-box;
         }
 
@@ -58,22 +63,58 @@
             top: auto !important;
             bottom: auto !important;
             transform: none !important;
-            max-width: min(920px, calc(100% - 2rem));
             width: max-content;
+            max-width: 100%;
+            min-width: 0;
             box-sizing: border-box;
             padding: clamp(8px, 1.2vmin + 6px, 22px) clamp(12px, 2.5vw, 40px);
             font-size: clamp(0.88rem, 1.85vmin + 0.62rem, 2.05rem);
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* KaTeX ggf. etwas zu breit: horizontal schieben, Scrollbar unsichtbar (kein grauer Streifen) */
             overflow-x: auto;
-            overflow-y: visible;
-            -webkit-overflow-scrolling: touch;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body.compact-ui #fourier-stack #formula-overlay::-webkit-scrollbar {
+            height: 0;
         }
 
         body.compact-ui #fourier-stack #formula-overlay .katex-display {
             margin: 0 !important;
+            white-space: nowrap;
         }
 
         body.compact-ui #fourier-stack #formula-overlay .katex-display > .katex {
             font-size: clamp(0.78rem, 2.15vmin + 0.48rem, 1.95rem) !important;
+            white-space: nowrap;
+        }
+
+        body.compact-ui #fourier-stack #formula-overlay .katex .katex-html {
+            white-space: nowrap;
+        }
+
+        /* N-Schritt-Buttons: gleiche Breite trotz wechselnder Beschriftung (-500, +10, …) */
+        body.compact-ui .fourier-n-step-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            min-width: 0;
+        }
+
+        body.compact-ui .fourier-n-step-row .cyber-btn {
+            width: auto !important;
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            min-height: 36px !important;
+            padding: 4px 2px !important;
+            font-size: 0.6rem !important;
+            letter-spacing: 0.35px !important;
+            border-color: rgba(0, 210, 255, 0.3) !important;
         }
 
         @media (max-width: 720px) {
@@ -84,12 +125,11 @@
             }
 
             body.compact-ui #fourier-stack {
-                max-width: calc(100% - 16px);
+                max-width: min(580px, calc(100% - 16px));
                 bottom: clamp(8px, 2vmin, 26px);
             }
 
             body.compact-ui #fourier-stack #formula-overlay {
-                max-width: calc(100% - 8px);
                 font-size: clamp(0.78rem, 1.6vmin + 0.52rem, 1.15rem);
             }
 
@@ -105,7 +145,7 @@
             }
 
             body.compact-ui #fourier-stack {
-                max-width: calc(100% - 16px);
+                max-width: min(580px, calc(100% - 16px));
                 bottom: clamp(6px, 2vmin, 18px);
             }
 
@@ -281,11 +321,11 @@
                     </div>
 
                     <div class="cyber-control-group" style="margin: 5px 0 0 0 !important; padding: 0; overflow: visible;">
-                        <div style="display: flex; gap: 4px; margin-bottom: 8px;">
-                            <button class="cyber-btn" onclick="adjustN(-10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-10</button>
-                            <button id="btn-n-down" class="cyber-btn" onclick="adjustN(-1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">-1</button>
-                            <button id="btn-n-up" class="cyber-btn" onclick="adjustN(1)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+1</button>
-                            <button class="cyber-btn" onclick="adjustN(10)" style="flex: 1; padding: 4px; font-size: 0.6rem; border-color: rgba(0, 210, 255, 0.3);">+10</button>
+                        <div class="fourier-n-step-row">
+                            <button class="cyber-btn" onclick="adjustN(-10)">-10</button>
+                            <button id="btn-n-down" class="cyber-btn" onclick="adjustN(-1)">-1</button>
+                            <button id="btn-n-up" class="cyber-btn" onclick="adjustN(1)">+1</button>
+                            <button class="cyber-btn" onclick="adjustN(10)">+10</button>
                         </div>
                         <div class="cyber-label" style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 4px;">
                             <span id="n-value" style="color: var(--neon-blue);">2</span>
@@ -383,8 +423,10 @@
             const num = parseInt(document.getElementById('n-input')?.value || 2);
             if (window.katex) {
                 // SUM LIMIT is now GOLDEN (#ffd700) to match telemetry
-                const formula = "{ \\color{#ffd700} f(t) } = \\sum_{{\\color{#aaddff} n}=1}^{\\color{#ffd700} " + num + "} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
+                /* displayMode + \\displaystyle + \\limits: obere Grenze zentriert über Σ (nicht „hoch rechts“) */
+                const formula = "\\displaystyle { \\color{#ffd700} f(t) } = \\sum\\limits_{{\\color{#aaddff} n}=1}^{{\\color{#ffd700} " + num + "}} { \\color{#ff7eb9} c_{\\color{#aaddff} n} } \\cdot { \\color{#7afbff} e^{i {\\color{#aaddff} n} \\omega t} }";
                 katex.render(formula, document.getElementById('formula-overlay'), {
+                    displayMode: true,
                     throwOnError: false,
                     trust: true
                 });

@@ -92,7 +92,7 @@
         let points = [];
         let nEcken = 3;
         let dragIdx = -1;
-        const BOGEN_RAD = 50;
+        const BOGEN_RAD = 34;
 
         // 2. Build UI Cards
         function setupUI() {
@@ -202,23 +202,37 @@
             ctx.closePath(); ctx.stroke();
 
             // Beweis (Addition an der Geraden)
-            const gY = height * 0.85, gX = width / 2;
+            const gY = height * 0.85,
+                gX = width / 2;
             const lineLen = 280;
-            ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(gX - lineLen, gY); ctx.lineTo(gX + lineLen, gY); ctx.stroke();
 
-            let currentStart = Math.PI;
-            winkelWerte.forEach((w, i) => {
-                const color = neonColors[i % neonColors.length];
-                ctx.save();
-                ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.fillStyle = color + "60";
-                ctx.beginPath(); ctx.moveTo(gX, gY); ctx.arc(gX, gY, BOGEN_RAD * 1.6, currentStart, currentStart - w, true); ctx.closePath(); ctx.fill();
-                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.5; ctx.stroke();
-                ctx.restore();
-                currentStart -= w;
-            });
+            if (n < 5) {
+                ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(gX - lineLen, gY);
+                ctx.lineTo(gX + lineLen, gY);
+                ctx.stroke();
 
+                let currentStart = Math.PI;
+                winkelWerte.forEach((w, i) => {
+                    const color = neonColors[i % neonColors.length];
+                    ctx.save();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = color;
+                    ctx.fillStyle = color + "60";
+                    ctx.beginPath();
+                    ctx.moveTo(gX, gY);
+                    ctx.arc(gX, gY, BOGEN_RAD * 1.65, currentStart, currentStart - w, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                    ctx.restore();
+                    currentStart -= w;
+                });
+            }
             // Handles
             points.forEach((p, idx) => {
                 const color = neonColors[idx % neonColors.length];
@@ -310,4 +324,4 @@
     </script>
 </body>
 
-</html>ml>
+</html>
