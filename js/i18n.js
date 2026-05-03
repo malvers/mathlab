@@ -152,7 +152,7 @@ const CyberI18n = {
             },
             galton: {
                 title: "GALTON BOARD",
-                balls_total: "ANZAHL ALLER KUGELN",
+                balls_total: "Anzahl der Kugeln",
                 controls: "STEUERUNG",
                 bins: "Bins",
                 interval: "Austrittsintervall (ms)",
