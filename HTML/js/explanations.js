@@ -1,14 +1,19 @@
 function updateExplanation() {
     const box = document.getElementById('explanation-box');
+    const splitHost = document.getElementById('canvas-container');
     const title = document.getElementById('exp-title');
     const text = document.getElementById('exp-text');
     const v = variants[currentVariant];
 
     if (currentStep === 0) {
-        box.style.display = 'none';
+        if (box) box.style.display = 'none';
+        if (splitHost) splitHost.classList.remove('lenglay-split-explanation');
         return;
     }
-    box.style.display = 'flex';
+    if (box) box.style.display = 'flex';
+    if (splitHost) splitHost.classList.add('lenglay-split-explanation');
+
+    if (!box || !title || !text) return;
 
     if (currentStep === 1) {
         title.innerText = "SCHRITT 1: Die Basis";

@@ -35,20 +35,29 @@
 
         body.page-lenglay #canvas-container {
             min-height: 0;
-            display: flex;
-            flex-flow: row nowrap;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
             align-items: stretch;
             gap: clamp(10px, 2vmin, 18px);
         }
 
-        /* Linke Fläche: nur hier misst draw.js die Canvas-Pixelbreite/-höhe */
+        body.page-lenglay #canvas-container.lenglay-split-explanation {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        }
+
+        /* Linkes Drittel: Canvas-Bühne */
         body.page-lenglay #lenglay-canvas-stage {
-            flex: 1 1 auto;
+            grid-column: 1;
+            grid-row: 1;
             min-width: 0;
             min-height: 0;
+            height: 100%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-left: clamp(2px, 1vmin, 10px);
+            padding-right: clamp(2px, 1vmin, 8px);
             position: relative;
         }
 
@@ -70,26 +79,36 @@
 
         body.page-lenglay #explanation-box {
             position: relative;
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: stretch;
             display: none;
             flex-direction: column;
             justify-content: flex-start;
-            flex: 0 0 auto;
-            align-self: stretch;
-            gap: clamp(6px, 2vmin, 10px);
-            width: clamp(132px, 26vw, 300px);
-            max-width: min(300px, 38%);
-            max-height: 100%;
+            width: auto;
+            max-width: none;
+            align-self: start;
+            gap: clamp(4px, 1.2vmin, 8px);
+            margin: clamp(4px, 1vmin, 10px) 0 0 0;
+            max-height: min(60.48vh, 576px);
             overflow-x: hidden;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            margin: 0;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: clamp(12px, 3.5vmin, 18px);
-            border-radius: clamp(14px, 3vmin, 18px);
+            padding: clamp(8px, 1.8vmin, 13px) clamp(14px, 3.8vmin, 28px);
+            border-radius: clamp(12px, 2.6vmin, 16px);
             z-index: 100;
             box-sizing: border-box;
+        }
+
+        body.page-lenglay #canvas-container.lenglay-split-explanation #explanation-box {
+            align-self: end;
+            margin-top: 0;
+            margin-bottom: 0;
+            transform: translate(-10px, calc(-1 * var(--lenglay-exp-baseline-lift, 0px)));
+            transform-origin: bottom center;
         }
 
         .exp-title {
@@ -100,8 +119,8 @@
         }
 
         .exp-text {
-            font-size: clamp(0.8rem, 2.4vmin, 0.9rem);
-            line-height: 1.5;
+            font-size: clamp(0.8rem, 2.2vmin, 0.92rem);
+            line-height: 1.38;
             color: rgba(255, 255, 255, 0.8);
         }
 
@@ -378,8 +397,8 @@
     </script>
     <script src="js/config.js"></script>
     <script src="js/geometry.js"></script>
-    <script src="js/explanations.js"></script>
-    <script src="js/draw.js?v=langley13"></script>
+    <script src="js/explanations.js?v=lenglay-split"></script>
+    <script src="js/draw.js?v=langley19"></script>
     <script src="js/main.js?v=langley10"></script>
 </body>
 
