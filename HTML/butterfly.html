@@ -17,25 +17,49 @@
     <style>
         #equation-panel {
             position: absolute;
-            bottom: 120px;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, 3.5vmin, 28px));
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            pointer-events: none;
+            pointer-events: auto;
             text-align: center;
-            width: fit-content;
+            width: max-content;
+            max-width: min(calc(100vw - 20px), calc(100% - 16px));
+            box-sizing: border-box;
             background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(15px);
-            padding: 15px 40px;
-            border-radius: 20px;
+            padding: clamp(8px, 1.8vw, 14px) clamp(10px, 3.5vw, 28px);
+            border-radius: clamp(12px, 2.5vw, 20px);
             border: 1px solid rgba(0, 210, 255, 0.2);
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .katex-display {
+        #equation-panel::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        #equation-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 210, 255, 0.35);
+            border-radius: 4px;
+        }
+
+        /* Responsive KaTeX: Basis über Panel + untere Grenze für schmale Phones */
+        #equation-panel .katex-display {
             margin: 0 !important;
             color: white;
-            font-size: 1.1rem;
+        }
+
+        #equation-panel .katex-display > .katex {
+            font-size: clamp(9px, 1.35vw + 0.42rem, 1.05rem) !important;
+        }
+
+        #equation-panel .katex-display > .katex .mord,
+        #equation-panel .katex-display > .katex .mrel,
+        #equation-panel .katex-display > .katex .mbin {
+            font-size: inherit;
         }
 
         #main-content {

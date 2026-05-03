@@ -535,6 +535,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner:has(#side-panel.collapsed) {
+    /* Same rail column as expanded (66px); only sidebar column drops to 0 — identical mini-rail ZF/size. */
     grid-template-columns: 66px 0 !important;
 }
 
@@ -563,4 +564,80 @@ body.cyber-shell-grid #main-content {
     z-index: 1;
     /* Verhindert, dass Kinder der Hauptfläche unter Compositing über die Chrome-Spalte „malen“. */
     contain: paint;
+}
+
+/*
+ * Narrow viewport (phone portrait): two-column shell leaves almost no width for the canvas
+ * (#side-panel min-width 350 + rail vs ~390px window) → CyberCanvas gets extreme aspect, grid looks vertically stretched.
+ * Stack chrome on top; canvas row gets minmax(0,1fr) and full width so world units stay ~square.
+ */
+@media (max-width: 560px) {
+    body.cyber-shell-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto minmax(0, 1fr) !important;
+        min-height: 0 !important;
+    }
+
+    body.cyber-shell-grid #cyber-left-chrome {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: auto !important;
+        max-height: min(42vh, 360px) !important;
+        overflow: hidden !important;
+    }
+
+    body.cyber-shell-grid:has(#side-panel.collapsed) #cyber-left-chrome {
+        max-height: none !important;
+    }
+
+    body.cyber-shell-grid #cyber-left-chrome-inner {
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: 100% !important;
+        max-height: inherit !important;
+        min-height: 0 !important;
+        transform: none !important;
+        transform-origin: top left;
+        grid-template-columns: 56px minmax(0, 1fr) !important;
+        grid-template-rows: minmax(0, 1fr) !important;
+        align-items: stretch !important;
+    }
+
+    body.cyber-shell-grid:has(#side-panel.collapsed) #cyber-left-chrome-inner {
+        max-height: none !important;
+    }
+
+    body.cyber-shell-grid #cyber-left-chrome-inner:has(#side-panel.collapsed) {
+        grid-template-columns: 56px 0 !important;
+    }
+
+    body.cyber-shell-grid #cyber-left-chrome-inner > #mini-rail {
+        height: 100% !important;
+        min-height: 0 !important;
+    }
+
+    body.cyber-shell-grid #mini-rail {
+        height: 100% !important;
+        max-height: none !important;
+    }
+
+    body.cyber-shell-grid #cyber-left-chrome-inner > #side-panel {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    body.cyber-shell-grid #main-content {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+    }
 }

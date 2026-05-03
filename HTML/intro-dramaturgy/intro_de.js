@@ -7,6 +7,7 @@
  * is not translated / copied from this file for other languages (same as a # section break).
  *
  * Dynamic count: line «#numberlabs» (after optional «200pt» etc.) → LABS_DATA.length when intro loads js/labs-config.js.
+ * «%numlanguages» in running text → number of supported intro languages (same as ?lang= codes).
  *
  * @locale de
  */
@@ -27,10 +28,12 @@ von Dr. Michael R. Alvers
 60pt
 Interaktive Mathematik
 Labore
+%purplepulsating and counting
+
 
 #
 120pt
-7 Sprachen
+%numlanguages Sprachen
 20pt
 %purplepulsating and counting
 30pt
@@ -41,6 +44,8 @@ französisch 🇫🇷
 italienisch 🇮🇹
 portugiesisch 🇵🇹
 kiswahili 🇰🇪
+niederländisch 🇳🇱
+türkisch 🇹🇷
 
 #
 // es werden alle screenshots gezeigt
@@ -65,6 +70,7 @@ JAVA
 %loc
 60pt
 Programmzeilen
+%purplepulsating and counting
 
 #
 für Euch!

@@ -17,28 +17,43 @@ const CyberFormula = {
         style.textContent = `
             .cyber-formula {
                 position: absolute;
-                bottom: 45px;
+                bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
                 left: 50%;
                 transform: translateX(-50%);
-                padding: 10px;
+                padding: 8px max(10px, env(safe-area-inset-left, 0px))
+                    8px max(10px, env(safe-area-inset-right, 0px));
                 z-index: 50;
-                white-space: nowrap;
+                box-sizing: border-box;
+                max-width: min(920px, calc(100vw - 16px));
+                width: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 color: white;
-                font-size: calc(0.8rem + 1.0rem * var(--header-scale, 1));
+                font-size: clamp(0.5rem, 0.26rem + 2.65vmin, calc(0.85rem + 0.95rem * var(--header-scale, 1)));
                 pointer-events: none;
                 text-shadow: 0 0 20px rgba(0, 210, 255, 0.6);
                 transition: font-size 0.2s ease;
                 text-align: center;
+                line-height: 1.22;
+                white-space: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
             }
 
-            @media (max-width: 600px) {
+            .cyber-formula .katex-display {
+                margin: 0 !important;
+            }
+
+            .cyber-formula.cyber-formula--display {
+                white-space: normal;
+                overflow-x: visible;
+            }
+
+            @media (min-width: 900px) {
                 .cyber-formula {
-                    bottom: 20px;
-                    width: 90%;
-                    white-space: normal; /* Erlaubt Umbruch auf kleinen Handy-Screens */
+                    bottom: max(16px, calc(36px + env(safe-area-inset-bottom, 0px)));
                 }
             }
         `;
@@ -58,10 +73,13 @@ const CyberFormula = {
         anchor.appendChild(container);
     },
 
-    set(tex) {
+    set(tex, renderOpts = {}) {
         const container = document.getElementById(this.containerId);
-        if (container && window.katex) {
-            window.katex.render(tex, container, { throwOnError: false });
-        }
+        if (!container || !window.katex) return;
+        container.classList.toggle('cyber-formula--display', !!renderOpts.displayMode);
+        window.katex.render(tex, container, {
+            throwOnError: false,
+            ...renderOpts,
+        });
     }
 };

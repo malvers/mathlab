@@ -14,35 +14,47 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
-        /* Essential SVG clock overrides */
+        /* Essential SVG clock — responsive HUD + Uhr */
         #main-content {
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            min-height: 0;
+            padding: clamp(6px, 2vmin, 14px);
+            box-sizing: border-box;
         }
 
         svg#clock {
-            width: 90%;
-            max-width: 550px;
+            width: min(92vw, calc(100% - 16px));
+            max-width: min(550px, 88vmin);
+            height: auto;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+            touch-action: none;
             filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.15));
         }
 
         #slider-mount .val-display {
             display: none !important;
         }
+
         .clock-face { fill: rgba(10, 15, 30, 0.6); stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; }
         #hour-hand { stroke: var(--neon-blue); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-blue)); }
         #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-purple)); }
         .angle-arc { fill: rgba(0, 210, 255, 0.15); stroke: var(--neon-blue); stroke-width: 3; }
 
-        /* Floating HUD Tags */
+        /* Floating HUD Tags — gleiche Breite, skaliert mit Viewport */
         #tag-container {
             position: absolute;
-            top: 70px;
+            top: clamp(44px, 9vmin, 72px);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: clamp(8px, 2.5vw, 20px);
+            max-width: calc(100% - 16px);
             z-index: 20;
             pointer-events: none;
         }
@@ -50,20 +62,20 @@
         #floating-tag, #floating-tag-beta {
             background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(20px);
-            padding: 12px 10px;
-            border-radius: 12px;
-            font-size: 1.6rem;
-            font-family: 'Orbitron';
-            /* TRIPLE WIDTH LOCK FOR ABSOLUTE SYMMETRY */
-            width: 180px !important; 
-            min-width: 180px !important;
-            max-width: 180px !important;
-            flex: 0 0 180px !important;
+            padding: clamp(8px, 2vw, 12px) clamp(8px, 2.5vw, 14px);
+            border-radius: clamp(8px, 2vw, 12px);
+            font-size: clamp(0.82rem, 2.8vw + 0.35rem, 1.6rem);
+            font-family: 'Orbitron', sans-serif;
+            flex: 1 1 clamp(104px, 36vw, 180px);
+            width: clamp(104px, 36vw, 180px);
+            min-width: 0;
+            max-width: min(180px, 46vw);
             box-sizing: border-box;
             text-align: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #floating-tag {
@@ -80,35 +92,116 @@
             box-shadow: 0 0 20px rgba(255, 136, 0, 0.15);
         }
 
-        /* Floating Digital-Uhr (BOX RESTORED) */
+        /* Floating Digital-Uhr */
         #floating-time {
             position: absolute;
-            bottom: 70px;
+            bottom: clamp(14px, 7vmin, 70px);
             left: 50%;
             transform: translateX(-50%);
             background: rgba(147, 51, 234, 0.1);
             backdrop-filter: blur(20px);
             border: 1px solid var(--neon-purple);
-            padding: 10px 25px;
-            border-radius: 12px;
-            font-size: 1.8rem;
+            padding: clamp(6px, 1.8vw, 10px) clamp(14px, 4vw, 28px);
+            border-radius: clamp(8px, 2vw, 12px);
+            font-size: clamp(1rem, 4.2vmin, 1.8rem);
             color: var(--neon-purple);
             box-shadow: 0 0 30px rgba(147, 51, 234, 0.2);
             z-index: 10;
             pointer-events: none;
-            font-family: 'Orbitron';
+            font-family: 'Orbitron', sans-serif;
             text-shadow: 0 0 10px var(--neon-purple);
             text-align: center;
-            min-width: 120px;
+            min-width: min(108px, 28vw);
+            max-width: calc(100% - 20px);
+            box-sizing: border-box;
         }
 
-        /* Hide the redundant slider value as it causes jitter */
         .val-display { display: none !important; }
 
         .angle-arc-beta { fill: rgba(255, 136, 0, 0.1); stroke: #ff8800; stroke-width: 2; }
+
+        @media (max-width: 520px) {
+            #hour-hand { stroke-width: 6; }
+            #minute-hand { stroke-width: 4; }
+            .angle-arc { stroke-width: 2.25; }
+            .angle-arc-beta { stroke-width: 1.5; }
+            .clock-face { stroke-width: 1.25; }
+        }
+
+        @media (max-width: 360px) {
+            #tag-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #floating-tag, #floating-tag-beta {
+                max-width: none;
+                width: 100%;
+            }
+        }
+
+        /* Sidebar: Instrument-Card + Stats + Slider (scoped — nur Winkel-Uhr) */
+        body.page-uhrzeit-winkel #sidebar-header {
+            min-height: clamp(52px, 14vmin, 80px);
+            margin-bottom: clamp(4px, 1.5vw, 8px);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .instrument-card {
+            padding: clamp(8px, 2.2vw, 14px) clamp(10px, 2.8vw, 16px);
+            border-radius: clamp(12px, 2.8vw, 18px);
+            gap: clamp(3px, 1vw, 6px);
+            margin-bottom: clamp(4px, 1.2vw, 8px);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .instrument-title {
+            font-size: clamp(0.56rem, 1.4vw + 0.32rem, 0.72rem);
+            letter-spacing: clamp(0.06em, 0.35vw, 2px);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .stats-grid {
+            gap: clamp(6px, 2vw, 12px);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
+        }
+
+        body.page-uhrzeit-winkel #side-panel .stats-card {
+            padding: clamp(8px, 2vw, 12px);
+            border-radius: clamp(10px, 2vw, 14px);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .stats-label {
+            font-size: clamp(0.48rem, 1.1vw + 0.26rem, 0.58rem);
+            margin-bottom: clamp(3px, 1vw, 5px);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .stats-val {
+            font-size: clamp(0.78rem, 2vw + 0.38rem, 1.05rem);
+        }
+
+        body.page-uhrzeit-winkel #side-panel .cyber-slider {
+            min-height: clamp(22px, 5.5vw, 30px);
+            margin: clamp(4px, 1.2vw, 8px) 0;
+        }
+
+        body.page-uhrzeit-winkel #side-panel .cyber-slider::-webkit-slider-thumb {
+            width: clamp(14px, 3.8vw, 18px);
+            height: clamp(14px, 3.8vw, 18px);
+            margin-top: -5px;
+        }
+
+        body.page-uhrzeit-winkel #side-panel .cyber-slider::-moz-range-thumb {
+            width: clamp(14px, 3.8vw, 18px);
+            height: clamp(14px, 3.8vw, 18px);
+        }
+
+        @media (max-width: 520px) {
+            body.page-uhrzeit-winkel #side-panel #ui-container,
+            body.page-uhrzeit-winkel #side-panel #data-container {
+                font-size: clamp(0.72rem, 2.5vw, 0.88rem);
+            }
+        }
     </style>
 </head>
-<body>
+<body class="page-uhrzeit-winkel">
     <!-- Mini Rail -->
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
@@ -121,7 +214,7 @@
     </nav>
 
     <aside id="side-panel">
-        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <header id="sidebar-header"></header>
         <div id="ui-container"></div>
         <div id="data-container"></div>
     </aside>

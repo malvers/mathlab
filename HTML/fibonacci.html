@@ -93,9 +93,6 @@
             let viewOffsetY = 0;
             let showSpiral = true;
             let showSquares = true;
-            let mouseRGB = "RGB: -";
-            let lastMouseX = 0;
-            let lastMouseY = 0;
 
             const SETTINGS_KEY = "fibonacci-settings-v2";
 
@@ -285,32 +282,7 @@
 
                 ctx.restore();
 
-                // 6. Color dashboard (swatch + numeric RGB)
-                try {
-                    const pixel = ctx.getImageData(lastMouseX, lastMouseY, 1, 1).data;
-                    const rgbStr = `${pixel[0]}, ${pixel[1]}, ${pixel[2]}`;
-                    const sampledColor = `rgb(${rgbStr})`;
-                    
-                    // Background panel
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                    ctx.fillRect(10, 10, 180, 50);
-                    
-                    // Swatch
-                    ctx.fillStyle = sampledColor;
-                    ctx.fillRect(15, 15, 40, 40);
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-                    ctx.strokeRect(15, 15, 40, 40);
-                    
-                    // RGB readout beside swatch
-                    ctx.fillStyle = "var(--branding-orange)";
-                    ctx.font = "12px Orbitron";
-                    ctx.textAlign = "left";
-                    ctx.fillText("RGB:", 65, 30);
-                    ctx.fillStyle = "white";
-                    ctx.fillText(rgbStr, 65, 48);
-                } catch (err) {}
-
-                // 7. Animation Loop
+                // 6. Animation Loop
                 if (Math.abs(targetUnitPx - viewUnitPx) > 0.1 || Math.abs(targetOffsetX - viewOffsetX) > 0.1) {
                     requestAnimationFrame(drawFibonacciTo13);
                 }
@@ -395,13 +367,6 @@
                     saveSettings();
                     drawFibonacciTo13();
                 }
-            });
-
-            canvas.addEventListener("mousemove", (e) => {
-                const rect = canvas.getBoundingClientRect();
-                lastMouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-                lastMouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
-                drawFibonacciTo13(); // Trigger redraw for new mouse position
             });
 
             updateStepLabel();

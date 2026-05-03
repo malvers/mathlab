@@ -16,7 +16,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
     <style>
-        /* Beweis-spezifische Anpassungen */
+        /* Beweis-spezifische Anpassungen — Overlay-Mathe skaliert mit Viewport */
         #canvas-latex-vertex {
             position: absolute;
             pointer-events: none;
@@ -25,19 +25,23 @@
             white-space: nowrap;
             transition: opacity 0.2s;
             text-shadow: 0 0 10px black, 0 0 5px var(--neon-blue);
-            font-size: 1.1rem;
+            font-size: clamp(0.72rem, 0.55rem + 1.4vmin, 1.12rem);
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: clamp(8px, 2vw, 15px);
+            margin-bottom: clamp(12px, 3vw, 20px);
         }
 
-        .math-glow {
+        #parameters-container .math-glow {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            font-size: 1.1em;
+            font-size: clamp(0.78rem, 0.7rem + 0.85vmin, 1.08rem);
+        }
+
+        #parameters-container .katex {
+            font-size: clamp(0.82em, 0.72em + 0.9vmin, 1.05em) !important;
         }
     </style>
 </head>
@@ -98,24 +102,26 @@
         // Named hooks for re-binding on reset
         const onMouseDownHook = (pos) => {
             if (!cc || !cc.canvas) return false;
-            
+            const ui = cc.getUiScale();
+            const hitPx = 26 * ui;
+
             const px = cc.mapX(pos.x);
             const py = cc.mapY(pos.y);
-            
+
             const vX = cc.mapX(paraD);
             const vY = cc.mapY(paraE);
             const hX = cc.mapX(paraD + 1);
             const hY = cc.mapY(paraA + paraE);
 
-            if (Math.hypot(vX - px, vY - py) < 30) {
+            if (Math.hypot(vX - px, vY - py) < hitPx) {
                 draggedHandle = "vertex";
                 cc.allowPan = false;
-                return true; 
+                return true;
             }
-            if (Math.hypot(hX - px, hY - py) < 30) {
+            if (Math.hypot(hX - px, hY - py) < hitPx) {
                 draggedHandle = "a";
                 cc.allowPan = false;
-                return true; 
+                return true;
             }
             return false;
         };
@@ -320,10 +326,10 @@
             if (lE) lE.innerText = paraE.toFixed(2);
         }
 
-        function drawParabola(ctx) {
+        function drawParabola(ctx, ui) {
             ctx.beginPath();
             ctx.strokeStyle = varColor('--neon-purple');
-            ctx.lineWidth = 4;
+            ctx.lineWidth = Math.max(1.35, 4 * ui);
 
             const startX = cc.view.minX;
             const endX = cc.view.maxX;
@@ -341,46 +347,50 @@
             }
             ctx.stroke();
 
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = Math.max(6, Math.round(15 * ui));
             ctx.shadowColor = varColor('--neon-purple');
             ctx.stroke();
             ctx.shadowBlur = 0;
         }
 
-        function drawHandle(ctx, mathX, mathY, color, label, position = "top-right", isHandle = true) {
+        function drawHandle(ctx, mathX, mathY, color, label, position = "top-right", isHandle = true, ui = 1) {
             const px = cc.mapX(mathX);
             const py = cc.mapY(mathY);
+            const rOuter = 12 * ui;
+            const rInner = 5 * ui;
+            const strokeLw = Math.max(1.25, 3 * ui);
 
             if (isHandle) {
                 ctx.beginPath();
-                ctx.arc(px, py, 12, 0, Math.PI * 2);
+                ctx.arc(px, py, rOuter, 0, Math.PI * 2);
                 ctx.fillStyle = "rgba(0,0,0,0.6)";
                 ctx.fill();
                 ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = strokeLw;
                 ctx.stroke();
             }
 
             ctx.beginPath();
-            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.arc(px, py, rInner, 0, Math.PI * 2);
             ctx.fillStyle = color;
             ctx.fill();
 
             if (label) {
-                ctx.font = "bold 12px Orbitron";
+                const fs = Math.max(9, Math.round(12 * ui));
+                ctx.font = `bold ${fs}px Orbitron`;
                 ctx.fillStyle = color;
                 ctx.textAlign = "center";
 
                 let offX = 0, offY = 0;
-                if (position === "bottom") { offY = 30; }
-                else if (position === "top") { offY = -30; }
-                else if (position === "top-right") { offX = 50; offY = -20; }
+                if (position === "bottom") { offY = 28 * ui; }
+                else if (position === "top") { offY = -28 * ui; }
+                else if (position === "top-right") { offX = 48 * ui; offY = -18 * ui; }
                 else if (position === "smart-vertex") {
-                    offY = -35; 
-                    if (Math.abs(mathX) < 0.2) offX = 45; 
+                    offY = -32 * ui;
+                    if (Math.abs(mathX) < 0.2) offX = 44 * ui;
                 }
 
-                ctx.shadowBlur = 4;
+                ctx.shadowBlur = Math.max(2, Math.round(4 * ui));
                 ctx.shadowColor = "black";
                 ctx.fillText(label, px + offX, py + offY);
                 ctx.shadowBlur = 0;
@@ -389,12 +399,13 @@
 
         function draw() {
             if (!cc || !cc.isInitialized) return;
+            const ui = cc.getUiScale();
             const ctx = cc.ctx;
             ctx.clearRect(0, 0, cc.canvas.width, cc.canvas.height);
 
             cc.drawGrid();
 
-            drawParabola(ctx);
+            drawParabola(ctx, ui);
 
             // --- DRAW ROOTS ON CANVAS ---
             const disc = -paraE / paraA;
@@ -402,28 +413,31 @@
             if (disc > 0) {
                 const x1 = paraD - Math.sqrt(disc);
                 const x2 = paraD + Math.sqrt(disc);
-                drawHandle(ctx, x1, 0, green, "x1", "bottom", false);
-                drawHandle(ctx, x2, 0, green, "x2", "bottom", false);
+                drawHandle(ctx, x1, 0, green, "x1", "bottom", false, ui);
+                drawHandle(ctx, x2, 0, green, "x2", "bottom", false, ui);
             } else if (Math.abs(disc) < 0.0001) {
-                drawHandle(ctx, paraD, 0, green, "x0", "bottom", false);
+                drawHandle(ctx, paraD, 0, green, "x0", "bottom", false, ui);
             }
 
             // Draw handles LAST so they are on top
-            drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex");
-            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", CyberI18n.get('parabola.vertex_label'), "top-right");
+            drawHandle(ctx, paraD, paraE, varColor('--neon-blue'), null, "smart-vertex", true, ui);
+            drawHandle(ctx, paraD + 1, paraA + paraE, "#facc15", CyberI18n.get('parabola.vertex_label'), "top-right", true, ui);
 
-            updateUI();
+            updateUI(ui);
         }
 
-        function updateUI() {
+        function updateUI(uiScale) {
             if (typeof katex === 'undefined') return;
+            const ui = typeof uiScale === 'number' ? uiScale : (cc && cc.getUiScale ? cc.getUiScale() : 1);
 
             const latexSpan = document.getElementById('canvas-latex-vertex');
-            if (latexSpan) {
+            if (latexSpan && cc && cc.isInitialized) {
+                latexSpan.style.fontSize = `${Math.max(10, Math.min(22, Math.round(13 * ui)))}px`;
+
                 const px = cc.mapX(paraD);
                 const py = cc.mapY(paraE);
-                let offX = 0, offY = -35;
-                if (Math.abs(paraD) < 0.2) offX = 45;
+                let offX = 0, offY = -32 * ui;
+                if (Math.abs(paraD) < 0.2) offX = 44 * ui;
 
                 latexSpan.style.left = (px + offX) + "px";
                 latexSpan.style.top = (py + offY) + "px";

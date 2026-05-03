@@ -11,27 +11,44 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
-        /* Beweis-spezifische Anpassungen */
-        .angle-sum-display {
-            font-family: 'Orbitron';
-            font-size: 1.8rem;
-            color: var(--neon-blue);
-            text-align: center;
+        /* Einzeilig: keine Zeilenumbrüche in Flex-Items (Globale Card-Styles wrappen sonst weiter). */
+        #side-panel .winkel-angle-sum-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap !important;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: clamp(0.62rem, 2.8vmin, 1.05rem);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 10px;
-            margin-top: 10px;
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            margin-top: 8px;
+            white-space: nowrap !important;
+            width: max-content;
+            max-width: 100%;
+            margin-inline: auto;
+            box-sizing: border-box;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
-        .angle-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Orbitron';
-            font-size: 1.2rem;
-            font-weight: bold;
+        #side-panel .winkel-angle-sum-row > * {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
         }
-        .angle-row #vC {
+        #side-panel .winkel-angle-sum-row .angle-op {
+            opacity: 0.45;
+            font-weight: 600;
+        }
+        #side-panel .winkel-angle-sum-row .angle-sum-eq {
+            color: var(--neon-blue);
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+        }
+        #side-panel .winkel-angle-sum-row #vC {
             color: var(--neon-red) !important;
         }
     </style>
@@ -214,14 +231,14 @@
             CyberUI.createSlider('anim-sliders', CyberI18n.get('angle3d.offset'), -1.5, 1.5, currentSkew, 0.01, (v) => rebuild(v));
 
             CyberUI.createCard('ui-container', CyberI18n.get('angle3d.sum_eq'), `
-                <div class="angle-row">
+                <div class="winkel-angle-sum-row" role="presentation">
                     <span id="vA" style="color:var(--neon-orange)">0°</span>
-                    <span style="opacity:0.4">+</span>
+                    <span class="angle-op">+</span>
                     <span id="vB" style="color:var(--neon-green)">0°</span>
-                    <span style="opacity:0.4">+</span>
+                    <span class="angle-op">+</span>
                     <span id="vC">0°</span>
+                    <span class="angle-sum-eq">=&nbsp;180°</span>
                 </div>
-                <div class="angle-sum-display">= 180°</div>
             `, 'var(--neon-purple)');
         }
 

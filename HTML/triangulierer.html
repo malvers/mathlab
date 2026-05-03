@@ -71,31 +71,77 @@
             filter: grayscale(1);
         }
 
-        /* HUD Table */
+        #main-content {
+            position: relative;
+            min-height: 0;
+        }
+
+        /* Kompakte HUD-Tabelle rechts; bei Bedarf Browser-Zoom — hier zusätzlich leicht per zoom() verkleinert (WebKit/Blink) */
         #equation-hud {
             position: absolute;
-            /* Positions are now handled dynamically in JavaScript */
+            box-sizing: border-box;
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 16px;
-            font-family: 'Orbitron';
+            padding: clamp(6px, 1vw + 4px, 12px);
+            border-radius: clamp(8px, 1.5vw, 12px);
+            font-family: 'Orbitron', sans-serif;
             color: white;
             pointer-events: auto;
             z-index: 50;
-            min-width: 240px;
-            max-height: 70vh;
+            min-width: min(120px, calc(100% - 24px));
+            width: min(188px, calc(100vw - 24px));
+            max-width: min(188px, calc(100% - 16px));
+            max-height: min(52vh, 280px);
+            overflow-x: auto;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease-out; /* Smooth transition on resize */
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+            transition: top 0.25s ease-out, left 0.25s ease-out, right 0.25s ease-out, width 0.25s ease-out;
         }
 
-        .hud-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        .hud-table th { text-align: left; color: var(--neon-blue); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .hud-table td { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .hud-sum-row { border-top: 2px solid var(--neon-blue); color: var(--neon-blue); font-weight: bold; font-size: 0.9rem; }
-        .hud-sum-val { text-align: right; padding-top: 10px !important; }
+        @supports (zoom: 1) {
+            #equation-hud {
+                zoom: 0.9;
+            }
+        }
+
+        #equation-hud.tri-hud--stacked {
+            left: max(10px, env(safe-area-inset-left, 0px)) !important;
+            right: max(10px, env(safe-area-inset-right, 0px)) !important;
+            width: auto !important;
+            max-width: none;
+            max-height: min(34vh, 220px);
+        }
+
+        .hud-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.5rem, 0.45rem + 0.65vw, 0.62rem);
+        }
+
+        .hud-table th {
+            text-align: left;
+            color: var(--neon-blue);
+            padding-bottom: clamp(4px, 1vw, 6px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hud-table td {
+            padding: clamp(2px, 0.5vw, 4px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .hud-sum-row {
+            border-top: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-weight: bold;
+            font-size: clamp(0.56rem, 0.5rem + 0.75vw, 0.68rem);
+        }
+
+        .hud-sum-label-cell { padding-top: clamp(4px, 1vw, 6px) !important; }
+
+        .hud-sum-val { text-align: right; padding-top: clamp(4px, 1vw, 6px) !important; }
 
         canvas {
             display: block;
@@ -132,7 +178,7 @@
                 <tbody id="hud-body"></tbody>
                 <tfoot>
                     <tr class="hud-sum-row">
-                        <td style="padding-top:10px;"><script>document.write(CyberI18n.get('triangulierer.sum'))</script></td>
+                        <td class="hud-sum-label-cell"><script>document.write(CyberI18n.get('triangulierer.sum'))</script></td>
                         <td id="hud-sum-val" class="hud-sum-val">0,00 cm²</td>
                     </tr>
                 </tfoot>
@@ -291,18 +337,44 @@
                 canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
                 canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                sWidth = Math.min(rect.height * 0.8, rect.width * 0.6, 600);
-                ox = (rect.width - sWidth) / 3; oy = (rect.height - sWidth) / 2;
+
+                const leftPad = Math.max(10, Math.round(rect.width * 0.022));
+                const hudGap = Math.max(10, Math.round(rect.width * 0.016));
+                const hudSlot = Math.min(205, Math.max(136, Math.round(rect.width * 0.195)));
+                const stackHud = rect.width < 560;
+
+                const hud = document.getElementById('equation-hud');
+
+                if (!stackHud) {
+                    sWidth = Math.min(rect.height * 0.78, rect.width - leftPad - hudGap - hudSlot, 600);
+                    sWidth = Math.max(130, sWidth);
+                    ox = leftPad;
+                    oy = (rect.height - sWidth) / 2;
+                    if (hud) {
+                        hud.classList.remove('tri-hud--stacked');
+                        hud.style.left = (ox + sWidth + hudGap) + 'px';
+                        hud.style.right = 'auto';
+                        hud.style.top = oy + 'px';
+                        hud.style.width = hudSlot + 'px';
+                    }
+                } else {
+                    sWidth = Math.min(rect.height * 0.42, rect.width - leftPad - 12, 400);
+                    sWidth = Math.max(120, sWidth);
+                    ox = leftPad;
+                    const hudBlock = 132;
+                    oy = Math.max(36, Math.min((rect.height - sWidth - hudBlock) / 2, rect.height * 0.12));
+                    if (hud) {
+                        hud.classList.add('tri-hud--stacked');
+                        hud.style.left = '';
+                        hud.style.right = '';
+                        hud.style.top = (oy + sWidth + hudGap) + 'px';
+                        hud.style.width = '';
+                    }
+                }
+
                 points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
                 selectedIndices.clear();
                 for (let i = 0; i < 6; i++) points.push([ox + 50 + Math.random()*(sWidth-100), oy + 50 + Math.random()*(sWidth-100)]);
-                
-                // Update HUD Position: Top-Left of Table to Top-Right of Square
-                const hud = document.getElementById('equation-hud');
-                if (hud) {
-                    hud.style.top = oy + 'px';
-                    hud.style.left = (ox + sWidth + 30) + 'px';
-                }
 
                 render();
             }

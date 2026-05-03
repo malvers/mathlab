@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mathematik interaktiv by Dr. Michael R. Alvers</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap"
         rel="stylesheet">
@@ -23,10 +23,9 @@
                 document.querySelectorAll('.index-lang-switcher .lang-flag').forEach((el) => {
                     el.classList.toggle('active', el.getAttribute('data-lang') === currentLang);
                 });
-                const about = document.getElementById('btn-about');
-                if (about) {
+                document.querySelectorAll('a[data-intro-about]').forEach((about) => {
                     about.href = 'intro.html?lang=' + encodeURIComponent(currentLang || 'de');
-                }
+                });
                 const toolsHub = document.getElementById('portal-link-tools');
                 if (toolsHub) {
                     toolsHub.href = 'tools.html?lang=' + encodeURIComponent(currentLang || 'de');
@@ -57,6 +56,7 @@
 
         html {
             background-color: var(--space-bg);
+            overflow-x: hidden;
             scrollbar-width: thin;
             /* Thumb | track — muted thumb, lighter track */
             scrollbar-color: rgba(72, 88, 112, 0.95) rgba(38, 46, 64, 0.88);
@@ -118,6 +118,11 @@
             box-sizing: border-box;
         }
 
+        /* Index hero: Platz für Sprach-Leiste (inkl. höherer Flag-Zeile) + Safe Area */
+        body.cyber-hub.index-mission {
+            padding-top: clamp(108px, 15vmin + 54px, 188px);
+        }
+
         /* Real content above planet overlay (z-index 0), avoids 🪐/🛸 painting over it */
         body.cyber-hub > header,
         body.cyber-hub > #tool-subchrome,
@@ -131,8 +136,19 @@
 
         body.cyber-hub > header .header-content {
             max-width: min(1123px, calc(100vw - 24px));
-            padding: 0 12px;
+            padding-left: max(12px, env(safe-area-inset-left, 0px));
+            padding-right: max(12px, env(safe-area-inset-right, 0px));
             box-sizing: border-box;
+        }
+
+        /* Startansicht: Hauptinhalt (Hero, Suchzeile, Kacheln, Labor-Ansicht, Fuß) ~10vh nach oben */
+        body.cyber-hub.index-mission > header,
+        body.cyber-hub.index-mission > #tool-subchrome,
+        body.cyber-hub.index-mission > .search-scan-row,
+        body.cyber-hub.index-mission > #grade-view,
+        body.cyber-hub.index-mission > #tool-view,
+        body.cyber-hub.index-mission > footer {
+            transform: translateY(calc(-10vh));
         }
 
         body.cyber-hub > header .subtitle {
@@ -241,39 +257,42 @@
         }
 
         .header-content {
-            width: 95%;
+            width: min(1123px, calc(100vw - 24px));
             max-width: 1123px;
+            box-sizing: border-box;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.8rem, 8vw, 3.15rem);
+            font-size: clamp(1.25rem, 4.2vw + 0.72rem, 3.15rem);
             margin: 0;
-            letter-spacing: clamp(1px, 1vw, 3.2px);
-            line-height: 1.2;
+            letter-spacing: clamp(0.5px, 0.85vw, 3.2px);
+            line-height: 1.15;
             background: var(--header-title-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px var(--neon-blue));
             text-transform: uppercase;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .subtitle {
             font-family: 'Orbitron', sans-serif;
             font-weight: 400;
             text-transform: uppercase;
-            letter-spacing: clamp(2px, 2vw, 8px);
+            letter-spacing: clamp(1px, 1.1vw, 6px);
             margin-top: 8px;
             color: var(--neon-blue);
-            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            font-size: clamp(0.62rem, 1.85vw + 0.35rem, 0.9rem);
             opacity: 0.9;
         }
 
         .author-attribution {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.55rem;
-            letter-spacing: 3px;
+            font-size: clamp(0.45rem, 1.5vw + 0.28rem, 0.55rem);
+            letter-spacing: clamp(1px, 0.65vw, 3px);
             opacity: 0.9;
             margin-top: 10px;
             color: #f5f3ff;
@@ -1270,6 +1289,144 @@
             border-color: rgba(255, 255, 255, 0.4);
         }
 
+        /* --- Index Mission Control: fixed chrome + flags (responsive) --- */
+        .index-fixed-corner {
+            position: fixed;
+            z-index: 1001;
+            top: max(10px, env(safe-area-inset-top, 0px));
+            box-sizing: border-box;
+        }
+
+        .index-fixed-corner--left {
+            left: max(10px, env(safe-area-inset-left, 0px));
+        }
+
+        .index-left-cluster {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Ambient-Toggle oben links: gleiche Ecke wie früher Kaffee, nicht fixed unten rechts */
+        .index-left-cluster .sound-toggle {
+            position: static;
+            inset: auto;
+            top: auto;
+            right: auto;
+            bottom: auto;
+            left: auto;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            flex-shrink: 0;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            font: inherit;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .index-left-cluster .sound-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Ein About-Link links neben Kaffee: ≤720px nur „A“, sonst Icon + ABOUT (kein zweiter Button rechts) */
+        a.intro-about-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-sizing: border-box;
+            position: static !important;
+        }
+
+        a.intro-about-btn .intro-about-icon {
+            display: block;
+            flex-shrink: 0;
+        }
+
+        a.intro-about-btn .intro-about-mark--narrow {
+            display: none !important;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.92rem;
+            letter-spacing: 0;
+            line-height: 1;
+        }
+
+        a.intro-about-btn .intro-about-mark--wide {
+            display: inline;
+        }
+
+        @media (max-width: 720px) {
+            a.intro-about-btn {
+                width: 38px;
+                min-width: 38px;
+                height: 38px;
+                padding: 0 !important;
+                gap: 0;
+            }
+
+            a.intro-about-btn .intro-about-icon {
+                display: none !important;
+            }
+
+            a.intro-about-btn .intro-about-mark--wide {
+                display: none !important;
+            }
+
+            a.intro-about-btn .intro-about-mark--narrow {
+                display: inline !important;
+            }
+        }
+
+        .index-fixed-corner--right {
+            right: max(10px, env(safe-area-inset-right, 0px));
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: clamp(8px, 2.5vw, 15px);
+        }
+
+        .index-lang-switcher {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(2px, 1vw, 9px);
+            max-width: calc(100vw - 16px);
+            min-height: clamp(48px, 13vmin, 62px);
+            padding: clamp(8px, 2vmin, 14px) max(8px, env(safe-area-inset-right, 0px))
+                clamp(12px, 2.8vmin, 22px) max(8px, env(safe-area-inset-left, 0px));
+            box-sizing: border-box;
+            z-index: 1002;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .index-lang-switcher::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .index-lang-switcher::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+        }
+
         /* --- Index Mission Control: flags only; active language glows --- */
         @keyframes lang-flag-active-glow {
             0%,
@@ -1285,10 +1442,11 @@
 
         .index-lang-switcher .lang-flag {
             box-sizing: border-box;
+            flex-shrink: 0;
             width: auto;
             height: auto;
             min-width: unset;
-            padding: 4px !important;
+            padding: clamp(5px, 1.5vmin, 9px) clamp(5px, 1.8vmin, 10px) !important;
             margin: 0;
             display: inline-flex;
             user-select: none;
@@ -1302,7 +1460,7 @@
                 opacity 0.25s ease,
                 transform 0.25s ease,
                 filter 0.25s ease;
-            font-size: 1.65rem !important;
+            font-size: clamp(0.88rem, 3.25vmin, 1.52rem) !important;
             line-height: 1;
             cursor: pointer;
             font-family: inherit;
@@ -1428,11 +1586,6 @@
     <!-- Dark overlay on video for stronger contrast -->
     <div id="bg-overlay"></div>
 
-    <!-- Ambient Audio Loop -->
-    <audio id="bg-audio" loop>
-        <source src="resources/ambient.wav" type="audio/wav">
-    </audio>
-
     <!-- Admin Gate Modal (Custom Prompt) -->
     <div id="admin-gate">
         <div class="admin-gate-box">
@@ -1445,23 +1598,33 @@
         </div>
     </div>
 
-    <!-- Coffee control: standalone top-left -->
-    <div style="position: fixed; top: 25px; left: 25px; z-index: 1000;">
-        <div class="contact-btn btn-donate" id="btn-coffee" onclick="document.getElementById('donate-overlay').classList.add('open')"
-            title="Cyber-Kaffee spendieren"
-            style="position: static; padding: 0; width: 38px; justify-content: center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                <line x1="6" y1="1" x2="6" y2="4"></line>
-                <line x1="10" y1="1" x2="10" y2="4"></line>
-                <line x1="14" y1="1" x2="14" y2="4"></line>
-            </svg>
+    <!-- About (alle Breiten links, vor Kaffee) + Kaffee -->
+    <div class="index-fixed-corner index-fixed-corner--left">
+        <div class="index-left-cluster">
+            <a href="intro.html" id="btn-about" class="contact-btn intro-about-btn" data-intro-about style="position: static;"
+                title="Cinematic Intro — Doc Alvers">
+                <svg class="intro-about-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+                <span class="intro-about-mark intro-about-mark--narrow" aria-hidden="true">A</span>
+                <span class="intro-about-mark intro-about-mark--wide" id="txt-about">ABOUT</span>
+            </a>
+            <button type="button" id="sound-toggle" class="sound-toggle" title="Ambient Sound"
+                aria-label="Ambient Sound">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 18V5l12-3v13" />
+                    <circle cx="6" cy="18" r="3" />
+                    <circle cx="18" cy="15" r="3" />
+                </svg>
+            </button>
         </div>
     </div>
 
     <!-- Language switcher (flags only): role="button" + Tab/Enter/Space -->
-    <div class="index-lang-switcher" style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: min(96vw, 520px); z-index: 1000;">
+    <div class="index-lang-switcher" role="toolbar" aria-label="Sprache / Language">
         <span role="button" tabindex="0" data-lang="de" onclick="setLanguage('de')" class="lang-flag" title="Deutsch">🇩🇪</span>
         <span role="button" tabindex="0" data-lang="es" onclick="setLanguage('es')" class="lang-flag" title="Español">🇪🇸</span>
         <span role="button" tabindex="0" data-lang="en" onclick="setLanguage('en')" class="lang-flag" title="English">🇬🇧</span>
@@ -1474,17 +1637,7 @@
     </div>
 
     <!-- Top Action Buttons -->
-    <div style="position: fixed; top: 25px; right: 25px; display: flex; gap: 15px; z-index: 1000;">
-        <!-- About → Cinematic Intro -->
-        <a href="intro.html" class="contact-btn" id="btn-about" style="position: static;" title="Cinematic Intro — Doc Alvers">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 16v-4"></path>
-                <path d="M12 8h.01"></path>
-            </svg>
-            <span id="txt-about">ABOUT</span>
-        </a>
-
+    <div class="index-fixed-corner index-fixed-corner--right">
         <!-- QR code for this page -->
         <div class="contact-btn" id="btn-qr" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
@@ -1549,16 +1702,6 @@
             <button class="contact-close" id="donate-close"
                 onclick="document.getElementById('donate-overlay').classList.remove('open')">SCHLIESSEN</button>
         </div>
-    </div>
-
-    <!-- Sound controller floating bottom-right -->
-    <div id="sound-toggle" class="sound-toggle" title="Ambient Sound">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M9 18V5l12-3v13" />
-            <circle cx="6" cy="18" r="3" />
-            <circle cx="18" cy="15" r="3" />
-        </svg>
     </div>
 
     <header>
@@ -1760,29 +1903,58 @@
     <script src="js/labs-icons.js"></script>
     <script src="js/labs-config.js"></script>
 
-    <!-- Sound toggle + autoplay fallback -->
+    <!-- Sound toggle + Ambient (JS Audio wie intro — zuverlässiger bei großer m4a) -->
     <script>
-        const bgAudio = document.getElementById('bg-audio');
+        const BG_AMBIENT_URL = 'resources/Infinity_6min.m4a';
+        const BG_AMBIENT_VOLUME = 0.045;
+        /** @type {HTMLAudioElement | null} */
+        let bgAudioEl = null;
+
+        function getBgAudio() {
+            if (!bgAudioEl) {
+                bgAudioEl = new Audio(BG_AMBIENT_URL);
+                bgAudioEl.loop = true;
+                bgAudioEl.preload = 'auto';
+                bgAudioEl.volume = BG_AMBIENT_VOLUME;
+                bgAudioEl.addEventListener('error', () => {
+                    const e = bgAudioEl && bgAudioEl.error;
+                    console.error('Ambient-Audio Fehler:', e ? e.code + ' ' + e.message : 'unknown');
+                });
+            }
+            return bgAudioEl;
+        }
+
         const soundToggle = document.getElementById('sound-toggle');
         let isPlaying = false;
 
-        soundToggle.addEventListener('click', () => {
-            if (!isPlaying) {
-                bgAudio.volume = 0.5;
-                bgAudio.play().then(() => {
-                    soundToggle.classList.add('playing');
-                    isPlaying = true;
-                }).catch(error => {
-                    console.error('Audio play failed:', error);
-                    alert("Fehler beim Abspielen von 'ambient.wav'.");
-                });
-            } else {
-                bgAudio.pause();
-                soundToggle.classList.remove('playing');
-                isPlaying = false;
-            }
-        });
+        if (soundToggle) {
+            soundToggle.addEventListener('click', () => {
+                const bgAudio = getBgAudio();
+                if (!isPlaying) {
+                    bgAudio.volume = BG_AMBIENT_VOLUME;
+                    const p = bgAudio.play();
+                    if (p !== undefined) {
+                        p.then(() => {
+                            soundToggle.classList.add('playing');
+                            isPlaying = true;
+                        }).catch((error) => {
+                            console.error('Audio play failed:', error);
+                            alert("Fehler beim Abspielen von 'Infinity_6min.m4a'.");
+                        });
+                    } else {
+                        soundToggle.classList.add('playing');
+                        isPlaying = true;
+                    }
+                } else {
+                    bgAudio.pause();
+                    soundToggle.classList.remove('playing');
+                    isPlaying = false;
+                }
+            });
+        }
+    </script>
 
+    <script>
         // --- DYNAMIC RENDERING ---
         function renderCards() {
             const container = document.getElementById('tool-container');
@@ -2245,8 +2417,8 @@
         if (bgVid) bgVid.playbackRate = 0.5;
 
         window.addEventListener('hashchange', handleHash);
-        /* --- Playground: Saturn & UFO from center in sequence, never same twice in a row --- */
-        const playgroundSprites = ['🪐', '🛸', '🚀', '🛰️', '☄️', '🌙', '🌍', '🌠', '⭐', '🌟', '🌌', '☀️', '🌕', '🌑', '✨'];
+        /* --- HG-Flybys: nur UFO + Satellit (nie zweimal dasselbe hintereinander) --- */
+        const playgroundSprites = ['🛸', '🛰️'];
         const overlay = document.getElementById('planet-overlay');
         let lastFlyingSprite = null;
 
@@ -2338,8 +2510,16 @@
         if (document.getElementById('gate-cancel')) document.getElementById('gate-cancel').innerHTML = CyberI18n.get('index.admin_gate.cancel');
         
         // UI Icons Tooltips
-        if (document.getElementById('btn-coffee')) document.getElementById('btn-coffee').title = CyberI18n.get('index.ui.coffee_title');
-        if (document.getElementById('btn-about')) document.getElementById('btn-about').title = CyberI18n.get('index.ui.about_title');
+        const soundTip = CyberI18n.get('index.ui.sound_title');
+        const stEl = document.getElementById('sound-toggle');
+        if (stEl) {
+            stEl.title = soundTip;
+            stEl.setAttribute('aria-label', soundTip);
+        }
+        document.querySelectorAll('a[data-intro-about]').forEach((el) => {
+            el.title = aboutIntroTip;
+            el.setAttribute('aria-label', aboutIntroTip);
+        });
         if (document.getElementById('contact-link-credits')) {
             document.getElementById('contact-link-credits').textContent =
                 CyberI18n.get('index.ui.credits') || 'CREDITS';
@@ -2349,8 +2529,6 @@
                 CyberI18n.get('index.ui.impressum') || 'IMPRESSUM';
         }
         if (document.getElementById('btn-qr')) document.getElementById('btn-qr').title = CyberI18n.get('index.ui.qr_title');
-        if (document.getElementById('sound-toggle')) document.getElementById('sound-toggle').title = CyberI18n.get('index.ui.sound_title');
-        
         // Modals
         if (document.getElementById('contact-title')) document.getElementById('contact-title').innerHTML = CyberI18n.get('index.contact.title');
         if (document.getElementById('contact-desc')) document.getElementById('contact-desc').innerHTML = CyberI18n.get('index.contact.desc');

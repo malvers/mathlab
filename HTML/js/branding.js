@@ -299,7 +299,11 @@ const CyberBranding = {
         `;
 
         container.addEventListener('click', () => this.toggleFullscreen());
-        document.body.appendChild(container);
+        const anchor =
+            document.getElementById('main-content') ||
+            document.getElementById('workspace') ||
+            document.body;
+        anchor.appendChild(container);
     },
 
     toggleFullscreen() {

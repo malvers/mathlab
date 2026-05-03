@@ -79,6 +79,16 @@ class CyberCanvas {
         // Prevent default browser zoom on iPad
         this.canvas.style.touchAction = 'none';
 
+        this.canvas.setAttribute('tabindex', '0');
+        this.canvas.style.outline = 'none';
+        this.addListener(this.canvas, 'pointerdown', () => {
+            try {
+                this.canvas.focus({ preventScroll: true });
+            } catch (_) {
+                this.canvas.focus();
+            }
+        });
+
         // Listeners
         this.addListener(window, 'resize', () => this.resize());
         this.addListener(this.canvas, 'mousedown', (e) => this.handleMouseDown(e));
@@ -94,10 +104,14 @@ class CyberCanvas {
         this.addListener(this.canvas, 'mouseenter', () => this.setTeleOpacity(1));
         this.addListener(this.canvas, 'mouseleave', () => this.setTeleOpacity(0.3));
 
-        // Right-Click Context Menu
+        // Right-Click Context Menu — defer so hit-testing / follow-up mouse events finish before UI mounts a full-screen layer.
         this.addListener(this.canvas, 'contextmenu', (e) => {
             e.preventDefault();
-            if (this.onContextMenu) this.onContextMenu(e);
+            if (!this.onContextMenu) return;
+            const ev = e;
+            setTimeout(() => {
+                if (this.onContextMenu) this.onContextMenu(ev);
+            }, 0);
         });
 
         this.resize();
@@ -220,6 +234,12 @@ class CyberCanvas {
         this.ctx.resetTransform();
         this.ctx.scale(this.dpr, this.dpr);
         this.needsRedraw = true;
+    }
+
+    /** CSS-Pixel-basierte Skala für Strichstärken und Achsenbeschriftung (Referenz ~560px Kantenlänge). */
+    getUiScale() {
+        const m = Math.min(this.width > 0 ? this.width : 560, this.height > 0 ? this.height : 560);
+        return Math.max(0.52, Math.min(1.5, m / 560));
     }
 
     resetView(minY = -10, maxY = 10) {
@@ -381,7 +401,6 @@ class CyberCanvas {
         this.clear();
         const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.5)';
         const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.1)';
-        const textColor = 'rgba(255, 255, 255, 0.4)';
 
         if (options.vignette) {
             const grad = ctx.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width / 1.2);
@@ -391,10 +410,13 @@ class CyberCanvas {
             ctx.fillRect(0, 0, this.width, this.height);
         }
 
+        const s = this.getUiScale();
+
         // --- GRID LINES & LABELS ---
         ctx.strokeStyle = gridColor;
-        ctx.lineWidth = 1;
-        ctx.font = '12px Orbitron, sans-serif';
+        ctx.lineWidth = Math.max(0.65, s);
+        const labelPx = Math.max(9, Math.round(12 * s));
+        ctx.font = `${labelPx}px Orbitron, sans-serif`;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.textAlign = 'center';
 
@@ -409,7 +431,9 @@ class CyberCanvas {
 
             if (this.showLabels && Math.abs(x) > 0.001) {
                 const py = this.mapY(0);
-                const labelY = Math.min(Math.max(py + 15, 20), this.height - 10);
+                const pad = 15 * s;
+                const edge = 10 * s;
+                const labelY = Math.min(Math.max(py + pad, 14 * s + edge), this.height - edge);
                 ctx.fillText(x.toFixed(x % 1 === 0 ? 0 : 1), px, labelY);
             }
         }
@@ -424,16 +448,18 @@ class CyberCanvas {
 
             if (this.showLabels && Math.abs(y) > 0.001) {
                 const px = this.mapX(0);
-                const labelX = Math.min(Math.max(px - 10, 40), this.width - 10);
-                ctx.fillText(y.toFixed(y % 1 === 0 ? 0 : 1), labelX, py + 4);
+                const inset = 10 * s;
+                const gutter = 36 * s;
+                const labelX = Math.min(Math.max(px - inset, gutter), this.width - inset);
+                ctx.fillText(y.toFixed(y % 1 === 0 ? 0 : 1), labelX, py + 4 * s);
             }
         }
 
         // --- MAIN AXES ---
         if (this.showAxes) {
             ctx.strokeStyle = mainColor;
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = options.glow ? 10 : 0;
+            ctx.lineWidth = Math.max(1.25, 2 * s);
+            ctx.shadowBlur = options.glow ? Math.round(10 * s) : 0;
             ctx.shadowColor = mainColor;
 
             const xA = this.mapY(0);

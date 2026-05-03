@@ -66,12 +66,12 @@
             color: #e8fbff;
         }
 
-        /* Formelbox: Rand immer blau · Hauptformeln orange · Parameter cyan */
+        /* Formula overlay — responsive position + typography */
         .lissajous-overlay-formula {
             position: absolute;
-            left: 14px;
+            left: clamp(6px, 1.6vw + 2px, 16px);
             top: var(--cyber-nav-band-top, 14px);
-            max-width: min(94vw, 620px);
+            max-width: min(96vw, 640px);
             pointer-events: none;
             z-index: 6;
         }
@@ -80,17 +80,19 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 0;
-            padding: 0.28rem 1.05rem 0.4rem;
+            padding: clamp(0.15rem, 0.9vmin + 0.08rem, 0.38rem)
+                clamp(0.45rem, 2.6vmin + 0.2rem, 1.05rem)
+                clamp(0.22rem, 1.1vmin + 0.1rem, 0.42rem);
             box-sizing: border-box;
             background: rgba(8, 15, 32, 0.88);
-            border-radius: 12px;
+            border-radius: clamp(8px, 1.8vmin, 14px);
             border: 1px solid rgba(100, 190, 255, 0.5);
-            box-shadow: 0 0 22px rgba(80, 170, 255, 0.2);
+            box-shadow: 0 0 clamp(14px, 3vmin, 22px) rgba(80, 170, 255, 0.2);
         }
         .lissajous-formula-params {
             width: 100%;
             margin: 0;
-            padding: 0.18rem 0 0;
+            padding: clamp(0.08rem, 0.6vmin + 0.02rem, 0.2rem) 0 0;
             border-top: 1px solid rgba(100, 190, 255, 0.28);
             box-sizing: border-box;
         }
@@ -99,13 +101,13 @@
             margin: 0 !important;
         }
         #canvas-container #lissajous-formula-tex .katex {
-            font-size: 1.08em !important;
+            font-size: clamp(0.78rem, 1.65vmin + 0.48rem, 1.15rem) !important;
             color: #ffb070 !important;
-            text-shadow: 0 0 14px rgba(255, 157, 80, 0.28);
+            text-shadow: 0 0 clamp(8px, 2vmin, 14px) rgba(255, 157, 80, 0.28);
             line-height: 1.12 !important;
         }
         #canvas-container #lissajous-formula-params .katex {
-            font-size: 0.92em !important;
+            font-size: clamp(0.68rem, 1.35vmin + 0.38rem, 0.95rem) !important;
             color: #9ae8ff !important;
             letter-spacing: 0.03em;
             line-height: 1.15 !important;
@@ -551,11 +553,6 @@
                 ctx.lineWidth = 1;
                 ctx.stroke();
             }
-
-            ctx.fillStyle = 'rgba(200, 225, 255, 0.55)';
-            ctx.font = '11px Orbitron, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(CyberI18n.get('lissajous.view_3d_desc'), 14, h - 14);
 
             ctx.restore();
         }
