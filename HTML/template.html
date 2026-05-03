@@ -28,7 +28,6 @@
             background: var(--deep-bg);
             color: white;
             font-family: 'Outfit', sans-serif;
-            display: flex;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -120,7 +119,8 @@
             height: 100%;
             background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+            /* Größere Zellen: weniger „Mini-Raster“, wenn die Hauptfläche breit ist */
+            background-size: min(120px, 11vw) min(120px, 11vw);
             pointer-events: none;
         }
 
@@ -190,6 +190,7 @@
         </div>
     </main>
 
+    <script src="js/cyber-left-chrome.js"></script>
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/i18n.js"></script>
@@ -199,9 +200,15 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
                 if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
             }, 400);
         }
         // 1. Branding & UI Init
@@ -213,6 +220,10 @@
             subtitle: "Template" // Replace with i18n key or string
         });
         CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -300,10 +311,6 @@
         }
 
         window.onresize = init;
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') nextStep();
-            if (e.key === 'ArrowRight') prevStep();
-        });
         setupUI();
         document.fonts.ready.then(init);
     </script>
