@@ -198,11 +198,45 @@ const App = {
     focusOscPhase: 0,
     FOCUS_OSC_AMP: 180,
     FOCUS_OSC_SPEED: 0.015,
+    /* Vertikaler Mittelpunkt der Linse im Canvas [0–1]; < 0.5 = höher im Feld */
+    LENS_VERTICAL_CENTER_FRAC: 0.36,
+
+    computeLensOffsetY(h) {
+        const margin = 10;
+        const half = this.perimeter / 2;
+        const minCy = half + margin;
+        const maxCy = h - half - margin;
+        let cy = h * this.LENS_VERTICAL_CENTER_FRAC;
+        if (maxCy < minCy) cy = h / 2;
+        else cy = Math.min(maxCy, Math.max(minCy, cy));
+        return Math.round(cy - half);
+    },
+
+    repositionLensGeometry() {
+        const wLens = 150;
+        const space = this.perimeter / (this.ppsSide - 1);
+        this.points = [];
+        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - wLens / 2, y: this.offsetY + i * space });
+        for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + wLens / 2, y: this.offsetY + this.perimeter - i * space });
+        this.basePoints = this.points.map(p => ({ ...p }));
+        this.focus.x = this.getFocusDefaultX();
+        this.focus.y = this.offsetY + this.perimeter / 2;
+        this.focusBaseY = this.focus.y;
+        this.focusOscPhase = 0;
+        this.fitness = this.calcPathAndQuality(this.points);
+        this.updateTelemetry();
+    },
 
     init() {
         this.canvas = document.getElementById('lensCanvas');
         this.ctx = this.canvas.getContext('2d');
-        window.addEventListener('resize', () => this.resize()); this.resize();
+        window.addEventListener('resize', () => this.resize());
+        const lensStage = document.getElementById('lens-stage');
+        if (lensStage && typeof ResizeObserver !== 'undefined') {
+            this._stageObserver = new ResizeObserver(() => this.resize());
+            this._stageObserver.observe(lensStage);
+        }
+        this.resize();
         document.getElementById('btn-play').onclick = () => this.togglePlay();
         document.getElementById('btn-reset').onclick = () => this.reset();
         const btnResetView = document.getElementById('btn-reset-view');
@@ -241,7 +275,40 @@ const App = {
         this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
         this.reset(); this.animate();
     },
-    resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
+    resize() {
+        const canvas = this.canvas;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.max(1, Math.round(rect.width));
+        const h = Math.max(1, Math.round(rect.height));
+        const bmChanged = canvas.width !== w || canvas.height !== h;
+        const prevOy = this.offsetY;
+        if (bmChanged) {
+            canvas.width = w;
+            canvas.height = h;
+        }
+        const newOy = this.computeLensOffsetY(h);
+        this.offsetY = newOy;
+        const oyChanged = newOy !== prevOy;
+        const hadGeometry = this.points && this.points.length > 0;
+
+        if (oyChanged && hadGeometry) {
+            this.es = null;
+            this.generation = 0;
+            this.calls = 0;
+            this.paused = true;
+            const btn = document.getElementById('btn-play');
+            if (btn) btn.innerHTML = 'START';
+            this.updateRunningIndicator();
+            this.repositionLensGeometry();
+        } else if (hadGeometry && bmChanged && !oyChanged) {
+            this.focus.x = this.getFocusDefaultX();
+            this.fitness = this.calcPathAndQuality(this.points);
+            this.updateTelemetry();
+        }
+
+        if ((!this.paused || this.focusOscillate) && canvas.width && canvas.height) this.draw();
+    },
     screenToWorld(sx, sy) {
         const rect = this.canvas.getBoundingClientRect();
         const cx = sx - rect.left;
@@ -293,6 +360,7 @@ const App = {
     },
     reset() {
         this.syncControlUI();
+        if (this.canvas) this.offsetY = this.computeLensOffsetY(this.canvas.height);
         this.points = []; const w = 150; const space = this.perimeter / (this.ppsSide - 1);
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX - w / 2, y: this.offsetY + i * space });
         for (let i = 0; i < this.ppsSide; i++) this.points.push({ x: this.offsetX + w / 2, y: this.offsetY + this.perimeter - i * space });

@@ -53,7 +53,17 @@ body {
     padding-right: env(safe-area-inset-right, 0px);
 }
 
-canvas {
+/* Bühnenbereich: Linse füllt nur den Streifen bis zur oberen Kante der Glas-Boxen (Dock im Fluss darunter). */
+.lens-stage {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    padding-top: env(safe-area-inset-top, 0px);
+    position: relative;
+}
+
+#lens-stage canvas {
+    display: block;
     width: 100%;
     height: 100%;
     cursor: crosshair;
@@ -124,16 +134,15 @@ canvas {
     100% { opacity: 0.4; }
 }
 
-/* Unterer HUD-Stack — näher zum unteren Rand, breiter nutzbarer Bereich */
+/* Unterer HUD-Stack — im Fluss unter der Linse (kein Überdecken), Abstand gleich wie zuvor */
 #lens-ui-dock {
-    position: absolute;
+    position: relative;
     z-index: 40;
-    bottom: calc(4px + env(safe-area-inset-bottom, 0px));
-    left: max(6px, env(safe-area-inset-left, 6px));
-    right: max(6px, env(safe-area-inset-right, 6px));
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 0 max(6px, env(safe-area-inset-left, 6px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-right, 6px));
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     align-items: center;
     pointer-events: none;
 }
