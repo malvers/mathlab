@@ -8,7 +8,8 @@ function draw() {
 
     // 1. CANVAS SETUP & LAYOUT
     const parent = canvas.parentElement;
-    
+    const narrowFigColumn = parent && parent.id === 'lenglay-canvas-stage';
+
     let canvasW = parent.clientWidth;
     if (!canvasW || canvasW < 10) {
         const mainEl = document.getElementById('main-content');
@@ -48,7 +49,12 @@ function draw() {
 
     const heightRatio = (currentVariant === 0) ? 2.85 : 1.2;
     const maxSafeWidth = availableHeight / heightRatio;
-    const baseWidth = Math.min(280, canvasW * 0.8, maxSafeWidth);
+    const widthFrac = narrowFigColumn ? 0.94 : 0.8;
+    let baseWidth = Math.min(280, canvasW * widthFrac, maxSafeWidth);
+    if (narrowFigColumn) {
+        const lw = 1.1 * 1.05;
+        baseWidth = Math.min(baseWidth * lw, canvasW - 16, maxSafeWidth * lw);
+    }
 
     const scale = Math.max(0.05, baseWidth / 280); // Radii must stay non-negative
     const fL = Math.max(12, Math.round(18 * scale));
@@ -60,11 +66,19 @@ function draw() {
 
     // 4. COMPUTE POINTS
     // Main drawing area only — no extra 380px sidebar subtraction
-    let centerX = canvasW / 2;
-    centerX = Math.max(centerX, baseWidth / 2 + 20);
+    // Schmale linke Spalte: Figur etwas links im Canvas, sonst zentriert
+    let centerX = narrowFigColumn ? canvasW * 0.44 : canvasW / 2;
+    centerX = Math.max(centerX, baseWidth / 2 + 12);
+    centerX = Math.min(centerX, canvasW - baseWidth / 2 - 8);
 
-    const A = { x: centerX - baseWidth/2, y: canvasH - bottomPadding };
-    const B = { x: centerX + baseWidth/2, y: canvasH - bottomPadding };
+    const baseLineDesired = narrowFigColumn
+        ? canvasH - bottomPadding + canvasH * 0.1
+        : canvasH - bottomPadding;
+    /* Unter AB: Buchstaben bei A.y+10 / B.y+10 + Schrift — nie unter Canvas-/Viewport-Unterkante schneiden */
+    const belowAbReserve = Math.max(42, Math.round(fL + 26));
+    const baseLineY = Math.min(baseLineDesired, canvasH - belowAbReserve);
+    const A = { x: centerX - baseWidth/2, y: baseLineY };
+    const B = { x: centerX + baseWidth/2, y: baseLineY };
     const D = getPoint(A, B, v.BAD, v.ABD);
     const C = getPoint(A, B, v.BAC, angABC);
     const E = getPoint(A, B, 80, 80);
@@ -159,4 +173,25 @@ function draw() {
     if (showDE || showEP || isChecked('cb_AEB')) ctx.fillText("E", E.x, E.y - 15);
     if (showEP || isChecked('cb_P')) ctx.fillText("P", P.x + 15, P.y + 10);
     if (showF) ctx.fillText("F", F.x - 25, F.y - 5);
+
+    /** Figure bottom Y (downward coords) — matches explanation box bottom */
+    const abLblDepth = Math.max(22, Math.round(10 + fL * 0.52));
+    let figBottomY = baseLineY;
+    const showALbl = showAB || showAD || showAC || showBAD || isChecked('cb_BAC') || showDAC;
+    const showBLbl = showAB || showBC || showBD || isChecked('cb_ABC') || isChecked('cb_ABD') || isChecked('cb_DBC');
+    if (showALbl || showBLbl) figBottomY = Math.max(figBottomY, baseLineY + abLblDepth);
+    if (showEP || isChecked('cb_P')) figBottomY = Math.max(figBottomY, P.y + abLblDepth);
+    if (showF) figBottomY = Math.max(figBottomY, F.y + Math.ceil(6 + fL * 0.45));
+
+    const cc = document.getElementById('canvas-container');
+    if (cc) {
+        let lift = 0;
+        if (narrowFigColumn) {
+            const stageEl = document.getElementById('lenglay-canvas-stage');
+            const topInStage = stageEl ? canvas.offsetTop : 0;
+            const stageH = stageEl ? stageEl.clientHeight : canvasH;
+            lift = Math.max(0, Math.round(stageH - topInStage - figBottomY));
+        }
+        cc.style.setProperty('--lenglay-exp-baseline-lift', lift + 'px');
+    }
 }
