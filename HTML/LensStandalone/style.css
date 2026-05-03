@@ -339,6 +339,55 @@ body {
     text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
 }
 
+/* Collapsed: nur Einklapp-Taste sichtbar (Telemetrie + Steuerblock aus) */
+#lens-ui-dock.collapsed #telemetry {
+    display: none;
+}
+
+#lens-ui-dock.collapsed .control-bar-main {
+    display: none !important;
+}
+
+#lens-ui-dock.collapsed #control-bar {
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    align-self: stretch;
+    flex: 0 0 auto;
+    padding-block: clamp(4px, 1.2vmin, 8px);
+    padding-inline: clamp(4px, 1.2vmin, 10px);
+    /* große Glas-Leiste aus — nur noch der Pfeil */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+#lens-ui-dock.collapsed .lens-ui-dock-inner {
+    gap: 0;
+}
+
+.control-bar-main {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: clamp(8px, 2.2vmin, 20px);
+}
+
+.btn-dock-fold .dock-chevron {
+    display: block;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#lens-ui-dock.collapsed .btn-dock-fold .dock-chevron {
+    transform: rotate(180deg);
+}
+
 /* Control Bar — fest unter der Telemetriezeile, immer eine Zeile (Buttons + Slider) */
 #control-bar {
     position: relative;
@@ -456,7 +505,33 @@ body {
     font-size: clamp(9px, 1.95vmin + 0.03rem, var(--dock-font-btn));
 }
 
-#control-bar .action-btn svg {
+#control-bar .btn-dock-fold {
+    flex: 0 0 auto;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: clamp(6px, 1.5vmin, 10px);
+    min-width: auto;
+    justify-content: center;
+    color: var(--neon-cyan);
+}
+
+#control-bar .btn-dock-fold:hover {
+    background: rgba(0, 242, 255, 0.07);
+    box-shadow: none;
+}
+
+#control-bar .btn-dock-fold:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+}
+
+#control-bar .btn-dock-fold svg {
+    width: 14px;
+    height: 14px;
+}
+
+#control-bar .btn-group .action-btn svg {
     width: clamp(12px, 2.85vmin, 16px);
     height: clamp(12px, 2.85vmin, 16px);
 }
@@ -545,7 +620,6 @@ input[type="range"]::-webkit-slider-thumb {
     color: #00d2ff;
     margin-top: 6px;
     opacity: 0.9;
-    text-transform: uppercase;
     text-shadow: 0 0 7px #00d2ff;
     line-height: 1.4;
     font-weight: 400;
