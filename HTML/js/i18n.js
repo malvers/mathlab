@@ -5,8 +5,8 @@
  */
 
 const CyberI18n = {
-    // Current active language
-    current: 'en',
+    // Current active language (resolveLanguageFromEnvironment runs at script end)
+    current: 'de',
 
     // Dictionary
     translations: {
@@ -4270,7 +4270,7 @@ pt: {
         }
     },
 
-    /** URL ?lang= → localStorage → Browser-Sprache → de; schreibt cyber-lab-lang (Best-Effort). */
+    /** URL ?lang= → localStorage cyber-lab-lang → Standard de (keine Browser-Sprache, damit Erstbesuch konsistent DE). */
     resolveLanguageFromEnvironment: function () {
         const supported = ['de', 'en', 'es', 'fr', 'it', 'pt', 'nl', 'sw', 'tr'];
         const norm = function (s) {
@@ -4283,19 +4283,6 @@ pt: {
             let pick = norm(urlParams.get('lang'));
             if (!supported.includes(pick)) {
                 pick = norm(localStorage.getItem('cyber-lab-lang'));
-            }
-            if (!supported.includes(pick)) {
-                const list =
-                    navigator.languages && navigator.languages.length
-                        ? navigator.languages
-                        : [navigator.language || ''];
-                for (let i = 0; i < list.length; i++) {
-                    const two = norm(list[i]);
-                    if (supported.includes(two)) {
-                        pick = two;
-                        break;
-                    }
-                }
             }
             if (!supported.includes(pick)) pick = 'de';
             this.current = pick;
@@ -4942,7 +4929,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
     });
 })();
 
-// Auto-detect language from URL, localStorage, or browser
+// Sprache: URL ?lang= → localStorage cyber-lab-lang → Standard DE (Nutzerwahl persistiert beim Flag-Toggle)
 (function () {
     try {
         CyberI18n.resolveLanguageFromEnvironment();

@@ -66,11 +66,11 @@ Per voi!
 che follia!
 180pt
 %emoji 😎
-%button indietro
 
 #
 120pt
 docalvers.de
+%button index Torna alla panoramica
 
 %stop
 

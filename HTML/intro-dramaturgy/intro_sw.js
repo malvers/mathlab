@@ -66,11 +66,11 @@ Kwako!
 ni la kushangaza!
 180pt
 %emoji 😎
-%button nyuma
 
 #
 120pt
 docalvers.de
+%button index Rudi kwenye orodha
 
 %stop
 

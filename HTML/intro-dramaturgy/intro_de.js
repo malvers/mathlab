@@ -1,7 +1,7 @@
 /**
  * Reference dramaturgy (German). Maintain narrative content only in this file.
  * Translations: intro-dramaturgy/intro_<lang>.js — sync after edits here.
- * Open intro: ?lang=en (also es, fr, it, pt, nl, sw, tr). Else browser language or de.
+ * Open intro: ?lang=en (also es, fr, it, pt, nl, sw, tr). Standard DE / gespeicherte Sprache (cyber-lab-lang).
  *
  * In dramaturgy text only: line «#notranslate» = following section (until next #)
  * is not translated / copied from this file for other languages (same as a # section break).
@@ -81,7 +81,7 @@ das crazy!
 #
 120pt
 docalvers.de
-%button zurück
+%button index Zur Übersicht
 
 %stop
 

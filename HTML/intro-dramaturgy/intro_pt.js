@@ -66,11 +66,11 @@ Para vocês!
 que loucura!
 180pt
 %emoji 😎
-%button voltar
 
 #
 120pt
 docalvers.de
+%button index Voltar ao índice
 
 %stop
 

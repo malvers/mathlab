@@ -67,11 +67,11 @@ Voor jullie!
 dat is gek!
 180pt
 %emoji 😎
-%button terug
 
 #
 120pt
 docalvers.de
+%button index Naar het overzicht
 
 %stop
 

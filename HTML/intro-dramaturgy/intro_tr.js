@@ -67,11 +67,11 @@ Sizin için!
 inanılmaz!
 180pt
 %emoji 😎
-%button geri
 
 #
 120pt
 docalvers.de
+%button index Genel görünüme dön
 
 %stop
 
