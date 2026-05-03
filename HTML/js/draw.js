@@ -1,7 +1,6 @@
 // js/draw.js
 
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-const expBox = document.getElementById('explanation-box');
 
 function draw() {
     const dpr = window.devicePixelRatio || 1;
@@ -10,20 +9,16 @@ function draw() {
     // 1. CANVAS SETUP & LAYOUT
     const parent = canvas.parentElement;
     
-    // Fallback: window.innerWidth minus sidebar (380px) if flex/parent width is unusable
     let canvasW = parent.clientWidth;
     if (!canvasW || canvasW < 10) {
-        canvasW = isMobile ? window.innerWidth : (window.innerWidth - 380);
+        const mainEl = document.getElementById('main-content');
+        canvasW = mainEl && mainEl.clientWidth > 10 ? mainEl.clientWidth : window.innerWidth;
     }
     
     let canvasH = parent.clientHeight;
     if (!canvasH || canvasH < 10) {
-        canvasH = window.innerHeight;
-    }
-
-    // Subtract explanation panel height on tablet/phone from drawable area
-    if (isMobile && expBox && expBox.style.display !== 'none') {
-        canvasH -= expBox.offsetHeight;
+        const mainEl = document.getElementById('main-content');
+        canvasH = mainEl && mainEl.clientHeight > 10 ? mainEl.clientHeight : window.innerHeight;
     }
 
     canvasW = Math.max(1, canvasW);

@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>docalvers | <script>document.write(CyberI18n.get('arithmetic.add.title'))</script></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -22,40 +24,96 @@
             --deep-bg: #050b18;
         }
 
-        #explanation-box {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 320px;
+        body.page-lenglay #main-content {
+            min-height: 0;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-left: env(safe-area-inset-left, 0px);
+        }
+
+        body.page-lenglay #canvas-container {
+            min-height: 0;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: stretch;
+            gap: clamp(10px, 2vmin, 18px);
+        }
+
+        /* Linke Fläche: nur hier misst draw.js die Canvas-Pixelbreite/-höhe */
+        body.page-lenglay #lenglay-canvas-stage {
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* cyber-layout setzt 100%/100% — hier messen wir per draw() explizite Pixel */
+        body.page-lenglay #canvas-container canvas {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        body.page-lenglay #sidebar-header {
+            min-height: clamp(48px, 12vmin, 72px);
+        }
+
+        body.page-lenglay #side-panel #ui-container .instrument-card {
+            font-size: clamp(0.85rem, 2.35vmin + 0.14rem, 0.96rem);
+        }
+
+        body.page-lenglay #explanation-box {
+            position: relative;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            flex: 0 0 auto;
+            align-self: stretch;
+            gap: clamp(6px, 2vmin, 10px);
+            width: clamp(132px, 26vw, 300px);
+            max-width: min(300px, 38%);
+            max-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 18px;
+            padding: clamp(12px, 3.5vmin, 18px);
+            border-radius: clamp(14px, 3vmin, 18px);
             z-index: 100;
+            box-sizing: border-box;
         }
 
         .exp-title {
             font-family: 'Orbitron';
-            font-size: 0.75rem;
+            font-size: clamp(0.68rem, 2vmin, 0.75rem);
             color: var(--neon-blue);
-            margin-bottom: 10px;
+            margin-bottom: 0;
         }
 
         .exp-text {
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 2.4vmin, 0.9rem);
             line-height: 1.5;
             color: rgba(255, 255, 255, 0.8);
         }
 
         #math-coach-box {
             position: absolute;
-            width: 380px;
+            width: min(380px, calc(100vw - max(90px, env(safe-area-inset-left) + env(safe-area-inset-right, 0px) + 24px)));
+            max-width: calc(100% - 24px);
             background: rgba(10, 20, 40, 0.4);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(0, 210, 255, 0.2);
             border-radius: 20px;
-            padding: 25px;
+            padding: clamp(16px, 4vmin, 25px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             color: white;
             font-family: 'Orbitron', sans-serif;
@@ -120,7 +178,7 @@
         }
 
         .stats-val {
-            font-size: 1.1rem;
+            font-size: clamp(1rem, 2.8vmin, 1.1rem);
         }
 
         /* Spinner (Pfeile) ausblenden */
@@ -145,7 +203,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 
-<body>
+<body class="page-lenglay">
     <!-- Mini Rail -->
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
@@ -164,7 +222,9 @@
 
     <main id="main-content">
         <div id="canvas-container">
-            <canvas id="canvas"></canvas>
+            <div id="lenglay-canvas-stage">
+                <canvas id="canvas"></canvas>
+            </div>
             <div id="explanation-box">
                 <div class="exp-title" id="exp-title">MISSION BRIEFING</div>
                 <div class="exp-text" id="exp-text">Analysieren Sie das Langley-Viereck durch schrittweise Winkelkonstruktion.</div>
@@ -302,6 +362,13 @@
                 cbAll.dispatchEvent(new Event('change'));
             }
             
+            const canvasHost = document.getElementById('canvas-container');
+            if (canvasHost && typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(() => {
+                    if (typeof draw === 'function') draw();
+                }).observe(canvasHost);
+            }
+
             // Trigger initial draw and resize
             if (typeof draw === 'function') {
                 window.dispatchEvent(new Event('resize'));
@@ -312,7 +379,7 @@
     <script src="js/config.js"></script>
     <script src="js/geometry.js"></script>
     <script src="js/explanations.js"></script>
-    <script src="js/draw.js?v=langley10"></script>
+    <script src="js/draw.js?v=langley13"></script>
     <script src="js/main.js?v=langley10"></script>
 </body>
 
