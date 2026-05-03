@@ -30,6 +30,13 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # Pages artifact is only HTML/; screenshots live in repo-root resources/screenshots (tracked).
+      # Copy them into the site tree so intro.html / universe.html paths resolve online.
+      - name: Copy screenshots into HTML bundle
+        run: |
+          mkdir -p HTML/resources/screenshots
+          cp resources/screenshots/*.png HTML/resources/screenshots/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

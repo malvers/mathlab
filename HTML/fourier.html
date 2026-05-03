@@ -15,81 +15,106 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
-    <!-- Nur Fourier: responsive Formel + N — überschreibt #formula-overlay / #n-telemetry aus cyber-lab-overrides -->
+    <!-- Fourier: Formel unten; großes N rechts, vertikal zur Figur (Canvas-Mitte = Note) -->
     <style>
         body.compact-ui #canvas-container {
             position: relative;
             min-height: 0;
         }
 
-        body.compact-ui #formula-overlay {
+        /* Großes N rechts, auf Höhe der gezeichneten Kurve (Canvas vertikal zentriert) */
+        body.compact-ui #n-telemetry {
+            position: absolute !important;
+            z-index: 100;
+            pointer-events: none;
+            left: auto !important;
+            bottom: auto !important;
+            right: clamp(12px, 3.5vw, 72px);
+            top: 50%;
+            transform: translateY(-50%) !important;
+            font-size: clamp(2.75rem, min(19vmin, 12vw), 9.5rem);
+            line-height: 0.92;
+            letter-spacing: -0.03em;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        body.compact-ui #fourier-stack {
+            position: absolute;
+            z-index: 100;
+            pointer-events: none;
             left: 50%;
+            bottom: clamp(10px, 3vmin, 44px);
             transform: translateX(-50%);
-            max-width: min(920px, calc(100% - clamp(7rem, min(20vmin, 18vw), 15rem)));
+            width: max-content;
+            max-width: min(960px, calc(100% - clamp(7rem, min(18vmin, 24vw), 16rem)));
+            box-sizing: border-box;
+        }
+
+        body.compact-ui #fourier-stack #formula-overlay {
+            position: relative !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            max-width: min(920px, calc(100% - 2rem));
             width: max-content;
             box-sizing: border-box;
             padding: clamp(8px, 1.2vmin + 6px, 22px) clamp(12px, 2.5vw, 40px);
-            bottom: clamp(10px, 3vmin, 44px);
-            /* Skaliert mit Ansicht — auf großen Screens deutlich größer als vorher */
             font-size: clamp(0.88rem, 1.85vmin + 0.62rem, 2.05rem);
             overflow-x: auto;
             overflow-y: visible;
             -webkit-overflow-scrolling: touch;
         }
 
-        body.compact-ui #formula-overlay .katex-display {
+        body.compact-ui #fourier-stack #formula-overlay .katex-display {
             margin: 0 !important;
         }
 
-        body.compact-ui #formula-overlay .katex-display > .katex {
+        body.compact-ui #fourier-stack #formula-overlay .katex-display > .katex {
             font-size: clamp(0.78rem, 2.15vmin + 0.48rem, 1.95rem) !important;
-        }
-
-        /* Gleiche Unterkante wie Formelbox → wirkt als eine Zeile unten rechts */
-        body.compact-ui #n-telemetry {
-            top: auto;
-            bottom: clamp(10px, 3vmin, 44px);
-            right: clamp(10px, 4vw, 80px);
-            transform: none;
-            font-size: clamp(2.75rem, min(19vmin, 12vw), 9.5rem);
-            line-height: 1;
-            letter-spacing: -0.03em;
-            white-space: nowrap;
         }
 
         @media (max-width: 720px) {
             body.compact-ui #n-telemetry {
-                /* Über der Formel, gleiche horizontale Einordnung rechts */
-                bottom: calc(clamp(8px, 2vmin, 26px) + clamp(52px, 12vmin, 88px) + clamp(22px, 6vmin, 40px));
                 font-size: clamp(1.95rem, 14vmin, 3.35rem);
-                right: clamp(8px, 3vw, 22px);
+                right: clamp(8px, 2.5vw, 20px);
+                line-height: 1;
             }
 
-            body.compact-ui #formula-overlay {
+            body.compact-ui #fourier-stack {
                 max-width: calc(100% - 16px);
                 bottom: clamp(8px, 2vmin, 26px);
+            }
+
+            body.compact-ui #fourier-stack #formula-overlay {
+                max-width: calc(100% - 8px);
                 font-size: clamp(0.78rem, 1.6vmin + 0.52rem, 1.15rem);
             }
 
-            body.compact-ui #formula-overlay .katex-display > .katex {
+            body.compact-ui #fourier-stack #formula-overlay .katex-display > .katex {
                 font-size: clamp(0.68rem, 1.85vmin + 0.42rem, 1.05rem) !important;
             }
         }
 
         @media (max-height: 520px) and (orientation: landscape) {
             body.compact-ui #n-telemetry {
-                bottom: calc(clamp(6px, 2vmin, 18px) + clamp(40px, 10vmin, 68px) + clamp(16px, 4vmin, 28px));
                 font-size: clamp(1.65rem, 16vmin, 2.85rem);
-                right: clamp(8px, 3vw, 28px);
+                right: clamp(8px, 2.5vw, 24px);
             }
 
-            body.compact-ui #formula-overlay {
+            body.compact-ui #fourier-stack {
+                max-width: calc(100% - 16px);
                 bottom: clamp(6px, 2vmin, 18px);
+            }
+
+            body.compact-ui #fourier-stack #formula-overlay {
                 padding: clamp(6px, 1.2vmin, 12px) clamp(10px, 2vw, 22px);
                 font-size: clamp(0.72rem, 1.5vmin + 0.45rem, 1rem);
             }
 
-            body.compact-ui #formula-overlay .katex-display > .katex {
+            body.compact-ui #fourier-stack #formula-overlay .katex-display > .katex {
                 font-size: clamp(0.62rem, 1.65vmin + 0.38rem, 0.92rem) !important;
             }
         }
@@ -119,8 +144,10 @@
                 <!-- Injected via JS to match 2-row layout -->
             </div>
             <div class="cyber-grid"></div>
-            <div id="formula-overlay"></div>
             <div id="n-telemetry">2</div>
+            <div id="fourier-stack" class="fourier-stack">
+                <div id="formula-overlay"></div>
+            </div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
