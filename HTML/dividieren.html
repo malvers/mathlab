@@ -73,14 +73,14 @@
 
         #math-coach-box {
             position: absolute;
-            width: min(228px, calc(42vw));
-            max-width: calc(100% - 20px);
+            width: min(174px, calc(32vw));
+            max-width: calc(100% - 12px);
             box-sizing: border-box;
             background: rgba(10, 20, 40, 0.4);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 14px;
-            padding: clamp(8px, 1.8vw, 14px);
+            border-radius: 12px;
+            padding: clamp(6px, 1.35vw, 11px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             color: white;
             font-family: 'Orbitron', sans-serif;
@@ -89,7 +89,7 @@
             transform: translateY(10px);
             transition: opacity 0.5s ease, transform 0.5s ease;
             z-index: 10;
-            right: 10px;
+            right: max(4px, env(safe-area-inset-right, 0px));
             left: auto;
         }
 
@@ -99,7 +99,7 @@
         }
 
         .coach-message {
-            font-size: clamp(0.62rem, 2.2vw, 0.78rem);
+            font-size: clamp(0.56rem, 1.9vw, 0.72rem);
             line-height: 1.4;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -451,9 +451,9 @@
             const divStr = String(divisor);
             const resStr = String(Math.floor(dividend / divisor));
 
-            const coachMargin = 10;
+            const coachMargin = 6;
             const gapWide = 16;
-            const coachWidthPx = Math.min(228, Math.max(150, width * 0.22));
+            const coachWidthPx = Math.min(174, Math.max(112, width * 0.168));
             const calcAvailWidth = Math.max(120, width - coachWidthPx - gapWide - coachMargin * 2);
 
             // 1. GRID METRICS — Rechenfläche wie addition/subtraktion (rechts Coach reserviert)
@@ -464,6 +464,8 @@
             let fontSizeHeight = (height * 0.85) / (totalLines * 1.3);
             let fontSize = Math.min(fontSizeWidth, fontSizeHeight, 96);
             fontSize = Math.max(11, fontSize);
+            fontSize *= 1.1;
+            fontSize = Math.min(106, Math.max(12, fontSize));
 
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
@@ -482,11 +484,20 @@
             const ensembleStartX = coachMargin + Math.max(0, (calcAvailWidth - totalCalcWidth) / 2);
 
             const startX = ensembleStartX + charWidth * 0.5;
-            const centeredStartY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5;
-            const nudgeDown = Math.max(72, Math.min(height * 0.16, fontSize * 2.35 + 56));
-            const minRow0CenterY = Math.max(96, height * 0.095 + fontSize * 0.58);
-            let startY = centeredStartY + nudgeDown * 0.72;
+            const layoutDownPx = height * 0.05;
+            const unusedVert = Math.max(0, height - totalLines * rowHeight);
+            const topMarginFrac = 0.16;
+            let startY = unusedVert * topMarginFrac + rowHeight * 0.5;
+            const bandCap = height * 0.14 + rowHeight * 0.55;
+            if (startY > bandCap) startY = bandCap;
+            const minRow0CenterY = Math.max(36, height * 0.018 + fontSize * 0.16);
             if (startY < minRow0CenterY) startY = minRow0CenterY;
+            startY += layoutDownPx;
+
+            /* Aufgabe 2 % weiter nach unten; Box-Anker nutzt weiter nur startY (ohne diese Extra-Pixel). */
+            const taskExtraDownPx = height * 0.02;
+            const paintStartY = startY + taskExtraDownPx;
+            const getRowY = (r) => paintStartY + r * rowHeight;
 
             const coachBox = document.getElementById('math-coach-box');
             if (coachBox) {
@@ -497,7 +508,6 @@
 
             // Positioning Helpers
             const getColX = (c) => startX + c * charWidth;
-            const getRowY = (r) => startY + r * rowHeight;
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
 
@@ -631,31 +641,38 @@
 
             }
 
+            const coachAnchorY = (r) => startY + r * rowHeight;
+
             // --- 3. POSITION COACH BOX (After content is updated for correct height) ---
             updateStepInfo();
 
             if (coachBox) {
                 coachBox.classList.add('visible');
                 const boxHeight = coachBox.offsetHeight;
-                let targetY = getRowY(0);
+                let targetY = coachAnchorY(0);
                 if (step) {
                     let currentRow = 1;
                     const activeSteps = stepSequence.slice(0, currentStep + 1);
-                    let opY = getRowY(0);
+                    let opY = coachAnchorY(0);
                     activeSteps.forEach((s) => {
                         if (s.type === 'divide') {
                             currentRow++;
-                            opY = getRowY(currentRow);
+                            opY = coachAnchorY(currentRow);
                         } else if (s.type === 'bringDown') {
-                            opY = getRowY(currentRow);
+                            opY = coachAnchorY(currentRow);
                             currentRow++;
                         }
                     });
                     targetY = opY;
                 }
-                const minTop = 20 + boxHeight / 2;
+                if (step && step.type === 'final') {
+                    targetY = Math.max(targetY, height * 0.43);
+                }
+                const minTop = 20 + boxHeight / 2 + layoutDownPx;
                 const maxTop = height - 20 - boxHeight / 2;
-                const clampedY = Math.max(minTop, Math.min(maxTop, targetY));
+                let clampedY = Math.max(minTop, Math.min(maxTop, targetY));
+                const coachExtraDownPx = height * 0.055;
+                clampedY = Math.min(maxTop, clampedY + coachExtraDownPx);
                 coachBox.style.top = `${clampedY - boxHeight / 2}px`;
             }
         }

@@ -11,6 +11,43 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
+        /* Gleiche Hauptflächen-Kette wie winkelsumme / Orbital-Lab (sonst zweiter „Pfad“, falsches clientWidth/clientHeight → Ansicht seitlich verschoben). */
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #main-content {
+            flex: 1 1 0%;
+            flex-grow: 1;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
+        }
+
+        #canvas-container {
+            flex: 1 1 0%;
+            width: 100%;
+            min-height: 0;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+        }
+
+        #canvas-container canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            outline: none;
+        }
+
         /* Einzeilig: keine Zeilenumbrüche in Flex-Items (Globale Card-Styles wrappen sonst weiter). */
         #side-panel .winkel-angle-sum-row {
             display: flex;
@@ -126,6 +163,15 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
+
+        function resizeRendererToCanvas() {
+            if (!container || !camera || !renderer) return;
+            const w = Math.max(1, container.clientWidth | 0);
+            const h = Math.max(1, container.clientHeight | 0);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -283,11 +329,12 @@
             renderer.render(scene, camera);
         }
 
-        window.onresize = () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        };
+        window.onresize = resizeRendererToCanvas;
+        window.addEventListener('load', () => {
+            requestAnimationFrame(resizeRendererToCanvas);
+            setTimeout(resizeRendererToCanvas, 150);
+        });
+        requestAnimationFrame(() => requestAnimationFrame(resizeRendererToCanvas));
 
         setupUI(); rebuild(0.5); animate();
     </script>
