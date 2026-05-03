@@ -17,7 +17,7 @@
 
     <!-- Branding & UI Engines -->
     <link rel="icon" type="image/png" href="resources/favicon.png">
-    <script src="js/branding/briefings.js?v=539"></script>
+<script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
@@ -135,12 +135,17 @@
     </main>
 
     <!-- Logic -->
-    <script src="js/cyber-canvas.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/cyber-canvas.js"></script>
     <script src="js/integral-engine.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
             }, 400);
@@ -160,6 +165,10 @@
 
             // 2. Initialize UI Components
             CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
             // 3. Create Parameter Controls
             CyberUI.createCard('parameters-container', '', `

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Schmetterlings-Labor</title>
-    <script src="js/i18n.js"></script>
+<script src="js/i18n.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -126,7 +126,8 @@
         </div>
     </main>
 
-    <script src="js/branding/briefings.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
@@ -135,6 +136,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
             }, 400);
@@ -151,6 +156,10 @@
                 subtitle: CyberI18n.get('butterfly.title')
             });
             CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
             
             // Central Canvas Setup - Locked Viewport
             CyberCanvasInstance.init('canvas', {

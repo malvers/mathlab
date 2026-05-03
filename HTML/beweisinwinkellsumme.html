@@ -112,7 +112,8 @@
         </div>
     </main>
 
-    <script src="js/branding/briefings.js?v=539"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
@@ -121,6 +122,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
                 if (typeof draw === 'function') draw();
@@ -138,6 +143,10 @@
 
         // --- CyberUI Initialization ---
         CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
         CyberUI.createCard('parameters-container', CyberI18n.get('sum.coords'), `
             <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">${CyberI18n.get('sum.parallel_point')}</div>
             <div class="radio-group">

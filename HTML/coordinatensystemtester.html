@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/i18n.js"></script>
+<script src="js/i18n.js"></script>
     <title>docalvers | Ultra v6.7.0</title>
     
     <!-- Fonts -->
@@ -63,7 +63,8 @@
     </main>
 
     <!-- Scripts -->
-    <script src="js/cyber-canvas.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/cyber-canvas.js"></script>
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/branding.js?v=539"></script>
@@ -73,6 +74,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
             }, 400);
@@ -95,6 +100,10 @@
 
             // 2. Initialize UI Engine
             CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
             // 3. Create Navigation & Control Cards
             CyberUI.createCard('parameters-container', CyberI18n.get('coord.controls'), `

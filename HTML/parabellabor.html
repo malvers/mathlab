@@ -65,7 +65,8 @@
         </div>
     </div>
 
-    <script src="js/branding/briefings.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
@@ -76,6 +77,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
             }, 400);
@@ -181,6 +186,10 @@
                 
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
                     
                     // Card 1: FUNKTIONSGLEICHUNG
                     CyberUI.createCard('parameters-container', CyberI18n.get('parabola.eq_title'), `

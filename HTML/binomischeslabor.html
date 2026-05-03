@@ -138,7 +138,8 @@
         <div id="formula-glow-v3"></div>
     </main>
 
-    <script src="js/branding/briefings.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js"></script>
@@ -147,6 +148,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
             }, 400);
@@ -172,6 +177,10 @@
 
             // 2. Build Sidebar via CyberUI
             CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
             
             CyberUI.createCard('parameters-container', CyberI18n.get('binom.division'), `
                 <div class="area-item" style="color:#ffcc00;">

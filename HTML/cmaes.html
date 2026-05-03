@@ -38,7 +38,8 @@
         </div>
     </main>
 
-    <script src="js/branding/briefings.js?v=539"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
@@ -49,6 +50,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             // Grid must reflow after sidebar animation
             setTimeout(() => {
                 cc.resize();
@@ -60,6 +65,10 @@
 
         CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: CyberI18n.get('cmaes.title') });
         CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
         const cc = CyberCanvasInstance;
         cc.init('canvas', { minX: -8, maxX: 8, minY: -4, maxY: 4 }, {

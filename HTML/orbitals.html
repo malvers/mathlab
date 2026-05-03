@@ -23,7 +23,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>docalvers | Atomorbitale</title>
-    <script src="js/i18n.js"></script>
+<script src="js/i18n.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" href="resources/favicon.png">
@@ -556,7 +556,8 @@
         </div>
     </main>
 
-    <script src="js/branding/briefings.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
@@ -1532,6 +1533,10 @@
         function toggleSidebar() {
             const panel = document.getElementById("side-panel");
             panel.classList.toggle("collapsed");
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             if (panel.classList.contains("collapsed") && typeof window.kffSetOrbitalDropdownOpen === "function") {
                 window.kffSetOrbitalDropdownOpen(false);
             }
@@ -1543,6 +1548,10 @@
         window.addEventListener("load", () => {
             if (typeof CyberUI !== "undefined") {
                 CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
                 const railBtn = document.getElementById('rail-toggle-btn');
                 if (railBtn) railBtn.title = CyberI18n.get('geometry.lab_control');
             }
