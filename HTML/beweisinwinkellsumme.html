@@ -2,8 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>docalvers | Winkelsumme Beweis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -11,7 +13,50 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
-        /* Beweis-spezifische Anpassungen */
+        /* Responsive: Safe Area auf Hauptfläche, Sidebar, umbrechende Gleichungen; Canvas wie Layout */
+        body.page-beweisinwinkel #main-content {
+            min-height: 0;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-left: env(safe-area-inset-left, 0px);
+        }
+
+        body.page-beweisinwinkel #sidebar-header {
+            min-height: clamp(52px, 14vmin, 80px);
+        }
+
+        body.page-beweisinwinkel #side-panel #parameters-container .instrument-card {
+            margin-bottom: clamp(4px, 1.2vw, 8px);
+            font-size: clamp(0.828rem, 2.34vmin + 0.18rem, 0.9rem);
+        }
+
+        body.page-beweisinwinkel .beweis-panel-hint {
+            font-size: clamp(0.666rem, 2.16vmin, 0.792rem);
+            color: rgba(255, 255, 255, 0.42);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        body.page-beweisinwinkel .beweis-panel-section {
+            font-size: clamp(0.666rem, 2.16vmin, 0.792rem);
+            color: var(--neon-blue);
+            opacity: 0.78;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        body.page-beweisinwinkel .beweis-panel-section + .proof-row,
+        body.page-beweisinwinkel .beweis-panel-hint + .radio-group {
+            margin-top: 0;
+        }
+
+        body.page-beweisinwinkel .beweis-panel-section.is-spaced {
+            margin-top: 10px;
+        }
+
         canvas {
             display: block;
             cursor: crosshair;
@@ -21,7 +66,8 @@
         /* Radio Styling */
         .radio-group {
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: clamp(8px, 2.5vmin, 15px);
             margin-top: 5px;
         }
 
@@ -31,7 +77,7 @@
             gap: 8px;
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
+            font-size: clamp(0.738rem, 2.43vmin, 0.855rem);
             color: rgba(255, 255, 255, 0.6);
             transition: 0.3s;
         }
@@ -43,8 +89,8 @@
         .radio-item input[type="radio"] {
             accent-color: var(--neon-blue);
             cursor: pointer;
-            width: 18px;
-            height: 18px;
+            width: clamp(14px, 4vmin, 18px);
+            height: clamp(14px, 4vmin, 18px);
         }
 
         .radio-item.active {
@@ -53,22 +99,25 @@
 
         .proof-row {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 10px;
-            font-family: 'Orbitron';
-            font-size: 1.1rem;
+            gap: clamp(6px, 1.8vmin, 10px);
+            row-gap: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.792rem, 2.88vmin + 0.378rem, 1.098rem);
             font-weight: bold;
             color: white;
-            margin: 5px 0;
+            margin: clamp(5px, 1.5vmin, 8px) 0;
+            line-height: 1.35;
         }
 
         .val-box {
-            padding: 6px 10px;
-            border-radius: 10px;
-            min-width: 55px;
+            padding: clamp(4px, 1.2vmin, 7px) clamp(6px, 2vmin, 10px);
+            border-radius: clamp(8px, 2vmin, 10px);
+            min-width: min(52px, 14vmin);
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            font-size: 1.1rem;
+            font-size: clamp(0.792rem, 2.88vmin + 0.378rem, 1.098rem);
             letter-spacing: 1px;
         }
 
@@ -89,7 +138,7 @@
     </style>
 </head>
 
-<body>
+<body class="page-beweisinwinkel">
     <!-- Mini Rail -->
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
@@ -102,7 +151,7 @@
     </nav>
 
     <aside id="side-panel">
-        <header id="sidebar-header" style="min-height: 80px;"></header>
+        <header id="sidebar-header"></header>
         <div id="parameters-container"></div>
     </aside>
 
@@ -148,7 +197,7 @@
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
         }
         CyberUI.createCard('parameters-container', CyberI18n.get('sum.coords'), `
-            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">${CyberI18n.get('sum.parallel_point')}</div>
+            <div class="beweis-panel-hint">${CyberI18n.get('sum.parallel_point')}</div>
             <div class="radio-group">
                 <label class="radio-item"><input type="radio" name="pivot" value="0"> A</label>
                 <label class="radio-item"><input type="radio" name="pivot" value="1"> B</label>
@@ -157,14 +206,14 @@
         `);
 
         CyberUI.createCard('parameters-container', CyberI18n.get('sum.proof'), `
-            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">${CyberI18n.get('sum.pivot_point')}</div>
+            <div class="beweis-panel-section">${CyberI18n.get('sum.pivot_point')}</div>
             <div class="proof-row">
                 <span class="val-box box-a" id="val-l">0°</span> + 
                 <span class="val-box box-c" id="val-g1">0°</span> + 
                 <span class="val-box box-b" id="val-p">0°</span> = 180°
             </div>
             
-            <div style="font-size: 0.75rem; color: var(--neon-blue); opacity: 0.7; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">${CyberI18n.get('sum.internal_angles')}</div>
+            <div class="beweis-panel-section is-spaced">${CyberI18n.get('sum.internal_angles')}</div>
             <div class="proof-row">
                 <span class="val-box box-a" id="val-a">0°</span> + 
                 <span class="val-box box-c" id="val-g2">0°</span> + 
@@ -178,16 +227,53 @@
         let points = [];
         let dragIdx = -1;
         let selectedPivotIdx = 2; // Default: C
-        const BOGEN_RAD = 65;
+        let layoutW = 0;
+        let layoutH = 0;
 
-        function initTriangle() {
-            const w = canvas.parentElement.clientWidth;
-            const h = canvas.parentElement.clientHeight;
+        function resetTrianglePositions(w, h) {
             points = [
                 { x: w * 0.25, y: h * 0.7 }, // A
                 { x: w * 0.75, y: h * 0.7 }, // B
                 { x: w * 0.5,  y: h * 0.3 }  // C
             ];
+            layoutW = w;
+            layoutH = h;
+        }
+
+        function initTriangle() {
+            const el = canvas.parentElement;
+            const w = el.clientWidth;
+            const h = el.clientHeight;
+            if (w <= 0 || h <= 0) return;
+            resetTrianglePositions(w, h);
+            draw();
+        }
+
+        function onCanvasContainerResize() {
+            const el = canvas.parentElement;
+            const w = el.clientWidth;
+            const h = el.clientHeight;
+            if (w <= 0 || h <= 0) return;
+
+            if (layoutW <= 0 || layoutH <= 0 || points.length !== 3) {
+                resetTrianglePositions(w, h);
+                draw();
+                return;
+            }
+
+            if (w === layoutW && h === layoutH) {
+                draw();
+                return;
+            }
+
+            const sx = w / layoutW;
+            const sy = h / layoutH;
+            layoutW = w;
+            layoutH = h;
+            points.forEach((p) => {
+                p.x *= sx;
+                p.y *= sy;
+            });
             draw();
         }
 
@@ -199,7 +285,7 @@
             return angle * 180 / Math.PI;
         }
 
-        function drawAngle(p, v1, v2, r, color, text) {
+        function drawAngle(p, v1, v2, r, color, text, labelFontPx) {
             let a1 = Math.atan2(v1.y, v1.x);
             let a2 = Math.atan2(v2.y, v2.x);
             let diff = a2 - a1;
@@ -221,7 +307,7 @@
             let ly = p.y + (r * 0.7) * Math.sin(bisect) + 5;
 
             ctx.fillStyle = "white";
-            ctx.font = "bold 14px 'Orbitron'";
+            ctx.font = `bold ${labelFontPx}px 'Orbitron'`;
             ctx.textAlign = "center";
             ctx.fillText(text, lx, ly);
         }
@@ -233,6 +319,11 @@
             canvas.height = rect.height * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, rect.width, rect.height);
+
+            const m = Math.min(rect.width, rect.height);
+            const bogenR = Math.round(1.65 * Math.max(26, Math.min(65, m * 0.09)));
+            const arcLabelPx = Math.round(Math.max(11, Math.min(15, rect.width * 0.0279)));
+            const vertLabelPx = Math.round(Math.max(12, Math.min(17, rect.width * 0.0324)));
 
             const A = points[0], B = points[1], C = points[2];
             
@@ -298,7 +389,7 @@
                 const vert = points[i];
                 const pNext = points[(i + 1) % 3];
                 const pPrev = points[(i + 2) % 3];
-                drawAngle(vert, { x: pNext.x - vert.x, y: pNext.y - vert.y }, { x: pPrev.x - vert.x, y: pPrev.y - vert.y }, BOGEN_RAD, colors[i], angles[i] + "°");
+                drawAngle(vert, { x: pNext.x - vert.x, y: pNext.y - vert.y }, { x: pPrev.x - vert.x, y: pPrev.y - vert.y }, bogenR, colors[i], angles[i] + "°", arcLabelPx);
             }
             
             // --- DRAW ALTERNATE ANGLES AT PIVOT ---
@@ -310,9 +401,9 @@
             const vPar2 = { x: nx, y: ny };
             
             // Angle 1: between vPar1 and vToP1
-            drawAngle(P, vPar1, vToP1, BOGEN_RAD, colors[(selectedPivotIdx + 1) % 3], angles[(selectedPivotIdx + 1) % 3] + "°");
+            drawAngle(P, vPar1, vToP1, bogenR, colors[(selectedPivotIdx + 1) % 3], angles[(selectedPivotIdx + 1) % 3] + "°", arcLabelPx);
             // Angle 2: between vPar2 and vToP2
-            drawAngle(P, vPar2, vToP2, BOGEN_RAD, colors[(selectedPivotIdx + 2) % 3], angles[(selectedPivotIdx + 2) % 3] + "°");
+            drawAngle(P, vPar2, vToP2, bogenR, colors[(selectedPivotIdx + 2) % 3], angles[(selectedPivotIdx + 2) % 3] + "°", arcLabelPx);
 
             // Dreieck (Vordergrund)
             ctx.strokeStyle = "white"; ctx.lineWidth = 2;
@@ -335,7 +426,7 @@
 
                 // Label
                 ctx.fillStyle = "var(--neon-blue)";
-                ctx.font = "bold 16px Orbitron";
+                ctx.font = `bold ${vertLabelPx}px Orbitron`;
                 ctx.textAlign = "center";
                 
                 // Position label outside the triangle
@@ -357,7 +448,9 @@
 
         function start(e) {
             const pos = getPos(e);
-            dragIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 40);
+            const rect = canvas.getBoundingClientRect();
+            const hitR = Math.max(28, Math.min(46, rect.width * 0.058));
+            dragIdx = points.findIndex((p) => Math.hypot(p.x - pos.x, p.y - pos.y) < hitR);
             if(dragIdx !== -1) e.preventDefault();
         }
 
@@ -375,9 +468,31 @@
         canvas.addEventListener('touchstart', start, {passive: false});
         window.addEventListener('touchmove', move, {passive: false});
         window.addEventListener('touchend', () => dragIdx = -1);
-        window.addEventListener('resize', () => { draw(); });
+        window.addEventListener('resize', onCanvasContainerResize);
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => onCanvasContainerResize()).observe(canvas.parentElement);
+        }
 
-        initTriangle();
+        function bootProofLabCanvas() {
+            const kick = () => initTriangle();
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready
+                    .then(() => {
+                        if (typeof document.fonts.load === 'function') {
+                            return Promise.all([
+                                document.fonts.load("700 14px Orbitron"),
+                                document.fonts.load("700 13px Orbitron")
+                            ]);
+                        }
+                    })
+                    .then(() => requestAnimationFrame(kick))
+                    .catch(kick);
+            } else {
+                requestAnimationFrame(kick);
+            }
+        }
+
+        bootProofLabCanvas();
 
         // Event Listeners for Radio Menu
         document.querySelectorAll('input[name="pivot"]').forEach(radio => {
