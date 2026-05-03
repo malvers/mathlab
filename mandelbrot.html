@@ -275,9 +275,9 @@
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            min-height: 52px;
+            min-height: clamp(44px, 10vmin, 52px);
             height: auto;
-            padding: 10px 18px;
+            padding: clamp(6px, 1.8vmin, 10px) clamp(10px, 2.8vmin, 18px);
             background: rgba(6, 14, 28, 0.9);
             border-radius: 12px;
             border: 0.5px solid rgba(242, 187, 68, 0.48);
@@ -290,15 +290,15 @@
             margin: 0 !important;
         }
 
-        /* Orbit |z²|/N: Glas-Kapsel; N fest bei ~54 % Breite */
+        /* Orbit |z²|/N: Kasten nur so breit wie Inhalt — max. 368px / Plotbreite */
         #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
             box-sizing: border-box;
-            width: clamp(268px, 34vw, 368px);
-            min-width: clamp(268px, 34vw, 368px);
-            max-width: clamp(268px, 34vw, 368px);
+            width: fit-content;
+            max-width: min(368px, calc(100% - 20px));
+            min-width: 0;
             min-height: 52px;
-            padding: 11px 26px;
-            flex-shrink: 0;
+            padding: clamp(8px, 2vmin, 11px) clamp(12px, 3.2vmin, 22px);
+            flex-shrink: 1;
             justify-content: flex-start;
             align-items: center;
             contain: layout style;
@@ -324,7 +324,7 @@
         #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner {
             box-sizing: border-box;
             width: fit-content;
-            max-width: min(560px, 92vw);
+            max-width: min(560px, calc(100% - 20px));
             min-width: 0;
             min-height: 52px;
             padding: 8px 14px;
@@ -345,10 +345,23 @@
             justify-content: center;
         }
 
-        /* Orbit/Scan: |z²| links; N bei fester Horizontalposition (~Mitte zweiter Teil der Box) */
+        #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics #mb-fractal-formula-tex {
+            width: auto;
+            max-width: 100%;
+            min-height: 0;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        /* Orbit/Scan: |z²| und N nebeneinander mit Gap */
         #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
             #mb-fractal-formula-tex.mb-fractal-mz-split {
             position: relative;
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: baseline;
+            gap: clamp(0.55rem, 2vmin, 1rem);
             justify-content: flex-start;
             text-align: left;
         }
@@ -361,13 +374,14 @@
         }
 
         #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-n {
-            position: absolute;
-            left: 54%;
-            top: 50%;
-            transform: translateY(-50%);
+            position: static;
+            transform: none;
+            left: auto;
+            top: auto;
             white-space: nowrap;
             display: inline-block;
             vertical-align: middle;
+            flex-shrink: 0;
         }
 
         /* FRACTAL-Hauptzeile linksbündig, Breite folgt KaTeX */
@@ -384,6 +398,11 @@
             margin-right: auto !important;
         }
 
+        #canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics .katex-display {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
         #canvas-container
             #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner
             #mb-fractal-formula-tex:not(.mb-fractal-mz-split)
@@ -393,7 +412,7 @@
         }
 
         #canvas-container #mb-fractal-formula-tex .katex {
-            font-size: 1.38rem !important;
+            font-size: clamp(0.88rem, 0.55rem + 1.8vmin, 1.38rem) !important;
             color: #f2bb44 !important;
             text-shadow:
                 0 0 14px rgba(242, 187, 68, 0.42),
@@ -405,7 +424,7 @@
             #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
             #mb-fractal-formula-tex
             .katex {
-            font-size: 1.34rem !important;
+            font-size: clamp(0.86rem, 0.52rem + 1.75vmin, 1.34rem) !important;
             text-shadow:
                 0 0 20px rgba(242, 187, 68, 0.38),
                 0 0 38px rgba(0, 210, 255, 0.14),
@@ -492,6 +511,60 @@
         /* CyberBranding legt .canvas-branding mit pointer-events:auto über den Plot — Maus erreichte den Canvas nicht. */
         #main-content .canvas-branding {
             pointer-events: none !important;
+        }
+
+        @media (max-width: 720px) {
+            .mb-fractal-formula-row {
+                grid-template-columns: 1fr;
+                gap: clamp(6px, 1.8vmin, 10px);
+                min-height: 0;
+                align-items: center;
+            }
+
+            .mb-fractal-formula-row > .mb-fractal-formula-box:not(.mb-fractal-stable-panel) {
+                grid-column: 1;
+                justify-self: start;
+                align-self: stretch;
+                margin-left: clamp(8px, 2.4vw, 16px);
+                margin-right: auto;
+                width: fit-content;
+                max-width: calc(100% - 16px);
+            }
+
+            .mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel {
+                grid-column: 1;
+                justify-self: center;
+            }
+
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics,
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner {
+                width: fit-content;
+                max-width: calc(100% - 16px);
+            }
+        }
+
+        @media (max-width: 520px) {
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
+                border-radius: 14px;
+                width: fit-content;
+                max-width: calc(100% - 12px);
+            }
+
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+                #mb-fractal-formula-tex.mb-fractal-mz-split {
+                flex-direction: column;
+                align-items: flex-start !important;
+                justify-content: flex-start !important;
+                gap: 6px;
+                min-height: 0;
+            }
+
+            #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-n {
+                position: static !important;
+                left: auto !important;
+                top: auto !important;
+                transform: none !important;
+            }
         }
 
     </style>
