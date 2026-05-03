@@ -8,6 +8,16 @@
     --glass-border: rgba(0, 210, 255, 0.3);
     --text-main: #e0e6ed;
     --text-dim: #94a3b8;
+    /* Gesamter unterer HUD-Block (Telemetrie + Control-Bar) */
+    --lens-ui-scale: 0.88;
+    /* Lesbarkeit unter zusätzlicher Skalierung; eng am Dock gebunden */
+    --dock-font-micro: 9px;       /* Glas-Karte Überschrift */
+    --dock-font-label: 12px;      /* Datenfeld-/Config-Beschriftung links */
+    --dock-font-body: 12px;       /* allgemeiner Dock-Body (.hint …) */
+    --dock-font-value: 12px;      /* Messwerte (cyan, etwas kleiner als zuvor) */
+    --dock-font-check: 11px;      /* Checkbox-Zeilen (CONTROL FLAGS) */
+    --dock-font-slider: 10px;
+    --dock-font-btn: 11px;
 }
 
 * {
@@ -21,7 +31,8 @@ body {
     background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
     color: var(--text-main);
     font-family: 'Orbitron', sans-serif;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
 }
 
@@ -34,9 +45,12 @@ body {
 #viewport {
     position: relative;
     flex: 1;
+    min-height: 0;
     background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
     display: flex;
     flex-direction: column;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
 }
 
 canvas {
@@ -110,14 +124,49 @@ canvas {
     100% { opacity: 0.4; }
 }
 
-/* Telemetry Sidebar */
-#telemetry {
+/* Unterer HUD-Stack — näher zum unteren Rand, breiter nutzbarer Bereich */
+#lens-ui-dock {
     position: absolute;
-    bottom: 95px;
-    left: 20px;
-    right: 20px;
+    z-index: 40;
+    bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+    left: max(6px, env(safe-area-inset-left, 6px));
+    right: max(6px, env(safe-area-inset-right, 6px));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    pointer-events: none;
+}
+
+.lens-ui-dock-inner {
+    pointer-events: auto;
+    width: min(1580px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: clamp(10px, 1.8vmin, 14px);
+    flex: 0 0 auto;
+    /* zoom wirkt gleichmäßig auf Layout + Grafik → keine Überdeckung zwischen Kartenzeile und Bar */
+    zoom: var(--lens-ui-scale);
+}
+
+/* Browser ohne zoom: transform mit Ursprung oben (gleichmäßige Staffel Telemetrie → Bar) */
+@supports not (zoom: 1) {
+    .lens-ui-dock-inner {
+        transform: scale(var(--lens-ui-scale));
+        transform-origin: top center;
+    }
+}
+
+/* Telemetry row — oben im Dock, immer volle Breite */
+#telemetry {
+    position: static;
     display: flex;
     flex-direction: row;
+    flex: 0 0 auto;
+    width: 100%;
+    order: 1;
+    z-index: 0;
     gap: 15px;
     pointer-events: none;
 }
@@ -138,7 +187,7 @@ canvas {
 
 .glass-card h3 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
+    font-size: var(--dock-font-micro);
     color: var(--text-dim);
     margin-bottom: 4px;
     letter-spacing: 1.5px;
@@ -158,7 +207,7 @@ canvas {
 }
 
 .data-item label {
-    font-size: 13px;
+    font-size: var(--dock-font-label);
     color: var(--text-main);
     margin-bottom: 2px;
     letter-spacing: 1px;
@@ -166,7 +215,8 @@ canvas {
 
 .neon-text {
     font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
+    font-size: var(--dock-font-value);
+    font-variant-numeric: tabular-nums;
     color: var(--neon-cyan);
     text-shadow: 0 0 8px rgba(0, 242, 255, 0.35);
     font-weight: 700;
@@ -183,18 +233,31 @@ canvas {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(3, auto);
     grid-auto-flow: column;
-    gap: 3px 16px;
+    gap: 3px 10px;
+    column-gap: min(12px, 2vw);
 }
 
 .config-item {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
+    align-items: baseline;
+    gap: 10px;
     padding: 1px 0;
 }
 
 .config-item label {
+    font-size: var(--dock-font-label);
     color: var(--text-main);
+    flex-shrink: 0;
+}
+
+.config-item span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: var(--dock-font-value);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
 }
 
 .controls-hint {
@@ -209,9 +272,10 @@ canvas {
 .check-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: var(--dock-font-check);
+    letter-spacing: 0.04em;
     color: var(--text-main);
     padding: 1px 0;
     transition: all 0.2s ease;
@@ -248,7 +312,7 @@ canvas {
 }
 
 .hint {
-    font-size: 14px; /* Was 9px */
+    font-size: var(--dock-font-body);
     color: var(--text-main);
     display: flex;
     flex-direction: column;
@@ -261,32 +325,79 @@ canvas {
 .hint span {
     color: var(--neon-gold);
     font-weight: 700;
-    font-size: 18px; /* Was 11px */
+    font-size: clamp(17px, 2.2vmin, 20px);
     font-family: 'Orbitron', sans-serif;
     text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
 }
 
-/* Control Bar */
+/* Control Bar — fest unter der Telemetriezeile, immer eine Zeile (Buttons + Slider) */
 #control-bar {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    order: 2;
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 15px 14px;
+    padding: clamp(8px, 1.6vmin, 15px) clamp(10px, 2vmin, 14px);
     backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
-    gap: 20px;
+    flex-wrap: nowrap;
+    gap: clamp(8px, 2.2vmin, 20px);
+    min-width: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 210, 255, 0.08);
+    container: lensctrl / inline-size;
+}
+
+/* RESET VIEW bei schmaler Steuerleiste → kurz RV (Messgröße: Breite von #control-bar) */
+#btn-reset-view .btn-rv-compact {
+    display: none;
+}
+
+@container lensctrl (max-width: 1020px) {
+    #btn-reset-view .btn-rv-full {
+        display: none;
+    }
+
+    #btn-reset-view .btn-rv-compact {
+        display: inline;
+    }
+}
+
+@supports not (container-type: inline-size) {
+    @media (max-width: 1020px) {
+        #btn-reset-view .btn-rv-full {
+            display: none;
+        }
+
+        #btn-reset-view .btn-rv-compact {
+            display: inline;
+        }
+    }
 }
 
 .btn-group {
     display: flex;
-    gap: 15px;
-    width: calc((100vw - 70px) / 3 - 14px);
+    align-items: center;
+    gap: clamp(8px, 2vmin, 15px);
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.slider-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: clamp(10px, 2vmin, 20px);
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.slider-row .slider-group {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .btn-group .action-btn {
@@ -301,7 +412,7 @@ canvas {
     padding: 8px 14px;
     border-radius: 6px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: var(--dock-font-btn);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -330,6 +441,17 @@ canvas {
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
 }
 
+#control-bar .action-btn {
+    padding: clamp(5px, 1.35vmin, 8px) clamp(6px, 1.7vmin, 14px);
+    gap: clamp(4px, 1vmin, 8px);
+    font-size: clamp(9px, 1.95vmin + 0.03rem, var(--dock-font-btn));
+}
+
+#control-bar .action-btn svg {
+    width: clamp(12px, 2.85vmin, 16px);
+    height: clamp(12px, 2.85vmin, 16px);
+}
+
 .action-btn svg {
     width: 16px;
     height: 16px;
@@ -345,17 +467,25 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+#control-bar .slider-group label {
+    font-size: clamp(8px, 1.85vmin + 0.02rem, var(--dock-font-slider));
+    letter-spacing: 0.55px;
 }
 
 .slider-group label {
-    font-size: 10px;
+    font-size: var(--dock-font-slider);
     color: var(--text-dim);
     letter-spacing: 1px;
 }
 
 input[type="range"] {
     appearance: none;
+    width: 100%;
+    min-width: 0;
     background: rgba(255, 255, 255, 0.05);
     height: 4px;
     border-radius: 2px;
@@ -374,8 +504,8 @@ input[type="range"]::-webkit-slider-thumb {
 /* Branding Header (top-right) — extracted from CyberBranding v5.3.8 */
 .canvas-branding {
     position: absolute;
-    top: 15px;
-    right: 25px;
+    top: max(15px, env(safe-area-inset-top, 12px));
+    right: max(18px, env(safe-area-inset-right, 18px));
     text-align: right;
     z-index: 100;
     pointer-events: none;
@@ -420,8 +550,8 @@ input[type="range"]::-webkit-slider-thumb {
 /* Running indicator (top-left) */
 #running-indicator {
     position: absolute;
-    top: 22px;
-    left: 25px;
+    top: max(22px, env(safe-area-inset-top, 14px));
+    left: max(22px, env(safe-area-inset-left, 18px));
     display: flex;
     align-items: center;
     gap: 10px;
@@ -451,4 +581,67 @@ input[type="range"]::-webkit-slider-thumb {
 @keyframes running-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%      { opacity: 0.25; transform: scale(0.8); }
+}
+
+@media (max-width: 840px) {
+    :root {
+        --lens-ui-scale: 0.76;
+        --dock-font-micro: 8px;
+        --dock-font-label: 11px;
+        --dock-font-body: 11px;
+        --dock-font-value: 11px;
+        --dock-font-check: 10px;
+        --dock-font-slider: 9px;
+        --dock-font-btn: 10px;
+    }
+
+    #telemetry {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .glass-card {
+        flex: 1 1 150px;
+        min-width: min(100%, 150px);
+    }
+
+    #control-bar {
+        justify-content: flex-start;
+        gap: clamp(6px, 2vmin, 16px);
+        padding: clamp(7px, 1.5vmin, 12px) clamp(8px, 2vmin, 12px);
+    }
+
+    .slider-row {
+        gap: clamp(8px, 2vmin, 16px);
+    }
+
+    .canvas-branding {
+        max-width: min(92vw, 420px);
+    }
+
+    .canvas-branding h1 {
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+
+    .canvas-subtitle {
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --lens-ui-scale: 0.7;
+    }
+
+    #control-bar {
+        gap: clamp(6px, 2.2vw, 14px);
+    }
+}
+
+@media (max-width: 420px) {
+    :root {
+        --lens-ui-scale: 0.64;
+    }
 }
