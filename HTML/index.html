@@ -687,6 +687,7 @@
             user-select: none;
         }
 
+        /*
         .jahrgang-grid-debug-unique {
             font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
             font-size: clamp(0.55rem, 1.4vw, 0.72rem);
@@ -700,6 +701,7 @@
             background: rgba(20, 12, 8, 0.35);
             line-height: 1.35;
         }
+        */
 
         /* EDUCATION: show grade tiles, hide topic tiles */
         #index-jahrgang-block {
@@ -1798,7 +1800,7 @@
                 <h3 id="txt-uni">Uni</h3>
             </a>
         </div>
-        <p id="jahrgang-grid-debug-unique" class="jahrgang-grid-debug-unique" aria-label="Debug: eindeutige Labs JG- und Uni-Kacheln"></p>
+        <!-- <p id="jahrgang-grid-debug-unique" class="jahrgang-grid-debug-unique" aria-label="Debug: eindeutige Labs JG- und Uni-Kacheln"></p> -->
         </div>
 
         <div id="index-themes-block">
@@ -2212,14 +2214,9 @@
             }).length;
         }
 
-        /** Grade-row + uni tokens (same as data-jg-category), for union counting */
+        /* EDUCATION debug: Jahrgangs-Union-Zähler (wieder aktivieren wenn <p id="jahrgang-grid-debug-unique"> und CSS da sind)
         const JG_UNI_HUB_TOKENS = ['grade5', 'grade6', 'grade7', 'grade8', 'grade9', 'grade10', 'grade11', 'grade12', 'uni'];
 
-        /**
-         * Unique lab tiles: each `id` at most once when category includes any grade/uni token.
-         * `columnSum` = sum of per-column counts (labs with multiple tags count multiple times).
-         * `excludedIds` = labs in LABS_DATA without grade5–12/uni (e.g. “hot” only).
-         */
         function countUniqueLabsJahrgangUniDebug() {
             if (typeof LABS_DATA === 'undefined') {
                 return { union: 0, columnSum: 0, excludedIds: [], totalAll: 0 };
@@ -2245,6 +2242,7 @@
                 : '';
             el.textContent = `[debug] eindeutige Labs (JG 5–12 + Uni): ${union} · Σ Spalten: ${columnSum}${extra}`;
         }
+        */
 
         function updateJahrgangLabCounts() {
             const grid = document.getElementById('jahrgang-grid');
@@ -2264,7 +2262,7 @@
                 const prefix = token === 'uni' ? 'Universität' : baseAria.replace(/,.*$/, '');
                 tile.setAttribute('aria-label', `${prefix}, ${laborePhrase}`);
             });
-            updateJahrgangGridDebugUnique();
+            // updateJahrgangGridDebugUnique();
         }
 
         // --- ADMIN ACCESS LOGIC ---

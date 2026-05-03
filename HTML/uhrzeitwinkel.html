@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>docalvers | Winkel-Uhr Labor</title>
     <!-- Fonts & Tools -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -14,20 +14,95 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
-        /* Essential SVG clock — responsive HUD + Uhr */
+        /* Flex: großer Hauptblock (Volle Höhe bis Digitalezeit) + Uhr+ Pills darin vertikal mittig • Zeit unten */
         #main-content {
+            /* Schmal genug für „β = 360°“, gleich für α */
+            --uhr-angle-pill-w: clamp(88px, 17vmin, 100px);
+            /* Digitalezeit: feste Breite • kleinere Pill nur über Padding/Radius • Schrift wie bisher */
+            --uhr-time-pill-w: 138px;
+
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
             position: relative;
             min-height: 0;
+            height: 100%;
+            max-height: 100%;
             padding: clamp(6px, 2vmin, 14px);
+            padding-left: max(clamp(6px, 2vmin, 14px), env(safe-area-inset-left, 0px));
+            padding-right: max(clamp(6px, 2vmin, 14px), env(safe-area-inset-right, 0px));
+            padding-top: max(clamp(6px, 2vmin, 14px), env(safe-area-inset-top, 0px));
+            padding-bottom: max(clamp(6px, 2vmin, 14px), env(safe-area-inset-bottom, 0px));
+            box-sizing: border-box;
+            gap: clamp(4px, 1.2vmin, 12px);
+        }
+
+        .uhr-stage {
+            flex: 1 1 auto;
+            height: 100%;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
+            align-items: center;
+            gap: clamp(6px, 2vmin, 14px);
+            width: 100%;
             box-sizing: border-box;
         }
 
+        #floating-tag, #floating-tag-beta {
+            position: relative;
+            z-index: 20;
+            pointer-events: none;
+            flex-shrink: 0;
+            width: min(var(--uhr-angle-pill-w), 100%);
+            min-width: 0;
+            max-width: min(var(--uhr-angle-pill-w), 100%);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(20px);
+            padding: clamp(4px, 1vmin, 7px) clamp(5px, 1.2vmin, 8px);
+            border-radius: clamp(8px, 2vw, 12px);
+            font-size: clamp(0.6rem, 0.32rem + 2.2vmin, 1.22rem);
+            font-family: 'Orbitron', sans-serif;
+            box-sizing: border-box;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #floating-tag {
+            justify-self: end;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+        }
+
+        #floating-tag-beta {
+            justify-self: start;
+            color: #ff8800;
+            border: 1px solid #ff8800;
+            text-shadow: 0 0 10px #ff8800;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.15);
+        }
+
+        .uhr-clock-slot {
+            grid-column: 2;
+            justify-self: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            min-width: 0;
+            width: auto;
+            transform: translateY(5vh);
+        }
+
         svg#clock {
-            width: min(92vw, calc(100% - 16px));
-            max-width: min(550px, 88vmin);
+            width: min(100% - 8px, min(550px, 85vmin, 85dvh));
+            max-width: 100%;
             height: auto;
             aspect-ratio: 1 / 1;
             flex-shrink: 0;
@@ -44,81 +119,75 @@
         #minute-hand { stroke: var(--neon-purple); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 15px var(--neon-purple)); }
         .angle-arc { fill: rgba(0, 210, 255, 0.15); stroke: var(--neon-blue); stroke-width: 3; }
 
-        /* Floating HUD Tags — gleiche Breite, skaliert mit Viewport */
-        #tag-container {
-            position: absolute;
-            top: clamp(44px, 9vmin, 72px);
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: clamp(8px, 2.5vw, 20px);
-            max-width: calc(100% - 16px);
-            z-index: 20;
-            pointer-events: none;
-        }
-
-        #floating-tag, #floating-tag-beta {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(20px);
-            padding: clamp(8px, 2vw, 12px) clamp(8px, 2.5vw, 14px);
-            border-radius: clamp(8px, 2vw, 12px);
-            font-size: clamp(0.82rem, 2.8vw + 0.35rem, 1.6rem);
-            font-family: 'Orbitron', sans-serif;
-            flex: 1 1 clamp(104px, 36vw, 180px);
-            width: clamp(104px, 36vw, 180px);
-            min-width: 0;
-            max-width: min(180px, 46vw);
-            box-sizing: border-box;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        #floating-tag {
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
-        }
-
-        #floating-tag-beta {
-            color: #ff8800;
-            border: 1px solid #ff8800;
-            text-shadow: 0 0 10px #ff8800;
-            box-shadow: 0 0 20px rgba(255, 136, 0, 0.15);
-        }
-
-        /* Floating Digital-Uhr */
+        /* Digitalezeit: eigene Zeile unten — Y-Mitte des Uhr+Pill-Blocks liegt in .uhr-stage */
         #floating-time {
-            position: absolute;
-            bottom: clamp(14px, 7vmin, 70px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(147, 51, 234, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--neon-purple);
-            padding: clamp(6px, 1.8vw, 10px) clamp(14px, 4vw, 28px);
-            border-radius: clamp(8px, 2vw, 12px);
+            flex: 0 0 auto;
+            align-self: center;
+            position: relative;
+            bottom: auto;
+            left: auto;
+            transform: none;
+            background: transparent;
+            border: none;
+            padding: clamp(4px, 1vmin, 6px) clamp(8px, 2vmin, 12px);
+            border-radius: 0;
             font-size: clamp(1rem, 4.2vmin, 1.8rem);
-            color: var(--neon-purple);
-            box-shadow: 0 0 30px rgba(147, 51, 234, 0.2);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+            box-shadow: none;
             z-index: 10;
             pointer-events: none;
             font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px var(--neon-purple);
             text-align: center;
-            min-width: min(108px, 28vw);
-            max-width: calc(100% - 20px);
+            width: min(var(--uhr-time-pill-w), 100%);
+            min-width: 0;
+            max-width: min(var(--uhr-time-pill-w), 100%);
             box-sizing: border-box;
+        }
+
+        #floating-time .uhr-time-h {
+            color: var(--neon-blue);
+            text-shadow: 0 0 14px rgba(0, 210, 255, 0.45);
+        }
+
+        #floating-time .uhr-time-sep {
+            color: rgba(255, 255, 255, 0.45);
+            text-shadow: none;
+        }
+
+        #floating-time .uhr-time-m {
+            color: var(--neon-purple);
+            text-shadow: 0 0 14px rgba(157, 80, 187, 0.45);
         }
 
         .val-display { display: none !important; }
 
         .angle-arc-beta { fill: rgba(255, 136, 0, 0.1); stroke: #ff8800; stroke-width: 2; }
+
+        @media (max-height: 480px) and (orientation: landscape) {
+            #main-content {
+                --uhr-angle-pill-w: clamp(80px, 15vmin, 94px);
+                --uhr-time-pill-w: 128px;
+                gap: clamp(2px, 0.8vmin, 8px);
+            }
+
+            svg#clock {
+                width: min(100% - 8px, min(400px, 72vmin));
+            }
+
+            #floating-tag, #floating-tag-beta {
+                font-size: clamp(0.54rem, 0.26rem + 2vmin, 0.92rem);
+                padding: clamp(3px, 1vmin, 7px) clamp(5px, 1.4vmin, 8px);
+            }
+
+            .uhr-stage {
+                gap: clamp(4px, 1.5vmin, 10px);
+            }
+
+            #floating-time {
+                padding: clamp(3px, 0.8vmin, 5px) clamp(6px, 1.6vmin, 10px);
+            }
+        }
 
         @media (max-width: 520px) {
             #hour-hand { stroke-width: 6; }
@@ -129,14 +198,17 @@
         }
 
         @media (max-width: 360px) {
-            #tag-container {
-                flex-direction: column;
-                align-items: stretch;
+            #main-content {
+                --uhr-angle-pill-w: clamp(76px, 26vw, 90px);
+                --uhr-time-pill-w: 118px;
             }
 
             #floating-tag, #floating-tag-beta {
-                max-width: none;
-                width: 100%;
+                font-size: clamp(0.56rem, 0.28rem + 2.1vmin, 1rem);
+            }
+
+            .uhr-stage {
+                gap: clamp(4px, 1.5vmin, 8px);
             }
         }
 
@@ -220,10 +292,9 @@
     </aside>
 
     <main id="main-content">
-        <div id="tag-container">
+        <div class="uhr-stage">
             <div id="floating-tag">α = 0.0°</div>
-            <div id="floating-tag-beta">β = 360.0°</div>
-        </div>
+            <div class="uhr-clock-slot">
         <svg id="clock" viewBox="0 0 200 200">
             <circle cx="100" cy="100" r="95" class="clock-face" />
             <g id="ticks"></g>
@@ -237,7 +308,10 @@
             <circle id="minute-handle" cx="100" cy="45" r="15" fill="transparent" style="cursor: grab;" />
             <circle id="hour-handle" cx="100" cy="62" r="15" fill="transparent" style="cursor: grab;" />
         </svg>
-        <div id="floating-time">12:00</div>
+            </div>
+            <div id="floating-tag-beta">β = 360.0°</div>
+        </div>
+        <div id="floating-time"><span class="uhr-time-h">12</span><span class="uhr-time-sep">:</span><span class="uhr-time-m">00</span></div>
     </main>
 
         <script src="js/cyber-left-chrome.js"></script>
@@ -329,15 +403,10 @@
                     const hours = Math.floor(displayMins / 60) % 12;
                     const minsOnClock = displayMins % 60;
                     const hourDisplay = hours === 0 ? 12 : hours;
-                    const timeString = `${hourDisplay.toString().padStart(2, '0')}:${minsOnClock.toString().padStart(2, '0')}`;
-
-                    let diff = Math.round(Math.abs(hourAngle - minuteAngle));
-                    if (diff > 180) diff = 360 - diff;
-                    const beta = 360 - diff;
-
-                    document.getElementById('floating-tag').innerText = `α = ${diff}°`;
-                    document.getElementById('floating-tag-beta').innerText = `β = ${beta}°`;
-                    document.getElementById('floating-time').innerText = timeString;
+                    const hStr = hourDisplay.toString().padStart(2, '0');
+                    const mStr = minsOnClock.toString().padStart(2, '0');
+                    document.getElementById('floating-time').innerHTML =
+                        `<span class="uhr-time-h">${hStr}</span><span class="uhr-time-sep">:</span><span class="uhr-time-m">${mStr}</span>`;
 
                     // 3. Silent Slider Sync (Floored for slider increments)
                     if (!skipSlider) {
