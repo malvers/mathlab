@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/i18n.js"></script>
     <title>docalvers | Ultra v6.7.0</title>
     
@@ -74,50 +74,73 @@
         #main-content {
             position: relative;
             min-height: 0;
+            min-width: 0;
+            flex: 1 1 0% !important;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: clamp(4px, 1vmin, 12px);
+            padding-top: clamp(24px, 3.8vmin + 18px, 52px);
+            padding-right: clamp(6px, 1.6vmin, 14px);
+            padding-bottom: clamp(6px, 1.6vmin, 14px);
+            padding-left: clamp(6px, 1.6vmin, 14px);
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
-        /* Kompakte HUD-Tabelle rechts; bei Bedarf Browser-Zoom — hier zusätzlich leicht per zoom() verkleinert (WebKit/Blink) */
+        .tri-canvas-wrap {
+            flex: 1 1 0%;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Tabelle immer rechts; Breite/Skalierung folgt Viewport — kein Überdecken des Diagramms */
         #equation-hud {
-            position: absolute;
+            position: relative;
+            align-self: center;
+            flex: 0 0 auto;
             box-sizing: border-box;
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: clamp(6px, 1vw + 4px, 12px);
-            border-radius: clamp(8px, 1.5vw, 12px);
+            padding: clamp(6px, 1.2vmin + 4px, 14px);
+            border-radius: clamp(8px, 1.4vmin, 12px);
             font-family: 'Orbitron', sans-serif;
             color: white;
             pointer-events: auto;
             z-index: 50;
-            min-width: min(120px, calc(100% - 24px));
-            width: min(188px, calc(100vw - 24px));
-            max-width: min(188px, calc(100% - 16px));
-            max-height: min(52vh, 280px);
+            width: clamp(116px, 16vmin + 5.75rem, 268px);
+            min-width: 100px;
+            max-width: min(268px, 41%);
+            max-height: min(72vh, 100%);
             overflow-x: auto;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-            transition: top 0.25s ease-out, left 0.25s ease-out, right 0.25s ease-out, width 0.25s ease-out;
         }
 
         @supports (zoom: 1) {
-            #equation-hud {
-                zoom: 0.9;
+            @media (max-width: 700px) {
+                #equation-hud {
+                    zoom: 0.9;
+                }
             }
-        }
-
-        #equation-hud.tri-hud--stacked {
-            left: max(10px, env(safe-area-inset-left, 0px)) !important;
-            right: max(10px, env(safe-area-inset-right, 0px)) !important;
-            width: auto !important;
-            max-width: none;
-            max-height: min(34vh, 220px);
+            @media (max-width: 480px) {
+                #equation-hud {
+                    zoom: 0.85;
+                }
+            }
         }
 
         .hud-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: clamp(0.5rem, 0.45rem + 0.65vw, 0.62rem);
+            font-size: clamp(0.48rem, 0.4rem + 0.95vmin, 0.72rem);
         }
 
         .hud-table th {
@@ -136,7 +159,7 @@
             border-top: 2px solid var(--neon-blue);
             color: var(--neon-blue);
             font-weight: bold;
-            font-size: clamp(0.56rem, 0.5rem + 0.75vw, 0.68rem);
+            font-size: clamp(0.52rem, 0.44rem + 1vmin, 0.74rem);
         }
 
         .hud-sum-label-cell { padding-top: clamp(4px, 1vw, 6px) !important; }
@@ -170,7 +193,10 @@
     </aside>
 
     <main id="main-content">
-        <div id="equation-hud">
+        <div id="tri-canvas-wrap" class="tri-canvas-wrap">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="equation-hud" aria-live="polite">
             <table class="hud-table">
                 <thead>
                     <tr><th><script>document.write(CyberI18n.get('triangulierer.triangle'))</script></th><th style="text-align:right"><script>document.write(CyberI18n.get('triangulierer.area'))</script></th></tr>
@@ -184,7 +210,6 @@
                 </tfoot>
             </table>
         </div>
-        <canvas id="canvas"></canvas>
     </main>
 
         <script src="js/cyber-left-chrome.js"></script>
@@ -275,12 +300,16 @@
                     // Dimension Labels
                     ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; ctx.font = "15px Orbitron";
                     ctx.textAlign = "center";
-                    ctx.fillText("10 cm", ox + sWidth/2, oy - 15);
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("10 cm", ox + sWidth / 2, oy + sWidth + 14);
                     ctx.save();
-                    ctx.translate(ox - 20, oy + sWidth/2);
-                    ctx.rotate(-Math.PI/2);
+                    ctx.translate(ox - 12, oy + sWidth / 2);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
                     ctx.fillText("10 cm", 0, 0);
                     ctx.restore();
+                    ctx.textBaseline = "alphabetic";
 
                     let totalArea = 0;
                     const hudBody = document.getElementById('hud-body');
@@ -333,44 +362,23 @@
 
             function resetPoints() {
                 const dpr = window.devicePixelRatio || 1;
-                const rect = document.getElementById('main-content').getBoundingClientRect();
-                canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-                canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+                const wrapEl = document.getElementById('tri-canvas-wrap');
+                let rect = wrapEl ? wrapEl.getBoundingClientRect() : null;
+                if (!rect || rect.width < 8 || rect.height < 8) {
+                    rect = document.getElementById('main-content').getBoundingClientRect();
+                }
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-                const leftPad = Math.max(10, Math.round(rect.width * 0.022));
-                const hudGap = Math.max(10, Math.round(rect.width * 0.016));
-                const hudSlot = Math.min(205, Math.max(136, Math.round(rect.width * 0.195)));
-                const stackHud = rect.width < 560;
-
-                const hud = document.getElementById('equation-hud');
-
-                if (!stackHud) {
-                    sWidth = Math.min(rect.height * 0.78, rect.width - leftPad - hudGap - hudSlot, 600);
-                    sWidth = Math.max(130, sWidth);
-                    ox = leftPad;
-                    oy = (rect.height - sWidth) / 2;
-                    if (hud) {
-                        hud.classList.remove('tri-hud--stacked');
-                        hud.style.left = (ox + sWidth + hudGap) + 'px';
-                        hud.style.right = 'auto';
-                        hud.style.top = oy + 'px';
-                        hud.style.width = hudSlot + 'px';
-                    }
-                } else {
-                    sWidth = Math.min(rect.height * 0.42, rect.width - leftPad - 12, 400);
-                    sWidth = Math.max(120, sWidth);
-                    ox = leftPad;
-                    const hudBlock = 132;
-                    oy = Math.max(36, Math.min((rect.height - sWidth - hudBlock) / 2, rect.height * 0.12));
-                    if (hud) {
-                        hud.classList.add('tri-hud--stacked');
-                        hud.style.left = '';
-                        hud.style.right = '';
-                        hud.style.top = (oy + sWidth + hudGap) + 'px';
-                        hud.style.width = '';
-                    }
-                }
+                const inset = Math.max(12, Math.min(26, Math.round(Math.min(rect.width, rect.height) * 0.045)));
+                const inner = Math.max(50, Math.min(rect.width, rect.height) - inset * 2);
+                sWidth = Math.min(inner * 0.96, Math.min(rect.width, rect.height) * 0.9, 600);
+                sWidth = Math.max(110, Math.floor(sWidth * 0.95));
+                ox = Math.round((rect.width - sWidth) / 2);
+                oy = Math.round((rect.height - sWidth) / 2);
 
                 points = [[ox, oy], [ox+sWidth, oy], [ox+sWidth, oy+sWidth], [ox, oy+sWidth]];
                 selectedIndices.clear();
@@ -472,6 +480,7 @@
 
             window.addEventListener('resize', resetPoints);
             resetPoints();
+            requestAnimationFrame(() => requestAnimationFrame(() => resetPoints()));
         });
     </script>
 </body>
