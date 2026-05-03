@@ -157,7 +157,11 @@ class CyberUI {
             btn.setAttribute('aria-label', `${titleBase} (${code})`);
         });
 
-        document.documentElement.lang = code === 'sw' ? 'sw' : code;
+        if (typeof CyberI18n.applyHtmlLangAttribute === 'function') {
+            CyberI18n.applyHtmlLangAttribute();
+        } else {
+            document.documentElement.lang = code === 'sw' ? 'sw' : code;
+        }
     }
 
     /** Sidebar hamburger: HTML placeholders are often DE/EN; sync to active CyberI18n. */

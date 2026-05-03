@@ -23,13 +23,13 @@ lugha 7
 20pt
 %purplepulsating endelea kuongezeka
 30pt
-Kijerumani
-Kiingereza
-Kihispania
-Kifaransa
-Kiitaliano
-Kireno
-Kiswahili
+Kijerumani 🇩🇪
+Kiingereza 🇬🇧
+Kihispania 🇪🇸
+Kifaransa 🇫🇷
+Kiitaliano 🇮🇹
+Kireno 🇵🇹
+Kiswahili 🇰🇪
 
 #
 // picha zote za skrini zinaonyeshwa
@@ -69,7 +69,6 @@ ni la kushangaza!
 %button nyuma
 
 #
-%cwstack left
 120pt
 docalvers.de
 

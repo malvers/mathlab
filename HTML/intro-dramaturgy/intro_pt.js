@@ -23,13 +23,13 @@ laboratórios
 20pt
 %purplepulsating and counting
 30pt
-alemão
-inglês
-espanhol
-francês
-italiano
-português
-suaíli
+alemão 🇩🇪
+inglês 🇬🇧
+espanhol 🇪🇸
+francês 🇫🇷
+italiano 🇮🇹
+português 🇵🇹
+suaíli 🇰🇪
 
 #
 // todas as capturas de ecrã são mostradas
@@ -69,7 +69,6 @@ que loucura!
 %button voltar
 
 #
-%cwstack left
 120pt
 docalvers.de
 

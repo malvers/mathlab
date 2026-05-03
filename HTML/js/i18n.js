@@ -4253,6 +4253,23 @@ pt: {
         },
     },
 
+    /**
+     * Keep the document root lang attribute aligned with CyberI18n.current.
+     * Only writes when the value changes — avoids redundant style/layout work during WebGL labs (orbitals, …).
+     */
+    applyHtmlLangAttribute: function () {
+        try {
+            const code = this.current || 'de';
+            const langAttr = code === 'sw' ? 'sw' : code;
+            const root = document.documentElement;
+            if (root && root.getAttribute('lang') !== langAttr) {
+                root.lang = langAttr;
+            }
+        } catch (e) {
+            /* ignore */
+        }
+    },
+
     /** URL ?lang= → localStorage → Browser-Sprache → de; schreibt cyber-lab-lang (Best-Effort). */
     resolveLanguageFromEnvironment: function () {
         const supported = ['de', 'en', 'es', 'fr', 'it', 'pt', 'nl', 'sw', 'tr'];
@@ -4285,6 +4302,7 @@ pt: {
             try {
                 localStorage.setItem('cyber-lab-lang', pick);
             } catch (e) {}
+            this.applyHtmlLangAttribute();
         } catch (e) {
             console.warn('Language resolve failed:', e);
         }
@@ -4337,6 +4355,22 @@ pt: {
     /** Brand masthead line — fixed German wording; not localized. */
     getBrandMastheadTitle: function () {
         return "Doc Alvers Mathe-Labor";
+    },
+
+    /** Internal lab/tool links: ensure ?lang= matches CyberI18n.current (same tab / new tab / BFCache-safe). */
+    appendLangToRelativeHref: function (href) {
+        if (!href || /^https?:\/\//i.test(href)) return href;
+        const lang = this.current || 'de';
+        const hashIdx = href.indexOf('#');
+        const hash = hashIdx >= 0 ? href.slice(hashIdx) : '';
+        const head = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
+        const qIdx = head.indexOf('?');
+        const path = qIdx >= 0 ? head.slice(0, qIdx) : head;
+        const query = qIdx >= 0 ? head.slice(qIdx + 1) : '';
+        const params = new URLSearchParams(query);
+        params.set('lang', lang);
+        const qs = params.toString();
+        return path + (qs ? '?' + qs : '') + hash;
     }
 };
 
@@ -4916,5 +4950,23 @@ Object.assign(CyberI18n.translations.nl.fractal, {
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }
+    window.addEventListener(
+        'pageshow',
+        function (ev) {
+            if (!ev.persisted) return;
+            requestAnimationFrame(function () {
+                try {
+                    CyberI18n.resolveLanguageFromEnvironment();
+                    CyberI18n.suppressBrowserTranslatePrompt();
+                    if (typeof CyberUI !== 'undefined' && typeof CyberUI.syncCyberLangDisplayButtons === 'function') {
+                        CyberUI.syncCyberLangDisplayButtons();
+                    }
+                } catch (e2) {
+                    console.warn('Language re-sync after bfcache failed:', e2);
+                }
+            });
+        },
+        false
+    );
 })();
 

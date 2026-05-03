@@ -23,13 +23,13 @@ laboratorios
 20pt
 %purplepulsating and counting
 30pt
-alemán
-inglés
-español
-francés
-italiano
-portugués
-suajili
+alemán 🇩🇪
+inglés 🇬🇧
+español 🇪🇸
+francés 🇫🇷
+italiano 🇮🇹
+portugués 🇵🇹
+suajili 🇰🇪
 
 #
 // se muestran todas las capturas
@@ -69,7 +69,6 @@ líneas de código
 %button volver
 
 #
-%cwstack left
 120pt
 docalvers.de
 

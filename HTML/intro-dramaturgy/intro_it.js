@@ -23,13 +23,13 @@ laboratori
 20pt
 %purplepulsating and counting
 30pt
-tedesco
-inglese
-spagnolo
-francese
-italiano
-portoghese
-swahili
+tedesco 🇩🇪
+inglese 🇬🇧
+spagnolo 🇪🇸
+francese 🇫🇷
+italiano 🇮🇹
+portoghese 🇵🇹
+swahili 🇰🇪
 
 #
 // vengono mostrate tutte le schermate
@@ -69,7 +69,6 @@ che follia!
 %button indietro
 
 #
-%cwstack left
 120pt
 docalvers.de
 

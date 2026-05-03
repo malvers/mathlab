@@ -1804,9 +1804,13 @@
                 if (description === descKey) description = lab.description; // Fallback if key not found
                 
                 const missionStart = CyberI18n.get('index.ui.mission_start') || "Mission Start";
-                
+                const cardHref =
+                    ext || typeof CyberI18n.appendLangToRelativeHref !== 'function'
+                        ? lab.href
+                        : CyberI18n.appendLangToRelativeHref(lab.href);
+
                 return `
-                <a href="${lab.href}"${linkAttrs} class="card" data-category="${lab.category}" data-keywords="${lab.keywords}">
+                <a href="${cardHref}"${linkAttrs} class="card" data-lab-id="${lab.id}" data-category="${lab.category}" data-keywords="${lab.keywords}">
                     <div class="card-icon">
                         ${lab.icon}
                     </div>
@@ -2186,7 +2190,7 @@
 
             // Generate a fresh LABS_DATA output based on UI edits
             const updatedData = LABS_DATA.map(lab => {
-                const card = document.querySelector(`.card[data-old-href="${lab.href}"], .card[href="${lab.href}"]`);
+                const card = document.querySelector(`.card[data-lab-id="${lab.id}"]`);
                 if (card) {
                     return {
                         ...lab,

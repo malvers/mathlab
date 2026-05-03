@@ -34,13 +34,13 @@ Labore
 20pt
 %purplepulsating and counting
 30pt
-deutsch
-englisch
-spanisch
-französisch
-italienisch
-portugiesisch
-kiswahili
+deutsch 🇩🇪
+englisch 🇬🇧
+spanisch 🇪🇸
+französisch 🇫🇷
+italienisch 🇮🇹
+portugiesisch 🇵🇹
+kiswahili 🇰🇪
 
 #
 // es werden alle screenshots gezeigt
@@ -80,7 +80,6 @@ das crazy!
 %button zurück
 
 #
-%cwstack left
 120pt
 docalvers.de
 

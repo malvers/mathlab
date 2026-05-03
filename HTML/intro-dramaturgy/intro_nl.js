@@ -23,14 +23,14 @@ labs
 20pt
 %purplepulsating en het worden er meer
 30pt
-Duits
-Engels
-Spaans
-Frans
-Italiaans
-Portugees
-Swahili
-Nederlands
+Duits 🇩🇪
+Engels 🇬🇧
+Spaans 🇪🇸
+Frans 🇫🇷
+Italiaans 🇮🇹
+Portugees 🇵🇹
+Swahili 🇰🇪
+Nederlands 🇳🇱
 
 #
 // alle screenshots worden getoond
@@ -70,7 +70,6 @@ dat is gek!
 %button terug
 
 #
-%cwstack left
 120pt
 docalvers.de
 
