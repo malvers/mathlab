@@ -513,6 +513,14 @@ body.cyber-shell-grid #cyber-left-chrome {
     height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
+    background: rgba(10, 15, 26, 1);
+    /*
+     * #main-content kommt im DOM nach der Chrome-Spalte; ohne z-index gewinnt bei Überlappung
+     * die Hauptfläche (z. B. fest positionierte Kinder / Full-Bleed). Mini-Rail/Sidebar wirken dann
+     * „unter einem Balken“. Chrome-Spalte explizit darüber legen — Modals bleiben höher (z. B. .cyber-overlay).
+     */
+    position: relative;
+    z-index: 2100;
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner {
@@ -534,12 +542,17 @@ body.cyber-shell-grid #cyber-left-chrome-inner > #mini-rail {
     grid-column: 1 !important;
     grid-row: 1 !important;
     justify-self: start !important;
+    /* Feste 100vh + scale(<1): Innere Grid-Zeile ist höher als 100vh → unten Spalt zum Body-HG. */
+    height: 100% !important;
+    min-height: 0 !important;
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner > #side-panel {
     grid-column: 2 !important;
     grid-row: 1 !important;
     justify-self: start !important;
+    height: 100% !important;
+    min-height: 0 !important;
 }
 
 body.cyber-shell-grid #main-content {
@@ -547,4 +560,7 @@ body.cyber-shell-grid #main-content {
     grid-row: 1 !important;
     min-width: 0 !important;
     height: 100vh !important;
+    z-index: 1;
+    /* Verhindert, dass Kinder der Hauptfläche unter Compositing über die Chrome-Spalte „malen“. */
+    contain: paint;
 }
