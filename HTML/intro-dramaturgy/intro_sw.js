@@ -19,7 +19,7 @@ zinazoingiliana
 
 #
 120pt
-lugha 7
+Lugha %numlanguages
 20pt
 %purplepulsating endelea kuongezeka
 30pt
@@ -30,6 +30,8 @@ Kifaransa 🇫🇷
 Kiitaliano 🇮🇹
 Kireno 🇵🇹
 Kiswahili 🇰🇪
+Kiholanzi 🇳🇱
+Kituruki 🇹🇷
 
 #
 // picha zote za skrini zinaonyeshwa

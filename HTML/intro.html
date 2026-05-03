@@ -2,32 +2,42 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Catching Words | docalvers ULTRA</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00d2ff;
             --neon-purple: #9d50bb;
+            /* Intro chrome: scales with viewport; mins keep targets roughly touch-sized */
+            --intro-safe-top: env(safe-area-inset-top, 0px);
+            --intro-pb-icon: clamp(18px, 5.5vmin, 26px);
+            --intro-round-btn: clamp(38px, 11vmin, 46px);
+            --intro-round-icon: clamp(17px, 4.8vmin, 22px);
         }
 
         html {
             background: #050b18;
+            overflow: hidden;
+            height: 100%;
         }
 
         body {
             margin: 0;
             padding: 0;
             background: #050b18;
-            overflow: visible;
-            height: 100vh;
-            width: 100vw;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            min-height: 100%;
             font-family: 'Orbitron', sans-serif;
             color: white;
         }
 
         body.mode-catching-words {
             background: transparent;
+            overflow: hidden;
         }
 
         #bg-video {
@@ -101,22 +111,28 @@
             to { transform: scale(1.2); opacity: 0.6; }
         }
 
-        /* Playback pill + ambient / fullscreen / close — one row, centered */
+        /* Playback pill + ambient / fullscreen / close — immer eine Zeile nebeneinander */
         .intro-top-bar {
             position: fixed;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: max(6px, var(--intro-safe-top));
+            left: 0;
+            right: 0;
+            transform: none;
             z-index: 10000;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px 12px;
-            max-width: calc(100vw - 24px);
+            flex-wrap: nowrap;
+            gap: clamp(6px, 1.8vmin, 12px) clamp(8px, 2.4vw, 14px);
+            max-width: none;
+            width: 100%;
+            padding-left: max(8px, env(safe-area-inset-left, 0px));
+            padding-right: max(8px, env(safe-area-inset-right, 0px));
             box-sizing: border-box;
             pointer-events: none;
+            overflow-x: hidden;
+            overflow-y: visible;
         }
         .intro-top-bar > * {
             pointer-events: auto;
@@ -127,9 +143,9 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 10px;
+            gap: clamp(6px, 2vmin, 11px);
             background: rgba(15, 23, 42, 0.92);
-            padding: 6px 14px;
+            padding: clamp(4px, 1.2vmin, 8px) clamp(10px, 3.2vw, 18px);
             border-radius: 999px;
             border: 1px solid rgba(0, 210, 255, 0.3);
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
@@ -149,7 +165,7 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 10px;
+            gap: clamp(8px, 2.2vmin, 12px);
             flex-shrink: 0;
             padding: 0;
             margin: 0;
@@ -164,7 +180,7 @@
             border: none;
             color: rgba(255, 255, 255, 0.85);
             cursor: pointer;
-            padding: 4px;
+            padding: clamp(2px, 0.8vmin, 6px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -177,8 +193,8 @@
             filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.6));
         }
         .intro-playback-btn svg {
-            width: 24px;
-            height: 24px;
+            width: var(--intro-pb-icon);
+            height: var(--intro-pb-icon);
             fill: currentColor;
         }
 
@@ -186,8 +202,8 @@
         .intro-top-bar .fs-toggle,
         .intro-top-bar .intro-back-btn {
             box-sizing: border-box;
-            width: 42px;
-            height: 42px;
+            width: var(--intro-round-btn);
+            height: var(--intro-round-btn);
             padding: 0;
             margin: 0;
             flex-shrink: 0;
@@ -217,52 +233,51 @@
             filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.5));
         }
         .intro-top-bar .fs-toggle svg {
-            width: 22px;
-            height: 22px;
+            width: var(--intro-round-icon);
+            height: var(--intro-round-icon);
             stroke: currentColor;
             stroke-width: 2;
         }
         .intro-top-bar #intro-ambient-btn svg {
-            width: 22px;
-            height: 22px;
+            width: var(--intro-round-icon);
+            height: var(--intro-round-icon);
             fill: currentColor;
             stroke: none;
         }
 
         .intro-top-bar .intro-back-btn svg {
-            width: 22px;
-            height: 22px;
+            width: var(--intro-round-icon);
+            height: var(--intro-round-icon);
             stroke: currentColor;
             stroke-width: 2.2;
             stroke-linecap: round;
             fill: none;
         }
 
-        .intro-section-nav {
             position: fixed;
-            left: 18px;
-            right: 18px;
-            bottom: 20px;
+            left: max(12px, env(safe-area-inset-left, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 10px));
             z-index: 2600;
             display: flex;
             justify-content: space-between;
             align-items: center;
             pointer-events: none;
-            gap: 12px;
+            gap: clamp(8px, 2vw, 12px);
         }
         .intro-section-btn {
             pointer-events: auto;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 18px;
+            gap: clamp(6px, 1.8vw, 10px);
+            padding: clamp(8px, 2vmin, 11px) clamp(11px, 3.8vw, 18px);
             border-radius: 999px;
             border: 1px solid rgba(255, 255, 255, 0.14);
             background: rgba(15, 23, 42, 0.9);
             color: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.68rem;
+            font-size: clamp(0.56rem, 2.9vw, 0.68rem);
             font-weight: 600;
             letter-spacing: 0.14em;
             text-transform: lowercase;
@@ -290,6 +305,8 @@
         }
         .intro-section-btn svg {
             flex-shrink: 0;
+            width: clamp(14px, 4vmin, 18px);
+            height: clamp(14px, 4vmin, 18px);
             stroke: currentColor;
             fill: none;
             stroke-width: 2;
@@ -314,10 +331,12 @@
         #catching-words-panel .cw-play {
             position: absolute;
             inset: 0;
-            padding: 28px 0 88px;
+            /* Unten: Platz für intro-section-nav + Safe Area */
+            padding: clamp(16px, 4vmin, 28px) 0 clamp(56px, 12vmin, 88px);
             box-sizing: border-box;
             cursor: crosshair;
-            overflow: visible;
+            overflow-x: hidden;
+            overflow-y: visible;
         }
         #catching-words-panel.cw-drag-over {
             box-shadow: inset 0 0 0 3px rgba(0, 210, 255, 0.45);
@@ -347,8 +366,8 @@
             width: 100%;
             max-width: none;
             box-sizing: border-box;
-            gap: 24px;
-            padding: 0 clamp(6px, 2vw, 16px);
+            gap: clamp(10px, 2.5vw, 24px);
+            padding: 0 clamp(16px, 4.5vw, 40px);
             isolation: isolate;
             overflow: visible;
         }
@@ -658,6 +677,8 @@
             border: none;
             border-radius: 12px;
             overflow: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             box-shadow:
                 0 0 28px rgba(0, 210, 255, 0.35),
                 0 0 56px rgba(157, 80, 187, 0.18),
@@ -667,6 +688,11 @@
             filter: blur(8px);
             animation: none;
             z-index: 1;
+        }
+        #catching-words-panel .cw-media-wrap::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
         }
         #catching-words-panel .cw-media-wrap.cw-media-show {
             animation: cw-portal-in calc(var(--cw-anim-sec) * 0.72s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -696,9 +722,9 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            max-width: 100vw;
+            width: 100%;
+            height: 100%;
+            max-width: none;
             margin: 0;
             border-radius: 0;
             box-shadow: none;
@@ -728,10 +754,10 @@
         }
         /* Fast screenshot sequence: crossfade (opacity) between consecutive fullscreen frames */
         #catching-words-panel .cw-media-wrap.cw-media-fast .cw-media-img {
-            width: 100vw;
-            height: 100vh;
-            max-width: 100vw;
-            max-height: 100vh;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
             border-radius: 0;
             object-fit: cover;
             object-position: top left;
@@ -748,6 +774,8 @@
             background: transparent;
             object-fit: contain;
             opacity: 1;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         #catching-words-panel .cw-coverr-fallback-msg {
             margin: 0 0 10px;
@@ -809,27 +837,97 @@
             justify-content: center;
             cursor: pointer;
             transition: opacity 0.5s ease;
-        }
-
-        #intro-start-overlay .intro-start-overlay-main {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            gap: clamp(1rem, 5vw, 2.75rem);
-            width: min(92vw, 640px);
-            padding: 0 clamp(0.5rem, 2vw, 1rem);
+            overflow: hidden;
+            padding:
+                max(8px, env(safe-area-inset-top, 0px))
+                max(10px, env(safe-area-inset-right, 0px))
+                max(12px, env(safe-area-inset-bottom, 0px))
+                max(10px, env(safe-area-inset-left, 0px));
             box-sizing: border-box;
         }
 
-        #intro-start-overlay .intro-start-play-block {
+        /* PLAY-Zeile: ein String (PLAY ▶ Dauer), ein durchgehender Verlauf blau → weiß → purple */
+        #intro-start-overlay .intro-start-overlay-main {
             display: flex;
             flex-direction: row;
+            flex-wrap: nowrap;
             align-items: center;
-            gap: clamp(0.65rem, 2.5vw, 1.1rem);
-            flex-shrink: 0;
+            justify-content: center;
+            width: auto;
+            max-width: min(calc(100vw - 24px), 720px);
+            min-width: 0;
+            padding: 0 clamp(8px, 2vw, 16px);
+            box-sizing: border-box;
+            animation: introPlayRowPulse 2s infinite ease-in-out;
         }
-        
+
+        @keyframes introPlayRowPulse {
+            0% {
+                filter:
+                    drop-shadow(0 0 10px rgba(0, 210, 255, 0.38))
+                    drop-shadow(0 0 14px rgba(157, 80, 247, 0.28));
+            }
+            50% {
+                filter:
+                    drop-shadow(0 0 26px rgba(0, 210, 255, 0.65))
+                    drop-shadow(0 0 30px rgba(157, 80, 247, 0.45));
+            }
+            100% {
+                filter:
+                    drop-shadow(0 0 10px rgba(0, 210, 255, 0.38))
+                    drop-shadow(0 0 14px rgba(157, 80, 247, 0.28));
+            }
+        }
+
+        #intro-start-overlay .intro-play-full-line {
+            --intro-play-text-grad: linear-gradient(to right, var(--neon-blue), #ffffff, var(--neon-purple));
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.1rem, 3.8vw, 2rem);
+            font-weight: 600;
+            letter-spacing: clamp(0.06em, 1.5vw, 0.18em);
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1.2;
+            width: auto;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            background-image: var(--intro-play-text-grad);
+            background-attachment: fixed;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Größeres ▶ mit gleichem viewport-fixierten Verlauf wie die Zeile */
+        #intro-start-overlay .intro-play-full-line .intro-play-icon {
+            font-size: 1.72em;
+            vertical-align: -0.14em;
+            background-image: var(--intro-play-text-grad);
+            background-attachment: fixed;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media (max-width: 480px) {
+            #intro-start-overlay .intro-start-overlay-main {
+                max-width: calc(100vw - 16px);
+            }
+
+            #intro-start-overlay .intro-play-full-line {
+                font-size: clamp(0.95rem, 4.5vw, 1.35rem);
+                letter-spacing: clamp(0.04em, 1vw, 0.12em);
+            }
+
+            #intro-start-overlay .intro-play-full-line .intro-play-icon {
+                font-size: 1.55em;
+            }
+        }
+
         @keyframes pulseGlowAnim {
             0% {
                 filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
@@ -845,38 +943,6 @@
             }
         }
 
-        #intro-start-overlay .intro-duration-side {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.35rem, 3.8vw, 2rem);
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            color: rgba(0, 210, 255, 0.78);
-            text-align: right;
-            white-space: nowrap;
-            animation: pulseGlowAnim 2s infinite ease-in-out;
-            flex-shrink: 0;
-        }
-
-        #intro-start-overlay svg {
-            width: clamp(88px, 20vw, 132px);
-            height: clamp(88px, 20vw, 132px);
-            fill: rgba(0, 210, 255, 0.8);
-            filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.5));
-            transition: transform 0.3s ease, fill 0.3s ease, filter 0.3s ease;
-            animation: pulseGlowAnim 2s infinite ease-in-out;
-        }
-
-        #intro-start-overlay .play-text {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.55rem, 5vw, 2.35rem);
-            font-weight: 600;
-            letter-spacing: 0.28em;
-            color: rgba(0, 210, 255, 0.8);
-            text-transform: uppercase;
-            animation: pulseGlowAnim 2s infinite ease-in-out;
-        }
-        
         #intro-ambient-btn.is-playing {
             opacity: 1;
             border-color: rgba(0, 210, 255, 0.55);
@@ -892,13 +958,7 @@
 
     <div id="intro-start-overlay">
         <div class="intro-start-overlay-main">
-            <div class="intro-start-play-block">
-                <div class="play-text">PLAY</div>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-            </div>
-            <div class="intro-duration-side" aria-hidden="true">66 seconds</div>
+            <p class="intro-play-full-line" aria-hidden="true">PLAY&#x2003;<span class="intro-play-icon">▶</span>&#x2003;66 SECONDS</p>
         </div>
     </div>
 
@@ -1107,6 +1167,9 @@
         const CW_WORD_SETTLED_LETTER_PX = 12;
         const CW_WORD_SETTLED_SCALE = 0.9;
         const CW_EMOJI_SETTLED_SCALE = 0.92;
+        /** Width fit: probe uses horizontal padding — scale must use inner width; slack for glow/subpixel */
+        /* Unterlagen Glow (drop-shadow) + Abgleich Stack-Padding — nicht zu großzügig */
+        const CW_FIT_WIDTH_SAFE_FRAC = 0.88;
 
         /** Debounced: re-run anticipation fit (e.g. window resize). */
         let cwStackFitRaf = null;
@@ -1186,10 +1249,16 @@
             const GAP_BELOW_CONTROLS = 12;
             const bandTopGlobal = Math.max(playRect.top + ptp, ctrlBottom + GAP_BELOW_CONTROLS);
             const bandBottomGlobal = playRect.bottom - pbp;
-            const stageH = Math.max(64, bandBottomGlobal - bandTopGlobal);
+            /* Unterkante des Stacks ~16 % der Viewporthöhe über dem Bildschirmrand (Reserve unten). */
+            const innerPlayTopGlobal = playRect.top + ptp;
+            const CW_STACK_BOTTOM_VIEWPORT_FRAC = 0.16;
+            const bottomReservePx = Math.max(0, window.innerHeight * CW_STACK_BOTTOM_VIEWPORT_FRAC);
+            const effectiveBandBottomGlobal = Math.min(bandBottomGlobal, window.innerHeight - bottomReservePx);
+            const stageH = Math.max(64, effectiveBandBottomGlobal - bandTopGlobal);
             const margin = Math.max(16, Math.min(28, Math.round(stageH * 0.04)));
-            const sidePad = Math.max(6, Math.min(16, Math.round(availW * 0.02)));
-            const innerMaxW = Math.max(80, availW - sidePad * 2);
+            /* Gleiches wie #catching-words-panel .cw-stack: padding 0 clamp(16px, 4.5vw, 40px) */
+            const stackPadLR = Math.max(16, Math.min(40, Math.round(window.innerWidth * 0.045)));
+            const innerAvailW = Math.max(48, availW - 2 * stackPadLR);
 
             const probe = document.createElement('div');
             probe.setAttribute('data-cw-fit-probe', '1');
@@ -1207,7 +1276,7 @@
                 'gap:' + CW_STACK_LAYOUT_GAP_PX + 'px',
                 'align-items:' + (plan.alignLeft ? 'flex-start' : 'center'),
                 'width:' + availW + 'px',
-                'padding:0 ' + sidePad + 'px',
+                'padding:0 ' + stackPadLR + 'px',
             ].join(';');
 
             for (let j = 0; j < plan.items.length; j++) {
@@ -1216,19 +1285,40 @@
                     const ptSz0 = item.pt != null && Number.isFinite(item.pt) ? item.pt : 80;
                     const effPt = item.isDomain ? ptSz0 : ptSz0 * CW_WORD_SETTLED_SCALE;
                     const row = document.createElement('div');
-                    row.style.cssText =
-                        'font-family:Orbitron,sans-serif;font-weight:700;line-height:' +
-                        CW_WORD_LINE_HEIGHT +
-                        ';white-space:nowrap;width:max-content;max-width:' +
-                        innerMaxW +
-                        'px;overflow:hidden;text-overflow:clip;text-transform:' +
-                        (item.isDomain ? 'none' : 'uppercase') +
-                        ';letter-spacing:' +
-                        (item.isDomain ? 'normal' : CW_WORD_SETTLED_LETTER_PX + 'px') +
-                        ';font-size:' +
-                        effPt +
-                        'pt;';
-                    row.textContent = item.text;
+                    if (item.isDomain) {
+                        const dm = String(item.text || '').trim().match(/^docalvers\.([a-z]{2})$/i);
+                        row.style.cssText =
+                            'display:inline-flex;flex-direction:row;align-items:baseline;flex-wrap:nowrap;gap:0;' +
+                            'font-family:Orbitron,sans-serif;font-weight:700;line-height:' +
+                            CW_WORD_LINE_HEIGHT +
+                            ';white-space:nowrap;box-sizing:border-box;text-transform:none;letter-spacing:normal;';
+                        const parts = dm
+                            ? [
+                                  ['docalvers', 'cw-domain-prefix'],
+                                  ['.', 'cw-domain-dot'],
+                                  [dm[1].toLowerCase(), 'cw-domain-tld'],
+                              ]
+                            : [[String(item.text || ''), '']];
+                        for (let pi = 0; pi < parts.length; pi++) {
+                            const sp = document.createElement('span');
+                            sp.className = 'cw-domain-inner ' + (parts[pi][1] || '');
+                            sp.style.cssText = 'font-size:' + effPt + 'pt;line-height:inherit';
+                            if (parts[pi][1] === 'cw-domain-dot') sp.style.padding = '0 0.03em';
+                            sp.textContent = parts[pi][0];
+                            row.appendChild(sp);
+                        }
+                    } else {
+                        row.style.cssText =
+                            'font-family:Orbitron,sans-serif;font-weight:700;line-height:' +
+                            CW_WORD_LINE_HEIGHT +
+                            ';white-space:nowrap;width:max-content;overflow:visible;box-sizing:border-box;text-transform:uppercase' +
+                            ';letter-spacing:' +
+                            CW_WORD_SETTLED_LETTER_PX +
+                            'px;font-size:' +
+                            effPt +
+                            'pt;';
+                        row.textContent = item.text;
+                    }
                     probe.appendChild(row);
                 } else if (item.t === 'emoji') {
                     const ptSz0 = item.pt != null && Number.isFinite(item.pt) ? item.pt : 80;
@@ -1252,7 +1342,7 @@
                 } else if (item.t === 'media') {
                     if (item.fast) continue;
                     const mh = Math.min(Math.round(stageH * 0.46), 520);
-                    const mw = Math.min(960, Math.round(availW * 0.92));
+                    const mw = Math.min(960, Math.round(innerAvailW * 0.96));
                     const row = document.createElement('div');
                     row.style.cssText = 'width:' + mw + 'px;height:' + mh + 'px;flex-shrink:0;';
                     probe.appendChild(row);
@@ -1278,19 +1368,28 @@
             }
             document.body.removeChild(probe);
 
+            const hasDomainLine = plan.items.some(function (it) {
+                return it && it.t === 'text' && it.isDomain;
+            });
+            if (hasDomainLine) {
+                w = Math.ceil(w * 1.06);
+            }
+
             if (h < 2 || w < 2) {
                 stack.style.setProperty('--cw-fit-scale', '1');
                 stack.style.removeProperty('--cw-stack-pad-top');
                 return;
             }
-            let s = Math.min(1, (stageH - margin) / h, (availW - margin) / w);
+            const fitW = Math.max(32, innerAvailW * CW_FIT_WIDTH_SAFE_FRAC - margin);
+            let s = Math.min(1, (stageH - margin) / h, fitW / w);
             s = Math.max(0.18, Math.min(1, s));
             const scaledH = s * h;
             if (stack.classList.contains('cw-stack-align-left')) {
                 stack.style.removeProperty('--cw-stack-pad-top');
             } else {
-                const playContentTopGlobal = playRect.top;
-                const padTop = Math.max(0, bandTopGlobal - playContentTopGlobal + (stageH - scaledH) / 2);
+                let padTop = effectiveBandBottomGlobal - scaledH - innerPlayTopGlobal;
+                const minPadTopControls = bandTopGlobal - innerPlayTopGlobal;
+                padTop = Math.max(0, padTop, minPadTopControls);
                 stack.style.setProperty('--cw-stack-pad-top', padTop + 'px');
             }
             stack.style.setProperty('--cw-fit-scale', String(s));
@@ -2275,7 +2374,7 @@
                     const v = document.createElement('video');
                     v.className = 'cw-media-video';
                     v.setAttribute('playsinline', '');
-                    v.controls = true;
+                    v.controls = false;
                     v.muted = true;
                     v.loop = true;
                     v.autoplay = true;
@@ -2519,6 +2618,8 @@
          * Sections (←/→): new section at each # line (# alone, # comment, or # 60pt on one line).
          * Size: «# 60pt» or its own line «60pt» / «200pt» (applies to following words until the next size line).
          * Count: «#numberlabs» — expands to LABS_DATA.length (intro loads js/labs-config.js); fallback 38 if missing.
+         * «%numlanguages» — expands to the number of supported intro/UI languages (same set as ?lang= / resolveIntroDramaturgieLang).
+         * Stack width: fit uses inner play width minus horizontal stack padding (same as .cw-stack clamp) × CW_FIT_WIDTH_SAFE_FRAC (domain line = three-span measure like DOM).
          * Lines starting with «//»: comment (ignore).
          * Video: «%video URL» — also «%videohttps://…» without space. A lone line with only a Coverr or .mp4/.webm URL counts as video (paste without %video).
          * Coverr page: extract MP4 from page (hero before “Related”), HTML5 video only — no Coverr UI in iframe.
@@ -2591,9 +2692,16 @@
             return 38;
         }
 
+        /** Supported intro languages (?lang=…) — keep in sync with resolveIntroDramaturgieLang `SUPPORTED`. */
+        function getCwIntroNumlanguagesCount() {
+            return 9;
+        }
+
         function parseCwSections(text) {
             const locText = (typeof window.__CURRENT_LOC !== 'undefined') ? window.__CURRENT_LOC : "40.000+";
-            text = String(text || '').replace(/%loc/gi, locText);
+            text = String(text || '')
+                .replace(/%loc/gi, locText)
+                .replace(/%numlanguages/gi, String(getCwIntroNumlanguagesCount()));
             const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\n|\r/);
             const hashWithPt = /^\s*#\s*(\d+(?:\.\d+)?)\s*pt\b/i;
             const standalonePt = /^\s*(\d+(?:\.\d+)?)\s*pt\s*$/i;
@@ -2799,7 +2907,7 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
-            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=20';
+            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=21';
 
             function applyLoaded() {
                 var inline =
@@ -2927,6 +3035,9 @@
         (function initCwStackAutoFit() {
             if (!document.getElementById('cw-stack')) return;
             window.addEventListener('resize', () => scheduleCwStackFit(), { passive: true });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => scheduleCwStackFit(), { passive: true });
+            }
         })();
 
         document.addEventListener(

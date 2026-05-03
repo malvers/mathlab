@@ -28,7 +28,6 @@
             background: var(--deep-bg);
             color: white;
             font-family: 'Outfit', sans-serif;
-            display: flex;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -72,20 +71,24 @@
 
         #math-coach-box {
             position: absolute;
-            width: 380px;
+            width: min(228px, calc(42vw));
+            max-width: calc(100% - 20px);
+            box-sizing: border-box;
             background: rgba(10, 20, 40, 0.4);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 14px;
+            padding: clamp(8px, 1.8vw, 14px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             color: white;
             font-family: 'Orbitron', sans-serif;
             pointer-events: none;
             opacity: 0;
             transform: translateY(10px);
-            transition: all 0.5s ease;
+            transition: opacity 0.5s ease, transform 0.5s ease;
             z-index: 10;
+            right: 10px;
+            left: auto;
         }
 
         #math-coach-box.visible {
@@ -93,11 +96,18 @@
             transform: translateY(0);
         }
 
+        .coach-message {
+            font-size: clamp(0.62rem, 2.2vw, 0.78rem);
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
         .coach-title {
-            font-size: 0.7rem;
+            font-size: 0.58rem;
             color: #00d2ff;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -158,6 +168,21 @@
 
         .cyber-select {
             background-image: none !important;
+        }
+
+        @media (max-width: 520px) {
+            #sidebar-header {
+                min-height: 56px !important;
+            }
+
+            .stats-grid {
+                gap: 8px !important;
+            }
+
+            .stats-card {
+                padding: 8px !important;
+                min-height: 44px !important;
+            }
         }
     </style>
 </head>
@@ -345,6 +370,7 @@
             const rect = container.getBoundingClientRect();
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
             buildStepSequence();
             draw();
@@ -360,32 +386,43 @@
             const s2Str = String(subtrahend);
             const maxCols = Math.max(s1Str.length, s2Str.length) + 1;
 
-            // Advanced Adaptive Scaling (Safe-Fit)
+            const coachMargin = 10;
+            const gapWide = 16;
+            const coachWidthPx = Math.min(228, Math.max(150, width * 0.22));
+            const calcAvailWidth = Math.max(120, width - coachWidthPx - gapWide - coachMargin * 2);
             const maxCharsContent = maxCols;
             const totalLines = 4;
-            const fontSizeWidth = (width * 0.85) / (maxCharsContent * 0.75 + 5);
-            const fontSizeHeight = (height * 0.75) / (totalLines * 1.6);
-            const fontSize = Math.min(fontSizeWidth, fontSizeHeight);
+
+            function metricsWithReserve(coachReserve) {
+                const fontSizeWidth = (calcAvailWidth * 0.92) / (maxCharsContent * 0.75 + 5);
+                const fontSizeHeight = ((height - coachReserve) * 0.72) / (totalLines * 1.6);
+                let fs = Math.min(fontSizeWidth, fontSizeHeight);
+                fs = Math.max(11, Math.min(fs, 96));
+                const cw = fs * 0.85;
+                const calcW = maxCols * cw;
+                return { fs, cw, calcW };
+            }
+
+            const coachReserve = 0;
+            let { fs: fontSize, cw: charWidthScaled, calcW: calcWidthScaled } = metricsWithReserve(0);
 
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
-            const charWidth = fontSize * 0.85;
             const rowHeight = fontSize * 1.5;
 
-            // Ensemble Centering Logic
+            const ensembleStartX = Math.max(
+                coachMargin,
+                coachMargin + (calcAvailWidth - calcWidthScaled) / 2
+            );
+
+            const startX = ensembleStartX + (maxCols - 1) * charWidthScaled;
+            const startY = height / 2 - rowHeight * 1.15;
+
             const coachBox = document.getElementById('math-coach-box');
-            const coachWidth = 380;
-            const gap = 40;
-            const calcWidth = maxCols * charWidth;
-            const ensembleWidth = calcWidth + gap + coachWidth;
-            const ensembleStartX = (width - ensembleWidth) / 2;
-
-            const startX = ensembleStartX + (maxCols - 1) * charWidth;
-            const startY = height / 2 - rowHeight * 1.4;
-
             if (coachBox) {
-                coachBox.style.left = `${ensembleStartX + calcWidth + gap}px`;
-                coachBox.style.top = `${height / 2 - 100}px`;
+                coachBox.style.left = 'auto';
+                coachBox.style.right = `${coachMargin}px`;
+                coachBox.style.top = `${Math.max(10, height / 2 - 72)}px`;
                 coachBox.classList.add('visible');
             }
 
@@ -399,7 +436,7 @@
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
                 if (isFocused) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
-                ctx.fillText(s1Str[s1Str.length - 1 - i], startX - i * charWidth, startY);
+                ctx.fillText(s1Str[s1Str.length - 1 - i], startX - i * charWidthScaled, startY);
                 if (isFocused) ctx.restore();
             }
 
@@ -407,14 +444,14 @@
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.font = `${fontSize}px Orbitron`;
             const plusCol = Math.max(s1Str.length, s2Str.length);
-            ctx.fillText('-', startX - plusCol * charWidth, startY + rowHeight);
+            ctx.fillText('-', startX - plusCol * charWidthScaled, startY + rowHeight);
 
             ctx.font = `bold ${fontSize}px Orbitron`;
             for (let i = 0; i < s2Str.length; i++) {
                 const isFocused = step && step.col === i && step.type !== 'complete';
                 ctx.fillStyle = isFocused ? '#ffde00' : BRAND_BLUE;
                 if (isFocused) { ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
-                ctx.fillText(s2Str[s2Str.length - 1 - i], startX - i * charWidth, startY + rowHeight);
+                ctx.fillText(s2Str[s2Str.length - 1 - i], startX - i * charWidthScaled, startY + rowHeight);
                 if (isFocused) ctx.restore();
             }
 
@@ -423,8 +460,8 @@
             ctx.strokeStyle = '#888888';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(startX - plusCol * charWidth - charWidth * 0.5, startY + rowHeight * 1.6);
-            ctx.lineTo(startX + charWidth * 0.5, startY + rowHeight * 1.6);
+            ctx.moveTo(startX - plusCol * charWidthScaled - charWidthScaled * 0.5, startY + rowHeight * 1.6);
+            ctx.lineTo(startX + charWidthScaled * 0.5, startY + rowHeight * 1.6);
             ctx.stroke();
 
             // 3. Draw Results & Carries
@@ -433,7 +470,7 @@
                 if (s.type === 'calculate') {
                     ctx.font = `bold ${fontSize}px Orbitron`;
                     ctx.fillStyle = 'white';
-                    ctx.fillText(s.resultDigit, startX - s.col * charWidth, startY + rowHeight * 2.2);
+                    ctx.fillText(s.resultDigit, startX - s.col * charWidthScaled, startY + rowHeight * 2.2);
 
                     if (s.newCarry > 0) {
                         ctx.save();
@@ -441,7 +478,7 @@
                         const isCurrent = (i === currentStep);
                         ctx.fillStyle = isCurrent ? '#ffde00' : 'rgba(150, 150, 150, 0.4)';
                         if (isCurrent) { ctx.shadowBlur = 15; ctx.shadowColor = '#ffde00'; }
-                        ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidth, startY + rowHeight * 1.45);
+                        ctx.fillText(s.newCarry, startX - (s.col + 1) * charWidthScaled, startY + rowHeight * 1.45);
                         ctx.restore();
                     }
                 }
@@ -454,8 +491,8 @@
                 ctx.lineWidth = 2;
                 const lineY1 = startY + rowHeight * 2.7;
                 const lineY2 = startY + rowHeight * 2.8;
-                const lineStartX = startX - plusCol * charWidth - charWidth * 0.5;
-                const lineEndX = startX + charWidth * 0.5;
+                const lineStartX = startX - plusCol * charWidthScaled - charWidthScaled * 0.5;
+                const lineEndX = startX + charWidthScaled * 0.5;
                 ctx.beginPath();
                 ctx.moveTo(lineStartX, lineY1); ctx.lineTo(lineEndX, lineY1);
                 ctx.moveTo(lineStartX, lineY2); ctx.lineTo(lineEndX, lineY2);

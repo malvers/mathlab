@@ -62,33 +62,75 @@
         #canvas-wrap {
             flex: 1 1 0%;
             width: 100%;
-            min-height: 200px;
+            min-height: 0;
             position: relative;
+            display: grid;
+            grid-template-rows: 1fr;
+            grid-template-columns: 1fr;
             background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
             var(--space-bg);
         }
 
-        /* Formelbox: +6 px vs. orbitals/styles.css, dann −4px wie Nav (2+2) */
-        #canvas-wrap .overlay-formula {
-            top: 12px;
+        /* WebGL fills the cell; overlay sits in the same cell (no full-width strip shifting perception/layout). */
+        #canvas-wrap canvas {
+            grid-area: 1 / 1;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            min-height: 0;
+            display: block;
+            z-index: 0;
         }
 
-        /* KaTeX-Formel: +30 %, Text orange; Rand/Schatten Cyan wie Lab */
+        /* Override orbitals/styles.css absolute full-width strip — compact box top-left only */
+        #canvas-wrap .overlay-formula {
+            grid-area: 1 / 1;
+            align-self: start;
+            justify-self: start;
+            position: relative;
+            left: auto;
+            right: auto;
+            top: auto;
+            margin: clamp(8px, 1.2vmin + 4px, 14px) 0 0 clamp(10px, 1.4vw + 4px, 18px);
+            width: max-content;
+            max-width: min(calc(100% - 28px), 640px);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* KaTeX displayMode: .katex-display hat sonst ~1em Rand oben/unten — macht „flacher“ per Padding wirkungslos */
+        #canvas-wrap #formula-tex .katex-display,
+        #canvas-wrap #formula-zf .katex-display {
+            margin: 0 !important;
+        }
+
+        /* KaTeX-Formel: +30 %, Text orange; Rand/Schatten Cyan wie Lab (extra flach: wenig Padding + kein Display-Margin) */
         #canvas-wrap .overlay-formula .formula-box#formula {
             border-color: rgba(0, 210, 255, 0.38) !important;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.14) !important;
+            box-shadow: 0 0 clamp(14px, 3vmin, 22px) rgba(0, 210, 255, 0.14) !important;
+            gap: 0.06rem !important;
+            padding: clamp(0.12rem, 0.42vmin + 0.05rem, 0.28rem) clamp(0.55rem, 2.2vmin + 0.28rem, 0.95rem)
+                clamp(0.14rem, 0.48vmin + 0.06rem, 0.3rem) !important;
+            border-radius: clamp(10px, 1.6vmin, 14px);
+        }
+
+        #canvas-wrap #formula-zf.formula-zf {
+            padding-top: 0.12rem !important;
         }
 
         #canvas-wrap #formula-tex .katex {
-            font-size: 1.365em !important;
+            font-size: clamp(0.92rem, 2.4vmin + 0.42rem, 1.35rem) !important;
             color: #ff9d00 !important;
-            text-shadow: 0 0 14px rgba(255, 157, 0, 0.35);
+            text-shadow: 0 0 clamp(8px, 2vmin, 14px) rgba(255, 157, 0, 0.35);
+            line-height: 1.12 !important;
         }
 
         #canvas-wrap #formula-zf .katex {
-            font-size: 1.235em !important;
+            font-size: clamp(0.78rem, 2vmin + 0.36rem, 1.12rem) !important;
             color: #6ee7ff !important;
             letter-spacing: 0.06em;
+            line-height: 1.12 !important;
         }
 
         #canvas-wrap #formula-zf .katex,
@@ -1245,14 +1287,17 @@
           /* Kein Vollflächen-Farbfilm: gleicher Radial-Gradient auf #canvas-wrap sichtbar (wie Lab-CSS) */
           scene.background = null;
         
-          camera = new THREE.PerspectiveCamera(44, container.clientWidth / container.clientHeight, 0.1, 15000);
+          const cw = Math.max(1, container.clientWidth);
+          const ch = Math.max(1, container.clientHeight);
+          camera = new THREE.PerspectiveCamera(44, cw / ch, 0.1, 15000);
           camera.position.set(0, 0, BASE_REF_CAMERA_DISTANCE);
         
           /* preserveDrawingBuffer: Cmd+Shift+S-Screenshot (CyberUI) liest das Canvas aus */
           renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
           renderer.setClearColor(0x000000, 0);
           renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-          renderer.setSize(container.clientWidth, container.clientHeight);
+          /* updateStyle false: Zeichenpuffer = cw/ch; CSS füllt #canvas-wrap (keine festklebende Pixelbreite). */
+          renderer.setSize(cw, ch, false);
           renderer.outputColorSpace = THREE.SRGBColorSpace;
           renderer.toneMapping = THREE.ACESFilmicToneMapping;
           renderer.toneMappingExposure = 1.12;
@@ -1291,6 +1336,13 @@
           scene.add(new THREE.HemisphereLight(0xe1eaf6, 0x0a0d18, 0.36));
         
           window.addEventListener("resize", onResize);
+          if (!container.dataset.orbitalsRoBound) {
+            container.dataset.orbitalsRoBound = "1";
+            const ro = new ResizeObserver(() => {
+              window.requestAnimationFrame(onResize);
+            });
+            ro.observe(container);
+          }
         }
         
         function onResize() {
@@ -1298,9 +1350,10 @@
           if (!container || !camera || !renderer) return;
           const w = container.clientWidth;
           const h = container.clientHeight;
+          if (w < 1 || h < 1) return;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
-          renderer.setSize(w, h);
+          renderer.setSize(w, h, false);
           if (controls) controls.handleResize();
         }
         

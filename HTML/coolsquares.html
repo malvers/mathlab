@@ -41,6 +41,18 @@
             max-height: 95%;
             filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.1));
         }
+
+        #ui-container,
+        #data-container {
+            font-size: clamp(0.68rem, 0.35vw + 0.62rem, 0.95rem);
+        }
+
+        .cs-label-toggle-text {
+            font-family: Orbitron, sans-serif;
+            font-size: clamp(0.65rem, 2.8vw, 0.88rem);
+            color: white;
+            letter-spacing: 0.06em;
+        }
     </style>
 </head>
 
@@ -94,12 +106,21 @@
             const canvas = document.getElementById('squareCanvas');
             const ctx = canvas.getContext('2d');
 
-            let a = 1; // Start with a=1 as requested
+            let a = 1;
             const x = 5;
             let showLabels = true;
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const minDim = Math.min(canvas.width, canvas.height);
+                const padding = Math.min(240, Math.max(64, Math.round(minDim * 0.22)));
+                const fzArea = Math.max(11, Math.round(minDim * 0.026));
+                const fzLab = Math.max(10, Math.round(minDim * 0.021));
+                const offEdge = Math.max(6, Math.round(minDim * 0.016));
+                const offAbove = Math.max(14, Math.round(minDim * 0.03));
+                const offBelow = Math.max(22, Math.round(minDim * 0.052));
+                const textDY = Math.max(5, Math.round(fzLab * 0.42));
 
                 const y = 4 * a;
                 const s1 = x + a;
@@ -110,7 +131,6 @@
                 const totalW = s4 + y;
                 const totalH = s4 + a + s2;
 
-                const padding = 240;
                 const scale = Math.min((canvas.width - padding) / totalW, (canvas.height - padding) / totalH);
 
                 const offsetX = (canvas.width - totalW * scale) / 2;
@@ -140,27 +160,27 @@
 
                     if (s.area !== undefined) {
                         ctx.fillStyle = s.txt;
-                        ctx.font = 'bold 22px Orbitron';
+                        ctx.font = `bold ${fzArea}px Orbitron`;
                         ctx.textAlign = "center";
-                        ctx.fillText(s.area, rx + rw / 2, ry + rh / 2 + 8);
+                        ctx.fillText(s.area, rx + rw / 2, ry + rh / 2 + textDY);
                     }
 
                     if (showLabels && s.label) {
                         ctx.fillStyle = "#00d2ff";
-                        ctx.font = 'bold 18px Orbitron';
+                        ctx.font = `bold ${fzLab}px Orbitron`;
                         if (s.id === 'S4') {
-                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - 30);
-                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh / 2 + 8);
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - offAbove);
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - offEdge, ry + rh / 2 + textDY);
                         }
                         if (s.id === 'G') {
-                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - 30);
-                            ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh / 2 + 8);
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry - offAbove);
+                            ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + offEdge, ry + rh / 2 + textDY);
                         }
-                        if (s.id === 'S1') { ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + 15, ry + rh / 2 + 8); }
-                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + 55); }
+                        if (s.id === 'S1') { ctx.textAlign = "left"; ctx.fillText(s.label, rx + rw + offEdge, ry + rh / 2 + textDY); }
+                        if (s.id === 'S2') { ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + offBelow); }
                         if (s.id === 'S3') {
-                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - 15, ry + rh / 2 + 8);
-                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + 55);
+                            ctx.textAlign = "right"; ctx.fillText(s.label, rx - offEdge, ry + rh / 2 + textDY);
+                            ctx.textAlign = "center"; ctx.fillText(s.label, rx + rw / 2, ry + rh + offBelow);
                         }
                     }
                 });
@@ -176,10 +196,10 @@
                 ctx.lineTo(spineX, offsetY + spineY_orange_top);
                 ctx.stroke();
 
-                ctx.font = 'bold 22px Orbitron';
+                ctx.font = `bold ${fzArea}px Orbitron`;
                 ctx.fillStyle = "#9d50bb";
                 ctx.textAlign = "left";
-                ctx.fillText(`x`, spineX + 20, offsetY + (spineY_green_bottom + spineY_orange_top) / 2 + 8);
+                ctx.fillText(`x`, spineX + offEdge * 1.35, offsetY + (spineY_green_bottom + spineY_orange_top) / 2 + textDY);
 
                 ctx.beginPath();
                 ctx.strokeStyle = "#ff8c00";
@@ -188,11 +208,11 @@
                 ctx.stroke();
 
                 ctx.textAlign = "left";
-                ctx.fillText(`a = ${a}`, spineX + 20, offsetY + spineY_orange_top + (a / 2) * scale + 8);
+                ctx.fillText(`a = ${a}`, spineX + offEdge * 1.35, offsetY + spineY_orange_top + (a / 2) * scale + textDY);
 
                 ctx.fillStyle = "white";
                 ctx.textAlign = "right";
-                ctx.fillText(`y = ${y}`, spineX - 30, offsetY + (y / 2) * scale + 8);
+                ctx.fillText(`y = ${y}`, spineX - offEdge * 2, offsetY + (y / 2) * scale + textDY);
             }
 
             function update() {
@@ -223,7 +243,7 @@
                     <div id="label-toggle-box" style="width:20px; height:20px; border:2px solid var(--neon-blue); border-radius:4px; display:flex; justify-content:center; align-items:center;">
                         <div id="label-toggle-check" style="width:10px; height:10px; background:var(--neon-blue); display:block;"></div>
                     </div>
-                    <span style="font-family:Orbitron; font-size:0.8rem; color:white; letter-spacing:1px;">${CyberI18n.get('coolsquares.show_labels')}</span>
+                    <span class="cs-label-toggle-text">${CyberI18n.get('coolsquares.show_labels')}</span>
                 </div>
             `;
             document.getElementById('sliders').insertAdjacentHTML('beforeend', labelToggleHtml);

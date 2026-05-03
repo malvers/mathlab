@@ -11,16 +11,19 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
-        /* Beweis-spezifische Anpassungen */
+        /*
+         * Figure in #canvas-container. Vertex C stays at fixed CSS pixels until the canvas size changes (resize / sidebar).
+         * Analytics card is in #ui-container (sidebar).
+         */
         canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
 
-        /* Custom Stats Styling for CyberUI Card integration */
         .pyth-stat {
             background: rgba(255, 255, 255, 0.03);
             padding: 12px;
             border-radius: 12px;
             margin-bottom: 8px;
         }
+
         .pyth-label {
             font-family: 'Orbitron';
             font-size: 0.6rem;
@@ -29,10 +32,17 @@
             letter-spacing: 1px;
             margin-bottom: 4px;
         }
+
         .pyth-val {
             font-family: 'Orbitron';
             font-size: 1.2rem;
             font-weight: bold;
+        }
+
+        @media (max-width: 520px) {
+            .pyth-val {
+                font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+            }
         }
     </style>
 </head>
@@ -48,6 +58,7 @@
         </div>
     </nav>
 
+    <!-- Sidebar: shell unchanged; card bodies injected via CyberUI → #ui-container -->
     <aside id="side-panel">
         <header id="sidebar-header" style="min-height: 80px;"></header>
         <div id="ui-container"></div>
@@ -75,6 +86,7 @@
 
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
+                if (typeof draw === 'function') draw();
             }, 400);
         }
         // 1. Branding & UI Init
@@ -97,6 +109,18 @@
         let draggingA = false, draggingB = false;
         let ox = 0, oy = 0;
         let mode = 'quadrat';
+
+        /** Latest layout from draw(); pointer hit-testing and drag (scaled figure). */
+        let _layout = { scale: 1, ox: 0, oy: 0, bw: 0, ah: 0 };
+
+        /** Vertex C = (cx, cy) in CSS px; constant while the canvas size is constant. Only scale changes with a_px / b_px. */
+        let pinnedCornerScreen = { cx: null, cy: null, sig: '' };
+
+        function invalidatePinnedCorner() {
+            pinnedCornerScreen.cx = null;
+            pinnedCornerScreen.cy = null;
+            pinnedCornerScreen.sig = '';
+        }
 
         const COLORS = {
             A: "#00d2ff", B: "#ff00ff", C: "#ffd700"
@@ -132,7 +156,90 @@
 
         function updateMode(val) {
             mode = val;
+            invalidatePinnedCorner();
             draw();
+        }
+
+        /** Extra slack multipliers so hypotenuse decorations stay inside bounds at current mode. */
+        function footprintSlackFactors() {
+            switch (mode) {
+                case 'halbkreis': return { fx: 1.06, fy: 1.06 };
+                case 'dreieck': return { fx: 1.08, fy: 1.08 };
+                case 'stern': return { fx: 1.22, fy: 1.22 };
+                case 'pacman': return { fx: 1.12, fy: 1.1 };
+                default: return { fx: 1, fy: 1 };
+            }
+        }
+
+        function computeFigureLayout(rect) {
+            const padY = Math.max(16, Math.min(36, rect.height * 0.04));
+            const padX = Math.max(padY, Math.min(52, rect.width * 0.045));
+            const regionW = rect.width - 2 * padX;
+            const regionH = rect.height - 2 * padY;
+            const gutterX = Math.max(28, Math.min(72, regionW * 0.09));
+            const gutterY = Math.max(24, Math.min(64, regionH * 0.08));
+            const marginLeft = padX + gutterX;
+            const marginBottom = padY + gutterY;
+            const marginTop = padY + gutterY;
+            const innerRight = rect.width - padX - gutterX;
+            const slackX = 128;
+            const slackY = 108;
+            const { fx, fy } = footprintSlackFactors();
+            const rawSpanX = a_px + b_px + slackX;
+            const rawSpanY = a_px + b_px + slackY;
+            const innerW = rect.width - 2 * padX - 2 * gutterX;
+            const innerH = rect.height - 2 * padY - 2 * gutterY;
+
+            const clampScale = (s) => Math.max(0.22, Math.min(s, 2.75));
+
+            const sig = `${Math.round(rect.width)}x${Math.round(rect.height)}`;
+            if (pinnedCornerScreen.sig !== sig || pinnedCornerScreen.cx == null) {
+                let sSeed = Math.min(innerW / rawSpanX, innerH / rawSpanY) * 0.76;
+                sSeed = clampScale(sSeed);
+                pinnedCornerScreen.cx = marginLeft + a_px * sSeed;
+                pinnedCornerScreen.cy = rect.height - marginBottom - b_px * sSeed;
+                pinnedCornerScreen.sig = sig;
+            }
+
+            const Cx = pinnedCornerScreen.cx;
+            const Cy = pinnedCornerScreen.cy;
+
+            const eps = 1;
+            const labelMinOx = (s) => {
+                const fsLbl = Math.max(10, Math.min(18, 14 * Math.sqrt(s)));
+                return padX + 22 * s + fsLbl * 0.55;
+            };
+
+            const capRatio = (num, den) =>
+                den > eps && num > eps ? num / den : Infinity;
+
+            let layoutScale = Math.min(
+                capRatio(Cx - marginLeft - eps, a_px),
+                capRatio(rect.height - marginBottom - Cy - eps, b_px),
+                capRatio(innerRight - Cx - eps, b_px + fx * slackX),
+                capRatio(Cy - marginTop - eps, a_px + fy * slackY)
+            );
+            if (!Number.isFinite(layoutScale)) layoutScale = 0.22;
+            layoutScale = clampScale(layoutScale);
+
+            const fitsPinned = (s) => {
+                const bw = b_px * s;
+                const ah = a_px * s;
+                if (Cx + eps < labelMinOx(s)) return false;
+                if (Cx - ah < marginLeft - eps) return false;
+                if (Cy + bw > rect.height - marginBottom + eps) return false;
+                if (Cx + bw + fx * slackX * s > innerRight + eps) return false;
+                if (Cy - ah - fy * slackY * s < marginTop - eps) return false;
+                return true;
+            };
+
+            for (let i = 0; i < 40 && !fitsPinned(layoutScale); i++) {
+                layoutScale = clampScale(layoutScale * 0.93);
+            }
+
+            const bw = b_px * layoutScale;
+            const ah = a_px * layoutScale;
+            return { scale: layoutScale, ox: Cx, oy: Cy, bw, ah, pad: padY };
         }
 
         function drawShape(pStart, pEnd, type, color) {
@@ -188,21 +295,30 @@
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, rect.width, rect.height);
 
-            ox = rect.width * 0.35; oy = rect.height * 0.60;
-            const A = { x: ox, y: oy - a_px }, B = { x: ox + b_px, y: oy }, C = { x: ox, y: oy };
+            const L = computeFigureLayout(rect);
+            _layout = L;
+            ox = L.ox;
+            oy = L.oy;
+            const bw = L.bw;
+            const ah = L.ah;
+            const sc = L.scale;
+
+            const A = { x: ox, y: oy - ah }, B = { x: ox + bw, y: oy }, C = { x: ox, y: oy };
 
             drawShape(A, C, mode, COLORS.A);
             drawShape(C, B, mode, COLORS.B);
             drawShape(B, A, mode, COLORS.C);
 
-            // Zentrumsdreieck
+            // Core triangle fill
             ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.closePath();
             ctx.fillStyle = "rgba(255, 255, 255, 0.07)"; ctx.fill();
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; ctx.lineWidth = 2; ctx.stroke();
-            
-            // Rechter Winkel Symbol
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.2)"; 
-            ctx.strokeRect(ox, oy - 15, 15, 15);
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; ctx.lineWidth = Math.max(1, 2 * sc); ctx.stroke();
+
+            // Right-angle corner marker
+            const sq = Math.max(10, 15 * sc);
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+            ctx.lineWidth = Math.max(1, 1.5 * sc);
+            ctx.strokeRect(ox, oy - sq, sq, sq);
 
             // Analysis
             let cmFactor = 40; let valA = a_px / cmFactor, valB = b_px / cmFactor;
@@ -220,22 +336,26 @@
             if(checkText) checkText.innerHTML = `<span style="color:${COLORS.C}">A₃ = ${areaSum.toFixed(2)}</span>`;
 
             // Canvas Labels
-            ctx.font = "bold 14px Orbitron"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.fillText(valA.toFixed(2), ox - 25, oy - a_px / 2);
-            ctx.fillText(valB.toFixed(2), ox + b_px / 2, oy + 25);
-            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + b_px / 2 + 20, oy - a_px / 2 - 20);
+            const fs = Math.max(10, Math.min(18, 14 * Math.sqrt(sc)));
+            ctx.font = `bold ${fs}px Orbitron`; ctx.textAlign = "center"; ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillText(valA.toFixed(2), ox - 22 * sc, oy - ah / 2);
+            ctx.fillText(valB.toFixed(2), ox + bw / 2, oy + 22 * sc);
+            ctx.fillText(Math.hypot(valA, valB).toFixed(2), ox + bw / 2 + 18 * sc, oy - ah / 2 - 16 * sc);
 
             // Handles
+            const hr = Math.max(6, 7 * sc);
             const drawH = (p, color) => {
                 ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = color;
-                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, hr, 0, Math.PI*2); ctx.fill();
                 ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
             };
             drawH(A, COLORS.A); drawH(B, COLORS.B);
         }
 
         function resetLab() {
-            a_px = 120; b_px = 160; draw();
+            a_px = 120; b_px = 160;
+            invalidatePinnedCorner();
+            draw();
         }
 
         function getPos(e) {
@@ -247,22 +367,25 @@
 
         canvas.onpointerdown = e => {
             const pos = getPos(e);
-            if (Math.hypot(pos.x - (ox + b_px), pos.y - oy) < 40) draggingB = true;
-            if (Math.hypot(pos.x - ox, pos.y - (oy - a_px)) < 40) draggingA = true;
+            const { ox: lx, oy: ly, bw, ah } = _layout;
+            const hit = Math.max(32, 36);
+            if (Math.hypot(pos.x - (lx + bw), pos.y - ly) < hit) draggingB = true;
+            if (Math.hypot(pos.x - lx, pos.y - (ly - ah)) < hit) draggingA = true;
             if (draggingA || draggingB) canvas.setPointerCapture(e.pointerId);
         };
 
         canvas.onpointermove = e => {
             if (!draggingA && !draggingB) return;
             const pos = getPos(e);
-            if (draggingA) a_px = Math.max(40, oy - pos.y);
-            if (draggingB) b_px = Math.max(40, pos.x - ox);
+            const { scale, ox: lx, oy: ly } = _layout;
+            if (draggingA) a_px = Math.max(40, (ly - pos.y) / scale);
+            if (draggingB) b_px = Math.max(40, (pos.x - lx) / scale);
             draw();
         };
 
         canvas.onpointerup = e => {
             draggingA = draggingB = false;
-            canvas.releasePointerCapture(e.pointerId);
+            try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
         };
 
         window.onresize = draw;

@@ -14,45 +14,83 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
+        /* Wie addition / subtraktion: Shell-Füllung, Coach rechts, Canvas 100% */
+        :root {
+            --side-width: 350px;
+            --branding-blue: #00d2ff;
+            --neon-blue: #00d2ff;
+            --deep-bg: #050b18;
+        }
+
         body {
-            font-family: 'Orbitron', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: var(--deep-bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #side-panel {
+            width: var(--side-width);
+            min-width: var(--side-width);
+            background: rgba(15, 23, 42, 0.6);
+            border: none;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            height: 100vh;
+            min-width: 0;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
         }
 
         #canvas-container {
+            width: 100%;
+            height: 100%;
             position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
             overflow: hidden;
         }
 
-        .cyber-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-        }
-
         #math-coach-box {
             position: absolute;
-            width: 350px;
+            width: min(228px, calc(42vw));
+            max-width: calc(100% - 20px);
+            box-sizing: border-box;
             background: rgba(10, 20, 40, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 210, 255, 0.25);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.05);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 14px;
+            padding: clamp(8px, 1.8vw, 14px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             color: white;
             font-family: 'Orbitron', sans-serif;
             pointer-events: none;
             opacity: 0;
-            transform: translateY(0);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
             z-index: 10;
+            right: 10px;
+            left: auto;
         }
 
         #math-coach-box.visible {
@@ -60,12 +98,18 @@
             transform: translateY(0);
         }
 
+        .coach-message {
+            font-size: clamp(0.62rem, 2.2vw, 0.78rem);
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
         .coach-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
+            font-size: 0.58rem;
             color: #00d2ff;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -80,38 +124,26 @@
             box-shadow: 0 0 10px #00d2ff;
         }
 
-        .coach-message {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
         }
 
         .coach-math-highlight {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
             color: #ffde00;
-        }
-
-        /* UI Refinements */
-        .stats-card {
-            padding: 8px 12px !important;
-            min-height: 50px !important;
-        }
-
-        .stats-val {
-            font-size: 1.1rem !important;
-        }
-
-        /* Perfekte vertikale Ausrichtung */
-        .cyber-card-title {
-            text-align: left !important;
-            padding-left: 0 !important;
-            margin-left: 0 !important;
+            font-weight: bold;
         }
 
         .cyber-label {
-            font-family: 'Orbitron', sans-serif !important;
-            font-size: 0.7rem !important;
+            font-family: 'Orbitron' !important;
+            font-size: 0.7rem;
             letter-spacing: 2px;
             opacity: 0.8;
             margin-bottom: 12px !important;
@@ -119,17 +151,36 @@
             text-align: left !important;
         }
 
-        /* Spacing & Scaling Refinements */
         .cyber-control-group {
             margin-bottom: 35px !important;
         }
 
-        /* Reine Input-Felder (Vorsichtig!) */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        .stats-card {
+            padding: 8px 12px !important;
+            min-height: 50px !important;
         }
+
+        .stats-val {
+            font-size: 1.1rem;
+        }
+
+        .cyber-card-title {
+            text-align: left !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        .cyber-card-header {
+            padding-left: 0 !important;
+            margin-bottom: 20px !important;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         input[type=number] {
             -moz-appearance: textfield;
             text-align: left !important;
@@ -143,19 +194,28 @@
             box-sizing: border-box;
             border-radius: 12px;
         }
-        
+
         .cyber-select {
             background-image: none !important;
         }
-        
+
         .cyber-select::after {
-            display: none !important; 
+            display: none !important;
         }
 
-        /* Title alignment fix for CyberUI cards */
-        .cyber-card-header {
-            padding-left: 0 !important;
-            margin-bottom: 20px !important;
+        @media (max-width: 520px) {
+            #sidebar-header {
+                min-height: 56px !important;
+            }
+
+            .stats-grid {
+                gap: 8px !important;
+            }
+
+            .stats-card {
+                padding: 8px !important;
+                min-height: 44px !important;
+            }
         }
     </style>
 </head>
@@ -163,7 +223,7 @@
 <body>
     <!-- Mini Rail -->
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü umschalten">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -371,63 +431,73 @@
         function init() {
             dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
-            width = rect.width; height = rect.height;
-            canvas.width = width * dpr; canvas.height = height * dpr;
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
             buildStepSequence();
             draw();
         }
 
         function draw() {
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
             ctx.clearRect(0, 0, width, height);
 
             const dStr = String(dividend);
             const divStr = String(divisor);
             const resStr = String(Math.floor(dividend / divisor));
 
-            // 1. GRID METRICS (ULTRA Scaling)
+            const coachMargin = 10;
+            const gapWide = 16;
+            const coachWidthPx = Math.min(228, Math.max(150, width * 0.22));
+            const calcAvailWidth = Math.max(120, width - coachWidthPx - gapWide - coachMargin * 2);
+
+            // 1. GRID METRICS — Rechenfläche wie addition/subtraktion (rechts Coach reserviert)
             const maxChars = Math.max(dStr.length + divStr.length + resStr.length + 5, 12);
-            const totalLines = (dStr.length * 2) + 2; 
-            
-            const fontSizeWidth = (width * 0.96) / (maxChars * 0.85);
-            const fontSizeHeight = (height * 0.95) / (totalLines * 1.3);
-            const fontSize = Math.min(fontSizeWidth, fontSizeHeight, 140); 
-            
+            const totalLines = (dStr.length * 2) + 2;
+
+            let fontSizeWidth = (calcAvailWidth * 0.92) / (maxChars * 0.85);
+            let fontSizeHeight = (height * 0.85) / (totalLines * 1.3);
+            let fontSize = Math.min(fontSizeWidth, fontSizeHeight, 96);
+            fontSize = Math.max(11, fontSize);
+
             ctx.font = `bold ${fontSize}px Orbitron`;
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';
 
-            const charWidth = fontSize * 0.85; 
+            const charWidth = fontSize * 0.85;
             const rowHeight = fontSize * 1.4;
 
-            // 2. ENSEMBLE CENTERING
-            const coachBox = document.getElementById('math-coach-box');
-            const coachWidth = 380;
-            const gap = 40;
+            const lineWide = Math.max(2.25, Math.min(5.5, fontSize * 0.075));
+            /* Hilfslinien beim Herunterholen — schmal, keine runden Caps (wirken sonst noch dicker/gelb angehucht) */
+            const lineThin = Math.max(1.2, Math.min(2.65, fontSize * 0.036));
+            const bracketTopW = Math.max(2.1, Math.min(4.5, fontSize * 0.068));
+            const bracketStubW = Math.max(1.25, Math.min(2.2, bracketTopW * 0.48));
+
             const totalCalcWidth = maxChars * charWidth;
-            const canShowCoachBesideCalc = !!coachBox && (width >= (totalCalcWidth + gap + coachWidth + 80));
-            const ensembleTotalWidth = canShowCoachBesideCalc ? (totalCalcWidth + gap + coachWidth) : totalCalcWidth;
-            const ensembleStartX = (width - ensembleTotalWidth) / 2;
+            const ensembleStartX = coachMargin + Math.max(0, (calcAvailWidth - totalCalcWidth) / 2);
 
             const startX = ensembleStartX + charWidth * 0.5;
-            const startY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5 + 150;
+            const centeredStartY = (height - totalLines * rowHeight) / 2 + rowHeight * 0.5;
+            const nudgeDown = Math.max(72, Math.min(height * 0.16, fontSize * 2.35 + 56));
+            const minRow0CenterY = Math.max(96, height * 0.095 + fontSize * 0.58);
+            let startY = centeredStartY + nudgeDown * 0.72;
+            if (startY < minRow0CenterY) startY = minRow0CenterY;
+
+            const coachBox = document.getElementById('math-coach-box');
+            if (coachBox) {
+                coachBox.style.display = 'block';
+                coachBox.style.left = 'auto';
+                coachBox.style.right = `${coachMargin}px`;
+            }
 
             // Positioning Helpers
             const getColX = (c) => startX + c * charWidth;
             const getRowY = (r) => startY + r * rowHeight;
-
-            // Position Coach Box
-            if (coachBox) {
-                coachBox.style.display = 'block';
-                if (canShowCoachBesideCalc) {
-                    const boxLeft = Math.floor(ensembleStartX + totalCalcWidth + gap);
-                    coachBox.style.left = `${boxLeft}px`;
-                } else {
-                    // Keep the coach box visible as overlay on small screens
-                    const overlayLeft = Math.max(20, width - coachWidth - 20);
-                    coachBox.style.left = `${overlayLeft}px`;
-                }
-            }
 
             const step = currentStep >= 0 ? stepSequence[currentStep] : null;
 
@@ -479,17 +549,33 @@
                 const partLen = step.type === 'collect' ? step.currentPart.length : step.partStr.length;
                 const partStartIdx = step.type === 'collect' ? 0 : step.digitIdx - partLen + 1;
                 
-                ctx.strokeStyle = BRAND_GOLD;
-                ctx.lineWidth = 4;
+                /* Oben stark, seitliche Stummel dünn → keine „dicke gelbe Säule“ über der Hilfslinie */
                 const bLeft = getColX(partStartIdx) - charWidth * 0.45;
                 const bWidth = partLen * charWidth - charWidth * 0.1;
                 const bTop = getRowY(0) - fontSize * 0.75;
-                
+                const stubLen = Math.min(18, Math.max(10, fontSize * 0.18));
+
+                ctx.strokeStyle = BRAND_GOLD;
+                ctx.lineJoin = 'miter';
+
+                ctx.lineWidth = bracketStubW;
+                ctx.lineCap = 'butt';
                 ctx.beginPath();
-                ctx.moveTo(bLeft, bTop + 15);
+                ctx.moveTo(bLeft, bTop + stubLen);
                 ctx.lineTo(bLeft, bTop);
+                ctx.stroke();
+
+                ctx.lineWidth = bracketTopW;
+                ctx.lineCap = 'butt';
+                ctx.beginPath();
+                ctx.moveTo(bLeft, bTop);
                 ctx.lineTo(bLeft + bWidth, bTop);
-                ctx.lineTo(bLeft + bWidth, bTop + 15);
+                ctx.stroke();
+
+                ctx.lineWidth = bracketStubW;
+                ctx.beginPath();
+                ctx.moveTo(bLeft + bWidth, bTop + stubLen);
+                ctx.lineTo(bLeft + bWidth, bTop);
                 ctx.stroke();
             }
 
@@ -508,9 +594,11 @@
                         ctx.fillText('-', getColX(colEnd - String(s.product).length), getRowY(currentRow));
                         drawNumber(s.product, colEnd, currentRow, 'white');
                         
-                        // Line
-                        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                        // Line unter der Subtraktionszeile
+                        ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+                        ctx.lineWidth = lineWide;
                         ctx.setLineDash([]);
+                        ctx.lineCap = 'round';
                         ctx.beginPath();
                         ctx.moveTo(getColX(colEnd - String(s.product).length) - charWidth*0.4, getRowY(currentRow) + fontSize/1.8);
                         ctx.lineTo(getColX(colEnd) + charWidth*0.4, getRowY(currentRow) + fontSize/1.8);
@@ -527,9 +615,9 @@
                         ctx.fillStyle = BRAND_GOLD;
                         ctx.fillText(s.digit, getColX(colPos), getRowY(currentRow));
                         
-                        // Bring-down line (Light Grey)
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = 'rgba(200, 220, 255, 0.45)';
+                        ctx.lineWidth = lineThin;
+                        ctx.lineCap = 'butt';
                         ctx.setLineDash([]);
                         ctx.beginPath();
                         ctx.moveTo(getColX(colPos), getRowY(0) + fontSize/2 + 5);
@@ -547,17 +635,16 @@
             updateStepInfo();
 
             if (coachBox) {
+                coachBox.classList.add('visible');
                 const boxHeight = coachBox.offsetHeight;
-                // Determine target Y based on active step
                 let targetY = getRowY(0);
                 if (step) {
-                    // Find lastOperationY from the loop above
                     let currentRow = 1;
-                    let activeSteps = stepSequence.slice(0, currentStep + 1);
+                    const activeSteps = stepSequence.slice(0, currentStep + 1);
                     let opY = getRowY(0);
                     activeSteps.forEach((s) => {
                         if (s.type === 'divide') {
-                            currentRow++; // Move to remainder row
+                            currentRow++;
                             opY = getRowY(currentRow);
                         } else if (s.type === 'bringDown') {
                             opY = getRowY(currentRow);

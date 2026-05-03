@@ -4,6 +4,8 @@
  * Central component engine for the Cyber-Labor ecosystem.
  */
 class CyberUI {
+    static _contextMenuDocCleanup = null;
+
     static init() {
         console.log("⚛️ Cyber-UI Engine v5.3.8 initialized.");
         this.installResourceGuard();
@@ -729,14 +731,13 @@ class CyberUI {
                 opacity: 0;
                 transform: scale(0.95);
                 transform-origin: top left;
-                pointer-events: none;
+                pointer-events: auto;
                 transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             }
 
             .cyber-context-menu.visible {
                 opacity: 1;
                 transform: scale(1);
-                pointer-events: auto;
             }
 
             .context-item {
@@ -759,27 +760,6 @@ class CyberUI {
                 color: rgba(255, 255, 255, 0.85);
                 text-transform: uppercase;
                 letter-spacing: 1px;
-            }
-
-            .context-close {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                opacity: 0.4;
-                transition: opacity 0.2s;
-                font-size: 1.2rem;
-                line-height: 1;
-                color: white;
-            }
-
-            .context-close:hover {
-                opacity: 1;
             }
 
             @keyframes ui-card-fade {
@@ -1749,25 +1729,23 @@ class CyberUI {
     }
 
     static showContextMenu(x, y, items = []) {
+        if (typeof CyberUI._contextMenuDocCleanup === 'function') {
+            try {
+                CyberUI._contextMenuDocCleanup();
+            } catch (_) {}
+            CyberUI._contextMenuDocCleanup = null;
+        }
+
         let menu = document.getElementById('cyber-context-menu');
         if (menu) menu.remove();
+        const orphanBackdrop = document.getElementById('cyber-context-menu-backdrop');
+        if (orphanBackdrop) orphanBackdrop.remove();
 
         menu = document.createElement('div');
         menu.id = 'cyber-context-menu';
         menu.className = 'cyber-context-menu';
         document.body.appendChild(menu);
 
-        // Close Button (X)
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'context-close';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.onclick = () => {
-            menu.classList.remove('visible');
-            setTimeout(() => menu.remove(), 200);
-        };
-        menu.appendChild(closeBtn);
-
-        // Position & Shift if near edges
         const menuWidth = 220;
         const menuHeight = items.length * 45 + 20;
         let finalX = x;
@@ -1779,8 +1757,66 @@ class CyberUI {
         menu.style.left = `${finalX}px`;
         menu.style.top = `${finalY}px`;
 
-        // Render items
-        items.forEach(item => {
+        let armTimer = null;
+        let docArmed = false;
+        let keyArmed = false;
+
+        const unarmDoc = () => {
+            if (armTimer != null) {
+                clearTimeout(armTimer);
+                armTimer = null;
+            }
+            if (docArmed) {
+                document.removeEventListener('pointerdown', onDocPointer, false);
+                document.removeEventListener('contextmenu', onDocCtx, false);
+                docArmed = false;
+            }
+            if (keyArmed) {
+                document.removeEventListener('keydown', onKey, true);
+                keyArmed = false;
+            }
+        };
+
+        const closeMenu = () => {
+            if (CyberUI._contextMenuDocCleanup === unarmDoc) {
+                CyberUI._contextMenuDocCleanup = null;
+            }
+            unarmDoc();
+            menu.classList.remove('visible');
+            setTimeout(() => {
+                if (menu.parentNode) menu.remove();
+            }, 200);
+        };
+
+        CyberUI._contextMenuDocCleanup = unarmDoc;
+
+        const onDocPointer = (e) => {
+            if (!menu.isConnected) {
+                unarmDoc();
+                return;
+            }
+            if (menu.contains(e.target)) return;
+            closeMenu();
+        };
+
+        const onDocCtx = (e) => {
+            if (!menu.isConnected) {
+                unarmDoc();
+                return;
+            }
+            if (menu.contains(e.target)) return;
+            e.preventDefault();
+            closeMenu();
+        };
+
+        const onKey = (e) => {
+            if (e.key !== 'Escape') return;
+            e.preventDefault();
+            e.stopPropagation();
+            closeMenu();
+        };
+
+        items.forEach((item) => {
             if (item.divider) {
                 const divider = document.createElement('div');
                 divider.className = 'context-divider';
@@ -1788,39 +1824,34 @@ class CyberUI {
                 return;
             }
             if (item.checked !== undefined) {
-                // Checkbox Item
                 const checkboxWrapper = this.createCheckbox(null, item.label, item.checked, (val) => {
                     if (item.onchange) item.onchange(val);
                 });
-                /* Sonst schließt der Fenster-mousedown-Dismiss das Menü oft vor checkbox.change */
-                checkboxWrapper.addEventListener('mousedown', (ev) => ev.stopPropagation());
+                checkboxWrapper.addEventListener('pointerdown', (ev) => ev.stopPropagation());
                 menu.appendChild(checkboxWrapper);
             } else {
-                // Action Item (No Checkbox)
                 const actionBtn = document.createElement('div');
                 actionBtn.className = 'context-item action-item';
                 actionBtn.innerHTML = `<div class="context-label">${item.label}</div>`;
                 actionBtn.onclick = () => {
                     if (item.onclick) item.onclick();
-                    // Close menu on action
-                    menu.classList.remove('visible');
-                    setTimeout(() => menu.remove(), 200);
+                    closeMenu();
                 };
                 menu.appendChild(actionBtn);
             }
         });
 
-        requestAnimationFrame(() => menu.classList.add('visible'));
-
-        // global close
-        const dismiss = (e) => {
-            if (!menu.contains(e.target)) {
-                menu.classList.remove('visible');
-                setTimeout(() => menu.remove(), 200);
-                window.removeEventListener('mousedown', dismiss);
-            }
-        };
-        setTimeout(() => window.addEventListener('mousedown', dismiss), 10);
+        requestAnimationFrame(() => {
+            menu.classList.add('visible');
+            document.addEventListener('keydown', onKey, true);
+            keyArmed = true;
+            armTimer = setTimeout(() => {
+                armTimer = null;
+                document.addEventListener('pointerdown', onDocPointer, false);
+                document.addEventListener('contextmenu', onDocCtx, false);
+                docArmed = true;
+            }, 250);
+        });
     }
 
     /**

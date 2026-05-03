@@ -261,15 +261,15 @@
                 background: rgba(0, 210, 255, 0.05);
             }
 
-            /* Gradient text: shrink box to content width — otherwise the fill reads as a wide cyan bar */
+            /* Floating masthead: top-right; H1 bleibt links in der Box, Modul-Titel (.canvas-subtitle) rechtsbündig zur gemeinsamen Breite.
+               Standard: fixed am Viewport (z. B. index ohne #main-content). Labs mit #main-content: nur über der Hauptfläche → kein Überdecken der Sidebar-Nav. */
             .canvas-branding {
                 position: fixed;
-                top: 10px;
-                right: 25px;
+                top: max(10px, env(safe-area-inset-top, 0px));
+                right: max(12px, env(safe-area-inset-right, 0px));
                 display: flex;
                 flex-direction: column;
-                align-items: flex-end;
-                text-align: right;
+                align-items: stretch;
                 pointer-events: auto;
                 z-index: 99999;
                 animation: branding-fade-in 1.2s ease-out forwards;
@@ -280,12 +280,21 @@
                 cursor: pointer;
             }
 
+            #main-content > .canvas-branding,
+            #workspace > .canvas-branding {
+                position: absolute;
+                z-index: 120;
+                max-width: min(100%, calc(100% - 16px));
+                width: auto;
+                align-items: flex-end;
+            }
+
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(11px + 11px * var(--header-scale));
+                font-size: calc(11px + 11px * var(--header-scale, 0.5));
                 margin: 0 !important;
-                letter-spacing: calc(1px + 2.5px * var(--header-scale));
-                align-self: flex-end;
+                letter-spacing: calc(1px + 2.5px * var(--header-scale, 0.5));
+                align-self: flex-start;
                 width: max-content;
                 max-width: 100%;
                 display: block;
@@ -304,8 +313,8 @@
 
             .canvas-subtitle {
                 font-family: 'Orbitron', sans-serif;
-                font-size: calc(7.9px + 3.5px * var(--header-scale)); /* +20% again */
-                letter-spacing: calc(1px + 3.5px * var(--header-scale));
+                font-size: calc(7.9px + 3.5px * var(--header-scale, 0.5)); /* stays secondary to h1 */
+                letter-spacing: calc(1px + 3.5px * var(--header-scale, 0.5));
                 color: var(--branding-blue);
                 margin: 0 !important;
                 margin-top: 3px !important;
@@ -315,26 +324,28 @@
                 transition: font-size 0.2s ease;
                 line-height: 1.1;
                 font-weight: 400;
-                align-self: flex-end;
-                width: max-content;
+                align-self: stretch;
+                width: 100%;
                 max-width: 100%;
                 display: block;
+                text-align: right;
+                box-sizing: border-box;
             }
 
             @media (max-width: 1024px) {
-                .canvas-branding { top: 10px; right: 25px; }
+                .canvas-branding { top: max(10px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); }
             }
 
             @media (max-width: 768px) {
-                .canvas-branding { top: 10px; right: 15px; max-width: 80%; }
-                .canvas-branding h1 { letter-spacing: 2px; margin-top: 2px; font-size: calc(10px + 3px * var(--header-scale)); }
-                .canvas-subtitle { letter-spacing: 1px; font-size: calc(12px + 10px * var(--header-scale)); }
+                .canvas-branding { top: max(10px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); max-width: min(88vw, 520px); }
+                .canvas-branding h1 { letter-spacing: 1.5px; margin-top: 2px; font-size: calc(11px + 9px * var(--header-scale, 0.5)); }
+                .canvas-subtitle { letter-spacing: 0.8px; font-size: calc(8px + 5px * var(--header-scale, 0.5)); }
             }
 
             @media (max-width: 500px) {
-                .canvas-branding { top: 10px; right: 10px; max-width: 90%; }
+                .canvas-branding { top: max(10px, env(safe-area-inset-top, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); max-width: min(94vw, 100%); }
                 .canvas-branding h1 { display: none !important; }
-                .canvas-subtitle { font-size: calc(11px + 7px * var(--header-scale)); letter-spacing: 0.5px; }
+                .canvas-subtitle { font-size: calc(10px + 6px * var(--header-scale, 0.5)); letter-spacing: 0.45px; }
             }
 
             /* Navigation logic now handled by cyber-layout.css */

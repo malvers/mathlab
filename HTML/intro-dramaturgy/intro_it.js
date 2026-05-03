@@ -19,7 +19,7 @@ laboratori
 
 #
 120pt
-7 lingue
+%numlanguages lingue
 20pt
 %purplepulsating and counting
 30pt
@@ -30,6 +30,8 @@ francese 🇫🇷
 italiano 🇮🇹
 portoghese 🇵🇹
 swahili 🇰🇪
+olandese 🇳🇱
+turco 🇹🇷
 
 #
 // vengono mostrate tutte le schermate

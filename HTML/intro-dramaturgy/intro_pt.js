@@ -19,7 +19,7 @@ laboratórios
 
 #
 120pt
-7 idiomas
+%numlanguages idiomas
 20pt
 %purplepulsating and counting
 30pt
@@ -30,6 +30,8 @@ francês 🇫🇷
 italiano 🇮🇹
 português 🇵🇹
 suaíli 🇰🇪
+holandês 🇳🇱
+turco 🇹🇷
 
 #
 // todas as capturas de ecrã são mostradas

@@ -20,16 +20,22 @@
             align-items: center;
             overflow: hidden;
             background: radial-gradient(circle at center, rgba(0,210,255,0.02) 0%, transparent 70%);
+            box-sizing: border-box;
+            padding: clamp(8px, 2vmin, 20px);
         }
 
+        /* Quadratisch, im Hauptbereich zentriert — nicht 100%/100% (füllt sonst die Zelle und wirkt „fest verklebt“). */
         #fermat-canvas {
-            width: 100%;
-            height: 100%;
+            flex: 0 1 auto;
+            width: min(100%, 90vmin);
             max-width: 800px;
-            max-height: 800px;
+            aspect-ratio: 1 / 1;
+            height: auto;
+            max-height: min(800px, calc(100vh - 48px));
             filter: drop-shadow(0 0 50px rgba(0, 210, 255, 0.1));
             user-select: none;
             overflow: visible;
+            display: block;
         }
 
         .vertex {
@@ -123,19 +129,19 @@
     </aside>
 
     <main id="main-content">
-        <svg id="fermat-canvas" viewBox="0 0 600 600">
+        <svg id="fermat-canvas" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
             <!-- Layers -->
             <g id="layer-construction"></g>
             <g id="layer-main"></g>
             <g id="layer-hud"></g>
             
-            <!-- Interactive Points -->
-            <circle id="pt-A" class="vertex" cx="0" cy="0" r="6" />
-            <circle id="pt-B" class="vertex" cx="0" cy="0" r="6" />
-            <circle id="pt-C" class="vertex" cx="0" cy="0" r="6" />
-            <circle id="pt-P" class="vertex" cx="0" cy="0" r="6" style="fill: rgba(255,157,0,0.2); stroke: #ff9d00;" />
+            <!-- Interactive Points: Bounding-Box von ΔABC zentriert in 600×600 (Mitte 300,300); +25 px ggü. klassischem Start Δy -->
+            <circle id="pt-A" class="vertex" cx="300" cy="175" r="6" />
+            <circle id="pt-B" class="vertex" cx="150" cy="425" r="6" />
+            <circle id="pt-C" class="vertex" cx="450" cy="425" r="6" />
+            <circle id="pt-P" class="vertex" cx="350" cy="275" r="6" style="fill: rgba(255,157,0,0.2); stroke: #ff9d00;" />
             
-            <circle id="pt-F" class="fermat-point" cx="0" cy="0" r="4" style="pointer-events: none;" />
+            <circle id="pt-F" class="fermat-point" cx="300" cy="300" r="4" style="pointer-events: none;" />
         </svg>
     </main>
 
@@ -174,12 +180,12 @@
             let showConstruction = false;
             let showP = true;
 
-            // Geometry state (nice initial layout)
+            // Geometry state: Bounding-Box-Zentrum von ABC bei (300,300) im ViewBox
             const pts = {
-                A: { x: 300, y: 150 },
-                B: { x: 150, y: 400 },
-                C: { x: 450, y: 400 },
-                P: { x: 350, y: 250 }
+                A: { x: 300, y: 175 },
+                B: { x: 150, y: 425 },
+                C: { x: 450, y: 425 },
+                P: { x: 350, y: 275 }
             };
 
             const canvas = document.getElementById('fermat-canvas');

@@ -19,7 +19,7 @@ laboratuvarları
 
 #
 120pt
-8 dil
+%numlanguages dil
 20pt
 %purplepulsating ve sayıları artıyor
 30pt
@@ -30,6 +30,7 @@ Fransızca 🇫🇷
 İtalyanca 🇮🇹
 Portekizce 🇵🇹
 Kiswahili 🇰🇪
+Hollandaca 🇳🇱
 Türkçe 🇹🇷
 
 #

@@ -19,7 +19,7 @@ labs
 
 #
 120pt
-8 talen
+%numlanguages talen
 20pt
 %purplepulsating en het worden er meer
 30pt
@@ -31,6 +31,7 @@ Italiaans 🇮🇹
 Portugees 🇵🇹
 Swahili 🇰🇪
 Nederlands 🇳🇱
+Turks 🇹🇷
 
 #
 // alle screenshots worden getoond

@@ -94,10 +94,14 @@ class CyberCanvas {
         this.addListener(this.canvas, 'mouseenter', () => this.setTeleOpacity(1));
         this.addListener(this.canvas, 'mouseleave', () => this.setTeleOpacity(0.3));
 
-        // Right-Click Context Menu
+        // Right-Click Context Menu — defer so hit-testing / follow-up mouse events finish before UI mounts a full-screen layer.
         this.addListener(this.canvas, 'contextmenu', (e) => {
             e.preventDefault();
-            if (this.onContextMenu) this.onContextMenu(e);
+            if (!this.onContextMenu) return;
+            const ev = e;
+            setTimeout(() => {
+                if (this.onContextMenu) this.onContextMenu(ev);
+            }, 0);
         });
 
         this.resize();

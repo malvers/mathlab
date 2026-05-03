@@ -47,30 +47,30 @@
             transform: translate(-50%, -50%);
             color: white;
             white-space: nowrap;
-            font-size: 1.4rem;
+            font-size: var(--binom-label-fs, clamp(0.72rem, 2.6vmin + 0.35rem, 1.35rem));
             text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             pointer-events: none;
         }
 
         .side-label {
-            font-size: 1.4rem;
+            font-size: var(--binom-side-fs, clamp(0.66rem, 2.35vmin + 0.32rem, 1.2rem));
             color: rgba(255, 255, 255, 0.5);
         }
 
         .area-label {
-            font-size: 1.4rem;
+            font-size: var(--binom-label-fs, clamp(0.72rem, 2.6vmin + 0.35rem, 1.35rem));
             font-weight: bold;
         }
 
         #formula-glow-v3 {
             position: absolute;
-            bottom: 20px;
+            bottom: clamp(8px, 2.5vmin, 20px);
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            padding: 15px 45px;
+            padding: clamp(8px, 1.8vmin, 15px) clamp(16px, 4vmin, 45px);
             width: fit-content;
-            max-width: 90%;
+            max-width: min(94vw, 640px);
             text-align: center;
             display: flex;
             justify-content: center;
@@ -86,7 +86,7 @@
 
         .math-glow {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            font-size: 1.1em;
+            font-size: clamp(0.88em, 2.5vmin, 1.08em);
         }
         
         .area-item {
@@ -98,6 +98,28 @@
         .stat-val {
             font-weight: 700;
             font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.82rem, 0.85vw + 0.62rem, 1.05rem);
+        }
+
+        #parameters-container {
+            font-size: clamp(0.68rem, 0.42vw + 0.58rem, 0.94rem);
+        }
+
+        #parameters-container .binom-stat-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.65rem, 0.38vw + 0.52rem, 0.82rem);
+        }
+
+        #parameters-container .binom-tip {
+            font-size: clamp(0.58rem, 0.32vw + 0.48rem, 0.72rem);
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            margin-top: 10px;
+            font-family: Outfit, sans-serif;
+        }
+
+        #parameters-container .binom-total-row {
+            font-size: clamp(0.92rem, 0.65vw + 0.68rem, 1.12rem);
         }
     </style>
 </head>
@@ -184,11 +206,11 @@
             
             CyberUI.createCard('parameters-container', CyberI18n.get('binom.division'), `
                 <div class="area-item" style="color:#ffcc00;">
-                    <span style="font-family:Orbitron; font-size:0.8rem;">${CyberI18n.get('binom.p_value')}</span>
+                    <span class="binom-stat-label">${CyberI18n.get('binom.p_value')}</span>
                     <span id="val-p" class="stat-val">7.00</span>
                 </div>
                 <input type="range" id="p-slider" min="0.5" max="9.5" step="0.01" value="7" style="accent-color:#ffcc00; width:100%;">
-                <p style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px; font-family:Outfit;">${CyberI18n.get('binom.tip')}</p>
+                <p class="binom-tip">${CyberI18n.get('binom.tip')}</p>
             `, '#ffcc00'); // Gold accent for P-Adjustment
 
             CyberUI.createCard('parameters-container', CyberI18n.get('binom.analytics'), `
@@ -206,8 +228,8 @@
                         <span id="stat-q2-lt" class="stat-val"></span>
                     </div>
                     <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 12px 0;">
-                    <div class="area-item" style="color:white; font-size:1.1rem;">
-                        <span style="font-family:Orbitron; font-size:0.8rem;">${CyberI18n.get('binom.total')}</span>
+                    <div class="area-item binom-total-row" style="color:white;">
+                        <span class="binom-stat-label">${CyberI18n.get('binom.total')}</span>
                         <span id="stat-total" class="stat-val">100.00</span>
                     </div>
                 </div>
@@ -264,7 +286,14 @@
 
             wrapper.style.width = totalSize + "px";
             wrapper.style.height = totalSize + "px";
-            board.style.fontSize = (totalSize * 0.08) + "px";
+
+            const labelPx = Math.max(11, Math.min(20, totalSize * 0.048));
+            const sidePx = Math.max(10, labelPx * 0.93);
+            wrapper.style.setProperty('--binom-label-fs', labelPx + 'px');
+            wrapper.style.setProperty('--binom-side-fs', sidePx + 'px');
+
+            const katexPx = Math.max(12, Math.min(26, totalSize * 0.076));
+            board.style.fontSize = katexPx + 'px';
 
             draw();
         }
@@ -272,15 +301,17 @@
         function updateLabels(px, qx) {
             if (!window.katex) return;
 
+            /* Side p/q labels: smaller offset = tighter to the square edge */
+            const edgePad = Math.max(7, Math.min(16, totalSize * 0.026));
             const labels = {
                 'lbl-p2': { x: px / 2, y: px / 2, tex: '\\color{#ffcc00}{p^2}' },
                 'lbl-pq1': { x: px + qx / 2, y: px / 2, tex: '\\color{#ffcc00}{p}\\color{#00f2ff}{q}' },
                 'lbl-pq2': { x: px / 2, y: px + qx / 2, tex: '\\color{#ffcc00}{p}\\color{#00f2ff}{q}' },
                 'lbl-q2': { x: px + qx / 2, y: px + qx / 2, tex: '\\color{#00f2ff}{q^2}' },
-                'lbl-p-top': { x: px / 2, y: -28, tex: '\\color{#ffcc00}{p}' },
-                'lbl-q-top': { x: px + qx / 2, y: -28, tex: '\\color{#00f2ff}{q}' },
-                'lbl-p-left': { x: -28, y: px / 2, tex: '\\color{#ffcc00}{p}' },
-                'lbl-q-left': { x: -28, y: px + qx / 2, tex: '\\color{#00f2ff}{q}' }
+                'lbl-p-top': { x: px / 2, y: -edgePad, tex: '\\color{#ffcc00}{p}' },
+                'lbl-q-top': { x: px + qx / 2, y: -edgePad, tex: '\\color{#00f2ff}{q}' },
+                'lbl-p-left': { x: -edgePad, y: px / 2, tex: '\\color{#ffcc00}{p}' },
+                'lbl-q-left': { x: -edgePad, y: px + qx / 2, tex: '\\color{#00f2ff}{q}' }
             };
 
             for (const [id, cfg] of Object.entries(labels)) {
