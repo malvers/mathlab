@@ -201,7 +201,7 @@ const App = {
     focusOscillate: false,
     focusBaseY: 0,
     focusOscPhase: 0,
-    FOCUS_OSC_AMP: 180,
+    /** Winkelgeschwindigkeit der Brennpunkt-Oszillation entlang der Linsenhöhe */
     FOCUS_OSC_SPEED: 0.015,
     /** Vertikaler Linsenschwerpunkt im freien Schlitz [0–1]: 0 = oben am Randband, 0.5 mittig */
     LENS_VERTICAL_SLACK_BIAS: 0.44,
@@ -644,7 +644,11 @@ const App = {
     animate() {
         if (this.focusOscillate) {
             this.focusOscPhase += this.FOCUS_OSC_SPEED;
-            this.focus.y = this.focusBaseY + this.FOCUS_OSC_AMP * Math.sin(this.focusOscPhase);
+            const yTop = this.offsetY;
+            const yBot = this.offsetY + this.perimeter;
+            const mid = 0.5 * (yTop + yBot);
+            const half = 0.5 * (yBot - yTop);
+            this.focus.y = Math.min(yBot, Math.max(yTop, mid + half * Math.sin(this.focusOscPhase)));
         }
         this.step();
         if (this.paused || this.shouldDisplay() || this.focusOscillate) this.draw();
