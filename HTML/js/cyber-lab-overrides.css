@@ -22,6 +22,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 4px;
     padding: var(--cyber-nav-band-top) 0 22px 0;
     z-index: 2000;
     backdrop-filter: blur(25px);
@@ -55,16 +56,16 @@
     width: 100% !important;
     max-width: none !important;
     padding: 0 !important;
-    /* No extra top spacing — top edge comes from #side-panel padding + this variable */
-    margin: 0 0 6px 0 !important;
+    /* No extra top spacing — top edge comes from #side-panel padding + this variable.
+       Bottom margin matches mini-rail / nav row gap (4px). */
+    margin: 0 0 4px 0 !important;
     box-sizing: border-box !important;
 }
 
 /* Global: no forced 80px header slot (cyber-layout); height = nav row */
-/* Parameter/instrument card ~3px closer under sidebar nav (was 4px gap) */
 #sidebar-header {
     min-height: 0 !important;
-    margin-bottom: 1px !important;
+    margin-bottom: 0 !important;
 }
 
 #side-panel .cyber-nav .nav-btn,
@@ -119,7 +120,7 @@
     color: #fff !important;
     background: rgba(15, 23, 42, 0.85) !important;
     border: 1px solid rgba(0, 210, 255, 0.3) !important;
-    margin-bottom: 20px;
+    margin-bottom: 0 !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -172,6 +173,14 @@
     flex-direction: column; 
     width: 100% !important; 
     padding: 0 !important; /* Panel padding is handled by #side-panel */
+    box-sizing: border-box;
+}
+
+/* Zwischen Stats/HUD-Zeile und Karten — gleicher Rhythmus wie cyber-nav gap (4px); kein Inline margin mehr nötig */
+#side-panel #data-container {
+    margin-bottom: 4px !important;
+    width: 100% !important;
+    padding: 0 !important;
     box-sizing: border-box;
 }
 
