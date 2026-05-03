@@ -48,7 +48,8 @@
         </div>
     </main>
 
-    <script src="js/branding/briefings.js?v=539"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=539"></script>
@@ -58,6 +59,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
                 if (typeof draw === 'function') draw();
@@ -85,6 +90,10 @@
                 // 2. Initialize UI Engine
                 if (typeof CyberUI !== 'undefined') {
                     CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
                     
                     CyberUI.createCard('parameters-container', CyberI18n.get('steigung.function'), `
                         <div id="eq-main" class="math-glow" style="text-align:left; margin-bottom:2px; padding-left:5px; font-size:1.3rem;"></div>

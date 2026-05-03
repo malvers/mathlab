@@ -224,7 +224,8 @@
         </div>
     </main>
 
-    <script src="js/cyber-canvas.js"></script>
+        <script src="js/cyber-left-chrome.js"></script>
+<script src="js/cyber-canvas.js"></script>
     <script src="js/branding/briefings.js?v=539"></script>
     <script src="js/branding/overlays.js?v=539"></script>
     <script src="js/i18n.js"></script>
@@ -235,6 +236,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
         }
 
@@ -615,6 +620,10 @@
                 subtitle: CyberI18n.get('lissajous.title')
             });
             CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
             CyberUI.createCard('ui-container', CyberI18n.get('lissajous.parameters'), `
                 <div id="grp-view" class="lissajous-view-row" role="group" aria-label="Ansicht">

@@ -12,37 +12,8 @@
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
-</head>
 
-<body class="template-copy-sandbox">
-    <!-- Mini Rail -->
-    <nav id="mini-rail">
-        <div class="nav-btn" id="template-rail-toggle" onclick="toggleSidebar()" title="">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </div>
-    </nav>
-
-    <aside id="side-panel">
-        <header id="sidebar-header"></header>
-        <div id="ui-container"></div>
-    </aside>
-
-    <main id="main-content">
-        <div id="canvas-container">
-            <div class="cyber-grid"></div>
-            <div id="math-coach-box">
-                <div class="coach-title"><span id="template-coach-heading"></span></div>
-                <div id="coach-content" class="coach-message">...</div>
-            </div>
-            <canvas id="canvas"></canvas>
-        </div>
-    </main>
-
-    <!-- Stylesheets laden zuerst; dieses <style> steht zuletzt im Dokument → höhere Cascade-Priorität -->
+    <!-- Nach den verlinkten Stylesheets (Cascade-Priorität über gleiche Spezifität). -->
     <style id="template-copy-styles-tail">
         :root {
             --side-width: 350px;
@@ -243,7 +214,37 @@
             background-image: none !important;
         }
     </style>
+</head>
 
+<body class="template-copy-sandbox">
+    <!-- Mini Rail -->
+    <nav id="mini-rail">
+        <div class="nav-btn" id="template-rail-toggle" onclick="toggleSidebar()" title="">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title"><span id="template-coach-heading"></span></div>
+                <div id="coach-content" class="coach-message">...</div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
     <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
     <script src="js/i18n.js"></script>
@@ -253,6 +254,10 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
                 if (typeof init === 'function') init();
@@ -279,6 +284,10 @@
             subtitle: CyberI18n.get('ui.template_brand_subtitle')
         });
         CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
 
         /** Letztes Stylesheet am Ende von body — nach CyberUI.injectStyles (#cyber-ui-dynamic-styles). */
         function enforceTemplateCopyShell() {
