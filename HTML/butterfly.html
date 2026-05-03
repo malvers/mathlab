@@ -49,6 +49,18 @@
             font-size: 0.65rem !important;
             min-height: 42px !important;
         }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
 </head>
 
@@ -71,15 +83,17 @@
             <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); margin-bottom:15px;">
                 <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:12px; letter-spacing:1px;"><script>document.write(CyberI18n.get('butterfly.animation'))</script></span>
                 
-                <label class="control-group" style="margin-bottom:12px; display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.speed'))</script> <span style="color:var(--neon-blue);" id="val-speed">3.5</span></div>
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.speed'))</script> <span style="color:var(--neon-blue);" id="val-speed">3.5</span></div>
+                    <label for="speed" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.speed'))</script></label>
                     <input type="range" id="speed" min="0" max="10" step="0.1" value="3.5">
-                </label>
+                </div>
 
-                <label class="control-group" style="display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.hue'))</script> <span style="color:var(--neon-blue);" id="val-hue">180</span></div>
+                <div class="control-group">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.7); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.hue'))</script> <span style="color:var(--neon-blue);" id="val-hue">180</span></div>
+                    <label for="hue" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.hue'))</script></label>
                     <input type="range" id="hue" min="0" max="360" step="1" value="180">
-                </label>
+                </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-top:15px;">
                     <button id="btn-toggle" class="cyber-btn compact-btn"><script>document.write(CyberI18n.get('butterfly.pause'))</script></button>
@@ -92,30 +106,35 @@
             <section class="stat-card" style="background:rgba(255,255,255,0.03); padding:18px; border-radius:18px; border:1px solid rgba(255,255,255,0.08);">
                 <span style="font-family:Orbitron; font-size:0.85rem; color:rgba(255,255,255,0.4); display:block; margin-bottom:12px; letter-spacing:1px;"><script>document.write(CyberI18n.get('butterfly.params'))</script></span>
 
-                <label class="control-group" style="margin-bottom:12px; display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-pink); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.exp_amp'))</script> <span id="val-eA">1.0</span></div>
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-pink); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.exp_amp'))</script> <span id="val-eA">1.0</span></div>
+                    <label for="p-eA" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.exp_amp'))</script></label>
                     <input type="range" id="p-eA" min="0.1" max="2.5" step="0.1" value="1.0" style="accent-color:var(--neon-pink);">
-                </label>
+                </div>
 
-                <label class="control-group" style="margin-bottom:12px; display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_amp'))</script> <span id="val-cA">2.0</span></div>
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_amp'))</script> <span id="val-cA">2.0</span></div>
+                    <label for="p-cA" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.cos_amp'))</script></label>
                     <input type="range" id="p-cA" min="0.1" max="4.0" step="0.1" value="2.0" style="accent-color:var(--neon-green);">
-                </label>
+                </div>
 
-                <label class="control-group" style="margin-bottom:12px; display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_freq'))</script> <span id="val-cF">4</span></div>
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-green); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.cos_freq'))</script> <span id="val-cF">4</span></div>
+                    <label for="p-cF" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.cos_freq'))</script></label>
                     <input type="range" id="p-cF" min="1" max="12" step="1" value="4" style="accent-color:var(--neon-green);">
-                </label>
+                </div>
 
-                <label class="control-group" style="margin-bottom:12px; display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_amp'))</script> <span id="val-sA">1.0</span></div>
+                <div class="control-group" style="margin-bottom:12px;">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_amp'))</script> <span id="val-sA">1.0</span></div>
+                    <label for="p-sA" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.sin_amp'))</script></label>
                     <input type="range" id="p-sA" min="0.1" max="3.0" step="0.1" value="1.0" style="accent-color:var(--neon-orange);">
-                </label>
+                </div>
 
-                <label class="control-group" style="display:block;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_div'))</script> <span id="val-sD">24</span></div>
+                <div class="control-group">
+                    <div aria-hidden="true" style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--neon-amber); font-family:Orbitron;"><script>document.write(CyberI18n.get('butterfly.sin_div'))</script> <span id="val-sD">24</span></div>
+                    <label for="p-sD" class="visually-hidden"><script>document.write(CyberI18n.get('butterfly.sin_div'))</script></label>
                     <input type="range" id="p-sD" min="1" max="48" step="1" value="24" style="accent-color:var(--neon-orange);">
-                </label>
+                </div>
             </section>
         </div>
     </aside>
