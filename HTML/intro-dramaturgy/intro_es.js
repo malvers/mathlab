@@ -66,11 +66,11 @@ líneas de código
 ¡una locura!
 180pt
 %emoji 😎
-%button volver
 
 #
 120pt
 docalvers.de
+%button index Volver al índice
 
 %stop
 

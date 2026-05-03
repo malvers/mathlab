@@ -66,11 +66,11 @@ Pour vous !
 c'est dingue !
 180pt
 %emoji 😎
-%button retour
 
 #
 120pt
 docalvers.de
+%button index Retour à l’aperçu
 
 %stop
 
