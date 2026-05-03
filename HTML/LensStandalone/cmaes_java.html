@@ -10,7 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=37">
 </head>
 
 <body>
@@ -30,12 +30,12 @@
             <!-- Branding Header (top-right) -->
             <div class="canvas-branding">
                 <h1>DOC ALVERS MATHE-LABOR</h1>
-                <div class="canvas-subtitle">Optimierung einer Linse mit Covarianz Matrix Adaptions Evolutionsstrategie</div>
+                <div class="canvas-subtitle">Optimierung einer Linse · CMA-ES</div>
             </div>
 
             <!-- Bottom HUD: Telemetrie + Steuerung, gemeinsam skaliert -->
             <div id="lens-ui-dock">
-                <div class="lens-ui-dock-inner">
+                <div class="lens-ui-dock-inner" id="lens-ui-dock-inner">
                     <aside id="telemetry">
                 <div class="glass-card">
                     <h3>EVOLUTION DATA</h3>
@@ -106,6 +106,14 @@
                 </aside>
 
                     <footer id="control-bar">
+                <button type="button" id="btn-dock-toggle" class="action-btn btn-dock-fold"
+                    aria-expanded="true" aria-controls="lens-ui-dock-inner"
+                    title="Bedienfeld ausblenden" aria-label="Bedienfeld ausblenden">
+                    <svg class="dock-chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                        <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+                    </svg>
+                </button>
+                <div id="control-bar-main" class="control-bar-main">
                 <div class="btn-group">
                     <button id="btn-play" class="action-btn primary">
                         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -127,6 +135,7 @@
                         <label>SIGMA</label>
                         <input type="range" id="slider-sigma" min="0.01" max="0.5" step="0.01" value="0.1">
                     </div>
+                    </div>
                 </div>
                 </footer>
                 </div>
@@ -139,7 +148,7 @@
     <script>
         CyberUI.init();
     </script>
-    <script src="cmaes_java.js?v=22"></script>
+    <script src="cmaes_java.js?v=28"></script>
 </body>
 
 </html>
