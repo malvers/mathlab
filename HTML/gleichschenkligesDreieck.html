@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="js/i18n.js"></script>
     <title>docalvers | Ultra v6.7.0</title>
 
@@ -24,35 +24,86 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            grid-template-rows: minmax(0, 100vh);
+            grid-template-rows: minmax(0, 100dvh);
+        }
+
+        #sidebar-header {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+        }
+
+        #main-content {
+            flex: 1 1 0%;
+            flex-grow: 1;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            max-height: 100vh;
+            max-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.06) 0%, transparent 45%);
+        }
+
+        #canvas-container {
+            flex: 1 1 0%;
+            width: 100%;
+            min-height: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2.4vmin, 20px);
+            padding: clamp(8px, 2vmin, 20px);
+        }
+
         /* Beweis-spezifische Anpassungen */
         .canvas-container {
+            flex: 1 1 0%;
             min-height: 0;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
+            border-radius: clamp(12px, 2vmin, 20px);
             position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1), min-height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .canvas-container > canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         #tri-container {
-            flex: 1;
+            flex: 1 1 42%;
+            min-height: clamp(88px, 22vh, 220px);
+            min-height: clamp(88px, 18svh, 220px);
         }
 
         #graph-container {
-            flex: 1;
+            flex: 1 1 58%;
+            min-height: clamp(104px, 26vh, 300px);
+            min-height: clamp(104px, 22svh, 300px);
         }
 
         #graph-container.collapsed {
-            flex: 0 0 50px;
+            flex: 0 0 clamp(46px, 8vmin, 56px);
+            min-height: 0;
         }
 
         .panel-toggle {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: clamp(10px, 1.8vmin, 15px);
+            right: clamp(12px, 2vmin, 20px);
             width: 32px;
             height: 32px;
             background: rgba(255, 255, 255, 0.05);
@@ -72,6 +123,17 @@
             border-color: var(--neon-blue);
         }
 
+        /* Kompaktere Masthead: mehr Resthöhe für die beiden Panels */
+        #main-content > .canvas-branding h1 {
+            font-size: calc(9px + 8px * var(--header-scale, 0.5)) !important;
+            letter-spacing: calc(0.5px + 1.25px * var(--header-scale, 0.5)) !important;
+        }
+
+        #main-content > .canvas-branding .canvas-subtitle {
+            font-size: calc(7px + 4px * var(--header-scale, 0.5)) !important;
+            letter-spacing: calc(0.6px + 2.2px * var(--header-scale, 0.5)) !important;
+        }
+
         #warning-box {
             background: rgba(255, 51, 51, 0.1);
             border: 1px solid #ff3333;
@@ -84,6 +146,49 @@
             font-size: 0.7rem;
             color: #ff3333;
             animation: cyber-glow-red 2s infinite;
+        }
+
+        @media (max-width: 520px) {
+            #canvas-container {
+                padding: clamp(6px, 1.8vmin, 12px);
+                gap: clamp(8px, 2vmin, 14px);
+            }
+
+            #sidebar-header {
+                min-height: 56px !important;
+            }
+        }
+
+        @media (max-height: 720px) {
+            #canvas-container {
+                gap: clamp(6px, 1.4vmin, 12px);
+                padding: clamp(6px, 1.4vmin, 14px);
+            }
+
+            #tri-container {
+                flex: 1 1 38%;
+                min-height: clamp(80px, 20vh, 180px);
+                min-height: clamp(80px, 16svh, 180px);
+            }
+
+            #graph-container {
+                flex: 1 1 62%;
+                min-height: clamp(96px, 28vh, 260px);
+                min-height: clamp(96px, 24svh, 260px);
+            }
+        }
+
+        @media (max-height: 560px) {
+            #tri-container {
+                flex: 1 1 34%;
+                min-height: 72px;
+            }
+
+            #graph-container {
+                flex: 1 1 66%;
+                min-height: clamp(88px, 34vh, 220px);
+                min-height: clamp(88px, 28svh, 220px);
+            }
         }
     </style>
 </head>
@@ -107,7 +212,7 @@
     </aside>
 
     <main id="main-content">
-        <div id="canvas-container" style="display: flex; flex-direction: column; gap: 20px; padding: 20px;">
+        <div id="canvas-container">
             <div id="tri-container" class="canvas-container">
                 <canvas id="triCanvas"></canvas>
             </div>
@@ -182,10 +287,18 @@
         function resize() {
             const dpr = window.devicePixelRatio || 1;
             [triCanvas, graphCanvas].forEach(c => {
-                const rect = c.parentNode.getBoundingClientRect();
-                c.width = rect.width * dpr;
-                c.height = rect.height * dpr;
-                c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+                const parent = c.parentNode;
+                if (!parent) return;
+                const rect = parent.getBoundingClientRect();
+                const w = Math.max(1, Math.round(rect.width));
+                const h = Math.max(1, Math.round(rect.height));
+                c.width = w * dpr;
+                c.height = h * dpr;
+                c.style.width = w + 'px';
+                c.style.height = h + 'px';
+                const ctx = c.getContext('2d');
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
             });
             draw();
         }
@@ -286,88 +399,107 @@
         }
 
         function drawGraph() {
+            const rect = graphCanvas.getBoundingClientRect();
             const container = document.getElementById('graph-container');
             if (container && container.classList.contains('collapsed')) {
-                // Clear and don't draw if collapsed
-                graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+                graphCtx.clearRect(0, 0, rect.width, rect.height);
                 return;
             }
 
-            const rect = graphCanvas.getBoundingClientRect();
             graphCtx.clearRect(0, 0, rect.width, rect.height);
-            const pad = 60;
-            const gw = rect.width - pad * 2;
-            const gh = rect.height - pad * 2;
-            const toX = (val) => pad + (val / 8.5) * gw;
-            const toY = (val) => rect.height - pad - (val / 4.5) * gh;
+
+            const pw = rect.width;
+            const ph = rect.height;
+            const tickFontSize = ph < 200 ? 9 : 10;
+            const axisLabelSize = ph < 200 ? 11 : 13;
+
+            const legAxisText = CyberI18n.get('iso_tri.leg');
+
+            let padBottom = Math.min(72, Math.max(46, ph * 0.28));
+            let padTop = Math.min(52, Math.max(26, ph * 0.15));
+            const tickMarkLeft = Math.max(18, pw * 0.06 + 14);
+            let padLeft = Math.min(64, Math.max(38, pw * 0.12));
+            padLeft = Math.max(padLeft, tickMarkLeft);
+
+            const padRight = Math.min(40, Math.max(16, pw * 0.05));
+
+            let gw = pw - padLeft - padRight;
+            let gh = ph - padTop - padBottom;
+            gw = Math.max(24, gw);
+            gh = Math.max(24, gh);
+
+            const toX = (val) => padLeft + (val / 8.5) * gw;
+            const toY = (val) => ph - padBottom - (val / 4.5) * gh;
+
+            const pxPerYUnit = gh / 4.5;
+            const yLabelStep = pxPerYUnit >= 16 ? 1 : pxPerYUnit >= 10 ? 2 : 4;
 
             // Grid & Ticks
             graphCtx.lineWidth = 0.5;
-            graphCtx.font = "10px Orbitron";
+            graphCtx.font = tickFontSize + "px Orbitron";
             graphCtx.textAlign = "center";
             graphCtx.textBaseline = "top";
             
             for (let i = 0; i <= 8; i++) {
-                // Grid Line
                 graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
                 graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(4.5)); graphCtx.stroke();
                 
-                // Tick & Number
                 graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
-                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(0) + 5); graphCtx.stroke();
-                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
-                graphCtx.fillText(i, toX(i), toY(0) + 8);
+                graphCtx.beginPath(); graphCtx.moveTo(toX(i), toY(0)); graphCtx.lineTo(toX(i), toY(0) + 6); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.55)";
+                graphCtx.fillText(i, toX(i), toY(0) + 9);
             }
             
             graphCtx.textAlign = "right";
             graphCtx.textBaseline = "middle";
+            graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
             for (let i = 0; i <= 4; i++) {
-                // Grid Line
-                graphCtx.strokeStyle = "rgba(255,255,255,0.05)";
                 graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(8.5), toY(i)); graphCtx.stroke();
-                
-                // Tick & Number
+            }
+            for (let i = 0; i <= 4; i += yLabelStep) {
                 graphCtx.strokeStyle = "rgba(255,255,255,0.3)";
-                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(0) - 5, toY(i)); graphCtx.stroke();
-                graphCtx.fillStyle = "rgba(255,255,255,0.5)";
-                graphCtx.fillText(i, toX(0) - 8, toY(i));
+                graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(i)); graphCtx.lineTo(toX(0) - 6, toY(i)); graphCtx.stroke();
+                graphCtx.fillStyle = "rgba(255,255,255,0.55)";
+                graphCtx.fillText(i, toX(0) - 10, toY(i));
             }
 
-            // Axes with Arrows
             graphCtx.lineWidth = 2;
             
-            // X-Axis (Basis b)
             graphCtx.strokeStyle = "#9d50bb";
             const xAxisEnd = toX(8.2);
             graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(xAxisEnd, toY(0)); graphCtx.stroke();
-            // Arrowhead X
             graphCtx.beginPath();
             graphCtx.moveTo(xAxisEnd, toY(0));
             graphCtx.lineTo(xAxisEnd - 10, toY(0) - 5);
             graphCtx.lineTo(xAxisEnd - 10, toY(0) + 5);
             graphCtx.fillStyle = "#9d50bb";
             graphCtx.fill();
-            // Label X (BASIS)
-            graphCtx.fillStyle = "white";
-            graphCtx.font = "bold 13px Orbitron";
-            graphCtx.textAlign = "right";
-            graphCtx.fillText(CyberI18n.get('iso_tri.base'), xAxisEnd, toY(0) + 35);
 
-            // Y-Axis (SCHENKEL)
+            graphCtx.fillStyle = "white";
+            graphCtx.font = "bold " + axisLabelSize + "px Orbitron";
+            graphCtx.textAlign = "right";
+            graphCtx.textBaseline = "alphabetic";
+            const baseLabelY = Math.min(toY(0) + (ph < 200 ? 22 : 28), ph - 6);
+            graphCtx.fillText(CyberI18n.get('iso_tri.base'), xAxisEnd, baseLabelY);
+
             graphCtx.strokeStyle = "#00d2ff";
             const yAxisEnd = toY(4.2);
             graphCtx.beginPath(); graphCtx.moveTo(toX(0), toY(0)); graphCtx.lineTo(toX(0), yAxisEnd); graphCtx.stroke();
-            // Arrowhead Y
             graphCtx.beginPath();
             graphCtx.moveTo(toX(0), yAxisEnd);
             graphCtx.lineTo(toX(0) - 5, yAxisEnd + 10);
             graphCtx.lineTo(toX(0) + 5, yAxisEnd + 10);
             graphCtx.fillStyle = "#00d2ff";
             graphCtx.fill();
-            // Label Y (SCHENKEL)
+
             graphCtx.fillStyle = "white";
-            graphCtx.textAlign = "center";
-            graphCtx.fillText(CyberI18n.get('iso_tri.leg'), toX(0), yAxisEnd - 15);
+            graphCtx.font = "bold " + axisLabelSize + "px Orbitron";
+            graphCtx.textAlign = "left";
+            graphCtx.textBaseline = "bottom";
+            const legInsetX = 12;
+            const legLabelY = Math.max(axisLabelSize + 10, Math.min(padTop + 20 + axisLabelSize, yAxisEnd - 14));
+
+            graphCtx.fillText(legAxisText, legInsetX, legLabelY);
 
             // Function
             graphCtx.lineWidth = 3;
@@ -437,10 +569,12 @@
                 </div>
             `, '#00d2ff');
 
-            setTimeout(() => {
-                resize();
-                // removed KaTeX overriding for label-u, label-b, label-s
-            }, 100);
+            setTimeout(() => resize(), 80);
+            requestAnimationFrame(() => requestAnimationFrame(() => resize()));
+            setTimeout(() => resize(), 180);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(function () { resize(); });
+            }
         });
 
         window.addEventListener('resize', resize);
