@@ -482,6 +482,53 @@
             letter-spacing: 0 !important;
             transform: scale(0.92);
         }
+        /* Language line + trailing RI flag: gradient/uppercase only on letters */
+        #catching-words-panel .falling-word.cw-lang-with-flag {
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35em;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: unset;
+        }
+        #catching-words-panel .falling-word.cw-lang-with-flag .cw-lang-label-text {
+            flex: 0 0 auto;
+            background: linear-gradient(to right, var(--neon-blue), #fff, var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-transform: uppercase;
+        }
+        #catching-words-panel .falling-word.cw-lang-with-flag .cw-lang-label-flag {
+            flex: 0 0 auto;
+            font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', emoji, sans-serif;
+            font-weight: 400;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            text-indent: 0;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: rgba(255, 252, 255, 0.96);
+            line-height: 1;
+            filter: none;
+        }
+        #catching-words-panel .falling-word.cw-lang-with-flag.cw-purple-pulse .cw-lang-label-text {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: #d8b4fe !important;
+        }
+        #catching-words-panel .falling-word.cw-lang-with-flag.cw-settled .cw-lang-label-flag {
+            letter-spacing: 0 !important;
+        }
         #catching-words-panel .falling-word.caught {
             animation: cw-caught 0.38s ease-out forwards;
         }
@@ -1920,6 +1967,20 @@
             }
         }
 
+        /** Split «keyword 🇩🇪»: gradient + uppercase on letters breaks regional-indicator flags (background-clip / text-transform). */
+        function cwSplitTrailingRlFlag(label) {
+            const s = String(label || '').trim();
+            if (!s) return null;
+            const oneRI = '(?:\\uD83C[\\uDDE6-\\uDDFF])';
+            const re = new RegExp('^(.*?)(' + '\\s+' + oneRI + '{2}' + ')$');
+            const m = s.match(re);
+            if (!m) return null;
+            const base = m[1].replace(/\s+$/, '');
+            const flag = m[2].trim();
+            if (!base || !flag) return null;
+            return { base: base, flag: flag };
+        }
+
         function spawnCwWord() {
             const playStack = document.getElementById('cw-stack');
             if (!playStack) return;
@@ -2348,7 +2409,20 @@
                 if (/^docalvers\.?$/i.test(labNorm)) domainExtra = ' cw-domain-prefix';
                 else if (/^de$/i.test(labNorm)) domainExtra = ' cw-domain-tld';
                 el.className = 'falling-word' + (entry.purplePulse ? ' cw-purple-pulse' : '') + domainExtra;
-                el.textContent = label;
+                const splitFlag = cwSplitTrailingRlFlag(labNorm);
+                if (splitFlag) {
+                    el.classList.add('cw-lang-with-flag');
+                    const spanText = document.createElement('span');
+                    spanText.className = 'cw-lang-label-text';
+                    spanText.textContent = splitFlag.base;
+                    const spanFlag = document.createElement('span');
+                    spanFlag.className = 'cw-lang-label-flag';
+                    spanFlag.textContent = splitFlag.flag;
+                    el.appendChild(spanText);
+                    el.appendChild(spanFlag);
+                } else {
+                    el.textContent = label;
+                }
             }
             el.style.zIndex = String(cwSpawnRoundIndex);
             if (fontPt != null && Number.isFinite(fontPt)) el.style.setProperty('font-size', fontPt + 'pt', 'important');
@@ -2360,6 +2434,7 @@
                 if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
                 el.classList.add('cw-settled');
                 el.querySelectorAll('.cw-domain-inner').forEach((s) => s.classList.add('cw-settled'));
+                el.querySelectorAll('.cw-lang-label-text, .cw-lang-label-flag').forEach((s) => s.classList.add('cw-settled'));
             });
 
             function onCatch(e) {
@@ -2743,7 +2818,7 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
-            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=10';
+            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=13';
 
             function applyLoaded() {
                 var inline =

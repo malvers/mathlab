@@ -23,13 +23,13 @@ labs
 20pt
 %purplepulsating and counting
 30pt
-German
-English
-Spanish
-French
-Italian
-Portuguese
-Swahili
+German 🇩🇪
+English 🇬🇧
+Spanish 🇪🇸
+French 🇫🇷
+Italian 🇮🇹
+Portuguese 🇵🇹
+Swahili 🇰🇪
 
 #
 // all screenshots are shown
@@ -69,7 +69,6 @@ that's crazy!
 %button back
 
 #
-%cwstack left
 120pt
 docalvers.de
 

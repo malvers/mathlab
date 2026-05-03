@@ -23,14 +23,14 @@ laboratuvarları
 20pt
 %purplepulsating ve sayıları artıyor
 30pt
-Almanca
-İngilizce
-İspanyolca
-Fransızca
-İtalyanca
-Portekizce
-Kiswahili
-Türkçe
+Almanca 🇩🇪
+İngilizce 🇬🇧
+İspanyolca 🇪🇸
+Fransızca 🇫🇷
+İtalyanca 🇮🇹
+Portekizce 🇵🇹
+Kiswahili 🇰🇪
+Türkçe 🇹🇷
 
 #
 // tüm ekran görüntüleri gösterilir
@@ -70,7 +70,6 @@ inanılmaz!
 %button geri
 
 #
-%cwstack left
 120pt
 docalvers.de
 
