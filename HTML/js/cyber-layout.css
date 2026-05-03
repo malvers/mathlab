@@ -22,12 +22,28 @@ body {
     color: white;
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
-    display: flex;
+    /* TEST: Flex auf body aus — Shell per Grid (Rail-Spalte fest 66px, keine Quetschung) */
+    /* Zurück zum Vorher: nächste ~15 Zeilen bis Ende der body:has()-Blöcke durch eine Zeile ersetzen: display: flex; */
+    display: grid;
+    grid-template-columns: 66px minmax(350px, auto) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 100vh);
+    align-items: stretch;
     overflow-x: hidden;
+}
+
+body:not(:has(#side-panel)) {
+    grid-template-columns: 66px minmax(0, 1fr);
+}
+
+body:has(#side-panel.collapsed) {
+    grid-template-columns: 66px 0 minmax(0, 1fr);
 }
 
 /* --- SIDE PANEL (SIDEBAR) --- */
 #side-panel {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
     width: 380px;
     min-width: 380px;
     background: var(--glass);
@@ -52,11 +68,20 @@ body {
 
 /* --- MAIN CONTENT AREA --- */
 #main-content {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: stretch;
     flex-grow: 1;
+    min-width: 0;
     height: 100vh;
     position: relative;
     overflow: hidden;
     background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+}
+
+body:not(:has(#side-panel)) #main-content {
+    grid-column: 2;
+    grid-row: 1;
 }
 
 #canvas-container {

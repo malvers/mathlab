@@ -429,9 +429,10 @@
             text-transform: uppercase;
             filter: drop-shadow(0 0 40px rgba(0, 210, 255, 0.7));
             user-select: none;
-            touch-action: manipulation;
+            pointer-events: none;
+            touch-action: auto;
             white-space: nowrap;
-            cursor: pointer;
+            cursor: default;
             transform-origin: center center;
             opacity: 0;
             transform: scale(0.05);
@@ -2357,9 +2358,9 @@
                 const glyph = String(entry.text || '').trim();
                 if (!glyph) return;
                 const fontPt = entry.fontSizePt;
-                const el = document.createElement('button');
-                el.type = 'button';
+                const el = document.createElement('div');
                 el.className = 'falling-word cw-emoji';
+                el.setAttribute('aria-hidden', 'true');
                 el.textContent = glyph;
                 el.style.zIndex = String(cwSpawnRoundIndex);
                 if (fontPt != null && Number.isFinite(fontPt))
@@ -2372,26 +2373,14 @@
                     if (!cwRunning || cwPaused || el.classList.contains('caught')) return;
                     el.classList.add('cw-settled');
                 });
-
-                function onCatchEmoji(e) {
-                    e.preventDefault();
-                    if (!cwRunning || el.classList.contains('caught')) return;
-                    el.classList.add('caught');
-                    setTimeout(() => el.remove(), 380);
-                }
-                el.addEventListener('click', onCatchEmoji);
-                el.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    onCatchEmoji(e);
-                }, { passive: false });
                 return;
             }
 
             const label = entry.text;
             const fontPt = entry.fontSizePt;
 
-            const el = document.createElement('button');
-            el.type = 'button';
+            const el = document.createElement('div');
+            el.setAttribute('aria-hidden', 'true');
             const labNorm = String(label || '').trim();
             const domainHost = labNorm.match(/^docalvers\.([a-z]{2})$/i);
 
@@ -2437,14 +2426,6 @@
                 el.querySelectorAll('.cw-lang-label-text, .cw-lang-label-flag').forEach((s) => s.classList.add('cw-settled'));
             });
 
-            function onCatch(e) {
-                e.preventDefault();
-                if (!cwRunning || el.classList.contains('caught')) return;
-                el.classList.add('caught');
-                setTimeout(() => el.remove(), 380);
-            }
-            el.addEventListener('click', onCatch);
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); onCatch(e); }, { passive: false });
         }
 
         function scheduleCwSpawn() {
@@ -2818,7 +2799,7 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
-            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=13';
+            var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=17';
 
             function applyLoaded() {
                 var inline =
