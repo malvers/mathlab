@@ -10,7 +10,12 @@
 }
 
 #mini-rail {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
     width: 66px;
+    min-width: 66px;
+    flex-shrink: 0;
     height: 100vh;
     background: rgba(5, 10, 20, 0.95);
     border-right: 1px solid rgba(0, 210, 255, 0.2);
@@ -51,7 +56,7 @@
     max-width: none !important;
     padding: 0 !important;
     /* No extra top spacing — top edge comes from #side-panel padding + this variable */
-    margin: 0 0 8px 0 !important;
+    margin: 0 0 6px 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -81,6 +86,7 @@
     background: rgba(10, 15, 26, 0.98); 
     display: flex; 
     flex-direction: column; 
+    gap: 0 !important; /* cyber-layout hat gap:10px — sonst wirkt Content unter der Nav-Zeile „versetzt“ */
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
     position: relative;
@@ -98,6 +104,10 @@
 }
 
 #mini-rail .nav-btn {
+    flex: 0 0 auto !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    aspect-ratio: 1 / 1 !important;
     width: 52px !important;
     height: 52px !important;
     display: flex !important;
@@ -165,13 +175,13 @@
     box-sizing: border-box;
 }
 
-body { 
-    background-color: #050b18; 
-    margin: 0; 
-    overflow: hidden; 
-    display: flex; 
-    width: 100vw; 
-    height: 100vh; 
+/* Kein display:flex hier — sonst wird das Shell-Layout aus cyber-layout.css überschrieben (Grid / zuvor Flex-Zeile). */
+body {
+    background-color: #050b18;
+    margin: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 }
 
 #main-content { 
