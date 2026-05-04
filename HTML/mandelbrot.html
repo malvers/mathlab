@@ -410,6 +410,27 @@
             text-shadow: none !important;
         }
 
+        /* μ-Zeile: lesbar ohne Fraktal-Palette (Parent `.katex` erzwingt sonst Gold + \textcolor verliert gegen !important). */
+        #canvas-container
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+            #mb-fractal-formula-tex.mb-fractal-mz-split
+            .mb-fractal-mz-spd--white
+            .katex {
+            color: #f8faff !important;
+            text-shadow: none !important;
+            filter: none !important;
+        }
+
+        #canvas-container
+            #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+            #mb-fractal-formula-tex.mb-fractal-mz-split
+            .mb-fractal-mz-spd--muted
+            .katex {
+            color: #94a3b8 !important;
+            text-shadow: none !important;
+            filter: none !important;
+        }
+
         /* FRACTAL main row left-aligned; width follows KaTeX */
         #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex:not(.mb-fractal-mz-split) {
             justify-content: flex-start;
@@ -545,14 +566,18 @@
             right: clamp(16px, 2.6vw, 36px);
             top: var(--mb-orbit-worked-top);
             z-index: 200;
-            display: flex;
+            /**
+             * \texttt{inline-flex} + \texttt{align-items: flex-start}: Kartenbreite = \(\max\)(Merkhilfe, Rechenspur),
+             * nicht die volle \#main-content-Breite (Problem war \texttt{width:fit-content}-Flex mit \texttt{stretch}
+             * + \(\texttt{max-width:100\%}\) Kindern beim abs.\ Positionieren).
+             */
+            display: inline-flex;
             flex-direction: column;
-            align-items: stretch;
-            width: fit-content;
-            /* Platz für Kopf \(z^2=\cdots\in\mathbb{C}\); auf schmalen Viewports randnah an \texttt{vw} */
-            max-width: min(720px, calc(100vw - 24px));
+            align-items: flex-start;
+            /* Obere Merkhilfe + Schritte: begrenzt breit; \(z^2\)-Zeile bleibt einzeilig. */
+            max-width: min(940px, calc(100vw - 20px));
             min-width: 0;
-            padding: 12px 14px 16px;
+            padding: 10px 12px 14px;
             box-sizing: border-box;
             pointer-events: auto;
             cursor: grab;
@@ -583,13 +608,15 @@
             cursor: grabbing;
         }
 
-        /** Volle Breite der Karte; KaTeX links, Scrollbar bis an den rechten Innenrand. */
+        /** Rechenspur: Inhaltsbreite wie Merkhilfe (Kartenbreite kommt vom breiteren Block). */
         #orbit-mb-worked .orbit-mb-worked-tex-scroll {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            width: 100%;
-            align-self: stretch;
+            width: fit-content;
+            max-width: 100%;
+            min-width: 0;
+            align-self: flex-start;
             max-height: min(38vh, 15rem);
             scrollbar-gutter: auto;
             overflow-x: hidden;
@@ -622,8 +649,9 @@
         #orbit-mb-worked .orbit-mb-worked-tex {
             margin: 0;
             padding: 0;
-            width: 100%;
+            width: fit-content;
             max-width: 100%;
+            min-width: 0;
             box-sizing: border-box;
             text-align: left;
         }
@@ -637,6 +665,8 @@
         #orbit-mb-worked .orbit-mb-worked-tex .katex-display {
             margin: 0 !important;
             text-align: left !important;
+            width: fit-content;
+            max-width: 100%;
         }
 
         #orbit-mb-worked .orbit-mb-worked-tex .katex-display > .katex {
@@ -656,11 +686,13 @@
             tab-size: 4;
         }
 
-        /** Merkhilfe: gleiche Innenbreite wie Scrollbereich. */
+        /** Merkhilfe: Inhaltsbreite (kein volle-Breite-\(aligned\)-Stretch der Modulus-Zeile). */
         #orbit-mb-worked-memo {
             margin: 0 0 2px;
-            width: 100%;
+            width: fit-content;
             max-width: 100%;
+            min-width: 0;
+            align-self: flex-start;
             box-sizing: border-box;
         }
 
@@ -670,6 +702,8 @@
 
         #orbit-mb-worked-memo .katex-display {
             margin: 0 !important;
+            width: fit-content;
+            max-width: 100%;
         }
 
         #orbit-mb-worked-memo .katex {
@@ -684,8 +718,9 @@
             border: none;
             border-top: 1px solid rgba(0, 210, 255, 0.38);
             margin: 12px 0 16px;
-            width: 100%;
-            max-width: 100%;
+            align-self: stretch;
+            width: auto;
+            min-width: 0;
             box-sizing: border-box;
         }
 
@@ -1485,7 +1520,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         '|' +
                         fractalShaderTargetMaxIter() +
                         '|t' +
-                        time.toFixed(4);
+                        time.toFixed(4) +
+                        '|muW';
                     cacheKey = `OS:${mode}:${rScanKey}:${orbitScanStableHits.length}:${spdScan}`;
                 } else if (mainPlane === 'ORBIT') {
                     const r2Show =
@@ -1504,7 +1540,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         '|' +
                         fractalShaderTargetMaxIter() +
                         '|t' +
-                        time.toFixed(4);
+                        time.toFixed(4) +
+                        '|muW';
                     cacheKey = `OL:${mode}:${r2Key}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}:${spdOrbit}`;
                 } else {
                     cacheKey = 'X';
@@ -1594,14 +1631,13 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     const texN = '\\textcolor{' + hex + '}{N = ' + nPartStr + '}';
                     let texSpd;
                     if (speedProbe && speedProbe.escaped) {
-                        texSpd =
-                            '\\mu \\approx \\textcolor{' +
-                            speedProbe.hex +
-                            '}{' +
-                            speedProbe.texMuBody +
-                            '}';
+                        spdWrap.classList.remove('mb-fractal-mz-spd--muted');
+                        spdWrap.classList.add('mb-fractal-mz-spd--white');
+                        texSpd = '\\mu \\approx ' + speedProbe.texMuBody;
                     } else {
-                        texSpd = '\\textcolor{#94a3b8}{\\mu \\approx \\text{—}}';
+                        spdWrap.classList.remove('mb-fractal-mz-spd--white');
+                        spdWrap.classList.add('mb-fractal-mz-spd--muted');
+                        texSpd = '\\mu \\approx \\text{—}';
                     }
                     if (typeof katex !== 'undefined') {
                         katex.render(texZ2, z2Wrap, { throwOnError: false, displayMode: false });
@@ -1612,8 +1648,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         nWrap.textContent = 'N = ' + nPartStr;
                         if (speedProbe && speedProbe.escaped) {
                             spdWrap.textContent = '\u03bc \u2248 ' + speedProbe.plainMu;
-                            spdWrap.style.color = speedProbe.hex;
-                            spdWrap.style.textShadow = '0 0 10px rgba(255,255,255,0.09)';
+                            spdWrap.style.color = '#f8faff';
+                            spdWrap.style.textShadow = 'none';
                         } else {
                             spdWrap.textContent = '\u03bc \u2248 \u2014';
                             spdWrap.style.color = '#94a3b8';
@@ -2345,25 +2381,46 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             const ORBIT_WORKED_STEP_HEAD_COLOR = '#5ce1ff';
             /** Nur \(\mathbf c\) im Rechenfeld (Purple). */
             const ORBIT_WORKED_C_ACCENT_COLOR = '#a855f7';
-            /** Abstand kopf-/Blockzeilen im \texttt{aligned}. */
+            /** Abstand kopf-/Blockzeilen in der Rechenspur (\texttt{aligned}). */
             const ORBIT_WORKED_BLOCK_GAP_PX = 6;
+            /** Merkhilfe: engere Zeilen als im Schritt-Panel (nur Memo-\texttt{aligned}). */
+            const ORBIT_WORKED_MEMO_ROW_GAP_PX = 2;
 
-            /** Merkhilfe = gleiche kursive \(z\)-Lesart wie \(\texttt{aligned}\)-Spur. */
-            const ORBIT_WORKED_MEMO_TEX_REV = 'memo-z-italic-like-box-v3';
+            /** Merkhilfe nur \(x,y\); \(z\) wie Rechenspur in Cyan (\texttt{\\textcolor}). */
+            const ORBIT_WORKED_MEMO_TEX_REV = 'memo-xy-memo-tight-rows-v17';
 
-            /** Kursives \(z\) wie KaTeX-Spur (Plain). */
+            /** Gleiche Gleichungsketten ohne \(a,b\). */
             const ORBIT_WORKED_MEMO_PLAIN =
-                'z\u00b2 = (x+i\xb7y)\u00b2 = (x\u00b2\u2212y\u00b2 | 2xy)   z \u2208 \u2102';
+                'z = x + i\xb7y,  z \u2208 \u2102\n' +
+                'z\u00b2 = (x+i\xb7y)\u00b2 = (x\u00b2\u2212y\u00b2 | 2xy)\n' +
+                '|z| = \u221a(x\u00b2 + y\u00b2), |z|\u00b2 = x\u00b2 + y\u00b2';
 
-            /** Kursiv + Cyan wie Rechenspur; erste \(^2\) explizit hell. */
+            /** Wie \(\texttt{orbitWorkedQuadrBlockTex}\): kursives \(z\) in \texttt{\#5ce1ff}. */
+            const ORBIT_WORKED_MEMO_Z = '\\textcolor{' + ORBIT_WORKED_STEP_HEAD_COLOR + '}{z}';
+
+            /** Betragszeile: \(|z|^2\) direkt hinter der Wurzel; \(z\in\mathbb{C}\) in Zeile \(z=x+\mathrm iy\). */
             const ORBIT_WORKED_MEMO_KATEX =
-                '\\textcolor{' +
-                ORBIT_WORKED_STEP_HEAD_COLOR +
-                '}{z}^{\\textcolor{#f8faff}{2}} = (x+\\mathrm{i}\\, y)^2 = \\bigl(x^{2}-y^{2} \\bigm| 2xy\\bigr) \\quad \\textcolor{' +
-                ORBIT_WORKED_STEP_HEAD_COLOR +
-                '}{z} \\in \\mathbb{C}';
+                '\\begin{aligned}' +
+                ORBIT_WORKED_MEMO_Z +
+                ' &= x + \\mathrm{i}\\, y, \\quad ' +
+                ORBIT_WORKED_MEMO_Z +
+                ' \\in \\mathbb{C} \\\\' +
+                '\\\\[' +
+                ORBIT_WORKED_MEMO_ROW_GAP_PX +
+                'px]' +
+                ORBIT_WORKED_MEMO_Z +
+                '^{2} &= (x+\\mathrm{i}\\, y)^2 = \\bigl(x^{2}-y^{2} \\bigm| 2xy\\bigr) \\\\' +
+                '\\\\[' +
+                ORBIT_WORKED_MEMO_ROW_GAP_PX +
+                'px]' +
+                '\\left\\lvert ' +
+                ORBIT_WORKED_MEMO_Z +
+                '\\right\\rvert &= \\sqrt{x^{2} + y^{2}}\\,,\\;\\left\\lvert ' +
+                ORBIT_WORKED_MEMO_Z +
+                '\\right\\rvert^{2} = x^{2} + y^{2}' +
+                '\\end{aligned}';
 
-            /** Oberzeile: Quadrat-Identität + \(z\in\mathbb{C}\); bei vollem Orbit-Schrittpanel aktiv. */
+            /** Merkhilfe über der \texttt{aligned}-Rechenspur (Orbit-Schrittpanel aktiv). */
             function syncOrbitWorkedMemoStrip(enabled) {
                 const memo = document.getElementById('orbit-mb-worked-memo');
                 const rule = document.getElementById('orbit-mb-worked-rule');

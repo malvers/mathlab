@@ -342,4 +342,10 @@ const LAB_ICONS = {
             <line x1="20" y1="30" x2="80" y2="70" stroke="var(--neon-orange)" stroke-width="2.5" />
             <circle cx="50" cy="50" r="4.5" fill="var(--neon-green)" style="filter: drop-shadow(0 0 5px var(--neon-green));" />
         </svg>`,
+    "imaginarynumbers": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="8" y1="50" x2="92" y2="50" stroke="var(--neon-blue)" stroke-width="1.35" opacity="0.88"/>
+            <line x1="50" y1="8" x2="50" y2="92" stroke="var(--neon-purple)" stroke-width="1.35" opacity="0.88"/>
+            <circle cx="64" cy="36" r="6" fill="rgba(0,210,255,0.2)" stroke="var(--neon-blue)" stroke-width="1.4"/>
+            <text x="73" y="30" font-family="'Orbitron',sans-serif" font-size="13" fill="var(--neon-blue)" opacity="0.95">i</text>
+        </svg>`,
 };
