@@ -121,6 +121,29 @@ function scheduleNavigationConsistencyCheck() {
     queueMicrotask(() => runNavigationConsistency());
 }
 
+/**
+ * Pfade wie js/branding/core.js beziehen sich auf das HTML-Wurzelverzeichnis (Ordner mit js/).
+ * Liegt die Seite in einem Unterordner (z.B. imaginarynumbers/index.html), würde ein nacktes
+ * "js/..." sonst relativ zur Seite aufgelöst und 404/File-not-found auslösen.
+ */
+function resolveCyberHtmlAsset(relativePath) {
+    try {
+        const scripts = document.getElementsByTagName("script");
+        for (let i = scripts.length - 1; i >= 0; i--) {
+            const raw = scripts[i].getAttribute("src");
+            if (!raw) continue;
+            const abs = new URL(raw, document.baseURI);
+            const pathname = abs.pathname || "";
+            if (!/\/js\/branding\.js$/i.test(pathname)) continue;
+            const base = new URL(abs.href);
+            base.pathname = pathname.replace(/\/js\/branding\.js$/i, "/");
+            const rel = String(relativePath || "").replace(/^\//, "");
+            return new URL(rel, base).href;
+        }
+    } catch (_) {}
+    return relativePath;
+}
+
 const CyberBranding = {
     MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
     /// MRA ///
@@ -143,14 +166,15 @@ const CyberBranding = {
             head.appendChild(link);
         }
         link.setAttribute("type", "image/svg+xml");
-        link.setAttribute("href", href);
+        const resolved = /^https?:\/\//i.test(href) ? href : resolveCyberHtmlAsset(href);
+        link.setAttribute("href", resolved);
     },
 
     ensureCoreModuleLoaded() {
         if (window.CyberBrandingCore || this._coreLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = "js/branding/core.js";
+        script.src = resolveCyberHtmlAsset("js/branding/core.js");
         script.async = true;
         script.dataset.cyberBrandingCore = "1";
         script.onerror = () => {
@@ -166,7 +190,7 @@ const CyberBranding = {
         if (window.CyberBrandingNav || this._navLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = "js/branding/nav.js";
+        script.src = resolveCyberHtmlAsset("js/branding/nav.js");
         script.async = true;
         script.dataset.cyberBrandingNav = "1";
         script.onerror = () => {
@@ -182,7 +206,7 @@ const CyberBranding = {
         if (window.CyberBrandingOverlays || this._overlaysLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = "js/branding/overlays.js";
+        script.src = resolveCyberHtmlAsset("js/branding/overlays.js");
         script.async = true;
         script.dataset.cyberBrandingOverlays = "1";
         script.onerror = () => {
@@ -199,7 +223,7 @@ const CyberBranding = {
         if (this._briefingLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = "js/branding/i18n-descriptions.js";
+        script.src = resolveCyberHtmlAsset("js/branding/i18n-descriptions.js");
         script.async = true;
         script.dataset.cyberBrandingBriefing = "1";
         script.onerror = () => {

@@ -479,7 +479,7 @@ const LABS_DATA = [
     },
     {
         "id": "imaginarynumbers",
-        "href": "imaginarynumbers.html",
+        "href": "imaginarynumbers/index.html",
         "title": "Imaginary numbers",
         "description": "Komplexe Zahlen in der Gaußschen Zahlenebene: Realteil, Imaginärteil und die imaginäre Einheit — interaktiv erkunden (Ausbau folgt).",
         "tagline": "Komplexe Ebene · Re / Im · i",
