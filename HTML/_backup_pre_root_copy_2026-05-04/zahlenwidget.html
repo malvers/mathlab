@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber-Zahlen-Widget | ULTRA v6.8</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-pink: #ff00ff;
+            --bg-dark: #0a0f19;
+            --border-color: rgba(0, 210, 255, 0.4);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            gap: 40px;
+        }
+
+        .showcase-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.1);
+        }
+
+        /* --- NUMBER WIDGET CSS (BOXES REMOVED) --- */
+        .cyber-number-widget {
+            display: inline-flex;
+            gap: 2px; /* A bit tighter without borders */
+            align-items: center;
+        }
+
+        .cyber-digit-box {
+            width: 24px; /* Fixed width for stability */
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent; /* Box removed */
+            border: none; /* Border removed */
+            font-size: 1.8rem; /* Slightly larger for stronger presence */
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+            transition: all 0.1s ease;
+        }
+
+        .cyber-digit-box.separator {
+            width: 10px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+        }
+
+        .label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .control-panel {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 8px 16px;
+            font-family: 'Orbitron';
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase-container">
+        <div>
+            <div class="label">Fitness Value</div>
+            <div id="widget-fitness" class="cyber-number-widget"></div>
+        </div>
+
+        <div>
+            <div class="label">Sigma Strategy</div>
+            <div id="widget-sigma" class="cyber-number-widget"></div>
+        </div>
+
+        <div>
+            <div class="label">Generations</div>
+            <div id="widget-gen" class="cyber-number-widget"></div>
+        </div>
+
+        <div class="control-panel">
+            <button onclick="randomize()">RANDOMIZE DATA</button>
+            <button onclick="toggleAuto()">TOGGLE AUTO-RUN</button>
+        </div>
+    </div>
+
+    <script src="js/ui.js?v=4"></script>
+    <script>
+        CyberUI.init();
+
+        /**
+         * Builds a cyber number widget inside a container.
+         * @param {string} containerId - Target element ID
+         * @param {number} value - Value to display
+         * @param {number} decimals - Decimal places
+         * @param {number} minDigits - Minimum integer digits (for layout stability)
+         */
+        function updateCyberWidget(containerId, value, decimals = 2, minDigits = 1) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Format value
+            let str = value.toFixed(decimals);
+            
+            // Leading padding to prevent visual jitter
+            const parts = str.split('.');
+            while (parts[0].length < minDigits) {
+                parts[0] = ' ' + parts[0];
+            }
+            str = parts.join('.');
+
+            // Build HTML
+            let html = '';
+            for (let char of str) {
+                if (char === '.' || char === ',' || char === '-') {
+                    html += `<div class="cyber-digit-box separator">${char}</div>`;
+                } else if (char === ' ') {
+                    html += `<div class="cyber-digit-box" style="border-color:transparent; background:transparent;"></div>`;
+                } else {
+                    html += `<div class="cyber-digit-box">${char}</div>`;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // --- DEMO LOGIC ---
+        let autoRun = false;
+        let genCount = 1245;
+
+        function randomize() {
+            updateCyberWidget('widget-fitness', Math.random() * 9999, 2, 4);
+            updateCyberWidget('widget-sigma', Math.random() * 20, 3, 2);
+            updateCyberWidget('widget-gen', genCount++, 0, 5);
+        }
+
+        function toggleAuto() {
+            autoRun = !autoRun;
+            if (autoRun) runLoop();
+        }
+
+        function runLoop() {
+            if (!autoRun) return;
+            randomize();
+            setTimeout(runLoop, 100);
+        }
+
+        // Initialisierung
+        window.onload = () => {
+            updateCyberWidget('widget-fitness', 8888.27, 2, 4);
+            updateCyberWidget('widget-sigma', 0.045, 3, 2);
+            updateCyberWidget('widget-gen', 968, 0, 5);
+        };
+    </script>
+</body>
+</html>

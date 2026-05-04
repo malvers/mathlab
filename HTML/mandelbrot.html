@@ -12,7 +12,55 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+
+    <script>
+    (function () {
+        try {
+            if (/[?&]mbNoFormula(?:=1)?(?:&|$)/.test(location.search)) {
+                sessionStorage.setItem('mbDebugNoFormula', '1');
+            }
+            if (/[?&]mbFormulaOn(?:=1)?(?:&|$)/.test(location.search)) {
+                sessionStorage.removeItem('mbDebugNoFormula');
+            }
+            if (sessionStorage.getItem('mbDebugNoFormula') === '1') {
+                document.documentElement.classList.add('mb-debug-no-formula-overlay');
+            }
+            /* Alle Plot-Überlagerungen (KaTeX/„Fraktale“-Zeile, Orbit-HUD, top-right Branding) — ?mbNoRightUi=1, löschen mit ?mbRightUiOn=1 */
+            if (/[?&]mbNoRightUi(?:=1)?(?:&|$)/.test(location.search)) {
+                sessionStorage.setItem('mbDebugNoRightUi', '1');
+            }
+            if (/[?&]mbRightUiOn(?:=1)?(?:&|$)/.test(location.search)) {
+                sessionStorage.removeItem('mbDebugNoRightUi');
+            }
+            if (sessionStorage.getItem('mbDebugNoRightUi') === '1') {
+                document.documentElement.classList.add('mb-debug-no-right-ui');
+            }
+        } catch (e) {}
+    })();
+    </script>
     <style>
+        /* DEBUG: hide KaTeX/formula strip over plot (?mbNoFormula=1 persists in sessionStorage; mbFormulaOn clears). */
+        html.mb-debug-no-formula-overlay .mb-fractal-formula-overlay {
+            display: none !important;
+        }
+
+        /* DEBUG: keine Text-/Chrome-Überblendung mehr über den Canvases (?mbNoRightUi=1; ?mbRightUiOn=1). */
+        html.mb-debug-no-right-ui #canvas-container .mb-fractal-formula-overlay,
+        html.mb-debug-no-right-ui #canvas-container #orbit-hud,
+        html.mb-debug-no-right-ui #main-content .canvas-branding {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+        html.mb-debug-no-right-ui #main-content {
+            background: #000 !important;
+        }
+        html.mb-debug-no-right-ui #canvas-container {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 100% !important;
+        }
+
         #main-content {
             background: #000;
             /* Flex: fills remaining width like multiplikation.html — avoids visible stripe on the right */

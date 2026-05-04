@@ -21,10 +21,10 @@ if [[ "$(git -C "${repo_root}" config --get hooks.allowMassDelete 2>/dev/null)" 
 fi
 
 protected_files=(
-  "js/cyber-layout.css"
-  "js/index-ui.css"
-  "js/ui.js"
-  "index.html"
+  "HTML/js/cyber-layout.css"
+  "HTML/js/index-ui.css"
+  "HTML/js/ui.js"
+  "HTML/index.html"
 )
 
 is_protected_file() {
