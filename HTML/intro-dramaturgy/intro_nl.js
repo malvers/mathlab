@@ -21,7 +21,7 @@ labs
 120pt
 %numlanguages talen
 20pt
-%purplepulsating en het worden er meer
+%purplepulsating and counting
 30pt
 Duits 🇩🇪
 Engels 🇬🇧
@@ -41,15 +41,22 @@ Turks 🇹🇷
 
 # 
 60pt
-7 technologieën
+8 programmeertalen
 40pt
 hypertext markup language
 cascading styles sheets
 type script
 java script
 python
+Latex
 JSON
 JAVA
+
+#notranslate 
+60pt
+Artificial Intelligence 
+40pt
+fully vibed coded
 
 # 
 200pt

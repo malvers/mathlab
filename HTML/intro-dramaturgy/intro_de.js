@@ -55,15 +55,22 @@ türkisch 🇹🇷
 
 # 
 60pt
-7 Technologien 
+8 Programmiersprachen 
 40pt
 hypertext markup language
 cascading styles sheets
 type script
 java script
 python
+Latex
 JSON
 JAVA
+
+#notranslate 
+60pt
+Artificial Intelligence 
+40pt
+fully vibed coded
 
 # 
 200pt
