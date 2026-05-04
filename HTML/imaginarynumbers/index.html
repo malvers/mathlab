@@ -286,12 +286,17 @@
     <script src="../js/ui.js"></script>
     <script src="../js/cyber-canvas.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="imaginarynumbers-math.js"></script>
     <script src="imaginarynumbers-controls.js"></script>
+    <script src="imaginarynumbers-overlays.js"></script>
     <script>
         ImaginaryNumbersControls.applyPaletteCssVars();
         const P = ImaginaryNumbersControls.PALETTE;
         const rgbaFromHex = (hex, a) =>
             `rgba(${ImaginaryNumbersControls.hexToRgbComma(hex)}, ${a})`;
+        
+        const fmtNum = ImaginaryNumbersMath.fmtNum;
+        const mapRFromZ = (re, im) => ImaginaryNumbersMath.mapRFromZ(re, im, state.zMapMode);
 
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -361,23 +366,6 @@
             }
         }
 
-        /** r aus z: Hauptwert-Wurzel oder Quadrat — für Canvas, Overlays, Sidebar. */
-        function mapRFromZ(re, im) {
-            if (state.zMapMode === 'square') {
-                return { re: re * re - im * im, im: 2 * re * im };
-            }
-            return principalComplexSqrt(re, im);
-        }
-
-        function invalidateCnOverlaysMemo() {
-            cnFormulaMemoKey = '';
-            cnMagnitudeMemoKey = '';
-            cnAbsrMemoKey = '';
-            document.querySelectorAll('.cn-point-label').forEach((el) => {
-                delete el.dataset.cnPointKey;
-            });
-        }
-
         /** Sidebar sqrt / ^2 — visuell mit state.zMapMode synchron halten */
         function syncMapModeButtons() {
             const sqrtBtn = document.getElementById('cn-map-sqrt');
@@ -399,7 +387,7 @@
                 if (state.zMapMode === 'sqrt') return;
                 state.zMapMode = 'sqrt';
                 syncMapModeButtons();
-                invalidateCnOverlaysMemo();
+                ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                 ImaginaryNumbersControls.renderValDisplays(state, fmtNum);
                 if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                     CyberCanvasInstance.needsRedraw = true;
@@ -410,7 +398,7 @@
                 if (state.zMapMode === 'square') return;
                 state.zMapMode = 'square';
                 syncMapModeButtons();
-                invalidateCnOverlaysMemo();
+                ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                 ImaginaryNumbersControls.renderValDisplays(state, fmtNum);
                 if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                     CyberCanvasInstance.needsRedraw = true;
@@ -455,239 +443,6 @@
             if (t - labPersistDrawAt < 450) return;
             labPersistDrawAt = t;
             persistLabState();
-        }
-
-        /** Immer zwei Nachkommastellen (z. B. 1.00, 0.00) — für Overlays und Sidebar. */
-        function fmtNum(v) {
-            if (typeof v !== 'number' || !Number.isFinite(v)) return '0.00';
-            const n = Math.round(v * 100) / 100;
-            return n.toFixed(2);
-        }
-
-        let cnFormulaMemoKey = '';
-        let cnMagnitudeMemoKey = '';
-        let cnAbszMemoKey = '';
-        let cnAbsrMemoKey = '';
-        let cnFormulaWidthResizeBound = false;
-
-        /**
-         * Principal branch of √(x + iy): Re(√z) ≥ 0; for negative real axis, Im(√z) > 0.
-         */
-        function principalComplexSqrt(re, im) {
-            const r = Math.hypot(re, im);
-            if (r === 0) return { re: 0, im: 0 };
-            const u = Math.sqrt((r + re) / 2);
-            let v;
-            if (u > 1e-12) {
-                v = im / (2 * u);
-            } else {
-                v = (im >= 0 ? 1 : -1) * Math.sqrt((r - re) / 2);
-            }
-            return { re: u, im: v };
-        }
-
-        function updateCnFormulaOverlay() {
-            const host = document.getElementById('cn-formula-tex');
-            if (!host || typeof katex === 'undefined') return;
-            const x = fmtNum(state.re);
-            const y = fmtNum(state.im);
-            const et = ImaginaryNumbersControls.escapeTexText;
-
-            let memoKey;
-            let tex;
-            const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            /* z ziehen: r = √z bzw. r = z²; idle: z = x + iy */
-            if (dragTarget === 'z') {
-                memoKey = `mode:z|${zm}`;
-                tex =
-                    state.zMapMode === 'square'
-                        ? ImaginaryNumbersControls.texZSquare()
-                        : ImaginaryNumbersControls.texRSqrtZ();
-            } else {
-                memoKey = `mode:idle|${zm}|${x}|${y}`;
-                tex = `\\textcolor{${P.VAR_Z}}{z} = \\textcolor{${P.AXIS_RE}}{\\text{${et(x)}}} + \\mathit{i}\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(y)}}}`;
-            }
-
-            if (memoKey === cnFormulaMemoKey) return;
-            cnFormulaMemoKey = memoKey;
-
-            try {
-                katex.render(tex, host, { throwOnError: false, displayMode: false });
-            } catch (_) {
-                if (dragTarget === 'z') {
-                    host.textContent = state.zMapMode === 'square' ? 'r = z²' : 'r = √z';
-                } else host.textContent = `z = ${x} + i ${y}`;
-            }
-        }
-
-        /** |z| allein (Extra-Box); unter √ keine großen Klammern um die Summanden — nur x² + y² eingefärbt. */
-        function updateCnAbszOverlay() {
-            const host = document.getElementById('cn-formula-absz-tex');
-            if (!host || typeof katex === 'undefined') return;
-            const xr = state.re;
-            const yi = state.im;
-            const xs = fmtNum(xr);
-            const ys = fmtNum(yi);
-            const memoKey = `absz|${xs}|${ys}`;
-            if (memoKey === cnAbszMemoKey) return;
-            cnAbszMemoKey = memoKey;
-            const et = ImaginaryNumbersControls.escapeTexText;
-            const rho = Math.hypot(xr, yi);
-            const rhos = fmtNum(rho);
-            /* \textstyle im Radikanden: niedrigere Wurzel („flacher“) als \displaystyle + großer \vphantom */
-            const tex =
-                `\\left|\\textcolor{${P.VAR_Z}}{z}\\right| \\,{=}\\, ` +
-                `\\sqrt{\\textstyle\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}^{2}\\,+\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}^{2}} ` +
-                `\\,{=}\\, \\textcolor{${P.TITLE_MUTED}}{\\text{${et(rhos)}}}`;
-            try {
-                katex.render(tex, host, { throwOnError: false, displayMode: false });
-            } catch (_) {
-                host.textContent = `|z| = √((${xs})² + (${ys})²) = ${rhos}`;
-            }
-        }
-
-        /** |r| mit re(r), im(r) aus Hauptwert-√z; gleiche flache \textstyle-Wurzel wie |z|. */
-        function updateCnAbsrOverlay() {
-            const host = document.getElementById('cn-formula-absr-tex');
-            if (!host || typeof katex === 'undefined') return;
-            const xr = state.re;
-            const yi = state.im;
-            const xs = fmtNum(xr);
-            const ys = fmtNum(yi);
-            const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            const memoKey = `absr|${zm}|${xs}|${ys}`;
-            if (memoKey === cnAbsrMemoKey) return;
-            cnAbsrMemoKey = memoKey;
-            const et = ImaginaryNumbersControls.escapeTexText;
-            const w = mapRFromZ(xr, yi);
-            const us = fmtNum(w.re);
-            const vs = fmtNum(w.im);
-            const absr = Math.hypot(w.re, w.im);
-            const absrs = fmtNum(absr);
-            const tex =
-                `\\left|\\textcolor{${P.VAR_R}}{r}\\right| \\,{=}\\, ` +
-                `\\sqrt{\\textstyle\\textcolor{${P.AXIS_RE}}{\\text{${et(us)}}}^{2}\\,+\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}^{2}} ` +
-                `\\,{=}\\, \\textcolor{${P.TITLE_MUTED}}{\\text{${et(absrs)}}}`;
-            try {
-                katex.render(tex, host, { throwOnError: false, displayMode: false });
-            } catch (_) {
-                host.textContent = `|r| = √((${us})² + (${vs})²) = ${absrs}`;
-            }
-        }
-
-        /**
-         * Hauptwert √z: nur noch re(r)- und im(r)-Zeilen (ohne Ergebnispaar-Zeile, ohne |z| — die stehen Extra).
-         */
-        function updateCnMagnitudeOverlay() {
-            const host = document.getElementById('cn-formula-mag-tex');
-            if (!host || typeof katex === 'undefined') return;
-            const xr = state.re;
-            const yi = state.im;
-            const xs = fmtNum(xr);
-            const ys = fmtNum(yi);
-            const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            const memoKey = `mag|${zm}|${xs}|${ys}`;
-            if (memoKey === cnMagnitudeMemoKey) return;
-            cnMagnitudeMemoKey = memoKey;
-            const et = ImaginaryNumbersControls.escapeTexText;
-
-            const rho = Math.hypot(xr, yi);
-            const rhos = fmtNum(rho);
-            const w = mapRFromZ(xr, yi);
-            const us = fmtNum(w.re);
-            const vs = fmtNum(w.im);
-
-            let tex;
-            if (state.zMapMode === 'square') {
-                if (rho < 1e-14) {
-                    tex =
-                        `\\begin{aligned}` +
-                        `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}^{2}-\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}^{2} \\,{=}\\, 0 \\\\[0.35em]` +
-                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\,{=}\\, 2\\,\\cdot\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\cdot\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, 0` +
-                        `\\end{aligned}`;
-                } else {
-                    tex =
-                        `\\begin{aligned}` +
-                        `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\quad \\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}^{2}-\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}^{2} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(us)}}} \\\\[0.4em]` +
-                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\quad 2\\,\\cdot\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\cdot\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, \\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}` +
-                        `\\end{aligned}`;
-                }
-            } else if (rho < 1e-14) {
-                tex =
-                    `\\begin{aligned}` +
-                    `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\,{=}\\, 0 \\\\[0.35em]` +
-                    `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\,{=}\\, 0` +
-                    `\\end{aligned}`;
-            } else if (Math.abs(w.re) > 1e-12) {
-                tex =
-                    `\\begin{aligned}` +
-                    `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\quad \\sqrt{\\dfrac{\\textcolor{${P.TITLE_MUTED}}{\\text{${et(rhos)}}}+\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}}{2}} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(us)}}} \\\\[0.4em]` +
-                    `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\quad \\dfrac{\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}}{2\\,\\cdot\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(us)}}}} \\,{=}\\, \\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}` +
-                    `\\end{aligned}`;
-            } else {
-                tex =
-                    `\\begin{aligned}` +
-                    `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\,{=}\\, 0 \\\\[0.4em]` +
-                    `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\quad \\operatorname{sgn}\\bigl(\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}\\bigr)\\,\\sqrt{\\dfrac{|\\textcolor{${P.VAR_Z}}{z}|-\\textcolor{${P.AXIS_RE}}{x}}{2}} \\,{=}\\, \\sqrt{\\dfrac{\\textcolor{${P.TITLE_MUTED}}{\\text{${et(rhos)}}}-\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}}{2}} \\,{=}\\, \\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}` +
-                    `\\end{aligned}`;
-            }
-
-            try {
-                katex.render(tex, host, { throwOnError: false, displayMode: true });
-            } catch (_) {
-                host.textContent = `re(r)=${us}, im(r)=${vs}`;
-            }
-        }
-
-        /**
-         * Alle vier Formel-Pillen gleich breit: max. natürliche Breite + ggf. Korrektur via scrollWidth,
-         * damit KaTeX in |z|/|r| nicht schmaler wird als der Inhalt (keine Scrollleisten).
-         */
-        function syncCnFormulaOverlayWidths() {
-            const row = document.getElementById('cn-formula-row');
-            const ids = ['cn-formula-overlay', 'cn-formula-magnitude', 'cn-formula-absz', 'cn-formula-absr'];
-            const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
-            if (!row || !els.length) return;
-
-            els.forEach((el) => {
-                el.style.display = 'inline-block';
-                el.style.width = 'max-content';
-                el.style.maxWidth = 'none';
-            });
-            let maxW = 0;
-            els.forEach((el) => {
-                maxW = Math.max(maxW, el.getBoundingClientRect().width);
-            });
-            els.forEach((el) => {
-                el.style.display = '';
-                el.style.width = '';
-                el.style.maxWidth = '';
-            });
-
-            /* Kein Canvas-Cap mehr: sonst wurde |z|/|r| schmaler als KaTeX → horizontale Scrollbalken. */
-            let px = Math.max(120, Math.ceil(maxW));
-            row.style.setProperty('--cn-formula-unified-w', `${px}px`);
-            let need = px;
-            els.forEach((el) => {
-                need = Math.max(need, el.scrollWidth);
-            });
-            if (need > px) {
-                px = Math.ceil(need);
-                row.style.setProperty('--cn-formula-unified-w', `${px}px`);
-            }
-        }
-
-        function ensureCnFormulaWidthResizeListener() {
-            if (cnFormulaWidthResizeBound) return;
-            cnFormulaWidthResizeBound = true;
-            let resizeTimer = null;
-            window.addEventListener('resize', () => {
-                if (resizeTimer) clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    resizeTimer = null;
-                    syncCnFormulaOverlayWidths();
-                }, 120);
-            });
         }
 
         /** Grab radius in math units (~finger-sized on screen). */
@@ -736,7 +491,7 @@
             CC.onMouseUp = () => {
                 if (dragTarget !== null) {
                     dragTarget = null;
-                    cnFormulaMemoKey = '';
+                    ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                     CC.allowPan = true;
                     syncSlidersFromState();
                     CC.needsRedraw = true;
@@ -820,58 +575,14 @@
             ctx.arc(ax, ay, 6 * s, 0, Math.PI * 2);
             ctx.fill();
 
-            updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s);
+            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s, state);
 
-            updateCnFormulaOverlay();
-            updateCnAbszOverlay();
-            updateCnAbsrOverlay();
-            updateCnMagnitudeOverlay();
-            requestAnimationFrame(() => syncCnFormulaOverlayWidths());
+            ImaginaryNumbersOverlays.updateCnFormulaOverlay(state, dragTarget);
+            ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbsrOverlay(state);
+            ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
+            requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
             maybePersistAfterDraw();
-        }
-
-        function ensureCnPointLabelsKatex() {
-            if (typeof katex === 'undefined') return;
-            const zEl = document.getElementById('cn-label-z');
-            const rEl = document.getElementById('cn-label-r');
-            const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            const key = `cn-pt-${zm}`;
-
-            if (zEl && zEl.dataset.cnPointKey !== key) {
-                zEl.innerHTML = '';
-                const zTex = `\\textcolor{${P.VAR_Z}}{z}`;
-                katex.render(zTex, zEl, { throwOnError: false, displayMode: false });
-                zEl.dataset.cnPointKey = key;
-            }
-            if (rEl && rEl.dataset.cnPointKey !== key) {
-                rEl.innerHTML = '';
-                const rTex =
-                    state.zMapMode === 'square'
-                        ? ImaginaryNumbersControls.texZSquare()
-                        : ImaginaryNumbersControls.texRSqrtZ();
-                katex.render(rTex, rEl, { throwOnError: false, displayMode: false });
-                rEl.dataset.cnPointKey = key;
-            }
-        }
-
-        function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s) {
-            ensureCnPointLabelsKatex();
-            const canvas = CC.canvas;
-            const zEl = document.getElementById('cn-label-z');
-            const rEl = document.getElementById('cn-label-r');
-            if (!canvas || !zEl || !rEl) return;
-            const ox = canvas.offsetLeft;
-            const oy = canvas.offsetTop;
-            const pad = 3 * s;
-            const fz = Math.max(18, Math.round(21 * s)) + 'px';
-            zEl.style.fontSize = fz;
-            rEl.style.fontSize = fz;
-            zEl.style.left = `${ox + ax + pad}px`;
-            zEl.style.top = `${oy + ay - pad}px`;
-            zEl.style.transform = 'translateY(-100%)';
-            rEl.style.left = `${ox + sx + pad}px`;
-            rEl.style.top = `${oy + sy - pad}px`;
-            rEl.style.transform = 'translateY(-100%)';
         }
 
         function setupLab() {
@@ -897,13 +608,7 @@
                 CyberCanvasInstance.resetView(Z_SLIDER_MIN, Z_SLIDER_MAX);
             }
 
-            cnFormulaMemoKey = '';
-            cnAbszMemoKey = '';
-            cnAbsrMemoKey = '';
-            cnMagnitudeMemoKey = '';
-            document.querySelectorAll('.cn-point-label').forEach((el) => {
-                delete el.dataset.cnPointKey;
-            });
+            ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
 
             CyberCanvasInstance.onResize = draw;
             bindZPointDrag();
@@ -958,12 +663,12 @@
             setupMapModeButtons();
 
             syncSlidersFromState();
-            updateCnFormulaOverlay();
-            updateCnAbszOverlay();
-            updateCnAbsrOverlay();
-            updateCnMagnitudeOverlay();
-            ensureCnFormulaWidthResizeListener();
-            requestAnimationFrame(() => syncCnFormulaOverlayWidths());
+            ImaginaryNumbersOverlays.updateCnFormulaOverlay(state, dragTarget);
+            ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbsrOverlay(state);
+            ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
+            ImaginaryNumbersOverlays.ensureCnFormulaWidthResizeListener();
+            requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
 
             CyberCanvasInstance.needsRedraw = true;
         }
