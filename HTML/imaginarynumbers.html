@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>docalvers | Imaginary numbers</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <style>
+        /* Canvas overlay: larger KaTeX + pill frame (pointer-events none — canvas stays interactive). */
+        #canvas-container {
+            position: relative;
+        }
+
+        .cn-formula-overlay {
+            position: absolute;
+            top: clamp(10px, 2vmin, 18px);
+            left: clamp(10px, 2vmin, 18px);
+            z-index: 30;
+            pointer-events: none;
+            max-width: min(94vw, 560px);
+            padding: 12px 22px;
+            border-radius: 999px;
+            background: rgba(5, 10, 26, 0.88);
+            border: 1px solid rgba(var(--cn-var-z-rgb, 239, 68, 68), 0.55);
+            box-shadow:
+                0 0 0 1px rgba(var(--cn-var-z-rgb, 239, 68, 68), 0.1),
+                0 8px 28px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Base: + and i stay light; Re / Im blocks use \\textcolor in KaTeX. */
+        .cn-formula-overlay .katex {
+            font-size: clamp(1.12rem, 0.95rem + 1.35vmin, 1.55rem) !important;
+            color: rgba(226, 232, 240, 0.96) !important;
+        }
+
+        /* KaTeX-Beschriftungen an z- und r-Punkt (Farben: PALETTE / --cn-*). */
+        .cn-point-labels {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 28;
+        }
+
+        .cn-point-label {
+            position: absolute;
+            left: 0;
+            top: 0;
+            line-height: 1;
+            filter: drop-shadow(0 0 2px rgba(5, 10, 26, 0.96)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.78));
+        }
+
+        .cn-point-label .katex {
+            font-size: inherit !important;
+        }
+
+        #imaginarynumbers-coach {
+            display: none !important;
+        }
+
+        /* Sidebar: +50 %; Farben aus PALETTE → applyPaletteCssVars */
+        #cn-sliders .cyber-label {
+            font-size: clamp(1.17rem, 1.02rem + 1.35vmin, 1.425rem) !important;
+        }
+
+        #cn-sliders .val-display {
+            font-size: clamp(1.32rem, 1.17rem + 1.5vmin, 1.68rem) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(1) .cyber-label,
+        #cn-sliders .cyber-control-group:nth-child(1) .val-display {
+            color: var(--cn-axis-re, #facc15) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(2) .cyber-label,
+        #cn-sliders .cyber-control-group:nth-child(2) .val-display {
+            color: var(--cn-axis-im, #22d3ee) !important;
+        }
+
+        /* Slider dichter an die Werte: buttons-ultra bläht Range-Inputs auf; Header↔Track enger. */
+        #cn-sliders .cyber-control-group {
+            margin-top: 4px !important;
+            margin-bottom: 2px !important;
+        }
+
+        #cn-sliders .cyber-control-group:first-child {
+            margin-top: 0 !important;
+        }
+
+        #cn-sliders .control-header {
+            margin-bottom: 1px !important;
+            line-height: 1.15 !important;
+            align-items: center;
+        }
+
+        #cn-sliders input.cyber-slider[type="range"] {
+            padding: 4px 0 !important;
+            margin: 2px 0 !important;
+            min-height: 0 !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(1) input.cyber-slider::-webkit-slider-thumb {
+            background: var(--cn-axis-re, #facc15) !important;
+            border: 2px solid var(--cn-axis-re-dim, #a16207) !important;
+            box-shadow: 0 0 14px rgba(var(--cn-axis-re-rgb, 250, 204, 21), 0.85) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(1) input.cyber-slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 22px rgba(var(--cn-axis-re-rgb, 250, 204, 21), 0.95) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(1) input.cyber-slider:active::-webkit-slider-thumb {
+            box-shadow: 0 0 18px rgba(var(--cn-axis-re-rgb, 250, 204, 21), 0.98) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(1) input.cyber-slider::-moz-range-thumb {
+            background: var(--cn-axis-re, #facc15) !important;
+            border: 2px solid var(--cn-axis-re-dim, #a16207) !important;
+            box-shadow: 0 0 14px rgba(var(--cn-axis-re-rgb, 250, 204, 21), 0.85) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(2) input.cyber-slider::-webkit-slider-thumb {
+            background: var(--cn-axis-im, #22d3ee) !important;
+            border: 2px solid var(--cn-axis-im-dim, #0e7490) !important;
+            box-shadow: 0 0 12px rgba(var(--cn-axis-im-rgb, 34, 211, 238), 0.75) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(2) input.cyber-slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 20px rgba(var(--cn-axis-im-rgb, 34, 211, 238), 0.95) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(2) input.cyber-slider:active::-webkit-slider-thumb {
+            box-shadow: 0 0 16px rgba(var(--cn-axis-im-rgb, 34, 211, 238), 0.95) !important;
+        }
+
+        #cn-sliders .cyber-control-group:nth-child(2) input.cyber-slider::-moz-range-thumb {
+            background: var(--cn-axis-im, #22d3ee) !important;
+            border: 2px solid var(--cn-axis-im-dim, #0e7490) !important;
+            box-shadow: 0 0 12px rgba(var(--cn-axis-im-rgb, 34, 211, 238), 0.75) !important;
+        }
+
+        /*
+         * CyberUI (ui.js): .instrument-title { text-transform: uppercase }
+         * würde KaTeX-Buchstaben zu „Z“, „R“ machen — hier unterbinden.
+         */
+        #side-panel #ui-container .instrument-title {
+            text-transform: none !important;
+        }
+
+        /* Karten-Titel z ∈ ℂ / r=√z: deutlich größer als bisher (nur Titelzeile) */
+        #ui-container .instrument-title .katex {
+            font-size: clamp(1.2rem, 1.05rem + 0.95vmin, 1.48rem) !important;
+        }
+
+        #cn-sliders .cyber-label .katex {
+            font-size: clamp(1.17rem, 1.02rem + 1.35vmin, 1.425rem) !important;
+        }
+
+        #cn-sliders .val-display .katex {
+            font-size: clamp(1.32rem, 1.17rem + 1.5vmin, 1.68rem) !important;
+        }
+
+        /* r = √z: zweite Karte (blauer Akzent), Re/Im wie z — nur Anzeige, kein Slider */
+        #cn-r-readout {
+            margin-top: 0;
+        }
+
+        #cn-r-readout .cyber-label {
+            font-size: clamp(1.17rem, 1.02rem + 1.35vmin, 1.425rem) !important;
+        }
+
+        #cn-r-readout .val-display {
+            font-size: clamp(1.32rem, 1.17rem + 1.5vmin, 1.68rem) !important;
+        }
+
+        #cn-r-readout .cn-r-row:nth-child(1) .cyber-label,
+        #cn-r-readout .cn-r-row:nth-child(1) .val-display {
+            color: var(--cn-axis-re, #facc15) !important;
+        }
+
+        #cn-r-readout .cn-r-row:nth-child(2) .cyber-label,
+        #cn-r-readout .cn-r-row:nth-child(2) .val-display {
+            color: var(--cn-axis-im, #22d3ee) !important;
+        }
+
+        #cn-r-readout .control-header {
+            margin-bottom: 1px !important;
+            line-height: 1.15 !important;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <!-- Grid + axes: CyberCanvas.drawGrid (see js/cyber-canvas.js) -->
+            <canvas id="main-canvas"></canvas>
+            <div id="cn-formula-overlay" class="cn-formula-overlay" aria-live="polite">
+                <span id="cn-formula-tex"></span>
+            </div>
+            <div id="cn-point-labels" class="cn-point-labels" aria-hidden="true">
+                <span id="cn-label-z" class="cn-point-label"></span>
+                <span id="cn-label-r" class="cn-point-label"></span>
+            </div>
+            <div id="imaginarynumbers-coach" class="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-canvas.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="imaginarynumbers-controls.js"></script>
+    <script>
+        ImaginaryNumbersControls.applyPaletteCssVars();
+        const P = ImaginaryNumbersControls.PALETTE;
+        const rgbaFromHex = (hex, a) =>
+            `rgba(${ImaginaryNumbersControls.hexToRgbComma(hex)}, ${a})`;
+
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                    CyberCanvasInstance.needsRedraw = true;
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Imaginary numbers',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        /** Real part x, imaginary part y — same math space as CyberCanvas axis pair. */
+        const state = { re: 1, im: 1 };
+        let draggingZ = false;
+        const Z_SLIDER_MIN = -4;
+        const Z_SLIDER_MAX = 4;
+
+        function fmtNum(v) {
+            const n = Math.round(v * 100) / 100;
+            return Number.isInteger(n) ? String(n) : n.toFixed(2);
+        }
+
+        /**
+         * Principal branch of √(x + iy): Re(√z) ≥ 0; for negative real axis, Im(√z) > 0.
+         */
+        function principalComplexSqrt(re, im) {
+            const r = Math.hypot(re, im);
+            if (r === 0) return { re: 0, im: 0 };
+            const u = Math.sqrt((r + re) / 2);
+            let v;
+            if (u > 1e-12) {
+                v = im / (2 * u);
+            } else {
+                v = (im >= 0 ? 1 : -1) * Math.sqrt((r - re) / 2);
+            }
+            return { re: u, im: v };
+        }
+
+        function updateCnFormulaOverlay() {
+            const host = document.getElementById('cn-formula-tex');
+            if (!host || typeof katex === 'undefined') return;
+            const x = fmtNum(state.re);
+            const y = fmtNum(state.im);
+            const et = ImaginaryNumbersControls.escapeTexText;
+            const tex = `\\textcolor{${P.VAR_Z}}{z} = \\textcolor{${P.AXIS_RE}}{\\text{${et(x)}}} + \\mathit{i}\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(y)}}}`;
+            try {
+                katex.render(tex, host, { throwOnError: false, displayMode: false });
+            } catch (_) {
+                host.textContent = `z = ${x} + i ${y}`;
+            }
+        }
+
+        /** Grab radius in math units (~finger-sized on screen). */
+        function grabRadiusMath(CC) {
+            const span = Math.max(CC.view.maxX - CC.view.minX, CC.view.maxY - CC.view.minY);
+            return Math.max(0.06, span * 0.032);
+        }
+
+        function hitZ(CC, pos) {
+            const r = grabRadiusMath(CC);
+            return Math.hypot(pos.x - state.re, pos.y - state.im) <= r;
+        }
+
+        /** Keep range sliders in sync when z is moved on the canvas (no duplicate slider callbacks). */
+        function syncSlidersFromState() {
+            const wrap = document.getElementById('cn-sliders');
+            if (!wrap) return;
+            const inputs = wrap.querySelectorAll('input[type="range"]');
+            if (inputs[0]) inputs[0].value = String(state.re);
+            if (inputs[1]) inputs[1].value = String(state.im);
+            ImaginaryNumbersControls.renderValDisplays(state, fmtNum);
+        }
+
+        function bindZPointDrag() {
+            const CC = CyberCanvasInstance;
+
+            CC.onMouseDown = (pos) => {
+                if (hitZ(CC, pos)) {
+                    draggingZ = true;
+                    CC.allowPan = false;
+                    CC.canvas.style.cursor = 'grabbing';
+                }
+            };
+
+            CC.onMouseMove = (pos) => {
+                if (draggingZ) {
+                    state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.x));
+                    state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.y));
+                    syncSlidersFromState();
+                    CC.needsRedraw = true;
+                    return;
+                }
+                if (CC.isDragging) return;
+                CC.canvas.style.cursor = hitZ(CC, pos) ? 'grab' : 'crosshair';
+            };
+
+            CC.onMouseUp = () => {
+                if (draggingZ) {
+                    draggingZ = false;
+                    CC.allowPan = true;
+                    syncSlidersFromState();
+                }
+                if (!CC.isDragging) CC.canvas.style.cursor = 'crosshair';
+            };
+        }
+
+        function draw() {
+            const CC = CyberCanvasInstance;
+            if (!CC.isInitialized) return;
+
+            CC.drawGrid({
+                vignette: true,
+                glow: true,
+                mainColor: rgbaFromHex(P.CARD_ACCENT, 0.42),
+            });
+
+            const ctx = CC.ctx;
+            const ox = CC.mapX(0);
+            const oy = CC.mapY(0);
+            const ax = CC.mapX(state.re);
+            const ay = CC.mapY(state.im);
+            const sqrtZ = principalComplexSqrt(state.re, state.im);
+            const sx = CC.mapX(sqrtZ.re);
+            const sy = CC.mapY(sqrtZ.im);
+            const s = CC.getUiScale();
+
+            /*
+             * Gestrichelt: nur Lotfußpunkte auf reeller / imaginärer Achse (jeweils zwei Striche pro Punkt).
+             * Keine Strecke auf der imaginären Achse von (0, im) nach (0, 0) — die war redundant „auf der y-Achse“.
+             */
+            ctx.setLineDash([6, 6]);
+            ctx.lineWidth = Math.max(0.8, s);
+            ctx.strokeStyle = P.AXIS_RE;
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(ox, ay);
+            ctx.stroke();
+            ctx.strokeStyle = P.AXIS_IM;
+            ctx.beginPath();
+            ctx.moveTo(ax, oy);
+            ctx.lineTo(ax, ay);
+            ctx.stroke();
+            ctx.strokeStyle = P.AXIS_RE;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(ox, sy);
+            ctx.stroke();
+            ctx.strokeStyle = P.AXIS_IM;
+            ctx.beginPath();
+            ctx.moveTo(sx, oy);
+            ctx.lineTo(sx, sy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            /* Vektoren O → r und O → z: beide weiß, dünn */
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = Math.max(0.45, 0.65 * s);
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(sx, sy);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(ax, ay);
+            ctx.stroke();
+
+            ctx.fillStyle = rgbaFromHex(P.VAR_R, 0.98);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 5.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = rgbaFromHex(P.VAR_Z, 0.95);
+            ctx.beginPath();
+            ctx.arc(ax, ay, 6 * s, 0, Math.PI * 2);
+            ctx.fill();
+
+            updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s);
+
+            updateCnFormulaOverlay();
+        }
+
+        function ensureCnPointLabelsKatex() {
+            if (typeof katex === 'undefined') return;
+            const zEl = document.getElementById('cn-label-z');
+            const rEl = document.getElementById('cn-label-r');
+            const labelVer = 'v6';
+            if (zEl && zEl.dataset.cnLabelVer !== labelVer) {
+                zEl.innerHTML = '';
+                katex.render(`\\textcolor{${P.VAR_Z}}{z}`, zEl, {
+                    throwOnError: false,
+                    displayMode: false,
+                });
+                zEl.dataset.cnLabelVer = labelVer;
+            }
+            if (rEl && rEl.dataset.cnLabelVer !== labelVer) {
+                rEl.innerHTML = '';
+                katex.render(ImaginaryNumbersControls.texRSqrtZ(), rEl, {
+                    throwOnError: false,
+                    displayMode: false,
+                });
+                rEl.dataset.cnLabelVer = labelVer;
+            }
+        }
+
+        function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s) {
+            ensureCnPointLabelsKatex();
+            const canvas = CC.canvas;
+            const zEl = document.getElementById('cn-label-z');
+            const rEl = document.getElementById('cn-label-r');
+            if (!canvas || !zEl || !rEl) return;
+            const ox = canvas.offsetLeft;
+            const oy = canvas.offsetTop;
+            const pad = 3 * s;
+            const fz = Math.max(18, Math.round(21 * s)) + 'px';
+            const fzR = Math.max(12, Math.round(15.5 * s)) + 'px';
+            zEl.style.fontSize = fz;
+            rEl.style.fontSize = fzR;
+            zEl.style.left = `${ox + ax + pad}px`;
+            zEl.style.top = `${oy + ay - pad}px`;
+            zEl.style.transform = 'translateY(-100%)';
+            rEl.style.left = `${ox + sx + pad}px`;
+            rEl.style.top = `${oy + sy - pad}px`;
+            rEl.style.transform = 'translateY(-100%)';
+        }
+
+        function setupLab() {
+            CyberCanvasInstance.init('main-canvas', {}, {
+                showLabels: true,
+                showTelemetry: false,
+            });
+            CyberCanvasInstance.resetView(-4, 4);
+            CyberCanvasInstance.onResize = draw;
+            bindZPointDrag();
+
+            CyberCanvasInstance.onContextMenu = (e) => {
+                CyberUI.showContextMenu(e.clientX, e.clientY, [
+                    {
+                        label: CyberI18n.get('lgs.view_reset'),
+                        onclick: () => {
+                            CyberCanvasInstance.resetView(-4, 4);
+                            CyberCanvasInstance.needsRedraw = true;
+                        },
+                    },
+                    { divider: true },
+                    {
+                        label: CyberI18n.get('ui.show_axes'),
+                        checked: CyberCanvasInstance.showAxes,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showAxes = val;
+                            CyberCanvasInstance.needsRedraw = true;
+                        },
+                    },
+                    {
+                        label: CyberI18n.get('ui.show_grid'),
+                        checked: CyberCanvasInstance.showGrid,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showGrid = val;
+                            CyberCanvasInstance.needsRedraw = true;
+                        },
+                    },
+                    {
+                        label: CyberI18n.get('ui.show_labels'),
+                        checked: CyberCanvasInstance.showLabels,
+                        onchange: (val) => {
+                            CyberCanvasInstance.showLabels = val;
+                            CyberCanvasInstance.needsRedraw = true;
+                        },
+                    },
+                ]);
+            };
+
+            ImaginaryNumbersControls.setupParameterCard({
+                state,
+                fmtNum,
+                sliderMin: Z_SLIDER_MIN,
+                sliderMax: Z_SLIDER_MAX,
+                step: 0.05,
+                onSliderChange: () => {
+                    CyberCanvasInstance.needsRedraw = true;
+                },
+                sqrtProvider: principalComplexSqrt,
+            });
+
+            updateCnFormulaOverlay();
+
+            CyberCanvasInstance.needsRedraw = true;
+        }
+
+        document.fonts.ready.then(setupLab);
+    </script>
+</body>
+
+</html>

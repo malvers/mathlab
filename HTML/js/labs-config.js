@@ -476,5 +476,16 @@ const LABS_DATA = [
         "category": "highlight lgs geometrie hot grade8",
         "keywords": "lgs gleichungssystem schnittpunkt geraden algebra mathe",
         "color": "green"
+    },
+    {
+        "id": "imaginarynumbers",
+        "href": "imaginarynumbers.html",
+        "title": "Imaginary numbers",
+        "description": "Komplexe Zahlen in der Gaußschen Zahlenebene: Realteil, Imaginärteil und die imaginäre Einheit — interaktiv erkunden (Ausbau folgt).",
+        "tagline": "Komplexe Ebene · Re / Im · i",
+        "icon": LAB_ICONS["imaginarynumbers"],
+        "category": "algebra highlight grade10 grade11 grade12 oberstufe uni",
+        "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
+        "color": "blue"
     }
 ];

@@ -15,7 +15,7 @@
  * resizeTo when allowed; sized popup otherwise. noopener is omitted on programmatic open so
  * window.open returns a real reference. Preset skip uses a tight px tolerance so “almost” sizes still open a popup.
  *
- * Load only where desired (e.g. template.html).
+ * Load only where desired (e.g. template_minimal.html).
  *
  * Zoom bounds: DEFAULT_MIN … DEFAULT_MAX (arrows / setScale); fit capped upward by DEFAULT_MAX; optional clamp: false → SAFETY_*.
  * Collapsed sidebar: --cyber-left-natural-w switches to rail-only width; fit scale is derived from expanded chrome so --cyber-left-scale does not jump when toggling SB (same mini-rail ZF).
