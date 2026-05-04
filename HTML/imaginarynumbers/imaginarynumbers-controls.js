@@ -5,20 +5,21 @@
  */
 (function (global) {
     /**
-     * Rollen-basierte Farben — hier Hex ändern, nicht die Keys.
-     * VAR_Z: Punkt/Variable z | AXIS_RE: re-Anteil | AXIS_IM: im-Anteil | VAR_R: √z / r-Karte
+     * Role-based colors — change hex here, not the keys.
+     * VAR_Z: Point/Variable z | AXIS_RE: re-part | AXIS_IM: im-part | VAR_R: √z / r-card
      */
-    /* Farben wie Winkel-Diagramm (Stufenwinkel / Scheitelwinkel / Nebenwinkel + Gelb). */
+    /* Colors like angle diagram (corresponding / vertically opposite / alternate + yellow). */
     const PALETTE = Object.freeze({
         CARD_ACCENT: '#00B0F0',
         VAR_Z: '#ED1C24',
         AXIS_RE: '#FFC000',
         AXIS_IM: '#00B0F0',
         VAR_R: '#92D050',
+        VAR_OMEGA: '#B026FF', // Purple für die Summe
         TITLE_MUTED: '#e2e8f0',
     });
 
-    /** Etwas dunklere Ränder (zu AXIS_RE / AXIS_IM passend). */
+    /** Slightly darker edges (matching AXIS_RE / AXIS_IM). */
     const PALETTE_DIM = Object.freeze({
         AXIS_RE_EDGE: '#B88600',
         AXIS_IM_EDGE: '#0077A3',
@@ -28,7 +29,7 @@
 
     const AXIS_RE_IM = [PALETTE.AXIS_RE, PALETTE.AXIS_IM];
 
-    /** Unter z- und r-Karte (nicht in der z-Karte): KaTeX r = √(z) vs z² (nur einer aktiv). */
+    /** Below z- and r-card (not in z-card): KaTeX r = √(z) vs z² (only one active). */
     const ROOT_MAP_MODE_HTML = `
                 <div id="cn-map-mode" class="cn-map-mode" role="radiogroup" aria-label="Abbildung z nach r">
                     <button type="button" id="cn-map-sqrt" class="cn-map-mode-btn" aria-pressed="true" aria-label="r gleich Wurzel aus z">
@@ -39,7 +40,24 @@
                     </button>
                 </div>`;
 
-    const ROOT_MAP_MODE_WRAP_HTML = `<div id="cn-map-mode-wrap" class="cn-map-mode-wrap">${ROOT_MAP_MODE_HTML}</div>`;
+    const ROOT_MAP_MODE_WRAP_HTML = `
+        <div id="cn-map-mode-wrap" class="cn-map-mode-wrap">
+            ${ROOT_MAP_MODE_HTML}
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding-left: 10px;">
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-sum" class="cyber-checkbox"> 
+                    <span id="cn-check-sum-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
+                </label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-dashed" class="cyber-checkbox"> 
+                    <span id="cn-check-dashed-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
+                </label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-abs" class="cyber-checkbox"> 
+                    <span id="cn-check-abs-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
+                </label>
+            </div>
+        </div>`;
 
     const ROOT_Z_READOUT_HTML = `
                 <div id="cn-z-readout" class="cn-z-readout">
@@ -73,7 +91,7 @@
             .replace(/\}/g, '\\}');
     }
 
-    /** #RRGGBB → "r, g, b" für CSS rgba(var(--…-rgb), α) */
+    /** #RRGGBB → "r, g, b" for CSS rgba(var(--…-rgb), α) */
     function hexToRgbComma(hex) {
         const h = String(hex).replace('#', '');
         if (h.length !== 6) return '0, 0, 0';
@@ -92,6 +110,7 @@
         setHexAndRgb('--cn-axis-re', P.AXIS_RE);
         setHexAndRgb('--cn-axis-im', P.AXIS_IM);
         setHexAndRgb('--cn-var-r', P.VAR_R);
+        setHexAndRgb('--cn-var-omega', P.VAR_OMEGA);
         setHexAndRgb('--cn-title-muted', P.TITLE_MUTED);
         root.style.setProperty('--cn-card-accent', P.CARD_ACCENT);
         root.style.setProperty('--cn-axis-re-dim', PALETTE_DIM.AXIS_RE_EDGE);
@@ -101,13 +120,15 @@
     }
 
     function texReImPair(reInner, imInner) {
+        const reColor = reInner === 'r' ? PALETTE.VAR_R : (reInner === 'z' ? PALETTE.VAR_Z : PALETTE.AXIS_RE);
+        const imColor = imInner === 'r' ? PALETTE.VAR_R : (imInner === 'z' ? PALETTE.VAR_Z : PALETTE.AXIS_IM);
         return [
-            `\\textcolor{${PALETTE.AXIS_RE}}{\\mathit{re}\\,(${reInner})}`,
-            `\\textcolor{${PALETTE.AXIS_IM}}{\\mathit{im}\\,(${imInner})}`,
+            `\\textcolor{${PALETTE.AXIS_RE}}{\\mathit{re}\\,(\\textcolor{${reColor}}{${reInner}})}`,
+            `\\textcolor{${PALETTE.AXIS_IM}}{\\mathit{im}\\,(\\textcolor{${imColor}}{${imInner}})}`,
         ];
     }
 
-    /** Nur \\textit{r} und \\textit{z} in Rollenfarben; = und Wurzel neutral (TITLE_MUTED). */
+    /** Only \\textit{r} and \\textit{z} in role colors; = and sqrt neutral (TITLE_MUTED). */
     function texRSqrtZ() {
         return (
             `\\textcolor{${PALETTE.VAR_R}}{r}\\,` +
@@ -116,7 +137,7 @@
         );
     }
 
-    /** r = z² — Exponent wie = neutral, nur z rot. */
+    /** r = z² — Exponent and = neutral, only z red. */
     function texZSquare() {
         return (
             `\\textcolor{${PALETTE.VAR_R}}{r}\\,` +
@@ -125,7 +146,7 @@
         );
     }
 
-    /** Titelzeile z-Karte wie bisher: z ∈ ℂ */
+    /** Title row z-card as before: z ∈ ℂ */
     function texZInC() {
         return `\\textcolor{${PALETTE.VAR_Z}}{z}\\,\\textcolor{${PALETTE.TITLE_MUTED}}{\\in\\,\\mathbb{C}}`;
     }
@@ -241,11 +262,30 @@
     function renderMapModeKatex() {
         const sqrtEl = document.getElementById('cn-map-sqrt-tex');
         const sqEl = document.getElementById('cn-map-sq-tex');
+        const sumEl = document.getElementById('cn-check-sum-tex');
+        const dashedEl = document.getElementById('cn-check-dashed-tex');
+        const absEl = document.getElementById('cn-check-abs-tex');
         if (!sqrtEl || !sqEl) return;
         sqrtEl.textContent = '';
         sqEl.textContent = '';
         katexTry(sqrtEl, texRSqrtZ(), 'r = √(z)');
         katexTry(sqEl, texZSquare(), 'r = z²');
+        if (sumEl) {
+            const sumTex = 
+                `\\Large ` +
+                `\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+                `\\textcolor{${PALETTE.VAR_Z}}{z}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{+}\\,` +
+                `\\textcolor{${PALETTE.VAR_R}}{r}`;
+            katexTry(sumEl, sumTex, 'ω = z + r');
+        }
+        if (dashedEl) {
+            dashedEl.textContent = 'Hilfslinien';
+        }
+        if (absEl) {
+            absEl.textContent = 'Beträge';
+        }
     }
 
     function setupParameterCard(options) {

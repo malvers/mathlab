@@ -18,11 +18,27 @@
     box-sizing: border-box;
 }
 
+.cn-formula-row-bottom {
+    position: absolute;
+    bottom: clamp(10px, 2vmin, 18px);
+    left: clamp(10px, 2vmin, 18px);
+    z-index: 30;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 /*
- * Einheitliche Breite: --cn-formula-unified-w (px), gesetzt per syncCnFormulaOverlayWidths()
- * nach KaTeX — so breit wie der breiteste Inhalt, ggf. an Canvas gekappt.
+ * Unified width: --cn-formula-unified-w (px), set via syncCnFormulaOverlayWidths()
+ * after KaTeX — as wide as the widest content, clamped to Canvas if needed.
  */
-.cn-formula-row > .cn-formula-overlay {
+.cn-formula-row > .cn-formula-overlay,
+.cn-formula-row-bottom > .cn-formula-overlay {
     width: var(--cn-formula-unified-w, min(96vw, 820px));
     max-width: 100%;
     box-sizing: border-box;
@@ -44,7 +60,7 @@
     white-space: normal;
 }
 
-/* |z| (Betrag) — eigene „Extra“-Box, dezenter Rand */
+/* |z| (Magnitude) — separate "Extra" box, subtle border */
 .cn-formula-absz {
     border: 1px solid rgba(var(--cn-title-muted-rgb, 226, 232, 240), 0.35);
     box-shadow:
@@ -54,7 +70,7 @@
     padding-bottom: 12px;
 }
 
-/* |r| — zweite Extra-Box, Rand an VAR_R */
+/* |r| — second Extra box, border matching VAR_R */
 .cn-formula-absr {
     border: 1px solid rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.42);
     box-shadow:
@@ -64,7 +80,36 @@
     padding-bottom: 12px;
 }
 
-/* Hauptwert √z: re(r), im(r) — Rand VAR_R */
+/* |w| — third Extra box, border matching VAR_OMEGA */
+.cn-formula-absw {
+    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.42);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.08),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Sum ω = z + r */
+.cn-formula-sum {
+    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.42);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.08),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.cn-formula-sum .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-sum .katex {
+    font-size: clamp(0.95rem, 0.82rem + 1.05vmin, 1.38rem) !important;
+}
+
+/* Principal value √z: re(r), im(r) — border VAR_R */
 .cn-formula-magnitude {
     border: 1px solid rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.55);
     box-shadow:
@@ -87,7 +132,7 @@
     color: rgba(226, 232, 240, 0.96) !important;
 }
 
-/* KaTeX-Beschriftungen an z- und r-Punkt (Farben: PALETTE / --cn-*). */
+/* KaTeX labels on z and r points (colors: PALETTE / --cn-*). */
 .cn-point-labels {
     position: absolute;
     inset: 0;
@@ -113,7 +158,7 @@
 
 /*
  * CyberUI (ui.js): .instrument-title { text-transform: uppercase }
- * würde KaTeX-Buchstaben zu „Z“, „R“ machen — hier unterbinden.
+ * would turn KaTeX letters into "Z", "R" — prevent this here.
  */
 #side-panel #ui-container .instrument-title {
     text-transform: none !important;
@@ -123,12 +168,12 @@
     max-width: 100%;
 }
 
-/* Karten-Titel z ∈ ℂ / r=√z: deutlich größer als bisher (nur Titelzeile) */
+/* Card titles z ∈ ℂ / r=√z: significantly larger than before (title row only) */
 #ui-container .instrument-title .katex {
     font-size: clamp(1.2rem, 1.05rem + 0.95vmin, 1.48rem) !important;
 }
 
-/* sqrt / z² — unter beiden Karten (#cn-map-mode-wrap), nicht in der z-Karte */
+/* sqrt / z² — below both cards (#cn-map-mode-wrap), not in the z-card */
 #ui-container .cn-map-mode-wrap {
     margin-top: 12px;
     padding-top: 10px;
@@ -176,7 +221,7 @@
     color: rgba(248, 250, 252, 0.98);
 }
 
-/* z- und r-Readout: gleiches Layout (re/im Zeilen, KaTeX-Titel in .instrument-title) */
+/* z- and r-Readout: same layout (re/im rows, KaTeX title in .instrument-title) */
 #cn-z-readout,
 #cn-r-readout {
     margin-top: 0;

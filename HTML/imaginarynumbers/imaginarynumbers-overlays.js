@@ -8,14 +8,18 @@
         formula: '',
         absz: '',
         absr: '',
-        magnitude: ''
+        absw: '',
+        magnitude: '',
+        sum: ''
     };
 
     function invalidateCnOverlaysMemo() {
         memoKeys.formula = '';
         memoKeys.absz = '';
         memoKeys.absr = '';
+        memoKeys.absw = '';
         memoKeys.magnitude = '';
+        memoKeys.sum = '';
         document.querySelectorAll('.cn-point-label').forEach((el) => {
             delete el.dataset.cnPointKey;
         });
@@ -39,8 +43,8 @@
     const Tex = {
         color: (hex, text) => `\\textcolor{${hex}}{${text}}`,
         val: (hex, numStr) => `\\textcolor{${hex}}{\\text{${et(numStr)}}}`,
-        re: (inner) => `\\operatorname{re}(${inner})`,
-        im: (inner) => `\\operatorname{im}(${inner})`,
+        re: (inner) => `\\mathit{re}\\,(${inner})`,
+        im: (inner) => `\\mathit{im}\\,(${inner})`,
         sqrt: (inner) => `\\sqrt{${inner}}`,
         frac: (num, den) => `\\dfrac{${num}}{${den}}`,
         sgn: (inner) => `\\operatorname{sgn}\\bigl(${inner}\\bigr)`,
@@ -68,6 +72,15 @@
     }
 
     function updateCnAbszOverlay(state) {
+        const host = document.getElementById('cn-formula-absz');
+        if (!host) return;
+
+        if (!state.showAbsBoxes) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
         const rhos = fmtNum(Math.hypot(state.re, state.im));
@@ -83,6 +96,15 @@
     }
 
     function updateCnAbsrOverlay(state) {
+        const host = document.getElementById('cn-formula-absr');
+        if (!host) return;
+
+        if (!state.showAbsBoxes) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
         const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
@@ -102,6 +124,35 @@
         renderOverlay('cn-formula-absr-tex', 'absr', memoKey, buildTex, fallback, false);
     }
 
+    function updateCnAbswOverlay(state) {
+        const host = document.getElementById('cn-formula-absw');
+        if (!host) return;
+
+        if (!state.showAbsBoxes || !state.showSum) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const wx = state.re + rPt.re;
+        const wy = state.im + rPt.im;
+        const wxs = fmtNum(wx);
+        const wys = fmtNum(wy);
+        const absws = fmtNum(Math.hypot(wx, wy));
+
+        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const memoKey = `absw|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
+
+        const buildTex = () => `\\left|${Tex.color(P.VAR_OMEGA, '\\omega')}\\right| \\,{=}\\, ` +
+            `\\sqrt{\\textstyle${Tex.val(P.AXIS_RE, wxs)}^{2}\\,+\\,${Tex.val(P.AXIS_IM, wys)}^{2}} ` +
+            `\\,{=}\\, ${Tex.val(P.TITLE_MUTED, absws)}`;
+            
+        const fallback = () => `|ω| = √((${wxs})² + (${wys})²) = ${absws}`;
+
+        renderOverlay('cn-formula-absw-tex', 'absw', memoKey, buildTex, fallback, false);
+    }
+
     function updateCnMagnitudeOverlay(state) {
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
@@ -115,8 +166,8 @@
         const vs = fmtNum(w.im);
 
         const buildTex = () => {
-            const re_r = Tex.color(P.AXIS_RE, Tex.re('r'));
-            const im_r = Tex.color(P.AXIS_IM, Tex.im('r'));
+            const re_r = Tex.color(P.AXIS_RE, `\\mathit{re}\\,(\\textcolor{${P.VAR_R}}{r})`);
+            const im_r = Tex.color(P.AXIS_IM, `\\mathit{im}\\,(\\textcolor{${P.VAR_R}}{r})`);
             const vx = Tex.val(P.AXIS_RE, xs);
             const vy = Tex.val(P.AXIS_IM, ys);
             const vu = Tex.val(P.AXIS_RE, us);
@@ -158,12 +209,57 @@
         renderOverlay('cn-formula-mag-tex', 'magnitude', memoKey, buildTex, fallback, true);
     }
 
+    function updateCnSumOverlay(state) {
+        const host = document.getElementById('cn-formula-sum');
+        if (!host) return;
+
+        if (!state.showSum) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const xs = fmtNum(state.re);
+        const ys = fmtNum(state.im);
+        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const memoKey = `sum|${zm}|${xs}|${ys}`;
+
+        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const us = fmtNum(rPt.re);
+        const vs = fmtNum(rPt.im);
+        
+        const wx = fmtNum(state.re + rPt.re);
+        const wy = fmtNum(state.im + rPt.im);
+
+        const buildTex = () => {
+            const omega = Tex.color(P.VAR_OMEGA, '\\omega');
+            const re_w = Tex.color(P.AXIS_RE, `\\mathit{re}\\,(${omega})`);
+            const im_w = Tex.color(P.AXIS_IM, `\\mathit{im}\\,(${omega})`);
+            const zRe = Tex.val(P.AXIS_RE, xs);
+            const zIm = Tex.val(P.AXIS_IM, ys);
+            const rRe = Tex.val(P.VAR_R, us);
+            const rIm = Tex.val(P.VAR_R, vs);
+            const wRe = Tex.val(P.AXIS_RE, wx);
+            const wIm = Tex.val(P.AXIS_IM, wy);
+            
+            return Tex.aligned([
+                `&${re_w} \\quad ${zRe} \\,+\\, ${rRe} \\,{=}\\, ${wRe}`,
+                `&${im_w} \\quad ${zIm} \\,+\\, ${rIm} \\,{=}\\, ${wIm}`
+            ]);
+        };
+
+        const fallback = () => `re(ω)=${wx}, im(ω)=${wy}`;
+
+        renderOverlay('cn-formula-sum-tex', 'sum', memoKey, buildTex, fallback, true);
+    }
+
     function ensureCnPointLabelsKatex(state) {
         if (typeof katex === 'undefined') return;
         const zEl = document.getElementById('cn-label-z');
         const rEl = document.getElementById('cn-label-r');
+        const wEl = document.getElementById('cn-label-w');
         const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-        const key = `cn-pt-${zm}`;
+        const key = `cn-pt-${zm}-${state.showSum}`;
 
         if (zEl && zEl.dataset.cnPointKey !== key) {
             zEl.innerHTML = '';
@@ -179,13 +275,22 @@
             katex.render(rTex, rEl, { throwOnError: false, displayMode: false });
             rEl.dataset.cnPointKey = key;
         }
+        if (wEl && wEl.dataset.cnPointKey !== key) {
+            wEl.innerHTML = '';
+            if (state.showSum) {
+                const wTex = `\\textcolor{${P.VAR_OMEGA}}{\\omega}`;
+                katex.render(wTex, wEl, { throwOnError: false, displayMode: false });
+            }
+            wEl.dataset.cnPointKey = key;
+        }
     }
 
-    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, s, state) {
+    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, s, state) {
         ensureCnPointLabelsKatex(state);
         const canvas = CC.canvas;
         const zEl = document.getElementById('cn-label-z');
         const rEl = document.getElementById('cn-label-r');
+        const wEl = document.getElementById('cn-label-w');
         if (!canvas || !zEl || !rEl) return;
         const ox = canvas.offsetLeft;
         const oy = canvas.offsetTop;
@@ -199,13 +304,29 @@
         rEl.style.left = `${ox + sx + pad}px`;
         rEl.style.top = `${oy + sy - pad}px`;
         rEl.style.transform = 'translateY(-100%)';
+        
+        if (wEl) {
+            if (state.showSum) {
+                wEl.style.display = '';
+                wEl.style.fontSize = fz;
+                wEl.style.left = `${ox + wx + pad}px`;
+                wEl.style.top = `${oy + wy - pad}px`;
+                wEl.style.transform = 'translateY(-100%)';
+            } else {
+                wEl.style.display = 'none';
+            }
+        }
     }
 
     function syncCnFormulaOverlayWidths() {
         const row = document.getElementById('cn-formula-row');
-        const ids = ['cn-formula-overlay', 'cn-formula-magnitude', 'cn-formula-absz', 'cn-formula-absr'];
-        const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
-        if (!row || !els.length) return;
+        const rowBottom = document.getElementById('cn-formula-row-bottom');
+        const ids = ['cn-formula-overlay', 'cn-formula-magnitude', 'cn-formula-absz', 'cn-formula-absr', 'cn-formula-absw', 'cn-formula-sum'];
+        
+        // Only process elements that are not explicitly hidden
+        const els = ids.map((id) => document.getElementById(id)).filter(el => el && el.style.display !== 'none');
+        
+        if (!els.length) return;
 
         els.forEach((el) => {
             el.style.display = 'inline-block';
@@ -223,14 +344,16 @@
         });
 
         let px = Math.max(120, Math.ceil(maxW));
-        row.style.setProperty('--cn-formula-unified-w', `${px}px`);
+        if (row) row.style.setProperty('--cn-formula-unified-w', `${px}px`);
+        if (rowBottom) rowBottom.style.setProperty('--cn-formula-unified-w', `${px}px`);
         let need = px;
         els.forEach((el) => {
             need = Math.max(need, el.scrollWidth);
         });
         if (need > px) {
             px = Math.ceil(need);
-            row.style.setProperty('--cn-formula-unified-w', `${px}px`);
+            if (row) row.style.setProperty('--cn-formula-unified-w', `${px}px`);
+            if (rowBottom) rowBottom.style.setProperty('--cn-formula-unified-w', `${px}px`);
         }
     }
 
@@ -253,7 +376,9 @@
         updateCnFormulaOverlay,
         updateCnAbszOverlay,
         updateCnAbsrOverlay,
+        updateCnAbswOverlay,
         updateCnMagnitudeOverlay,
+        updateCnSumOverlay,
         updateCnPointLabelOverlays,
         syncCnFormulaOverlayWidths,
         ensureCnFormulaWidthResizeListener

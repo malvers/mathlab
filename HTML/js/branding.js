@@ -37,7 +37,22 @@ function getBriefingModuleKey() {
 /** Briefing registry keys differ from page basenames (e.g. mandelbrot.html → mandelbrot_deep). */
 function getBriefingLookupKey(moduleKey) {
     const aliases = { mandelbrot: "mandelbrot_deep" };
-    return aliases[moduleKey] || moduleKey;
+    if (aliases[moduleKey]) return aliases[moduleKey];
+    
+    // Support for labs in subdirectories (e.g. imaginarynumbers/index.html)
+    try {
+        const path = window.location.pathname || "";
+        const segments = path.split("/").filter(Boolean);
+        if (segments.length >= 2 && moduleKey === "index") {
+            const parentDir = segments[segments.length - 2].toLowerCase();
+            // If the parent dir matches a known briefing key, use it
+            if (window.CyberBriefings && window.CyberBriefings['de'] && window.CyberBriefings['de'][parentDir]) {
+                return parentDir;
+            }
+        }
+    } catch (e) {}
+    
+    return moduleKey;
 }
 
 const CYBER_BRIEFING_BTN = '.nav-btn[title="Beschreibung anzeigen"]';
