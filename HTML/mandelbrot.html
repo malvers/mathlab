@@ -183,6 +183,10 @@
             box-sizing: border-box;
         }
 
+        .mb-fractal-formula-overlay[hidden] {
+            display: none !important;
+        }
+
         .mb-fractal-formula-row {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -395,6 +399,17 @@
             flex-shrink: 0;
         }
 
+        #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-spd {
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-spd .katex {
+            text-shadow: none !important;
+        }
+
         /* FRACTAL main row left-aligned; width follows KaTeX */
         #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex:not(.mb-fractal-mz-split) {
             justify-content: flex-start;
@@ -554,6 +569,10 @@
                 0 0 0 1px rgba(0, 210, 255, 0.1),
                 0 0 22px rgba(0, 210, 255, 0.18),
                 0 12px 36px rgba(0, 0, 0, 0.42);
+        }
+
+        #main-content > #orbit-mb-worked.orbit-mb-worked[hidden] {
+            display: none !important;
         }
 
         .orbit-mb-worked-caption {
@@ -1155,6 +1174,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             let mbFormulaOverlayCacheKey = '';
             /** Polyline z_k→z_{k+1} (legs); orbit context menu */
             let orbitShowLegPolyline = true;
+            /** KaTeX-/Metrik-Leiste über der Plot-Spalte + Schritt-\#orbit-mb-worked — nur im Orbit; Schalter in der Sidebar. */
+            let orbitShowWorkedCalc = true;
             /** Last synced fractal view (w|h|cx|cy|zoom) — align orbit view only when WebGL changes (otherwise each redraw breaks orbit zoom). */
             let orbitFractalViewportSyncKey = '';
             /** Smoothed drawOrbitPlane runtime (ms) — lag line only in orbit HUD */
@@ -1195,6 +1216,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             const LS_MB_MAIN_PLANE = 'forloop.mandelbrot.mainPlane';
             const LS_MB_ORBIT_HUD_VISIBLE = 'forloop.mandelbrot.orbitHudVisible';
             const LS_MB_ORBIT_LEG_POLYLINE = 'forloop.mandelbrot.orbitShowLegPolyline';
+            const LS_MB_ORBIT_SHOW_WORKED = 'forloop.mandelbrot.orbitShowWorkedCalc';
             const LS_MB_MODE = 'forloop.mandelbrot.mode';
             const LS_MB_CENTER_X = 'forloop.mandelbrot.centerX';
             const LS_MB_CENTER_Y = 'forloop.mandelbrot.centerY';
@@ -1422,6 +1444,17 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 return { tex: s.replace('.', '{.}'), plain: Number(r2).toFixed(ORBIT_COORD_NKS) };
             }
 
+            /** Top-Leiste \(\lvert z^{2}\\rvert\)/\(N\)/\(\mu\): nur in der Orbitebene wenn \texttt{orbitShowWorkedCalc}. */
+            function syncMbOrbitFormulaOverlayShellVisibility() {
+                const overlay = document.querySelector('.mb-fractal-formula-overlay');
+                if (!overlay) return;
+                if (mainPlane === 'FRACTAL') {
+                    overlay.hidden = false;
+                } else {
+                    overlay.hidden = !orbitShowWorkedCalc;
+                }
+            }
+
             /** Top KaTeX box: FRACTAL = classic / Burning Ship; ORBIT leg mode = |z²| at endpoint + leg N; scan = same line at grid point + hit count */
             function syncMbFractalFormulaOverlay() {
                 const formulaPanel = document.getElementById('mb-fractal-formula-panel');
@@ -1429,8 +1462,12 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     formulaPanel.classList.toggle('mb-fractal-formula-panel--orbit-metrics', mainPlane === 'ORBIT');
                     formulaPanel.classList.toggle('mb-fractal-formula-panel--fractal-banner', mainPlane === 'FRACTAL');
                 }
+                syncMbOrbitFormulaOverlayShellVisibility();
                 const el = document.getElementById('mb-fractal-formula-tex');
                 if (!el) return;
+                if (mainPlane === 'ORBIT' && !orbitShowWorkedCalc) {
+                    return;
+                }
                 let cacheKey;
                 if (mainPlane === 'FRACTAL') {
                     cacheKey = `F:${mode}`;
@@ -1441,7 +1478,15 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         : Math.abs(rSnap) >= 1e10 || (Math.abs(rSnap) > 0 && Math.abs(rSnap) < 1e-4)
                           ? String(rSnap.toExponential(6))
                           : String(Math.round(rSnap * 1e6));
-                    cacheKey = `OS:${mode}:${rScanKey}:${orbitScanStableHits.length}`;
+                    const pcx = orbitScanProbeCx;
+                    const pcy = orbitScanProbeCy;
+                    const spdScan =
+                        (fractalUsesCBurnPlane() ? `0~0@${pcx}@${pcy}` : `${pcx}@${pcy}@${juliaX}@${juliaY}`) +
+                        '|' +
+                        fractalShaderTargetMaxIter() +
+                        '|t' +
+                        time.toFixed(4);
+                    cacheKey = `OS:${mode}:${rScanKey}:${orbitScanStableHits.length}:${spdScan}`;
                 } else if (mainPlane === 'ORBIT') {
                     const r2Show =
                         orbitLastLegEndR2 >= 0 && Number.isFinite(orbitLastLegEndR2) ? orbitLastLegEndR2 : -1;
@@ -1452,7 +1497,15 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                             : r2Show >= 1e10 || (r2Show > 0 && r2Show < 1e-4)
                               ? r2Show.toExponential(6)
                               : String(Math.round(Math.min(r2Show, 1e15) * 1000));
-                    cacheKey = `OL:${mode}:${r2Key}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}`;
+                    const spdOrbit =
+                        (fractalUsesCBurnPlane()
+                            ? `MB@${juliaX}@${juliaY}`
+                            : `${centerX}@${centerY}@${juliaX}@${juliaY}`) +
+                        '|' +
+                        fractalShaderTargetMaxIter() +
+                        '|t' +
+                        time.toFixed(4);
+                    cacheKey = `OL:${mode}:${r2Key}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}:${spdOrbit}`;
                 } else {
                     cacheKey = 'X';
                 }
@@ -1463,8 +1516,58 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const baseBurning =
                     'z_{n+1} = \\bigl(\\lvert\\Re z_n\\rvert + i\\,\\lvert\\Im z_n\\rvert\\bigr)^{2} + c';
 
+                function orbitProbeSpeedMatchesFractalShader() {
+                    const maxSteps = fractalShaderTargetMaxIter();
+                    const burning = mode === 'BURNING_SHIP';
+                    if (mainPlane === 'ORBIT' && orbitScanActive) {
+                        if (fractalUsesCBurnPlane()) {
+                            return fractalEscapeProbeLikeShader(
+                                0,
+                                0,
+                                orbitScanProbeCx,
+                                orbitScanProbeCy,
+                                maxSteps,
+                                burning,
+                                time,
+                            );
+                        }
+                        return fractalEscapeProbeLikeShader(
+                            orbitScanProbeCx,
+                            orbitScanProbeCy,
+                            juliaX,
+                            juliaY,
+                            maxSteps,
+                            burning,
+                            time,
+                        );
+                    }
+                    if (mainPlane === 'ORBIT') {
+                        if (fractalUsesCBurnPlane()) {
+                            return fractalEscapeProbeLikeShader(
+                                0,
+                                0,
+                                juliaX,
+                                juliaY,
+                                maxSteps,
+                                burning,
+                                time,
+                            );
+                        }
+                        return fractalEscapeProbeLikeShader(
+                            centerX,
+                            centerY,
+                            juliaX,
+                            juliaY,
+                            maxSteps,
+                            burning,
+                            time,
+                        );
+                    }
+                    return { escaped: false, interior: true, hex: '#94a3b8', texMuBody: '\\text{—}', plainMu: '—' };
+                }
+
                 /** Same layout as scan row; values from leg polyline or grid hits — red when |z|²>4 like plot */
-                function renderMzSquaredLine(rTexBody, nPartStr, r2Numeric, plainR) {
+                function renderMzSquaredLine(rTexBody, nPartStr, r2Numeric, plainR, speedProbe) {
                     let hex = '#f2bb44';
                     let shadow = '0 0 12px rgba(242,187,68,0.4)';
                     if (Number.isFinite(r2Numeric)) {
@@ -1478,9 +1581,10 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     }
                     el.classList.add('mb-fractal-mz-split');
                     el.innerHTML =
-                        '<span class="mb-fractal-mz-z2"></span><span class="mb-fractal-mz-n"></span>';
+                        '<span class="mb-fractal-mz-z2"></span><span class="mb-fractal-mz-n"></span><span class="mb-fractal-mz-spd"></span>';
                     const z2Wrap = el.querySelector('.mb-fractal-mz-z2');
                     const nWrap = el.querySelector('.mb-fractal-mz-n');
+                    const spdWrap = el.querySelector('.mb-fractal-mz-spd');
                     const texZ2 =
                         '\\textcolor{' +
                         hex +
@@ -1488,12 +1592,33 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         rTexBody +
                         '}';
                     const texN = '\\textcolor{' + hex + '}{N = ' + nPartStr + '}';
+                    let texSpd;
+                    if (speedProbe && speedProbe.escaped) {
+                        texSpd =
+                            '\\mu \\approx \\textcolor{' +
+                            speedProbe.hex +
+                            '}{' +
+                            speedProbe.texMuBody +
+                            '}';
+                    } else {
+                        texSpd = '\\textcolor{#94a3b8}{\\mu \\approx \\text{—}}';
+                    }
                     if (typeof katex !== 'undefined') {
                         katex.render(texZ2, z2Wrap, { throwOnError: false, displayMode: false });
                         katex.render(texN, nWrap, { throwOnError: false, displayMode: false });
+                        katex.render(texSpd, spdWrap, { throwOnError: false, displayMode: false });
                     } else {
                         z2Wrap.textContent = '|z²| = ' + (plainR != null ? plainR : '');
                         nWrap.textContent = 'N = ' + nPartStr;
+                        if (speedProbe && speedProbe.escaped) {
+                            spdWrap.textContent = '\u03bc \u2248 ' + speedProbe.plainMu;
+                            spdWrap.style.color = speedProbe.hex;
+                            spdWrap.style.textShadow = '0 0 10px rgba(255,255,255,0.09)';
+                        } else {
+                            spdWrap.textContent = '\u03bc \u2248 \u2014';
+                            spdWrap.style.color = '#94a3b8';
+                            spdWrap.style.textShadow = 'none';
+                        }
                         el.style.cssText =
                             'font-family:Orbitron,sans-serif;font-size:1.22rem;line-height:1.25;color:' +
                             hex +
@@ -1506,7 +1631,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 if (mainPlane === 'ORBIT' && orbitScanActive) {
                     const fmt = orbitHudFormatZSquaredDisplay(orbitScanHudMagR2);
                     const nHits = orbitScanStableHits.length;
-                    renderMzSquaredLine(fmt.tex, String(nHits), orbitScanHudMagR2, fmt.plain);
+                    const spdProbe = orbitProbeSpeedMatchesFractalShader();
+                    renderMzSquaredLine(fmt.tex, String(nHits), orbitScanHudMagR2, fmt.plain, spdProbe);
                     return;
                 }
 
@@ -1515,7 +1641,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     const fmt = orbitHudFormatZSquaredDisplay(r2Ok ? orbitLastLegEndR2 : NaN);
                     const nStr =
                         orbitLastActualLegs >= 0 ? String(orbitLastActualLegs) : '—';
-                    renderMzSquaredLine(fmt.tex, nStr, r2Ok ? orbitLastLegEndR2 : NaN, fmt.plain);
+                    const spdProbe = orbitProbeSpeedMatchesFractalShader();
+                    renderMzSquaredLine(
+                        fmt.tex,
+                        nStr,
+                        r2Ok ? orbitLastLegEndR2 : NaN,
+                        fmt.plain,
+                        spdProbe,
+                    );
                     return;
                 }
 
@@ -1542,6 +1675,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
             }
 
+            function persistMandelbrotOrbitShowWorkedCalc() {
+                try {
+                    localStorage.setItem(LS_MB_ORBIT_SHOW_WORKED, orbitShowWorkedCalc ? '1' : '0');
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
             /** Read persisted orbit/HUD settings; returns saved view or null (\(\texttt{orbitLegCount}\) nur Sitzung). */
             function loadMandelbrotPersist() {
                 try {
@@ -1549,9 +1690,23 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     const legPoly = localStorage.getItem(LS_MB_ORBIT_LEG_POLYLINE);
                     if (legPoly === '0') orbitShowLegPolyline = false;
                     else if (legPoly === '1') orbitShowLegPolyline = true;
+                    const worked = localStorage.getItem(LS_MB_ORBIT_SHOW_WORKED);
+                    if (worked === '0') orbitShowWorkedCalc = false;
+                    else if (worked === '1') orbitShowWorkedCalc = true;
                     return plane === 'FRACTAL' || plane === 'ORBIT' ? plane : null;
                 } catch (e) {
                     return null;
+                }
+            }
+
+            function syncOrbitSidebarWorkedCheckboxMount() {
+                const wrap = document.getElementById('orbit-sidebar-worked-wrap');
+                const cb = document.getElementById('orbit-show-worked-checkbox');
+                if (wrap) {
+                    wrap.hidden = mainPlane !== 'ORBIT';
+                }
+                if (cb && cb.checked !== orbitShowWorkedCalc) {
+                    cb.checked = orbitShowWorkedCalc;
                 }
             }
 
@@ -1564,6 +1719,89 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     return { zx: ax * ax - ay * ay + cr, zy: 2 * ax * ay + ci };
                 }
                 return { zx: zx * zx - zy * zy + cr, zy: 2 * zx * zy + ci };
+            }
+
+            /** Matches \texttt{fs} fragment: cosine palette from smooth iteration \texttt{sn} + \texttt{u\_time}. */
+            function fractalRgbFromShaderSn(sn, uTime) {
+                const r = 0.5 + 0.5 * Math.cos(3.0 + sn * 0.15 + uTime * 0.12);
+                const g = 0.5 + 0.5 * Math.cos(2.0 + sn * 0.15 + uTime * 0.12);
+                const b = 0.5 + 0.5 * Math.cos(1.0 + sn * 0.15 + uTime * 0.12);
+                return { r, g, b };
+            }
+
+            function fractalRgb01ToHex(r, g, b) {
+                const q = (x) =>
+                    Math.max(0, Math.min(255, Math.round(Number(x) * 255)))
+                        .toString(16)
+                        .padStart(2, '0');
+                return '#' + q(r) + q(g) + q(b);
+            }
+
+            /**
+             * Iterate like WebGL (768 cap, breakout |z|²>4), \(\texttt{sn}=\texttt{iter}-\log_2\max(1,\log_2|z|)}\),
+             * \(\mu=\ln|z|^{2}/(2\max(1,\texttt{iter}))\) at escape.
+             */
+            function fractalEscapeProbeLikeShader(z0x, z0y, cx, cy, maxSteps, burning, uTime) {
+                const cap = Math.min(768, Math.max(1, maxSteps | 0));
+                let zx = Number(z0x);
+                let zy = Number(z0y);
+                const cr = Number(cx);
+                const ci = Number(cy);
+                if (![zx, zy, cr, ci].every((v) => Number.isFinite(v))) {
+                    return {
+                        escaped: false,
+                        interior: true,
+                        mu: NaN,
+                        hex: '#94a3b8',
+                        texMuBody: '\\text{—}',
+                        plainMu: '—',
+                    };
+                }
+                for (let k = 0; k < cap; k++) {
+                    const r2 = zx * zx + zy * zy;
+                    if (r2 > 4.0) {
+                        const len = Math.hypot(zx, zy);
+                        const inner = Math.log2(Math.max(1.0, Math.log2(len)));
+                        const sn = k - inner;
+                        const rgb = fractalRgbFromShaderSn(sn, uTime);
+                        const hex = fractalRgb01ToHex(rgb.r, rgb.g, rgb.b);
+                        const den = Math.max(1, k);
+                        const mu = Math.log(r2) / (2 * den);
+                        let texMuBody;
+                        let plainMu;
+                        const ax = Math.abs(mu);
+                        if (ax >= 1e5 || (ax > 0 && ax < 1e-5)) {
+                            texMuBody = orbitScientificFloatToKatex(mu, 3);
+                            plainMu = Number(mu).toExponential(3);
+                        } else {
+                            plainMu = mu.toFixed(4).replace(/\.?0+$/, '');
+                            if (plainMu === '-0') plainMu = '0';
+                            texMuBody = plainMu.replace('.', '{.}');
+                        }
+                        return { escaped: true, iter: k, sn, mu, hex, texMuBody, plainMu, r2Esc: r2 };
+                    }
+                    const st = orbitIterateMap(zx, zy, cr, ci, burning);
+                    zx = st.zx;
+                    zy = st.zy;
+                    if (!Number.isFinite(zx) || !Number.isFinite(zy)) {
+                        return {
+                            escaped: false,
+                            interior: false,
+                            mu: NaN,
+                            hex: '#94a3b8',
+                            texMuBody: '\\text{—}',
+                            plainMu: '—',
+                        };
+                    }
+                }
+                return {
+                    escaped: false,
+                    interior: true,
+                    mu: NaN,
+                    hex: '#000000',
+                    texMuBody: '\\text{—}',
+                    plainMu: '—',
+                };
             }
 
             /** Stable point after maxSteps with |z|² ≤ 4; else stable: false. escapeR2 = |z|² when crossing cutoff (HUD). */
@@ -1773,6 +2011,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             /** Nach „Zurücksetzen“: Orbit-/Shader-Parameter \(c\) in MANDELBROT & BURNING_SHIP (von Kamerazentrum entkoppelt). */
             const DEF_MB_ORBIT_C_RE = 0.5, DEF_MB_ORBIT_C_IM = 0.5;
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
+            /** Classic Julia c — spiral dendrite, lies on ∂M. */
+            const DEF_JULIA_C_RE = -0.7, DEF_JULIA_C_IM = 0.27015;
             const DEF_MAX_ITER = 500;
             /** “Max iterations” slider — shader loop up to 768; JS zoom boost still capped at MB_ITER_EFFECTIVE_CAP */
             const MB_ITER_SLIDER_MIN = 32;
@@ -2474,7 +2714,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             function syncOrbitMbWorkedExample() {
                 const wrap = document.getElementById('orbit-mb-worked');
                 if (!wrap) return;
-                const show = mainPlane === 'ORBIT';
+                const show = mainPlane === 'ORBIT' && orbitShowWorkedCalc;
                 wrap.hidden = !show;
                 wrap.setAttribute('aria-hidden', show ? 'false' : 'true');
                 if (!show) {
@@ -2709,7 +2949,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const widgetMount = document.getElementById('mb-fractal-stable-widget');
                 const noteEl = document.getElementById('mb-fractal-stable-note');
                 if (!panel || !widgetMount) return;
-                if (mainPlane !== 'ORBIT' || !orbitScanActive) {
+                if (mainPlane !== 'ORBIT' || !orbitScanActive || !orbitShowWorkedCalc) {
                     panel.hidden = true;
                     if (noteEl) {
                         noteEl.textContent = '';
@@ -3289,6 +3529,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncMbOrbitStableCountPanel();
                 syncMbFractalFormulaOverlay();
                 syncFlightButtonForMainPlane();
+                syncOrbitSidebarWorkedCheckboxMount();
                 syncOrbitMbWorkedExample();
             }
 
@@ -3622,6 +3863,12 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     <button type="button" id="btn-plane-fractal" class="fraktal-seg-btn">${CyberI18n.get('fractal.plane_fractal')}</button>
                     <button type="button" id="btn-plane-orbit" class="fraktal-seg-btn is-active">${CyberI18n.get('fractal.plane_orbit')}</button>
                 </div>
+                <div id="orbit-sidebar-worked-wrap" class="orbit-sidebar-worked-wrap" hidden>
+                    <label class="cyber-checkbox-wrapper" style="margin-top:12px;margin-bottom:0">
+                        <input type="checkbox" id="orbit-show-worked-checkbox" class="cyber-checkbox" checked />
+                        <span class="cyber-label">${CyberI18n.get('fractal.orbit_show_worked')}</span>
+                    </label>
+                </div>
             `, 'var(--neon-blue)');
 
             CyberUI.createCard('ui-container', CyberI18n.get('fractal.params'), `
@@ -3694,6 +3941,10 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             };
             document.getElementById('btn-mode-j').onclick = () => {
                 mode = 'JULIA';
+                juliaX = DEF_JULIA_C_RE;
+                juliaY = DEF_JULIA_C_IM;
+                updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
+                updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                 mbFormulaOverlayCacheKey = '';
                 syncModeButtonsFromState();
                 persistMandelbrotFractalState();
@@ -3704,6 +3955,18 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             document.getElementById('btn-plane-fractal').onclick = () => setMainPlane('FRACTAL');
             document.getElementById('btn-plane-orbit').onclick = () => setMainPlane('ORBIT');
+
+            const orbitShowWorkedEl = document.getElementById('orbit-show-worked-checkbox');
+            if (orbitShowWorkedEl) {
+                orbitShowWorkedEl.addEventListener('change', () => {
+                    orbitShowWorkedCalc = !!orbitShowWorkedEl.checked;
+                    persistMandelbrotOrbitShowWorkedCalc();
+                    mbFormulaOverlayCacheKey = '';
+                    syncMbFractalFormulaOverlay();
+                    syncMbOrbitStableCountPanel();
+                    syncOrbitMbWorkedExample();
+                });
+            }
 
             const btnFlightEl = document.querySelector('#side-panel #btn-flight');
             if (btnFlightEl) {
@@ -4009,6 +4272,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             const startPlane = loadMandelbrotPersist();
             loadMandelbrotFractalPersist();
+            if (orbitShowWorkedEl) orbitShowWorkedEl.checked = orbitShowWorkedCalc;
+            syncOrbitSidebarWorkedCheckboxMount();
             setMainPlane(startPlane === 'FRACTAL' ? 'FRACTAL' : 'ORBIT');
             render();
         });
