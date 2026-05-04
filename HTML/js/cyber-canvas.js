@@ -401,6 +401,12 @@ class CyberCanvas {
         this.clear();
         const mainColor = options.mainColor || 'rgba(0, 210, 255, 0.5)';
         const gridColor = options.gridColor || 'rgba(255, 255, 255, 0.1)';
+        /** Reelle x-Achse (Linie y=0) / imaginäre y-Achse (Linie x=0); fallback: gemeinsame mainColor wie bisher. */
+        const axisReColor = options.axisReColor != null ? options.axisReColor : mainColor;
+        const axisImColor = options.axisImColor != null ? options.axisImColor : mainColor;
+        const labelDefault = 'rgba(255, 255, 255, 0.7)';
+        const axisLabelReColor = options.axisLabelReColor != null ? options.axisLabelReColor : labelDefault;
+        const axisLabelImColor = options.axisLabelImColor != null ? options.axisLabelImColor : labelDefault;
 
         if (options.vignette) {
             const grad = ctx.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width / 1.2);
@@ -417,12 +423,11 @@ class CyberCanvas {
         ctx.lineWidth = Math.max(0.65, s);
         const labelPx = Math.max(9, Math.round(12 * s));
         ctx.font = `${labelPx}px Orbitron, sans-serif`;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.textAlign = 'center';
 
         const step = this.getStepSize();
 
-        // Vertical lines & X labels
+        // Vertical lines & X labels (Koordinaten entlang der reellen Achse)
         for (let x = Math.floor(this.view.minX / step) * step; x <= this.view.maxX; x += step) {
             const px = this.mapX(x);
             if (this.showGrid) {
@@ -434,11 +439,12 @@ class CyberCanvas {
                 const pad = 15 * s;
                 const edge = 10 * s;
                 const labelY = Math.min(Math.max(py + pad, 14 * s + edge), this.height - edge);
+                ctx.fillStyle = axisLabelReColor;
                 ctx.fillText(x.toFixed(x % 1 === 0 ? 0 : 1), px, labelY);
             }
         }
 
-        // Horizontal lines & Y labels
+        // Horizontal lines & Y labels (Koordinaten entlang der imaginären Achse)
         ctx.textAlign = 'right';
         for (let y = Math.floor(this.view.minY / step) * step; y <= this.view.maxY; y += step) {
             const py = this.mapY(y);
@@ -451,21 +457,24 @@ class CyberCanvas {
                 const inset = 10 * s;
                 const gutter = 36 * s;
                 const labelX = Math.min(Math.max(px - inset, gutter), this.width - inset);
+                ctx.fillStyle = axisLabelImColor;
                 ctx.fillText(y.toFixed(y % 1 === 0 ? 0 : 1), labelX, py + 4 * s);
             }
         }
 
         // --- MAIN AXES ---
         if (this.showAxes) {
-            ctx.strokeStyle = mainColor;
             ctx.lineWidth = Math.max(1.25, 2 * s);
             ctx.shadowBlur = options.glow ? Math.round(10 * s) : 0;
-            ctx.shadowColor = mainColor;
 
             const xA = this.mapY(0);
+            ctx.strokeStyle = axisReColor;
+            ctx.shadowColor = axisReColor;
             ctx.beginPath(); ctx.moveTo(0, xA); ctx.lineTo(this.width, xA); ctx.stroke();
 
             const yA = this.mapX(0);
+            ctx.strokeStyle = axisImColor;
+            ctx.shadowColor = axisImColor;
             ctx.beginPath(); ctx.moveTo(yA, 0); ctx.lineTo(yA, this.height); ctx.stroke();
             ctx.shadowBlur = 0;
         }

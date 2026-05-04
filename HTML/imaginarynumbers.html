@@ -327,7 +327,7 @@
 
         /** Real part x, imaginary part y — same math space as CyberCanvas axis pair. */
         const state = { re: 1, im: 1, zMapMode: 'sqrt' };
-        /** null | 'z' | 'r' — sqrt: r = √z, ziehen an r setzt z = r² | square: r = z², ziehen setzt z = Hauptwert-√r */
+        /** null | 'z' — nur z per Maus; r folgt immer aus z (mapRFromZ). */
         let dragTarget = null;
         const Z_SLIDER_MIN = -20;
         const Z_SLIDER_MAX = 20;
@@ -496,14 +496,8 @@
             let memoKey;
             let tex;
             const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            /* r ziehen: r = u + iv; z ziehen: r = √z bzw. r = z²; idle: z = x + iy */
-            if (dragTarget === 'r') {
-                const w = mapRFromZ(state.re, state.im);
-                const ur = fmtNum(w.re);
-                const vi = fmtNum(w.im);
-                memoKey = `mode:r|${zm}|${ur}|${vi}`;
-                tex = `\\textcolor{${P.VAR_R}}{r} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(ur)}}} + \\mathit{i}\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(vi)}}}`;
-            } else if (dragTarget === 'z') {
+            /* z ziehen: r = √z bzw. r = z²; idle: z = x + iy */
+            if (dragTarget === 'z') {
                 memoKey = `mode:z|${zm}`;
                 tex =
                     state.zMapMode === 'square'
@@ -520,14 +514,9 @@
             try {
                 katex.render(tex, host, { throwOnError: false, displayMode: false });
             } catch (_) {
-                if (dragTarget === 'r') {
-                    const w = mapRFromZ(state.re, state.im);
-                    host.textContent = `r = ${fmtNum(w.re)} + i ${fmtNum(w.im)}`;
-                }
-                else if (dragTarget === 'z') {
+                if (dragTarget === 'z') {
                     host.textContent = state.zMapMode === 'square' ? 'r = z²' : 'r = √z';
-                }
-                else host.textContent = `z = ${x} + i ${y}`;
+                } else host.textContent = `z = ${x} + i ${y}`;
             }
         }
 
@@ -707,39 +696,11 @@
             return Math.max(0.06, span * 0.032);
         }
 
-        function hitZ(CC, pos) {
-            const r = grabRadiusMath(CC);
-            return Math.hypot(pos.x - state.re, pos.y - state.im) <= r;
-        }
-
-        /** Wenn beide Punkte im Griff liegen: näherer gewinnt. */
+        /** Maus nur auf z: innerhalb des Griffradius → 'z', sonst null. */
         function pickDragTarget(CC, pos) {
             const rad = grabRadiusMath(CC);
             const zd = Math.hypot(pos.x - state.re, pos.y - state.im);
-            const w = mapRFromZ(state.re, state.im);
-            const rd = Math.hypot(pos.x - w.re, pos.y - w.im);
-            const hz = zd <= rad;
-            const hr = rd <= rad;
-            if (!hz && !hr) return null;
-            if (hz && !hr) return 'z';
-            if (!hz && hr) return 'r';
-            return zd <= rd ? 'z' : 'r';
-        }
-
-        /** sqrt: z = (u+iv)² (r = Hauptwert-√z). square: r = z² am Punkt (u,v), z = Hauptwert-√r */
-        function applyZFromRDrag(u, v) {
-            const ur = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, u));
-            const vr = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, v));
-            if (state.zMapMode === 'square') {
-                const z = principalComplexSqrt(ur, vr);
-                state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, z.re));
-                state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, z.im));
-            } else {
-                let zre = ur * ur - vr * vr;
-                let zim = 2 * ur * vr;
-                state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zre));
-                state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zim));
-            }
+            return zd <= rad ? 'z' : null;
         }
 
         /** r-Readout in der Sidebar nach z-Bewegung (keine Slider mehr). */
@@ -764,12 +725,6 @@
                 if (dragTarget === 'z') {
                     state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.x));
                     state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.y));
-                    syncSlidersFromState();
-                    CC.needsRedraw = true;
-                    return;
-                }
-                if (dragTarget === 'r') {
-                    applyZFromRDrag(pos.x, pos.y);
                     syncSlidersFromState();
                     CC.needsRedraw = true;
                     return;
@@ -799,6 +754,10 @@
                 vignette: true,
                 glow: true,
                 mainColor: rgbaFromHex(P.CARD_ACCENT, 0.42),
+                axisReColor: rgbaFromHex(P.AXIS_RE, 0.88),
+                axisImColor: rgbaFromHex(P.AXIS_IM, 0.88),
+                axisLabelReColor: rgbaFromHex(P.AXIS_RE, 0.9),
+                axisLabelImColor: rgbaFromHex(P.AXIS_IM, 0.9),
             });
 
             const ctx = CC.ctx;
@@ -875,32 +834,21 @@
             if (typeof katex === 'undefined') return;
             const zEl = document.getElementById('cn-label-z');
             const rEl = document.getElementById('cn-label-r');
-            const mode = dragTarget == null ? 'idle' : dragTarget;
             const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-            const key = `cn-pt-${mode}-${zm}`;
+            const key = `cn-pt-${zm}`;
 
             if (zEl && zEl.dataset.cnPointKey !== key) {
                 zEl.innerHTML = '';
-                let zTex;
-                if (mode === 'r') {
-                    zTex =
-                        state.zMapMode === 'square'
-                            ? `\\textcolor{${P.VAR_Z}}{z}\\,\\textcolor{${P.TITLE_MUTED}}{=}\\,\\textcolor{${P.TITLE_MUTED}}{\\sqrt{\\textcolor{${P.VAR_R}}{r}}}`
-                            : `\\textcolor{${P.VAR_Z}}{z}\\,\\textcolor{${P.TITLE_MUTED}}{=}\\,\\textcolor{${P.VAR_R}}{r}^{\\textcolor{${P.TITLE_MUTED}}{2}}`;
-                } else {
-                    zTex = `\\textcolor{${P.VAR_Z}}{z}`;
-                }
+                const zTex = `\\textcolor{${P.VAR_Z}}{z}`;
                 katex.render(zTex, zEl, { throwOnError: false, displayMode: false });
                 zEl.dataset.cnPointKey = key;
             }
             if (rEl && rEl.dataset.cnPointKey !== key) {
                 rEl.innerHTML = '';
                 const rTex =
-                    mode === 'r'
-                        ? `\\textcolor{${P.VAR_R}}{r}`
-                        : state.zMapMode === 'square'
-                          ? ImaginaryNumbersControls.texZSquare()
-                          : ImaginaryNumbersControls.texRSqrtZ();
+                    state.zMapMode === 'square'
+                        ? ImaginaryNumbersControls.texZSquare()
+                        : ImaginaryNumbersControls.texRSqrtZ();
                 katex.render(rTex, rEl, { throwOnError: false, displayMode: false });
                 rEl.dataset.cnPointKey = key;
             }
@@ -915,8 +863,7 @@
             const ox = canvas.offsetLeft;
             const oy = canvas.offsetTop;
             const pad = 3 * s;
-            const longZ = dragTarget === 'r';
-            const fz = (longZ ? Math.max(14, Math.round(17 * s)) : Math.max(18, Math.round(21 * s))) + 'px';
+            const fz = Math.max(18, Math.round(21 * s)) + 'px';
             zEl.style.fontSize = fz;
             rEl.style.fontSize = fz;
             zEl.style.left = `${ox + ax + pad}px`;
