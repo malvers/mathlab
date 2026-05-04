@@ -479,8 +479,9 @@
 
         .orbit-point-katex--c {
             transform: scale(0.6);
-            color: rgba(0, 220, 255, 0.96);
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.35);
+            color: rgba(248, 250, 255, 0.96);
+            border-color: rgba(168, 85, 247, 0.48) !important;
+            text-shadow: 0 0 10px rgba(167, 85, 247, 0.38);
         }
 
         .orbit-point-katex--waypoint {
@@ -493,12 +494,23 @@
             display: none !important;
         }
 
-        #orbit-view-wrap .orbit-point-katex .katex {
+        #orbit-view-wrap .orbit-point-katex.orbit-point-katex--waypoint .katex {
             font-size: clamp(1.02rem, 0.74rem + 1.95vmin, 1.72rem) !important;
-            color: rgba(248, 250, 255, 0.96) !important;
+            /* kein Farb-!important — \textcolor{…}{z} in KaTeX muss wirken */
+            color: rgba(248, 250, 255, 0.96);
             text-shadow:
-                0 0 18px rgba(242, 187, 68, 0.35),
-                0 0 28px rgba(0, 210, 255, 0.12);
+                0 0 14px rgba(0, 210, 255, 0.28),
+                0 0 24px rgba(0, 0, 0, 0.25);
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+        }
+
+        #orbit-view-wrap .orbit-point-katex.orbit-point-katex--c .katex {
+            font-size: clamp(1.02rem, 0.74rem + 1.95vmin, 1.72rem) !important;
+            /* kein Farb-!important — \textcolor am \(\mathbf c\) */
+            color: rgba(248, 250, 255, 0.96);
+            text-shadow:
+                0 0 12px rgba(167, 85, 247, 0.22),
+                0 0 22px rgba(0, 0, 0, 0.2);
             filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
         }
 
@@ -518,8 +530,14 @@
             right: clamp(16px, 2.6vw, 36px);
             top: var(--mb-orbit-worked-top);
             z-index: 200;
-            max-width: min(580px, 72vw);
-            padding: 12px 20px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: fit-content;
+            /* Platz für Kopf \(z^2=\cdots\in\mathbb{C}\); auf schmalen Viewports randnah an \texttt{vw} */
+            max-width: min(720px, calc(100vw - 24px));
+            min-width: 0;
+            padding: 12px 14px 16px;
             box-sizing: border-box;
             pointer-events: auto;
             cursor: grab;
@@ -546,17 +564,48 @@
             cursor: grabbing;
         }
 
-        /** Kein Hinweistext bei 1 „Leg“ während auf z₂ gewartet wird — keine leere Tooltip-Fläche. */
-        #main-content > #orbit-mb-worked.orbit-mb-worked.orbit-mb-worked--await-legs {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+        /** Volle Breite der Karte; KaTeX links, Scrollbar bis an den rechten Innenrand. */
+        #orbit-mb-worked .orbit-mb-worked-tex-scroll {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            width: 100%;
+            align-self: stretch;
+            max-height: min(38vh, 15rem);
+            scrollbar-gutter: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
+        }
+
+        /**
+         Über der Scrollleiste vertikaler „Hoch/Runter“-Cursor (\texttt{ns-resize}).
+         Nur WebKit: bei Firefox wirkt natives Scrollbar-Verhalten ohne eigenen Cursor-Stil pro Streifen.
+         */
+        #orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar {
+            width: 8px;
+            cursor: ns-resize;
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar-thumb {
+            cursor: ns-resize;
+            background: rgba(0, 210, 255, 0.35);
+            border-radius: 6px;
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar-track {
+            cursor: ns-resize;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
         }
 
         #orbit-mb-worked .orbit-mb-worked-tex {
             margin: 0;
             padding: 0;
             width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             text-align: left;
         }
 
@@ -586,6 +635,39 @@
             color: rgba(230, 240, 255, 0.96);
             white-space: pre-line;
             tab-size: 4;
+        }
+
+        /** Merkhilfe: gleiche Innenbreite wie Scrollbereich. */
+        #orbit-mb-worked-memo {
+            margin: 0 0 2px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        #orbit-mb-worked-memo.orbit-mb-worked-plain {
+            padding: 0 2px;
+        }
+
+        #orbit-mb-worked-memo .katex-display {
+            margin: 0 !important;
+        }
+
+        #orbit-mb-worked-memo .katex {
+            /* gleiche Skalierung/Schlagschatten wie `.orbit-mb-worked-tex .katex` */
+            font-size: clamp(0.92rem, 0.78rem + 1.35vmin, 1.22rem) !important;
+            /* kein Farb-!important — kursives \(\textcolor{}{z}\) wie Rechenspur */
+            color: rgba(248, 250, 255, 0.96);
+            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+        }
+
+        #orbit-mb-worked-rule {
+            border: none;
+            border-top: 1px solid rgba(0, 210, 255, 0.38);
+            margin: 12px 0 16px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .orbit-hud {
@@ -812,10 +894,14 @@
             class="orbit-mb-worked"
             hidden
             aria-hidden="true"
-            aria-label="Beispielrechnung Orbitebenen-Schritte (z₁ bis z₃)"
+            aria-label="Beispielrechnung Orbitebene ausführliche Schritte"
         >
             <div id="orbit-mb-worked-caption" class="orbit-mb-worked-caption"></div>
-            <div id="orbit-mb-worked-tex" class="orbit-mb-worked-tex"></div>
+            <div id="orbit-mb-worked-memo" class="orbit-mb-worked-memo" hidden></div>
+            <hr id="orbit-mb-worked-rule" class="orbit-mb-worked-rule" hidden />
+            <div id="orbit-mb-worked-tex-scroll" class="orbit-mb-worked-tex-scroll">
+                <div id="orbit-mb-worked-tex" class="orbit-mb-worked-tex"></div>
+            </div>
         </aside>
     </main>
     <script id="vs" type="x-shader/x-vertex">
@@ -1051,9 +1137,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             let fractalRenderPaused = true;
             /** Orbit plane: 'c' | 'z0' | null — drag point vs. pan */
             let orbitCanvasDrag = null;
+            /**
+             Max. KaTeX-Rechenschritte (\(z_k\)-Spur mit Cyan-Köpfen); gleicher Wert clamped \(\texttt{↑/↓}\).
+             (\texttt{ORBIT_LEG_MAX}).
+             */
+            const ORBIT_WORKED_PANEL_ZS_MAX = 10;
             /** Max legs (segments z_k→z_{k+1}; ↑/↓ only in orbit view). */
             const ORBIT_LEG_MIN = 0;
-            const ORBIT_LEG_MAX = 55;
+            const ORBIT_LEG_MAX = ORBIT_WORKED_PANEL_ZS_MAX;
             const ORBIT_LEG_DEFAULT = 1;
             let orbitLegCount = ORBIT_LEG_DEFAULT;
             /** Last drawn legs vs. budget — for HUD hint when Esc before budget ends */
@@ -1090,8 +1181,10 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             /** Own RAF during scan — CyberCanvas often sets needsRedraw=false after render */
             let orbitScanAnimRaf = null;
             const ORBIT_SCAN_DOT_GOLD = 'rgba(242, 187, 68, 0.94)';
-            /** Griff / Scan-Probenpunkt \(c\) in der Orbitebene — UI-Zyan statt Warnrot. */
-            const ORBIT_HANDLE_C_FILL = 'rgba(0, 210, 255, 0.94)';
+            /** Julia-\(z_0\)-Griff und Scan-Probepunkt (Cyan). */
+            const ORBIT_HANDLE_Z0_FILL = 'rgba(0, 210, 255, 0.94)';
+            /** Orbit-Griff \(\mathbf c\) (Purple). */
+            const ORBIT_HANDLE_C_FILL = 'rgba(167, 85, 247, 0.94)';
             /** Julia: short probe before full budget — same escape threshold as orbit drawing */
             const ORBIT_SCAN_JULIA_QUICK_ESCAPE_ITERS = 24;
             /** |z|² cutoff like leg plot (orbitStablePath); avoids “never stable” from float noise */
@@ -1101,16 +1194,11 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             const LS_MB_MAIN_PLANE = 'forloop.mandelbrot.mainPlane';
             const LS_MB_ORBIT_HUD_VISIBLE = 'forloop.mandelbrot.orbitHudVisible';
-            const LS_MB_ORBIT_LEG = 'forloop.mandelbrot.orbitLegCount';
-            /** Legacy: former “step cap” (= legs + 1 point); migrated on load */
-            const LS_MB_ORBIT_STEPS_LEGACY = 'forloop.mandelbrot.orbitDrawStepsCap';
             const LS_MB_ORBIT_LEG_POLYLINE = 'forloop.mandelbrot.orbitShowLegPolyline';
             const LS_MB_MODE = 'forloop.mandelbrot.mode';
             const LS_MB_CENTER_X = 'forloop.mandelbrot.centerX';
             const LS_MB_CENTER_Y = 'forloop.mandelbrot.centerY';
             const LS_MB_ZOOM = 'forloop.mandelbrot.zoom';
-            const LS_MB_JULIA_X = 'forloop.mandelbrot.juliaX';
-            const LS_MB_JULIA_Y = 'forloop.mandelbrot.juliaY';
             const LS_MB_MAX_ITER = 'forloop.mandelbrot.maxIter';
             const LS_MB_ORBIT_WORKED_BOX = 'forloop.mandelbrot.orbitWorkedBoxPos';
 
@@ -1244,6 +1332,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     if (t && typeof t.closest === 'function') {
                         const bad = t.closest('a[href], button, input, select, textarea, [contenteditable="true"]');
                         if (bad) return;
+                        /** Scrollbereich nicht zum Ziehen — sonst kämpfen Maus‑Drag und scrollbar. */
+                        if (t.closest('.orbit-mb-worked-tex-scroll')) return;
                     }
 
                     const clientX = ev.clientX != null ? ev.clientX : ev.touches && ev.touches[0] && ev.touches[0].clientX;
@@ -1306,6 +1396,32 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 document.addEventListener('touchcancel', onUp);
             }
 
+            /** Wissenschaftliche Darstellung \(a\times10^{n}\) (Orbit-/Rechen‑HUD); Mantisse mit \texttt{ORBIT\_COORD\_NKS} Nachkommastellen. */
+            function orbitScientificFloatToKatex(x, sigDig) {
+                const d = sigDig != null ? sigDig : ORBIT_COORD_NKS;
+                const eStr = Number(x).toExponential(d);
+                const parsed = /^(-?)(\d(?:\.\d+)?)[eE]([+-])(\d+)$/.exec(eStr);
+                if (!parsed) return '\\text{' + eStr + '}';
+                const es = parsed[3] === '-' ? '-' : '';
+                return parsed[1] + parsed[2] + '\\times10^{' + es + parsed[4] + '}';
+            }
+
+            /** \(|z|^{2}\) am Ende der Orbitschiene: keine vollständig ausgeschriebenen Riesenzahlen durch \texttt{toFixed}. */
+            function orbitHudFormatZSquaredDisplay(r2) {
+                if (!Number.isFinite(r2)) return { tex: '\\text{n/a}', plain: '—' };
+                if (Object.is(r2, -0) || r2 === 0) return { tex: '0', plain: '0' };
+                const ax = Math.abs(r2);
+                if (ax >= 1e5 || ax < 1e-4) {
+                    return {
+                        tex: orbitScientificFloatToKatex(r2, ORBIT_COORD_NKS),
+                        plain: Number(r2).toExponential(ORBIT_COORD_NKS),
+                    };
+                }
+                let s = String(Number(r2.toFixed(ORBIT_COORD_NKS)));
+                if (s === '-0') s = '0';
+                return { tex: s.replace('.', '{.}'), plain: Number(r2).toFixed(ORBIT_COORD_NKS) };
+            }
+
             /** Top KaTeX box: FRACTAL = classic / Burning Ship; ORBIT leg mode = |z²| at endpoint + leg N; scan = same line at grid point + hit count */
             function syncMbFractalFormulaOverlay() {
                 const formulaPanel = document.getElementById('mb-fractal-formula-panel');
@@ -1319,12 +1435,24 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 if (mainPlane === 'FRACTAL') {
                     cacheKey = `F:${mode}`;
                 } else if (mainPlane === 'ORBIT' && orbitScanActive) {
-                    cacheKey = `OS:${mode}:${Math.round(orbitScanHudMagR2 * 1e6)}:${orbitScanStableHits.length}`;
+                    const rSnap = orbitScanHudMagR2;
+                    const rScanKey = !Number.isFinite(rSnap)
+                        ? 'x'
+                        : Math.abs(rSnap) >= 1e10 || (Math.abs(rSnap) > 0 && Math.abs(rSnap) < 1e-4)
+                          ? String(rSnap.toExponential(6))
+                          : String(Math.round(rSnap * 1e6));
+                    cacheKey = `OS:${mode}:${rScanKey}:${orbitScanStableHits.length}`;
                 } else if (mainPlane === 'ORBIT') {
                     const r2Show =
                         orbitLastLegEndR2 >= 0 && Number.isFinite(orbitLastLegEndR2) ? orbitLastLegEndR2 : -1;
                     const nLeg = orbitLastActualLegs;
-                    cacheKey = `OL:${mode}:${Math.round(Math.max(0, r2Show) * 1000)}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}`;
+                    const r2Key =
+                        !Number.isFinite(r2Show) || r2Show < 0
+                            ? 'x'
+                            : r2Show >= 1e10 || (r2Show > 0 && r2Show < 1e-4)
+                              ? r2Show.toExponential(6)
+                              : String(Math.round(Math.min(r2Show, 1e15) * 1000));
+                    cacheKey = `OL:${mode}:${r2Key}:${nLeg}:${clampOrbitLegCount(orbitLegCount)}`;
                 } else {
                     cacheKey = 'X';
                 }
@@ -1336,7 +1464,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     'z_{n+1} = \\bigl(\\lvert\\Re z_n\\rvert + i\\,\\lvert\\Im z_n\\rvert\\bigr)^{2} + c';
 
                 /** Same layout as scan row; values from leg polyline or grid hits — red when |z|²>4 like plot */
-                function renderMzSquaredLine(rStr, nPartStr, r2Numeric) {
+                function renderMzSquaredLine(rTexBody, nPartStr, r2Numeric, plainR) {
                     let hex = '#f2bb44';
                     let shadow = '0 0 12px rgba(242,187,68,0.4)';
                     if (Number.isFinite(r2Numeric)) {
@@ -1344,7 +1472,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                             hex = '#e53935';
                             shadow = '0 0 12px rgba(229,57,53,0.38)';
                         }
-                    } else if (rStr === '—') {
+                    } else {
                         hex = '#94a3b8';
                         shadow = '0 0 8px rgba(148,163,184,0.22)';
                     }
@@ -1357,14 +1485,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         '\\textcolor{' +
                         hex +
                         '}{\\left\\lvert z^{2}\\right\\rvert = ' +
-                        rStr +
+                        rTexBody +
                         '}';
                     const texN = '\\textcolor{' + hex + '}{N = ' + nPartStr + '}';
                     if (typeof katex !== 'undefined') {
                         katex.render(texZ2, z2Wrap, { throwOnError: false, displayMode: false });
                         katex.render(texN, nWrap, { throwOnError: false, displayMode: false });
                     } else {
-                        z2Wrap.textContent = '|z²| = ' + rStr;
+                        z2Wrap.textContent = '|z²| = ' + (plainR != null ? plainR : '');
                         nWrap.textContent = 'N = ' + nPartStr;
                         el.style.cssText =
                             'font-family:Orbitron,sans-serif;font-size:1.22rem;line-height:1.25;color:' +
@@ -1376,18 +1504,18 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
 
                 if (mainPlane === 'ORBIT' && orbitScanActive) {
-                    const rStr = orbitScanHudMagR2.toFixed(2);
+                    const fmt = orbitHudFormatZSquaredDisplay(orbitScanHudMagR2);
                     const nHits = orbitScanStableHits.length;
-                    renderMzSquaredLine(rStr, String(nHits), orbitScanHudMagR2);
+                    renderMzSquaredLine(fmt.tex, String(nHits), orbitScanHudMagR2, fmt.plain);
                     return;
                 }
 
                 if (mainPlane === 'ORBIT') {
                     const r2Ok = orbitLastLegEndR2 >= 0 && Number.isFinite(orbitLastLegEndR2);
-                    const rStr = r2Ok ? orbitLastLegEndR2.toFixed(2) : '—';
+                    const fmt = orbitHudFormatZSquaredDisplay(r2Ok ? orbitLastLegEndR2 : NaN);
                     const nStr =
                         orbitLastActualLegs >= 0 ? String(orbitLastActualLegs) : '—';
-                    renderMzSquaredLine(rStr, nStr, r2Ok ? orbitLastLegEndR2 : NaN);
+                    renderMzSquaredLine(fmt.tex, nStr, r2Ok ? orbitLastLegEndR2 : NaN, fmt.plain);
                     return;
                 }
 
@@ -1406,14 +1534,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
             }
 
-            function persistMandelbrotOrbitLeg() {
-                try {
-                    localStorage.setItem(LS_MB_ORBIT_LEG, String(orbitLegCount));
-                } catch (e) {
-                    /* ignore */
-                }
-            }
-
             function persistMandelbrotOrbitLegPolyline() {
                 try {
                     localStorage.setItem(LS_MB_ORBIT_LEG_POLYLINE, orbitShowLegPolyline ? '1' : '0');
@@ -1422,25 +1542,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
             }
 
-            /** Read persisted orbit/HUD settings; returns saved view or null */
+            /** Read persisted orbit/HUD settings; returns saved view or null (\(\texttt{orbitLegCount}\) nur Sitzung). */
             function loadMandelbrotPersist() {
                 try {
-                    let migratedLegacyLeg = false;
-                    const legStored = localStorage.getItem(LS_MB_ORBIT_LEG);
-                    if (legStored != null) {
-                        const n = parseInt(legStored, 10);
-                        if (Number.isFinite(n)) orbitLegCount = clampOrbitLegCount(n);
-                    } else {
-                        const legacyCap = localStorage.getItem(LS_MB_ORBIT_STEPS_LEGACY);
-                        if (legacyCap != null) {
-                            const c = parseInt(legacyCap, 10);
-                            if (Number.isFinite(c)) {
-                                orbitLegCount = clampOrbitLegCount(Math.max(0, c - 1));
-                                migratedLegacyLeg = true;
-                            }
-                        }
-                    }
-                    if (migratedLegacyLeg) persistMandelbrotOrbitLeg();
                     const plane = localStorage.getItem(LS_MB_MAIN_PLANE);
                     const legPoly = localStorage.getItem(LS_MB_ORBIT_LEG_POLYLINE);
                     if (legPoly === '0') orbitShowLegPolyline = false;
@@ -1669,7 +1773,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             /** Nach „Zurücksetzen“: Orbit-/Shader-Parameter \(c\) in MANDELBROT & BURNING_SHIP (von Kamerazentrum entkoppelt). */
             const DEF_MB_ORBIT_C_RE = 0.5, DEF_MB_ORBIT_C_IM = 0.5;
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
-            const DEF_JULIA_X = -0.8, DEF_JULIA_Y = 0.156;
             const DEF_MAX_ITER = 500;
             /** “Max iterations” slider — shader loop up to 768; JS zoom boost still capped at MB_ITER_EFFECTIVE_CAP */
             const MB_ITER_SLIDER_MIN = 32;
@@ -1682,7 +1785,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 return mode === 'MANDELBROT' || mode === 'BURNING_SHIP';
             }
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
-            let juliaX = DEF_JULIA_X, juliaY = DEF_JULIA_Y;
+            /** \(c\) — Start & nach jedem Reload \(0{.}5\) (wird nicht mehr in localStorage persistiert). */
+            let juliaX = DEF_MB_ORBIT_C_RE, juliaY = DEF_MB_ORBIT_C_IM;
             let resetAnim = null;
             const RESET_ANIM_MS_MAX = 12000;
             const RESET_ANIM_MS_MIN = 2800;
@@ -1798,8 +1902,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     localStorage.setItem(LS_MB_CENTER_X, String(centerX));
                     localStorage.setItem(LS_MB_CENTER_Y, String(centerY));
                     localStorage.setItem(LS_MB_ZOOM, String(clampZoom(zoom)));
-                    localStorage.setItem(LS_MB_JULIA_X, String(juliaX));
-                    localStorage.setItem(LS_MB_JULIA_Y, String(juliaY));
                     localStorage.setItem(
                         LS_MB_MAX_ITER,
                         String(Math.max(MB_ITER_SLIDER_MIN, Math.min(MB_ITER_SLIDER_MAX, Math.round(maxIter))))
@@ -1992,12 +2094,89 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /** Bumpt cacheKey wenn sich KaTeX‑TeX‑Layout ändert (sonst bleibt alte Ausgabe hängen). */
-            const ORBIT_WORKED_PANEL_TEX_REV = 'aligned-accent-lhs-rhs-cz-blocks';
-            /** Akzentfarbe für die Kopfzeile jedes Blocks (\(z_k = z_{k-1}^2+\mathbf{c}\) bzw. Burning). */
+            const ORBIT_WORKED_PANEL_TEX_REV = 'orbit-worked-z-italic-box-v3';
+            /**
+             * KaTeX-\texttt{maxExpand} (Default 1000): unsere lange \texttt{aligned}-Spur erreicht das schnell —
+             * mit \texttt{throwOnError:false} wirkt das wie „ab Block 5 Schluss“, obwohl mehr Legs gezeichnet sind.
+             */
+            const ORBIT_WORKED_KATEX_MAX_EXPAND = 25000;
+
+            /** Cyan für kursive \(z_k\)-Köpfe in der Rechenspur (\texttt{\#5ce1ff}), nicht \(\mathbf z\). */
             const ORBIT_WORKED_STEP_HEAD_COLOR = '#5ce1ff';
+            /** Nur \(\mathbf c\) im Rechenfeld (Purple). */
+            const ORBIT_WORKED_C_ACCENT_COLOR = '#a855f7';
+            /** Abstand kopf-/Blockzeilen im \texttt{aligned}. */
+            const ORBIT_WORKED_BLOCK_GAP_PX = 6;
+
+            /** Merkhilfe = gleiche kursive \(z\)-Lesart wie \(\texttt{aligned}\)-Spur. */
+            const ORBIT_WORKED_MEMO_TEX_REV = 'memo-z-italic-like-box-v3';
+
+            /** Kursives \(z\) wie KaTeX-Spur (Plain). */
+            const ORBIT_WORKED_MEMO_PLAIN =
+                'z\u00b2 = (x+i\xb7y)\u00b2 = (x\u00b2\u2212y\u00b2 | 2xy)   z \u2208 \u2102';
+
+            /** Kursiv + Cyan wie Rechenspur; erste \(^2\) explizit hell. */
+            const ORBIT_WORKED_MEMO_KATEX =
+                '\\textcolor{' +
+                ORBIT_WORKED_STEP_HEAD_COLOR +
+                '}{z}^{\\textcolor{#f8faff}{2}} = (x+\\mathrm{i}\\, y)^2 = \\bigl(x^{2}-y^{2} \\bigm| 2xy\\bigr) \\quad \\textcolor{' +
+                ORBIT_WORKED_STEP_HEAD_COLOR +
+                '}{z} \\in \\mathbb{C}';
+
+            /** Oberzeile: Quadrat-Identität + \(z\in\mathbb{C}\); bei vollem Orbit-Schrittpanel aktiv. */
+            function syncOrbitWorkedMemoStrip(enabled) {
+                const memo = document.getElementById('orbit-mb-worked-memo');
+                const rule = document.getElementById('orbit-mb-worked-rule');
+                if (!memo || !rule) return;
+                if (!enabled) {
+                    memo.hidden = true;
+                    rule.hidden = true;
+                    memo.innerHTML = '';
+                    memo.textContent = '';
+                    memo.classList.remove('orbit-mb-worked-plain');
+                    delete memo.dataset.mbMemoKey;
+                    return;
+                }
+                memo.hidden = false;
+                rule.hidden = false;
+                const kFlag = typeof katex !== 'undefined' ? 'k' : 't';
+                const key = `${kFlag}|${ORBIT_WORKED_MEMO_TEX_REV}`;
+                if (memo.dataset.mbMemoKey === key) return;
+                memo.dataset.mbMemoKey = key;
+                memo.innerHTML = '';
+                memo.classList.remove('orbit-mb-worked-plain');
+                if (typeof katex !== 'undefined') {
+                    try {
+                        katex.render(ORBIT_WORKED_MEMO_KATEX, memo, { throwOnError: false, displayMode: true });
+                    } catch (_) {
+                        memo.classList.add('orbit-mb-worked-plain');
+                        memo.textContent = ORBIT_WORKED_MEMO_PLAIN;
+                    }
+                } else {
+                    memo.classList.add('orbit-mb-worked-plain');
+                    memo.textContent = ORBIT_WORKED_MEMO_PLAIN;
+                }
+            }
+
+            function orbitWorkedAlignedBlockEndRowSuffix(extraGapPx) {
+                return extraGapPx ? '\\\\[' + ORBIT_WORKED_BLOCK_GAP_PX + 'px]' : '\\\\';
+            }
 
             function orbitWorkedNumTex(v) {
-                return mbOrbitPlaneTexNum(v, ORBIT_COORD_NKS);
+                const fv = Number(v);
+                if (!Number.isFinite(fv)) return '\\text{—}';
+                const ax = Math.abs(fv);
+                if (ax >= 1e5 || (ax > 0 && ax < 1e-5)) return orbitScientificFloatToKatex(fv, ORBIT_COORD_NKS);
+                return mbOrbitPlaneTexNum(fv, ORBIT_COORD_NKS);
+            }
+
+            /** Plaintext-Realfürzel für das Rechenpanel (wie KaTeX, aber ohne Makros). */
+            function orbitWorkedPlainCoord(x) {
+                const fv = Number(x);
+                if (!Number.isFinite(fv)) return '—';
+                const ax = Math.abs(fv);
+                if (ax >= 1e5 || (ax > 0 && ax < 1e-5)) return fv.toExponential(ORBIT_COORD_NKS);
+                return fv.toFixed(ORBIT_COORD_NKS);
             }
 
             /** Koordinate (-Paar) \(\bigl(\Re\big|\Im\bigr)\) für die Rechenspur (3 NKS). */
@@ -2011,31 +2190,41 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 );
             }
 
-            /** Kettenliste z₁, z₂ und ggf. z₃. */
-            function orbitWorkedZsList(z1, z2, z3) {
-                const a = [];
-                if (z1) a.push(z1);
-                if (z2) a.push(z2);
-                if (z3) a.push(z3);
-                return a;
+            const ORBIT_WORKED_PLAIN_UNICODE_SUB = '₀₁₂₃₄₅₆₇₈₉';
+
+            /** Plain: kursives \(z_k\) wie KaTeX-Spur (Unicode-Tiefgestellt). */
+            function orbitWorkedPlainZkLabel(k) {
+                return (
+                    'z' +
+                    String(Math.max(0, Math.floor(k)))
+                        .split('')
+                        .map((d) => ORBIT_WORKED_PLAIN_UNICODE_SUB[+d])
+                        .join('')
+                );
             }
 
-            /** z²+c: ein Block z_k vom Vor‑Punkt (aligned-Zeilen mit &=). */
-            function orbitWorkedQuadrBlockTex(cr, ci, pk, zk, idx) {
+            /** \(z²+c\): ein Block z_k vom Vor‑Punkt (aligned-Zeilen mit &=). */
+            function orbitWorkedQuadrBlockTex(cr, ci, pk, zk, idx, gapAfterBlock) {
                 const H = ORBIT_WORKED_STEP_HEAD_COLOR;
                 const P = orbitWorkedPairTex;
                 const kp = idx - 1;
                 const rsq = pk.x * pk.x - pk.y * pk.y;
                 const jsq = 2 * pk.x * pk.y;
-                const rh = '\\textcolor{' + H + '}{z_' + kp + '^{2} + \\mathbf{c}}';
-                const zres = '\\textcolor{' + H + '}{\\mathbf{z}_{' + idx + '}}';
-                const pres = '\\textcolor{' + H + '}{' + P(zk.x, zk.y) + '}';
+                const rh =
+                    '\\textcolor{' +
+                    H +
+                    '}{z_{' +
+                    kp +
+                    '}^{\\textcolor{#f8faff}{2}}} + \\textcolor{' +
+                    ORBIT_WORKED_C_ACCENT_COLOR +
+                    '}{\\mathbf{c}}';
+                const endRow = orbitWorkedAlignedBlockEndRowSuffix(gapAfterBlock);
                 return (
                     '\\textcolor{' +
                     H +
-                    '}{z_' +
+                    '}{z_{' +
                     idx +
-                    '} &= ' +
+                    '}} &= ' +
                     rh +
                     '\\\\' +
                     ' &= ' +
@@ -2048,10 +2237,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     ' + ' +
                     P(cr, ci) +
                     '\\\\' +
-                    zres +
                     ' &= ' +
-                    pres +
-                    '\\\\'
+                    P(zk.x, zk.y) +
+                    endRow
                 );
             }
 
@@ -2060,39 +2248,53 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 let prev = { x: z0x, y: z0y };
                 let tex = '';
                 for (let i = 0; i < zs.length; i++) {
-                    tex += orbitWorkedQuadrBlockTex(cr, ci, prev, zs[i], i + 1);
+                    const gapAfter =
+                        zs.length <= 1 ? false : i < zs.length - 1;
+                    tex += orbitWorkedQuadrBlockTex(cr, ci, prev, zs[i], i + 1, gapAfter);
                     prev = zs[i];
                 }
                 return tex;
             }
 
-            function orbitWorkedBurningBsFormulaTex(kMinus1) {
+            /** Klammerteil von \(\bigl(|\Re z_{k}|\ldots\bigr)\) (ohne \(\vphantom|^2\) — Hochzahl liegt außerhalb von \(\texttt H\)-\(\texttt{\\textcolor}\)). */
+            function orbitWorkedBurningBsParenTex(kMinus1) {
                 return (
-                    '\\bigl(\\lvert\\Re z_' +
+                    '\\bigl(\\lvert\\Re z_{' +
                     kMinus1 +
-                    '\\rvert + \\mathrm{i}\\,\\lvert\\Im z_' +
+                    '}\\rvert + \\mathrm{i}\\,\\lvert\\Im z_{' +
                     kMinus1 +
-                    '\\rvert\\bigr)^{2}+\\mathbf{c}'
+                    '}\\rvert\\bigr)'
                 );
             }
 
+            function orbitWorkedBurningBsFormulaTex(kMinus1) {
+                const Cp = ORBIT_WORKED_C_ACCENT_COLOR;
+                return orbitWorkedBurningBsParenTex(kMinus1) + '^{2}+\\textcolor{' + Cp + '}{\\mathbf{c}}';
+            }
+
             /** Ein Burning-Schritt z_k, konsistent zur JS-Iterationsfunktion orbitIterateMap. */
-            function orbitWorkedBurningBlockTex(cr, ci, pk, zk, idx) {
+            function orbitWorkedBurningBlockTex(cr, ci, pk, zk, idx, gapAfterBlock) {
                 const H = ORBIT_WORKED_STEP_HEAD_COLOR;
                 const P = orbitWorkedPairTex;
                 const fx = Math.abs(pk.x);
                 const fy = Math.abs(pk.y);
                 const qx = fx * fx - fy * fy;
                 const qy = 2 * fx * fy;
-                const rh = '\\textcolor{' + H + '}{' + orbitWorkedBurningBsFormulaTex(idx - 1) + '}';
-                const zres = '\\textcolor{' + H + '}{\\mathbf{z}_{' + idx + '}}';
-                const pres = '\\textcolor{' + H + '}{' + P(zk.x, zk.y) + '}';
+                const rh =
+                    '\\textcolor{' +
+                    H +
+                    '}{' +
+                    orbitWorkedBurningBsParenTex(idx - 1) +
+                    '}^{2}+\\textcolor{' +
+                    ORBIT_WORKED_C_ACCENT_COLOR +
+                    '}{\\mathbf{c}}';
+                const endRow = orbitWorkedAlignedBlockEndRowSuffix(gapAfterBlock);
                 return (
                     '\\textcolor{' +
                     H +
-                    '}{z_' +
+                    '}{z_{' +
                     idx +
-                    '} &= ' +
+                    '}} &= ' +
                     rh +
                     '\\\\' +
                     ' &= ' +
@@ -2105,78 +2307,97 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     ' + ' +
                     P(cr, ci) +
                     '\\\\' +
-                    zres +
                     ' &= ' +
-                    pres +
-                    '\\\\'
+                    P(zk.x, zk.y) +
+                    endRow
                 );
             }
 
-            /** Burning-Kette (2 oder 3 Blöcke wie zs). */
+            /** Burning-Kette: beliebig viele Blöcke (Länge \texttt{zs}). */
             function orbitWorkedBurningTrailTex(cr, ci, z0x, z0y, zs) {
                 let prev = { x: z0x, y: z0y };
                 let tex = '';
                 for (let i = 0; i < zs.length; i++) {
-                    tex += orbitWorkedBurningBlockTex(cr, ci, prev, zs[i], i + 1);
+                    const gapAfter =
+                        zs.length <= 1 ? false : i < zs.length - 1;
+                    tex += orbitWorkedBurningBlockTex(cr, ci, prev, zs[i], i + 1, gapAfter);
                     prev = zs[i];
                 }
                 return tex;
             }
 
-            /** AMS aligned (KaTeX-sicher): kein array @{…}‑Preamble. */
-            function orbitWorkedPanelKatex(cr, ci, z0x, z0y, z1, z2, z3, burning) {
-                const H = ORBIT_WORKED_STEP_HEAD_COLOR;
+            /** Kopf \(\mathbf{c}\), \(z_0\) mit Blockabstand (geteilt mit Voll‑ und Cz‑only‑Panel). */
+            function orbitWorkedCzHeadTex(cr, ci, z0x, z0y) {
+                const H = ORBIT_WORKED_BLOCK_GAP_PX;
+                const Cp = ORBIT_WORKED_C_ACCENT_COLOR;
                 const P = orbitWorkedPairTex;
-                const zs = orbitWorkedZsList(z1, z2, z3);
-                const czHead =
-                    '\\textcolor{' +
-                    H +
-                    '}{\\mathbf{c}} &= \\textcolor{' +
-                    H +
-                    '}{' +
+                return (
+                    '\\textcolor{' + Cp + '}{\\mathbf{c}} &= ' +
                     P(cr, ci) +
-                    '}' +
-                    '\\\\' +
+                    '\\\\[' +
+                    H +
+                    'px]' +
                     '\\textcolor{' +
-                    H +
-                    '}{\\mathbf{z}_0} &= \\textcolor{' +
-                    H +
-                    '}{' +
+                    ORBIT_WORKED_STEP_HEAD_COLOR +
+                    '}{z_{0}} &= ' +
                     P(z0x, z0y) +
-                    '}' +
-                    '\\\\';
-                let tail = burning ? orbitWorkedBurningTrailTex(cr, ci, z0x, z0y, zs) : orbitWorkedQuadrTrailTex(cr, ci, z0x, z0y, zs);
+                    '\\\\[' +
+                    H +
+                    'px]'
+                );
+            }
+
+            /** Nur Konstanten \(\mathbf{c}\) und \(z_0\) (noch kein Iterationsschritt). */
+            function orbitWorkedPanelKatexCzOnly(cr, ci, z0x, z0y) {
+                return '\\begin{aligned}' + orbitWorkedCzHeadTex(cr, ci, z0x, z0y) + '\\end{aligned}';
+            }
+
+            /** AMS aligned (KaTeX-sicher): kein array @{…}‑Preamble. */
+            function orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burning) {
+                const zsUse = zs && zs.length ? zs : [];
+                const czHead = orbitWorkedCzHeadTex(cr, ci, z0x, z0y);
+                let tail = burning
+                    ? orbitWorkedBurningTrailTex(cr, ci, z0x, z0y, zsUse)
+                    : orbitWorkedQuadrTrailTex(cr, ci, z0x, z0y, zsUse);
                 while (tail.length >= 2 && tail.slice(-2) === '\\\\') {
                     tail = tail.slice(0, -2);
                 }
                 return '\\begin{aligned}' + czHead + tail + '\\end{aligned}';
             }
 
-            /** KaTeX-freier Fallback; optional dritter Block bei vorhandenem z₃. */
-            function orbitWorkedPanelPlain(cr, ci, z0x, z0y, z1, z2, z3, burning) {
-                const f = (x) => Number(x).toFixed(ORBIT_COORD_NKS);
-                const Pcoord = (x, y) => `(${f(x)} | ${f(y)})`;
+            /** KaTeX-freier Fallback; gleiche \(z\)-Stil-Kette wie \(\texttt{orbitWorkedPanelKatex}\). */
+            function orbitWorkedPanelPlain(cr, ci, z0x, z0y, zsIn, burning) {
+                const Pcoord = (x, y) => `(${orbitWorkedPlainCoord(x)} | ${orbitWorkedPlainCoord(y)})`;
                 let body = `c = ${Pcoord(cr, ci)}\nz₀ = ${Pcoord(z0x, z0y)}`;
 
                 const quadrBlock = (ax, ay, out, zk, zp) => {
                     const rsq = ax * ax - ay * ay;
                     const jsq = 2 * ax * ay;
                     return (
-                        `\n${zk} = ${zp}² + c` +
+                        `${zk} = ${zp}² + c` +
                         `\n= ${Pcoord(ax, ay)}² + ${Pcoord(cr, ci)}` +
                         `\n= ${Pcoord(rsq, jsq)} + ${Pcoord(cr, ci)}` +
-                        `\n${zk} = ${Pcoord(out.x, out.y)}`
+                        `\n${Pcoord(out.x, out.y)}`
                     );
                 };
 
-                const zs = orbitWorkedZsList(z1, z2, z3);
-                const lab = ['z₀', 'z₁', 'z₂', 'z₃'];
+                const zs = zsIn && zsIn.length ? zsIn : [];
+                const blockSep = '\n\n';
 
                 if (!burning) {
                     let pa = z0x;
                     let pb = z0y;
                     for (let i = 0; i < zs.length; i++) {
-                        body += quadrBlock(pa, pb, zs[i], lab[i + 1], lab[i]);
+                        const k = i + 1;
+                        body +=
+                            blockSep +
+                            quadrBlock(
+                                pa,
+                                pb,
+                                zs[i],
+                                orbitWorkedPlainZkLabel(k),
+                                orbitWorkedPlainZkLabel(k - 1),
+                            );
                         pa = zs[i].x;
                         pb = zs[i].y;
                     }
@@ -2185,19 +2406,26 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     let pa = z0x;
                     let pb = z0y;
                     for (let i = 0; i < zs.length; i++) {
+                        const k = i + 1;
                         const fx = Math.abs(pa);
                         const fy = Math.abs(pb);
                         const q = cplxSq(fx, fy);
                         body +=
-                            `\n${lab[i + 1]} = (|Re ${lab[i]}| + i|Im ${lab[i]}|)² + c` +
+                            blockSep +
+                            `${orbitWorkedPlainZkLabel(k)} = (|Re ${orbitWorkedPlainZkLabel(k - 1)}| + i|Im ${orbitWorkedPlainZkLabel(k - 1)}|)² + c` +
                             `\n= ${Pcoord(fx, fy)}² + ${Pcoord(cr, ci)}` +
                             `\n= ${Pcoord(q.x, q.y)} + ${Pcoord(cr, ci)}` +
-                            `\n${lab[i + 1]} = ${Pcoord(zs[i].x, zs[i].y)}`;
+                            `\n${Pcoord(zs[i].x, zs[i].y)}`;
                         pa = zs[i].x;
                         pb = zs[i].y;
                     }
                 }
                 return body;
+            }
+
+            function orbitWorkedPanelPlainCzOnly(cr, ci, z0x, z0y) {
+                const Pcoord = (x, y) => `(${orbitWorkedPlainCoord(x)} | ${orbitWorkedPlainCoord(y)})`;
+                return `c = ${Pcoord(cr, ci)}\nz₀ = ${Pcoord(z0x, z0y)}`;
             }
 
             /** Kurzer Hinweis im Rechenpanel: KaTeX wie die Hauptausgabe, sonst Unicode-Plaintext (keine rohen `$`). */
@@ -2217,14 +2445,42 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
             }
 
-            /** Orbit-Panel: Kopf \(\mathbf{c}\), \(\mathbf{z}_0\), dann Ketten \(\mathbf{z}_1\ldots\) (bei 3↑ auch \(\mathbf{z}_3\)). */
+            /** CacheSegment für \(z\)-Orbit-Punkte (\(;\)-getrennte Paare \texttt{NKS}). */
+            function orbitWorkedZsMbWorkedCacheSeg(zs, nk) {
+                if (!zs || !zs.length) return '';
+                return zs.map((p) => p.x.toFixed(nk) + '|' + p.y.toFixed(nk)).join(';');
+            }
+
+            /**
+             Nur nach neu aufgebautem Inhalt ans untere Ende scrollen.
+             Nicht bei Cache-Hit (\texttt{syncOrbitMbWorkedExample} läuft pro Orbit-Zeichenzyklus) — sonst bleibt manuelles Scrollen nicht bestehen.
+             */
+            function orbitWorkedScrollTexToBottom() {
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() => {
+                        try {
+                            const sc = document.getElementById('orbit-mb-worked-tex-scroll');
+                            if (sc) sc.scrollTop = sc.scrollHeight;
+                        } catch (_) {}
+                    }),
+                );
+            }
+
+            function orbitWorkedFinishMbWorkedLayout() {
+                orbitWorkedBoxReclampPersisted();
+                orbitWorkedScrollTexToBottom();
+            }
+
             function syncOrbitMbWorkedExample() {
                 const wrap = document.getElementById('orbit-mb-worked');
                 if (!wrap) return;
                 const show = mainPlane === 'ORBIT';
                 wrap.hidden = !show;
                 wrap.setAttribute('aria-hidden', show ? 'false' : 'true');
-                if (!show) return;
+                if (!show) {
+                    syncOrbitWorkedMemoStrip(false);
+                    return;
+                }
 
                 const host = document.getElementById('orbit-mb-worked-tex');
                 if (!host) return;
@@ -2232,55 +2488,124 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const snap = orbitWorkedPanelSnap;
                 const kFlag = typeof katex !== 'undefined' ? 'k' : 't';
 
-                /** Nur 1 angezeigtes Leg: keinen „mehr ↑ für z₂“-Hinweis (nutzer möchte keine Box). */
+                /** Nur ein Leg angezeigt, Budget < 2: Rechenweg bis \(z_1\) ohne leeres Panel. */
                 const hideAwaitLegs =
-                    snap && snap.z1 && snap.z2 == null && snap.legsBudget !== null && snap.legsBudget < 2;
-                wrap.classList.toggle('orbit-mb-worked--await-legs', !!hideAwaitLegs);
-                if (hideAwaitLegs) {
-                    host.innerHTML = '';
-                    host.textContent = '';
-                    host.classList.remove('orbit-mb-worked-plain');
-                    host.dataset.mbWorked = `${kFlag}|skipz2legs|${snap.legsBudget}`;
-                    orbitWorkedBoxReclampPersisted();
-                    return;
-                }
+                    snap &&
+                    snap.zs &&
+                    snap.zs.length === 1 &&
+                    snap.legsBudget !== null &&
+                    snap.legsBudget < 2;
 
-                if (!snap || !snap.z1 || !snap.z2) {
-                    let cacheTag;
-                    let tex;
-                    let plain;
-                    if (!snap || !snap.z1) {
-                        cacheTag =
-                            snap && snap.legsBudget <= 0
-                                ? `${kFlag}|hint|legs0|${snap.legsBudget}`
-                                : `${kFlag}|hint|init`;
-                        if (snap && snap.legsBudget <= 0) {
-                            plain = 'Mindestens 1 Schritt (↑), damit z₁ existiert.';
-                            tex =
-                                '\\textbf{Orbitebene}\\\\' +
-                                '\\text{Mindestens 1 Schritt (↑), damit }\\mathbf{z}_{1}\\text{ existiert.}';
-                        } else {
-                            plain = 'Zeichnung startet gleich.';
-                            tex = '\\textbf{Orbitebene}\\\\\\text{Zeichnung startet gleich.}';
-                        }
-                    } else {
-                        cacheTag = `${kFlag}|hint|escaped|${snap.legsBudget}`;
-                        plain = '|z|² > 4 vor z₂ — kein weiterer Punkt im Plot.';
-                        tex =
-                            '\\textbf{Achtung}\\\\' +
-                            '\\lvert z\\rvert^{2}\\! > 4\\ \\text{vor }\\mathbf{z}_{2}\\text{ — kein weiterer Punkt im Plot.}';
+                if (!snap) {
+                    syncOrbitWorkedMemoStrip(false);
+                    const cacheTag = `${kFlag}|hint|init`;
+                    if (host.dataset.mbWorked === cacheTag) {
+                        return;
                     }
-                    if (host.dataset.mbWorked === cacheTag) return;
                     host.dataset.mbWorked = cacheTag;
-                    orbitWorkedRenderPlaceholder(host, tex, plain);
-                    orbitWorkedBoxReclampPersisted();
+                    orbitWorkedRenderPlaceholder(
+                        host,
+                        '\\textbf{Orbitebene}\\\\\\text{Zeichnung startet gleich.}',
+                        'Zeichnung startet gleich.',
+                    );
+                    orbitWorkedFinishMbWorkedLayout();
                     return;
                 }
 
-                wrap.classList.remove('orbit-mb-worked--await-legs');
+                const { cr, ci, z0x, z0y, burnOrbit } = snap;
+                const zs = snap.zs && snap.zs.length ? snap.zs : [];
 
-                const { cr, ci, z0x, z0y, z1, z2, z3, burnOrbit } = snap;
+                /** Merkhilfe \((x+\mathrm{i}y)^2\) gilt für \(z^2+c\) — Burning-Ship-Formel \(|\cdot|\) anderer Schlüssel. */
+                const showSqMemo = !burnOrbit;
                 const nk = ORBIT_COORD_NKS;
+
+                const paintMbWorkedMain = (cacheKey, tex, plainUnicode) => {
+                    if (host.dataset.mbWorked === cacheKey) {
+                        syncOrbitWorkedMemoStrip(showSqMemo);
+                        return;
+                    }
+                    delete host.dataset.mbWorked;
+                    host.classList.remove('orbit-mb-worked-plain');
+                    syncOrbitWorkedMemoStrip(showSqMemo);
+                    if (typeof katex !== 'undefined') {
+                        host.innerHTML = '';
+                        katex.render(tex, host, {
+                            throwOnError: false,
+                            displayMode: true,
+                            maxExpand: ORBIT_WORKED_KATEX_MAX_EXPAND,
+                        });
+                        host.dataset.mbWorked = cacheKey;
+                        orbitWorkedFinishMbWorkedLayout();
+                        return;
+                    }
+                    host.textContent = plainUnicode;
+                    host.classList.add('orbit-mb-worked-plain');
+                    host.dataset.mbWorked = cacheKey;
+                    orbitWorkedFinishMbWorkedLayout();
+                };
+
+                if (!zs.length) {
+                    const cacheKey = [
+                        kFlag,
+                        ORBIT_WORKED_PANEL_TEX_REV,
+                        'cz',
+                        burnOrbit ? 'B' : 'S',
+                        cr.toFixed(nk),
+                        ci.toFixed(nk),
+                        z0x.toFixed(nk),
+                        z0y.toFixed(nk),
+                    ].join('|');
+                    paintMbWorkedMain(
+                        cacheKey,
+                        orbitWorkedPanelKatexCzOnly(cr, ci, z0x, z0y),
+                        orbitWorkedPanelPlainCzOnly(cr, ci, z0x, z0y),
+                    );
+                    return;
+                }
+
+                if (hideAwaitLegs) {
+                    const cacheKey = [
+                        kFlag,
+                        ORBIT_WORKED_PANEL_TEX_REV,
+                        burnOrbit ? 'B' : 'S',
+                        cr.toFixed(nk),
+                        ci.toFixed(nk),
+                        z0x.toFixed(nk),
+                        z0y.toFixed(nk),
+                        orbitWorkedZsMbWorkedCacheSeg(zs, nk),
+                    ].join('|');
+                    paintMbWorkedMain(
+                        cacheKey,
+                        orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burnOrbit),
+                        orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs, burnOrbit),
+                    );
+                    return;
+                }
+
+                if (zs.length < 2) {
+                    syncOrbitWorkedMemoStrip(false);
+                    const nextK = zs.length + 1;
+                    const zkPlain = orbitWorkedPlainZkLabel(nextK);
+                    const cacheTag =
+                        `${kFlag}|hint|escaped|${snap.legsBudget}|${orbitWorkedZsMbWorkedCacheSeg(zs, nk)}`;
+                    if (host.dataset.mbWorked === cacheTag) {
+                        return;
+                    }
+                    host.dataset.mbWorked = cacheTag;
+                    orbitWorkedRenderPlaceholder(
+                        host,
+                        '\\textbf{Achtung}\\\\' +
+                            '\\lvert z\\rvert^{2}\\! > 4\\ \\text{vor }\\textcolor{' +
+                            ORBIT_WORKED_STEP_HEAD_COLOR +
+                            '}{z_{' +
+                            nextK +
+                            '}}\\text{ — kein weiterer Punkt im Plot.}',
+                        '|z|² > 4 vor ' + zkPlain + ' — kein weiterer Punkt im Plot.',
+                    );
+                    orbitWorkedFinishMbWorkedLayout();
+                    return;
+                }
+
                 const cacheKey = [
                     kFlag,
                     ORBIT_WORKED_PANEL_TEX_REV,
@@ -2289,31 +2614,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     ci.toFixed(nk),
                     z0x.toFixed(nk),
                     z0y.toFixed(nk),
-                    z1.x.toFixed(nk),
-                    z1.y.toFixed(nk),
-                    z2.x.toFixed(nk),
-                    z2.y.toFixed(nk),
-                    z3 ? z3.x.toFixed(nk) + '|' + z3.y.toFixed(nk) : '_',
+                    orbitWorkedZsMbWorkedCacheSeg(zs, nk),
                 ].join('|');
 
-                if (host.dataset.mbWorked === cacheKey) return;
-                delete host.dataset.mbWorked;
-                host.classList.remove('orbit-mb-worked-plain');
-
-                const tex = orbitWorkedPanelKatex(cr, ci, z0x, z0y, z1, z2, z3, burnOrbit);
-
-                if (typeof katex !== 'undefined') {
-                    host.innerHTML = '';
-                    katex.render(tex, host, { throwOnError: false, displayMode: true });
-                    host.dataset.mbWorked = cacheKey;
-                    orbitWorkedBoxReclampPersisted();
-                    return;
-                }
-
-                host.textContent = orbitWorkedPanelPlain(cr, ci, z0x, z0y, z1, z2, z3, burnOrbit);
-                host.classList.add('orbit-mb-worked-plain');
-                host.dataset.mbWorked = cacheKey;
-                orbitWorkedBoxReclampPersisted();
+                paintMbWorkedMain(
+                    cacheKey,
+                    orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burnOrbit),
+                    orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs, burnOrbit),
+                );
             }
 
             function syncOrbitHud() {
@@ -2459,18 +2767,18 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
 
                 if (showC) {
-                    const cqKey = `${cqKind}|${cr.toFixed(ORBIT_COORD_NKS)}|${ci.toFixed(ORBIT_COORD_NKS)}`;
+                    const cqKey = `${cqKind}|${cr.toFixed(ORBIT_COORD_NKS)}|${ci.toFixed(ORBIT_COORD_NKS)}|cPurp`;
                     if (orbitOverlayCTexKey !== cqKey) {
                         orbitOverlayCTexKey = cqKey;
                         if (typeof katex !== 'undefined') {
-                            const tex = `\\mathbf{c}\\ \\bigl(${mbOrbitPlaneTexNum(cr)} \\bigm| ${mbOrbitPlaneTexNum(
-                                ci
-                            )}\\bigr)`;
+                            const tex = `\\textcolor{${ORBIT_WORKED_C_ACCENT_COLOR}}{\\mathbf{c}}\\ \\bigl(${mbOrbitPlaneTexNum(
+                                cr,
+                            )} \\bigm| ${mbOrbitPlaneTexNum(ci)}\\bigr)`;
                             katex.render(tex, elC, { throwOnError: false, displayMode: false });
                         } else {
-                            elC.textContent = `c (${Number(cr).toFixed(ORBIT_COORD_NKS)} | ${Number(ci).toFixed(
-                                ORBIT_COORD_NKS
-                            )})`;
+                            const pxS = Number(cr).toFixed(ORBIT_COORD_NKS);
+                            const pyS = Number(ci).toFixed(ORBIT_COORD_NKS);
+                            elC.innerHTML = `<span style="color:rgba(167,85,247,0.98);font-weight:700">c</span> (${pxS} | ${pyS})`;
                         }
                     }
                     elC.hidden = false;
@@ -2493,6 +2801,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const dy = py - ci0;
                 return dx * dx + dy * dy < ORBIT_WAYPOINT_SAME_AS_C_R2_MAX;
             }
+
+            /** Bumpt DOM-Cache in syncOrbitWaypointKatexOverlays bei Label-TeX-/Farbänderungen. */
+            const ORBIT_WAYPOINT_KATEX_KEY_REV = 'zb5-italic-like-box';
 
             /** One KaTeX chip per orbit vertex z_i (Re | Im); skip chips that sit on c — c has its own overlay. */
             function syncOrbitWaypointKatexOverlays(cco, pts, showPolyline, cr0, ci0) {
@@ -2526,18 +2837,18 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     }
                     el.hidden = false;
                     el.classList.remove('orbit-point-katex--hidden');
-                    const key = `${i}|${cqKind}|${px.toFixed(ORBIT_COORD_NKS)}|${py.toFixed(ORBIT_COORD_NKS)}`;
+                    const key = `${i}|${cqKind}|${px.toFixed(ORBIT_COORD_NKS)}|${py.toFixed(ORBIT_COORD_NKS)}|${ORBIT_WAYPOINT_KATEX_KEY_REV}`;
                     if (el.dataset.mbOrbitWpKey !== key) {
                         el.dataset.mbOrbitWpKey = key;
                         if (typeof katex !== 'undefined') {
-                            const tex = `\\mathbf{z}_{${i}}\\ \\bigl(${mbOrbitPlaneTexNum(px)} \\bigm| ${mbOrbitPlaneTexNum(
-                                py
-                            )}\\bigr)`;
+                            const tex = `\\textcolor{${ORBIT_WORKED_STEP_HEAD_COLOR}}{z_{${i}}}\\ \\bigl(${mbOrbitPlaneTexNum(
+                                px,
+                            )} \\bigm| ${mbOrbitPlaneTexNum(py)}\\bigr)`;
                             katex.render(tex, el, { throwOnError: false, displayMode: false });
                         } else {
-                            el.textContent = `z_${i} (${Number(px).toFixed(ORBIT_COORD_NKS)} | ${Number(py).toFixed(
-                                ORBIT_COORD_NKS
-                            )})`;
+                            const pxS = Number(px).toFixed(ORBIT_COORD_NKS);
+                            const pyS = Number(py).toFixed(ORBIT_COORD_NKS);
+                            el.innerHTML = `<span style="color:rgba(92,225,255,0.96)">z<sub>${i}</sub></span> (${pxS} | ${pyS})`;
                         }
                     }
                     const ux = cco.mapX(px);
@@ -2605,26 +2916,28 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 /** ↑/↓ in orbit view adjust orbitLegCount (legs / segments). */
                 const legsBudget = clampOrbitLegCount(orbitLegCount);
                 pts.push({ x: zx, y: zy });
+                /** Schenkel nur anhängen, wenn die Iteration endliche Werte liefert (kein Schweif aus „n/a“-Punkten). */
                 for (let seg = 0; seg < legsBudget; seg++) {
-                    if (zx * zx + zy * zy > 4) break;
                     const st = orbitIterateMap(zx, zy, cr, ci, burnOrbit);
-                    zx = st.zx;
-                    zy = st.zy;
+                    const nzx = st.zx;
+                    const nzy = st.zy;
+                    if (!Number.isFinite(nzx) || !Number.isFinite(nzy)) break;
+                    zx = nzx;
+                    zy = nzy;
                     pts.push({ x: zx, y: zy });
                 }
 
                 orbitLastLegBudget = legsBudget;
                 orbitLastActualLegs = Math.max(0, pts.length - 1);
 
+                const nWp = pts.length > 1 ? Math.min(pts.length - 1, ORBIT_WORKED_PANEL_ZS_MAX) : 0;
                 orbitWorkedPanelSnap = {
                     cr,
                     ci,
                     z0x,
                     z0y,
                     burnOrbit,
-                    z1: pts.length > 1 ? pts[1] : null,
-                    z2: pts.length > 2 ? pts[2] : null,
-                    z3: pts.length > 3 ? pts[3] : null,
+                    zs: nWp > 0 ? pts.slice(1, 1 + nWp) : [],
                     legsBudget,
                 };
 
@@ -2636,9 +2949,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const orbitStroke = orbitStablePath
                     ? 'rgba(242, 187, 68, 0.94)'
                     : 'rgba(229, 57, 53, 0.94)';
-                const orbitDotFill = orbitStablePath
-                    ? 'rgba(242, 187, 68, 0.88)'
-                    : 'rgba(229, 57, 53, 0.88)';
+                /** Kleine Quadrate/Punkte auf \(z_k\): einheitlich Cyan wie Griff; Schenkelfarbe bleibt gold/rot. */
+                const ORBIT_WAYPOINT_DOT_FILL = 'rgba(5, 209, 255, 0.92)';
+                const ORBIT_WAYPOINT_DOT_R_SCALE = 1.2;
 
                 const nSeg = pts.length - 1;
                 if (orbitShowLegPolyline) {
@@ -2657,7 +2970,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
                 const ni = Math.max(1, pts.length - 1);
                 if (orbitShowLegPolyline) {
-                    ctx.fillStyle = orbitDotFill;
+                    ctx.fillStyle = ORBIT_WAYPOINT_DOT_FILL;
                     pts.forEach((p, i) => {
                         if (i === 0) return;
                         const dc = (p.x - cr) * (p.x - cr) + (p.y - ci) * (p.y - ci);
@@ -2665,18 +2978,23 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         const px = cc.mapX(p.x);
                         const py = cc.mapY(p.y);
                         const tr = ni <= 0 ? 1 : i / ni;
-                        const r = 1.35 + tr * 1.55;
+                        const r = (1.35 + tr * 1.55) * ORBIT_WAYPOINT_DOT_R_SCALE;
                         ctx.beginPath();
                         ctx.arc(px, py, r, 0, Math.PI * 2);
                         ctx.fill();
                     });
                 }
 
-                function drawHandle(mx, my, isDraggable) {
+                function drawHandle(mx, my, isDraggable, draggableFill) {
                     const px = cc.mapX(mx);
                     const py = cc.mapY(my);
                     ctx.save();
-                    ctx.fillStyle = isDraggable ? ORBIT_HANDLE_C_FILL : 'rgba(160, 175, 198, 0.72)';
+                    const fillIdle = 'rgba(160, 175, 198, 0.72)';
+                    ctx.fillStyle = isDraggable
+                        ? draggableFill != null
+                            ? draggableFill
+                            : ORBIT_HANDLE_C_FILL
+                        : fillIdle;
                     ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
                     ctx.lineWidth = 1.2;
                     ctx.beginPath();
@@ -2690,7 +3008,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     drawHandle(cr, ci, true);
                 }
                 if (mode === 'JULIA') {
-                    drawHandle(z0x, z0y, true);
+                    drawHandle(z0x, z0y, true, ORBIT_HANDLE_Z0_FILL);
                 } else {
                     drawHandle(0, 0, false);
                 }
@@ -2775,7 +3093,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     const px = cc.mapX(orbitScanProbeCx);
                     const py = cc.mapY(orbitScanProbeCy);
                     ctx.save();
-                    ctx.fillStyle = ORBIT_HANDLE_C_FILL;
+                    ctx.fillStyle = ORBIT_HANDLE_Z0_FILL;
                     ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
                     ctx.lineWidth = 1.2;
                     ctx.beginPath();
@@ -3139,7 +3457,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 isFlight = false;
                 time = 0;
                 orbitLegCount = ORBIT_LEG_DEFAULT;
-                persistMandelbrotOrbitLeg();
                 mbFormulaOverlayCacheKey = '';
                 if (mainPlane === 'ORBIT') syncOrbitHud();
                 syncMbFractalFormulaOverlay();
@@ -3453,7 +3770,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                             const step = e.shiftKey ? 5 : 1;
                             orbitLegCount += arrowUp ? step : -step;
                             orbitLegCount = clampOrbitLegCount(orbitLegCount);
-                            persistMandelbrotOrbitLeg();
                             if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                                 CyberCanvasInstance.needsRedraw = true;
                             }
@@ -3663,10 +3979,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     centerX = rf(LS_MB_CENTER_X, centerX);
                     centerY = rf(LS_MB_CENTER_Y, centerY);
                     zoom = clampZoom(rf(LS_MB_ZOOM, zoom));
-                    const jx = rf(LS_MB_JULIA_X, juliaX);
-                    const jy = rf(LS_MB_JULIA_Y, juliaY);
-                    juliaX = Math.max(-2, Math.min(2, jx));
-                    juliaY = Math.max(-2, Math.min(2, jy));
                     maxIter = ri(LS_MB_MAX_ITER, maxIter, MB_ITER_SLIDER_MIN, MB_ITER_SLIDER_MAX);
 
                     const u = zoomDepthLogUnit(zoom);

@@ -846,7 +846,7 @@
             box-sizing: border-box;
         }
 
-        /* PLAY-Zeile: ein String (PLAY ▶ Dauer), ein durchgehender Verlauf blau → weiß → purple */
+        /* PLAY-Zeile: Cyan → Weiß → helles Lavendel (wie Referenz), Verlauf über die Zeilenbreite — nicht viewport-fixed */
         #intro-start-overlay .intro-start-overlay-main {
             display: flex;
             flex-direction: row;
@@ -854,63 +854,74 @@
             align-items: center;
             justify-content: center;
             width: auto;
-            max-width: min(calc(100vw - 24px), 720px);
+            max-width: min(calc(100vw - 24px), 920px);
             min-width: 0;
             padding: 0 clamp(8px, 2vw, 16px);
             box-sizing: border-box;
-            animation: introPlayRowPulse 2s infinite ease-in-out;
         }
 
         @keyframes introPlayRowPulse {
-            0% {
-                filter:
-                    drop-shadow(0 0 10px rgba(0, 210, 255, 0.38))
-                    drop-shadow(0 0 14px rgba(157, 80, 247, 0.28));
+            0%,
+            100% {
+                text-shadow:
+                    0 0 14px rgba(0, 210, 255, 0.5),
+                    0 0 28px rgba(157, 80, 247, 0.35);
             }
             50% {
-                filter:
-                    drop-shadow(0 0 26px rgba(0, 210, 255, 0.65))
-                    drop-shadow(0 0 30px rgba(157, 80, 247, 0.45));
-            }
-            100% {
-                filter:
-                    drop-shadow(0 0 10px rgba(0, 210, 255, 0.38))
-                    drop-shadow(0 0 14px rgba(157, 80, 247, 0.28));
+                text-shadow:
+                    0 0 26px rgba(0, 210, 255, 0.82),
+                    0 0 44px rgba(157, 80, 247, 0.48);
             }
         }
 
+        /* Verlauf nur auf Glyphen: keine filter-Animation hier — die bricht mit background-clip:text oft komplett (Safari/Chrome). */
         #intro-start-overlay .intro-play-full-line {
-            --intro-play-text-grad: linear-gradient(to right, var(--neon-blue), #ffffff, var(--neon-purple));
+            --intro-play-text-grad: linear-gradient(
+                to right,
+                #5cf8ff 0%,
+                #aefbff 24%,
+                #ffffff 46%,
+                #ffffff 54%,
+                #efe2fb 78%,
+                #cfafe8 100%
+            );
+            display: inline-block;
+            width: fit-content;
+            max-width: 100%;
             margin: 0;
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.1rem, 3.8vw, 2rem);
-            font-weight: 600;
+            font-size: clamp(1.45rem, 5.2vw, 2.65rem);
+            font-weight: 700;
             letter-spacing: clamp(0.06em, 1.5vw, 0.18em);
             text-align: center;
             white-space: nowrap;
             line-height: 1.2;
-            width: auto;
-            max-width: 100%;
-            min-width: 0;
             box-sizing: border-box;
+            vertical-align: middle;
             background-image: var(--intro-play-text-grad);
-            background-attachment: fixed;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: 0 0;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             -webkit-text-fill-color: transparent;
+            animation: introPlayRowPulse 2s infinite ease-in-out;
         }
 
-        /* Größeres ▶ mit gleichem viewport-fixierten Verlauf wie die Zeile */
+        @media (prefers-reduced-motion: reduce) {
+            #intro-start-overlay .intro-play-full-line {
+                animation: none !important;
+                text-shadow:
+                    0 0 14px rgba(0, 210, 255, 0.42),
+                    0 0 26px rgba(157, 80, 247, 0.3);
+            }
+        }
+
+        /* Ein durchgehender Verlauf über die ganze Zeile — kein eigenes background auf ▶ */
         #intro-start-overlay .intro-play-full-line .intro-play-icon {
             font-size: 1.72em;
             vertical-align: -0.14em;
-            background-image: var(--intro-play-text-grad);
-            background-attachment: fixed;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
         }
 
         @media (max-width: 480px) {
@@ -919,12 +930,12 @@
             }
 
             #intro-start-overlay .intro-play-full-line {
-                font-size: clamp(0.95rem, 4.5vw, 1.35rem);
+                font-size: clamp(1.12rem, 5.8vw, 1.78rem);
                 letter-spacing: clamp(0.04em, 1vw, 0.12em);
             }
 
             #intro-start-overlay .intro-play-full-line .intro-play-icon {
-                font-size: 1.55em;
+                font-size: 1.58em;
             }
         }
 
@@ -943,6 +954,47 @@
             }
         }
 
+        /* Play-all: 60 s Kreisuhr oben links (Sektor = verstrichener Anteil) */
+        #intro-play-clock {
+            position: fixed;
+            top: max(10px, calc(env(safe-area-inset-top, 0px) + 6px));
+            left: max(10px, calc(env(safe-area-inset-left, 0px) + 6px));
+            z-index: 9998;
+            width: clamp(44px, 11vmin, 56px);
+            height: clamp(44px, 11vmin, 56px);
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.35));
+            opacity: 0.92;
+            transition: opacity 0.35s ease;
+        }
+        #intro-play-clock[hidden] {
+            display: none !important;
+        }
+        #intro-play-clock svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .intro-play-clock-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.14);
+            stroke-width: 2.25;
+        }
+        .intro-play-clock-sector {
+            fill: rgba(0, 210, 255, 0.22);
+            stroke: none;
+        }
+        .intro-play-clock-arc {
+            fill: none;
+            stroke: #00d2ff;
+            stroke-width: 2.35;
+            stroke-linecap: round;
+            stroke-dasharray: 125.664;
+            stroke-dashoffset: 125.664;
+            transform: rotate(-90deg);
+            transform-origin: 24px 24px;
+        }
+
         #intro-ambient-btn.is-playing {
             opacity: 1;
             border-color: rgba(0, 210, 255, 0.55);
@@ -956,9 +1008,17 @@
 </head>
 <body class="mode-catching-words">
 
+    <div id="intro-play-clock" hidden aria-hidden="true">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle class="intro-play-clock-track" cx="24" cy="24" r="20" />
+            <path id="intro-play-clock-sector" class="intro-play-clock-sector" d="" />
+            <circle id="intro-play-clock-arc" class="intro-play-clock-arc" cx="24" cy="24" r="20" />
+        </svg>
+    </div>
+
     <div id="intro-start-overlay">
         <div class="intro-start-overlay-main">
-            <p class="intro-play-full-line" aria-hidden="true">PLAY&#x2003;<span class="intro-play-icon">▶</span>&#x2003;66 SECONDS</p>
+            <p class="intro-play-full-line" id="intro-play-full-line" aria-hidden="true"><span id="intro-play-prefix">PLAY</span>&#x2003;<span class="intro-play-icon">▶</span>&#x2003;<span id="intro-play-suffix">60 Sekunden</span></p>
         </div>
     </div>
 
@@ -1086,6 +1146,35 @@
             }
             return 'de';
         };
+
+        /** Start overlay: «PLAY ▶ …» — matches Dramaturgie-Sprache */
+        window.introPlayOverlayI18n = {
+            de: { play: 'PLAY', seconds: '60 Sekunden' },
+            en: { play: 'PLAY', seconds: '60 seconds' },
+            es: { play: 'PLAY', seconds: '60 segundos' },
+            fr: { play: 'PLAY', seconds: '60 secondes' },
+            it: { play: 'PLAY', seconds: '60 secondi' },
+            pt: { play: 'PLAY', seconds: '60 segundos' },
+            nl: { play: 'PLAY', seconds: '60 seconden' },
+            sw: { play: 'PLAY', seconds: '60 sekunde' },
+            tr: { play: 'PLAY', seconds: '60 saniye' },
+        };
+        window.syncIntroPlayOverlayLine = function () {
+            try {
+                var lang =
+                    typeof window.resolveIntroDramaturgieLang === 'function'
+                        ? window.resolveIntroDramaturgieLang()
+                        : 'de';
+                var pack =
+                    window.introPlayOverlayI18n && window.introPlayOverlayI18n[lang]
+                        ? window.introPlayOverlayI18n[lang]
+                        : window.introPlayOverlayI18n.de;
+                var pre = document.getElementById('intro-play-prefix');
+                var suf = document.getElementById('intro-play-suffix');
+                if (pre) pre.textContent = pack.play;
+                if (suf) suf.textContent = pack.seconds;
+            } catch (e) {}
+        };
     </script>
     <script src="js/ui.js?v=4"></script>
     <script>
@@ -1094,6 +1183,9 @@
         } catch (err) {
             console.warn('CyberUI.init', err);
         }
+        try {
+            if (typeof window.syncIntroPlayOverlayLine === 'function') window.syncIntroPlayOverlayLine();
+        } catch (e) {}
 
         const DEV_MODE = true;
         if (DEV_MODE) {
@@ -1387,9 +1479,15 @@
             if (stack.classList.contains('cw-stack-align-left')) {
                 stack.style.removeProperty('--cw-stack-pad-top');
             } else {
-                let padTop = effectiveBandBottomGlobal - scaledH - innerPlayTopGlobal;
-                const minPadTopControls = bandTopGlobal - innerPlayTopGlobal;
-                padTop = Math.max(0, padTop, minPadTopControls);
+                const padTopMin = bandTopGlobal - innerPlayTopGlobal;
+                const padTopMax = effectiveBandBottomGlobal - scaledH - innerPlayTopGlobal;
+                const bandMid = (bandTopGlobal + effectiveBandBottomGlobal) / 2;
+                let padTop = bandMid - scaledH / 2 - innerPlayTopGlobal;
+                if (padTopMax >= padTopMin) {
+                    padTop = Math.max(padTopMin, Math.min(padTop, padTopMax));
+                } else {
+                    padTop = padTopMin;
+                }
                 stack.style.setProperty('--cw-stack-pad-top', padTop + 'px');
             }
             stack.style.setProperty('--cw-fit-scale', String(s));
@@ -1410,8 +1508,227 @@
         let cwDbgSwLatchMs = null;
         let cwDbgSwRafId = null;
         const CW_PLAY_ALL_GAP_MS = 320;
+        /** Wall-clock length for one full play-all pass (spawn gaps + Flug scaled to hit this). */
+        const INTRO_PLAY_ALL_TARGET_MS = 60000;
+        const INTRO_PLAY_CLOCK_R = 20;
+        const INTRO_PLAY_CLOCK_CIRC = 2 * Math.PI * INTRO_PLAY_CLOCK_R;
+
+        let introTimelineScale = 1;
+        let introPlayAllWallStart = null;
+        let introClockRaf = null;
+        let introClockFinishTimer = null;
+        /** True while the 60s HUD session should run (overlay dismissed → play-all started). */
+        let introClockHudActive = false;
+
+        function cwDelayAfterPrevEntry(prevEntry) {
+            if (!prevEntry || prevEntry.kind === 'stop-play-all') return cwSpawnMs;
+            if (prevEntry.kind === 'pause') return prevEntry.ms;
+            if (prevEntry.fast) return cwFastSpawnMs;
+            return cwSpawnMs;
+        }
+
+        function estimateSectionDurationMs(seq) {
+            if (!seq || !seq.length) return cwAnimSec * 1000 * 1.2;
+            let spawnAccum = 0;
+            for (let i = 1; i < seq.length; i++) {
+                const prev = seq[i - 1];
+                if (!prev || prev.kind === 'stop-play-all') break;
+                spawnAccum += cwDelayAfterPrevEntry(prev);
+            }
+            return spawnAccum + cwAnimSec * 1000 * 1.2;
+        }
+
+        function estimateFullIntroPlayAllMs() {
+            let t = 0;
+            for (let s = 0; s < cwSections.length; s++) {
+                t += estimateSectionDurationMs(cwSections[s]);
+                if (s < cwSections.length - 1) t += CW_PLAY_ALL_GAP_MS;
+            }
+            return Math.max(8000, t);
+        }
+
+        function computeIntroTimelineScale() {
+            const raw = estimateFullIntroPlayAllMs();
+            introTimelineScale = Math.min(2.85, Math.max(0.17, INTRO_PLAY_ALL_TARGET_MS / raw));
+        }
+
+        function getCwAnimSecForMotion() {
+            return cwPlayAllActive ? cwAnimSec * introTimelineScale : cwAnimSec;
+        }
+
+        function introClockSectorPath(p01) {
+            const cx = 24;
+            const cy = 24;
+            const r = 17.5;
+            const p = Math.min(1, Math.max(0, p01));
+            if (p <= 0.001) return '';
+            const theta = p * 2 * Math.PI;
+            const x = cx + r * Math.sin(theta);
+            const y = cy - r * Math.cos(theta);
+            const large = theta > Math.PI ? 1 : 0;
+            return (
+                'M ' +
+                cx +
+                ' ' +
+                cy +
+                ' L ' +
+                cx +
+                ' ' +
+                (cy - r) +
+                ' A ' +
+                r +
+                ' ' +
+                r +
+                ' 0 ' +
+                large +
+                ' 1 ' +
+                x +
+                ' ' +
+                y +
+                ' Z'
+            );
+        }
+
+        function updateIntroClockProgress(p01) {
+            const sector = document.getElementById('intro-play-clock-sector');
+            const arc = document.getElementById('intro-play-clock-arc');
+            const p = Math.min(1, Math.max(0, p01));
+            if (sector) sector.setAttribute('d', introClockSectorPath(p));
+            if (arc) arc.style.strokeDashoffset = String(INTRO_PLAY_CLOCK_CIRC * (1 - p));
+        }
+
+        function finishIntroPlayClockSession() {
+            if (introClockRaf != null) {
+                cancelAnimationFrame(introClockRaf);
+                introClockRaf = null;
+            }
+            if (introClockFinishTimer) {
+                clearTimeout(introClockFinishTimer);
+                introClockFinishTimer = null;
+            }
+            if (!introClockHudActive) {
+                introTimelineScale = 1;
+                syncCwMotionVars();
+                return;
+            }
+            introClockHudActive = false;
+            updateIntroClockProgress(1);
+            introTimelineScale = 1;
+            syncCwMotionVars();
+            introClockFinishTimer = setTimeout(() => {
+                introClockFinishTimer = null;
+                const el = document.getElementById('intro-play-clock');
+                if (el) el.hidden = true;
+                updateIntroClockProgress(0);
+                introPlayAllWallStart = null;
+            }, 720);
+        }
+
+        function introClockTick() {
+            introClockRaf = null;
+            if (!introClockHudActive) return;
+            const start = introPlayAllWallStart;
+            if (start == null) return;
+            const elapsed = performance.now() - start;
+            let p = Math.min(1, elapsed / INTRO_PLAY_ALL_TARGET_MS);
+            if (!cwPlayAllActive) p = 1;
+            updateIntroClockProgress(p);
+            if (cwPlayAllActive && elapsed >= INTRO_PLAY_ALL_TARGET_MS) {
+                stopCwPlayAllFromScript();
+                return;
+            }
+            if (!cwPlayAllActive) {
+                finishIntroPlayClockSession();
+                return;
+            }
+            introClockRaf = requestAnimationFrame(introClockTick);
+        }
+
+        function startIntroPlayClock() {
+            if (introClockFinishTimer) {
+                clearTimeout(introClockFinishTimer);
+                introClockFinishTimer = null;
+            }
+            if (introClockRaf != null) cancelAnimationFrame(introClockRaf);
+            introClockRaf = null;
+            const el = document.getElementById('intro-play-clock');
+            if (el) el.hidden = false;
+            updateIntroClockProgress(0);
+            introClockRaf = requestAnimationFrame(introClockTick);
+        }
+
         const cwActiveSfxSet = new Set();
+        /** Läuft weiter über automatischen Abschnittswechsel (z. B. resources/kids.wav). */
+        const cwSfxLingerSet = new Set();
         const CW_SFX_FADE_OUT_SEC = 1.15;
+
+        function disposeCwSfx(snd) {
+            try {
+                snd.pause();
+                snd.removeAttribute('src');
+                snd.load();
+            } catch (err) {
+                /* ignore */
+            }
+        }
+
+        /** Vor neuem Abschnitt: laufende Intro-SFX nicht abschneiden. */
+        function promotePlayingSfxToLinger() {
+            cwActiveSfxSet.forEach((snd) => {
+                try {
+                    const keepGoing = !snd.paused && !snd.ended;
+                    if (keepGoing) {
+                        cwSfxLingerSet.add(snd);
+                        function release() {
+                            cwSfxLingerSet.delete(snd);
+                            disposeCwSfx(snd);
+                        }
+                        snd.addEventListener('ended', release, { once: true });
+                        snd.addEventListener('error', release, { once: true });
+                    } else {
+                        disposeCwSfx(snd);
+                    }
+                } catch (err) {
+                    disposeCwSfx(snd);
+                }
+            });
+            cwActiveSfxSet.clear();
+        }
+
+        /** Intro Kinderschrei — merklich leiser (siehe applyCwKidsSfxVolume). */
+        const CW_KIDS_SFX_VOLUME = 0.1;
+
+        /** Pfad kann relativ sein oder zur absoluten URL werden — immer noch zuverlässig matchen. */
+        function cwIsKidsIntroSfxUrl(rawSrc) {
+            const s = String(rawSrc || '').trim();
+            if (!s || /^javascript:/i.test(s)) return false;
+            try {
+                const low = decodeURIComponent(s).toLowerCase();
+                return (
+                    /(^|[\\/])kids\.wav(\?|#|$)/i.test(low) ||
+                    low.endsWith('/kids.wav') ||
+                    low.endsWith('\\kids.wav') ||
+                    low === 'kids.wav'
+                );
+            } catch (err) {
+                return /kids\.wav/i.test(s);
+            }
+        }
+
+        function applyCwKidsSfxVolume(snd, rawSrc) {
+            if (!cwIsKidsIntroSfxUrl(rawSrc)) return false;
+            const v = CW_KIDS_SFX_VOLUME;
+            function setVol() {
+                try {
+                    snd.volume = v;
+                } catch (e) {}
+            }
+            setVol();
+            snd.addEventListener('loadedmetadata', setVol, { once: true });
+            snd.addEventListener('canplay', setVol, { once: true });
+            snd.addEventListener('playing', setVol, { once: true });
+            return true;
+        }
 
         function attachCwSfxFadeOut(snd) {
             snd.volume = 1;
@@ -1674,6 +1991,13 @@
                         /* ignore */
                     }
                 });
+                cwSfxLingerSet.forEach((snd) => {
+                    try {
+                        snd.pause();
+                    } catch (err) {
+                        /* ignore */
+                    }
+                });
             }
             syncIntroAmbientBtn();
             saveIntroPersistedPrefs();
@@ -1753,7 +2077,7 @@
 
         function syncCwMotionVars() {
             const panel = document.getElementById('catching-words-panel');
-            if (panel) panel.style.setProperty('--cw-anim-sec', String(cwAnimSec));
+            if (panel) panel.style.setProperty('--cw-anim-sec', String(getCwAnimSecForMotion()));
             const hud = document.getElementById('cw-debug-hud');
             if (hud && hud.classList.contains('visible')) {
                 const secLine =
@@ -1853,17 +2177,24 @@
             clearCwPlayAllTimer();
             syncCwMotionVars();
             fadeOutBgMusic();
+            finishIntroPlayClockSession();
         }
 
         function beginCwPlayAllSections() {
             if (!document.body.classList.contains('mode-catching-words')) return;
             if (!cwSections.length) return;
+            finishIntroPlayClockSession();
             clearCwPlayAllTimer();
             cwPlayAllActive = true;
             cwSectionIndex = 0;
             cwSequence = cwSections[0] || [];
+            computeIntroTimelineScale();
+            introClockHudActive = true;
+            introPlayAllWallStart = performance.now();
             stopCatchingWords();
             startCatchingWords();
+            syncCwMotionVars();
+            startIntroPlayClock();
             cwDbgStartStopwatch();
         }
 
@@ -1883,12 +2214,12 @@
                     cwPlayAllTimer = null;
                     if (!cwPlayAllActive || !document.body.classList.contains('mode-catching-words')) return;
                     stepCwSection('auto');
-                }, CW_PLAY_ALL_GAP_MS);
+                }, Math.max(48, Math.round(CW_PLAY_ALL_GAP_MS * introTimelineScale)));
             } else {
                 cwPlayAllActive = false;
                 cwDbgClearStopwatchIdle();
                 stopCatchingWords();
-                syncCwMotionVars();
+                finishIntroPlayClockSession();
             }
         }
 
@@ -1998,6 +2329,7 @@
                 cwPlayAllActive = false;
                 cwDbgClearStopwatchIdle();
                 clearCwPlayAllTimer();
+                finishIntroPlayClockSession();
             }
             const actualDelta = delta === 'auto' ? 1 : delta;
             
@@ -2013,7 +2345,7 @@
             if (next === cwSectionIndex) return;
             cwSectionIndex = next;
             cwSequence = cwSections[cwSectionIndex];
-            stopCatchingWords();
+            stopCatchingWords({ preserveSfx: delta === 'auto' });
             startCatchingWords();
         }
 
@@ -2052,6 +2384,13 @@
                         /* ignore */
                     }
                 });
+                cwSfxLingerSet.forEach((snd) => {
+                    try {
+                        snd.pause();
+                    } catch (err) {
+                        /* ignore */
+                    }
+                });
             } else {
                 cwPlayAllActive = true; // Resume auto-advancing sections when unpausing
                 stack.querySelectorAll('.falling-word, .cw-portal-btn, .cw-media-wrap').forEach((el) => {
@@ -2061,6 +2400,9 @@
                     v.play().catch(() => {});
                 });
                 cwActiveSfxSet.forEach((snd) => {
+                    snd.play().catch(() => {});
+                });
+                cwSfxLingerSet.forEach((snd) => {
                     snd.play().catch(() => {});
                 });
                 scheduleCwSpawn();
@@ -2136,7 +2478,10 @@
                     try {
                         const snd = new Audio(rawSrc);
                         snd.preload = 'auto';
-                        attachCwSfxFadeOut(snd);
+                        if (!applyCwKidsSfxVolume(snd, rawSrc)) {
+                            snd.volume = 1;
+                            attachCwSfxFadeOut(snd);
+                        }
                         cwActiveSfxSet.add(snd);
                         function releaseSfx() {
                             cwActiveSfxSet.delete(snd);
@@ -2543,7 +2888,11 @@
                     delay = prevEntry.ms; // Custom pause duration
                 }
             }
-            
+            if (cwPlayAllActive) {
+                delay = Math.round(delay * introTimelineScale);
+                delay = Math.max(28, delay);
+            }
+
             cwSpawnTimer = setTimeout(() => {
                 if (!cwRunning || cwPaused) return;
                 spawnCwWord();
@@ -2555,7 +2904,8 @@
             if (cwRunning && Array.isArray(cwSequence)) precomputeCwStackFitFromSequence(cwSequence);
         }
 
-        function stopCatchingWords() {
+        function stopCatchingWords(opts) {
+            const preserveSfx = opts && opts.preserveSfx;
             clearCwPlayAllTimer();
             cwRunning = false;
             cwPaused = false;
@@ -2563,16 +2913,14 @@
             if (cwSpawnTimer) clearTimeout(cwSpawnTimer);
             cwSpawnTimer = null;
             const stack = document.getElementById('cw-stack');
-            cwActiveSfxSet.forEach((snd) => {
-                try {
-                    snd.pause();
-                    snd.removeAttribute('src');
-                    snd.load();
-                } catch (err) {
-                    /* ignore */
-                }
-            });
-            cwActiveSfxSet.clear();
+            if (preserveSfx) {
+                promotePlayingSfxToLinger();
+            } else {
+                cwActiveSfxSet.forEach(disposeCwSfx);
+                cwActiveSfxSet.clear();
+                cwSfxLingerSet.forEach(disposeCwSfx);
+                cwSfxLingerSet.clear();
+            }
             if (stack) {
                 stack.innerHTML = '';
                 stack.classList.remove('cw-stack-fullscreen-mode');
@@ -2907,6 +3255,9 @@
                     ? window.resolveIntroDramaturgieLang()
                     : 'de';
             window.__INTRO_DRAMATURGIE_LANG = lang;
+            try {
+                if (typeof window.syncIntroPlayOverlayLine === 'function') window.syncIntroPlayOverlayLine();
+            } catch (e1) {}
             var bundleUrl = 'intro-dramaturgy/intro_' + lang + '.js?v=21';
 
             function applyLoaded() {
