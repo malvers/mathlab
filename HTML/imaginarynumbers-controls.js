@@ -1,5 +1,5 @@
 /**
- * Sidebar + Slider für das Lab imaginarynumbers (nur diese Seite — nicht global).
+ * Sidebar für das Lab imaginarynumbers (nur diese Seite — nicht global).
  *
  * Farben: nur über PALETTE.* (Rollen, keine Farbnamen in Keys), dann applyPaletteCssVars().
  */
@@ -8,29 +8,50 @@
      * Rollen-basierte Farben — hier Hex ändern, nicht die Keys.
      * VAR_Z: Punkt/Variable z | AXIS_RE: re-Anteil | AXIS_IM: im-Anteil | VAR_R: √z / r-Karte
      */
+    /* Farben wie Winkel-Diagramm (Stufenwinkel / Scheitelwinkel / Nebenwinkel + Gelb). */
     const PALETTE = Object.freeze({
-        CARD_ACCENT: '#00d2ff',
-        VAR_Z: '#ef4444',
-        AXIS_RE: '#facc15',
-        AXIS_IM: '#22d3ee',
-        VAR_R: '#38bdf8',
+        CARD_ACCENT: '#00B0F0',
+        VAR_Z: '#ED1C24',
+        AXIS_RE: '#FFC000',
+        AXIS_IM: '#00B0F0',
+        VAR_R: '#92D050',
         TITLE_MUTED: '#e2e8f0',
     });
 
-    /** Etwas dunklere Ränder für Slider-Knöpfe (zu AXIS_RE / AXIS_IM passend). */
+    /** Etwas dunklere Ränder (zu AXIS_RE / AXIS_IM passend). */
     const PALETTE_DIM = Object.freeze({
-        AXIS_RE_EDGE: '#a16207',
-        AXIS_IM_EDGE: '#0e7490',
+        AXIS_RE_EDGE: '#B88600',
+        AXIS_IM_EDGE: '#0077A3',
     });
 
     const KATEX_OPTS = Object.freeze({ throwOnError: false, displayMode: false });
 
     const AXIS_RE_IM = [PALETTE.AXIS_RE, PALETTE.AXIS_IM];
 
-    const Z_SLIDER_DEFS = Object.freeze([
-        { label: 're (x)', key: 're', color: PALETTE.AXIS_RE },
-        { label: 'im (y)', key: 'im', color: PALETTE.AXIS_IM },
-    ]);
+    /** Unter z- und r-Karte (nicht in der z-Karte): KaTeX r = √(z) vs z² (nur einer aktiv). */
+    const ROOT_MAP_MODE_HTML = `
+                <div id="cn-map-mode" class="cn-map-mode" role="radiogroup" aria-label="Abbildung z nach r">
+                    <button type="button" id="cn-map-sqrt" class="cn-map-mode-btn" aria-pressed="true" aria-label="r gleich Wurzel aus z">
+                        <span id="cn-map-sqrt-tex" class="cn-map-mode-tex"></span>
+                    </button>
+                    <button type="button" id="cn-map-sq" class="cn-map-mode-btn" aria-pressed="false" aria-label="z Quadrat">
+                        <span id="cn-map-sq-tex" class="cn-map-mode-tex"></span>
+                    </button>
+                </div>`;
+
+    const ROOT_MAP_MODE_WRAP_HTML = `<div id="cn-map-mode-wrap" class="cn-map-mode-wrap">${ROOT_MAP_MODE_HTML}</div>`;
+
+    const ROOT_Z_READOUT_HTML = `
+                <div id="cn-z-readout" class="cn-z-readout">
+                    <div class="control-header cn-r-row">
+                        <span id="cn-z-tex-re" class="cyber-label"></span>
+                        <span id="cn-z-val-re" class="val-display"></span>
+                    </div>
+                    <div class="control-header cn-r-row">
+                        <span id="cn-z-tex-im" class="cyber-label"></span>
+                        <span id="cn-z-val-im" class="val-display"></span>
+                    </div>
+                </div>`;
 
     const ROOT_READOUT_CARD_HTML = `
                 <div id="cn-r-readout" class="cn-r-readout">
@@ -71,7 +92,7 @@
         setHexAndRgb('--cn-axis-re', P.AXIS_RE);
         setHexAndRgb('--cn-axis-im', P.AXIS_IM);
         setHexAndRgb('--cn-var-r', P.VAR_R);
-        root.style.setProperty('--cn-title-muted', P.TITLE_MUTED);
+        setHexAndRgb('--cn-title-muted', P.TITLE_MUTED);
         root.style.setProperty('--cn-card-accent', P.CARD_ACCENT);
         root.style.setProperty('--cn-axis-re-dim', PALETTE_DIM.AXIS_RE_EDGE);
         root.style.setProperty('--cn-axis-im-dim', PALETTE_DIM.AXIS_IM_EDGE);
@@ -86,13 +107,19 @@
         ];
     }
 
-    function sidebarTexLabels() {
-        return texReImPair('x', 'y');
-    }
-
     /** r-Teil in VAR_R, Radikand z in VAR_Z */
     function texRSqrtZ() {
         return `\\textcolor{${PALETTE.VAR_R}}{r}\\,{=}\\,\\sqrt{\\textcolor{${PALETTE.VAR_Z}}{z}}`;
+    }
+
+    /** r = z² — Sidebar-Modus „Quadrat“ (VAR_R / VAR_Z wie bei r = √(z)). */
+    function texZSquare() {
+        return `\\textcolor{${PALETTE.VAR_R}}{r}\\,{=}\\,\\textcolor{${PALETTE.VAR_Z}}{z}^{\\,2}`;
+    }
+
+    /** Titelzeile z-Karte wie bisher: z ∈ ℂ */
+    function texZInC() {
+        return `\\textcolor{${PALETTE.VAR_Z}}{z}\\,\\textcolor{${PALETTE.TITLE_MUTED}}{\\in\\,\\mathbb{C}}`;
     }
 
     function katexTry(el, tex, fallbackText) {
@@ -133,16 +160,35 @@
 
     function renderValDisplays(state, fmtNum) {
         if (typeof katex === 'undefined') return;
-        const wrap = document.getElementById('cn-sliders');
-        if (!wrap) return;
-        const groups = wrap.querySelectorAll('.cyber-control-group');
-        const values = Z_SLIDER_DEFS.map((row) => fmtNum(state[row.key]));
-        groups.forEach((g, i) => {
-            const d = g.querySelector('.val-display');
-            if (!d || AXIS_RE_IM[i] === undefined) return;
-            katexColoredNumeric(d, AXIS_RE_IM[i], values[i]);
-        });
+        renderZReadout(state, fmtNum);
         renderRReadout(state, fmtNum);
+    }
+
+    function renderZReadout(state, fmtNum) {
+        if (typeof katex === 'undefined') return;
+        const mount = document.getElementById('cn-z-readout');
+        if (!mount) return;
+
+        const card = mount.closest('.instrument-card');
+        const titleHost = card?.querySelector('.instrument-title');
+        if (titleHost && titleHost.dataset.cnZTitleVer !== 'v10') {
+            katexTry(titleHost, texZInC(), 'z ∈ ℂ');
+            titleHost.dataset.cnZTitleVer = 'v10';
+        }
+
+        const zTex = texReImPair('z', 'z');
+        const zFallbacks = ['re (z)', 'im (z)'];
+        const labelIds = ['cn-z-tex-re', 'cn-z-tex-im'];
+        labelIds.forEach((id, i) => {
+            katexLabelOnce(document.getElementById(id), zTex[i], zFallbacks[i], 'zli1');
+        });
+
+        const vals = [fmtNum(state.re), fmtNum(state.im)];
+        renderTwoColoredValues(
+            [document.getElementById('cn-z-val-re'), document.getElementById('cn-z-val-im')],
+            AXIS_RE_IM,
+            vals,
+        );
     }
 
     function renderRReadout(state, fmtNum) {
@@ -152,9 +198,9 @@
 
         const card = mount.closest('.instrument-card');
         const titleHost = card?.querySelector('.instrument-title');
-        if (titleHost && titleHost.dataset.cnRTitleVer !== 'v6') {
+        if (titleHost && titleHost.dataset.cnRTitleVer !== 'v10') {
             katexTry(titleHost, texRSqrtZ(), 'r = √z');
-            titleHost.dataset.cnRTitleVer = 'v6';
+            titleHost.dataset.cnRTitleVer = 'v10';
         }
 
         const rTex = texReImPair('r', 'r');
@@ -175,39 +221,22 @@
 
     function renderSidebarKatex(state, fmtNum) {
         if (typeof katex === 'undefined') return;
-        const card = document.getElementById('cn-sliders')?.closest('.instrument-card');
-        const titleHost = card?.querySelector('.instrument-title');
-        if (titleHost) {
-            titleHost.textContent = '';
-            katexTry(
-                titleHost,
-                `\\textcolor{${PALETTE.VAR_Z}}{z}\\,\\textcolor{${PALETTE.TITLE_MUTED}}{\\in\\,\\mathbb{C}}`,
-                'z ∈ ℂ',
-            );
-        }
-        const labelTex = sidebarTexLabels();
-        const zFallbacks = ['re (x)', 'im (y)'];
-        document.querySelectorAll('#cn-sliders .cyber-label').forEach((el, i) => {
-            if (!labelTex[i]) return;
-            el.textContent = '';
-            el.style.fontFamily = 'inherit';
-            katexTry(el, labelTex[i], zFallbacks[i]);
-        });
         renderValDisplays(state, fmtNum);
+        renderMapModeKatex();
     }
 
-    function bindSliderKatexRefresh(state, fmtNum) {
-        const wrap = document.getElementById('cn-sliders');
-        if (!wrap) return;
-        wrap.querySelectorAll('input.cyber-slider[type="range"]').forEach((inp) => {
-            inp.addEventListener('input', () => {
-                requestAnimationFrame(() => renderValDisplays(state, fmtNum));
-            });
-        });
+    function renderMapModeKatex() {
+        const sqrtEl = document.getElementById('cn-map-sqrt-tex');
+        const sqEl = document.getElementById('cn-map-sq-tex');
+        if (!sqrtEl || !sqEl) return;
+        sqrtEl.textContent = '';
+        sqEl.textContent = '';
+        katexTry(sqrtEl, texRSqrtZ(), 'r = √(z)');
+        katexTry(sqEl, texZSquare(), 'r = z²');
     }
 
     function setupParameterCard(options) {
-        const { state, fmtNum, sliderMin, sliderMax, step, onSliderChange, sqrtProvider } = options;
+        const { state, fmtNum, sqrtProvider } = options;
 
         if (typeof CyberUI === 'undefined' || typeof CyberUI.createCard !== 'function') return;
 
@@ -215,35 +244,18 @@
 
         sqrtProviderRef = typeof sqrtProvider === 'function' ? sqrtProvider : null;
 
-        CyberUI.createCard(
-            'ui-container',
-            'z ∈ ℂ',
-            '<div id="cn-sliders"></div>',
-            PALETTE.CARD_ACCENT,
-        );
-
-        Z_SLIDER_DEFS.forEach((row) => {
-            CyberUI.createSlider(
-                'cn-sliders',
-                row.label,
-                sliderMin,
-                sliderMax,
-                state[row.key],
-                step,
-                (v) => {
-                    state[row.key] = v;
-                    onSliderChange();
-                },
-                row.color,
-            );
-        });
+        CyberUI.createCard('ui-container', 'z', ROOT_Z_READOUT_HTML, PALETTE.VAR_Z);
 
         if (sqrtProviderRef) {
             CyberUI.createCard('ui-container', 'r', ROOT_READOUT_CARD_HTML, PALETTE.VAR_R);
         }
 
+        const uiMount = document.getElementById('ui-container');
+        if (uiMount && !document.getElementById('cn-map-mode-wrap')) {
+            uiMount.insertAdjacentHTML('beforeend', ROOT_MAP_MODE_WRAP_HTML);
+        }
+
         renderSidebarKatex(state, fmtNum);
-        bindSliderKatexRefresh(state, fmtNum);
     }
 
     global.ImaginaryNumbersControls = {
@@ -252,10 +264,13 @@
         hexToRgbComma,
         escapeTexText,
         texRSqrtZ,
+        texZSquare,
+        texZInC,
+        renderMapModeKatex,
         renderValDisplays,
         renderSidebarKatex,
-        bindSliderKatexRefresh,
         setupParameterCard,
+        renderZReadout,
         renderRReadout,
     };
 })(typeof window !== 'undefined' ? window : globalThis);
