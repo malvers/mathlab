@@ -1,12 +1,12 @@
 /**
  * CYBER-LABOR GLOBAL i18n DICTIONARY
  * Supports: Addition, Subtraction, Multiplication, Division, Logic, Geometry, Proof, Polygon
- * Languages: DE, EN, ES, FR, IT, PT, SW (Kiswahili)
+ * Languages: DE, EN, ES, FR, IT, PT, NL (Nederlands: eigen woordenboek + lab-overlay), SW (Kiswahili), TR (Türkçe)
  */
 
 const CyberI18n = {
-    // Current active language
-    current: 'en',
+    // Current active language (resolveLanguageFromEnvironment runs at script end)
+    current: 'de',
 
     // Dictionary
     translations: {
@@ -268,6 +268,7 @@ const CyberI18n = {
                 mode: "LABOR-MODUS",
                 mandelbrot: "MANDELBROT",
                 julia: "JULIA-MENGE",
+                burning_ship: "BURNING SHIP",
                 params: "FRAKTAL-PARAMETER",
                 detail: "DETAILGRAD",
                 zoom: "ZOOMFAKTOR",
@@ -283,8 +284,10 @@ const CyberI18n = {
                 plane_fractal: "FRAKTAL",
                 plane_orbit: "ORBIT",
                 orbit_help_mb: "Orbit z_{n+1}=z_n²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 (typ. Escape-Schranke).",
+                orbit_help_bs:
+                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 wie beim Mandelbrot.",
                 orbit_help_jl: "Julia: c aus Real-/Imaginär-Schiebern; Orbit startet bei z₀ = Mittelpunkt der Fraktal-Ansicht.",
-                orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
+                orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot oder Burning Ship, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
                 orbit_grid: "Gitterlinien",
                 orbit_leg_polyline: "Orbit: Schenkel, Zwischenpunkt-Kreise + Punkt c",
                 orbit_legs_arrows: "Schenkel-Budget (max.): {n} (↑/↓ nur Orbit-Ansicht; Shift = größere Schritte)",
@@ -562,7 +565,7 @@ const CyberI18n = {
                 prev: "BACK",
                 reset: "RESET LAB",
                 step: "STEP",
-                coach_title: "Doc Alvers Math Lab",
+                coach_title: "Doc Alvers Mathe-Labor",
                 universe_title: "Universe · Lab Gallery",
                 logic_game: "Number Puzzle",
                 angle_lab: "Angle Lab",
@@ -796,6 +799,7 @@ const CyberI18n = {
                 mode: "LAB MODE",
                 mandelbrot: "MANDELBROT",
                 julia: "JULIA SET",
+                burning_ship: "BURNING SHIP",
                 params: "FRACTAL PARAMETERS",
                 detail: "DETAIL LEVEL",
                 zoom: "ZOOM FACTOR",
@@ -811,8 +815,10 @@ const CyberI18n = {
                 plane_fractal: "FRACTAL",
                 plane_orbit: "ORBIT",
                 orbit_help_mb: "Iteration z_{n+1}=z_n²+c from z₀=0 with c at the center of the fractal view. Circles |z|=1 and |z|=2 (escape radius).",
+                orbit_help_bs:
+                    "Burning Ship iteration z_{n+1}=(|Re z_n|+i|Im z_n|)²+c from z₀=0 with c at fractal center. Same |z|=1 and |z|=2 guides as Mandelbrot.",
                 orbit_help_jl: "Julia: fixed c from sliders; orbit starts at z₀ = fractal view center.",
-                orbit_drag_hint: "Drag point c (Mandelbrot; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
+                orbit_drag_hint: "Drag point c (Mandelbrot or Burning Ship; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
                 orbit_grid: "Grid lines",
                 orbit_leg_polyline: "Orbit: segments, vertex dots + point c",
                 orbit_legs_arrows: "Leg budget (max.): {n} (↑/↓ orbit view only; Shift = bigger steps)",
@@ -1090,7 +1096,7 @@ const CyberI18n = {
                 prev: "VOLVER",
                 reset: "REINICIAR",
                 step: "PASO",
-                coach_title: "Doc Alvers Laboratorio",
+                coach_title: "Doc Alvers Mathe-Labor",
                 universe_title: "Universe · Galería de laboratorios",
                 logic_game: "Rompecabezas Numérico",
                 angle_lab: "Laboratorio de Ángulos",
@@ -1324,6 +1330,7 @@ const CyberI18n = {
                 mode: "MODO DE LABORATORIO",
                 mandelbrot: "MANDELBROT",
                 julia: "CONJUNTO DE JULIA",
+                burning_ship: "BURNING SHIP",
                 params: "PARÁMETROS FRACTALES",
                 detail: "NIVEL DE DETALLE",
                 zoom: "FACTOR DE ZOOM",
@@ -1339,8 +1346,10 @@ const CyberI18n = {
                 plane_fractal: "FRACTAL",
                 plane_orbit: "ÓRBITA",
                 orbit_help_mb: "Órbita z_{n+1}=z_n²+c con z₀=0; c = centro de la vista fractal. Círculos |z|=1 y |z|=2 (radio de escape).",
+                orbit_help_bs:
+                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c con z₀=0; c = centro de la vista. Círculos |z|=1 y |z|=2 (guías de escape).",
                 orbit_help_jl: "Julia: c con controles; órbita desde z₀ = centro de la vista fractal.",
-                orbit_drag_hint: "Arrastra c (Mandelbrot, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
+                orbit_drag_hint: "Arrastra c (Mandelbrot o Burning Ship, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
                 orbit_grid: "Cuadrícula",
                 orbit_leg_polyline: "Órbita: tramos, puntos intermedios + punto c",
                 orbit_legs_arrows: "Tramos de órbita (máx.): {n} (↑/↓ solo vista órbita; Shift pasos mayores)",
@@ -1618,7 +1627,7 @@ const CyberI18n = {
                 prev: "RETOUR",
                 reset: "RÉINITIALISER",
                 step: "ÉTAPE",
-                coach_title: "Doc Alvers Laboratoire",
+                coach_title: "Doc Alvers Mathe-Labor",
                 universe_title: "Universe · Galerie des laboratoires",
                 logic_game: "Puzzle Numérique",
                 angle_lab: "Laboratoire d'Angles",
@@ -1852,6 +1861,7 @@ const CyberI18n = {
                 mode: "MODE LABO",
                 mandelbrot: "MANDELBROT",
                 julia: "ENSEMBLE DE JULIA",
+                burning_ship: "BURNING SHIP",
                 params: "PARAMÈTRES FRACTALES",
                 detail: "NIVEAU DE DÉTAIL",
                 zoom: "FACTEUR DE ZOOM",
@@ -1867,8 +1877,10 @@ const CyberI18n = {
                 plane_fractal: "FRACTAL",
                 plane_orbit: "ORBITES",
                 orbit_help_mb: "Orbite z_{n+1}=z_n²+c avec z₀=0 ; c = centre de la vue. Cercles |z|=1 et |z|=2 (rayon d'évasion).",
+                orbit_help_bs:
+                    "Burning Ship : z_{n+1}=(|Re z_n|+i|Im z_n|)²+c avec z₀=0 ; c au centre de la vue. Cercles |z|=1 et |z|=2.",
                 orbit_help_jl: "Julia : c depuis les curseurs ; orbite depuis z₀ = centre de la vue fractale.",
-                orbit_drag_hint: "Glisser le point c (Mandelbrot, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
+                orbit_drag_hint: "Glisser le point c (Mandelbrot ou Burning Ship, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
                 orbit_grid: "Quadrillage",
                 orbit_leg_polyline: "Orbite : segments, pastilles + point c",
                 orbit_legs_arrows: "Segments d’orbite (max.) : {n} (↑/↓ vue orbite ; Shift pas plus grands)",
@@ -2146,7 +2158,7 @@ const CyberI18n = {
                 prev: "INDIETRO",
                 reset: "RESET LABORATORIO",
                 step: "PASSO",
-                coach_title: "Doc Alvers Laboratorio",
+                coach_title: "Doc Alvers Mathe-Labor",
                 universe_title: "Universe · Galleria laboratori",
                 logic_game: "Puzzle Numerico",
                 angle_lab: "Laboratorio degli Angoli",
@@ -2380,6 +2392,7 @@ const CyberI18n = {
                 mode: "MODALITÀ LAB",
                 mandelbrot: "MANDELBROT",
                 julia: "INSIEME DI JULIA",
+                burning_ship: "BURNING SHIP",
                 params: "PARAMETRI FRATTALI",
                 detail: "LIVELLO DI DETTAGLIO",
                 zoom: "FATTORE DI ZOOM",
@@ -2395,8 +2408,10 @@ const CyberI18n = {
                 plane_fractal: "FRATTALE",
                 plane_orbit: "ORBITA",
                 orbit_help_mb: "Orbita z_{n+1}=z_n²+c con z₀=0; c = centro della vista. Cerchi |z|=1 e |z|=2 (raggio di fuga).",
+                orbit_help_bs:
+                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c con z₀=0; stessi cerchi guida |z|=1 e |z|=2 del Mandelbrot.",
                 orbit_help_jl: "Julia: c dagli slider; orbita da z₀ = centro della vista frattale.",
-                orbit_drag_hint: "Trascina c (Mandelbrot, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
+                orbit_drag_hint: "Trascina c (Mandelbrot o Burning Ship, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
                 orbit_grid: "Griglia",
                 orbit_leg_polyline: "Orbita: segmenti, puntini intermedi + punto c",
                 orbit_legs_arrows: "Segmenti orbita (max.): {n} (↑/↓ solo vista orbita; Shift passi più grandi)",
@@ -2908,6 +2923,7 @@ pt: {
                 mode: "LAB MODE",
                 mandelbrot: "MANDELBROT",
                 julia: "JULIA SET",
+                burning_ship: "BURNING SHIP",
                 params: "FRACTAL PARAMETERS",
                 detail: "DETAIL LEVEL",
                 zoom: "ZOOM FACTOR",
@@ -2923,8 +2939,10 @@ pt: {
                 plane_fractal: "FRACTAL",
                 plane_orbit: "ÓRBITA",
                 orbit_help_mb: "Órbita z_{n+1}=z_n²+c com z₀=0; c = centro da vista. Círculos |z|=1 e |z|=2 (escape).",
+                orbit_help_bs:
+                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c com z₀=0; c ao centro da vista. Círculos |z|=1 e |z|=2.",
                 orbit_help_jl: "Julia: c nos sliders; órbita a partir de z₀ = centro da vista fractal.",
-                orbit_drag_hint: "Arraste c (Mandelbrot, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
+                orbit_drag_hint: "Arraste c (Mandelbrot ou Burning Ship, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
                 orbit_grid: "Grade",
                 orbit_leg_polyline: "Órbita: segmentos, pontos intermediários + ponto c",
                 orbit_legs_arrows: "Segmentos da órbita (máx.): {n} (↑/↓ só vista órbita; Shift passos maiores)",
@@ -3203,7 +3221,7 @@ pt: {
                 prev: "NYUMA",
                 reset: "WEKA UPYA MAABARA",
                 step: "HATUA",
-                coach_title: "Maabara ya Hisabati — Doc Alvers",
+                coach_title: "Doc Alvers Mathe-Labor",
                 universe_title: "Ulimwengu · Matunzio ya Maabara",
                 logic_game: "Puzzle ya Nambari",
                 angle_lab: "Maabara ya Pembe",
@@ -3437,6 +3455,7 @@ pt: {
                 mode: "HALI YA MAABABU",
                 mandelbrot: "MANDELBROT",
                 julia: "JULIA SET",
+                burning_ship: "BURNING SHIP",
                 params: "VIGEZO VYA FRACTAL",
                 detail: "KIWANGO CHA MAELEZO",
                 zoom: "ZOOM FACTOR",
@@ -3452,8 +3471,10 @@ pt: {
                 plane_fractal: "FRACTAL",
                 plane_orbit: "OBITI",
                 orbit_help_mb: "Iteration z_{n+1}=z_n²+c kutoka z₀=0 na c katikati ya mwonekano wa fractal. Miduara |z|=1 na |z|=2 (radius ya kutoroka).",
+                orbit_help_bs:
+                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c kutoka z₀=0; c katika kituo cha fractal. Miduara |z|=1 na |z|=2.",
                 orbit_help_jl: "Julia: fasta c kutoka sliders; obiti inaanzia z₀ = kituo cha kutazama fractal.",
-                orbit_drag_hint: "Buruta sehemu c (Mandelbrot; sawa na kituo cha kutazama) au z₀ (Julia). Vinginevyo panua/kuza ndege.",
+                orbit_drag_hint: "Buruta sehemu c (Mandelbrot au Burning Ship; sawa na kituo cha kutazama) au z₀ (Julia). Vinginevyo panua/kuza ndege.",
                 orbit_grid: "Mistari ya gridi ya taifa",
                 orbit_leg_polyline: "Obiti: mistari, nukta za kati + pointi c",
                 orbit_legs_arrows: "Bajeti ya mguu (kiwango cha juu zaidi): 0 (↑/↓ mwonekano wa obiti pekee; Shift = hatua kubwa zaidi)",
@@ -3722,12 +3743,560 @@ pt: {
                 bumps: "Kiwango cha Mwiba",
                 shape: "Kipengele cha Umbo (Y)"
             }
+        },
+        tr: {
+            ui: {
+                next: "SONRAKİ",
+                prev: "GERİ",
+                reset: "LABORATUVARI SIFIRLA",
+                step: "ADIM",
+                coach_title: "Doc Alvers Mathe-Labor",
+                universe_title: "Evren · Laboratuvar Galerisi",
+                logic_game: "Sayı Bulmaca",
+                angle_lab: "Açı Laboratuvarı",
+                pythagoras: "Pisagor Kanıtı",
+                angle_sum: "Açı Toplamı Laboratuvarı",
+                transformation: "Dönüşümler",
+                parabola: "Parabol Laboratuvarı",
+                regression: "İstatistik Laboratuvarı",
+                euler: "Euler Hattı",
+                summand: "Toplanan",
+                description: "ADIM AÇIKLAMA",
+                minuend: "Eksilen",
+                subtrahend: "Çıkan",
+                factor1: "Faktör 1 (Çarpılan)",
+                factor2: "Faktör 2 (Çarpan)",
+                dividend: "Bölünen",
+                divisor: "Bölen",
+                fine_mode: "Adım adım",
+                show_grid: "Izgarayı göster",
+                show_axes: "Eksenleri Göster",
+                show_labels: "Etiketleri Göster",
+                show_telemetry: "Koordinatlar",
+                reset_view: "Görünümü sıfırla",
+                toggle_menu: "Menüyü Değiştir",
+                mini_rail_lang_title: "Görüntüleme dili — sonraki için tıklayın",
+                adopt_contact_btn_title: "Bir laboratuvar edinin!",
+                contact_lab_modal_title: "Bir laboratuvar edinin!",
+                contact_lab_modal_body: "Bir laboratuvarın sorumluluğunu hisseden ve ara sıra her şeyin hâlâ çalışıp çalışmadığını kontrol eden insanlara ihtiyacımız var. Yardımınızdan gerçekten memnun oluruz!",
+                contact_lab_email_cta: "E-posta",
+                contact_lab_close: "KAPAT"
+            },
+            euler: {
+                construction: "KURGU",
+                euler_line: "Euler Hattı",
+                feuerbach: "Feuerbach Çemberi",
+                circumcircle: "Çevrel çember",
+                incircle: "İç çember",
+                help_lines: "YARDIM ÇİZGİLERİ",
+                altitudes: "Yükseklikler (H)",
+                medians: "Kenarortaylar (S)",
+                bisectors: "Açıortaylar (I)",
+                fermat: "Fermat / Napoleon",
+                analysis: "ANALİZ",
+                ratio: "Oran HS / SU",
+                incircle_radius: "İç çember R",
+                reset_construction: "Kurguyu sıfırla"
+            },
+            lgs: {
+                system_title: "DENKLEM SİSTEMİ",
+                formal_system: "RESMİ SİSTEM",
+                intersection: "KESİŞİM S",
+                notation: "NOTASYON",
+                magnet_snap: "Mıknatısla yapışma",
+                new_task: "YENİ GÖREV",
+                view_reset: "SIFIRLAMAYI GÖRÜNTÜLE",
+                mode_normal: "NORMAL",
+                mode_mirrored: "AYNA",
+                mode_scaled: "ÖLÇEKLİ (sY)",
+                mode_implicit_a: "Örtülü A",
+                mode_implicit_b: "Örtülü B",
+                mode_random: "RASTGELE KARIŞIM",
+                no_solution: "Paralel / Çözüm Yok"
+            },
+            binom: {
+                proof_title: "Kanıt 1. Binom Formülü",
+                division: "BÖLÜM",
+                p_value: "P-DEĞERİ",
+                tip: "İpucu: Karenin orta noktasını sürükleyin!",
+                analytics: "ANALİZ",
+                total: "TOPLAM"
+            },
+            integral: {
+                title: "İNTEGRAL HESABI",
+                active_formula: "AKTİF INTEGRAL FORMÜL",
+                area_under_curve: "EĞRİ ALTINDAKİ ALAN",
+                error: "HATA",
+                limit_a: "Bir",
+                limit_b: "sınırlaması Sınır b",
+                precision_n: "Hassasiyet n",
+                mode_analytical: "ANALİTİK",
+                mode_bars: "BARLAR",
+                waiting: "Veri bekleniyor..."
+            },
+            diff: {
+                title: "DİFERANSİYEL HESABI",
+                functionality: "İŞLEVSELLİK",
+                point_pos: "Nokta Konumu (x₀)",
+                visualization: "GÖRSELLEŞTİRME",
+                deriv_1: "1. Türev f'(x)",
+                deriv_2: "2. Türev f''(x)",
+                analysis: "ANALİZ",
+                slope: "Eğim f'(x₀)",
+                curvature: "Eğrilik f''(x₀)",
+                reset_point: "Sıfırlama Noktası (x₀)"
+            },
+            power: {
+                title: "Güç ve Kök İşlevleri",
+                parameters: "PARAMETRELER",
+                exponent: "ÜS (N)",
+                x_pos: "X-POZİSYONU",
+                analytics: "ANALİZ"
+            },
+            cmaes: {
+                title: "ALAN OPTİMİZASYONU",
+                circle_mission: "DAİRE OPTİMİZASYONU",
+                lens_mission: "LENS OPTİMİZASYONU",
+                controls: "KONTROLLER",
+                telemetry: "EVRİM VERİLERİ",
+                generation: "NESİL",
+                fitness: "FITNESS",
+                perimeter: "ÇEVRE",
+                area: "ALAN",
+                start: "BAŞLA",
+                reset: "SIFIRLAMA",
+                pause: "DURAKLAT",
+                resume: "DEVAM ET",
+                max_gen: "MAKS 5000",
+                view_circle: "OPTİMİZASYON: DAİRE"
+            },
+            fourier: {
+                title: "FOURIER ANALİZİ",
+                select_shape: "ŞEKLİ SEÇİN",
+                shape_note: "MÜZİK NOTASI",
+                shape_square: "KARE",
+                shape_heart: "KALP",
+                circles: "ÇEVRELER",
+                speed: "HIZ",
+                show_circles: "ÇEVRELERİ GÖSTER",
+                tracking: "TAKİP KAMERA",
+                auto_evolve: "OTOMATİK EVRİM",
+                stop_evolution: "EVRİMİ DURDURUN",
+                start_evolution: "OTOMATİK EVRİMİ BAŞLAT"
+            },
+            galton: {
+                title: "GALTON KURULU",
+                balls_total: "TOPLAM TOPLAR",
+                controls: "KONTROLLER",
+                bins: "Kutular",
+                interval: "Ortaya Çıkma Aralığı (ms)",
+                speed: "Uçuş Hızı",
+                slow: "yavaş",
+                fast: "hızlı",
+                ball_count: "Top Sayımı",
+                stop: "DUR",
+                play: "OYNAMAK",
+                reset: "SIFIRLAMA",
+                rows: "Satırlar",
+                balls_active: "Aktif Toplar",
+                spawn_ms: "Ortaya çıkma (ms)"
+            },
+            lissajous: {
+                title: "LISSAJOUS · PARAMETRİK EĞRİLER",
+                parameters: "PARAMETRELER",
+                view_2d: "2B Eğri",
+                view_3d: "3D Sarkaç",
+                amp_a: "Genlik A",
+                amp_b: "Genlik B",
+                freq_x: "ωₓ (Açısal Frekans)",
+                freq_y: "ωᵧ (Açısal Frekans)",
+                phase: "Faz δ (Derece)",
+                path_span: "Yol Açıklığı (× Dönemler)",
+                curve_color: "Eğri Rengi (Ton)",
+                simulation: "SİMÜLASYON",
+                stop: "DUR",
+                reset: "SIFIRLAMA",
+                view_3d_desc: "Merkezi perspektif · xz düzlemi · Süperpozisyona benzer süspansiyon"
+            },
+            steigung: {
+                title: "DOĞRUSAL FONKSİYONLAR",
+                function: "FONKSİYON",
+                slope_m: "EĞİM M",
+                intercept_n: "Y-KESME NOKTASI N",
+                zero_x0: "KÖK X₀",
+                parameters: "PARAMETRELER",
+                slope_m_long: "HAT EĞİMİ M",
+                tri_pos: "ÜÇGEN KONUMU (X)",
+                tri_width: "ÜÇGEN GENİŞLİĞİ (ΔX)",
+                reset_lab: "Laboratuvarı Sıfırla"
+            },
+            pyth: {
+                title: "GENEL PİSAGORALAR",
+                construction: "İNŞAAT",
+                choose_mode: "MODU SEÇİN",
+                mode_quad: "Kareler",
+                mode_semi: "Yarım Daireler",
+                mode_tri: "Eşkenar Üçgenler",
+                mode_star: "Çılgın Yıldız 🌟",
+                mode_pacman: "Pac-Man Modu 🕹️",
+                reset: "LABORATUVARI SIFIRLA",
+                analytics: "ANALİZ: ALANLAR",
+                area_sum: "ALAN TOPLAM [A₁ + A₂]",
+                large_area: "BÜYÜK ALAN [A₃]"
+            },
+            fermat: {
+                title: "FERMAT NOKTASI MİNİMİZASYONU",
+                dist_f: "FERMAT MESAFESİ (F)",
+                dist_p: "NOKTA MESAFESİ (P)",
+                diff: "FARK (Δ)",
+                system: "FERMAT NOKTA SİSTEMİ",
+                show_tri: "İNŞAAT ÜÇGENLERİNİ GÖSTER",
+                comp_p: "KARŞILAŞTIRMA NOKTASI P"
+            },
+            clock: {
+                title: "ELLER ARASINDAKİ AÇI",
+                time_control: "ZAMAN KONTROLÜ",
+                angle_alpha: "Açı α",
+                angle_beta: "Açı β"
+            },
+            sum: {
+                title: "İÇ AÇI TOPLAM KANIT",
+                coords: "KOORDİNATLAR",
+                parallel_point: "Noktadan paralel:",
+                proof: "MATEMATİKSEL KANIT",
+                pivot_point: "Pivot noktasında:",
+                internal_angles: "Üçgenin iç açıları:"
+            },
+            puzzle: {
+                title: "AÇILI BULMACA",
+                wedge_angle: "TAKOZ AÇISI (°)",
+                dist_a: "MESAFE A",
+                dist_b: "MESAFE B",
+                dist_c: "MESAFE C",
+                dist_d: "MESAFE D",
+                given_blue: "VERİLEN (MAVİ)",
+                solution_red: "ÇÖZÜM (KIRMIZI)",
+                steps_yellow: "ARA ADIMLAR (SARI)",
+                reset: "LABORATUVARI SIFIRLA"
+            },
+            fractal: {
+                title: "FRAKTALLAR · MANDELBROT ve JULIA",
+                mode: "LABORATUVAR MODU",
+                mandelbrot: "MANDELBROT",
+                julia: "JULIA SET",
+                burning_ship: "BURNING SHIP",
+                params: "FRAKTAL PARAMETRELER",
+                detail: "DETAY DÜZEYİ",
+                zoom: "YAKINLAŞTIRMA FAKTÖRÜ",
+                arithmetic: "Aritmetik",
+                real: "GERÇEK BÖLÜM (C_re)",
+                imaginary: "HAYAL PARÇA (C_im)",
+                iterations: "MAKS. yinelemeler",
+                navigation: "NAVİGASYON",
+                flight_start: "UÇUŞU BAŞLAT",
+                flight_stop: "UÇUŞU DURDUR",
+                reset: "SIFIRLAMA",
+                display: "GÖRÜŞ",
+                plane_fractal: "FRAKTAL",
+                plane_orbit: "YÖRÜNGE",
+                orbit_help_mb: "Fraktal görünümün merkezinde c olacak şekilde z₀=0'dan z_{n+1}=z_n²+c yinelemesi. |z|=1 ve |z|=2 daireleri (kaçış yarıçapı).",
+                orbit_help_bs:
+                    "Burning Ship yinelemesi: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c, z₀=0 ile; c görünüm merkezinde. |z|=1 ve |z|=2 kılavuzları Mandelbrot ile aynı.",
+                orbit_help_jl: "Julia: kaydırıcılardan c düzeltildi; Yörünge z₀ = fraktal görüş merkezinde başlar.",
+                orbit_drag_hint: "c (Mandelbrot veya Burning Ship; fraktal görünüm merkeziyle aynı) veya z₀ (Julia) noktasını sürükleyin. Aksi halde düzlemi kaydırın/yakınlaştırın.",
+                orbit_grid: "Izgara çizgileri",
+                orbit_leg_polyline: "Yörünge: segmentler, köşe noktaları + c noktası",
+                orbit_legs_arrows: "Bacak bütçesi (maks.): {n} (yalnızca ↑/↓ yörünge görünümü; Kaydırma = daha büyük adımlar)",
+                orbit_legs_escape_trunc: "→ çizilmiş: {shown} / {budget} maksimum (kaçışta durduruldu |z|²>4)",
+                orbit_scan_hint: "Boşluk: satır satır tarayın üst → alt — ince turuncu noktalar ≈ sınırlı yörünge; altta durur. Tarama sırasındaki boşluk: iptal et ve temizle.",
+                orbit_scan_running: "→ Taranıyor (üst→alt)",
+                orbit_stable_points_label: "Sabit noktalar",
+                orbit_scan_julia_outside_mb_note:
+                    "This c is outside the Mandelbrot set: the filled Julia set here is extremely thin (Cantor dust). A pixel grid almost never lands on a starting z₀ whose orbit stays bounded — N≈0 is expected.\nTry Mandelbrot mode + scan for many yellow c hits.",
+                orbit_scan_julia_outside_mb_hud:
+                    "Note: Julia c outside M → sparse raster hits (N≈0). Mandelbrot scan shows yellow dots.",
+                orbit_hud_toggle: "⌘D / Ctrl+D: HUD'da geçiş yap",
+                orbit_hud_stopwatch_idle: "Kronometre:\n—",
+                orbit_hud_stopwatch_running: "Kronometre:\n{t}",
+                orbit_hud_stopwatch_latched: "Kronometre:\n{t}\n(duraklatıldı / bitti)",
+                telemetry: "Koordinatlar"
+            },
+            stats: {
+                analytics: "ANALİZ",
+                correlation: "Korelasyon (r)",
+                slope: "EĞİM (m)",
+                y_intercept: "Y-INT (n)",
+                error_analysis: "HATA ANALİZİ",
+                std_dev: "Standart Sapma (SD)",
+                chaos_points: "RASTGELE NOKTALAR",
+                points_near: "DAHA YAKIN NOKTALAR",
+                points_far: "DAHA SONRAKİ NOKTALAR",
+                mission_title: "MİSYON: İSTATİSTİK LABORATUVARI",
+                mission_desc: "Doğrusal Regresyon analiz ünitesine hoş geldiniz. Veri noktaları arasındaki korelasyonu, bunları koordinat sistemine yerleştirip taşıyarak analiz edin.",
+                admin_ctrl: "TEKNİK KONTROL (YALNIZCA YÖNETİCİ)",
+                admin_ctx: "İçerik Menüsü: Izgara, eksenler ve telemetri için sağ tıklayın.",
+                admin_keys: "Klavye: Artıkları ölçeklendirmek için ok tuşları (Yukarı/Aşağı).",
+                admin_manip: "Manipülasyon: Kaos yaratmak ve kalıcı değişim için kenar çubuğu düğmelerini kullanın."
+            },
+            parabola: {
+                eq_title: "FONKSİYON DENKLEMİ",
+                vertex_form: "KÖŞE FORMU",
+                standard_form: "STANDART FORM",
+                roots: "KÖKLER (SIFIR)",
+                roots_none: "GERÇEK KÖK YOK",
+                vertex_point: "KÖŞE S",
+                parameter_a: "PARAMETRE A",
+                stretch_a: "",
+                shift_d: "Uzatmak Shift d (x)",
+                shift_e: "Shift e (y)",
+                vertex_label: "KÖŞE"
+            },
+            angle3d: {
+                fold: "KATLANIR",
+                offset: "Yatay Ofset",
+                fold_btn: "KATLAMA",
+                rotate_btn: "DÖNME",
+                sum_title: "3 BOYUTLU İÇ AÇI TEOREMİ",
+                sum_eq: "AÇI TOPLAM",
+                tetrahedron: "Dört Yüzlü Katlama",
+                axes: "Eksenleri Göster",
+                grid: "Izgarayı göster",
+                labels: "Etiketleri göster"
+            },
+            transform: {
+                rotation: "DÖNME",
+                scale: "ÖLÇEK",
+                mirror_axis: "AYNA EKSENİ",
+                mirror_point: "AYNA NOKTASI",
+                urbild: "ÖN GÖRÜNTÜ (BAŞLAT)",
+                hl_lock: "KİLİT YARDIMCILARI",
+                measurements: "ÖLÇÜMLER",
+                congruent: "UYUMLULUK",
+                not_congruent: "UYUMLU DEĞİL",
+                transversal_short: "TRANSV.",
+                parallels_short: "PARALEL."
+            },
+            polygon: {
+                sum_interior: "İÇ AÇI TOPLAM",
+                angle_protocol: "AÇI PROTOKOLÜ",
+                angle_label: "AÇI {n}",
+                vertices: "KÖŞELER",
+                vertex_short: "{n}V"
+            },
+            proof: {
+                target_area: "Hedef Alan [ABCD]",
+                triangle_sum: "Üçgen Toplamı",
+                tria_on: "ÜÇGENLEME",
+                tria_off: "ÜÇGENLEME KAPALI",
+                reset_proof: "SIFIRLAMA KANITI",
+                area_cm2: "ALAN CM²",
+                sum_sigma: "TOPLA Σ",
+                tria_deactive: "ÜÇGENLEME DEVRE DIŞI",
+                out_of_bounds: "SINIR DIŞI",
+                collision: "ÇARPIŞMA TESPİT EDİLDİ"
+            },
+            geometry: {
+                angle_analysis: "AÇI ANALİZİ",
+                lab_control: "LABORATUVAR KONTROLÜ",
+                supp_sum: "EK AÇI TOPLAM",
+                parallel_on: "PARALELLER: AÇIK",
+                parallel_off: "PARALELLER: KAPALI",
+                transversal: "ÇAPRAZ",
+                parallels: "PARALELLER",
+                step_width: "ADIM GENİŞLİĞİ: {deg}°"
+            },
+            logic: {
+                instruction_sum: "Sayıları, satırların yanındaki ve sütunların altındaki toplamlarla eşleşecek şekilde ekleyin.",
+                instruction_prod: "Sayıları, satırların yanındaki ve sütunların altındaki toplamlarla eşleşecek şekilde çarpın.",
+                mission_status: "GÖREV DURUMU",
+                level: "SEVİYE",
+                moves: "HAREKETLER",
+                time: "ZAMAN",
+                mode: "HESAPLAMA MODU",
+                protocol_select: "PROTOKOL SEÇİMİ",
+                protocol_restart: "PROTOKOLÜ YENİDEN BAŞLAT",
+                hint_request: "İPUCU İSTE",
+                hint_title: "İPUCU PROTOKOLÜ",
+                confirm: "ONAYLA",
+                cancel: "İPTAL",
+                solved: "PROTOKOL ÇÖZÜLDÜ!",
+                next_protocol: "SONRAKİ PROTOKOL"
+            },
+            units: {
+                ones: "olanlar",
+                tens: "onlarca",
+                hundreds: "yüzlerce",
+                thousands: "binlerce"
+            },
+            arithmetic: {
+                add: {
+                    title: "YAZILI EK",
+                    ready: "{a} ve {b} eklemeye hazır. Sağdan sola hesaplama.",
+                    focus: "{unit}'a bakıyorum.",
+                    calc: "{d1} + {d2} {c} = {sum} ekleniyor.",
+                    carry: "{digit} yazıp {newCarry} öğesini taşımak.",
+                    complete: "Hesaplama bitti! Sonuç {result} olur."
+                },
+                sub: {
+                    title: "YAZILI ÇIKARMA",
+                    ready: "Çıkarmaya hazır: {a} - {b}.",
+                    borrow: "{d1} {d2}'den küçük olduğu için 10 ödünç alınmıştır.",
+                    calc: "Hesaplanıyor ({d1} + 10) - {d2} = {result}.",
+                    complete: "Hesaplama bitti! Sonuç {result} olur."
+                },
+                mult: {
+                    title: "YAZILI ÇARPLAMA",
+                    ready: "Çarpmaya hazır: {a} · {b}.",
+                    digit_step: "{d}'ı {factor} ile çarpmak.",
+                    row_done: "{d} ile çarpma işlemi tamamlandı. Bu satırın tüm kısmi sonuçları hesaplanır.",
+                    carry_init: "Bu pozisyon için önceki kısmi hesaplamadan {c}'nin taşınımını alıyoruz.",
+                    carry_add: "Taşımayı ekleme: {prod} + {c} = {final}.",
+                    complete: "Çarpma işlemi tamamlandı! Sonuç {result} olur."
+                },
+                div: {
+                    title: "YAZILI BÖLÜM",
+                    ready: "Bölünmeye hazır: {a} : {b}.",
+                    collect: "Kontrol ediliyor: {b} {val}'ye uyuyor mu? Hayır, o zaman bir sonraki rakamı alıyoruz.",
+                    fit: "{b} kaç kez {val}'e sığar? {q} zamanlarına uyuyor. {q} × {b} = {prod}.",
+                    bring_down: "Bir sonraki rakamı aşağıya getiriyoruz {d}. Yeni numara {newVal}.",
+                    rem: "Geriye kalan {rem} not edilir.",
+                    complete: "Bölüm bitti! Sonuç {result} olur."
+                }
+            },
+            coolsquares: {
+                title: "EN ÜST DÜZEY KARE KANIT",
+                proportions: "ORANLAR",
+                side_a: "Orta Taraf a",
+                show_labels: "Etiketleri Göster",
+                gap_x: "Boşluk x",
+                result_y: "Sonuç y",
+                area_green: "Yeşil Alan"
+            },
+            fibonacci: {
+                title: "FIBONACCI SARMALI",
+                step: "Adım",
+                spiral: "Çeyrek Daireler (Sarmal)",
+                squares: "Kare Sınırları"
+            },
+            orbitals: {
+                title: "Atomik Orbitaller",
+                parameters: "PARAMETRELER",
+                orbital: "Yörünge",
+                resolution: "Çözünürlük (Izgara)",
+                specular: "Aynasal (Parlaklık)",
+                opacity: "Opaklık",
+                prob_cloud: "Olasılık Bulutu",
+                prob_sq: "|Y|²",
+                prob_desc: "(Yüzey kapalı)",
+                rotation: "OTOMATİK DÖNME (BOŞLUK)",
+                help_btn: "KLAVYE YARDIMI",
+                help_title: "Klavye Kısayolları",
+                help_prev_next: "Önceki / sonraki yörünge",
+                help_res: "Çözünürlük: Tuş başına ±1, Shift ile ±10",
+                help_space_esc: "Otomatik döndürme (Boşluk) · Sıfırla (Esc)",
+                help_digits: "Çözünürlük: Hızlı seçim (rakam)",
+                help_toggle: "Yardım panelini değiştir",
+                help_mouse: "Trackball: sola döndürme · tekerlek / orta yakınlaştırma · sağa kaydırma",
+                orbital_suffix: "YÖRÜNGE"
+            },
+            coord: {
+                title: "Koordinat Test Cihazı | ULTRA v5.3.8",
+                subtitle: "KOORD-SİSTEM TEST CİHAZI",
+                controls: "PROJEKSİYON KONTROL",
+                func1: "f(x) = -x²",
+                func2: "g(x) = x⁻²"
+            },
+            iso_tri: {
+                title: "İkizkenar Üçgen | ULTRA v5.3.8",
+                subtitle: "İKİZKELEŞ ÜÇGEN",
+                invalid: "⚠️ ÜÇGEN MÜMKÜN DEĞİL",
+                perimeter: "ÇEVRE",
+                base: "TABAN",
+                leg: "BACAK",
+                base_length: "TABAN UZUNLUĞU",
+                note: "NOT: Üçgen yalnızca b < 4,0 için mevcuttur."
+            },
+            triangulierer: {
+                title: "DELAUNAY ÜÇGENLEME",
+                triangle: "ÜÇGEN",
+                area: "ALAN",
+                sum: "TOPLA Σ",
+                controls: "KONTROLLER",
+                multi_mode: "Çoklu Seçim Modu",
+                delete_selection: "Seçimi Sil",
+                target_area: "Hedef Alan",
+                sum_delta: "Toplam Δ"
+            },
+            langley: {
+                title: "LANGLEY MACERASI",
+                subtitle: "Geometri ve Trigonometri",
+                all_on_off: "HEPSİ AÇIK/KAPALI",
+                phase1: "Aşama 1: Sağ Üçgen",
+                phase2: "Aşama 2: Sol Üçgen",
+                phase3: "Aşama 3: İç Açılar",
+                phase4: "Aşama 4: Gizem",
+                phase5_geo: "Aşama 5: Geometrik Çözüm",
+                phase5_tri: "Aşama 5: Trigonometrik Çözüm",
+                step: "ADIM",
+                variant_classic: "1. Klasik (BAC=70°, ABD=60°)",
+                variant_v2: "2. Değişken (BAC=60°, ABD=50°)",
+                variant_v3: "3. Değişken (BAC=50°, ABD=60°)",
+                briefing_title: "MİSYON BİLGİLENDİRMESİ",
+                briefing_text: "Langley dörtgenini adım adım açı oluşturma yoluyla analiz edin."
+            },
+            butterfly: {
+                title: "KELEBEK LABORATUVARI",
+                animation: "ANİMASYON MOTORU",
+                speed: "Hız",
+                hue: "Temel Ton",
+                pause: "DURAKLAT",
+                play: "OYNAMAK",
+                glow: "IŞILT",
+                reset: "SIFIRLAMA",
+                params: "EĞRİ PARAMETRELERİ",
+                exp_amp: "Tecrübe Amplifikatörü",
+                cos_amp: "Çünkü Amfi",
+                cos_freq: "Çünkü Frekans",
+                sin_amp: "Günah Amp",
+                sin_div: "Günah Div",
+                ctx_reset: "Animasyonu Sıfırla",
+                ctx_glow: "Parlama Efekti AÇIK/KAPALI"
+            },
+            heart3d: {
+                title: "3D KALP YÜZEYİ | TAUBİN DENKLEMİ",
+                sdf_control: "SDF KONTROLÜ",
+                stretch: "Esneme Faktörü (A)",
+                modulation: "Yüzey Modülasyonu (B)"
+            },
+            litchi3d: {
+                title: "3D LİTÇİ | PROSEDÜREL GEOMETRİ",
+                ripeness: "Meyve Olgunluğu",
+                bumps: "Ani Yoğunluk",
+                shape: "Şekil Faktörü (Y)"
+            }
+        },
+    },
+
+    /**
+     * Keep the document root lang attribute aligned with CyberI18n.current.
+     * Only writes when the value changes — avoids redundant style/layout work during WebGL labs (orbitals, …).
+     */
+    applyHtmlLangAttribute: function () {
+        try {
+            const code = this.current || 'de';
+            const langAttr = code === 'sw' ? 'sw' : code;
+            const root = document.documentElement;
+            if (root && root.getAttribute('lang') !== langAttr) {
+                root.lang = langAttr;
+            }
+        } catch (e) {
+            /* ignore */
         }
     },
 
-    /** URL ?lang= → localStorage → Browser-Sprache → de; schreibt cyber-lab-lang (Best-Effort). */
+    /** URL ?lang= → localStorage cyber-lab-lang → Standard de (keine Browser-Sprache, damit Erstbesuch konsistent DE). */
     resolveLanguageFromEnvironment: function () {
-        const supported = ['de', 'en', 'es', 'fr', 'it', 'pt', 'nl', 'sw'];
+        const supported = ['de', 'en', 'es', 'fr', 'it', 'pt', 'nl', 'sw', 'tr'];
         const norm = function (s) {
             if (s == null || s === '') return '';
             const t = String(s).trim().replace(/_/g, '-').toLowerCase();
@@ -3739,32 +4308,20 @@ pt: {
             if (!supported.includes(pick)) {
                 pick = norm(localStorage.getItem('cyber-lab-lang'));
             }
-            if (!supported.includes(pick)) {
-                const list =
-                    navigator.languages && navigator.languages.length
-                        ? navigator.languages
-                        : [navigator.language || ''];
-                for (let i = 0; i < list.length; i++) {
-                    const two = norm(list[i]);
-                    if (supported.includes(two)) {
-                        pick = two;
-                        break;
-                    }
-                }
-            }
             if (!supported.includes(pick)) pick = 'de';
             this.current = pick;
             try {
                 localStorage.setItem('cyber-lab-lang', pick);
             } catch (e) {}
+            this.applyHtmlLangAttribute();
         } catch (e) {
             console.warn('Language resolve failed:', e);
         }
     },
 
     /**
-     * Unterdrückt Chrome/Edge „Seite übersetzen?“ — Labs sind bereits per CyberI18n mehrsprachig;
-     * sonst mischt sich der Browser (z. B. bei lang≠ erkanntem Text).
+     * Suppress Chrome/Edge “Translate this page?” — labs are already multilingual via CyberI18n;
+     * otherwise the browser mixes in (e.g. when lang≠ detected page text).
      */
     suppressBrowserTranslatePrompt: function () {
         try {
@@ -3806,13 +4363,29 @@ pt: {
     },
 
     /** Floating canvas masthead (coach line): always German, independent of UI language */
+    /** Brand masthead line — fixed German wording; not localized. */
     getBrandMastheadTitle: function () {
-        const ui = this.translations && this.translations.de && this.translations.de.ui;
-        return (ui && ui.coach_title) || "Doc Alvers Mathe-Labor";
+        return "Doc Alvers Mathe-Labor";
+    },
+
+    /** Internal lab/tool links: ensure ?lang= matches CyberI18n.current (same tab / new tab / BFCache-safe). */
+    appendLangToRelativeHref: function (href) {
+        if (!href || /^https?:\/\//i.test(href)) return href;
+        const lang = this.current || 'de';
+        const hashIdx = href.indexOf('#');
+        const hash = hashIdx >= 0 ? href.slice(hashIdx) : '';
+        const head = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
+        const qIdx = head.indexOf('?');
+        const path = qIdx >= 0 ? head.slice(0, qIdx) : head;
+        const query = qIdx >= 0 ? head.slice(qIdx + 1) : '';
+        const params = new URLSearchParams(query);
+        params.set('lang', lang);
+        const qs = params.toString();
+        return path + (qs ? '?' + qs : '') + hash;
     }
 };
 
-// NL: eigen object zodat i18n-index.js .index kan zetten zonder EN te wijzigen.
+// Nederlands: eigen object (niet alias van EN) zodat index/tools in i18n-index.js nl krijgen zonder EN te wijzigen.
 try {
     CyberI18n.translations.nl = structuredClone(CyberI18n.translations.en);
 } catch (e) {
@@ -4341,6 +4914,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
         mode: "LABMODUS",
         mandelbrot: "MANDELBROT",
         julia: "JULIA-VERZAMELING",
+        burning_ship: "BURNING SHIP",
         params: "FRACTALPARAMETERS",
         detail: "DETAILNIVEAU",
         zoom: "ZOOM",
@@ -4357,9 +4931,11 @@ Object.assign(CyberI18n.translations.nl.fractal, {
         plane_orbit: "ORBIT",
         orbit_help_mb:
             "Iteratie z_{n+1}=z_n²+c vanaf z₀=0 met c in het midden van de fractaalweergave. Cirkels |z|=1 en |z|=2 (typische ontsnappingsgrens).",
+        orbit_help_bs:
+            "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c vanaf z₀=0; dezelfde cirkels |z|=1 en |z|=2 als bij Mandelbrot.",
         orbit_help_jl: "Julia: vaste c via de schuifregelaars; de orbit start bij z₀ = het midden van de fractaalweergave.",
         orbit_drag_hint:
-            "Sleep punt c (Mandelbrot; gelijk aan het midden van de fractaalweergave) of z₀ (Julia). Anders: het vlak verschuiven of zoomen.",
+            "Sleep punt c (Mandelbrot of Burning Ship; gelijk aan het midden van de fractaalweergave) of z₀ (Julia). Anders: het vlak verschuiven of zoomen.",
         orbit_grid: "Rasterlijnen",
         orbit_leg_polyline: "Orbit: segmenten, tussenpunten + punt c",
         orbit_legs_arrows:
@@ -4380,7 +4956,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
     });
 })();
 
-// Auto-detect language from URL, localStorage, or browser
+// Sprache: URL ?lang= → localStorage cyber-lab-lang → Standard DE (Nutzerwahl persistiert beim Flag-Toggle)
 (function () {
     try {
         CyberI18n.resolveLanguageFromEnvironment();
@@ -4388,5 +4964,23 @@ Object.assign(CyberI18n.translations.nl.fractal, {
     } catch (e) {
         console.warn("Language auto-detect failed:", e);
     }
+    window.addEventListener(
+        'pageshow',
+        function (ev) {
+            if (!ev.persisted) return;
+            requestAnimationFrame(function () {
+                try {
+                    CyberI18n.resolveLanguageFromEnvironment();
+                    CyberI18n.suppressBrowserTranslatePrompt();
+                    if (typeof CyberUI !== 'undefined' && typeof CyberUI.syncCyberLangDisplayButtons === 'function') {
+                        CyberUI.syncCyberLangDisplayButtons();
+                    }
+                } catch (e2) {
+                    console.warn('Language re-sync after bfcache failed:', e2);
+                }
+            });
+        },
+        false
+    );
 })();
 
