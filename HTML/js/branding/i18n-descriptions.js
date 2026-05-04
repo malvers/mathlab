@@ -248,6 +248,18 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Hochfunktionales ULTRA-Design mit Fokus auf die algebraische Entsprechung der Geometrie.`,
 
+        "imaginarynumbers": `MATHEMATISCHER HINTERGRUND:
+Die Gaußsche Zahlenebene erweitert den eindimensionalen Zahlenstrahl um eine zweite Dimension: die imaginäre Achse. Eine komplexe Zahl z = x + iy wird als Punkt in dieser Ebene dargestellt. Der Abstand zum Ursprung ist der Betrag |z|, und die Wurzel √(z) bzw. das Quadrat z² lassen sich geometrisch als Längen- und Winkelveränderungen interpretieren.
+
+FEATURES & STEUERUNG:
+- Interaktiver Vektor: Ziehe den Punkt z frei durch die Ebene.
+- Modus-Schalter: Wechsle zwischen r = √(z) und r = z².
+- Echtzeit-Algebra: Die Formel-Overlays (Betrag, Realteil, Imaginärteil) passen sich dynamisch an.
+- KaTeX-Rendering: Hochwertige mathematische Typografie für alle Formeln.
+
+INTERFACE:
+Minimalistisches ULTRA-Design mit Fokus auf die visuelle und algebraische Entsprechung komplexer Zahlen.`,
+
         "binomischeslabor": `MATHEMATISCHER HINTERGRUND:
 Visualisierung der ersten binomischen Formel (a + b)² als geometrische Flächenzerlegung.
 
@@ -658,6 +670,18 @@ FEATURES & CONTROLS:
 INTERFACE:
 Highly functional ULTRA design focused on the algebraic equivalent of geometry.`,
 
+        "imaginarynumbers": `MATHEMATICAL BACKGROUND:
+The complex plane (Gaussian plane) extends the one-dimensional number line with a second dimension: the imaginary axis. A complex number z = x + iy is represented as a point in this plane. The distance to the origin is the magnitude |z|, and operations like the square root √(z) or the square z² can be interpreted geometrically as changes in length and angle.
+
+FEATURES & CONTROLS:
+- Interactive Vector: Drag the point z freely across the plane.
+- Mode Switch: Toggle between r = √(z) and r = z².
+- Real-time Algebra: Formula overlays (magnitude, real part, imaginary part) update dynamically.
+- KaTeX Rendering: High-quality mathematical typography for all formulas.
+
+INTERFACE:
+Minimalist ULTRA design focusing on the visual and algebraic correspondence of complex numbers.`,
+
         "binomischeslabor": `MATHEMATICAL BACKGROUND:
 Visualization of the first binomial formula (a + b)² as a geometric area decomposition.
 
@@ -1045,6 +1069,18 @@ CARACTERÍSTICAS Y CONTROLES:
 
 INTERFAZ:
 Interfaz analítica centrada en comparar clases de funciones.`,
+
+        "imaginarynumbers": `ANTECEDENTES MATEMÁTICOS:
+El plano complejo (plano de Gauss) amplía la recta numérica unidimensional con una segunda dimensión: el eje imaginario. Un número complejo z = x + iy se representa como un punto en este plano. La distancia al origen es la magnitud |z|, y operaciones como la raíz cuadrada √(z) o el cuadrado z² pueden interpretarse geométricamente como cambios en longitud y ángulo.
+
+CARACTERÍSTICAS Y CONTROLES:
+- Vector Interactivo: Arrastra el punto z libremente por el plano.
+- Cambio de Modo: Alterna entre r = √(z) y r = z².
+- Álgebra en Tiempo Real: Las superposiciones de fórmulas (magnitud, parte real, parte imaginaria) se actualizan dinámicamente.
+- Renderizado KaTeX: Tipografía matemática de alta calidad para todas las fórmulas.
+
+INTERFAZ:
+Diseño ULTRA minimalista centrado en la correspondencia visual y algebraica de los números complejos.`,
 
         "transformationen": `ANTECEDENTES MATEMÁTICOS:
 Estudio de traslación, rotación, simetría y escalado en objetos geométricos.
@@ -1456,6 +1492,18 @@ FONCTIONNALITÉS & COMMANDES :
 INTERFACE :
 Interface analytique comparant les classes de fonctions.`,
 
+        "imaginarynumbers": `CONTEXTE MATHÉMATIQUE :
+Le plan complexe (plan de Gauss) étend la droite numérique unidimensionnelle avec une deuxième dimension : l'axe imaginaire. Un nombre complexe z = x + iy est représenté comme un point dans ce plan. La distance à l'origine est la magnitude |z|, et les opérations comme la racine carrée √(z) ou le carré z² peuvent être interprétées géométriquement comme des changements de longueur et d'angle.
+
+FONCTIONNALITÉS & CONTRÔLES :
+- Vecteur Interactif : Faites glisser le point z librement à travers le plan.
+- Changement de Mode : Basculez entre r = √(z) et r = z².
+- Algèbre en Temps Réel : Les superpositions de formules (magnitude, partie réelle, partie imaginaire) se mettent à jour dynamiquement.
+- Rendu KaTeX : Typographie mathématique de haute qualité pour toutes les formules.
+
+INTERFACE :
+Design ULTRA minimaliste axé sur la correspondance visuelle et algébrique des nombres complexes.`,
+
         "transformationen": `CONTEXTE MATHÉMATIQUE :
 Translation, rotation, symétrie et échelle sur objets géométriques.
 
@@ -1866,6 +1914,18 @@ CARATTERISTICHE E COMANDI:
 INTERFACCIA:
 Interfaccia analitica che confronta le classi di funzioni.`,
 
+        "imaginarynumbers": `CONTESTO MATEMATICO:
+Il piano complesso (piano di Gauss) estende la retta numerica unidimensionale con una seconda dimensione: l'asse immaginario. Un numero complesso z = x + iy è rappresentato come un punto in questo piano. La distanza dall'origine è il modulo |z|, e operazioni come la radice quadrata √(z) o il quadrato z² possono essere interpretate geometricamente come variazioni di lunghezza e angolo.
+
+CARATTERISTICHE E CONTROLLI:
+- Vettore Interattivo: Trascina il punto z liberamente attraverso il piano.
+- Cambio Modalità: Passa da r = √(z) a r = z².
+- Algebra in Tempo Reale: Gli overlay delle formule (modulo, parte reale, parte immaginaria) si aggiornano dinamicamente.
+- Rendering KaTeX: Tipografia matematica di alta qualità per tutte le formule.
+
+INTERFACCIA:
+Design ULTRA minimalista focalizzato sulla corrispondenza visiva e algebrica dei numeri complessi.`,
+
         "transformationen": `CONTESTO MATEMATICO:
 Traslazione, rotazione, simmetria e scala su oggetti geometrici.
 
@@ -2275,6 +2335,18 @@ RECURSOS E CONTROLOS:
 
 INTERFACE:
 Interface analítica comparando classes de funções.`,
+
+        "imaginarynumbers": `CONTEXTO MATEMÁTICO:
+O plano complexo (plano de Gauss) estende a reta numérica unidimensional com uma segunda dimensão: o eixo imaginário. Um número complexo z = x + iy é representado como um ponto neste plano. A distância até a origem é a magnitude |z|, e operações como a raiz quadrada √(z) ou o quadrado z² podem ser interpretadas geometricamente como mudanças de comprimento e ângulo.
+
+RECURSOS E CONTROLES:
+- Vetor Interativo: Arraste o ponto z livremente pelo plano.
+- Mudança de Modo: Alterne entre r = √(z) e r = z².
+- Álgebra em Tempo Real: As sobreposições de fórmulas (magnitude, parte real, parte imaginária) são atualizadas dinamicamente.
+- Renderização KaTeX: Tipografia matemática de alta qualidade para todas as fórmulas.
+
+INTERFACE:
+Design ULTRA minimalista focado na correspondência visual e algébrica dos números complexos.`,
 
         "transformationen": `CONTEXTO MATEMÁTICO:
 Translação, rotação, simetria e escala em objetos geométricos.
