@@ -28,6 +28,8 @@
             flex: 1 1 0% !important;
             min-width: 0 !important;
             min-height: 0 !important;
+            /* Worked-example box (#orbit-mb-worked): vertical slot under masthead / formula lane */
+            --mb-orbit-worked-top: calc(var(--cyber-nav-band-top, 14px) + clamp(64px, 11.5vmin, 102px));
         }
 
         /* Sidebar: global 350px + 10px in this lab only */
@@ -458,7 +460,7 @@
             display: none !important;
         }
 
-        /** KaTeX labels at orbit drag-handles (canvas cannot render LaTeX). */
+        /** KaTeX labels at orbit (HTML over canvas — no canvas LaTeX). */
         .orbit-point-katex {
             position: absolute;
             left: 0;
@@ -472,8 +474,16 @@
             border-radius: 8px;
             border: 1px solid rgba(0, 210, 255, 0.35);
             box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
-            transform: scale(0.6);
             transform-origin: 0 0;
+        }
+
+        .orbit-point-katex--c {
+            transform: scale(0.6);
+        }
+
+        .orbit-point-katex--waypoint {
+            transform: scale(0.6);
+            z-index: 5;
         }
 
         .orbit-point-katex[hidden],
@@ -495,6 +505,78 @@
             height: 100%;
             display: block;
             cursor: crosshair;
+        }
+
+        /*
+         * Rechenbox: direkt unter #main-content — nicht in #canvas-container.
+         * Sonst liegt die ganze Plot-Ebene unter .canvas-branding (z-index 120) und die Box blieb unsichtbar.
+         */
+        #main-content > #orbit-mb-worked.orbit-mb-worked {
+            position: absolute;
+            right: clamp(16px, 2.6vw, 36px);
+            top: var(--mb-orbit-worked-top);
+            z-index: 200;
+            max-width: min(448px, 58vw);
+            padding: 6px 14px 12px;
+            box-sizing: border-box;
+            pointer-events: auto;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            font-family: Outfit, system-ui, sans-serif;
+            font-size: 0.88rem;
+            background: rgba(5, 12, 26, 0.88);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            box-shadow:
+                0 0 0 1px rgba(0, 210, 255, 0.1),
+                0 0 22px rgba(0, 210, 255, 0.18),
+                0 12px 36px rgba(0, 0, 0, 0.42);
+        }
+
+        .orbit-mb-worked-caption {
+            display: none;
+        }
+
+        #main-content > #orbit-mb-worked.orbit-mb-worked.orbit-mb-worked--drag {
+            cursor: grabbing;
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex .katex {
+            font-size: clamp(0.75rem, 0.62rem + 1.05vmin, 0.94rem) !important;
+            color: rgba(248, 250, 255, 0.96) !important;
+            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex .katex-display {
+            margin: 0 !important;
+            text-align: left !important;
+        }
+
+        #orbit-mb-worked .orbit-mb-worked-tex .katex-display > .katex {
+            margin: 0 !important;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .orbit-mb-worked-plain {
+            margin: 0;
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.86rem;
+            line-height: 1.52;
+            color: rgba(230, 240, 255, 0.96);
+            white-space: pre-line;
+            tab-size: 4;
         }
 
         .orbit-hud {
@@ -697,8 +779,8 @@
             <canvas id="canvas"></canvas>
             <div id="orbit-view-wrap" class="orbit-view-wrap" hidden aria-hidden="true">
                 <canvas id="orbit-canvas"></canvas>
-                <div id="orbit-tex-c" class="orbit-point-katex orbit-point-katex--hidden" hidden aria-hidden="true"></div>
-                <div id="orbit-tex-z0" class="orbit-point-katex orbit-point-katex--hidden" hidden aria-hidden="true"></div>
+                <div id="orbit-tex-c" class="orbit-point-katex orbit-point-katex--c orbit-point-katex--hidden" hidden aria-hidden="true"></div>
+                <div id="orbit-tex-chain" aria-hidden="true"></div>
                 <div id="orbit-hud" class="orbit-hud" aria-live="polite"></div>
             </div>
             <div class="mb-fractal-formula-overlay" aria-hidden="true">
@@ -716,6 +798,16 @@
                 </div>
             </div>
         </div>
+        <aside
+            id="orbit-mb-worked"
+            class="orbit-mb-worked"
+            hidden
+            aria-hidden="true"
+            aria-label="Beispielrechnung z_2 bei gegebenem c"
+        >
+            <div id="orbit-mb-worked-caption" class="orbit-mb-worked-caption"></div>
+            <div id="orbit-mb-worked-tex" class="orbit-mb-worked-tex"></div>
+        </aside>
     </main>
     <script id="vs" type="x-shader/x-vertex">
         attribute vec2 position;
@@ -969,7 +1061,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             let orbitHudFrameMsSmooth = 0;
             /** Coords + visibility key for KaTeX orbit handle labels (avoid re-render each frame). */
             let orbitOverlayCTexKey = '';
-            let orbitOverlayZ0TexKey = '';
+            /** Snapshot for worked-example sidebar (filled each drawOrbitPlane before sync). */
+            let orbitWorkedPanelSnap = null;
 
             /** Orbit view Space: grid — yellow dots only = stable orbit under scan depth. */
             let orbitScanActive = false;
@@ -1006,6 +1099,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             const LS_MB_JULIA_X = 'forloop.mandelbrot.juliaX';
             const LS_MB_JULIA_Y = 'forloop.mandelbrot.juliaY';
             const LS_MB_MAX_ITER = 'forloop.mandelbrot.maxIter';
+            const LS_MB_ORBIT_WORKED_BOX = 'forloop.mandelbrot.orbitWorkedBoxPos';
+
             let orbitHudVisible = true;
             try {
                 if (localStorage.getItem(LS_MB_ORBIT_HUD_VISIBLE) === '0') orbitHudVisible = false;
@@ -1028,6 +1123,174 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const x = Math.round(Number(n));
                 if (!Number.isFinite(x)) return ORBIT_LEG_DEFAULT;
                 return Math.max(ORBIT_LEG_MIN, Math.min(ORBIT_LEG_MAX, x));
+            }
+
+            let orbitWorkedBoxDrag = null;
+
+            /** { l, t } = Ecke links/oben relativ zu #main-content [%]. */
+            function orbitWorkedBoxClampPct(l, t, el, main) {
+                const mw = Math.max(1, main.clientWidth);
+                const mh = Math.max(1, main.clientHeight);
+                const ew = Math.max(1, el.offsetWidth || 1);
+                const eh = Math.max(1, el.offsetHeight || 1);
+                const maxL = Math.max(0, ((mw - ew) / mw) * 100);
+                const maxT = Math.max(0, ((mh - eh) / mh) * 100);
+                return {
+                    l: Math.max(0, Math.min(maxL, l)),
+                    t: Math.max(0, Math.min(maxT, t)),
+                };
+            }
+
+            function orbitWorkedBoxApplyPct(l, t) {
+                const el = document.getElementById('orbit-mb-worked');
+                const main = document.getElementById('main-content');
+                if (!el || !main) return;
+                const c = orbitWorkedBoxClampPct(l, t, el, main);
+                el.style.right = 'auto';
+                el.style.left = c.l + '%';
+                el.style.top = c.t + '%';
+            }
+
+            /** Nach KaTeX/Resize: gespeicherte Ecke wieder anwenden und begrenzen. */
+            function orbitWorkedBoxReclampPersisted() {
+                if (orbitWorkedBoxDrag) return;
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() => {
+                        try {
+                            const raw = localStorage.getItem(LS_MB_ORBIT_WORKED_BOX);
+                            if (!raw) return;
+                            const o = JSON.parse(raw);
+                            if (typeof o.l === 'number' && typeof o.t === 'number' && Number.isFinite(o.l) && Number.isFinite(o.t))
+                                orbitWorkedBoxApplyPct(o.l, o.t);
+                        } catch (e) {
+                            /* ignore */
+                        }
+                    })
+                );
+            }
+
+            function loadOrbitWorkedBoxPos() {
+                try {
+                    const raw = localStorage.getItem(LS_MB_ORBIT_WORKED_BOX);
+                    if (!raw) return;
+                    const o = JSON.parse(raw);
+                    if (typeof o.l !== 'number' || typeof o.t !== 'number') return;
+                    if (!Number.isFinite(o.l) || !Number.isFinite(o.t)) return;
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => orbitWorkedBoxApplyPct(o.l, o.t));
+                    });
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            function persistOrbitWorkedBoxPos() {
+                try {
+                    const el = document.getElementById('orbit-mb-worked');
+                    const main = document.getElementById('main-content');
+                    if (!el || !main) return;
+                    const mr = main.getBoundingClientRect();
+                    const er = el.getBoundingClientRect();
+                    const l = ((er.left - mr.left) / Math.max(1, mr.width)) * 100;
+                    const t = ((er.top - mr.top) / Math.max(1, mr.height)) * 100;
+                    const cl = orbitWorkedBoxClampPct(l, t, el, main);
+                    localStorage.setItem(LS_MB_ORBIT_WORKED_BOX, JSON.stringify({ l: cl.l, t: cl.t }));
+                } catch (e) {
+                    /* ignore */
+                }
+            }
+
+            let orbitWorkedBoxResizeTim = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(orbitWorkedBoxResizeTim);
+                orbitWorkedBoxResizeTim = setTimeout(() => {
+                    try {
+                        const raw = localStorage.getItem(LS_MB_ORBIT_WORKED_BOX);
+                        if (!raw) return;
+                        const o = JSON.parse(raw);
+                        if (typeof o.l === 'number' && typeof o.t === 'number' && Number.isFinite(o.l) && Number.isFinite(o.t))
+                            orbitWorkedBoxApplyPct(o.l, o.t);
+                    } catch (e) {
+                        /* ignore */
+                    }
+                }, 120);
+            });
+
+            /** Einmalige Maus-/Touch-Ziehlogik (#orbit-mb-worked relativ zu #main-content). */
+            function initOrbitWorkedBoxDragOnce() {
+                const el = document.getElementById('orbit-mb-worked');
+                const main = document.getElementById('main-content');
+                if (!el || !main || el.dataset.mbWorkedDragInit === '1') return;
+                el.dataset.mbWorkedDragInit = '1';
+
+                function onDown(ev) {
+                    if (mainPlane !== 'ORBIT') return;
+                    const btn = ev.button !== undefined ? ev.button : ev.type === 'touchstart' ? 0 : 0;
+                    if (btn !== 0) return;
+                    const t = ev.target;
+                    if (t && typeof t.closest === 'function') {
+                        const bad = t.closest('a[href], button, input, select, textarea, [contenteditable="true"]');
+                        if (bad) return;
+                    }
+
+                    const clientX = ev.clientX != null ? ev.clientX : ev.touches && ev.touches[0] && ev.touches[0].clientX;
+                    const clientY = ev.clientY != null ? ev.clientY : ev.touches && ev.touches[0] && ev.touches[0].clientY;
+                    if (clientX == null || clientY == null) return;
+
+                    const mr = main.getBoundingClientRect();
+                    const er = el.getBoundingClientRect();
+                    let lPct = ((er.left - mr.left) / Math.max(1, mr.width)) * 100;
+                    let tPct = ((er.top - mr.top) / Math.max(1, mr.height)) * 100;
+                    orbitWorkedBoxApplyPct(lPct, tPct);
+
+                    const mr2 = main.getBoundingClientRect();
+                    const r = el.getBoundingClientRect();
+                    orbitWorkedBoxDrag = {
+                        startX: clientX,
+                        startY: clientY,
+                        startL: ((r.left - mr2.left) / mr2.width) * 100,
+                        startT: ((r.top - mr2.top) / mr2.height) * 100,
+                        mainW: mr2.width,
+                        mainH: mr2.height,
+                    };
+
+                    el.classList.add('orbit-mb-worked--drag');
+                    document.body.style.userSelect = 'none';
+                    document.body.style.webkitUserSelect = 'none';
+                    ev.preventDefault();
+                }
+
+                function onMove(ev) {
+                    const d = orbitWorkedBoxDrag;
+                    if (!d) return;
+
+                    const clientX = ev.clientX != null ? ev.clientX : ev.touches && ev.touches[0] && ev.touches[0].clientX;
+                    const clientY = ev.clientY != null ? ev.clientY : ev.touches && ev.touches[0] && ev.touches[0].clientY;
+                    if (clientX == null || clientY == null) return;
+
+                    const dxPct = ((clientX - d.startX) / Math.max(1, d.mainW)) * 100;
+                    const dyPct = ((clientY - d.startY) / Math.max(1, d.mainH)) * 100;
+                    orbitWorkedBoxApplyPct(d.startL + dxPct, d.startT + dyPct);
+
+                    ev.preventDefault();
+                }
+
+                function onUp() {
+                    const had = orbitWorkedBoxDrag != null || el.classList.contains('orbit-mb-worked--drag');
+                    orbitWorkedBoxDrag = null;
+                    el.classList.remove('orbit-mb-worked--drag');
+                    document.body.style.userSelect = '';
+                    document.body.style.webkitUserSelect = '';
+                    if (had) persistOrbitWorkedBoxPos();
+                }
+
+                el.addEventListener('mousedown', onDown);
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+                el.addEventListener('touchstart', onDown, { passive: false });
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
+                document.addEventListener('touchcancel', onUp);
             }
 
             /** Top KaTeX box: FRACTAL = classic / Burning Ship; ORBIT leg mode = |z²| at endpoint + leg N; scan = same line at grid point + hit count */
@@ -1662,6 +1925,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 orbitLastLegBudget = -1;
                 orbitLastLegEndR2 = -1;
                 orbitHudFrameMsSmooth = 0;
+                orbitWorkedPanelSnap = null;
                 if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                     CyberCanvasInstance.cleanup();
                 }
@@ -1710,6 +1974,231 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
                 html += '</div>';
                 return html;
+            }
+
+            const ORBIT_WORKED_NKS = 3;
+
+            function orbitWorkedNumTex(v) {
+                return mbOrbitPlaneTexNum(v, ORBIT_WORKED_NKS);
+            }
+
+            /** Koordinate (-Paar) \(\bigl(\Re\big|\Im\bigr)\) für die Rechenspur (3 NKS). */
+            function orbitWorkedPairTex(x, y) {
+                return (
+                    '\\bigl(' +
+                    orbitWorkedNumTex(x) +
+                    ' \\bigm| ' +
+                    orbitWorkedNumTex(y) +
+                    '\\bigr)'
+                );
+            }
+
+            /** Zwei Schritte z²+c: Schritt‑Überschrift, Formel, Einsetzen, \(\mathbf{z}_k\). */
+            function orbitWorkedQuadrTwoStepsTex(cr, ci, z0x, z0y, z1, z2) {
+                const P = orbitWorkedPairTex;
+                function half(ax, ay, outZ, idx) {
+                    const rsq = ax * ax - ay * ay;
+                    const jsq = 2 * ax * ay;
+                    const zk = idx === 1 ? 'z_1' : 'z_2';
+                    const zi = idx === 1 ? 'z_0' : 'z_1';
+                    const head = idx === 1 ? '& z_0 \\to z_1\\\\' : '& z_1 \\to z_2\\\\';
+                    const sep = idx === 1 ? '\\\\[0.45em]' : '';
+                    return (
+                        head +
+                        '& ' +
+                        zk +
+                        ' = ' +
+                        zi +
+                        '^{2} + \\mathbf{c}\\\\[0.12em]' +
+                        '& \\quad{} = ' +
+                        P(ax, ay) +
+                        '^{2} + ' +
+                        P(cr, ci) +
+                        '\\\\' +
+                        '& \\quad{} = ' +
+                        P(rsq, jsq) +
+                        ' + ' +
+                        P(cr, ci) +
+                        '\\\\[0.2em]' +
+                        '& \\mathbf{z}_' +
+                        (idx === 1 ? '1' : '2') +
+                        ' = ' +
+                        P(outZ.x, outZ.y) +
+                        sep
+                    );
+                }
+                return half(z0x, z0y, z1, 1) + half(z1.x, z1.y, z2, 2);
+            }
+
+            /** Wie Quadr, aber Burning Ship: \((|{\\Re}|,|{\\Im}|)\) quadrieren, \(+\\mathbf{c}\). */
+            function orbitWorkedBurningTwoStepsTex(cr, ci, z0x, z0y, z1, z2) {
+                const fx0 = Math.abs(z0x);
+                const fy0 = Math.abs(z0y);
+                const fx1 = Math.abs(z1.x);
+                const fy1 = Math.abs(z1.y);
+                function cplxSq(rx, iy) {
+                    return { x: rx * rx - iy * iy, y: 2 * rx * iy };
+                }
+                const q0 = cplxSq(fx0, fy0);
+                const q1 = cplxSq(fx1, fy1);
+                const P = orbitWorkedPairTex;
+                return (
+                    '& z_0 \\to z_1\\\\' +
+                    '& z_1 = \\bigl(\\lvert\\Re z_0\\rvert + \\mathrm{i}\\,\\lvert\\Im z_0\\rvert\\bigr)^{2}+\\mathbf{c}\\\\[0.12em]' +
+                    '& \\quad{} = ' +
+                    P(fx0, fy0) +
+                    '^{2} + ' +
+                    P(cr, ci) +
+                    '\\\\' +
+                    '& \\quad{} = ' +
+                    P(q0.x, q0.y) +
+                    ' + ' +
+                    P(cr, ci) +
+                    '\\\\[0.2em]' +
+                    '& \\mathbf{z}_1 = ' +
+                    P(z1.x, z1.y) +
+                    '\\\\[0.45em]' +
+                    '& z_1 \\to z_2\\\\' +
+                    '& z_2 = \\bigl(\\lvert\\Re z_1\\rvert + \\mathrm{i}\\,\\lvert\\Im z_1\\rvert\\bigr)^{2}+\\mathbf{c}\\\\[0.12em]' +
+                    '& \\quad{} = ' +
+                    P(fx1, fy1) +
+                    '^{2} + ' +
+                    P(cr, ci) +
+                    '\\\\' +
+                    '& \\quad{} = ' +
+                    P(q1.x, q1.y) +
+                    ' + ' +
+                    P(cr, ci) +
+                    '\\\\[0.2em]' +
+                    '& \\mathbf{z}_2 = ' +
+                    P(z2.x, z2.y)
+                );
+            }
+
+            /**
+             * Oben \(\mathbf{c}\) \| \(\mathbf{z}_0\); darunter zwei Schritte ohne Text‑Labels („Vorschrift“/„Zahlen“).
+             */
+            function orbitWorkedPanelKatex(cr, ci, z0x, z0y, z1, z2, burning) {
+                const czTwin =
+                    '& \\mathbf{c} = ' +
+                    orbitWorkedPairTex(cr, ci) +
+                    ' \\qquad \\mathbf{z}_0 = ' +
+                    orbitWorkedPairTex(z0x, z0y) +
+                    '\\\\';
+                const tail = burning
+                    ? orbitWorkedBurningTwoStepsTex(cr, ci, z0x, z0y, z1, z2)
+                    : orbitWorkedQuadrTwoStepsTex(cr, ci, z0x, z0y, z1, z2);
+                return '\\begin{aligned}' + czTwin + tail + '\\end{aligned}';
+            }
+
+            /** KaTeX-freier Fallback: oben c‖z₀; Formeln und Einsetzen links ohne Text‑Labels. */
+            function orbitWorkedPanelPlain(cr, ci, z0x, z0y, z1, z2, burning) {
+                const f = (x) => Number(x).toFixed(ORBIT_WORKED_NKS);
+                const P = (x, y) => `(${f(x)} | ${f(y)})`;
+                let body = `c = ${P(cr, ci)}    z₀ = ${P(z0x, z0y)}`;
+                const quadrHalf = (ax, ay, out, zNext, zPrev, stepTitle) => {
+                    const rsq = ax * ax - ay * ay;
+                    const jsq = 2 * ax * ay;
+                    return (
+                        `\n${stepTitle}` +
+                        `\n${zNext} = ${zPrev}² + c` +
+                        `\n= ${P(ax, ay)}² + ${P(cr, ci)}` +
+                        `\n= ${P(rsq, jsq)} + ${P(cr, ci)}` +
+                        `\n${zNext} = ${P(out.x, out.y)}`
+                    );
+                };
+                if (!burning) {
+                    body += quadrHalf(z0x, z0y, z1, 'z₁', 'z₀', 'z₀ → z₁');
+                    body += quadrHalf(z1.x, z1.y, z2, 'z₂', 'z₁', 'z₁ → z₂');
+                } else {
+                    const fx0 = Math.abs(z0x);
+                    const fy0 = Math.abs(z0y);
+                    const fx1 = Math.abs(z1.x);
+                    const fy1 = Math.abs(z1.y);
+                    const cplxSq = (re, im) => ({ x: re * re - im * im, y: 2 * re * im });
+                    const q0 = cplxSq(fx0, fy0);
+                    const q1 = cplxSq(fx1, fy1);
+                    const burnHalf = (fx, fy, q, out, zNext, zPrevLabel, stepTitle) => {
+                        return (
+                            `\n${stepTitle}` +
+                            `\n${zNext} = (|Re ${zPrevLabel}| + i|Im ${zPrevLabel}|)² + c` +
+                            `\n= ${P(fx, fy)}² + ${P(cr, ci)}` +
+                            `\n= ${P(q.x, q.y)} + ${P(cr, ci)}` +
+                            `\n${zNext} = ${P(out.x, out.y)}`
+                        );
+                    };
+                    body += burnHalf(fx0, fy0, q0, z1, 'z₁', 'z₀', 'z₀ → z₁');
+                    body += burnHalf(fx1, fy1, q1, z2, 'z₂', 'z₁', 'z₁ → z₂');
+                }
+                return body;
+            }
+
+            /** Orbit-Panel: oben c‖z₀, darunter nachvollziehbare Schritte z₀→z₁ und z₁→z₂. */
+            function syncOrbitMbWorkedExample() {
+                const wrap = document.getElementById('orbit-mb-worked');
+                if (!wrap) return;
+                const show = mainPlane === 'ORBIT';
+                wrap.hidden = !show;
+                wrap.setAttribute('aria-hidden', show ? 'false' : 'true');
+                if (!show) return;
+
+                const host = document.getElementById('orbit-mb-worked-tex');
+                if (!host) return;
+
+                const snap = orbitWorkedPanelSnap;
+                const kFlag = typeof katex !== 'undefined' ? 'k' : 't';
+
+                if (!snap || !snap.z1 || !snap.z2) {
+                    let why;
+                    if (!snap || !snap.z1) {
+                        why =
+                            snap && snap.legsBudget <= 0
+                                ? 'Mindestens 1 Schritt (↑), damit z₁ existiert.'
+                                : 'Zeichnung startet gleich.';
+                    } else if (snap.legsBudget < 2) {
+                        why = 'Für z₂ bitte mindestens 2 Schritte (↑ in der Orbitebene).';
+                    } else {
+                        why = '|z|² > 4 vor z₂ — kein weiterer Punkt im Plot.';
+                    }
+                    host.classList.add('orbit-mb-worked-plain');
+                    host.textContent = why;
+                    host.dataset.mbWorked = `${kFlag}|na|${snap ? snap.legsBudget : 'x'}`;
+                    orbitWorkedBoxReclampPersisted();
+                    return;
+                }
+
+                const { cr, ci, z0x, z0y, z1, z2, burnOrbit } = snap;
+                const cacheKey = [
+                    kFlag,
+                    burnOrbit ? 'B' : 'S',
+                    cr.toFixed(5),
+                    ci.toFixed(5),
+                    z0x.toFixed(5),
+                    z0y.toFixed(5),
+                    z1.x.toFixed(5),
+                    z1.y.toFixed(5),
+                    z2.x.toFixed(5),
+                    z2.y.toFixed(5),
+                ].join('|');
+
+                if (host.dataset.mbWorked === cacheKey) return;
+                delete host.dataset.mbWorked;
+                host.classList.remove('orbit-mb-worked-plain');
+
+                const tex = orbitWorkedPanelKatex(cr, ci, z0x, z0y, z1, z2, burnOrbit);
+
+                if (typeof katex !== 'undefined') {
+                    host.innerHTML = '';
+                    katex.render(tex, host, { throwOnError: false, displayMode: true });
+                    host.dataset.mbWorked = cacheKey;
+                    orbitWorkedBoxReclampPersisted();
+                    return;
+                }
+
+                host.textContent = orbitWorkedPanelPlain(cr, ci, z0x, z0y, z1, z2, burnOrbit);
+                host.classList.add('orbit-mb-worked-plain');
+                host.dataset.mbWorked = cacheKey;
+                orbitWorkedBoxReclampPersisted();
             }
 
             function syncOrbitHud() {
@@ -1836,14 +2325,13 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /**
-             * KaTeX overlays for c and z₀ — HTML layered on #orbit-view-wrap (canvas cannot render LaTeX).
-             * Prefix k| vs t| in cache keys bumps render when KaTeX loads after first paint.
+             * KaTeX overlay for c; orbit vertices use #orbit-tex-chain (see syncOrbitWaypointKatexOverlays).
+             * Prefix k| vs t| in cache bumps render when KaTeX loads after first paint.
              */
             function syncOrbitHandleKatexOverlays(planeCtx) {
-                const { cc: cco, canvasEl, cr, ci, z0x, z0y, showC } = planeCtx;
+                const { cc: cco, canvasEl, cr, ci, showC } = planeCtx;
                 const elC = document.getElementById('orbit-tex-c');
-                const elZ = document.getElementById('orbit-tex-z0');
-                if (!elC || !elZ || !canvasEl || !cco) return;
+                if (!elC || !canvasEl || !cco) return;
                 const w = Math.max(1, cco.width);
                 const h = Math.max(1, cco.height);
                 const cqKind = typeof katex !== 'undefined' ? 'k' : 't';
@@ -1855,52 +2343,93 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     el.style.top = tp + '%';
                 }
 
-                const juliaPlane = mode === 'JULIA';
-
                 if (showC) {
                     const cqKey = `${cqKind}|${cr.toFixed(4)}|${ci.toFixed(4)}`;
                     if (orbitOverlayCTexKey !== cqKey) {
                         orbitOverlayCTexKey = cqKey;
                         if (typeof katex !== 'undefined') {
-                            const tex = `\\mathbf{c}\\ \\bigl(${mbOrbitPlaneTexNum(cr)},\\ ${mbOrbitPlaneTexNum(
+                            const tex = `\\mathbf{c}\\ \\bigl(${mbOrbitPlaneTexNum(cr)} \\bigm| ${mbOrbitPlaneTexNum(
                                 ci
                             )}\\bigr)`;
                             katex.render(tex, elC, { throwOnError: false, displayMode: false });
                         } else {
-                            elC.textContent = `c (${Number(cr).toFixed(4)}, ${Number(ci).toFixed(4)})`;
+                            elC.textContent = `c (${Number(cr).toFixed(4)} | ${Number(ci).toFixed(4)})`;
                         }
                     }
                     elC.hidden = false;
                     elC.classList.remove('orbit-point-katex--hidden');
-                    placePct(elC, cco.mapX(cr), cco.mapY(ci), 12, 22);
+                    placePct(elC, cco.mapX(cr), cco.mapY(ci), 4, 10);
                 } else {
                     orbitOverlayCTexKey = '';
                     elC.innerHTML = '';
                     elC.hidden = true;
                     elC.classList.add('orbit-point-katex--hidden');
                 }
+            }
 
-                const zqKey = juliaPlane ? `${cqKind}|${z0x.toFixed(4)}|${z0y.toFixed(4)}` : `${cqKind}|mb`;
-                if (orbitOverlayZ0TexKey !== zqKey) {
-                    orbitOverlayZ0TexKey = zqKey;
-                    if (typeof katex !== 'undefined') {
-                        const tex = juliaPlane
-                            ? `\\mathbf{z}_{0}\\ \\bigl(${mbOrbitPlaneTexNum(z0x)},\\ ${mbOrbitPlaneTexNum(
-                                  z0y
-                              )}\\bigr)`
-                            : '\\mathbf{z}_{0}\\ \\bigl(0,\\ 0\\bigr)';
-                        katex.render(tex, elZ, { throwOnError: false, displayMode: false });
-                    } else {
-                        elZ.textContent = juliaPlane
-                            ? `z\u2080 (${Number(z0x).toFixed(4)}, ${Number(z0y).toFixed(4)})`
-                            : 'z\u2080 (0, 0)';
-                    }
+            /** Squared-plane distance threshold: match drawOrbitPlane waypoint dots vs c (omit duplicate chips). */
+            const ORBIT_WAYPOINT_SAME_AS_C_R2_MAX = 1e-10;
+
+            /** True when orbit vertex lies on the red c handle (e.g. z₁ = c after z₀ = 0): avoid duplicate KaTeX chips. */
+            function orbitWaypointSameAsDragC(px, py, cr0, ci0) {
+                const dx = px - cr0;
+                const dy = py - ci0;
+                return dx * dx + dy * dy < ORBIT_WAYPOINT_SAME_AS_C_R2_MAX;
+            }
+
+            /** One KaTeX chip per orbit vertex z_i (Re | Im); skip chips that sit on c — c has its own overlay. */
+            function syncOrbitWaypointKatexOverlays(cco, pts, showPolyline, cr0, ci0) {
+                const chain = document.getElementById('orbit-tex-chain');
+                if (!chain || !cco) return;
+                const w = Math.max(1, cco.width);
+                const h = Math.max(1, cco.height);
+                if (!showPolyline || !pts || pts.length === 0) {
+                    chain.innerHTML = '';
+                    return;
                 }
-                elZ.hidden = false;
-                elZ.classList.remove('orbit-point-katex--hidden');
-                const zx = juliaPlane ? z0x : 0;
-                const zy = juliaPlane ? z0y : 0;
-                placePct(elZ, cco.mapX(zx), cco.mapY(zy), 12, 28);
+                while (chain.children.length < pts.length) {
+                    const d = document.createElement('div');
+                    d.className = 'orbit-point-katex orbit-point-katex--waypoint';
+                    chain.appendChild(d);
+                }
+                while (chain.children.length > pts.length) {
+                    chain.removeChild(chain.lastChild);
+                }
+                const cqKind = typeof katex !== 'undefined' ? 'k' : 't';
+                for (let i = 0; i < pts.length; i++) {
+                    const el = chain.children[i];
+                    const px = pts[i].x;
+                    const py = pts[i].y;
+                    if (orbitWaypointSameAsDragC(px, py, cr0, ci0)) {
+                        el.hidden = true;
+                        el.classList.add('orbit-point-katex--hidden');
+                        el.innerHTML = '';
+                        delete el.dataset.mbOrbitWpKey;
+                        continue;
+                    }
+                    el.hidden = false;
+                    el.classList.remove('orbit-point-katex--hidden');
+                    const key = `${i}|${cqKind}|${px.toFixed(4)}|${py.toFixed(4)}`;
+                    if (el.dataset.mbOrbitWpKey !== key) {
+                        el.dataset.mbOrbitWpKey = key;
+                        if (typeof katex !== 'undefined') {
+                            const tex = `\\mathbf{z}_{${i}}\\ \\bigl(${mbOrbitPlaneTexNum(px)} \\bigm| ${mbOrbitPlaneTexNum(
+                                py
+                            )}\\bigr)`;
+                            katex.render(tex, el, { throwOnError: false, displayMode: false });
+                        } else {
+                            el.textContent = `z_${i} (${Number(px).toFixed(4)} | ${Number(py).toFixed(4)})`;
+                        }
+                    }
+                    const ux = cco.mapX(px);
+                    const uy = cco.mapY(py);
+                    const ox = 4 + (i % 3) * 3;
+                    const oy = 8 + (i % 4) * 3;
+                    const lp = Math.max(0, Math.min(100, ((ux + ox) / w) * 100));
+                    const tp = Math.max(0, Math.min(100, ((uy + oy) / h) * 100));
+                    el.style.left = lp + '%';
+                    el.style.top = tp + '%';
+                }
             }
 
             function drawOrbitPlane() {
@@ -1968,6 +2497,17 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 orbitLastLegBudget = legsBudget;
                 orbitLastActualLegs = Math.max(0, pts.length - 1);
 
+                orbitWorkedPanelSnap = {
+                    cr,
+                    ci,
+                    z0x,
+                    z0y,
+                    burnOrbit,
+                    z1: pts.length > 1 ? pts[1] : null,
+                    z2: pts.length > 2 ? pts[2] : null,
+                    legsBudget,
+                };
+
                 /** Escape like shader: |z|² > 4 → unstable (red); inside disk yellow like stable HUD gold. */
                 const lp = pts[pts.length - 1];
                 const r2Last = lp.x * lp.x + lp.y * lp.y;
@@ -1996,13 +2536,12 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
 
                 const ni = Math.max(1, pts.length - 1);
-                const epsNear = 1e-10;
                 if (orbitShowLegPolyline) {
                     ctx.fillStyle = orbitDotFill;
                     pts.forEach((p, i) => {
                         if (i === 0) return;
                         const dc = (p.x - cr) * (p.x - cr) + (p.y - ci) * (p.y - ci);
-                        if (dc < epsNear) return;
+                        if (dc < ORBIT_WAYPOINT_SAME_AS_C_R2_MAX) return;
                         const px = cc.mapX(p.x);
                         const py = cc.mapY(p.y);
                         const tr = ni <= 0 ? 1 : i / ni;
@@ -2042,10 +2581,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     canvasEl: orbitCanvasEl,
                     cr,
                     ci,
-                    z0x,
-                    z0y,
                     showC: orbitShowLegPolyline,
                 });
+                syncOrbitWaypointKatexOverlays(cc, pts, orbitShowLegPolyline, cr, ci);
 
                 if (orbitScanActive) {
                     const scanIters = Math.min(8192, fractalShaderTargetMaxIter());
@@ -2135,6 +2673,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncOrbitHud();
                 syncMbOrbitStableCountPanel();
                 syncMbFractalFormulaOverlay();
+                syncOrbitMbWorkedExample();
             }
 
             function setupOrbitCyberCanvas() {
@@ -2276,6 +2815,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 startOrbitRedrawLoop();
                 applyOrbitHudVisibility();
                 syncOrbitHud();
+                syncOrbitMbWorkedExample();
             }
 
             function setMainPlane(next) {
@@ -2311,6 +2851,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncMbOrbitStableCountPanel();
                 syncMbFractalFormulaOverlay();
                 syncFlightButtonForMainPlane();
+                syncOrbitMbWorkedExample();
             }
 
             /** 0 at zoom≈1, 1 at ZOOM_MAX — depth measure on log scale */
@@ -2684,6 +3225,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncModeButtonsFromState();
                 persistMandelbrotFractalState();
                 syncMbFractalFormulaOverlay();
+                syncOrbitMbWorkedExample();
             };
             document.getElementById('btn-mode-bs').onclick = () => {
                 mode = 'BURNING_SHIP';
@@ -2692,6 +3234,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncModeButtonsFromState();
                 persistMandelbrotFractalState();
                 syncMbFractalFormulaOverlay();
+                syncOrbitMbWorkedExample();
             };
             document.getElementById('btn-mode-j').onclick = () => {
                 mode = 'JULIA';
@@ -2699,6 +3242,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 syncModeButtonsFromState();
                 persistMandelbrotFractalState();
                 syncMbFractalFormulaOverlay();
+                syncOrbitMbWorkedExample();
             };
             syncModeButtonsFromState();
 
@@ -3008,6 +3552,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             window.addEventListener('beforeunload', () => {
                 persistMandelbrotFractalState();
             });
+
+            loadOrbitWorkedBoxPos();
+            initOrbitWorkedBoxDragOnce();
 
             const startPlane = loadMandelbrotPersist();
             loadMandelbrotFractalPersist();
