@@ -1,5 +1,5 @@
 /**
- * Sidebar für das Lab imaginarynumbers (nur diese Seite — nicht global).
+ * Sidebar für das Lab imaginarynumbers (HTML/imaginarynumbers/ — nicht global).
  *
  * Farben: nur über PALETTE.* (Rollen, keine Farbnamen in Keys), dann applyPaletteCssVars().
  */
