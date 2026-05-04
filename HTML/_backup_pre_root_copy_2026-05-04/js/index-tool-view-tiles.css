@@ -1,0 +1,137 @@
+/* Lab view (#tool-view): tile layout — tokens in index-portal-tokens.css */
+
+#tool-view {
+    --tool-card-icon-h: var(--portal-lab-card-icon-h);
+}
+
+#tool-view .container {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+#tool-view .card {
+    align-items: flex-start;
+    text-align: left;
+    padding: 15px 20px;
+    background: var(--portal-lab-tile-bg);
+    border: 1px solid var(--portal-lab-tile-border);
+    border-radius: var(--portal-lab-card-radius);
+    box-shadow: var(--portal-lab-card-shadow);
+    backdrop-filter: blur(14px);
+    /* No fixed 16:9 — otherwise too little height with tall icon slot + overflow:hidden on .card → text clipped mid-line */
+    aspect-ratio: unset;
+    min-height: 0;
+    height: auto;
+}
+
+#tool-view .card-icon {
+    margin-bottom: 8px;
+    min-height: var(--tool-card-icon-h);
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    filter: drop-shadow(0 0 8px rgba(102, 204, 255, 0.15));
+    transform: scale(1);
+}
+
+/* Downscaled logos (Stanford): no vertical “air tunnel”; heading closer to icon */
+#tool-view .card-icon:has(> svg.stanford-lab-card-mark) {
+    align-items: flex-start;
+    min-height: 0;
+    margin-bottom: 9px;
+}
+
+#tool-view .card-icon > svg {
+    height: var(--tool-card-icon-h);
+    width: auto;
+    max-width: 142px;
+    flex-shrink: 0;
+    display: block;
+}
+
+#tool-view .card-icon svg.stanford-lab-card-mark {
+    --stanford-lab-scale: var(--portal-stanford-lab-scale);
+    width: calc(var(--tool-card-icon-h) * var(--stanford-lab-scale) * 162 / 248.022);
+    height: calc(var(--tool-card-icon-h) * var(--stanford-lab-scale));
+    max-width: none;
+    filter: brightness(1.18) contrast(1.06) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+#tool-view .card-icon:not(:has(> svg)) {
+    font-size: var(--tool-card-icon-h);
+    line-height: 1;
+    filter: drop-shadow(0 0 8px rgba(102, 204, 255, 0.15));
+}
+
+#tool-view .card h3 {
+    font-size: 1.08rem;
+    margin: 0 0 8px 0;
+    text-align: left;
+    background: linear-gradient(
+        to right,
+        #ffffff 0%,
+        #ffffff 42%,
+        var(--portal-lab-title-cyan) 72%,
+        var(--portal-neon-blue) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 600;
+}
+
+#tool-view .card .card-desc {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--portal-lab-desc-color);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+}
+
+#tool-view .card .btn {
+    display: none;
+}
+
+/* Hover: subtle border glow (no size scale) */
+#tool-view .card:hover {
+    transform: none;
+    background: var(--portal-lab-tile-bg-hover);
+    border-color: var(--portal-lab-tile-border-hover);
+    box-shadow: var(--portal-lab-card-shadow-hover);
+}
+
+#tool-view .card:hover::before {
+    opacity: 0.35;
+}
+
+#tool-view .card:hover h3 {
+    background: linear-gradient(
+        to right,
+        #ffffff 0%,
+        #ffffff 42%,
+        var(--portal-lab-title-cyan) 72%,
+        var(--portal-neon-blue) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+}
+
+#tool-view .card:hover .card-desc {
+    color: var(--portal-lab-desc-color);
+}
+
+#tool-view .card:hover .card-icon {
+    transform: none;
+}
