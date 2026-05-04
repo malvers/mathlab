@@ -107,14 +107,22 @@
         ];
     }
 
-    /** r-Teil in VAR_R, Radikand z in VAR_Z */
+    /** Nur \\textit{r} und \\textit{z} in Rollenfarben; = und Wurzel neutral (TITLE_MUTED). */
     function texRSqrtZ() {
-        return `\\textcolor{${PALETTE.VAR_R}}{r}\\,{=}\\,\\sqrt{\\textcolor{${PALETTE.VAR_Z}}{z}}`;
+        return (
+            `\\textcolor{${PALETTE.VAR_R}}{r}\\,` +
+            `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+            `\\textcolor{${PALETTE.TITLE_MUTED}}{\\sqrt{\\textcolor{${PALETTE.VAR_Z}}{z}}}`
+        );
     }
 
-    /** r = z² — Sidebar-Modus „Quadrat“ (VAR_R / VAR_Z wie bei r = √(z)). */
+    /** r = z² — Exponent wie = neutral, nur z rot. */
     function texZSquare() {
-        return `\\textcolor{${PALETTE.VAR_R}}{r}\\,{=}\\,\\textcolor{${PALETTE.VAR_Z}}{z}^{\\,2}`;
+        return (
+            `\\textcolor{${PALETTE.VAR_R}}{r}\\,` +
+            `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+            `\\textcolor{${PALETTE.VAR_Z}}{z}^{\\textcolor{${PALETTE.TITLE_MUTED}}{2}}`
+        );
     }
 
     /** Titelzeile z-Karte wie bisher: z ∈ ℂ */
@@ -198,9 +206,14 @@
 
         const card = mount.closest('.instrument-card');
         const titleHost = card?.querySelector('.instrument-title');
-        if (titleHost && titleHost.dataset.cnRTitleVer !== 'v10') {
-            katexTry(titleHost, texRSqrtZ(), 'r = √z');
-            titleHost.dataset.cnRTitleVer = 'v10';
+        const titleVer = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        if (titleHost && titleHost.dataset.cnRTitleVer !== titleVer) {
+            katexTry(
+                titleHost,
+                state.zMapMode === 'square' ? texZSquare() : texRSqrtZ(),
+                state.zMapMode === 'square' ? 'r = z²' : 'r = √z',
+            );
+            titleHost.dataset.cnRTitleVer = titleVer;
         }
 
         const rTex = texReImPair('r', 'r');
