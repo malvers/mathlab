@@ -110,6 +110,7 @@
                 "fibonacci": { title: "Fibonacci-Labor", description: "Erkunde die goldene Spirale und das organische Wachstum." },
                 "fermatpunkt": { title: "Fermat-Punkt", description: "Finde den Punkt mit der minimalen Abstandssumme zu den Ecken." },
                 "gleichungssysteme": { title: "LGS Labor", description: "Erkunde Lineare Gleichungssysteme visuell durch Geraden." },
+                "imaginarynumbers": { title: "Imaginary numbers", description: "Komplexe Zahlen in der Gaußschen Zahlenebene: Realteil, Imaginärteil und die imaginäre Einheit — interaktiv erkunden." },
                 "pythagoras": { title: "Pythagoras", description: "Entdecke den Satz des Pythagoras durch interaktive Flächenvergleiche." },
                 "pythagorasbeweis": { title: "Pythagoras Beweis", description: "Geometrischer Beweis des Satzes von Pythagoras durch Flächenzerlegung." },
                 "gleichschenkligesDreieck": { title: "Gleichschenkliges Dreieck", description: "Spezielle Dreiecke und ihre Eigenschaften interaktiv berechnen." },
