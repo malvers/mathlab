@@ -21,7 +21,7 @@ laboratuvarları
 120pt
 %numlanguages dil
 20pt
-%purplepulsating ve sayıları artıyor
+%purplepulsating and counting
 30pt
 Almanca 🇩🇪
 İngilizce 🇬🇧
@@ -41,15 +41,22 @@ Türkçe 🇹🇷
 
 # 
 60pt
-7 teknoloji
+8 programlama dili
 40pt
 hypertext markup language
 cascading styles sheets
 type script
 java script
 python
+Latex
 JSON
 JAVA
+
+#notranslate 
+60pt
+Artificial Intelligence 
+40pt
+fully vibed coded
 
 # 
 200pt

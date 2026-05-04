@@ -41,15 +41,22 @@ turco 🇹🇷
 
 # 
 60pt
-7 tecnologías
+8 lenguajes de programación
 40pt
 hypertext markup language
 cascading styles sheets
 type script
 java script
 python
+Latex
 JSON
 JAVA
+
+#notranslate 
+60pt
+Artificial Intelligence 
+40pt
+fully vibed coded
 
 # 
 200pt

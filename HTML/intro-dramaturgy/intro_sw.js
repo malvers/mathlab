@@ -21,7 +21,7 @@ zinazoingiliana
 120pt
 Lugha %numlanguages
 20pt
-%purplepulsating endelea kuongezeka
+%purplepulsating and counting
 30pt
 Kijerumani 🇩🇪
 Kiingereza 🇬🇧
@@ -41,15 +41,22 @@ Kituruki 🇹🇷
 
 # 
 60pt
-teknolojia 7
+Lugha 8 za programu
 40pt
 hypertext markup language
 cascading styles sheets
 type script
 java script
 python
+Latex
 JSON
 JAVA
+
+#notranslate 
+60pt
+Artificial Intelligence 
+40pt
+fully vibed coded
 
 # 
 200pt
