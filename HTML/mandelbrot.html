@@ -458,6 +458,38 @@
             display: none !important;
         }
 
+        /** KaTeX labels at orbit drag-handles (canvas cannot render LaTeX). */
+        .orbit-point-katex {
+            position: absolute;
+            left: 0;
+            top: 0;
+            margin: 0;
+            padding: 2px 8px;
+            pointer-events: none;
+            z-index: 6;
+            max-width: min(96%, 440px);
+            background: rgba(5, 12, 24, 0.72);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+            transform: scale(0.6);
+            transform-origin: 0 0;
+        }
+
+        .orbit-point-katex[hidden],
+        .orbit-point-katex--hidden {
+            display: none !important;
+        }
+
+        #orbit-view-wrap .orbit-point-katex .katex {
+            font-size: clamp(1.02rem, 0.74rem + 1.95vmin, 1.72rem) !important;
+            color: rgba(248, 250, 255, 0.96) !important;
+            text-shadow:
+                0 0 18px rgba(242, 187, 68, 0.35),
+                0 0 28px rgba(0, 210, 255, 0.12);
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+        }
+
         #orbit-canvas {
             width: 100%;
             height: 100%;
@@ -515,6 +547,42 @@
         .orbit-hud-lag--warn {
             color: #ffb74d;
             text-shadow: 0 0 8px rgba(255, 183, 77, 0.38);
+        }
+
+        /* Orbit HUD: c and z₀ as aligned rows, tabular digits */
+        .orbit-hud-values {
+            display: table;
+            margin: 0.35em 0 0.2em;
+            border-collapse: separate;
+            border-spacing: 0 0.12em;
+            font-family: Orbitron, ui-monospace, monospace;
+            font-size: 0.84em;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.03em;
+            line-height: 1.35;
+            color: rgba(232, 244, 255, 0.96);
+        }
+
+        .orbit-hud-cz-row {
+            display: table-row;
+        }
+
+        .orbit-hud-cz-lab {
+            display: table-cell;
+            text-align: right;
+            vertical-align: baseline;
+            padding-right: 0.45em;
+            white-space: nowrap;
+            font-weight: 600;
+            color: rgba(0, 210, 255, 0.88);
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.22);
+        }
+
+        .orbit-hud-cz-num {
+            display: table-cell;
+            vertical-align: baseline;
+            white-space: nowrap;
+            padding-left: 0.05em;
         }
 
         /* CyberBranding puts .canvas-branding with pointer-events:auto over plot — mouse never reached canvas */
@@ -629,6 +697,8 @@
             <canvas id="canvas"></canvas>
             <div id="orbit-view-wrap" class="orbit-view-wrap" hidden aria-hidden="true">
                 <canvas id="orbit-canvas"></canvas>
+                <div id="orbit-tex-c" class="orbit-point-katex orbit-point-katex--hidden" hidden aria-hidden="true"></div>
+                <div id="orbit-tex-z0" class="orbit-point-katex orbit-point-katex--hidden" hidden aria-hidden="true"></div>
                 <div id="orbit-hud" class="orbit-hud" aria-live="polite"></div>
             </div>
             <div class="mb-fractal-formula-overlay" aria-hidden="true">
@@ -699,7 +769,7 @@
     <script src="js/branding/overlays.js?v=542"></script>
     <script src="js/i18n.js"></script>
     <script src="js/branding.js?v=542"></script>
-    <script src="js/ui.js?v=543"></script>
+    <script src="js/ui.js?v=544"></script>
     <script src="js/cyber-canvas.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
@@ -883,7 +953,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             /** Max legs (segments z_k→z_{k+1}; ↑/↓ only in orbit view). */
             const ORBIT_LEG_MIN = 0;
             const ORBIT_LEG_MAX = 55;
-            const ORBIT_LEG_DEFAULT = 21;
+            const ORBIT_LEG_DEFAULT = 1;
             let orbitLegCount = ORBIT_LEG_DEFAULT;
             /** Last drawn legs vs. budget — for HUD hint when Esc before budget ends */
             let orbitLastActualLegs = -1;
@@ -897,6 +967,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             let orbitFractalViewportSyncKey = '';
             /** Smoothed drawOrbitPlane runtime (ms) — lag line only in orbit HUD */
             let orbitHudFrameMsSmooth = 0;
+            /** Coords + visibility key for KaTeX orbit handle labels (avoid re-render each frame). */
+            let orbitOverlayCTexKey = '';
+            let orbitOverlayZ0TexKey = '';
 
             /** Orbit view Space: grid — yellow dots only = stable orbit under scan depth. */
             let orbitScanActive = false;
@@ -984,7 +1057,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
                 const baseClassic = 'z_{n+1} = z_n^{2} + c';
                 const baseBurning =
-                    'z_{n+1} = \\bigl(\\lvert\\operatorname{Re} z_n\\rvert + i\\,\\lvert\\operatorname{Im} z_n\\rvert\\bigr)^{2} + c';
+                    'z_{n+1} = \\bigl(\\lvert\\Re z_n\\rvert + i\\,\\lvert\\Im z_n\\rvert\\bigr)^{2} + c';
 
                 /** Same layout as scan row; values from leg polyline or grid hits — red when |z|²>4 like plot */
                 function renderMzSquaredLine(rStr, nPartStr, r2Numeric) {
@@ -1050,7 +1123,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 } else {
                     el.textContent =
                         mode === 'BURNING_SHIP'
-                            ? 'z_{n+1} = (|Re z_n| + i|Im z_n|)² + c   z_n, c ∈ ℂ'
+                            ? 'z_{n+1} = (|ℜ z_n| + i|ℑ z_n|)² + c   z_n, c ∈ ℂ'
                             : 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
                     el.style.cssText =
                         'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#f2bb44;text-align:left;text-shadow:0 0 12px rgba(242,187,68,0.4);';
@@ -1468,20 +1541,11 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             /** Mandelbrot / Burning Ship: WebGL center = REAL/IMAG sliders; Julia: sliders = fixed c (shader-independent). */
             function syncMbFractalCenterFromJuliaSliders() {
-                if (!fractalUsesCBurnPlane()) return;
-                centerX = juliaX;
-                centerY = juliaY;
+                // Decoupled C from camera center
             }
 
             function syncMbJuliaSlidersFromFractalCenter() {
-                if (!fractalUsesCBurnPlane()) return;
-                const nx = Math.round(centerX * 1000);
-                const ny = Math.round(centerY * 1000);
-                if (Math.round(juliaX * 1000) === nx && Math.round(juliaY * 1000) === ny) return;
-                juliaX = nx / 1000;
-                juliaY = ny / 1000;
-                updateSliderMountVisual('jx-mount', nx);
-                updateSliderMountVisual('jy-mount', ny);
+                // Decoupled C from camera center
             }
 
             function stopFlightUi() {
@@ -1620,6 +1684,34 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     .replace(/"/g, '&quot;');
             }
 
+            /** Standard form Re ± Im·i for orbit HUD (ASCII digits, Unicode −). */
+            function orbitHudFormatComplexPair(re, im) {
+                const r = Number(re);
+                const j = Number(im);
+                if (Math.abs(r) < 1e-14 && Math.abs(j) < 1e-14) return '0';
+                const rStr = r.toFixed(5);
+                const imStr = Math.abs(j).toFixed(5);
+                const op = j >= 0 ? '+' : '\u2212';
+                return `${rStr} ${op} ${imStr}i`;
+            }
+
+            function orbitHudCzBlockHtml(rows) {
+                let html = '<div class="orbit-hud-values">';
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const lab = orbitHudEscapeHtml(row.lab);
+                    const rhs = orbitHudEscapeHtml(orbitHudFormatComplexPair(row.re, row.im));
+                    html +=
+                        '<div class="orbit-hud-cz-row"><span class="orbit-hud-cz-lab">' +
+                        lab +
+                        '</span><span class="orbit-hud-cz-num">= ' +
+                        rhs +
+                        '</span></div>';
+                }
+                html += '</div>';
+                return html;
+            }
+
             function syncOrbitHud() {
                 const el = document.getElementById('orbit-hud');
                 if (!el || !orbitHudVisible || mainPlane !== 'ORBIT') return;
@@ -1633,36 +1725,53 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         t: formatOrbitHudDuration((performance.now() - orbitHudSwStart) / 1000),
                     });
                 }
-                const hudHead = `${swLine}\n${CyberI18n.get('fractal.orbit_hud_toggle')}\n`;
-                let hint =
+                const headLines = [
+                    swLine,
+                    CyberI18n.get('fractal.orbit_hud_toggle'),
                     mode === 'JULIA'
                         ? CyberI18n.get('fractal.orbit_help_jl')
                         : mode === 'BURNING_SHIP'
                           ? CyberI18n.get('fractal.orbit_help_bs')
-                          : CyberI18n.get('fractal.orbit_help_mb');
-                let detail;
-                if (fractalUsesCBurnPlane()) {
-                    detail = `c = ${centerX.toFixed(5)} ${centerY >= 0 ? '+' : ''} ${centerY.toFixed(5)}i · z₀ = 0`;
-                } else {
-                    detail = `c = ${juliaX.toFixed(5)} ${juliaY >= 0 ? '+' : ''} ${juliaY.toFixed(5)}i · z₀ = ${centerX.toFixed(5)} ${centerY >= 0 ? '+' : ''} ${centerY.toFixed(5)}i`;
-                }
-                let hudBase = `${hudHead}${hint}\n${detail}\n${CyberI18n.get('fractal.orbit_drag_hint')}\n${CyberI18n.get('fractal.orbit_legs_arrows', { n: orbitLegCount })}\n${CyberI18n.get('fractal.orbit_scan_hint')}`;
+                          : CyberI18n.get('fractal.orbit_help_mb'),
+                ];
+                const czRows = fractalUsesCBurnPlane()
+                    ? [
+                          { lab: 'c', re: centerX, im: centerY },
+                          { lab: 'z\u2080', re: 0, im: 0 },
+                      ]
+                    : [
+                          { lab: 'c', re: juliaX, im: juliaY },
+                          { lab: 'z\u2080', re: centerX, im: centerY },
+                      ];
+                const czHtml = orbitHudCzBlockHtml(czRows);
+                const tailLines = [
+                    CyberI18n.get('fractal.orbit_drag_hint'),
+                    CyberI18n.get('fractal.orbit_legs_arrows', { n: orbitLegCount }),
+                    CyberI18n.get('fractal.orbit_scan_hint'),
+                ];
                 const effIterTarget = fractalShaderTargetMaxIter();
                 if (effIterTarget > maxIter) {
-                    hudBase += `\n${CyberI18n.get('fractal.detail')}: ${maxIter}→${effIterTarget}`;
+                    tailLines.push(`${CyberI18n.get('fractal.detail')}: ${maxIter}\u2192${effIterTarget}`);
                 }
                 if (
                     orbitLastLegBudget > 0 &&
                     orbitLastActualLegs >= 0 &&
                     orbitLastActualLegs < orbitLastLegBudget
                 ) {
-                    hudBase += `\n${CyberI18n.get('fractal.orbit_legs_escape_trunc', {
-                        shown: orbitLastActualLegs,
-                        budget: orbitLastLegBudget,
-                    })}`;
+                    tailLines.push(
+                        CyberI18n.get('fractal.orbit_legs_escape_trunc', {
+                            shown: orbitLastActualLegs,
+                            budget: orbitLastLegBudget,
+                        })
+                    );
                 }
-                if (orbitScanActive) hudBase += `\n${CyberI18n.get('fractal.orbit_scan_running')}`;
-                const bodyHtml = hudBase.split('\n').map((ln) => orbitHudEscapeHtml(ln)).join('<br>');
+                if (orbitScanActive) tailLines.push(CyberI18n.get('fractal.orbit_scan_running'));
+                const bodyHtml =
+                    headLines.map((ln) => orbitHudEscapeHtml(ln)).join('<br>') +
+                    '<br>' +
+                    czHtml +
+                    '<br>' +
+                    tailLines.map((ln) => orbitHudEscapeHtml(ln)).join('<br>');
                 const lagWarnMs = 48;
                 const msReady = orbitHudFrameMsSmooth >= 0.5;
                 const lagCls =
@@ -1718,6 +1827,82 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
             }
 
+            /** Format one real for KaTeX (decimal separator escaped). */
+            function mbOrbitPlaneTexNum(x, digits) {
+                const n = digits != null ? digits : 4;
+                let s = String(Number(Number(x).toFixed(n)));
+                if (s === '-0') s = '0';
+                return s.replace('.', '{.}');
+            }
+
+            /**
+             * KaTeX overlays for c and z₀ — HTML layered on #orbit-view-wrap (canvas cannot render LaTeX).
+             * Prefix k| vs t| in cache keys bumps render when KaTeX loads after first paint.
+             */
+            function syncOrbitHandleKatexOverlays(planeCtx) {
+                const { cc: cco, canvasEl, cr, ci, z0x, z0y, showC } = planeCtx;
+                const elC = document.getElementById('orbit-tex-c');
+                const elZ = document.getElementById('orbit-tex-z0');
+                if (!elC || !elZ || !canvasEl || !cco) return;
+                const w = Math.max(1, cco.width);
+                const h = Math.max(1, cco.height);
+                const cqKind = typeof katex !== 'undefined' ? 'k' : 't';
+
+                function placePct(el, ux, uy, ox, oy) {
+                    const lp = Math.max(0, Math.min(100, ((ux + ox) / w) * 100));
+                    const tp = Math.max(0, Math.min(100, ((uy + oy) / h) * 100));
+                    el.style.left = lp + '%';
+                    el.style.top = tp + '%';
+                }
+
+                const juliaPlane = mode === 'JULIA';
+
+                if (showC) {
+                    const cqKey = `${cqKind}|${cr.toFixed(4)}|${ci.toFixed(4)}`;
+                    if (orbitOverlayCTexKey !== cqKey) {
+                        orbitOverlayCTexKey = cqKey;
+                        if (typeof katex !== 'undefined') {
+                            const tex = `\\mathbf{c}\\ \\bigl(${mbOrbitPlaneTexNum(cr)},\\ ${mbOrbitPlaneTexNum(
+                                ci
+                            )}\\bigr)`;
+                            katex.render(tex, elC, { throwOnError: false, displayMode: false });
+                        } else {
+                            elC.textContent = `c (${Number(cr).toFixed(4)}, ${Number(ci).toFixed(4)})`;
+                        }
+                    }
+                    elC.hidden = false;
+                    elC.classList.remove('orbit-point-katex--hidden');
+                    placePct(elC, cco.mapX(cr), cco.mapY(ci), 12, 22);
+                } else {
+                    orbitOverlayCTexKey = '';
+                    elC.innerHTML = '';
+                    elC.hidden = true;
+                    elC.classList.add('orbit-point-katex--hidden');
+                }
+
+                const zqKey = juliaPlane ? `${cqKind}|${z0x.toFixed(4)}|${z0y.toFixed(4)}` : `${cqKind}|mb`;
+                if (orbitOverlayZ0TexKey !== zqKey) {
+                    orbitOverlayZ0TexKey = zqKey;
+                    if (typeof katex !== 'undefined') {
+                        const tex = juliaPlane
+                            ? `\\mathbf{z}_{0}\\ \\bigl(${mbOrbitPlaneTexNum(z0x)},\\ ${mbOrbitPlaneTexNum(
+                                  z0y
+                              )}\\bigr)`
+                            : '\\mathbf{z}_{0}\\ \\bigl(0,\\ 0\\bigr)';
+                        katex.render(tex, elZ, { throwOnError: false, displayMode: false });
+                    } else {
+                        elZ.textContent = juliaPlane
+                            ? `z\u2080 (${Number(z0x).toFixed(4)}, ${Number(z0y).toFixed(4)})`
+                            : 'z\u2080 (0, 0)';
+                    }
+                }
+                elZ.hidden = false;
+                elZ.classList.remove('orbit-point-katex--hidden');
+                const zx = juliaPlane ? z0x : 0;
+                const zy = juliaPlane ? z0y : 0;
+                placePct(elZ, cco.mapX(zx), cco.mapY(zy), 12, 28);
+            }
+
             function drawOrbitPlane() {
                 const cc = CyberCanvasInstance;
                 if (!cc.isInitialized || mainPlane !== 'ORBIT') return;
@@ -1756,8 +1941,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 if (fractalUsesCBurnPlane()) {
                     z0x = 0;
                     z0y = 0;
-                    cr = centerX;
-                    ci = centerY;
+                    cr = juliaX;
+                    ci = juliaY;
                 } else {
                     z0x = centerX;
                     z0y = centerY;
@@ -1851,17 +2036,16 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     drawHandle(0, 0, false);
                 }
 
-                ctx.font = 'bold 12px Orbitron,sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                if (orbitShowLegPolyline) {
-                    ctx.fillText('c', cc.mapX(cr) + 9, cc.mapY(ci) - 7);
-                }
-                if (mode === 'JULIA') {
-                    ctx.fillText('z₀', cc.mapX(z0x) + 9, cc.mapY(z0y) + 17);
-                } else {
-                    ctx.fillText('z₀', cc.mapX(0) + 9, cc.mapY(0) + 17);
-                }
+                const orbitCanvasEl = document.getElementById('orbit-canvas');
+                syncOrbitHandleKatexOverlays({
+                    cc,
+                    canvasEl: orbitCanvasEl,
+                    cr,
+                    ci,
+                    z0x,
+                    z0y,
+                    showC: orbitShowLegPolyline,
+                });
 
                 if (orbitScanActive) {
                     const scanIters = Math.min(8192, fractalShaderTargetMaxIter());
@@ -1972,8 +2156,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     if (fractalUsesCBurnPlane()) {
                         z0x_ = 0;
                         z0y_ = 0;
-                        cr = centerX;
-                        ci = centerY;
+                        cr = juliaX;
+                        ci = juliaY;
                     } else {
                         z0x_ = centerX;
                         z0y_ = centerY;
@@ -2009,10 +2193,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     if (!orbitCanvasDrag) return;
                     if (orbitCanvasDrag === 'c') {
                         if (fractalUsesCBurnPlane()) {
-                            centerX = pos.x;
-                            centerY = pos.y;
-                            juliaX = centerX;
-                            juliaY = centerY;
+                            juliaX = pos.x;
+                            juliaY = pos.y;
                             updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
                             updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                         } else {
@@ -2034,8 +2216,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     CyberCanvasInstance.allowPan = true;
                     if (was === 'c') {
                         if (fractalUsesCBurnPlane()) {
-                            juliaX = centerX;
-                            juliaY = centerY;
                             updateSliderMountVisual('jx-mount', Math.round(juliaX * 1000));
                             updateSliderMountVisual('jy-mount', Math.round(juliaY * 1000));
                         } else {
@@ -2180,10 +2360,16 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             function updateSliderMountVisual(mountId, numericValue) {
                 const inp = document.querySelector('#' + mountId + ' input.cyber-slider');
                 if (!inp) return;
-                const str = String(Math.round(numericValue));
-                inp.value = str;
+                const rounded = Math.round(Number(numericValue));
+                inp.value = String(rounded);
                 const disp = document.querySelector('#' + mountId + ' .val-display');
-                if (disp) disp.textContent = str;
+                if (disp) {
+                    if (mountId === 'jx-mount' || mountId === 'jy-mount') {
+                        disp.textContent = (rounded / 1000).toFixed(3);
+                    } else {
+                        disp.textContent = String(rounded);
+                    }
+                }
             }
 
             function onFlightMouseSync(e) {
@@ -2288,6 +2474,11 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             function resetView() {
                 isFlight = false;
                 time = 0;
+                orbitLegCount = ORBIT_LEG_DEFAULT;
+                persistMandelbrotOrbitLeg();
+                mbFormulaOverlayCacheKey = '';
+                if (mainPlane === 'ORBIT') syncOrbitHud();
+                syncMbFractalFormulaOverlay();
                 syncModeButtonsFromState();
                 const bf = document.querySelector('#side-panel #btn-flight');
                 if (bf) {
@@ -2332,6 +2523,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 if (br) br.disabled = true;
                 if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                     orbitScanClearAndRestartGrid(CyberCanvasInstance);
+                    CyberCanvasInstance.needsRedraw = true;
                 }
             }
 
@@ -2451,19 +2643,21 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 </div>
             `, 'var(--neon-blue)');
 
+            const fmtJuliaSliderPlane = (raw) => (Number(raw) / 1000).toFixed(3);
+
             CyberUI.createSlider('jx-mount', CyberI18n.get('fractal.real'), -2000, 2000, -800, 1, (v) => {
                 abortResetAnim();
                 juliaX = v / 1000;
                 syncMbFractalCenterFromJuliaSliders();
                 persistMandelbrotFractalState();
-            }, 'var(--neon-blue)');
+            }, 'var(--neon-blue)', fmtJuliaSliderPlane);
 
             CyberUI.createSlider('jy-mount', CyberI18n.get('fractal.imaginary'), -2000, 2000, 156, 1, (v) => {
                 abortResetAnim();
                 juliaY = v / 1000;
                 syncMbFractalCenterFromJuliaSliders();
                 persistMandelbrotFractalState();
-            }, 'var(--neon-blue)');
+            }, 'var(--neon-blue)', fmtJuliaSliderPlane);
 
             CyberUI.createSlider('iter-mount', CyberI18n.get('fractal.iterations'), MB_ITER_SLIDER_MIN, MB_ITER_SLIDER_MAX, DEF_MAX_ITER, 1, (v) => {
                 abortResetAnim();
@@ -2573,7 +2767,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         if (keyboardTypingCapturesArrows(t)) return;
                         if (mainPlane === 'ORBIT') {
                             e.preventDefault();
-                            const step = e.shiftKey ? 4 : 2;
+                            const step = e.shiftKey ? 5 : 1;
                             orbitLegCount += arrowUp ? step : -step;
                             orbitLegCount = clampOrbitLegCount(orbitLegCount);
                             persistMandelbrotOrbitLeg();
