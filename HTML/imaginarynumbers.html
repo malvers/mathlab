@@ -163,13 +163,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 2.5rem;
+            min-height: 5rem;
             font-family: inherit;
-            font-size: clamp(0.92rem, 0.82rem + 0.85vmin, 1.08rem);
+            font-size: clamp(1.05rem, 0.92rem + 1vmin, 1.35rem);
             font-weight: 600;
             letter-spacing: 0.02em;
-            padding: 8px 6px;
-            border-radius: 11px;
+            padding: 16px 10px;
+            border-radius: 14px;
             border: 1px solid rgba(148, 163, 184, 0.38);
             background: rgba(15, 23, 42, 0.55);
             color: rgba(226, 232, 240, 0.88);
@@ -178,7 +178,7 @@
         }
 
         #ui-container .cn-map-mode-tex .katex {
-            font-size: clamp(0.98rem, 0.86rem + 0.75vmin, 1.2rem) !important;
+            font-size: clamp(1.45rem, 1.15rem + 1.85vmin, 2.45rem) !important;
             color: rgba(248, 250, 252, 0.96) !important;
         }
 
@@ -614,13 +614,13 @@
                     tex =
                         `\\begin{aligned}` +
                         `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}^{2}-\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}^{2} \\,{=}\\, 0 \\\\[0.35em]` +
-                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\,{=}\\, 2\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, 0` +
+                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\,{=}\\, 2\\,\\cdot\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\cdot\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, 0` +
                         `\\end{aligned}`;
                 } else {
                     tex =
                         `\\begin{aligned}` +
                         `&\\textcolor{${P.AXIS_RE}}{\\operatorname{re}(r)} \\quad \\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}^{2}-\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}}^{2} \\,{=}\\, \\textcolor{${P.AXIS_RE}}{\\text{${et(us)}}} \\\\[0.4em]` +
-                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\quad 2\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, \\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}` +
+                        `&\\textcolor{${P.AXIS_IM}}{\\operatorname{im}(r)} \\quad 2\\,\\cdot\\,\\textcolor{${P.AXIS_RE}}{\\text{${et(xs)}}}\\,\\cdot\\,\\textcolor{${P.AXIS_IM}}{\\text{${et(ys)}}} \\,{=}\\, \\textcolor{${P.AXIS_IM}}{\\text{${et(vs)}}}` +
                         `\\end{aligned}`;
                 }
             } else if (rho < 1e-14) {
@@ -716,7 +716,7 @@
         function pickDragTarget(CC, pos) {
             const rad = grabRadiusMath(CC);
             const zd = Math.hypot(pos.x - state.re, pos.y - state.im);
-            const w = principalComplexSqrt(state.re, state.im);
+            const w = mapRFromZ(state.re, state.im);
             const rd = Math.hypot(pos.x - w.re, pos.y - w.im);
             const hz = zd <= rad;
             const hr = rd <= rad;
@@ -726,14 +726,20 @@
             return zd <= rd ? 'z' : 'r';
         }
 
-        /** z aus komplexem r (u+iv): z = (u+iv)² */
-        function applyZFromSqrtPosition(u, v) {
+        /** sqrt: z = (u+iv)² (r = Hauptwert-√z). square: r = z² am Punkt (u,v), z = Hauptwert-√r */
+        function applyZFromRDrag(u, v) {
             const ur = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, u));
             const vr = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, v));
-            let zre = ur * ur - vr * vr;
-            let zim = 2 * ur * vr;
-            state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zre));
-            state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zim));
+            if (state.zMapMode === 'square') {
+                const z = principalComplexSqrt(ur, vr);
+                state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, z.re));
+                state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, z.im));
+            } else {
+                let zre = ur * ur - vr * vr;
+                let zim = 2 * ur * vr;
+                state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zre));
+                state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, zim));
+            }
         }
 
         /** r-Readout in der Sidebar nach z-Bewegung (keine Slider mehr). */
@@ -763,7 +769,7 @@
                     return;
                 }
                 if (dragTarget === 'r') {
-                    applyZFromSqrtPosition(pos.x, pos.y);
+                    applyZFromRDrag(pos.x, pos.y);
                     syncSlidersFromState();
                     CC.needsRedraw = true;
                     return;
@@ -800,9 +806,9 @@
             const oy = CC.mapY(0);
             const ax = CC.mapX(state.re);
             const ay = CC.mapY(state.im);
-            const sqrtZ = principalComplexSqrt(state.re, state.im);
-            const sx = CC.mapX(sqrtZ.re);
-            const sy = CC.mapY(sqrtZ.im);
+            const rPt = mapRFromZ(state.re, state.im);
+            const sx = CC.mapX(rPt.re);
+            const sy = CC.mapY(rPt.im);
             const s = CC.getUiScale();
 
             /*
@@ -870,14 +876,20 @@
             const zEl = document.getElementById('cn-label-z');
             const rEl = document.getElementById('cn-label-r');
             const mode = dragTarget == null ? 'idle' : dragTarget;
-            const key = `cn-pt-${mode}`;
+            const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+            const key = `cn-pt-${mode}-${zm}`;
 
             if (zEl && zEl.dataset.cnPointKey !== key) {
                 zEl.innerHTML = '';
-                const zTex =
-                    mode === 'r'
-                        ? `\\textcolor{${P.VAR_Z}}{z} \\,{=}\\, \\textcolor{${P.VAR_R}}{r}^{\\,2}`
-                        : `\\textcolor{${P.VAR_Z}}{z}`;
+                let zTex;
+                if (mode === 'r') {
+                    zTex =
+                        state.zMapMode === 'square'
+                            ? `\\textcolor{${P.VAR_Z}}{z}\\,\\textcolor{${P.TITLE_MUTED}}{=}\\,\\textcolor{${P.TITLE_MUTED}}{\\sqrt{\\textcolor{${P.VAR_R}}{r}}}`
+                            : `\\textcolor{${P.VAR_Z}}{z}\\,\\textcolor{${P.TITLE_MUTED}}{=}\\,\\textcolor{${P.VAR_R}}{r}^{\\textcolor{${P.TITLE_MUTED}}{2}}`;
+                } else {
+                    zTex = `\\textcolor{${P.VAR_Z}}{z}`;
+                }
                 katex.render(zTex, zEl, { throwOnError: false, displayMode: false });
                 zEl.dataset.cnPointKey = key;
             }
@@ -886,7 +898,9 @@
                 const rTex =
                     mode === 'r'
                         ? `\\textcolor{${P.VAR_R}}{r}`
-                        : ImaginaryNumbersControls.texRSqrtZ();
+                        : state.zMapMode === 'square'
+                          ? ImaginaryNumbersControls.texZSquare()
+                          : ImaginaryNumbersControls.texRSqrtZ();
                 katex.render(rTex, rEl, { throwOnError: false, displayMode: false });
                 rEl.dataset.cnPointKey = key;
             }
@@ -991,7 +1005,7 @@
             ImaginaryNumbersControls.setupParameterCard({
                 state,
                 fmtNum,
-                sqrtProvider: principalComplexSqrt,
+                sqrtProvider: mapRFromZ,
             });
 
             setupMapModeButtons();
