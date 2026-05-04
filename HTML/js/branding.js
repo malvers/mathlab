@@ -34,6 +34,12 @@ function getBriefingModuleKey() {
     }
 }
 
+/** Briefing registry keys differ from page basenames (e.g. mandelbrot.html → mandelbrot_deep). */
+function getBriefingLookupKey(moduleKey) {
+    const aliases = { mandelbrot: "mandelbrot_deep" };
+    return aliases[moduleKey] || moduleKey;
+}
+
 const CYBER_BRIEFING_BTN = '.nav-btn[title="Beschreibung anzeigen"]';
 
 function getBrandingNavHost() {
@@ -648,6 +654,7 @@ const CyberBranding = {
 
     showBriefing: function () {
         const moduleKey = getBriefingModuleKey();
+        const briefingLookupKey = getBriefingLookupKey(moduleKey);
         const currentLang = (window.CyberI18n && window.CyberI18n.current) || 'de';
 
         const pageBrief = this.briefingContent != null && String(this.briefingContent).trim() !== "";
@@ -658,13 +665,13 @@ const CyberBranding = {
             const tryLangs = [currentLang, 'en', 'de'];
             for (let i = 0; i < tryLangs.length && content == null; i++) {
                 const L = tryLangs[i];
-                if (window.CyberBriefings[L] && window.CyberBriefings[L][moduleKey]) {
-                    content = window.CyberBriefings[L][moduleKey];
+                if (window.CyberBriefings[L] && window.CyberBriefings[L][briefingLookupKey]) {
+                    content = window.CyberBriefings[L][briefingLookupKey];
                 }
             }
             // Case 3: Old flat structure { "key": "..." }
-            if (!content && window.CyberBriefings[moduleKey] && typeof window.CyberBriefings[moduleKey] === 'string') {
-                content = window.CyberBriefings[moduleKey];
+            if (!content && window.CyberBriefings[briefingLookupKey] && typeof window.CyberBriefings[briefingLookupKey] === 'string') {
+                content = window.CyberBriefings[briefingLookupKey];
             }
 
             if (content) {

@@ -275,6 +275,8 @@ const CyberI18n = {
                 arithmetic: "ARITHMETIK",
                 real: "REAL-TEIL (C_re)",
                 imaginary: "IMAGINÄR-TEIL (C_im)",
+                slider_plane_hint:
+                    "Schieberegler = Koordinaten in der komplexen Ebene (wie die Orbit-Achsen), keine Pixel.",
                 iterations: "MAX. ITERATIONEN",
                 navigation: "NAVIGATION",
                 flight_start: "START FLIGHT",
@@ -285,7 +287,7 @@ const CyberI18n = {
                 plane_orbit: "ORBIT",
                 orbit_help_mb: "Orbit z_{n+1}=z_n²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 (typ. Escape-Schranke).",
                 orbit_help_bs:
-                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 wie beim Mandelbrot.",
+                    "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c mit z₀=0; c = Mittelpunkt der Fraktal-Ansicht. Kreise |z|=1 und |z|=2 wie beim Mandelbrot.",
                 orbit_help_jl: "Julia: c aus Real-/Imaginär-Schiebern; Orbit startet bei z₀ = Mittelpunkt der Fraktal-Ansicht.",
                 orbit_drag_hint: "Ziehen: Punkt c (Mandelbrot oder Burning Ship, entspricht Bildmitte der Fraktal-Ansicht) oder z₀ (Julia). Sonst Ebene schieben / Zoomen.",
                 orbit_grid: "Gitterlinien",
@@ -806,6 +808,7 @@ const CyberI18n = {
                 arithmetic: "ARITHMETIC",
                 real: "REAL PART (C_re)",
                 imaginary: "IMAGINARY PART (C_im)",
+                slider_plane_hint: "Sliders set complex-plane coordinates (same units as the orbit axes), not pixels.",
                 iterations: "MAX. ITERATIONS",
                 navigation: "NAVIGATION",
                 flight_start: "START FLIGHT",
@@ -816,7 +819,7 @@ const CyberI18n = {
                 plane_orbit: "ORBIT",
                 orbit_help_mb: "Iteration z_{n+1}=z_n²+c from z₀=0 with c at the center of the fractal view. Circles |z|=1 and |z|=2 (escape radius).",
                 orbit_help_bs:
-                    "Burning Ship iteration z_{n+1}=(|Re z_n|+i|Im z_n|)²+c from z₀=0 with c at fractal center. Same |z|=1 and |z|=2 guides as Mandelbrot.",
+                    "Burning Ship iteration z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c from z₀=0 with c at fractal center. Same |z|=1 and |z|=2 guides as Mandelbrot.",
                 orbit_help_jl: "Julia: fixed c from sliders; orbit starts at z₀ = fractal view center.",
                 orbit_drag_hint: "Drag point c (Mandelbrot or Burning Ship; same as fractal view center) or z₀ (Julia). Otherwise pan/zoom the plane.",
                 orbit_grid: "Grid lines",
@@ -1337,6 +1340,8 @@ const CyberI18n = {
                 arithmetic: "ARITMÉTICA",
                 real: "PARTE REAL (C_re)",
                 imaginary: "PARTE IMAGINARIA (C_im)",
+                slider_plane_hint:
+                    "Los controles son coordenadas en el plano complejo (mismas unidades que los ejes de órbita), no píxeles.",
                 iterations: "MÁX. ITERACIONES",
                 navigation: "NAVEGACIÓN",
                 flight_start: "INICIAR VUELO",
@@ -1347,7 +1352,7 @@ const CyberI18n = {
                 plane_orbit: "ÓRBITA",
                 orbit_help_mb: "Órbita z_{n+1}=z_n²+c con z₀=0; c = centro de la vista fractal. Círculos |z|=1 y |z|=2 (radio de escape).",
                 orbit_help_bs:
-                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c con z₀=0; c = centro de la vista. Círculos |z|=1 y |z|=2 (guías de escape).",
+                    "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c con z₀=0; c = centro de la vista. Círculos |z|=1 y |z|=2 (guías de escape).",
                 orbit_help_jl: "Julia: c con controles; órbita desde z₀ = centro de la vista fractal.",
                 orbit_drag_hint: "Arrastra c (Mandelbrot o Burning Ship, igual que el centro de la vista fractal) o z₀ (Julia). Si no, mover/ampliar el plano.",
                 orbit_grid: "Cuadrícula",
@@ -1868,6 +1873,8 @@ const CyberI18n = {
                 arithmetic: "ARITHMÉTIQUE",
                 real: "PARTIE RÉELLE (C_re)",
                 imaginary: "PARTIE IMAGINAIRE (C_im)",
+                slider_plane_hint:
+                    "Les curseurs sont des coordonnées du plan complexe (mêmes unités que les axes orbit), pas des pixels.",
                 iterations: "MAX. ITÉRATIONS",
                 navigation: "NAVIGATION",
                 flight_start: "DÉMARRER VOL",
@@ -1878,7 +1885,7 @@ const CyberI18n = {
                 plane_orbit: "ORBITES",
                 orbit_help_mb: "Orbite z_{n+1}=z_n²+c avec z₀=0 ; c = centre de la vue. Cercles |z|=1 et |z|=2 (rayon d'évasion).",
                 orbit_help_bs:
-                    "Burning Ship : z_{n+1}=(|Re z_n|+i|Im z_n|)²+c avec z₀=0 ; c au centre de la vue. Cercles |z|=1 et |z|=2.",
+                    "Burning Ship : z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c avec z₀=0 ; c au centre de la vue. Cercles |z|=1 et |z|=2.",
                 orbit_help_jl: "Julia : c depuis les curseurs ; orbite depuis z₀ = centre de la vue fractale.",
                 orbit_drag_hint: "Glisser le point c (Mandelbrot ou Burning Ship, comme le centre de la vue fractale) ou z₀ (Julia). Sinon déplacer/zoomer le plan.",
                 orbit_grid: "Quadrillage",
@@ -2399,6 +2406,8 @@ const CyberI18n = {
                 arithmetic: "ARITMETICA",
                 real: "PARTE REALE (C_re)",
                 imaginary: "PARTE IMMAGINARIA (C_im)",
+                slider_plane_hint:
+                    "Gli slider sono coordinate nel piano complesso (stesse unità degli assi orbit), non pixel.",
                 iterations: "MAX. ITERAZIONI",
                 navigation: "NAVIGAZIONE",
                 flight_start: "AVVIA VOLO",
@@ -2409,7 +2418,7 @@ const CyberI18n = {
                 plane_orbit: "ORBITA",
                 orbit_help_mb: "Orbita z_{n+1}=z_n²+c con z₀=0; c = centro della vista. Cerchi |z|=1 e |z|=2 (raggio di fuga).",
                 orbit_help_bs:
-                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c con z₀=0; stessi cerchi guida |z|=1 e |z|=2 del Mandelbrot.",
+                    "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c con z₀=0; stessi cerchi guida |z|=1 e |z|=2 del Mandelbrot.",
                 orbit_help_jl: "Julia: c dagli slider; orbita da z₀ = centro della vista frattale.",
                 orbit_drag_hint: "Trascina c (Mandelbrot o Burning Ship, come il centro della vista frattale) o z₀ (Julia). Altrimenti pan/zoom sul piano.",
                 orbit_grid: "Griglia",
@@ -2930,6 +2939,8 @@ pt: {
                 arithmetic: "ARITHMETIC",
                 real: "REAL PART (C_re)",
                 imaginary: "IMAGINARY PART (C_im)",
+                slider_plane_hint:
+                    "Controles = coordenadas no plano complexo (mesmas unidades que os eixos na órbita), não pixels.",
                 iterations: "MAX. ITERATIONS",
                 navigation: "NAVIGATION",
                 flight_start: "INICIAR VÔO",
@@ -2940,7 +2951,7 @@ pt: {
                 plane_orbit: "ÓRBITA",
                 orbit_help_mb: "Órbita z_{n+1}=z_n²+c com z₀=0; c = centro da vista. Círculos |z|=1 e |z|=2 (escape).",
                 orbit_help_bs:
-                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c com z₀=0; c ao centro da vista. Círculos |z|=1 e |z|=2.",
+                    "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c com z₀=0; c ao centro da vista. Círculos |z|=1 e |z|=2.",
                 orbit_help_jl: "Julia: c nos sliders; órbita a partir de z₀ = centro da vista fractal.",
                 orbit_drag_hint: "Arraste c (Mandelbrot ou Burning Ship, igual ao centro da vista fractal) ou z₀ (Julia). Senão, mover/ampliar o plano.",
                 orbit_grid: "Grade",
@@ -3462,6 +3473,8 @@ pt: {
                 arithmetic: "HERI",
                 real: "SEHEMU HALISI (C_re)",
                 imaginary: "SEHEMU YA FIKIRI (C_im)",
+                slider_plane_hint:
+                    "Sliders set complex-plane coordinates (same units as the orbit axes), not pixels.",
                 iterations: "MAX. MAELEZO",
                 navigation: "USAFIRI",
                 flight_start: "ANZA NDEGE",
@@ -3472,7 +3485,7 @@ pt: {
                 plane_orbit: "OBITI",
                 orbit_help_mb: "Iteration z_{n+1}=z_n²+c kutoka z₀=0 na c katikati ya mwonekano wa fractal. Miduara |z|=1 na |z|=2 (radius ya kutoroka).",
                 orbit_help_bs:
-                    "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c kutoka z₀=0; c katika kituo cha fractal. Miduara |z|=1 na |z|=2.",
+                    "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c kutoka z₀=0; c katika kituo cha fractal. Miduara |z|=1 na |z|=2.",
                 orbit_help_jl: "Julia: fasta c kutoka sliders; obiti inaanzia z₀ = kituo cha kutazama fractal.",
                 orbit_drag_hint: "Buruta sehemu c (Mandelbrot au Burning Ship; sawa na kituo cha kutazama) au z₀ (Julia). Vinginevyo panua/kuza ndege.",
                 orbit_grid: "Mistari ya gridi ya taifa",
@@ -3991,6 +4004,8 @@ pt: {
                 arithmetic: "Aritmetik",
                 real: "GERÇEK BÖLÜM (C_re)",
                 imaginary: "HAYAL PARÇA (C_im)",
+                slider_plane_hint:
+                    "Kaydırıcılar karmaşık düzlemde koordinatlar belirler (yörünge eksenleriyle aynı birimler), piksel değildir.",
                 iterations: "MAKS. yinelemeler",
                 navigation: "NAVİGASYON",
                 flight_start: "UÇUŞU BAŞLAT",
@@ -4001,7 +4016,7 @@ pt: {
                 plane_orbit: "YÖRÜNGE",
                 orbit_help_mb: "Fraktal görünümün merkezinde c olacak şekilde z₀=0'dan z_{n+1}=z_n²+c yinelemesi. |z|=1 ve |z|=2 daireleri (kaçış yarıçapı).",
                 orbit_help_bs:
-                    "Burning Ship yinelemesi: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c, z₀=0 ile; c görünüm merkezinde. |z|=1 ve |z|=2 kılavuzları Mandelbrot ile aynı.",
+                    "Burning Ship yinelemesi: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c, z₀=0 ile; c görünüm merkezinde. |z|=1 ve |z|=2 kılavuzları Mandelbrot ile aynı.",
                 orbit_help_jl: "Julia: kaydırıcılardan c düzeltildi; Yörünge z₀ = fraktal görüş merkezinde başlar.",
                 orbit_drag_hint: "c (Mandelbrot veya Burning Ship; fraktal görünüm merkeziyle aynı) veya z₀ (Julia) noktasını sürükleyin. Aksi halde düzlemi kaydırın/yakınlaştırın.",
                 orbit_grid: "Izgara çizgileri",
@@ -4921,6 +4936,8 @@ Object.assign(CyberI18n.translations.nl.fractal, {
         arithmetic: "REKENEN",
         real: "REËEL DEEL (C_re)",
         imaginary: "IMAGINAIR DEEL (C_im)",
+        slider_plane_hint:
+            "Schuifregelaars = coördinaten in het complexe vlak (zelfde eenheden als de orbit-assen), geen pixels.",
         iterations: "MAX. ITERATIES",
         navigation: "NAVIGATIE",
         flight_start: "ORBIT STARTEN",
@@ -4932,7 +4949,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
         orbit_help_mb:
             "Iteratie z_{n+1}=z_n²+c vanaf z₀=0 met c in het midden van de fractaalweergave. Cirkels |z|=1 en |z|=2 (typische ontsnappingsgrens).",
         orbit_help_bs:
-            "Burning Ship: z_{n+1}=(|Re z_n|+i|Im z_n|)²+c vanaf z₀=0; dezelfde cirkels |z|=1 en |z|=2 als bij Mandelbrot.",
+            "Burning Ship: z_{n+1}=(|ℜ z_n|+i|ℑ z_n|)²+c vanaf z₀=0; dezelfde cirkels |z|=1 en |z|=2 als bij Mandelbrot.",
         orbit_help_jl: "Julia: vaste c via de schuifregelaars; de orbit start bij z₀ = het midden van de fractaalweergave.",
         orbit_drag_hint:
             "Sleep punt c (Mandelbrot of Burning Ship; gelijk aan het midden van de fractaalweergave) of z₀ (Julia). Anders: het vlak verschuiven of zoomen.",

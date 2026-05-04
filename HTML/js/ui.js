@@ -1492,18 +1492,25 @@ class CyberUI {
         }
     }
 
-    static createSlider(containerId, label, min, max, value, step, oninput, color = 'var(--neon-blue)') {
+    static createSlider(containerId, label, min, max, value, step, oninput, color = 'var(--neon-blue)', formatDisplay = null) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
         const sliderId = `slider-${Math.random().toString(36).substr(2, 9)}`;
         const displayId = `val-${sliderId}`;
 
+        const fmt =
+            typeof formatDisplay === 'function'
+                ? formatDisplay
+                : function (raw) {
+                      return String(raw);
+                  };
+
         const html = `
             <div class="cyber-control-group">
                 <div class="control-header">
                     <span class="cyber-label" style="color:rgba(255,255,255,0.7); font-size:0.7rem; font-family:'Orbitron';">${label}</span>
-                    <span id="${displayId}" class="val-display" style="color:${color}">${value}</span>
+                    <span id="${displayId}" class="val-display" style="color:${color}">${fmt(value)}</span>
                 </div>
                 <input type="range" class="cyber-slider" id="${sliderId}" 
                     min="${min}" max="${max}" value="${value}" step="${step}"
@@ -1517,9 +1524,9 @@ class CyberUI {
         const display = document.getElementById(displayId);
 
         input.oninput = (e) => {
-            const val = e.target.value;
-            display.innerText = val;
-            oninput(parseFloat(val));
+            const val = parseFloat(e.target.value);
+            display.innerText = fmt(val);
+            oninput(val);
         };
     }
 
