@@ -200,7 +200,7 @@
                 sumCheck.addEventListener('change', (e) => {
                     state.showSum = e.target.checked;
                     ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
-                    ImaginaryNumbersControls.renderMapModeKatex();
+                    ImaginaryNumbersControls.renderMapModeKatex(state);
                     if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                         CyberCanvasInstance.needsRedraw = true;
                     }
@@ -213,7 +213,7 @@
                 diffCheck.addEventListener('change', (e) => {
                     state.showDiff = e.target.checked;
                     ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
-                    ImaginaryNumbersControls.renderMapModeKatex();
+                    ImaginaryNumbersControls.renderMapModeKatex(state);
                     if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                         CyberCanvasInstance.needsRedraw = true;
                     }
@@ -227,7 +227,7 @@
                 prodCheck.addEventListener('change', (e) => {
                     state.showProd = e.target.checked;
                     ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
-                    ImaginaryNumbersControls.renderMapModeKatex();
+                    ImaginaryNumbersControls.renderMapModeKatex(state);
                     if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                         CyberCanvasInstance.needsRedraw = true;
                     }
@@ -551,6 +551,12 @@
                 ctx.moveTo(mx, my);
                 ctx.lineTo(dx, dy);
                 ctx.stroke();
+
+                // Punkt an der Ecke –r (grün)
+                ctx.fillStyle = rgbaFromHex(P.VAR_R, 0.98);
+                ctx.beginPath();
+                ctx.arc(mx, my, 6 * s, 0, Math.PI * 2);
+                ctx.fill();
             }
 
             /* Vectors O → r, O → z, O → w, O → d: in their respective colors */
@@ -755,3 +761,4 @@
 </body>
 
 </html>
+

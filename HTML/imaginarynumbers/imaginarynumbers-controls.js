@@ -254,10 +254,10 @@
     function renderSidebarKatex(state, fmtNum) {
         if (typeof katex === 'undefined') return;
         renderValDisplays(state, fmtNum);
-        renderMapModeKatex();
+        renderMapModeKatex(state);
     }
 
-    function renderMapModeKatex() {
+    function renderMapModeKatex(state) {
         const sqrtEl = document.getElementById('cn-map-sqrt-tex');
         const sqEl = document.getElementById('cn-map-sq-tex');
         const sumEl = document.getElementById('cn-check-sum-tex');
@@ -302,10 +302,6 @@
                 `\\textcolor{${PALETTE.TITLE_MUTED}}{\\cdot}\\,` +
                 `\\textcolor{${PALETTE.VAR_R}}{r}`;
             katexTry(prodEl, prodTex, 'μ = z · r');
-        }
-        if (state.zMapMode === 'free') {
-            if (sqrtEl) sqrtEl.textContent = 'r frei';
-            if (sqEl) sqEl.textContent = '';
         }
         if (absEl) {
             const absTex = `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, |\\textcolor{${PALETTE.VAR_R}}{r}| \\, |\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, |\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}|`;
