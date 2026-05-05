@@ -17,6 +17,7 @@
         VAR_R: '#92D050',
         VAR_OMEGA: '#B026FF', // Purple for sum
         VAR_DIFF: '#FF8C00', // Orange for difference
+        VAR_PRODUCT: '#38D9A9', // Teal for product
         TITLE_MUTED: '#e2e8f0',
     });
 
@@ -32,13 +33,15 @@
 
     /** Below z- and r-card (not in z-card): KaTeX r = √(z) vs z² (only one active). */
     const ROOT_MAP_MODE_HTML = `
-                <div id="cn-map-mode" class="cn-map-mode" role="radiogroup" aria-label="Abbildung z nach r">
-                    <button type="button" id="cn-map-sqrt" class="cn-map-mode-btn" aria-pressed="true" aria-label="r gleich Wurzel aus z">
-                        <span id="cn-map-sqrt-tex" class="cn-map-mode-tex"></span>
-                    </button>
-                    <button type="button" id="cn-map-sq" class="cn-map-mode-btn" aria-pressed="false" aria-label="z Quadrat">
-                        <span id="cn-map-sq-tex" class="cn-map-mode-tex"></span>
-                    </button>
+                <div id="cn-map-mode" class="cn-map-mode cyber-control-group">
+                    <label class="cyber-checkbox-wrapper">
+                        <input type="checkbox" id="cn-map-sqrt" class="cyber-checkbox">
+                        <span id="cn-map-sqrt-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
+                    </label>
+                    <label class="cyber-checkbox-wrapper">
+                        <input type="checkbox" id="cn-map-sq" class="cyber-checkbox">
+                        <span id="cn-map-sq-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
+                    </label>
                 </div>`;
 
     const ROOT_MAP_MODE_WRAP_HTML = `
@@ -54,8 +57,8 @@
                     <span id="cn-check-diff-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
-                    <input type="checkbox" id="cn-check-dashed" class="cyber-checkbox"> 
-                    <span id="cn-check-dashed-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
+                    <input type="checkbox" id="cn-check-prod" class="cyber-checkbox"> 
+                    <span id="cn-check-prod-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-abs" class="cyber-checkbox"> 
@@ -63,6 +66,10 @@
                         <span id="cn-check-abs-math"></span>
                         <span id="cn-check-abs-tex"></span>
                     </span>
+                </label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-dashed" class="cyber-checkbox"> 
+                    <span id="cn-check-dashed-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
                 </label>
             </div>
         </div>`;
@@ -120,6 +127,7 @@
         setHexAndRgb('--cn-var-r', P.VAR_R);
         setHexAndRgb('--cn-var-omega', P.VAR_OMEGA);
         setHexAndRgb('--cn-var-diff', P.VAR_DIFF);
+        setHexAndRgb('--cn-var-product', P.VAR_PRODUCT);
         setHexAndRgb('--cn-title-muted', P.TITLE_MUTED);
         root.style.setProperty('--cn-card-accent', P.CARD_ACCENT);
         root.style.setProperty('--cn-axis-re-dim', PALETTE_DIM.AXIS_RE_EDGE);
@@ -234,7 +242,7 @@
             katexLabelOnce(document.getElementById(id), rTex[i], rFallbacks[i], 'li1');
         });
 
-        const w = sqrtProviderRef(state.re, state.im);
+        const w = state.zMapMode === 'free' ? { re: state.rRe, im: state.rIm } : sqrtProviderRef(state.re, state.im);
         const vals = [fmtNum(w.re), fmtNum(w.im)];
         renderTwoColoredValues(
             [document.getElementById('cn-r-val-re'), document.getElementById('cn-r-val-im')],
@@ -281,8 +289,23 @@
                 `\\textcolor{${PALETTE.VAR_R}}{r}`;
             katexTry(diffEl, diffTex, 'δ = z - r');
         }
+        const prodEl = document.getElementById('cn-check-prod-tex');
         if (dashedEl) {
             dashedEl.textContent = 'Hilfslinien';
+        }
+        if (prodEl) {
+            const prodTex = 
+                `\\Large ` +
+                `\\textcolor{${PALETTE.VAR_PRODUCT}}{\\mu}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+                `\\textcolor{${PALETTE.VAR_Z}}{z}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{\\cdot}\\,` +
+                `\\textcolor{${PALETTE.VAR_R}}{r}`;
+            katexTry(prodEl, prodTex, 'μ = z · r');
+        }
+        if (state.zMapMode === 'free') {
+            if (sqrtEl) sqrtEl.textContent = 'r frei';
+            if (sqEl) sqEl.textContent = '';
         }
         if (absEl) {
             const absTex = `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, |\\textcolor{${PALETTE.VAR_R}}{r}| \\, |\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, |\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}|`;

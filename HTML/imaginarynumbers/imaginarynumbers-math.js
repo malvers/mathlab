@@ -23,6 +23,13 @@
         return principalComplexSqrt(re, im);
     }
 
+    function multiplyComplex(re1, im1, re2, im2) {
+        return {
+            re: re1 * re2 - im1 * im2,
+            im: re1 * im2 + im1 * re2,
+        };
+    }
+
     /** Immer zwei Nachkommastellen (z. B. 1.00, 0.00) — für Overlays und Sidebar. */
     function fmtNum(v) {
         if (typeof v !== 'number' || !Number.isFinite(v)) return '0.00';
@@ -33,6 +40,7 @@
     global.ImaginaryNumbersMath = {
         principalComplexSqrt,
         mapRFromZ,
+        multiplyComplex,
         fmtNum
     };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -51,6 +51,9 @@
                 <div id="cn-formula-diff" class="cn-formula-overlay cn-formula-diff" aria-live="polite" style="display: none;">
                     <span id="cn-formula-diff-tex"></span>
                 </div>
+                <div id="cn-formula-prod" class="cn-formula-overlay cn-formula-prod" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-prod-tex"></span>
+                </div>
             </div>
             <div id="cn-formula-row-bottom" class="cn-formula-row-bottom">
                 <div id="cn-formula-absz" class="cn-formula-overlay cn-formula-absz" aria-live="polite">
@@ -65,12 +68,16 @@
                 <div id="cn-formula-absd" class="cn-formula-overlay cn-formula-absd" aria-live="polite" style="display: none;">
                     <span id="cn-formula-absd-tex"></span>
                 </div>
+                <div id="cn-formula-absp" class="cn-formula-overlay cn-formula-absp" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-absp-tex"></span>
+                </div>
             </div>
             <div id="cn-point-labels" class="cn-point-labels" aria-hidden="true">
                 <span id="cn-label-z" class="cn-point-label"></span>
                 <span id="cn-label-r" class="cn-point-label"></span>
                 <span id="cn-label-w" class="cn-point-label"></span>
                 <span id="cn-label-d" class="cn-point-label"></span>
+                <span id="cn-label-p" class="cn-point-label"></span>
             </div>
             <div id="imaginarynumbers-coach" class="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
@@ -97,7 +104,10 @@
             `rgba(${ImaginaryNumbersControls.hexToRgbComma(hex)}, ${a})`;
         
         const fmtNum = ImaginaryNumbersMath.fmtNum;
-        const mapRFromZ = (re, im) => ImaginaryNumbersMath.mapRFromZ(re, im, state.zMapMode);
+        const mapRFromZ = (re, im) =>
+            state.zMapMode === 'free'
+                ? { re: state.rRe, im: state.rIm }
+                : ImaginaryNumbersMath.mapRFromZ(re, im, state.zMapMode);
 
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -133,8 +143,8 @@
         }
 
         /** Real part x, imaginary part y — same math space as CyberCanvas axis pair. */
-        const state = { re: 1, im: 1, zMapMode: 'sqrt', showSum: false, showDiff: false, showDashedLines: true, showAbsBoxes: true };
-        /** null | 'z' — nur z per Maus; r folgt immer aus z (mapRFromZ). */
+        const state = { re: 1, im: 1, zMapMode: 'sqrt', rRe: 1, rIm: 1, showSum: false, showDiff: false, showProd: false, showDashedLines: true, showAbsBoxes: true };
+        /** null | 'z' | 'r' — only point drag target; in free mode r moves independently of z. */
         let dragTarget = null;
         const Z_SLIDER_MIN = -20;
         const Z_SLIDER_MAX = 20;
@@ -170,19 +180,16 @@
 
         /** Sidebar sqrt / ^2 — keep visually in sync with state.zMapMode */
         function syncMapModeButtons() {
-            const sqrtBtn = document.getElementById('cn-map-sqrt');
-            const sqBtn = document.getElementById('cn-map-sq');
-            if (!sqrtBtn || !sqBtn) return;
-            const mode = state.zMapMode === 'square' ? 'square' : 'sqrt';
-            sqrtBtn.setAttribute('aria-pressed', mode === 'sqrt' ? 'true' : 'false');
-            sqBtn.setAttribute('aria-pressed', mode === 'square' ? 'true' : 'false');
-            sqrtBtn.classList.toggle('cn-map-mode-btn--active', mode === 'sqrt');
-            sqBtn.classList.toggle('cn-map-mode-btn--active', mode === 'square');
+            const sqrtCheck = document.getElementById('cn-map-sqrt');
+            const sqCheck = document.getElementById('cn-map-sq');
+            if (!sqrtCheck || !sqCheck) return;
+            sqrtCheck.checked = state.zMapMode === 'sqrt';
+            sqCheck.checked = state.zMapMode === 'square';
         }
 
         function setupMapModeButtons() {
-            const sqrtBtn = document.getElementById('cn-map-sqrt');
-            const sqBtn = document.getElementById('cn-map-sq');
+            const sqrtCheck = document.getElementById('cn-map-sqrt');
+            const sqCheck = document.getElementById('cn-map-sq');
             const sumCheck = document.getElementById('cn-check-sum');
             const diffCheck = document.getElementById('cn-check-diff');
             const dashedCheck = document.getElementById('cn-check-dashed');
@@ -205,6 +212,20 @@
                 diffCheck.checked = state.showDiff;
                 diffCheck.addEventListener('change', (e) => {
                     state.showDiff = e.target.checked;
+                    ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
+                    ImaginaryNumbersControls.renderMapModeKatex();
+                    if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                        CyberCanvasInstance.needsRedraw = true;
+                    }
+                    schedulePersistLabState();
+                });
+            }
+
+            const prodCheck = document.getElementById('cn-check-prod');
+            if (prodCheck) {
+                prodCheck.checked = state.showProd;
+                prodCheck.addEventListener('change', (e) => {
+                    state.showProd = e.target.checked;
                     ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                     ImaginaryNumbersControls.renderMapModeKatex();
                     if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
@@ -237,11 +258,18 @@
                 });
             }
 
-            if (!sqrtBtn || !sqBtn || sqrtBtn.dataset.cnBound === '1') return;
-            sqrtBtn.dataset.cnBound = '1';
-            sqrtBtn.addEventListener('click', () => {
-                if (state.zMapMode === 'sqrt') return;
-                state.zMapMode = 'sqrt';
+            if (!sqrtCheck || !sqCheck || sqrtCheck.dataset.cnBound === '1') return;
+            sqrtCheck.dataset.cnBound = '1';
+            sqrtCheck.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    state.zMapMode = 'sqrt';
+                    sqCheck.checked = false;
+                } else if (!sqCheck.checked && state.zMapMode !== 'free') {
+                    state.zMapMode = 'free';
+                    const currentR = ImaginaryNumbersMath.mapRFromZ(state.re, state.im, 'sqrt');
+                    state.rRe = currentR.re;
+                    state.rIm = currentR.im;
+                }
                 syncMapModeButtons();
                 ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                 ImaginaryNumbersControls.renderValDisplays(state, fmtNum);
@@ -250,9 +278,16 @@
                 }
                 schedulePersistLabState();
             });
-            sqBtn.addEventListener('click', () => {
-                if (state.zMapMode === 'square') return;
-                state.zMapMode = 'square';
+            sqCheck.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    state.zMapMode = 'square';
+                    sqrtCheck.checked = false;
+                } else if (!sqrtCheck.checked && state.zMapMode !== 'free') {
+                    state.zMapMode = 'free';
+                    const currentR = ImaginaryNumbersMath.mapRFromZ(state.re, state.im, 'square');
+                    state.rRe = currentR.re;
+                    state.rIm = currentR.im;
+                }
                 syncMapModeButtons();
                 ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
                 ImaginaryNumbersControls.renderValDisplays(state, fmtNum);
@@ -274,9 +309,12 @@
                         v: 1,
                         re: state.re,
                         im: state.im,
-                        zMapMode: state.zMapMode === 'square' ? 'square' : 'sqrt',
+                        zMapMode: state.zMapMode === 'square' ? 'square' : state.zMapMode === 'free' ? 'free' : 'sqrt',
+                        rRe: state.rRe,
+                        rIm: state.rIm,
                         showSum: !!state.showSum,
                         showDiff: !!state.showDiff,
+                        showProd: !!state.showProd,
                         showDashedLines: !!state.showDashedLines,
                         showAbsBoxes: !!state.showAbsBoxes,
                         view: {
@@ -311,11 +349,18 @@
             return Math.max(0.06, span * 0.032);
         }
 
-        /** Mouse only on z: within grab radius → 'z', else null. */
+        /** Mouse point target: z or r in free mode. */
         function pickDragTarget(CC, pos) {
             const rad = grabRadiusMath(CC);
             const zd = Math.hypot(pos.x - state.re, pos.y - state.im);
-            return zd <= rad ? 'z' : null;
+            let closest = { target: zd <= rad ? 'z' : null, dist: zd };
+            if (state.zMapMode === 'free') {
+                const rd = Math.hypot(pos.x - state.rRe, pos.y - state.rIm);
+                if (rd <= rad && (closest.target === null || rd < closest.dist)) {
+                    closest = { target: 'r', dist: rd };
+                }
+            }
+            return closest.target;
         }
 
         /** r-Readout in the sidebar after z-movement (no sliders anymore). */
@@ -340,6 +385,13 @@
                 if (dragTarget === 'z') {
                     state.re = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.x));
                     state.im = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.y));
+                    syncSlidersFromState();
+                    CC.needsRedraw = true;
+                    return;
+                }
+                if (dragTarget === 'r') {
+                    state.rRe = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.x));
+                    state.rIm = Math.max(Z_SLIDER_MIN, Math.min(Z_SLIDER_MAX, pos.y));
                     syncSlidersFromState();
                     CC.needsRedraw = true;
                     return;
@@ -385,7 +437,7 @@
             const sy = CC.mapY(rPt.im);
             const s = CC.getUiScale();
 
-            let wx, wy, dx, dy;
+            let wx, wy, dx, dy, px, py;
             if (state.showSum) {
                 wx = CC.mapX(state.re + rPt.re);
                 wy = CC.mapY(state.im + rPt.im);
@@ -393,6 +445,11 @@
             if (state.showDiff) {
                 dx = CC.mapX(state.re - rPt.re);
                 dy = CC.mapY(state.im - rPt.im);
+            }
+            if (state.showProd) {
+                const prod = ImaginaryNumbersMath.multiplyComplex(state.re, state.im, rPt.re, rPt.im);
+                px = CC.mapX(prod.re);
+                py = CC.mapY(prod.im);
             }
 
             if (state.showDashedLines) {
@@ -441,6 +498,18 @@
                     ctx.beginPath();
                     ctx.moveTo(dx, oy);
                     ctx.lineTo(dx, dy);
+                    ctx.stroke();
+                }
+                if (state.showProd) {
+                    ctx.strokeStyle = P.AXIS_RE;
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(ox, py);
+                    ctx.stroke();
+                    ctx.strokeStyle = P.AXIS_IM;
+                    ctx.beginPath();
+                    ctx.moveTo(px, oy);
+                    ctx.lineTo(px, py);
                     ctx.stroke();
                 }
                 ctx.setLineDash([]);
@@ -515,6 +584,14 @@
                 ctx.stroke();
             }
 
+            if (state.showProd) {
+                ctx.strokeStyle = P.VAR_PRODUCT;
+                ctx.beginPath();
+                ctx.moveTo(ox, oy);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+            }
+
             ctx.fillStyle = rgbaFromHex(P.VAR_R, 0.98);
             ctx.beginPath();
             ctx.arc(sx, sy, 6 * s, 0, Math.PI * 2);
@@ -539,15 +616,24 @@
                 ctx.fill();
             }
 
-            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, s, state);
+            if (state.showProd) {
+                ctx.fillStyle = rgbaFromHex(P.VAR_PRODUCT, 0.98);
+                ctx.beginPath();
+                ctx.arc(px, py, 6 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, px, py, s, state);
 
             ImaginaryNumbersOverlays.updateCnFormulaOverlay(state, dragTarget);
             ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbsrOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbswOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbspOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbsdOverlay(state);
             ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
             ImaginaryNumbersOverlays.updateCnSumOverlay(state);
+            ImaginaryNumbersOverlays.updateCnProdOverlay(state);
             ImaginaryNumbersOverlays.updateCnDiffOverlay(state);
             requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
             maybePersistAfterDraw();
@@ -564,14 +650,21 @@
             if (saved) {
                 state.re = clampToSliders(saved.re);
                 state.im = clampToSliders(saved.im);
-                if (saved.zMapMode === 'sqrt' || saved.zMapMode === 'square') {
+                if (saved.zMapMode === 'sqrt' || saved.zMapMode === 'square' || saved.zMapMode === 'free') {
                     state.zMapMode = saved.zMapMode;
+                }
+                if (typeof saved.rRe === 'number' && typeof saved.rIm === 'number') {
+                    state.rRe = saved.rRe;
+                    state.rIm = saved.rIm;
                 }
                 if (saved.showSum !== undefined) {
                     state.showSum = !!saved.showSum;
                 }
                 if (saved.showDiff !== undefined) {
                     state.showDiff = !!saved.showDiff;
+                }
+                if (saved.showProd !== undefined) {
+                    state.showProd = !!saved.showProd;
                 }
                 if (saved.showDashedLines !== undefined) {
                     state.showDashedLines = !!saved.showDashedLines;
@@ -647,8 +740,10 @@
             ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbsrOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbswOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbspOverlay(state);
             ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
             ImaginaryNumbersOverlays.updateCnSumOverlay(state);
+            ImaginaryNumbersOverlays.updateCnProdOverlay(state);
             ImaginaryNumbersOverlays.ensureCnFormulaWidthResizeListener();
             requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
 
