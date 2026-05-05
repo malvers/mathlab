@@ -15,7 +15,8 @@
         AXIS_RE: '#FFC000',
         AXIS_IM: '#00B0F0',
         VAR_R: '#92D050',
-        VAR_OMEGA: '#B026FF', // Purple für die Summe
+        VAR_OMEGA: '#B026FF', // Purple for sum
+        VAR_DIFF: '#FF8C00', // Orange for difference
         TITLE_MUTED: '#e2e8f0',
     });
 
@@ -49,12 +50,19 @@
                     <span id="cn-check-sum-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-diff" class="cyber-checkbox"> 
+                    <span id="cn-check-diff-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
+                </label>
+                <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-dashed" class="cyber-checkbox"> 
                     <span id="cn-check-dashed-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-abs" class="cyber-checkbox"> 
-                    <span id="cn-check-abs-tex" class="cyber-label" style="text-transform: none; font-size: 1.1rem;"></span>
+                    <span class="cyber-label" style="text-transform: none; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">
+                        <span id="cn-check-abs-math"></span>
+                        <span id="cn-check-abs-tex"></span>
+                    </span>
                 </label>
             </div>
         </div>`;
@@ -111,6 +119,7 @@
         setHexAndRgb('--cn-axis-im', P.AXIS_IM);
         setHexAndRgb('--cn-var-r', P.VAR_R);
         setHexAndRgb('--cn-var-omega', P.VAR_OMEGA);
+        setHexAndRgb('--cn-var-diff', P.VAR_DIFF);
         setHexAndRgb('--cn-title-muted', P.TITLE_MUTED);
         root.style.setProperty('--cn-card-accent', P.CARD_ACCENT);
         root.style.setProperty('--cn-axis-re-dim', PALETTE_DIM.AXIS_RE_EDGE);
@@ -198,13 +207,6 @@
         const mount = document.getElementById('cn-z-readout');
         if (!mount) return;
 
-        const card = mount.closest('.instrument-card');
-        const titleHost = card?.querySelector('.instrument-title');
-        if (titleHost && titleHost.dataset.cnZTitleVer !== 'v10') {
-            katexTry(titleHost, texZInC(), 'z ∈ ℂ');
-            titleHost.dataset.cnZTitleVer = 'v10';
-        }
-
         const zTex = texReImPair('z', 'z');
         const zFallbacks = ['re (z)', 'im (z)'];
         const labelIds = ['cn-z-tex-re', 'cn-z-tex-im'];
@@ -224,18 +226,6 @@
         if (typeof katex === 'undefined' || !sqrtProviderRef) return;
         const mount = document.getElementById('cn-r-readout');
         if (!mount) return;
-
-        const card = mount.closest('.instrument-card');
-        const titleHost = card?.querySelector('.instrument-title');
-        const titleVer = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-        if (titleHost && titleHost.dataset.cnRTitleVer !== titleVer) {
-            katexTry(
-                titleHost,
-                state.zMapMode === 'square' ? texZSquare() : texRSqrtZ(),
-                state.zMapMode === 'square' ? 'r = z²' : 'r = √z',
-            );
-            titleHost.dataset.cnRTitleVer = titleVer;
-        }
 
         const rTex = texReImPair('r', 'r');
         const rFallbacks = ['re (r)', 'im (r)'];
@@ -263,6 +253,7 @@
         const sqrtEl = document.getElementById('cn-map-sqrt-tex');
         const sqEl = document.getElementById('cn-map-sq-tex');
         const sumEl = document.getElementById('cn-check-sum-tex');
+        const diffEl = document.getElementById('cn-check-diff-tex');
         const dashedEl = document.getElementById('cn-check-dashed-tex');
         const absEl = document.getElementById('cn-check-abs-tex');
         if (!sqrtEl || !sqEl) return;
@@ -280,11 +271,28 @@
                 `\\textcolor{${PALETTE.VAR_R}}{r}`;
             katexTry(sumEl, sumTex, 'ω = z + r');
         }
+        if (diffEl) {
+            const diffTex = 
+                `\\Large ` +
+                `\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+                `\\textcolor{${PALETTE.VAR_Z}}{z}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{-}\\,` +
+                `\\textcolor{${PALETTE.VAR_R}}{r}`;
+            katexTry(diffEl, diffTex, 'δ = z - r');
+        }
         if (dashedEl) {
             dashedEl.textContent = 'Hilfslinien';
         }
         if (absEl) {
+            const absTex = `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, |\\textcolor{${PALETTE.VAR_R}}{r}| \\, |\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, |\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}|`;
             absEl.textContent = 'Beträge';
+            
+            // We need a separate element for the KaTeX part of the Beträge label
+            const absMathEl = document.getElementById('cn-check-abs-math');
+            if (absMathEl) {
+                katexTry(absMathEl, absTex, '|z| |r| |ω| |δ|');
+            }
         }
     }
 
@@ -297,10 +305,10 @@
 
         sqrtProviderRef = typeof sqrtProvider === 'function' ? sqrtProvider : null;
 
-        CyberUI.createCard('ui-container', 'z', ROOT_Z_READOUT_HTML, PALETTE.VAR_Z);
+        CyberUI.createCard('ui-container', '', ROOT_Z_READOUT_HTML, PALETTE.VAR_Z);
 
         if (sqrtProviderRef) {
-            CyberUI.createCard('ui-container', 'r', ROOT_READOUT_CARD_HTML, PALETTE.VAR_R);
+            CyberUI.createCard('ui-container', '', ROOT_READOUT_CARD_HTML, PALETTE.VAR_R);
         }
 
         const uiMount = document.getElementById('ui-container');

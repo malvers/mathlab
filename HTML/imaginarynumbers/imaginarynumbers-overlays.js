@@ -253,13 +253,87 @@
         renderOverlay('cn-formula-sum-tex', 'sum', memoKey, buildTex, fallback, true);
     }
 
+    function updateCnDiffOverlay(state) {
+        const host = document.getElementById('cn-formula-diff');
+        if (!host) return;
+
+        if (!state.showDiff) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const xs = fmtNum(state.re);
+        const ys = fmtNum(state.im);
+        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const memoKey = `diff|${zm}|${xs}|${ys}`;
+
+        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const us = fmtNum(rPt.re);
+        const vs = fmtNum(rPt.im);
+        
+        const dx = fmtNum(state.re - rPt.re);
+        const dy = fmtNum(state.im - rPt.im);
+
+        const buildTex = () => {
+            const delta = Tex.color(P.VAR_DIFF, '\\delta');
+            const re_d = Tex.color(P.AXIS_RE, `\\mathit{re}\\,(${delta})`);
+            const im_d = Tex.color(P.AXIS_IM, `\\mathit{im}\\,(${delta})`);
+            const zRe = Tex.val(P.AXIS_RE, xs);
+            const zIm = Tex.val(P.AXIS_IM, ys);
+            const rRe = Tex.val(P.VAR_R, us);
+            const rIm = Tex.val(P.VAR_R, vs);
+            const dRe = Tex.val(P.AXIS_RE, dx);
+            const dIm = Tex.val(P.AXIS_IM, dy);
+            
+            return Tex.aligned([
+                `&${re_d} \\quad ${zRe} \\,-\\, ${rRe} \\,{=}\\, ${dRe}`,
+                `&${im_d} \\quad ${zIm} \\,-\\, ${rIm} \\,{=}\\, ${dIm}`
+            ]);
+        };
+
+        const fallback = () => `re(δ)=${dx}, im(δ)=${dy}`;
+
+        renderOverlay('cn-formula-diff-tex', 'diff', memoKey, buildTex, fallback, true);
+    }
+
+    function updateCnAbsdOverlay(state) {
+        const host = document.getElementById('cn-formula-absd');
+        if (!host) return;
+
+        if (!state.showAbsBoxes || !state.showDiff) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const dx = state.re - rPt.re;
+        const dy = state.im - rPt.im;
+        const dxs = fmtNum(dx);
+        const dys = fmtNum(dy);
+        const absds = fmtNum(Math.hypot(dx, dy));
+
+        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const memoKey = `absd|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
+
+        const buildTex = () => `\\left|${Tex.color(P.VAR_DIFF, '\\delta')}\\right| \\,{=}\\, ` +
+            `\\sqrt{\\textstyle${Tex.val(P.AXIS_RE, dxs)}^{2}\\,+\\,${Tex.val(P.AXIS_IM, dys)}^{2}} ` +
+            `\\,{=}\\, ${Tex.val(P.TITLE_MUTED, absds)}`;
+            
+        const fallback = () => `|δ| = √((${dxs})² + (${dys})²) = ${absds}`;
+
+        renderOverlay('cn-formula-absd-tex', 'absd', memoKey, buildTex, fallback, false);
+    }
+
     function ensureCnPointLabelsKatex(state) {
         if (typeof katex === 'undefined') return;
         const zEl = document.getElementById('cn-label-z');
         const rEl = document.getElementById('cn-label-r');
         const wEl = document.getElementById('cn-label-w');
+        const dEl = document.getElementById('cn-label-d');
         const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
-        const key = `cn-pt-${zm}-${state.showSum}`;
+        const key = `cn-pt-${zm}-${state.showSum}-${state.showDiff}`;
 
         if (zEl && zEl.dataset.cnPointKey !== key) {
             zEl.innerHTML = '';
@@ -283,14 +357,23 @@
             }
             wEl.dataset.cnPointKey = key;
         }
+        if (dEl && dEl.dataset.cnPointKey !== key) {
+            dEl.innerHTML = '';
+            if (state.showDiff) {
+                const dTex = `\\textcolor{${P.VAR_DIFF}}{\\delta}`;
+                katex.render(dTex, dEl, { throwOnError: false, displayMode: false });
+            }
+            dEl.dataset.cnPointKey = key;
+        }
     }
 
-    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, s, state) {
+    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, s, state) {
         ensureCnPointLabelsKatex(state);
         const canvas = CC.canvas;
         const zEl = document.getElementById('cn-label-z');
         const rEl = document.getElementById('cn-label-r');
         const wEl = document.getElementById('cn-label-w');
+        const dEl = document.getElementById('cn-label-d');
         if (!canvas || !zEl || !rEl) return;
         const ox = canvas.offsetLeft;
         const oy = canvas.offsetTop;
@@ -314,6 +397,18 @@
                 wEl.style.transform = 'translateY(-100%)';
             } else {
                 wEl.style.display = 'none';
+            }
+        }
+
+        if (dEl) {
+            if (state.showDiff) {
+                dEl.style.display = '';
+                dEl.style.fontSize = fz;
+                dEl.style.left = `${ox + dx + pad}px`;
+                dEl.style.top = `${oy + dy - pad}px`;
+                dEl.style.transform = 'translateY(-100%)';
+            } else {
+                dEl.style.display = 'none';
             }
         }
     }
@@ -377,8 +472,10 @@
         updateCnAbszOverlay,
         updateCnAbsrOverlay,
         updateCnAbswOverlay,
+        updateCnAbsdOverlay,
         updateCnMagnitudeOverlay,
         updateCnSumOverlay,
+        updateCnDiffOverlay,
         updateCnPointLabelOverlays,
         syncCnFormulaOverlayWidths,
         ensureCnFormulaWidthResizeListener
