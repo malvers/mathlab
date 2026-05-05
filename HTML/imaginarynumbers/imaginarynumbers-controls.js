@@ -314,9 +314,9 @@
                 `\\textcolor{${PALETTE.VAR_QUOT}}{\\nu}\\,` +
                 `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
                 `\\textcolor{${PALETTE.VAR_Z}}{z}\\,` +
-                `\\textcolor{${PALETTE.TITLE_MUTED}}{/}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{\\div}\\,` +
                 `\\textcolor{${PALETTE.VAR_R}}{r}`;
-            katexTry(quotEl, quotTex, 'ν = z / r');
+            katexTry(quotEl, quotTex, 'ν = z ÷ r');
         }
         if (absEl) {
             const absTex = 
