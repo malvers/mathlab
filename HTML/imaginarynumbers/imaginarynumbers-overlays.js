@@ -213,9 +213,18 @@
     }
 
     function updateCnMagnitudeOverlay(state) {
+        const host = document.getElementById('cn-formula-magnitude');
+        if (!host) return;
+
+        if (state.zMapMode === 'free') {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
         const memoKey = `mag|${zm}|${xs}|${ys}`;
 
         const rho = Math.hypot(state.re, state.im);
