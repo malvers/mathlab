@@ -131,7 +131,7 @@
         const host = document.getElementById('cn-formula-absr');
         if (!host) return;
 
-        if (!state.showAbsBoxes) {
+        if (!state.showAbsBoxes || state.zMapMode === 'free') {
             host.style.display = 'none';
             return;
         }
@@ -558,7 +558,7 @@
         if (qEl && qEl.dataset.cnPointKey !== key) {
             qEl.innerHTML = '';
             if (state.showQuot) {
-                const qTex = `\\textcolor{${P.VAR_QUOT}}{q}`;
+                const qTex = `\\textcolor{${P.VAR_QUOT}}{\\nu}`;
                 katex.render(qTex, qEl, { throwOnError: false, displayMode: false });
             }
             qEl.dataset.cnPointKey = key;
