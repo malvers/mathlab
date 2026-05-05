@@ -48,7 +48,8 @@
     const ROOT_MAP_MODE_WRAP_HTML = `
         <div id="cn-map-mode-wrap" class="cn-map-mode-wrap">
             ${ROOT_MAP_MODE_HTML}
-            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding-left: 10px;">
+
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-sum" class="cyber-checkbox"> 
                     <span id="cn-check-sum-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
@@ -321,14 +322,15 @@
             katexTry(quotEl, quotTex, 'ν = z / r');
         }
         if (absEl) {
-            const absTex = `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, |\\textcolor{${PALETTE.VAR_R}}{r}| \\, |\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, |\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}|`;
-            absEl.textContent = 'Beträge';
-            
-            // We need a separate element for the KaTeX part of the Beträge label
-            const absMathEl = document.getElementById('cn-check-abs-math');
-            if (absMathEl) {
-                katexTry(absMathEl, absTex, '|z| |r| |ω| |δ|');
-            }
+            const absTex = 
+                `\\Large ` +
+                `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, ` +
+                `|\\textcolor{${PALETTE.VAR_R}}{r}| \\, ` +
+                `|\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, ` +
+                `|\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}| \\, ` +
+                `|\\textcolor{${PALETTE.VAR_PRODUCT}}{\\mu}| \\, ` +
+                `|\\textcolor{${PALETTE.VAR_QUOT}}{\\nu}|`;
+            katexTry(absEl, absTex, '|z| |r| |ω| |δ| |μ| |ν|');
         }
     }
 
