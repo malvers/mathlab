@@ -470,8 +470,8 @@
             const qRe = Tex.val(P.AXIS_RE, qx);
             const qIm = Tex.val(P.AXIS_IM, qy);
             return Tex.aligned([
-                `&${re_q} \\quad \\dfrac{${zRe}\\,{\\cdot}\\,${rRe}\\,{+}\\,${zIm}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}\,{+}\,${rIm}^{2}}\\,{=}\\,${qRe}`,
-                `&${im_q} \\quad \\dfrac{${zIm}\\,{\\cdot}\\,${rRe}\\,{-}\\,${zRe}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}\,{+}\,${rIm}^{2}}\\,{=}\\,${qIm}`
+                `&${re_q} \\quad \\dfrac{${zRe}\\,{\\cdot}\\,${rRe}\\,{+}\\,${zIm}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}+${rIm}^{2}}\\,{=}\\,${qRe}`,
+                `&${im_q} \\quad \\dfrac{${zIm}\\,{\\cdot}\\,${rRe}\\,{-}\\,${zRe}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}+${rIm}^{2}}\\,{=}\\,${qIm}`
             ]);
         };
 
