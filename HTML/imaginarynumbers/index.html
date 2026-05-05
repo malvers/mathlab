@@ -54,6 +54,9 @@
                 <div id="cn-formula-prod" class="cn-formula-overlay cn-formula-prod" aria-live="polite" style="display: none;">
                     <span id="cn-formula-prod-tex"></span>
                 </div>
+                <div id="cn-formula-quot" class="cn-formula-overlay cn-formula-quot" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-quot-tex"></span>
+                </div>
             </div>
             <div id="cn-formula-row-bottom" class="cn-formula-row-bottom">
                 <div id="cn-formula-absz" class="cn-formula-overlay cn-formula-absz" aria-live="polite">
@@ -71,6 +74,9 @@
                 <div id="cn-formula-absp" class="cn-formula-overlay cn-formula-absp" aria-live="polite" style="display: none;">
                     <span id="cn-formula-absp-tex"></span>
                 </div>
+                <div id="cn-formula-absq" class="cn-formula-overlay cn-formula-absq" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-absq-tex"></span>
+                </div>
             </div>
             <div id="cn-point-labels" class="cn-point-labels" aria-hidden="true">
                 <span id="cn-label-z" class="cn-point-label"></span>
@@ -78,6 +84,7 @@
                 <span id="cn-label-w" class="cn-point-label"></span>
                 <span id="cn-label-d" class="cn-point-label"></span>
                 <span id="cn-label-p" class="cn-point-label"></span>
+                <span id="cn-label-q" class="cn-point-label"></span>
             </div>
             <div id="imaginarynumbers-coach" class="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
@@ -143,7 +150,8 @@
         }
 
         /** Real part x, imaginary part y — same math space as CyberCanvas axis pair. */
-        const state = { re: 1, im: 1, zMapMode: 'sqrt', rRe: 1, rIm: 1, showSum: false, showDiff: false, showProd: false, showDashedLines: true, showAbsBoxes: true };
+
+        const state = { re: 1, im: 1, zMapMode: 'sqrt', rRe: 1, rIm: 1, showSum: false, showDiff: false, showProd: false, showQuot: false, showDashedLines: true, showAbsBoxes: true };
         /** null | 'z' | 'r' — only point drag target; in free mode r moves independently of z. */
         let dragTarget = null;
         const Z_SLIDER_MIN = -20;
@@ -235,6 +243,20 @@
                 });
             }
 
+            const quotCheck = document.getElementById('cn-check-quot');
+            if (quotCheck) {
+                quotCheck.checked = state.showQuot;
+                quotCheck.addEventListener('change', (e) => {
+                    state.showQuot = e.target.checked;
+                    ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
+                    ImaginaryNumbersControls.renderMapModeKatex(state);
+                    if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                        CyberCanvasInstance.needsRedraw = true;
+                    }
+                    schedulePersistLabState();
+                });
+            }
+
             if (dashedCheck) {
                 dashedCheck.checked = state.showDashedLines;
                 dashedCheck.addEventListener('change', (e) => {
@@ -315,6 +337,7 @@
                         showSum: !!state.showSum,
                         showDiff: !!state.showDiff,
                         showProd: !!state.showProd,
+                        showQuot: !!state.showQuot,
                         showDashedLines: !!state.showDashedLines,
                         showAbsBoxes: !!state.showAbsBoxes,
                         view: {
@@ -432,12 +455,12 @@
             const oy = CC.mapY(0);
             const ax = CC.mapX(state.re);
             const ay = CC.mapY(state.im);
-            const rPt = mapRFromZ(state.re, state.im);
+            const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
             const sx = CC.mapX(rPt.re);
             const sy = CC.mapY(rPt.im);
             const s = CC.getUiScale();
 
-            let wx, wy, dx, dy, px, py;
+            let wx, wy, dx, dy, px, py, qx, qy;
             if (state.showSum) {
                 wx = CC.mapX(state.re + rPt.re);
                 wy = CC.mapY(state.im + rPt.im);
@@ -450,6 +473,11 @@
                 const prod = ImaginaryNumbersMath.multiplyComplex(state.re, state.im, rPt.re, rPt.im);
                 px = CC.mapX(prod.re);
                 py = CC.mapY(prod.im);
+            }
+            if (state.showQuot) {
+                const quot = ImaginaryNumbersMath.divideComplex(state.re, state.im, rPt.re, rPt.im);
+                qx = CC.mapX(quot.re);
+                qy = CC.mapY(quot.im);
             }
 
             if (state.showDashedLines) {
@@ -510,6 +538,18 @@
                     ctx.beginPath();
                     ctx.moveTo(px, oy);
                     ctx.lineTo(px, py);
+                    ctx.stroke();
+                }
+                if (state.showQuot) {
+                    ctx.strokeStyle = P.AXIS_RE;
+                    ctx.beginPath();
+                    ctx.moveTo(qx, qy);
+                    ctx.lineTo(ox, qy);
+                    ctx.stroke();
+                    ctx.strokeStyle = P.AXIS_IM;
+                    ctx.beginPath();
+                    ctx.moveTo(qx, oy);
+                    ctx.lineTo(qx, qy);
                     ctx.stroke();
                 }
                 ctx.setLineDash([]);
@@ -597,6 +637,13 @@
                 ctx.lineTo(px, py);
                 ctx.stroke();
             }
+            if (state.showQuot) {
+                ctx.strokeStyle = P.VAR_QUOT;
+                ctx.beginPath();
+                ctx.moveTo(ox, oy);
+                ctx.lineTo(qx, qy);
+                ctx.stroke();
+            }
 
             ctx.fillStyle = rgbaFromHex(P.VAR_R, 0.98);
             ctx.beginPath();
@@ -628,8 +675,14 @@
                 ctx.arc(px, py, 6 * s, 0, Math.PI * 2);
                 ctx.fill();
             }
+            if (state.showQuot) {
+                ctx.fillStyle = rgbaFromHex(P.VAR_QUOT, 0.98);
+                ctx.beginPath();
+                ctx.arc(qx, qy, 6 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
-            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, px, py, s, state);
+            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, px, py, qx, qy, s, state);
 
             ImaginaryNumbersOverlays.updateCnFormulaOverlay(state, dragTarget);
             ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
@@ -637,9 +690,11 @@
             ImaginaryNumbersOverlays.updateCnAbswOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbspOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbsdOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbsqOverlay(state);
             ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
             ImaginaryNumbersOverlays.updateCnSumOverlay(state);
             ImaginaryNumbersOverlays.updateCnProdOverlay(state);
+            ImaginaryNumbersOverlays.updateCnQuotOverlay(state);
             ImaginaryNumbersOverlays.updateCnDiffOverlay(state);
             requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
             maybePersistAfterDraw();
@@ -761,4 +816,5 @@
 </body>
 
 </html>
+
 

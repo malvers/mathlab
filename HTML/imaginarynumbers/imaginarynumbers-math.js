@@ -30,6 +30,16 @@
         };
     }
 
+    /** Division: (a+bi)/(c+di) = ((ac+bd) + i(bc-ad)) / (c²+d²) */
+    function divideComplex(re1, im1, re2, im2) {
+        const denom = re2 * re2 + im2 * im2;
+        if (denom === 0) return { re: NaN, im: NaN };
+        return {
+            re: (re1 * re2 + im1 * im2) / denom,
+            im: (im1 * re2 - re1 * im2) / denom,
+        };
+    }
+
     /** Immer zwei Nachkommastellen (z. B. 1.00, 0.00) — für Overlays und Sidebar. */
     function fmtNum(v) {
         if (typeof v !== 'number' || !Number.isFinite(v)) return '0.00';
@@ -41,6 +51,7 @@
         principalComplexSqrt,
         mapRFromZ,
         multiplyComplex,
+        divideComplex,
         fmtNum
     };
 })(typeof window !== 'undefined' ? window : globalThis);

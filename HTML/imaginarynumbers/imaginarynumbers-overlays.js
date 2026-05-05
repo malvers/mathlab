@@ -18,9 +18,12 @@
         absw: '',
         absd: '',
         absp: '',
+        absq: '',
         magnitude: '',
         sum: '',
-        diff: ''
+        diff: '',
+        prod: '',
+        quot: ''
     };
 
     function invalidateCnOverlaysMemo() {
@@ -30,9 +33,12 @@
         memoKeys.absw = '';
         memoKeys.absd = '';
         memoKeys.absp = '';
+        memoKeys.absq = '';
         memoKeys.magnitude = '';
         memoKeys.sum = '';
         memoKeys.diff = '';
+        memoKeys.prod = '';
+        memoKeys.quot = '';
         document.querySelectorAll('.cn-point-label').forEach((el) => {
             delete el.dataset.cnPointKey;
         });
@@ -66,13 +72,17 @@
 
     function updateCnFormulaOverlay(state, dragTarget) {
         const host = document.getElementById('cn-formula-tex');
-        if (!host) return;
+        const overlay = document.getElementById('cn-formula-overlay');
+        if (!host || !overlay) return;
 
-        // In free mode, don't show any formula overlay
         if (state.zMapMode === 'free') {
+            overlay.style.display = 'none';
+            memoKeys.formula = 'free';
             host.textContent = '';
             return;
         }
+
+        overlay.style.display = '';
 
         const x = fmtNum(state.re);
         const y = fmtNum(state.im);
@@ -335,8 +345,8 @@
             const pRe = Tex.val(P.AXIS_RE, px);
             const pIm = Tex.val(P.AXIS_IM, py);
             return Tex.aligned([
-                `&${re_p} \\quad ${zRe} \\cdot \\; ${rRe} \,{=}\, ${pRe}`,
-                `&${im_p} \\quad ${zIm} \\cdot \\; ${rIm} \,{=}\, ${pIm}`
+                `&${re_p} \\quad ${zRe}\\,{\\cdot}\\,${rRe}\\,{-}\\,${zIm}\\,{\\cdot}\\,${rIm}\\,{=}\\,${pRe}`,
+                `&${im_p} \\quad ${zRe}\\,{\\cdot}\\,${rIm}\\,{+}\\,${zIm}\\,{\\cdot}\\,${rRe}\\,{=}\\,${pIm}`
             ]);
         };
 
@@ -418,6 +428,76 @@
         renderOverlay('cn-formula-absd-tex', 'absd', memoKey, buildTex, fallback, false);
     }
 
+    function updateCnQuotOverlay(state) {
+        const host = document.getElementById('cn-formula-quot');
+        if (!host) return;
+
+        if (!state.showQuot) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const xs = fmtNum(state.re);
+        const ys = fmtNum(state.im);
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
+        const memoKey = `quot|${zm}|${xs}|${ys}`;
+
+        const rPt = rPointFromState(state);
+        const us = fmtNum(rPt.re);
+        const vs = fmtNum(rPt.im);
+        const q = ImaginaryNumbersMath.divideComplex(state.re, state.im, rPt.re, rPt.im);
+        const qx = fmtNum(q.re);
+        const qy = fmtNum(q.im);
+
+        const buildTex = () => {
+            const nu = Tex.color(P.VAR_QUOT, '\\nu');
+            const re_q = Tex.color(P.AXIS_RE, `\\mathit{re}\\,(${nu})`);
+            const im_q = Tex.color(P.AXIS_IM, `\\mathit{im}\\,(${nu})`);
+            const zRe = Tex.val(P.AXIS_RE, xs);
+            const zIm = Tex.val(P.AXIS_IM, ys);
+            const rRe = Tex.val(P.VAR_R, us);
+            const rIm = Tex.val(P.VAR_R, vs);
+            const qRe = Tex.val(P.AXIS_RE, qx);
+            const qIm = Tex.val(P.AXIS_IM, qy);
+            return Tex.aligned([
+                `&${re_q} \\quad \\dfrac{${zRe}\\,{\\cdot}\\,${rRe}\\,{+}\\,${zIm}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}\,{+}\,${rIm}^{2}}\\,{=}\\,${qRe}`,
+                `&${im_q} \\quad \\dfrac{${zIm}\\,{\\cdot}\\,${rRe}\\,{-}\\,${zRe}\\,{\\cdot}\\,${rIm}}{${rRe}^{2}\,{+}\,${rIm}^{2}}\\,{=}\\,${qIm}`
+            ]);
+        };
+
+        const fallback = () => `re(ν)=${qx}, im(ν)=${qy}`;
+
+        renderOverlay('cn-formula-quot-tex', 'quot', memoKey, buildTex, fallback, true);
+    }
+
+    function updateCnAbsqOverlay(state) {
+        const host = document.getElementById('cn-formula-absq');
+        if (!host) return;
+
+        if (!state.showAbsBoxes || !state.showQuot) {
+            host.style.display = 'none';
+            return;
+        }
+        host.style.display = '';
+
+        const rPt = rPointFromState(state);
+        const q = ImaginaryNumbersMath.divideComplex(state.re, state.im, rPt.re, rPt.im);
+        const qx = fmtNum(q.re);
+        const qy = fmtNum(q.im);
+        const absq = fmtNum(Math.hypot(q.re, q.im));
+
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
+        const memoKey = `absq|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
+
+        const buildTex = () => `\\left|${Tex.color(P.VAR_QUOT, '\\nu')}\\right| \\,{=}\\, ` +
+            `\\sqrt{\\textstyle${Tex.val(P.AXIS_RE, qx)}^{2}\\,+\\,${Tex.val(P.AXIS_IM, qy)}^{2}} ` +
+            `\\,{=}\\, ${Tex.val(P.TITLE_MUTED, absq)}`;
+        const fallback = () => `|ν| = √((${qx})² + (${qy})²) = ${absq}`;
+
+        renderOverlay('cn-formula-absq-tex', 'absq', memoKey, buildTex, fallback, false);
+    }
+
     function ensureCnPointLabelsKatex(state) {
         if (typeof katex === 'undefined') return;
         const zEl = document.getElementById('cn-label-z');
@@ -425,8 +505,9 @@
         const wEl = document.getElementById('cn-label-w');
         const dEl = document.getElementById('cn-label-d');
         const pEl = document.getElementById('cn-label-p');
+        const qEl = document.getElementById('cn-label-q');
         const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
-        const key = `cn-pt-${zm}-${state.showSum}-${state.showDiff}-${state.showProd}`;
+        const key = `cn-pt-${zm}-${state.showSum}-${state.showDiff}-${state.showProd}-${state.showQuot}`;
 
         if (zEl && zEl.dataset.cnPointKey !== key) {
             zEl.innerHTML = '';
@@ -474,9 +555,17 @@
             }
             pEl.dataset.cnPointKey = key;
         }
+        if (qEl && qEl.dataset.cnPointKey !== key) {
+            qEl.innerHTML = '';
+            if (state.showQuot) {
+                const qTex = `\\textcolor{${P.VAR_QUOT}}{q}`;
+                katex.render(qTex, qEl, { throwOnError: false, displayMode: false });
+            }
+            qEl.dataset.cnPointKey = key;
+        }
     }
 
-    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, px, py, s, state) {
+    function updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, px, py, qx, qy, s, state) {
         ensureCnPointLabelsKatex(state);
         const canvas = CC.canvas;
         const zEl = document.getElementById('cn-label-z');
@@ -484,6 +573,7 @@
         const wEl = document.getElementById('cn-label-w');
         const dEl = document.getElementById('cn-label-d');
         const pEl = document.getElementById('cn-label-p');
+        const qEl = document.getElementById('cn-label-q');
         if (!canvas || !zEl || !rEl) return;
         const ox = canvas.offsetLeft;
         const oy = canvas.offsetTop;
@@ -533,12 +623,23 @@
                 pEl.style.display = 'none';
             }
         }
+        if (qEl) {
+            if (state.showQuot) {
+                qEl.style.display = '';
+                qEl.style.fontSize = fz;
+                qEl.style.left = `${ox + qx + pad}px`;
+                qEl.style.top = `${oy + qy - pad}px`;
+                qEl.style.transform = 'translateY(-100%)';
+            } else {
+                qEl.style.display = 'none';
+            }
+        }
     }
 
     function syncCnFormulaOverlayWidths() {
         const row = document.getElementById('cn-formula-row');
         const rowBottom = document.getElementById('cn-formula-row-bottom');
-        const ids = ['cn-formula-overlay', 'cn-formula-magnitude', 'cn-formula-absz', 'cn-formula-absr', 'cn-formula-absw', 'cn-formula-absd', 'cn-formula-absp', 'cn-formula-sum', 'cn-formula-prod'];
+        const ids = ['cn-formula-overlay', 'cn-formula-magnitude', 'cn-formula-absz', 'cn-formula-absr', 'cn-formula-absw', 'cn-formula-absd', 'cn-formula-absp', 'cn-formula-absq', 'cn-formula-sum', 'cn-formula-prod', 'cn-formula-quot'];
         
         // Only process elements that are not explicitly hidden
         const els = ids.map((id) => document.getElementById(id)).filter(el => el && el.style.display !== 'none');
@@ -596,14 +697,17 @@
         updateCnAbswOverlay,
         updateCnAbspOverlay,
         updateCnAbsdOverlay,
+        updateCnAbsqOverlay,
         updateCnMagnitudeOverlay,
         updateCnSumOverlay,
         updateCnProdOverlay,
+        updateCnQuotOverlay,
         updateCnDiffOverlay,
         updateCnPointLabelOverlays,
         syncCnFormulaOverlayWidths,
         ensureCnFormulaWidthResizeListener
     };
 })(typeof window !== 'undefined' ? window : globalThis);
+
 
 

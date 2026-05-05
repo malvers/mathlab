@@ -18,6 +18,7 @@
         VAR_OMEGA: '#B026FF', // Purple for sum
         VAR_DIFF: '#FF8C00', // Orange for difference
         VAR_PRODUCT: '#38D9A9', // Teal for product
+        VAR_QUOT: '#E056A0', // Pink for quotient
         TITLE_MUTED: '#e2e8f0',
     });
 
@@ -59,6 +60,10 @@
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-prod" class="cyber-checkbox"> 
                     <span id="cn-check-prod-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
+                </label>
+                <label class="cyber-checkbox-wrapper">
+                    <input type="checkbox" id="cn-check-quot" class="cyber-checkbox"> 
+                    <span id="cn-check-quot-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-abs" class="cyber-checkbox"> 
@@ -128,6 +133,7 @@
         setHexAndRgb('--cn-var-omega', P.VAR_OMEGA);
         setHexAndRgb('--cn-var-diff', P.VAR_DIFF);
         setHexAndRgb('--cn-var-product', P.VAR_PRODUCT);
+        setHexAndRgb('--cn-var-quot', P.VAR_QUOT);
         setHexAndRgb('--cn-title-muted', P.TITLE_MUTED);
         root.style.setProperty('--cn-card-accent', P.CARD_ACCENT);
         root.style.setProperty('--cn-axis-re-dim', PALETTE_DIM.AXIS_RE_EDGE);
@@ -290,6 +296,7 @@
             katexTry(diffEl, diffTex, 'δ = z - r');
         }
         const prodEl = document.getElementById('cn-check-prod-tex');
+        const quotEl = document.getElementById('cn-check-quot-tex');
         if (dashedEl) {
             dashedEl.textContent = 'Hilfslinien';
         }
@@ -302,6 +309,16 @@
                 `\\textcolor{${PALETTE.TITLE_MUTED}}{\\cdot}\\,` +
                 `\\textcolor{${PALETTE.VAR_R}}{r}`;
             katexTry(prodEl, prodTex, 'μ = z · r');
+        }
+        if (quotEl) {
+            const quotTex = 
+                `\\Large ` +
+                `\\textcolor{${PALETTE.VAR_QUOT}}{\\nu}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{=}\\,` +
+                `\\textcolor{${PALETTE.VAR_Z}}{z}\\,` +
+                `\\textcolor{${PALETTE.TITLE_MUTED}}{/}\\,` +
+                `\\textcolor{${PALETTE.VAR_R}}{r}`;
+            katexTry(quotEl, quotTex, 'ν = z / r');
         }
         if (absEl) {
             const absTex = `|\\textcolor{${PALETTE.VAR_Z}}{z}| \\, |\\textcolor{${PALETTE.VAR_R}}{r}| \\, |\\textcolor{${PALETTE.VAR_OMEGA}}{\\omega}| \\, |\\textcolor{${PALETTE.VAR_DIFF}}{\\delta}|`;
