@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>DOC ALVERS – LAB AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* Branding Styles matching other labs */
+        .canvas-branding {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .canvas-branding h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+            text-transform: uppercase;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .canvas-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 5px;
+            color: #00d2ff;
+            margin-top: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 7px #00d2ff;
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 60px auto 0 auto;
+            background: rgba(5, 7, 25, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+        }
+
+        /* API-Leiste – wird ausgeblendet, wenn Key gespeichert */
+        .api-section {
+            padding: 16px 24px;
+            background: rgba(0, 5, 20, 0.7);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.4);
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .api-section.hidden {
+            display: none;
+        }
+
+        .api-input {
+            flex: 2;
+            background: #070b1a;
+            border: 1px solid #2d2f6e;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #b5f0ff;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+
+        .model-select {
+            flex: 1;
+            background: #070b1a;
+            border: 1px solid #3d2a6e;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #e0c4ff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .save-key-btn {
+            background: #1e2a3e;
+            border: 1px solid #00d2ff;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #00d2ff;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .save-key-btn:hover {
+            background: #00d2ff;
+            color: #0a0a2a;
+        }
+
+
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-area::-webkit-scrollbar-track {
+            background: #0a0f2a;
+            border-radius: 10px;
+        }
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #9d50bb;
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            animation: fadeSlide 0.25s ease-out;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-weight: 400;
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(125deg, #00a3cc, #5e2a84);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: rgba(0, 20, 40, 0.8);
+            backdrop-filter: blur(4px);
+            color: #ccf5ff;
+            border: 1px solid #4b2c7a;
+        }
+
+        .message-content pre {
+            background: #03081a;
+            padding: 10px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 3px solid #00d2ff;
+        }
+        .message-content code {
+            font-family: monospace;
+            background: #00000055;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+        }
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            animation: typing-pulse 1.4s infinite ease-in-out;
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing-pulse {
+            0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .input-area {
+            padding: 20px 24px;
+            background: rgba(2, 6, 23, 0.8);
+            display: flex;
+            gap: 14px;
+        }
+
+        .message-input {
+            flex: 1;
+            background: #050a1c;
+            border: 1px solid #3a2c5f;
+            border-radius: 10px;
+            padding: 14px 20px;
+            color: #bcf0ff;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 0.95rem;
+            resize: none;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #00d2ff;
+            box-shadow: 0 0 6px #00d2ff;
+        }
+
+        .send-button {
+            background: linear-gradient(95deg, #00d2ff, #9d50bb);
+            border: none;
+            border-radius: 10px;
+            padding: 0 28px;
+            color: white;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 14px #9d50bb;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="canvas-branding">
+    <h1>DOC ALVERS MATHE-LABOR</h1>
+    <div class="canvas-subtitle">LAB AI</div>
+</div>
+
+<div class="chat-container">
+    <!-- API-Leiste (wird ausgeblendet, wenn Key gespeichert) -->
+    <div class="api-section" id="apiSection">
+        <input type="password" class="api-input" id="apiKeyInput" placeholder="DeepSeek API Key (sk-...)" autocomplete="off">
+        <select class="model-select" id="modelSelect">
+            <option value="deepseek-chat">DeepSeek V3 (Chat)</option>
+            <option value="deepseek-reasoner">DeepSeek R1 (Reasoner)</option>
+        </select>
+        <button class="save-key-btn" id="saveKeyBtn">💾 Key speichern</button>
+    </div>
+
+
+
+    <div class="messages-area" id="messagesArea">
+        <div class="message assistant">
+            <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
+                <strong>Wie kann ich Dir helfen?</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <textarea class="message-input" id="messageInput" rows="1" placeholder="Du hast sicher Fragen ... schreib sie hier!"></textarea>
+        <button class="send-button" id="sendButton">GO</button>
+    </div>
+
+</div>
+
+<script>
+    const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
+    let conversationHistory = [];
+
+    const messagesArea = document.getElementById('messagesArea');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const modelSelect = document.getElementById('modelSelect');
+
+    const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const apiSection = document.getElementById('apiSection');
+
+
+    const STORAGE_KEY = 'deepseek_api_key';
+    const MODEL_KEY = 'deepseek_model';
+
+    // UI aktualisieren: Input-Feld verstecken / zeigen
+    function updateUIForSavedKey() {
+        const savedKey = localStorage.getItem(STORAGE_KEY);
+        if (savedKey && savedKey.startsWith('sk-')) {
+            apiSection.classList.add('hidden');
+        } else {
+            apiSection.classList.remove('hidden');
+        }
+    }
+
+    // Gespeicherten Key laden
+    function loadSavedKey() {
+        const savedKey = localStorage.getItem(STORAGE_KEY);
+        if (savedKey && savedKey.startsWith('sk-')) {
+            updateUIForSavedKey();
+        }
+        
+        const savedModel = localStorage.getItem(MODEL_KEY);
+        if (savedModel) {
+            modelSelect.value = savedModel;
+        }
+        updateUIForSavedKey();
+    }
+
+    // API-Key speichern
+    function saveApiKey() {
+        const key = apiKeyInput.value.trim();
+        if (!key || !key.startsWith('sk-')) {
+            return;
+        }
+        
+        localStorage.setItem(STORAGE_KEY, key);
+        localStorage.setItem(MODEL_KEY, modelSelect.value);
+        
+        
+        updateUIForSavedKey();
+    }
+
+
+
+    loadSavedKey();
+    saveKeyBtn.addEventListener('click', saveApiKey);
+
+    // ----- CHAT-LOGIK -----
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+    });
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    sendButton.addEventListener('click', sendMessage);
+
+    function addMessage(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        let formatted = content.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+            return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+        });
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        contentDiv.innerHTML = formatted;
+        messageDiv.appendChild(contentDiv);
+        messagesArea.appendChild(messageDiv);
+        
+        // MathJax Rendering
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([contentDiv]);
+        }
+        
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message assistant';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = `<div class="message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+        messagesArea.appendChild(typingDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function hideTyping() {
+        const el = document.getElementById('typingIndicator');
+        if (el) el.remove();
+    }
+
+    async function sendMessage() {
+        const userText = messageInput.value.trim();
+        let apiKey = localStorage.getItem(STORAGE_KEY);
+        
+        if (!userText) return;
+        
+        if (!apiKey || !apiKey.startsWith('sk-')) {
+            updateUIForSavedKey();
+            return;
+        }
+
+        addMessage('user', userText);
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendButton.disabled = true;
+        conversationHistory.push({ role: 'user', content: userText });
+        showTyping();
+
+        try {
+            const response = await fetch(DEEPSEEK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: modelSelect.value,
+                    messages: conversationHistory,
+                    temperature: 0.6,
+                    max_tokens: 3000
+                })
+            });
+            if (!response.ok) {
+                hideTyping();
+                let err = `Fehler ${response.status}`;
+                if (response.status === 401) err = 'Ungültiger API-Key – bitte neu speichern';
+                if (response.status === 402) err = 'Nicht genug Guthaben – DeepSeek aufladen';
+                throw new Error(err);
+            }
+            const data = await response.json();
+            const reply = data.choices[0].message.content;
+            conversationHistory.push({ role: 'assistant', content: reply });
+            if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+            
+            hideTyping();
+            addMessage('assistant', reply);
+        } catch (err) {
+            hideTyping();
+            addMessage('assistant', `❌ Fehler: ${err.message}`);
+        } finally {
+            sendButton.disabled = false;
+            messageInput.focus();
+        }
+    }
+    messageInput.focus();
+</script>
+</body>
+</html>
