@@ -68,10 +68,7 @@
                 </label>
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-abs" class="cyber-checkbox"> 
-                    <span class="cyber-label" style="text-transform: none; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">
-                        <span id="cn-check-abs-math"></span>
-                        <span id="cn-check-abs-tex"></span>
-                    </span>
+                    <span id="cn-check-abs-tex" class="cyber-label" style="text-transform: none; font-size: 1.4rem;"></span>
                 </label>
                 <label class="cyber-checkbox-wrapper">
                     <input type="checkbox" id="cn-check-dashed" class="cyber-checkbox"> 
