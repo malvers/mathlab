@@ -94,4 +94,342 @@ canvas { display: block; }
     }
     .exp-title { font-size: 1rem; margin-bottom: 0; }
     .exp-text { line-height: 1.4; }
+}/* die my farbe haben und da steht ,=,Canvas overlay: larger KaTeX + pill frame (pointer-events none — canvas stays interactive). */
+#canvas-container {
+    position: relative;
 }
+
+.cn-formula-row {
+    position: absolute;
+    top: clamp(10px, 2vmin, 18px);
+    left: clamp(10px, 2vmin, 18px);
+    z-index: 30;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.cn-formula-row-bottom {
+    position: absolute;
+    bottom: clamp(10px, 2vmin, 18px);
+    left: clamp(10px, 2vmin, 18px);
+    z-index: 30;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/*
+ * Unified width: --cn-formula-unified-w (px), set via syncCnFormulaOverlayWidths()
+ * after KaTeX — as wide as the widest content, clamped to Canvas if needed.
+ */
+.cn-formula-row > .cn-formula-overlay,
+.cn-formula-row-bottom > .cn-formula-overlay {
+    width: var(--cn-formula-unified-w, min(96vw, 820px));
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    overflow-x: visible;
+}
+
+.cn-formula-overlay {
+    position: relative;
+    padding: 8px 16px;
+    border-radius: 16px;
+    background: rgba(10, 15, 35, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        inset 0 0 20px rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.15);
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    transition: all 0.3s ease;
+}
+
+/* Magnitude boxes (all |·|) — white border */
+.cn-formula-absz,
+.cn-formula-absr,
+.cn-formula-absw,
+.cn-formula-absd,
+.cn-formula-absp,
+.cn-formula-absq {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Sum ω = z + r */
+.cn-formula-sum {
+    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.cn-formula-sum .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-sum .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+/* Difference δ = z - r */
+.cn-formula-diff {
+    border: 1px solid rgba(var(--cn-var-diff-rgb, 255, 140, 0), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-diff-rgb, 255, 140, 0), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.cn-formula-diff .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-diff .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+/* Product μ = z · r */
+.cn-formula-prod {
+    border: 1px solid rgba(var(--cn-var-product-rgb, 56, 217, 169), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-product-rgb, 56, 217, 169), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.cn-formula-prod .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-prod .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+
+/* Quotient ν = z / r */
+.cn-formula-quot {
+    border: 1px solid rgba(var(--cn-var-quot-rgb, 224, 86, 160), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-quot-rgb, 224, 86, 160), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.cn-formula-quot .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-quot .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+
+/* Principal value √z: re(r), im(r) — border VAR_R */
+.cn-formula-magnitude {
+    border: 1px solid rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.cn-formula-magnitude .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-magnitude .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+/* Base: + and i stay light; Re / Im blocks use \textcolor in KaTeX. */
+.cn-formula-overlay .katex {
+    font-size: clamp(0.89rem, 0.76rem + 1.08vmin, 1.24rem) !important;
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* KaTeX labels on z and r points (colors: PALETTE / --cn-*). */
+.cn-point-labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 28;
+}
+
+.cn-point-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+
+.cn-point-label .katex {
+    font-size: inherit !important;
+}
+
+#imaginarynumbers-coach {
+    display: none !important;
+}
+
+/*
+ * CyberUI (ui.js): .instrument-title { text-transform: uppercase }
+ * would turn KaTeX letters into "Z", "R" — prevent this here.
+ */
+#side-panel #ui-container .instrument-title {
+    text-transform: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    max-width: 100%;
+}
+
+/* Card titles z ∈ ℂ / r=√z: significantly larger than before (title row only) */
+#ui-container .instrument-title .katex {
+    font-size: clamp(1.4rem, 1.25rem + 1.5vmin, 1.75rem) !important;
+}
+
+/* sqrt / z² — below both cards (#cn-map-mode-wrap), not in the z-card */
+#ui-container .cn-map-mode-wrap {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+#ui-container .cn-map-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#ui-container .cn-map-mode.cyber-control-group {
+    gap: 10px;
+}
+
+#ui-container .cn-map-mode.cyber-control-group .cyber-checkbox-wrapper {
+    width: 100%;
+}
+
+#ui-container .cn-map-mode.cyber-control-group .cyber-label {
+    font-size: clamp(1.45rem, 1.15rem + 1.85vmin, 2.45rem) !important;
+}
+
+#ui-container .cn-map-mode.cyber-control-group .cyber-label .katex,
+#ui-container .cn-map-mode.cyber-control-group .cyber-label .katex .katex-html,
+#ui-container .cn-map-mode.cyber-control-group .cyber-label .katex .katex-mathml {
+    font-size: clamp(1.45rem, 1.15rem + 1.85vmin, 2.45rem) !important;
+    line-height: 1.05 !important;
+}
+
+#ui-container .cn-map-mode-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 5rem;
+    font-family: inherit;
+    font-size: clamp(1.05rem, 0.92rem + 1vmin, 1.35rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 16px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(25, 35, 60, 0.6), rgba(10, 15, 30, 0.8));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgba(226, 232, 240, 0.88);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#ui-container .cn-map-mode .cyber-label .katex {
+    font-size: clamp(1.45rem, 1.15rem + 1.85vmin, 2.45rem) !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+}
+
+#ui-container .cn-map-mode-btn:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: linear-gradient(145deg, rgba(35, 45, 75, 0.7), rgba(15, 20, 40, 0.9));
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+#ui-container .cn-map-mode-btn--active {
+    border-color: var(--cn-card-accent, #00b0f0);
+    background: linear-gradient(145deg, rgba(0, 176, 240, 0.25), rgba(0, 176, 240, 0.05));
+    box-shadow: 
+        0 0 0 1px rgba(0, 176, 240, 0.3),
+        0 0 20px rgba(0, 176, 240, 0.4),
+        inset 0 0 15px rgba(0, 176, 240, 0.2);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* z- and r-Readout: same layout (re/im rows, KaTeX title in .instrument-title) */
+#cn-z-readout,
+#cn-r-readout {
+    margin-top: 0;
+}
+
+#cn-z-readout .cyber-label,
+#cn-r-readout .cyber-label {
+    font-size: clamp(1.25rem, 1.1rem + 1.35vmin, 1.55rem) !important;
+}
+
+#cn-z-readout .val-display,
+#cn-r-readout .val-display {
+    font-size: clamp(1.32rem, 1.17rem + 1.5vmin, 1.68rem) !important;
+}
+
+#cn-z-readout .cn-r-row:nth-child(1) .cyber-label,
+#cn-z-readout .cn-r-row:nth-child(1) .val-display,
+#cn-r-readout .cn-r-row:nth-child(1) .cyber-label,
+#cn-r-readout .cn-r-row:nth-child(1) .val-display {
+    color: var(--cn-axis-re, #FFC000) !important;
+}
+
+#cn-z-readout .cn-r-row:nth-child(2) .cyber-label,
+#cn-z-readout .cn-r-row:nth-child(2) .val-display,
+#cn-r-readout .cn-r-row:nth-child(2) .cyber-label,
+#cn-r-readout .cn-r-row:nth-child(2) .val-display {
+    color: var(--cn-axis-im, #00B0F0) !important;
+}
+
+#cn-z-readout .control-header,
+#cn-r-readout .control-header {
+    margin-bottom: 1px !important;
+    line-height: 1.15 !important;
+    align-items: center;
+}
+
