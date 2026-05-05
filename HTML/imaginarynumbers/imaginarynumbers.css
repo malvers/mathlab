@@ -13,7 +13,7 @@
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -28,7 +28,7 @@
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -48,56 +48,43 @@
 
 .cn-formula-overlay {
     position: relative;
-    padding: 12px 22px;
-    border-radius: 22px;
-    background: rgba(5, 10, 26, 0.88);
+    padding: 8px 16px;
+    border-radius: 16px;
+    background: rgba(10, 15, 35, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.55);
     box-shadow:
-        0 0 0 1px rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.1),
-        0 8px 28px rgba(0, 0, 0, 0.45);
+        0 0 0 1px rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        inset 0 0 20px rgba(var(--cn-var-z-rgb, 237, 28, 36), 0.15);
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
+    transition: all 0.3s ease;
 }
 
-/* |z| (Magnitude) — separate "Extra" box, subtle border */
-.cn-formula-absz {
+/* Magnitude boxes (|z|, |r|, |ω|, |δ|) — subtle border */
+.cn-formula-absz,
+.cn-formula-absr,
+.cn-formula-absw,
+.cn-formula-absd {
     border: 1px solid rgba(var(--cn-title-muted-rgb, 226, 232, 240), 0.35);
     box-shadow:
         0 0 0 1px rgba(var(--cn-title-muted-rgb, 226, 232, 240), 0.06),
         0 8px 28px rgba(0, 0, 0, 0.45);
-    padding-top: 12px;
-    padding-bottom: 12px;
-}
-
-/* |r| — second Extra box, border matching VAR_R */
-.cn-formula-absr {
-    border: 1px solid rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.42);
-    box-shadow:
-        0 0 0 1px rgba(var(--cn-var-r-rgb, 146, 208, 80), 0.08),
-        0 8px 28px rgba(0, 0, 0, 0.45);
-    padding-top: 12px;
-    padding-bottom: 12px;
-}
-
-/* |w| — third Extra box, border matching VAR_OMEGA */
-.cn-formula-absw {
-    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.42);
-    box-shadow:
-        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.08),
-        0 8px 28px rgba(0, 0, 0, 0.45);
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 /* Sum ω = z + r */
 .cn-formula-sum {
-    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.42);
+    border: 1px solid rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.55);
     box-shadow:
-        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.08),
+        0 0 0 1px rgba(var(--cn-var-omega-rgb, 176, 38, 255), 0.1),
         0 8px 28px rgba(0, 0, 0, 0.45);
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .cn-formula-sum .katex-display {
@@ -106,7 +93,26 @@
 }
 
 .cn-formula-sum .katex {
-    font-size: clamp(0.95rem, 0.82rem + 1.05vmin, 1.38rem) !important;
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
+}
+
+/* Difference δ = z - r */
+.cn-formula-diff {
+    border: 1px solid rgba(var(--cn-var-diff-rgb, 255, 140, 0), 0.55);
+    box-shadow:
+        0 0 0 1px rgba(var(--cn-var-diff-rgb, 255, 140, 0), 0.1),
+        0 8px 28px rgba(0, 0, 0, 0.45);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.cn-formula-diff .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.cn-formula-diff .katex {
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
 }
 
 /* Principal value √z: re(r), im(r) — border VAR_R */
@@ -123,13 +129,14 @@
 }
 
 .cn-formula-magnitude .katex {
-    font-size: clamp(0.95rem, 0.82rem + 1.05vmin, 1.38rem) !important;
+    font-size: clamp(0.76rem, 0.65rem + 0.84vmin, 1.1rem) !important;
 }
 
 /* Base: + and i stay light; Re / Im blocks use \textcolor in KaTeX. */
 .cn-formula-overlay .katex {
-    font-size: clamp(1.12rem, 0.95rem + 1.35vmin, 1.55rem) !important;
-    color: rgba(226, 232, 240, 0.96) !important;
+    font-size: clamp(0.89rem, 0.76rem + 1.08vmin, 1.24rem) !important;
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 /* KaTeX labels on z and r points (colors: PALETTE / --cn-*). */
@@ -145,7 +152,7 @@
     left: 0;
     top: 0;
     line-height: 1;
-    filter: drop-shadow(0 0 2px rgba(5, 10, 26, 0.96)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.78));
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
 }
 
 .cn-point-label .katex {
@@ -170,7 +177,7 @@
 
 /* Card titles z ∈ ℂ / r=√z: significantly larger than before (title row only) */
 #ui-container .instrument-title .katex {
-    font-size: clamp(1.2rem, 1.05rem + 0.95vmin, 1.48rem) !important;
+    font-size: clamp(1.4rem, 1.25rem + 1.5vmin, 1.75rem) !important;
 }
 
 /* sqrt / z² — below both cards (#cn-map-mode-wrap), not in the z-card */
@@ -197,11 +204,14 @@
     letter-spacing: 0.02em;
     padding: 16px 10px;
     border-radius: 14px;
-    border: 1px solid rgba(148, 163, 184, 0.38);
-    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(25, 35, 60, 0.6), rgba(10, 15, 30, 0.8));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: rgba(226, 232, 240, 0.88);
     cursor: pointer;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 #ui-container .cn-map-mode-tex .katex {
@@ -210,15 +220,22 @@
 }
 
 #ui-container .cn-map-mode-btn:hover {
-    border-color: rgba(148, 163, 184, 0.55);
-    color: rgba(248, 250, 252, 0.95);
+    border-color: rgba(255, 255, 255, 0.25);
+    background: linear-gradient(145deg, rgba(35, 45, 75, 0.7), rgba(15, 20, 40, 0.9));
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 #ui-container .cn-map-mode-btn--active {
     border-color: var(--cn-card-accent, #00b0f0);
-    background: rgba(0, 176, 240, 0.14);
-    box-shadow: 0 0 0 1px rgba(0, 176, 240, 0.22);
-    color: rgba(248, 250, 252, 0.98);
+    background: linear-gradient(145deg, rgba(0, 176, 240, 0.25), rgba(0, 176, 240, 0.05));
+    box-shadow: 
+        0 0 0 1px rgba(0, 176, 240, 0.3),
+        0 0 20px rgba(0, 176, 240, 0.4),
+        inset 0 0 15px rgba(0, 176, 240, 0.2);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 /* z- and r-Readout: same layout (re/im rows, KaTeX title in .instrument-title) */
@@ -229,7 +246,7 @@
 
 #cn-z-readout .cyber-label,
 #cn-r-readout .cyber-label {
-    font-size: clamp(1.17rem, 1.02rem + 1.35vmin, 1.425rem) !important;
+    font-size: clamp(1.25rem, 1.1rem + 1.35vmin, 1.55rem) !important;
 }
 
 #cn-z-readout .val-display,

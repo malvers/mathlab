@@ -48,6 +48,9 @@
                 <div id="cn-formula-sum" class="cn-formula-overlay cn-formula-sum" aria-live="polite" style="display: none;">
                     <span id="cn-formula-sum-tex"></span>
                 </div>
+                <div id="cn-formula-diff" class="cn-formula-overlay cn-formula-diff" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-diff-tex"></span>
+                </div>
             </div>
             <div id="cn-formula-row-bottom" class="cn-formula-row-bottom">
                 <div id="cn-formula-absz" class="cn-formula-overlay cn-formula-absz" aria-live="polite">
@@ -59,11 +62,15 @@
                 <div id="cn-formula-absw" class="cn-formula-overlay cn-formula-absw" aria-live="polite" style="display: none;">
                     <span id="cn-formula-absw-tex"></span>
                 </div>
+                <div id="cn-formula-absd" class="cn-formula-overlay cn-formula-absd" aria-live="polite" style="display: none;">
+                    <span id="cn-formula-absd-tex"></span>
+                </div>
             </div>
             <div id="cn-point-labels" class="cn-point-labels" aria-hidden="true">
                 <span id="cn-label-z" class="cn-point-label"></span>
                 <span id="cn-label-r" class="cn-point-label"></span>
                 <span id="cn-label-w" class="cn-point-label"></span>
+                <span id="cn-label-d" class="cn-point-label"></span>
             </div>
             <div id="imaginarynumbers-coach" class="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
@@ -126,7 +133,7 @@
         }
 
         /** Real part x, imaginary part y — same math space as CyberCanvas axis pair. */
-        const state = { re: 1, im: 1, zMapMode: 'sqrt', showSum: false, showDashedLines: true, showAbsBoxes: true };
+        const state = { re: 1, im: 1, zMapMode: 'sqrt', showSum: false, showDiff: false, showDashedLines: true, showAbsBoxes: true };
         /** null | 'z' — nur z per Maus; r folgt immer aus z (mapRFromZ). */
         let dragTarget = null;
         const Z_SLIDER_MIN = -20;
@@ -177,6 +184,7 @@
             const sqrtBtn = document.getElementById('cn-map-sqrt');
             const sqBtn = document.getElementById('cn-map-sq');
             const sumCheck = document.getElementById('cn-check-sum');
+            const diffCheck = document.getElementById('cn-check-diff');
             const dashedCheck = document.getElementById('cn-check-dashed');
             const absCheck = document.getElementById('cn-check-abs');
             
@@ -185,6 +193,20 @@
                 sumCheck.addEventListener('change', (e) => {
                     state.showSum = e.target.checked;
                     ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
+                    ImaginaryNumbersControls.renderMapModeKatex();
+                    if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
+                        CyberCanvasInstance.needsRedraw = true;
+                    }
+                    schedulePersistLabState();
+                });
+            }
+
+            if (diffCheck) {
+                diffCheck.checked = state.showDiff;
+                diffCheck.addEventListener('change', (e) => {
+                    state.showDiff = e.target.checked;
+                    ImaginaryNumbersOverlays.invalidateCnOverlaysMemo();
+                    ImaginaryNumbersControls.renderMapModeKatex();
                     if (typeof CyberCanvasInstance !== 'undefined' && CyberCanvasInstance.isInitialized) {
                         CyberCanvasInstance.needsRedraw = true;
                     }
@@ -254,6 +276,7 @@
                         im: state.im,
                         zMapMode: state.zMapMode === 'square' ? 'square' : 'sqrt',
                         showSum: !!state.showSum,
+                        showDiff: !!state.showDiff,
                         showDashedLines: !!state.showDashedLines,
                         showAbsBoxes: !!state.showAbsBoxes,
                         view: {
@@ -362,10 +385,14 @@
             const sy = CC.mapY(rPt.im);
             const s = CC.getUiScale();
 
-            let wx, wy;
+            let wx, wy, dx, dy;
             if (state.showSum) {
                 wx = CC.mapX(state.re + rPt.re);
                 wy = CC.mapY(state.im + rPt.im);
+            }
+            if (state.showDiff) {
+                dx = CC.mapX(state.re - rPt.re);
+                dy = CC.mapY(state.im - rPt.im);
             }
 
             if (state.showDashedLines) {
@@ -404,6 +431,18 @@
                     ctx.lineTo(wx, wy);
                     ctx.stroke();
                 }
+                if (state.showDiff) {
+                    ctx.strokeStyle = P.AXIS_RE;
+                    ctx.beginPath();
+                    ctx.moveTo(dx, dy);
+                    ctx.lineTo(ox, dy);
+                    ctx.stroke();
+                    ctx.strokeStyle = P.AXIS_IM;
+                    ctx.beginPath();
+                    ctx.moveTo(dx, oy);
+                    ctx.lineTo(dx, dy);
+                    ctx.stroke();
+                }
                 ctx.setLineDash([]);
             }
 
@@ -422,7 +461,30 @@
                 ctx.stroke();
             }
 
-            /* Vectors O → r, O → z, O → w: in their respective colors */
+            if (state.showDiff) {
+                const mx = CC.mapX(-rPt.re);
+                const my = CC.mapY(-rPt.im);
+                ctx.lineWidth = Math.max(0.45, 0.65 * s);
+                
+                ctx.strokeStyle = P.VAR_R;
+                ctx.beginPath();
+                ctx.moveTo(ox, oy);
+                ctx.lineTo(mx, my);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(ax, ay);
+                ctx.lineTo(dx, dy);
+                ctx.stroke();
+                
+                ctx.strokeStyle = P.VAR_Z;
+                ctx.beginPath();
+                ctx.moveTo(mx, my);
+                ctx.lineTo(dx, dy);
+                ctx.stroke();
+            }
+
+            /* Vectors O → r, O → z, O → w, O → d: in their respective colors */
             ctx.lineWidth = Math.max(0.45, 0.65 * s);
             
             ctx.strokeStyle = P.VAR_R;
@@ -445,6 +507,14 @@
                 ctx.stroke();
             }
 
+            if (state.showDiff) {
+                ctx.strokeStyle = P.VAR_DIFF;
+                ctx.beginPath();
+                ctx.moveTo(ox, oy);
+                ctx.lineTo(dx, dy);
+                ctx.stroke();
+            }
+
             ctx.fillStyle = rgbaFromHex(P.VAR_R, 0.98);
             ctx.beginPath();
             ctx.arc(sx, sy, 6 * s, 0, Math.PI * 2);
@@ -462,14 +532,23 @@
                 ctx.fill();
             }
 
-            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, s, state);
+            if (state.showDiff) {
+                ctx.fillStyle = rgbaFromHex(P.VAR_DIFF, 0.98);
+                ctx.beginPath();
+                ctx.arc(dx, dy, 6 * s, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ImaginaryNumbersOverlays.updateCnPointLabelOverlays(CC, ax, ay, sx, sy, wx, wy, dx, dy, s, state);
 
             ImaginaryNumbersOverlays.updateCnFormulaOverlay(state, dragTarget);
             ImaginaryNumbersOverlays.updateCnAbszOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbsrOverlay(state);
             ImaginaryNumbersOverlays.updateCnAbswOverlay(state);
+            ImaginaryNumbersOverlays.updateCnAbsdOverlay(state);
             ImaginaryNumbersOverlays.updateCnMagnitudeOverlay(state);
             ImaginaryNumbersOverlays.updateCnSumOverlay(state);
+            ImaginaryNumbersOverlays.updateCnDiffOverlay(state);
             requestAnimationFrame(() => ImaginaryNumbersOverlays.syncCnFormulaOverlayWidths());
             maybePersistAfterDraw();
         }
@@ -490,6 +569,9 @@
                 }
                 if (saved.showSum !== undefined) {
                     state.showSum = !!saved.showSum;
+                }
+                if (saved.showDiff !== undefined) {
+                    state.showDiff = !!saved.showDiff;
                 }
                 if (saved.showDashedLines !== undefined) {
                     state.showDashedLines = !!saved.showDashedLines;
