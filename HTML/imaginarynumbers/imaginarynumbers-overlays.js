@@ -65,6 +65,15 @@
     };
 
     function updateCnFormulaOverlay(state, dragTarget) {
+        const host = document.getElementById('cn-formula-tex');
+        if (!host) return;
+
+        // In free mode, don't show any formula overlay
+        if (state.zMapMode === 'free') {
+            host.textContent = '';
+            return;
+        }
+
         const x = fmtNum(state.re);
         const y = fmtNum(state.im);
         const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
@@ -120,10 +129,10 @@
 
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `absr|${zm}|${xs}|${ys}`;
 
-        const w = mapRFromZ(state.re, state.im, state.zMapMode);
+        const w = rPointFromState(state);
         const us = fmtNum(w.re);
         const vs = fmtNum(w.im);
         const absrs = fmtNum(Math.hypot(w.re, w.im));
@@ -147,14 +156,14 @@
         }
         host.style.display = '';
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const wx = state.re + rPt.re;
         const wy = state.im + rPt.im;
         const wxs = fmtNum(wx);
         const wys = fmtNum(wy);
         const absws = fmtNum(Math.hypot(wx, wy));
 
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `absw|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
 
         const buildTex = () => `\\left|${Tex.color(P.VAR_OMEGA, '\\omega')}\\right| \\,{=}\\, ` +
@@ -176,18 +185,18 @@
         }
         host.style.display = '';
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const p = ImaginaryNumbersMath.multiplyComplex(state.re, state.im, rPt.re, rPt.im);
         const px = fmtNum(p.re);
         const py = fmtNum(p.im);
         const absp = fmtNum(Math.hypot(p.re, p.im));
 
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `absp|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
 
-        const buildTex = () => `\left|${Tex.color(P.VAR_PRODUCT, '\\mu')}\right| \,{=}\, ` +
-            `\sqrt{\textstyle${Tex.val(P.AXIS_RE, px)}^{2}\,+\,${Tex.val(P.AXIS_IM, py)}^{2}} ` +
-            `\,{=}\, ${Tex.val(P.TITLE_MUTED, absp)}`;
+        const buildTex = () => `\\left|${Tex.color(P.VAR_PRODUCT, '\\mu')}\\right| \\,{=}\\, ` +
+            `\\sqrt{\\textstyle${Tex.val(P.AXIS_RE, px)}^{2}\\,+\\,${Tex.val(P.AXIS_IM, py)}^{2}} ` +
+            `\\,{=}\\, ${Tex.val(P.TITLE_MUTED, absp)}`;
         const fallback = () => `|μ| = √((${px})² + (${py})²) = ${absp}`;
 
         renderOverlay('cn-formula-absp-tex', 'absp', memoKey, buildTex, fallback, false);
@@ -196,12 +205,12 @@
     function updateCnMagnitudeOverlay(state) {
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `mag|${zm}|${xs}|${ys}`;
 
         const rho = Math.hypot(state.re, state.im);
         const rhos = fmtNum(rho);
-        const w = mapRFromZ(state.re, state.im, state.zMapMode);
+        const w = rPointFromState(state);
         const us = fmtNum(w.re);
         const vs = fmtNum(w.im);
 
@@ -261,10 +270,10 @@
 
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `sum|${zm}|${xs}|${ys}`;
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const us = fmtNum(rPt.re);
         const vs = fmtNum(rPt.im);
         
@@ -305,10 +314,10 @@
 
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `prod|${zm}|${xs}|${ys}`;
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const us = fmtNum(rPt.re);
         const vs = fmtNum(rPt.im);
         const p = ImaginaryNumbersMath.multiplyComplex(state.re, state.im, rPt.re, rPt.im);
@@ -348,10 +357,10 @@
 
         const xs = fmtNum(state.re);
         const ys = fmtNum(state.im);
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `diff|${zm}|${xs}|${ys}`;
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const us = fmtNum(rPt.re);
         const vs = fmtNum(rPt.im);
         
@@ -390,14 +399,14 @@
         }
         host.style.display = '';
 
-        const rPt = mapRFromZ(state.re, state.im, state.zMapMode);
+        const rPt = rPointFromState(state);
         const dx = state.re - rPt.re;
         const dy = state.im - rPt.im;
         const dxs = fmtNum(dx);
         const dys = fmtNum(dy);
         const absds = fmtNum(Math.hypot(dx, dy));
 
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const memoKey = `absd|${zm}|${fmtNum(state.re)}|${fmtNum(state.im)}`;
 
         const buildTex = () => `\\left|${Tex.color(P.VAR_DIFF, '\\delta')}\\right| \\,{=}\\, ` +
@@ -416,7 +425,7 @@
         const wEl = document.getElementById('cn-label-w');
         const dEl = document.getElementById('cn-label-d');
         const pEl = document.getElementById('cn-label-p');
-        const zm = state.zMapMode === 'square' ? 'sq' : 'sqrt';
+        const zm = state.zMapMode === 'square' ? 'sq' : state.zMapMode === 'free' ? 'free' : 'sqrt';
         const key = `cn-pt-${zm}-${state.showSum}-${state.showDiff}-${state.showProd}`;
 
         if (zEl && zEl.dataset.cnPointKey !== key) {
@@ -427,9 +436,11 @@
         }
         if (rEl && rEl.dataset.cnPointKey !== key) {
             rEl.innerHTML = '';
-            const rTex = state.zMapMode === 'square'
-                ? ImaginaryNumbersControls.texZSquare()
-                : ImaginaryNumbersControls.texRSqrtZ();
+            const rTex = state.zMapMode === 'free'
+                ? `\\textcolor{${P.VAR_R}}{r}`
+                : state.zMapMode === 'square'
+                    ? ImaginaryNumbersControls.texZSquare()
+                    : ImaginaryNumbersControls.texRSqrtZ();
             katex.render(rTex, rEl, { throwOnError: false, displayMode: false });
             rEl.dataset.cnPointKey = key;
         }
@@ -444,7 +455,13 @@
         if (dEl && dEl.dataset.cnPointKey !== key) {
             dEl.innerHTML = '';
             if (state.showDiff) {
-                const dTex = `\\textcolor{${P.VAR_DIFF}}{\\delta}`;
+                const dTex = (
+                    `\\textcolor{${P.VAR_DIFF}}{\\delta}` +
+                    `\\textcolor{${P.TITLE_MUTED}}{=}` +
+                    `\\textcolor{${P.VAR_Z}}{z}` +
+                    `\\textcolor{${P.TITLE_MUTED}}{-}` +
+                    `\\textcolor{${P.VAR_R}}{r}`
+                );
                 katex.render(dTex, dEl, { throwOnError: false, displayMode: false });
             }
             dEl.dataset.cnPointKey = key;
@@ -588,3 +605,5 @@
         ensureCnFormulaWidthResizeListener
     };
 })(typeof window !== 'undefined' ? window : globalThis);
+
+
