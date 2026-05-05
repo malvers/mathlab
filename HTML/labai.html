@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>DOC ALVERS – LAB AI</title>
@@ -18,7 +19,8 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         * {
@@ -36,15 +38,16 @@
 
         /* Branding Styles matching other labs */
         .canvas-branding {
-            position: absolute;
+            position: fixed;
             top: 20px;
-            left: 24px;
+            right: 24px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: flex-end;
             z-index: 1000;
             pointer-events: none;
         }
+
         .canvas-branding h1 {
             font-family: 'Orbitron', sans-serif;
             font-size: 22px;
@@ -60,6 +63,7 @@
             font-weight: 700;
             line-height: 1.1;
         }
+
         .canvas-subtitle {
             font-family: 'Orbitron', sans-serif;
             font-size: 11px;
@@ -72,8 +76,8 @@
         }
 
         .chat-container {
-            max-width: 1200px;
-            width: 95%;
+            max-width: 1000px;
+            width: 100%;
             margin: 60px auto 0 auto;
             background: rgba(5, 7, 25, 0.65);
             backdrop-filter: blur(12px);
@@ -86,7 +90,67 @@
             height: calc(100vh - 180px);
         }
 
+        /* API-Leiste – wird ausgeblendet, wenn Key gespeichert */
+        .api-section {
+            padding: 16px 24px;
+            background: rgba(0, 5, 20, 0.7);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.4);
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
 
+        .api-section.hidden {
+            display: none;
+        }
+
+        .api-input {
+            flex: 2;
+            background: #070b1a;
+            border: 1px solid #2d2f6e;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #b5f0ff;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+
+        .model-select {
+            flex: 1;
+            background: #070b1a;
+            border: 1px solid #3d2a6e;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #e0c4ff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .save-key-btn {
+            background: #1e2a3e;
+            border: 1px solid #00d2ff;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #00d2ff;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .save-key-btn:hover {
+            background: #00d2ff;
+            color: #0a0a2a;
+        }
 
 
 
@@ -100,62 +164,35 @@
             scroll-behavior: smooth;
         }
 
-        /* Vereinheitlichte Scrollbars für das gesamte Labor */
-        .chat-container *::-webkit-scrollbar {
+        .messages-area::-webkit-scrollbar,
+        .message-input::-webkit-scrollbar,
+        .message-content pre::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
-        .chat-container *::-webkit-scrollbar-track {
+
+        .messages-area::-webkit-scrollbar-track,
+        .message-content pre::-webkit-scrollbar-track {
             background: #0a0f2a;
             border-radius: 10px;
         }
-        .chat-container *::-webkit-scrollbar-thumb {
-            background: #4a235a;
-            border-radius: 10px;
-        }
 
-        /* Spezialfall Eingabefeld (Inset) */
         .message-input::-webkit-scrollbar-track {
             background: transparent;
             margin: 8px 0;
         }
 
-        .code-container {
-            position: relative;
-            margin: 12px 0;
+        /* Horizontaler Inset für Code-Blöcke */
+        .message-content pre::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 0 12px;
         }
 
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0, 210, 255, 0.15);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            border-radius: 6px;
-            padding: 5px;
-            cursor: pointer;
-            opacity: 1;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .message.assistant:hover .copy-btn,
-        .code-container:hover .copy-btn {
-            opacity: 1;
-        }
-
-        .copy-btn:hover {
-            background: rgba(0, 210, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .copy-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: #00d2ff;
+        .messages-area::-webkit-scrollbar-thumb,
+        .message-input::-webkit-scrollbar-thumb,
+        .message-content pre::-webkit-scrollbar-thumb {
+            background: #9d50bb;
+            border-radius: 10px;
         }
 
         .message {
@@ -168,6 +205,7 @@
                 opacity: 0;
                 transform: translateY(12px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -204,67 +242,6 @@
             width: 80%;
         }
 
-        .message-content ul {
-            padding-left: 35px;
-            margin: 10px 0;
-            list-style: none;
-        }
-
-        .message-content li {
-            position: relative;
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .message-content li::before {
-            content: "•";
-            color: #00d2ff;
-            font-weight: bold;
-            display: inline-block; 
-            width: 1em;
-            margin-left: -1em;
-        }
-
-        /* Tabellen-Styling */
-        .table-container {
-            overflow-x: auto;
-            margin: 15px 0;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 210, 255, 0.2);
-            background: rgba(10, 15, 42, 0.4);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        th {
-            background: rgba(0, 210, 255, 0.15);
-            color: #00d2ff;
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-        }
-
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: #ccf5ff;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: rgba(0, 210, 255, 0.05);
-        }
-
         .message-content pre {
             background: #03081a;
             padding: 10px;
@@ -273,6 +250,7 @@
             margin: 8px 0;
             border-left: 3px solid #00d2ff;
         }
+
         .message-content code {
             font-family: monospace;
             background: #00000055;
@@ -286,6 +264,7 @@
             gap: 6px;
             padding: 4px 0;
         }
+
         .typing-dots span {
             width: 8px;
             height: 8px;
@@ -294,12 +273,28 @@
             animation: typing-pulse 1.4s infinite ease-in-out;
             box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
         }
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes typing-pulse {
-            0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-            40% { transform: scale(1.2); opacity: 1; }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.7);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
         }
 
         .message-content hr {
@@ -342,11 +337,11 @@
         }
 
         .send-button {
-            background: linear-gradient(135deg, #00d2ff, #9d50bb);
+            background: linear-gradient(135deg, #00d2ff, #00a3cc);
             border: none;
             border-radius: 10px;
             padding: 12px 24px;
-            color: white;
+            color: #050a1c;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             font-size: 0.9rem;
@@ -354,248 +349,272 @@
             transition: all 0.2s;
             height: 47px;
             flex-shrink: 0;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
         }
 
         .send-button:hover:not(:disabled) {
             transform: scale(1.02);
             box-shadow: 0 0 14px #9d50bb;
         }
-
     </style>
 </head>
+
 <body>
 
-<div class="canvas-branding">
-    <h1>DOC ALVERS MATHE-LABOR</h1>
-    <div class="canvas-subtitle">LAB AI</div>
-</div>
+    <div class="canvas-branding">
+        <h1>DOC ALVERS MATHE-LABOR</h1>
+        <div class="canvas-subtitle">LAB AI</div>
+    </div>
 
-<div class="chat-container">
-    <div class="messages-area" id="messagesArea">
-        <div class="message assistant">
-            <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
-                <strong>Wie kann ich Dir helfen?</strong>
+    <div class="chat-container">
+        <!-- API-Leiste (wird ausgeblendet, wenn Key gespeichert) -->
+        <div class="api-section" id="apiSection">
+            <input type="password" class="api-input" id="apiKeyInput" placeholder="DeepSeek API Key (sk-...)"
+                autocomplete="off" aria-label="DeepSeek API Key">
+            <select class="model-select" id="modelSelect" aria-label="KI-Modell auswählen">
+                <option value="deepseek-chat">DeepSeek V3 (Chat)</option>
+                <option value="deepseek-reasoner">DeepSeek R1 (Reasoner)</option>
+            </select>
+            <button class="save-key-btn" id="saveKeyBtn">💾 Key speichern</button>
+        </div>
+
+
+
+        <div class="messages-area" id="messagesArea">
+            <div class="message assistant">
+                <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
+                    <strong>Wie kann ich Dir helfen?</strong>
+                </div>
             </div>
         </div>
+
+        <div class="input-area">
+            <textarea class="message-input" id="messageInput" rows="1"
+                placeholder="Du hast sicher Fragen ... schreib sie hier!"
+                aria-label="Deine Nachricht an die KI"></textarea>
+            <button class="send-button" id="sendButton">GO</button>
+        </div>
+
     </div>
 
-    <div class="input-area">
-        <textarea class="message-input" id="messageInput" rows="1" placeholder="Du hast sicher Fragen ... schreib sie hier!" aria-label="Deine Nachricht an die KI"></textarea>
-        <button class="send-button" id="sendButton">GO</button>
-    </div>
-</div>
+    <script>
+        const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
+        let conversationHistory = [];
 
-<script>
-    const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
-    
-    const messagesArea = document.getElementById('messagesArea');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
+        const messagesArea = document.getElementById('messagesArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
 
-    let chatHistory = [];
-
-    // Auto-resize input
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        let scrollH = this.scrollHeight;
-        if (scrollH > 120) {
-            this.style.height = '120px';
-            this.style.overflowY = 'auto';
-        } else {
-            this.style.height = scrollH + 'px';
-            this.style.overflowY = 'hidden';
-        }
-    });
-
-    // ----- CHAT-LOGIK -----
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-    sendButton.addEventListener('click', sendMessage);
-
-    function addMessage(role, content) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${role}`;
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-
-        chatHistory.push({ role, content });
-
-        // 1. Code-Blöcke extrahieren (Platzhalter nutzen)
-        const codeBlocks = [];
-        let formatted = content.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
-            codeBlocks.push({ lang, code });
-            return placeholder;
-        });
-
-        // 2. Andere Markups formatieren
-        formatted = formatted.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        formatted = formatted.replace(/^## (.*$)/gim, '<h4>$1</h4>');
-        formatted = formatted.replace(/^# (.*$)/gim, '<h5>$1</h5>');
-        formatted = formatted.replace(/^\s*[-*+]\s+(.*)$/gim, '<li>$1</li>');
-        formatted = formatted.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
-        formatted = formatted.replace(/<\/ul>\s*<ul>/gim, '');
-        formatted = formatted.replace(/^---$/gm, '<hr>');
-        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-        // Tables
-        formatted = formatted.replace(/^\|(.+)\|$\n^\|([-|: ]+)\|$\n((?:^\|(.+)\|$\n?)+)/gim, (match, header, separator, body) => {
-            const rows = body.trim().split('\n');
-            const headerCols = header.split('|').filter(c => c.trim() !== '').map(c => c.trim());
-            const bodyHtml = rows.map(row => {
-                const cols = row.split('|').filter(c => c.trim() !== '').map(c => c.trim());
-                return `<tr>${cols.map(c => `<td>${c}</td>`).join('')}</tr>`;
-            }).join('');
-            
-            return `<div class="table-container"><table><thead><tr>${headerCols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
-        });
-
-        formatted = formatted.replace(/\n/g, '<br>');
-
-        // 3. Code-Blöcke sicher wieder einsetzen (Ein-Pass-Verfahren)
-        const copyIcon = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
-        
-        window.codeStorage = window.codeStorage || {};
-
-        formatted = formatted.replace(/__CODE_BLOCK_(\d+)__/g, (match, index) => {
-            const block = codeBlocks[index];
-            const storageId = `code_${Date.now()}_${index}`;
-            window.codeStorage[storageId] = block.code;
-            
-            const langClass = block.lang ? ` class="language-${block.lang}"` : '';
-            return `
-                <div class="code-container">
-                    <button class="copy-btn" onclick="copyStoredContent(this, '${storageId}')" title="Code kopieren">
-                        ${copyIcon}
-                    </button>
-                    <pre><code${langClass}>${escapeHtml(block.code.trim())}</code></pre>
-                </div>`;
-        });
-
-        contentDiv.innerHTML = formatted;
-
-        if (role === 'assistant') {
-            const storageId = `resp_${Date.now()}`;
-            window.codeStorage[storageId] = content;
-            const bubbleBtn = document.createElement('button');
-            bubbleBtn.className = 'copy-btn';
-            bubbleBtn.title = 'Antwort kopieren';
-            bubbleBtn.innerHTML = copyIcon;
-            bubbleBtn.onclick = () => copyStoredContent(bubbleBtn, storageId);
-            contentDiv.appendChild(bubbleBtn);
-        }
-
-        messageDiv.appendChild(contentDiv);
-        messagesArea.appendChild(messageDiv);
-        
-        // MathJax Rendering
-        if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise([contentDiv]);
-        }
-
-        // Syntax Highlighting
-        if (typeof hljs !== 'undefined') {
-            contentDiv.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
-        }
-        
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-    }
-
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    function copyStoredContent(btn, storageId) {
-        const text = window.codeStorage[storageId];
-        navigator.clipboard.writeText(text).then(() => {
-            const originalInner = btn.innerHTML;
-            btn.innerHTML = `<svg viewBox="0 0 24 24" style="fill: #00ff88;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
-            setTimeout(() => btn.innerHTML = originalInner, 2000);
-        });
-    }
-
-    function showTyping() {
-        const typingDiv = document.createElement('div');
-        typingDiv.className = 'message assistant';
-        typingDiv.id = 'typingIndicator';
-        typingDiv.innerHTML = `<div class="message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-        messagesArea.appendChild(typingDiv);
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-    }
-
-    function hideTyping() {
-        const el = document.getElementById('typingIndicator');
-        if (el) el.remove();
-    }
-
-    async function sendMessage() {
-        const userText = messageInput.value.trim();
-        let apiKey = localStorage.getItem(STORAGE_KEY);
-        
-        if (!userText) return;
-        
-        if (!apiKey || !apiKey.startsWith('sk-')) {
-            updateUIForSavedKey();
-            return;
-        }
-
-        addMessage('user', userText);
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        sendButton.disabled = true;
-        conversationHistory.push({ role: 'user', content: userText });
-        showTyping();
-
-        try {
-            const response = await fetch(DEEPSEEK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: modelSelect.value,
-                    messages: conversationHistory,
-                    temperature: 0.6,
-                    max_tokens: 3000
-                })
-            });
-            if (!response.ok) {
-                hideTyping();
-                let err = `Fehler ${response.status}`;
-                if (response.status === 401) err = 'Ungültiger API-Key – bitte neu speichern';
-                if (response.status === 402) err = 'Nicht genug Guthaben – DeepSeek aufladen';
-                throw new Error(err);
+        // Auto-resize input
+        messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            let scrollH = this.scrollHeight;
+            if (scrollH > 120) {
+                this.style.height = '120px';
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.height = scrollH + 'px';
+                this.style.overflowY = 'hidden';
             }
-            const data = await response.json();
-            const reply = data.choices[0].message.content;
-            conversationHistory.push({ role: 'assistant', content: reply });
-            if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
-            
-            hideTyping();
-            addMessage('assistant', reply);
-        } catch (err) {
-            hideTyping();
-            addMessage('assistant', `❌ Fehler: ${err.message}`);
-        } finally {
-            sendButton.disabled = false;
-            messageInput.focus();
+        });
+
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const modelSelect = document.getElementById('modelSelect');
+
+        const saveKeyBtn = document.getElementById('saveKeyBtn');
+        const apiSection = document.getElementById('apiSection');
+
+
+        const STORAGE_KEY = 'deepseek_api_key';
+        const MODEL_KEY = 'deepseek_model';
+
+        // UI aktualisieren: Input-Feld verstecken / zeigen
+        function updateUIForSavedKey() {
+            const savedKey = localStorage.getItem(STORAGE_KEY);
+            if (savedKey && savedKey.startsWith('sk-')) {
+                apiSection.classList.add('hidden');
+            } else {
+                apiSection.classList.remove('hidden');
+            }
         }
-    }
-    messageInput.focus();
-</script>
+
+        // Gespeicherten Key laden
+        function loadSavedKey() {
+            const savedKey = localStorage.getItem(STORAGE_KEY);
+            if (savedKey && savedKey.startsWith('sk-')) {
+                updateUIForSavedKey();
+            }
+
+            const savedModel = localStorage.getItem(MODEL_KEY);
+            if (savedModel) {
+                modelSelect.value = savedModel;
+            }
+            updateUIForSavedKey();
+        }
+
+        // API-Key speichern
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (!key || !key.startsWith('sk-')) {
+                return;
+            }
+
+            localStorage.setItem(STORAGE_KEY, key);
+            localStorage.setItem(MODEL_KEY, modelSelect.value);
+
+
+            updateUIForSavedKey();
+        }
+
+
+
+        loadSavedKey();
+        saveKeyBtn.addEventListener('click', saveApiKey);
+
+        // ----- CHAT-LOGIK -----
+        messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+        });
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        sendButton.addEventListener('click', sendMessage);
+
+        function addMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            // 1. Code-Blöcke extrahieren (Platzhalter nutzen)
+            const codeBlocks = [];
+            let formatted = content.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+                codeBlocks.push({ lang, code });
+                return placeholder;
+            });
+
+            // 2. Andere Markups formatieren
+            formatted = formatted.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            formatted = formatted.replace(/^## (.*$)/gim, '<h4>$1</h4>');
+            formatted = formatted.replace(/^# (.*$)/gim, '<h5>$1</h5>');
+            formatted = formatted.replace(/^\s*[-*+]\s+(.*)$/gim, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
+            formatted = formatted.replace(/<\/ul>\s*<ul>/gim, '');
+            formatted = formatted.replace(/^---$/gm, '<hr>');
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            // 3. Code-Blöcke sicher wieder einsetzen
+            codeBlocks.forEach((block, index) => {
+                const langClass = block.lang ? ` class="language-${block.lang}"` : '';
+                const codeHtml = `<pre><code${langClass}>${escapeHtml(block.code.trim())}</code></pre>`;
+                formatted = formatted.replace(`__CODE_BLOCK_${index}__`, codeHtml);
+            });
+
+            contentDiv.innerHTML = formatted;
+            messageDiv.appendChild(contentDiv);
+            messagesArea.appendChild(messageDiv);
+
+            // MathJax Rendering
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([contentDiv]);
+            }
+
+            // Syntax Highlighting
+            if (typeof hljs !== 'undefined') {
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `<div class="message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+            messagesArea.appendChild(typingDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        async function sendMessage() {
+            const userText = messageInput.value.trim();
+            let apiKey = localStorage.getItem(STORAGE_KEY);
+
+            if (!userText) return;
+
+            if (!apiKey || !apiKey.startsWith('sk-')) {
+                updateUIForSavedKey();
+                return;
+            }
+
+            addMessage('user', userText);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendButton.disabled = true;
+            conversationHistory.push({ role: 'user', content: userText });
+            showTyping();
+
+            try {
+                const response = await fetch(DEEPSEEK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        messages: conversationHistory,
+                        temperature: 0.6,
+                        max_tokens: 3000
+                    })
+                });
+                if (!response.ok) {
+                    hideTyping();
+                    let err = `Fehler ${response.status}`;
+                    if (response.status === 401) err = 'Ungültiger API-Key – bitte neu speichern';
+                    if (response.status === 402) err = 'Nicht genug Guthaben – DeepSeek aufladen';
+                    throw new Error(err);
+                }
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                conversationHistory.push({ role: 'assistant', content: reply });
+                if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+
+                hideTyping();
+                addMessage('assistant', reply);
+            } catch (err) {
+                hideTyping();
+                addMessage('assistant', `❌ Fehler: ${err.message}`);
+            } finally {
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        messageInput.focus();
+    </script>
 </body>
+
 </html>
