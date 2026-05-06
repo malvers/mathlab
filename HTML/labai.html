@@ -50,24 +50,68 @@
         }
 
         .model-select {
+            position: relative;
+            flex: 1;
+            align-self: stretch;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            user-select: none;
+        }
+
+        .model-select-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            height: 100%;
             background: rgba(0, 20, 40, 0.8);
             border: 1px solid #4b2c7a;
             border-radius: 10px;
             color: #ccf5ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 400;
-            padding: 4px 14px;
-            height: auto;
-            outline: none;
             cursor: pointer;
             backdrop-filter: blur(4px);
             transition: border-color 0.2s;
-            flex-shrink: 0;
+            box-sizing: border-box;
         }
 
-        .model-select:hover {
+        .model-select-display:hover,
+        .model-select.open .model-select-display {
             border-color: #00d2ff;
+        }
+
+        .model-select-options {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: rgba(3, 8, 26, 0.98);
+            border: 1px solid #4b2c7a;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+
+        .model-select.open .model-select-options {
+            display: block;
+        }
+
+        .model-option {
+            padding: 12px 18px;
+            color: #ccf5ff;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .model-option:hover {
+            background: rgba(0, 210, 255, 0.08);
+        }
+
+        .model-option.selected {
+            color: #00d2ff;
+            background: rgba(0, 210, 255, 0.06);
         }
 
         .canvas-branding h1 {
@@ -98,8 +142,7 @@
         }
 
         .chat-container {
-            max-width: 1100px;
-            width: 100%;
+            width: 86%;
             margin: 60px auto 0 auto;
             background: rgba(5, 7, 25, 0.65);
             backdrop-filter: blur(12px);
@@ -505,14 +548,20 @@
 
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
-            <div class="message assistant" style="align-items: center; gap: 12px; width: 100%;">
+            <div class="message assistant" style="align-items: center; gap: 10px; width: 100%;">
                 <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
                     <strong>Wie kann ich Dir helfen?</strong>
                 </div>
-                <select id="modelSelect" class="model-select" aria-label="Model Selection" style="margin-left: auto;">
-                    <option value="deepseek-v4-pro">V4 PRO</option>
-                    <option value="deepseek-v4-flash">V4 FLASH</option>
-                </select>
+                <div class="model-select" id="modelDropdown">
+                    <div class="model-select-display" id="modelDisplay">
+                        <span id="modelLabel">V4 FLASH</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="model-select-options" id="modelOptions">
+                        <div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div>
+                        <div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -590,10 +639,41 @@
 
         function getApiKey() { return sessionApiKey; }
 
-        function getModel() {
-            const select = document.getElementById('modelSelect');
-            return select ? select.value : (localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash');
+        let currentModel = localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash';
+
+        function getModel() { return currentModel; }
+
+        function initModelDropdown(dropdownEl) {
+            if (!dropdownEl) return;
+            const display = dropdownEl.querySelector('.model-select-display');
+            const label   = dropdownEl.querySelector('#modelLabel') || dropdownEl.querySelector('span');
+            const options = dropdownEl.querySelectorAll('.model-option');
+
+            // Gespeicherten Wert setzen
+            options.forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.value === currentModel);
+                if (opt.dataset.value === currentModel && label) label.textContent = opt.textContent;
+            });
+
+            display.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownEl.classList.toggle('open');
+            });
+
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    currentModel = opt.dataset.value;
+                    localStorage.setItem(MODEL_KEY, currentModel);
+                    if (label) label.textContent = opt.textContent;
+                    options.forEach(o => o.classList.toggle('selected', o === opt));
+                    dropdownEl.classList.remove('open');
+                });
+            });
         }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.model-select.open').forEach(d => d.classList.remove('open'));
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             const pwdInput = document.getElementById('cyber-pwd-input');
@@ -602,14 +682,7 @@
                     if (e.key === 'Enter') validateLabAccess();
                 });
             }
-            const modelSelect = document.getElementById('modelSelect');
-            if (modelSelect) {
-                const saved = localStorage.getItem(MODEL_KEY);
-                if (saved) modelSelect.value = saved;
-                modelSelect.addEventListener('change', () => {
-                    localStorage.setItem(MODEL_KEY, modelSelect.value);
-                });
-            }
+            initModelDropdown(document.getElementById('modelDropdown'));
         });
 
         function saveHistory() {
@@ -764,10 +837,11 @@
 
             if (!userText) return;
 
-            if (userText.toLowerCase() === '%clearchat') {
+            if (userText.toLowerCase() === '%clear') {
                 conversationHistory = [];
                 localStorage.removeItem(HISTORY_KEY);
-                messagesArea.innerHTML = `<div class="message assistant"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div></div>`;
+                messagesArea.innerHTML = `<div class="message assistant" style="align-items:center;gap:10px;width:100%;"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div><div class="model-select" id="modelDropdown"><div class="model-select-display" id="modelDisplay"><span id="modelLabel">V4 FLASH</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="model-select-options" id="modelOptions"><div class="model-option" data-value="deepseek-v4-pro">V4 PRO</div><div class="model-option selected" data-value="deepseek-v4-flash">V4 FLASH</div></div></div></div>`;
+                initModelDropdown(document.getElementById('modelDropdown'));
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
                 return;
