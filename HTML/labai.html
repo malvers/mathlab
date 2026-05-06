@@ -352,30 +352,63 @@
             }
         }
 
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
         .message-content table {
             border-collapse: collapse;
             width: 100%;
-            margin: 10px 0;
             font-size: 0.88rem;
+            background: rgba(0, 0, 0, 0.2);
         }
 
         .message-content th,
         .message-content td {
-            border: 1px solid rgba(0, 210, 255, 0.25);
-            padding: 6px 12px;
+            border: 1px solid rgba(0, 210, 255, 0.15);
+            padding: 10px 14px;
             text-align: left;
         }
 
         .message-content th {
-            background: rgba(0, 210, 255, 0.12);
+            background: linear-gradient(to bottom, rgba(0, 210, 255, 0.15), rgba(157, 80, 187, 0.1));
             color: #00d2ff;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.78rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
+        .message-content tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
 
-        .message-content tr:nth-child(even) td {
-            background: rgba(0, 210, 255, 0.04);
+        .message-content tr:hover {
+            background: rgba(0, 210, 255, 0.08);
+        }
+
+        .cyber-box {
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 10px 15px;
+            margin: 10px 0;
+            background: rgba(0, 210, 255, 0.05);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: #00d2ff;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .cyber-box-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: #00d2ff;
+            margin-bottom: 5px;
+            text-align: center;
+            opacity: 0.8;
         }
 
         .message-content hr {
@@ -677,14 +710,41 @@
                 return placeholder;
             });
 
-            // 2a. Markdown-Tabellen rendern
-            formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
-                const parseRow = row => row.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
-                const ths = parseRow(header).map(h => `<th>${h}</th>`).join('');
-                const trs = body.trim().split('\n').map(row =>
-                    '<tr>' + parseRow(row).map(c => `<td>${c}</td>`).join('') + '</tr>'
-                ).join('');
-                return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+            // 2a. Markdown-Tabellen & Cyber-Boxes rendern
+            formatted = formatted.replace(/((?:^\|.*\|(?:\n|$))+)/gm, (match) => {
+                const lines = match.trim().split('\n');
+                if (lines.length < 1) return match;
+
+                // Spezialfall: Cyber-Box (nur eine Zeile oder kein Separator)
+                let headerIdx = -1;
+                let sepIdx = -1;
+                for (let i = 0; i < lines.length - 1; i++) {
+                    // Suche nach Zeile mit Inhalt gefolgt von Trennzeile (--- oder +---+)
+                    if (lines[i].includes('|') && lines[i + 1].match(/[|+]{1,}[-+ :|]{2,}/)) {
+                        headerIdx = i;
+                        sepIdx = i + 1;
+                        break;
+                    }
+                }
+
+                const parseRow = row => {
+                    let clean = row.trim().replace(/^\|+|\|+$/g, '');
+                    return clean.split('|').map(c => c.trim());
+                };
+
+                if (headerIdx !== -1) {
+                    const preLines = lines.slice(0, headerIdx).map(l => `<div class="cyber-box-text">${l.replace(/^\|+|\|+$/g, '').trim()}</div>`).join('');
+                    const ths = parseRow(lines[headerIdx]).map(h => `<th>${h}</th>`).join('');
+                    const trs = lines.slice(sepIdx + 1).map(row => {
+                        const cells = parseRow(row);
+                        if (cells.length === 0 || (cells.length === 1 && cells[0] === "")) return '';
+                        return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                    }).join('');
+                    return preLines + `<div class="table-container"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+                } else {
+                    // Einfache Cyber-Box (keine Tabelle)
+                    return lines.map(l => `<div class="cyber-box">${l.replace(/^\|+|\|+$/g, '').trim()}</div>`).join('');
+                }
             });
 
             // 2. Andere Markups formatieren
