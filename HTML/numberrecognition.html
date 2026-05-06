@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | KI Zahlenerkennung</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <style>
+        :root { --side-width: 340px; }
+
+        /* ── Drawing pad ── */
+        #draw-canvas {
+            display: block;
+            background: #000;
+            cursor: crosshair;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.15);
+            touch-action: none;
+            max-width: 100%;
+        }
+        #draw-canvas.model-loading { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Centered draw wrapper ── */
+        #draw-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 80px 20px 20px;
+            box-sizing: border-box;
+        }
+        #draw-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* ── Sidebar: prediction ── */
+        #result-digit {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 80px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1;
+            color: #adff2f;
+            text-shadow: 0 0 40px rgba(173, 255, 47, 0.55);
+            min-height: 90px;
+            transition: color 0.2s;
+        }
+        #result-digit.dim { color: rgba(255,255,255,0.2); text-shadow: none; }
+        #result-conf {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: center;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        /* ── Confidence bars ── */
+        .conf-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 5px;
+        }
+        .conf-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: rgba(0, 210, 255, 0.7);
+            width: 14px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .conf-bar-bg {
+            flex: 1;
+            height: 7px;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .conf-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            background: rgba(0, 210, 255, 0.6);
+            transition: width 0.18s ease, background 0.18s;
+        }
+        .conf-bar-fill.top { background: #adff2f; }
+        .conf-pct {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            width: 38px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .conf-pct.top { color: #adff2f; }
+
+        /* ── 28×28 preview ── */
+        #preview-canvas {
+            image-rendering: pixelated;
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 4px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ── Model status dot ── */
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin-right: 6px;
+            vertical-align: middle;
+            transition: background 0.3s;
+        }
+        .status-dot.ok  { background: #adff2f; box-shadow: 0 0 6px rgba(173,255,47,0.6); }
+        .status-dot.err { background: #ff4444; }
+        .status-dot.spin { animation: statusSpin 1s linear infinite; background: var(--neon-blue, #00d2ff); }
+        @keyframes statusSpin {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        #model-status-text {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            vertical-align: middle;
+        }
+        #arch-text {
+            font-size: 9px;
+            color: rgba(255,255,255,0.25);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <div id="draw-wrap">
+                <canvas id="draw-canvas" width="280" height="280"></canvas>
+                <div id="draw-hint"></div>
+            </div>
+            <canvas id="canvas" style="display:none"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        // ── Local translations ──────────────────────────────────────────────────
+        const LAB_T = {
+            de: {
+                lab_title:    'KI Zahlenerkennung',
+                card_result:  'Erkannte Ziffer',
+                card_conf:    'Konfidenz-Analyse',
+                card_preview: 'Modell-Eingang (28 × 28)',
+                card_model:   'Modell',
+                clear:        'ZEICHNUNG LÖSCHEN',
+                draw_hint:    'Zeichne eine Ziffer (0–9) — Maus oder Finger',
+                nothing:      'Noch nichts gezeichnet',
+                loading:      'KI-Modell wird geladen …',
+                ready:        'Zeichne eine Ziffer — Vorhersage in Echtzeit',
+                error:        'Modell konnte nicht geladen werden',
+                coach_intro:  'Zeichne eine Ziffer (0–9). Das neuronale Netz erkennt sie in Echtzeit.',
+                arch:         'CNN · Conv2D → MaxPool → Dense(128) → Softmax(10)\nTrainiert auf MNIST (60 000 Beispiele)',
+                predicted:    'Vorhersage',
+                conf_label:   'Konfidenz',
+            },
+            en: {
+                lab_title:    'AI Number Recognition',
+                card_result:  'Predicted Digit',
+                card_conf:    'Confidence Analysis',
+                card_preview: 'Model Input (28 × 28)',
+                card_model:   'Model',
+                clear:        'CLEAR DRAWING',
+                draw_hint:    'Draw a digit (0–9) — mouse or finger',
+                nothing:      'Nothing drawn yet',
+                loading:      'Loading AI model …',
+                ready:        'Draw a digit — real-time prediction',
+                error:        'Could not load the model',
+                coach_intro:  'Draw a digit (0–9). The neural network recognizes it in real time.',
+                arch:         'CNN · Conv2D → MaxPool → Dense(128) → Softmax(10)\nTrained on MNIST (60 000 examples)',
+                predicted:    'Prediction',
+                conf_label:   'Confidence',
+            },
+            es: {
+                lab_title:    'Reconocimiento de Dígitos IA',
+                card_result:  'Dígito Reconocido',
+                card_conf:    'Análisis de Confianza',
+                card_preview: 'Entrada del Modelo (28 × 28)',
+                card_model:   'Modelo',
+                clear:        'BORRAR',
+                draw_hint:    'Dibuja un dígito (0–9) — ratón o dedo',
+                nothing:      'Nada dibujado aún',
+                loading:      'Cargando modelo IA …',
+                ready:        'Dibuja un dígito — predicción en tiempo real',
+                error:        'No se pudo cargar el modelo',
+                coach_intro:  'Dibuja un dígito (0–9). La red neuronal lo reconoce en tiempo real.',
+                arch:         'CNN · Conv2D → MaxPool → Dense(128) → Softmax(10)\nEntrenado en MNIST (60 000 ejemplos)',
+                predicted:    'Predicción',
+                conf_label:   'Confianza',
+            },
+            fr: {
+                lab_title:    'Reconnaissance de Chiffres IA',
+                card_result:  'Chiffre Reconnu',
+                card_conf:    'Analyse de Confiance',
+                card_preview: 'Entrée du Modèle (28 × 28)',
+                card_model:   'Modèle',
+                clear:        'EFFACER',
+                draw_hint:    'Dessine un chiffre (0–9) — souris ou doigt',
+                nothing:      'Rien de dessiné',
+                loading:      'Chargement du modèle IA …',
+                ready:        'Dessine un chiffre — prédiction en temps réel',
+                error:        'Impossible de charger le modèle',
+                coach_intro:  'Dessine un chiffre (0–9). Le réseau neuronal le reconnaît en temps réel.',
+                arch:         'CNN · Conv2D → MaxPool → Dense(128) → Softmax(10)\nEntraîné sur MNIST (60 000 exemples)',
+                predicted:    'Prédiction',
+                conf_label:   'Confiance',
+            },
+            nl: {
+                lab_title:    'AI Cijferherkenning',
+                card_result:  'Herkend Cijfer',
+                card_conf:    'Vertrouwensanalyse',
+                card_preview: 'Model-ingang (28 × 28)',
+                card_model:   'Model',
+                clear:        'WISSEN',
+                draw_hint:    'Teken een cijfer (0–9) — muis of vinger',
+                nothing:      'Nog niets getekend',
+                loading:      'AI-model laden …',
+                ready:        'Teken een cijfer — real-time voorspelling',
+                error:        'Model kon niet worden geladen',
+                coach_intro:  'Teken een cijfer (0–9). Het neurale netwerk herkent het in real time.',
+                arch:         'CNN · Conv2D → MaxPool → Dense(128) → Softmax(10)\nGetraind op MNIST (60 000 voorbeelden)',
+                predicted:    'Voorspelling',
+                conf_label:   'Vertrouwen',
+            },
+        };
+
+        function t(key) {
+            const lang = (typeof CyberI18n !== 'undefined' ? CyberI18n.current : null) || 'de';
+            return (LAB_T[lang] || LAB_T.en || LAB_T.de)[key] || (LAB_T.de)[key] || key;
+        }
+
+        // ── Branding & Shell ────────────────────────────────────────────────────
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: t('lab_title') });
+        CyberUI.init();
+        document.getElementById('coach-title-slot').textContent = t('lab_title');
+        document.getElementById('draw-hint').textContent = t('draw_hint');
+
+        if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
+
+        // ── Sidebar cards ───────────────────────────────────────────────────────
+        CyberUI.createCard('ui-container', t('card_result'), `
+            <div id="result-digit" class="dim">—</div>
+            <div id="result-conf">${t('nothing')}</div>
+            <button class="cyber-btn" id="clear-btn" onclick="clearDraw()"
+                style="width:100%; margin-top:16px; border-color:rgba(0,210,255,0.4);">
+                ${t('clear')}
+            </button>
+        `);
+
+        let confBarsHtml = '';
+        for (let i = 0; i <= 9; i++) {
+            confBarsHtml += `<div class="conf-row">
+                <span class="conf-label">${i}</span>
+                <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-${i}"></div></div>
+                <span class="conf-pct" id="pct-${i}">—</span>
+            </div>`;
+        }
+        CyberUI.createCard('ui-container', t('card_conf'), confBarsHtml);
+
+        CyberUI.createCard('ui-container', t('card_preview'), `
+            <canvas id="preview-canvas" width="56" height="56"
+                style="width:112px;height:112px;"></canvas>
+        `);
+
+        CyberUI.createCard('ui-container', t('card_model'), `
+            <div style="margin-bottom:6px;">
+                <span class="status-dot spin" id="status-dot"></span>
+                <span id="model-status-text">${t('loading')}</span>
+            </div>
+            <div id="arch-text">${t('arch').replace('\n','<br>')}</div>
+        `);
+
+        // ── Coach ───────────────────────────────────────────────────────────────
+        const coachEl = document.getElementById('coach-content');
+        coachEl.textContent = t('loading');
+
+        // ── Drawing canvas setup ────────────────────────────────────────────────
+        const drawCanvas = document.getElementById('draw-canvas');
+        const drawCtx   = drawCanvas.getContext('2d');
+
+        let isDrawing   = false;
+        let hasStrokes  = false;
+        let model       = null;
+        let predictTid  = null;
+
+        function initDraw() {
+            drawCtx.fillStyle = '#000';
+            drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawCtx.strokeStyle = '#fff';
+            drawCtx.lineWidth   = 22;
+            drawCtx.lineCap     = 'round';
+            drawCtx.lineJoin    = 'round';
+        }
+
+        function pos(e) {
+            const r = drawCanvas.getBoundingClientRect();
+            const sx = drawCanvas.width  / r.width;
+            const sy = drawCanvas.height / r.height;
+            const src = e.touches ? e.touches[0] : e;
+            return { x: (src.clientX - r.left) * sx, y: (src.clientY - r.top) * sy };
+        }
+
+        drawCanvas.addEventListener('mousedown', e => {
+            if (!model) return;
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = pos(e); drawCtx.moveTo(p.x, p.y);
+        });
+        drawCanvas.addEventListener('mousemove', e => {
+            if (!isDrawing) return;
+            const p = pos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            hasStrokes = true; schedulePred();
+        });
+        drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
+        drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+        drawCanvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (!model) return;
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = pos(e); drawCtx.moveTo(p.x, p.y);
+        }, { passive: false });
+        drawCanvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const p = pos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            hasStrokes = true; schedulePred();
+        }, { passive: false });
+        drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+
+        function schedulePred() {
+            clearTimeout(predictTid);
+            predictTid = setTimeout(predict, 120);
+        }
+
+        function clearDraw() {
+            initDraw();
+            hasStrokes = false;
+            document.getElementById('result-digit').textContent = '—';
+            document.getElementById('result-digit').className = 'dim';
+            document.getElementById('result-conf').textContent = t('nothing');
+            for (let i = 0; i <= 9; i++) {
+                document.getElementById('bar-' + i).style.width = '0%';
+                document.getElementById('bar-' + i).classList.remove('top');
+                document.getElementById('pct-' + i).textContent = '—';
+                document.getElementById('pct-' + i).classList.remove('top');
+            }
+            const pvCtx = document.getElementById('preview-canvas').getContext('2d');
+            pvCtx.clearRect(0, 0, 56, 56);
+            coachEl.textContent = model ? t('ready') : t('loading');
+        }
+
+        // ── Inference ───────────────────────────────────────────────────────────
+        async function predict() {
+            if (!model || !hasStrokes) return;
+            tf.tidy(() => {
+                // fromPixels → [280,280,1]  resizeBilinear → [28,28,1]  expandDims → [1,28,28,1]
+                const tensor = tf.browser
+                    .fromPixels(drawCanvas, 1)
+                    .resizeBilinear([28, 28])
+                    .toFloat()
+                    .div(255.0);            // [28, 28, 1]
+
+                updatePreview(tensor);
+
+                const probs = Array.from(
+                    model.predict(tensor.expandDims(0))  // [1, 28, 28, 1]
+                         .softmax()
+                         .dataSync()
+                );
+                updateBars(probs);
+            });
+        }
+
+        function updatePreview(tensor28) {
+            const pv  = document.getElementById('preview-canvas');
+            const ctx = pv.getContext('2d');
+            const data = tensor28.dataSync();
+            const img  = ctx.createImageData(28, 28);
+            for (let i = 0; i < 784; i++) {
+                const v = Math.round(data[i] * 255);
+                img.data[i * 4]     = v;
+                img.data[i * 4 + 1] = v;
+                img.data[i * 4 + 2] = v;
+                img.data[i * 4 + 3] = 255;
+            }
+            // draw to offscreen 28×28 then scale to preview
+            const off = document.createElement('canvas');
+            off.width = off.height = 28;
+            off.getContext('2d').putImageData(img, 0, 0);
+            ctx.clearRect(0, 0, 56, 56);
+            ctx.drawImage(off, 0, 0, 56, 56);
+        }
+
+        function updateBars(probs) {
+            let top = probs.indexOf(Math.max(...probs));
+            for (let i = 0; i <= 9; i++) {
+                const pct  = (probs[i] * 100).toFixed(1);
+                const fill = document.getElementById('bar-' + i);
+                const lbl  = document.getElementById('pct-' + i);
+                fill.style.width = pct + '%';
+                fill.classList.toggle('top', i === top);
+                lbl.textContent  = pct + '%';
+                lbl.classList.toggle('top', i === top);
+            }
+            document.getElementById('result-digit').textContent = top;
+            document.getElementById('result-digit').className   = '';
+            const confPct = (probs[top] * 100).toFixed(1);
+            document.getElementById('result-conf').textContent  = confPct + '%';
+            coachEl.textContent = `${t('predicted')}: ${top}  ·  ${t('conf_label')}: ${confPct}%`;
+        }
+
+        // ── Model loading ───────────────────────────────────────────────────────
+        const MODEL_URL = 'https://storage.googleapis.com/tfjs-tutorials/mnist/model.json';
+
+        async function loadModel() {
+            const dot  = document.getElementById('status-dot');
+            const text = document.getElementById('model-status-text');
+            try {
+                model = await tf.loadLayersModel(MODEL_URL);
+                // warm-up pass
+                tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1])));
+                dot.className  = 'status-dot ok';
+                text.textContent = '✓ MNIST CNN · ready';
+                drawCanvas.classList.remove('model-loading');
+                coachEl.textContent = t('ready');
+            } catch (err) {
+                dot.className  = 'status-dot err';
+                text.textContent = '✗ ' + t('error');
+                coachEl.textContent = t('error');
+                console.error('[ANN Lab] Model load failed:', err);
+            }
+        }
+
+        // ── Boot ────────────────────────────────────────────────────────────────
+        initDraw();
+        drawCanvas.classList.add('model-loading');
+        coachEl.textContent = t('coach_intro');
+        loadModel();
+    </script>
+</body>
+
+</html>
