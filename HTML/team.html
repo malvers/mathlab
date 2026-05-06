@@ -17,7 +17,8 @@
             background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
             min-height: 100vh;
             color: #ffffff;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -77,24 +78,25 @@
             transition: transform 0.2s ease-out;
             transform: translateX(-50%) scale(var(--current-scale, 1));
             z-index: 5;
+            padding-bottom: 20px;
         }
 
         .personal-footer {
-            margin-top: 20px;
-            padding: 60px 0;
+            margin-top: -160px; /* Slightly adjusted down */
+            padding: 20px 0 100px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             z-index: 10;
             position: relative;
         }
 
         .personal-photo {
-            width: 250px;
+            width: 400px;
             border-radius: 20px;
             border: 3px solid rgba(0, 210, 255, 0.4);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.3);
             transition: transform 0.3s ease;
         }
 
@@ -413,7 +415,7 @@
 
     <div class="personal-footer">
         <img src="resources/team/alvers.jpg" alt="Dr. Michael Alvers" class="personal-photo">
-        <div class="canvas-subtitle" style="text-align: center;">VON MICHAEL FÜR DAS TEAM</div>
+        <div class="canvas-subtitle" style="text-align: center; font-size: 14px;">Dr. Michael R. Alvers</div>
     </div>
 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -455,7 +457,7 @@
             
             // Ensure wrapper height matches the SCALED height of the absolute container
             // This pushes the personal footer down correctly
-            wrapper.style.height = (baseH * scale + 80) + 'px';
+            wrapper.style.height = (baseH * scale + 20) + 'px';
         }
 
         function openLightbox(src) {
