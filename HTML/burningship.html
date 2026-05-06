@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Burning Ship</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+
+    <style>
+        #main-content {
+            background: #000;
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .bs-seg-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .bs-seg-btn {
+            flex: 1;
+            min-width: 80px;
+            box-sizing: border-box;
+            padding: 8px 10px;
+            font-family: Orbitron, sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none;
+            background: rgba(16, 30, 52, 0.9);
+            border: 1px solid rgba(255, 140, 60, 0.38);
+            color: #ffe4c4;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .bs-seg-btn:hover {
+            border-color: rgba(255, 160, 80, 0.65);
+            background: rgba(26, 18, 10, 0.95);
+        }
+
+        .bs-readouts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec2 position;
+        void main() { gl_Position = vec4(position, 0.0, 1.0); }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision highp float;
+        uniform vec2 u_res;
+        uniform vec2 u_center;
+        uniform float u_zoom;
+        uniform int u_max_iter;
+        uniform float u_time;
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+            float sc = 3.0 / max(u_zoom, 1e-8);
+            vec2 c = u_center + uv * sc;
+            vec2 z = vec2(0.0);
+            int iter = 0;
+            bool escaped = false;
+            for (int k = 0; k < 768; k++) {
+                if (k >= u_max_iter) break;
+                if (dot(z, z) > 4.0) { escaped = true; iter = k; break; }
+                z = vec2(abs(z.x), abs(z.y));
+                z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
+            }
+            if (escaped) {
+                float sn = float(iter) - log2(max(1.0, log2(length(z))));
+                float r = 0.5 + 0.5 * cos(0.3 + sn * 0.13 + u_time * 0.09);
+                float g = 0.5 + 0.5 * cos(1.5 + sn * 0.13 + u_time * 0.09);
+                float b = 0.5 + 0.5 * cos(3.5 + sn * 0.13 + u_time * 0.09);
+                gl_FragColor = vec4(r, g, b, 1.0);
+            } else {
+                gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+            }
+        }
+    </script>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+
+    <script>
+    (function () {
+        'use strict';
+
+        window.toggleSidebar = function () {
+            document.getElementById('side-panel').classList.toggle('collapsed');
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        };
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: 'Burning Ship',
+            subtitle: 'Fraktal-Explorer',
+        });
+        CyberUI.init();
+
+        // --- WebGL setup ---
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl');
+
+        function compileShader(type, id) {
+            const sh = gl.createShader(type);
+            gl.shaderSource(sh, document.getElementById(id).text);
+            gl.compileShader(sh);
+            return sh;
+        }
+        const prg = gl.createProgram();
+        gl.attachShader(prg, compileShader(gl.VERTEX_SHADER, 'vs'));
+        gl.attachShader(prg, compileShader(gl.FRAGMENT_SHADER, 'fs'));
+        gl.linkProgram(prg);
+        gl.useProgram(prg);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+        const pos = gl.getAttribLocation(prg, 'position');
+        gl.enableVertexAttribArray(pos);
+        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+        const uRes     = gl.getUniformLocation(prg, 'u_res');
+        const uCenter  = gl.getUniformLocation(prg, 'u_center');
+        const uZoom    = gl.getUniformLocation(prg, 'u_zoom');
+        const uMaxIter = gl.getUniformLocation(prg, 'u_max_iter');
+        const uTime    = gl.getUniformLocation(prg, 'u_time');
+
+        // --- State ---
+        const DEF_CX = -0.5, DEF_CY = -0.5, DEF_ZOOM = 1.0, DEF_ITER = 200;
+        const ITER_MIN = 32, ITER_MAX = 500, ITER_CAP = 512, ZOOM_MAX = 200000;
+        const LS = 'bs_';
+
+        let cx = DEF_CX, cy = DEF_CY, zoom = DEF_ZOOM;
+        let maxIter = DEF_ITER, smoothIter = DEF_ITER, time = 0;
+
+        function clampZoom(z) {
+            return !Number.isFinite(z) ? 1 : Math.max(1, Math.min(ZOOM_MAX, z));
+        }
+
+        function zoomDepth(z) {
+            return Math.log(Math.max(1, clampZoom(z))) / Math.log(ZOOM_MAX);
+        }
+
+        // --- Render loop ---
+        const FRAME_MS = 1000 / 30;
+        let lastFrame = 0;
+
+        function draw() {
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w; canvas.height = h;
+                gl.viewport(0, 0, w, h);
+            }
+            const boost = (ITER_CAP - maxIter) * 0.9 * zoomDepth(zoom);
+            smoothIter += (Math.min(ITER_CAP, maxIter + boost) - smoothIter) * 0.14;
+            smoothIter = Math.max(ITER_MIN, Math.min(ITER_CAP, smoothIter));
+
+            gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.uniform2f(uCenter, cx, cy);
+            gl.uniform1f(uZoom, clampZoom(zoom));
+            gl.uniform1i(uMaxIter, Math.round(smoothIter));
+            gl.uniform1f(uTime, time);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+
+        function render(now) {
+            requestAnimationFrame(render);
+            if (now - lastFrame < FRAME_MS) return;
+            lastFrame = now;
+            time += 0.004;
+            draw();
+            syncReadouts();
+        }
+        requestAnimationFrame(render);
+
+        // --- Pan & zoom helpers ---
+        function canvasPx(clientX, clientY) {
+            const r = canvas.getBoundingClientRect();
+            return { mx: clientX - r.left, my: clientY - r.top };
+        }
+
+        function focalPoint(mx, my) {
+            const s = Math.min(canvas.width, canvas.height);
+            const k = 3 / (s * clampZoom(zoom));
+            return { fX: cx + (mx - canvas.width / 2) * k, fY: cy - (my - canvas.height / 2) * k };
+        }
+
+        function shiftCenter(factor, mx, my) {
+            const { fX, fY } = focalPoint(mx, my);
+            zoom = clampZoom(zoom * factor);
+            const s = Math.min(canvas.width, canvas.height);
+            const k = 3 / (s * zoom);
+            cx = fX - (mx - canvas.width / 2) * k;
+            cy = fY + (my - canvas.height / 2) * k;
+            scheduleSave();
+        }
+
+        // --- Mouse pan ---
+        let isDrag = false, dragLast = null;
+        canvas.addEventListener('mousedown', (e) => {
+            isDrag = true;
+            dragLast = canvasPx(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDrag || !dragLast) return;
+            const cur = canvasPx(e.clientX, e.clientY);
+            const s = Math.min(canvas.width, canvas.height);
+            cx -= ((cur.mx - dragLast.mx) / s / clampZoom(zoom)) * 3;
+            cy += ((cur.my - dragLast.my) / s / clampZoom(zoom)) * 3;
+            dragLast = cur;
+        });
+        window.addEventListener('mouseup', () => { isDrag = false; dragLast = null; scheduleSave(); });
+
+        // --- Wheel zoom ---
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const { mx, my } = canvasPx(e.clientX, e.clientY);
+            let dz = -e.deltaY;
+            if (e.deltaMode === 1) dz *= 16;
+            else if (e.deltaMode === 2) dz *= 300;
+            const sens = e.shiftKey ? 0.00032 : 0.00105;
+            const factor = Math.max(0.92, Math.min(1.092, Math.exp(dz * sens)));
+            shiftCenter(factor, mx, my);
+        }, { passive: false });
+
+        // --- Touch pinch ---
+        let pinchDist = 0, pinchZoom0 = 1, pinchAnchor = null;
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 2) return;
+            const a = e.touches[0], b = e.touches[1];
+            pinchDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+            pinchZoom0 = zoom;
+            const { mx, my } = canvasPx((a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2);
+            pinchAnchor = { mx, my, ...focalPoint(mx, my) };
+        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length !== 2 || !pinchAnchor || pinchDist < 8) return;
+            e.preventDefault();
+            const a = e.touches[0], b = e.touches[1];
+            const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+            zoom = clampZoom(pinchZoom0 * Math.max(0.25, Math.min(4, d / pinchDist)));
+            const { mx, my, fX, fY } = pinchAnchor;
+            const s = Math.min(canvas.width, canvas.height);
+            const k = 3 / (s * zoom);
+            cx = fX - (mx - canvas.width / 2) * k;
+            cy = fY + (my - canvas.height / 2) * k;
+        }, { passive: false });
+        canvas.addEventListener('touchend', () => { pinchAnchor = null; scheduleSave(); });
+
+        // --- Persist ---
+        let saveTimer = null;
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                try {
+                    localStorage.setItem(LS + 'cx', cx);
+                    localStorage.setItem(LS + 'cy', cy);
+                    localStorage.setItem(LS + 'zoom', clampZoom(zoom));
+                    localStorage.setItem(LS + 'iter', maxIter);
+                } catch (_) {}
+            }, 400);
+        }
+        (function loadSaved() {
+            try {
+                const rf = (k, d) => { const v = parseFloat(localStorage.getItem(LS + k)); return Number.isFinite(v) ? v : d; };
+                cx = rf('cx', DEF_CX); cy = rf('cy', DEF_CY);
+                zoom = clampZoom(rf('zoom', DEF_ZOOM));
+                maxIter = Math.max(ITER_MIN, Math.min(ITER_MAX, Math.round(rf('iter', DEF_ITER))));
+                smoothIter = maxIter;
+            } catch (_) {}
+        })();
+
+        // --- Sidebar ---
+        CyberUI.createCard('ui-container', 'NAVIGATION', `
+            <div class="bs-seg-row">
+                <button type="button" id="btn-reset" class="bs-seg-btn">Zurücksetzen</button>
+            </div>
+            <div class="bs-readouts">
+                <div class="stats-card">
+                    <span class="stats-label">Zoom</span>
+                    <span id="readout-zoom" class="stats-val">1×</span>
+                </div>
+                <div class="stats-card">
+                    <span class="stats-label">Detail</span>
+                    <span id="readout-iter" class="stats-val">${DEF_ITER}</span>
+                </div>
+                <div class="stats-card" style="grid-column: span 2;">
+                    <span class="stats-label">Re / Im</span>
+                    <span id="readout-pos" class="stats-val" style="font-size:0.68rem;">−0.500 / −0.500</span>
+                </div>
+            </div>
+        `, 'var(--neon-orange, #ff8c3c)');
+
+        CyberUI.createCard('ui-container', 'PARAMETER', `
+            <div id="iter-mount"></div>
+        `, 'var(--neon-orange, #ff8c3c)');
+
+        CyberUI.createSlider('iter-mount', 'Iterationen',
+            ITER_MIN, ITER_MAX, maxIter, 1,
+            (v) => { maxIter = parseInt(v, 10); smoothIter = maxIter; scheduleSave(); },
+            'var(--neon-orange, #ff8c3c)'
+        );
+
+        document.getElementById('btn-reset').onclick = () => {
+            cx = DEF_CX; cy = DEF_CY; zoom = DEF_ZOOM;
+            maxIter = DEF_ITER; smoothIter = DEF_ITER;
+            scheduleSave();
+        };
+
+        function syncReadouts() {
+            const z = clampZoom(zoom);
+            const zEl = document.getElementById('readout-zoom');
+            const iEl = document.getElementById('readout-iter');
+            const pEl = document.getElementById('readout-pos');
+            if (zEl) zEl.textContent = z >= 10 ? Math.round(z) + '×' : z.toFixed(2) + '×';
+            if (iEl) iEl.textContent = Math.round(smoothIter);
+            if (pEl) pEl.textContent = cx.toFixed(4) + ' / ' + cy.toFixed(4);
+        }
+
+    })();
+    </script>
+</body>
+
+</html>

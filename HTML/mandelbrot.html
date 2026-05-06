@@ -971,7 +971,6 @@
         uniform vec2 u_julia_c;
         uniform float u_time;
         uniform int u_julia;
-        uniform int u_burning;
         void main() {
             vec3 color = vec3(0.0);
             vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
@@ -990,9 +989,7 @@
             for (int k = 0; k < 768; k++) {
                 if (k >= u_max_iter) break;
                 if (dot(z, z) > 4.0) { escaped = true; iter = k; break; }
-                vec2 zz = z;
-                if (u_burning == 1) zz = abs(z);
-                z = vec2(zz.x * zz.x - zz.y * zz.y, 2.0 * zz.x * zz.y) + c;
+                z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
             }
             if (escaped) {
                 float sn = float(iter) - log2(max(1.0, log2(length(z))));
@@ -1559,12 +1556,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 mbFormulaOverlayCacheKey = cacheKey;
 
                 const baseClassic = 'z_{n+1} = z_n^{2} + c';
-                const baseBurning =
-                    'z_{n+1} = \\bigl(\\lvert\\Re z_n\\rvert + i\\,\\lvert\\Im z_n\\rvert\\bigr)^{2} + c';
 
                 function orbitProbeSpeedMatchesFractalShader() {
                     const maxSteps = fractalShaderTargetMaxIter();
-                    const burning = mode === 'BURNING_SHIP';
                     if (mainPlane === 'ORBIT' && orbitScanActive) {
                         if (fractalUsesCBurnPlane()) {
                             return fractalEscapeProbeLikeShader(
@@ -1573,7 +1567,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                                 orbitScanProbeCx,
                                 orbitScanProbeCy,
                                 maxSteps,
-                                burning,
                                 time,
                             );
                         }
@@ -1583,7 +1576,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                             juliaX,
                             juliaY,
                             maxSteps,
-                            burning,
                             time,
                         );
                     }
@@ -1595,7 +1587,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                                 juliaX,
                                 juliaY,
                                 maxSteps,
-                                burning,
                                 time,
                             );
                         }
@@ -1605,7 +1596,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                             juliaX,
                             juliaY,
                             maxSteps,
-                            burning,
                             time,
                         );
                     }
@@ -1698,15 +1688,11 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
 
                 el.classList.remove('mb-fractal-mz-split');
-                const bannerBase = mode === 'BURNING_SHIP' ? baseBurning : baseClassic;
-                const texFull = `${bannerBase}\\quad z_n,\\, c \\in \\mathbb{C}`;
+                const texFull = `${baseClassic}\\quad z_n,\\, c \\in \\mathbb{C}`;
                 if (typeof katex !== 'undefined') {
                     katex.render(texFull, el, { throwOnError: false, displayMode: true });
                 } else {
-                    el.textContent =
-                        mode === 'BURNING_SHIP'
-                            ? 'z_{n+1} = (|ℜ z_n| + i|ℑ z_n|)² + c   z_n, c ∈ ℂ'
-                            : 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
+                    el.textContent = 'z_{n+1} = z_n² + c  z_n, c ∈ ℂ';
                     el.style.cssText =
                         'font-family:Orbitron,sans-serif;font-size:1.28rem;line-height:1.2;color:#f2bb44;text-align:left;text-shadow:0 0 12px rgba(242,187,68,0.4);';
                 }
@@ -1757,12 +1743,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             if (!gl) return;
 
-            function orbitIterateMap(zx, zy, cr, ci, burning) {
-                if (burning) {
-                    const ax = Math.abs(zx);
-                    const ay = Math.abs(zy);
-                    return { zx: ax * ax - ay * ay + cr, zy: 2 * ax * ay + ci };
-                }
+            function orbitIterateMap(zx, zy, cr, ci) {
                 return { zx: zx * zx - zy * zy + cr, zy: 2 * zx * zy + ci };
             }
 
@@ -1786,7 +1767,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
              * Iterate like WebGL (768 cap, breakout |z|²>4), \(\texttt{sn}=\texttt{iter}-\log_2\max(1,\log_2|z|)}\),
              * \(\mu=\ln|z|^{2}/(2\max(1,\texttt{iter}))\) at escape.
              */
-            function fractalEscapeProbeLikeShader(z0x, z0y, cx, cy, maxSteps, burning, uTime) {
+            function fractalEscapeProbeLikeShader(z0x, z0y, cx, cy, maxSteps, uTime) {
                 const cap = Math.min(768, Math.max(1, maxSteps | 0));
                 let zx = Number(z0x);
                 let zy = Number(z0y);
@@ -1825,7 +1806,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         }
                         return { escaped: true, iter: k, sn, mu, hex, texMuBody, plainMu, r2Esc: r2 };
                     }
-                    const st = orbitIterateMap(zx, zy, cr, ci, burning);
+                    const st = orbitIterateMap(zx, zy, cr, ci);
                     zx = st.zx;
                     zy = st.zy;
                     if (!Number.isFinite(zx) || !Number.isFinite(zy)) {
@@ -1850,13 +1831,13 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /** Stable point after maxSteps with |z|² ≤ 4; else stable: false. escapeR2 = |z|² when crossing cutoff (HUD). */
-            function orbitProbeStableWithFinalR2(cr, ci, z0x, z0y, maxSteps, burning) {
+            function orbitProbeStableWithFinalR2(cr, ci, z0x, z0y, maxSteps) {
                 let zx = z0x;
                 let zy = z0y;
                 for (let i = 0; i < maxSteps; i++) {
                     const r2 = zx * zx + zy * zy;
                     if (r2 > ORBIT_SCAN_ESC_R2) return { stable: false, escapeR2: r2 };
-                    const st = orbitIterateMap(zx, zy, cr, ci, burning);
+                    const st = orbitIterateMap(zx, zy, cr, ci);
                     zx = st.zx;
                     zy = st.zy;
                 }
@@ -1871,15 +1852,14 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /** Julia: short probe — escaped with |z|² on first step > 4 (scan HUD). */
-            function orbitJuliaQuickExteriorResult(cr, ci, z0x, z0y, quickSteps, burning) {
+            function orbitJuliaQuickExteriorResult(cr, ci, z0x, z0y, quickSteps) {
                 const q = quickSteps != null ? quickSteps : ORBIT_SCAN_JULIA_QUICK_ESCAPE_ITERS;
                 let zx = z0x;
                 let zy = z0y;
-                const br = burning === true;
                 for (let i = 0; i < q; i++) {
                     const r2 = zx * zx + zy * zy;
                     if (r2 > ORBIT_SCAN_ESC_R2) return { escaped: true, escapeR2: r2 };
-                    const st = orbitIterateMap(zx, zy, cr, ci, br);
+                    const st = orbitIterateMap(zx, zy, cr, ci);
                     zx = st.zx;
                     zy = st.zy;
                 }
@@ -2051,9 +2031,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             const prg = linkShaderProgram('vs', 'fs');
             const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
             const pos = gl.getAttribLocation(prg, 'position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-            const uRes = gl.getUniformLocation(prg, 'u_res'), uCenter = gl.getUniformLocation(prg, 'u_center'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uJuliaC = gl.getUniformLocation(prg, 'u_julia_c'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia'), uBurning = gl.getUniformLocation(prg, 'u_burning');
+            const uRes = gl.getUniformLocation(prg, 'u_res'), uCenter = gl.getUniformLocation(prg, 'u_center'), uZoom = gl.getUniformLocation(prg, 'u_zoom'), uMaxIter = gl.getUniformLocation(prg, 'u_max_iter'), uJuliaC = gl.getUniformLocation(prg, 'u_julia_c'), uTime = gl.getUniformLocation(prg, 'u_time'), uJulia = gl.getUniformLocation(prg, 'u_julia');
             const DEF_MB_CENTER_X = 0, DEF_MB_CENTER_Y = 0, DEF_MB_ZOOM = 1;
-            /** Nach „Zurücksetzen“: Orbit-/Shader-Parameter \(c\) in MANDELBROT & BURNING_SHIP (von Kamerazentrum entkoppelt). */
+            /** Nach „Zurücksetzen”: Orbit-/Shader-Parameter \(c\) in MANDELBROT (von Kamerazentrum entkoppelt). */
             const DEF_MB_ORBIT_C_RE = 0.5, DEF_MB_ORBIT_C_IM = 0.5;
             const DEF_JL_CENTER_X = 0, DEF_JL_CENTER_Y = 0, DEF_JL_ZOOM = 1;
             /** Classic Julia c — spiral dendrite, lies on ∂M. */
@@ -2067,7 +2047,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             let mode = 'JULIA';
             /** Mandelbrot & Burning Ship: c-plane pixels, z₀=0; Julia: fixed c, z-plane */
             function fractalUsesCBurnPlane() {
-                return mode === 'MANDELBROT' || mode === 'BURNING_SHIP';
+                return mode === 'MANDELBROT';
             }
             let centerX = DEF_JL_CENTER_X, centerY = DEF_JL_CENTER_Y, zoom = DEF_JL_ZOOM;
             /** \(c\) — Start & nach jedem Reload \(0{.}5\) (wird nicht mehr in localStorage persistiert). */
@@ -2182,7 +2162,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 try {
                     localStorage.setItem(
                         LS_MB_MODE,
-                        mode === 'MANDELBROT' || mode === 'JULIA' || mode === 'BURNING_SHIP' ? mode : 'JULIA'
+                        mode === 'MANDELBROT' || mode === 'JULIA' ? mode : 'JULIA'
                     );
                     localStorage.setItem(LS_MB_CENTER_X, String(centerX));
                     localStorage.setItem(LS_MB_CENTER_Y, String(centerY));
@@ -2562,76 +2542,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 return tex;
             }
 
-            /** Klammerteil von \(\bigl(|\Re z_{k}|\ldots\bigr)\) (ohne \(\vphantom|^2\) — Hochzahl liegt außerhalb von \(\texttt H\)-\(\texttt{\\textcolor}\)). */
-            function orbitWorkedBurningBsParenTex(kMinus1) {
-                return (
-                    '\\bigl(\\lvert\\Re z_{' +
-                    kMinus1 +
-                    '}\\rvert + \\mathrm{i}\\,\\lvert\\Im z_{' +
-                    kMinus1 +
-                    '}\\rvert\\bigr)'
-                );
-            }
-
-            function orbitWorkedBurningBsFormulaTex(kMinus1) {
-                const Cp = ORBIT_WORKED_C_ACCENT_COLOR;
-                return orbitWorkedBurningBsParenTex(kMinus1) + '^{2}+\\textcolor{' + Cp + '}{\\mathbf{c}}';
-            }
-
-            /** Ein Burning-Schritt z_k, konsistent zur JS-Iterationsfunktion orbitIterateMap. */
-            function orbitWorkedBurningBlockTex(cr, ci, pk, zk, idx, gapAfterBlock) {
-                const H = ORBIT_WORKED_STEP_HEAD_COLOR;
-                const P = orbitWorkedPairTex;
-                const fx = Math.abs(pk.x);
-                const fy = Math.abs(pk.y);
-                const qx = fx * fx - fy * fy;
-                const qy = 2 * fx * fy;
-                const rh =
-                    '\\textcolor{' +
-                    H +
-                    '}{' +
-                    orbitWorkedBurningBsParenTex(idx - 1) +
-                    '}^{2}+\\textcolor{' +
-                    ORBIT_WORKED_C_ACCENT_COLOR +
-                    '}{\\mathbf{c}}';
-                const endRow = orbitWorkedAlignedBlockEndRowSuffix(gapAfterBlock);
-                return (
-                    '\\textcolor{' +
-                    H +
-                    '}{z_{' +
-                    idx +
-                    '}} &= ' +
-                    rh +
-                    '\\\\' +
-                    ' &= ' +
-                    P(fx, fy) +
-                    '^{2} + ' +
-                    P(cr, ci) +
-                    '\\\\' +
-                    ' &= ' +
-                    P(qx, qy) +
-                    ' + ' +
-                    P(cr, ci) +
-                    '\\\\' +
-                    ' &= ' +
-                    P(zk.x, zk.y) +
-                    endRow
-                );
-            }
-
-            /** Burning-Kette: beliebig viele Blöcke (Länge \texttt{zs}). */
-            function orbitWorkedBurningTrailTex(cr, ci, z0x, z0y, zs) {
-                let prev = { x: z0x, y: z0y };
-                let tex = '';
-                for (let i = 0; i < zs.length; i++) {
-                    const gapAfter =
-                        zs.length <= 1 ? false : i < zs.length - 1;
-                    tex += orbitWorkedBurningBlockTex(cr, ci, prev, zs[i], i + 1, gapAfter);
-                    prev = zs[i];
-                }
-                return tex;
-            }
-
             /** Kopf \(\mathbf{c}\), \(z_0\) mit Blockabstand (geteilt mit Voll‑ und Cz‑only‑Panel). */
             function orbitWorkedCzHeadTex(cr, ci, z0x, z0y) {
                 const H = ORBIT_WORKED_BLOCK_GAP_PX;
@@ -2659,12 +2569,10 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /** AMS aligned (KaTeX-sicher): kein array @{…}‑Preamble. */
-            function orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burning) {
+            function orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs) {
                 const zsUse = zs && zs.length ? zs : [];
                 const czHead = orbitWorkedCzHeadTex(cr, ci, z0x, z0y);
-                let tail = burning
-                    ? orbitWorkedBurningTrailTex(cr, ci, z0x, z0y, zsUse)
-                    : orbitWorkedQuadrTrailTex(cr, ci, z0x, z0y, zsUse);
+                let tail = orbitWorkedQuadrTrailTex(cr, ci, z0x, z0y, zsUse);
                 while (tail.length >= 2 && tail.slice(-2) === '\\\\') {
                     tail = tail.slice(0, -2);
                 }
@@ -2672,7 +2580,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             }
 
             /** KaTeX-freier Fallback; gleiche \(z\)-Stil-Kette wie \(\texttt{orbitWorkedPanelKatex}\). */
-            function orbitWorkedPanelPlain(cr, ci, z0x, z0y, zsIn, burning) {
+            function orbitWorkedPanelPlain(cr, ci, z0x, z0y, zsIn) {
                 const Pcoord = (x, y) => `(${orbitWorkedPlainCoord(x)} | ${orbitWorkedPlainCoord(y)})`;
                 let body = `c = ${Pcoord(cr, ci)}\nz₀ = ${Pcoord(z0x, z0y)}`;
 
@@ -2689,42 +2597,21 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
                 const zs = zsIn && zsIn.length ? zsIn : [];
                 const blockSep = '\n\n';
-
-                if (!burning) {
-                    let pa = z0x;
-                    let pb = z0y;
-                    for (let i = 0; i < zs.length; i++) {
-                        const k = i + 1;
-                        body +=
-                            blockSep +
-                            quadrBlock(
-                                pa,
-                                pb,
-                                zs[i],
-                                orbitWorkedPlainZkLabel(k),
-                                orbitWorkedPlainZkLabel(k - 1),
-                            );
-                        pa = zs[i].x;
-                        pb = zs[i].y;
-                    }
-                } else {
-                    const cplxSq = (re, im) => ({ x: re * re - im * im, y: 2 * re * im });
-                    let pa = z0x;
-                    let pb = z0y;
-                    for (let i = 0; i < zs.length; i++) {
-                        const k = i + 1;
-                        const fx = Math.abs(pa);
-                        const fy = Math.abs(pb);
-                        const q = cplxSq(fx, fy);
-                        body +=
-                            blockSep +
-                            `${orbitWorkedPlainZkLabel(k)} = (|Re ${orbitWorkedPlainZkLabel(k - 1)}| + i|Im ${orbitWorkedPlainZkLabel(k - 1)}|)² + c` +
-                            `\n= ${Pcoord(fx, fy)}² + ${Pcoord(cr, ci)}` +
-                            `\n= ${Pcoord(q.x, q.y)} + ${Pcoord(cr, ci)}` +
-                            `\n${Pcoord(zs[i].x, zs[i].y)}`;
-                        pa = zs[i].x;
-                        pb = zs[i].y;
-                    }
+                let pa = z0x;
+                let pb = z0y;
+                for (let i = 0; i < zs.length; i++) {
+                    const k = i + 1;
+                    body +=
+                        blockSep +
+                        quadrBlock(
+                            pa,
+                            pb,
+                            zs[i],
+                            orbitWorkedPlainZkLabel(k),
+                            orbitWorkedPlainZkLabel(k - 1),
+                        );
+                    pa = zs[i].x;
+                    pb = zs[i].y;
                 }
                 return body;
             }
@@ -2818,11 +2705,10 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     return;
                 }
 
-                const { cr, ci, z0x, z0y, burnOrbit } = snap;
+                const { cr, ci, z0x, z0y } = snap;
                 const zs = snap.zs && snap.zs.length ? snap.zs : [];
 
-                /** Merkhilfe \((x+\mathrm{i}y)^2\) gilt für \(z^2+c\) — Burning-Ship-Formel \(|\cdot|\) anderer Schlüssel. */
-                const showSqMemo = !burnOrbit;
+                const showSqMemo = true;
                 const nk = ORBIT_COORD_NKS;
 
                 const paintMbWorkedMain = (cacheKey, tex, plainUnicode) => {
@@ -2855,7 +2741,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                         kFlag,
                         ORBIT_WORKED_PANEL_TEX_REV,
                         'cz',
-                        burnOrbit ? 'B' : 'S',
                         cr.toFixed(nk),
                         ci.toFixed(nk),
                         z0x.toFixed(nk),
@@ -2873,7 +2758,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     const cacheKey = [
                         kFlag,
                         ORBIT_WORKED_PANEL_TEX_REV,
-                        burnOrbit ? 'B' : 'S',
                         cr.toFixed(nk),
                         ci.toFixed(nk),
                         z0x.toFixed(nk),
@@ -2882,8 +2766,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     ].join('|');
                     paintMbWorkedMain(
                         cacheKey,
-                        orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burnOrbit),
-                        orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs, burnOrbit),
+                        orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs),
+                        orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs),
                     );
                     return;
                 }
@@ -2915,7 +2799,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const cacheKey = [
                     kFlag,
                     ORBIT_WORKED_PANEL_TEX_REV,
-                    burnOrbit ? 'B' : 'S',
                     cr.toFixed(nk),
                     ci.toFixed(nk),
                     z0x.toFixed(nk),
@@ -2925,8 +2808,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
                 paintMbWorkedMain(
                     cacheKey,
-                    orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs, burnOrbit),
-                    orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs, burnOrbit),
+                    orbitWorkedPanelKatex(cr, ci, z0x, z0y, zs),
+                    orbitWorkedPanelPlain(cr, ci, z0x, z0y, zs),
                 );
             }
 
@@ -2948,9 +2831,7 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     CyberI18n.get('fractal.orbit_hud_toggle'),
                     mode === 'JULIA'
                         ? CyberI18n.get('fractal.orbit_help_jl')
-                        : mode === 'BURNING_SHIP'
-                          ? CyberI18n.get('fractal.orbit_help_bs')
-                          : CyberI18n.get('fractal.orbit_help_mb'),
+                        : CyberI18n.get('fractal.orbit_help_mb'),
                 ];
                 const czRows = fractalUsesCBurnPlane()
                     ? [
@@ -3218,13 +3099,12 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 const pts = [];
                 let zx = z0x;
                 let zy = z0y;
-                const burnOrbit = mode === 'BURNING_SHIP';
                 /** ↑/↓ in orbit view adjust orbitLegCount (legs / segments). */
                 const legsBudget = clampOrbitLegCount(orbitLegCount);
                 pts.push({ x: zx, y: zy });
-                /** Schenkel nur anhängen, wenn die Iteration endliche Werte liefert (kein Schweif aus „n/a“-Punkten). */
+                /** Schenkel nur anhängen, wenn die Iteration endliche Werte liefert (kein Schweif aus „n/a”-Punkten). */
                 for (let seg = 0; seg < legsBudget; seg++) {
-                    const st = orbitIterateMap(zx, zy, cr, ci, burnOrbit);
+                    const st = orbitIterateMap(zx, zy, cr, ci);
                     const nzx = st.zx;
                     const nzy = st.zy;
                     if (!Number.isFinite(nzx) || !Number.isFinite(nzy)) break;
@@ -3242,7 +3122,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                     ci,
                     z0x,
                     z0y,
-                    burnOrbit,
                     zs: nWp > 0 ? pts.slice(1, 1 + nWp) : [],
                     legsBudget,
                 };
@@ -3347,19 +3226,18 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                                     sy,
                                     0,
                                     0,
-                                    scanIters,
-                                    mode === 'BURNING_SHIP'
+                                    scanIters
                                 );
                                 if (probe.stable) hudMagR2 = probe.finalR2;
                                 else hudMagR2 = probe.escapeR2 ?? hudMagR2;
                             }
                         } else {
-                            const jq = orbitJuliaQuickExteriorResult(juliaX, juliaY, sx, sy, undefined, false);
+                            const jq = orbitJuliaQuickExteriorResult(juliaX, juliaY, sx, sy, undefined);
                             if (jq.escaped) {
                                 probe = { stable: false };
                                 hudMagR2 = jq.escapeR2 ?? hudMagR2;
                             } else {
-                                probe = orbitProbeStableWithFinalR2(juliaX, juliaY, sx, sy, scanIters, false);
+                                probe = orbitProbeStableWithFinalR2(juliaX, juliaY, sx, sy, scanIters);
                                 if (probe.stable) hudMagR2 = probe.finalR2;
                                 else hudMagR2 = probe.escapeR2 ?? hudMagR2;
                             }
@@ -3842,7 +3720,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 gl.uniform2f(uJuliaC, juliaX, juliaY);
                 gl.uniform1f(uTime, time);
                 gl.uniform1i(uJulia, mode === 'JULIA' ? 1 : 0);
-                gl.uniform1i(uBurning, mode === 'BURNING_SHIP' ? 1 : 0);
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
             }
 
@@ -3921,7 +3798,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             CyberUI.createCard('ui-container', CyberI18n.get('fractal.mode'), `
                 <div class="fraktal-seg-row">
                     <button type="button" id="btn-mode-m" class="fraktal-seg-btn">${CyberI18n.get('fractal.mandelbrot')}</button>
-                    <button type="button" id="btn-mode-bs" class="fraktal-seg-btn">${CyberI18n.get('fractal.burning_ship')}</button>
                     <button type="button" id="btn-mode-j" class="fraktal-seg-btn">${CyberI18n.get('fractal.julia')}</button>
                 </div>
                 <div style="margin:14px 0 6px;font-size:0.65rem;letter-spacing:0.14em;color:rgba(180,210,235,0.82);">${CyberI18n.get('fractal.display')}</div>
