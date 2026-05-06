@@ -56,8 +56,8 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            gap: 16px;
-            background: rgba(10, 15, 30, 0.88);
+            gap: 12px;
+            background: rgba(10, 15, 30, 0.92);
             border-radius: 10px;
             padding: 24px;
             box-sizing: border-box;
@@ -65,30 +65,49 @@
         #train-overlay.visible { display: flex; }
         #train-label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
+            font-size: 26px;
+            font-weight: 700;
             color: var(--neon-blue, #00d2ff);
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 30px rgba(0,210,255,0.4);
+        }
+        #train-epoch-info {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 0.06em;
+        }
+        #mnist-anim {
+            image-rendering: pixelated;
+            width: 196px;
+            height: 196px;
+            border: 2px solid rgba(0,210,255,0.25);
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        #mnist-anim-digit {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #adff2f;
+            text-shadow: 0 0 20px rgba(173,255,47,0.5);
+            min-height: 44px;
         }
         .train-bar-bg {
             width: 100%;
             max-width: 240px;
-            height: 6px;
+            height: 4px;
             background: rgba(255,255,255,0.08);
             border-radius: 3px;
             overflow: hidden;
+            margin-top: 4px;
         }
         #train-bar {
             height: 100%;
             width: 0%;
             background: var(--neon-blue, #00d2ff);
             border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        #train-stats {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.45);
-            text-align: center;
-            min-height: 16px;
+            transition: width 0.4s ease;
         }
 
         /* ── Prediction display ── */
@@ -204,9 +223,11 @@
             <div id="draw-wrap">
                 <canvas id="draw-canvas" width="280" height="280"></canvas>
                 <div id="train-overlay">
-                    <div id="train-label">TRAINING …</div>
+                    <div id="train-label">ZAHLEN LERNEN</div>
+                    <div id="train-epoch-info">Durchlauf 0 / 8</div>
+                    <canvas id="mnist-anim" width="84" height="84"></canvas>
+                    <div id="mnist-anim-digit">—</div>
                     <div class="train-bar-bg"><div id="train-bar"></div></div>
-                    <div id="train-stats"></div>
                 </div>
                 <div id="draw-hint"></div>
             </div>
@@ -350,6 +371,10 @@
         </button>
     `);
 
+    CyberUI.createCard('ui-container', 'DEBUG', `
+        <div id="debug-list" style="font-family:monospace;font-size:10px;line-height:2;"></div>
+    `);
+
     const coachEl = document.getElementById('coach-content');
     coachEl.textContent = t('training');
 
@@ -358,9 +383,32 @@
     const drawCtx    = drawCanvas.getContext('2d');
     let isDrawing    = false;
     let hasStrokes   = false;
-    let wasPredicted = false;   // true after first prediction — triggers auto-clear on next stroke
+    let wasPredicted = false;
     let model        = null;
     let predictTid   = null;
+    let animInterval = null;
+
+    function startMnistAnim(pixels, labels, n) {
+        const ac  = document.getElementById('mnist-anim');
+        const ctx = ac.getContext('2d');
+        const lbl = document.getElementById('mnist-anim-digit');
+        const S   = 3; // 28 × 3 = 84px
+        animInterval = setInterval(() => {
+            const idx = Math.floor(Math.random() * n);
+            for (let py = 0; py < 28; py++) {
+                for (let px = 0; px < 28; px++) {
+                    const v = Math.round(pixels[idx * 784 + py * 28 + px] * 255);
+                    ctx.fillStyle = `rgb(${v},${v},${v})`;
+                    ctx.fillRect(px * S, py * S, S, S);
+                }
+            }
+            lbl.textContent = labels[idx];
+        }, 80);
+    }
+
+    function stopMnistAnim() {
+        if (animInterval) { clearInterval(animInterval); animInterval = null; }
+    }
 
     function initDraw() {
         drawCtx.fillStyle = '#000';
@@ -432,18 +480,47 @@
         coachEl.textContent = t('ready');
     }
 
+    // ── Bounding-box crop → centered square (matches MNIST preprocessing) ───────
+    function getCroppedCanvas(src) {
+        const w = src.width, h = src.height;
+        const data = src.getContext('2d').getImageData(0, 0, w, h).data;
+        let minX = w, maxX = -1, minY = h, maxY = -1;
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                if (data[(y * w + x) * 4] > 10) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        if (maxX < 0) return null;
+        const bw = maxX - minX + 1;
+        const bh = maxY - minY + 1;
+        const pad = Math.max(Math.round(Math.max(bw, bh) * 0.25), 14);
+        const size = Math.max(bw, bh) + pad * 2;
+        const off = document.createElement('canvas');
+        off.width = off.height = size;
+        const ctx = off.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(src, minX, minY, bw, bh,
+            Math.round((size - bw) / 2), Math.round((size - bh) / 2), bw, bh);
+        return off;
+    }
+
     // ── Inference ───────────────────────────────────────────────────────────────
     function runPredict() {
         if (!model || !hasStrokes) return;
+        const cropped = getCroppedCanvas(drawCanvas);
+        if (!cropped) return;
         tf.tidy(() => {
-            // [280,280,1] → resize → [28,28,1] → add batch → [1,28,28,1]
             const tensor = tf.browser
-                .fromPixels(drawCanvas, 1)
+                .fromPixels(cropped, 1)
                 .resizeBilinear([28, 28])
                 .toFloat().div(255.0);
-
             updatePreview(tensor);
-
             const probs = Array.from(
                 model.predict(tensor.expandDims(0)).dataSync()
             );
@@ -491,18 +568,23 @@
     // Sprite: 784 px wide × 65 000 px tall — each row = one 28×28 image flattened
     const MNIST_IMG_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
     const MNIST_LAB_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
-    const PER_CLASS     = 1000;  // balanced: 1 000 × 10 classes = 10 000 total
+    const PER_CLASS     = 5000;  // balanced: 5 000 × 10 classes = 50 000 total
 
     async function loadMNIST(onStatus) {
-        // 1. Labels first (only ~65 KB)
+        // 1. Labels first — file is one-hot encoded: 10 bytes per sample → 650 000 bytes total
         onStatus('Labels laden …');
         await tf.nextFrame();
-        const labRes   = await fetch(MNIST_LAB_URL);
-        const allLabels = new Uint8Array(await labRes.arrayBuffer()); // all 65 000
+        const labRes  = await fetch(MNIST_LAB_URL);
+        const rawBytes = new Uint8Array(await labRes.arrayBuffer());
+        const NUM_SAMPLES = rawBytes.length / 10; // 65 000
+        const allLabels = new Uint8Array(NUM_SAMPLES);
+        for (let i = 0; i < NUM_SAMPLES; i++) {
+            allLabels[i] = rawBytes.indexOf(1, i * 10) - i * 10;
+        }
 
         // 2. Balanced index selection — 1 000 per class, scanning in order
         const buckets = Array.from({length: 10}, () => []);
-        for (let i = 0; i < allLabels.length; i++) {
+        for (let i = 0; i < NUM_SAMPLES; i++) {
             const c = allLabels[i];
             if (buckets[c].length < PER_CLASS) buckets[c].push(i);
             if (buckets.every(b => b.length >= PER_CLASS)) break;
@@ -530,13 +612,18 @@
         const n      = selected.length;
         const pixels = new Float32Array(n * 784);
         const labels = new Uint8Array(n);
+        const refSamples = new Array(10).fill(null);
         selected.forEach((srcRow, dst) => {
+            const cls = allLabels[srcRow];
             for (let px = 0; px < 784; px++)
                 pixels[dst * 784 + px] = raw[(srcRow * 784 + px) * 4] / 255;
-            labels[dst] = allLabels[srcRow];
+            labels[dst] = cls;
+            if (refSamples[cls] === null) {
+                refSamples[cls] = pixels.slice(dst * 784, dst * 784 + 784);
+            }
         });
 
-        return { pixels, labels, n };
+        return { pixels, labels, n, refSamples };
     }
 
     // ── Model definition & training ─────────────────────────────────────────────
@@ -557,23 +644,21 @@
         return m;
     }
 
-    const IDB_KEY = 'indexeddb://cyber-mnist-cnn-v2'; // v2: balanced sampling
+    const IDB_KEY = 'indexeddb://cyber-mnist-cnn-v3'; // v3: 50 000 samples
 
     async function trainAndReady() {
-        const overlay = document.getElementById('train-overlay');
-        const bar     = document.getElementById('train-bar');
-        const stats   = document.getElementById('train-stats');
-        const label   = document.getElementById('train-label');
+        const overlay   = document.getElementById('train-overlay');
+        const bar       = document.getElementById('train-bar');
+        const epochInfo = document.getElementById('train-epoch-info');
 
         drawCanvas.classList.add('disabled');
         overlay.classList.add('visible');
 
-        const setStatus = msg => { stats.textContent = msg; };
+        const setStatus = msg => { if (epochInfo) epochInfo.textContent = msg; };
 
         // ── 1. Try to load cached model from IndexedDB ──────────────────────────
         try {
             setStatus('Gespeichertes Modell suchen …');
-            label.textContent = 'MODELL LADEN';
             await tf.nextFrame();
             model = await tf.loadLayersModel(IDB_KEY);
             tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1]))); // warmup
@@ -588,10 +673,9 @@
         }
 
         // ── 2. Load MNIST data & train ──────────────────────────────────────────
-        label.textContent = 'MNIST TRAINING';
-        let pixels, labels;
+        let pixels, labels, refSamples;
         try {
-            ({ pixels, labels } = await loadMNIST(setStatus));
+            ({ pixels, labels, refSamples } = await loadMNIST(setStatus));
         } catch (err) {
             overlay.classList.remove('visible');
             drawCanvas.classList.remove('disabled');
@@ -602,7 +686,7 @@
             return;
         }
 
-        setStatus('Modell kompilieren …');
+        setStatus('Daten geladen — Training startet …');
         await tf.nextFrame();
 
         const n       = pixels.length / 784;
@@ -611,6 +695,7 @@
 
         const EPOCHS = 8;
         model = buildModel();
+        startMnistAnim(pixels, labels, n);
 
         await model.fit(xTensor, yTensor, {
             epochs:          EPOCHS,
@@ -621,15 +706,34 @@
                 onEpochEnd: async (epoch, logs) => {
                     const pct = Math.round(((epoch + 1) / EPOCHS) * 100);
                     bar.style.width = pct + '%';
-                    stats.textContent =
-                        `Epoch ${epoch + 1}/${EPOCHS}  ·  ` +
-                        `acc ${(logs.acc * 100).toFixed(1)} %  ·  ` +
-                        `val_acc ${(logs.val_acc * 100).toFixed(1)} %`;
+                    epochInfo.textContent = `Durchlauf ${epoch + 1} / ${EPOCHS}`;
+
+                    // Debug: predict on reference samples → sidebar list
+                    const dbg = document.getElementById('debug-list');
+                    const epochHeader = document.createElement('div');
+                    epochHeader.style.cssText = 'color:rgba(255,255,255,0.4);margin-top:6px;margin-bottom:2px;';
+                    epochHeader.textContent = `── Epoch ${epoch+1} ──`;
+                    dbg.appendChild(epochHeader);
+                    tf.tidy(() => {
+                        for (let d = 0; d < 10; d++) {
+                            if (!refSamples || !refSamples[d]) return;
+                            const inp = tf.tensor4d(refSamples[d], [1, 28, 28, 1]);
+                            const probs = Array.from(model.predict(inp).dataSync());
+                            const pred = probs.indexOf(Math.max(...probs));
+                            const conf = (Math.max(...probs) * 100).toFixed(0);
+                            const ok = pred === d;
+                            const line = document.createElement('div');
+                            line.style.color = ok ? '#adff2f' : '#ff6060';
+                            line.textContent = `  ${d} → ${pred}   ${conf}%`;
+                            dbg.appendChild(line);
+                        }
+                    });
                     await tf.nextFrame();
                 }
             }
         });
 
+        stopMnistAnim();
         xTensor.dispose();
         yTensor.dispose();
 
@@ -648,7 +752,7 @@
         drawCanvas.classList.remove('disabled');
         document.getElementById('status-dot').className = 'status-dot ok';
         document.getElementById('model-status-text').textContent =
-            `✓ MNIST CNN · ${(PER_CLASS * 10).toLocaleString()} Beispiele · gecacht`;
+            `✓ MNIST CNN · ${(PER_CLASS * 10).toLocaleString('de')} Beispiele · gecacht`;
         coachEl.textContent = t('ready');
     }
 
