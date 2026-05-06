@@ -162,6 +162,8 @@
             flex-direction: column;
             gap: 18px;
             scroll-behavior: smooth;
+            scrollbar-color: #5a2080 #0a0f2a;
+            scrollbar-width: thin;
         }
 
         .messages-area::-webkit-scrollbar,
@@ -182,16 +184,22 @@
             margin: 8px 0;
         }
 
-        /* Horizontaler Inset für Code-Blöcke */
+        /* Horizontale Scrollbar in Code-Blöcken */
         .message-content pre::-webkit-scrollbar-track {
-            background: transparent;
+            background: #1a0a2e;
+            border-radius: 10px;
             margin: 0 12px;
+        }
+
+        .message-content pre::-webkit-scrollbar-thumb {
+            background: #5a2080;
+            border-radius: 10px;
         }
 
         .messages-area::-webkit-scrollbar-thumb,
         .message-input::-webkit-scrollbar-thumb,
         .message-content pre::-webkit-scrollbar-thumb {
-            background: #9d50bb;
+            background: #5a2080;
             border-radius: 10px;
         }
 
@@ -249,6 +257,8 @@
             overflow-x: auto;
             margin: 8px 0;
             border-left: 3px solid #00d2ff;
+            scrollbar-color: #5a2080 #1a0a2e;
+            scrollbar-width: thin;
         }
 
         .message-content code {
@@ -372,7 +382,7 @@
         }
 
         .send-button {
-            background: linear-gradient(135deg, #00d2ff, #00a3cc);
+            background: linear-gradient(135deg, #00d2ff, #9d50bb);
             border: none;
             border-radius: 10px;
             padding: 12px 24px;
@@ -401,19 +411,6 @@
     </div>
 
     <div class="chat-container">
-        <!-- API-Leiste (wird ausgeblendet, wenn Key gespeichert) -->
-        <div class="api-section" id="apiSection">
-            <input type="password" class="api-input" id="apiKeyInput" placeholder="DeepSeek API Key (sk-...)"
-                autocomplete="off" aria-label="DeepSeek API Key">
-            <select class="model-select" id="modelSelect" aria-label="KI-Modell auswählen">
-                <option value="deepseek-chat">DeepSeek V3 (Chat)</option>
-                <option value="deepseek-reasoner">DeepSeek R1 (Reasoner)</option>
-            </select>
-            <button class="save-key-btn" id="saveKeyBtn">💾 Key speichern</button>
-        </div>
-
-
-
         <div class="messages-area" id="messagesArea">
             <div class="message assistant">
                 <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
@@ -432,78 +429,48 @@
     </div>
 
     <script>
-        const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
+        const AI_URL = 'https://api.deepseek.com/v1/chat/completions';
         let conversationHistory = [];
 
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
 
-        // Auto-resize input
-        messageInput.addEventListener('input', function () {
-            this.style.height = 'auto';
-            let scrollH = this.scrollHeight;
-            if (scrollH > 120) {
-                this.style.height = '120px';
-                this.style.overflowY = 'auto';
-            } else {
-                this.style.height = scrollH + 'px';
-                this.style.overflowY = 'hidden';
-            }
-        });
+        // Storage Keys – liest auch alten 'deepseek_api_key' für Migration
+        const STORAGE_KEY = 'ai_api_key';
+        const MODEL_KEY = 'ai_model';
+        const HISTORY_KEY = 'ai_history';
 
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const modelSelect = document.getElementById('modelSelect');
-
-        const saveKeyBtn = document.getElementById('saveKeyBtn');
-        const apiSection = document.getElementById('apiSection');
-
-
-        const STORAGE_KEY = 'deepseek_api_key';
-        const MODEL_KEY = 'deepseek_model';
-
-        // UI aktualisieren: Input-Feld verstecken / zeigen
-        function updateUIForSavedKey() {
-            const savedKey = localStorage.getItem(STORAGE_KEY);
-            if (savedKey && savedKey.startsWith('sk-')) {
-                apiSection.classList.add('hidden');
-            } else {
-                apiSection.classList.remove('hidden');
-            }
+        function getApiKey() {
+            return localStorage.getItem(STORAGE_KEY)
+                || localStorage.getItem('deepseek_api_key')
+                || '';
         }
 
-        // Gespeicherten Key laden
-        function loadSavedKey() {
-            const savedKey = localStorage.getItem(STORAGE_KEY);
-            if (savedKey && savedKey.startsWith('sk-')) {
-                updateUIForSavedKey();
-            }
-
-            const savedModel = localStorage.getItem(MODEL_KEY);
-            if (savedModel) {
-                modelSelect.value = savedModel;
-            }
-            updateUIForSavedKey();
+        function getModel() {
+            return localStorage.getItem(MODEL_KEY)
+                || localStorage.getItem('deepseek_model')
+                || 'deepseek-chat';
         }
 
-        // API-Key speichern
-        function saveApiKey() {
-            const key = apiKeyInput.value.trim();
-            if (!key || !key.startsWith('sk-')) {
-                return;
-            }
-
-            localStorage.setItem(STORAGE_KEY, key);
-            localStorage.setItem(MODEL_KEY, modelSelect.value);
-
-
-            updateUIForSavedKey();
+        function saveHistory() {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory));
         }
 
+        function loadHistory() {
+            try {
+                const saved = localStorage.getItem(HISTORY_KEY)
+                    || localStorage.getItem('deepseek_history');
+                if (!saved) return;
+                const history = JSON.parse(saved);
+                if (!Array.isArray(history) || history.length === 0) return;
+                conversationHistory = history;
+                messagesArea.innerHTML = '';
+                history.forEach(msg => addMessage(msg.role, msg.content));
+            } catch (e) {}
+        }
 
-
-        loadSavedKey();
-        saveKeyBtn.addEventListener('click', saveApiKey);
+        loadHistory();
 
         // ----- CHAT-LOGIK -----
         messageInput.addEventListener('input', function () {
@@ -606,12 +573,12 @@
 
         async function sendMessage() {
             const userText = messageInput.value.trim();
-            let apiKey = localStorage.getItem(STORAGE_KEY);
+            const apiKey = getApiKey();
 
             if (!userText) return;
 
             if (!apiKey || !apiKey.startsWith('sk-')) {
-                updateUIForSavedKey();
+                addMessage('assistant', '❌ Kein API-Key gefunden. Bitte in localStorage unter "ai_api_key" speichern.');
                 return;
             }
 
@@ -623,14 +590,14 @@
             showTyping();
 
             try {
-                const response = await fetch(DEEPSEEK_URL, {
+                const response = await fetch(AI_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        model: modelSelect.value,
+                        model: getModel(),
                         messages: conversationHistory,
                         temperature: 0.6,
                         max_tokens: 3000
@@ -640,13 +607,14 @@
                     hideTyping();
                     let err = `Fehler ${response.status}`;
                     if (response.status === 401) err = 'Ungültiger API-Key – bitte neu speichern';
-                    if (response.status === 402) err = 'Nicht genug Guthaben – DeepSeek aufladen';
+                    if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
                     throw new Error(err);
                 }
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
                 conversationHistory.push({ role: 'assistant', content: reply });
                 if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+                saveHistory();
 
                 hideTyping();
                 addMessage('assistant', reply);

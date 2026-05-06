@@ -3630,11 +3630,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             function syncModeButtonsFromState() {
                 const bm = document.getElementById('btn-mode-m');
-                const bs = document.getElementById('btn-mode-bs');
                 const bj = document.getElementById('btn-mode-j');
-                if (!bm || !bs || !bj) return;
+                if (!bm || !bj) return;
                 bm.classList.toggle('is-active', mode === 'MANDELBROT');
-                bs.classList.toggle('is-active', mode === 'BURNING_SHIP');
                 bj.classList.toggle('is-active', mode === 'JULIA');
             }
 
@@ -3865,15 +3863,6 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 
             document.getElementById('btn-mode-m').onclick = () => {
                 mode = 'MANDELBROT';
-                syncMbFractalCenterFromJuliaSliders();
-                mbFormulaOverlayCacheKey = '';
-                syncModeButtonsFromState();
-                persistMandelbrotFractalState();
-                syncMbFractalFormulaOverlay();
-                syncOrbitMbWorkedExample();
-            };
-            document.getElementById('btn-mode-bs').onclick = () => {
-                mode = 'BURNING_SHIP';
                 syncMbFractalCenterFromJuliaSliders();
                 mbFormulaOverlayCacheKey = '';
                 syncModeButtonsFromState();
@@ -4165,7 +4154,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
             function loadMandelbrotFractalPersist() {
                 try {
                     const m = localStorage.getItem(LS_MB_MODE);
-                    if (m === 'MANDELBROT' || m === 'JULIA' || m === 'BURNING_SHIP') mode = m;
+                    if (m === 'MANDELBROT' || m === 'JULIA') mode = m;
+                    else if (m === 'BURNING_SHIP') mode = 'MANDELBROT';
 
                     const rf = (key, fb) => {
                         const s = localStorage.getItem(key);
