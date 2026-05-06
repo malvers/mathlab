@@ -158,13 +158,21 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
-                    SECURITY CLEARANCE
+                    Passwort eingeben
                 </div>
-                <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6; font-family: Orbitron;">LEVEL 5 ACCESS REQUIRED</div>
-                <input type="password" id="cyber-pwd-input" class="auth-input" placeholder="********" autocomplete="off">
+                <div style="position: relative; margin: 20px 0;">
+                    <input type="password" id="cyber-pwd-input" class="auth-input" placeholder="********" autocomplete="off" style="margin: 0; padding-right: 48px;">
+                    <button onclick="(function(){var i=document.getElementById('cyber-pwd-input');var e=document.getElementById('branding-eye');var h=i.type==='password';i.type=h?'text':'password';e.innerHTML=h?'<path d=\\'M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94\\'/><path d=\\'M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19\\'/><line x1=\\'1\\' y1=\\'1\\' x2=\\'23\\' y2=\\'23\\'/>':'<path d=\\'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\'/>';})();"
+                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--branding-blue,#00d2ff);padding:4px;line-height:1;">
+                        <svg id="branding-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
                 <div style="display: flex; gap: 15px; justify-content: center;">
-                    <button class="nav-btn" style="width: auto; padding: 10px 25px;" onclick="CyberBranding.validateAccess()">LOGIN</button>
-                    <button class="nav-btn" style="width: auto; padding: 10px 25px; opacity: 0.5;" onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
+                    <button style="flex:1;background:linear-gradient(135deg,#00d2ff,#9d50bb);border:none;border-radius:10px;padding:10px 28px;color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;" onclick="CyberBranding.validateAccess()">LOGIN</button>
+                    <button style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,0.5);font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;" onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
                 </div>
             </div>
         `;
@@ -177,12 +185,18 @@
             }, 10);
         },
 
-        validateAccess() {
+        async validateAccess() {
             const input = document.getElementById("cyber-pwd-input");
-            // Secure Obfuscation (Base64 check for !aMe5007!!??)
-            const target = "IWFNZTUwMDchIT8/";
+            // SHA-256 hash — password cannot be reconstructed from this
+            const TARGET_HASH = "91fe6d6f2b54568d7c2e22557431e6a42d7c03543aade710212da4c1cd959dc9";
 
-            if (btoa(input.value) === target) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input.value);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashHex = Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
+
+            if (hashHex === TARGET_HASH) {
                 document.getElementById("cyber-auth-overlay").classList.remove("visible");
                 this.toggleEditMode();
                 this.showNotification("Zugriff gewährt. Briefing-Edit aktiviert.");
