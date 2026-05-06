@@ -49,6 +49,29 @@
                         setLanguage(el.getAttribute('data-lang'));
                     });
                 }
+                // Translate static category tile headings
+                const tileKeys = {
+                    'txt-games':      'index.ui.games',
+                    'txt-lgs':        'index.ui.lgs',
+                    'txt-pythagoras': 'index.ui.pythagoras',
+                    'txt-triangles':  'index.ui.triangles',
+                    'txt-arithmetic': 'index.ui.arithmetic',
+                    'txt-hot':        'index.ui.hot_stuff',
+                    'txt-fun':        'index.ui.fun',
+                    'txt-functions':  'index.ui.functions',
+                    'txt-highlights': 'index.ui.highlights',
+                    'txt-all-tools':  'index.ui.all_tools',
+                    'txt-education':  'index.ui.education',
+                    'txt-themes':     'index.ui.themes_count',
+                    'txt-university': 'index.ui.university',
+                    'txt-grade':      'index.ui.grade_title',
+                    'txt-uni':        'index.ui.grade_uni',
+                };
+                Object.entries(tileKeys).forEach(([id, key]) => {
+                    const el = document.getElementById(id);
+                    const t = CyberI18n.get(key);
+                    if (el && t && t !== key) el.textContent = t;
+                });
             });
         })();
     </script>
