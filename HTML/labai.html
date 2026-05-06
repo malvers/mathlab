@@ -248,6 +248,41 @@
             border: 1px solid #4b2c7a;
             max-width: 80%;
             width: 80%;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 6px;
+            color: #00d2ff;
+            cursor: pointer;
+            padding: 4px 6px;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: background 0.2s, color 0.2s;
+            z-index: 2;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 210, 255, 0.22);
+        }
+
+        .copy-btn.copied {
+            color: #7fff7f;
+            border-color: #7fff7f;
+        }
+
+        .pre-wrapper {
+            position: relative;
+        }
+
+        .pre-wrapper .copy-btn {
+            top: 12px;
+            right: 12px;
         }
 
         .message-content pre {
@@ -386,7 +421,7 @@
             border: none;
             border-radius: 10px;
             padding: 12px 24px;
-            color: #050a1c;
+            color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             font-size: 0.9rem;
@@ -441,10 +476,26 @@
         const MODEL_KEY = 'ai_model';
         const HISTORY_KEY = 'ai_history';
 
+        const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+        const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
         function getApiKey() {
-            return localStorage.getItem(STORAGE_KEY)
-                || localStorage.getItem('deepseek_api_key')
-                || '';
+            const raw = localStorage.getItem(STORAGE_KEY)
+                     || localStorage.getItem('deepseek_api_key')
+                     || '';
+            if (!raw) return '';
+            try {
+                const decoded = atob(raw);
+                // Wenn der dekodierte Wert wie ein API-Key aussieht → ok
+                if (decoded.startsWith('sk-')) return decoded;
+                // Sonst war es Klartext → jetzt kodiert speichern
+                localStorage.setItem(STORAGE_KEY, btoa(raw));
+                return raw;
+            } catch (e) {
+                // Klartext (atob schlägt fehl) → kodiert speichern
+                localStorage.setItem(STORAGE_KEY, btoa(raw));
+                return raw;
+            }
         }
 
         function getModel() {
@@ -525,11 +576,28 @@
             // 3. Code-Blöcke sicher wieder einsetzen
             codeBlocks.forEach((block, index) => {
                 const langClass = block.lang ? ` class="language-${block.lang}"` : '';
-                const codeHtml = `<pre><code${langClass}>${escapeHtml(block.code.trim())}</code></pre>`;
+                const codeHtml = `<div class="pre-wrapper"><button class="copy-btn" data-code="${encodeURIComponent(block.code.trim())}">${COPY_ICON}</button><pre><code${langClass}>${escapeHtml(block.code.trim())}</code></pre></div>`;
                 formatted = formatted.replace(`__CODE_BLOCK_${index}__`, codeHtml);
             });
 
             contentDiv.innerHTML = formatted;
+
+            // Copy-Button für gesamte Antwort
+            if (role === 'assistant') {
+                const msgCopyBtn = document.createElement('button');
+                msgCopyBtn.className = 'copy-btn';
+                msgCopyBtn.innerHTML = COPY_ICON;
+                msgCopyBtn.style.position = 'absolute';
+                msgCopyBtn.addEventListener('click', () => copyText(content, msgCopyBtn));
+                contentDiv.appendChild(msgCopyBtn);
+            }
+
+            // Copy-Button für Code-Blöcke verdrahten
+            contentDiv.querySelectorAll('.pre-wrapper .copy-btn').forEach(btn => {
+                const code = decodeURIComponent(btn.dataset.code);
+                btn.addEventListener('click', () => copyText(code, btn));
+            });
+
             messageDiv.appendChild(contentDiv);
             messagesArea.appendChild(messageDiv);
 
@@ -546,6 +614,17 @@
             }
 
             messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                btn.innerHTML = CHECK_ICON;
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = COPY_ICON;
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
         }
 
         function escapeHtml(str) {
