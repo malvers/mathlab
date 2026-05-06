@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>DOC ALVERS – TEAM</title>
@@ -60,9 +61,7 @@
 
         #page-zoom-wrapper {
             width: 100vw;
-            height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
+            min-height: 100vh;
             position: relative;
             padding-top: 40px;
         }
@@ -76,13 +75,44 @@
             animation: fadeIn 0.8s ease-out;
             transform-origin: top center;
             transition: transform 0.2s ease-out;
-            /* Combined transform for centering and scaling */
             transform: translateX(-50%) scale(var(--current-scale, 1));
+            z-index: 5;
+        }
+
+        .personal-footer {
+            margin-top: 20px;
+            padding: 60px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .personal-photo {
+            width: 250px;
+            border-radius: 20px;
+            border: 3px solid rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .personal-photo:hover {
+            transform: scale(1.05);
+            border-color: #00d2ff;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) scale(0.98) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) scale(var(--current-scale, 1)) translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.98) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(var(--current-scale, 1)) translateY(0);
+            }
         }
 
         h2 {
@@ -260,6 +290,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="canvas-branding">
@@ -269,90 +300,120 @@
 
     <div id="page-zoom-wrapper">
         <div class="team-container">
-            <h2>UNSER TEAM</h2>
+            <h2 style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                UNSER TEAM 
+                <img src="resources/team/monkey.png" alt="Mascot" style="width: 60px; height: 60px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));">
+            </h2>
             <div class="team-list">
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_05.png');" onclick="openLightbox('resources/team/team_05.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Executive Officer</div>
-                    <div class="member-role">CEO / Strategic Vision</div>
-                    <div class="member-desc"><strong>Dr. Michael R. Alvers</strong><br>Leitet die globale Strategie und die langfristige Ausrichtung des Labors mit visionärer Kraft.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_05.png');"
+                        onclick="openLightbox('resources/team/team_05.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Executive Officer</div>
+                        <div class="member-role">CEO / Strategic Vision</div>
+                        <div class="member-desc"><strong>Dr. Michael R. Alvers</strong><br>Leitet die globale Strategie
+                            und die langfristige Ausrichtung des Labors mit visionärer Kraft.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_01.png');" onclick="openLightbox('resources/team/team_01.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Financial Officer</div>
-                    <div class="member-role">CFO / Financial Architect</div>
-                    <div class="member-desc"><strong>Dr. Ella Goldstein</strong><br>Verantwortlich für die finanzielle Stabilität und die ökonomische Skalierung des Labors.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_01.png');"
+                        onclick="openLightbox('resources/team/team_01.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Financial Officer</div>
+                        <div class="member-role">CFO / Financial Architect</div>
+                        <div class="member-desc"><strong>Dr. Ella Goldstein</strong><br>Verantwortlich für die
+                            finanzielle Stabilität und die ökonomische Skalierung des Labors.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_07.png');" onclick="openLightbox('resources/team/team_07.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Mathematician</div>
-                    <div class="member-role">Lead Architect / Theory</div>
-                    <div class="member-desc"><strong>Prof. Dr. Arthur Prime (Stanford)</strong><br>Mastermind hinter der theoretischen Architektur und Visionär des mathematischen Labors.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_07.png');"
+                        onclick="openLightbox('resources/team/team_07.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Mathematician</div>
+                        <div class="member-role">Lead Architect / Theory</div>
+                        <div class="member-desc"><strong>Prof. Dr. Arthur Prime (Stanford)</strong><br>Mastermind hinter
+                            der theoretischen Architektur und Visionär des mathematischen Labors.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_08.png');" onclick="openLightbox('resources/team/team_08.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Software Advisor</div>
-                    <div class="member-role">Software Strategy / Lead</div>
-                    <div class="member-desc"><strong>Victor Code, Ph.D. (Berkeley)</strong><br>Beratender Experte für zukunftsweisende Software-Architekturen und technologische Exzellenz.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_08.png');"
+                        onclick="openLightbox('resources/team/team_08.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Software Advisor</div>
+                        <div class="member-role">Software Strategy / Lead</div>
+                        <div class="member-desc"><strong>Victor Code, Ph.D. (Berkeley)</strong><br>Beratender Experte
+                            für zukunftsweisende Software-Architekturen und technologische Exzellenz.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_02.png');" onclick="openLightbox('resources/team/team_02.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Lead AI-Team</div>
-                    <div class="member-role">Logic Engine / Core AI</div>
-                    <div class="member-desc"><strong>Aria Neural</strong><br>Verantwortlich für die algorithmische Präzision und die Implementierung komplexer Logikstrukturen.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_02.png');"
+                        onclick="openLightbox('resources/team/team_02.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Lead AI-Team</div>
+                        <div class="member-role">Logic Engine / Core AI</div>
+                        <div class="member-desc"><strong>Aria Neural</strong><br>Verantwortlich für die algorithmische
+                            Präzision und die Implementierung komplexer Logikstrukturen.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_03.png');" onclick="openLightbox('resources/team/team_03.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Tech Lead</div>
-                    <div class="member-role">Infrastructure Specialist</div>
-                    <div class="member-desc"><strong>Marcus Grid</strong><br>Hüter der Systeme und Experte für skalierbare High-Performance Infrastrukturen.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_03.png');"
+                        onclick="openLightbox('resources/team/team_03.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Tech Lead</div>
+                        <div class="member-role">Infrastructure Specialist</div>
+                        <div class="member-desc"><strong>Marcus Grid</strong><br>Hüter der Systeme und Experte für
+                            skalierbare High-Performance Infrastrukturen.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_04.png');" onclick="openLightbox('resources/team/team_04.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">UI Designer</div>
-                    <div class="member-role">Cyber Aesthetics</div>
-                    <div class="member-desc"><strong>Luna Pixel</strong><br>Verwandelt komplexe Daten in intuitive, visuell beeindruckende Erlebnisse.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_04.png');"
+                        onclick="openLightbox('resources/team/team_04.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">UI Designer</div>
+                        <div class="member-role">Cyber Aesthetics</div>
+                        <div class="member-desc"><strong>Luna Pixel</strong><br>Verwandelt komplexe Daten in intuitive,
+                            visuell beeindruckende Erlebnisse.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_06.png');" onclick="openLightbox('resources/team/team_06.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Ops Lead</div>
-                    <div class="member-role">Operations Manager</div>
-                    <div class="member-desc"><strong>Silas Flow</strong><br>Sorgt für reibungslose Abläufe und koordiniert die Schnittstellen zwischen Theorie und Praxis.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_06.png');"
+                        onclick="openLightbox('resources/team/team_06.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Ops Lead</div>
+                        <div class="member-role">Operations Manager</div>
+                        <div class="member-desc"><strong>Silas Flow</strong><br>Sorgt für reibungslose Abläufe und
+                            koordiniert die Schnittstellen zwischen Theorie und Praxis.</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_09.png');" onclick="openLightbox('resources/team/team_09.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Security Officer</div>
-                    <div class="member-role">CSO / Feel-Good Lead</div>
-                    <div class="member-desc"><strong>Buster "The Guardian"</strong><br>Hüter der physischen Sicherheit und Experte für Stressabbau im Labor. Hat immer ein Auge auf die Server (und auf Snacks).</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_09.png');"
+                        onclick="openLightbox('resources/team/team_09.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Security Officer</div>
+                        <div class="member-role">CSO / Feel-Good Lead</div>
+                        <div class="member-desc"><strong>Buster "The Guardian"</strong><br>Hüter der physischen
+                            Sicherheit und Experte für Stressabbau im Labor. Hat immer ein Auge auf die Server (und auf
+                            Snacks).</div>
+                    </div>
                 </div>
-            </div>
-            <div class="team-member">
-                <div class="member-photo" style="background-image: url('resources/team/team_10.png');" onclick="openLightbox('resources/team/team_10.png')"></div>
-                <div class="member-info">
-                    <div class="member-name">Chief Aesthetic Officer</div>
-                    <div class="member-role">CAO / Silent Supervision</div>
-                    <div class="member-desc"><strong>Lady Seraphina</strong><br>Hüterin der Ästhetik und Expertin für lautlose Überwachung. Sorgt dafür, dass im Labor alles mit aristokratischer Eleganz abläuft.</div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('resources/team/team_10.png');"
+                        onclick="openLightbox('resources/team/team_10.png')"></div>
+                    <div class="member-info">
+                        <div class="member-name">Chief Aesthetic Officer</div>
+                        <div class="member-role">CAO / Silent Supervision</div>
+                        <div class="member-desc"><strong>Lady Seraphina</strong><br>Hüterin der Ästhetik und Expertin
+                            für lautlose Überwachung. Sorgt dafür, dass im Labor alles mit aristokratischer Eleganz
+                            abläuft.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="personal-footer">
+        <img src="resources/team/alvers.jpg" alt="Dr. Michael Alvers" class="personal-photo">
+        <div class="canvas-subtitle" style="text-align: center;">VON MICHAEL FÜR DAS TEAM</div>
     </div>
 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -372,23 +433,29 @@
     <script>
         function autoScale() {
             const container = document.querySelector('.team-container');
+            const wrapper = document.getElementById('page-zoom-wrapper');
             const winW = window.innerWidth;
             const winH = window.innerHeight;
             
+            if (!container || !wrapper) return;
+
             const baseW = 1320;
             const baseH = container.offsetHeight;
             const padding = 40; 
             
+            // Calculate scale - aim for fit but allow scroll if needed for height
             const scaleX = (winW - padding) / baseW;
-            const scaleY = (winH - padding - 100) / baseH;
+            const scaleY = (winH - padding - 150) / baseH;
             
             let scale = Math.min(scaleX, scaleY);
-            // Allow upscale zooming for huge windows, but limit to 2.0
             if (scale > 2) scale = 2;
             if (scale < 0.4) scale = 0.4;
             
-            // CSS handles translateX(-50%), we only set the scale variable
             document.documentElement.style.setProperty('--current-scale', scale);
+            
+            // Ensure wrapper height matches the SCALED height of the absolute container
+            // This pushes the personal footer down correctly
+            wrapper.style.height = (baseH * scale + 80) + 'px';
         }
 
         function openLightbox(src) {
@@ -408,7 +475,9 @@
         // Initialize Scaling
         window.addEventListener('resize', autoScale);
         window.addEventListener('load', () => {
-            setTimeout(autoScale, 100);
+            // Run twice to handle potential font/image loading height changes
+            autoScale();
+            setTimeout(autoScale, 200);
         });
 
         // Close on ESC
@@ -416,6 +485,6 @@
             if (e.key === 'Escape') closeLightbox();
         });
     </script>
-
 </body>
+
 </html>

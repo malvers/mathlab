@@ -54,13 +54,16 @@
             border: 1px solid #4b2c7a;
             border-radius: 10px;
             color: #ccf5ff;
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-family: 'Orbitron', sans-serif;
             font-size: 0.95rem;
-            padding: 12px 18px;
+            font-weight: 400;
+            padding: 4px 14px;
+            height: auto;
             outline: none;
             cursor: pointer;
             backdrop-filter: blur(4px);
             transition: border-color 0.2s;
+            flex-shrink: 0;
         }
 
         .model-select:hover {
@@ -491,13 +494,13 @@
 
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
-            <div class="message assistant" style="align-items: center; gap: 12px;">
+            <div class="message assistant" style="align-items: center; gap: 12px; width: 100%;">
                 <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
                     <strong>Wie kann ich Dir helfen?</strong>
                 </div>
-                <select id="modelSelect" class="model-select" aria-label="Model Selection">
-                    <option value="deepseek-chat">V3 CHAT</option>
-                    <option value="deepseek-reasoner">R1 REASONER</option>
+                <select id="modelSelect" class="model-select" aria-label="Model Selection" style="margin-left: auto;">
+                    <option value="deepseek-v4-pro">V4 PRO</option>
+                    <option value="deepseek-v4-flash">V4 FLASH</option>
                 </select>
             </div>
         </div>
@@ -543,6 +546,11 @@
             
             if (decrypted.startsWith("sk-")) {
                 sessionApiKey = decrypted;
+                const isLocal = location.hostname === "localhost" ||
+                                location.hostname === "127.0.0.1" ||
+                                location.protocol === "file:" ||
+                                location.hostname.startsWith("192.168.");
+                if (isLocal) localStorage.setItem('dev_access', pwd);
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
                 document.getElementById('messageInput').focus();
             } else {
@@ -571,7 +579,7 @@
 
         function getModel() {
             const select = document.getElementById('modelSelect');
-            return select ? select.value : (localStorage.getItem(MODEL_KEY) || 'deepseek-chat');
+            return select ? select.value : (localStorage.getItem(MODEL_KEY) || 'deepseek-v4-flash');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
