@@ -477,7 +477,7 @@ const LABS_DATA = [
         "keywords": "lgs gleichungssystem schnittpunkt geraden algebra mathe",
         "color": "green"
     },
-    {
+    /* {
         "id": "imaginarynumbers",
         "href": "imaginarynumbers/index.html",
         "title": "Imaginary numbers",
@@ -487,7 +487,7 @@ const LABS_DATA = [
         "category": "algebra highlight grade10 grade11 grade12 oberstufe uni",
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
-    },
+    }, */
     {
         "id": "labai",
         "href": "labai.html",
