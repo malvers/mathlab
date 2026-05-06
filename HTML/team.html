@@ -14,6 +14,30 @@
             box-sizing: border-box;
         }
 
+        /* Custom Scrollbar matching index.html */
+        html::-webkit-scrollbar {
+            width: 11px;
+            height: 11px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: rgba(40, 48, 68, 0.72);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(78, 92, 118, 0.95) 0%, rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        html::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(92, 108, 134, 0.98) 0%, rgba(68, 82, 108, 0.95) 100%);
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
         body {
             font-family: 'Orbitron', sans-serif;
             background: #030318;
@@ -29,41 +53,7 @@
             align-items: center;
         }
 
-        /* Branding Styles matching other labs */
-        .canvas-branding {
-            position: fixed;
-            top: 20px;
-            right: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            z-index: 1000;
-        }
 
-        .canvas-branding h1 {
-            font-size: 22px;
-            margin: 0;
-            letter-spacing: 3px;
-            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
-            text-transform: uppercase;
-            font-weight: 700;
-            line-height: 1.1;
-        }
-
-        .canvas-subtitle {
-            font-size: 11px;
-            letter-spacing: 5px;
-            color: #00d2ff;
-            margin-top: 4px;
-            text-transform: uppercase;
-            text-shadow: 0 0 7px #00d2ff;
-            opacity: 0.9;
-        }
 
         #page-zoom-wrapper {
             width: 100vw;
@@ -126,8 +116,12 @@
             margin-bottom: 30px;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: #00d2ff;
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
         }
 
         .team-list {
@@ -185,7 +179,7 @@
         }
 
         .member-role {
-            font-size: 0.85rem;
+            font-size: 1rem;
             color: #9d50bb;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -205,39 +199,34 @@
             position: fixed;
             top: 24px;
             left: 24px;
-            width: 58px;
-            height: 58px;
-            background: rgba(0, 20, 40, 0.5);
+            width: 42px;
+            height: 42px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(0, 210, 255, 0.3);
-            border-radius: 16px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #00d2ff;
+            color: #ffffff;
             cursor: pointer;
             z-index: 1100;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            animation: neonPulse 2s infinite alternate;
         }
 
-        @keyframes neonPulse {
-            from {
-                box-shadow: 0 0 5px rgba(0, 210, 255, 0.2);
-                border-color: rgba(0, 210, 255, 0.3);
-            }
-
-            to {
-                box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
-                border-color: rgba(0, 210, 255, 0.6);
-            }
+        .back-btn-fixed svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2.5;
         }
 
         .back-btn-fixed:hover {
+            transform: translateY(-2px) scale(1.05);
             background: rgba(0, 210, 255, 0.2);
             border-color: #00d2ff;
-            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
             color: #ffffff;
         }
 
@@ -324,17 +313,12 @@
 
 <body>
 
-    <div class="canvas-branding">
-        <h1>DOC ALVERS MATHE-LABOR</h1>
-        <div class="canvas-subtitle">TEAM OPS</div>
-    </div>
+
 
     <div id="page-zoom-wrapper">
         <div class="team-container">
             <h2 style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-                UNSER TEAM
-                <img src="resources/team/monkey.png" alt="Mascot"
-                    style="width: 60px; height: 60px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));">
+                DOC ALVERS MATHE-LABORE - DAS TEAM
             </h2>
             <div class="team-list">
                 <div class="team-member">
@@ -443,7 +427,7 @@
 
             <div class="personal-footer">
                 <img src="resources/team/alvers_final.png" alt="Dr. Michael Alvers" class="personal-photo">
-                <div class="canvas-subtitle" style="text-align: center; font-size: 80%;">Dr. rer. nat. Michael R. Alvers</div>
+                <div class="canvas-subtitle" style="text-align: center; font-size: 1.35rem; font-weight: 700; background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; text-shadow: none; letter-spacing: 2px;">Dr. rer. nat. Michael R. Alvers</div>
             </div>
         </div>
     </div>
@@ -461,8 +445,7 @@
     </div>
 
     <a href="#" onclick="history.back(); return false;" class="back-btn-fixed" title="Zurück">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
@@ -485,7 +468,7 @@
             const scaleX = (winW - padding) / baseW;
             const scaleY = (winH - padding - 150) / baseH;
 
-            let scale = Math.min(scaleX, scaleY) * 1.18;
+            let scale = Math.min(scaleX, scaleY) * 1.68;
             if (scale > 2) scale = 2;
             if (scale < 0.4) scale = 0.4;
 
