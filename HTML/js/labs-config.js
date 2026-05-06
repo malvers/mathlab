@@ -487,5 +487,16 @@ const LABS_DATA = [
         "category": "algebra highlight grade10 grade11 grade12 oberstufe uni",
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
+    },
+    {
+        "id": "labai",
+        "href": "labai.html",
+        "title": "Lab AI",
+        "description": "Dein intelligenter Assistent im Doc Alvers Mathe-Labor. KI-gestützte Analysen und Hilfe für komplexe Aufgaben.",
+        "tagline": "Künstliche Intelligenz / Assistent",
+        "icon": LAB_ICONS["labai"],
+        "category": "hot",
+        "keywords": "ai ki artificial intelligence assistent bot hilfe chat",
+        "color": "blue"
     }
 ];

@@ -348,4 +348,5 @@ const LAB_ICONS = {
             <circle cx="64" cy="36" r="6" fill="rgba(0,210,255,0.2)" stroke="var(--neon-blue)" stroke-width="1.4"/>
             <text x="73" y="30" font-family="'Orbitron',sans-serif" font-size="13" fill="var(--neon-blue)" opacity="0.95">i</text>
         </svg>`,
+    "labai": "🤖"
 };
