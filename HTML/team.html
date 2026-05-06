@@ -16,11 +16,10 @@
             background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
             min-height: 100vh;
             color: #ffffff;
-            overflow-x: hidden;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         /* Branding Styles matching other labs */
@@ -59,21 +58,31 @@
             opacity: 0.9;
         }
 
+        #page-zoom-wrapper {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            padding-top: 40px;
+        }
+
         .team-container {
-            width: 1200px;
-            max-width: 95vw;
-            margin: 0 auto;
-            padding: 40px 0;
+            width: 1320px;
+            position: absolute;
+            left: 50%;
+            top: 40px;
             text-align: center;
             animation: fadeIn 0.8s ease-out;
             transform-origin: top center;
             transition: transform 0.2s ease-out;
-            position: relative;
+            /* Combined transform for centering and scaling */
+            transform: translateX(-50%) scale(var(--current-scale, 1));
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98) translateY(20px); }
-            to { opacity: 1; transform: scale(var(--current-scale, 1)) translateY(0); }
+            from { opacity: 0; transform: translateX(-50%) scale(0.98) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) scale(var(--current-scale, 1)) translateY(0); }
         }
 
         h2 {
@@ -258,9 +267,10 @@
         <div class="canvas-subtitle">TEAM OPS</div>
     </div>
 
-    <div class="team-container">
-        <h2>UNSER TEAM</h2>
-        <div class="team-list">
+    <div id="page-zoom-wrapper">
+        <div class="team-container">
+            <h2>UNSER TEAM</h2>
+            <div class="team-list">
             <div class="team-member">
                 <div class="member-photo" style="background-image: url('resources/team/team_05.png');" onclick="openLightbox('resources/team/team_05.png')"></div>
                 <div class="member-info">
@@ -343,6 +353,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <div class="lightbox-content">
@@ -362,19 +373,20 @@
         function autoScale() {
             const container = document.querySelector('.team-container');
             const winW = window.innerWidth;
+            const winH = window.innerHeight;
             
-            // Fixed design width
-            const baseW = 1200;
+            const baseW = 1320;
+            const baseH = container.offsetHeight;
             const padding = 40; 
             
-            // Calculate scale to fit width with a bit of breathing room
-            let scale = (winW - padding) / baseW;
+            const scaleX = (winW - padding) / baseW;
+            const scaleY = (winH - padding - 100) / baseH;
             
-            // Boundaries: Don't grow larger than 1.0, don't shrink smaller than 0.5
+            let scale = Math.min(scaleX, scaleY);
             if (scale > 1) scale = 1;
-            if (scale < 0.5) scale = 0.5;
+            if (scale < 0.4) scale = 0.4;
             
-            container.style.transform = `scale(${scale})`;
+            // CSS handles translateX(-50%), we only set the scale variable
             document.documentElement.style.setProperty('--current-scale', scale);
         }
 

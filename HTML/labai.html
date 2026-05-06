@@ -118,58 +118,6 @@
             height: calc((100vh - 180px) * 1.1);
         }
 
-        /* API-Leiste – wird ausgeblendet, wenn Key gespeichert */
-        .api-section {
-            padding: 16px 24px;
-            background: rgba(0, 5, 20, 0.7);
-            border-bottom: 1px solid rgba(0, 210, 255, 0.4);
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .api-section.hidden {
-            display: none;
-        }
-
-        .api-input {
-            flex: 2;
-            background: #070b1a;
-            border: 1px solid #2d2f6e;
-            border-radius: 10px;
-            padding: 12px 20px;
-            color: #b5f0ff;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.8rem;
-        }
-
-        .api-input:focus {
-            outline: none;
-            border-color: #00d2ff;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
-        }
-
-        .save-key-btn {
-            background: #1e2a3e;
-            border: 1px solid #00d2ff;
-            border-radius: 10px;
-            padding: 12px 20px;
-            color: #00d2ff;
-            font-family: 'Orbitron', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .save-key-btn:hover {
-            background: #00d2ff;
-            color: #0a0a2a;
-        }
-
-
-
         .messages-area {
             flex: 1;
             overflow-y: auto;
@@ -553,10 +501,8 @@
     <div class="chat-container">
         <div class="chat-header">
             <select id="modelSelect" class="model-select" aria-label="Model Selection">
-                <option value="deepseek-v4-pro">V4 PRO</option>
-                <option value="deepseek-v4-flash">V4 FLASH</option>
-                <option value="deepseek-reasoner">REASONER</option>
-                <option value="deepseek-chat">CHAT (V3)</option>
+                <option value="deepseek-chat">V3 CHAT</option>
+                <option value="deepseek-reasoner">R1 REASONER</option>
             </select>
         </div>
         <div class="messages-area" id="messagesArea">
@@ -622,17 +568,6 @@
             }
         }
 
-        // Event-Listener für das Passwortfeld (erst registrieren, wenn DOM ready ist)
-        document.addEventListener('DOMContentLoaded', () => {
-            const pwdInput = document.getElementById('cyber-pwd-input');
-            if(pwdInput) {
-                pwdInput.focus();
-                pwdInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') validateLabAccess();
-                });
-            }
-        });
-
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
@@ -643,17 +578,20 @@
         const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
-        function getApiKey() {
-            return sessionApiKey;
-        }
+        function getApiKey() { return sessionApiKey; }
 
         function getModel() {
             const select = document.getElementById('modelSelect');
-            if (select) return select.value;
-            return localStorage.getItem(MODEL_KEY) || 'deepseek-v4-pro';
+            return select ? select.value : (localStorage.getItem(MODEL_KEY) || 'deepseek-chat');
         }
-        
+
         document.addEventListener('DOMContentLoaded', () => {
+            const pwdInput = document.getElementById('cyber-pwd-input');
+            if (pwdInput) {
+                pwdInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') validateLabAccess();
+                });
+            }
             const modelSelect = document.getElementById('modelSelect');
             if (modelSelect) {
                 const saved = localStorage.getItem(MODEL_KEY);
@@ -826,7 +764,8 @@
             }
 
             if (!apiKey || !apiKey.startsWith('sk-')) {
-                addMessage('assistant', '❌ Kein API-Key gefunden. Bitte in localStorage unter "ai_api_key" speichern.');
+                document.getElementById('cyber-auth-overlay').classList.add('visible');
+                setTimeout(() => document.getElementById('cyber-pwd-input')?.focus(), 100);
                 return;
             }
 
@@ -852,9 +791,8 @@
                     })
                 });
                 if (!response.ok) {
-                    hideTyping();
                     let err = `Fehler ${response.status}`;
-                    if (response.status === 401) err = 'Ungültiger API-Key – bitte neu speichern';
+                    if (response.status === 401) err = 'Ungültiger API-Key';
                     if (response.status === 402) err = 'Nicht genug Guthaben – AI-Konto aufladen';
                     throw new Error(err);
                 }
@@ -863,10 +801,10 @@
                 conversationHistory.push({ role: 'assistant', content: reply });
                 if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
                 saveHistory();
-
                 hideTyping();
                 addMessage('assistant', reply);
             } catch (err) {
+                conversationHistory.pop(); // User-Nachricht bei Fehler wieder entfernen
                 hideTyping();
                 addMessage('assistant', `❌ Fehler: ${err.message}`);
             } finally {
