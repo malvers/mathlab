@@ -414,10 +414,12 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
+
         .auth-overlay.visible {
             opacity: 1;
             pointer-events: all;
         }
+
         .auth-modal {
             background: rgba(5, 10, 30, 0.95);
             border: 1px solid var(--neon-blue, #00d2ff);
@@ -429,6 +431,7 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 210, 255, 0.1);
             transition: all 0.3s ease;
         }
+
         .auth-modal .briefing-header {
             display: flex;
             align-items: center;
@@ -439,6 +442,7 @@
             color: var(--neon-blue, #00d2ff);
             letter-spacing: 2px;
         }
+
         .auth-input {
             width: 100%;
             background: rgba(0, 0, 0, 0.5);
@@ -452,6 +456,7 @@
             margin: 20px 0;
             outline: none;
         }
+
         .auth-input:focus {
             border-color: #00d2ff;
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
@@ -471,18 +476,24 @@
                 Passwort eingeben
             </div>
             <div style="position: relative; margin: 20px 0;">
-                <input type="password" id="cyber-pwd-input" class="auth-input" placeholder="********" autocomplete="off" aria-label="Passwort" style="margin: 0; padding-right: 48px;">
+                <input type="password" id="cyber-pwd-input" class="auth-input" placeholder="********" autocomplete="off"
+                    aria-label="Passwort" style="margin: 0; padding-right: 48px;">
                 <button id="toggle-pwd-btn" onclick="togglePwdVisibility()" aria-label="Passwort anzeigen"
                     style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#00d2ff; padding:4px; line-height:1;">
-                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 </button>
             </div>
             <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="send-button" style="flex:1; padding: 10px 25px;" onclick="validateLabAccess()">LOGIN</button>
-                <button style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,0.5);font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;" onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
+                <button class="send-button" style="flex:1; padding: 10px 25px;"
+                    onclick="validateLabAccess()">LOGIN</button>
+                <button
+                    style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,0.5);font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;"
+                    onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
             </div>
         </div>
     </div>
@@ -506,7 +517,9 @@
         </div>
 
         <div class="input-area">
-            <textarea class="message-input" id="messageInput" rows="1" placeholder="Du hast sicher Fragen ... schreib sie hier!" aria-label="Deine Nachricht an die KI"></textarea>
+            <textarea class="message-input" id="messageInput" rows="1"
+                placeholder="Du hast sicher Fragen ... schreib sie hier!"
+                aria-label="Deine Nachricht an die KI"></textarea>
             <button class="send-button" id="sendButton">GO</button>
         </div>
 
@@ -515,7 +528,7 @@
     <script>
         const AI_URL = 'https://api.deepseek.com/v1/chat/completions';
         let conversationHistory = [];
-        
+
         // HIER KOMMT DER VERSCHLÜSSELTE KEY HIN:
         // Verschlüssele deinen Key in der Browser-Konsole mit: CryptoJS.AES.encrypt("sk-DEIN_KEY", "vsb2026!").toString()
         const ENCRYPTED_API_KEY = "U2FsdGVkX18xMjM0NTY3OF0Uf+jzF9gByhGWIdT4T2fU3spB2Qdhpje6i/EbkuiEknQzonQJGrEVmzraOCZTng==";
@@ -528,7 +541,7 @@
                 return "";
             }
         }
-        
+
         let sessionApiKey = ""; // Wird nach Login gefüllt
 
         function togglePwdVisibility() {
@@ -543,13 +556,13 @@
         function validateLabAccess() {
             const pwd = document.getElementById('cyber-pwd-input').value;
             const decrypted = aesDecrypt(ENCRYPTED_API_KEY, pwd);
-            
+
             if (decrypted.startsWith("sk-")) {
                 sessionApiKey = decrypted;
                 const isLocal = location.hostname === "localhost" ||
-                                location.hostname === "127.0.0.1" ||
-                                location.protocol === "file:" ||
-                                location.hostname.startsWith("192.168.");
+                    location.hostname === "127.0.0.1" ||
+                    location.protocol === "file:" ||
+                    location.hostname.startsWith("192.168.");
                 if (isLocal) localStorage.setItem('dev_access', pwd);
                 document.getElementById('cyber-auth-overlay').classList.remove('visible');
                 document.getElementById('messageInput').focus();
@@ -812,11 +825,11 @@
         // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
         (function initAuth() {
             const devPwd = localStorage.getItem('dev_access');
-            const isLocal = location.hostname === "localhost" || 
-                           location.hostname === "127.0.0.1" || 
-                           location.protocol === "file:" ||
-                           location.hostname.startsWith("192.168.");
-            
+            const isLocal = location.hostname === "localhost" ||
+                location.hostname === "127.0.0.1" ||
+                location.protocol === "file:" ||
+                location.hostname.startsWith("192.168.");
+
             let success = false;
             if (isLocal && devPwd) {
                 const decrypted = aesDecrypt(ENCRYPTED_API_KEY, devPwd);

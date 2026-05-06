@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>DOC ALVERS – TEAM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Raleway:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,7 +16,10 @@
 
         body {
             font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
+            background: #030318;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(0, 210, 255, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(157, 80, 187, 0.1), transparent 40%);
             min-height: 100vh;
             color: #ffffff;
             overflow-x: hidden;
@@ -82,7 +87,8 @@
         }
 
         .personal-footer {
-            margin-top: -160px; /* Slightly adjusted down */
+            margin-top: -160px;
+            /* Slightly adjusted down */
             padding: 20px 0 100px 0;
             display: flex;
             flex-direction: column;
@@ -138,19 +144,22 @@
         .team-member {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(0, 210, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 24px;
             display: flex;
             align-items: stretch;
             gap: 25px;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: left;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .team-member:hover {
-            background: rgba(0, 210, 255, 0.05);
-            border-color: rgba(0, 210, 255, 0.4);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            background: rgba(0, 210, 255, 0.07);
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 210, 255, 0.15);
+            transform: translateY(-5px);
         }
 
         .member-photo {
@@ -187,29 +196,51 @@
         }
 
         .member-desc {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.5;
-            font-family: 'Helvetica', sans-serif;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 400;
         }
 
-        .back-link {
+        .back-btn-fixed {
             position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.4);
+            top: 24px;
+            left: 24px;
+            width: 58px;
+            height: 58px;
+            background: rgba(0, 20, 40, 0.5);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00d2ff;
+            cursor: pointer;
+            z-index: 1100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
             text-decoration: none;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            border-bottom: 1px solid transparent;
+            animation: neonPulse 2s infinite alternate;
         }
 
-        .back-link:hover {
-            color: #00d2ff;
+        @keyframes neonPulse {
+            from {
+                box-shadow: 0 0 5px rgba(0, 210, 255, 0.2);
+                border-color: rgba(0, 210, 255, 0.3);
+            }
+
+            to {
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+                border-color: rgba(0, 210, 255, 0.6);
+            }
+        }
+
+        .back-btn-fixed:hover {
+            background: rgba(0, 210, 255, 0.2);
             border-color: #00d2ff;
+            transform: scale(1.1) rotate(-5deg);
+            color: #ffffff;
         }
 
         /* LIGHTBOX MODAL */
@@ -303,8 +334,9 @@
     <div id="page-zoom-wrapper">
         <div class="team-container">
             <h2 style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-                UNSER TEAM 
-                <img src="resources/team/monkey.png" alt="Mascot" style="width: 60px; height: 60px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));">
+                UNSER TEAM
+                <img src="resources/team/monkey.png" alt="Mascot"
+                    style="width: 60px; height: 60px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));">
             </h2>
             <div class="team-list">
                 <div class="team-member">
@@ -313,7 +345,7 @@
                     <div class="member-info">
                         <div class="member-name">Chief Executive Officer</div>
                         <div class="member-role">CEO / Strategic Vision</div>
-                        <div class="member-desc"><strong>Dr. Michael R. Alvers</strong><br>Leitet die globale Strategie
+                        <div class="member-desc"><strong>Dr. Leachim <span style="display: inline-block; transform: scaleX(-1);">R</span>. Srevla</strong><br>Leitet die globale Strategie
                             und die langfristige Ausrichtung des Labors mit visionärer Kraft.</div>
                     </div>
                 </div>
@@ -404,7 +436,7 @@
                     <div class="member-info">
                         <div class="member-name">Chief Aesthetic Officer</div>
                         <div class="member-role">CAO / Silent Supervision</div>
-                        <div class="member-desc"><strong>Lady Seraphina</strong><br>Hüterin der Ästhetik und Expertin
+                        <div class="member-desc"><strong>Seraphina Aristocat</strong><br>Hüterin der Ästhetik und Expertin
                             für lautlose Überwachung. Sorgt dafür, dass im Labor alles mit aristokratischer Eleganz
                             abläuft.</div>
                     </div>
@@ -430,7 +462,13 @@
         </div>
     </div>
 
-    <a href="labai.html" class="back-link">Back to Lab AI</a>
+    <a href="#" onclick="history.back(); return false;" class="back-btn-fixed" title="Zurück">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </a>
 
     <script>
         function autoScale() {
@@ -438,23 +476,23 @@
             const wrapper = document.getElementById('page-zoom-wrapper');
             const winW = window.innerWidth;
             const winH = window.innerHeight;
-            
+
             if (!container || !wrapper) return;
 
             const baseW = 1320;
             const baseH = container.offsetHeight;
-            const padding = 40; 
-            
+            const padding = 40;
+
             // Calculate scale - aim for fit but allow scroll if needed for height
             const scaleX = (winW - padding) / baseW;
             const scaleY = (winH - padding - 150) / baseH;
-            
+
             let scale = Math.min(scaleX, scaleY);
             if (scale > 2) scale = 2;
             if (scale < 0.4) scale = 0.4;
-            
+
             document.documentElement.style.setProperty('--current-scale', scale);
-            
+
             // Ensure wrapper height matches the SCALED height of the absolute container
             // This pushes the personal footer down correctly
             wrapper.style.height = (baseH * scale + 20) + 'px';
