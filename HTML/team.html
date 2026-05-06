@@ -383,7 +383,8 @@
             const scaleY = (winH - padding - 100) / baseH;
             
             let scale = Math.min(scaleX, scaleY);
-            if (scale > 1) scale = 1;
+            // Allow upscale zooming for huge windows, but limit to 2.0
+            if (scale > 2) scale = 2;
             if (scale < 0.4) scale = 0.4;
             
             // CSS handles translateX(-50%), we only set the scale variable
