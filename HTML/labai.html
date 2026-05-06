@@ -536,7 +536,7 @@
                     onclick="validateLabAccess()">LOGIN</button>
                 <button
                     style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,0.5);font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;"
-                    onclick="document.getElementById('cyber-auth-overlay').classList.remove('visible')">CANCEL</button>
+                    onclick="history.back()">CANCEL</button>
             </div>
         </div>
     </div>
@@ -545,6 +545,11 @@
         <h1>DOC ALVERS MATHE-LABOR</h1>
         <div class="canvas-subtitle">LAB AI</div>
     </div>
+
+    <button onclick="localStorage.removeItem('dev_access'); sessionApiKey=''; document.getElementById('cyber-auth-overlay').classList.add('visible'); document.getElementById('cyber-pwd-input').value=''; setTimeout(()=>document.getElementById('cyber-pwd-input').focus(),100);"
+        style="position:fixed;bottom:16px;right:16px;background:rgba(255,0,0,0.12);border:1px solid rgba(255,60,60,0.4);border-radius:8px;color:rgba(255,100,100,0.8);font-family:'Orbitron',monospace;font-size:0.65rem;padding:5px 10px;cursor:pointer;z-index:9998;letter-spacing:1px;">
+        LOGOUT
+    </button>
 
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
@@ -630,6 +635,7 @@
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        messageInput.value = '';
 
         const MODEL_KEY = 'ai_model';
         const HISTORY_KEY = 'ai_history';
