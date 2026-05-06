@@ -49,6 +49,33 @@
             pointer-events: none;
         }
 
+        .chat-header {
+            padding: 8px 16px;
+            background: rgba(0, 5, 20, 0.4);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .model-select {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 4px;
+            color: #00d2ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .model-select:hover {
+            border-color: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
         .canvas-branding h1 {
             font-family: 'Orbitron', sans-serif;
             font-size: 22px;
@@ -77,7 +104,8 @@
         }
 
         .chat-container {
-            width: 86%;
+            max-width: 1100px;
+            width: 100%;
             margin: 60px auto 0 auto;
             background: rgba(5, 7, 25, 0.65);
             backdrop-filter: blur(12px);
@@ -121,18 +149,6 @@
             outline: none;
             border-color: #00d2ff;
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
-        }
-
-        .model-select {
-            flex: 1;
-            background: #070b1a;
-            border: 1px solid #3d2a6e;
-            border-radius: 10px;
-            padding: 12px 20px;
-            color: #e0c4ff;
-            font-family: 'Orbitron', monospace;
-            font-weight: 500;
-            cursor: pointer;
         }
 
         .save-key-btn {
@@ -352,63 +368,30 @@
             }
         }
 
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin: 15px 0;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 210, 255, 0.2);
-        }
-
         .message-content table {
             border-collapse: collapse;
             width: 100%;
+            margin: 10px 0;
             font-size: 0.88rem;
-            background: rgba(0, 0, 0, 0.2);
         }
 
         .message-content th,
         .message-content td {
-            border: 1px solid rgba(0, 210, 255, 0.15);
-            padding: 10px 14px;
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            padding: 6px 12px;
             text-align: left;
         }
 
         .message-content th {
-            background: linear-gradient(to bottom, rgba(0, 210, 255, 0.15), rgba(157, 80, 187, 0.1));
+            background: rgba(0, 210, 255, 0.12);
             color: #00d2ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            text-transform: uppercase;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.78rem;
             letter-spacing: 1px;
         }
-        .message-content tr:nth-child(even) {
-            background: rgba(255, 255, 255, 0.03);
-        }
 
-        .message-content tr:hover {
-            background: rgba(0, 210, 255, 0.08);
-        }
-
-        .cyber-box {
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            padding: 10px 15px;
-            margin: 10px 0;
-            background: rgba(0, 210, 255, 0.05);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.85rem;
-            color: #00d2ff;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .cyber-box-text {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            color: #00d2ff;
-            margin-bottom: 5px;
-            text-align: center;
-            opacity: 0.8;
+        .message-content tr:nth-child(even) td {
+            background: rgba(0, 210, 255, 0.04);
         }
 
         .message-content hr {
@@ -536,7 +519,7 @@
 
 <body>
 
-    <div class="auth-overlay visible" id="cyber-auth-overlay">
+    <div class="auth-overlay" id="cyber-auth-overlay">
         <div class="auth-modal">
             <div class="briefing-header">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -568,6 +551,14 @@
     </div>
 
     <div class="chat-container">
+        <div class="chat-header">
+            <select id="modelSelect" class="model-select">
+                <option value="deepseek-v4-pro">V4 PRO</option>
+                <option value="deepseek-v4-flash">V4 FLASH</option>
+                <option value="deepseek-reasoner">REASONER</option>
+                <option value="deepseek-chat">CHAT (V3)</option>
+            </select>
+        </div>
         <div class="messages-area" id="messagesArea">
             <div class="message assistant">
                 <div class="message-content" style="font-family: 'Helvetica', 'Arial', sans-serif;">
@@ -659,10 +650,21 @@
         }
 
         function getModel() {
-            return localStorage.getItem(MODEL_KEY)
-                || localStorage.getItem('deepseek_model')
-                || 'deepseek-chat';
+            const select = document.getElementById('modelSelect');
+            if (select) return select.value;
+            return localStorage.getItem(MODEL_KEY) || 'deepseek-v4-pro';
         }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelSelect = document.getElementById('modelSelect');
+            if (modelSelect) {
+                const saved = localStorage.getItem(MODEL_KEY);
+                if (saved) modelSelect.value = saved;
+                modelSelect.addEventListener('change', () => {
+                    localStorage.setItem(MODEL_KEY, modelSelect.value);
+                });
+            }
+        });
 
         function saveHistory() {
             localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory));
@@ -710,41 +712,14 @@
                 return placeholder;
             });
 
-            // 2a. Markdown-Tabellen & Cyber-Boxes rendern
-            formatted = formatted.replace(/((?:^\|.*\|(?:\n|$))+)/gm, (match) => {
-                const lines = match.trim().split('\n');
-                if (lines.length < 1) return match;
-
-                // Spezialfall: Cyber-Box (nur eine Zeile oder kein Separator)
-                let headerIdx = -1;
-                let sepIdx = -1;
-                for (let i = 0; i < lines.length - 1; i++) {
-                    // Suche nach Zeile mit Inhalt gefolgt von Trennzeile (--- oder +---+)
-                    if (lines[i].includes('|') && lines[i + 1].match(/[|+]{1,}[-+ :|]{2,}/)) {
-                        headerIdx = i;
-                        sepIdx = i + 1;
-                        break;
-                    }
-                }
-
-                const parseRow = row => {
-                    let clean = row.trim().replace(/^\|+|\|+$/g, '');
-                    return clean.split('|').map(c => c.trim());
-                };
-
-                if (headerIdx !== -1) {
-                    const preLines = lines.slice(0, headerIdx).map(l => `<div class="cyber-box-text">${l.replace(/^\|+|\|+$/g, '').trim()}</div>`).join('');
-                    const ths = parseRow(lines[headerIdx]).map(h => `<th>${h}</th>`).join('');
-                    const trs = lines.slice(sepIdx + 1).map(row => {
-                        const cells = parseRow(row);
-                        if (cells.length === 0 || (cells.length === 1 && cells[0] === "")) return '';
-                        return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
-                    }).join('');
-                    return preLines + `<div class="table-container"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
-                } else {
-                    // Einfache Cyber-Box (keine Tabelle)
-                    return lines.map(l => `<div class="cyber-box">${l.replace(/^\|+|\|+$/g, '').trim()}</div>`).join('');
-                }
+            // 2a. Markdown-Tabellen rendern
+            formatted = formatted.replace(/^(\|.+\|)\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm, (match, header, body) => {
+                const parseRow = row => row.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+                const ths = parseRow(header).map(h => `<th>${h}</th>`).join('');
+                const trs = body.trim().split('\n').map(row =>
+                    '<tr>' + parseRow(row).map(c => `<td>${c}</td>`).join('') + '</tr>'
+                ).join('');
+                return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
             });
 
             // 2. Andere Markups formatieren
@@ -843,6 +818,15 @@
 
             if (!userText) return;
 
+            if (userText.toLowerCase() === '%clearchat') {
+                conversationHistory = [];
+                localStorage.removeItem(HISTORY_KEY);
+                messagesArea.innerHTML = `<div class="message assistant"><div class="message-content"><strong>Wie kann ich Dir helfen?</strong></div></div>`;
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                return;
+            }
+
             if (!apiKey || !apiKey.startsWith('sk-')) {
                 addMessage('assistant', '❌ Kein API-Key gefunden. Bitte in localStorage unter "ai_api_key" speichern.');
                 return;
@@ -892,7 +876,31 @@
                 messageInput.focus();
             }
         }
-        messageInput.focus();
+        // ----- AUTO-LOGIN & AUTH-INITIALISIERUNG -----
+        (function initAuth() {
+            const devPwd = localStorage.getItem('dev_access');
+            const isLocal = location.hostname === "localhost" || 
+                           location.hostname === "127.0.0.1" || 
+                           location.protocol === "file:" ||
+                           location.hostname.startsWith("192.168.");
+            
+            let success = false;
+            if (isLocal && devPwd) {
+                const decrypted = aesDecrypt(ENCRYPTED_API_KEY, devPwd);
+                if (decrypted && decrypted.startsWith("sk-")) {
+                    sessionApiKey = decrypted;
+                    success = true;
+                }
+            }
+
+            if (!success) {
+                document.getElementById('cyber-auth-overlay').classList.add('visible');
+                const pwdInput = document.getElementById('cyber-pwd-input');
+                if (pwdInput) setTimeout(() => pwdInput.focus(), 100);
+            } else {
+                setTimeout(() => messageInput.focus(), 100);
+            }
+        })();
     </script>
 </body>
 

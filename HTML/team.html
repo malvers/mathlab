@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>DOC ALVERS – TEAM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: radial-gradient(circle at 20% 30%, #0a0a2a, #030318);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Branding Styles matching other labs */
+        .canvas-branding {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .canvas-branding h1 {
+            font-size: 22px;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #00d2ff, #ffffff, #9d50bb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.4));
+            text-transform: uppercase;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .canvas-subtitle {
+            font-size: 11px;
+            letter-spacing: 5px;
+            color: #00d2ff;
+            margin-top: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 7px #00d2ff;
+            opacity: 0.9;
+        }
+
+        .team-container {
+            width: 86%;
+            max-width: 900px;
+            margin: 80px 0;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #00d2ff;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .team-member {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 210, 255, 0.1);
+            border-radius: 12px;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .team-member:hover {
+            background: rgba(0, 210, 255, 0.05);
+            border-color: rgba(0, 210, 255, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .member-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 210, 255, 0.4);
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 1.4rem;
+            color: #00d2ff;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .member-role {
+            font-size: 0.85rem;
+            color: #9d50bb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .member-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            font-family: 'Helvetica', sans-serif;
+        }
+
+        .back-link {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .back-link:hover {
+            color: #00d2ff;
+            border-color: #00d2ff;
+        }
+
+        /* LIGHTBOX MODAL */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(3, 4, 18, 0.9);
+            backdrop-filter: blur(15px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            cursor: zoom-out;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+            display: block;
+        }
+
+        .lightbox.active img {
+            transform: scale(1);
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.9);
+        }
+
+        .lightbox.active .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox img {
+            display: block;
+            max-width: 100%;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 2001;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+            color: #00d2ff;
+            filter: drop-shadow(0 0 10px #00d2ff);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="canvas-branding">
+        <h1>DOC ALVERS MATHE-LABOR</h1>
+        <div class="canvas-subtitle">TEAM OPS</div>
+    </div>
+
+    <div class="team-container">
+        <h2>UNSER TEAM</h2>
+        <div class="team-list">
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_05.png');" onclick="openLightbox('resources/team/team_05.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Chief Executive Officer</div>
+                    <div class="member-role">CEO / Strategic Vision</div>
+                    <div class="member-desc"><strong>Dr. Michael R. Alvers</strong><br>Leitet die globale Strategie und die langfristige Ausrichtung des Labors mit visionärer Kraft.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_01.png');" onclick="openLightbox('resources/team/team_01.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Chief Financial Officer</div>
+                    <div class="member-role">CFO / Financial Architect</div>
+                    <div class="member-desc"><strong>Dr. Ella Goldstein</strong><br>Verantwortlich für die finanzielle Stabilität und die ökonomische Skalierung des Labors.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_07.png');" onclick="openLightbox('resources/team/team_07.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Chief Mathematician</div>
+                    <div class="member-role">Lead Architect / Theory</div>
+                    <div class="member-desc"><strong>Prof. Dr. Arthur Prime (Stanford)</strong><br>Mastermind hinter der theoretischen Architektur und Visionär des mathematischen Labors.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_08.png');" onclick="openLightbox('resources/team/team_08.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Chief Software Advisor</div>
+                    <div class="member-role">Software Strategy / Lead</div>
+                    <div class="member-desc"><strong>Victor Code, Ph.D. (Berkeley)</strong><br>Beratender Experte für zukunftsweisende Software-Architekturen und technologische Exzellenz.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_02.png');" onclick="openLightbox('resources/team/team_02.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Lead AI-Team</div>
+                    <div class="member-role">Logic Engine / Core AI</div>
+                    <div class="member-desc"><strong>Aria Neural</strong><br>Verantwortlich für die algorithmische Präzision und die Implementierung komplexer Logikstrukturen.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_03.png');" onclick="openLightbox('resources/team/team_03.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Tech Lead</div>
+                    <div class="member-role">Infrastructure Specialist</div>
+                    <div class="member-desc"><strong>Marcus Grid</strong><br>Hüter der Systeme und Experte für skalierbare High-Performance Infrastrukturen.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_04.png');" onclick="openLightbox('resources/team/team_04.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">UI Designer</div>
+                    <div class="member-role">Cyber Aesthetics</div>
+                    <div class="member-desc"><strong>Luna Pixel</strong><br>Verwandelt komplexe Daten in intuitive, visuell beeindruckende Erlebnisse.</div>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-photo" style="background-image: url('resources/team/team_06.png');" onclick="openLightbox('resources/team/team_06.png')"></div>
+                <div class="member-info">
+                    <div class="member-name">Ops Lead</div>
+                    <div class="member-role">Operations Manager</div>
+                    <div class="member-desc"><strong>Silas Flow</strong><br>Sorgt für reibungslose Abläufe und koordiniert die Schnittstellen zwischen Theorie und Praxis.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content">
+            <div class="close-btn" onclick="closeLightbox()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+            <img id="lightbox-img" src="" alt="Team Member Large">
+        </div>
+    </div>
+
+    <a href="labai.html" class="back-link">Back to Lab AI</a>
+
+    <script>
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.style.display = 'flex';
+            setTimeout(() => lb.classList.add('active'), 10);
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('active');
+            setTimeout(() => lb.style.display = 'none', 400);
+        }
+
+        // Close on ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+
+</body>
+</html>
