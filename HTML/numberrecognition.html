@@ -245,7 +245,7 @@
             ready:        'Zeichne eine Ziffer — Vorhersage in Echtzeit',
             predicted:    'Erkannt',
             conf:         'Konfidenz',
-            arch:         'CNN · 2× Conv2D + MaxPool · Dense 64 · Softmax 10\n1 500 synthetische Trainingsbeispiele',
+            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrainiert auf 10 000 echten MNIST-Handschriften',
         },
         en: {
             lab_title:    'AI Number Recognition',
@@ -260,7 +260,7 @@
             ready:        'Draw a digit — real-time prediction',
             predicted:    'Predicted',
             conf:         'Confidence',
-            arch:         'CNN · 2× Conv2D + MaxPool · Dense 64 · Softmax 10\n1 500 synthetic training samples',
+            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrained on 10 000 real MNIST handwriting samples',
         },
         fr: {
             lab_title:    'Reconnaissance de Chiffres IA',
@@ -275,7 +275,7 @@
             ready:        'Dessine un chiffre — prédiction en temps réel',
             predicted:    'Prédit',
             conf:         'Confiance',
-            arch:         'CNN · 2× Conv2D + MaxPool · Dense 64 · Softmax 10\n1 500 échantillons synthétiques',
+            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nEntraîné sur 10 000 échantillons MNIST réels',
         },
         nl: {
             lab_title:    'AI Cijferherkenning',
@@ -290,7 +290,7 @@
             ready:        'Teken een cijfer — real-time voorspelling',
             predicted:    'Voorspelling',
             conf:         'Vertrouwen',
-            arch:         'CNN · 2× Conv2D + MaxPool · Dense 64 · Softmax 10\n1 500 synthetische trainingssamples',
+            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nGetraind op 10 000 echte MNIST-handschriften',
         },
     };
 
@@ -344,6 +344,10 @@
             <span id="model-status-text">${t('training')}</span>
         </div>
         <div id="arch-text">${t('arch').replace('\n','<br>')}</div>
+        <button class="cyber-btn" onclick="resetModel()"
+            style="width:100%;margin-top:12px;border-color:rgba(255,100,100,0.4);color:rgba(255,150,150,0.9);font-size:10px;">
+            MODELL ZURÜCKSETZEN
+        </button>
     `);
 
     const coachEl = document.getElementById('coach-content');
@@ -354,6 +358,7 @@
     const drawCtx    = drawCanvas.getContext('2d');
     let isDrawing    = false;
     let hasStrokes   = false;
+    let wasPredicted = false;   // true after first prediction — triggers auto-clear on next stroke
     let model        = null;
     let predictTid   = null;
 
@@ -376,6 +381,7 @@
 
     drawCanvas.addEventListener('mousedown', e => {
         if (!model) return;
+        if (wasPredicted) { clearDraw(); wasPredicted = false; }
         isDrawing = true;
         drawCtx.beginPath();
         const p = getPos(e); drawCtx.moveTo(p.x, p.y);
@@ -391,6 +397,7 @@
     drawCanvas.addEventListener('touchstart', e => {
         e.preventDefault();
         if (!model) return;
+        if (wasPredicted) { clearDraw(); wasPredicted = false; }
         isDrawing = true;
         drawCtx.beginPath();
         const p = getPos(e); drawCtx.moveTo(p.x, p.y);
@@ -438,7 +445,7 @@
             updatePreview(tensor);
 
             const probs = Array.from(
-                model.predict(tensor.expandDims(0)).softmax().dataSync()
+                model.predict(tensor.expandDims(0)).dataSync()
             );
             updateBars(probs);
         });
@@ -477,91 +484,66 @@
         const c = (probs[top] * 100).toFixed(1);
         document.getElementById('result-conf').textContent  = c + '%';
         coachEl.textContent = `${t('predicted')}: ${top}  ·  ${t('conf')}: ${c}%`;
+        wasPredicted = true;
     }
 
-    // ── Synthetic data generation ───────────────────────────────────────────────
-    const FONTS  = ['Arial', 'Georgia', 'Courier New', 'Verdana', 'Impact',
-                    'Trebuchet MS', 'Palatino Linotype', 'serif', 'monospace'];
-    const STYLES = ['normal', 'bold', 'italic', 'bold italic'];
-    const SIZES  = [16, 18, 20, 22, 24, 26];
-    const EXAMPLES_PER_CLASS = 150; // 10 × 150 = 1500 total
+    // ── MNIST data loading (real handwritten digits) ────────────────────────────
+    // Sprite: 784 px wide × 65 000 px tall — each row = one 28×28 image flattened
+    const MNIST_IMG_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
+    const MNIST_LAB_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
+    const PER_CLASS     = 1000;  // balanced: 1 000 × 10 classes = 10 000 total
 
-    function renderExample(digit) {
-        const off = document.createElement('canvas');
-        off.width = off.height = 28;
-        const ctx = off.getContext('2d');
+    async function loadMNIST(onStatus) {
+        // 1. Labels first (only ~65 KB)
+        onStatus('Labels laden …');
+        await tf.nextFrame();
+        const labRes   = await fetch(MNIST_LAB_URL);
+        const allLabels = new Uint8Array(await labRes.arrayBuffer()); // all 65 000
 
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, 28, 28);
-
-        const font  = FONTS [Math.floor(Math.random() * FONTS.length)];
-        const style = STYLES[Math.floor(Math.random() * STYLES.length)];
-        const size  = SIZES [Math.floor(Math.random() * SIZES.length)];
-        const dx    = (Math.random() - 0.5) * 5;
-        const dy    = (Math.random() - 0.5) * 5;
-        const angle = (Math.random() - 0.5) * 28 * Math.PI / 180;
-
-        ctx.save();
-        ctx.translate(14 + dx, 14 + dy);
-        ctx.rotate(angle);
-
-        if (Math.random() < 0.25) {
-            ctx.shadowColor = '#fff';
-            ctx.shadowBlur  = 1 + Math.random() * 2;
+        // 2. Balanced index selection — 1 000 per class, scanning in order
+        const buckets = Array.from({length: 10}, () => []);
+        for (let i = 0; i < allLabels.length; i++) {
+            const c = allLabels[i];
+            if (buckets[c].length < PER_CLASS) buckets[c].push(i);
+            if (buckets.every(b => b.length >= PER_CLASS)) break;
         }
+        const selected = buckets.flat().sort((a, b) => a - b);
+        const maxRow   = selected[selected.length - 1];
 
-        ctx.fillStyle   = '#fff';
-        ctx.font        = `${style} ${size}px ${font}`;
-        ctx.textAlign   = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(String(digit), 0, 0);
-        ctx.restore();
+        // 3. Image sprite (browser caches it — only needed once)
+        onStatus('Bilder laden … (1× ~12 MB, danach gecacht)');
+        await tf.nextFrame();
+        const img = new Image();
+        img.crossOrigin = '';
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = MNIST_IMG_URL; });
 
-        // pixel noise
-        const id = ctx.getImageData(0, 0, 28, 28);
-        for (let i = 0; i < id.data.length; i += 4) {
-            const n = (Math.random() - 0.5) * 28;
-            id.data[i]   = Math.max(0, Math.min(255, id.data[i]   + n));
-            id.data[i+1] = Math.max(0, Math.min(255, id.data[i+1] + n));
-            id.data[i+2] = Math.max(0, Math.min(255, id.data[i+2] + n));
-        }
-        ctx.putImageData(id, 0, 0);
+        // 4. Extract only the rows we need
+        onStatus('Pixeldaten extrahieren …');
+        await tf.nextFrame();
+        const canvas  = document.createElement('canvas');
+        canvas.width  = 784;
+        canvas.height = maxRow + 1;
+        const ctx     = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 784, maxRow + 1, 0, 0, 784, maxRow + 1);
+        const raw     = ctx.getImageData(0, 0, 784, maxRow + 1).data;
 
-        const pixels = new Float32Array(784);
-        const data   = ctx.getImageData(0, 0, 28, 28).data;
-        for (let i = 0; i < 784; i++) pixels[i] = data[i * 4] / 255;
-        return pixels;
-    }
+        const n      = selected.length;
+        const pixels = new Float32Array(n * 784);
+        const labels = new Uint8Array(n);
+        selected.forEach((srcRow, dst) => {
+            for (let px = 0; px < 784; px++)
+                pixels[dst * 784 + px] = raw[(srcRow * 784 + px) * 4] / 255;
+            labels[dst] = allLabels[srcRow];
+        });
 
-    function buildDataset() {
-        const n     = EXAMPLES_PER_CLASS * 10;
-        const xs    = new Float32Array(n * 784);
-        const ys    = new Int32Array(n);
-        let idx     = 0;
-        for (let d = 0; d <= 9; d++) {
-            for (let k = 0; k < EXAMPLES_PER_CLASS; k++) {
-                xs.set(renderExample(d), idx * 784);
-                ys[idx] = d;
-                idx++;
-            }
-        }
-        // shuffle
-        for (let i = n - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            // swap labels
-            [ys[i], ys[j]] = [ys[j], ys[i]];
-            // swap image rows
-            const tmp = xs.slice(i * 784, (i + 1) * 784);
-            xs.copyWithin(i * 784, j * 784, (j + 1) * 784);
-            xs.set(tmp, j * 784);
-        }
-        return { xs, ys, n };
+        return { pixels, labels, n };
     }
 
     // ── Model definition & training ─────────────────────────────────────────────
     function buildModel() {
         const m = tf.sequential({ layers: [
-            tf.layers.conv2d({ inputShape: [28, 28, 1], filters: 16, kernelSize: 3, activation: 'relu', padding: 'same' }),
+            tf.layers.conv2d({ inputShape: [28, 28, 1], filters: 16, kernelSize: 3,
+                               activation: 'relu', padding: 'same' }),
             tf.layers.maxPooling2d({ poolSize: 2 }),
             tf.layers.conv2d({ filters: 32, kernelSize: 3, activation: 'relu', padding: 'same' }),
             tf.layers.maxPooling2d({ poolSize: 2 }),
@@ -570,9 +552,12 @@
             tf.layers.dense({ units: 128, activation: 'relu' }),
             tf.layers.dense({ units: 10,  activation: 'softmax' }),
         ]});
-        m.compile({ optimizer: tf.train.adam(0.001), loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
+        m.compile({ optimizer: tf.train.adam(0.001),
+                    loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
         return m;
     }
+
+    const IDB_KEY = 'indexeddb://cyber-mnist-cnn-v2'; // v2: balanced sampling
 
     async function trainAndReady() {
         const overlay = document.getElementById('train-overlay');
@@ -582,22 +567,54 @@
 
         drawCanvas.classList.add('disabled');
         overlay.classList.add('visible');
-        label.textContent = t('training').toUpperCase();
 
-        // Generate synthetic data
-        stats.textContent = 'Generating training data …';
+        const setStatus = msg => { stats.textContent = msg; };
+
+        // ── 1. Try to load cached model from IndexedDB ──────────────────────────
+        try {
+            setStatus('Gespeichertes Modell suchen …');
+            label.textContent = 'MODELL LADEN';
+            await tf.nextFrame();
+            model = await tf.loadLayersModel(IDB_KEY);
+            tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1]))); // warmup
+            overlay.classList.remove('visible');
+            drawCanvas.classList.remove('disabled');
+            document.getElementById('status-dot').className = 'status-dot ok';
+            document.getElementById('model-status-text').textContent = '✓ Modell aus Cache geladen';
+            coachEl.textContent = t('ready');
+            return;
+        } catch (_) {
+            // not cached yet → train from scratch
+        }
+
+        // ── 2. Load MNIST data & train ──────────────────────────────────────────
+        label.textContent = 'MNIST TRAINING';
+        let pixels, labels;
+        try {
+            ({ pixels, labels } = await loadMNIST(setStatus));
+        } catch (err) {
+            overlay.classList.remove('visible');
+            drawCanvas.classList.remove('disabled');
+            document.getElementById('status-dot').className = 'status-dot err';
+            document.getElementById('model-status-text').textContent = '✗ Daten nicht ladbar (kein Internet?)';
+            coachEl.textContent = 'MNIST-Daten konnten nicht geladen werden.';
+            console.error('[ANN Lab] MNIST load failed:', err);
+            return;
+        }
+
+        setStatus('Modell kompilieren …');
         await tf.nextFrame();
-        const { xs, ys, n } = buildDataset();
 
-        const xTensor = tf.tensor4d(xs, [n, 28, 28, 1]);
-        const yTensor = tf.oneHot(tf.tensor1d(ys, 'int32'), 10).toFloat();
+        const n       = pixels.length / 784;
+        const xTensor = tf.tensor4d(pixels, [n, 28, 28, 1]);
+        const yTensor = tf.oneHot(tf.tensor1d(labels, 'int32'), 10).toFloat();
 
-        const EPOCHS = 12;
+        const EPOCHS = 8;
         model = buildModel();
 
         await model.fit(xTensor, yTensor, {
             epochs:          EPOCHS,
-            batchSize:       64,
+            batchSize:       128,
             validationSplit: 0.1,
             shuffle:         true,
             callbacks: {
@@ -606,8 +623,8 @@
                     bar.style.width = pct + '%';
                     stats.textContent =
                         `Epoch ${epoch + 1}/${EPOCHS}  ·  ` +
-                        `acc ${(logs.acc * 100).toFixed(1)}%  ·  ` +
-                        `loss ${logs.loss.toFixed(3)}`;
+                        `acc ${(logs.acc * 100).toFixed(1)} %  ·  ` +
+                        `val_acc ${(logs.val_acc * 100).toFixed(1)} %`;
                     await tf.nextFrame();
                 }
             }
@@ -616,14 +633,36 @@
         xTensor.dispose();
         yTensor.dispose();
 
-        // Warmup
-        tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1])));
+        // ── 3. Save to IndexedDB for next visit ─────────────────────────────────
+        try {
+            setStatus('Modell speichern …');
+            await tf.nextFrame();
+            await model.save(IDB_KEY);
+        } catch (e) {
+            console.warn('[ANN Lab] Could not save model to IndexedDB:', e);
+        }
+
+        tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1]))); // warmup
 
         overlay.classList.remove('visible');
         drawCanvas.classList.remove('disabled');
         document.getElementById('status-dot').className = 'status-dot ok';
-        document.getElementById('model-status-text').textContent = '✓ Trained · ready';
+        document.getElementById('model-status-text').textContent =
+            `✓ MNIST CNN · ${(PER_CLASS * 10).toLocaleString()} Beispiele · gecacht`;
         coachEl.textContent = t('ready');
+    }
+
+    async function resetModel() {
+        try {
+            await tf.io.removeModel(IDB_KEY);
+        } catch (_) { /* wasn't cached */ }
+        if (model) { model.dispose(); model = null; }
+        clearDraw();
+        document.getElementById('status-dot').className = 'status-dot spin';
+        document.getElementById('model-status-text').textContent = t('training');
+        coachEl.textContent = t('training');
+        initDraw();
+        trainAndReady();
     }
 
     // ── Boot ────────────────────────────────────────────────────────────────────
