@@ -309,16 +309,8 @@ const CyberBranding = {
         this.updateScale();
         if (!this.briefingContent) this.briefingContent = "";
 
-        // --- DEV-MODE: SYSTEM SYNC ---
-        if (this.DEV_MODE) {
-            console.warn("⚠️ DEV_MODE ACTIVE: Page will hard-reload on tab focus.");
-            document.addEventListener("visibilitychange", () => {
-                if (document.visibilityState === "visible") {
-                    console.log("♻️ Dev-Mode: Triggering hard reload...");
-                    window.location.reload(true);
-                }
-            });
-        }
+        // --- DEV-MODE: SYSTEM SYNC --- (deaktiviert)
+        // if (this.DEV_MODE) { ... }
         scheduleNavigationConsistencyCheck();
     },
 
