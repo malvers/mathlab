@@ -984,22 +984,6 @@
             // Brief pause so user sees "Phase 2 — ✓ alle … Bilder gezeigt"
             await new Promise(r => setTimeout(r, 1000));
 
-            // ── Check IndexedDB cache — nur wenn kein Reset ───────────────────────
-            try {
-                model = await tf.loadLayersModel(IDB_KEY);
-                tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1])));
-                dbgLog('Modell aus IDB geladen — Training übersprungen');
-                epochInfo.className   = 'loaded';
-                epochInfo.textContent = 'Phase 3 — Modell aus Cache ✓';
-                await new Promise(r => setTimeout(r, 800));
-                document.getElementById('status-dot').className = 'status-dot ok';
-                document.getElementById('model-status-text').textContent = '✓ Modell bereit (Cache)';
-                coachEl.textContent = t('ready');
-                overlay.classList.remove('visible');
-                drawCanvas.classList.remove('disabled');
-                return;
-            } catch (_) { /* not cached → train */ }
-
             // ── Phase 3: Training ─────────────────────────────────────────────────
             const EPOCHS = 8;
             const { pixels, labels, n: nTrain } = mnistData;
@@ -1017,6 +1001,7 @@
             epochInfo.className   = 'running';
             epochInfo.textContent = 'Phase 3 — Training startet …';
             coachEl.textContent   = 'Modell wird trainiert …';
+            startMnistAnim(pixels, labels, nTrain);
 
             const batchesPerEpoch = Math.ceil(Math.floor(N_TRAIN * 0.9) / 128);
             dbgLog(`Training: ${EPOCHS} Epochen × ~${batchesPerEpoch} Batches`);
@@ -1054,6 +1039,7 @@
             });
 
             xs.dispose(); ys.dispose();
+            stopMnistAnim();
 
             try { await model.save(IDB_KEY); dbgLog('Modell in IDB gespeichert'); } catch (_) {}
 
