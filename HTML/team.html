@@ -489,8 +489,9 @@
             const scaleY = (winH - padding - containerTop) / baseH;
 
             let scale = Math.min(scaleX, scaleY);
+            scale = Math.max(scale, 0.4);   // Minimalzoom
+            scale = Math.min(scale, scaleY); // Y überschreibt immer: kein vertikaler Overflow
             if (scale > 2) scale = 2;
-            if (scale < 0.4) scale = 0.4;
 
             document.documentElement.style.setProperty('--current-scale', scale);
             wrapper.style.height = (containerTop + baseH * scale + padding) + 'px';
