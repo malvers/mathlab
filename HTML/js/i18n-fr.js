@@ -31,8 +31,8 @@ CyberI18n.translations.fr = {
                 reset_view: "Réinitialiser la vue",
                 toggle_menu: "Changer de menu",
                 mini_rail_lang_title: "Langue d’affichage — clic pour suivante",
-                adopt_contact_btn_title: "Adopt a lab!",
-                contact_lab_modal_title: "Adopt a lab!",
+                adopt_contact_btn_title: "Adopter un labo !",
+                contact_lab_modal_title: "Adopter un labo !",
                 contact_lab_modal_body: "Il nous faut des personnes qui se sentent responsables d’un laboratoire et vérifient de temps en temps que tout fonctionne encore bien. Nous serions très heureux de votre aide !",
                 contact_lab_email_cta: "E-mail",
                 contact_lab_close: "FERMER"

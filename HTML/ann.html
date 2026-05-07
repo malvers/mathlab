@@ -19,7 +19,9 @@
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        #input0-field, #input1-field { background-image: none !important; padding-right: 15px; text-align: right; font-size: 1rem; }
+        #input0-field, #input1-field { background-image: none !important; padding-right: 15px; text-align: left; font-size: 1rem; }
+        #input0-field { color: #ff3c3c !important; }
+        #input1-field { color: #00dc64 !important; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 </head>
@@ -49,6 +51,8 @@
             </div>
             <canvas id="canvas"></canvas>
             <div id="output-latex" style="position:absolute;pointer-events:none;display:none;font-size:15px;line-height:2"></div>
+            <div id="input-latex-0" style="position:absolute;pointer-events:none;transform:translateX(-100%)"></div>
+            <div id="input-latex-1" style="position:absolute;pointer-events:none;transform:translateX(-100%)"></div>
         </div>
     </main>
 
@@ -192,6 +196,42 @@
         let trainEpoch = 0;
         let lossHistory = [];
         let rafId = null;
+        let lastTrainSample = null;
+        let lastSavedEpoch = 0;
+
+        function saveWeights() {
+            if (!model) return;
+            try {
+                const ws = model.getWeights();
+                const data = { layers: LAYERS.slice(), w: ws.map(t => ({ shape: t.shape, data: Array.from(t.dataSync()) })) };
+                localStorage.setItem('ann_weights_' + selectedOp.id, JSON.stringify(data));
+                refreshOpButtons();
+            } catch(e) { console.warn('saveWeights:', e); }
+        }
+
+        function refreshOpButtons() {
+            OPS.forEach(o => {
+                const btn = document.getElementById('op-btn-' + o.id);
+                if (!btn) return;
+                const active = o.id === selectedOp.id;
+                const trained = !!localStorage.getItem('ann_weights_' + o.id);
+                btn.style.filter = active ? `drop-shadow(0 0 8px ${opColors[o.id]})` : trained ? 'none' : 'grayscale(1)';
+                btn.style.opacity = active ? '1' : trained ? '0.75' : '0.3';
+            });
+        }
+
+        function loadWeights() {
+            if (!model) return;
+            try {
+                const raw = localStorage.getItem('ann_weights_' + selectedOp.id);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (JSON.stringify(data.layers) !== JSON.stringify(LAYERS)) return;
+                const tensors = data.w.map(({ shape, data: d }) => tf.tensor(d, shape));
+                model.setWeights(tensors);
+                tensors.forEach(t => t.dispose());
+            } catch(e) { console.warn('loadWeights:', e); }
+        }
 
         function resetTraining() {
             stopTraining();
@@ -209,6 +249,7 @@
                 if (selectedOp.id === 'div' && Math.abs(x2) < 0.5) continue;
                 xs.push([x1 / INORM, x2 / INORM]);
                 ys.push([getNormTarget(x1, x2)]);
+                lastTrainSample = [x1, x2];
                 count++;
             }
             let lossVal = 0;
@@ -235,6 +276,7 @@
                 trainEpoch += stepsPerFrame;
                 lossHistory.push(Math.log10(Math.max(loss, 1e-10)));
                 if (lossHistory.length > 300) lossHistory.shift();
+                if (trainEpoch - lastSavedEpoch >= 500) { saveWeights(); lastSavedEpoch = trainEpoch; }
                 draw();
             } catch(e) {
                 console.error('trainingLoop:', e);
@@ -246,8 +288,10 @@
 
         function startTraining() {
             if (isTraining) return;
-            isTraining = true; trainingLoop();
+            if (!model) return;
+            isTraining = true;
             document.getElementById('train-btn').textContent = 'STOP';
+            trainingLoop();
         }
 
         function stopTraining() {
@@ -257,7 +301,21 @@
             if (btn) btn.textContent = 'TRAIN';
         }
 
-        buildModel();
+        // preload operator icons from labs-icons
+        const OP_ICONS = {};
+        {
+            const svgs = {
+                add: `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0,210,255,0.12)" stroke="#00d2ff" stroke-width="2"/><line x1="50" y1="33" x2="50" y2="67" stroke="#00d2ff" stroke-width="7" stroke-linecap="round"/><line x1="33" y1="50" x2="67" y2="50" stroke="#00d2ff" stroke-width="7" stroke-linecap="round"/></svg>`,
+                sub: `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255,77,77,0.12)" stroke="#ff4d4d" stroke-width="2"/><line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="7" stroke-linecap="round"/></svg>`,
+                mul: `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255,215,0,0.12)" stroke="#ffd700" stroke-width="2"/><circle cx="50" cy="50" r="8" fill="#ffd700"/></svg>`,
+                div: `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(173,255,47,0.12)" stroke="#adff2f" stroke-width="2"/><circle cx="50" cy="33" r="6" fill="#adff2f"/><line x1="33" y1="50" x2="67" y2="50" stroke="#adff2f" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="67" r="6" fill="#adff2f"/></svg>`
+            };
+            Object.entries(svgs).forEach(([id, svg]) => {
+                const img = new Image();
+                img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+                OP_ICONS[id] = img;
+            });
+        }
 
         const OPS = [
             { id: 'add', label: '+ Addition',      sym: '+' },
@@ -266,6 +324,9 @@
             { id: 'div', label: '÷ Division',       sym: '÷' },
         ];
         let selectedOp = OPS[0];
+
+        buildModel();
+        loadWeights();
 
         // hit zones for canvas triangles + layer buttons
         let triangleZones = [];
@@ -339,31 +400,47 @@
             }
         });
 
+        function updateInput(i, val) {
+            const v = parseFloat(val);
+            if (!isNaN(v)) { INPUT_VALUES[i] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
+        }
+
         CyberUI.createCard('ui-container', 'Eingabe', `
-            <div style="margin-bottom:10px">
-                <div style="font-family:Orbitron,sans-serif;font-size:0.7rem;color:rgba(200,220,255,0.6);margin-bottom:5px">Zahl 1</div>
-                <input type="number" id="input0-field" class="cyber-select" value="${INPUT_VALUES[0]}" step="0.01">
+            <div class="cyber-control-group">
+                <label class="cyber-label">Summand 1</label>
+                <input type="number" id="input0-field" class="cyber-select" value="${INPUT_VALUES[0]}" step="0.01" oninput="updateInput(0, this.value)">
             </div>
-            <div>
-                <div style="font-family:Orbitron,sans-serif;font-size:0.7rem;color:rgba(200,220,255,0.6);margin-bottom:5px">Zahl 2</div>
-                <input type="number" id="input1-field" class="cyber-select" value="${INPUT_VALUES[1]}" step="0.01">
+            <div class="cyber-control-group" style="margin-top:20px">
+                <label class="cyber-label">Summand 2</label>
+                <input type="number" id="input1-field" class="cyber-select" value="${INPUT_VALUES[1]}" step="0.01" oninput="updateInput(1, this.value)">
             </div>
         `, 'var(--neon-blue)');
-        document.getElementById('input0-field').addEventListener('input', e => {
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) { INPUT_VALUES[0] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
-        });
-        document.getElementById('input1-field').addEventListener('input', e => {
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) { INPUT_VALUES[1] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
-        });
 
-        CyberUI.createCard('ui-container', 'Operation', `<div id="op-drop"></div>`, 'var(--neon-blue)');
-        CyberUI.createDropdown('op-drop', OPS, (id) => {
+        const opIconSVGs = {
+            add: `<svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(0,210,255,0.12)" stroke="#00d2ff" stroke-width="2"/><line x1="50" y1="33" x2="50" y2="67" stroke="#00d2ff" stroke-width="7" stroke-linecap="round"/><line x1="33" y1="50" x2="67" y2="50" stroke="#00d2ff" stroke-width="7" stroke-linecap="round"/></svg>`,
+            sub: `<svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255,77,77,0.12)" stroke="#ff4d4d" stroke-width="2"/><line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="7" stroke-linecap="round"/></svg>`,
+            mul: `<svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255,215,0,0.12)" stroke="#ffd700" stroke-width="2"/><circle cx="50" cy="50" r="8" fill="#ffd700"/></svg>`,
+            div: `<svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(173,255,47,0.12)" stroke="#adff2f" stroke-width="2"/><circle cx="50" cy="33" r="6" fill="#adff2f"/><line x1="33" y1="50" x2="67" y2="50" stroke="#adff2f" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="67" r="6" fill="#adff2f"/></svg>`
+        };
+        const opColors = { add: '#00d2ff', sub: '#ff4d4d', mul: '#ffd700', div: '#adff2f' };
+
+        function selectOp(id) {
+            saveWeights();
             selectedOp = OPS.find(o => o.id === id);
-            resetTraining();
+            buildModel(); loadWeights(); resetTraining();
+            refreshOpButtons();
             draw();
-        }, selectedOp.id);
+        }
+
+        CyberUI.createCard('ui-container', 'Operation', `
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+                ${OPS.map(o => `<button id="op-btn-${o.id}" onclick="selectOp('${o.id}')"
+                    style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:filter 0.2s">
+                    ${opIconSVGs[o.id].replace('width="44" height="44"', 'width="100%" height="auto" style="width:100%"')}
+                </button>`).join('')}
+            </div>
+        `, 'var(--neon-blue)');
+        selectOp(selectedOp.id);
 
         CyberUI.createCard('ui-container', 'Training', `
             <div style="display:flex;gap:8px;margin-bottom:8px;">
@@ -415,7 +492,7 @@
 
             const positions = getNodePositions(w, h);
 
-            // forward pass
+            // forward pass always on user's input values
             const activations = forwardPass(normIn(INPUT_VALUES));
 
             function layerRGB(l) {
@@ -459,9 +536,11 @@
 
                 for (let i = 0; i < positions[l].length; i++) {
                     const { x, y } = positions[l][i];
-                    const t = (layerActs[i] - actMin) / actRange;
+                    const t = isInput ? 0.7 : (layerActs[i] - actMin) / actRange;
 
-                    const [r, g, b] = layerRGB(l);
+                    const [r, g, b] = (isInput && LAYERS[0] === 2)
+                        ? (i === 0 ? [255, 60, 60] : [0, 220, 100])
+                        : layerRGB(l);
 
                     const alpha = 0.15 + t * 0.7;
 
@@ -485,37 +564,27 @@
                 }
             }
 
-            // operator symbol between input nodes
+            // operator icon between input nodes
             if (positions[0].length === 2) {
                 const p0 = positions[0][0];
                 const p1 = positions[0][1];
-                const textX = p0.x - NODE_RADIUS - 18;
                 const oy = (p0.y + p1.y) / 2;
-                ctx.font = '700 26px Orbitron, sans-serif';
-                const symW = ctx.measureText(selectedOp.sym).width;
-                const cx = textX - symW / 2;
-                const r = 20;
-                ctx.beginPath();
-                ctx.arc(cx, oy, r, 0, Math.PI * 2);
-                ctx.strokeStyle = '#00c8ff';
-                ctx.lineWidth = 1.5;
-                ctx.fillStyle = 'rgba(0,200,255,0.1)';
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = '#00c8ff';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(selectedOp.sym, cx, oy);
-                ctx.textBaseline = 'alphabetic';
+                const iconSize = 44;
+                const ix = p0.x - NODE_RADIUS - 14 - iconSize;
+                const img = OP_ICONS[selectedOp.id];
+                if (img && img.complete) ctx.drawImage(img, ix, oy - iconSize / 2, iconSize, iconSize);
             }
 
-            // input values
-            ctx.font = '700 15px Orbitron, sans-serif';
-            ctx.textAlign = 'right';
+            // input values as KaTeX — always show INPUT_VALUES (stable, no jumping)
             for (let i = 0; i < INPUT_VALUES.length; i++) {
                 const { x, y } = positions[0][i];
-                ctx.fillStyle = '#00c8ff';
-                ctx.fillText(INPUT_VALUES[i].toFixed(2), x - NODE_RADIUS - 18, y + 5);
+                const el = document.getElementById('input-latex-' + i);
+                const latex = `s_${i+1} = \\mathit{${INPUT_VALUES[i].toFixed(2)}}`;
+                el.style.left = (x - NODE_RADIUS - 14) + 'px';
+                el.style.top  = (y - 11) + 'px';
+                el.style.color = i === 0 ? '#ff3c3c' : '#00dc64';
+                el.style.fontSize = '22px';
+                el.innerHTML = katex.renderToString(latex, { throwOnError: false });
             }
 
             // layer labels + triangles for hidden layers
@@ -539,16 +608,10 @@
                 const layerColor = `rgb(${lr},${lg},${lb})`;
 
                 if (isHidden) {
-                    const countStr = `${LAYERS[l]}`;
                     ctx.font = '700 17px Orbitron, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillStyle = layerColor;
-                    ctx.fillText(countStr, x, labelY);
-                } else {
-                    ctx.font = '600 17px Orbitron, sans-serif';
-                    ctx.fillStyle = layerColor;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(getLayerLabel(l), x, labelY);
+                    ctx.fillText(`${LAYERS[l]}`, x, labelY);
                 }
 
                 if (isHidden) {
@@ -569,22 +632,31 @@
 
             // +/- Layer buttons at bottom center
             {
-                const bW = 100, bH = 32, bGap = 10, bR = 6;
-                const bY = h - 18;
+                const bW = 56, bH = 56, bGap = 14, bR = 10;
+                const bY = h - 36;
                 const canAdd = LAYERS.length - 2 < 5;
                 const canRemove = LAYERS.length - 2 > 1;
                 const plusX = w / 2 - bGap / 2 - bW / 2;
                 const minusX = w / 2 + bGap / 2 + bW / 2;
 
-                [[plusX, '+ LAYER', canAdd, addLayer], [minusX, '− LAYER', canRemove, removeLayer]].forEach(([bx, label, enabled, action]) => {
+                [[plusX, '+', canAdd, addLayer], [minusX, '−', canRemove, removeLayer]].forEach(([bx, label, enabled, action]) => {
                     const col = enabled ? '#00c8ff' : 'rgba(0,200,255,0.2)';
                     drawRoundRect(bx - bW / 2, bY - bH / 2, bW, bH, bR);
                     ctx.fillStyle = enabled ? 'rgba(0,200,255,0.08)' : 'rgba(0,0,0,0.1)';
                     ctx.fill();
                     ctx.strokeStyle = col;
-                    ctx.lineWidth = 1.2;
+                    ctx.lineWidth = 1.8;
                     ctx.stroke();
-                    ctx.font = '700 20px Orbitron, sans-serif';
+                    if (enabled) {
+                        ctx.save();
+                        ctx.shadowColor = col;
+                        ctx.shadowBlur = 10;
+                        ctx.strokeStyle = col;
+                        ctx.lineWidth = 1.8;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                    ctx.font = '700 32px Orbitron, sans-serif';
                     ctx.fillStyle = col;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -592,6 +664,36 @@
                     ctx.textBaseline = 'alphabetic';
                     if (enabled) layerBtnZones.push({ x: bx, y: bY, hw: bW / 2, hh: bH / 2, action });
                 });
+            }
+
+            // Q box top-left
+            {
+                const mse = lossHistory.length > 0 ? Math.pow(10, lossHistory[lossHistory.length - 1]) : null;
+                const rmse = mse !== null ? Math.sqrt(mse) * (ONORM[selectedOp.id] || 10) : null;
+                const _outVal = activations[activations.length - 1][0];
+                const _pred = denormOut(_outVal);
+                const [_v1, _v2] = INPUT_VALUES;
+                const _target = selectedOp.id === 'add' ? _v1+_v2 : selectedOp.id === 'sub' ? _v1-_v2 : selectedOp.id === 'mul' ? _v1*_v2 : _v2 !== 0 ? _v1/_v2 : 0;
+                const absDelta = Math.abs(_pred - _target);
+
+                const bx = 16, by = 16, bw = 180, bh = 42, bR = 6;
+                drawRoundRect(bx, by, bw, bh, bR);
+                ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,200,255,0.3)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.font = 'italic 700 18px Times New Roman, serif';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ff2222';
+                ctx.textAlign = 'left';
+                ctx.fillText('Q', bx + 12, by + bh / 2);
+                ctx.font = 'italic 700 20px Times New Roman, serif';
+                ctx.textAlign = 'right';
+                ctx.fillStyle = rmse !== null ? '#ff2222' : 'rgba(255,34,34,0.3)';
+                ctx.fillText(rmse !== null ? rmse.toFixed(4) : '—', bx + bw - 12, by + bh / 2);
+                ctx.textBaseline = 'alphabetic';
             }
 
             // loss curve
@@ -636,7 +738,7 @@
 
             const absDelta = Math.abs(delta);
             const renderSym = s => katex.renderToString(s, {throwOnError: false});
-            const renderNum = (v, sign) => katex.renderToString((sign && v >= 0 ? '+' : '') + v.toFixed(3), {throwOnError: false});
+            const renderNum = (v, sign) => katex.renderToString('\\mathit{' + (sign && v >= 0 ? '+' : '') + v.toFixed(3) + '}', {throwOnError: false});
             const row = (sym, val, sign, color) =>
                 `<div style="display:contents;color:${color}">` +
                     `<div style="text-align:right">${renderSym(sym)}</div>` +
@@ -654,9 +756,9 @@
             ol.style.left = tx + 'px';
             ol.style.top = (outPos.y - (rowH + rowGapPx) - rowH / 2) + 'px';
             ol.innerHTML =
-                row('\\hat{y}', predRaw, false, '#ffcc00') +
-                row('y', targetRaw, false, '#cc66ff') +
-                row('\\Delta', delta, true, '#ff4466');
+                row('y_{Ziel}', targetRaw, false, '#ffcc00') +
+                row('y_{Netz}', predRaw, false, '#cc66ff') +
+                row('|\\Delta|', Math.abs(delta), false, '#ff2222');
         }
 
         function init() {
