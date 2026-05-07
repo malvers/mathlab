@@ -488,6 +488,7 @@ const LABS_DATA = [
         "keywords": "komplexe zahlen imaginaerteil reell imaginary complex plane gauss i",
         "color": "blue"
     }, */
+    /*
     {
         "id": "labai",
         "href": "labai.html",
@@ -499,4 +500,5 @@ const LABS_DATA = [
         "keywords": "ai ki artificial intelligence assistent bot hilfe chat",
         "color": "blue"
     }
+    */
 ];
