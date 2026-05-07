@@ -279,66 +279,8 @@
             75%      { transform: translateX(-50%) scale(0.9, 1.05) rotate(3deg); opacity: 0.95; }
         }
 
-        /* --- Wish button --- */
-        .wish-btn {
-            margin-top: 10px;
-            background: transparent;
-            border: 1.5px solid var(--c1);
-            color: var(--c1);
-            padding: 14px 32px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.25s ease;
-            opacity: 0;
-            animation: fadeUp 1s ease 2.6s forwards;
-            backdrop-filter: blur(6px);
-        }
-
-        .wish-btn:hover {
-            background: rgba(0, 210, 255, 0.12);
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
-            color: #fff;
-            transform: translateY(-2px);
-        }
-
-        .wish-btn:active {
-            transform: translateY(0);
-        }
 
         /* --- Footer hint --- */
-        .hint {
-            position: fixed;
-            bottom: 18px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 11px;
-            letter-spacing: 4px;
-            color: rgba(255, 255, 255, 0.35);
-            font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
-            z-index: 4;
-            opacity: 0;
-            animation: fadeUp 1s ease 3s forwards;
-        }
-
-        .hint kbd {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: inherit;
-            color: var(--c1);
-            margin: 0 2px;
-        }
-
-        @media (max-width: 600px) {
-            .hint { display: none; }
-        }
     </style>
 </head>
 
@@ -350,7 +292,6 @@
     <div id="stage">
         <h1 id="title"></h1>
         <div class="name-line" id="nameLine"></div>
-        <div class="tag-line">Doc Alvers Mathe-Labor &middot; Cyber Edition</div>
 
         <div class="cake-wrap">
             <div class="cake">
@@ -374,10 +315,8 @@
             </div>
         </div>
 
-        <button class="wish-btn" id="wishBtn">Wünsch dir was</button>
     </div>
 
-    <div class="hint">Klick irgendwo &middot; <kbd>SPACE</kbd> Feuerwerk &middot; <kbd>?name=DEINNAME</kbd></div>
 
     <script src="js/ui.js?v=4"></script>
     <script>
@@ -385,9 +324,14 @@
         // -------------------------------------------------------------
         // 0. Personalisation: ?name=Anna
         // -------------------------------------------------------------
-        const name = (new URLSearchParams(location.search).get('name') || 'Ulf').trim();
+        let name = new URLSearchParams(location.search).get('name');
+        if (!name && location.href.includes('name=')) {
+            try { name = decodeURIComponent(location.href.split('name=')[1].split('&')[0].split('#')[0]); } catch(e){}
+        }
+        name = (name || 'Doc Alvers').trim();
+
         const titleEl = document.getElementById('title');
-        const words = name ? ['Happy', 'Birthday', name + '!'] : ['Happy', 'Birthday'];
+        const words = ['Happy', 'Birthday'];
         let charIdx = 0;
         words.forEach((w) => {
             const wordSpan = document.createElement('span');
@@ -402,7 +346,13 @@
             });
             titleEl.appendChild(wordSpan);
         });
-        document.getElementById('nameLine').textContent = name ? '✨ Alles Liebe ✨' : '✨ Wir feiern dich ✨';
+
+        const nameLine = document.getElementById('nameLine');
+        nameLine.textContent = name;
+        nameLine.style.fontSize = 'clamp(30px, 6vw, 80px)';
+        nameLine.style.color = 'var(--c3)';
+        nameLine.style.marginTop = '10px';
+        nameLine.style.textShadow = '0 0 20px rgba(255, 204, 0, 0.6)';
 
         // -------------------------------------------------------------
         // 1. Star field (parallax twinkle)
@@ -613,7 +563,6 @@
 
         addEventListener('click', (e) => {
             // Don't intercept the wish button (handled separately)
-            if (e.target.closest('.wish-btn')) return;
             rocket(e.clientX, e.clientY);
             spawnConfetti(e.clientX, e.clientY, 24);
         });
@@ -622,17 +571,6 @@
             if (e.code === 'Space') { e.preventDefault(); bigFinale(); }
         });
 
-        document.getElementById('wishBtn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            bigFinale();
-            const subject = encodeURIComponent(`Mein Geburtstagswunsch${name ? ' von ' + name : ''}`);
-            const body = encodeURIComponent(
-                `Lieber Michael,\n\nmein Wunsch zum Geburtstag ist:\n\n\n\nLiebe Grüße${name ? ',\n' + name : ''}`
-            );
-            setTimeout(() => {
-                window.location.href = `mailto:info@docalvers.de?subject=${subject}&body=${body}`;
-            }, 600);
-        });
 
         addEventListener('resize', () => {
             initStars(); initFx(); initConfetti();
