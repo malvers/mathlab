@@ -568,7 +568,9 @@ class CyberUI {
             .instrument-card.collapsible .toggle-icon {
                 font-size: 0.7rem;
                 transition: transform 0.3s ease;
-                display: inline-block;
+                display: flex;
+                align-items: center;
+                line-height: 1;
             }
 
             .instrument-card.collapsed .toggle-icon {
@@ -588,6 +590,7 @@ class CyberUI {
                 max-height: 0;
                 opacity: 0;
                 margin: 0;
+                padding: 0;
             }
 
             /* CYBER CHECKBOX SYSTEM (PREMIUM) */
@@ -1469,7 +1472,7 @@ class CyberUI {
         const glowColor = (typeof accentColor === 'string' && accentColor.startsWith('#')) ? `${accentColor}66` : 'rgba(0, 210, 255, 0.4)';
 
         const cardHTML = `
-            <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''}">
+            <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''} ${options.collapsed ? 'collapsed' : ''}">
                 ${title ? `
                 <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${glowColor};">
                     ${toggleHtml}

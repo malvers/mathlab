@@ -273,6 +273,11 @@
             margin: 0 auto;
         }
 
+        .instrument-card.collapsed {
+            padding-top: 6px !important;
+            padding-bottom: 6px !important;
+        }
+
         /* ── Status ── */
         /*
         .instrument-card.collapsible .toggle-icon {
@@ -559,7 +564,8 @@
         if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
         // ── Sidebar cards ───────────────────────────────────────────────────────────
-        CyberUI.createCard('ui-container', t('card_result'), `
+        document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="result-cards-wrap" style="display:none"></div>');
+        CyberUI.createCard('result-cards-wrap', t('card_result'), `
         <div id="result-digit" class="cyber-number-widget dim" style="display:flex;width:100%;justify-content:center;min-height:90px;"></div>
         <div id="result-conf" class="cyber-number-widget" style="display:flex;width:100%;justify-content:center;min-height:20px;margin-top:5px;"></div>
         <button class="cyber-btn" onclick="clearDraw()"
@@ -578,23 +584,38 @@
         }
         CyberUI.createCard('ui-container', t('card_conf'), barsHtml);
 
-        CyberUI.createCard('ui-container', t('card_preview'), `
+        document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="model-cards-wrap" style="display:none"></div>');
+        CyberUI.createCard('model-cards-wrap', t('card_preview'), `
         <canvas id="preview-canvas" width="56" height="56"
             style="width:112px;height:112px;"></canvas>
     `);
-
-        CyberUI.createCard('ui-container', t('card_model'), `
+        CyberUI.createCard('model-cards-wrap', t('card_model'), `
         <button class="cyber-btn" onclick="resetModel()"
             style="width:100%;margin-top:12px;border-color:rgba(0,210,255,0.35);">
             RESET MODEL
         </button>
     `);
 
+        CyberUI.createCard('ui-container', 'TRAININGSDATEN', `
+        <select id="td-select" onchange="trainSampleCount = +this.value"
+            style="width:100%;padding:8px 12px;font-family:'Orbitron',sans-serif;font-size:13px;
+                   background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.35);
+                   border-radius:8px;color:#00d2ff;cursor:pointer;outline:none;">
+            <option value="10000">10.000</option>
+            <option value="20000">20.000</option>
+            <option value="30000">30.000</option>
+            <option value="40000">40.000</option>
+            <option value="50000" selected>50.000</option>
+        </select>
+    `);
+
+        /* DEBUG-Karte auskommentiert
         CyberUI.createCard('ui-container', 'DEBUG', `
-        <div id="debug-list" style="font-family:monospace;font-size:10px;line-height:2;">
-            <span id="debug-empty" style="color:rgba(255,255,255,0.2);font-family:'Outfit',sans-serif;font-size:10px;">— kein Training aktiv —</span>
+        <div id="debug-list" style="font-family:monospace;font-size:14px;line-height:2;">
+            <span id="debug-empty" style="color:rgba(255,255,255,0.2);font-family:'Outfit',sans-serif;font-size:14px;">— kein Training aktiv —</span>
         </div>
-    `, '#00d2ff', { collapsible: true });
+    `, '#00d2ff', { collapsible: true, collapsed: true });
+        */
 
         const coachEl = document.getElementById('coach-content');
         coachEl.textContent = t('training');
@@ -606,6 +627,7 @@
         let hasStrokes = false;
         let wasPredicted = false;
         let model = null;
+        let trainSampleCount = 50000;
         let predictTid = null;
         let animInterval = null;
 
@@ -949,7 +971,8 @@
             const n = selected.length;
             const pixels = new Float32Array(n * 784);
             const labels = new Uint8Array(n);
-            const refSamples = new Array(10).fill(null);
+            const REF_PER_CLASS = 100;
+            const refSamples = Array.from({ length: 10 }, () => []); // 100 samples per class
 
             // Chunked extraction — yield every 1000 samples so browser can render
             const CHUNK = 1000;
@@ -959,8 +982,8 @@
                 for (let px = 0; px < 784; px++)
                     pixels[dst * 784 + px] = raw[(srcRow * 784 + px) * 4] / 255;
                 labels[dst] = cls;
-                if (refSamples[cls] === null)
-                    refSamples[cls] = pixels.slice(dst * 784, dst * 784 + 784);
+                if (refSamples[cls].length < REF_PER_CLASS)
+                    refSamples[cls].push(pixels.slice(dst * 784, dst * 784 + 784));
                 if ((dst + 1) % CHUNK === 0) {
                     if (onProgress) onProgress(dst + 1, n, pixels);
                     await tf.nextFrame();
@@ -968,7 +991,7 @@
             }
             if (onProgress) onProgress(n, n, pixels);
 
-            return { pixels, labels, n, refSamples };
+            return { pixels, labels, n, refSamples, REF_PER_CLASS };
         }
 
         // ── Model definition & training ─────────────────────────────────────────────
@@ -1017,6 +1040,7 @@
                     dbgLog('IDB-Cache gefunden — Modell laden');
                     model = await tf.loadLayersModel(IDB_KEY);
                     dbgLog('Modell aus IDB geladen');
+                    showModelCards();
                     coachEl.textContent = t('ready');
                     drawCanvas.classList.remove('disabled');
                     return;
@@ -1099,40 +1123,25 @@
                 return;
             }
 
-            // ── PHASE 1 FERTIG — STOPP ────────────────────────────────────────────
+            // ── PHASE 1 FERTIG → direkt Training ─────────────────────────────────
             const { n } = mnistData;
             dbgLog(`Phase 1 fertig — ${n} Beispiele geladen`);
-
-            bar.style.width       = '100%';
-            epochInfo.className   = 'loaded';
-            epochInfo.textContent = 'Phase 2 — Daten bereit ✓';
-            CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
-                fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)', thousandsSep: true
-            });
-            coachEl.textContent = 'Daten geladen — Animation läuft …';
-            await new Promise(r => setTimeout(r, 1000));
-
-            // ── Phase 2: Alle Bilder als Thumbnails zeigen ────────────────────────
+            bar.style.transition = 'none';
+            bar.style.width = '100%';
+            await new Promise(r => requestAnimationFrame(r));
             document.getElementById('load-spinner').style.display = 'none';
-            epochInfo.className   = '';
-            epochInfo.textContent = '';
-            await startSequentialAnim(mnistData.pixels, mnistData.labels, mnistData.n);
 
-            // Brief pause so user sees "Phase 2 — ✓ alle … Bilder gezeigt"
-            await new Promise(r => setTimeout(r, 1000));
-
-            // ── Phase 3: Training ─────────────────────────────────────────────────
+            // ── Phase 2: Training ─────────────────────────────────────────────────
             const EPOCHS = 8;
             const { pixels, labels, n: nTrain } = mnistData;
-            const N_TRAIN = Math.floor(nTrain * 0.9);
+            const N = Math.min(trainSampleCount, nTrain);
             dbgLog('Phase 3 start — Training');
 
             model = buildModel();
 
-            const xs = tf.tensor4d(pixels.slice(0, N_TRAIN * 784), [N_TRAIN, 28, 28, 1]);
+            const xs = tf.tensor4d(pixels.slice(0, N * 784), [N, 28, 28, 1]);
             const ys = tf.oneHot(
-                tf.tensor1d(Int32Array.from(labels.slice(0, N_TRAIN)), 'int32'), 10
+                tf.tensor1d(Int32Array.from(labels.slice(0, N)), 'int32'), 10
             ).toFloat();
 
             bar.style.cssText = 'width:0%;background:#00d2ff;transition:width 0.5s ease;';
@@ -1144,17 +1153,17 @@
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
             });
-            startMnistAnim(pixels, labels, nTrain);
+            startMnistAnim(pixels, labels, N);
 
-            const N_ACTUAL = Math.floor(N_TRAIN * 0.9);
+            const N_ACTUAL = N;
             const batchesPerEpoch = Math.ceil(N_ACTUAL / 256);
-            const { refSamples } = mnistData;
+            const { refSamples, REF_PER_CLASS } = mnistData;
             let currentEpoch = 0;
             let epochStartTime = 0.0;
+            const accSum = new Array(10).fill(0);
             await model.fit(xs, ys, {
                 epochs: EPOCHS,
                 batchSize: 256,
-                validationSplit: 0.1,
                 callbacks: {
                     onEpochBegin: async (epoch) => {
                         currentEpoch = epoch;
@@ -1172,6 +1181,9 @@
                         CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
                             fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
                         });
+                        if ((batch + 1) % 25 === 0) {
+                            computeAndShowClassAcc(null);
+                        }
                         await tf.nextFrame();
                     },
                     onEpochEnd: async (epoch) => {
@@ -1179,25 +1191,17 @@
                         dbgLog(`Epoch ${epoch + 1}  ${ms.toFixed(3)} ms`);
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.round((epoch + 1) / EPOCHS * 100)}%`;
-                        // Bar-i = Konfidenz des Modells für Klasse i (je ein Referenzbild pro Ziffer)
-                        const classConf = tf.tidy(() => {
-                            const batch = tf.tensor4d(
-                                new Float32Array(refSamples.flatMap(s => Array.from(s))),
-                                [10, 28, 28, 1]
-                            );
-                            const out = model.predict(batch).arraySync();
-                            return out.map((probs, i) => probs[i]);
-                        });
+                        computeAndShowClassAcc(epoch);
                         for (let i = 0; i < 10; i++) {
-                            const v = classConf[i] * 100;
-                            const pct = v.toFixed(1);
+                            accSum[i] += lastClassAcc[i];
+                            const v = (accSum[i] / (epoch + 1)) * 100;
                             const color = barColor(v);
                             const b = document.getElementById('bar-' + i);
                             const p = document.getElementById('pct-' + i);
-                            b.style.width = pct + '%';
+                            b.style.width = v.toFixed(1) + '%';
                             b.classList.remove('top');
                             b.style.background = color;
-                            if (p) { p.textContent = pct + '%'; p.classList.remove('top'); p.style.color = color; }
+                            if (p) { p.textContent = v.toFixed(1) + '%'; p.classList.remove('top'); p.style.color = color; }
                         }
                         await tf.nextFrame();
                     }
@@ -1206,6 +1210,7 @@
 
             xs.dispose(); ys.dispose();
             stopMnistAnim();
+            stopStopwatch();
 
             try { await model.save(IDB_KEY); dbgLog('Modell in IDB gespeichert'); } catch (_) {}
 
@@ -1217,9 +1222,16 @@
             document.getElementById('btn-training-done').style.display = 'inline-block';
         }
 
+        function showModelCards() {
+            document.getElementById('result-cards-wrap').style.display = '';
+            document.getElementById('model-cards-wrap').style.display = '';
+        }
+
+
         function finishTraining() {
             document.getElementById('btn-training-done').style.display = 'none';
             const overlay = document.getElementById('train-overlay');
+            showModelCards();
             coachEl.textContent = t('ready');
             overlay.classList.remove('visible');
             drawCanvas.classList.remove('disabled');
@@ -1230,6 +1242,8 @@
                 await tf.io.removeModel(IDB_KEY);
             } catch (_) { /* wasn't cached */ }
             if (model) { model.dispose(); model = null; }
+            document.getElementById('result-cards-wrap').style.display = 'none';
+            document.getElementById('model-cards-wrap').style.display = 'none';
             clearDraw();
             coachEl.textContent = t('training');
             initDraw();
@@ -1239,14 +1253,15 @@
 
         function dbgLog(msg) {
             const t = Date.now() - dbgT0;
+            console.log(`+${t}ms  ${msg}`);
             const dbg = document.getElementById('debug-list');
+            if (!dbg) return;
             const placeholder = document.getElementById('debug-empty');
             if (placeholder) placeholder.remove();
             const line = document.createElement('div');
             line.style.cssText = 'color:#00d2ff;';
             line.textContent = msg;
             dbg.appendChild(line);
-            console.log(`+${t}ms  ${msg}`);
         }
         let dbgT0 = 0;
 
