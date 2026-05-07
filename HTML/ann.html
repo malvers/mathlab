@@ -15,6 +15,12 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        #input0-field, #input1-field { background-image: none !important; padding-right: 15px; text-align: right; font-size: 1rem; }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 </head>
 
@@ -114,9 +120,13 @@
         const _saved = localStorage.getItem('ann_layers');
         let LAYERS = _saved ? JSON.parse(_saved) : [2, 10, 10, 10, 1];
         const NODE_RADIUS = 14;
-        const LAYER_LABELS = ['Input', 'Hidden 1', 'Hidden 2', 'Hidden 3', 'Output'];
-        let INPUT_VALUES = [2.57, 4.72];
-
+        const _savedVals = localStorage.getItem('ann_inputs');
+        let INPUT_VALUES = _savedVals ? JSON.parse(_savedVals) : [2.57, 4.72];
+        function getLayerLabel(l) {
+            if (l === 0) return 'Input';
+            if (l === LAYERS.length - 1) return 'Output';
+            return 'Hidden ' + l;
+        }
         // --- normalization ---
         const INORM = 5;
         const ONORM = { add: 10, sub: 10, mul: 25, div: 10 };
@@ -215,13 +225,22 @@
             return lossVal;
         }
 
+        let stepsPerFrame = 10;
+
         function trainingLoop() {
             if (!isTraining) return;
-            const loss = trainStep();
-            trainEpoch++;
-            lossHistory.push(Math.log10(Math.max(loss, 1e-10)));
-            if (lossHistory.length > 300) lossHistory.shift();
-            draw();
+            try {
+                let loss = 0;
+                for (let i = 0; i < stepsPerFrame; i++) loss = trainStep();
+                trainEpoch += stepsPerFrame;
+                lossHistory.push(Math.log10(Math.max(loss, 1e-10)));
+                if (lossHistory.length > 300) lossHistory.shift();
+                draw();
+            } catch(e) {
+                console.error('trainingLoop:', e);
+                stopTraining();
+                return;
+            }
             rafId = requestAnimationFrame(trainingLoop);
         }
 
@@ -248,8 +267,37 @@
         ];
         let selectedOp = OPS[0];
 
-        // hit zones for canvas triangles
+        // hit zones for canvas triangles + layer buttons
         let triangleZones = [];
+        let layerBtnZones = [];
+
+        function addLayer() {
+            if (LAYERS.length - 2 >= 5) return;
+            LAYERS.splice(LAYERS.length - 1, 0, 5);
+            localStorage.setItem('ann_layers', JSON.stringify(LAYERS));
+            buildModel(); resetTraining(); draw();
+        }
+
+        function removeLayer() {
+            if (LAYERS.length - 2 <= 1) return;
+            LAYERS.splice(LAYERS.length - 2, 1);
+            localStorage.setItem('ann_layers', JSON.stringify(LAYERS));
+            buildModel(); resetTraining(); draw();
+        }
+
+        function drawRoundRect(x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h);
+            ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r);
+            ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+        }
 
         function drawTriangle(x, y, size, up) {
             ctx.beginPath();
@@ -283,14 +331,32 @@
                     return;
                 }
             }
+            for (const z of layerBtnZones) {
+                if (mx >= z.x - z.hw && mx <= z.x + z.hw && my >= z.y - z.hh && my <= z.y + z.hh) {
+                    z.action();
+                    return;
+                }
+            }
         });
 
         CyberUI.createCard('ui-container', 'Eingabe', `
-            <div id="input0-slider"></div>
-            <div id="input1-slider"></div>
+            <div style="margin-bottom:10px">
+                <div style="font-family:Orbitron,sans-serif;font-size:0.7rem;color:rgba(200,220,255,0.6);margin-bottom:5px">Zahl 1</div>
+                <input type="number" id="input0-field" class="cyber-select" value="${INPUT_VALUES[0]}" step="0.01">
+            </div>
+            <div>
+                <div style="font-family:Orbitron,sans-serif;font-size:0.7rem;color:rgba(200,220,255,0.6);margin-bottom:5px">Zahl 2</div>
+                <input type="number" id="input1-field" class="cyber-select" value="${INPUT_VALUES[1]}" step="0.01">
+            </div>
         `, 'var(--neon-blue)');
-        CyberUI.createSlider('input0-slider', 'Input 1', -10, 10, INPUT_VALUES[0], 0.01, (v) => { INPUT_VALUES[0] = v; draw(); }, 'var(--neon-blue)');
-        CyberUI.createSlider('input1-slider', 'Input 2', -10, 10, INPUT_VALUES[1], 0.01, (v) => { INPUT_VALUES[1] = v; draw(); }, 'var(--neon-blue)');
+        document.getElementById('input0-field').addEventListener('input', e => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) { INPUT_VALUES[0] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
+        });
+        document.getElementById('input1-field').addEventListener('input', e => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) { INPUT_VALUES[1] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
+        });
 
         CyberUI.createCard('ui-container', 'Operation', `<div id="op-drop"></div>`, 'var(--neon-blue)');
         CyberUI.createDropdown('op-drop', OPS, (id) => {
@@ -305,9 +371,11 @@
                 <button class="cyber-btn" onclick="buildModel();resetTraining();draw()">RESET</button>
             </div>
             <div id="lr-slider"></div>
+            <div id="spf-slider"></div>
             <div id="train-info" style="font-family:Orbitron,sans-serif;font-size:10px;color:rgba(200,220,255,0.6);margin-top:6px;"></div>
         `, 'var(--neon-pink)');
         CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; optimizer = tf.train.adam(v); }, 'var(--neon-pink)');
+        CyberUI.createSlider('spf-slider', 'Schritte/Frame', 1, 50, stepsPerFrame, 1, (v) => { stepsPerFrame = Math.round(v); }, 'var(--neon-pink)');
 
         function getNodePositions(w, h) {
             const positions = [];
@@ -452,6 +520,7 @@
 
             // layer labels + triangles for hidden layers
             triangleZones = [];
+            layerBtnZones = [];
             ctx.font = '600 18px Orbitron, sans-serif';
             ctx.textAlign = 'center';
             const labelY = 34 + h * 0.06;
@@ -479,7 +548,7 @@
                     ctx.font = '600 17px Orbitron, sans-serif';
                     ctx.fillStyle = layerColor;
                     ctx.textAlign = 'center';
-                    ctx.fillText(LAYER_LABELS[l], x, labelY);
+                    ctx.fillText(getLayerLabel(l), x, labelY);
                 }
 
                 if (isHidden) {
@@ -496,6 +565,33 @@
                     ctx.fill();
                     if (!atMin) triangleZones.push({ layer: l, dir: -1, x, y: triDown, hit: triSize + 4 });
                 }
+            }
+
+            // +/- Layer buttons at bottom center
+            {
+                const bW = 100, bH = 32, bGap = 10, bR = 6;
+                const bY = h - 18;
+                const canAdd = LAYERS.length - 2 < 5;
+                const canRemove = LAYERS.length - 2 > 1;
+                const plusX = w / 2 - bGap / 2 - bW / 2;
+                const minusX = w / 2 + bGap / 2 + bW / 2;
+
+                [[plusX, '+ LAYER', canAdd, addLayer], [minusX, '− LAYER', canRemove, removeLayer]].forEach(([bx, label, enabled, action]) => {
+                    const col = enabled ? '#00c8ff' : 'rgba(0,200,255,0.2)';
+                    drawRoundRect(bx - bW / 2, bY - bH / 2, bW, bH, bR);
+                    ctx.fillStyle = enabled ? 'rgba(0,200,255,0.08)' : 'rgba(0,0,0,0.1)';
+                    ctx.fill();
+                    ctx.strokeStyle = col;
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                    ctx.font = '700 20px Orbitron, sans-serif';
+                    ctx.fillStyle = col;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(label, bx, bY);
+                    ctx.textBaseline = 'alphabetic';
+                    if (enabled) layerBtnZones.push({ x: bx, y: bY, hw: bW / 2, hh: bH / 2, action });
+                });
             }
 
             // loss curve
@@ -551,9 +647,12 @@
             ol.style.gridTemplateColumns = 'auto auto';
             ol.style.columnGap = '0.6em';
             ol.style.rowGap = '0.15em';
-            ol.style.fontSize = '22px';
+            const fs = 22;
+            const rowH = fs * 2;
+            const rowGapPx = Math.round(fs * 0.15);
+            ol.style.fontSize = fs + 'px';
             ol.style.left = tx + 'px';
-            ol.style.top = (outPos.y - lineH * 2) + 'px';
+            ol.style.top = (outPos.y - (rowH + rowGapPx) - rowH / 2) + 'px';
             ol.innerHTML =
                 row('\\hat{y}', predRaw, false, '#ffcc00') +
                 row('y', targetRaw, false, '#cc66ff') +
@@ -566,9 +665,9 @@
         }
 
         window.addEventListener('resize', init);
-        let mouseLeft = false;
-        document.documentElement.addEventListener('mouseleave', () => { mouseLeft = true; });
-        document.documentElement.addEventListener('mouseenter', () => { if (mouseLeft) location.reload(); });
+        // let mouseLeft = false;
+        // document.documentElement.addEventListener('mouseleave', () => { mouseLeft = true; });
+        // document.documentElement.addEventListener('mouseenter', () => { if (mouseLeft) location.reload(); });
         document.fonts.ready.then(init);
     </script>
 </body>
