@@ -100,15 +100,37 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        #mnist-anim {
-            width: 280px !important;
-            height: 280px !important;
+        #mnist-anim-wrap {
             flex-shrink: 0;
-            cursor: default !important;
             border: 1px solid rgba(0, 210, 255, 0.3);
             border-radius: 8px;
             margin: 8px 0;
+            overflow: hidden;
+        }
+
+        #mnist-anim {
+            width: 280px !important;
+            height: 280px !important;
+            display: block;
+            cursor: default !important;
             image-rendering: pixelated;
+        }
+
+        #load-spinner { pointer-events: none; }
+
+        .squiri {
+            width: 80px;
+            height: 80px;
+            border-radius: 30px;
+            border: 4px solid transparent;
+            border-top-color: #00d2ff;
+            border-right-color: rgba(0,210,255,0.4);
+            animation: squiri-spin 1s cubic-bezier(0.6,0,0.4,1) infinite;
+            box-shadow: 0 0 20px rgba(0,210,255,0.3);
+        }
+
+        @keyframes squiri-spin {
+            to { transform: rotate(360deg); }
         }
 
         #mnist-anim-digit {
@@ -365,16 +387,20 @@
                 <div id="train-overlay">
                     <div id="train-label">KI LERNT ZAHLEN</div>
                     <div id="train-epoch-info">Durchlauf 0 / 8</div>
-                    <canvas id="mnist-anim" width="280" height="280"></canvas>
+                    <div id="mnist-anim-wrap" style="position:relative;width:280px;height:280px;">
+                        <canvas id="mnist-anim" width="280" height="280" style="width:280px;height:280px;"></canvas>
+                        <div id="load-spinner" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                            <div class="squiri"></div>
+                        </div>
+                    </div>
                     <div id="mnist-anim-digit"></div>
                     <div class="train-bar-bg">
                         <div id="train-bar"></div>
                     </div>
-                    <div id="train-seen-wrap" style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+                    <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;margin-top:8px;">
                         <div id="train-seen" class="cyber-number-widget"></div>
                         <span id="train-seen-label"
-                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;">Beispiele
-                            geladen</span>
+                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;">Beispiele geladen</span>
                     </div>
                 </div>
                 <div id="draw-hint"></div>
@@ -916,11 +942,12 @@
             epochInfo.className   = '';
             epochInfo.textContent = 'Phase 1 — Daten laden …';
             document.getElementById('mnist-anim-digit').textContent = '';
-            document.getElementById('mnist-anim').getContext('2d').clearRect(0, 0, 84, 84);
+            document.getElementById('mnist-anim').getContext('2d').clearRect(0, 0, 280, 280);
+            document.getElementById('load-spinner').style.display = 'flex';
             seenLabel.textContent = 'Beispiele geladen';
             seenLabel.style.color = 'rgba(255,255,255,0.35)';
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '13px', digitWidth: '9px', digitHeight: '18px',
+                fontSize: '11px', digitWidth: '7px', digitHeight: '13px',
                 color: 'rgba(255,255,255,0.35)'
             });
             drawCanvas.classList.add('disabled');
@@ -945,7 +972,7 @@
                         bar.style.width = pct + '%';
                         seenLabel.style.color = '#adff2f';
                         CyberUI.updateNumberWidget('train-seen', done, 0, 6, {
-                            fontSize: '13px', digitWidth: '9px', digitHeight: '18px',
+                            fontSize: '11px', digitWidth: '7px', digitHeight: '13px',
                             color: '#adff2f'
                         });
                     }
@@ -968,7 +995,7 @@
             epochInfo.className   = 'loaded';
             epochInfo.textContent = `Phase 2 — Daten bereit ✓  (${n.toLocaleString('de')} Beispiele)`;
             CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
-                fontSize: '13px', digitWidth: '9px', digitHeight: '18px', color: '#adff2f'
+                fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#adff2f'
             });
             document.getElementById('status-dot').className = 'status-dot ok';
             document.getElementById('model-status-text').textContent =
@@ -977,6 +1004,7 @@
             await new Promise(r => setTimeout(r, 1000));
 
             // ── Phase 2: Alle Bilder als Thumbnails zeigen ────────────────────────
+            document.getElementById('load-spinner').style.display = 'none';
             epochInfo.className   = '';
             epochInfo.textContent = '';
             await startSequentialAnim(mnistData.pixels, mnistData.labels, mnistData.n);
@@ -1001,10 +1029,16 @@
             epochInfo.className   = 'running';
             epochInfo.textContent = 'Phase 3 — Training startet …';
             coachEl.textContent   = 'Modell wird trainiert …';
+            seenLabel.textContent = 'Beispiele trainiert';
+            seenLabel.style.color = '#00d2ff';
+            CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
+                fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#00d2ff'
+            });
             startMnistAnim(pixels, labels, nTrain);
 
-            const batchesPerEpoch = Math.ceil(Math.floor(N_TRAIN * 0.9) / 128);
-            dbgLog(`Training: ${EPOCHS} Epochen × ~${batchesPerEpoch} Batches`);
+            const N_ACTUAL = Math.floor(N_TRAIN * 0.9);
+            const batchesPerEpoch = Math.ceil(N_ACTUAL / 128);
+            const { refSamples } = mnistData;
             let currentEpoch = 0;
             await model.fit(xs, ys, {
                 epochs: EPOCHS,
@@ -1016,23 +1050,41 @@
                         epochInfo.textContent = `Phase 3 — Trainingsdurchlauf ${epoch + 1} von ${EPOCHS}`;
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.round(epoch / EPOCHS * 100)}%`;
-                        dbgLog(`Epoche ${epoch + 1}/${EPOCHS} startet`);
                         await tf.nextFrame();
                     },
                     onBatchEnd: async (batch, logs) => {
                         const epochFrac = (currentEpoch + (batch + 1) / batchesPerEpoch) / EPOCHS;
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
-                        if (batch % 10 === 0)
-                            dbgLog(`  E${currentEpoch + 1} B${batch} — loss: ${(logs.loss ?? 0).toFixed(4)}`);
+                        const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 128, (currentEpoch + 1) * N_ACTUAL);
+                        CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
+                            fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#00d2ff'
+                        });
                         await tf.nextFrame();
                     },
-                    onEpochEnd: async (epoch, logs) => {
-                        const acc = (logs.acc ?? logs.categoricalAccuracy ?? 0);
-                        const valAcc = (logs.val_acc ?? logs.val_categoricalAccuracy ?? 0);
+                    onEpochEnd: async (epoch) => {
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.round((epoch + 1) / EPOCHS * 100)}%`;
-                        dbgLog(`Epoche ${epoch + 1}/${EPOCHS} fertig — acc: ${acc.toFixed(4)}, val_acc: ${valAcc.toFixed(4)}`);
+                        // Bar-i = Konfidenz des Modells für Klasse i (je ein Referenzbild pro Ziffer)
+                        const classConf = tf.tidy(() => {
+                            const batch = tf.tensor4d(
+                                new Float32Array(refSamples.flatMap(s => Array.from(s))),
+                                [10, 28, 28, 1]
+                            );
+                            const out = model.predict(batch).arraySync();
+                            return out.map((probs, i) => probs[i]);
+                        });
+                        for (let i = 0; i < 10; i++) {
+                            const v = classConf[i] * 100;
+                            const pct = v.toFixed(1);
+                            const color = v >= 99 ? '#adff2f' : v < 10 ? '#ff4444' : 'rgba(0,210,255,0.55)';
+                            const b = document.getElementById('bar-' + i);
+                            const p = document.getElementById('pct-' + i);
+                            b.style.width = pct + '%';
+                            b.classList.remove('top');
+                            b.style.background = color;
+                            if (p) { p.textContent = pct + '%'; p.classList.remove('top'); p.style.color = color; }
+                        }
                         await tf.nextFrame();
                     }
                 }
