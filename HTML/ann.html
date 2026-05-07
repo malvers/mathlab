@@ -107,10 +107,223 @@
             ctx.scale(dpr, dpr);
         }
 
-        const LAYERS = [2, 10, 10, 10, 1];
+        const _saved = localStorage.getItem('ann_layers');
+        let LAYERS = _saved ? JSON.parse(_saved) : [2, 10, 10, 10, 1];
         const NODE_RADIUS = 14;
         const LAYER_LABELS = ['Input', 'Hidden 1', 'Hidden 2', 'Hidden 3', 'Output'];
-        const INPUT_VALUES = [2.57, 4.72];
+        let INPUT_VALUES = [2.57, 4.72];
+
+        // --- network weights ---
+        function seededRng(seed) {
+            let s = seed >>> 0;
+            return () => {
+                s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
+                s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
+                s ^= s >>> 16;
+                return ((s >>> 0) / 0xffffffff);
+            };
+        }
+
+        let weights = [], biases = [];
+        function rebuildWeights() {
+            const rng = seededRng(1337);
+            weights = []; biases = [];
+            for (let l = 0; l < LAYERS.length - 1; l++) {
+                const rows = LAYERS[l + 1], cols = LAYERS[l];
+                const scale = Math.sqrt(1 / cols);
+                weights.push(Array.from({ length: rows }, () =>
+                    Array.from({ length: cols }, () => (rng() * 2 - 1) * scale)));
+                biases.push(Array.from({ length: rows }, () => (rng() * 2 - 1) * 0.1));
+            }
+        }
+        rebuildWeights();
+
+        const actFn  = x => Math.tanh(x);
+        const actFnD = x => { const t = Math.tanh(x); return 1 - t * t; };
+
+        // normalization
+        const INORM = 5;
+        const ONORM = { add: 10, sub: 10, mul: 25, div: 10 };
+        const normIn = inputs => inputs.map(x => x / INORM);
+        const denormOut = y => y * (ONORM[selectedOp.id] || 10);
+
+        function forwardFull(inputs) {
+            const zs = [], acts = [inputs];
+            let cur = inputs;
+            for (let l = 0; l < weights.length; l++) {
+                const z = weights[l].map((row, r) => row.reduce((s, w, c) => s + w * cur[c], biases[l][r]));
+                zs.push(z);
+                const a = l < weights.length - 1 ? z.map(actFn) : z;
+                acts.push(a); cur = a;
+            }
+            return { zs, acts };
+        }
+
+        function forwardPass(inputs) { return forwardFull(inputs).acts; }
+
+        // --- training ---
+        let isTraining = false;
+        let trainEpoch = 0;
+        let lossHistory = [];
+        let learningRate = 0.01;
+        let rafId = null;
+
+        function resetTraining() {
+            stopTraining();
+            trainEpoch = 0;
+            lossHistory = [];
+        }
+
+        function computeGradients(inputs, target) {
+            const L = weights.length;
+            const { zs, acts } = forwardFull(inputs);
+            const dW = weights.map(W => W.map(row => new Float64Array(row.length)));
+            const dB = biases.map(b => new Float64Array(b.length));
+            let delta = [2 * (acts[L][0] - target)];
+            for (let l = L - 1; l >= 0; l--) {
+                for (let r = 0; r < LAYERS[l + 1]; r++) {
+                    dB[l][r] = delta[r];
+                    for (let c = 0; c < LAYERS[l]; c++) dW[l][r][c] = delta[r] * acts[l][c];
+                }
+                if (l > 0) {
+                    delta = Array.from({ length: LAYERS[l] }, (_, c) => {
+                        let sum = 0;
+                        for (let r = 0; r < LAYERS[l + 1]; r++) sum += weights[l][r][c] * delta[r];
+                        return sum * actFnD(zs[l - 1][c]);
+                    });
+                }
+            }
+            return { dW, dB, loss: (acts[L][0] - target) ** 2 };
+        }
+
+        function trainStep() {
+            const BS = 32;
+            const dWs = weights.map(W => W.map(row => new Float64Array(row.length)));
+            const dBs = biases.map(b => new Float64Array(b.length));
+            let totalLoss = 0, count = 0;
+            while (count < BS) {
+                const x1 = (Math.random() * 10) - 5;
+                const x2 = (Math.random() * 10) - 5;
+                if (selectedOp.id === 'div' && Math.abs(x2) < 0.5) continue;
+                const t = selectedOp.id === 'add' ? (x1+x2)/ONORM.add
+                        : selectedOp.id === 'sub' ? (x1-x2)/ONORM.sub
+                        : selectedOp.id === 'mul' ? (x1*x2)/ONORM.mul
+                        : Math.max(-1, Math.min(1, x1/x2/ONORM.div));
+                const { dW, dB, loss } = computeGradients(normIn([x1, x2]), t);
+                totalLoss += loss;
+                for (let l = 0; l < weights.length; l++) {
+                    for (let r = 0; r < weights[l].length; r++) {
+                        for (let c = 0; c < weights[l][r].length; c++) dWs[l][r][c] += dW[l][r][c];
+                        dBs[l][r] += dB[l][r];
+                    }
+                }
+                count++;
+            }
+            const clip = 5.0;
+            for (let l = 0; l < weights.length; l++) {
+                for (let r = 0; r < weights[l].length; r++) {
+                    for (let c = 0; c < weights[l][r].length; c++) {
+                        const g = Math.max(-clip, Math.min(clip, dWs[l][r][c] / BS));
+                        weights[l][r][c] -= learningRate * g;
+                    }
+                    const gb = Math.max(-clip, Math.min(clip, dBs[l][r] / BS));
+                    biases[l][r] -= learningRate * gb;
+                }
+            }
+            return totalLoss / BS;
+        }
+
+        function trainingLoop() {
+            if (!isTraining) return;
+            const loss = trainStep();
+            trainEpoch++;
+            lossHistory.push(Math.log10(Math.max(loss, 1e-10)));
+            if (lossHistory.length > 300) lossHistory.shift();
+            draw();
+            rafId = requestAnimationFrame(trainingLoop);
+        }
+
+        function startTraining() {
+            if (isTraining) return;
+            isTraining = true; trainingLoop();
+            document.getElementById('train-btn').textContent = 'STOP';
+        }
+
+        function stopTraining() {
+            isTraining = false;
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            const btn = document.getElementById('train-btn');
+            if (btn) btn.textContent = 'TRAIN';
+        }
+
+        const OPS = [
+            { id: 'add', label: '+ Addition',      sym: '+' },
+            { id: 'sub', label: '− Subtraktion',   sym: '−' },
+            { id: 'mul', label: '× Multiplikation',sym: '×' },
+            { id: 'div', label: '÷ Division',       sym: '÷' },
+        ];
+        let selectedOp = OPS[0];
+
+        // hit zones for canvas triangles
+        let triangleZones = [];
+
+        function drawTriangle(x, y, size, up) {
+            ctx.beginPath();
+            if (up) {
+                ctx.moveTo(x, y - size);
+                ctx.lineTo(x + size, y + size * 0.6);
+                ctx.lineTo(x - size, y + size * 0.6);
+            } else {
+                ctx.moveTo(x, y + size);
+                ctx.lineTo(x + size, y - size * 0.6);
+                ctx.lineTo(x - size, y - size * 0.6);
+            }
+            ctx.closePath();
+        }
+
+        function changeHidden(idx, delta) {
+            LAYERS[idx] = Math.max(1, Math.min(20, LAYERS[idx] + delta));
+            localStorage.setItem('ann_layers', JSON.stringify(LAYERS));
+            rebuildWeights();
+            resetTraining();
+            draw();
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            for (const z of triangleZones) {
+                if (Math.abs(mx - z.x) < z.hit && Math.abs(my - z.y) < z.hit) {
+                    changeHidden(z.layer, z.dir);
+                    return;
+                }
+            }
+        });
+
+        CyberUI.createCard('ui-container', 'Eingabe', `
+            <div id="input0-slider"></div>
+            <div id="input1-slider"></div>
+        `, 'var(--neon-blue)');
+        CyberUI.createSlider('input0-slider', 'Input 1', -10, 10, INPUT_VALUES[0], 0.01, (v) => { INPUT_VALUES[0] = v; draw(); }, 'var(--neon-blue)');
+        CyberUI.createSlider('input1-slider', 'Input 2', -10, 10, INPUT_VALUES[1], 0.01, (v) => { INPUT_VALUES[1] = v; draw(); }, 'var(--neon-blue)');
+
+        CyberUI.createCard('ui-container', 'Operation', `<div id="op-drop"></div>`, 'var(--neon-blue)');
+        CyberUI.createDropdown('op-drop', OPS, (id) => {
+            selectedOp = OPS.find(o => o.id === id);
+            resetTraining();
+            draw();
+        }, selectedOp.id);
+
+        CyberUI.createCard('ui-container', 'Training', `
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <button id="train-btn" class="cyber-btn" style="flex:1" onclick="isTraining ? stopTraining() : startTraining()">TRAIN</button>
+                <button class="cyber-btn" onclick="rebuildWeights();resetTraining();draw()">RESET</button>
+            </div>
+            <div id="lr-slider"></div>
+            <div id="train-info" style="font-family:Orbitron,sans-serif;font-size:10px;color:rgba(200,220,255,0.6);margin-top:6px;"></div>
+        `, 'var(--neon-pink)');
+        CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; }, 'var(--neon-pink)');
 
         function getNodePositions(w, h) {
             const positions = [];
@@ -142,6 +355,9 @@
 
             const positions = getNodePositions(w, h);
 
+            // forward pass
+            const activations = forwardPass(normIn(INPUT_VALUES));
+
             // draw connections
             for (let l = 0; l < LAYERS.length - 1; l++) {
                 for (const src of positions[l]) {
@@ -160,19 +376,26 @@
             for (let l = 0; l < LAYERS.length; l++) {
                 const isInput = l === 0;
                 const isOutput = l === LAYERS.length - 1;
-                for (const { x, y } of positions[l]) {
+                const layerActs = activations[l];
+                const actMin = Math.min(...layerActs);
+                const actMax = Math.max(...layerActs);
+                const actRange = actMax - actMin || 1;
+
+                for (let i = 0; i < positions[l].length; i++) {
+                    const { x, y } = positions[l][i];
+                    const t = (layerActs[i] - actMin) / actRange;
+
+                    let r, g, b;
+                    if (isInput)       { r = 0;   g = 200; b = 255; }
+                    else if (isOutput) { r = 255; g = 100; b = 200; }
+                    else               { r = 0;   g = 255; b = 180; }
+
+                    const alpha = 0.15 + t * 0.7;
+
                     // glow
                     const grd = ctx.createRadialGradient(x, y, 2, x, y, NODE_RADIUS * 2);
-                    if (isInput) {
-                        grd.addColorStop(0, 'rgba(0,200,255,0.3)');
-                        grd.addColorStop(1, 'rgba(0,200,255,0)');
-                    } else if (isOutput) {
-                        grd.addColorStop(0, 'rgba(255,100,200,0.3)');
-                        grd.addColorStop(1, 'rgba(255,100,200,0)');
-                    } else {
-                        grd.addColorStop(0, 'rgba(0,255,180,0.25)');
-                        grd.addColorStop(1, 'rgba(0,255,180,0)');
-                    }
+                    grd.addColorStop(0, `rgba(${r},${g},${b},${(0.2 + t * 0.5).toFixed(2)})`);
+                    grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
                     ctx.beginPath();
                     ctx.arc(x, y, NODE_RADIUS * 2, 0, Math.PI * 2);
                     ctx.fillStyle = grd;
@@ -181,20 +404,36 @@
                     // circle
                     ctx.beginPath();
                     ctx.arc(x, y, NODE_RADIUS, 0, Math.PI * 2);
-                    if (isInput) {
-                        ctx.strokeStyle = '#00c8ff';
-                        ctx.fillStyle = 'rgba(0,200,255,0.15)';
-                    } else if (isOutput) {
-                        ctx.strokeStyle = '#ff64c8';
-                        ctx.fillStyle = 'rgba(255,100,200,0.15)';
-                    } else {
-                        ctx.strokeStyle = '#00ffb4';
-                        ctx.fillStyle = 'rgba(0,255,180,0.1)';
-                    }
+                    ctx.strokeStyle = `rgba(${r},${g},${b},1)`;
+                    ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
                     ctx.lineWidth = 1.5;
                     ctx.fill();
                     ctx.stroke();
                 }
+            }
+
+            // operator symbol between input nodes
+            if (positions[0].length === 2) {
+                const p0 = positions[0][0];
+                const p1 = positions[0][1];
+                const textX = p0.x - NODE_RADIUS - 18;
+                const oy = (p0.y + p1.y) / 2;
+                ctx.font = '700 26px Orbitron, sans-serif';
+                const symW = ctx.measureText(selectedOp.sym).width;
+                const cx = textX - symW / 2;
+                const r = 20;
+                ctx.beginPath();
+                ctx.arc(cx, oy, r, 0, Math.PI * 2);
+                ctx.strokeStyle = '#00c8ff';
+                ctx.lineWidth = 1.5;
+                ctx.fillStyle = 'rgba(0,200,255,0.1)';
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#00c8ff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(selectedOp.sym, cx, oy);
+                ctx.textBaseline = 'alphabetic';
             }
 
             // input values
@@ -206,18 +445,126 @@
                 ctx.fillText(INPUT_VALUES[i].toFixed(2), x - NODE_RADIUS - 18, y + 5);
             }
 
-            // layer labels
+            // layer labels + triangles for hidden layers
+            triangleZones = [];
             ctx.font = '600 16px Orbitron, sans-serif';
             ctx.textAlign = 'center';
+            const labelY = 34 + h * 0.06;
+            const countY = 68 + h * 0.06;
+            const triSize = 10;
+            const triUp = labelY - 22;
+            const triDown = labelY + 12;
+
             for (let l = 0; l < LAYERS.length; l++) {
                 const x = positions[l][0].x;
                 const isInput = l === 0;
                 const isOutput = l === LAYERS.length - 1;
-                ctx.fillStyle = isInput ? '#00c8ff' : isOutput ? '#ff64c8' : '#00ffb4';
-                ctx.fillText(LAYER_LABELS[l], x, 30 + h * 0.06);
-                ctx.fillStyle = 'rgba(200,220,255,0.45)';
-                ctx.fillText(`(${LAYERS[l]})`, x, 44 + h * 0.06);
+                const isHidden = !isInput && !isOutput;
+
+                if (isHidden) {
+                    ctx.font = '600 13px Orbitron, sans-serif';
+                    ctx.fillStyle = '#00ffb4';
+                    const labelW = ctx.measureText(LAYER_LABELS[l]).width;
+                    ctx.font = '700 13px Orbitron, sans-serif';
+                    const numW = ctx.measureText(`(${LAYERS[l]})`).width;
+                    const gap = 8;
+                    const totalW = labelW + gap + numW;
+                    const startX = x - totalW / 2;
+                    ctx.font = '600 13px Orbitron, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#00ffb4';
+                    ctx.fillText(LAYER_LABELS[l], startX, labelY);
+                    ctx.font = '700 13px Orbitron, sans-serif';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(`(${LAYERS[l]})`, startX + labelW + gap, labelY);
+                    ctx.textAlign = 'center';
+                } else {
+                    const color = isInput ? '#00c8ff' : '#ff64c8';
+                    ctx.font = '600 13px Orbitron, sans-serif';
+                    ctx.fillStyle = color;
+                    const lw = ctx.measureText(LAYER_LABELS[l]).width;
+                    const nw = ctx.measureText(`(${LAYERS[l]})`).width;
+                    const gap = 8;
+                    const total = lw + gap + nw;
+                    const sx = x - total / 2;
+                    ctx.textAlign = 'left';
+                    ctx.fillText(LAYER_LABELS[l], sx, labelY);
+                    ctx.fillStyle = 'rgba(200,220,255,0.45)';
+                    ctx.fillText(`(${LAYERS[l]})`, sx + lw + gap, labelY);
+                    ctx.textAlign = 'center';
+                }
+
+                if (isHidden) {
+                    const atMax = LAYERS[l] >= 20;
+                    const atMin = LAYERS[l] <= 1;
+
+                    drawTriangle(x, triUp, triSize, true);
+                    ctx.fillStyle = atMax ? 'rgba(0,255,180,0.2)' : '#00ffb4';
+                    ctx.fill();
+                    if (!atMax) triangleZones.push({ layer: l, dir: +1, x, y: triUp, hit: triSize + 4 });
+
+                    drawTriangle(x, triDown, triSize, false);
+                    ctx.fillStyle = atMin ? 'rgba(0,255,180,0.2)' : '#00ffb4';
+                    ctx.fill();
+                    if (!atMin) triangleZones.push({ layer: l, dir: -1, x, y: triDown, hit: triSize + 4 });
+                }
             }
+
+            // loss curve
+            if (lossHistory.length > 1) {
+                const cw = 220, ch = 70, cx = w - cw - 20, cy = h - ch - 20;
+                ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                ctx.strokeStyle = 'rgba(255,100,200,0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.rect(cx, cy, cw, ch); ctx.fill(); ctx.stroke();
+                ctx.font = '9px Orbitron, sans-serif';
+                ctx.fillStyle = 'rgba(255,100,200,0.6)';
+                ctx.textAlign = 'left';
+                ctx.fillText('LOG LOSS', cx + 6, cy + 13);
+                ctx.fillText(`Epoch ${trainEpoch}`, cx + cw - 70, cy + 13);
+                const minL = Math.min(...lossHistory), maxL = Math.max(...lossHistory);
+                const rng = maxL - minL || 1;
+                ctx.beginPath();
+                ctx.strokeStyle = '#ff64c8';
+                ctx.lineWidth = 1.5;
+                lossHistory.forEach((v, i) => {
+                    const px = cx + (i / (lossHistory.length - 1)) * cw;
+                    const py = cy + ch - ((v - minL) / rng) * (ch - 20) - 6;
+                    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                });
+                ctx.stroke();
+                const info = document.getElementById('train-info');
+                if (info) info.textContent = `Epoch ${trainEpoch} · Loss ${Math.pow(10, lossHistory[lossHistory.length-1]).toExponential(2)}`;
+            }
+
+            // output value + target + delta
+            const outVal = activations[activations.length - 1][0];
+            const outPos = positions[positions.length - 1][0];
+            const predRaw = denormOut(outVal);
+            const [v1, v2] = INPUT_VALUES;
+            const targetRaw = selectedOp.id === 'add' ? v1 + v2
+                            : selectedOp.id === 'sub' ? v1 - v2
+                            : selectedOp.id === 'mul' ? v1 * v2
+                            : v2 !== 0 ? v1 / v2 : 0;
+            const delta = predRaw - targetRaw;
+            const tx = outPos.x + NODE_RADIUS + 18;
+            const lineH = 18;
+
+            ctx.font = '700 15px Orbitron, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillStyle = '#ff64c8';
+            ctx.fillText(`ŷ  ${predRaw.toFixed(3)}`, tx, outPos.y - lineH);
+
+            ctx.fillStyle = 'rgba(200,220,255,0.7)';
+            ctx.fillText(`y  ${targetRaw.toFixed(3)}`, tx, outPos.y);
+
+            const absDelta = Math.abs(delta);
+            ctx.fillStyle = absDelta < 0.05 ? '#00ffb4' : absDelta < 0.5 ? '#ffcc00' : '#ff4466';
+            ctx.fillText(`Δ  ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}`, tx, outPos.y + lineH);
+
+            ctx.textBaseline = 'alphabetic';
         }
 
         function init() {
@@ -226,6 +573,9 @@
         }
 
         window.addEventListener('resize', init);
+        let mouseLeft = false;
+        document.documentElement.addEventListener('mouseleave', () => { mouseLeft = true; });
+        document.documentElement.addEventListener('mouseenter', () => { if (mouseLeft) location.reload(); });
         document.fonts.ready.then(init);
     </script>
 </body>
