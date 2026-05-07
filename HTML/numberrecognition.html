@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOC ALVERS MATHE-LABORE | KI Zahlenerkennung</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -15,7 +16,9 @@
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
     <style>
-        :root { --side-width: 340px; }
+        :root {
+            --side-width: 340px;
+        }
 
         /* ── Drawing canvas ── */
         #draw-canvas {
@@ -28,7 +31,11 @@
             touch-action: none;
             max-width: 100%;
         }
-        #draw-canvas.disabled { opacity: 0.35; cursor: not-allowed; }
+
+        #draw-canvas.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
 
         #draw-wrap {
             position: absolute;
@@ -41,6 +48,7 @@
             padding: 80px 20px 20px;
             box-sizing: border-box;
         }
+
         #draw-hint {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.35);
@@ -62,46 +70,66 @@
             padding: 24px;
             box-sizing: border-box;
         }
-        #train-overlay.visible { display: flex; }
+
+        #train-overlay.visible {
+            display: flex;
+        }
+
         #train-label {
             font-family: 'Orbitron', sans-serif;
             font-size: 26px;
             font-weight: 700;
             color: var(--neon-blue, #00d2ff);
             letter-spacing: 0.1em;
-            text-shadow: 0 0 30px rgba(0,210,255,0.4);
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
         }
+
         #train-epoch-info {
             font-family: 'Orbitron', sans-serif;
             font-size: 13px;
-            color: rgba(255,255,255,0.4);
+            color: var(--neon-blue, #00d2ff);
             letter-spacing: 0.06em;
+            transition: color 0.4s ease;
         }
+
+        #train-epoch-info.loaded {
+            color: #adff2f;
+        }
+
+        #train-epoch-info.running {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
         #mnist-anim {
-            image-rendering: pixelated;
-            width: 196px;
-            height: 196px;
-            border: 2px solid rgba(0,210,255,0.25);
+            width: 280px !important;
+            height: 280px !important;
+            flex-shrink: 0;
+            cursor: default !important;
+            border: 1px solid rgba(0, 210, 255, 0.3);
             border-radius: 8px;
-            margin: 4px 0;
+            margin: 8px 0;
+            image-rendering: pixelated;
         }
+
         #mnist-anim-digit {
             font-family: 'Orbitron', sans-serif;
             font-size: 36px;
             font-weight: 700;
             color: #adff2f;
-            text-shadow: 0 0 20px rgba(173,255,47,0.5);
+            text-shadow: 0 0 20px rgba(173, 255, 47, 0.5);
             min-height: 44px;
         }
+
         .train-bar-bg {
             width: 100%;
             max-width: 240px;
             height: 4px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 3px;
             overflow: hidden;
             margin-top: 4px;
         }
+
         #train-bar {
             height: 100%;
             width: 0%;
@@ -122,7 +150,12 @@
             min-height: 90px;
             transition: color 0.15s;
         }
-        #result-digit.dim { color: rgba(255,255,255,0.18); text-shadow: none; }
+
+        #result-digit.dim {
+            color: rgba(255, 255, 255, 0.18);
+            text-shadow: none;
+        }
+
         #result-conf {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
@@ -138,6 +171,7 @@
             gap: 7px;
             margin-bottom: 5px;
         }
+
         .conf-label {
             font-family: 'Orbitron', sans-serif;
             font-size: 11px;
@@ -146,13 +180,15 @@
             text-align: right;
             flex-shrink: 0;
         }
+
         .conf-bar-bg {
             flex: 1;
             height: 7px;
-            background: rgba(255,255,255,0.07);
+            background: rgba(255, 255, 255, 0.07);
             border-radius: 4px;
             overflow: hidden;
         }
+
         .conf-bar-fill {
             height: 100%;
             width: 0%;
@@ -160,15 +196,22 @@
             background: rgba(0, 210, 255, 0.55);
             transition: width 0.15s ease, background 0.15s;
         }
-        .conf-bar-fill.top { background: #adff2f; }
+
+        .conf-bar-fill.top {
+            background: #adff2f;
+        }
+
         .conf-pct {
             font-size: 10px;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255, 255, 255, 0.35);
             width: 36px;
             text-align: right;
             flex-shrink: 0;
         }
-        .conf-pct.top { color: #adff2f; }
+
+        .conf-pct.top {
+            color: #adff2f;
+        }
 
         /* ── 28×28 preview ── */
         #preview-canvas {
@@ -180,20 +223,117 @@
         }
 
         /* ── Status ── */
+        .instrument-card.collapsible .toggle-icon {
+            font-size: 1rem !important;
+            line-height: 1 !important;
+        }
+
         .status-dot {
             display: inline-block;
-            width: 8px; height: 8px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             margin-right: 6px;
             vertical-align: middle;
         }
-        .status-dot.ok   { background: #adff2f; box-shadow: 0 0 6px rgba(173,255,47,0.5); }
-        .status-dot.err  { background: #ff4444; }
-        .status-dot.spin { background: var(--neon-blue, #00d2ff); animation: blink 0.9s ease-in-out infinite; }
-        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
-        #model-status-text { font-size: 11px; color: rgba(255,255,255,0.5); vertical-align: middle; }
-        #arch-text { font-size: 9px; color: rgba(255,255,255,0.22); margin-top: 6px; line-height: 1.5; }
+
+        .status-dot.ok {
+            background: #adff2f;
+            box-shadow: 0 0 6px rgba(173, 255, 47, 0.5);
+        }
+
+        .status-dot.err {
+            background: #ff4444;
+        }
+
+        .status-dot.spin {
+            background: var(--neon-blue, #00d2ff);
+            animation: blink 0.9s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.25;
+            }
+        }
+
+        #model-status-text {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            vertical-align: middle;
+        }
+
+        #arch-text {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.22);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* ── Start screen ── */
+        #start-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            background: rgba(10, 15, 30, 0.92);
+            border-radius: 10px;
+        }
+
+        #start-overlay.hidden {
+            display: none;
+        }
+
+        #start-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--neon-blue, #00d2ff);
+            letter-spacing: 0.1em;
+            text-align: center;
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.35);
+        }
+
+        #start-sub {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.35);
+            text-align: center;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        #btn-start {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            padding: 18px 56px;
+            background: transparent;
+            border: 2px solid var(--neon-blue, #00d2ff);
+            color: var(--neon-blue, #00d2ff);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.1);
+        }
+
+        #btn-start:hover {
+            background: var(--neon-blue, #00d2ff);
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.5);
+        }
     </style>
 </head>
 
@@ -223,13 +363,26 @@
             <div id="draw-wrap">
                 <canvas id="draw-canvas" width="280" height="280"></canvas>
                 <div id="train-overlay">
-                    <div id="train-label">ZAHLEN LERNEN</div>
+                    <div id="train-label">KI LERNT ZAHLEN</div>
                     <div id="train-epoch-info">Durchlauf 0 / 8</div>
-                    <canvas id="mnist-anim" width="84" height="84"></canvas>
-                    <div id="mnist-anim-digit">—</div>
-                    <div class="train-bar-bg"><div id="train-bar"></div></div>
+                    <canvas id="mnist-anim" width="280" height="280"></canvas>
+                    <div id="mnist-anim-digit"></div>
+                    <div class="train-bar-bg">
+                        <div id="train-bar"></div>
+                    </div>
+                    <div id="train-seen-wrap" style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+                        <div id="train-seen" class="cyber-number-widget"></div>
+                        <span id="train-seen-label"
+                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;">Beispiele
+                            geladen</span>
+                    </div>
                 </div>
                 <div id="draw-hint"></div>
+                <div id="start-overlay">
+                    <div id="start-title">KI ZAHLENERKENNUNG</div>
+                    <div id="start-sub">Die KI lernt Ziffern aus 50.000 echten Handschriften — direkt im Browser.</div>
+                    <button id="btn-start" onclick="startLab()">START</button>
+                </div>
             </div>
             <canvas id="canvas" style="display:none"></canvas>
         </div>
@@ -251,527 +404,708 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
-    // ── Local translations ──────────────────────────────────────────────────────
-    const LAB_T = {
-        de: {
-            lab_title:    'KI Zahlenerkennung',
-            card_result:  'Erkannte Ziffer',
-            card_conf:    'Konfidenz-Analyse',
-            card_preview: 'Modell-Eingang (28×28)',
-            card_model:   'Modell',
-            clear:        'LÖSCHEN',
-            draw_hint:    'Zeichne eine Ziffer (0–9) — Maus oder Finger',
-            nothing:      'Noch nichts gezeichnet',
-            training:     'Modell wird trainiert …',
-            ready:        'Zeichne eine Ziffer — Vorhersage in Echtzeit',
-            predicted:    'Erkannt',
-            conf:         'Konfidenz',
-            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrainiert auf 10 000 echten MNIST-Handschriften',
-        },
-        en: {
-            lab_title:    'AI Number Recognition',
-            card_result:  'Predicted Digit',
-            card_conf:    'Confidence Analysis',
-            card_preview: 'Model Input (28×28)',
-            card_model:   'Model',
-            clear:        'CLEAR',
-            draw_hint:    'Draw a digit (0–9) — mouse or finger',
-            nothing:      'Nothing drawn yet',
-            training:     'Training model …',
-            ready:        'Draw a digit — real-time prediction',
-            predicted:    'Predicted',
-            conf:         'Confidence',
-            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrained on 10 000 real MNIST handwriting samples',
-        },
-        fr: {
-            lab_title:    'Reconnaissance de Chiffres IA',
-            card_result:  'Chiffre Reconnu',
-            card_conf:    'Analyse de Confiance',
-            card_preview: 'Entrée du Modèle (28×28)',
-            card_model:   'Modèle',
-            clear:        'EFFACER',
-            draw_hint:    'Dessine un chiffre (0–9) — souris ou doigt',
-            nothing:      'Rien dessiné',
-            training:     'Entraînement du modèle …',
-            ready:        'Dessine un chiffre — prédiction en temps réel',
-            predicted:    'Prédit',
-            conf:         'Confiance',
-            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nEntraîné sur 10 000 échantillons MNIST réels',
-        },
-        nl: {
-            lab_title:    'AI Cijferherkenning',
-            card_result:  'Herkend Cijfer',
-            card_conf:    'Vertrouwensanalyse',
-            card_preview: 'Model-Ingang (28×28)',
-            card_model:   'Model',
-            clear:        'WISSEN',
-            draw_hint:    'Teken een cijfer (0–9) — muis of vinger',
-            nothing:      'Nog niets getekend',
-            training:     'Model trainen …',
-            ready:        'Teken een cijfer — real-time voorspelling',
-            predicted:    'Voorspelling',
-            conf:         'Vertrouwen',
-            arch:         'CNN · 2× Conv2D · Dense 128 · Softmax 10\nGetraind op 10 000 echte MNIST-handschriften',
-        },
-    };
+        // ── Local translations ──────────────────────────────────────────────────────
+        const LAB_T = {
+            de: {
+                lab_title: 'KI Zahlenerkennung',
+                card_result: 'Erkannte Ziffer',
+                card_conf: 'Konfidenz-Analyse',
+                card_preview: 'Modell-Eingang (28×28)',
+                card_model: 'Modell',
+                clear: 'LÖSCHEN',
+                draw_hint: 'Zeichne eine Ziffer (0–9) — Maus oder Finger',
+                nothing: 'Noch nichts gezeichnet',
+                training: 'Modell wird trainiert …',
+                ready: 'Zeichne eine Ziffer — Vorhersage in Echtzeit',
+                predicted: 'Erkannt',
+                conf: 'Konfidenz',
+                arch: 'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrainiert auf 10 000 echten MNIST-Handschriften',
+            },
+            en: {
+                lab_title: 'AI Number Recognition',
+                card_result: 'Predicted Digit',
+                card_conf: 'Confidence Analysis',
+                card_preview: 'Model Input (28×28)',
+                card_model: 'Model',
+                clear: 'CLEAR',
+                draw_hint: 'Draw a digit (0–9) — mouse or finger',
+                nothing: 'Nothing drawn yet',
+                training: 'Training model …',
+                ready: 'Draw a digit — real-time prediction',
+                predicted: 'Predicted',
+                conf: 'Confidence',
+                arch: 'CNN · 2× Conv2D · Dense 128 · Softmax 10\nTrained on 10 000 real MNIST handwriting samples',
+            },
+            fr: {
+                lab_title: 'Reconnaissance de Chiffres IA',
+                card_result: 'Chiffre Reconnu',
+                card_conf: 'Analyse de Confiance',
+                card_preview: 'Entrée du Modèle (28×28)',
+                card_model: 'Modèle',
+                clear: 'EFFACER',
+                draw_hint: 'Dessine un chiffre (0–9) — souris ou doigt',
+                nothing: 'Rien dessiné',
+                training: 'Entraînement du modèle …',
+                ready: 'Dessine un chiffre — prédiction en temps réel',
+                predicted: 'Prédit',
+                conf: 'Confiance',
+                arch: 'CNN · 2× Conv2D · Dense 128 · Softmax 10\nEntraîné sur 10 000 échantillons MNIST réels',
+            },
+            nl: {
+                lab_title: 'AI Cijferherkenning',
+                card_result: 'Herkend Cijfer',
+                card_conf: 'Vertrouwensanalyse',
+                card_preview: 'Model-Ingang (28×28)',
+                card_model: 'Model',
+                clear: 'WISSEN',
+                draw_hint: 'Teken een cijfer (0–9) — muis of vinger',
+                nothing: 'Nog niets getekend',
+                training: 'Model trainen …',
+                ready: 'Teken een cijfer — real-time voorspelling',
+                predicted: 'Voorspelling',
+                conf: 'Vertrouwen',
+                arch: 'CNN · 2× Conv2D · Dense 128 · Softmax 10\nGetraind op 10 000 echte MNIST-handschriften',
+            },
+        };
 
-    function t(key) {
-        const lang = (typeof CyberI18n !== 'undefined' ? CyberI18n.current : null) || 'de';
-        return (LAB_T[lang] || LAB_T.en || LAB_T.de)[key] || (LAB_T.de)[key] || key;
-    }
+        function t(key) {
+            const lang = (typeof CyberI18n !== 'undefined' ? CyberI18n.current : null) || 'de';
+            return (LAB_T[lang] || LAB_T.en || LAB_T.de)[key] || (LAB_T.de)[key] || key;
+        }
 
-    // ── Shell & Branding ────────────────────────────────────────────────────────
-    function toggleSidebar() {
-        const panel = document.getElementById('side-panel');
-        panel.classList.toggle('collapsed');
-        if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
-        setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
-    }
+        // ── Shell & Branding ────────────────────────────────────────────────────────
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
 
-    CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: t('lab_title') });
-    CyberUI.init();
-    document.getElementById('coach-title-slot').textContent = t('lab_title');
-    document.getElementById('draw-hint').textContent = t('draw_hint');
-    if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: t('lab_title') });
+        CyberUI.init();
+        document.getElementById('coach-title-slot').textContent = t('lab_title');
+        document.getElementById('draw-hint').textContent = t('draw_hint');
+        if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
-    // ── Sidebar cards ───────────────────────────────────────────────────────────
-    CyberUI.createCard('ui-container', t('card_result'), `
-        <div id="result-digit" class="dim">—</div>
-        <div id="result-conf">${t('nothing')}</div>
+        // ── Sidebar cards ───────────────────────────────────────────────────────────
+        CyberUI.createCard('ui-container', t('card_result'), `
+        <div id="result-digit" class="cyber-number-widget dim" style="justify-content:center;min-height:90px;"></div>
+        <div id="result-conf" class="cyber-number-widget" style="justify-content:center;min-height:20px;margin-top:5px;"></div>
         <button class="cyber-btn" onclick="clearDraw()"
             style="width:100%;margin-top:14px;border-color:rgba(0,210,255,0.35);">
             ${t('clear')}
         </button>
     `);
 
-    let barsHtml = '';
-    for (let i = 0; i <= 9; i++) {
-        barsHtml += `<div class="conf-row">
+        let barsHtml = '';
+        for (let i = 0; i <= 9; i++) {
+            barsHtml += `<div class="conf-row">
             <span class="conf-label">${i}</span>
             <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-${i}"></div></div>
             <span class="conf-pct" id="pct-${i}">—</span>
         </div>`;
-    }
-    CyberUI.createCard('ui-container', t('card_conf'), barsHtml);
+        }
+        CyberUI.createCard('ui-container', t('card_conf'), barsHtml);
 
-    CyberUI.createCard('ui-container', t('card_preview'), `
+        CyberUI.createCard('ui-container', t('card_preview'), `
         <canvas id="preview-canvas" width="56" height="56"
             style="width:112px;height:112px;"></canvas>
     `);
 
-    CyberUI.createCard('ui-container', t('card_model'), `
+        CyberUI.createCard('ui-container', t('card_model'), `
         <div style="margin-bottom:5px;">
             <span class="status-dot spin" id="status-dot"></span>
             <span id="model-status-text">${t('training')}</span>
         </div>
-        <div id="arch-text">${t('arch').replace('\n','<br>')}</div>
+        <div id="arch-text">${t('arch').replace('\n', '<br>')}</div>
         <button class="cyber-btn" onclick="resetModel()"
             style="width:100%;margin-top:12px;border-color:rgba(255,100,100,0.4);color:rgba(255,150,150,0.9);font-size:10px;">
             RESET MODEL
         </button>
     `);
 
-    CyberUI.createCard('ui-container', 'DEBUG', `
-        <div id="debug-list" style="font-family:monospace;font-size:10px;line-height:2;"></div>
-    `);
+        CyberUI.createCard('ui-container', 'DEBUG', `
+        <div id="debug-list" style="font-family:monospace;font-size:10px;line-height:2;">
+            <span id="debug-empty" style="color:rgba(255,255,255,0.2);font-family:'Outfit',sans-serif;font-size:10px;">— kein Training aktiv —</span>
+        </div>
+    `, '#00d2ff', { collapsible: true });
 
-    const coachEl = document.getElementById('coach-content');
-    coachEl.textContent = t('training');
+        const coachEl = document.getElementById('coach-content');
+        coachEl.textContent = t('training');
 
-    // ── Drawing setup ───────────────────────────────────────────────────────────
-    const drawCanvas = document.getElementById('draw-canvas');
-    const drawCtx    = drawCanvas.getContext('2d');
-    let isDrawing    = false;
-    let hasStrokes   = false;
-    let wasPredicted = false;
-    let model        = null;
-    let predictTid   = null;
-    let animInterval = null;
+        // ── Drawing setup ───────────────────────────────────────────────────────────
+        const drawCanvas = document.getElementById('draw-canvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        let isDrawing = false;
+        let hasStrokes = false;
+        let wasPredicted = false;
+        let model = null;
+        let predictTid = null;
+        let animInterval = null;
 
-    function startMnistAnim(pixels, labels, n) {
-        const ac  = document.getElementById('mnist-anim');
-        const ctx = ac.getContext('2d');
-        const lbl = document.getElementById('mnist-anim-digit');
-        const S   = 3; // 28 × 3 = 84px
-        animInterval = setInterval(() => {
-            const idx = Math.floor(Math.random() * n);
-            for (let py = 0; py < 28; py++) {
-                for (let px = 0; px < 28; px++) {
-                    const v = Math.round(pixels[idx * 784 + py * 28 + px] * 255);
-                    ctx.fillStyle = `rgb(${v},${v},${v})`;
-                    ctx.fillRect(px * S, py * S, S, S);
+        function startMnistAnim(pixels, labels, n) {
+            // Zufällige Einzel-Animation für Training-Phase
+            const ac = document.getElementById('mnist-anim');
+            const ctx = ac.getContext('2d');
+            const lbl = document.getElementById('mnist-anim-digit');
+            const S = 10; // 28 × 10 = 280px
+            animInterval = setInterval(() => {
+                const idx = Math.floor(Math.random() * n);
+                const imgData = ctx.createImageData(28, 28);
+                for (let i = 0; i < 784; i++) {
+                    const v = Math.round(pixels[idx * 784 + i] * 255);
+                    imgData.data[i * 4] = imgData.data[i * 4 + 1] = imgData.data[i * 4 + 2] = v;
+                    imgData.data[i * 4 + 3] = 255;
                 }
-            }
-            lbl.textContent = labels[idx];
-        }, 80);
-    }
-
-    function stopMnistAnim() {
-        if (animInterval) { clearInterval(animInterval); animInterval = null; }
-    }
-
-    function initDraw() {
-        drawCtx.fillStyle = '#000';
-        drawCtx.fillRect(0, 0, 280, 280);
-        drawCtx.strokeStyle = '#fff';
-        drawCtx.lineWidth   = 22;
-        drawCtx.lineCap     = 'round';
-        drawCtx.lineJoin    = 'round';
-    }
-
-    function getPos(e) {
-        const r  = drawCanvas.getBoundingClientRect();
-        const sx = drawCanvas.width  / r.width;
-        const sy = drawCanvas.height / r.height;
-        const s  = e.touches ? e.touches[0] : e;
-        return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
-    }
-
-    drawCanvas.addEventListener('mousedown', e => {
-        if (!model) return;
-        if (wasPredicted) { clearDraw(); wasPredicted = false; }
-        isDrawing = true;
-        drawCtx.beginPath();
-        const p = getPos(e); drawCtx.moveTo(p.x, p.y);
-    });
-    drawCanvas.addEventListener('mousemove', e => {
-        if (!isDrawing) return;
-        const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
-        hasStrokes = true; schedulePred();
-    });
-    drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
-    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
-
-    drawCanvas.addEventListener('touchstart', e => {
-        e.preventDefault();
-        if (!model) return;
-        if (wasPredicted) { clearDraw(); wasPredicted = false; }
-        isDrawing = true;
-        drawCtx.beginPath();
-        const p = getPos(e); drawCtx.moveTo(p.x, p.y);
-    }, { passive: false });
-    drawCanvas.addEventListener('touchmove', e => {
-        e.preventDefault();
-        if (!isDrawing) return;
-        const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
-        hasStrokes = true; schedulePred();
-    }, { passive: false });
-    drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
-
-    function schedulePred() {
-        clearTimeout(predictTid);
-        predictTid = setTimeout(runPredict, 120);
-    }
-
-    function clearDraw() {
-        initDraw();
-        hasStrokes = false;
-        document.getElementById('result-digit').textContent = '—';
-        document.getElementById('result-digit').className   = 'dim';
-        document.getElementById('result-conf').textContent  = t('nothing');
-        for (let i = 0; i <= 9; i++) {
-            const b = document.getElementById('bar-' + i);
-            b.style.width = '0%'; b.classList.remove('top');
-            const p = document.getElementById('pct-' + i);
-            p.textContent = '—'; p.classList.remove('top');
-        }
-        document.getElementById('preview-canvas').getContext('2d')
-            .clearRect(0, 0, 56, 56);
-        coachEl.textContent = t('ready');
-    }
-
-    // ── Bounding-box crop → centered square (matches MNIST preprocessing) ───────
-    function getCroppedCanvas(src) {
-        const w = src.width, h = src.height;
-        const data = src.getContext('2d').getImageData(0, 0, w, h).data;
-        let minX = w, maxX = -1, minY = h, maxY = -1;
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                if (data[(y * w + x) * 4] > 10) {
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                }
-            }
-        }
-        if (maxX < 0) return null;
-        const bw = maxX - minX + 1;
-        const bh = maxY - minY + 1;
-        const pad = Math.max(Math.round(Math.max(bw, bh) * 0.25), 14);
-        const size = Math.max(bw, bh) + pad * 2;
-        const off = document.createElement('canvas');
-        off.width = off.height = size;
-        const ctx = off.getContext('2d');
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, size, size);
-        ctx.drawImage(src, minX, minY, bw, bh,
-            Math.round((size - bw) / 2), Math.round((size - bh) / 2), bw, bh);
-        return off;
-    }
-
-    // ── Inference ───────────────────────────────────────────────────────────────
-    function runPredict() {
-        if (!model || !hasStrokes) return;
-        const cropped = getCroppedCanvas(drawCanvas);
-        if (!cropped) return;
-        tf.tidy(() => {
-            const tensor = tf.browser
-                .fromPixels(cropped, 1)
-                .resizeBilinear([28, 28])
-                .toFloat().div(255.0);
-            updatePreview(tensor);
-            const probs = Array.from(
-                model.predict(tensor.expandDims(0)).dataSync()
-            );
-            updateBars(probs);
-        });
-    }
-
-    function updatePreview(t28) {
-        const pv  = document.getElementById('preview-canvas');
-        const ctx = pv.getContext('2d');
-        const d   = t28.dataSync();
-        const img = ctx.createImageData(28, 28);
-        for (let i = 0; i < 784; i++) {
-            const v = Math.round(d[i] * 255);
-            img.data[i*4] = img.data[i*4+1] = img.data[i*4+2] = v;
-            img.data[i*4+3] = 255;
-        }
-        const off = document.createElement('canvas');
-        off.width = off.height = 28;
-        off.getContext('2d').putImageData(img, 0, 0);
-        ctx.clearRect(0, 0, 56, 56);
-        ctx.drawImage(off, 0, 0, 56, 56);
-    }
-
-    function updateBars(probs) {
-        const top = probs.indexOf(Math.max(...probs));
-        for (let i = 0; i <= 9; i++) {
-            const pct = (probs[i] * 100).toFixed(1);
-            const b   = document.getElementById('bar-' + i);
-            b.style.width = pct + '%';
-            b.classList.toggle('top', i === top);
-            const p = document.getElementById('pct-' + i);
-            p.textContent = pct + '%';
-            p.classList.toggle('top', i === top);
-        }
-        document.getElementById('result-digit').textContent = top;
-        document.getElementById('result-digit').className   = '';
-        const c = (probs[top] * 100).toFixed(1);
-        document.getElementById('result-conf').textContent  = c + '%';
-        coachEl.textContent = `${t('predicted')}: ${top}  ·  ${t('conf')}: ${c}%`;
-        wasPredicted = true;
-    }
-
-    // ── MNIST data loading (real handwritten digits) ────────────────────────────
-    // Sprite: 784 px wide × 65 000 px tall — each row = one 28×28 image flattened
-    const MNIST_IMG_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
-    const MNIST_LAB_URL = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
-    const PER_CLASS     = 5000;  // balanced: 5 000 × 10 classes = 50 000 total
-
-    async function loadMNIST(onStatus) {
-        // 1. Labels first — file is one-hot encoded: 10 bytes per sample → 650 000 bytes total
-        onStatus('Labels laden …');
-        await tf.nextFrame();
-        const labRes  = await fetch(MNIST_LAB_URL);
-        const rawBytes = new Uint8Array(await labRes.arrayBuffer());
-        const NUM_SAMPLES = rawBytes.length / 10; // 65 000
-        const allLabels = new Uint8Array(NUM_SAMPLES);
-        for (let i = 0; i < NUM_SAMPLES; i++) {
-            allLabels[i] = rawBytes.indexOf(1, i * 10) - i * 10;
+                const off = document.createElement('canvas');
+                off.width = off.height = 28;
+                off.getContext('2d').putImageData(imgData, 0, 0);
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(off, 0, 0, 280, 280);
+                lbl.textContent = labels[idx];
+            }, 80);
         }
 
-        // 2. Balanced index selection — 1 000 per class, scanning in order
-        const buckets = Array.from({length: 10}, () => []);
-        for (let i = 0; i < NUM_SAMPLES; i++) {
-            const c = allLabels[i];
-            if (buckets[c].length < PER_CLASS) buckets[c].push(i);
-            if (buckets.every(b => b.length >= PER_CLASS)) break;
-        }
-        const selected = buckets.flat().sort((a, b) => a - b);
-        const maxRow   = selected[selected.length - 1];
+        // ── Sequenzielle 10×10 Thumbnail-Grid-Animation nach Phase 1 ───────────────
+        function startSequentialAnim(pixels, labels, n) {
+            return new Promise(resolve => {
+                const ac = document.getElementById('mnist-anim');
+                const ctx = ac.getContext('2d');
+                const epochInfo = document.getElementById('train-epoch-info');
+                const lbl = document.getElementById('mnist-anim-digit');
 
-        // 3. Image sprite (browser caches it — only needed once)
-        onStatus('Bilder laden … (1× ~12 MB, danach gecacht)');
-        await tf.nextFrame();
-        const img = new Image();
-        img.crossOrigin = '';
-        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = MNIST_IMG_URL; });
+                // 10×10 Grid: jede Zelle = 28×28px → gesamt 280×280
+                const COLS = 10, ROWS = 10, CELL = 28;
+                const BATCH = COLS * ROWS; // 100 Bilder pro Frame
 
-        // 4. Extract only the rows we need
-        onStatus('Pixeldaten extrahieren …');
-        await tf.nextFrame();
-        const canvas  = document.createElement('canvas');
-        canvas.width  = 784;
-        canvas.height = maxRow + 1;
-        const ctx     = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, 784, maxRow + 1, 0, 0, 784, maxRow + 1);
-        const raw     = ctx.getImageData(0, 0, 784, maxRow + 1).data;
+                // Offscreen-Buffer für das gesamte Grid
+                const gridData = ctx.createImageData(280, 280);
 
-        const n      = selected.length;
-        const pixels = new Float32Array(n * 784);
-        const labels = new Uint8Array(n);
-        const refSamples = new Array(10).fill(null);
-        selected.forEach((srcRow, dst) => {
-            const cls = allLabels[srcRow];
-            for (let px = 0; px < 784; px++)
-                pixels[dst * 784 + px] = raw[(srcRow * 784 + px) * 4] / 255;
-            labels[dst] = cls;
-            if (refSamples[cls] === null) {
-                refSamples[cls] = pixels.slice(dst * 784, dst * 784 + 784);
-            }
-        });
+                let idx = 0;
+                let rafId = null;
 
-        return { pixels, labels, n, refSamples };
-    }
+                function renderFrame() {
+                    if (idx >= n) {
+                        epochInfo.className = 'loaded';
+                        epochInfo.textContent = `Phase 2 — ✓ alle ${n.toLocaleString('de')} Bilder gezeigt`;
+                        lbl.textContent = '';
+                        animInterval = null;
+                        resolve();
+                        return;
+                    }
 
-    // ── Model definition & training ─────────────────────────────────────────────
-    function buildModel() {
-        const m = tf.sequential({ layers: [
-            tf.layers.conv2d({ inputShape: [28, 28, 1], filters: 16, kernelSize: 3,
-                               activation: 'relu', padding: 'same' }),
-            tf.layers.maxPooling2d({ poolSize: 2 }),
-            tf.layers.conv2d({ filters: 32, kernelSize: 3, activation: 'relu', padding: 'same' }),
-            tf.layers.maxPooling2d({ poolSize: 2 }),
-            tf.layers.flatten(),
-            tf.layers.dropout({ rate: 0.25 }),
-            tf.layers.dense({ units: 128, activation: 'relu' }),
-            tf.layers.dense({ units: 10,  activation: 'softmax' }),
-        ]});
-        m.compile({ optimizer: tf.train.adam(0.001),
-                    loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
-        return m;
-    }
-
-    const IDB_KEY = 'indexeddb://cyber-mnist-cnn-v3'; // v3: 50 000 samples
-
-    async function trainAndReady() {
-        const overlay   = document.getElementById('train-overlay');
-        const bar       = document.getElementById('train-bar');
-        const epochInfo = document.getElementById('train-epoch-info');
-
-        drawCanvas.classList.add('disabled');
-        overlay.classList.add('visible');
-
-        const setStatus = msg => { if (epochInfo) epochInfo.textContent = msg; };
-
-        // ── 1. Try to load cached model from IndexedDB ──────────────────────────
-        try {
-            setStatus('Gespeichertes Modell suchen …');
-            await tf.nextFrame();
-            model = await tf.loadLayersModel(IDB_KEY);
-            tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1]))); // warmup
-            overlay.classList.remove('visible');
-            drawCanvas.classList.remove('disabled');
-            document.getElementById('status-dot').className = 'status-dot ok';
-            document.getElementById('model-status-text').textContent = '✓ Modell aus Cache geladen';
-            coachEl.textContent = t('ready');
-            return;
-        } catch (_) {
-            // not cached yet → train from scratch
-        }
-
-        // ── 2. Load MNIST data & train ──────────────────────────────────────────
-        let pixels, labels, refSamples;
-        try {
-            ({ pixels, labels, refSamples } = await loadMNIST(setStatus));
-        } catch (err) {
-            overlay.classList.remove('visible');
-            drawCanvas.classList.remove('disabled');
-            document.getElementById('status-dot').className = 'status-dot err';
-            document.getElementById('model-status-text').textContent = '✗ Daten nicht ladbar (kein Internet?)';
-            coachEl.textContent = 'MNIST-Daten konnten nicht geladen werden.';
-            console.error('[ANN Lab] MNIST load failed:', err);
-            return;
-        }
-
-        setStatus('Daten geladen — Training startet …');
-        await tf.nextFrame();
-
-        const n       = pixels.length / 784;
-        const xTensor = tf.tensor4d(pixels, [n, 28, 28, 1]);
-        const yTensor = tf.oneHot(tf.tensor1d(labels, 'int32'), 10).toFloat();
-
-        const EPOCHS = 8;
-        model = buildModel();
-        startMnistAnim(pixels, labels, n);
-
-        await model.fit(xTensor, yTensor, {
-            epochs:          EPOCHS,
-            batchSize:       128,
-            validationSplit: 0.1,
-            shuffle:         true,
-            callbacks: {
-                onEpochEnd: async (epoch, logs) => {
-                    const pct = Math.round(((epoch + 1) / EPOCHS) * 100);
-                    bar.style.width = pct + '%';
-                    epochInfo.textContent = `Durchlauf ${epoch + 1} / ${EPOCHS}`;
-
-                    // Debug: predict on reference samples → sidebar list
-                    const dbg = document.getElementById('debug-list');
-                    const epochHeader = document.createElement('div');
-                    epochHeader.style.cssText = 'color:rgba(255,255,255,0.4);margin-top:6px;margin-bottom:2px;';
-                    epochHeader.textContent = `── Epoch ${epoch+1} ──`;
-                    dbg.appendChild(epochHeader);
-                    tf.tidy(() => {
-                        for (let d = 0; d < 10; d++) {
-                            if (!refSamples || !refSamples[d]) return;
-                            const inp = tf.tensor4d(refSamples[d], [1, 28, 28, 1]);
-                            const probs = Array.from(model.predict(inp).dataSync());
-                            const pred = probs.indexOf(Math.max(...probs));
-                            const conf = (Math.max(...probs) * 100).toFixed(0);
-                            const ok = pred === d;
-                            const line = document.createElement('div');
-                            line.style.color = ok ? '#adff2f' : '#ff6060';
-                            line.textContent = `  ${d} → ${pred}   ${conf}%`;
-                            dbg.appendChild(line);
+                    // 100 Bilder in das Grid-ImageData schreiben
+                    for (let b = 0; b < BATCH && idx < n; b++, idx++) {
+                        const col = b % COLS;
+                        const row = Math.floor(b / COLS);
+                        const base = idx * 784;
+                        for (let py = 0; py < CELL; py++) {
+                            for (let px = 0; px < CELL; px++) {
+                                const v = Math.round(pixels[base + py * CELL + px] * 255);
+                                const di = ((row * CELL + py) * 280 + col * CELL + px) * 4;
+                                gridData.data[di] = gridData.data[di + 1] = gridData.data[di + 2] = v;
+                                gridData.data[di + 3] = 255;
+                            }
                         }
-                    });
+                    }
+
+                    ctx.putImageData(gridData, 0, 0);
+                    epochInfo.textContent = `Phase 2 — ${Math.min(idx, n).toLocaleString('de')} / ${n.toLocaleString('de')} Bilder`;
+
+                    rafId = requestAnimationFrame(renderFrame);
+                    animInterval = rafId;
+                }
+
+                rafId = requestAnimationFrame(renderFrame);
+                animInterval = rafId;
+            });
+        }
+
+        function stopMnistAnim() {
+            if (animInterval) {
+                // Stoppt sowohl setInterval als auch requestAnimationFrame
+                clearInterval(animInterval);
+                cancelAnimationFrame(animInterval);
+                animInterval = null;
+            }
+        }
+
+        function initDraw() {
+            drawCtx.fillStyle = '#000';
+            drawCtx.fillRect(0, 0, 280, 280);
+            drawCtx.strokeStyle = '#fff';
+            drawCtx.lineWidth = 22;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+        }
+
+        function getPos(e) {
+            const r = drawCanvas.getBoundingClientRect();
+            const sx = drawCanvas.width / r.width;
+            const sy = drawCanvas.height / r.height;
+            const s = e.touches ? e.touches[0] : e;
+            return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
+        }
+
+        drawCanvas.addEventListener('mousedown', e => {
+            if (!model) return;
+            if (wasPredicted) { clearDraw(); wasPredicted = false; }
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        });
+        drawCanvas.addEventListener('mousemove', e => {
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            hasStrokes = true; schedulePred();
+        });
+        drawCanvas.addEventListener('mouseup', () => { isDrawing = false; });
+        drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+        drawCanvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (!model) return;
+            if (wasPredicted) { clearDraw(); wasPredicted = false; }
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        }, { passive: false });
+        drawCanvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            hasStrokes = true; schedulePred();
+        }, { passive: false });
+        drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+
+        function schedulePred() {
+            clearTimeout(predictTid);
+            predictTid = setTimeout(runPredict, 120);
+        }
+
+        function clearDraw() {
+            initDraw();
+            hasStrokes = false;
+            const rd = document.getElementById('result-digit');
+            rd.className = 'cyber-number-widget dim';
+            rd.innerHTML = '<div class="cyber-digit-box" style="font-size:80px;width:60px;height:88px;opacity:0.18;">—</div>';
+            document.getElementById('result-conf').innerHTML = '';
+            for (let i = 0; i <= 9; i++) {
+                const b = document.getElementById('bar-' + i);
+                b.style.width = '0%'; b.classList.remove('top');
+                const p = document.getElementById('pct-' + i);
+                p.textContent = '—'; p.classList.remove('top');
+            }
+            document.getElementById('preview-canvas').getContext('2d')
+                .clearRect(0, 0, 56, 56);
+            coachEl.textContent = t('ready');
+        }
+
+        // ── Bounding-box crop → centered square (matches MNIST preprocessing) ───────
+        function getCroppedCanvas(src) {
+            const w = src.width, h = src.height;
+            const data = src.getContext('2d').getImageData(0, 0, w, h).data;
+            let minX = w, maxX = -1, minY = h, maxY = -1;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    if (data[(y * w + x) * 4] > 10) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (maxX < 0) return null;
+            const bw = maxX - minX + 1;
+            const bh = maxY - minY + 1;
+            const pad = Math.max(Math.round(Math.max(bw, bh) * 0.25), 14);
+            const size = Math.max(bw, bh) + pad * 2;
+            const off = document.createElement('canvas');
+            off.width = off.height = size;
+            const ctx = off.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, size, size);
+            ctx.drawImage(src, minX, minY, bw, bh,
+                Math.round((size - bw) / 2), Math.round((size - bh) / 2), bw, bh);
+            return off;
+        }
+
+        // ── Inference ───────────────────────────────────────────────────────────────
+        function runPredict() {
+            if (!model || !hasStrokes) return;
+            const cropped = getCroppedCanvas(drawCanvas);
+            if (!cropped) return;
+            tf.tidy(() => {
+                const tensor = tf.browser
+                    .fromPixels(cropped, 1)
+                    .resizeBilinear([28, 28])
+                    .toFloat().div(255.0);
+                updatePreview(tensor);
+                const probs = Array.from(
+                    model.predict(tensor.expandDims(0)).dataSync()
+                );
+                updateBars(probs);
+            });
+        }
+
+        function updatePreview(t28) {
+            const pv = document.getElementById('preview-canvas');
+            const ctx = pv.getContext('2d');
+            const d = t28.dataSync();
+            const img = ctx.createImageData(28, 28);
+            for (let i = 0; i < 784; i++) {
+                const v = Math.round(d[i] * 255);
+                img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v;
+                img.data[i * 4 + 3] = 255;
+            }
+            const off = document.createElement('canvas');
+            off.width = off.height = 28;
+            off.getContext('2d').putImageData(img, 0, 0);
+            ctx.clearRect(0, 0, 56, 56);
+            ctx.drawImage(off, 0, 0, 56, 56);
+        }
+
+        function updateBars(probs) {
+            const top = probs.indexOf(Math.max(...probs));
+            for (let i = 0; i <= 9; i++) {
+                const pct = (probs[i] * 100).toFixed(1);
+                const b = document.getElementById('bar-' + i);
+                b.style.width = pct + '%';
+                b.classList.toggle('top', i === top);
+                const p = document.getElementById('pct-' + i);
+                p.textContent = pct + '%';
+                p.classList.toggle('top', i === top);
+            }
+            const rdEl = document.getElementById('result-digit');
+            rdEl.className = 'cyber-number-widget';
+            CyberUI.updateNumberWidget('result-digit', top, 0, 1, {
+                fontSize: '80px', digitWidth: '60px', digitHeight: '88px',
+                color: '#adff2f', textShadow: '0 0 40px rgba(173,255,47,0.5)'
+            });
+            const c = (probs[top] * 100).toFixed(1);
+            CyberUI.updateNumberWidget('result-conf', parseFloat(c), 1, 2, {
+                fontSize: '12px', digitWidth: '8px', digitHeight: '18px',
+                color: 'rgba(255,255,255,0.45)'
+            });
+            coachEl.textContent = `${t('predicted')}: ${top}  ·  ${t('conf')}: ${c}%`;
+            wasPredicted = true;
+        }
+
+        // ── MNIST data loading (real handwritten digits) ────────────────────────────
+        // Sprite: 784 px wide × 65 000 px tall — each row = one 28×28 image flattened
+        // Cache-Busting: ?nocache=<timestamp> verhindert Browser-HTTP-Cache
+        const MNIST_BASE_IMG = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
+        const MNIST_BASE_LAB = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
+        const PER_CLASS = 5000;  // balanced: 5 000 × 10 classes = 50 000 total
+
+        async function loadMNIST(onStatus, onProgress) {
+            // Cache-Busting-Timestamp für diese Session
+            const cb = `?nocache=${Date.now()}`;
+            const MNIST_IMG_URL = MNIST_BASE_IMG + cb;
+            const MNIST_LAB_URL = MNIST_BASE_LAB + cb;
+
+            // 1. Labels first — file is one-hot encoded: 10 bytes per sample → 650 000 bytes total
+            onStatus('Labels laden …');
+            await tf.nextFrame();
+            const labRes = await fetch(MNIST_LAB_URL, { cache: 'no-store' });
+            const rawBytes = new Uint8Array(await labRes.arrayBuffer());
+            const NUM_SAMPLES = rawBytes.length / 10; // 65 000
+            const allLabels = new Uint8Array(NUM_SAMPLES);
+            for (let i = 0; i < NUM_SAMPLES; i++) {
+                for (let j = 0; j < 10; j++) {
+                    if (rawBytes[i * 10 + j] === 1) { allLabels[i] = j; break; }
+                }
+            }
+
+            // 2. Balanced index selection — 5 000 per class, scanning in order
+            const buckets = Array.from({ length: 10 }, () => []);
+            for (let i = 0; i < NUM_SAMPLES; i++) {
+                const c = allLabels[i];
+                if (buckets[c].length < PER_CLASS) buckets[c].push(i);
+                if (buckets.every(b => b.length >= PER_CLASS)) break;
+            }
+            const selected = buckets.flat().sort((a, b) => a - b);
+            const maxRow = selected[selected.length - 1];
+
+            // 3. Image sprite — via fetch() um Browser-Cache zu umgehen
+            onStatus('Bilder laden … (~12 MB, kein Cache)');
+            await tf.nextFrame();
+            const imgRes = await fetch(MNIST_IMG_URL, { cache: 'no-store' });
+            const imgBlob = await imgRes.blob();
+            const imgBlobUrl = URL.createObjectURL(imgBlob);
+            const img = new Image();
+            img.crossOrigin = '';
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = imgBlobUrl; });
+            URL.revokeObjectURL(imgBlobUrl); // Speicher freigeben
+
+            // 4. Extract only the rows we need
+            onStatus('Pixeldaten extrahieren …');
+            await tf.nextFrame();
+            const canvas = document.createElement('canvas');
+            canvas.width = 784;
+            canvas.height = maxRow + 1;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 784, maxRow + 1, 0, 0, 784, maxRow + 1);
+            const raw = ctx.getImageData(0, 0, 784, maxRow + 1).data;
+
+            const n = selected.length;
+            const pixels = new Float32Array(n * 784);
+            const labels = new Uint8Array(n);
+            const refSamples = new Array(10).fill(null);
+
+            // Chunked extraction — yield every 5000 samples so browser can render
+            const CHUNK = 5000;
+            for (let dst = 0; dst < n; dst++) {
+                const srcRow = selected[dst];
+                const cls = allLabels[srcRow];
+                for (let px = 0; px < 784; px++)
+                    pixels[dst * 784 + px] = raw[(srcRow * 784 + px) * 4] / 255;
+                labels[dst] = cls;
+                if (refSamples[cls] === null)
+                    refSamples[cls] = pixels.slice(dst * 784, dst * 784 + 784);
+                if ((dst + 1) % CHUNK === 0) {
+                    if (onProgress) onProgress(dst + 1, n);
                     await tf.nextFrame();
                 }
             }
-        });
+            if (onProgress) onProgress(n, n);
 
-        stopMnistAnim();
-        xTensor.dispose();
-        yTensor.dispose();
-
-        // ── 3. Save to IndexedDB for next visit ─────────────────────────────────
-        try {
-            setStatus('Modell speichern …');
-            await tf.nextFrame();
-            await model.save(IDB_KEY);
-        } catch (e) {
-            console.warn('[ANN Lab] Could not save model to IndexedDB:', e);
+            return { pixels, labels, n, refSamples };
         }
 
-        tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1]))); // warmup
+        // ── Model definition & training ─────────────────────────────────────────────
+        function buildModel() {
+            const m = tf.sequential({
+                layers: [
+                    tf.layers.conv2d({
+                        inputShape: [28, 28, 1], filters: 16, kernelSize: 3,
+                        activation: 'relu', padding: 'same'
+                    }),
+                    tf.layers.maxPooling2d({ poolSize: 2 }),
+                    tf.layers.conv2d({ filters: 32, kernelSize: 3, activation: 'relu', padding: 'same' }),
+                    tf.layers.maxPooling2d({ poolSize: 2 }),
+                    tf.layers.flatten(),
+                    tf.layers.dropout({ rate: 0.25 }),
+                    tf.layers.dense({ units: 128, activation: 'relu' }),
+                    tf.layers.dense({ units: 10, activation: 'softmax' }),
+                ]
+            });
+            m.compile({
+                optimizer: tf.train.adam(0.001),
+                loss: 'categoricalCrossentropy', metrics: ['accuracy']
+            });
+            return m;
+        }
 
-        overlay.classList.remove('visible');
-        drawCanvas.classList.remove('disabled');
-        document.getElementById('status-dot').className = 'status-dot ok';
-        document.getElementById('model-status-text').textContent =
-            `✓ MNIST CNN · ${(PER_CLASS * 10).toLocaleString('de')} Beispiele · gecacht`;
-        coachEl.textContent = t('ready');
-    }
+        const IDB_KEY = 'indexeddb://cyber-mnist-cnn-v3'; // v3: 50 000 samples
 
-    async function resetModel() {
-        try {
-            await tf.io.removeModel(IDB_KEY);
-        } catch (_) { /* wasn't cached */ }
-        if (model) { model.dispose(); model = null; }
-        clearDraw();
-        document.getElementById('status-dot').className = 'status-dot spin';
-        document.getElementById('model-status-text').textContent = t('training');
-        coachEl.textContent = t('training');
+        // ── Geladene Daten — global gespeichert für späteres Training ───────────
+        let mnistData = null; // { pixels, labels, n, refSamples }
+
+        async function trainAndReady() {
+            const overlay   = document.getElementById('train-overlay');
+            const bar       = document.getElementById('train-bar');
+            const epochInfo = document.getElementById('train-epoch-info');
+            const seenLabel = document.getElementById('train-seen-label');
+
+            // ── Reset UI ─────────────────────────────────────────────────────────
+            stopMnistAnim();
+            mnistData = null;
+            bar.style.cssText     = 'width:0%;background:#adff2f;transition:width 0.3s ease;';
+            epochInfo.className   = '';
+            epochInfo.textContent = 'Phase 1 — Daten laden …';
+            document.getElementById('mnist-anim-digit').textContent = '';
+            document.getElementById('mnist-anim').getContext('2d').clearRect(0, 0, 84, 84);
+            seenLabel.textContent = 'Beispiele geladen';
+            seenLabel.style.color = 'rgba(255,255,255,0.35)';
+            CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
+                fontSize: '13px', digitWidth: '9px', digitHeight: '18px',
+                color: 'rgba(255,255,255,0.35)'
+            });
+            drawCanvas.classList.add('disabled');
+            overlay.classList.add('visible');
+
+            // Zwei Frames warten bis display:flex wirklich gerendert ist
+            await new Promise(r => requestAnimationFrame(r));
+            await new Promise(r => requestAnimationFrame(r));
+
+            dbgLog('Phase 1 start — Daten laden');
+
+            // ── PHASE 1: Daten laden — echte Fortschrittsbalken ──────────────────
+            // onStatus → epochInfo-Text live aktualisieren
+            // onProgress → echter Balken basierend auf geladenen Samples
+            try {
+                mnistData = await loadMNIST(
+                    (statusText) => {
+                        epochInfo.textContent = 'Phase 1 — ' + statusText;
+                    },
+                    (done, total) => {
+                        const pct = Math.round((done / total) * 100);
+                        bar.style.width = pct + '%';
+                        seenLabel.style.color = '#adff2f';
+                        CyberUI.updateNumberWidget('train-seen', done, 0, 6, {
+                            fontSize: '13px', digitWidth: '9px', digitHeight: '18px',
+                            color: '#adff2f'
+                        });
+                    }
+                );
+            } catch (err) {
+                overlay.classList.remove('visible');
+                drawCanvas.classList.remove('disabled');
+                document.getElementById('status-dot').className = 'status-dot err';
+                document.getElementById('model-status-text').textContent = '✗ Daten nicht ladbar (kein Internet?)';
+                coachEl.textContent = 'MNIST-Daten konnten nicht geladen werden.';
+                console.error('[ANN Lab] MNIST load failed:', err);
+                return;
+            }
+
+            // ── PHASE 1 FERTIG — STOPP ────────────────────────────────────────────
+            const { n } = mnistData;
+            dbgLog(`Phase 1 fertig — ${n} Beispiele geladen`);
+
+            bar.style.width       = '100%';
+            epochInfo.className   = 'loaded';
+            epochInfo.textContent = `Phase 2 — Daten bereit ✓  (${n.toLocaleString('de')} Beispiele)`;
+            CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
+                fontSize: '13px', digitWidth: '9px', digitHeight: '18px', color: '#adff2f'
+            });
+            document.getElementById('status-dot').className = 'status-dot ok';
+            document.getElementById('model-status-text').textContent =
+                `✓ ${n.toLocaleString('de')} Beispiele geladen — bereit zum Training`;
+            coachEl.textContent = 'Daten geladen — Animation läuft …';
+            await new Promise(r => setTimeout(r, 1000));
+
+            // ── Phase 2: Alle Bilder als Thumbnails zeigen ────────────────────────
+            epochInfo.className   = '';
+            epochInfo.textContent = '';
+            await startSequentialAnim(mnistData.pixels, mnistData.labels, mnistData.n);
+
+            // Brief pause so user sees "Phase 2 — ✓ alle … Bilder gezeigt"
+            await new Promise(r => setTimeout(r, 1000));
+
+            // ── Check IndexedDB cache — nur wenn kein Reset ───────────────────────
+            try {
+                model = await tf.loadLayersModel(IDB_KEY);
+                tf.tidy(() => model.predict(tf.zeros([1, 28, 28, 1])));
+                dbgLog('Modell aus IDB geladen — Training übersprungen');
+                epochInfo.className   = 'loaded';
+                epochInfo.textContent = 'Phase 3 — Modell aus Cache ✓';
+                await new Promise(r => setTimeout(r, 800));
+                document.getElementById('status-dot').className = 'status-dot ok';
+                document.getElementById('model-status-text').textContent = '✓ Modell bereit (Cache)';
+                coachEl.textContent = t('ready');
+                overlay.classList.remove('visible');
+                drawCanvas.classList.remove('disabled');
+                return;
+            } catch (_) { /* not cached → train */ }
+
+            // ── Phase 3: Training ─────────────────────────────────────────────────
+            const EPOCHS = 8;
+            const { pixels, labels, n: nTrain } = mnistData;
+            const N_TRAIN = Math.floor(nTrain * 0.9);
+            dbgLog('Phase 3 start — Training');
+
+            model = buildModel();
+
+            const xs = tf.tensor4d(pixels.slice(0, N_TRAIN * 784), [N_TRAIN, 28, 28, 1]);
+            const ys = tf.oneHot(
+                tf.tensor1d(Int32Array.from(labels.slice(0, N_TRAIN)), 'int32'), 10
+            ).toFloat();
+
+            bar.style.cssText = 'width:0%;background:#00d2ff;transition:width 0.5s ease;';
+            epochInfo.className   = 'running';
+            epochInfo.textContent = 'Phase 3 — Training startet …';
+            coachEl.textContent   = 'Modell wird trainiert …';
+
+            const batchesPerEpoch = Math.ceil(Math.floor(N_TRAIN * 0.9) / 128);
+            dbgLog(`Training: ${EPOCHS} Epochen × ~${batchesPerEpoch} Batches`);
+            let currentEpoch = 0;
+            await model.fit(xs, ys, {
+                epochs: EPOCHS,
+                batchSize: 128,
+                validationSplit: 0.1,
+                callbacks: {
+                    onEpochBegin: async (epoch) => {
+                        currentEpoch = epoch;
+                        epochInfo.textContent = `Phase 3 — Trainingsdurchlauf ${epoch + 1} von ${EPOCHS}`;
+                        bar.style.transition = 'none';
+                        bar.style.width = `${Math.round(epoch / EPOCHS * 100)}%`;
+                        dbgLog(`Epoche ${epoch + 1}/${EPOCHS} startet`);
+                        await tf.nextFrame();
+                    },
+                    onBatchEnd: async (batch, logs) => {
+                        const epochFrac = (currentEpoch + (batch + 1) / batchesPerEpoch) / EPOCHS;
+                        bar.style.transition = 'none';
+                        bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
+                        if (batch % 10 === 0)
+                            dbgLog(`  E${currentEpoch + 1} B${batch} — loss: ${(logs.loss ?? 0).toFixed(4)}`);
+                        await tf.nextFrame();
+                    },
+                    onEpochEnd: async (epoch, logs) => {
+                        const acc = (logs.acc ?? logs.categoricalAccuracy ?? 0);
+                        const valAcc = (logs.val_acc ?? logs.val_categoricalAccuracy ?? 0);
+                        bar.style.transition = 'none';
+                        bar.style.width = `${Math.round((epoch + 1) / EPOCHS * 100)}%`;
+                        dbgLog(`Epoche ${epoch + 1}/${EPOCHS} fertig — acc: ${acc.toFixed(4)}, val_acc: ${valAcc.toFixed(4)}`);
+                        await tf.nextFrame();
+                    }
+                }
+            });
+
+            xs.dispose(); ys.dispose();
+
+            try { await model.save(IDB_KEY); dbgLog('Modell in IDB gespeichert'); } catch (_) {}
+
+            epochInfo.className   = 'loaded';
+            epochInfo.textContent = 'Phase 3 — Fertig ✓';
+            bar.style.transition  = 'none';
+            bar.style.width       = '100%';
+            await new Promise(r => setTimeout(r, 800));
+
+            document.getElementById('status-dot').className = 'status-dot ok';
+            document.getElementById('model-status-text').textContent = '✓ Modell bereit';
+            coachEl.textContent = t('ready');
+            overlay.classList.remove('visible');
+            drawCanvas.classList.remove('disabled');
+        }
+
+        async function resetModel() {
+            try {
+                await tf.io.removeModel(IDB_KEY);
+            } catch (_) { /* wasn't cached */ }
+            if (model) { model.dispose(); model = null; }
+            clearDraw();
+            document.getElementById('status-dot').className = 'status-dot spin';
+            document.getElementById('model-status-text').textContent = t('training');
+            coachEl.textContent = t('training');
+            initDraw();
+            dbgT0 = Date.now();
+            trainAndReady();
+        }
+
+        function dbgLog(msg) {
+            const t = Date.now() - dbgT0;
+            const dbg = document.getElementById('debug-list');
+            const placeholder = document.getElementById('debug-empty');
+            if (placeholder) placeholder.remove();
+            const line = document.createElement('div');
+            line.style.cssText = 'color:#00d2ff;';
+            line.textContent = `+${t}ms  ${msg}`;
+            dbg.appendChild(line);
+            console.log(`+${t}ms  ${msg}`);
+        }
+        let dbgT0 = 0;
+
+        function startLab() {
+            dbgT0 = Date.now();
+            dbgLog('START geklickt');
+            document.getElementById('start-overlay').classList.add('hidden');
+            trainAndReady();
+        }
+
+        // ── Boot ────────────────────────────────────────────────────────────────────
         initDraw();
-        trainAndReady();
-    }
-
-    // ── Boot ────────────────────────────────────────────────────────────────────
-    initDraw();
-    trainAndReady();
     </script>
 </body>
 
