@@ -567,7 +567,8 @@
         document.getElementById('draw-hint').textContent = t('draw_hint');
         if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
-        const trainSampleCountStored = +(localStorage.getItem('mnist-td-count') || 50000);
+        let trainSampleCountStored = 50000;
+        try { trainSampleCountStored = +(localStorage.getItem('mnist-td-count') || 50000) || 50000; } catch(_) {}
 
         // ── Sidebar cards ───────────────────────────────────────────────────────────
         document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="result-cards-wrap" style="display:none"></div>');
@@ -665,7 +666,7 @@
         }
         function tdSelect(val) {
             trainSampleCount = val;
-            localStorage.setItem('mnist-td-count', val);
+            try { localStorage.setItem('mnist-td-count', val); } catch(_) {}
             document.getElementById('td-label').textContent = val.toLocaleString('de-DE');
             document.querySelectorAll('.td-opt').forEach(el => {
                 const active = +el.dataset.val === val;
@@ -1082,6 +1083,33 @@
         // ── Geladene Daten — global gespeichert für späteres Training ───────────
         let mnistData = null; // { pixels, labels, n, refSamples }
 
+        function showError(msg, detail) {
+            stopStopwatch();
+            stopMnistAnim();
+            const overlay = document.getElementById('train-overlay');
+            if (overlay) overlay.classList.remove('visible');
+            drawCanvas.classList.remove('disabled');
+            let box = document.getElementById('error-toast');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'error-toast';
+                box.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+                    z-index:9999;background:rgba(30,0,0,0.97);border:1px solid rgba(255,60,60,0.7);
+                    border-radius:12px;padding:16px 24px;max-width:480px;box-shadow:0 0 30px rgba(255,0,0,0.3);
+                    font-family:'Outfit',sans-serif;color:#fff;text-align:center;`;
+                document.body.appendChild(box);
+            }
+            box.innerHTML = `<div style="font-family:'Orbitron',sans-serif;font-size:13px;color:#ff4444;
+                letter-spacing:0.08em;margin-bottom:8px;">⚠ FEHLER</div>
+                <div style="font-size:14px;margin-bottom:6px;">${msg}</div>
+                ${detail ? `<div style="font-size:11px;color:rgba(255,255,255,0.45);word-break:break-all;">${detail}</div>` : ''}
+                <div onclick="document.getElementById('error-toast').style.display='none'"
+                    style="margin-top:12px;cursor:pointer;font-size:11px;color:rgba(255,100,100,0.7);">
+                    SCHLIESSEN</div>`;
+            box.style.display = 'block';
+            console.error('[ANN Lab]', msg, detail);
+        }
+
         async function trainAndReady() {
             const overlay   = document.getElementById('train-overlay');
             const bar       = document.getElementById('train-bar');
@@ -1099,6 +1127,7 @@
                     dbgLog('IDB-Cache gefunden — Modell laden');
                     model = await tf.loadLayersModel(IDB_KEY);
                     dbgLog('Modell aus IDB geladen');
+                    stopStopwatch();
                     showModelCards();
                     coachEl.textContent = t('ready');
                     drawCanvas.classList.remove('disabled');
@@ -1126,11 +1155,12 @@
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => requestAnimationFrame(r));
 
-            dbgLog('Phase 1 start — Daten laden');
+            const isIPad = /iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+            dbgLog(`TF Backend: ${tf.getBackend()} | TD: ${trainSampleCount} | iPad: ${isIPad}`);
 
-            // ── PHASE 1: Daten laden — echte Fortschrittsbalken ──────────────────
-            // onStatus → epochInfo-Text live aktualisieren
-            // onProgress → echter Balken basierend auf geladenen Samples
+            try { // ── äußerer Fehler-Catch für gesamten Trainingsfluss ──────────
+
+            // ── PHASE 1: Daten laden ──────────────────────────────────────────────
             try {
                 mnistData = await loadMNIST(
                     (statusText) => {
@@ -1315,6 +1345,13 @@
             bar.style.width       = '100%';
 
             document.getElementById('btn-training-done').style.display = 'inline-block';
+
+            } catch (err) { // ── äußerer Fehler-Catch ──────────────────────────
+                showError(
+                    'Training fehlgeschlagen',
+                    `${err?.message || err} | Backend: ${tf.getBackend()} | TD: ${trainSampleCount}`
+                );
+            }
         }
 
         function showModelCards() {
