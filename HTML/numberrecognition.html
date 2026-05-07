@@ -192,6 +192,14 @@
             text-shadow: 0 0 40px rgba(173, 255, 47, 0.5);
             min-height: 90px;
             transition: color 0.15s;
+            display: flex !important;
+            width: 100% !important;
+            justify-content: center !important;
+        }
+        #result-conf {
+            display: flex !important;
+            width: 100% !important;
+            justify-content: center !important;
         }
 
         #result-digit.dim {
@@ -438,9 +446,10 @@
                     <div id="train-stopwatch-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:6px 18px;border:1px solid rgba(0,210,255,0.12);border-radius:10px;background:rgba(0,210,255,0.04);margin-top:6px;align-self:center;">
                         <div id="train-stopwatch" class="cyber-number-widget"></div>
                     </div>
+                    <button id="btn-training-done" onclick="finishTraining()" style="display:none;margin-top:12px;padding:10px 36px;font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:0.1em;background:rgba(173,255,47,0.12);border:1px solid rgba(173,255,47,0.5);color:#adff2f;border-radius:8px;cursor:pointer;">OK</button>
                 </div>
                 <div id="draw-hint"></div>
-                <div id="start-overlay">
+                <div id="start-overlay" class="hidden">
                     <div id="start-title">KI ZAHLENERKENNUNG</div>
                     <div id="start-sub">Die KI lernt Ziffern aus 50.000 echten Handschriften — direkt im Browser.</div>
                     <button id="btn-start" onclick="startLab()">START</button>
@@ -1015,6 +1024,7 @@
             } catch (_) { /* kein Cache oder Fehler → normal trainieren */ }
 
             // ── Reset UI für Training ─────────────────────────────────────────────
+            document.getElementById('btn-training-done').style.display = 'none';
             bar.style.cssText     = 'width:0%;background:#adff2f;transition:width 0.3s ease;';
             epochInfo.className   = '';
             epochInfo.textContent = 'Phase 1 — Daten laden …';
@@ -1203,8 +1213,13 @@
             epochInfo.textContent = 'Phase 3 — Fertig ✓';
             bar.style.transition  = 'none';
             bar.style.width       = '100%';
-            await new Promise(r => setTimeout(r, 800));
 
+            document.getElementById('btn-training-done').style.display = 'inline-block';
+        }
+
+        function finishTraining() {
+            document.getElementById('btn-training-done').style.display = 'none';
+            const overlay = document.getElementById('train-overlay');
             coachEl.textContent = t('ready');
             overlay.classList.remove('visible');
             drawCanvas.classList.remove('disabled');
@@ -1244,6 +1259,19 @@
 
         // ── Boot ────────────────────────────────────────────────────────────────────
         initDraw();
+
+        // IDB-Cache prüfen: wenn Modell vorhanden → direkt laden, sonst Start-Overlay zeigen
+        (async () => {
+            try {
+                const cached = await tf.io.listModels();
+                if (IDB_KEY in cached) {
+                    dbgT0 = Date.now();
+                    trainAndReady();
+                    return;
+                }
+            } catch (_) {}
+            document.getElementById('start-overlay').classList.remove('hidden');
+        })();
     </script>
 </body>
 
