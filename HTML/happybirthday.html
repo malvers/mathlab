@@ -81,7 +81,7 @@
         h1 {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: clamp(40px, 9vw, 130px);
+            font-size: clamp(32px, 7.2vw, 104px);
             letter-spacing: clamp(4px, 1vw, 14px);
             line-height: 1;
             text-transform: uppercase;
@@ -156,6 +156,7 @@
         .cake-wrap {
             opacity: 0;
             animation: fadeUp 1s ease 2.2s forwards;
+            margin-top: 50px;
         }
 
         .cake {
@@ -308,8 +309,6 @@
                     <div class="drip d3"></div>
                 </div>
                 <div class="layer bottom">
-                    <div class="drip d2"></div>
-                    <div class="drip d4"></div>
                 </div>
                 <div class="plate"></div>
             </div>
@@ -320,15 +319,12 @@
 
     <script src="js/ui.js?v=4"></script>
     <script>
-        CyberUI.init();
-        // -------------------------------------------------------------
-        // 0. Personalisation: ?name=Anna
-        // -------------------------------------------------------------
-        let name = new URLSearchParams(location.search).get('name');
-        if (!name && location.href.includes('name=')) {
-            try { name = decodeURIComponent(location.href.split('name=')[1].split('&')[0].split('#')[0]); } catch(e){}
+        function getParam(key) {
+            const regex = new RegExp(`[?&]${key}=([^&#]*)`, 'i');
+            const match = location.href.match(regex);
+            return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
         }
-        name = (name || 'Doc Alvers').trim();
+        const name = (getParam('name') || 'Doc Alvers').trim();
 
         const titleEl = document.getElementById('title');
         const words = ['Happy', 'Birthday'];
