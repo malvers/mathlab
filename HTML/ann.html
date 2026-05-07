@@ -358,14 +358,30 @@
             // forward pass
             const activations = forwardPass(normIn(INPUT_VALUES));
 
+            function layerRGB(l) {
+                const t = l / (LAYERS.length - 1);
+                if (t <= 0.5) {
+                    const s = t * 2;
+                    return [Math.round(0   + 255 * s), Math.round(200 + 55 * s), 255];
+                } else {
+                    const s = (t - 0.5) * 2;
+                    return [Math.round(255 - 95  * s), Math.round(255 - 155 * s), 255];
+                }
+            }
+
             // draw connections
             for (let l = 0; l < LAYERS.length - 1; l++) {
+                const [r0,g0,b0] = layerRGB(l);
+                const [r1,g1,b1] = layerRGB(l + 1);
                 for (const src of positions[l]) {
                     for (const dst of positions[l + 1]) {
+                        const grad = ctx.createLinearGradient(src.x, src.y, dst.x, dst.y);
+                        grad.addColorStop(0, `rgba(${r0},${g0},${b0},0.25)`);
+                        grad.addColorStop(1, `rgba(${r1},${g1},${b1},0.25)`);
                         ctx.beginPath();
                         ctx.moveTo(src.x, src.y);
                         ctx.lineTo(dst.x, dst.y);
-                        ctx.strokeStyle = 'rgba(0, 255, 200, 0.08)';
+                        ctx.strokeStyle = grad;
                         ctx.lineWidth = 0.8;
                         ctx.stroke();
                     }
@@ -385,10 +401,7 @@
                     const { x, y } = positions[l][i];
                     const t = (layerActs[i] - actMin) / actRange;
 
-                    let r, g, b;
-                    if (isInput)       { r = 0;   g = 200; b = 255; }
-                    else if (isOutput) { r = 255; g = 100; b = 200; }
-                    else               { r = 0;   g = 255; b = 180; }
+                    const [r, g, b] = layerRGB(l);
 
                     const alpha = 0.15 + t * 0.7;
 
@@ -461,9 +474,12 @@
                 const isOutput = l === LAYERS.length - 1;
                 const isHidden = !isInput && !isOutput;
 
+                const [lr,lg,lb] = layerRGB(l);
+                const layerColor = `rgb(${lr},${lg},${lb})`;
+
                 if (isHidden) {
                     ctx.font = '600 13px Orbitron, sans-serif';
-                    ctx.fillStyle = '#00ffb4';
+                    ctx.fillStyle = layerColor;
                     const labelW = ctx.measureText(LAYER_LABELS[l]).width;
                     ctx.font = '700 13px Orbitron, sans-serif';
                     const numW = ctx.measureText(`(${LAYERS[l]})`).width;
@@ -472,15 +488,15 @@
                     const startX = x - totalW / 2;
                     ctx.font = '600 13px Orbitron, sans-serif';
                     ctx.textAlign = 'left';
-                    ctx.fillStyle = '#00ffb4';
+                    ctx.fillStyle = layerColor;
                     ctx.fillText(LAYER_LABELS[l], startX, labelY);
                     ctx.font = '700 13px Orbitron, sans-serif';
                     ctx.fillStyle = '#ffffff';
                     ctx.fillText(`(${LAYERS[l]})`, startX + labelW + gap, labelY);
                     ctx.textAlign = 'center';
                 } else {
-                    const color = isInput ? '#00c8ff' : '#ff64c8';
-                    ctx.font = '600 13px Orbitron, sans-serif';
+                    const color = layerColor;
+                    ctx.font = '600 17px Orbitron, sans-serif';
                     ctx.fillStyle = color;
                     const lw = ctx.measureText(LAYER_LABELS[l]).width;
                     const nw = ctx.measureText(`(${LAYERS[l]})`).width;
@@ -499,12 +515,12 @@
                     const atMin = LAYERS[l] <= 1;
 
                     drawTriangle(x, triUp, triSize, true);
-                    ctx.fillStyle = atMax ? 'rgba(0,255,180,0.2)' : '#00ffb4';
+                    ctx.fillStyle = atMax ? layerColor.replace('rgb', 'rgba').replace(')', ',0.2)') : layerColor;
                     ctx.fill();
                     if (!atMax) triangleZones.push({ layer: l, dir: +1, x, y: triUp, hit: triSize + 4 });
 
                     drawTriangle(x, triDown, triSize, false);
-                    ctx.fillStyle = atMin ? 'rgba(0,255,180,0.2)' : '#00ffb4';
+                    ctx.fillStyle = atMin ? layerColor.replace('rgb', 'rgba').replace(')', ',0.2)') : layerColor;
                     ctx.fill();
                     if (!atMin) triangleZones.push({ layer: l, dir: -1, x, y: triDown, hit: triSize + 4 });
                 }
