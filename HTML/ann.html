@@ -113,59 +113,70 @@
         const LAYER_LABELS = ['Input', 'Hidden 1', 'Hidden 2', 'Hidden 3', 'Output'];
         let INPUT_VALUES = [2.57, 4.72];
 
-        // --- network weights ---
-        function seededRng(seed) {
-            let s = seed >>> 0;
-            return () => {
-                s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
-                s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
-                s ^= s >>> 16;
-                return ((s >>> 0) / 0xffffffff);
-            };
-        }
-
-        let weights = [], biases = [];
-        function rebuildWeights() {
-            const rng = seededRng(1337);
-            weights = []; biases = [];
-            for (let l = 0; l < LAYERS.length - 1; l++) {
-                const rows = LAYERS[l + 1], cols = LAYERS[l];
-                const scale = Math.sqrt(1 / cols);
-                weights.push(Array.from({ length: rows }, () =>
-                    Array.from({ length: cols }, () => (rng() * 2 - 1) * scale)));
-                biases.push(Array.from({ length: rows }, () => (rng() * 2 - 1) * 0.1));
-            }
-        }
-        rebuildWeights();
-
-        const actFn  = x => Math.tanh(x);
-        const actFnD = x => { const t = Math.tanh(x); return 1 - t * t; };
-
-        // normalization
+        // --- normalization ---
         const INORM = 5;
         const ONORM = { add: 10, sub: 10, mul: 25, div: 10 };
         const normIn = inputs => inputs.map(x => x / INORM);
         const denormOut = y => y * (ONORM[selectedOp.id] || 10);
-
-        function forwardFull(inputs) {
-            const zs = [], acts = [inputs];
-            let cur = inputs;
-            for (let l = 0; l < weights.length; l++) {
-                const z = weights[l].map((row, r) => row.reduce((s, w, c) => s + w * cur[c], biases[l][r]));
-                zs.push(z);
-                const a = l < weights.length - 1 ? z.map(actFn) : z;
-                acts.push(a); cur = a;
-            }
-            return { zs, acts };
+        function getNormTarget(x1, x2) {
+            return selectedOp.id === 'add' ? (x1+x2)/ONORM.add
+                 : selectedOp.id === 'sub' ? (x1-x2)/ONORM.sub
+                 : selectedOp.id === 'mul' ? (x1*x2)/ONORM.mul
+                 : Math.max(-1, Math.min(1, x1/x2/ONORM.div));
         }
 
-        function forwardPass(inputs) { return forwardFull(inputs).acts; }
+        // --- TF.js model ---
+        let model = null, intermediateModel = null, optimizer = null;
+        let learningRate = 0.01;
+
+        function buildModel() {
+            try {
+                if (intermediateModel) intermediateModel.dispose();
+                if (model) model.dispose();
+                optimizer = tf.train.adam(learningRate);
+                model = tf.sequential();
+                for (let l = 1; l < LAYERS.length; l++) {
+                    model.add(tf.layers.dense({
+                        units: LAYERS[l],
+                        activation: l < LAYERS.length - 1 ? 'tanh' : 'linear',
+                        kernelInitializer: 'glorotNormal',
+                        biasInitializer: 'zeros',
+                        ...(l === 1 ? { inputShape: [LAYERS[0]] } : {})
+                    }));
+                }
+                const denseOutputs = model.layers
+                    .filter(l => l.getClassName() === 'Dense')
+                    .map(l => l.output);
+                intermediateModel = tf.model({ inputs: model.inputs, outputs: denseOutputs });
+            } catch(e) {
+                console.error('buildModel failed:', e);
+                model = null; intermediateModel = null;
+            }
+        }
+
+        function forwardPass(normalizedInputs) {
+            if (!intermediateModel) {
+                return LAYERS.map(n => new Array(n).fill(0.5));
+            }
+            try {
+                return tf.tidy(() => {
+                    const x = tf.tensor2d([normalizedInputs]);
+                    const raw = intermediateModel.predict(x);
+                    const outs = Array.isArray(raw) ? raw : [raw];
+                    const acts = [normalizedInputs];
+                    for (const o of outs) acts.push(Array.from(o.dataSync()));
+                    return acts;
+                });
+            } catch(e) {
+                console.error('forwardPass failed:', e);
+                return LAYERS.map(n => new Array(n).fill(0.5));
+            }
+        }
 
         // --- training ---
         let isTraining = false;
         let trainEpoch = 0;
         let lossHistory = [];
-        let learningRate = 0.01;
         let rafId = null;
 
         function resetTraining() {
@@ -174,63 +185,30 @@
             lossHistory = [];
         }
 
-        function computeGradients(inputs, target) {
-            const L = weights.length;
-            const { zs, acts } = forwardFull(inputs);
-            const dW = weights.map(W => W.map(row => new Float64Array(row.length)));
-            const dB = biases.map(b => new Float64Array(b.length));
-            let delta = [2 * (acts[L][0] - target)];
-            for (let l = L - 1; l >= 0; l--) {
-                for (let r = 0; r < LAYERS[l + 1]; r++) {
-                    dB[l][r] = delta[r];
-                    for (let c = 0; c < LAYERS[l]; c++) dW[l][r][c] = delta[r] * acts[l][c];
-                }
-                if (l > 0) {
-                    delta = Array.from({ length: LAYERS[l] }, (_, c) => {
-                        let sum = 0;
-                        for (let r = 0; r < LAYERS[l + 1]; r++) sum += weights[l][r][c] * delta[r];
-                        return sum * actFnD(zs[l - 1][c]);
-                    });
-                }
-            }
-            return { dW, dB, loss: (acts[L][0] - target) ** 2 };
-        }
-
         function trainStep() {
             const BS = 32;
-            const dWs = weights.map(W => W.map(row => new Float64Array(row.length)));
-            const dBs = biases.map(b => new Float64Array(b.length));
-            let totalLoss = 0, count = 0;
+            const xs = [], ys = [];
+            let count = 0;
             while (count < BS) {
                 const x1 = (Math.random() * 10) - 5;
                 const x2 = (Math.random() * 10) - 5;
                 if (selectedOp.id === 'div' && Math.abs(x2) < 0.5) continue;
-                const t = selectedOp.id === 'add' ? (x1+x2)/ONORM.add
-                        : selectedOp.id === 'sub' ? (x1-x2)/ONORM.sub
-                        : selectedOp.id === 'mul' ? (x1*x2)/ONORM.mul
-                        : Math.max(-1, Math.min(1, x1/x2/ONORM.div));
-                const { dW, dB, loss } = computeGradients(normIn([x1, x2]), t);
-                totalLoss += loss;
-                for (let l = 0; l < weights.length; l++) {
-                    for (let r = 0; r < weights[l].length; r++) {
-                        for (let c = 0; c < weights[l][r].length; c++) dWs[l][r][c] += dW[l][r][c];
-                        dBs[l][r] += dB[l][r];
-                    }
-                }
+                xs.push([x1 / INORM, x2 / INORM]);
+                ys.push([getNormTarget(x1, x2)]);
                 count++;
             }
-            const clip = 5.0;
-            for (let l = 0; l < weights.length; l++) {
-                for (let r = 0; r < weights[l].length; r++) {
-                    for (let c = 0; c < weights[l][r].length; c++) {
-                        const g = Math.max(-clip, Math.min(clip, dWs[l][r][c] / BS));
-                        weights[l][r][c] -= learningRate * g;
-                    }
-                    const gb = Math.max(-clip, Math.min(clip, dBs[l][r] / BS));
-                    biases[l][r] -= learningRate * gb;
-                }
-            }
-            return totalLoss / BS;
+            let lossVal = 0;
+            tf.tidy(() => {
+                const xT = tf.tensor2d(xs);
+                const yT = tf.tensor2d(ys);
+                optimizer.minimize(() => {
+                    const pred = model.predict(xT);
+                    const loss = tf.losses.meanSquaredError(yT, pred);
+                    lossVal = loss.dataSync()[0];
+                    return loss;
+                });
+            });
+            return lossVal;
         }
 
         function trainingLoop() {
@@ -255,6 +233,8 @@
             const btn = document.getElementById('train-btn');
             if (btn) btn.textContent = 'TRAIN';
         }
+
+        buildModel();
 
         const OPS = [
             { id: 'add', label: '+ Addition',      sym: '+' },
@@ -284,7 +264,7 @@
         function changeHidden(idx, delta) {
             LAYERS[idx] = Math.max(1, Math.min(20, LAYERS[idx] + delta));
             localStorage.setItem('ann_layers', JSON.stringify(LAYERS));
-            rebuildWeights();
+            buildModel();
             resetTraining();
             draw();
         }
@@ -318,12 +298,12 @@
         CyberUI.createCard('ui-container', 'Training', `
             <div style="display:flex;gap:8px;margin-bottom:8px;">
                 <button id="train-btn" class="cyber-btn" style="flex:1" onclick="isTraining ? stopTraining() : startTraining()">TRAIN</button>
-                <button class="cyber-btn" onclick="rebuildWeights();resetTraining();draw()">RESET</button>
+                <button class="cyber-btn" onclick="buildModel();resetTraining();draw()">RESET</button>
             </div>
             <div id="lr-slider"></div>
             <div id="train-info" style="font-family:Orbitron,sans-serif;font-size:10px;color:rgba(200,220,255,0.6);margin-top:6px;"></div>
         `, 'var(--neon-pink)');
-        CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; }, 'var(--neon-pink)');
+        CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; optimizer = tf.train.adam(v); }, 'var(--neon-pink)');
 
         function getNodePositions(w, h) {
             const positions = [];
@@ -460,7 +440,7 @@
 
             // layer labels + triangles for hidden layers
             triangleZones = [];
-            ctx.font = '600 16px Orbitron, sans-serif';
+            ctx.font = '600 18px Orbitron, sans-serif';
             ctx.textAlign = 'center';
             const labelY = 34 + h * 0.06;
             const countY = 68 + h * 0.06;
@@ -478,36 +458,16 @@
                 const layerColor = `rgb(${lr},${lg},${lb})`;
 
                 if (isHidden) {
-                    ctx.font = '600 13px Orbitron, sans-serif';
-                    ctx.fillStyle = layerColor;
-                    const labelW = ctx.measureText(LAYER_LABELS[l]).width;
-                    ctx.font = '700 13px Orbitron, sans-serif';
-                    const numW = ctx.measureText(`(${LAYERS[l]})`).width;
-                    const gap = 8;
-                    const totalW = labelW + gap + numW;
-                    const startX = x - totalW / 2;
-                    ctx.font = '600 13px Orbitron, sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillStyle = layerColor;
-                    ctx.fillText(LAYER_LABELS[l], startX, labelY);
-                    ctx.font = '700 13px Orbitron, sans-serif';
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillText(`(${LAYERS[l]})`, startX + labelW + gap, labelY);
+                    const countStr = `${LAYERS[l]}`;
+                    ctx.font = '700 17px Orbitron, sans-serif';
                     ctx.textAlign = 'center';
+                    ctx.fillStyle = layerColor;
+                    ctx.fillText(countStr, x, labelY);
                 } else {
-                    const color = layerColor;
                     ctx.font = '600 17px Orbitron, sans-serif';
-                    ctx.fillStyle = color;
-                    const lw = ctx.measureText(LAYER_LABELS[l]).width;
-                    const nw = ctx.measureText(`(${LAYERS[l]})`).width;
-                    const gap = 8;
-                    const total = lw + gap + nw;
-                    const sx = x - total / 2;
-                    ctx.textAlign = 'left';
-                    ctx.fillText(LAYER_LABELS[l], sx, labelY);
-                    ctx.fillStyle = 'rgba(200,220,255,0.45)';
-                    ctx.fillText(`(${LAYERS[l]})`, sx + lw + gap, labelY);
+                    ctx.fillStyle = layerColor;
                     ctx.textAlign = 'center';
+                    ctx.fillText(LAYER_LABELS[l], x, labelY);
                 }
 
                 if (isHidden) {
