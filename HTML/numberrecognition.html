@@ -266,6 +266,7 @@
         }
 
         /* ── Status ── */
+        /*
         .instrument-card.collapsible .toggle-icon {
             font-size: 0.7rem !important;
             line-height: 1 !important;
@@ -280,6 +281,7 @@
             gap: 8px;
             min-height: 18px;
         }
+        */
 
         .status-dot {
             display: inline-block;
@@ -432,6 +434,9 @@
                         <div id="train-seen" class="cyber-number-widget"></div>
                         <span id="train-seen-label"
                             style="font-family:'Orbitron',sans-serif;font-size:17px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
+                    </div>
+                    <div id="train-stopwatch-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:6px 18px;border:1px solid rgba(0,210,255,0.12);border-radius:10px;background:rgba(0,210,255,0.04);margin-top:6px;align-self:center;">
+                        <div id="train-stopwatch" class="cyber-number-widget"></div>
                     </div>
                 </div>
                 <div id="draw-hint"></div>
@@ -680,6 +685,29 @@
                 cancelAnimationFrame(animInterval);
                 animInterval = null;
             }
+        }
+
+        let swRaf = null, swStart = 0;
+        function swFmt(ms) {
+            const s = Math.floor(ms / 1000);
+            const mm = String(Math.floor(s / 60)).padStart(2, '0');
+            const ss = String(s % 60).padStart(2, '0');
+            return mm + ':' + ss;
+        }
+        function startStopwatch() {
+            stopStopwatch();
+            swStart = performance.now();
+            function tick() {
+                CyberUI.updateNumberWidget('train-stopwatch', swFmt(performance.now() - swStart), 0, 0, {
+                    fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
+                    color: '#00d2ff'
+                });
+                swRaf = requestAnimationFrame(tick);
+            }
+            swRaf = requestAnimationFrame(tick);
+        }
+        function stopStopwatch() {
+            if (swRaf) { cancelAnimationFrame(swRaf); swRaf = null; }
         }
 
         function initDraw() {
@@ -969,9 +997,24 @@
             const epochInfo = document.getElementById('train-epoch-info');
             const seenLabel = document.getElementById('train-seen-label');
 
-            // ── Reset UI ─────────────────────────────────────────────────────────
+            // ── IDB-Cache prüfen (vor Overlay) ───────────────────────────────────
             stopMnistAnim();
+            startStopwatch();
             mnistData = null;
+            drawCanvas.classList.add('disabled');
+            try {
+                const cached = await tf.io.listModels();
+                if (IDB_KEY in cached) {
+                    dbgLog('IDB-Cache gefunden — Modell laden');
+                    model = await tf.loadLayersModel(IDB_KEY);
+                    dbgLog('Modell aus IDB geladen');
+                    coachEl.textContent = t('ready');
+                    drawCanvas.classList.remove('disabled');
+                    return;
+                }
+            } catch (_) { /* kein Cache oder Fehler → normal trainieren */ }
+
+            // ── Reset UI für Training ─────────────────────────────────────────────
             bar.style.cssText     = 'width:0%;background:#adff2f;transition:width 0.3s ease;';
             epochInfo.className   = '';
             epochInfo.textContent = 'Phase 1 — Daten laden …';
@@ -984,13 +1027,11 @@
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
                 color: 'rgba(255,255,255,0.35)', thousandsSep: true
             });
-            drawCanvas.classList.add('disabled');
             overlay.classList.add('visible');
 
             // Zwei Frames warten bis display:flex wirklich gerendert ist
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => requestAnimationFrame(r));
-
 
             dbgLog('Phase 1 start — Daten laden');
 
@@ -1054,7 +1095,7 @@
 
             bar.style.width       = '100%';
             epochInfo.className   = 'loaded';
-            epochInfo.textContent = `Phase 2 — Daten bereit ✓  (${n.toLocaleString('de')} Beispiele)`;
+            epochInfo.textContent = 'Phase 2 — Daten bereit ✓';
             CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
                 color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)', thousandsSep: true

@@ -1927,12 +1927,14 @@ class CyberUI {
             str = (typeof value === 'number') ? value.toFixed(decimals) : String(value);
         }
         const parts = str.split('.');
-        while (parts[0].replace(/\./g, '').length < minDigits) parts[0] = ' ' + parts[0];
-        str = parts.join('.');
+        if (!styleConfig?.thousandsSep) {
+            while (parts[0].replace(/\./g, '').length < minDigits) parts[0] = ' ' + parts[0];
+            str = parts.join('.');
+        }
 
         let html = '';
         for (let char of str) {
-            if (char === '.' || char === ',' || char === '-') {
+            if (char === '.' || char === ',' || char === '-' || char === ':') {
                 html += `<div class="cyber-digit-box separator">${char}</div>`;
             } else if (char === ' ') {
                 html += `<div class="cyber-digit-box" style="opacity:0;">0</div>`;
