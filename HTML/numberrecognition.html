@@ -126,18 +126,33 @@
         #load-spinner { pointer-events: none; }
 
         .squiri {
+            position: relative;
             width: 80px;
             height: 80px;
-            border-radius: 30px;
-            border: 4px solid transparent;
-            border-top-color: #00d2ff;
-            border-right-color: rgba(0,210,255,0.4);
-            animation: squiri-spin 1s cubic-bezier(0.6,0,0.4,1) infinite;
-            box-shadow: 0 0 20px rgba(0,210,255,0.3);
         }
 
-        @keyframes squiri-spin {
-            to { transform: rotate(360deg); }
+        .squiri span {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00d2ff;
+            box-shadow: 0 0 8px rgba(0,210,255,0.8);
+            animation: chase-fade 1.2s ease-in-out infinite;
+        }
+
+        .squiri span:nth-child(1) { top: 0;    left: 35px; animation-delay: 0s; }
+        .squiri span:nth-child(2) { top: 11px; left: 62px; animation-delay: -1.05s; }
+        .squiri span:nth-child(3) { top: 35px; left: 70px; animation-delay: -0.9s; }
+        .squiri span:nth-child(4) { top: 59px; left: 62px; animation-delay: -0.75s; }
+        .squiri span:nth-child(5) { top: 70px; left: 35px; animation-delay: -0.6s; }
+        .squiri span:nth-child(6) { top: 59px; left: 8px;  animation-delay: -0.45s; }
+        .squiri span:nth-child(7) { top: 35px; left: 0;    animation-delay: -0.3s; }
+        .squiri span:nth-child(8) { top: 11px; left: 8px;  animation-delay: -0.15s; }
+
+        @keyframes chase-fade {
+            0%, 100% { opacity: 0.15; transform: scale(0.7); }
+            50%       { opacity: 1;    transform: scale(1.2); }
         }
 
         #mnist-anim-digit {
@@ -253,14 +268,18 @@
 
         /* ── Status ── */
         .instrument-card.collapsible .toggle-icon {
-            font-size: 0.8rem !important;
-            line-height: 0 !important;
-            margin-top: -1px;
+            font-size: 0.7rem !important;
+            line-height: 1 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .instrument-title {
             display: flex !important;
             align-items: center !important;
+            gap: 8px;
+            min-height: 18px;
         }
 
         .status-dot {
@@ -403,7 +422,7 @@
                     <div id="mnist-anim-wrap" style="position:relative;width:280px;height:280px;">
                         <canvas id="mnist-anim" width="280" height="280" style="width:280px;height:280px;"></canvas>
                         <div id="load-spinner" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                            <div class="squiri"></div>
+                            <div class="squiri"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
                         </div>
                     </div>
                     <div id="mnist-anim-digit"></div>
@@ -413,7 +432,7 @@
                     <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;padding:8px 18px;border:1px solid rgba(0,210,255,0.2);border-radius:10px;background:rgba(0,210,255,0.06);margin-top:8px;align-self:center;">
                         <div id="train-seen" class="cyber-number-widget"></div>
                         <span id="train-seen-label"
-                            style="font-family:'Orbitron',sans-serif;font-size:21px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
+                            style="font-family:'Orbitron',sans-serif;font-size:15px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
                     </div>
                 </div>
                 <div id="draw-hint"></div>
@@ -552,13 +571,8 @@
     `);
 
         CyberUI.createCard('ui-container', t('card_model'), `
-        <div style="margin-bottom:5px;">
-            <span class="status-dot spin" id="status-dot"></span>
-            <span id="model-status-text">${t('training')}</span>
-        </div>
-        <div id="arch-text">${t('arch').replace('\n', '<br>')}</div>
         <button class="cyber-btn" onclick="resetModel()"
-            style="width:100%;margin-top:12px;border-color:rgba(255,100,100,0.4);color:rgba(255,150,150,0.9);font-size:10px;">
+            style="width:100%;margin-top:12px;border-color:rgba(0,210,255,0.35);">
             RESET MODEL
         </button>
     `);
@@ -806,7 +820,7 @@
         }
 
         function barColor(v) {
-            return `hsl(${Math.round(v * 1.2)}, 85%, 50%)`;
+            return `hsl(${Math.round(Math.pow(v / 100, 2) * 120)}, 85%, 50%)`;
         }
 
         function updateBars(probs) {
@@ -876,7 +890,7 @@
             const maxRow = selected[selected.length - 1];
 
             // 3. Image sprite — via fetch() um Browser-Cache zu umgehen
-            onStatus('Bilder laden … (~12 MB, kein Cache)');
+            onStatus('Bilder laden …');
             await tf.nextFrame();
             const imgRes = await fetch(MNIST_IMG_URL, { cache: 'no-store' });
             const imgBlob = await imgRes.blob();
@@ -901,8 +915,8 @@
             const labels = new Uint8Array(n);
             const refSamples = new Array(10).fill(null);
 
-            // Chunked extraction — yield every 5000 samples so browser can render
-            const CHUNK = 5000;
+            // Chunked extraction — yield every 1000 samples so browser can render
+            const CHUNK = 1000;
             for (let dst = 0; dst < n; dst++) {
                 const srcRow = selected[dst];
                 const cls = allLabels[srcRow];
@@ -1038,8 +1052,6 @@
             } catch (err) {
                 overlay.classList.remove('visible');
                 drawCanvas.classList.remove('disabled');
-                document.getElementById('status-dot').className = 'status-dot err';
-                document.getElementById('model-status-text').textContent = '✗ Daten nicht ladbar (kein Internet?)';
                 coachEl.textContent = 'MNIST-Daten konnten nicht geladen werden.';
                 console.error('[ANN Lab] MNIST load failed:', err);
                 return;
@@ -1056,9 +1068,6 @@
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
                 color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)'
             });
-            document.getElementById('status-dot').className = 'status-dot ok';
-            document.getElementById('model-status-text').textContent =
-                `✓ ${n.toLocaleString('de')} Beispiele geladen — bereit zum Training`;
             coachEl.textContent = 'Daten geladen — Animation läuft …';
             await new Promise(r => setTimeout(r, 1000));
 
@@ -1096,16 +1105,18 @@
             startMnistAnim(pixels, labels, nTrain);
 
             const N_ACTUAL = Math.floor(N_TRAIN * 0.9);
-            const batchesPerEpoch = Math.ceil(N_ACTUAL / 128);
+            const batchesPerEpoch = Math.ceil(N_ACTUAL / 256);
             const { refSamples } = mnistData;
             let currentEpoch = 0;
+            let epochStartTime = 0.0;
             await model.fit(xs, ys, {
                 epochs: EPOCHS,
-                batchSize: 128,
+                batchSize: 256,
                 validationSplit: 0.1,
                 callbacks: {
                     onEpochBegin: async (epoch) => {
                         currentEpoch = epoch;
+                        epochStartTime = performance.now();
                         epochInfo.textContent = `Phase 3 — Trainingsdurchlauf ${epoch + 1} von ${EPOCHS}`;
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.round(epoch / EPOCHS * 100)}%`;
@@ -1115,13 +1126,15 @@
                         const epochFrac = (currentEpoch + (batch + 1) / batchesPerEpoch) / EPOCHS;
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
-                        const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 128, (currentEpoch + 1) * N_ACTUAL);
+                        const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 256, (currentEpoch + 1) * N_ACTUAL);
                         CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
                             fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff'
                         });
                         await tf.nextFrame();
                     },
                     onEpochEnd: async (epoch) => {
+                        const ms = performance.now() - epochStartTime;
+                        dbgLog(`Epoch ${epoch + 1}  ${ms.toFixed(3)} ms`);
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.round((epoch + 1) / EPOCHS * 100)}%`;
                         // Bar-i = Konfidenz des Modells für Klasse i (je ein Referenzbild pro Ziffer)
@@ -1160,8 +1173,6 @@
             bar.style.width       = '100%';
             await new Promise(r => setTimeout(r, 800));
 
-            document.getElementById('status-dot').className = 'status-dot ok';
-            document.getElementById('model-status-text').textContent = '✓ Modell bereit';
             coachEl.textContent = t('ready');
             overlay.classList.remove('visible');
             drawCanvas.classList.remove('disabled');
@@ -1173,8 +1184,6 @@
             } catch (_) { /* wasn't cached */ }
             if (model) { model.dispose(); model = null; }
             clearDraw();
-            document.getElementById('status-dot').className = 'status-dot spin';
-            document.getElementById('model-status-text').textContent = t('training');
             coachEl.textContent = t('training');
             initDraw();
             dbgT0 = Date.now();
