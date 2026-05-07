@@ -82,6 +82,13 @@
             color: var(--neon-blue, #00d2ff);
             letter-spacing: 0.1em;
             text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+            padding: 8px 18px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 210, 255, 0.06);
+            align-self: center;
+            text-align: center;
+            white-space: nowrap;
         }
 
         #train-epoch-info {
@@ -246,8 +253,14 @@
 
         /* ── Status ── */
         .instrument-card.collapsible .toggle-icon {
-            font-size: 1rem !important;
-            line-height: 1 !important;
+            font-size: 0.8rem !important;
+            line-height: 0 !important;
+            margin-top: -1px;
+        }
+
+        .instrument-title {
+            display: flex !important;
+            align-items: center !important;
         }
 
         .status-dot {
@@ -397,10 +410,10 @@
                     <div class="train-bar-bg">
                         <div id="train-bar"></div>
                     </div>
-                    <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;margin-top:8px;">
+                    <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;padding:8px 18px;border:1px solid rgba(0,210,255,0.2);border-radius:10px;background:rgba(0,210,255,0.06);margin-top:8px;align-self:center;">
                         <div id="train-seen" class="cyber-number-widget"></div>
                         <span id="train-seen-label"
-                            style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;">Beispiele geladen</span>
+                            style="font-family:'Orbitron',sans-serif;font-size:21px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
                     </div>
                 </div>
                 <div id="draw-hint"></div>
@@ -589,7 +602,7 @@
                 ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(off, 0, 0, 280, 280);
                 lbl.textContent = labels[idx];
-            }, 80);
+            }, 140);
         }
 
         // ── Sequenzielle 10×10 Thumbnail-Grid-Animation nach Phase 1 ───────────────
@@ -792,16 +805,24 @@
             ctx.drawImage(off, 0, 0, 56, 56);
         }
 
+        function barColor(v) {
+            return `hsl(${Math.round(v * 1.2)}, 85%, 50%)`;
+        }
+
         function updateBars(probs) {
             const top = probs.indexOf(Math.max(...probs));
             for (let i = 0; i <= 9; i++) {
-                const pct = (probs[i] * 100).toFixed(1);
+                const v = probs[i] * 100;
+                const pct = v.toFixed(1);
+                const color = barColor(v);
                 const b = document.getElementById('bar-' + i);
                 b.style.width = pct + '%';
-                b.classList.toggle('top', i === top);
+                b.style.background = color;
+                b.classList.remove('top');
                 const p = document.getElementById('pct-' + i);
                 p.textContent = pct + '%';
-                p.classList.toggle('top', i === top);
+                p.style.color = color;
+                p.classList.remove('top');
             }
             const rdEl = document.getElementById('result-digit');
             rdEl.className = 'cyber-number-widget';
@@ -891,11 +912,11 @@
                 if (refSamples[cls] === null)
                     refSamples[cls] = pixels.slice(dst * 784, dst * 784 + 784);
                 if ((dst + 1) % CHUNK === 0) {
-                    if (onProgress) onProgress(dst + 1, n);
+                    if (onProgress) onProgress(dst + 1, n, pixels);
                     await tf.nextFrame();
                 }
             }
-            if (onProgress) onProgress(n, n);
+            if (onProgress) onProgress(n, n, pixels);
 
             return { pixels, labels, n, refSamples };
         }
@@ -947,7 +968,7 @@
             seenLabel.textContent = 'Beispiele geladen';
             seenLabel.style.color = 'rgba(255,255,255,0.35)';
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '11px', digitWidth: '7px', digitHeight: '13px',
+                fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
                 color: 'rgba(255,255,255,0.35)'
             });
             drawCanvas.classList.add('disabled');
@@ -956,6 +977,15 @@
             // Zwei Frames warten bis display:flex wirklich gerendert ist
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => requestAnimationFrame(r));
+
+            // Beide Boxen auf 110% der natürlichen Breite der unteren setzen
+            const seenWrap = document.getElementById('train-seen-wrap');
+            seenWrap.style.width = '';
+            document.getElementById('train-label').style.width = '';
+            await new Promise(r => requestAnimationFrame(r));
+            const boxW = Math.round(seenWrap.offsetWidth * 1.1);
+            seenWrap.style.width = boxW + 'px';
+            document.getElementById('train-label').style.width = boxW + 'px';
 
             dbgLog('Phase 1 start — Daten laden');
 
@@ -966,15 +996,43 @@
                 mnistData = await loadMNIST(
                     (statusText) => {
                         epochInfo.textContent = 'Phase 1 — ' + statusText;
+                        if (statusText.includes('extra')) {
+                            document.getElementById('load-spinner').style.display = 'none';
+                        }
                     },
-                    (done, total) => {
+                    (done, total, currentPixels) => {
                         const pct = Math.round((done / total) * 100);
                         bar.style.width = pct + '%';
                         seenLabel.style.color = '#adff2f';
+                        seenLabel.style.textShadow = '0 0 10px rgba(173,255,47,0.6)';
                         CyberUI.updateNumberWidget('train-seen', done, 0, 6, {
-                            fontSize: '11px', digitWidth: '7px', digitHeight: '13px',
-                            color: '#adff2f'
+                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
+                            color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)'
                         });
+                        
+                        // Zeichne 10x10 Grid der aktuell geladenen Daten
+                        const ac = document.getElementById('mnist-anim');
+                        const ctx = ac.getContext('2d');
+                        const COLS = 10, ROWS = 10, CELL = 28;
+                        const BATCH = COLS * ROWS;
+                        const gridData = ctx.createImageData(280, 280);
+                        const startIdx = Math.max(0, done - BATCH);
+                        
+                        for (let b = 0; b < BATCH; b++) {
+                            const idx = startIdx + b;
+                            const col = b % COLS;
+                            const row = Math.floor(b / COLS);
+                            const base = idx * 784;
+                            for (let py = 0; py < CELL; py++) {
+                                for (let px = 0; px < CELL; px++) {
+                                    const v = Math.round(currentPixels[base + py * CELL + px] * 255);
+                                    const di = ((row * CELL + py) * 280 + col * CELL + px) * 4;
+                                    gridData.data[di] = gridData.data[di + 1] = gridData.data[di + 2] = v;
+                                    gridData.data[di + 3] = 255;
+                                }
+                            }
+                        }
+                        ctx.putImageData(gridData, 0, 0);
                     }
                 );
             } catch (err) {
@@ -995,7 +1053,8 @@
             epochInfo.className   = 'loaded';
             epochInfo.textContent = `Phase 2 — Daten bereit ✓  (${n.toLocaleString('de')} Beispiele)`;
             CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
-                fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#adff2f'
+                fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
+                color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)'
             });
             document.getElementById('status-dot').className = 'status-dot ok';
             document.getElementById('model-status-text').textContent =
@@ -1032,7 +1091,7 @@
             seenLabel.textContent = 'Beispiele trainiert';
             seenLabel.style.color = '#00d2ff';
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#00d2ff'
+                fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff'
             });
             startMnistAnim(pixels, labels, nTrain);
 
@@ -1058,7 +1117,7 @@
                         bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
                         const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 128, (currentEpoch + 1) * N_ACTUAL);
                         CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
-                            fontSize: '11px', digitWidth: '7px', digitHeight: '13px', color: '#00d2ff'
+                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff'
                         });
                         await tf.nextFrame();
                     },
@@ -1077,7 +1136,7 @@
                         for (let i = 0; i < 10; i++) {
                             const v = classConf[i] * 100;
                             const pct = v.toFixed(1);
-                            const color = v >= 99 ? '#adff2f' : v < 10 ? '#ff4444' : 'rgba(0,210,255,0.55)';
+                            const color = barColor(v);
                             const b = document.getElementById('bar-' + i);
                             const p = document.getElementById('pct-' + i);
                             b.style.width = pct + '%';
