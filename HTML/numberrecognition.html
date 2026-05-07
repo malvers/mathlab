@@ -88,7 +88,6 @@
             background: rgba(0, 210, 255, 0.06);
             align-self: center;
             text-align: center;
-            white-space: nowrap;
         }
 
         #train-epoch-info {
@@ -432,7 +431,7 @@
                     <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;padding:8px 18px;border:1px solid rgba(0,210,255,0.2);border-radius:10px;background:rgba(0,210,255,0.06);margin-top:8px;align-self:center;">
                         <div id="train-seen" class="cyber-number-widget"></div>
                         <span id="train-seen-label"
-                            style="font-family:'Orbitron',sans-serif;font-size:15px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
+                            style="font-family:'Orbitron',sans-serif;font-size:17px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
                     </div>
                 </div>
                 <div id="draw-hint"></div>
@@ -992,14 +991,6 @@
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => requestAnimationFrame(r));
 
-            // Beide Boxen auf 110% der natürlichen Breite der unteren setzen
-            const seenWrap = document.getElementById('train-seen-wrap');
-            seenWrap.style.width = '';
-            document.getElementById('train-label').style.width = '';
-            await new Promise(r => requestAnimationFrame(r));
-            const boxW = Math.round(seenWrap.offsetWidth * 1.1);
-            seenWrap.style.width = boxW + 'px';
-            document.getElementById('train-label').style.width = boxW + 'px';
 
             dbgLog('Phase 1 start — Daten laden');
 
@@ -1197,7 +1188,7 @@
             if (placeholder) placeholder.remove();
             const line = document.createElement('div');
             line.style.cssText = 'color:#00d2ff;';
-            line.textContent = `+${t}ms  ${msg}`;
+            line.textContent = msg;
             dbg.appendChild(line);
             console.log(`+${t}ms  ${msg}`);
         }

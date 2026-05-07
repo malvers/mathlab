@@ -1920,9 +1920,14 @@ class CyberUI {
         const container = document.getElementById(containerId);
         if (!container) return;
 
-        let str = (typeof value === 'number') ? value.toFixed(decimals) : String(value);
+        let str;
+        if (typeof value === 'number' && styleConfig?.thousandsSep) {
+            str = Math.floor(value).toLocaleString('de-DE'); // z.B. 45.000
+        } else {
+            str = (typeof value === 'number') ? value.toFixed(decimals) : String(value);
+        }
         const parts = str.split('.');
-        while (parts[0].length < minDigits) parts[0] = ' ' + parts[0];
+        while (parts[0].replace(/\./g, '').length < minDigits) parts[0] = ' ' + parts[0];
         str = parts.join('.');
 
         let html = '';
