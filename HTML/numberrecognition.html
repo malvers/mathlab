@@ -546,8 +546,8 @@
 
         // ── Sidebar cards ───────────────────────────────────────────────────────────
         CyberUI.createCard('ui-container', t('card_result'), `
-        <div id="result-digit" class="cyber-number-widget dim" style="justify-content:center;min-height:90px;"></div>
-        <div id="result-conf" class="cyber-number-widget" style="justify-content:center;min-height:20px;margin-top:5px;"></div>
+        <div id="result-digit" class="cyber-number-widget dim" style="display:flex;width:100%;justify-content:center;min-height:90px;"></div>
+        <div id="result-conf" class="cyber-number-widget" style="display:flex;width:100%;justify-content:center;min-height:20px;margin-top:5px;"></div>
         <button class="cyber-btn" onclick="clearDraw()"
             style="width:100%;margin-top:14px;border-color:rgba(0,210,255,0.35);">
             ${t('clear')}
@@ -982,7 +982,7 @@
             seenLabel.style.color = 'rgba(255,255,255,0.35)';
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                color: 'rgba(255,255,255,0.35)'
+                color: 'rgba(255,255,255,0.35)', thousandsSep: true
             });
             drawCanvas.classList.add('disabled');
             overlay.classList.add('visible');
@@ -1012,7 +1012,7 @@
                         seenLabel.style.textShadow = '0 0 10px rgba(173,255,47,0.6)';
                         CyberUI.updateNumberWidget('train-seen', done, 0, 6, {
                             fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                            color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)'
+                            color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)', thousandsSep: true
                         });
                         
                         // Zeichne 10x10 Grid der aktuell geladenen Daten
@@ -1057,7 +1057,7 @@
             epochInfo.textContent = `Phase 2 — Daten bereit ✓  (${n.toLocaleString('de')} Beispiele)`;
             CyberUI.updateNumberWidget('train-seen', n, 0, 6, {
                 fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)'
+                color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)', thousandsSep: true
             });
             coachEl.textContent = 'Daten geladen — Animation läuft …';
             await new Promise(r => setTimeout(r, 1000));
@@ -1091,7 +1091,7 @@
             seenLabel.textContent = 'Beispiele trainiert';
             seenLabel.style.color = '#00d2ff';
             CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff'
+                fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
             });
             startMnistAnim(pixels, labels, nTrain);
 
@@ -1119,7 +1119,7 @@
                         bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
                         const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 256, (currentEpoch + 1) * N_ACTUAL);
                         CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
-                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff'
+                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
                         });
                         await tf.nextFrame();
                     },
