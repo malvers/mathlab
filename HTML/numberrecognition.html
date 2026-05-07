@@ -567,6 +567,8 @@
         document.getElementById('draw-hint').textContent = t('draw_hint');
         if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
+        const trainSampleCountStored = +(localStorage.getItem('mnist-td-count') || 50000);
+
         // ── Sidebar cards ───────────────────────────────────────────────────────────
         document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="result-cards-wrap" style="display:none"></div>');
         CyberUI.createCard('result-cards-wrap', t('card_result'), `
@@ -589,23 +591,23 @@
         CyberUI.createCard('ui-container', t('card_conf'), barsHtml + `
         <div style="display:flex;justify-content:space-between;align-items:center;
                     margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,210,255,0.15);">
-            <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(0,210,255,0.6);letter-spacing:0.08em;">AVERAGE</span>
+            <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(0,210,255,0.6);letter-spacing:0.08em;">DURCHSCHNITT</span>
             <span id="conf-avg" style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d2ff;letter-spacing:0.06em;">—</span>
         </div>`);
 
+        CyberUI.createCard('ui-container', t('card_model'), `
+        <button id="btn-reset" class="cyber-btn" onclick="resetModel()"
+            style="width:100%;margin-top:12px;border-color:rgba(0,210,255,0.35);transition:border-color 0.3s,box-shadow 0.3s,color 0.3s;">
+            START TRAINING
+        </button>
+    `);
         document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="model-cards-wrap" style="display:none"></div>');
         CyberUI.createCard('model-cards-wrap', t('card_preview'), `
         <canvas id="preview-canvas" width="56" height="56"
             style="width:112px;height:112px;"></canvas>
     `);
-        CyberUI.createCard('model-cards-wrap', t('card_model'), `
-        <button class="cyber-btn" onclick="resetModel()"
-            style="width:100%;margin-top:12px;border-color:rgba(0,210,255,0.35);">
-            RESET MODEL
-        </button>
-    `);
 
-        CyberUI.createCard('ui-container', 'TRAININGSDATEN', `
+        CyberUI.createCard('ui-container', 'ANZAHL TRAININGSDATEN', `
         <div id="td-dropdown" style="position:relative;user-select:none;">
             <div id="td-selected" onclick="tdToggle()"
                 style="display:flex;align-items:center;justify-content:space-between;
@@ -613,18 +615,18 @@
                        background:rgba(0,210,255,0.07);cursor:pointer;
                        font-family:'Orbitron',sans-serif;font-size:14px;color:#00d2ff;
                        box-shadow:0 0 12px rgba(0,210,255,0.08);transition:border-color 0.2s;">
-                <span id="td-label">50.000</span>
+                <span id="td-label">${trainSampleCountStored.toLocaleString('de-DE')}</span>
                 <span id="td-arrow" style="font-size:10px;transition:transform 0.2s;">▼</span>
             </div>
             <div id="td-options" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
                 border:1px solid rgba(0,210,255,0.35);border-radius:10px;
                 background:rgba(8,14,28,0.97);backdrop-filter:blur(20px);
                 overflow:hidden;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.6);">
-                ${[1000,5000,10000,20000,30000,40000,50000].map(v =>
+                ${[100,500,1000,5000,10000,20000,30000,40000,50000].map(v =>
                     `<div class="td-opt" data-val="${v}" onclick="tdSelect(${v})"
                         style="padding:10px 14px;font-family:'Orbitron',sans-serif;font-size:14px;
-                               color:${v===50000?'#00d2ff':'rgba(255,255,255,0.6)'};
-                               background:${v===50000?'rgba(0,210,255,0.1)':'transparent'};
+                               color:${v===trainSampleCountStored?'#00d2ff':'rgba(255,255,255,0.6)'};
+                               background:${v===trainSampleCountStored?'rgba(0,210,255,0.1)':'transparent'};
                                cursor:pointer;border-bottom:1px solid rgba(0,210,255,0.08);
                                transition:background 0.15s,color 0.15s;">
                         ${v.toLocaleString('de-DE')}
@@ -652,7 +654,7 @@
         let hasStrokes = false;
         let wasPredicted = false;
         let model = null;
-        let trainSampleCount = 50000;
+        let trainSampleCount = trainSampleCountStored;
 
         function tdToggle() {
             const opts = document.getElementById('td-options');
@@ -663,6 +665,7 @@
         }
         function tdSelect(val) {
             trainSampleCount = val;
+            localStorage.setItem('mnist-td-count', val);
             document.getElementById('td-label').textContent = val.toLocaleString('de-DE');
             document.querySelectorAll('.td-opt').forEach(el => {
                 const active = +el.dataset.val === val;
@@ -671,7 +674,12 @@
             });
             document.getElementById('td-options').style.display = 'none';
             document.getElementById('td-arrow').style.transform = '';
-            resetModel();
+            const btn = document.getElementById('btn-reset');
+            if (btn) {
+                btn.style.borderColor = '#adff2f';
+                btn.style.color = '#adff2f';
+                btn.style.boxShadow = '0 0 16px rgba(173,255,47,0.4)';
+            }
         }
         document.addEventListener('click', e => {
             if (!document.getElementById('td-dropdown')?.contains(e.target)) {
@@ -1213,6 +1221,7 @@
             let epochStartTime = 0.0;
             const accSum = new Array(10).fill(0);
             let lastClassAcc = new Array(10).fill(0);
+            let avgAccSum = 0, avgAccCount = 0;
 
             function computeAndShowClassAcc(epochForAccum) {
                 lastClassAcc = tf.tidy(() => {
@@ -1226,8 +1235,16 @@
                         return slice.filter(p => p === i).length / REF_PER_CLASS;
                     });
                 });
+                // akkumulierter Durchschnitt über alle Messungen
+                const batchAvg = lastClassAcc.reduce((s, v) => s + v, 0) / 10;
+                avgAccSum += batchAvg;
+                avgAccCount++;
+                const avgPct = (avgAccSum / avgAccCount) * 100;
+                const avgEl = document.getElementById('conf-avg');
+                if (avgEl) { avgEl.textContent = avgPct.toFixed(1) + ' %'; avgEl.style.color = barColor(avgPct); }
+
                 if (epochForAccum === null) {
-                    // intra-epoch: zeige Rohwert
+                    // intra-epoch: zeige Rohwert in Slidern
                     for (let i = 0; i < 10; i++) {
                         const v = lastClassAcc[i] * 100;
                         const b = document.getElementById('bar-' + i);
@@ -1237,9 +1254,6 @@
                         b.style.background = barColor(v);
                         if (p) { p.textContent = v.toFixed(1) + '%'; p.classList.remove('top'); p.style.color = barColor(v); }
                     }
-                    const avg = lastClassAcc.reduce((s, v) => s + v, 0) / 10 * 100;
-                    const avgEl = document.getElementById('conf-avg');
-                    if (avgEl) avgEl.textContent = avg.toFixed(1) + ' %';
                 }
             }
             await model.fit(xs, ys, {
@@ -1284,9 +1298,6 @@
                             b.style.background = color;
                             if (p) { p.textContent = v.toFixed(1) + '%'; p.classList.remove('top'); p.style.color = color; }
                         }
-                        const avg = accSum.reduce((s, v, i) => s + v / (epoch + 1), 0) / 10 * 100;
-                        const avgEl = document.getElementById('conf-avg');
-                        if (avgEl) avgEl.textContent = avg.toFixed(1) + ' %';
                         await tf.nextFrame();
                     }
                 }
@@ -1312,6 +1323,7 @@
         }
 
 
+
         function finishTraining() {
             document.getElementById('btn-training-done').style.display = 'none';
             const overlay = document.getElementById('train-overlay');
@@ -1322,12 +1334,15 @@
         }
 
         async function resetModel() {
+            const btn = document.getElementById('btn-reset');
+            if (btn) { btn.style.borderColor = ''; btn.style.color = ''; btn.style.boxShadow = ''; }
             try {
                 await tf.io.removeModel(IDB_KEY);
             } catch (_) { /* wasn't cached */ }
             if (model) { model.dispose(); model = null; }
             document.getElementById('result-cards-wrap').style.display = 'none';
             document.getElementById('model-cards-wrap').style.display = 'none';
+
             clearDraw();
             coachEl.textContent = t('training');
             initDraw();
