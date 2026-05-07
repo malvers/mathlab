@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 </head>
 
 <body>
@@ -40,6 +42,7 @@
                 <div id="coach-content" class="coach-message"></div>
             </div>
             <canvas id="canvas"></canvas>
+            <div id="output-latex" style="position:absolute;pointer-events:none;display:none;font-size:15px;line-height:2"></div>
         </div>
     </main>
 
@@ -58,6 +61,7 @@
     <script src="js/i18n-nl.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -198,16 +202,16 @@
                 count++;
             }
             let lossVal = 0;
-            tf.tidy(() => {
-                const xT = tf.tensor2d(xs);
-                const yT = tf.tensor2d(ys);
-                optimizer.minimize(() => {
-                    const pred = model.predict(xT);
-                    const loss = tf.losses.meanSquaredError(yT, pred);
-                    lossVal = loss.dataSync()[0];
-                    return loss;
-                });
+            const xT = tf.tensor2d(xs);
+            const yT = tf.tensor2d(ys);
+            optimizer.minimize(() => {
+                const pred = model.predict(xT);
+                const loss = tf.losses.meanSquaredError(yT, pred);
+                lossVal = loss.dataSync()[0];
+                return loss;
             });
+            xT.dispose();
+            yT.dispose();
             return lossVal;
         }
 
@@ -332,6 +336,14 @@
             const w = rect.width;
             const h = rect.height;
             ctx.clearRect(0, 0, w, h);
+
+            if (typeof tf === 'undefined') {
+                ctx.font = '14px Orbitron, sans-serif';
+                ctx.fillStyle = '#ff4466';
+                ctx.textAlign = 'center';
+                ctx.fillText('TF.js nicht geladen', w / 2, h / 2);
+                return;
+            }
 
             const positions = getNodePositions(w, h);
 
@@ -526,21 +538,26 @@
             const tx = outPos.x + NODE_RADIUS + 18;
             const lineH = 18;
 
-            ctx.font = '700 15px Orbitron, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-
-            ctx.fillStyle = '#ff64c8';
-            ctx.fillText(`ŷ  ${predRaw.toFixed(3)}`, tx, outPos.y - lineH);
-
-            ctx.fillStyle = 'rgba(200,220,255,0.7)';
-            ctx.fillText(`y  ${targetRaw.toFixed(3)}`, tx, outPos.y);
-
             const absDelta = Math.abs(delta);
-            ctx.fillStyle = absDelta < 0.05 ? '#00ffb4' : absDelta < 0.5 ? '#ffcc00' : '#ff4466';
-            ctx.fillText(`Δ  ${delta >= 0 ? '+' : ''}${delta.toFixed(3)}`, tx, outPos.y + lineH);
-
-            ctx.textBaseline = 'alphabetic';
+            const renderSym = s => katex.renderToString(s, {throwOnError: false});
+            const renderNum = (v, sign) => katex.renderToString((sign && v >= 0 ? '+' : '') + v.toFixed(3), {throwOnError: false});
+            const row = (sym, val, sign, color) =>
+                `<div style="display:contents;color:${color}">` +
+                    `<div style="text-align:right">${renderSym(sym)}</div>` +
+                    `<div style="text-align:right">${renderNum(val, sign)}</div>` +
+                `</div>`;
+            const ol = document.getElementById('output-latex');
+            ol.style.display = 'grid';
+            ol.style.gridTemplateColumns = 'auto auto';
+            ol.style.columnGap = '0.6em';
+            ol.style.rowGap = '0.15em';
+            ol.style.fontSize = '22px';
+            ol.style.left = tx + 'px';
+            ol.style.top = (outPos.y - lineH * 2) + 'px';
+            ol.innerHTML =
+                row('\\hat{y}', predRaw, false, '#ffcc00') +
+                row('y', targetRaw, false, '#cc66ff') +
+                row('\\Delta', delta, true, '#ff4466');
         }
 
         function init() {
