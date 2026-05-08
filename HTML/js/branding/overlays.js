@@ -188,7 +188,7 @@
         async validateAccess() {
             const input = document.getElementById("cyber-pwd-input");
             // SHA-256 hash — password cannot be reconstructed from this
-            const TARGET_HASH = "91fe6d6f2b54568d7c2e22557431e6a42d7c03543aade710212da4c1cd959dc9";
+            const TARGET_HASH = "5de55db526f754b12cf190a71d036393c913318e4ed3d58c134b22c8b7c98d88";
 
             const encoder = new TextEncoder();
             const data = encoder.encode(input.value);

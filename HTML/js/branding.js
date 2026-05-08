@@ -730,6 +730,10 @@ const CyberBranding = {
             document.body.appendChild(overlay);
         }
 
+        const isEdit = window.CyberBrandingOverlays && window.CyberBrandingOverlays.isEditMode;
+        const editAttr = isEdit ? 'contenteditable="true" data-edit-active="1"' : '';
+        const syncBtn = isEdit ? `<button class="nav-btn" style="width: auto; height: auto; padding: 12px 25px; margin-right: 10px; background: var(--branding-blue); color: black; border: none; display: inline-flex !important;" onclick="CyberBrandingOverlays.transmitEdits()">SYNC EDITS</button>` : '';
+
         overlay.innerHTML = `
             <div class="briefing-modal" style="position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 0;">
                 <div style="position: absolute; top: 22px; right: 25px; cursor: pointer; opacity: 0.5; transition: all 0.2s; color: var(--branding-blue); z-index: 10;" 
@@ -746,10 +750,11 @@ const CyberBranding = {
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
-                    Beschreibung
+                    Beschreibung ${isEdit ? '<span style="color:var(--branding-blue); margin-left:10px; font-size:0.7rem; letter-spacing:1px;">[EDIT-MODE]</span>' : ''}
                 </div>
-                <div class="briefing-text" style="flex: 1; overflow-y: auto; padding: 0 35px 25px 25px; margin-right: 5px;">${this.briefingContent}</div>
+                <div class="briefing-text" ${editAttr} style="flex: 1; overflow-y: auto; padding: 0 35px 25px 25px; margin-right: 5px;">${this.briefingContent}</div>
                 <div style="padding: 0 25px 25px 25px; display: flex; justify-content: flex-end; flex-shrink: 0;">
+                    ${syncBtn}
                     <button class="nav-btn" style="width: auto; height: auto; padding: 12px 35px; min-width: 140px; display: inline-flex !important;" onclick="document.getElementById('cyber-briefing-overlay').classList.remove('visible')">Verstanden</button>
                 </div>
             </div>
