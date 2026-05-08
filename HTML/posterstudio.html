@@ -251,8 +251,17 @@
     </div>
 
     <script src="screenshot_list.js"></script>
-    <script src="description_list.js"></script>
+    <script src="js/branding/i18n-descriptions.js"></script>
     <script>
+        // Compatibility Bridge: Map the i18n registry to the Poster Studio's expected format
+        // We use the 'de' section as the master source for the Poster Studio.
+        window.LAB_DESCRIPTIONS = {};
+        if (window.CyberBriefings && window.CyberBriefings.de) {
+            window.LAB_DESCRIPTIONS = window.CyberBriefings.de;
+            console.log("✅ Poster Studio: i18n-Registry (DE) successfully mapped.");
+        } else {
+            console.error("❌ Poster Studio: i18n-Registry not found or invalid.");
+        }
         // --- STATE & PERSISTENCE ---
         let currentCols = parseInt(localStorage.getItem('posterCols')) || 6;
         let currentFormat = localStorage.getItem('posterFormat') || 'A1';

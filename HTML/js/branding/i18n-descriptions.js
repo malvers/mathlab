@@ -1,5 +1,5 @@
 /**
- * ULTRA v6.7.0 - Internationalized Briefing Data Registry
+ * v6.7.0 - Internationalized Briefing Data Registry
  *
  * This file holds detailed lab descriptions in multiple languages.
  * Supported languages: DE, EN, ES, FR, IT, PT, SW (Kiswahili), TR — lab descriptions SW/TR initially same as EN
@@ -9,432 +9,345 @@ window.CyberBriefings = {
         "addition": `MATHEMATISCHER HINTERGRUND:
 Die schriftliche Addition ist einer der fundamenten Algorithmen der Arithmetik. Er basiert auf dem Stellenwertsystem (Dezimalsystem). Das Prinzip beruht darauf, Zahlen stellenweise von rechts nach links (Einer, Zehner, Hunderter...) zu addieren. Erreicht eine Teilsumme den Wert 10 oder mehr, entsteht ein "Übertrag" (Carry), der zur nächsthöheren Stelle addiert wird.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Summanden-Eingabe: Nutzer können zwei Summanden mit bis zu 7 Stellen eingeben.
 - Algorithmus-Schritte: Über die Navigations-Pfeile (< >) kann der Rechenweg Schritt für Schritt durchlaufen werden.
 - Übertrag-Visualisierung: Die kleinen Merkzahlen über den Spalten zeigen den aktiven Übertrag an.
 - Farb-Codierung: Aktive Stellenwerte werden hervorgehoben, um den Fokus des Algorithmus zu verdeutlichen.
 
-INTERFACE:
-- Eingabefelder (Top): Hier werden die Basis-Zahlen definiert.
-- Rechen-Matrix (Center): Die vertikale Anordnung der Summanden und der Ergebniszeile.
-- Steuerungs-Konsole (Bottom): Start, Reset und Schritt-Navigation.
-
-FUNKTION:
+FUNKTION
 Der Algorithmus prüft bei jedem Schritt die Summe der Ziffern einer Spalte plus den eventuellen Übertrag aus der vorherigen Spalte. Das Ergebnis (Modulo 10) wird notiert, der neue Übertrag (Division durch 10) wird für den nächsten Schritt gespeichert.`,
 
         "subtraktion": `MATHEMATISCHER HINTERGRUND:
 Die schriftliche Subtraktion berechnet die Differenz zwischen einem Minuenden und einem Subtrahenden. Das Labor nutzt das Abziehverfahren (Entbündelung), bei dem von rechts nach links subtrahiert wird. Ist eine Ziffer des Minuenden kleiner als die des Subtrahenden, wird ein Zehner von der nächsthöheren Stelle "geliehen".
 
-FEATURES & STEUERUNG:
+FEATURES
 - Ziffern-Eingabe: Präzise Kontrolle über Minuend und Subtrahend (max. 7 Stellen).
 - Entbündelungs-Logik: Der "Math Coach" erklärt explizit den Vorgang des "Leihens" und die daraus resultierende Veränderung der Nachbarstellen.
 - Prozess-Steuerung: Manuelle Navigation durch die Berechnungsschritte zur Förderung des algorithmischen Verständnisses.
-- Ergebnis-Verifikation: Automatische Berechnung und doppelte Unterstreichung des finalen Differenzwertes.
-
-INTERFACE:
-Zentrales ULTRA-Design mit adaptiver Skalierung und KaTeX-gestütztem Prozess-Overlay für maximale didaktische Clarity.`,
+- Ergebnis-Verifikation: Automatische Berechnung und doppelte Unterstreichung des finalen Differenzwertes.`,
 
         "multiplikation": `MATHEMATISCHER HINTERGRUND:
 Die schriftliche Multiplikation zerlegt die Berechnung des Produkts zweier Faktoren in Teilprodukte. Jede Ziffer des zweiten Faktors (Multiplikator) wird mit dem ersten Faktor (Multiplikand) multipliziert, wobei die Ergebnisse stellenrichtig untereinander addiert werden.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Multi-Digit-Support: Berechnung komplexer Produkte mit bis zu 7-stelligen Faktoren.
 - Fein-Modus: Ein detaillierter Modus zeigt jede einzelne Ziffernmultiplikation inklusive der internen Übertragsverwaltung.
 - Teilprodukt-Summation: Visualisierung der abschließenden Addition aller Zeilen zur Ermittlung des Gesamtergebnisses.
-- Farbkodierung: Jede Zeile der Teilrechnung ist farblich mit der entsprechenden Ziffer des Multiplikators verknüpft (z.B. Gold, Lila, Grün).
-
-INTERFACE:
-Prämiertes Cyber-Interface mit einem "Math Coach" in einer schwebenden Glasmorphismus-Box, der die algebraischen Schritte synchron zur Visualisierung erläutert.`,
+- Farbkodierung: Jede Zeile der Teilrechnung ist farblich mit der entsprechenden Ziffer des Multiplikators verknüpft (z.B. Gold, Lila, Grün).`,
 
         "dividieren": `MATHEMATISCHER HINTERGRUND:
 Die schriftliche Division ist der komplexeste der vier Grundrechenarten-Algorithmen. Er basiert auf dem wiederholten Schätzen, Multiplizieren, Subtrahieren und "Herunterholen" von Ziffern des Dividenden, um den Quotienten (ggf. mit Rest) zu ermitteln.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Dividenden-Management: Eingabe von Werten bis zu 7 Stellen; Divisor-Anpassung für verschiedene Schwierigkeitsgrade.
 - Rest-Visualisierung: Klare Darstellung von Restwerten am Ende der Berechnung.
 - Didaktisches Coaching: Der "Math Coach" führt den Nutzer durch die Fragen "Wie oft passt der Divisor in...?" und die anschließende Probe durch Multiplikation.
-- Fehler-Prävention: Visuelle Hinweise bei unmöglichen Rechenschritten oder falscher Stellenplatzierung.
-
-INTERFACE:
-Adaptives ULTRA-Layout, das den horizontalen Platzbedarf der Division und den vertikalen Prozessfluss optimal ausnutzt.`,
+- Fehler-Prävention: Visuelle Hinweise bei unmöglichen Rechenschritten oder falscher Stellenplatzierung.`,
 
         "parabellabor": `MATHEMATISCHER HINTERGRUND:
 Das Labor dient der Untersuchung von Parabeln der Form f(x) = a*(x-d)^2 + e (Scheitelpunktform). Es verdeutlicht den Einfluss der Parameter a (Streckung/Stauchung), d (horizontale Verschiebung) und e (vertikale Verschiebung) auf den Graphen.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Handles: Der Scheitelpunkt S(d|e) und der Streckfaktor a können direkt auf dem Canvas per Maus oder Touch manipuliert werden.
 - Duale Formelanzeige: Automatische Umrechnung zwischen der Scheitelpunktform und der Normalform (ax^2 + bx + c).
 - Nullstellen-Analyse: Automatische Berechnung und Markierung der reellen Nullstellen (x1, x2) auf der x-Achse.
-- Adaptive Skalierung: Das Koordinatensystem passt sich dynamisch an extreme Parameterwerte an.
-
-INTERFACE:
-Klares ULTRA-Design mit KaTeX-Formeln, die direkt am Scheitelpunkt "kleben" und sich bei jeder Interaktion aktualisieren.`,
+- Adaptive Skalierung: Das Koordinatensystem passt sich dynamisch an extreme Parameterwerte an.`,
 
         "mandelbrot_deep": `MATHEMATISCHER HINTERGRUND:
 Die Mandelbrot-Menge entsteht aus der Iteration z_{n+1} = z_n^2 + c mit z_0 = 0 über komplexen c. Bei Julia-Mengen wird c festgehalten und die Iteration aus variierenden Startpunkten betrachtet. Dieses Labor rendert direkt im WebGL-Fragment-Shader – sehr schnell, mit typischer Gleitkomma-Genauigkeit bei extrem hohem Zoom.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Modus: Mandelbrot und Julia; Julia-Parameter per Steuerelementen bzw. Cursor- Bezug.
 - Zoom & Pan: Mausrad zoomen, Shift für feinere Schritte; Ziehen verschiebt die Ebene.
 - Iterationen / Detail: Maximale Iterationszahl (Detail vs. Leistung).
-- Flight: START FLIGHT zoomt ein; der Blickmittelpunkt folgt der Maus auf dem Canvas.
-
-INTERFACE:
-ULTRA-Sidebar mit Parametern; zentrales WebGL-Canvas.`,
+- Flight: START FLIGHT zoomt ein; der Blickmittelpunkt folgt der Maus auf dem Canvas.`,
 
         "pythagoras": `MATHEMATISCHER HINTERGRUND:
 Dieses Labor visualisiert den Satz des Pythagoras (a² + b² = c²) für rechtwinklige Dreiecke. Es demonstriert grafisch, dass die Summe der Flächeninhalte der Quadrate über den Katheten (a und b) exakt dem Flächeninhalt des Quadrats über der Hypotenuse (c) entspricht.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Eckpunkte: Verändern der Dreiecksform durch Ziehen der Punkte A und B unter Beibehaltung des rechten Winkels.
 - Flächen-Animation: Dynamische Skalierung der Quadrate synchron zur Veränderung der Seitenlängen.
-- Live-Berechnung: Kontinuierliche Anzeige der Werte für a², b² und c² zur numerischen Verifikation der Gleichung.
-
-INTERFACE:
-Didaktisch fokussiertes ULTRA-Labor mit kontraststarken Flächenfarben und klarer geometrischer Führung.`,
+- Live-Berechnung: Kontinuierliche Anzeige der Werte für a², b² und c² zur numerischen Verifikation der Gleichung.`,
 
         "eulergerade": `MATHEMATISCHER HINTERGRUND:
 In jedem nicht-gleichseitigen Dreieck liegen der Höhenschnittpunkt (H), der Umkreismittelpunkt (U) und der Schwerpunkt (S) auf einer gemeinsamen Geraden – der Eulergeraden. Zudem ist die Strecke HS stets doppelt so lang wie die Strecke SU (Verhältnis 2:1).
 
-FEATURES & STEUERUNG:
+FEATURES
 - Konstruktions-Elemente: Ein- und Ausschalten von Umkreis, Inkreis und dem Feuerbach-Kreis.
 - Hilfslinien-System: Visualisierung der Höhen, Seitenhalbierenden und Winkelhalbierenden.
-- Live-Verhältnisanalyse: Das Dashboard berechnet permanent das HS/SU-Verhältnis.
-
-INTERFACE:
-Hochpräzises geometrisches Labor im ULTRA-Standard mit farblich differenzierten Punkten und Kreisen.`,
+- Live-Verhältnisanalyse: Das Dashboard berechnet permanent das HS/SU-Verhältnis.`,
 
         "pythagorasbeweis": `MATHEMATISCHER HINTERGRUND:
 Dieses Modul bietet einen interaktiven, visuellen Beweis für den Satz des Pythagoras durch Zerlegung und Umordnung. Es nutzt das Prinzip der Ergänzungsgleichheit: Vier kongruente rechtwinklige Dreiecke werden innerhalb eines Quadrats umgeordnet.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Puzzle-Mechanik: Freies Verschieben und Rotieren der blauen Dreiecks-Elemente.
 - Echtzeit-Triangulierung: Das System erkennt automatisch die verbleibenden Freiflächen.
-- Kollisions-Detektion: Warnung bei Überlappungen zur Sicherung des Beweises.
-
-INTERFACE:
-Hochgradig interaktives ULTRA-Labor, das Spielmechanik mit geometrischer Logik verbindet.`,
+- Kollisions-Detektion: Warnung bei Überlappungen zur Sicherung des Beweises.`,
 
         "differentiallabor": `MATHEMATISCHER HINTERGRUND:
 Dieses Modul visualisiert den Übergang von der Sekante zur Tangente und damit das Konzept der Ableitung f'(x) als lokale Steigung einer Funktion.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Funktions-Bibliothek: Auswahl verschiedener Basisfunktionen (quadratisch, trigonometrisch etc.).
 - Interaktive Tangente: Verschieben des Berührungspunktes zur Beobachtung der Steigung.
-- Ableitungs-Graphen: Visualisierung der ersten und zweiten Ableitung.
-
-INTERFACE:
-Professionelles ULTRA-Analyse-Interface mit hochauflösenden Funktions-Plots.`,
+- Ableitungs-Graphen: Visualisierung der ersten und zweiten Ableitung.`,
 
         "integralreaktor": `MATHEMATISCHER HINTERGRUND:
 Der Integralreaktor dient der Berechnung und Visualisierung des bestimmten Integrals einer Funktion f(x). Er interpretiert das Integral als orientierten Flächeninhalt.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Dynamische Intervallwahl: Anpassung der Grenzen direkt im Koordinatensystem.
 - Numerische Integration: Live-Berechnung des Integralwertes.
-- Visuelles Feedback: Die berechnete Fläche wird farblich hervorgehoben.
-
-INTERFACE:
-Modernes ULTRA-Design mit Fokus auf numerische Präzision und grafische Klarheit.`,
+- Visuelles Feedback: Die berechnete Fläche wird farblich hervorgehoben.`,
 
         "steigung": `MATHEMATISCHER HINTERGRUND:
 Das Labor visualisiert die Parameter m (Steigung) und n (y-Achsenabschnitt) der Geradengleichung y = mx + n.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Handle-Interaktion: Verschieben der Punkte zur Veränderung des Anstiegs.
 - Steigungsdreieck: Ein neon-blaues Dreieck zeigt Delta-X und Delta-Y.
-- Formel-Synchronisation: Die Gleichung wird in Echtzeit mittels KaTeX aktualisiert.
-
-INTERFACE:
-Analytisches ULTRA-Interface zur Kopplung von Algebra und Geometrie.`,
+- Formel-Synchronisation: Die Gleichung wird in Echtzeit mittels KaTeX aktualisiert.`,
 
         "winkelsumme": `MATHEMATISCHER HINTERGRUND:
 Die Summe der Innenwinkel in einem n-Eck folgt der Formel (n-2) * 180°. Dieses Labor erlaubt die Verifikation dieses Gesetzes für verschiedene Figuren.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Polygon-Konfiguration: Umschalten zwischen Dreieck, Viereck, Fünfeck etc.
 - Interaktive Eckpunkte: Freies Verschieben der Ecken zur Überprüfung der Invarianz.
-- Winkel-Visualisierung: Farbige Bogen-Markierungen an den Innenecken.
-
-INTERFACE:
-Klares ULTRA-Design mit neonfarbenen Winkelsegmenten und Live-Summen-Anzeige.`,
+- Winkel-Visualisierung: Farbige Bogen-Markierungen an den Innenecken.`,
 
         "winkelsumme3d": `MATHEMATISCHER HINTERGRUND:
 Dieses Modul demonstriert durch ein virtuelles Falt-Experiment, wie die drei Ecken eines Dreiecks an einem Punkt zusammentreffen und 180° bilden.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Faltung: Stufenlose Steuerung des Faltvorgangs.
 - 3D-Navigation: Freies Rotieren und Zoomen im Raum mittels Three.js.
-- Dynamische Geometrie: Veränderung der Dreiecksform während der Faltung.
-
-INTERFACE:
-Hochmodernes 3D-ULTRA-Design mit transparenten Materialeffekten.`,
+- Dynamische Geometrie: Veränderung der Dreiecksform während der Faltung.`,
 
         "beweisinwinkellsumme": `MATHEMATISCHER HINTERGRUND:
 Dieser Beweis nutzt Parallelen und Wechselwinkel (Z-Winkel), um die Winkelsumme von 180° im Dreieck herzuleiten.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Parallelprojektion: Automatische Konstruktion einer Parallelen durch einen Eckpunkt.
 - Wechselwinkel-Check: Farbliche Übereinstimmung der Winkel am Pivot-Punkt.
-- Live-Synchronisation: Zwei parallele Rechnungen zeigen die Übereinstimmung.
-
-INTERFACE:
-Didaktisch optimiertes ULTRA-Labor mit KaTeX-gestützter Beweisführung.`,
+- Live-Synchronisation: Zwei parallele Rechnungen zeigen die Übereinstimmung.`,
 
         "fermatpunkt": `MATHEMATISCHER HINTERGRUND:
 Der Fermat-Punkt ist der Punkt im Dreieck, für den die Summe der Abstände zu den drei Eckpunkten minimal ist.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Geometrischer Beweis: Visualisierung der Konstruktion über gleichseitige Dreiecke.
 - Distanz-Analyse: Ein freier Vergleichspunkt P zeigt die Differenz zum Minimum.
-- Dynamische Eckpunkte: Sofortige Neuberechnung bei Formveränderung.
-
-INTERFACE:
-Cyber-Interface mit lila hervorgehobenem Fermat-Punkt und Distanz-HUD.`,
+- Dynamische Eckpunkte: Sofortige Neuberechnung bei Formveränderung.`,
 
         "winkellabor": `MATHEMATISCHER HINTERGRUND:
 Untersuchung von Winkeln an geschnittenen Parallelen: Scheitel-, Neben-, Stufen- und Wechselwinkel.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Geometrie: Veränderung von Schnittwinkel und Parallelen-Abstand.
 - Winkel-Identifikation: Farbliche Kennzeichnung gleicher Winkelpaare.
-- Summen-Validierung: Anzeige der Supplementär-Beziehung (180°).
-
-INTERFACE:
-Übersichtliches ULTRA-Labor für die Basiskonzepte der Ebenengeometrie.`,
+- Summen-Validierung: Anzeige der Supplementär-Beziehung (180°).`,
 
         "gleichschenkligesdreieck": `MATHEMATISCHER HINTERGRUND:
 Untersuchung eines Dreiecks mit festem Umfang (u = 8 cm) und der Bedingung der Gleichschenkligkeit.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Basis-Slider: Veränderung der Basis b mit sofortiger Geometrie-Anpassung.
 - Existenz-Check: Prüfung der Dreiecksungleichung mit visueller Warnung.
-- Duale Darstellung: Kombination aus Modell und analytischem Graphen.
-
-INTERFACE:
-Minimalistisches ULTRA-Labor mit Fokus auf die Kopplung von Algebra und Geometrie.`,
+- Duale Darstellung: Kombination aus Modell und analytischem Graphen.`,
 
         "potenzlabor": `MATHEMATISCHER HINTERGRUND:
 Untersuchung von Potenzfunktionen f(x) = x^n und deren Umkehrfunktionen (Wurzelfunktionen).
 
-FEATURES & STEUERUNG:
+FEATURES
 - Exponenten-Tuning: Stufenlose Anpassung von n zur Beobachtung des Wachstums.
 - Punkt-Telemetrie: Interaktiver Cursor zeigt exakte (x, y) Koordinaten.
-- Symmetrie-Check: Parallele Darstellung von Funktion und Umkehrfunktion.
-
-INTERFACE:
-Analytisches ULTRA-Interface mit Fokus auf den Vergleich von Funktionsklassen.`,
+- Symmetrie-Check: Parallele Darstellung von Funktion und Umkehrfunktion.`,
 
         "transformationen": `MATHEMATISCHER HINTERGRUND:
 Untersuchung von Abbildungen (Translation, Rotation, Spiegelung, Skalierung) auf geometrische Objekte.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Multi-Abbildungs-System: Kombination verschiedener Transformationen.
 - Spiegelungs-Modus: Interaktive Achsen- und Punktspiegelung.
-- Flächen-Invarianz: Echtzeit-Check der Flächenerhaltung bei Kongruenz.
-
-INTERFACE:
-Interaktives ULTRA-Labor für die Untersuchung fundamentaler Abbildungsgeometrie.`,
+- Flächen-Invarianz: Echtzeit-Check der Flächenerhaltung bei Kongruenz.`,
 
         "gleichungssysteme": `MATHEMATISCHER HINTERGRUND:
 Grafische Lösung linearer Gleichungssysteme (LGS) als Schnittpunktproblem zweier Geraden.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Geraden-Manipulation: Veränderung der Gleichungen durch Ziehen der Punkte.
 - Notations-Scrambler: Umschalten zwischen Normalform, skaliert und implizit.
-- Aufgaben-Generator: Erstellung neuer Szenarien mit ganzzahligen Lösungen.
-
-INTERFACE:
-Hochfunktionales ULTRA-Design mit Fokus auf die algebraische Entsprechung der Geometrie.`,
+- Aufgaben-Generator: Erstellung neuer Szenarien mit ganzzahligen Lösungen.`,
 
         "imaginarynumbers": `MATHEMATISCHER HINTERGRUND:
 Die Gaußsche Zahlenebene erweitert den eindimensionalen Zahlenstrahl um eine zweite Dimension: die imaginäre Achse. Eine komplexe Zahl z = x + iy wird als Punkt in dieser Ebene dargestellt. Der Abstand zum Ursprung ist der Betrag |z|, und die Wurzel √(z) bzw. das Quadrat z² lassen sich geometrisch als Längen- und Winkelveränderungen interpretieren.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktiver Vektor: Ziehe den Punkt z frei durch die Ebene.
 - Modus-Schalter: Wechsle zwischen r = √(z) und r = z².
 - Echtzeit-Algebra: Die Formel-Overlays (Betrag, Realteil, Imaginärteil) passen sich dynamisch an.
-- KaTeX-Rendering: Hochwertige mathematische Typografie für alle Formeln.
-
-INTERFACE:
-Minimalistisches ULTRA-Design mit Fokus auf die visuelle und algebraische Entsprechung komplexer Zahlen.`,
+- KaTeX-Rendering: Hochwertige mathematische Typografie für alle Formeln.`,
 
         "binomischeslabor": `MATHEMATISCHER HINTERGRUND:
 Visualisierung der ersten binomischen Formel (a + b)² als geometrische Flächenzerlegung.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Dynamische Skalierung: Veränderung von a und b direkt am Modell.
 - Flächen-Analytik: Echtzeit-Berechnung der Teilflächen (a², b², 2ab).
-- KaTeX-Sync: Dynamische Aktualisierung der mathematischen Formel.
-
-INTERFACE:
-Klares ULTRA-Design mit Fokus auf die duale Repräsentation von Algebra und Geometrie.`,
+- KaTeX-Sync: Dynamische Aktualisierung der mathematischen Formel.`,
 
         "coordinatensystemtester": `MATHEMATISCHER HINTERGRUND:
 Entwicklungs- und Diagnosewerkzeug für die CyberCanvas-Engine zur Prüfung von Projektionen.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Stress-Test: Pan und Zoom im laufenden Betrieb.
 - Funktions-Overlays: Test steiler und asymptotischer Funktionsbereiche.
-- Integrität: Validierung der KaTeX-Achsenbeschriftung.
-
-INTERFACE:
-ULTRA-Sidebar mit Projektions-Checkboxen und CyberCanvas-Standardraster.`,
+- Integrität: Validierung der KaTeX-Achsenbeschriftung.`,
 
         "galtonboard": `MATHEMATISCHER HINTERGRUND:
 Visualisierung der Normalverteilung (Glockenkurve) durch einen stochastischen Galton-Prozess.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Physikalische Simulation: Echtzeit-Berechnung der Kugel-Kollisionen.
 - Histogramm-Akkumulation: Statistische Erfassung der Trefferwahrscheinlichkeit.
-- Glockenkurven-Overlay: Vergleich von Theorie und Simulation.
-
-INTERFACE:
-Dynamisches ULTRA-Interface mit flüssigen physikalischen Animationen.`,
+- Glockenkurven-Overlay: Vergleich von Theorie und Simulation.`,
 
         "fourier": `MATHEMATISCHER HINTERGRUND:
-Demonstration der Fourier-Analyse: Jede periodische Funktion als Summe von Sinus-Schwingungen.
+Die Fourier-Transformation erlaubt es, jede periodische Funktion (oder geschlossene Kurve) als Summe von Sinus- und Kosinus-Schwingungen darzustellen. Dieses Labor visualisiert diesen Prozess durch ein System rotierender Kreise (Epizyklen).
 
-FEATURES & STEUERUNG:
-- Epizyklen-Visualisierung: Rotierende Vektoren zeichnen komplexe Kurven.
-- Approximations-Grad: Anpassung der Anzahl der Oberschwingungen n.
-- Pfad-Tracking: Aufzeichnung der Rekonstruktion in Echtzeit.
-
-INTERFACE:
-Hochkomplexes ULTRA-Design mit Fokus auf die Ästhetik von Schwingungsprozessen.`,
+FEATURES
+- Epizyklen-Visualisierung: Darstellung der komplexen Fourier-Reihe als Kette rotierender Vektoren.
+- Approximations-Steuerung: Anpassung der Anzahl der verwendeten Oberschwingungen (n), um die Genauigkeit der Rekonstruktion zu erhöhen.
+- Pfad-Tracking: Aufzeichnung der resultierenden Kurve zur Veranschaulichung der Konvergenz gegen die Zielform.
+- Zeit-Manipulation: Steuerung der Simulationsgeschwindigkeit zur detaillierten Beobachtung der Phasenbeziehungen.`,
 
         "lissajous": `MATHEMATISCHER HINTERGRUND:
 Überlagerung zweier harmonischer Schwingungen in x- und y-Richtung erzeugt Lissajous-Figuren.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Frequenz-Manipulation: Unabhängige Steuerung der Achsen-Frequenzen.
 - Phasen-Shift: Untersuchung des Einflusses der zeitlichen Verschiebung.
-- 3D-Pendel: Physikalische Analogie als räumliche Schwingung.
-
-INTERFACE:
-Ästhetisches ULTRA-Design mit leuchtenden Trajektorien und Frequenz-Analyse.`,
+- 3D-Pendel: Physikalische Analogie als räumliche Schwingung.`,
 
         "fibonacci": `MATHEMATISCHER HINTERGRUND:
 Visualisierung der Fibonacci-Folge und der daraus resultierenden logarithmischen Spirale.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Iterations-Steuerung: Beobachtung des Wachstums der Fibonacci-Quadrate.
 - Spiral-Konstruktion: Ein- und Ausschalten der geometrischen Spirale.
-- Goldener Schnitt: Veranschaulichung der Konvergenz der Glieder-Verhältnisse.
-
-INTERFACE:
-Elegantes ULTRA-Design mit Fokus auf geometrische Proportionen.`,
+- Goldener Schnitt: Veranschaulichung der Konvergenz der Glieder-Verhältnisse.`,
 
         "ausgleichsgerade": `MATHEMATISCHER HINTERGRUND:
 Lineare Regression nach der Methode der kleinsten Quadrate zur Bestimmung von Trends.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Punktwolke: Manuelles Setzen von Datenpunkten.
 - Korrelations-Dashboard: Live-Berechnung von r, m und n.
-- Fehler-Visualisierung: Anzeige der Standardabweichung als Korridor.
-
-INTERFACE:
-Hochpräzises Statistik-Tool im ULTRA-Standard mit Echtzeit-Telemetrie.`,
+- Fehler-Visualisierung: Anzeige der Standardabweichung als Korridor.`,
 
         "logikspiel": `MATHEMATISCHER HINTERGRUND:
 Grundlagen der binären Logik: Visualisierung von Gattern wie AND, OR, XOR und NOT.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Interaktive Eingänge: Umschalten der Input-Zustände per Klick.
 - Signalfluss: Leuchtende Verbindungen zeigen den Datenfluss.
-- Wahrheitstabellen: Live-Abgleich mit der logischen Definition.
-
-INTERFACE:
-Futuristisches Schaltungs-Design im ULTRA-Standard mit klarer Signal-Hervorhebung.`,
+- Wahrheitstabellen: Live-Abgleich mit der logischen Definition.`,
 
         "logikspiel2": `MATHEMATISCHER HINTERGRUND:
 Magisches Quadrat / Zielwert-Rätsel: Logische Belegung von Zellen basierend auf Rand-Summen.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Rechen-Modi: Umschalten zwischen Addition und Multiplikation.
 - Rand-Validierung: Visuelles Feedback bei korrekten Teil-Lösungen.
-- Hilfe-System: Erarbeitung von Hinweisen durch kleine Mathe-Aufgaben.
-
-INTERFACE:
-ULTRA-Sidebar mit Zügen- und Zeiterfassung sowie Level-Auswahl.`,
+- Hilfe-System: Erarbeitung von Hinweisen durch kleine Mathe-Aufgaben.`,
 
         "heart3d": `MATHEMATISCHER HINTERGRUND:
 Visualisierung der Taubin-Herz-Gleichung mittels GPU-basiertem Raymarching (SDF).
 
-FEATURES & STEUERUNG:
+FEATURES
 - Deformation: Manipulation der Parameter A und B für Formvarianz.
 - Holografisches Rendering: Hochperformante Shader-Berechnung.
-- Dynamische Formel: Live-Einblendung der algebraischen Gleichung.
-
-INTERFACE:
-Futuristisches ULTRA-Design mit Symbiose aus Algebra und 3D-Grafik.`,
+- Dynamische Formel: Live-Einblendung der algebraischen Gleichung.`,
 
         "butterfly": `MATHEMATISCHER HINTERGRUND:
 Visualisierung des Butterfly-Effekts anhand des Lorenz-Attraktors (Chaos-Theorie).
 
-FEATURES & STEUERUNG:
+FEATURES
 - Dynamik-Simulation: Echtzeit-Integration der Lorenz-Gleichungen.
 - Parameter-Tuning: Anpassung der Koeffizienten für verschiedene Attraktoren.
-- Glow-Engine: Trajektorien als leuchtende Energieströme im Raum.
-
-INTERFACE:
-Cinematisches ULTRA-Design mit schwebendem KaTeX-Differentialgleichungs-Panel.`,
+- Glow-Engine: Trajektorien als leuchtende Energieströme im Raum.`,
 
         "litchi3d": `MATHEMATISCHER HINTERGRUND:
 Erzeugung organischer Strukturen durch Sine-Wellen-Modulation eines Signed Distance Fields.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Reife-Simulation: Dynamische Pigment-Verschiebung im Shader.
 - Stachel-Morphologie: Kontrolle über die prozeduralen Oberflächen-Erhebungen.
-- SDF-Gleichung: Live-Einblendung der Distanzfunktion d(p).
-
-INTERFACE:
-Organisch inspiriertes ULTRA-Design unter Nutzung von Raymarching.`,
+- SDF-Gleichung: Live-Einblendung der Distanzfunktion d(p).`,
 
         "triangulierer": `MATHEMATISCHER HINTERGRUND:
 Flächenzerlegung in Dreiecke nach dem Delaunay-Algorithmus zur Netz-Erzeugung.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Echtzeit-Triangulierung: Sofortige Neuberechnung bei Punkt-Verschiebung.
 - Flächen-HUD: Detaillierte Bilanzierung der Einzel- und Gesamtflächen.
-- Mehrfach-Selektion: Gruppierung von Messpunkten für Struktur-Checks.
-
-INTERFACE:
-Technisches Analyse-UI im ULTRA-Standard mit Fokus auf Präzision.`,
+- Mehrfach-Selektion: Gruppierung von Messpunkten für Struktur-Checks.`,
 
         "uhrzeitwinkel": `MATHEMATISCHER HINTERGRUND:
 Berechnung des Bogenwinkels zwischen Stunden- und Minutenzeiger basierend auf deren Geschwindigkeit.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Präzisions-Einstellung: Stufenlose Justierung der Zeit per Slider.
 - Dual-Winkel-Analyse: Anzeige von Innen- (Alpha) und Außenwinkel (Beta).
-- Digitale Synchronisation: Abgleich von analoger und digitaler Zeit.
-
-INTERFACE:
-Stilisiertes Cyber-Clock-Design mit Fokus auf mathematische Zeitintervall-Interpretation.`,
+- Digitale Synchronisation: Abgleich von analoger und digitaler Zeit.`,
 
         "universe": `MATHEMATISCHER HINTERGRUND:
-Visualisierung des ULTRA-Ökosystems als dynamische Galaxie mittels Raycasting-Logik.
+Visualisierung des-Ökosystems als dynamische Galaxie mittels Raycasting-Logik.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Lab-Matrix: Module fliegen aus dem Zentrum auf den Betrachter zu.
 - Interaktive Exploration: Fokussierung und Start der Labore per Klick.
-- Tiefen-Projektion: Skalierung basierend auf der virtuellen Z-Koordinate.
-
-INTERFACE:
-Cinematisches ULTRA-Interface als zentraler navigatorischer Hub der Suite.`,
+- Tiefen-Projektion: Skalierung basierend auf der virtuellen Z-Koordinate.`,
 
         "easyhard": `ÜBERSICHT:
 Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade für gezieltes Training.
 
-FEATURES & STEUERUNG:
+FEATURES
 - Schwierigkeitswahl: Umschalten zwischen Basis- und Expertenmodus.
 - Aufgaben-Matrix: Strukturierte Präsentation didaktischer Einheiten.
-- Hilfe-System: Schneller Zugriff auf Kurzinformationen über das Navigations-Icon.
+- Hilfe-System: Schneller Zugriff auf Kurzinformationen über das Navigations-Icon.`,
 
-INTERFACE:
-ULTRA-Labor-Layout mit zentraler Branding-Navigation und Fokus auf Usability.`
+        "zahlenerkennung": `KONZEPT:
+Künstliche neuronale Netze können lernen. Sie sind nicht programmiert darauf Muster zu erkennen, sie lernen Muster. Hier zeigt Dir das Labor, wie ein KNN geschriebene Zahlen lernt.
+
+FEATURES
+- Trainings-Management: Das Netz kann mit verschiedenen Batches von Trainingsdaten trainiert werden.
+- Validierung: Teste die Erkennungsrate bei hand- oder mausgeschriebenen Zahlen in Echtzeit.`,
+
+        "tools": `MISSION CONTROL (ZENTRALER LAUNCHER):
+Dieses Modul dient als zentrales Betriebssystem und Navigations-Hub der-Labor-Suite. Es bietet einen kuratierten Zugriff auf alle verfügbaren mathematischen und physikalischen Experimente.
+
+FEATURES
+- Interaktive Labor-Matrix: Ein dynamisches Gitter-Layout präsentiert alle Module mit hochauflösenden Thumbnails.
+- Zentraler Zugriff: Schneller Wechsel zwischen verschiedenen Laboren ohne Umwege.`,
+
+        "ann_labor": `KÜNSTLICHE NEURONALE NETZE (ANN):
+Dieses Labor ermöglicht die tiefe Untersuchung der Architektur und Funktionsweise künstlicher Neuronen. Von der Gewichtsanpassung bis hin zur Aktivierungsfunktion werden alle Prozesse visuell aufbereitet.
+
+FEATURES
+- Layer-Konfiguration: Anpassung der Anzahl der Neuronen und Schichten.
+- Lernprozess-Visualisierung: Beobachtung der Gewichtsveränderungen während des Trainings.`,
+
+        "cmaes_java": `EVOLUTIONÄRE STRATEGIEN (CMA-ES):
+Optimierung komplexer Probleme mittels Kovarianzmatrix-Adaption. Dieses Labor demonstriert die Mächtigkeit stochastischer Optimierungsalgorithmen in der Geometrie und Optik.
+
+FEATURES
+- Multidimensionale Suche: Beobachtung der Konvergenz im Parameterraum.
+- Echtzeit-Optimierung: Sofortiges Feedback der Fitness-Funktion bei Formänderungen.`
     },
     "en": {
         "addition": `MATHEMATICAL BACKGROUND:
@@ -443,12 +356,7 @@ Written addition is one of the fundamental algorithms of arithmetic. It is based
 FEATURES & CONTROLS:
 - Summand Input: Users can enter two summands with up to 7 digits.
 - Algorithm Steps: Navigation arrows (< >) allow a step-by-step walkthrough.
-- Carry Visualization: Small numbers above columns show the active carry.
-
-INTERFACE:
-- Input Fields (Top): Define base numbers.
-- Calculation Matrix (Center): Vertical arrangement.
-- Control Console (Bottom): Start, Reset, and step navigation.`,
+- Carry Visualization: Small numbers above columns show the active carry.`,
 
         "subtraktion": `MATHEMATICAL BACKGROUND:
 Written subtraction calculates the difference between a minuend and a subtrahend using the unbundling method.
@@ -456,10 +364,7 @@ Written subtraction calculates the difference between a minuend and a subtrahend
 FEATURES & CONTROLS:
 - Digit Input: Precise control over minuend and subtrahend (max. 7 digits).
 - Unbundling Logic: Math Coach explains the process of "borrowing".
-- Process Control: Manual navigation through steps.
-
-INTERFACE:
-Central ULTRA design with adaptive scaling and KaTeX-based process overlay.`,
+- Process Control: Manual navigation through steps.`,
 
         "multiplikation": `MATHEMATICAL BACKGROUND:
 Written multiplication breaks down the product calculation into partial products, which are added together digit-correctly.
@@ -467,10 +372,7 @@ Written multiplication breaks down the product calculation into partial products
 FEATURES & CONTROLS:
 - Multi-Digit Support: Complex products with up to 7-digit factors.
 - Fine Mode: Shows every single digit multiplication and carry.
-- Partial Product Summation: Final addition of all lines for the total result.
-
-INTERFACE:
-Award-winning Cyber Interface with a "Math Coach" box explaining algebraic steps.`,
+- Partial Product Summation: Final addition of all lines for the total result.`,
 
         "dividieren": `MATHEMATICAL BACKGROUND:
 Written division is based on repeated estimating, multiplying, subtracting, and "bringing down" digits to determine the quotient.
@@ -478,10 +380,7 @@ Written division is based on repeated estimating, multiplying, subtracting, and 
 FEATURES & CONTROLS:
 - Dividend Management: Values up to 7 digits; adjustable difficulty.
 - Remainder Visualization: Clear representation of remainders.
-- Didactic Coaching: Guides through "How many times does the divisor fit?".
-
-INTERFACE:
-Adaptive ULTRA layout utilizing horizontal space for division flow.`,
+- Didactic Coaching: Guides through "How many times does the divisor fit?".`,
 
         "parabellabor": `MATHEMATICAL BACKGROUND:
 Investigate parabolas of the form f(x) = a*(x-d)^2 + e. Shows the influence of parameters a, d, and e on the graph.
@@ -489,10 +388,7 @@ Investigate parabolas of the form f(x) = a*(x-d)^2 + e. Shows the influence of p
 FEATURES & CONTROLS:
 - Interactive Handles: Manipulate vertex S(d|e) and stretch factor a directly.
 - Dual Formula Display: Automatic conversion between vertex and standard form.
-- Root Analysis: Automatic calculation of real roots.
-
-INTERFACE:
-Clear ULTRA design with KaTeX formulas "sticking" to the vertex.`,
+- Root Analysis: Automatic calculation of real roots.`,
 
         "mandelbrot_deep": `MATHEMATICAL BACKGROUND:
 The Mandelbrot set arises from iterating z_{n+1} = z_n^2 + c. This lab renders directly in WebGL fragment shader for high-speed extreme zoom.
@@ -500,10 +396,7 @@ The Mandelbrot set arises from iterating z_{n+1} = z_n^2 + c. This lab renders d
 FEATURES & CONTROLS:
 - Mode: Mandelbrot and Julia; parameters via controls or cursor.
 - Zoom & Pan: Mouse wheel zoom, drag to shift plane.
-- Flight: START FLIGHT zooms in; center of view follows mouse.
-
-INTERFACE:
-ULTRA sidebar with parameters; central WebGL canvas.`,
+- Flight: START FLIGHT zooms in; center of view follows mouse.`,
 
         "pythagoras": `MATHEMATICAL BACKGROUND:
 Visualizes the Pythagorean theorem (a² + b² = c²) for right-angled triangles. Sum of leg squares equals hypotenuse square.
@@ -511,10 +404,7 @@ Visualizes the Pythagorean theorem (a² + b² = c²) for right-angled triangles.
 FEATURES & CONTROLS:
 - Interactive Vertices: Drag points A and B while maintaining the right angle.
 - Area Animation: Dynamic scaling of squares syncs with side lengths.
-- Live Calculation: Continuous verification of the equation.
-
-INTERFACE:
-Didactically focused ULTRA lab with high-contrast colors.`,
+- Live Calculation: Continuous verification of the equation.`,
 
         "eulergerade": `MATHEMATICAL BACKGROUND:
 In non-equilateral triangles, orthocenter (H), circumcenter (U), and centroid (S) lie on the Euler line. Ratio HS:SU is always 2:1.
@@ -522,10 +412,7 @@ In non-equilateral triangles, orthocenter (H), circumcenter (U), and centroid (S
 FEATURES & CONTROLS:
 - Construction: Toggle circumcircle, incircle, and Feuerbach circle.
 - Helper System: Visualization of altitudes, medians, and bisectors.
-- Live Analysis: Permanently calculates the HS/SU ratio.
-
-INTERFACE:
-High-precision geometric lab in ULTRA standard with color-differentiated points.`,
+- Live Analysis: Permanently calculates the HS/SU ratio.`,
 
         "pythagorasbeweis": `MATHEMATICAL BACKGROUND:
 Interactive visual proof of the Pythagorean theorem through decomposition and rearrangement of four congruent triangles.
@@ -533,10 +420,7 @@ Interactive visual proof of the Pythagorean theorem through decomposition and re
 FEATURES & CONTROLS:
 - Puzzle Mechanics: Free moving and rotating of triangle elements.
 - Real-time Triangulation: Automatically detects remaining free areas.
-- Collision Detection: Ensures proof integrity through overlap warnings.
-
-INTERFACE:
-Highly interactive ULTRA lab combining game mechanics with geometric logic.`,
+- Collision Detection: Ensures proof integrity through overlap warnings.`,
 
         "differentiallabor": `MATHEMATICAL BACKGROUND:
 This module visualizes the transition from secant to tangent and the derivative f'(x) as the local slope of a function.
@@ -544,10 +428,7 @@ This module visualizes the transition from secant to tangent and the derivative 
 FEATURES & CONTROLS:
 - Function library: Selection of various base functions (quadratic, trigonometric, etc.).
 - Interactive tangent: Move the point of tangency to observe the slope.
-- Derivative graphs: Visualization of the first and second derivatives.
-
-INTERFACE:
-Professional ULTRA analysis interface with high-resolution function plots.`,
+- Derivative graphs: Visualization of the first and second derivatives.`,
 
         "integralreaktor": `MATHEMATICAL BACKGROUND:
 The integral reactor computes and visualizes the definite integral of a function f(x), interpreted as signed area.
@@ -555,10 +436,7 @@ The integral reactor computes and visualizes the definite integral of a function
 FEATURES & CONTROLS:
 - Dynamic interval selection: Adjust bounds directly in the coordinate system.
 - Numerical integration: Live computation of the integral value.
-- Visual feedback: The computed area is highlighted.
-
-INTERFACE:
-Modern ULTRA design focused on numerical precision and graphical clarity.`,
+- Visual feedback: The computed area is highlighted.`,
 
         "steigung": `MATHEMATICAL BACKGROUND:
 The lab visualizes the slope m and y-intercept n in the line equation y = mx + n.
@@ -566,10 +444,7 @@ The lab visualizes the slope m and y-intercept n in the line equation y = mx + n
 FEATURES & CONTROLS:
 - Handle interaction: Drag points to change the slope.
 - Slope triangle: A neon-blue triangle shows Δx and Δy.
-- Formula synchronization: The equation updates in real time via KaTeX.
-
-INTERFACE:
-Analytical ULTRA interface coupling algebra and geometry.`,
+- Formula synchronization: The equation updates in real time via KaTeX.`,
 
         "winkelsumme": `MATHEMATICAL BACKGROUND:
 The sum of interior angles in an n-gon follows the formula (n-2) * 180°. Verify this law for various figures.
@@ -577,10 +452,7 @@ The sum of interior angles in an n-gon follows the formula (n-2) * 180°. Verify
 FEATURES & CONTROLS:
 - Configuration: Toggle between triangle, quad, pentagon, etc.
 - Interactive Vertices: Drag corners to check invariance of the sum.
-- Angle Visualization: Colored arc markings at interior corners.
-
-INTERFACE:
-Clear ULTRA design with neon angle segments and live sum display.`,
+- Angle Visualization: Colored arc markings at interior corners.`,
 
         "winkelsumme3d": `MATHEMATICAL BACKGROUND:
 Demonstrates through a virtual folding experiment how three triangle corners meet at one point to form 180°.
@@ -588,10 +460,7 @@ Demonstrates through a virtual folding experiment how three triangle corners mee
 FEATURES & CONTROLS:
 - Interactive Folding: Smooth control of the folding process.
 - 3D Navigation: Free rotation and zooming using Three.js.
-- Dynamic Geometry: Change triangle shape during folding.
-
-INTERFACE:
-Modern 3D ULTRA design with transparent material effects.`,
+- Dynamic Geometry: Change triangle shape during folding.`,
 
         "beweisinwinkellsumme": `MATHEMATICAL BACKGROUND:
 This proof uses parallels and alternate angles (Z-angles) to derive the 180° angle sum in a triangle.
@@ -599,10 +468,7 @@ This proof uses parallels and alternate angles (Z-angles) to derive the 180° an
 FEATURES & CONTROLS:
 - Parallel Projection: Automatic construction of a parallel through a vertex.
 - Alternate Angle Check: Color correspondence of angles at the pivot point.
-- Live Sync: Parallel calculations show the matching sums.
-
-INTERFACE:
-Didactically optimized ULTRA lab with KaTeX-supported proof guidance.`,
+- Live Sync: Parallel calculations show the matching sums.`,
 
         "fermatpunkt": `MATHEMATICAL BACKGROUND:
 The Fermat point is the point in a triangle where the sum of distances to the three vertices is minimal.
@@ -610,10 +476,7 @@ The Fermat point is the point in a triangle where the sum of distances to the th
 FEATURES & CONTROLS:
 - Geometric Proof: Visualization of construction via equilateral triangles.
 - Distance Analysis: Comparison point P shows deviation from the minimum.
-- Dynamic Vertices: Immediate recalculation on shape change.
-
-INTERFACE:
-Cyber Interface with purple highlighted Fermat point and distance HUD.`,
+- Dynamic Vertices: Immediate recalculation on shape change.`,
 
         "winkellabor": `MATHEMATICAL BACKGROUND:
 Study of angles at intersected parallels: vertically opposite, supplementary, corresponding, and alternate angles.
@@ -621,10 +484,7 @@ Study of angles at intersected parallels: vertically opposite, supplementary, co
 FEATURES & CONTROLS:
 - Interactive Geometry: Change intersection angle and parallel distance.
 - Angle Identification: Color coding of matching angle pairs.
-- Sum Validation: Display of supplementary relationship (180°).
-
-INTERFACE:
-Clear ULTRA lab for basic plane geometry concepts.`,
+- Sum Validation: Display of supplementary relationship (180°).`,
 
         "gleichschenkligesdreieck": `MATHEMATICAL BACKGROUND:
 Study of a triangle with fixed perimeter (u = 8 cm) under isosceles conditions.
@@ -632,10 +492,7 @@ Study of a triangle with fixed perimeter (u = 8 cm) under isosceles conditions.
 FEATURES & CONTROLS:
 - Base Slider: Change base b with immediate geometry adjustment.
 - Existence Check: Triangle inequality check with visual warning.
-- Dual View: Combination of model and analytical graph.
-
-INTERFACE:
-Minimalist ULTRA lab focused on coupling algebra and geometry.`,
+- Dual View: Combination of model and analytical graph.`,
 
         "potenzlabor": `MATHEMATICAL BACKGROUND:
 Investigation of power functions f(x) = x^n and their inverse functions (root functions).
@@ -643,10 +500,7 @@ Investigation of power functions f(x) = x^n and their inverse functions (root fu
 FEATURES & CONTROLS:
 - Exponent Tuning: Smooth adjustment of n to observe growth behavior.
 - Point Telemetry: Interactive cursor shows exact (x, y) coordinates.
-- Symmetry Check: Parallel display of function and its inverse.
-
-INTERFACE:
-Analytical ULTRA interface focused on comparing function classes.`,
+- Symmetry Check: Parallel display of function and its inverse.`,
 
         "transformationen": `MATHEMATICAL BACKGROUND:
 Study of mappings (translation, rotation, reflection, scaling) on geometric objects.
@@ -654,10 +508,7 @@ Study of mappings (translation, rotation, reflection, scaling) on geometric obje
 FEATURES & CONTROLS:
 - Multi-Mapping System: Combination of various transformations.
 - Reflection Mode: Interactive axis and point reflection.
-- Area Invariance: Real-time check of area conservation in congruency.
-
-INTERFACE:
-Interactive ULTRA lab for investigating fundamental mapping geometry.`,
+- Area Invariance: Real-time check of area conservation in congruency.`,
 
         "gleichungssysteme": `MATHEMATICAL BACKGROUND:
 Graphical solution of linear equation systems (LGS) as an intersection problem of two lines.
@@ -665,10 +516,7 @@ Graphical solution of linear equation systems (LGS) as an intersection problem o
 FEATURES & CONTROLS:
 - Line Manipulation: Change equations by dragging points.
 - Notation Scrambler: Toggle between standard form, scaled, and implicit.
-- Task Generator: Create new scenarios with integer solutions.
-
-INTERFACE:
-Highly functional ULTRA design focused on the algebraic equivalent of geometry.`,
+- Task Generator: Create new scenarios with integer solutions.`,
 
         "imaginarynumbers": `MATHEMATICAL BACKGROUND:
 The complex plane (Gaussian plane) extends the one-dimensional number line with a second dimension: the imaginary axis. A complex number z = x + iy is represented as a point in this plane. The distance to the origin is the magnitude |z|, and operations like the square root √(z) or the square z² can be interpreted geometrically as changes in length and angle.
@@ -677,10 +525,7 @@ FEATURES & CONTROLS:
 - Interactive Vector: Drag the point z freely across the plane.
 - Mode Switch: Toggle between r = √(z) and r = z².
 - Real-time Algebra: Formula overlays (magnitude, real part, imaginary part) update dynamically.
-- KaTeX Rendering: High-quality mathematical typography for all formulas.
-
-INTERFACE:
-Minimalist ULTRA design focusing on the visual and algebraic correspondence of complex numbers.`,
+- KaTeX Rendering: High-quality mathematical typography for all formulas.`,
 
         "binomischeslabor": `MATHEMATICAL BACKGROUND:
 Visualization of the first binomial formula (a + b)² as a geometric area decomposition.
@@ -688,10 +533,7 @@ Visualization of the first binomial formula (a + b)² as a geometric area decomp
 FEATURES & CONTROLS:
 - Dynamic Scaling: Change parameters a and b directly on the model.
 - Area Analytics: Real-time calculation of sub-areas (a², b², 2ab).
-- KaTeX Sync: Dynamic update of the mathematical formula.
-
-INTERFACE:
-Clear ULTRA design focused on the dual representation of algebra and geometry.`,
+- KaTeX Sync: Dynamic update of the mathematical formula.`,
 
         "coordinatensystemtester": `MATHEMATICAL BACKGROUND:
 Development and diagnostic tool for the CyberCanvas engine to test projections.
@@ -699,10 +541,7 @@ Development and diagnostic tool for the CyberCanvas engine to test projections.
 FEATURES & CONTROLS:
 - Stress Test: Pan and zoom during operation.
 - Function Overlays: Test steep and asymptotic function areas.
-- Integrity: Validation of KaTeX axis labeling.
-
-INTERFACE:
-ULTRA sidebar with projection checkboxes and CyberCanvas standard grid.`,
+- Integrity: Validation of KaTeX axis labeling.`,
 
         "galtonboard": `MATHEMATICAL BACKGROUND:
 Visualization of the normal distribution (bell curve) through a stochastic Galton process.
@@ -710,10 +549,7 @@ Visualization of the normal distribution (bell curve) through a stochastic Galto
 FEATURES & CONTROLS:
 - Physics Simulation: Real-time calculation of ball collisions.
 - Histogram Accumulation: Statistical capture of hit probabilities.
-- Bell Curve Overlay: Comparison of theory and simulation.
-
-INTERFACE:
-Dynamic ULTRA interface with smooth physical animations.`,
+- Bell Curve Overlay: Comparison of theory and simulation.`,
 
         "fourier": `MATHEMATICAL BACKGROUND:
 Demonstration of Fourier analysis: Any periodic function as a sum of sine waves.
@@ -721,10 +557,7 @@ Demonstration of Fourier analysis: Any periodic function as a sum of sine waves.
 FEATURES & CONTROLS:
 - Epicycle Visualization: Rotating vectors draw complex curves.
 - Approximation Grade: Adjustment of the number of harmonics n.
-- Path Tracking: Real-time recording of reconstruction.
-
-INTERFACE:
-Highly complex ULTRA design focused on the aesthetics of oscillatory processes.`,
+- Path Tracking: Real-time recording of reconstruction.`,
 
         "lissajous": `MATHEMATICAL BACKGROUND:
 Superposition of two harmonic oscillations in x and y directions creates Lissajous figures.
@@ -732,10 +565,7 @@ Superposition of two harmonic oscillations in x and y directions creates Lissajo
 FEATURES & CONTROLS:
 - Frequency Manipulation: Independent control of axis frequencies.
 - Phase Shift: Investigation of temporal shift influence.
-- 3D Pendulum: Physical analogy as spatial oscillation.
-
-INTERFACE:
-Aesthetically demanding ULTRA design with glowing trajectories and frequency analysis.`,
+- 3D Pendulum: Physical analogy as spatial oscillation.`,
 
         "fibonacci": `MATHEMATICAL BACKGROUND:
 Visualization of the Fibonacci sequence and the resulting logarithmic spiral.
@@ -743,10 +573,7 @@ Visualization of the Fibonacci sequence and the resulting logarithmic spiral.
 FEATURES & CONTROLS:
 - Iteration Control: Observe growth of Fibonacci squares.
 - Spiral Construction: Toggle the geometric spiral.
-- Golden Ratio: Illustrate convergence of term ratios.
-
-INTERFACE:
-Elegant ULTRA design focused on geometric proportions.`,
+- Golden Ratio: Illustrate convergence of term ratios.`,
 
         "ausgleichsgerade": `MATHEMATICAL BACKGROUND:
 Linear regression using the least squares method to determine trends in data.
@@ -754,10 +581,7 @@ Linear regression using the least squares method to determine trends in data.
 FEATURES & CONTROLS:
 - Interactive Point Cloud: Manually place data points.
 - Correlation Dashboard: Live calculation of r, m, and n.
-- Error Visualization: Display of standard deviation as a corridor.
-
-INTERFACE:
-High-precision statistics tool in ULTRA standard with real-time telemetry.`,
+- Error Visualization: Display of standard deviation as a corridor.`,
 
         "logikspiel": `MATHEMATICAL BACKGROUND:
 Fundamentals of binary logic: Visualization of gates like AND, OR, XOR, and NOT.
@@ -765,10 +589,7 @@ Fundamentals of binary logic: Visualization of gates like AND, OR, XOR, and NOT.
 FEATURES & CONTROLS:
 - Interactive Inputs: Toggle input states per click.
 - Signal Flow: Glowing connections show data flow.
-- Truth Tables: Live comparison with logical definitions.
-
-INTERFACE:
-Futuristic circuit design in ULTRA standard with clear signal highlighting.`,
+- Truth Tables: Live comparison with logical definitions.`,
 
         "logikspiel2": `MATHEMATICAL BACKGROUND:
 Magic Square / Target Value Puzzle: Logical cell assignment based on border sums.
@@ -776,10 +597,7 @@ Magic Square / Target Value Puzzle: Logical cell assignment based on border sums
 FEATURES & CONTROLS:
 - Calculation Modes: Toggle between addition and multiplication.
 - Border Validation: Visual feedback for correct partial solutions.
-- Help System: Develop hints through small math tasks.
-
-INTERFACE:
-ULTRA sidebar with move and time tracking plus level selection.`,
+- Help System: Develop hints through small math tasks.`,
 
         "heart3d": `MATHEMATICAL BACKGROUND:
 Visualization of the Taubin heart equation using GPU-based raymarching (SDF).
@@ -787,10 +605,7 @@ Visualization of the Taubin heart equation using GPU-based raymarching (SDF).
 FEATURES & CONTROLS:
 - Deformation: Manipulate parameters A and B for shape variance.
 - Holographic Rendering: High-performance shader calculation.
-- Dynamic Formula: Live display of the algebraic equation.
-
-INTERFACE:
-Futuristic ULTRA design with symbiosis of algebra and 3D graphics.`,
+- Dynamic Formula: Live display of the algebraic equation.`,
 
         "butterfly": `MATHEMATICAL BACKGROUND:
 Visualization of the butterfly effect via the Lorenz attractor (chaos theory).
@@ -798,10 +613,7 @@ Visualization of the butterfly effect via the Lorenz attractor (chaos theory).
 FEATURES & CONTROLS:
 - Dynamics Simulation: Real-time integration of Lorenz equations.
 - Parameter Tuning: Adjust coefficients for different attractors.
-- Glow Engine: Trajectories as glowing energy flows in space.
-
-INTERFACE:
-Cinematic ULTRA design with floating KaTeX differential equation panel.`,
+- Glow Engine: Trajectories as glowing energy flows in space.`,
 
         "litchi3d": `MATHEMATICAL BACKGROUND:
 Generation of organic structures through sine-wave modulation of a Signed Distance Field.
@@ -809,10 +621,7 @@ Generation of organic structures through sine-wave modulation of a Signed Distan
 FEATURES & CONTROLS:
 - Ripeness Simulation: Dynamic pigment shift in the shader.
 - Spike Morphology: Control over procedural surface bumps.
-- SDF Equation: Live display of distance function d(p).
-
-INTERFACE:
-Organically inspired ULTRA design using raymarching.`,
+- SDF Equation: Live display of distance function d(p).`,
 
         "triangulierer": `MATHEMATICAL BACKGROUND:
 Area decomposition into triangles using the Delaunay algorithm for mesh generation.
@@ -820,10 +629,7 @@ Area decomposition into triangles using the Delaunay algorithm for mesh generati
 FEATURES & CONTROLS:
 - Real-time Triangulation: Immediate recalculation on point move.
 - Area HUD: Detailed balance of individual and total areas.
-- Multi-Selection: Grouping of points for structural checks.
-
-INTERFACE:
-Technical analysis UI in ULTRA standard focused on precision.`,
+- Multi-Selection: Grouping of points for structural checks.`,
 
         "uhrzeitwinkel": `MATHEMATICAL BACKGROUND:
 Calculation of the arc angle between hour and minute hands based on their speed.
@@ -831,21 +637,15 @@ Calculation of the arc angle between hour and minute hands based on their speed.
 FEATURES & CONTROLS:
 - Precision Setting: Smooth adjustment of time via slider.
 - Dual Angle Analysis: Display of interior (Alpha) and exterior (Beta) angles.
-- Digital Sync: Matching analog and digital time.
-
-INTERFACE:
-Stylized Cyber Clock design focused on mathematical time interval interpretation.`,
+- Digital Sync: Matching analog and digital time.`,
 
         "universe": `MATHEMATICAL BACKGROUND:
-Visualization of the ULTRA ecosystem as a dynamic galaxy using raycasting logic.
+Visualization of the ecosystem as a dynamic galaxy using raycasting logic.
 
 FEATURES & CONTROLS:
 - Lab Matrix: Modules fly from the center towards the viewer.
 - Interactive Exploration: Focus and start labs via click.
-- Depth Projection: Scaling based on virtual Z-coordinate.
-
-INTERFACE:
-Cinematic ULTRA interface as the central navigation hub of the suite.`,
+- Depth Projection: Scaling based on virtual Z-coordinate.`,
 
         "easyhard": `OVERVIEW:
 Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
@@ -854,18 +654,6 @@ FEATURES & CONTROLS:
 - Difficulty Choice: Toggle between basic and expert mode.
 - Task Matrix: Structured presentation of didactic units.
 - Help System: Quick access to info via navigation icon.
-
-INTERFACE:
-ULTRA lab layout with central branding navigation and focus on usability.`
-    },
-    "es": {
-        "addition": `ANTECEDENTES MATEMÁTICOS:
-La suma escrita es uno de los algoritmos fundamentales de la aritmética. Se basa en el sistema decimal sumando números posición por posición de derecha a izquierda.
-
-CARACTERÍSTICAS Y CONTROLES:
-- Entrada de sumandos: Hasta 7 dígitos.
-- Pasos del algoritmo: Navegación (< >) paso a paso.
-- Acarreo visual: Los pequeños números muestran el acarreo activo.
 
 INTERFAZ:
 - Campos (Arriba): Definir números base.
@@ -881,7 +669,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Control de proceso: Navegación manual.
 
 INTERFAZ:
-Diseño ULTRA con escalado adaptativo y superposición KaTeX.`,
+Diseño con escalado adaptativo y superposición KaTeX.`,
 
         "multiplikation": `ANTECEDENTES MATEMÁTICOS:
 La multiplicación escrita desglosa el cálculo en productos parciales que se suman correctamente.
@@ -903,7 +691,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Coaching didáctico: Guía sobre "¿Cuántas veces cabe el divisor?".
 
 INTERFAZ:
-Layout ULTRA adaptativo que utiliza el espacio horizontal para el flujo.`,
+Layout adaptativo que utiliza el espacio horizontal para el flujo.`,
 
         "parabellabor": `ANTECEDENTES MATEMÁTICOS:
 Investigación de parábolas f(x) = a*(x-d)^2 + e. Muestra la influencia de a, d y e.
@@ -914,7 +702,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Análisis de raíces: Cálculo automático de ceros reales.
 
 INTERFAZ:
-Diseño ULTRA con fórmulas KaTeX que "siguen" al vértice.`,
+Diseño con fórmulas KaTeX que "siguen" al vértice.`,
 
         "mandelbrot_deep": `ANTECEDENTES MATEMÁTICOS:
 Conjunto de Mandelbrot mediante iteración z_{n+1} = z_n^2 + c. Renderizado WebGL rápido.
@@ -925,7 +713,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Vuelo: START FLIGHT activa el zoom interactivo.
 
 INTERFAZ:
-Barra lateral ULTRA; lienzo WebGL central.`,
+Barra lateral; lienzo WebGL central.`,
 
         "pythagoras": `ANTECEDENTES MATEMÁTICOS:
 Visualiza a² + b² = c² para triángulos rectángulos. La suma de cuadrados de catetos iguala a la hipotenusa.
@@ -936,7 +724,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Cálculo en vivo: Verificación continua de la ecuación.
 
 INTERFAZ:
-Laboratorio ULTRA didáctico con colores de alto contraste.`,
+Laboratorio didáctico con colores de alto contraste.`,
 
         "eulergerade": `ANTECEDENTES MATEMÁTICOS:
 Ortocentro (H), circuncentro (U) y baricentro (S) alineados en la recta de Euler. Relación HS:SU es 2:1.
@@ -958,7 +746,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Colisiones: Avisos para asegurar la integridad de la prueba.
 
 INTERFAZ:
-Laboratorio ULTRA interactivo que une juego y lógica.`,
+Laboratorio interactivo que une juego y lógica.`,
 
         "differentiallabor": `ANTECEDENTES MATEMÁTICOS:
 Este módulo visualiza la transición de la secante a la tangente y el concepto de la derivada f'(x) como pendiente local.
@@ -969,7 +757,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Gráficas de derivadas: visualización de la primera y la segunda derivada.
 
 INTERFAZ:
-Interfaz de análisis ULTRA profesional con gráficos de alta resolución.`,
+Interfaz de análisis profesional con gráficos de alta resolución.`,
 
         "integralreaktor": `ANTECEDENTES MATEMÁTICOS:
 El reactor integral calcula y visualiza la integral definida de f(x); interpreta la integral como área orientada.
@@ -980,7 +768,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Retroalimentación visual: el área calculada se resalta.
 
 INTERFAZ:
-Diseño ULTRA moderno con precisión numérica y claridad gráfica.`,
+Diseño moderno con precisión numérica y claridad gráfica.`,
 
         "steigung": `ANTECEDENTES MATEMÁTICOS:
 El laboratorio visualiza los parámetros m (pendiente) y n (ordenada al origen) de y = mx + n.
@@ -991,7 +779,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Sincronización de fórmula: la ecuación se actualiza en vivo con KaTeX.
 
 INTERFAZ:
-Interfaz analítica ULTRA que enlaza álgebra y geometría.`,
+Interfaz analítica que enlaza álgebra y geometría.`,
 
         "winkelsumme": `ANTECEDENTES MATEMÁTICOS:
 Suma de ángulos internos (n-2) * 180°. Verifica la ley en varias figuras.
@@ -1002,7 +790,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Visualización: Arcos de colores en ángulos internos.
 
 INTERFAZ:
-Diseño ULTRA con segmentos de neón y suma en vivo.`,
+Diseño con segmentos de neón y suma en vivo.`,
 
         "winkelsumme3d": `ANTECEDENTES MATEMÁTICOS:
 Demuestra mediante plegado virtual cómo las tres esquinas se unen en 180°.
@@ -1013,7 +801,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Geometría dinámica: Cambia la forma durante el plegado.
 
 INTERFAZ:
-Diseño 3D ULTRA con efectos de material transparente.`,
+Diseño 3D con efectos de material transparente.`,
 
         "beweisinwinkellsumme": `ANTECEDENTES MATEMÁTICOS:
 Prueba mediante paralelas y ángulos alternos para derivar los 180° en un triángulo.
@@ -1046,7 +834,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Validación: Relación suplementaria de 180°.
 
 INTERFAZ:
-Laboratorio ULTRA para conceptos básicos de geometría plana.`,
+Laboratorio para conceptos básicos de geometría plana.`,
 
         "gleichschenkligesdreieck": `ANTECEDENTES MATEMÁTICOS:
 Estudio de un triángulo con perímetro fijo (8 cm) bajo condición de isósceles.
@@ -1080,7 +868,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Renderizado KaTeX: Tipografía matemática de alta calidad para todas las fórmulas.
 
 INTERFAZ:
-Diseño ULTRA minimalista centrado en la correspondencia visual y algebraica de los números complejos.`,
+Diseño minimalista centrado en la correspondencia visual y algebraica de los números complejos.`,
 
         "transformationen": `ANTECEDENTES MATEMÁTICOS:
 Estudio de traslación, rotación, simetría y escalado en objetos geométricos.
@@ -1113,7 +901,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Sync KaTeX: Actualización dinámica de la fórmula.
 
 INTERFAZ:
-Diseño ULTRA centrado en la representación dual.`,
+Diseño centrado en la representación dual.`,
 
         "coordinatensystemtester": `ANTECEDENTES MATEMÁTICOS:
 Herramienta de diagnóstico para CyberCanvas probando proyecciones.
@@ -1146,7 +934,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Tracking: Registro de la reconstrucción en vivo.
 
 INTERFAZ:
-Diseño ULTRA centrado en la estética de oscilaciones.`,
+Diseño centrado en la estética de oscilaciones.`,
 
         "lissajous": `ANTECEDENTES MATEMÁTICOS:
 Figuras de Lissajous mediante superposición de oscilaciones en x e y.
@@ -1259,7 +1047,7 @@ INTERFAZ:
 Reloj Cyber centrado en interpretación matemática.`,
 
         "universe": `ANTECEDENTES MATEMÁTICOS:
-Ecosistema ULTRA como galaxia dinámica mediante raycasting.
+Ecosistema como galaxia dinámica mediante raycasting.
 
 CARACTERÍSTICAS Y CONTROLES:
 - Matriz: Módulos vuelan desde el centro.
@@ -1278,7 +1066,7 @@ CARACTERÍSTICAS Y CONTROLES:
 - Ayuda: Acceso rápido vía icono de navegación.
 
 INTERFAZ:
-Diseño ULTRA con navegación de marca central.`
+Diseño con navegación de marca central.`
     },
     "fr": {
         "addition": `CONTEXTE MATHÉMATIQUE :
@@ -1303,7 +1091,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Contrôle : Navigation manuelle.
 
 INTERFACE :
-Design ULTRA avec mise à l'échelle adaptive et KaTeX.`,
+Design avec mise à l'échelle adaptive et KaTeX.`,
 
         "multiplikation": `CONTEXTE MATHÉMATIQUE :
 Multiplication posée décomposée en produits partiels additionnés.
@@ -1325,7 +1113,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Coaching : Guide "Combien de fois le diviseur tient-il ?".
 
 INTERFACE :
-Layout ULTRA adaptatif utilisant l'espace horizontal.`,
+Layout adaptatif utilisant l'espace horizontal.`,
 
         "parabellabor": `CONTEXTE MATHÉMATIQUE :
 Étude des paraboles f(x) = a*(x-d)^2 + e. Influence de a, d et e.
@@ -1336,7 +1124,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Racines : Calcul automatique des zéros réels.
 
 INTERFACE :
-Design ULTRA avec formules KaTeX liées au sommet.`,
+Design avec formules KaTeX liées au sommet.`,
 
         "mandelbrot_deep": `CONTEXTE MATHÉMATIQUE :
 Ensemble de Mandelbrot via z_{n+1} = z_n^2 + c. Rendu WebGL ultra-rapide.
@@ -1347,7 +1135,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Vol : START FLIGHT active le zoom interactif.
 
 INTERFACE :
-Barre latérale ULTRA ; canevas WebGL central.`,
+Barre latérale ; canevas WebGL central.`,
 
         "pythagoras": `CONTEXTE MATHÉMATIQUE :
 Visualise a² + b² = c² pour triangles rectangles. Somme des carrés des côtés égale l'hypoténuse.
@@ -1358,7 +1146,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Calcul : Vérification continue de l'équation.
 
 INTERFACE :
-Labo ULTRA didactique aux couleurs contrastées.`,
+Labo didactique aux couleurs contrastées.`,
 
         "eulergerade": `CONTEXTE MATHÉMATIQUE :
 Orthocentre (H), centre circonscrit (U) et gravité (S) alignés. Rapport HS:SU = 2:1.
@@ -1380,7 +1168,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Collisions : Alertes pour garantir la preuve.
 
 INTERFACE :
-Labo ULTRA interactif alliant jeu et logique.`,
+Labo interactif alliant jeu et logique.`,
 
         "differentiallabor": `CONTEXTE MATHÉMATIQUE :
 Visualisation du passage de la sécante à la tangente et du concept de dérivée f'(x) comme pente locale.
@@ -1391,7 +1179,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Graphes des dérivées : visualisation des dérivées première et seconde.
 
 INTERFACE :
-Interface d'analyse ULTRA professionnelle avec tracés haute résolution.`,
+Interface d'analyse professionnelle avec tracés haute résolution.`,
 
         "integralreaktor": `CONTEXTE MATHÉMATIQUE :
 Calcul et visualisation de l'intégrale définie de f(x), interprétée comme aire algébrique.
@@ -1402,7 +1190,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Retour visuel : mise en évidence de l'aire calculée.
 
 INTERFACE :
-Design ULTRA axé sur la précision numérique et la clarté graphique.`,
+Design axé sur la précision numérique et la clarté graphique.`,
 
         "steigung": `CONTEXTE MATHÉMATIQUE :
 Visualisation des paramètres m (pente) et n (ordonnée à l'origine) de y = mx + n.
@@ -1413,7 +1201,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Synchronisation KaTeX : équation mise à jour en temps réel.
 
 INTERFACE :
-Interface analytique ULTRA reliant algèbre et géométrie.`,
+Interface analytique reliant algèbre et géométrie.`,
 
         "winkelsumme": `CONTEXTE MATHÉMATIQUE :
 Somme des angles (n-2) * 180°. Vérifiez la loi sur diverses figures.
@@ -1424,7 +1212,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Visualisation : Arcs colorés aux angles internes.
 
 INTERFACE :
-Design ULTRA avec segments néon et somme en direct.`,
+Design avec segments néon et somme en direct.`,
 
         "winkelsumme3d": `CONTEXTE MATHÉMATIQUE :
 Démontre par pliage virtuel comment les trois coins forment 180°.
@@ -1435,7 +1223,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Géométrie : Changez la forme durant le pliage.
 
 INTERFACE :
-Design 3D ULTRA avec effets de matière.`,
+Design 3D avec effets de matière.`,
 
         "beweisinwinkellsumme": `CONTEXTE MATHÉMATIQUE :
 Preuve via parallèles et angles alternes pour dériver les 180°.
@@ -1468,7 +1256,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Validation : Relation de 180°.
 
 INTERFACE :
-Labo ULTRA pour les concepts de géométrie plane.`,
+Labo pour les concepts de géométrie plane.`,
 
         "gleichschenkligesdreieck": `CONTEXTE MATHÉMATIQUE :
 Triangle à périmètre fixe (8 cm) sous condition d'isocèle.
@@ -1502,7 +1290,7 @@ FONCTIONNALITÉS & CONTRÔLES :
 - Rendu KaTeX : Typographie mathématique de haute qualité pour toutes les formules.
 
 INTERFACE :
-Design ULTRA minimaliste axé sur la correspondance visuelle et algébrique des nombres complexes.`,
+Design minimaliste axé sur la correspondance visuelle et algébrique des nombres complexes.`,
 
         "transformationen": `CONTEXTE MATHÉMATIQUE :
 Translation, rotation, symétrie et échelle sur objets géométriques.
@@ -1535,7 +1323,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Sync KaTeX : Mise à jour dynamique de la formule.
 
 INTERFACE :
-Design ULTRA centré sur la représentation duale.`,
+Design centré sur la représentation duale.`,
 
         "coordinatensystemtester": `CONTEXTE MATHÉMATIQUE :
 Outil de diagnostic CyberCanvas testant les projections.
@@ -1568,7 +1356,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Tracking : Enregistrement de la reconstruction.
 
 INTERFACE :
-Design ULTRA axé sur l'esthétique des oscillations.`,
+Design axé sur l'esthétique des oscillations.`,
 
         "lissajous": `CONTEXTE MATHÉMATIQUE :
 Figures de Lissajous par superposition d'oscillations x et y.
@@ -1681,7 +1469,7 @@ INTERFACE :
 Horloge Cyber centrée sur l'interprétation.`,
 
         "universe": `CONTEXTE MATHÉMATIQUE :
-Écosystème ULTRA en galaxie dynamique via raycasting.
+Écosystème en galaxie dynamique via raycasting.
 
 FONCTIONNALITÉS & COMMANDES :
 - Matrice : Modules volant depuis le centre.
@@ -1700,7 +1488,7 @@ FONCTIONNALITÉS & COMMANDES :
 - Aide : Accès rapide via icône navigation.
 
 INTERFACE :
-Design ULTRA avec navigation de marque.`
+Design avec navigation de marque.`
     },
     "it": {
         "addition": `CONTESTO MATEMATICO:
@@ -1725,7 +1513,7 @@ CARATTERISTICHE E COMANDI:
 - Controllo: Navigazione manuale.
 
 INTERFACCIA:
-Design ULTRA con ridimensionamento adattivo e KaTeX.`,
+Design con ridimensionamento adattivo e KaTeX.`,
 
         "multiplikation": `CONTESTO MATEMATICO:
 Moltiplicazione in colonna scomposta in prodotti parziali sommati.
@@ -1747,7 +1535,7 @@ CARATTERISTICHE E COMANDI:
 - Coaching: Guida "Quante volte il divisore sta nel...?".
 
 INTERFACCIA:
-Layout ULTRA adattivo che usa lo spazio orizzontale.`,
+Layout adattivo che usa lo spazio orizzontale.`,
 
         "parabellabor": `CONTESTO MATEMATICO:
 Studio di parabole f(x) = a*(x-d)^2 + e. Influenza di a, d ed e.
@@ -1758,7 +1546,7 @@ CARATTERISTICHE E COMANDI:
 - Radici: Calcolo automatico degli zeri reali.
 
 INTERFACCIA:
-Design ULTRA con formule KaTeX legate al vertice.`,
+Design con formule KaTeX legate al vertice.`,
 
         "mandelbrot_deep": `CONTESTO MATEMATICO:
 Insieme di Mandelbrot via z_{n+1} = z_n^2 + c. Rendering WebGL veloce.
@@ -1769,7 +1557,7 @@ CARATTERISTICHE E COMANDI:
 - Volo: START FLIGHT attiva lo zoom interattivo.
 
 INTERFACCIA:
-Sidebar ULTRA; tela WebGL centrale.`,
+Sidebar; tela WebGL centrale.`,
 
         "pythagoras": `CONTESTO MATEMATICO:
 Visualizza a² + b² = c² per triangoli rettangoli. Somma dei quadrati uguale all'ipotenusa.
@@ -1780,7 +1568,7 @@ CARATTERISTICHE E COMANDI:
 - Calcolo: Verifica continua dell'equazione.
 
 INTERFACCIA:
-Labo ULTRA didattico con colori contrastanti.`,
+Labo didattico con colori contrastanti.`,
 
         "eulergerade": `CONTESTO MATEMATICO:
 Ortocentro (H), circocentro (U) e baricentro (S) allineati. Rapporto HS:SU = 2:1.
@@ -1802,7 +1590,7 @@ CARATTERISTICHE E COMANDI:
 - Collisioni: Avvisi per garantire la prova.
 
 INTERFACCIA:
-Labo ULTRA interattivo tra gioco e logica.`,
+Labo interattivo tra gioco e logica.`,
 
         "differentiallabor": `CONTESTO MATEMATICO:
 Visualizza il passaggio dalla secante alla tangente e il concetto di derivata f'(x) come pendenza locale.
@@ -1813,7 +1601,7 @@ CARATTERISTICHE E COMANDI:
 - Grafici delle derivate: visualizzazione della prima e della seconda derivata.
 
 INTERFACCIA:
-Interfaccia di analisi ULTRA professionale con grafici ad alta risoluzione.`,
+Interfaccia di analisi professionale con grafici ad alta risoluzione.`,
 
         "integralreaktor": `CONTESTO MATEMATICO:
 Calcolo e visualizzazione dell'integrale definito di f(x), interpretato come area orientata.
@@ -1824,7 +1612,7 @@ CARATTERISTICHE E COMANDI:
 - Feedback visivo: evidenziazione dell'area calcolata.
 
 INTERFACCIA:
-Design ULTRA moderno su precisione numerica e chiarezza grafica.`,
+Design moderno su precisione numerica e chiarezza grafica.`,
 
         "steigung": `CONTESTO MATEMATICO:
 Visualizza i parametri m (pendenza) e n (intersezione con l'asse y) di y = mx + n.
@@ -1835,7 +1623,7 @@ CARATTERISTICHE E COMANDI:
 - Sincronizzazione KaTeX: equazione aggiornata in tempo reale.
 
 INTERFACCIA:
-Interfaccia analitica ULTRA che collega algebra e geometria.`,
+Interfaccia analitica che collega algebra e geometria.`,
 
         "winkelsumme": `CONTESTO MATEMATICO:
 Somma angoli (n-2) * 180°. Verifica la legge su varie figure.
@@ -1846,7 +1634,7 @@ CARATTERISTICHE E COMANDI:
 - Visualizzazione: Archi colorati negli angoli interni.
 
 INTERFACCIA:
-Design ULTRA con segmenti neon e somma live.`,
+Design con segmenti neon e somma live.`,
 
         "winkelsumme3d": `CONTESTO MATEMATICO:
 Dimostra con piegatura virtuale come i tre angoli formino 180°.
@@ -1857,7 +1645,7 @@ CARATTERISTICHE E COMANDI:
 - Geometria: Cambia forma durante la piegatura.
 
 INTERFACCIA:
-Design 3D ULTRA con effetti di materiale.`,
+Design 3D con effetti di materiale.`,
 
         "beweisinwinkellsumme": `CONTESTO MATEMATICO:
 Prova con parallele e angoli alterni per derivare i 180°.
@@ -1890,7 +1678,7 @@ CARATTERISTICHE E COMANDI:
 - Validazione: Relazione di 180°.
 
 INTERFACCIA:
-Labo ULTRA per i concetti di geometria piana.`,
+Labo per i concetti di geometria piana.`,
 
         "gleichschenkligesdreieck": `CONTESTO MATEMATICO:
 Triangolo a perimetro fisso (8 cm) con condizione isoscele.
@@ -1924,7 +1712,7 @@ CARATTERISTICHE E CONTROLLI:
 - Rendering KaTeX: Tipografia matematica di alta qualità per tutte le formule.
 
 INTERFACCIA:
-Design ULTRA minimalista focalizzato sulla corrispondenza visiva e algebrica dei numeri complessi.`,
+Design minimalista focalizzato sulla corrispondenza visiva e algebrica dei numeri complessi.`,
 
         "transformationen": `CONTESTO MATEMATICO:
 Traslazione, rotazione, simmetria e scala su oggetti geometrici.
@@ -1957,7 +1745,7 @@ CARATTERISTICHE E COMANDI:
 - Sync KaTeX: Aggiornamento dinamico formula.
 
 INTERFACCIA:
-Design ULTRA sulla rappresentazione duale.`,
+Design sulla rappresentazione duale.`,
 
         "coordinatensystemtester": `CONTESTO MATEMATICO:
 Strumento diagnostico CyberCanvas che testa proiezioni.
@@ -1990,7 +1778,7 @@ CARATTERISTICHE E COMANDI:
 - Tracking: Registrazione ricostruzione.
 
 INTERFACCIA:
-Design ULTRA sull'estetica delle oscillazioni.`,
+Design sull'estetica delle oscillazioni.`,
 
         "lissajous": `CONTESTO MATEMATICO:
 Figure di Lissajous per sovrapposizione di oscillazioni x e y.
@@ -2103,7 +1891,7 @@ INTERFACCIA:
 Orologio Cyber sull'interpretazione math.`,
 
         "universe": `CONTESTO MATEMATICO:
-Ecosistema ULTRA in galassia dinamica via raycasting.
+Ecosistema in galassia dinamica via raycasting.
 
 CARATTERISTICHE E COMANDI:
 - Matrice: Moduli volanti dal centro.
@@ -2122,7 +1910,7 @@ CARATTERISTICHE E COMANDI:
 - Aiuto: Accesso rapido via icona navigazione.
 
 INTERFACCIA:
-Design ULTRA con navigazione di marca.`
+Design con navigazione di marca.`
     },
     "pt": {
         "addition": `CONTEXTO MATEMÁTICO:
@@ -2131,12 +1919,7 @@ Adição escrita é um algoritmo fundamental baseado no sistema decimal, somando
 RECURSOS E CONTROLOS:
 - Entrada de parcelas: Até 7 dígitos.
 - Etapas: Navegação (< >) passo a passo.
-- Transporte: Visualização do transporte ativo.
-
-INTERFACE:
-- Campos (Topo): Números base.
-- Matriz (Centro): Disposição vertical.
-- Consola (Fundo): Iniciar, Reset e navegação.`,
+- Transporte: Visualização do transporte ativo.`,
 
         "subtraktion": `CONTEXTO MATEMÁTICO:
 Subtração escrita usando o método de empréstimo para calcular a diferença.
@@ -2144,10 +1927,7 @@ Subtração escrita usando o método de empréstimo para calcular a diferença.
 RECURSOS E CONTROLOS:
 - Entrada de dígitos: Controlo preciso (máx. 7 dígitos).
 - Lógica de empréstimo: Explicação do Math Coach.
-- Controlo: Navegação manual.
-
-INTERFACE:
-Design ULTRA com escala adaptativa e KaTeX.`,
+- Controlo: Navegação manual.`,
 
         "multiplikation": `CONTEXTO MATEMÁTICO:
 Multiplicação escrita decomposta em produtos parciais somados.
@@ -2155,10 +1935,7 @@ Multiplicação escrita decomposta em produtos parciais somados.
 RECURSOS E CONTROLOS:
 - Multi-dígito: Fatores até 7 dígitos.
 - Modo detalhado: Cada multiplicação e transporte mostrados.
-- Soma: Adição final das linhas.
-
-INTERFACE:
-Interface Cyber com "Math Coach" que explica as etapas.`,
+- Soma: Adição final das linhas.`,
 
         "dividieren": `CONTEXTO MATEMÁTICO:
 Divisão escrita baseada em estimativa e descida de dígitos.
@@ -2166,10 +1943,7 @@ Divisão escrita baseada em estimativa e descida de dígitos.
 RECURSOS E CONTROLOS:
 - Gestão: Valores até 7 dígitos.
 - Restos: Representação clara de resíduos.
-- Coaching: Guia "Quantas vezes o divisor cabe no...?".
-
-INTERFACE:
-Layout ULTRA adaptativo que usa o espaço horizontal.`,
+- Coaching: Guia "Quantas vezes o divisor cabe no...?".`,
 
         "parabellabor": `CONTEXTO MATEMÁTICO:
 Estudo de parábolas f(x) = a*(x-d)^2 + e. Influência de a, d e e.
@@ -2177,10 +1951,7 @@ Estudo de parábolas f(x) = a*(x-d)^2 + e. Influência de a, d e e.
 RECURSOS E CONTROLOS:
 - Manipuladores: Manipule o vértice S(d|e) e a diretamente.
 - Dupla fórmula: Conversão vértice/padrão automática.
-- Raízes: Cálculo automático de zeros reais.
-
-INTERFACE:
-Design ULTRA com fórmulas KaTeX ligadas ao vértice.`,
+- Raízes: Cálculo automático de zeros reais.`,
 
         "mandelbrot_deep": `CONTEXTO MATEMÁTICO:
 Conjunto de Mandelbrot via z_{n+1} = z_n^2 + c. Renderização WebGL rápida.
@@ -2188,10 +1959,7 @@ Conjunto de Mandelbrot via z_{n+1} = z_n^2 + c. Renderização WebGL rápida.
 RECURSOS E CONTROLOS:
 - Modo: Mandelbrot e Julia via controlos.
 - Zoom & Pan: Roda e arrasto.
-- Voo: START FLIGHT ativa o zoom interativo.
-
-INTERFACE:
-Sidebar ULTRA; tela WebGL central.`,
+- Voo: START FLIGHT ativa o zoom interativo.`,
 
         "pythagoras": `CONTEXTO MATEMÁTICO:
 Visualiza a² + b² = c² para triângulos retângulos. Soma dos quadrados igual à hipotenusa.
@@ -2199,10 +1967,7 @@ Visualiza a² + b² = c² para triângulos retângulos. Soma dos quadrados igual
 RECURSOS E CONTROLOS:
 - Vértices: Arraste A e B mantendo o ângulo reto.
 - Animação: Escala dinâmica dos quadrados.
-- Cálculo: Verificação contínua da equação.
-
-INTERFACE:
-Labo ULTRA didático com cores contrastantes.`,
+- Cálculo: Verificação contínua da equação.`,
 
         "eulergerade": `CONTEXTO MATEMÁTICO:
 Ortocentro (H), circuncentro (U) e centroide (S) alinhados. Razão HS:SU = 2:1.
@@ -2210,10 +1975,7 @@ Ortocentro (H), circuncentro (U) e centroide (S) alinhados. Razão HS:SU = 2:1.
 RECURSOS E CONTROLOS:
 - Construção: Círculos circunscrito, inscrito e Feuerbach.
 - Auxiliares: Alturas, medianas e bissetrizes.
-- Análise: Cálculo permanente da razão HS/SU.
-
-INTERFACE:
-Labo de precisão com pontos diferenciados por cores.`,
+- Análise: Cálculo permanente da razão HS/SU.`,
 
         "pythagorasbeweis": `CONTEXTO MATEMÁTICO:
 Prova visual interativa de Pitágoras por decomposição de triângulos.
@@ -2221,10 +1983,7 @@ Prova visual interativa de Pitágoras por decomposição de triângulos.
 RECURSOS E CONTROLOS:
 - Puzzle: Movimento e rotação livre dos elementos.
 - Triangulação: Deteta áreas livres automaticamente.
-- Colisões: Avisos para garantir a prova.
-
-INTERFACE:
-Labo ULTRA interativo entre jogo e lógica.`,
+- Colisões: Avisos para garantir a prova.`,
 
         "differentiallabor": `CONTEXTO MATEMÁTICO:
 Visualiza a transição da secante à tangente e o conceito da derivada f'(x) como declive local.
@@ -2232,10 +1991,7 @@ Visualiza a transição da secante à tangente e o conceito da derivada f'(x) co
 RECURSOS E CONTROLOS:
 - Biblioteca de funções: seleção de funções de base (quadráticas, trigonométricas, etc.).
 - Tangente interativa: mover o ponto de tangência para observar o declive.
-- Gráficos das derivadas: visualização da primeira e da segunda derivada.
-
-INTERFACE:
-Interface de análise ULTRA profissional com gráficos de alta resolução.`,
+- Gráficos das derivadas: visualização da primeira e da segunda derivada.`,
 
         "integralreaktor": `CONTEXTO MATEMÁTICO:
 Cálculo e visualização do integral definido de f(x), interpretado como área orientada.
@@ -2243,10 +1999,7 @@ Cálculo e visualização do integral definido de f(x), interpretado como área 
 RECURSOS E CONTROLOS:
 - Intervalo dinâmico: limites diretamente no sistema de coordenadas.
 - Integração numérica: valor em tempo real.
-- Feedback visual: realce da área calculada.
-
-INTERFACE:
-Design ULTRA moderno com precisão numérica e clareza gráfica.`,
+- Feedback visual: realce da área calculada.`,
 
         "steigung": `CONTEXTO MATEMÁTICO:
 Visualiza os parâmetros m (declive) e n (ordenada na origem) de y = mx + n.
@@ -2254,10 +2007,7 @@ Visualiza os parâmetros m (declive) e n (ordenada na origem) de y = mx + n.
 RECURSOS E CONTROLOS:
 - Manipuladores: arraste pontos para alterar o declive.
 - Triângulo de declive: Δx e Δy em azul néon.
-- Sincronização KaTeX: equação atualizada em tempo real.
-
-INTERFACE:
-Interface analítica ULTRA que liga álgebra e geometria.`,
+- Sincronização KaTeX: equação atualizada em tempo real.`,
 
         "winkelsumme": `CONTEXTO MATEMÁTICO:
 Soma de ângulos (n-2) * 180°. Verifique a lei em várias figuras.
@@ -2265,10 +2015,7 @@ Soma de ângulos (n-2) * 180°. Verifique a lei em várias figuras.
 RECURSOS E CONTROLOS:
 - Configuração: Triângulo, quadrado, pentágono, etc.
 - Vértices: Arraste cantos para verificar a invariância.
-- Visualização: Arcos coloridos nos ângulos internos.
-
-INTERFACE:
-Design ULTRA com segmentos néon e soma live.`,
+- Visualização: Arcos coloridos nos ângulos internos.`,
 
         "winkelsumme3d": `CONTEXTO MATEMÁTICO:
 Demonstra por dobragem virtual como os três cantos formam 180°.
@@ -2276,10 +2023,7 @@ Demonstra por dobragem virtual como os três cantos formam 180°.
 RECURSOS E CONTROLOS:
 - Dobragem: Controlo contínuo do processo.
 - Navegação 3D: Rotação via Three.js.
-- Geometria: Altere a forma durante a dobragem.
-
-INTERFACE:
-Design 3D ULTRA com efeitos de material.`,
+- Geometria: Altere a forma durante a dobragem.`,
 
         "beweisinwinkellsumme": `CONTEXTO MATEMÁTICO:
 Prova por paralelas e ângulos alternos para derivar os 180°.
@@ -2287,10 +2031,7 @@ Prova por paralelas e ângulos alternos para derivar os 180°.
 RECURSOS E CONTROLOS:
 - Projeção: Construção automática por um vértice.
 - Ângulos: Correspondência de cor no ponto pivot.
-- Sync: Cálculos paralelos coincidindo em 180°.
-
-INTERFACE:
-Labo otimizado com guia KaTeX.`,
+- Sync: Cálculos paralelos coincidindo em 180°.`,
 
         "fermatpunkt": `CONTEXTO MATEMÁTICO:
 Ponto que minimiza a soma das distâncias aos vértices do triângulo.
@@ -2298,10 +2039,7 @@ Ponto que minimiza a soma das distâncias aos vértices do triângulo.
 RECURSOS E CONTROLOS:
 - Prova: Construção via triângulos equiláteros.
 - Análise: Ponto P comparado ao mínimo.
-- Vértices: Recálculo imediato nas mudanças.
-
-INTERFACE:
-Interface Cyber com ponto de Fermat lilás e HUD.`,
+- Vértices: Recálculo imediato nas mudanças.`,
 
         "winkellabor": `CONTEXTO MATEMÁTICO:
 Ângulos em paralelas: opostos, suplementares, correspondentes e alternos.
@@ -2309,10 +2047,7 @@ Interface Cyber com ponto de Fermat lilás e HUD.`,
 RECURSOS E CONTROLOS:
 - Geometria: Altere ângulo e distância.
 - Identificação: Código de cor para os pares.
-- Validação: Relação de 180°.
-
-INTERFACE:
-Labo ULTRA para conceitos de geometria plana.`,
+- Validação: Relação de 180°.`,
 
         "gleichschenkligesdreieck": `CONTEXTO MATEMÁTICO:
 Triângulo com perímetro fixo (8 cm) e condição isósceles.
@@ -2320,10 +2055,7 @@ Triângulo com perímetro fixo (8 cm) e condição isósceles.
 RECURSOS E CONTROLOS:
 - Slider: Altere b com ajuste imediato.
 - Existência: Inequação triangular com aviso.
-- Vista dual: Modelo e gráfico combinados.
-
-INTERFACE:
-Labo minimalista sobre álgebra e geometria.`,
+- Vista dual: Modelo e gráfico combinados.`,
 
         "potenzlabor": `CONTEXTO MATEMÁTICO:
 Funções potência f(x) = x^n e suas inversas (raízes).
@@ -2331,10 +2063,7 @@ Funções potência f(x) = x^n e suas inversas (raízes).
 RECURSOS E CONTROLOS:
 - Tuning: Ajuste n para observar o crescimento.
 - Telemetria: Cursor com coordenadas (x, y).
-- Simetria: Vista paralela função/inversa.
-
-INTERFACE:
-Interface analítica comparando classes de funções.`,
+- Simetria: Vista paralela função/inversa.`,
 
         "imaginarynumbers": `CONTEXTO MATEMÁTICO:
 O plano complexo (plano de Gauss) estende a reta numérica unidimensional com uma segunda dimensão: o eixo imaginário. Um número complexo z = x + iy é representado como um ponto neste plano. A distância até a origem é a magnitude |z|, e operações como a raiz quadrada √(z) ou o quadrado z² podem ser interpretadas geometricamente como mudanças de comprimento e ângulo.
@@ -2343,10 +2072,7 @@ RECURSOS E CONTROLES:
 - Vetor Interativo: Arraste o ponto z livremente pelo plano.
 - Mudança de Modo: Alterne entre r = √(z) e r = z².
 - Álgebra em Tempo Real: As sobreposições de fórmulas (magnitude, parte real, parte imaginária) são atualizadas dinamicamente.
-- Renderização KaTeX: Tipografia matemática de alta qualidade para todas as fórmulas.
-
-INTERFACE:
-Design ULTRA minimalista focado na correspondência visual e algébrica dos números complexos.`,
+- Renderização KaTeX: Tipografia matemática de alta qualidade para todas as fórmulas.`,
 
         "transformationen": `CONTEXTO MATEMÁTICO:
 Translação, rotação, simetria e escala em objetos geométricos.
@@ -2354,10 +2080,7 @@ Translação, rotação, simetria e escala em objetos geométricos.
 RECURSOS E CONTROLOS:
 - Multi-sistema: Combinação de transformações.
 - Simetria: Reflexão eixos/pontos interativa.
-- Invariância: Check conservação de área.
-
-INTERFACE:
-Labo interativo para geometria de transformação.`,
+- Invariância: Check conservação de área.`,
 
         "gleichungssysteme": `CONTEXTO MATEMÁTICO:
 Solução gráfica de sistemas lineares (LGS) como interseção de retas.
@@ -2365,10 +2088,7 @@ Solução gráfica de sistemas lineares (LGS) como interseção de retas.
 RECURSOS E CONTROLOS:
 - Manipulação: Arraste os pontos para mudar as retas.
 - Scrambler: Alterne entre formas padrão e implícitas.
-- Gerador: Novos desafios com soluções inteiras.
-
-INTERFACE:
-Design funcional sobre o equivalente algébrico.`,
+- Gerador: Novos desafios com soluções inteiras.`,
 
         "binomischeslabor": `CONTEXTO MATEMÁTICO:
 Visualização de (a + b)² como decomposição de áreas.
@@ -2376,10 +2096,7 @@ Visualização de (a + b)² como decomposição de áreas.
 RECURSOS E CONTROLOS:
 - Escala: Altere a e b diretamente.
 - Analítica: Cálculo de áreas (a², b², 2ab).
-- Sync KaTeX: Atualização dinâmica da fórmula.
-
-INTERFACE:
-Design ULTRA sobre a representação dual.`,
+- Sync KaTeX: Atualização dinâmica da fórmula.`,
 
         "coordinatensystemtester": `CONTEXTO MATEMÁTICO:
 Ferramenta de diagnóstico CyberCanvas testando projeções.
@@ -2387,10 +2104,7 @@ Ferramenta de diagnóstico CyberCanvas testando projeções.
 RECURSOS E CONTROLOS:
 - Stress Test: Pan e zoom em tempo real.
 - Overlays: Teste de zonas críticas e assíntotas.
-- Integridade: Validação de rótulos KaTeX.
-
-INTERFACE:
-Sidebar com checkboxes e grelha padrão.`,
+- Integridade: Validação de rótulos KaTeX.`,
 
         "galtonboard": `CONTEXTO MATEMÁTICO:
 Distribuição normal via processo estocástico de Galton.
@@ -2398,10 +2112,7 @@ Distribuição normal via processo estocástico de Galton.
 RECURSOS E CONTROLOS:
 - Física: Colisões em tempo real.
 - Histograma: Captura estatística.
-- Curva de Gauss: Comparação teoria/prática.
-
-INTERFACE:
-Interface dinâmica com animações físicas.`,
+- Curva de Gauss: Comparação teoria/prática.`,
 
         "fourier": `CONTEXTO MATEMÁTICO:
 Análise de Fourier: Funções periódicas como soma de senos.
@@ -2409,10 +2120,7 @@ Análise de Fourier: Funções periódicas como soma de senos.
 RECURSOS E CONTROLOS:
 - Epiciclos: Vetores rotativos desenhando curvas.
 - Aproximação: Ajuste de harmónicos n.
-- Tracking: Registo da reconstrução.
-
-INTERFACE:
-Design ULTRA sobre estética de oscilações.`,
+- Tracking: Registo da reconstrução.`,
 
         "lissajous": `CONTEXTO MATEMÁTICO:
 Figuras de Lissajous por sobreposição de oscilações x e y.
@@ -2420,10 +2128,7 @@ Figuras de Lissajous por sobreposição de oscilações x e y.
 RECURSOS E CONTROLOS:
 - Frequência: Controlo independente dos eixos.
 - Desfasagem: Influência do desvio temporal.
-- Pêndulo 3D: Analogia física espacial.
-
-INTERFACE:
-Design estético com trajetórias brilhantes.`,
+- Pêndulo 3D: Analogia física espacial.`,
 
         "fibonacci": `CONTEXTO MATEMÁTICO:
 Sucessão de Fibonacci e espiral logarítmica resultante.
@@ -2431,10 +2136,7 @@ Sucessão de Fibonacci e espiral logarítmica resultante.
 RECURSOS E CONTROLOS:
 - Iteração: Crescimento de quadrados Fibonacci.
 - Espiral: Ativa construção geométrica.
-- Proporção áurea: Convergência dos rácios.
-
-INTERFACE:
-Design elegante sobre proporções.`,
+- Proporção áurea: Convergência dos rácios.`,
 
         "ausgleichsgerade": `CONTEXTO MATEMÁTICO:
 Regressão linear por mínimos quadrados para tendências.
@@ -2442,10 +2144,7 @@ Regressão linear por mínimos quadrados para tendências.
 RECURSOS E CONTROLOS:
 - Nuvem: Posicione os pontos manualmente.
 - Dashboard: Cálculo live de r, m e n.
-- Erro: Desvio padrão visualizado.
-
-INTERFACE:
-Ferramenta estatística com telemetria.`,
+- Erro: Desvio padrão visualizado.`,
 
         "logikspiel": `CONTEXTO MATEMÁTICO:
 Lógica binária: Portas AND, OR, XOR e NOT.
@@ -2453,10 +2152,7 @@ Lógica binária: Portas AND, OR, XOR e NOT.
 RECURSOS E CONTROLOS:
 - Inputs: Alterne estados com um clique.
 - Fluxo: Conexões brilhantes mostram dados.
-- Tabelas: Comparação live de definições.
-
-INTERFACE:
-Design futurista com sinalização clara.`,
+- Tabelas: Comparação live de definições.`,
 
         "logikspiel2": `CONTEXTO MATEMÁTICO:
 Quadrado Mágico: Atribuição baseada em somas de bordas.
@@ -2464,10 +2160,7 @@ Quadrado Mágico: Atribuição baseada em somas de bordas.
 RECURSOS E CONTROLOS:
 - Modos: Adição e multiplicação.
 - Validação: Feedback visual das soluções.
-- Ajuda: Desafios math para pistas.
-
-INTERFACE:
-Sidebar com tracking de jogadas e tempo.`,
+- Ajuda: Desafios math para pistas.`,
 
         "heart3d": `CONTEXTO MATEMÁTICO:
 Equação de Taubin (coração) via raymarching GPU (SDF).
@@ -2475,10 +2168,7 @@ Equação de Taubin (coração) via raymarching GPU (SDF).
 RECURSOS E CONTROLOS:
 - Deformação: Parâmetros A e B para a forma.
 - Renderização: Shader de alto desempenho.
-- Fórmula: Equação algébrica live.
-
-INTERFACE:
-Design futurista, simbiose álgebra e 3D.`,
+- Fórmula: Equação algébrica live.`,
 
         "butterfly": `CONTEXTO MATEMÁTICO:
 Efeito borboleta via atrator de Lorenz (caos).
@@ -2486,10 +2176,7 @@ Efeito borboleta via atrator de Lorenz (caos).
 RECURSOS E CONTROLOS:
 - Simulação: Integração de Lorenz tempo real.
 - Tuning: Ajuste de atratores.
-- Glow: Trajetórias luminosas.
-
-INTERFACE:
-Design cinemático com painel KaTeX.`,
+- Glow: Trajetórias luminosas.`,
 
         "litchi3d": `CONTEXTO MATEMÁTICO:
 Estruturas orgânicas por modulação de ondas em SDF.
@@ -2497,10 +2184,7 @@ Estruturas orgânicas por modulação de ondas em SDF.
 RECURSOS E CONTROLOS:
 - Maturidade: Mudança de pigmento no shader.
 - Morfologia: Controlo de relevo procedimental.
-- Equação: Distância d(p) live.
-
-INTERFACE:
-Design orgânico com raymarching.`,
+- Equação: Distância d(p) live.`,
 
         "triangulierer": `CONTEXTO MATEMÁTICO:
 Triangulação Delaunay para geração de malhas.
@@ -2508,10 +2192,7 @@ Triangulação Delaunay para geração de malhas.
 RECURSOS E CONTROLOS:
 - Tempo real: Recálculo ao mover pontos.
 - HUD: Balanço de áreas parciais e totais.
-- Seleção: Agrupamento para checks.
-
-INTERFACE:
-Interface técnica sobre precisão.`,
+- Seleção: Agrupamento para checks.`,
 
         "uhrzeitwinkel": `CONTEXTO MATEMÁTICO:
 Ângulo entre ponteiros baseado nas suas velocidades.
@@ -2519,21 +2200,15 @@ Interface técnica sobre precisão.`,
 RECURSOS E CONTROLOS:
 - Precisão: Ajuste de tempo via slider.
 - Análise: Ângulos Alpha (interno) e Beta (externo).
-- Sync: Correspondência analógica-digital.
-
-INTERFACE:
-Relógio Cyber sobre interpretação math.`,
+- Sync: Correspondência analógica-digital.`,
 
         "universe": `CONTEXTO MATEMÁTICO:
-Ecossistema ULTRA em galáxia dinâmica via raycasting.
+Ecossistema em galáxia dinâmica via raycasting.
 
 RECURSOS E CONTROLOS:
 - Matriz: Módulos voando do centro.
 - Exploração: Foco e arranque via clique.
-- Projeção: Escala por coordenada Z.
-
-INTERFACE:
-Interface cinemática, hub central da suite.`,
+- Projeção: Escala por coordenada Z.`,
 
         "easyhard": `RESUMO:
 Módulo "easy/hard": tarefas graduadas para treino direcionado.
@@ -2544,7 +2219,7 @@ RECURSOS E CONTROLOS:
 - Ajuda: Acesso rápido via ícone de navegação.
 
 INTERFACE:
-Design ULTRA com navegação de marca.`
+Design com navegação de marca.`
     }
 };
 
