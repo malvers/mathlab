@@ -94,11 +94,18 @@
 
         .preview-container { 
             width: 100%; max-width: 1400px; display: flex; justify-content: center; position: relative; 
-            padding: 20px;
+            padding: 20px; overflow: auto; min-height: 80vh;
         }
         
+        .zoom-wrapper {
+            transform-origin: center center;
+            transition: transform 0.3s ease-out;
+            display: inline-block;
+            line-height: 0;
+        }
+
         canvas { 
-            display: block; max-width: 100%; height: auto; background: #000; 
+            display: block; width: auto; max-width: 100%; height: auto; background: #000; 
             box-shadow: 0 30px 90px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1); 
             cursor: grab;
             user-select: none;
@@ -114,12 +121,25 @@
         }
         .format-tag span { font-size: 0.4rem; opacity: 0.7; }
 
-        .hint {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            font-size: 0.55rem; color: #444; font-family: 'Orbitron'; letter-spacing: 1.5px;
-            background: rgba(0,0,0,0.6); padding: 6px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05);
-            pointer-events: none; z-index: 200;
+        /* Editor Overlay Styles */
+        #editor-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; padding: 40px; box-sizing: border-box;
         }
+        .editor-content {
+            width: 100%; max-width: 900px; background: var(--card); border: 1px solid var(--neon-blue);
+            padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+        }
+        .editor-header { font-family: 'Orbitron'; color: var(--neon-blue); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .editor-textarea {
+            width: 100%; height: 400px; background: #000; color: #fff; border: 1px solid var(--subtle);
+            padding: 20px; font-family: 'Outfit', sans-serif; font-size: 1.1rem; line-height: 1.6; border-radius: 10px;
+            box-sizing: border-box; resize: none; outline: none;
+        }
+        .editor-textarea:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
+        .editor-footer { display: flex; gap: 15px; margin-top: 25px; justify-content: flex-end; }
     </style>
     <style id="print-style"></style>
     <script src="screenshot_list.js"></script>
@@ -160,10 +180,26 @@
             <b id="format-display">A1</b>
             <span id="orientation-display">LANDSCAPE</span>
         </div>
-        <canvas id="poster-canvas"></canvas>
+        <div class="zoom-wrapper" id="zoom-wrapper">
+            <canvas id="poster-canvas"></canvas>
+        </div>
     </div>
 
-    <div class="hint">DRAG & DROP ZUM ARRANGIEREN DER KACHELN | FRONT/BACK ZUM UMSCHALTEN</div>
+    <div id="editor-overlay">
+        <div class="editor-content">
+            <div class="editor-header">
+                <span id="editor-title">LABOR EDITIEREN</span>
+                <span id="editor-id" style="font-size: 0.7rem; opacity: 0.5;">ID: --</span>
+            </div>
+            <textarea id="editor-textarea" class="editor-textarea"></textarea>
+            <div class="editor-footer">
+                <button class="main-btn" onclick="closeEditor()">ABBRECHEN</button>
+                <button class="main-btn" style="color: var(--neon-blue); border-color: var(--neon-blue);" onclick="saveDescription()">SPEICHERN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hint">DRAG & DROP ZUM ARRANGIEREN | CMD + SCROLL ZUM ZOOMEN | DOPPELKLICK ZUM EDITIEREN</div>
 
     <script src="screenshot_list.js"></script>
     <script src="description_list.js"></script>
@@ -175,6 +211,8 @@
         let viewMode = localStorage.getItem('posterViewMode') || 'front';
         let imageOrder = JSON.parse(localStorage.getItem('posterImageOrder')) || [...SCREENSHOT_LIST];
         let descriptions = window.LAB_DESCRIPTIONS || {};
+        let currentZoom = 1.0;
+        let editedDescriptions = JSON.parse(localStorage.getItem('posterEditedDescriptions')) || {};
 
         function saveToStorage() {
             localStorage.setItem('posterCols', currentCols);
@@ -182,6 +220,70 @@
             localStorage.setItem('posterOrientation', currentOrientation);
             localStorage.setItem('posterViewMode', viewMode);
             localStorage.setItem('posterImageOrder', JSON.stringify(imageOrder));
+            localStorage.setItem('posterEditedDescriptions', JSON.stringify(editedDescriptions));
+        }
+
+        // --- EDITOR FUNCTIONS ---
+        let currentEditingId = null;
+        const DEFAULT_TEMPLATE = "Kurze Einleitung: Beschreibe hier, worum es in diesem Labor geht.\n\nFEATURES\nFunktion 1: Beschreibung des ersten Highlights.\nFunktion 2: Anleitung zur Bedienung.";
+
+        function openEditor(id) {
+            currentEditingId = id;
+            let text = editedDescriptions[id] || descriptions[id] || "";
+            if (!text || text.trim() === "") text = DEFAULT_TEMPLATE;
+            
+            document.getElementById('editor-id').textContent = `ID: ${id.toUpperCase()}`;
+            document.getElementById('editor-textarea').value = text;
+            document.getElementById('editor-overlay').style.display = 'flex';
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-overlay').style.display = 'none';
+        }
+
+        function saveDescription() {
+            const text = document.getElementById('editor-textarea').value;
+            const id = currentEditingId;
+            
+            // 1. Update memory and localStorage (as backup)
+            editedDescriptions[id] = text;
+            saveToStorage();
+            
+            // 2. Attempt Live Sync to Disk via Python Bridge
+            fetch('http://localhost:5005/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, text: text })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`✅ ${id} synced to disk.`);
+                    // Remove from editedDescriptions once successfully on disk
+                    delete editedDescriptions[id];
+                    saveToStorage();
+                } else {
+                    console.warn("⚠️ Server reachable but error during save.");
+                }
+            })
+            .catch(err => {
+                console.log("ℹ️ Sync Server not running. Changes kept in localStorage.");
+            });
+
+            closeEditor();
+            renderPoster();
+        }
+
+        function showSyncStatus() {
+            const keys = Object.keys(editedDescriptions);
+            if (keys.length === 0) {
+                alert("Keine Änderungen zum Synchronisieren.");
+                return;
+            }
+            const dataString = JSON.stringify(editedDescriptions, null, 2);
+            console.log("UPDATED DESCRIPTIONS:", editedDescriptions);
+            
+            // Show in a prompt for easy copying
+            prompt(`${keys.length} Labore wurden geändert. Kopiere diesen Text und schicke ihn mir im Chat, damit ich die .txt-Dateien aktualisieren kann:`, dataString);
         }
 
         // --- CORE FUNCTIONS ---
@@ -191,6 +293,29 @@
             syncUI();
             renderPoster();
         }
+
+        // --- ZOOM LOGIC ---
+        window.addEventListener('wheel', (e) => {
+            if (e.metaKey || e.ctrlKey) {
+                e.preventDefault();
+                const wrapper = document.getElementById('zoom-wrapper');
+                const rect = wrapper.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / currentZoom;
+                const y = (e.clientY - rect.top) / currentZoom;
+                wrapper.style.transformOrigin = `${x}px ${y}px`;
+                
+                const delta = e.deltaY > 0 ? 0.96 : 1.04;
+                currentZoom = Math.min(5, Math.max(0.5, currentZoom * delta));
+                wrapper.style.transform = `scale(${currentZoom})`;
+            }
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                currentZoom = 1.0;
+                document.getElementById('zoom-wrapper').style.transform = `scale(1)`;
+            }
+        });
 
         function adjustCols(delta) {
             currentCols = Math.max(1, Math.min(12, currentCols + delta));
@@ -411,6 +536,12 @@
         }
 
         function drawBackCell(img, src, x, y, cellW, cellH) {
+            ctx.save();
+            // Create clipping region for this cell to prevent any overflow
+            ctx.beginPath();
+            ctx.rect(x, y, cellW, cellH);
+            ctx.clip();
+
             // Draw background box for text
             ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
             ctx.fillRect(x, y, cellW, cellH);
@@ -427,15 +558,21 @@
 
             // Text Cleaning & Processing
             const name = src.split('.')[0];
-            let rawText = descriptions[name] || "Keine Beschreibung verfügbar.";
+            let rawText = editedDescriptions[name] || descriptions[name] || "";
+            if (!rawText || rawText.trim() === "") rawText = DEFAULT_TEMPLATE;
             
-            // Remove title lines and separators
+            // Global cleanups
+            rawText = rawText.replace(/& Steuerung/gi, '');
+
+            // Remove title lines, separators, unwanted headers, and ULTRA references
             let lines = rawText.split('\n').filter(l => 
                 !l.includes('================') && 
                 !l.includes('----------------') &&
                 !l.startsWith('LABOR:') &&
+                !l.startsWith('MATHEMATISCHER HINTERGRUND:') &&
+                !l.includes('ULTRA') &&
                 l.trim() !== ''
-            );
+            ).map(l => l.replace(/^- /, '')); 
             
             ctx.textAlign = 'left';
             ctx.letterSpacing = '0px';
@@ -444,7 +581,8 @@
             const titleFontSize = Math.max(12, 16 * (cellW/400));
             ctx.font = '700 ' + titleFontSize + 'px Orbitron';
             ctx.fillStyle = '#00d2ff';
-            ctx.fillText(name.toUpperCase(), x + thumbW + 25, y + titleFontSize + 10);
+            const textX = x + thumbW + 25;
+            ctx.fillText(name.toUpperCase(), textX, y + titleFontSize + 10);
 
             // Body Text (Inter/Sans)
             const bodyFontSize = Math.max(9, 11 * (cellW/400));
@@ -452,27 +590,52 @@
             ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
             
-            const textX = x + thumbW + 25;
             let currentY = y + titleFontSize + 40;
-            const maxWidth = cellW - thumbW - 45;
+            const maxWidth = cellW - thumbW - 55; // More conservative padding
             const maxHeight = cellH - 20;
 
             for (let lineText of lines) {
                 if (currentY + lineHeight > maxHeight + y) break;
-                // Detect Keywords and highlight them
-                if (lineText.includes(':')) {
-                    const parts = lineText.split(':');
+                
+                let processedLine = lineText.trim();
+                
+                // Special Rule for Features Header: Rename and reduce space
+                if (processedLine.toUpperCase() === 'FEATURES' || processedLine.toUpperCase().includes('FEATURES & STEUERUNG')) {
+                    ctx.font = '700 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText("FEATURES", textX, currentY);
+                    currentY += lineHeight * 1.2; // Smaller gap after FEATURES
+                    continue;
+                }
+
+                // Detect Keywords (Headers) and highlight them
+                if (processedLine.includes(':')) {
+                    const parts = processedLine.split(':');
+                    
+                    // Draw Label (Bold)
                     ctx.font = '700 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
                     ctx.fillStyle = '#ffffff';
                     ctx.fillText(parts[0] + ':', textX, currentY);
+                    
+                    // Move to next line for description
+                    currentY += lineHeight;
+                    
+                    // Draw Description (Regular)
                     ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                    currentY = wrapText(ctx, parts.slice(1).join(':').trim(), textX, currentY + lineHeight, maxWidth, lineHeight);
+                    const description = parts.slice(1).join(':').trim();
+                    currentY = wrapText(ctx, description, textX, currentY, maxWidth, lineHeight);
                 } else {
-                    currentY = wrapText(ctx, lineText, textX, currentY, maxWidth, lineHeight);
+                    // Normal text block
+                    ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    currentY = wrapText(ctx, processedLine, textX, currentY, maxWidth, lineHeight);
                 }
-                currentY += lineHeight * 0.5; // Paragraph spacing
+                
+                currentY += lineHeight * 1.5; // Paragraph spacing
             }
+
+            ctx.restore();
         }
 
         function drawBrandedQR(x, y, w, h) {
@@ -527,27 +690,87 @@
         }
 
         function drawCellImage(img, x, y, cellW, cellH) {
+            const marginScale = 0.8; // 80% size
+            const targetW = cellW * marginScale;
+            const targetH = cellH * marginScale;
+            
             const imgRatio = img.width / img.height;
-            const cellRatio = cellW / cellH;
+            const targetRatio = targetW / targetH;
             let drawW, drawH;
-            if (imgRatio > cellRatio) {
-                drawW = cellW; drawH = cellW / imgRatio;
+            if (imgRatio > targetRatio) {
+                drawW = targetW; drawH = targetW / imgRatio;
             } else {
-                drawH = cellH; drawW = cellH * imgRatio;
+                drawH = targetH; drawW = targetH * imgRatio;
             }
             const offsetX = (cellW - drawW) / 2;
             const offsetY = (cellH - drawH) / 2;
             ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH);
         }
 
+        let isPanning = false;
+        let startScrollX, startScrollY, startMouseX, startMouseY;
+
         function setupInteractions() {
-            canvas.onmousedown = (e) => {
+            canvas.ondblclick = (e) => {
                 const pos = getMousePos(e);
                 const rect = cellRects.find(r => pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h);
-                if (rect) { draggingIndex = rect.index; dragX = pos.x; dragY = pos.y; renderPoster(); }
+                if (rect) {
+                    const name = imageOrder[rect.index].split('.')[0];
+                    openEditor(name);
+                }
             };
-            window.onmousemove = (e) => { if (draggingIndex === -1) return; const pos = getMousePos(e); dragX = pos.x; dragY = pos.y; renderPoster(); };
+
+            canvas.onmousedown = (e) => {
+                const container = document.querySelector('.preview-container');
+                
+                // --- PANNING MODE (Cmd + Drag) ---
+                if (e.metaKey || e.ctrlKey) {
+                    isPanning = true;
+                    canvas.style.cursor = 'grabbing';
+                    startMouseX = e.clientX;
+                    startMouseY = e.clientY;
+                    startScrollX = container.scrollLeft;
+                    startScrollY = container.scrollTop;
+                    return;
+                }
+
+                // --- DRAG & DROP MODE (Front only) ---
+                if (viewMode === 'back') return; // Fix tiles on back
+                
+                const pos = getMousePos(e);
+                const rect = cellRects.find(r => pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h);
+                if (rect) { 
+                    draggingIndex = rect.index; 
+                    dragX = pos.x; 
+                    dragY = pos.y; 
+                    renderPoster(); 
+                }
+            };
+
+            window.onmousemove = (e) => { 
+                if (isPanning) {
+                    const container = document.querySelector('.preview-container');
+                    const dx = e.clientX - startMouseX;
+                    const dy = e.clientY - startMouseY;
+                    container.scrollLeft = startScrollX - dx;
+                    container.scrollTop = startScrollY - dy;
+                    return;
+                }
+
+                if (draggingIndex === -1) return; 
+                const pos = getMousePos(e); 
+                dragX = pos.x; 
+                dragY = pos.y; 
+                renderPoster(); 
+            };
+
             window.onmouseup = (e) => {
+                if (isPanning) {
+                    isPanning = false;
+                    canvas.style.cursor = 'grab';
+                    return;
+                }
+
                 if (draggingIndex === -1) return;
                 const pos = getMousePos(e);
                 const targetRect = cellRects.find(r => pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h);
@@ -555,9 +778,10 @@
                     const temp = imageOrder[draggingIndex];
                     imageOrder[draggingIndex] = imageOrder[targetRect.index];
                     imageOrder[targetRect.index] = temp;
-                    saveSettings();
+                    saveToStorage();
                 }
-                draggingIndex = -1; renderPoster();
+                draggingIndex = -1; 
+                renderPoster();
             };
         }
 
