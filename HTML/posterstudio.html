@@ -50,11 +50,12 @@
         }
 
         .controls {
-            display: flex; gap: 3rem; align-items: center; background: var(--card); 
-            padding: 0.6rem 2.5rem; border-radius: 60px; margin: 8px 0 25px 0;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-            z-index: 100;
-            border: 1px solid rgba(0, 210, 255, 0.1);
+            position: sticky; top: 0; z-index: 1000;
+            display: flex; gap: 2.5rem; align-items: center; justify-content: center; 
+            background: var(--card); padding: 0.4rem 2.5rem; border-radius: 0 0 10px 10px; width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: none; border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+            margin-bottom: 25px;
         }
 
         .control-group { display: flex; align-items: center; gap: 15px; }
@@ -68,12 +69,12 @@
         }
 
         .stepper-btn {
-            background: transparent; border: none; color: var(--neon-blue); 
+            background: transparent; border: none; color: #888; 
             font-family: 'Orbitron'; font-size: 1.2rem; cursor: pointer; width: 28px; height: 100%;
             display: flex; align-items: center; justify-content: center; transition: 0.2s; opacity: 0.5;
         }
         .stepper-btn:hover { opacity: 1; transform: scale(1.1); }
-        .grid-value { font-family: 'Orbitron'; font-size: 0.95rem; min-width: 30px; text-align: center; color: #fff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4); }
+        .grid-value { font-family: 'Orbitron'; font-size: 0.85rem; min-width: 30px; text-align: center; color: #888; }
 
         .format-btn {
             background: transparent; border: 1px solid transparent; color: #666;
@@ -177,8 +178,10 @@
             <button id="btn-back" class="main-btn" onclick="setView('back')">BACK</button>
         </div>
 
-        <button class="main-btn" style="color: var(--neon-blue); margin-left: 5px;" onclick="location.reload()">RELOAD</button>
-        <button class="main-btn" onclick="preparePrint()">PRINT | PDF</button>
+        <div style="display: flex; gap: 4px;">
+            <button class="main-btn" style="color: var(--neon-blue);" onclick="location.reload()">RELOAD</button>
+            <button class="main-btn" onclick="preparePrint()">PRINT | PDF</button>
+        </div>
     </div>
 
     <div class="preview-container">
@@ -278,9 +281,7 @@
             .then(response => {
                 if (response.ok) {
                     console.log(`✅ ${id} synced to disk.`);
-                    // Remove from editedDescriptions once successfully on disk
-                    delete editedDescriptions[id];
-                    saveToStorage();
+                    // Keep in memory so UI stays updated!
                 } else {
                     console.warn("⚠️ Server reachable but error during save.");
                 }
@@ -569,12 +570,10 @@
             ctx.lineWidth = 1;
             ctx.strokeRect(x, y, cellW, cellH);
 
-            // Thumbnail with subtle border
+            // Thumbnail (floating)
             const thumbW = cellW * 0.32;
             const thumbH = (thumbW / img.width) * img.height;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.strokeRect(x + 10, y + 10, thumbW, thumbH);
-            drawCellImage(img, x + 10, y + 10, thumbW, thumbH);
+            drawCellImage(img, x - 6, y, thumbW, thumbH);
 
             // Text Cleaning & Processing
             const name = src.split('.')[0];
@@ -612,17 +611,24 @@
             const lineHeight = bodyFontSize * 1.5;
 
             let currentY = y + 25;
-            const textX = x + thumbW + 25;
+            const textX = x + thumbW - 4;
 
+            // Title Header (Multi-line support)
             ctx.font = '700 ' + titleFontSize + 'px Orbitron, sans-serif';
             ctx.fillStyle = '#00d2ff';
-            ctx.fillText(displayTitle.toUpperCase(), textX, y + titleFontSize + 10);
+            
+            const titleLines = displayTitle.split('\\n'); 
+            let titleY = y + titleFontSize + 10;
+            for (let tLine of titleLines) {
+                ctx.fillText(tLine.toUpperCase().trim(), textX, titleY);
+                titleY += titleFontSize * 1.2;
+            }
 
             // Body Text (Inter/Sans)
             ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
             
-            currentY = y + titleFontSize + 40;
+            currentY = titleY + 10;
             const maxWidth = cellW - thumbW - 55; // More conservative padding
             const maxHeight = cellH - 20;
 
@@ -632,11 +638,11 @@
                 let processedLine = lineText.trim();
                 
                 // Special Rule for Features Header: Rename and reduce space
-                if (processedLine.toUpperCase() === 'FEATURES' || processedLine.toUpperCase().includes('FEATURES & STEUERUNG')) {
+                if (processedLine.toUpperCase().startsWith('FEATURES')) {
                     ctx.font = '700 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
                     ctx.fillStyle = '#ffffff';
                     ctx.fillText("FEATURES", textX, currentY);
-                    currentY += lineHeight * 1.2; // Smaller gap after FEATURES
+                    currentY += lineHeight * 0.8; // Much tighter gap after FEATURES
                     continue;
                 }
 

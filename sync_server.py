@@ -24,14 +24,29 @@ class SyncHandler(BaseHTTPRequestHandler):
             text = data.get('text')
             
             if lab_id and text:
-                # Ensure the path exists and write the file
+                # Check if file exists and write
                 file_path = os.path.join(BASE_PATH, f"{lab_id}.txt")
+                exists = os.path.exists(file_path)
+                
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                
+                # --- SAFETY FIRST: Create Backup ---
+                if exists:
+                    import shutil
+                    from datetime import datetime
+                    backup_dir = os.path.join(BASE_PATH, "backups")
+                    os.makedirs(backup_dir, exist_ok=True)
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    backup_path = os.path.join(backup_dir, f"{lab_id}_{timestamp}.txt.bak")
+                    shutil.copy2(file_path, backup_path)
+                    print(f"📦 Backup created: {backup_path}")
+                # -----------------------------------
                 
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(text)
                 
-                print(f"✅ Successfully synced: {file_path}")
+                status = "Updated" if exists else "Created"
+                print(f"✅ {status}: {file_path}")
                 
                 self.send_response(200)
                 self.send_header('Access-Control-Allow-Origin', '*')
