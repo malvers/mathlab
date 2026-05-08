@@ -844,10 +844,7 @@
 
             const absDelta = Math.abs(delta);
             const renderSym = s => katex.renderToString(s, {throwOnError: false});
-            const renderNum = (v, sign) => {
-                let prefix = (v >= 0) ? (sign ? '+' : '\\phantom{-}') : '-';
-                return katex.renderToString('\\mathit{' + prefix + Math.abs(v).toFixed(3) + '}', {throwOnError: false});
-            };
+            const renderNum = (v, sign) => katex.renderToString('\\mathit{' + (sign && v >= 0 ? '+' : '') + v.toFixed(3) + '}', {throwOnError: false});
             const row = (sym, val, sign, color) =>
                 `<div style="display:contents;color:${color}">` +
                     `<div style="text-align:right">${renderSym(sym)}</div>` +
