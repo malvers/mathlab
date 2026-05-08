@@ -13,7 +13,7 @@ SYNC_SCRIPT = os.path.join(BASE_DIR, 'scratch', 'fix_briefings.py')
 class BriefingsEditor:
     def __init__(self, root):
         self.root = root
-        self.root.title("BRIEFING MANAGER")
+        self.root.title("BRIEFING MANAGER (STRICT CLICK)")
         
         # Fenstergröße und Zentrierung
         width = 1150
@@ -24,7 +24,6 @@ class BriefingsEditor:
         y = (screen_height // 2) - (height // 2)
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
-        # Immer im Vordergrund
         self.root.attributes("-topmost", True)
         self.root.configure(bg="#f0f0f0")
         
@@ -38,7 +37,7 @@ class BriefingsEditor:
         self.canvas.bind("<Configure>", self._on_canvas_configure)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        self.canvas.pack(side="left", fill="both", expand=True, padx=2, pady=2)
         self.scrollbar.pack(side="right", fill="y")
 
         self.is_editing = False
@@ -54,21 +53,25 @@ class BriefingsEditor:
         try:
             with open(READ_PATH, 'r', encoding='utf-8') as f:
                 content = f.read()
-            keys = sorted(list(set(re.findall(r'["\'](\w+)["\']:\s*`', content))))
+            # Sehr robuster Regex
+            keys = sorted(list(set(re.findall(r'["\'](\w+)["\']\s*:\s*`', content))))
             
             cols = 3
             for i, key in enumerate(keys):
                 r = i // cols
                 c = i % cols
-                # HEIGHT=6 für massive Buttons!
+                # Button OHNE command (wir binden es manuell für maximale Kontrolle)
                 btn = tk.Button(self.scroll_frame, text=f"{key.upper()}", 
-                               command=lambda k=key: self.trigger_edit(k),
                                font=("Arial", 11, "bold"), height=6, bg="white", relief="groove")
-                btn.grid(row=r, column=c, sticky="nsew", padx=3, pady=3)
+                btn.grid(row=r, column=c, sticky="nsew", padx=1, pady=1)
+                
+                # STRICT CLICK BINDING: Löst erst beim Loslassen der Taste aus
+                btn.bind("<ButtonRelease-1>", lambda e, k=key: self.trigger_edit(k))
+                
             for col in range(cols):
                 self.scroll_frame.columnconfigure(col, weight=1)
         except Exception as e:
-            print(f"Fehler: {e}")
+            print(f"Fehler beim Laden: {e}")
 
     def trigger_edit(self, key):
         if self.is_editing: return
@@ -80,7 +83,7 @@ class BriefingsEditor:
         try:
             with open(READ_PATH, 'r', encoding='utf-8') as f:
                 content = f.read()
-            pattern = r'["\']' + key + r'["\']:\s*`(.*?)`,'
+            pattern = r'["\']' + key + r'["\']\s*:\s*`(.*?)`,'
             match = re.search(pattern, content, re.DOTALL)
             if not match: 
                 self._restore_ui()
@@ -114,7 +117,7 @@ class BriefingsEditor:
 
     def _save_to_disk(self, key, text, original_content):
         clean_text = text.replace('`', '\\`').replace('$', '\\$')
-        pattern = r'["\']' + key + r'["\']:\s*`(.*?)`,'
+        pattern = r'["\']' + key + r'["\']\s*:\s*`(.*?)`,'
         match = re.search(pattern, original_content, re.DOTALL)
         if match:
             start, end = match.span(1)
