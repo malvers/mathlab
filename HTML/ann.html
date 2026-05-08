@@ -51,8 +51,6 @@
             </div>
             <canvas id="canvas"></canvas>
             <div id="output-latex" style="position:absolute;pointer-events:none;display:none;font-size:15px;line-height:2"></div>
-            <div id="input-latex-0" style="position:absolute;pointer-events:none;transform:translateX(-100%)"></div>
-            <div id="input-latex-1" style="position:absolute;pointer-events:none;transform:translateX(-100%)"></div>
         </div>
     </main>
 
@@ -149,8 +147,10 @@
 
         function buildModel() {
             try {
-                if (intermediateModel) intermediateModel.dispose();
-                if (model) model.dispose();
+                try { if (intermediateModel) intermediateModel.dispose(); } catch(e) {}
+                try { if (model) model.dispose(); } catch(e) {}
+                intermediateModel = null;
+                model = null;
                 optimizer = tf.train.adam(learningRate);
                 model = tf.sequential();
                 for (let l = 1; l < LAYERS.length; l++) {
@@ -401,17 +401,26 @@
         });
 
         function updateInput(i, val) {
-            const v = parseFloat(val);
+            const v = parseFloat(val.replace(',', '.'));
             if (!isNaN(v)) { INPUT_VALUES[i] = v; localStorage.setItem('ann_inputs', JSON.stringify(INPUT_VALUES)); draw(); }
         }
 
-        CyberUI.createCard('ui-container', 'Eingabe', `
+        let lbl1 = 'Summand 1';
+        let lbl2 = 'Summand 2';
+        let cardTitle = 'Eingabe';
+        if (typeof CyberI18n !== 'undefined') {
+            lbl1 = CyberI18n.get('ui.summand') + ' 1';
+            lbl2 = CyberI18n.get('ui.summand') + ' 2';
+            cardTitle = CyberI18n.currentLang === 'de' ? 'Eingabe' : 'Input';
+        }
+
+        CyberUI.createCard('ui-container', cardTitle, `
             <div class="cyber-control-group">
-                <label class="cyber-label">Summand 1</label>
+                <label class="cyber-label" id="label-op1">${lbl1}</label>
                 <input type="number" id="input0-field" class="cyber-select" value="${INPUT_VALUES[0]}" step="0.01" oninput="updateInput(0, this.value)">
             </div>
             <div class="cyber-control-group" style="margin-top:20px">
-                <label class="cyber-label">Summand 2</label>
+                <label class="cyber-label" id="label-op2">${lbl2}</label>
                 <input type="number" id="input1-field" class="cyber-select" value="${INPUT_VALUES[1]}" step="0.01" oninput="updateInput(1, this.value)">
             </div>
         `, 'var(--neon-blue)');
@@ -427,6 +436,16 @@
         function selectOp(id) {
             saveWeights();
             selectedOp = OPS.find(o => o.id === id);
+
+            const l1 = document.getElementById('label-op1');
+            const l2 = document.getElementById('label-op2');
+            if (l1 && l2 && typeof CyberI18n !== 'undefined') {
+                if (id === 'add') { l1.textContent = CyberI18n.get('ui.summand') + ' 1'; l2.textContent = CyberI18n.get('ui.summand') + ' 2'; }
+                else if (id === 'sub') { l1.textContent = CyberI18n.get('ui.minuend'); l2.textContent = CyberI18n.get('ui.subtrahend'); }
+                else if (id === 'mul') { l1.textContent = CyberI18n.get('ui.factor1'); l2.textContent = CyberI18n.get('ui.factor2'); }
+                else if (id === 'div') { l1.textContent = CyberI18n.get('ui.dividend'); l2.textContent = CyberI18n.get('ui.divisor'); }
+            }
+
             buildModel(); loadWeights(); resetTraining();
             refreshOpButtons();
             draw();
@@ -477,6 +496,7 @@
         }
 
         function draw() {
+          try {
             const rect = container.getBoundingClientRect();
             const w = rect.width;
             const h = rect.height;
@@ -492,8 +512,9 @@
 
             const positions = getNodePositions(w, h);
 
-            // forward pass always on user's input values
-            const activations = forwardPass(normIn(INPUT_VALUES));
+            // forward pass: during training show training data, otherwise user input
+            const currentInputs = (isTraining && lastTrainSample) ? lastTrainSample : INPUT_VALUES;
+            const activations = forwardPass(normIn(currentInputs));
 
             function layerRGB(l) {
                 const t = l / (LAYERS.length - 1);
@@ -569,23 +590,25 @@
                 const p0 = positions[0][0];
                 const p1 = positions[0][1];
                 const oy = (p0.y + p1.y) / 2;
-                const iconSize = 44;
+                const iconSize = 80;
                 const ix = p0.x - NODE_RADIUS - 14 - iconSize;
                 const img = OP_ICONS[selectedOp.id];
                 if (img && img.complete) ctx.drawImage(img, ix, oy - iconSize / 2, iconSize, iconSize);
             }
 
-            // input values as KaTeX — always show INPUT_VALUES (stable, no jumping)
-            for (let i = 0; i < INPUT_VALUES.length; i++) {
+            // input labels drawn on canvas — no DOM overlap issues
+            ctx.font = 'italic 700 22px Times New Roman, serif';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i < currentInputs.length; i++) {
                 const { x, y } = positions[0][i];
-                const el = document.getElementById('input-latex-' + i);
-                const latex = `s_${i+1} = \\mathit{${INPUT_VALUES[i].toFixed(2)}}`;
-                el.style.left = (x - NODE_RADIUS - 14) + 'px';
-                el.style.top  = (y - 11) + 'px';
-                el.style.color = i === 0 ? '#ff3c3c' : '#00dc64';
-                el.style.fontSize = '22px';
-                el.innerHTML = katex.renderToString(latex, { throwOnError: false });
+                ctx.fillStyle = i === 0 ? '#ff3c3c' : '#00dc64';
+                const sub = i === 0 ? '₁' : '₂';
+                
+                ctx.textAlign = 'right';
+                ctx.fillText(`s${sub} =`, x - NODE_RADIUS - 69, y);
+                ctx.fillText(currentInputs[i].toFixed(2), x - NODE_RADIUS - 8, y);
             }
+            ctx.textBaseline = 'alphabetic';
 
             // layer labels + triangles for hidden layers
             triangleZones = [];
@@ -639,83 +662,84 @@
                 const plusX = w / 2 - bGap / 2 - bW / 2;
                 const minusX = w / 2 + bGap / 2 + bW / 2;
 
-                [[plusX, '+', canAdd, addLayer], [minusX, '−', canRemove, removeLayer]].forEach(([bx, label, enabled, action]) => {
-                    const col = enabled ? '#00c8ff' : 'rgba(0,200,255,0.2)';
-                    drawRoundRect(bx - bW / 2, bY - bH / 2, bW, bH, bR);
-                    ctx.fillStyle = enabled ? 'rgba(0,200,255,0.08)' : 'rgba(0,0,0,0.1)';
+                [[plusX, true, canAdd, addLayer], [minusX, false, canRemove, removeLayer]].forEach(([bx, isPlus, enabled, action]) => {
+                    const col = enabled ? '#00c8ff' : 'rgba(0,200,255,0.18)';
+                    const s = bW / 100;
+                    const lx = bx - bW / 2, ly = bY - bH / 2;
+                    ctx.save();
+                    if (enabled) { ctx.shadowColor = '#00c8ff'; ctx.shadowBlur = 12; }
+                    drawRoundRect(lx, ly, bW, bH, bR);
+                    ctx.fillStyle = enabled ? 'rgba(0,200,255,0.10)' : 'rgba(0,0,0,0.08)';
                     ctx.fill();
                     ctx.strokeStyle = col;
                     ctx.lineWidth = 1.8;
                     ctx.stroke();
-                    if (enabled) {
-                        ctx.save();
-                        ctx.shadowColor = col;
-                        ctx.shadowBlur = 10;
-                        ctx.strokeStyle = col;
-                        ctx.lineWidth = 1.8;
+                    ctx.strokeStyle = col;
+                    ctx.lineWidth = 7 * s;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(lx + 33 * s, ly + 50 * s);
+                    ctx.lineTo(lx + 67 * s, ly + 50 * s);
+                    ctx.stroke();
+                    if (isPlus) {
+                        ctx.beginPath();
+                        ctx.moveTo(lx + 50 * s, ly + 33 * s);
+                        ctx.lineTo(lx + 50 * s, ly + 67 * s);
                         ctx.stroke();
-                        ctx.restore();
                     }
-                    ctx.font = '700 32px Orbitron, sans-serif';
-                    ctx.fillStyle = col;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(label, bx, bY);
-                    ctx.textBaseline = 'alphabetic';
+                    ctx.restore();
                     if (enabled) layerBtnZones.push({ x: bx, y: bY, hw: bW / 2, hh: bH / 2, action });
                 });
             }
 
-            // Q box top-left
+            // Q box top-left — only when trained
             {
                 const mse = lossHistory.length > 0 ? Math.pow(10, lossHistory[lossHistory.length - 1]) : null;
                 const rmse = mse !== null ? Math.sqrt(mse) * (ONORM[selectedOp.id] || 10) : null;
-                const _outVal = activations[activations.length - 1][0];
-                const _pred = denormOut(_outVal);
-                const [_v1, _v2] = INPUT_VALUES;
-                const _target = selectedOp.id === 'add' ? _v1+_v2 : selectedOp.id === 'sub' ? _v1-_v2 : selectedOp.id === 'mul' ? _v1*_v2 : _v2 !== 0 ? _v1/_v2 : 0;
-                const absDelta = Math.abs(_pred - _target);
+                if (rmse !== null) {
+                    const _outVal = activations[activations.length - 1][0];
+                    const _pred = denormOut(_outVal);
+                    const [_v1, _v2] = currentInputs;
+                    const _target = selectedOp.id === 'add' ? _v1+_v2 : selectedOp.id === 'sub' ? _v1-_v2 : selectedOp.id === 'mul' ? _v1*_v2 : _v2 !== 0 ? _v1/_v2 : 0;
+                    const absDelta = Math.abs(_pred - _target);
 
-                const bx = 16, by = 16, bw = 180, bh = 42, bR = 6;
-                drawRoundRect(bx, by, bw, bh, bR);
-                ctx.fillStyle = 'rgba(0,0,0,0.45)';
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(0,200,255,0.3)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                    const bx = 16, by = 16, bw = 130, bh = 50, bR = 6;
+                    drawRoundRect(bx, by, bw, bh, bR);
+                    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0,200,255,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
 
-                ctx.font = 'italic 700 18px Times New Roman, serif';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#ff2222';
-                ctx.textAlign = 'left';
-                ctx.fillText('Q', bx + 12, by + bh / 2);
-                ctx.font = 'italic 700 20px Times New Roman, serif';
-                ctx.textAlign = 'right';
-                ctx.fillStyle = rmse !== null ? '#ff2222' : 'rgba(255,34,34,0.3)';
-                ctx.fillText(rmse !== null ? rmse.toFixed(4) : '—', bx + bw - 12, by + bh / 2);
-                ctx.textBaseline = 'alphabetic';
+                    ctx.font = 'italic 700 18px Times New Roman, serif';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#ff2222';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('Q', bx + 15, by + bh / 2);
+                    ctx.font = 'italic 700 20px Times New Roman, serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#ff2222';
+                    ctx.fillText(rmse.toFixed(4), bx + 42, by + bh / 2);
+                    ctx.textBaseline = 'alphabetic';
+                }
             }
 
             // loss curve
             if (lossHistory.length > 1) {
                 const cw = 220, ch = 70, cx = w - cw - 20, cy = h - ch - 20;
                 ctx.fillStyle = 'rgba(0,0,0,0.45)';
-                ctx.strokeStyle = 'rgba(255,100,200,0.3)';
+                ctx.strokeStyle = 'rgba(255,34,34,0.3)';
                 ctx.lineWidth = 1;
                 ctx.beginPath(); ctx.rect(cx, cy, cw, ch); ctx.fill(); ctx.stroke();
-                ctx.font = '9px Orbitron, sans-serif';
-                ctx.fillStyle = 'rgba(255,100,200,0.6)';
-                ctx.textAlign = 'left';
-                ctx.fillText('LOG LOSS', cx + 6, cy + 13);
-                ctx.fillText(`Epoch ${trainEpoch}`, cx + cw - 70, cy + 13);
+                
                 const minL = Math.min(...lossHistory), maxL = Math.max(...lossHistory);
                 const rng = maxL - minL || 1;
                 ctx.beginPath();
-                ctx.strokeStyle = '#ff64c8';
+                ctx.strokeStyle = '#ff2222';
                 ctx.lineWidth = 1.5;
                 lossHistory.forEach((v, i) => {
                     const px = cx + (i / (lossHistory.length - 1)) * cw;
-                    const py = cy + ch - ((v - minL) / rng) * (ch - 20) - 6;
+                    const py = cy + ch - ((v - minL) / rng) * (ch - 12) - 6;
                     i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
                 });
                 ctx.stroke();
@@ -727,7 +751,7 @@
             const outVal = activations[activations.length - 1][0];
             const outPos = positions[positions.length - 1][0];
             const predRaw = denormOut(outVal);
-            const [v1, v2] = INPUT_VALUES;
+            const [v1, v2] = currentInputs;
             const targetRaw = selectedOp.id === 'add' ? v1 + v2
                             : selectedOp.id === 'sub' ? v1 - v2
                             : selectedOp.id === 'mul' ? v1 * v2
@@ -759,6 +783,7 @@
                 row('y_{Ziel}', targetRaw, false, '#ffcc00') +
                 row('y_{Netz}', predRaw, false, '#cc66ff') +
                 row('|\\Delta|', Math.abs(delta), false, '#ff2222');
+          } catch(e) { console.error('draw:', e); }
         }
 
         function init() {
