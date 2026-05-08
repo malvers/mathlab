@@ -1,3 +1,27 @@
+<!-- 
+    POSTER STUDIO PIPELINE & WORKFLOW DOCUMENTATION
+    ===============================================
+
+    1. ASSETS & REGISTRY:
+       - screenshot_list.js   : Central list of image filenames (from img/labs/)
+       - description_list.js : Central registry of pedagogical lab descriptions (LAB_DESCRIPTIONS object)
+       
+    2. FRONTEND (posterstudio.html):
+       - UI: Interactive grid to arrange labs via Drag & Drop.
+       - Editor: Double-click any tile to edit title and description.
+       - Persistence: All arrangements and edits are stored in localStorage for immediate session recovery.
+
+    3. SYNC PIPELINE (Python Bridge):
+       - When 'SAVE' is clicked in the editor, the frontend sends a POST request to:
+         http://localhost:5005/save
+       - Requirements: A local Python server (e.g. 'python_bridge.py') must be running.
+       - Action: The bridge writes the edited string directly back into 'description_list.js' on disk.
+
+    4. PRINT & EXPORT:
+       - Logic: Scales a high-resolution canvas based on selected format (A1, A2, A3, A4).
+       - Naming: Filename includes [Format] [Orientation] [Date] [Timestamp with Seconds].
+       - Constraints: Media print CSS enforces single-page export and removes UI overhead.
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -24,20 +48,25 @@
         /* Print Overrides */
         @media print {
             @page { margin: 0; size: auto; }
-            html, body, .container, .preview-container, .zoom-wrapper { 
+            html, body { 
                 margin: 0 !important; padding: 0 !important; 
-                background: #000000 !important; 
-                width: 100% !important; height: auto !important;
-                max-width: none !important; max-height: none !important;
+                background: #000 !important; 
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            .container, .preview-container, .zoom-wrapper { 
+                margin: 0 !important; padding: 0 !important; 
+                width: 100% !important; height: 100% !important;
                 display: block !important;
-                position: static !important;
+                font-size: 0 !important;
+                line-height: 0 !important;
             }
             .controls, .hint, #editor-overlay, .format-tag { display: none !important; }
             canvas { 
                 display: block !important;
                 width: 100% !important; 
                 height: auto !important; 
-                max-width: none !important; max-height: none !important;
+                max-height: 100% !important;
                 box-shadow: none !important; border: none !important;
                 margin: 0 !important;
             }
@@ -427,7 +456,9 @@
         function preparePrint() {
             const now = new Date();
             const dateStr = now.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
-            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0');
+            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + 
+                            now.getMinutes().toString().padStart(2, '0') + '.' + 
+                            now.getSeconds().toString().padStart(2, '0');
             const orientation = document.getElementById('orientation-display').textContent;
             
             const originalTitle = document.title;
