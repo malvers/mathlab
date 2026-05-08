@@ -155,7 +155,7 @@ FEATURES & STEUERUNG:
 INTERFACE:
 Übersichtliches ULTRA-Labor für das Erlernen der Basiskonzepte der Ebenengeometrie.`,
 
-    "gleichschenkligesdreieck": `MATHEMATISCHER HINTERGRUND:
+    "gleichschenkligesDreieck": `MATHEMATISCHER HINTERGRUND:
 In diesem Labor wird ein Dreieck mit festem Umfang (u = 8 cm) untersucht. Durch die Bedingung der Gleichschenkligkeit reduziert sich das System auf einen Freiheitsgrad: Die Veränderung der Basis b bestimmt zwangsläufig die Länge der Schenkel s.
 
 FEATURES & STEUERUNG:
@@ -528,6 +528,36 @@ FEATURES & STEUERUNG:
 
 INTERFACE:
 Cinematisches ULTRA-Interface mit Fokus auf Immersion und die navigatorische Verknüpfung der gesamten Suite.`,
+
+    "numberrecognition": `Künstliche neuronale Netze können lernen. Sie sind nicht programmiert darauf Muster zu erkennen, sie lernen Muster. Hier zeigt Dir das Labor, wie ein KNN geschriebene Zahlen lernt.
+
+FEATURES
+
+Man kann das Netz mit verschiedenen Batches von Trainingsdaten trainieren. Und dann sehen, wie gut es Hand- oder Mausschriftliche Zahlen erkennen kann.`,
+
+    "ann_labor": `Kurze Einleitung: Beschreibe hier, worum es in diesem Labor geht.
+
+FEATURES
+Funktion 1: Beschreibung des ersten Highlights.
+Funktion 2: Anleitung zur Bedienung.`,
+
+    "cmaes_java": `Kurze Einleitung: Beschreibe hier, worum es in diesem Labor geht.
+
+FEATURES
+Funktion 1: Beschreibung des ersten Highlights.
+Funktion 2: Anleitung zur Bedienung.`,
+
+    "tools": `Kurze Einleitung: Beschreibe hier, worum es in diesem Labor geht.
+
+FEATURES
+Funktion 1: Beschreibung des ersten Highlights.
+Funktion 2: Anleitung zur Bedienung.`,
+
+    "zahlenerkennung": `Kurze Einleitung: Beschreibe hier, worum es in diesem Labor geht.
+
+FEATURES
+Funktion 1: Beschreibung des ersten Highlights.
+Funktion 2: Anleitung zur Bedienung.`,
 
     "easyhard": `ÜBERSICHT:
 Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade (je nach Aufbau der Seite).
