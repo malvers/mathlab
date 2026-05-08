@@ -13,10 +13,10 @@ SYNC_SCRIPT = os.path.join(BASE_DIR, 'scratch', 'fix_briefings.py')
 class BriefingsEditor:
     def __init__(self, root):
         self.root = root
-        self.root.title("BRIEFING MANAGER (STRICT CLICK)")
+        self.root.title("BRIEFING MANAGER (FINAL STABILITY)")
         
         # Fenstergröße und Zentrierung
-        width = 1150
+        width = 1100
         height = 950
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -27,18 +27,13 @@ class BriefingsEditor:
         self.root.attributes("-topmost", True)
         self.root.configure(bg="#f0f0f0")
         
-        # Scrollable Area
-        self.canvas = tk.Canvas(self.root, bg="#f0f0f0", borderwidth=0, highlightthickness=0)
-        self.scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
-        self.scroll_frame = tk.Frame(self.canvas, bg="#f0f0f0")
-
-        self.scroll_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas_window = self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
-        self.canvas.bind("<Configure>", self._on_canvas_configure)
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
-
-        self.canvas.pack(side="left", fill="both", expand=True, padx=2, pady=2)
+        # DER TRICK: Ein Text-Widget als Container (extrem stabil am Mac)
+        self.container = tk.Text(self.root, bg="#f0f0f0", borderwidth=0, highlightthickness=0, cursor="arrow")
+        self.scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.container.yview)
+        self.container.configure(yscrollcommand=self.scrollbar.set)
+        
         self.scrollbar.pack(side="right", fill="y")
+        self.container.pack(side="left", fill="both", expand=True)
 
         self.is_editing = False
         self.load_keys()
@@ -46,32 +41,33 @@ class BriefingsEditor:
         self.root.lift()
         self.root.focus_force()
 
-    def _on_canvas_configure(self, event):
-        self.canvas.itemconfig(self.canvas_window, width=event.width)
-
     def load_keys(self):
         try:
             with open(READ_PATH, 'r', encoding='utf-8') as f:
                 content = f.read()
-            # Sehr robuster Regex
             keys = sorted(list(set(re.findall(r'["\'](\w+)["\']\s*:\s*`', content))))
             
-            cols = 3
-            for i, key in enumerate(keys):
-                r = i // cols
-                c = i % cols
-                # Button OHNE command (wir binden es manuell für maximale Kontrolle)
-                btn = tk.Button(self.scroll_frame, text=f"{key.upper()}", 
-                               font=("Arial", 11, "bold"), height=6, bg="white", relief="groove")
-                btn.grid(row=r, column=c, sticky="nsew", padx=1, pady=1)
+            # Wir packen 3 Buttons in eine Reihe (Frame) und diesen Frame in das Text-Widget
+            for i in range(0, len(keys), 3):
+                row_keys = keys[i:i+3]
+                row_frame = tk.Frame(self.container, bg="#f0f0f0")
                 
-                # STRICT CLICK BINDING: Löst erst beim Loslassen der Taste aus
-                btn.bind("<ButtonRelease-1>", lambda e, k=key: self.trigger_edit(k))
+                for key in row_keys:
+                    # Breite fest auf 30 Zeichen | pady=10 für angenehme Höhe
+                    btn = tk.Button(row_frame, text=key.upper(), 
+                                   command=lambda k=key: self.trigger_edit(k),
+                                   font=("Arial", 10, "bold"), width=30, height=3,
+                                   bg="#eee", relief="raised", borderwidth=1)
+                    btn.pack(side="left", padx=2, pady=2)
                 
-            for col in range(cols):
-                self.scroll_frame.columnconfigure(col, weight=1)
+                # Frame in das Text-Widget einfügen
+                self.container.window_create(tk.END, window=row_frame)
+                self.container.insert(tk.END, "\n") # Zeilenumbruch im Text-Widget
+            
+            self.container.config(state="disabled") # Text-Eingabe verhindern
+                
         except Exception as e:
-            print(f"Fehler beim Laden: {e}")
+            print(f"Fehler: {e}")
 
     def trigger_edit(self, key):
         if self.is_editing: return
