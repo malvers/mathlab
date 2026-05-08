@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Studio | Doc Alvers</title>
+    <title>Doc Alvers Mathe-Labor</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,29 +23,23 @@
 
         /* Print Overrides */
         @media print {
-            @page { margin: 0; }
-            html, body { 
-                background-color: #0a0c12 !important; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important;
+            @page { margin: 0; size: auto; }
+            html, body, .container, .preview-container, .zoom-wrapper { 
                 margin: 0 !important; padding: 0 !important; 
-                width: 100vw !important; height: 100vh !important;
-                overflow: hidden !important;
-                display: flex !important; align-items: center !important; justify-content: center !important;
+                background: #0a0c12 !important; 
+                width: 100% !important; height: auto !important;
+                max-width: none !important; max-height: none !important;
+                display: block !important;
+                position: static !important;
             }
-            .controls, .hint, .format-tag { display: none !important; }
-            .preview-container { 
-                padding: 0 !important; margin: 0 !important; 
-                width: 100vw !important; height: 100vh !important;
-                max-width: none !important; 
-                display: flex !important; align-items: center !important; justify-content: center !important; 
-            }
+            .controls, .hint, #editor-overlay, .format-tag { display: none !important; }
             canvas { 
-                max-width: 100vw !important; max-height: 100vh !important; 
-                width: auto !important; height: auto !important;
-                box-shadow: none !important; border: none !important; 
-                margin: 0 !important; cursor: default !important;
-                object-fit: contain !important;
+                display: block !important;
+                width: 100% !important; 
+                height: auto !important; 
+                max-width: none !important; max-height: none !important;
+                box-shadow: none !important; border: none !important;
+                margin: 0 !important;
             }
         }
 
@@ -121,6 +115,18 @@
             display: flex; flex-direction: column; align-items: flex-end;
         }
         .format-tag span { font-size: 0.4rem; opacity: 0.7; }
+        
+        .hint {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 15, 25, 0.85); backdrop-filter: blur(15px);
+            padding: 8px 25px; border-radius: 40px; border: 1px solid rgba(0, 210, 255, 0.2);
+            color: rgba(255, 255, 255, 0.3); font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 2000;
+            display: flex; gap: 15px; align-items: center; pointer-events: none;
+        }
+        .hint span { color: var(--neon-blue); opacity: 0.8; font-weight: 700; }
+        .hint b { color: rgba(255,255,255,0.2); font-weight: normal; margin: 0 5px; }
 
         /* Editor Overlay Styles */
         #editor-overlay {
@@ -209,7 +215,11 @@
         </div>
     </div>
 
-    <div class="hint">DRAG & DROP ZUM ARRANGIEREN | CMD + SCROLL ZUM ZOOMEN | DOPPELKLICK ZUM EDITIEREN</div>
+    <div class="hint">
+        <span>DRAG & DROP</span> <b>ZUM ARRANGIEREN</b> | 
+        <span>CMD + SCROLL</span> <b>ZUM ZOOMEN</b> | 
+        <span>DOPPELKLICK</span> <b>ZUM EDITIEREN</b>
+    </div>
 
     <script src="screenshot_list.js"></script>
     <script src="description_list.js"></script>
@@ -415,15 +425,7 @@
         }
 
         function preparePrint() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
-            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0');
-            const orientation = document.getElementById('orientation-display').textContent;
-            const fileName = `Doc Alvers Mathe-Labor ${currentFormat} ${orientation} ${dateStr} ${timeStr}`;
-            const originalTitle = document.title;
-            document.title = fileName;
             window.print();
-            setTimeout(() => { document.title = originalTitle; }, 1000);
         }
 
         function renderPoster() {
@@ -595,14 +597,13 @@
                 bodyText = parts.slice(1).join("\n").trim();
             }
 
-            // Remove title lines, separators, unwanted headers, and ULTRA references
+            // Remove title lines, separators and unwanted technical headers
             let lines = bodyText.split('\n').map(l => l.trim()).filter(l => 
                 l !== "" &&
                 !l.includes('================') && 
                 !l.includes('----------------') &&
                 !l.toUpperCase().startsWith('LABOR:') &&
-                !l.toUpperCase().startsWith('MATHEMATISCHER HINTERGRUND:') &&
-                !l.includes('ULTRA')
+                !l.toUpperCase().startsWith('MATHEMATISCHER HINTERGRUND:')
             ).map(l => l.replace(/^- /, '')); 
             
             ctx.textAlign = 'left';
