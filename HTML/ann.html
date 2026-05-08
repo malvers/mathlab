@@ -35,6 +35,33 @@
             background: rgba(255, 255, 255, 0.1) !important;
             border-color: var(--neon-blue) !important;
         }
+
+        /* Responsive Overrides */
+        @media (max-width: 768px) {
+            body {
+                display: flex !important;
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+            #side-panel {
+                width: 100% !important;
+                min-width: 100% !important;
+                height: auto !important;
+                max-height: 40vh;
+                overflow-y: auto;
+                order: 2; /* Sidebar below canvas */
+                border-top: 1px solid var(--border);
+            }
+            #main-content {
+                width: 100% !important;
+                height: 60vh !important;
+                min-height: 300px;
+                order: 1; /* Canvas at the top */
+            }
+            .cyber-nav {
+                display: none !important; /* Hide rail on very small mobile for more space */
+            }
+        }
     </style>
 </head>
 
@@ -664,7 +691,7 @@
             }
 
             // input labels drawn on canvas — no DOM overlap issues
-            ctx.font = 'italic 700 22px Times New Roman, serif';
+            ctx.font = 'italic 700 26px Times New Roman, serif';
             ctx.textBaseline = 'middle';
             for (let i = 0; i < currentInputs.length; i++) {
                 const { x, y } = positions[0][i];
@@ -772,7 +799,8 @@
 
             // loss curve
             if (lossHistory.length > 1) {
-                const cw = 220, ch = 70, cx = 20, cy = 20;
+                const isMobile = w < 500;
+                const cw = isMobile ? 160 : 220, ch = isMobile ? 50 : 70, cx = 20, cy = 20;
                 ctx.fillStyle = 'rgba(0,0,0,0.45)';
                 ctx.strokeStyle = 'rgba(255,34,34,0.3)';
                 ctx.lineWidth = 1;
@@ -816,7 +844,10 @@
 
             const absDelta = Math.abs(delta);
             const renderSym = s => katex.renderToString(s, {throwOnError: false});
-            const renderNum = (v, sign) => katex.renderToString('\\mathit{' + (sign && v >= 0 ? '+' : '') + v.toFixed(3) + '}', {throwOnError: false});
+            const renderNum = (v, sign) => {
+                let prefix = (v >= 0) ? (sign ? '+' : '\\phantom{-}') : '-';
+                return katex.renderToString('\\mathit{' + prefix + Math.abs(v).toFixed(3) + '}', {throwOnError: false});
+            };
             const row = (sym, val, sign, color) =>
                 `<div style="display:contents;color:${color}">` +
                     `<div style="text-align:right">${renderSym(sym)}</div>` +
