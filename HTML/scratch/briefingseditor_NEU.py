@@ -13,10 +13,10 @@ SYNC_SCRIPT = os.path.join(BASE_DIR, 'scratch', 'fix_briefings.py')
 class BriefingsEditor:
     def __init__(self, root):
         self.root = root
-        self.root.title("BRIEFING MANAGER (FINAL POLISH)")
+        self.root.title("BRIEFING MANAGER (POLITE FOCUS)")
         
-        # Fenstergröße und Zentrierung
-        width = 1100
+        # Fenstergröße
+        width = 860
         height = 950
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -24,19 +24,20 @@ class BriefingsEditor:
         y = (screen_height // 2) - (height // 2)
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
+        # Flash-Lift: Einmal nach vorne holen, dann frei lassen
         self.root.attributes("-topmost", True)
+        self.root.attributes("-topmost", False)
         self.root.configure(bg="#f0f0f0")
         
-        # Container mit Zentrierung
+        # Container
         self.container = tk.Text(self.root, bg="#f0f0f0", borderwidth=0, highlightthickness=0, cursor="arrow")
         self.scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.container.yview)
         self.container.configure(yscrollcommand=self.scrollbar.set)
         
-        # Tag für die Zentrierung
         self.container.tag_configure("center", justify='center')
         
         self.scrollbar.pack(side="right", fill="y")
-        self.container.pack(side="left", fill="both", expand=True, pady=10)
+        self.container.pack(side="left", fill="both", expand=True, pady=5)
 
         self.is_editing = False
         self.load_keys()
@@ -57,11 +58,10 @@ class BriefingsEditor:
                 for key in row_keys:
                     btn = tk.Button(row_frame, text=key.upper(), 
                                    command=lambda k=key: self.trigger_edit(k),
-                                   font=("Arial", 10, "bold"), width=30, height=3,
+                                   font=("Arial", 10, "bold"), width=25, height=3,
                                    bg="#eee", relief="raised", borderwidth=1)
-                    btn.pack(side="left", padx=3, pady=3)
+                    btn.pack(side="left", padx=2, pady=2)
                 
-                # Zeile einfügen und zentrieren
                 self.container.window_create(tk.END, window=row_frame)
                 self.container.insert(tk.END, "\n", "center")
             
@@ -108,7 +108,9 @@ class BriefingsEditor:
     def _restore_ui(self):
         self.is_editing = False
         self.root.deiconify()
+        # Flash-Lift beim Wiederkehren
         self.root.attributes("-topmost", True)
+        self.root.attributes("-topmost", False)
         self.root.lift()
         self.root.focus_force()
 
