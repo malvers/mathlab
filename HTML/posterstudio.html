@@ -26,7 +26,7 @@
             @page { margin: 0; size: auto; }
             html, body, .container, .preview-container, .zoom-wrapper { 
                 margin: 0 !important; padding: 0 !important; 
-                background: #0a0c12 !important; 
+                background: #000000 !important; 
                 width: 100% !important; height: auto !important;
                 max-width: none !important; max-height: none !important;
                 display: block !important;
@@ -425,7 +425,18 @@
         }
 
         function preparePrint() {
-            window.print();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0');
+            const orientation = document.getElementById('orientation-display').textContent;
+            
+            const originalTitle = document.title;
+            document.title = `Doc Alvers Mathe-Labor ${currentFormat} ${orientation} ${dateStr} ${timeStr}`;
+
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => { document.title = originalTitle; }, 1000);
+            }, 500);
         }
 
         function renderPoster() {
