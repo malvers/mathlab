@@ -533,6 +533,9 @@
                 if (i !== draggingIndex) {
                     if (viewMode === 'front') {
                         drawCellImage(img, x, y, finalCellW, finalCellH);
+                        ctx.strokeStyle = 'rgba(0, 210, 255, 0.1)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x, y, finalCellW, finalCellH);
                     } else {
                         drawBackCell(img, src, x, y, finalCellW, finalCellH);
                     }
@@ -573,7 +576,7 @@
             // Thumbnail (floating)
             const thumbW = cellW * 0.32;
             const thumbH = (thumbW / img.width) * img.height;
-            drawCellImage(img, x - 6, y, thumbW, thumbH);
+            drawCellImage(img, x - 6, y, thumbW, thumbH, 0.8);
 
             // Text Cleaning & Processing
             const name = src.split('.')[0];
@@ -716,19 +719,10 @@
                 offCtx.fillRect(0, 0, qrSize, qrSize);
                 
                 ctx.drawImage(offCanvas, qX, qY);
-                
-                // Subtle glow for QR
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = 'rgba(0, 210, 255, 0.3)';
-                ctx.strokeStyle = 'rgba(0, 210, 255, 0.2)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(qX - 10, qY - 10, qrSize + 20, qrSize + 20);
-                ctx.shadowBlur = 0;
             }
         }
 
-        function drawCellImage(img, x, y, cellW, cellH) {
-            const marginScale = 0.8; // 80% size
+        function drawCellImage(img, x, y, cellW, cellH, marginScale = 1.0) {
             const targetW = cellW * marginScale;
             const targetH = cellH * marginScale;
             
