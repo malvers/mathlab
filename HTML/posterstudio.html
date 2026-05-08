@@ -133,6 +133,12 @@
             padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
         }
         .editor-header { font-family: 'Orbitron'; color: var(--neon-blue); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .editor-title-input {
+            width: 100%; background: #111; color: var(--neon-blue); border: 1px solid var(--subtle);
+            padding: 12px 20px; font-family: 'Orbitron', sans-serif; font-size: 1rem; border-radius: 10px;
+            margin-bottom: 15px; outline: none; box-sizing: border-box;
+        }
+        .editor-title-input:focus { border-color: var(--neon-blue); }
         .editor-textarea {
             width: 100%; height: 400px; background: #000; color: #fff; border: 1px solid var(--subtle);
             padding: 20px; font-family: 'Outfit', sans-serif; font-size: 1.1rem; line-height: 1.6; border-radius: 10px;
@@ -191,6 +197,7 @@
                 <span id="editor-title">LABOR EDITIEREN</span>
                 <span id="editor-id" style="font-size: 0.7rem; opacity: 0.5;">ID: --</span>
             </div>
+            <input type="text" id="editor-title-field" class="editor-title-input" placeholder="TITEL EINGEBEN...">
             <textarea id="editor-textarea" class="editor-textarea"></textarea>
             <div class="editor-footer">
                 <button class="main-btn" onclick="closeEditor()">ABBRECHEN</button>
@@ -229,11 +236,21 @@
 
         function openEditor(id) {
             currentEditingId = id;
-            let text = editedDescriptions[id] || descriptions[id] || "";
-            if (!text || text.trim() === "") text = DEFAULT_TEMPLATE;
+            let raw = editedDescriptions[id] || descriptions[id] || "";
+            if (!raw || raw.trim() === "") raw = DEFAULT_TEMPLATE;
             
+            // Extract title if present (first line starting with TITLE: )
+            let title = id.toUpperCase();
+            let body = raw;
+            if (raw.startsWith("TITLE:")) {
+                const lines = raw.split("\n");
+                title = lines[0].replace("TITLE:", "").trim();
+                body = lines.slice(1).join("\n").trim();
+            }
+
             document.getElementById('editor-id').textContent = `ID: ${id.toUpperCase()}`;
-            document.getElementById('editor-textarea').value = text;
+            document.getElementById('editor-title-field').value = title;
+            document.getElementById('editor-textarea').value = body;
             document.getElementById('editor-overlay').style.display = 'flex';
         }
 
@@ -242,18 +259,21 @@
         }
 
         function saveDescription() {
-            const text = document.getElementById('editor-textarea').value;
+            const title = document.getElementById('editor-title-field').value.trim();
+            const body = document.getElementById('editor-textarea').value;
             const id = currentEditingId;
             
+            const fullText = `TITLE: ${title}\n${body}`;
+            
             // 1. Update memory and localStorage (as backup)
-            editedDescriptions[id] = text;
+            editedDescriptions[id] = fullText;
             saveToStorage();
             
             // 2. Attempt Live Sync to Disk via Python Bridge
             fetch('http://localhost:5005/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, text: text })
+                body: JSON.stringify({ id: id, text: fullText })
             })
             .then(response => {
                 if (response.ok) {
@@ -564,14 +584,23 @@
             // Global cleanups
             rawText = rawText.replace(/& Steuerung/gi, '');
 
+            // Separate Title and Body
+            let displayTitle = name.toUpperCase();
+            let bodyText = rawText;
+            if (rawText.startsWith("TITLE:")) {
+                const parts = rawText.split("\n");
+                displayTitle = parts[0].replace("TITLE:", "").trim();
+                bodyText = parts.slice(1).join("\n").trim();
+            }
+
             // Remove title lines, separators, unwanted headers, and ULTRA references
-            let lines = rawText.split('\n').filter(l => 
+            let lines = bodyText.split('\n').map(l => l.trim()).filter(l => 
+                l !== "" &&
                 !l.includes('================') && 
                 !l.includes('----------------') &&
-                !l.startsWith('LABOR:') &&
-                !l.startsWith('MATHEMATISCHER HINTERGRUND:') &&
-                !l.includes('ULTRA') &&
-                l.trim() !== ''
+                !l.toUpperCase().startsWith('LABOR:') &&
+                !l.toUpperCase().startsWith('MATHEMATISCHER HINTERGRUND:') &&
+                !l.includes('ULTRA')
             ).map(l => l.replace(/^- /, '')); 
             
             ctx.textAlign = 'left';
@@ -579,18 +608,21 @@
             
             // Title in Cyan (Orbitron)
             const titleFontSize = Math.max(12, 16 * (cellW/400));
-            ctx.font = '700 ' + titleFontSize + 'px Orbitron';
-            ctx.fillStyle = '#00d2ff';
-            const textX = x + thumbW + 25;
-            ctx.fillText(name.toUpperCase(), textX, y + titleFontSize + 10);
-
-            // Body Text (Inter/Sans)
             const bodyFontSize = Math.max(9, 11 * (cellW/400));
             const lineHeight = bodyFontSize * 1.5;
+
+            let currentY = y + 25;
+            const textX = x + thumbW + 25;
+
+            ctx.font = '700 ' + titleFontSize + 'px Orbitron, sans-serif';
+            ctx.fillStyle = '#00d2ff';
+            ctx.fillText(displayTitle.toUpperCase(), textX, y + titleFontSize + 10);
+
+            // Body Text (Inter/Sans)
             ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
             
-            let currentY = y + titleFontSize + 40;
+            currentY = y + titleFontSize + 40;
             const maxWidth = cellW - thumbW - 55; // More conservative padding
             const maxHeight = cellH - 20;
 
