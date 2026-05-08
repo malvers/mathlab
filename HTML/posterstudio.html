@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Studio | Doc Alvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --bg: #0a0c12;
+            --card: #12161d;
+            --text: #e6edf3;
+            --subtle: rgba(255, 255, 255, 0.15);
+            --toolbar-h: 36px;
+        }
+
+        body {
+            margin: 0; font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 0 20px 60px 20px;
+            overflow-x: hidden;
+        }
+
+        /* Print Overrides */
+        @media print {
+            @page { margin: 0; }
+            html, body { 
+                background-color: #0a0c12 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                margin: 0 !important; padding: 0 !important; 
+                width: 100vw !important; height: 100vh !important;
+                overflow: hidden !important;
+                display: flex !important; align-items: center !important; justify-content: center !important;
+            }
+            .controls, .hint, .format-tag { display: none !important; }
+            .preview-container { 
+                padding: 0 !important; margin: 0 !important; 
+                width: 100vw !important; height: 100vh !important;
+                max-width: none !important; 
+                display: flex !important; align-items: center !important; justify-content: center !important; 
+            }
+            canvas { 
+                max-width: 100vw !important; max-height: 100vh !important; 
+                width: auto !important; height: auto !important;
+                box-shadow: none !important; border: none !important; 
+                margin: 0 !important; cursor: default !important;
+                object-fit: contain !important;
+            }
+        }
+
+        .controls {
+            display: flex; gap: 3rem; align-items: center; background: var(--card); 
+            padding: 0.6rem 2.5rem; border-radius: 60px; margin: 8px 0 25px 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+            border: 1px solid rgba(0, 210, 255, 0.1);
+        }
+
+        .control-group { display: flex; align-items: center; gap: 15px; }
+        .label { font-family: 'Orbitron', sans-serif; font-size: 0.55rem; color: var(--neon-blue); letter-spacing: 2px; opacity: 0.6; }
+
+        /* Unified Height UI Elements */
+        .grid-stepper, .format-selector { 
+            display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); 
+            padding: 2px 6px; border-radius: 40px; border: 1px solid var(--subtle);
+            height: var(--toolbar-h); box-sizing: border-box;
+        }
+
+        .stepper-btn {
+            background: transparent; border: none; color: var(--neon-blue); 
+            font-family: 'Orbitron'; font-size: 1.2rem; cursor: pointer; width: 28px; height: 100%;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; opacity: 0.5;
+        }
+        .stepper-btn:hover { opacity: 1; transform: scale(1.1); }
+        .grid-value { font-family: 'Orbitron'; font-size: 0.95rem; min-width: 30px; text-align: center; color: #fff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.4); }
+
+        .format-btn {
+            background: transparent; border: 1px solid transparent; color: #666;
+            padding: 0 12px; border-radius: 30px; cursor: pointer; font-family: 'Orbitron';
+            font-size: 0.55rem; height: calc(100% - 4px); transition: 0.2s;
+            display: flex; align-items: center;
+        }
+        .format-btn:hover { color: #aaa; }
+        .format-btn.active { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
+
+        button.main-btn {
+            background: transparent; border: 1px solid var(--subtle); color: #888;
+            padding: 0 1.6rem; border-radius: 40px; font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem; cursor: pointer; transition: 0.3s; letter-spacing: 2px;
+            height: var(--toolbar-h); display: flex; align-items: center;
+        }
+        button.main-btn:hover { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
+
+        .preview-container { 
+            width: 100%; max-width: 1400px; display: flex; justify-content: center; position: relative; 
+            padding: 20px;
+        }
+        
+        canvas { 
+            display: block; max-width: 100%; height: auto; background: #000; 
+            box-shadow: 0 30px 90px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1); 
+            cursor: grab;
+            user-select: none;
+        }
+        canvas:active { cursor: grabbing; }
+
+        .format-tag {
+            position: absolute; top: 0; right: 0; background: var(--neon-blue); color: #000;
+            font-family: 'Orbitron'; font-weight: 700; font-size: 0.55rem; padding: 4px 12px;
+            border-radius: 0 0 0 10px; box-shadow: -2px 2px 10px rgba(0,0,0,0.5);
+            pointer-events: none; opacity: 0.8;
+            display: flex; flex-direction: column; align-items: flex-end;
+        }
+        .format-tag span { font-size: 0.4rem; opacity: 0.7; }
+
+        .hint {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 0.55rem; color: #444; font-family: 'Orbitron'; letter-spacing: 1.5px;
+            background: rgba(0,0,0,0.6); padding: 6px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05);
+            pointer-events: none; z-index: 200;
+        }
+    </style>
+    <style id="print-style"></style>
+    <script src="screenshot_list.js"></script>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="control-group">
+            <span class="label">GRID</span>
+            <div class="grid-stepper">
+                <button class="stepper-btn" onclick="adjustCols(-1)">-</button>
+                <span id="grid-val" class="grid-value">6</span>
+                <button class="stepper-btn" onclick="adjustCols(1)">+</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <span class="label">FORMAT</span>
+            <div class="format-selector">
+                <button id="fmt-A1" class="format-btn" onclick="setFormat('A1', this)">A1</button>
+                <button id="fmt-A2" class="format-btn" onclick="setFormat('A2', this)">A2</button>
+                <button id="fmt-A3" class="format-btn" onclick="setFormat('A3', this)">A3</button>
+                <button id="fmt-A4" class="format-btn" onclick="setFormat('A4', this)">A4</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 4px;">
+            <button id="btn-front" class="main-btn" style="color: var(--neon-blue);" onclick="setView('front')">FRONT</button>
+            <button id="btn-back" class="main-btn" onclick="setView('back')">BACK</button>
+        </div>
+
+        <button class="main-btn" style="color: var(--neon-blue); margin-left: 5px;" onclick="location.reload()">RELOAD</button>
+        <button class="main-btn" onclick="preparePrint()">PRINT | PDF</button>
+    </div>
+
+    <div class="preview-container">
+        <div id="format-tag" class="format-tag">
+            <b id="format-display">A1</b>
+            <span id="orientation-display">LANDSCAPE</span>
+        </div>
+        <canvas id="poster-canvas"></canvas>
+    </div>
+
+    <div class="hint">DRAG & DROP ZUM ARRANGIEREN DER KACHELN | FRONT/BACK ZUM UMSCHALTEN</div>
+
+    <script src="screenshot_list.js"></script>
+    <script src="description_list.js"></script>
+    <script>
+        // --- STATE & PERSISTENCE ---
+        let currentCols = parseInt(localStorage.getItem('posterCols')) || 6;
+        let currentFormat = localStorage.getItem('posterFormat') || 'A1';
+        let currentOrientation = localStorage.getItem('posterOrientation') || 'LANDSCAPE';
+        let viewMode = localStorage.getItem('posterViewMode') || 'front';
+        let imageOrder = JSON.parse(localStorage.getItem('posterImageOrder')) || [...SCREENSHOT_LIST];
+        let descriptions = window.LAB_DESCRIPTIONS || {};
+
+        function saveToStorage() {
+            localStorage.setItem('posterCols', currentCols);
+            localStorage.setItem('posterFormat', currentFormat);
+            localStorage.setItem('posterOrientation', currentOrientation);
+            localStorage.setItem('posterViewMode', viewMode);
+            localStorage.setItem('posterImageOrder', JSON.stringify(imageOrder));
+        }
+
+        // --- CORE FUNCTIONS ---
+        async function setView(mode) {
+            viewMode = mode;
+            saveToStorage();
+            syncUI();
+            renderPoster();
+        }
+
+        function adjustCols(delta) {
+            currentCols = Math.max(1, Math.min(12, currentCols + delta));
+            saveToStorage();
+            syncUI();
+            renderPoster();
+        }
+
+        function setFormat(fmt) {
+            currentFormat = fmt;
+            saveToStorage();
+            syncUI();
+            renderPoster();
+        }
+
+        function setOrientation(orient) {
+            currentOrientation = orient;
+            saveToStorage();
+            syncUI();
+            renderPoster();
+        }
+
+        function syncUI() {
+            document.getElementById('grid-val').textContent = currentCols;
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.id === 'fmt-' + currentFormat);
+            });
+            document.getElementById('format-display').textContent = currentFormat;
+            document.getElementById('orientation-display').textContent = currentOrientation;
+            
+            document.getElementById('btn-front').style.color = (viewMode === 'front') ? 'var(--neon-blue)' : 'rgba(255,255,255,0.4)';
+            document.getElementById('btn-back').style.color = (viewMode === 'back') ? 'var(--neon-blue)' : 'rgba(255,255,255,0.4)';
+        }
+
+        const canvas = document.getElementById('poster-canvas');
+        const ctx = canvas.getContext('2d');
+        const baseDir = './resources/screenshots_original/';
+        let loadedImages = {}; 
+        let cellRects = [];
+        let draggingIndex = -1;
+        let dragX = 0, dragY = 0;
+
+        async function init() {
+            syncUI();
+            const promises = SCREENSHOT_LIST.map(src => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => { loadedImages[src] = img; resolve(); };
+                    img.onerror = () => resolve();
+                    img.src = baseDir + src;
+                });
+            });
+            await Promise.all(promises);
+            document.fonts.ready.then(renderPoster);
+            setupInteractions();
+        }
+
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = context.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, currentY);
+            return currentY;
+        }
+
+        function preparePrint() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + now.getMinutes().toString().padStart(2, '0');
+            const orientation = document.getElementById('orientation-display').textContent;
+            const fileName = `Doc Alvers Mathe-Labor ${currentFormat} ${orientation} ${dateStr} ${timeStr}`;
+            const originalTitle = document.title;
+            document.title = fileName;
+            window.print();
+            setTimeout(() => { document.title = originalTitle; }, 1000);
+        }
+
+        function renderPoster() {
+            const cols = currentCols;
+            const rows = Math.ceil(imageOrder.length / cols);
+            const isoRatio = 1.4142;
+            const testWidth = 7000;
+            const padding = 50;
+            const cellW_test = (testWidth - 300 - (padding * (cols - 1))) / cols;
+            const cellH_test = cellW_test * 0.58;
+            const testHeaderH = 1000;
+            const testTotalH = testHeaderH + (rows * cellH_test) + (padding * (rows - 1)) + 150;
+            const isPortrait = testTotalH > testWidth;
+            
+            let posterWidth, posterHeight;
+            if (isPortrait) {
+                posterWidth = 7000 / isoRatio; posterHeight = 7000;
+                document.getElementById('orientation-display').textContent = 'PORTRAIT';
+                document.getElementById('print-style').textContent = '@media print { @page { size: portrait; margin: 0; } }';
+            } else {
+                posterWidth = 7000; posterHeight = 7000 / isoRatio;
+                document.getElementById('orientation-display').textContent = 'LANDSCAPE';
+                document.getElementById('print-style').textContent = '@media print { @page { size: landscape; margin: 0; } }';
+            }
+
+            canvas.width = posterWidth; canvas.height = posterHeight;
+            ctx.fillStyle = '#0a0c12'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const availableWidth = posterWidth - 300;
+            const maxCellW = 1100;
+            let cellW = (availableWidth - (padding * (cols - 1))) / cols;
+            if (cellW > maxCellW) cellW = maxCellW;
+            const gridWidth = (cols * cellW) + (padding * (cols - 1));
+
+            ctx.textAlign = 'center';
+            const titleText = 'DOC ALVERS MATHE-LABOR';
+            ctx.font = '700 250px Orbitron';
+            const titleMetrics = ctx.measureText(titleText);
+            let scaleFactor = gridWidth / titleMetrics.width;
+            const maxHeaderWidthOnCanvas = posterWidth * 0.72;
+            if (gridWidth > maxHeaderWidthOnCanvas) scaleFactor = maxHeaderWidthOnCanvas / titleMetrics.width;
+
+            const titleSize = 250 * scaleFactor;
+            const subSize = 90 * scaleFactor;
+            const authorSize = 50 * scaleFactor;
+            const titleY = 320;
+            const subY = titleY + (160 * scaleFactor);
+            const authorY = subY + (100 * scaleFactor);
+            const contactY = authorY + (85 * scaleFactor);
+            const headerBottomY = contactY + (150 * scaleFactor);
+
+            ctx.font = '700 ' + titleSize + 'px Orbitron';
+            const currentTitleW = titleMetrics.width * scaleFactor;
+            const gradient = ctx.createLinearGradient(posterWidth/2 - currentTitleW/2, 0, posterWidth/2 + currentTitleW/2, 0);
+            gradient.addColorStop(0, '#00d2ff'); gradient.addColorStop(0.5, '#ffffff'); gradient.addColorStop(1, '#9d50bb');
+            
+            // Glow effect
+            ctx.shadowBlur = 30 * scaleFactor;
+            ctx.shadowColor = 'rgba(0, 210, 255, 0.5)';
+            ctx.fillStyle = gradient;
+            ctx.fillText(titleText, posterWidth / 2, titleY);
+            
+            // Reset shadow for other elements
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            ctx.font = '400 ' + subSize + 'px Orbitron';
+            ctx.fillStyle = '#00d2ff'; ctx.letterSpacing = (20 * scaleFactor) + 'px';
+            ctx.fillText('INTERAKTIVE MATHEMATIK', posterWidth / 2, subY);
+            
+            ctx.font = '400 ' + (authorSize * 1.2) + 'px Orbitron';
+            ctx.fillStyle = '#c77dff'; ctx.letterSpacing = (12 * scaleFactor) + 'px';
+            ctx.fillText('www.docalvers.de · info@docalvers.de', posterWidth / 2, authorY);
+            
+            ctx.font = '400 ' + (authorSize * 0.7) + 'px Orbitron';
+            ctx.fillStyle = '#ffffff'; ctx.letterSpacing = (14 * scaleFactor) + 'px';
+            ctx.fillText('Dr. Michael R. Alvers', posterWidth / 2, contactY);
+            
+            ctx.letterSpacing = '0px';
+
+            const footerMargin = 150;
+            const availableHeight = posterHeight - headerBottomY - footerMargin;
+            let finalCellW = cellW;
+            let finalCellH = finalCellW * 0.58;
+            let finalTotalH = (rows * finalCellH) + (padding * (rows - 1));
+
+            if (finalTotalH > availableHeight) {
+                finalCellH = (availableHeight - (padding * (rows - 1))) / rows;
+                finalCellW = finalCellH / 0.58;
+                finalTotalH = availableHeight;
+            }
+
+            const finalGridWidth = (cols * finalCellW) + (padding * (cols - 1));
+            const startX = (posterWidth - finalGridWidth) / 2;
+            const startY = headerBottomY + (availableHeight - finalTotalH) / 2;
+
+            cellRects = [];
+            imageOrder.forEach((src, i) => {
+                const img = loadedImages[src];
+                if (!img) return;
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                const x = startX + c * (finalCellW + padding);
+                const y = startY + r * (finalCellH + padding);
+                cellRects.push({ x, y, w: finalCellW, h: finalCellH, index: i });
+                
+                if (i !== draggingIndex) {
+                    if (viewMode === 'front') {
+                        drawCellImage(img, x, y, finalCellW, finalCellH);
+                    } else {
+                        drawBackCell(img, src, x, y, finalCellW, finalCellH);
+                    }
+                }
+            });
+
+            // Draw QR Code in the very last slot (bottom right)
+            const lastX = startX + (cols - 1) * (finalCellW + padding);
+            const lastY = startY + (rows - 1) * (finalCellH + padding);
+            drawBrandedQR(lastX, lastY, finalCellW, finalCellH);
+
+            if (draggingIndex !== -1) {
+                const img = loadedImages[imageOrder[draggingIndex]];
+                ctx.globalAlpha = 0.7;
+                if (viewMode === 'front') {
+                    drawCellImage(img, dragX - finalCellW/2, dragY - finalCellH/2, finalCellW, finalCellH);
+                } else {
+                    drawBackCell(img, imageOrder[draggingIndex], dragX - finalCellW/2, dragY - finalCellH/2, finalCellW, finalCellH);
+                }
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        function drawBackCell(img, src, x, y, cellW, cellH) {
+            // Draw background box for text
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.fillRect(x, y, cellW, cellH);
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, cellW, cellH);
+
+            // Thumbnail with subtle border
+            const thumbW = cellW * 0.32;
+            const thumbH = (thumbW / img.width) * img.height;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.strokeRect(x + 10, y + 10, thumbW, thumbH);
+            drawCellImage(img, x + 10, y + 10, thumbW, thumbH);
+
+            // Text Cleaning & Processing
+            const name = src.split('.')[0];
+            let rawText = descriptions[name] || "Keine Beschreibung verfügbar.";
+            
+            // Remove title lines and separators
+            let lines = rawText.split('\n').filter(l => 
+                !l.includes('================') && 
+                !l.includes('----------------') &&
+                !l.startsWith('LABOR:') &&
+                l.trim() !== ''
+            );
+            
+            ctx.textAlign = 'left';
+            ctx.letterSpacing = '0px';
+            
+            // Title in Cyan (Orbitron)
+            const titleFontSize = Math.max(12, 16 * (cellW/400));
+            ctx.font = '700 ' + titleFontSize + 'px Orbitron';
+            ctx.fillStyle = '#00d2ff';
+            ctx.fillText(name.toUpperCase(), x + thumbW + 25, y + titleFontSize + 10);
+
+            // Body Text (Inter/Sans)
+            const bodyFontSize = Math.max(9, 11 * (cellW/400));
+            const lineHeight = bodyFontSize * 1.5;
+            ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            
+            const textX = x + thumbW + 25;
+            let currentY = y + titleFontSize + 40;
+            const maxWidth = cellW - thumbW - 45;
+            const maxHeight = cellH - 20;
+
+            for (let lineText of lines) {
+                if (currentY + lineHeight > maxHeight + y) break;
+                // Detect Keywords and highlight them
+                if (lineText.includes(':')) {
+                    const parts = lineText.split(':');
+                    ctx.font = '700 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(parts[0] + ':', textX, currentY);
+                    ctx.font = '400 ' + bodyFontSize + 'px Inter, Roboto, sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    currentY = wrapText(ctx, parts.slice(1).join(':').trim(), textX, currentY + lineHeight, maxWidth, lineHeight);
+                } else {
+                    currentY = wrapText(ctx, lineText, textX, currentY, maxWidth, lineHeight);
+                }
+                currentY += lineHeight * 0.5; // Paragraph spacing
+            }
+        }
+
+        function drawBrandedQR(x, y, w, h) {
+            const qrSize = Math.min(w, h) * 0.85;
+            const qX = x + (w - qrSize) / 2;
+            const qY = y + (h - qrSize) / 2;
+            
+            if (!window.qrImage) {
+                window.qrImage = new Image();
+                // Fetch black on white for reliable processing
+                window.qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https://docalvers.de&color=000000&bgcolor=ffffff';
+                window.qrImage.crossOrigin = "anonymous"; // Needed for pixel access
+                window.qrImage.onload = () => renderPoster();
+                return;
+            }
+
+            if (window.qrImage.complete) {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = qrSize; offCanvas.height = qrSize;
+                const offCtx = offCanvas.getContext('2d');
+                
+                offCtx.drawImage(window.qrImage, 0, 0, qrSize, qrSize);
+                
+                // Get image data to make white pixels transparent
+                const imageData = offCtx.getImageData(0, 0, qrSize, qrSize);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    // If pixel is white-ish, make it transparent
+                    if (data[i] > 200 && data[i+1] > 200 && data[i+2] > 200) {
+                        data[i+3] = 0;
+                    }
+                }
+                offCtx.putImageData(imageData, 0, 0);
+                
+                // Apply gradient to remaining (black) pixels
+                offCtx.globalCompositeOperation = 'source-in';
+                const grad = offCtx.createLinearGradient(0, 0, qrSize, qrSize);
+                grad.addColorStop(0, '#00d2ff'); grad.addColorStop(0.5, '#ffffff'); grad.addColorStop(1, '#9d50bb');
+                offCtx.fillStyle = grad;
+                offCtx.fillRect(0, 0, qrSize, qrSize);
+                
+                ctx.drawImage(offCanvas, qX, qY);
+                
+                // Subtle glow for QR
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 210, 255, 0.3)';
+                ctx.strokeStyle = 'rgba(0, 210, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(qX - 10, qY - 10, qrSize + 20, qrSize + 20);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function drawCellImage(img, x, y, cellW, cellH) {
+            const imgRatio = img.width / img.height;
+            const cellRatio = cellW / cellH;
+            let drawW, drawH;
+            if (imgRatio > cellRatio) {
+                drawW = cellW; drawH = cellW / imgRatio;
+            } else {
+                drawH = cellH; drawW = cellH * imgRatio;
+            }
+            const offsetX = (cellW - drawW) / 2;
+            const offsetY = (cellH - drawH) / 2;
+            ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH);
+        }
+
+        function setupInteractions() {
+            canvas.onmousedown = (e) => {
+                const pos = getMousePos(e);
+                const rect = cellRects.find(r => pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h);
+                if (rect) { draggingIndex = rect.index; dragX = pos.x; dragY = pos.y; renderPoster(); }
+            };
+            window.onmousemove = (e) => { if (draggingIndex === -1) return; const pos = getMousePos(e); dragX = pos.x; dragY = pos.y; renderPoster(); };
+            window.onmouseup = (e) => {
+                if (draggingIndex === -1) return;
+                const pos = getMousePos(e);
+                const targetRect = cellRects.find(r => pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h);
+                if (targetRect && targetRect.index !== draggingIndex) {
+                    const temp = imageOrder[draggingIndex];
+                    imageOrder[draggingIndex] = imageOrder[targetRect.index];
+                    imageOrder[targetRect.index] = temp;
+                    saveSettings();
+                }
+                draggingIndex = -1; renderPoster();
+            };
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
