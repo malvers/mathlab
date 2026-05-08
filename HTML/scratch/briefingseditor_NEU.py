@@ -13,7 +13,7 @@ SYNC_SCRIPT = os.path.join(BASE_DIR, 'scratch', 'fix_briefings.py')
 class BriefingsEditor:
     def __init__(self, root):
         self.root = root
-        self.root.title("BRIEFING MANAGER (FINAL STABILITY)")
+        self.root.title("BRIEFING MANAGER (FINAL POLISH)")
         
         # Fenstergröße und Zentrierung
         width = 1100
@@ -27,13 +27,16 @@ class BriefingsEditor:
         self.root.attributes("-topmost", True)
         self.root.configure(bg="#f0f0f0")
         
-        # DER TRICK: Ein Text-Widget als Container (extrem stabil am Mac)
+        # Container mit Zentrierung
         self.container = tk.Text(self.root, bg="#f0f0f0", borderwidth=0, highlightthickness=0, cursor="arrow")
         self.scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.container.yview)
         self.container.configure(yscrollcommand=self.scrollbar.set)
         
+        # Tag für die Zentrierung
+        self.container.tag_configure("center", justify='center')
+        
         self.scrollbar.pack(side="right", fill="y")
-        self.container.pack(side="left", fill="both", expand=True)
+        self.container.pack(side="left", fill="both", expand=True, pady=10)
 
         self.is_editing = False
         self.load_keys()
@@ -47,24 +50,22 @@ class BriefingsEditor:
                 content = f.read()
             keys = sorted(list(set(re.findall(r'["\'](\w+)["\']\s*:\s*`', content))))
             
-            # Wir packen 3 Buttons in eine Reihe (Frame) und diesen Frame in das Text-Widget
             for i in range(0, len(keys), 3):
                 row_keys = keys[i:i+3]
                 row_frame = tk.Frame(self.container, bg="#f0f0f0")
                 
                 for key in row_keys:
-                    # Breite fest auf 30 Zeichen | pady=10 für angenehme Höhe
                     btn = tk.Button(row_frame, text=key.upper(), 
                                    command=lambda k=key: self.trigger_edit(k),
                                    font=("Arial", 10, "bold"), width=30, height=3,
                                    bg="#eee", relief="raised", borderwidth=1)
-                    btn.pack(side="left", padx=2, pady=2)
+                    btn.pack(side="left", padx=3, pady=3)
                 
-                # Frame in das Text-Widget einfügen
+                # Zeile einfügen und zentrieren
                 self.container.window_create(tk.END, window=row_frame)
-                self.container.insert(tk.END, "\n") # Zeilenumbruch im Text-Widget
+                self.container.insert(tk.END, "\n", "center")
             
-            self.container.config(state="disabled") # Text-Eingabe verhindern
+            self.container.config(state="disabled")
                 
         except Exception as e:
             print(f"Fehler: {e}")

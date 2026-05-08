@@ -6,8 +6,7 @@
  */
 window.CyberBriefings = {
     "de": {
-        "addition": `MATHEMATISCHER HINTERGRUND:
-Die schriftliche Addition ist einer der fundamenten Algorithmen der Arithmetik. Er basiert auf dem Stellenwertsystem (Dezimalsystem). Das Prinzip beruht darauf, Zahlen stellenweise von rechts nach links (Einer, Zehner, Hunderter...) zu addieren. Erreicht eine Teilsumme den Wert 10 oder mehr, entsteht ein "Übertrag" (Carry), der zur nächsthöheren Stelle addiert wird.
+        "addition": `Die schriftliche Addition ist einer der fundamenten Algorithmen der Arithmetik. Er basiert auf dem Stellenwertsystem (Dezimalsystem). Das Prinzip beruht darauf, Zahlen stellenweise von rechts nach links (Einer, Zehner, Hunderter...) zu addieren. Erreicht eine Teilsumme den Wert 10 oder mehr, entsteht ein "Übertrag" (Carry), der zur nächsthöheren Stelle addiert wird.
 
 FEATURES
 - Summanden-Eingabe: Nutzer können zwei Summanden mit bis zu 7 Stellen eingeben.
@@ -18,8 +17,7 @@ FEATURES
 FUNKTION
 Der Algorithmus prüft bei jedem Schritt die Summe der Ziffern einer Spalte plus den eventuellen Übertrag aus der vorherigen Spalte. Das Ergebnis (Modulo 10) wird notiert, der neue Übertrag (Division durch 10) wird für den nächsten Schritt gespeichert.`,
 
-        "subtraktion": `MATHEMATISCHER HINTERGRUND:
-Die schriftliche Subtraktion berechnet die Differenz zwischen einem Minuenden und einem Subtrahenden. Das Labor nutzt das Abziehverfahren (Entbündelung), bei dem von rechts nach links subtrahiert wird. Ist eine Ziffer des Minuenden kleiner als die des Subtrahenden, wird ein Zehner von der nächsthöheren Stelle "geliehen".
+        "subtraktion": `Die schriftliche Subtraktion berechnet die Differenz zwischen einem Minuenden und einem Subtrahenden. Das Labor nutzt das Abziehverfahren (Entbündelung), bei dem von rechts nach links subtrahiert wird. Ist eine Ziffer des Minuenden kleiner als die des Subtrahenden, wird ein Zehner von der nächsthöheren Stelle "geliehen".
 
 FEATURES
 - Ziffern-Eingabe: Präzise Kontrolle über Minuend und Subtrahend (max. 7 Stellen).
@@ -27,8 +25,7 @@ FEATURES
 - Prozess-Steuerung: Manuelle Navigation durch die Berechnungsschritte zur Förderung des algorithmischen Verständnisses.
 - Ergebnis-Verifikation: Automatische Berechnung und doppelte Unterstreichung des finalen Differenzwertes.`,
 
-        "multiplikation": `MATHEMATISCHER HINTERGRUND:
-Die schriftliche Multiplikation zerlegt die Berechnung des Produkts zweier Faktoren in Teilprodukte. Jede Ziffer des zweiten Faktors (Multiplikator) wird mit dem ersten Faktor (Multiplikand) multipliziert, wobei die Ergebnisse stellenrichtig untereinander addiert werden.
+        "multiplikation": `Die schriftliche Multiplikation zerlegt die Berechnung des Produkts zweier Faktoren in Teilprodukte. Jede Ziffer des zweiten Faktors (Multiplikator) wird mit dem ersten Faktor (Multiplikand) multipliziert, wobei die Ergebnisse stellenrichtig untereinander addiert werden.
 
 FEATURES
 - Multi-Digit-Support: Berechnung komplexer Produkte mit bis zu 7-stelligen Faktoren.
@@ -36,8 +33,7 @@ FEATURES
 - Teilprodukt-Summation: Visualisierung der abschließenden Addition aller Zeilen zur Ermittlung des Gesamtergebnisses.
 - Farbkodierung: Jede Zeile der Teilrechnung ist farblich mit der entsprechenden Ziffer des Multiplikators verknüpft (z.B. Gold, Lila, Grün).`,
 
-        "dividieren": `MATHEMATISCHER HINTERGRUND:
-Die schriftliche Division ist der komplexeste der vier Grundrechenarten-Algorithmen. Er basiert auf dem wiederholten Schätzen, Multiplizieren, Subtrahieren und "Herunterholen" von Ziffern des Dividenden, um den Quotienten (ggf. mit Rest) zu ermitteln.
+        "dividieren": `Die schriftliche Division ist der komplexeste der vier Grundrechenarten-Algorithmen. Er basiert auf dem wiederholten Schätzen, Multiplizieren, Subtrahieren und "Herunterholen" von Ziffern des Dividenden, um den Quotienten (ggf. mit Rest) zu ermitteln.
 
 FEATURES
 - Dividenden-Management: Eingabe von Werten bis zu 7 Stellen; Divisor-Anpassung für verschiedene Schwierigkeitsgrade.
@@ -45,8 +41,7 @@ FEATURES
 - Didaktisches Coaching: Der "Math Coach" führt den Nutzer durch die Fragen "Wie oft passt der Divisor in...?" und die anschließende Probe durch Multiplikation.
 - Fehler-Prävention: Visuelle Hinweise bei unmöglichen Rechenschritten oder falscher Stellenplatzierung.`,
 
-        "parabellabor": `MATHEMATISCHER HINTERGRUND:
-Das Labor dient der Untersuchung von Parabeln der Form f(x) = a*(x-d)^2 + e (Scheitelpunktform). Es verdeutlicht den Einfluss der Parameter a (Streckung/Stauchung), d (horizontale Verschiebung) und e (vertikale Verschiebung) auf den Graphen.
+        "parabellabor": `Das Labor dient der Untersuchung von Parabeln der Form f(x) = a*(x-d)^2 + e (Scheitelpunktform). Es verdeutlicht den Einfluss der Parameter a (Streckung/Stauchung), d (horizontale Verschiebung) und e (vertikale Verschiebung) auf den Graphen.
 
 FEATURES
 - Interaktive Handles: Der Scheitelpunkt S(d|e) und der Streckfaktor a können direkt auf dem Canvas per Maus oder Touch manipuliert werden.
@@ -54,8 +49,7 @@ FEATURES
 - Nullstellen-Analyse: Automatische Berechnung und Markierung der reellen Nullstellen (x1, x2) auf der x-Achse.
 - Adaptive Skalierung: Das Koordinatensystem passt sich dynamisch an extreme Parameterwerte an.`,
 
-        "mandelbrot_deep": `MATHEMATISCHER HINTERGRUND:
-Die Mandelbrot-Menge entsteht aus der Iteration z_{n+1} = z_n^2 + c mit z_0 = 0 über komplexen c. Bei Julia-Mengen wird c festgehalten und die Iteration aus variierenden Startpunkten betrachtet. Dieses Labor rendert direkt im WebGL-Fragment-Shader – sehr schnell, mit typischer Gleitkomma-Genauigkeit bei extrem hohem Zoom.
+        "mandelbrot_deep": `Die Mandelbrot-Menge entsteht aus der Iteration z_{n+1} = z_n^2 + c mit z_0 = 0 über komplexen c. Bei Julia-Mengen wird c festgehalten und die Iteration aus variierenden Startpunkten betrachtet. Dieses Labor rendert direkt im WebGL-Fragment-Shader – sehr schnell, mit typischer Gleitkomma-Genauigkeit bei extrem hohem Zoom.
 
 FEATURES
 - Modus: Mandelbrot und Julia; Julia-Parameter per Steuerelementen bzw. Cursor- Bezug.
@@ -63,128 +57,112 @@ FEATURES
 - Iterationen / Detail: Maximale Iterationszahl (Detail vs. Leistung).
 - Flight: START FLIGHT zoomt ein; der Blickmittelpunkt folgt der Maus auf dem Canvas.`,
 
-        "pythagoras": `MATHEMATISCHER HINTERGRUND:
-Dieses Labor visualisiert den Satz des Pythagoras (a² + b² = c²) für rechtwinklige Dreiecke. Es demonstriert grafisch, dass die Summe der Flächeninhalte der Quadrate über den Katheten (a und b) exakt dem Flächeninhalt des Quadrats über der Hypotenuse (c) entspricht.
+        "pythagoras": `Dieses Labor visualisiert den Satz des Pythagoras (a² + b² = c²) für rechtwinklige Dreiecke. Es demonstriert grafisch, dass die Summe der Flächeninhalte der Quadrate über den Katheten (a und b) exakt dem Flächeninhalt des Quadrats über der Hypotenuse (c) entspricht.
 
 FEATURES
 - Interaktive Eckpunkte: Verändern der Dreiecksform durch Ziehen der Punkte A und B unter Beibehaltung des rechten Winkels.
 - Flächen-Animation: Dynamische Skalierung der Quadrate synchron zur Veränderung der Seitenlängen.
 - Live-Berechnung: Kontinuierliche Anzeige der Werte für a², b² und c² zur numerischen Verifikation der Gleichung.`,
 
-        "eulergerade": `MATHEMATISCHER HINTERGRUND:
-In jedem nicht-gleichseitigen Dreieck liegen der Höhenschnittpunkt (H), der Umkreismittelpunkt (U) und der Schwerpunkt (S) auf einer gemeinsamen Geraden – der Eulergeraden. Zudem ist die Strecke HS stets doppelt so lang wie die Strecke SU (Verhältnis 2:1).
+        "eulergerade": `In jedem nicht-gleichseitigen Dreieck liegen der Höhenschnittpunkt (H), der Umkreismittelpunkt (U) und der Schwerpunkt (S) auf einer gemeinsamen Geraden – der Eulergeraden. Zudem ist die Strecke HS stets doppelt so lang wie die Strecke SU (Verhältnis 2:1).
 
 FEATURES
 - Konstruktions-Elemente: Ein- und Ausschalten von Umkreis, Inkreis und dem Feuerbach-Kreis.
 - Hilfslinien-System: Visualisierung der Höhen, Seitenhalbierenden und Winkelhalbierenden.
 - Live-Verhältnisanalyse: Das Dashboard berechnet permanent das HS/SU-Verhältnis.`,
 
-        "pythagorasbeweis": `MATHEMATISCHER HINTERGRUND:
-Dieses Modul bietet einen interaktiven, visuellen Beweis für den Satz des Pythagoras durch Zerlegung und Umordnung. Es nutzt das Prinzip der Ergänzungsgleichheit: Vier kongruente rechtwinklige Dreiecke werden innerhalb eines Quadrats umgeordnet.
+        "pythagorasbeweis": `Dieses Modul bietet einen interaktiven, visuellen Beweis für den Satz des Pythagoras durch Zerlegung und Umordnung. Es nutzt das Prinzip der Ergänzungsgleichheit: Vier kongruente rechtwinklige Dreiecke werden innerhalb eines Quadrats umgeordnet.
 
 FEATURES
 - Puzzle-Mechanik: Freies Verschieben und Rotieren der blauen Dreiecks-Elemente.
 - Echtzeit-Triangulierung: Das System erkennt automatisch die verbleibenden Freiflächen.
 - Kollisions-Detektion: Warnung bei Überlappungen zur Sicherung des Beweises.`,
 
-        "differentiallabor": `MATHEMATISCHER HINTERGRUND:
-Dieses Modul visualisiert den Übergang von der Sekante zur Tangente und damit das Konzept der Ableitung f'(x) als lokale Steigung einer Funktion.
+        "differentiallabor": `Dieses Modul visualisiert den Übergang von der Sekante zur Tangente und damit das Konzept der Ableitung f'(x) als lokale Steigung einer Funktion.
 
 FEATURES
 - Funktions-Bibliothek: Auswahl verschiedener Basisfunktionen (quadratisch, trigonometrisch etc.).
 - Interaktive Tangente: Verschieben des Berührungspunktes zur Beobachtung der Steigung.
 - Ableitungs-Graphen: Visualisierung der ersten und zweiten Ableitung.`,
 
-        "integralreaktor": `MATHEMATISCHER HINTERGRUND:
-Der Integralreaktor dient der Berechnung und Visualisierung des bestimmten Integrals einer Funktion f(x). Er interpretiert das Integral als orientierten Flächeninhalt.
+        "integralreaktor": `Der Integralreaktor dient der Berechnung und Visualisierung des bestimmten Integrals einer Funktion f(x). Er interpretiert das Integral als orientierten Flächeninhalt.
 
 FEATURES
 - Dynamische Intervallwahl: Anpassung der Grenzen direkt im Koordinatensystem.
 - Numerische Integration: Live-Berechnung des Integralwertes.
 - Visuelles Feedback: Die berechnete Fläche wird farblich hervorgehoben.`,
 
-        "steigung": `MATHEMATISCHER HINTERGRUND:
-Das Labor visualisiert die Parameter m (Steigung) und n (y-Achsenabschnitt) der Geradengleichung y = mx + n.
+        "steigung": `Das Labor visualisiert die Parameter m (Steigung) und n (y-Achsenabschnitt) der Geradengleichung y = mx + n.
 
 FEATURES
 - Handle-Interaktion: Verschieben der Punkte zur Veränderung des Anstiegs.
 - Steigungsdreieck: Ein neon-blaues Dreieck zeigt Delta-X und Delta-Y.
 - Formel-Synchronisation: Die Gleichung wird in Echtzeit mittels KaTeX aktualisiert.`,
 
-        "winkelsumme": `MATHEMATISCHER HINTERGRUND:
-Die Summe der Innenwinkel in einem n-Eck folgt der Formel (n-2) * 180°. Dieses Labor erlaubt die Verifikation dieses Gesetzes für verschiedene Figuren.
+        "winkelsumme": `Die Summe der Innenwinkel in einem n-Eck folgt der Formel (n-2) * 180°. Dieses Labor erlaubt die Verifikation dieses Gesetzes für verschiedene Figuren.
 
 FEATURES
 - Polygon-Konfiguration: Umschalten zwischen Dreieck, Viereck, Fünfeck etc.
 - Interaktive Eckpunkte: Freies Verschieben der Ecken zur Überprüfung der Invarianz.
 - Winkel-Visualisierung: Farbige Bogen-Markierungen an den Innenecken.`,
 
-        "winkelsumme3d": `MATHEMATISCHER HINTERGRUND:
-Dieses Modul demonstriert durch ein virtuelles Falt-Experiment, wie die drei Ecken eines Dreiecks an einem Punkt zusammentreffen und 180° bilden.
+        "winkelsumme3d": `Dieses Modul demonstriert durch ein virtuelles Falt-Experiment, wie die drei Ecken eines Dreiecks an einem Punkt zusammentreffen und 180° bilden.
 
 FEATURES
 - Interaktive Faltung: Stufenlose Steuerung des Faltvorgangs.
 - 3D-Navigation: Freies Rotieren und Zoomen im Raum mittels Three.js.
 - Dynamische Geometrie: Veränderung der Dreiecksform während der Faltung.`,
 
-        "beweisinwinkellsumme": `MATHEMATISCHER HINTERGRUND:
-Dieser Beweis nutzt Parallelen und Wechselwinkel (Z-Winkel), um die Winkelsumme von 180° im Dreieck herzuleiten.
+        "beweisinwinkellsumme": `Dieser Beweis nutzt Parallelen und Wechselwinkel (Z-Winkel), um die Winkelsumme von 180° im Dreieck herzuleiten.
 
 FEATURES
 - Parallelprojektion: Automatische Konstruktion einer Parallelen durch einen Eckpunkt.
 - Wechselwinkel-Check: Farbliche Übereinstimmung der Winkel am Pivot-Punkt.
 - Live-Synchronisation: Zwei parallele Rechnungen zeigen die Übereinstimmung.`,
 
-        "fermatpunkt": `MATHEMATISCHER HINTERGRUND:
-Der Fermat-Punkt ist der Punkt im Dreieck, für den die Summe der Abstände zu den drei Eckpunkten minimal ist.
+        "fermatpunkt": `Der Fermat-Punkt ist der Punkt im Dreieck, für den die Summe der Abstände zu den drei Eckpunkten minimal ist.
 
 FEATURES
 - Geometrischer Beweis: Visualisierung der Konstruktion über gleichseitige Dreiecke.
 - Distanz-Analyse: Ein freier Vergleichspunkt P zeigt die Differenz zum Minimum.
 - Dynamische Eckpunkte: Sofortige Neuberechnung bei Formveränderung.`,
 
-        "winkellabor": `MATHEMATISCHER HINTERGRUND:
-Untersuchung von Winkeln an geschnittenen Parallelen: Scheitel-, Neben-, Stufen- und Wechselwinkel.
+        "winkellabor": `Untersuchung von Winkeln an geschnittenen Parallelen: Scheitel-, Neben-, Stufen- und Wechselwinkel.
 
 FEATURES
 - Interaktive Geometrie: Veränderung von Schnittwinkel und Parallelen-Abstand.
 - Winkel-Identifikation: Farbliche Kennzeichnung gleicher Winkelpaare.
 - Summen-Validierung: Anzeige der Supplementär-Beziehung (180°).`,
 
-        "gleichschenkligesdreieck": `MATHEMATISCHER HINTERGRUND:
-Untersuchung eines Dreiecks mit festem Umfang (u = 8 cm) und der Bedingung der Gleichschenkligkeit.
+        "gleichschenkligesdreieck": `Untersuchung eines Dreiecks mit festem Umfang (u = 8 cm) und der Bedingung der Gleichschenkligkeit.
 
 FEATURES
 - Basis-Slider: Veränderung der Basis b mit sofortiger Geometrie-Anpassung.
 - Existenz-Check: Prüfung der Dreiecksungleichung mit visueller Warnung.
 - Duale Darstellung: Kombination aus Modell und analytischem Graphen.`,
 
-        "potenzlabor": `MATHEMATISCHER HINTERGRUND:
-Untersuchung von Potenzfunktionen f(x) = x^n und deren Umkehrfunktionen (Wurzelfunktionen).
+        "potenzlabor": `Untersuchung von Potenzfunktionen f(x) = x^n und deren Umkehrfunktionen (Wurzelfunktionen).
 
 FEATURES
 - Exponenten-Tuning: Stufenlose Anpassung von n zur Beobachtung des Wachstums.
 - Punkt-Telemetrie: Interaktiver Cursor zeigt exakte (x, y) Koordinaten.
 - Symmetrie-Check: Parallele Darstellung von Funktion und Umkehrfunktion.`,
 
-        "transformationen": `MATHEMATISCHER HINTERGRUND:
-Untersuchung von Abbildungen (Translation, Rotation, Spiegelung, Skalierung) auf geometrische Objekte.
+        "transformationen": `Untersuchung von Abbildungen (Translation, Rotation, Spiegelung, Skalierung) auf geometrische Objekte.
 
 FEATURES
 - Multi-Abbildungs-System: Kombination verschiedener Transformationen.
 - Spiegelungs-Modus: Interaktive Achsen- und Punktspiegelung.
 - Flächen-Invarianz: Echtzeit-Check der Flächenerhaltung bei Kongruenz.`,
 
-        "gleichungssysteme": `MATHEMATISCHER HINTERGRUND:
-Grafische Lösung linearer Gleichungssysteme (LGS) als Schnittpunktproblem zweier Geraden.
+        "gleichungssysteme": `Grafische Lösung linearer Gleichungssysteme (LGS) als Schnittpunktproblem zweier Geraden.
 
 FEATURES
 - Geraden-Manipulation: Veränderung der Gleichungen durch Ziehen der Punkte.
 - Notations-Scrambler: Umschalten zwischen Normalform, skaliert und implizit.
 - Aufgaben-Generator: Erstellung neuer Szenarien mit ganzzahligen Lösungen.`,
 
-        "imaginarynumbers": `MATHEMATISCHER HINTERGRUND:
-Die Gaußsche Zahlenebene erweitert den eindimensionalen Zahlenstrahl um eine zweite Dimension: die imaginäre Achse. Eine komplexe Zahl z = x + iy wird als Punkt in dieser Ebene dargestellt. Der Abstand zum Ursprung ist der Betrag |z|, und die Wurzel √(z) bzw. das Quadrat z² lassen sich geometrisch als Längen- und Winkelveränderungen interpretieren.
+        "imaginarynumbers": `Die Gaußsche Zahlenebene erweitert den eindimensionalen Zahlenstrahl um eine zweite Dimension: die imaginäre Achse. Eine komplexe Zahl z = x + iy wird als Punkt in dieser Ebene dargestellt. Der Abstand zum Ursprung ist der Betrag |z|, und die Wurzel √(z) bzw. das Quadrat z² lassen sich geometrisch als Längen- und Winkelveränderungen interpretieren.
 
 FEATURES
 - Interaktiver Vektor: Ziehe den Punkt z frei durch die Ebene.
@@ -192,32 +170,28 @@ FEATURES
 - Echtzeit-Algebra: Die Formel-Overlays (Betrag, Realteil, Imaginärteil) passen sich dynamisch an.
 - KaTeX-Rendering: Hochwertige mathematische Typografie für alle Formeln.`,
 
-        "binomischeslabor": `MATHEMATISCHER HINTERGRUND:
-Visualisierung der ersten binomischen Formel (a + b)² als geometrische Flächenzerlegung.
+        "binomischeslabor": `Visualisierung der ersten binomischen Formel (a + b)² als geometrische Flächenzerlegung.
 
 FEATURES
 - Dynamische Skalierung: Veränderung von a und b direkt am Modell.
 - Flächen-Analytik: Echtzeit-Berechnung der Teilflächen (a², b², 2ab).
 - KaTeX-Sync: Dynamische Aktualisierung der mathematischen Formel.`,
 
-        "coordinatensystemtester": `MATHEMATISCHER HINTERGRUND:
-Entwicklungs- und Diagnosewerkzeug für die CyberCanvas-Engine zur Prüfung von Projektionen.
+        "coordinatensystemtester": `Entwicklungs- und Diagnosewerkzeug für die CyberCanvas-Engine zur Prüfung von Projektionen.
 
 FEATURES
 - Stress-Test: Pan und Zoom im laufenden Betrieb.
 - Funktions-Overlays: Test steiler und asymptotischer Funktionsbereiche.
 - Integrität: Validierung der KaTeX-Achsenbeschriftung.`,
 
-        "galtonboard": `MATHEMATISCHER HINTERGRUND:
-Visualisierung der Normalverteilung (Glockenkurve) durch einen stochastischen Galton-Prozess.
+        "galtonboard": `Visualisierung der Normalverteilung (Glockenkurve) durch einen stochastischen Galton-Prozess.
 
 FEATURES
 - Physikalische Simulation: Echtzeit-Berechnung der Kugel-Kollisionen.
 - Histogramm-Akkumulation: Statistische Erfassung der Trefferwahrscheinlichkeit.
 - Glockenkurven-Overlay: Vergleich von Theorie und Simulation.`,
 
-        "fourier": `MATHEMATISCHER HINTERGRUND:
-Die Fourier-Transformation erlaubt es, jede periodische Funktion (oder geschlossene Kurve) als Summe von Sinus- und Kosinus-Schwingungen darzustellen. Dieses Labor visualisiert diesen Prozess durch ein System rotierender Kreise (Epizyklen).
+        "fourier": `Die Fourier-Transformation erlaubt es, jede periodische Funktion (oder geschlossene Kurve) als Summe von Sinus- und Kosinus-Schwingungen darzustellen. Dieses Labor visualisiert diesen Prozess durch ein System rotierender Kreise (Epizyklen).
 
 FEATURES
 - Epizyklen-Visualisierung: Darstellung der komplexen Fourier-Reihe als Kette rotierender Vektoren.
@@ -225,88 +199,77 @@ FEATURES
 - Pfad-Tracking: Aufzeichnung der resultierenden Kurve zur Veranschaulichung der Konvergenz gegen die Zielform.
 - Zeit-Manipulation: Steuerung der Simulationsgeschwindigkeit zur detaillierten Beobachtung der Phasenbeziehungen.`,
 
-        "lissajous": `MATHEMATISCHER HINTERGRUND:
-Überlagerung zweier harmonischer Schwingungen in x- und y-Richtung erzeugt Lissajous-Figuren.
+        "lissajous": `Überlagerung zweier harmonischer Schwingungen in x- und y-Richtung erzeugt Lissajous-Figuren.
 
 FEATURES
 - Frequenz-Manipulation: Unabhängige Steuerung der Achsen-Frequenzen.
 - Phasen-Shift: Untersuchung des Einflusses der zeitlichen Verschiebung.
 - 3D-Pendel: Physikalische Analogie als räumliche Schwingung.`,
 
-        "fibonacci": `MATHEMATISCHER HINTERGRUND:
-Visualisierung der Fibonacci-Folge und der daraus resultierenden logarithmischen Spirale.
+        "fibonacci": `Visualisierung der Fibonacci-Folge und der daraus resultierenden logarithmischen Spirale.
 
 FEATURES
 - Iterations-Steuerung: Beobachtung des Wachstums der Fibonacci-Quadrate.
 - Spiral-Konstruktion: Ein- und Ausschalten der geometrischen Spirale.
 - Goldener Schnitt: Veranschaulichung der Konvergenz der Glieder-Verhältnisse.`,
 
-        "ausgleichsgerade": `MATHEMATISCHER HINTERGRUND:
-Lineare Regression nach der Methode der kleinsten Quadrate zur Bestimmung von Trends.
+        "ausgleichsgerade": `Lineare Regression nach der Methode der kleinsten Quadrate zur Bestimmung von Trends.
 
 FEATURES
 - Interaktive Punktwolke: Manuelles Setzen von Datenpunkten.
 - Korrelations-Dashboard: Live-Berechnung von r, m und n.
 - Fehler-Visualisierung: Anzeige der Standardabweichung als Korridor.`,
 
-        "logikspiel": `MATHEMATISCHER HINTERGRUND:
-Grundlagen der binären Logik: Visualisierung von Gattern wie AND, OR, XOR und NOT.
+        "logikspiel": `Grundlagen der binären Logik: Visualisierung von Gattern wie AND, OR, XOR und NOT.
 
 FEATURES
 - Interaktive Eingänge: Umschalten der Input-Zustände per Klick.
 - Signalfluss: Leuchtende Verbindungen zeigen den Datenfluss.
 - Wahrheitstabellen: Live-Abgleich mit der logischen Definition.`,
 
-        "logikspiel2": `MATHEMATISCHER HINTERGRUND:
-Magisches Quadrat / Zielwert-Rätsel: Logische Belegung von Zellen basierend auf Rand-Summen.
+        "logikspiel2": `Magisches Quadrat / Zielwert-Rätsel: Logische Belegung von Zellen basierend auf Rand-Summen.
 
 FEATURES
 - Rechen-Modi: Umschalten zwischen Addition und Multiplikation.
 - Rand-Validierung: Visuelles Feedback bei korrekten Teil-Lösungen.
 - Hilfe-System: Erarbeitung von Hinweisen durch kleine Mathe-Aufgaben.`,
 
-        "heart3d": `MATHEMATISCHER HINTERGRUND:
-Visualisierung der Taubin-Herz-Gleichung mittels GPU-basiertem Raymarching (SDF).
+        "heart3d": `Visualisierung der Taubin-Herz-Gleichung mittels GPU-basiertem Raymarching (SDF).
 
 FEATURES
 - Deformation: Manipulation der Parameter A und B für Formvarianz.
 - Holografisches Rendering: Hochperformante Shader-Berechnung.
 - Dynamische Formel: Live-Einblendung der algebraischen Gleichung.`,
 
-        "butterfly": `MATHEMATISCHER HINTERGRUND:
-Visualisierung des Butterfly-Effekts anhand des Lorenz-Attraktors (Chaos-Theorie).
+        "butterfly": `Visualisierung des Butterfly-Effekts anhand des Lorenz-Attraktors (Chaos-Theorie).
 
 FEATURES
 - Dynamik-Simulation: Echtzeit-Integration der Lorenz-Gleichungen.
 - Parameter-Tuning: Anpassung der Koeffizienten für verschiedene Attraktoren.
 - Glow-Engine: Trajektorien als leuchtende Energieströme im Raum.`,
 
-        "litchi3d": `MATHEMATISCHER HINTERGRUND:
-Erzeugung organischer Strukturen durch Sine-Wellen-Modulation eines Signed Distance Fields.
+        "litchi3d": `Erzeugung organischer Strukturen durch Sine-Wellen-Modulation eines Signed Distance Fields.
 
 FEATURES
 - Reife-Simulation: Dynamische Pigment-Verschiebung im Shader.
 - Stachel-Morphologie: Kontrolle über die prozeduralen Oberflächen-Erhebungen.
 - SDF-Gleichung: Live-Einblendung der Distanzfunktion d(p).`,
 
-        "triangulierer": `MATHEMATISCHER HINTERGRUND:
-Flächenzerlegung in Dreiecke nach dem Delaunay-Algorithmus zur Netz-Erzeugung.
+        "triangulierer": `Flächenzerlegung in Dreiecke nach dem Delaunay-Algorithmus zur Netz-Erzeugung.
 
 FEATURES
 - Echtzeit-Triangulierung: Sofortige Neuberechnung bei Punkt-Verschiebung.
 - Flächen-HUD: Detaillierte Bilanzierung der Einzel- und Gesamtflächen.
 - Mehrfach-Selektion: Gruppierung von Messpunkten für Struktur-Checks.`,
 
-        "uhrzeitwinkel": `MATHEMATISCHER HINTERGRUND:
-Berechnung des Bogenwinkels zwischen Stunden- und Minutenzeiger basierend auf deren Geschwindigkeit.
+        "uhrzeitwinkel": `Berechnung des Bogenwinkels zwischen Stunden- und Minutenzeiger basierend auf deren Geschwindigkeit.
 
 FEATURES
 - Präzisions-Einstellung: Stufenlose Justierung der Zeit per Slider.
 - Dual-Winkel-Analyse: Anzeige von Innen- (Alpha) und Außenwinkel (Beta).
 - Digitale Synchronisation: Abgleich von analoger und digitaler Zeit.`,
 
-        "universe": `MATHEMATISCHER HINTERGRUND:
-Visualisierung des-Ökosystems als dynamische Galaxie mittels Raycasting-Logik.
+        "universe": `Visualisierung des-Ökosystems als dynamische Galaxie mittels Raycasting-Logik.
 
 FEATURES
 - Lab-Matrix: Module fliegen aus dem Zentrum auf den Betrachter zu.
