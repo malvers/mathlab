@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Studio | Doc Alvers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --bg: #0a0c12;
+            --card: #12161d;
+            --text: #e6edf3;
+            --subtle: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            margin: 0; font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 0 20px 40px 20px;
+        }
+
+        /* Print Overrides */
+        @media print {
+            @page { size: landscape; margin: 0; }
+            html, body { 
+                background-color: #0a0c12 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                margin: 0 !important; padding: 0 !important; 
+                width: 100% !important; height: 100% !important;
+                display: flex !important; align-items: center !important; justify-content: center !important;
+            }
+            .controls { display: none !important; }
+            .preview-container { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; display: flex !important; align-items: center !important; }
+            canvas { width: 100% !important; height: auto !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
+        }
+
+        .controls {
+            display: flex; gap: 2.5rem; align-items: center; background: var(--card); 
+            padding: 0.35rem 2rem; border-radius: 50px; margin: 8px 0 15px 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+            border: 1px solid rgba(0, 210, 255, 0.1);
+        }
+
+        .control-group { display: flex; align-items: center; gap: 15px; }
+        .label { font-family: 'Orbitron', sans-serif; font-size: 0.55rem; color: var(--neon-blue); letter-spacing: 1.5px; opacity: 0.7; }
+
+        .format-selector { display: flex; gap: 6px; }
+        .format-btn {
+            background: transparent; border: 1px solid var(--subtle); color: #666;
+            padding: 2px 8px; border-radius: 4px; cursor: pointer; font-family: 'Orbitron';
+            font-size: 0.5rem; transition: 0.2s;
+        }
+        .format-btn.active { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
+
+        input[type="number"] {
+            background: transparent; color: white; border: none; border-bottom: 1px solid var(--subtle);
+            font-family: 'Orbitron', sans-serif; font-size: 0.9rem; width: 35px; text-align: center;
+            outline: none; transition: 0.3s;
+        }
+        input[type="number"]:focus { border-bottom-color: var(--neon-blue); }
+
+        button.main-btn {
+            background: transparent; border: 1px solid var(--subtle); color: #888;
+            padding: 0.3rem 1.2rem; border-radius: 30px; font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem; cursor: pointer; transition: 0.3s; letter-spacing: 2px;
+            min-width: 120px;
+        }
+        button.main-btn:hover { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
+
+        .preview-container { width: 100%; max-width: 1600px; display: flex; justify-content: center; }
+        canvas { display: block; width: 100%; height: auto; background: var(--bg); box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="control-group">
+            <span class="label">GRID</span>
+            <input type="number" id="cols-input" value="6" min="1" max="15" onchange="renderPoster()">
+        </div>
+        
+        <div class="control-group">
+            <span class="label">FORMAT</span>
+            <div class="format-selector">
+                <button class="format-btn active" onclick="setFormat('A1', this)">A1</button>
+                <button class="format-btn" onclick="setFormat('A2', this)">A2</button>
+                <button class="format-btn" onclick="setFormat('A3', this)">A3</button>
+                <button class="format-btn" onclick="setFormat('A4', this)">A4</button>
+            </div>
+        </div>
+
+        <button class="main-btn" onclick="window.print()">PRINT | PDF</button>
+    </div>
+
+    <div class="preview-container">
+        <canvas id="poster-canvas"></canvas>
+    </div>
+
+    <script>
+        const SCREENSHOTS = [
+            "index.png", "tools.png", 
+            "addition.png", "ausgleichsgerade.png", "beweisinwinkellsumme.png", "binomischeslabor.png",
+            "butterfly.png", "cmaes.png", "cmaes_java.png", "coolsquares.png", "coordinatensystemtester.png",
+            "differentiallabor.png", "dividieren.png", "eulergerade.png", "fermatpunkt.png", "fibonacci.png",
+            "fourier.png", "galtonboard.png", "gleichschenkligesDreieck.png", "gleichungssysteme.png",
+            "heart3d.png", "integralreaktor.png", "lissajous.png", "litchi3d.png",
+            "logikspiel2.png", "mandelbrot_deep.png", "multiplikation.png", "orbitals.png", "parabellabor.png",
+            "potenzlabor.png", "pythagoras.png", "pythagorasbeweis.png", "steigung.png", "subtraktion.png",
+            "transformationen.png", "triangulierer.png", "uhrzeitwinkel.png", "winkellabor.png",
+            "winkelpuzzle.png", "winkelsumme.png", "winkelsumme3d.png"
+        ];
+
+        let currentFormat = 'A1';
+        const canvas = document.getElementById('poster-canvas');
+        const ctx = canvas.getContext('2d');
+        const baseDir = './resources/screenshots_original/';
+        let loadedImages = [];
+
+        async function init() {
+            const promises = SCREENSHOTS.map(src => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                    img.src = baseDir + src;
+                });
+            });
+            loadedImages = (await Promise.all(promises)).filter(img => img !== null);
+            document.fonts.ready.then(renderPoster);
+        }
+
+        function setFormat(fmt, btn) {
+            currentFormat = fmt;
+            document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderPoster();
+        }
+
+        function renderPoster() {
+            const cols = parseInt(document.getElementById('cols-input').value) || 6;
+            const rows = Math.ceil(loadedImages.length / cols);
+            const posterWidth = 7000;
+            const isoRatio = 1.4142; 
+            let posterHeight = posterWidth / isoRatio;
+            
+            canvas.width = posterWidth; canvas.height = posterHeight;
+            ctx.fillStyle = '#0a0c12'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.textAlign = 'center';
+            
+            // BRANDING HEADER
+            ctx.font = '700 250px Orbitron';
+            const gradient = ctx.createLinearGradient(posterWidth/2 - 1200, 0, posterWidth/2 + 1200, 0);
+            gradient.addColorStop(0, '#00d2ff');
+            gradient.addColorStop(0.5, '#ffffff');
+            gradient.addColorStop(1, '#9d50bb');
+            ctx.fillStyle = gradient;
+            ctx.fillText('DOC ALVERS MATHE-LABOR', posterWidth / 2, 280);
+
+            ctx.font = '400 84px Orbitron';
+            ctx.fillStyle = '#00d2ff';
+            ctx.letterSpacing = '18px';
+            ctx.fillText(loadedImages.length + ' · INTERAKTIVE MATHEMATIK', posterWidth / 2, 460);
+            
+            ctx.font = '400 46px Orbitron';
+            ctx.fillStyle = '#ffffff';
+            ctx.letterSpacing = '12px';
+            ctx.fillText('von Dr. Michael R. Alvers', posterWidth / 2, 580);
+            ctx.letterSpacing = '0px';
+
+            // DYNAMISCHES GRID RENDERING MIT "FIT-TO-PAGE" LOGIK
+            const headerHeight = 1150; // Genug Platz für Branding
+            const footerMargin = 150;
+            const availableHeight = posterHeight - headerHeight - footerMargin;
+            const availableWidth = posterWidth - 200; // 100px Margin pro Seite
+
+            const padding = 40;
+            
+            // 1. Berechnung basierend auf Breite
+            let cellW = (availableWidth - (padding * (cols - 1))) / cols;
+            let cellH = cellW * 0.58;
+            let totalHeight = (rows * cellH) + (padding * (rows - 1));
+
+            // 2. Wenn zu hoch, basierend auf Höhe skalieren
+            if (totalHeight > availableHeight) {
+                cellH = (availableHeight - (padding * (rows - 1))) / rows;
+                cellW = cellH / 0.58;
+                totalHeight = availableHeight;
+            }
+
+            const totalWidth = (cols * cellW) + (padding * (cols - 1));
+            const startX = (posterWidth - totalWidth) / 2;
+            const startY = headerHeight + (availableHeight - totalHeight) / 2;
+
+            loadedImages.forEach((img, i) => {
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                const x = startX + c * (cellW + padding);
+                const y = startY + r * (cellH + padding);
+
+                const imgRatio = img.width / img.height;
+                const cellRatio = cellW / cellH;
+                let drawW, drawH;
+                if (imgRatio > cellRatio) {
+                    drawW = cellW; drawH = cellW / imgRatio;
+                } else {
+                    drawH = cellH; drawW = cellH * imgRatio;
+                }
+                const offsetX = (cellW - drawW) / 2;
+                const offsetY = (cellH - drawH) / 2;
+                ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
