@@ -382,6 +382,35 @@
             draw();
         }
 
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            let cursor = 'crosshair';
+            let tooltip = '';
+
+            for (const z of triangleZones) {
+                if (Math.abs(mx - z.x) < z.hit && Math.abs(my - z.y) < z.hit) {
+                    cursor = 'pointer';
+                    tooltip = z.dir > 0 
+                        ? (typeof CyberI18n !== 'undefined' ? CyberI18n.get('ui.increase_neurons') : 'Neuronen erhöhen')
+                        : (typeof CyberI18n !== 'undefined' ? CyberI18n.get('ui.decrease_neurons') : 'Neuronen verringern');
+                    break;
+                }
+            }
+            if (!tooltip) {
+                for (const z of layerBtnZones) {
+                    if (mx >= z.x - z.hw && mx <= z.x + z.hw && my >= z.y - z.hh && my <= z.y + z.hh) {
+                        cursor = 'pointer';
+                        tooltip = z.tip;
+                        break;
+                    }
+                }
+            }
+            canvas.style.cursor = cursor;
+            canvas.title = tooltip;
+        });
+
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
             const mx = e.clientX - rect.left;
@@ -464,14 +493,14 @@
         CyberUI.createCard('ui-container', 'Training', `
             <div style="display:flex;gap:8px;margin-bottom:8px;">
                 <button id="train-btn" class="cyber-btn" style="flex:1" onclick="isTraining ? stopTraining() : startTraining()">TRAIN</button>
-                <button class="cyber-btn" onclick="buildModel();resetTraining();draw()">RESET</button>
+                <button class="cyber-btn" style="flex:1" onclick="buildModel();resetTraining();draw()">RESET</button>
             </div>
             <div id="lr-slider"></div>
             <div id="spf-slider"></div>
             <div id="train-info" style="font-family:Orbitron,sans-serif;font-size:10px;color:rgba(200,220,255,0.6);margin-top:6px;"></div>
-        `, 'var(--neon-pink)');
-        CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; optimizer = tf.train.adam(v); }, 'var(--neon-pink)');
-        CyberUI.createSlider('spf-slider', 'Schritte/Frame', 1, 50, stepsPerFrame, 1, (v) => { stepsPerFrame = Math.round(v); }, 'var(--neon-pink)');
+        `, 'var(--neon-blue)');
+        CyberUI.createSlider('lr-slider', 'Lernrate', 0.0001, 0.05, learningRate, 0.0001, (v) => { learningRate = v; optimizer = tf.train.adam(v); }, 'var(--neon-blue)');
+        CyberUI.createSlider('spf-slider', 'Schritte/Frame', 1, 50, stepsPerFrame, 1, (v) => { stepsPerFrame = Math.round(v); }, 'var(--neon-blue)');
 
         function getNodePositions(w, h) {
             const positions = [];
@@ -559,18 +588,16 @@
                     const { x, y } = positions[l][i];
                     const t = isInput ? 0.7 : (layerActs[i] - actMin) / actRange;
 
-                    const [r, g, b] = (isInput && LAYERS[0] === 2)
-                        ? (i === 0 ? [255, 60, 60] : [0, 220, 100])
-                        : layerRGB(l);
+                    const [r, g, b] = layerRGB(l);
 
                     const alpha = 0.15 + t * 0.7;
 
                     // glow
-                    const grd = ctx.createRadialGradient(x, y, 2, x, y, NODE_RADIUS * 2);
-                    grd.addColorStop(0, `rgba(${r},${g},${b},${(0.2 + t * 0.5).toFixed(2)})`);
+                    const grd = ctx.createRadialGradient(x, y, 2, x, y, NODE_RADIUS * 1.8);
+                    grd.addColorStop(0, `rgba(${r},${g},${b},${(0.15 + t * 0.4).toFixed(2)})`);
                     grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
                     ctx.beginPath();
-                    ctx.arc(x, y, NODE_RADIUS * 2, 0, Math.PI * 2);
+                    ctx.arc(x, y, NODE_RADIUS * 1.8, 0, Math.PI * 2);
                     ctx.fillStyle = grd;
                     ctx.fill();
 
@@ -617,9 +644,9 @@
             ctx.textAlign = 'center';
             const labelY = 34 + h * 0.06;
             const countY = 68 + h * 0.06;
-            const triSize = 10;
-            const triUp = labelY - 22;
-            const triDown = labelY + 12;
+            const triSize = 14;
+            const triUp = labelY - 30;
+            const triDown = labelY + 16;
 
             for (let l = 0; l < LAYERS.length; l++) {
                 const x = positions[l][0].x;
@@ -631,7 +658,7 @@
                 const layerColor = `rgb(${lr},${lg},${lb})`;
 
                 if (isHidden) {
-                    ctx.font = '700 17px Orbitron, sans-serif';
+                    ctx.font = '700 22px Orbitron, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillStyle = layerColor;
                     ctx.fillText(`${LAYERS[l]}`, x, labelY);
@@ -655,8 +682,8 @@
 
             // +/- Layer buttons at bottom center
             {
-                const bW = 56, bH = 56, bGap = 14, bR = 10;
-                const bY = h - 36;
+                const bW = 45, bH = 45, bGap = 12, bR = 8;
+                const bY = h - 50;
                 const canAdd = LAYERS.length - 2 < 5;
                 const canRemove = LAYERS.length - 2 > 1;
                 const plusX = w / 2 - bGap / 2 - bW / 2;
@@ -688,7 +715,12 @@
                         ctx.stroke();
                     }
                     ctx.restore();
-                    if (enabled) layerBtnZones.push({ x: bx, y: bY, hw: bW / 2, hh: bH / 2, action });
+                    if (enabled) {
+                        const tip = isPlus 
+                            ? (typeof CyberI18n !== 'undefined' ? CyberI18n.get('ui.add_layer') : 'Layer hinzufügen')
+                            : (typeof CyberI18n !== 'undefined' ? CyberI18n.get('ui.remove_layer') : 'Layer entfernen');
+                        layerBtnZones.push({ x: bx, y: bY, hw: bW / 2, hh: bH / 2, action, tip });
+                    }
                 });
             }
 
