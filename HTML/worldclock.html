@@ -205,11 +205,10 @@
 
             cities.forEach(city => {
                 const cityAngle = (city.lon + mapRotation - 90);
-                let diff = (mouseAngle - cityAngle + 180) % 360 - 180;
-                if (diff < -180) diff += 360;
+                let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
                 
-                // If distance is near the plaques (r*0.92) and angle is close
-                if (dist > r * 0.85 && dist < r * 1.05 && Math.abs(diff) < 6) {
+                // If distance is near the plaques and angle is close
+                if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
                     selectedCity = city;
                     hit = true;
                 }
@@ -419,17 +418,15 @@
                 
                 // --- Connecting Line ---
                 const cityAngle = (selectedCity.lon + mapRotation - 90) * Math.PI / 180;
-                const startX = Math.cos(cityAngle) * (r * 0.85); // Start slightly inside the plaque
-                const startY = Math.sin(cityAngle) * (r * 0.85);
+                const startX = Math.cos(cityAngle) * (r * 0.88); // End exactly at the plaque edge
+                const startY = Math.sin(cityAngle) * (r * 0.88);
                 
                 ctx.beginPath();
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
                 ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]); // Dashed line for technical look
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(0, 0);
                 ctx.stroke();
-                ctx.setLineDash([]); // Reset
                 // -----------------------
 
                 const localStr = time.toLocaleTimeString('de-DE', { 
@@ -474,20 +471,11 @@
                 ctx.font = "bold 10px Orbitron";
                 ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 0, -18);
                 
-                // --- Digit Widgets ---
+                // --- Digit Widgets (Pure Text Version) ---
                 const drawDigitBox = (val, xPos) => {
-                    const w = 34;
-                    const h = 30;
-                    ctx.fillStyle = "#001a33";
-                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)";
-                    ctx.beginPath();
-                    ctx.roundRect(xPos - w/2, 2, w, h, 4);
-                    ctx.fill();
-                    ctx.stroke();
-                    
                     ctx.fillStyle = "#fff";
-                    ctx.font = "900 16px Orbitron";
-                    ctx.fillText(val, xPos, 17);
+                    ctx.font = "900 20px Orbitron"; // Slightly larger since boxes are gone
+                    ctx.fillText(val, xPos, 15);
                 };
 
                 drawDigitBox(parts[0], -40); // HH
@@ -497,8 +485,8 @@
                 // Colons
                 ctx.fillStyle = "#00d2ff";
                 ctx.font = "bold 14px Orbitron";
-                ctx.fillText(":", -20, 17);
-                ctx.fillText(":", 20, 17);
+                ctx.fillText(":", -20, 11);
+                ctx.fillText(":", 20, 11);
                 
                 ctx.restore();
             }
