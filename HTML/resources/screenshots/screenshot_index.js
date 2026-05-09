@@ -1,5 +1,6 @@
 const SCREENSHOTS = [
 "addition.png",
+"ann_labor.png",
 "ausgleichsgerade.png",
 "beweisinwinkellsumme.png",
 "binomischeslabor.png",
@@ -24,12 +25,6 @@ const SCREENSHOTS = [
 "litchi3d.png",
 "logikspiel2.png",
 "mandelbrot_deep.png",
-"media__1778233737340.png",
-"media__1778233933888.png",
-"media__1778234409990.png",
-"media__1778234745811.png",
-"media__1778236141482.png",
-"media__1778237062430.png",
 "multiplikation.png",
 "orbitals.png",
 "parabellabor.png",
@@ -45,5 +40,6 @@ const SCREENSHOTS = [
 "winkellabor.png",
 "winkelpuzzle.png",
 "winkelsumme.png",
-"winkelsumme3d.png"
+"winkelsumme3d.png",
+"zahlenerkennung.png",
 ];

@@ -38,7 +38,8 @@ function getBriefingModuleKey() {
 function getBriefingLookupKey(moduleKey) {
     const aliases = { 
         mandelbrot: "mandelbrot_deep",
-        numberrecognition: "zahlenerkennung"
+        numberrecognition: "zahlenerkennung",
+        ann: "ann_labor"
     };
     if (aliases[moduleKey]) return aliases[moduleKey];
     
