@@ -610,6 +610,14 @@ FEATURES & CONTROLS:
 - Interactive Exploration: Focus and start labs via click.
 - Depth Projection: Scaling based on virtual Z-coordinate.`,
 
+        "zahlenerkennung": `CONCEPT:
+Artificial neural networks can learn. They are not programmed to recognize patterns; they learn patterns. Here, the lab shows you how an ANN learns written numbers.
+
+FEATURES & CONTROLS:
+- Training Management: The network can be trained with various batches of training data.
+- Validation: Test the recognition rate for hand-drawn or mouse-written numbers in real time.`
+    },
+
         "easyhard": `OVERVIEW:
 Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
 
@@ -1029,7 +1037,14 @@ CARACTERÍSTICAS Y CONTROLES:
 - Ayuda: Acceso rápido vía icono de navegación.
 
 INTERFAZ:
-Diseño con navegación de marca central.`
+Diseño con navegación de marca central.`,
+
+        "zahlenerkennung": `CONCEPTO:
+Las redes neuronales artificiales pueden aprender. No están programadas para reconocer patrones; aprenden patrones. Aquí, el laboratorio te muestra cómo una ANN aprende números escritos.
+
+CARACTERÍSTICAS Y CONTROLES:
+- Gestión de entrenamiento: La red puede ser entrenada con diferentes lotes de datos de entrenamiento.
+- Validación: Prueba la tasa de reconocimiento de números escritos a mano o con el ratón en tiempo real.`
     },
     "fr": {
         "addition": `CONTEXTE MATHÉMATIQUE :
@@ -1451,7 +1466,14 @@ FONCTIONNALITÉS & COMMANDES :
 - Aide : Accès rapide via icône navigation.
 
 INTERFACE :
-Design avec navigation de marque.`
+Design avec navigation de marque.`,
+
+        "zahlenerkennung": `CONCEPT :
+Les réseaux neuronaux artificiels peuvent apprendre. Ils ne sont pas programmés pour reconnaître des motifs ; ils apprennent des motifs. Ici, le laboratoire vous montre comment un ANN apprend des nombres écrits.
+
+FONCTIONNALITÉS & COMMANDES :
+- Gestion de l'entraînement : Le réseau peut être entraîné avec différents lots de données d'entraînement.
+- Validation : Testez le taux de reconnaissance des nombres tracés à la main ou à la souris en temps réel.`
     },
     "it": {
         "addition": `CONTESTO MATEMATICO:
@@ -1873,7 +1895,14 @@ CARATTERISTICHE E COMANDI:
 - Aiuto: Accesso rapido via icona navigazione.
 
 INTERFACCIA:
-Design con navigazione di marca.`
+Design con navigazione di marca.`,
+
+        "zahlenerkennung": `CONCETTO:
+Le reti neurali artificiali possono imparare. Non sono programmate per riconoscere schemi; imparano schemi. Qui, il laboratorio ti mostra come un ANN impara i numeri scritti.
+
+CARATTERISTICHE E COMANDI:
+- Gestione dell'allenamento: La rete può essere addestrata con diversi lotti di dati di addestramento.
+- Validazione: Testa il tasso di riconoscimento per i numeri disegnati a mano o con il mouse in tempo reale.`
     },
     "pt": {
         "addition": `CONTEXTO MATEMÁTICO:
@@ -1882,7 +1911,12 @@ Adição escrita é um algoritmo fundamental baseado no sistema decimal, somando
 RECURSOS E CONTROLOS:
 - Entrada de parcelas: Até 7 dígitos.
 - Etapas: Navegação (< >) passo a passo.
-- Transporte: Visualização do transporte ativo.`,
+- Transporte: Visualização do transporte ativo.
+
+INTERFACE:
+- Campos (Alto): Números de base.
+- Matriz (Centro): Disposição vertical.
+- Consola (Baixo): Start, Reset e navegação.`,
 
         "subtraktion": `CONTEXTO MATEMÁTICO:
 Subtração escrita usando o método de empréstimo para calcular a diferença.
@@ -1890,7 +1924,10 @@ Subtração escrita usando o método de empréstimo para calcular a diferença.
 RECURSOS E CONTROLOS:
 - Entrada de dígitos: Controlo preciso (máx. 7 dígitos).
 - Lógica de empréstimo: Explicação do Math Coach.
-- Controlo: Navegação manual.`,
+- Controlo: Navegação manual.
+
+INTERFACE:
+Design com redimensionamento adaptativo e KaTeX.`,
 
         "multiplikation": `CONTEXTO MATEMÁTICO:
 Multiplicação escrita decomposta em produtos parciais somados.
@@ -1898,7 +1935,10 @@ Multiplicação escrita decomposta em produtos parciais somados.
 RECURSOS E CONTROLOS:
 - Multi-dígito: Fatores até 7 dígitos.
 - Modo detalhado: Cada multiplicação e transporte mostrados.
-- Soma: Adição final das linhas.`,
+- Soma: Adição final das linhas.
+
+INTERFACE:
+Interface Cyber com "Math Coach" que explica os passos.`,
 
         "dividieren": `CONTEXTO MATEMÁTICO:
 Divisão escrita baseada em estimativa e descida de dígitos.
@@ -1906,7 +1946,10 @@ Divisão escrita baseada em estimativa e descida de dígitos.
 RECURSOS E CONTROLOS:
 - Gestão: Valores até 7 dígitos.
 - Restos: Representação clara de resíduos.
-- Coaching: Guia "Quantas vezes o divisor cabe no...?".`,
+- Coaching: Guia "Quantas vezes o divisor cabe no...?".
+
+INTERFACE:
+Layout adaptativo que usa o espaço horizontal.`,
 
         "parabellabor": `CONTEXTO MATEMÁTICO:
 Estudo de parábolas f(x) = a*(x-d)^2 + e. Influência de a, d e e.
@@ -1914,7 +1957,10 @@ Estudo de parábolas f(x) = a*(x-d)^2 + e. Influência de a, d e e.
 RECURSOS E CONTROLOS:
 - Manipuladores: Manipule o vértice S(d|e) e a diretamente.
 - Dupla fórmula: Conversão vértice/padrão automática.
-- Raízes: Cálculo automático de zeros reais.`,
+- Raízes: Cálculo automático de zeros reais.
+
+INTERFACE:
+Design com fórmulas KaTeX ligadas ao vértice.`,
 
         "mandelbrot_deep": `CONTEXTO MATEMÁTICO:
 Conjunto de Mandelbrot via z_{n+1} = z_n^2 + c. Renderização WebGL rápida.
@@ -1922,7 +1968,10 @@ Conjunto de Mandelbrot via z_{n+1} = z_n^2 + c. Renderização WebGL rápida.
 RECURSOS E CONTROLOS:
 - Modo: Mandelbrot e Julia via controlos.
 - Zoom & Pan: Roda e arrasto.
-- Voo: START FLIGHT ativa o zoom interativo.`,
+- Voo: START FLIGHT ativa o zoom interativo.
+
+INTERFACE:
+Barra lateral; tela WebGL central.`,
 
         "pythagoras": `CONTEXTO MATEMÁTICO:
 Visualiza a² + b² = c² para triângulos retângulos. Soma dos quadrados igual à hipotenusa.
@@ -1930,7 +1979,10 @@ Visualiza a² + b² = c² para triângulos retângulos. Soma dos quadrados igual
 RECURSOS E CONTROLOS:
 - Vértices: Arraste A e B mantendo o ângulo reto.
 - Animação: Escala dinâmica dos quadrados.
-- Cálculo: Verificação contínua da equação.`,
+- Cálculo: Verificação contínua da equação.
+
+INTERFACE:
+Labo didático com cores contrastantes.`,
 
         "eulergerade": `CONTEXTO MATEMÁTICO:
 Ortocentro (H), circuncentro (U) e centroide (S) alinhados. Razão HS:SU = 2:1.
@@ -1938,7 +1990,10 @@ Ortocentro (H), circuncentro (U) e centroide (S) alinhados. Razão HS:SU = 2:1.
 RECURSOS E CONTROLOS:
 - Construção: Círculos circunscrito, inscrito e Feuerbach.
 - Auxiliares: Alturas, medianas e bissetrizes.
-- Análise: Cálculo permanente da razão HS/SU.`,
+- Análise: Cálculo permanente da razão HS/SU.
+
+INTERFACE:
+Labo de precisão com pontos diferenciados por cores.`,
 
         "pythagorasbeweis": `CONTEXTO MATEMÁTICO:
 Prova visual interativa de Pitágoras por decomposição de triângulos.
@@ -1946,7 +2001,10 @@ Prova visual interativa de Pitágoras por decomposição de triângulos.
 RECURSOS E CONTROLOS:
 - Puzzle: Movimento e rotação livre dos elementos.
 - Triangulação: Deteta áreas livres automaticamente.
-- Colisões: Avisos para garantir a prova.`,
+- Colisões: Avisos para garantir a prova.
+
+INTERFACE:
+Labo interativo entre jogo e lógica.`,
 
         "differentiallabor": `CONTEXTO MATEMÁTICO:
 Visualiza a transição da secante à tangente e o conceito da derivada f'(x) como declive local.
@@ -1954,7 +2012,10 @@ Visualiza a transição da secante à tangente e o conceito da derivada f'(x) co
 RECURSOS E CONTROLOS:
 - Biblioteca de funções: seleção de funções de base (quadráticas, trigonométricas, etc.).
 - Tangente interativa: mover o ponto de tangência para observar o declive.
-- Gráficos das derivadas: visualização da primeira e da segunda derivada.`,
+- Gráficos das derivadas: visualização da primeira e da segunda derivada.
+
+INTERFACE:
+Interface de análise profissional com gráficos de alta resolução.`,
 
         "integralreaktor": `CONTEXTO MATEMÁTICO:
 Cálculo e visualização do integral definido de f(x), interpretado como área orientada.
@@ -1962,7 +2023,10 @@ Cálculo e visualização do integral definido de f(x), interpretado como área 
 RECURSOS E CONTROLOS:
 - Intervalo dinâmico: limites diretamente no sistema de coordenadas.
 - Integração numérica: valor em tempo real.
-- Feedback visual: realce da área calculada.`,
+- Feedback visual: realce da área calculada.
+
+INTERFACE:
+Design moderno em precisão numérica e clareza gráfica.`,
 
         "steigung": `CONTEXTO MATEMÁTICO:
 Visualiza os parâmetros m (declive) e n (ordenada na origem) de y = mx + n.
@@ -1970,7 +2034,10 @@ Visualiza os parâmetros m (declive) e n (ordenada na origem) de y = mx + n.
 RECURSOS E CONTROLOS:
 - Manipuladores: arraste pontos para alterar o declive.
 - Triângulo de declive: Δx e Δy em azul néon.
-- Sincronização KaTeX: equação atualizada em tempo real.`,
+- Sincronização KaTeX: equação atualizada em tempo real.
+
+INTERFACE:
+Interface analítica que liga álgebra e geometria.`,
 
         "winkelsumme": `CONTEXTO MATEMÁTICO:
 Soma de ângulos (n-2) * 180°. Verifique a lei em várias figuras.
@@ -1978,7 +2045,10 @@ Soma de ângulos (n-2) * 180°. Verifique a lei em várias figuras.
 RECURSOS E CONTROLOS:
 - Configuração: Triângulo, quadrado, pentágono, etc.
 - Vértices: Arraste cantos para verificar a invariância.
-- Visualização: Arcos coloridos nos ângulos internos.`,
+- Visualização: Arcos coloridos nos ângulos internos.
+
+INTERFACE:
+Design com segmentos néon e soma live.`,
 
         "winkelsumme3d": `CONTEXTO MATEMÁTICO:
 Demonstra por dobragem virtual como os três cantos formam 180°.
@@ -1986,7 +2056,10 @@ Demonstra por dobragem virtual como os três cantos formam 180°.
 RECURSOS E CONTROLOS:
 - Dobragem: Controlo contínuo do processo.
 - Navegação 3D: Rotação via Three.js.
-- Geometria: Altere a forma durante a dobragem.`,
+- Geometria: Altere a forma durante a dobragem.
+
+INTERFACE:
+Design 3D com efeitos de material.`,
 
         "beweisinwinkellsumme": `CONTEXTO MATEMÁTICO:
 Prova por paralelas e ângulos alternos para derivar os 180°.
@@ -1994,7 +2067,10 @@ Prova por paralelas e ângulos alternos para derivar os 180°.
 RECURSOS E CONTROLOS:
 - Projeção: Construção automática por um vértice.
 - Ângulos: Correspondência de cor no ponto pivot.
-- Sync: Cálculos paralelos coincidindo em 180°.`,
+- Sync: Cálculos paralelos coincidindo em 180°.
+
+INTERFACE:
+Labo otimizado com guia KaTeX.`,
 
         "fermatpunkt": `CONTEXTO MATEMÁTICO:
 Ponto que minimiza a soma das distâncias aos vértices do triângulo.
@@ -2002,7 +2078,10 @@ Ponto que minimiza a soma das distâncias aos vértices do triângulo.
 RECURSOS E CONTROLOS:
 - Prova: Construção via triângulos equiláteros.
 - Análise: Ponto P comparado ao mínimo.
-- Vértices: Recálculo imediato nas mudanças.`,
+- Vértices: Recálculo imediato nas mudanças.
+
+INTERFACE:
+Interface Cyber com ponto de Fermat lilás e HUD.`,
 
         "winkellabor": `CONTEXTO MATEMÁTICO:
 Ângulos em paralelas: opostos, suplementares, correspondentes e alternos.
@@ -2010,7 +2089,10 @@ RECURSOS E CONTROLOS:
 RECURSOS E CONTROLOS:
 - Geometria: Altere ângulo e distância.
 - Identificação: Código de cor para os pares.
-- Validação: Relação de 180°.`,
+- Validação: Relação de 180°.
+
+INTERFACE:
+Labo para conceitos de geometria plana.`,
 
         "gleichschenkligesdreieck": `CONTEXTO MATEMÁTICO:
 Triângulo com perímetro fixo (8 cm) e condição isósceles.
@@ -2018,7 +2100,10 @@ Triângulo com perímetro fixo (8 cm) e condição isósceles.
 RECURSOS E CONTROLOS:
 - Slider: Altere b com ajuste imediato.
 - Existência: Inequação triangular com aviso.
-- Vista dual: Modelo e gráfico combinados.`,
+- Vista dual: Modelo e gráfico combinados.
+
+INTERFACE:
+Labo minimalista em álgebra e geometria.`,
 
         "potenzlabor": `CONTEXTO MATEMÁTICO:
 Funções potência f(x) = x^n e suas inversas (raízes).
@@ -2026,7 +2111,10 @@ Funções potência f(x) = x^n e suas inversas (raízes).
 RECURSOS E CONTROLOS:
 - Tuning: Ajuste n para observar o crescimento.
 - Telemetria: Cursor com coordenadas (x, y).
-- Simetria: Vista paralela função/inversa.`,
+- Simetria: Vista paralela função/inversa.
+
+INTERFACE:
+Interface analítica que compara classes de funções.`,
 
         "imaginarynumbers": `CONTEXTO MATEMÁTICO:
 O plano complexo (plano de Gauss) estende a reta numérica unidimensional com uma segunda dimensão: o eixo imaginário. Um número complexo z = x + iy é representado como um ponto neste plano. A distância até a origem é a magnitude |z|, e operações como a raiz quadrada √(z) ou o quadrado z² podem ser interpretadas geometricamente como mudanças de comprimento e ângulo.
@@ -2035,7 +2123,10 @@ RECURSOS E CONTROLES:
 - Vetor Interativo: Arraste o ponto z livremente pelo plano.
 - Mudança de Modo: Alterne entre r = √(z) e r = z².
 - Álgebra em Tempo Real: As sobreposições de fórmulas (magnitude, parte real, parte imaginária) são atualizadas dinamicamente.
-- Renderização KaTeX: Tipografia matemática de alta qualidade para todas as fórmulas.`,
+- Renderização KaTeX: Tipografia matemática de alta qualidade para todas as fórmulas.
+
+INTERFACE:
+Design minimalista focado na correspondência visual e algébrica dos números complexos.`,
 
         "transformationen": `CONTEXTO MATEMÁTICO:
 Translação, rotação, simetria e escala em objetos geométricos.
@@ -2043,7 +2134,10 @@ Translação, rotação, simetria e escala em objetos geométricos.
 RECURSOS E CONTROLOS:
 - Multi-sistema: Combinação de transformações.
 - Simetria: Reflexão eixos/pontos interativa.
-- Invariância: Check conservação de área.`,
+- Invariância: Check conservação de área.
+
+INTERFACE:
+Labo interativo para geometria de transformação.`,
 
         "gleichungssysteme": `CONTEXTO MATEMÁTICO:
 Solução gráfica de sistemas lineares (LGS) como interseção de retas.
@@ -2051,7 +2145,10 @@ Solução gráfica de sistemas lineares (LGS) como interseção de retas.
 RECURSOS E CONTROLOS:
 - Manipulação: Arraste os pontos para mudar as retas.
 - Scrambler: Alterne entre formas padrão e implícitas.
-- Gerador: Novos desafios com soluções inteiras.`,
+- Gerador: Novos desafios com soluções inteiras.
+
+INTERFACE:
+Design funcional sobre o equivalente algébrico.`,
 
         "binomischeslabor": `CONTEXTO MATEMÁTICO:
 Visualização de (a + b)² como decomposição de áreas.
@@ -2059,7 +2156,10 @@ Visualização de (a + b)² como decomposição de áreas.
 RECURSOS E CONTROLOS:
 - Escala: Altere a e b diretamente.
 - Analítica: Cálculo de áreas (a², b², 2ab).
-- Sync KaTeX: Atualização dinâmica da fórmula.`,
+- Sync KaTeX: Atualização dinâmica da fórmula.
+
+INTERFACE:
+Design sobre a representação dual.`,
 
         "coordinatensystemtester": `CONTEXTO MATEMÁTICO:
 Ferramenta de diagnóstico CyberCanvas testando projeções.
@@ -2067,7 +2167,10 @@ Ferramenta de diagnóstico CyberCanvas testando projeções.
 RECURSOS E CONTROLOS:
 - Stress Test: Pan e zoom em tempo real.
 - Overlays: Teste de zonas críticas e assíntotas.
-- Integridade: Validação de rótulos KaTeX.`,
+- Integridade: Validação de rótulos KaTeX.
+
+INTERFACE:
+Barra lateral com checkbox e grelha padrão.`,
 
         "galtonboard": `CONTEXTO MATEMÁTICO:
 Distribuição normal via processo estocástico de Galton.
@@ -2075,7 +2178,10 @@ Distribuição normal via processo estocástico de Galton.
 RECURSOS E CONTROLOS:
 - Física: Colisões em tempo real.
 - Histograma: Captura estatística.
-- Curva de Gauss: Comparação teoria/prática.`,
+- Curva de Gauss: Comparação teoria/prática.
+
+INTERFACE:
+Interface dinâmica com animações físicas.`,
 
         "fourier": `CONTEXTO MATEMÁTICO:
 Análise de Fourier: Funções periódicas como soma de senos.
@@ -2083,7 +2189,10 @@ Análise de Fourier: Funções periódicas como soma de senos.
 RECURSOS E CONTROLOS:
 - Epiciclos: Vetores rotativos desenhando curvas.
 - Aproximação: Ajuste de harmónicos n.
-- Tracking: Registo da reconstrução.`,
+- Tracking: Registo da reconstrução.
+
+INTERFACE:
+Design sobre a estética das oscilações.`,
 
         "lissajous": `CONTEXTO MATEMÁTICO:
 Figuras de Lissajous por sobreposição de oscilações x e y.
@@ -2091,7 +2200,10 @@ Figuras de Lissajous por sobreposição de oscilações x e y.
 RECURSOS E CONTROLOS:
 - Frequência: Controlo independente dos eixos.
 - Desfasagem: Influência do desvio temporal.
-- Pêndulo 3D: Analogia física espacial.`,
+- Pêndulo 3D: Analogia física espacial.
+
+INTERFACE:
+Design estético com trajetórias brilhantes.`,
 
         "fibonacci": `CONTEXTO MATEMÁTICO:
 Sucessão de Fibonacci e espiral logarítmica resultante.
@@ -2099,7 +2211,10 @@ Sucessão de Fibonacci e espiral logarítmica resultante.
 RECURSOS E CONTROLOS:
 - Iteração: Crescimento de quadrados Fibonacci.
 - Espiral: Ativa construção geométrica.
-- Proporção áurea: Convergência dos rácios.`,
+- Proporção áurea: Convergência dos rácios.
+
+INTERFACE:
+Design elegante sobre as proporções.`,
 
         "ausgleichsgerade": `CONTEXTO MATEMÁTICO:
 Regressão linear por mínimos quadrados para tendências.
@@ -2107,7 +2222,10 @@ Regressão linear por mínimos quadrados para tendências.
 RECURSOS E CONTROLOS:
 - Nuvem: Posicione os pontos manualmente.
 - Dashboard: Cálculo live de r, m e n.
-- Erro: Desvio padrão visualizado.`,
+- Erro: Desvio padrão visualizado.
+
+INTERFACE:
+Instrumento estatístico com telemetria.`,
 
         "logikspiel": `CONTEXTO MATEMÁTICO:
 Lógica binária: Portas AND, OR, XOR e NOT.
@@ -2115,7 +2233,10 @@ Lógica binária: Portas AND, OR, XOR e NOT.
 RECURSOS E CONTROLOS:
 - Inputs: Alterne estados com um clique.
 - Fluxo: Conexões brilhantes mostram dados.
-- Tabelas: Comparação live de definições.`,
+- Tabelas: Comparação live de definições.
+
+INTERFACE:
+Design futurista com sinalética clara.`,
 
         "logikspiel2": `CONTEXTO MATEMÁTICO:
 Quadrado Mágico: Atribuição baseada em somas de bordas.
@@ -2123,7 +2244,10 @@ Quadrado Mágico: Atribuição baseada em somas de bordas.
 RECURSOS E CONTROLOS:
 - Modos: Adição e multiplicação.
 - Validação: Feedback visual das soluções.
-- Ajuda: Desafios math para pistas.`,
+- Ajuda: Desafios math para pistas.
+
+INTERFACE:
+Barra lateral com tracking de movimentos e tempo.`,
 
         "heart3d": `CONTEXTO MATEMÁTICO:
 Equação de Taubin (coração) via raymarching GPU (SDF).
@@ -2131,7 +2255,10 @@ Equação de Taubin (coração) via raymarching GPU (SDF).
 RECURSOS E CONTROLOS:
 - Deformação: Parâmetros A e B para a forma.
 - Renderização: Shader de alto desempenho.
-- Fórmula: Equação algébrica live.`,
+- Fórmula: Equação algébrica live.
+
+INTERFACE:
+Design futurista, simbiose álgebra e 3D.`,
 
         "butterfly": `CONTEXTO MATEMÁTICO:
 Efeito borboleta via atrator de Lorenz (caos).
@@ -2139,7 +2266,10 @@ Efeito borboleta via atrator de Lorenz (caos).
 RECURSOS E CONTROLOS:
 - Simulação: Integração de Lorenz tempo real.
 - Tuning: Ajuste de atratores.
-- Glow: Trajetórias luminosas.`,
+- Glow: Trajetórias luminosas.
+
+INTERFACE:
+Design cinemático com painel KaTeX.`,
 
         "litchi3d": `CONTEXTO MATEMÁTICO:
 Estruturas orgânicas por modulação de ondas em SDF.
@@ -2147,7 +2277,10 @@ Estruturas orgânicas por modulação de ondas em SDF.
 RECURSOS E CONTROLOS:
 - Maturidade: Mudança de pigmento no shader.
 - Morfologia: Controlo de relevo procedimental.
-- Equação: Distância d(p) live.`,
+- Equação: Distância d(p) live.
+
+INTERFACE:
+Design orgânico com raymarching.`,
 
         "triangulierer": `CONTEXTO MATEMÁTICO:
 Triangulação Delaunay para geração de malhas.
@@ -2155,7 +2288,10 @@ Triangulação Delaunay para geração de malhas.
 RECURSOS E CONTROLOS:
 - Tempo real: Recálculo ao mover pontos.
 - HUD: Balanço de áreas parciais e totais.
-- Seleção: Agrupamento para checks.`,
+- Seleção: Agrupamento para checks.
+
+INTERFACE:
+Interface técnica em precisão.`,
 
         "uhrzeitwinkel": `CONTEXTO MATEMÁTICO:
 Ângulo entre ponteiros baseado nas suas velocidades.
@@ -2163,7 +2299,10 @@ RECURSOS E CONTROLOS:
 RECURSOS E CONTROLOS:
 - Precisão: Ajuste de tempo via slider.
 - Análise: Ângulos Alpha (interno) e Beta (externo).
-- Sync: Correspondência analógica-digital.`,
+- Sync: Correspondência analógica-digital.
+
+INTERFACE:
+Relógio Cyber sobre a interpretação math.`,
 
         "universe": `CONTEXTO MATEMÁTICO:
 Ecossistema em galáxia dinâmica via raycasting.
@@ -2171,7 +2310,10 @@ Ecossistema em galáxia dinâmica via raycasting.
 RECURSOS E CONTROLOS:
 - Matriz: Módulos voando do centro.
 - Exploração: Foco e arranque via clique.
-- Projeção: Escala por coordenada Z.`,
+- Projeção: Escala por coordenada Z.
+
+INTERFACE:
+Interface cinemática, hub central da suite.`,
 
         "easyhard": `RESUMO:
 Módulo "easy/hard": tarefas graduadas para treino direcionado.
@@ -2182,7 +2324,14 @@ RECURSOS E CONTROLOS:
 - Ajuda: Acesso rápido via ícone de navegação.
 
 INTERFACE:
-Design com navegação de marca.`
+Design com navegação de marca.`,
+
+        "zahlenerkennung": `CONCEITO:
+As redes neurais artificiais podem aprender. Elas não estão programadas para reconhecer padrões; elas aprendem padrões. Aqui, o laboratório mostra-te como uma ANN aprende números escritos.
+
+RECURSOS E CONTROLOS:
+- Gestão de treino: A rede pode ser treinada com diferentes lotes de dados de treino.
+- Validação: Testa a taxa de reconhecimento de números desenhados à mão ou com o rato em tempo real.`
     }
 };
 

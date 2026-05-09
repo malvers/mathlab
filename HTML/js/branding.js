@@ -36,7 +36,10 @@ function getBriefingModuleKey() {
 
 /** Briefing registry keys differ from page basenames (e.g. mandelbrot.html → mandelbrot_deep). */
 function getBriefingLookupKey(moduleKey) {
-    const aliases = { mandelbrot: "mandelbrot_deep" };
+    const aliases = { 
+        mandelbrot: "mandelbrot_deep",
+        numberrecognition: "zahlenerkennung"
+    };
     if (aliases[moduleKey]) return aliases[moduleKey];
     
     // Support for labs in subdirectories (e.g. imaginarynumbers/index.html)
