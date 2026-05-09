@@ -305,6 +305,11 @@ FEATURES
 - Layer-Konfiguration: Anpassung der Anzahl der Neuronen und Schichten.
 - Lernprozess-Visualisierung: Beobachtung der Gewichtsveränderungen während des Trainings.`,
 
+        "worldclock": `WELTUHR:
+Dieses Labor zeigt eine interaktive Weltzeituhr basierend auf einer Polarprojektion der Erde (Nordpol-zentriert). 
+Der äußere Ring zeigt die 24 Stunden eines Tages. Die Städte-Marker auf der rotierenden Weltkarte zeigen direkt auf die aktuelle Uhrzeit an ihrem jeweiligen Standort. 
+Dies verdeutlicht den Zusammenhang zwischen Längengraden und Zeitzonen auf anschauliche Weise.`,
+
         "cmaes_java": `EVOLUTIONÄRE STRATEGIEN (CMA-ES):
 Optimierung komplexer Probleme mittels Kovarianzmatrix-Adaption. Dieses Labor demonstriert die Mächtigkeit stochastischer Optimierungsalgorithmen in der Geometrie und Optik.
 
@@ -611,6 +616,11 @@ FEATURES & CONTROLS:
 - Depth Projection: Scaling based on virtual Z-coordinate.`,
 
         "ann_labor": `ARTIFICIAL NEURAL NETWORKS: Everyone is talking about Artificial Intelligence, but how does it actually work? This lab shows the learning process of an artificial neural network in detail. You can adjust the number of nodes per "hidden layer" as well as the number of hidden layers. Using the four basic arithmetic operations, you can study how such a network learns.`,
+
+        "worldclock": `WORLD CLOCK:
+This lab features an interactive world clock based on a polar projection of the Earth (centered on the North Pole).
+The outer ring displays the 24 hours of a day. City markers on the rotating world map point directly to the current time at their respective locations.
+This visually demonstrates the relationship between longitudes and time zones.`,
 
         "zahlenerkennung": `CONCEPT:
 Artificial neural networks can learn. They are not programmed to recognize patterns; they learn patterns. Here, the lab shows you how an ANN learns written numbers.
@@ -1042,6 +1052,11 @@ INTERFAZ:
 Diseño con navegación de marca central.`,
 
         "ann_labor": `REDES NEURONALES ARTIFICIALES: Todo el mundo habla de la Inteligencia Artificial, pero ¿cómo funciona exactamente? Este laboratorio muestra detalladamente el proceso de aprendizaje de una red neuronal artificial. Se puede ajustar el número de nodos por "hidden layer" (capa oculta), así como el número de capas ocultas. A través de las cuatro operaciones aritméticas básicas, se puede estudiar cómo aprende una red de este tipo.`,
+
+        "worldclock": `RELOJ MUNDIAL:
+Este laboratorio presenta un reloj mundial interactivo basado en una proyección polar de la Tierra (centrada en el Polo Norte).
+El anillo exterior muestra las 24 horas del día. Los marcadores de ciudades en el mapa mundial giratorio apuntan directamente a la hora actual en sus respectivas ubicaciones.
+Esto demuestra visualmente la relación entre longitudes y zonas horarias.`,
 
         "zahlenerkennung": `CONCEPTO:
 Las redes neuronales artificiales pueden aprender. No están programadas para reconocer patrones; aprenden patrones. Aquí, el laboratorio te muestra cómo una ANN aprende números escritos.

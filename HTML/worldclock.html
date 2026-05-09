@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | World Clock</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        body, #canvas-container, #side-panel {
+            background: #000616 !important; /* EXACT match for NASA image background */
+        }
+        .cyber-grid {
+            display: none;
+        }
+        #math-coach-box {
+            background: rgba(0, 6, 22, 0.9);
+            border-color: rgba(0, 255, 255, 0.2);
+            pointer-events: none; /* Don't block clicks */
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'World Clock',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // --- SETUP ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        // --- WORLD CLOCK LOGIC ---
+        const mapImg = new Image();
+        mapImg.src = 'resources/worldmap_polar.png';
+        let mapLoaded = false;
+        mapImg.onload = () => { mapLoaded = true; init(); };
+
+        const cities = [
+            { slot: 0, name: "London", color: "black", lon: 0 },
+            { slot: 1, name: "Paris\nBerlin\nRom", color: "white", textColor: "black", highlight: true, lon: 15 },
+            { slot: 2, name: "Ankara\nKairo", color: "black", lon: 30 },
+            { slot: 3, name: "Moskau\nBagdad", color: "black", lon: 45 },
+            { slot: 4, name: "Baku", color: "black", lon: 60 },
+            { slot: 5, name: "Karachi\nUralsk", color: "black", lon: 75 },
+            { slot: 6, name: "Bombay\nKalkutta", color: "black", lon: 90 }, // Snap to 90 for the slot logic
+            { slot: 7, name: "Bangkok", color: "black", lon: 105 },
+            { slot: 8, name: "Shanghai", color: "black", lon: 120 },
+            { slot: 9, name: "Tokio", color: "black", lon: 135 },
+            { slot: 10, name: "Sydney", color: "black", lon: 150 },
+            { slot: 11, name: "Salomon-\ninseln", color: "black", lon: 165 },
+            { slot: 12, name: "Neu\nSeeland", color: "black", lon: 180 },
+            { slot: 13, name: "Samoa", color: "black", lon: 195 }, // or -165
+            { slot: 14, name: "Fairbanks\nHonolulu", color: "black", lon: 210 },
+            { slot: 15, name: "Dawson", color: "black", lon: 225 },
+            { slot: 16, name: "San\nFrancisco", color: "black", lon: 240 },
+            { slot: 17, name: "Santa Fé", color: "black", lon: 255 },
+            { slot: 18, name: "Chicago", color: "black", lon: 270 },
+            { slot: 19, name: "New York", color: "black", lon: 285 },
+            { slot: 20, name: "Caracas\nSantiago", color: "black", lon: 300 },
+            { slot: 21, name: "Rio de\nJaneiro", color: "black", lon: 315 },
+            { slot: 22, name: "Kapverd.\nInseln", color: "black", lon: 330 },
+            { slot: 23, name: "Azoren", color: "black", lon: 345 },
+            { slot: -1, name: "Dakar\nMadeira", color: "black", lon: 345 } // Duplicate/Approx
+        ];
+
+        let isDragging = false;
+        let lastAngle = 0;
+        let manualOffset = 0; // in minutes
+        let autoRotation = 0;
+        let autoRotationEnabled = false;
+
+        function getDisplayTime() {
+            const now = new Date();
+            return new Date(now.getTime() + manualOffset * 60000);
+        }
+        function draw() {
+            if (!mapLoaded) return;
+            const rect = container.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            const size = Math.min(w, h) * 0.8;
+            const r = size / 2;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // 1. Draw Map (Rotating)
+            if (autoRotationEnabled) autoRotation -= 0.05; 
+            const mapRotation = (12 - utcHours) * 15 + autoRotation;
+            
+            ctx.save();
+            ctx.rotate(mapRotation * Math.PI / 180);
+            
+            ctx.save();
+            ctx.rotate(-Math.PI / 2); 
+            ctx.drawImage(mapImg, -r, -r, size, size);
+            ctx.restore();
+
+            // 2. Draw City Markers (Plaques)
+            cities.forEach(city => {
+                const cityAngle = (city.lon) * Math.PI / 180 - Math.PI / 2;
+                const markerR = r * 0.9; 
+                const circleRadius = 30;
+                const mx = Math.cos(cityAngle) * markerR;
+                const my = Math.sin(cityAngle) * markerR;
+
+                ctx.fillStyle = city.color;
+                ctx.beginPath();
+                ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
+                ctx.fill();
+                if (city.highlight) {
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                ctx.save();
+                ctx.translate(mx, my);
+                ctx.rotate(-(mapRotation * Math.PI / 180 + cityAngle + Math.PI/2));
+                
+                ctx.fillStyle = city.textColor || "white";
+                ctx.font = "bold 9px Orbitron";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                const lines = city.name.split('\n');
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * 10);
+                });
+                ctx.restore();
+            });
+            ctx.restore(); // End map rotation
+
+            // 3. Draw Numbers (Static Ring) - REVERSED (12 top, 13 left, 11 right)
+            ctx.fillStyle = "#aaa";
+            ctx.font = "bold 20px Orbitron";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (let i = 1; i <= 24; i++) {
+                // i=12 is top (-90 deg), i=13 is left (-105 deg), i=11 is right (-75 deg)
+                const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
+                const tx = Math.cos(angle) * (r * 1.3);
+                const ty = Math.sin(angle) * (r * 1.3);
+                ctx.fillText(i, tx, ty);
+                
+                // Ticks
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(angle) * (r * 1.15), Math.sin(angle) * (r * 1.15));
+                ctx.lineTo(Math.cos(angle) * (r * 1.2), Math.sin(angle) * (r * 1.2));
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.restore();
+            requestAnimationFrame(draw);
+        }
+
+        let isAnimating = false;
+        function init() {
+            resizeCanvasToContainer();
+            if (!isAnimating && mapLoaded) {
+                isAnimating = true;
+                draw();
+            }
+        }
+
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        
+
+        // Debug: Feedback and Reload on mouse enter canvas
+        const debugText = document.createElement('div');
+        debugText.style.position = 'fixed';
+        debugText.style.top = '10px';
+        debugText.style.left = '10px';
+        debugText.style.color = 'lime';
+        debugText.style.fontFamily = 'Orbitron';
+        debugText.style.zIndex = '9999';
+        debugText.textContent = 'WAITING FOR MOUSE...';
+        document.body.appendChild(debugText);
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right && 
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                if (debugText.textContent !== 'MOUSE ENTERED') {
+                    debugText.textContent = 'MOUSE ENTERED';
+                    console.log('MOUSE ENTERED');
+                    setTimeout(() => window.location.reload(), 300);
+                }
+            }
+        });
+
+        // UI Controls & Interaction
+        CyberUI.on('reset', () => { manualOffset = 0; autoRotation = 0; });
+        CyberUI.addControl({
+            type: 'toggle',
+            label: 'Rotation',
+            value: false,
+            callback: (val) => { autoRotationEnabled = val; }
+        });
+        
+        function getMouseAngle(e) {
+            const rect = container.getBoundingClientRect();
+            const clientX = (e.clientX !== undefined) ? e.clientX : (e.touches ? e.touches[0].clientX : 0);
+            const clientY = (e.clientY !== undefined) ? e.clientY : (e.touches ? e.touches[0].clientY : 0);
+            return Math.atan2(clientY - (rect.top + rect.height/2), clientX - (rect.left + rect.width/2));
+        }
+
+        function handleStart(e) {
+            isDragging = true;
+            lastAngle = getMouseAngle(e);
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            const currentAngle = getMouseAngle(e);
+            let delta = currentAngle - lastAngle;
+            while (delta > Math.PI) delta -= Math.PI * 2;
+            while (delta < -Math.PI) delta += Math.PI * 2;
+            manualOffset += (delta / (Math.PI * 2)) * 1440;
+            lastAngle = currentAngle;
+        }
+
+        function handleEnd() {
+            isDragging = false;
+        }
+
+        container.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        container.addEventListener('touchstart', (e) => { handleStart(e); }, {passive: false});
+        window.addEventListener('touchmove', (e) => { if(isDragging) e.preventDefault(); handleMove(e); }, {passive: false});
+        window.addEventListener('touchend', handleEnd);
+    </script>
+</body>
+
+</html>
+
