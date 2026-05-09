@@ -178,6 +178,34 @@
         let hoveredCity = null; // New for hover preview
         let targetCity = null;  // Last city to show during fade-out
         let displayAlpha = 0;   // For smooth fade in/out
+        let flagHitboxes = [];
+        let hoveredFlagIndex = null; // Use index to distinguish same flags
+
+        function getCountryName(flag) {
+            const map = {
+                "🇫🇷": "Frankreich", "🇮🇹": "Italien", "🇪🇸": "Spanien", "🇦🇹": "Österreich", "🇵🇱": "Polen",
+                "🇵🇹": "Portugal", "🇮🇪": "Irland", "🇬🇧": "Großbritannien",
+                "🇨🇦": "Kanada", "🇺🇸": "USA", "🇲🇽": "Mexiko",
+                "🇧🇷": "Brasilien", "🇦🇷": "Argentinien", "🇺🇾": "Uruguay", "🇵🇾": "Paraguay", "🇨🇱": "Chile",
+                "🇩🇴": "Dom. Republik", "🇵🇷": "Puerto Rico", "🇬🇾": "Guyana", "🇸🇷": "Suriname",
+                "🇨🇳": "China", "🇸🇬": "Singapur", "🇭🇰": "Hongkong", "🇹🇼": "Taiwan", "🇦🇺": "Australien",
+                "🇰🇷": "Südkorea", "🇯🇵": "Japan",
+                "🇴🇲": "Oman", "🇦🇪": "V.A.E.", "🇬🇪": "Georgien", "🇦🇿": "Aserbaidschan", "🇦🇲": "Armenien",
+                "🇮🇳": "Indien",
+                "🇰🇼": "Kuwait", "🇸🇦": "Saudi-Arabien", "🇾🇪": "Jemen", "🇪🇹": "Äthiopien", "🇰🇪": "Kenia",
+                "🇵🇰": "Pakistan", "🇺🇿": "Usbekistan", "🇹🇯": "Tadschikistan", "🇦🇫": "Afghanistan",
+                "🇮🇩": "Indonesien", "🇻🇳": "Vietnam", "🇰🇭": "Kambodscha", "🇱🇦": "Laos",
+                "🇳🇿": "Neuseeland", "🇫🇯": "Fidschi", "🇹🇴": "Tonga", "🇼🇸": "Samoa",
+                "🇻🇺": "Vanuatu", "🇳🇨": "Neukaledonien", "🇷🇺": "Russland",
+                "🇵🇫": "Franz. Polynesien", "🇨🇰": "Cookinseln",
+                "🇦🇸": "Amerik. Samoa", "🇳🇺": "Niue", "🇹🇰": "Tokelau",
+                "🇨🇻": "Kap Verde",
+                "🇬🇷": "Griechenland", "🇮🇱": "Israel", "🇱🇧": "Libanon", "🇯🇴": "Jordanien", "🇿🇦": "Südafrika",
+                "🇨🇮": "Elfenbeinküste", "🇲🇱": "Mali", "🇬🇳": "Guinea", "🇸🇱": "Sierra Leone", "🇱🇷": "Liberia",
+                "🌐": "Welt"
+            };
+            return map[flag] || "Land";
+        }
 
         function getDisplayTime() {
             const now = new Date();
@@ -233,9 +261,12 @@
         });
 
         window.addEventListener('mousemove', (e) => {
+            window.lastMouseX = e.clientX;
+            window.lastMouseY = e.clientY;
             const rect = canvas.getBoundingClientRect();
             const mx = e.clientX - (rect.left + rect.width / 2);
             const my = e.clientY - (rect.top + rect.height / 2);
+            // Existing hover logic continues as before
 
             if (isMouseDown) {
                 const currentAngle = Math.atan2(my, mx);
@@ -265,7 +296,19 @@
                     }
                 });
                 hoveredCity = found;
-                canvas.style.cursor = found ? 'pointer' : 'default';
+
+                let foundFlagIdx = null;
+                if (targetCity && displayAlpha > 0.5) {
+                    for (let box of flagHitboxes) {
+                        if (mx >= box.x && mx <= box.x + box.w && my >= box.y && my <= box.y + box.h) {
+                            foundFlagIdx = box.index;
+                            break;
+                        }
+                    }
+                }
+                hoveredFlagIndex = foundFlagIdx;
+
+                canvas.style.cursor = (found || foundFlagIdx !== null) ? 'pointer' : 'default';
             }
         });
 
@@ -303,6 +346,21 @@
             ctx.save();
             ctx.translate(cx, cy);
 
+            // --- Draw Pulsing Glow Under Earth ---
+            const pulse = (Math.sin(Date.now() / 1800) + 1) / 2; // 0 to 1, slower
+            const glowR = r + 5 + (10 * pulse); // tighter, less expansion
+            
+            ctx.save();
+            const glowGrad = ctx.createRadialGradient(0, 0, r * 0.98, 0, 0, glowR);
+            glowGrad.addColorStop(0, `rgba(0, 210, 255, ${0.15 + 0.15 * pulse})`); // lower opacity
+            glowGrad.addColorStop(1, 'rgba(0, 210, 255, 0)');
+            
+            ctx.fillStyle = glowGrad;
+            ctx.beginPath();
+            ctx.arc(0, 0, glowR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
             // 1. Draw Map (Rotating)
             if (autoRotationEnabled) autoRotation -= 0.02; 
             // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
@@ -315,6 +373,12 @@
             ctx.save();
             ctx.globalAlpha = 0.8;
             ctx.rotate(-Math.PI / 2); 
+            
+            // Clip to circle to remove dark blue corners
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.clip();
+            
             ctx.drawImage(mapImg, -r, -r, size, size);
             ctx.restore();
 
@@ -665,20 +729,67 @@
                 ctx.fill();
                 ctx.stroke();
 
+                flagHitboxes = []; // clear hitboxes
+                
+                // Set uniform baseline for perfect vertical alignment
+                ctx.textBaseline = "middle";
+
                 neighbors.forEach((item, i) => {
-                    const rowY = ny + 20 + (i * 18);
+                    const centerY = ny + 16 + (i * 18);
                     
                     // City Name (Left)
                     ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
                     ctx.font = "400 14px Orbitron";
                     ctx.textAlign = "left";
-                    ctx.fillText(item.name, nx + 10, rowY);
+                    ctx.fillText(item.name, nx + 10, centerY);
                     
                     // Flag (Right)
-                    ctx.font = "14px Arial"; // Standard Arial for Emojis
+                    ctx.font = "22px Arial"; // Standard Arial for Emojis
                     ctx.textAlign = "right";
-                    ctx.fillText(item.f, nx + nW - 10, rowY);
+                    // Emojis often need a small 1-2px vertical tweak to visually center
+                    ctx.fillText(item.f, nx + nW - 10, centerY + 1);
+
+                    // Save hitbox perfectly centered on the row
+                    flagHitboxes.push({
+                        x: nx + nW - 40,
+                        y: centerY - 13,
+                        w: 35,
+                        h: 26,
+                        countryCode: item.f,
+                        index: i,
+                        centerY: centerY
+                    });
                 });
+                
+                // Draw tooltip if flag is hovered
+                if (hoveredFlagIndex !== null) {
+                    const hoveredBox = flagHitboxes.find(b => b.index === hoveredFlagIndex);
+                    if (hoveredBox) {
+                        const countryName = getCountryName(hoveredBox.countryCode);
+                        ctx.save();
+                        ctx.font = "400 14px Orbitron";
+                        const tw = ctx.measureText(countryName).width;
+                        const tooltipW = tw + 20;
+                        const tooltipH = 26;
+                        
+                        const tx = nx + nW + 6; // Right of the box, 4px closer (was 10)
+                        const ty = hoveredBox.centerY - tooltipH / 2; // Perfectly align with row
+                        
+                        ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
+                        ctx.strokeStyle = "rgba(0, 210, 255, 0.4)"; // Match the list box border exactly
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.roundRect(tx, ty, tooltipW, tooltipH, 5);
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                        ctx.textAlign = "left";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(countryName, tx + 10, hoveredBox.centerY);
+                        ctx.restore();
+                    }
+                }
                 
                 ctx.restore();
             }
