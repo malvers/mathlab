@@ -154,19 +154,73 @@
             { name: "Moskau\nBagdad", lon: 45, color: "black" }
         ];
 
-        let isDragging = false;
-        let lastAngle = 0;
         let manualOffset = 0; // in minutes
         let autoRotation = 0;
         let autoRotationEnabled = false;
+        let isMouseDown = false;
+        let lastMouseAngle = 0;
+        let isReturning = false;
 
         function getDisplayTime() {
             const now = new Date();
             return new Date(now.getTime() + manualOffset * 60000);
         }
+
+        function getMouseAngle(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - (rect.left + rect.width / 2);
+            const my = e.clientY - (rect.top + rect.height / 2);
+            return Math.atan2(my, mx);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            isReturning = false; // Stop returning when user clicks
+            lastMouseAngle = getMouseAngle(e);
+            autoRotationEnabled = false;
+            const btn = document.getElementById('rotation-btn');
+            if (btn) {
+                btn.innerText = 'ROTATION START';
+                btn.style.borderColor = 'var(--neon-blue)';
+                btn.style.color = 'var(--neon-blue)';
+                btn.style.boxShadow = 'none';
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isMouseDown) {
+                const currentAngle = getMouseAngle(e);
+                let delta = currentAngle - lastMouseAngle;
+                if (delta > Math.PI) delta -= Math.PI * 2;
+                if (delta < -Math.PI) delta += Math.PI * 2;
+                
+                manualOffset -= delta * (1440 / (Math.PI * 2));
+                lastMouseAngle = currentAngle;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            isReturning = true; // Start smooth return
+        });
+
         function draw() {
             if (!mapLoaded) return;
-            const rect = container.getBoundingClientRect();
+
+            // Smooth Return Logic
+            if (isReturning && !isMouseDown) {
+                if (Math.abs(manualOffset) < 0.1) {
+                    manualOffset = 0;
+                    isReturning = false;
+                } else {
+                    manualOffset *= 0.92; // Smooth exponential decay back to 0
+                }
+            }
+
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            
+            const rect = canvas.getBoundingClientRect();
             const w = rect.width;
             const h = rect.height;
             const size = Math.min(w, h) * 0.8;
@@ -175,9 +229,17 @@
             const cy = h / 2;
 
             ctx.clearRect(0, 0, w, h);
-
-            const time = getDisplayTime();
-            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            
+            // Interaction Feedback
+            if (isMouseDown) {
+                ctx.save();
+                ctx.fillStyle = "lime";
+                ctx.font = "400 14px Orbitron";
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
+                ctx.fillText("dragging...", 10, 10);
+                ctx.restore();
+            }
             
             ctx.save();
             ctx.translate(cx, cy);
@@ -370,30 +432,6 @@
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
         
-
-        // Debug: Feedback and Reload on mouse enter canvas
-        const debugText = document.createElement('div');
-        debugText.style.position = 'fixed';
-        debugText.style.top = '10px';
-        debugText.style.left = '10px';
-        debugText.style.color = 'lime';
-        debugText.style.fontFamily = 'Orbitron';
-        debugText.style.zIndex = '9999';
-        debugText.style.display = 'none'; // Hidden per request
-        debugText.textContent = 'WAITING FOR MOUSE...';
-        document.body.appendChild(debugText);
-
-        window.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            if (e.clientX >= rect.left && e.clientX <= rect.right && 
-                e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                if (debugText.textContent !== 'MOUSE ENTERED') {
-                    debugText.textContent = 'MOUSE ENTERED';
-                    console.log('MOUSE ENTERED');
-                    setTimeout(() => window.location.reload(), 300);
-                }
-            }
-        });
 
         // UI Controls & Interaction
         CyberUI.on('reset', manualReset);
