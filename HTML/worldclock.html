@@ -183,10 +183,9 @@
             ctx.translate(cx, cy);
 
             // 1. Draw Map (Rotating)
-            if (autoRotationEnabled) autoRotation -= 0.05; 
+            if (autoRotationEnabled) autoRotation -= 0.02; // Slowed down for better aesthetic
             const mapRotation = (12 - utcHours) * 15 + autoRotation;
-            
-            ctx.save();
+                        ctx.save();
             ctx.rotate(mapRotation * Math.PI / 180);
             
             ctx.save();
@@ -194,29 +193,21 @@
             ctx.drawImage(mapImg, -r, -r, size, size);
             ctx.restore();
 
-            ctx.restore(); // End map rotation
-
-            // 2. Draw City Markers (Plaques) - STATIC (Matched to Photo Slots)
+            // 2. Draw City Markers (Plaques) - GLUED TO EARTH
             cities.forEach(city => {
-                // Fixed positions based on photo: 
-                // Ankara (UTC+2) is at 12:00 (top)
-                // Berlin/Dresden (UTC+1) is at 11:00 (right)
-                // Formula for the slot: 10 + (lon/15)
-                const citySlot = 10 + (city.lon / 15);
-                const cityAngle = (12 - citySlot) * (Math.PI * 2 / 24) - Math.PI / 2;
-                
+                // Angle relative to Lon 0 on the map
+                const cityAngle = (city.lon) * Math.PI / 180 - Math.PI / 2;
                 const markerR = r * 0.9; 
                 const circleRadius = 35;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
 
-                // Create a subtle dark blue radial gradient
                 const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
                 if (city.highlight) {
-                    grad.addColorStop(0, '#ffcc00'); // Gold
+                    grad.addColorStop(0, '#ffcc00'); 
                     grad.addColorStop(1, '#ffaa00'); 
                 } else {
-                    grad.addColorStop(0, '#0033aa'); // Darker blue
+                    grad.addColorStop(0, '#0033aa'); 
                     grad.addColorStop(1, '#000811'); 
                 }
 
@@ -227,7 +218,9 @@
                 
                 ctx.save();
                 ctx.translate(mx, my);
-                // Plaque is static
+                // Inverse the map rotation to keep text level
+                ctx.rotate(-mapRotation * Math.PI / 180);
+                
                 ctx.fillStyle = (city.highlight) ? "#000616" : "#eee";
                 ctx.font = "400 11px Raleway";
                 ctx.textAlign = "center";
@@ -238,6 +231,7 @@
                 });
                 ctx.restore();
             });
+            ctx.restore(); // End map rotation (Map + Glued Markers);
 
             // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
             ctx.fillStyle = "#aaa";
@@ -264,9 +258,54 @@
             requestAnimationFrame(draw);
         }
 
+        function setupUI() {
+            const container = document.getElementById('ui-container');
+            if (container) container.innerHTML = ''; // Clear previous to avoid duplicates
+            
+            const BRAND_BLUE = "#00d2ff";
+            CyberUI.createCard('ui-container', 'Steuerung', `
+                <div style="display: flex; flex-direction: column; gap: 10px; align-items: stretch; padding: 0;">
+                    <button id="rotation-btn" class="cyber-btn" onclick="toggleRotation()" 
+                            style="width: 100%; border-color: var(--neon-blue); color: var(--neon-blue); padding: 8px;">
+                        ROTATION START
+                    </button>
+                    
+                    <button class="cyber-btn" onclick="manualReset()" 
+                            style="width: 100%; border-color: #ff3366; color: #ff3366; padding: 8px;">
+                        RESET
+                    </button>
+                </div>
+            `, BRAND_BLUE);
+        }
+
+        function toggleRotation() {
+            autoRotationEnabled = !autoRotationEnabled;
+            const btn = document.getElementById('rotation-btn');
+            if (btn) {
+                btn.innerText = autoRotationEnabled ? 'ROTATION STOP' : 'ROTATION START';
+                btn.style.borderColor = autoRotationEnabled ? '#adff2f' : 'var(--neon-blue)';
+                btn.style.color = autoRotationEnabled ? '#adff2f' : 'var(--neon-blue)';
+                btn.style.boxShadow = autoRotationEnabled ? '0 0 15px rgba(173, 255, 47, 0.4)' : 'none';
+            }
+        }
+
+        function manualReset() {
+            manualOffset = 0;
+            autoRotation = 0;
+            autoRotationEnabled = false;
+            const btn = document.getElementById('rotation-btn');
+            if (btn) {
+                btn.innerText = 'ROTATION START';
+                btn.style.borderColor = 'var(--neon-blue)';
+                btn.style.color = 'var(--neon-blue)';
+                btn.style.boxShadow = 'none';
+            }
+        }
+
         let isAnimating = false;
         function init() {
             resizeCanvasToContainer();
+            setupUI(); // Mount the sidebar controls
             if (!isAnimating && mapLoaded) {
                 isAnimating = true;
                 draw();
@@ -302,13 +341,7 @@
         });
 
         // UI Controls & Interaction
-        CyberUI.on('reset', () => { manualOffset = 0; autoRotation = 0; });
-        CyberUI.addControl({
-            type: 'toggle',
-            label: 'Rotation',
-            value: false,
-            callback: (val) => { autoRotationEnabled = val; }
-        });
+        CyberUI.on('reset', manualReset);
         
         function getMouseAngle(e) {
             const rect = container.getBoundingClientRect();
