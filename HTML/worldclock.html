@@ -160,6 +160,8 @@
         let isMouseDown = false;
         let lastMouseAngle = 0;
         let isReturning = false;
+        let cityFontGray = 200; // Dynamic gray for city labels
+        let ringFontGray = 222; // Dynamic gray for standard ring hours
 
         function getDisplayTime() {
             const now = new Date();
@@ -228,18 +230,7 @@
             const cx = w / 2;
             const cy = h / 2;
 
-            ctx.clearRect(0, 0, w, h);
-            
-            // Interaction Feedback
-            if (isMouseDown) {
-                ctx.save();
-                ctx.fillStyle = "lime";
-                ctx.font = "400 14px Orbitron";
-                ctx.textAlign = "left";
-                ctx.textBaseline = "top";
-                ctx.fillText("dragging...", 10, 10);
-                ctx.restore();
-            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             ctx.save();
             ctx.translate(cx, cy);
@@ -314,7 +305,7 @@
                     lines.push(timeStr);
                 }
 
-                ctx.fillStyle = (city.highlight) ? "#333333" : "#eee";
+                ctx.fillStyle = (city.highlight) ? "#333333" : `rgb(${cityFontGray},${cityFontGray},${cityFontGray})`;
                 ctx.font = (city.highlight) ? "900 12px Orbitron" : "bold 11px Orbitron";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -331,10 +322,10 @@
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
                 const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15 - 5); 
-                const ty = Math.sin(angle) * (r * 1.15 - 5);
+                const tx = Math.cos(angle) * (r * 1.15 - 7); 
+                const ty = Math.sin(angle) * (r * 1.15 - 7);
                 
-                let color = "#aaa";
+                let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
                 let glow = false;
                 
                 if (i === 12) { color = "#ffaa00"; glow = true; }
@@ -391,6 +382,24 @@
                             style="width: 100%; border-color: #ff3366; color: #ff3366; padding: 8px;">
                         RESET
                     </button>
+
+                    <div style="margin-top: 15px;">
+                        <label style="color: var(--neon-blue); font-size: 10px; display: block; margin-bottom: 5px; font-family: Orbitron;">
+                            STADT-KONTRAST: <span id="gray-val">${cityFontGray}</span>
+                        </label>
+                        <input type="range" min="0" max="250" value="${cityFontGray}" 
+                               oninput="cityFontGray = parseInt(this.value); document.getElementById('gray-val').innerText = this.value;" 
+                               style="width: 100%; cursor: pointer; accent-color: var(--neon-blue);">
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <label style="color: var(--neon-blue); font-size: 10px; display: block; margin-bottom: 5px; font-family: Orbitron;">
+                            RING-KONTRAST: <span id="ring-gray-val">${ringFontGray}</span>
+                        </label>
+                        <input type="range" min="0" max="250" value="${ringFontGray}" 
+                               oninput="ringFontGray = parseInt(this.value); document.getElementById('ring-gray-val').innerText = this.value;" 
+                               style="width: 100%; cursor: pointer; accent-color: var(--neon-blue);">
+                    </div>
                 </div>
             `, BRAND_BLUE);
         }
@@ -432,45 +441,9 @@
         window.addEventListener('resize', init);
         document.fonts.ready.then(init);
         
-
         // UI Controls & Interaction
         CyberUI.on('reset', manualReset);
-        
-        function getMouseAngle(e) {
-            const rect = container.getBoundingClientRect();
-            const clientX = (e.clientX !== undefined) ? e.clientX : (e.touches ? e.touches[0].clientX : 0);
-            const clientY = (e.clientY !== undefined) ? e.clientY : (e.touches ? e.touches[0].clientY : 0);
-            return Math.atan2(clientY - (rect.top + rect.height/2), clientX - (rect.left + rect.width/2));
-        }
-
-        function handleStart(e) {
-            isDragging = true;
-            lastAngle = getMouseAngle(e);
-        }
-
-        function handleMove(e) {
-            if (!isDragging) return;
-            const currentAngle = getMouseAngle(e);
-            let delta = currentAngle - lastAngle;
-            while (delta > Math.PI) delta -= Math.PI * 2;
-            while (delta < -Math.PI) delta += Math.PI * 2;
-            manualOffset += (delta / (Math.PI * 2)) * 1440;
-            lastAngle = currentAngle;
-        }
-
-        function handleEnd() {
-            isDragging = false;
-        }
-
-        container.addEventListener('mousedown', handleStart);
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
-
-        container.addEventListener('touchstart', (e) => { handleStart(e); }, {passive: false});
-        window.addEventListener('touchmove', (e) => { if(isDragging) e.preventDefault(); handleMove(e); }, {passive: false});
-        window.addEventListener('touchend', handleEnd);
     </script>
 </body>
-
 </html>
 
