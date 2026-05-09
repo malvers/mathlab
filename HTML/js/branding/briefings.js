@@ -297,7 +297,7 @@ FEATURES
 - Interaktive Labor-Matrix: Ein dynamisches Gitter-Layout präsentiert alle Module mit hochauflösenden Thumbnails.
 - Zentraler Zugriff: Schneller Wechsel zwischen verschiedenen Laboren ohne Umwege.`,
 
-        "ann_labor": `KÜNSTLICHE NEURONALE NETZE (ANN):
+        "ann_labor": `KÜNSTLICHE NEURONALE \n NETZE:
 Dieses Labor ermöglicht die tiefe Untersuchung der Architektur und Funktionsweise künstlicher Neuronen. Von der Gewichtsanpassung bis hin zur Aktivierungsfunktion werden alle Prozesse visuell aufbereitet.
 
 FEATURES
