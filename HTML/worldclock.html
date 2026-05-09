@@ -176,6 +176,8 @@
         let ringFontGray = 222; // Dynamic gray for standard ring hours
         let selectedCity = null; // Currently clicked city
         let hoveredCity = null; // New for hover preview
+        let targetCity = null;  // Last city to show during fade-out
+        let displayAlpha = 0;   // For smooth fade in/out
 
         function getDisplayTime() {
             const now = new Date();
@@ -438,26 +440,33 @@
             ctx.restore(); // Restore from main translation
             
             const activeCity = hoveredCity || selectedCity;
+            if (activeCity) {
+                targetCity = activeCity;
+                displayAlpha = Math.min(1, displayAlpha + 0.15);
+            } else {
+                displayAlpha = Math.max(0, displayAlpha - 0.15);
+            }
 
             // 7. Draw Central Selection Time Box (Absolute Center)
-            if (activeCity) {
+            if (displayAlpha > 0 && targetCity) {
                 ctx.save();
+                ctx.globalAlpha = displayAlpha;
                 ctx.translate(cx, cy);
                                 // --- Connecting Line ---
-                const cityAngle = (-activeCity.lon + mapRotation - 90) * Math.PI / 180;
+                const cityAngle = (-targetCity.lon + mapRotation - 90) * Math.PI / 180;
                 const startX = Math.cos(cityAngle) * (r * 0.78); 
                 const startY = Math.sin(cityAngle) * (r * 0.78);
                 
                 ctx.beginPath();
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#aaaaaa"; // Solid Gray
+                ctx.lineWidth = 1;
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(0, 0);
                 ctx.stroke();
                 // -----------------------
 
                 const localStr = time.toLocaleTimeString('de-DE', { 
-                    timeZone: activeCity.tz, 
+                    timeZone: targetCity.tz, 
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
                 });
                 const parts = localStr.split(':'); // [HH, MM, SS]
@@ -489,7 +498,7 @@
                 ctx.textAlign = "center";
                 
                 // Status (Sommerzeit/Winterzeit)
-                const dstStatus = getDSTLabel(activeCity.tz);
+                const dstStatus = getDSTLabel(targetCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "WINTERZEIT", 0, y + 18);
@@ -504,7 +513,7 @@
                 // City Name (Top)
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "bold 12px Orbitron"; // Larger city name
-                ctx.fillText(activeCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
+                ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
                 
                 // --- Digit Widgets ---
                 const drawDigitBox = (val, xPos) => {
@@ -523,44 +532,119 @@
                 ctx.fillText(":", -20, y + 61);
                 ctx.fillText(":", 20, y + 61);
                 
-                // --- Neighborhood Cities (Full Map Database) ---
+                // --- Neighborhood Cities (Full Map Database with Flags) ---
                 const getRelatedCities = (tz) => {
                     const db = {
-                        "Europe/Berlin": ["Paris", "Rom", "Madrid", "Wien", "Warschau"],
-                        "Europe/London": ["Lissabon", "Dublin", "Edinburgh", "Porto", "Belfast"],
-                        "America/New_York": ["Toronto", "Miami", "Washington", "Montreal", "Atlanta"],
-                        "America/Chicago": ["Dallas", "Houston", "Winnipeg", "Memphis", "Minneapolis"],
-                        "America/Denver": ["Phoenix", "Salt Lake City", "Calgary", "Edmonton", "El Paso"],
-                        "America/Los_Angeles": ["Vancouver", "Seattle", "Las Vegas", "San Diego", "Tijuana"],
-                        "America/Whitehorse": ["Whitehorse", "Inuvik", "Yellowknife", "Juneau", "Sitka"],
-                        "America/Sao_Paulo": ["Brasilia", "Buenos Aires", "Montevideo", "Asunción", "Santiago"],
-                        "America/Caracas": ["Santo Domingo", "San Juan", "Manaus", "Georgetown", "Paramaribo"],
-                        "Asia/Shanghai": ["Peking", "Singapur", "Hongkong", "Taipeh", "Perth"],
-                        "Asia/Tokyo": ["Seoul", "Osaka", "Sapporo", "Kyoto", "Nagoya"],
-                        "Asia/Dubai": ["Maskat", "Abu Dhabi", "Tiflis", "Baku", "Jerewan"],
-                        "Asia/Kolkata": ["Mumbai", "Neu-Delhi", "Bangalore", "Chennai", "Hyderabad"],
-                        "Asia/Baghdad": ["Kuwait", "Riad", "Aden", "Addis Abeba", "Nairobi"],
-                        "Asia/Karachi": ["Islamabad", "Taschkent", "Samarkand", "Duschanbe", "Kabul"],
-                        "Asia/Bangkok": ["Jakarta", "Hanoi", "Saigon", "Phnom Penh", "Vientiane"],
-                        "Australia/Sydney": ["Melbourne", "Brisbane", "Canberra", "Hobart", "Gold Coast"],
-                        "Pacific/Auckland": ["Wellington", "Christchurch", "Suva", "Nuku'alofa", "Apia"],
-                        "Pacific/Guadalcanal": ["Port Vila", "Nouméa", "Magadan", "Sachalin", "Kamtschatka"],
-                        "Pacific/Honolulu": ["Anchorage", "Papeete", "Rarotonga", "Adak", "Midway"],
-                        "Pacific/Samoa": ["Apia", "Pago Pago", "Niue", "Alofi", "Tokelau"],
-                        "Atlantic/Azores": ["Ponta Delgada", "Angra", "Horta", "Funchal", "Santa Cruz"],
-                        "Atlantic/Cape_Verde": ["Praia", "Mindelo", "Santa Maria", "Sal", "Boa Vista"],
-                        "Africa/Cairo": ["Athen", "Jerusalem", "Beirut", "Amman", "Johannesburg"],
-                        "Africa/Dakar": ["Abidjan", "Bamako", "Conakry", "Freetown", "Monrovia"]
+                        "Europe/Berlin": [
+                            {name: "Paris", f: "🇫🇷"}, {name: "Rom", f: "🇮🇹"}, 
+                            {name: "Madrid", f: "🇪🇸"}, {name: "Wien", f: "🇦🇹"}, {name: "Warschau", f: "🇵🇱"}
+                        ],
+                        "Europe/London": [
+                            {name: "Lissabon", f: "🇵🇹"}, {name: "Dublin", f: "🇮🇪"}, 
+                            {name: "Edinburgh", f: "🇬🇧"}, {name: "Porto", f: "🇵🇹"}, {name: "Belfast", f: "🇬🇧"}
+                        ],
+                        "America/New_York": [
+                            {name: "Toronto", f: "🇨🇦"}, {name: "Miami", f: "🇺🇸"}, 
+                            {name: "Washington", f: "🇺🇸"}, {name: "Montreal", f: "🇨🇦"}, {name: "Atlanta", f: "🇺🇸"}
+                        ],
+                        "America/Chicago": [
+                            {name: "Dallas", f: "🇺🇸"}, {name: "Houston", f: "🇺🇸"}, 
+                            {name: "Winnipeg", f: "🇨🇦"}, {name: "Memphis", f: "🇺🇸"}, {name: "Minneapolis", f: "🇺🇸"}
+                        ],
+                        "America/Denver": [
+                            {name: "Phoenix", f: "🇺🇸"}, {name: "Salt Lake", f: "🇺🇸"}, 
+                            {name: "Calgary", f: "🇨🇦"}, {name: "Edmonton", f: "🇨🇦"}, {name: "El Paso", f: "🇺🇸"}
+                        ],
+                        "America/Los_Angeles": [
+                            {name: "Vancouver", f: "🇨🇦"}, {name: "Seattle", f: "🇺🇸"}, 
+                            {name: "Las Vegas", f: "🇺🇸"}, {name: "San Diego", f: "🇺🇸"}, {name: "Tijuana", f: "🇲🇽"}
+                        ],
+                        "America/Whitehorse": [
+                            {name: "Whitehorse", f: "🇨🇦"}, {name: "Inuvik", f: "🇨🇦"}, 
+                            {name: "Yellowknife", f: "🇨🇦"}, {name: "Juneau", f: "🇺🇸"}, {name: "Sitka", f: "🇺🇸"}
+                        ],
+                        "America/Sao_Paulo": [
+                            {name: "Brasilia", f: "🇧🇷"}, {name: "B. Aires", f: "🇦🇷"}, 
+                            {name: "Montevideo", f: "🇺🇾"}, {name: "Asunción", f: "🇵🇾"}, {name: "Santiago", f: "🇨🇱"}
+                        ],
+                        "America/Caracas": [
+                            {name: "S. Domingo", f: "🇩🇴"}, {name: "San Juan", f: "🇵🇷"}, 
+                            {name: "Manaus", f: "🇧🇷"}, {name: "Georgetown", f: "🇬🇾"}, {name: "Paramaribo", f: "🇸🇷"}
+                        ],
+                        "Asia/Shanghai": [
+                            {name: "Peking", f: "🇨🇳"}, {name: "Singapur", f: "🇸🇬"}, 
+                            {name: "Hongkong", f: "🇭🇰"}, {name: "Taipeh", f: "🇹🇼"}, {name: "Perth", f: "🇦🇺"}
+                        ],
+                        "Asia/Tokyo": [
+                            {name: "Seoul", f: "🇰🇷"}, {name: "Osaka", f: "🇯🇵"}, 
+                            {name: "Sapporo", f: "🇯🇵"}, {name: "Kyoto", f: "🇯🇵"}, {name: "Nagoya", f: "🇯🇵"}
+                        ],
+                        "Asia/Dubai": [
+                            {name: "Maskat", f: "🇴🇲"}, {name: "Abu Dhabi", f: "🇦🇪"}, 
+                            {name: "Tiflis", f: "🇬🇪"}, {name: "Baku", f: "🇦🇿"}, {name: "Jerewan", f: "🇦🇲"}
+                        ],
+                        "Asia/Kolkata": [
+                            {name: "Mumbai", f: "🇮🇳"}, {name: "Neu-Delhi", f: "🇮🇳"}, 
+                            {name: "Bangalore", f: "🇮🇳"}, {name: "Chennai", f: "🇮🇳"}, {name: "Hyderabad", f: "🇮🇳"}
+                        ],
+                        "Asia/Baghdad": [
+                            {name: "Kuwait", f: "🇰🇼"}, {name: "Riad", f: "🇸🇦"}, 
+                            {name: "Aden", f: "🇾🇪"}, {name: "Addis Abeba", f: "🇪🇹"}, {name: "Nairobi", f: "🇰🇪"}
+                        ],
+                        "Asia/Karachi": [
+                            {name: "Islamabad", f: "🇵🇰"}, {name: "Taschkent", f: "🇺🇿"}, 
+                            {name: "Samarkand", f: "🇺🇿"}, {name: "Duschanbe", f: "🇹🇯"}, {name: "Kabul", f: "🇦🇫"}
+                        ],
+                        "Asia/Bangkok": [
+                            {name: "Jakarta", f: "🇮🇩"}, {name: "Hanoi", f: "🇻🇳"}, 
+                            {name: "Saigon", f: "🇻🇳"}, {name: "Phnom Penh", f: "🇰🇭"}, {name: "Vientiane", f: "🇱🇦"}
+                        ],
+                        "Australia/Sydney": [
+                            {name: "Melbourne", f: "🇦🇺"}, {name: "Brisbane", f: "🇦🇺"}, 
+                            {name: "Canberra", f: "🇦🇺"}, {name: "Hobart", f: "🇦🇺"}, {name: "Gold Coast", f: "🇦🇺"}
+                        ],
+                        "Pacific/Auckland": [
+                            {name: "Wellington", f: "🇳🇿"}, {name: "Christchurch", f: "🇳🇿"}, 
+                            {name: "Suva", f: "🇫🇯"}, {name: "Nuku'alofa", f: "🇹🇴"}, {name: "Apia", f: "🇼🇸"}
+                        ],
+                        "Pacific/Guadalcanal": [
+                            {name: "Port Vila", f: "🇻🇺"}, {name: "Nouméa", f: "🇳🇨"}, 
+                            {name: "Magadan", f: "🇷🇺"}, {name: "Sachalin", f: "🇷🇺"}, {name: "Kamtschatka", f: "🇷🇺"}
+                        ],
+                        "Pacific/Honolulu": [
+                            {name: "Anchorage", f: "🇺🇸"}, {name: "Papeete", f: "🇵🇫"}, 
+                            {name: "Rarotonga", f: "🇨🇰"}, {name: "Adak", f: "🇺🇸"}, {name: "Midway", f: "🇺🇸"}
+                        ],
+                        "Pacific/Samoa": [
+                            {name: "Apia", f: "🇼🇸"}, {name: "Pago Pago", f: "🇦🇸"}, 
+                            {name: "Niue", f: "🇳🇺"}, {name: "Alofi", f: "🇳🇺"}, {name: "Tokelau", f: "🇹🇰"}
+                        ],
+                        "Atlantic/Azores": [
+                            {name: "Ponta Delgada", f: "🇵🇹"}, {name: "Angra", f: "🇵🇹"}, 
+                            {name: "Horta", f: "🇵🇹"}, {name: "Funchal", f: "🇵🇹"}, {name: "Santa Cruz", f: "🇵🇹"}
+                        ],
+                        "Atlantic/Cape_Verde": [
+                            {name: "Praia", f: "🇨🇻"}, {name: "Mindelo", f: "🇨🇻"}, 
+                            {name: "Santa Maria", f: "🇨🇻"}, {name: "Sal", f: "🇨🇻"}, {name: "Boa Vista", f: "🇨🇻"}
+                        ],
+                        "Africa/Cairo": [
+                            {name: "Athen", f: "🇬🇷"}, {name: "Jerusalem", f: "🇮🇱"}, 
+                            {name: "Beirut", f: "🇱🇧"}, {name: "Amman", f: "🇯🇴"}, {name: "Johannesburg", f: "🇿🇦"}
+                        ],
+                        "Africa/Dakar": [
+                            {name: "Abidjan", f: "🇨🇮"}, {name: "Bamako", f: "🇲🇱"}, 
+                            {name: "Conakry", f: "🇬🇳"}, {name: "Freetown", f: "🇸🇱"}, {name: "Monrovia", f: "🇱🇷"}
+                        ]
                     };
-                    return db[tz] || ["Metropol-Region", "Umland", "Lokaler Sektor"];
+                    return db[tz] || [{name: "Metropol-Region", f: "🌐"}];
                 };
 
-                const neighbors = getRelatedCities(activeCity.tz);
-                const nW = 160, nH = 90; // Increased height for larger font
+                const neighbors = getRelatedCities(targetCity.tz);
+                const nW = 160, nH = 100; // Increased height for larger font
                 const nx = -nW/2, ny = y + boxH + 5; 
                 
                 // Dark Background for the list (Harmonized)
-                ctx.fillStyle = "rgba(0, 15, 30, 0.9)";
+                ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -568,12 +652,19 @@
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
-                ctx.font = "400 12px Orbitron"; // Regular weight
-                ctx.textAlign = "center";
-                
-                neighbors.forEach((city, i) => {
-                    ctx.fillText(city, 0, ny + 18 + (i * 16)); // Adjusted spacing
+                neighbors.forEach((item, i) => {
+                    const rowY = ny + 20 + (i * 18);
+                    
+                    // City Name (Left)
+                    ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                    ctx.font = "400 14px Orbitron";
+                    ctx.textAlign = "left";
+                    ctx.fillText(item.name, nx + 10, rowY);
+                    
+                    // Flag (Right)
+                    ctx.font = "14px Arial"; // Standard Arial for Emojis
+                    ctx.textAlign = "right";
+                    ctx.fillText(item.f, nx + nW - 10, rowY);
                 });
                 
                 ctx.restore();
