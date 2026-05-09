@@ -471,8 +471,8 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
-        nav.appendChild(donateBtn);
         nav.appendChild(bugBtn);
+        nav.appendChild(donateBtn);
         nav.appendChild(briefingBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
