@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOC ALVERS MATHE-LABORE | World Clock</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -129,7 +129,7 @@
 
         const cities = [
             { name: "Ankara\nKairo", lon: 30, color: "black" },
-            { name: "Berlin\nDresden\nRom", lon: 15, color: "orange", textColor: "white", highlight: true },
+            { name: "Dresden", lon: 15, color: "#ffcc00", highlight: true },
             { name: "Dakar\nMadeira", lon: 0, color: "black" }, // London/Dakar Slot
             { name: "Azoren", lon: -15, color: "black" },
             { name: "Kapverd.\nInseln", lon: -30, color: "black" },
@@ -202,7 +202,7 @@
                 // FLIPPED: Use -city.lon because the hour ring is reversed (CCW)
                 const cityAngle = (-city.lon) * Math.PI / 180 - Math.PI / 2;
                 const markerR = (r * 0.9) - 6; // Moved 6px inward
-                const circleRadius = city.highlight ? 46 : 38; // DE larger
+                const circleRadius = 38; // Back to standard size for all
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
 
@@ -250,22 +250,39 @@
                 ctx.font = "400 11px Raleway";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                const lines = city.name.split('\n');
-                lines.forEach((line, i) => {
-                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * 12);
-                });
+                
+                if (city.highlight) {
+                    // Special case for Dresden: BLACK WEIGHT Name + Regular Time
+                    const localTime = new Date(time.getTime() + (city.lon / 15 - 1) * 3600000 + 3600000);
+                    const timeStr = localTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    
+                    ctx.fillStyle = "#000616";
+                    // Line 1: Dresden (Weight 900, Size 13px)
+                    ctx.font = "900 13px Raleway";
+                    ctx.fillText("Dresden", 0, -8);
+                    
+                    // Line 2: Time (Orbitron)
+                    ctx.font = "400 11px Orbitron";
+                    ctx.fillText(timeStr, 0, 8);
+                } else {
+                    ctx.fillStyle = "#eee";
+                    ctx.font = "bold 11px Raleway"; // All city names now bold
+                    const lines = city.name.split('\n');
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * 12);
+                    });
+                }
                 ctx.restore();
             });
             ctx.restore(); // End map rotation (Earth + Glued Markers)
-
             // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
             ctx.font = "400 28px Orbitron"; 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
                 const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15); 
-                const ty = Math.sin(angle) * (r * 1.15);
+                const tx = Math.cos(angle) * (r * 1.15 - 4); 
+                const ty = Math.sin(angle) * (r * 1.15 - 4);
                 
                 // All hours in Deeper Orange with Glow
                 ctx.save();
@@ -279,23 +296,23 @@
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * (r * 1.02), Math.sin(angle) * (r * 1.02));
-                ctx.lineTo(Math.cos(angle) * (r * 1.08), Math.sin(angle) * (r * 1.08));
+                ctx.moveTo(Math.cos(angle) * (r * 1.02 - 4), Math.sin(angle) * (r * 1.02 - 4));
+                ctx.lineTo(Math.cos(angle) * (r * 1.08 - 4), Math.sin(angle) * (r * 1.08 - 4));
                 ctx.stroke();
                 ctx.restore();
 
-                // Half-Hour Ticks (Only Ticks)
-                const halfAngle = angle - (Math.PI / 24); // 7.5 degrees CCW
+                // Half-Hour Ticks (Only Tics)
+                const halfAngle = angle - (Math.PI / 24); 
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02), Math.sin(halfAngle) * (r * 1.02));
-                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05), Math.sin(halfAngle) * (r * 1.05));
+                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - 4), Math.sin(halfAngle) * (r * 1.02 - 4));
+                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - 4), Math.sin(halfAngle) * (r * 1.05 - 4));
                 ctx.stroke();
                 ctx.restore();
             }
 
-            ctx.restore();
+            ctx.restore(); // Final End Center Translate
             requestAnimationFrame(draw);
         }
 
