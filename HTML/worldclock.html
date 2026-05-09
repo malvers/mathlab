@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOC ALVERS MATHE-LABORE | World Clock</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -128,31 +128,30 @@
         mapImg.onload = () => { mapLoaded = true; init(); };
 
         const cities = [
-            { slot: 0, name: "London", color: "black", lon: 0 },
-            { slot: 1, name: "Paris\nBerlin\nRom", color: "white", textColor: "black", highlight: true, lon: 15 },
-            { slot: 2, name: "Ankara\nKairo", color: "black", lon: 30 },
-            { slot: 3, name: "Moskau\nBagdad", color: "black", lon: 45 },
-            { slot: 4, name: "Baku", color: "black", lon: 60 },
-            { slot: 5, name: "Karachi\nUralsk", color: "black", lon: 75 },
-            { slot: 6, name: "Bombay\nKalkutta", color: "black", lon: 90 }, // Snap to 90 for the slot logic
-            { slot: 7, name: "Bangkok", color: "black", lon: 105 },
-            { slot: 8, name: "Shanghai", color: "black", lon: 120 },
-            { slot: 9, name: "Tokio", color: "black", lon: 135 },
-            { slot: 10, name: "Sydney", color: "black", lon: 150 },
-            { slot: 11, name: "Salomon-\ninseln", color: "black", lon: 165 },
-            { slot: 12, name: "Neu\nSeeland", color: "black", lon: 180 },
-            { slot: 13, name: "Samoa", color: "black", lon: 195 }, // or -165
-            { slot: 14, name: "Fairbanks\nHonolulu", color: "black", lon: 210 },
-            { slot: 15, name: "Dawson", color: "black", lon: 225 },
-            { slot: 16, name: "San\nFrancisco", color: "black", lon: 240 },
-            { slot: 17, name: "Santa Fé", color: "black", lon: 255 },
-            { slot: 18, name: "Chicago", color: "black", lon: 270 },
-            { slot: 19, name: "New York", color: "black", lon: 285 },
-            { slot: 20, name: "Caracas\nSantiago", color: "black", lon: 300 },
-            { slot: 21, name: "Rio de\nJaneiro", color: "black", lon: 315 },
-            { slot: 22, name: "Kapverd.\nInseln", color: "black", lon: 330 },
-            { slot: 23, name: "Azoren", color: "black", lon: 345 },
-            { slot: -1, name: "Dakar\nMadeira", color: "black", lon: 345 } // Duplicate/Approx
+            { name: "Ankara\nKairo", lon: 30, color: "black" },
+            { name: "Berlin\nDresden\nRom", lon: 15, color: "orange", textColor: "white", highlight: true },
+            { name: "Dakar\nMadeira", lon: 0, color: "black" }, // London/Dakar Slot
+            { name: "Azoren", lon: -15, color: "black" },
+            { name: "Kapverd.\nInseln", lon: -30, color: "black" },
+            { name: "Rio de\nJaneiro", lon: -45, color: "black" },
+            { name: "Caracas\nSantiago\nde Chile", lon: -60, color: "black" },
+            { name: "New York", lon: -75, color: "black" },
+            { name: "Chicago", lon: -90, color: "black" },
+            { name: "Santa Fé", lon: -105, color: "black" },
+            { name: "San\nFrancisco", lon: -120, color: "black" },
+            { name: "Dawson", lon: -135, color: "black" },
+            { name: "Fairbanks\nHonolulu", lon: -150, color: "black" },
+            { name: "Samoa", lon: -165, color: "black" },
+            { name: "Neu\nseeland", lon: 180, color: "black" },
+            { name: "Salomon-\ninseln", lon: 165, color: "black" },
+            { name: "Sydney", lon: 150, color: "black" },
+            { name: "Tokio", lon: 135, color: "black" },
+            { name: "Shanghai", lon: 120, color: "black" },
+            { name: "Bangkok", lon: 105, color: "black" },
+            { name: "Bombay\nKalkutta\n-30 Min", lon: 90, color: "black" }, // Moved to full hour slot 16
+            { name: "Karachi\nUralsk", lon: 75, color: "black" },
+            { name: "Baku", lon: 60, color: "black" },
+            { name: "Moskau\nBagdad", lon: 45, color: "black" }
         ];
 
         let isDragging = false;
@@ -197,41 +196,52 @@
 
             ctx.restore(); // End map rotation
 
-            // 2. Draw City Markers (Plaques) - STATIC
+            // 2. Draw City Markers (Plaques) - STATIC (Matched to Photo Slots)
             cities.forEach(city => {
-                const cityAngle = (city.lon) * Math.PI / 180 - Math.PI / 2;
+                // Fixed positions based on photo: 
+                // Ankara (UTC+2) is at 12:00 (top)
+                // Berlin/Dresden (UTC+1) is at 11:00 (right)
+                // Formula for the slot: 10 + (lon/15)
+                const citySlot = 10 + (city.lon / 15);
+                const cityAngle = (12 - citySlot) * (Math.PI * 2 / 24) - Math.PI / 2;
+                
                 const markerR = r * 0.9; 
-                const circleRadius = 30;
+                const circleRadius = 35;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
 
-                ctx.fillStyle = city.color;
+                // Create a subtle dark blue radial gradient
+                const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
+                if (city.highlight) {
+                    grad.addColorStop(0, '#ffcc00'); // Gold
+                    grad.addColorStop(1, '#ffaa00'); 
+                } else {
+                    grad.addColorStop(0, '#0033aa'); // Darker blue
+                    grad.addColorStop(1, '#000811'); 
+                }
+
+                ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
                 ctx.fill();
-                if (city.highlight) {
-                    ctx.strokeStyle = "white";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-
+                
                 ctx.save();
                 ctx.translate(mx, my);
-                // Plaque is static, text is upright
-                ctx.fillStyle = city.textColor || "white";
-                ctx.font = "bold 9px Orbitron";
+                // Plaque is static
+                ctx.fillStyle = (city.highlight) ? "#000616" : "#eee";
+                ctx.font = "400 11px Raleway";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 const lines = city.name.split('\n');
                 lines.forEach((line, i) => {
-                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * 10);
+                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * 12);
                 });
                 ctx.restore();
             });
 
             // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
             ctx.fillStyle = "#aaa";
-            ctx.font = "bold 20px Orbitron";
+            ctx.font = "400 20px Orbitron"; // Regular weight
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
@@ -275,6 +285,7 @@
         debugText.style.color = 'lime';
         debugText.style.fontFamily = 'Orbitron';
         debugText.style.zIndex = '9999';
+        debugText.style.display = 'none'; // Hidden per request
         debugText.textContent = 'WAITING FOR MOUSE...';
         document.body.appendChild(debugText);
 
