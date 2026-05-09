@@ -204,7 +204,7 @@
             const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
 
             cities.forEach(city => {
-                const cityAngle = (city.lon + mapRotation - 90);
+                const cityAngle = (-city.lon + mapRotation - 90);
                 let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
                 
                 // If distance is near the plaques and angle is close
@@ -411,13 +411,24 @@
 
             ctx.restore(); // Restore from main translation
             
+            // Debug Overlay: Selected City in Green
+            if (selectedCity) {
+                ctx.save();
+                ctx.fillStyle = "#adff2f"; // Neon Green
+                ctx.font = "900 24px Orbitron";
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
+                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 20, 20);
+                ctx.restore();
+            }
+
             // 7. Draw Central Selection Time Box (Absolute Center)
             if (selectedCity) {
                 ctx.save();
                 ctx.translate(cx, cy);
                 
                 // --- Connecting Line ---
-                const cityAngle = (selectedCity.lon + mapRotation - 90) * Math.PI / 180;
+                const cityAngle = (-selectedCity.lon + mapRotation - 90) * Math.PI / 180;
                 const startX = Math.cos(cityAngle) * (r * 0.88); // End exactly at the plaque edge
                 const startY = Math.sin(cityAngle) * (r * 0.88);
                 
