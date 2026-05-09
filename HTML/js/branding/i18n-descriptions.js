@@ -610,6 +610,8 @@ FEATURES & CONTROLS:
 - Interactive Exploration: Focus and start labs via click.
 - Depth Projection: Scaling based on virtual Z-coordinate.`,
 
+        "ann_labor": `ARTIFICIAL NEURAL NETWORKS: Everyone is talking about Artificial Intelligence, but how does it actually work? This lab shows the learning process of an artificial neural network in detail. You can adjust the number of nodes per "hidden layer" as well as the number of hidden layers. Using the four basic arithmetic operations, you can study how such a network learns.`,
+
         "zahlenerkennung": `CONCEPT:
 Artificial neural networks can learn. They are not programmed to recognize patterns; they learn patterns. Here, the lab shows you how an ANN learns written numbers.
 
@@ -1038,6 +1040,8 @@ CARACTERÍSTICAS Y CONTROLES:
 
 INTERFAZ:
 Diseño con navegación de marca central.`,
+
+        "ann_labor": `REDES NEURONALES ARTIFICIALES: Todo el mundo habla de la Inteligencia Artificial, pero ¿cómo funciona exactamente? Este laboratorio muestra detalladamente el proceso de aprendizaje de una red neuronal artificial. Se puede ajustar el número de nodos por "hidden layer" (capa oculta), así como el número de capas ocultas. A través de las cuatro operaciones aritméticas básicas, se puede estudiar cómo aprende una red de este tipo.`,
 
         "zahlenerkennung": `CONCEPTO:
 Las redes neuronales artificiales pueden aprender. No están programadas para reconocer patrones; aprenden patrones. Aquí, el laboratorio te muestra cómo una ANN aprende números escritos.
@@ -1468,6 +1472,8 @@ FONCTIONNALITÉS & COMMANDES :
 INTERFACE :
 Design avec navigation de marque.`,
 
+        "ann_labor": `RÉSEAUX DE NEURONES ARTIFICIELS : Tout le monde parle d'intelligence artificielle, mais comment cela fonctionne-t-il exactement ? Ce laboratoire montre en détail le processus d'apprentissage d'un réseau de neurones artificiels. On peut régler le nombre de nœuds par « hidden layer » (couche cachée) ainsi que le nombre de couches cachées. À l'aide des quatre opérations arithmétiques de base, on peut étudier comment un tel réseau apprend.`,
+
         "zahlenerkennung": `CONCEPT :
 Les réseaux neuronaux artificiels peuvent apprendre. Ils ne sont pas programmés pour reconnaître des motifs ; ils apprennent des motifs. Ici, le laboratoire vous montre comment un ANN apprend des nombres écrits.
 
@@ -1897,6 +1903,8 @@ CARATTERISTICHE E COMANDI:
 INTERFACCIA:
 Design con navigazione di marca.`,
 
+        "ann_labor": `RETI NEURALI ARTIFICIALI: Tutti parlano di intelligenza artificiale, ma come funziona esattamente? Questo laboratorio mostra in dettaglio il processo di apprendimento di una rete neurale artificiale. È possibile regolare il numero di nodi per ogni "hidden layer" (strato nascosto) e il numero di strati nascosti. Utilizzando le quattro operazioni aritmetiche di base, si può studiare come impara una rete di questo tipo.`,
+
         "zahlenerkennung": `CONCETTO:
 Le reti neurali artificiali possono imparare. Non sono programmate per riconoscere schemi; imparano schemi. Qui, il laboratorio ti mostra come un ANN impara i numeri scritti.
 
@@ -2325,6 +2333,8 @@ RECURSOS E CONTROLOS:
 
 INTERFACE:
 Design com navegação de marca.`,
+
+        "ann_labor": `REDES NEURONAIS ARTIFICIAIS: Toda a gente fala de Inteligência Artificial, mas como é que funciona exatamente? Este laboratório mostra detalhadamente o processo de aprendizagem de uma rede neuronal artificial. É possível ajustar o número de nós por "hidden layer" (camada oculta), bem como o número de camadas ocultas. À l'aide des quatre opérations arithmétiques de base, on peut étudier comment un tel réseau apprend.`,
 
         "zahlenerkennung": `CONCEITO:
 As redes neurais artificiais podem aprender. Elas não estão programadas para reconhecer padrões; elas aprendem padrões. Aqui, o laboratório mostra-te como uma ANN aprende números escritos.
