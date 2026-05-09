@@ -437,25 +437,15 @@
 
             ctx.restore(); // Restore from main translation
             
-            // Debug Overlay: Selected City in Green
-            if (selectedCity) {
-                ctx.save();
-                ctx.fillStyle = "#adff2f"; // Neon Green
-                ctx.font = "900 24px Orbitron";
-                ctx.textAlign = "left";
-                ctx.textBaseline = "top";
-                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 20, 20);
-                ctx.restore();
-            }
+            const activeCity = hoveredCity || selectedCity;
 
             // 7. Draw Central Selection Time Box (Absolute Center)
-            if (selectedCity) {
+            if (activeCity) {
                 ctx.save();
                 ctx.translate(cx, cy);
-                
-                // --- Connecting Line ---
-                const cityAngle = (-selectedCity.lon + mapRotation - 90) * Math.PI / 180;
-                const startX = Math.cos(cityAngle) * (r * 0.78); // Pull back further to avoid overlap
+                                // --- Connecting Line ---
+                const cityAngle = (-activeCity.lon + mapRotation - 90) * Math.PI / 180;
+                const startX = Math.cos(cityAngle) * (r * 0.78); 
                 const startY = Math.sin(cityAngle) * (r * 0.78);
                 
                 ctx.beginPath();
@@ -467,11 +457,12 @@
                 // -----------------------
 
                 const localStr = time.toLocaleTimeString('de-DE', { 
-                    timeZone: selectedCity.tz, 
+                    timeZone: activeCity.tz, 
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
                 });
                 const parts = localStr.split(':'); // [HH, MM, SS]
-                                const boxW = 160;
+                
+                const boxW = 160;
                 const boxH = 80; // More height for "air"
                 const rBox = 5;
                 const teamYOffset = -52; // Recalculated to center the larger team
@@ -498,7 +489,7 @@
                 ctx.textAlign = "center";
                 
                 // Status (Sommerzeit/Winterzeit)
-                const dstStatus = getDSTLabel(selectedCity.tz);
+                const dstStatus = getDSTLabel(activeCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "WINTERZEIT", 0, y + 18);
@@ -513,7 +504,7 @@
                 // City Name (Top)
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "bold 12px Orbitron"; // Larger city name
-                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
+                ctx.fillText(activeCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
                 
                 // --- Digit Widgets ---
                 const drawDigitBox = (val, xPos) => {
@@ -564,7 +555,7 @@
                     return db[tz] || ["Metropol-Region", "Umland", "Lokaler Sektor"];
                 };
 
-                const neighbors = getRelatedCities(selectedCity.tz);
+                const neighbors = getRelatedCities(activeCity.tz);
                 const nW = 160, nH = 90; // Increased height for larger font
                 const nx = -nW/2, ny = y + boxH + 5; 
                 
@@ -583,7 +574,7 @@
                 
                 neighbors.forEach((city, i) => {
                     ctx.fillText(city, 0, ny + 18 + (i * 16)); // Adjusted spacing
-                });;
+                });
                 
                 ctx.restore();
             }
