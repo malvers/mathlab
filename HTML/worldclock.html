@@ -183,29 +183,53 @@
             ctx.translate(cx, cy);
 
             // 1. Draw Map (Rotating)
-            if (autoRotationEnabled) autoRotation -= 0.02; // Slowed down for better aesthetic
-            const mapRotation = (12 - utcHours) * 15 + autoRotation;
-                        ctx.save();
-            ctx.rotate(mapRotation * Math.PI / 180);
+            if (autoRotationEnabled) autoRotation -= 0.02; 
+            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
+            const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
             
             ctx.save();
+            ctx.rotate(mapRotation * Math.PI / 180);
+            
+            // Draw Map Image (Slightly Darker)
+            ctx.save();
+            ctx.globalAlpha = 0.8;
             ctx.rotate(-Math.PI / 2); 
             ctx.drawImage(mapImg, -r, -r, size, size);
             ctx.restore();
 
             // 2. Draw City Markers (Plaques) - GLUED TO EARTH
             cities.forEach(city => {
-                // Angle relative to Lon 0 on the map
-                const cityAngle = (city.lon) * Math.PI / 180 - Math.PI / 2;
-                const markerR = r * 0.9; 
-                const circleRadius = 35;
+                // FLIPPED: Use -city.lon because the hour ring is reversed (CCW)
+                const cityAngle = (-city.lon) * Math.PI / 180 - Math.PI / 2;
+                const markerR = (r * 0.9) - 6; // Moved 6px inward
+                const circleRadius = city.highlight ? 46 : 38; // DE larger
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
 
+                // Draw Precision Triangle (Pointer) - LARGER
+                ctx.save();
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                // Tip of triangle further out
+                const tipR = markerR + circleRadius + 6;
+                const baseR = markerR + circleRadius - 12;
+                const spread = 0.06; // Wider spread
+                
+                ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
+                ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
+                ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
                 const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
                 if (city.highlight) {
-                    grad.addColorStop(0, '#ffcc00'); 
-                    grad.addColorStop(1, '#ffaa00'); 
+                    grad.addColorStop(0, '#ffaa00'); 
+                    grad.addColorStop(1, '#e68a00'); 
+                    
+                    ctx.save();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#e68a00';
                 } else {
                     grad.addColorStop(0, '#0033aa'); 
                     grad.addColorStop(1, '#000811'); 
@@ -215,6 +239,7 @@
                 ctx.beginPath();
                 ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
                 ctx.fill();
+                if (city.highlight) ctx.restore();
                 
                 ctx.save();
                 ctx.translate(mx, my);
@@ -231,25 +256,41 @@
                 });
                 ctx.restore();
             });
-            ctx.restore(); // End map rotation (Map + Glued Markers);
+            ctx.restore(); // End map rotation (Earth + Glued Markers)
 
             // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
-            ctx.fillStyle = "#aaa";
-            ctx.font = "400 20px Orbitron"; // Regular weight
+            ctx.font = "400 28px Orbitron"; 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
                 const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15); // Moved 5% back
+                const tx = Math.cos(angle) * (r * 1.15); 
                 const ty = Math.sin(angle) * (r * 1.15);
-                ctx.fillText(i, tx, ty);
                 
-                // Ticks
+                // All hours in Deeper Orange with Glow
                 ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillStyle = "#e68a00"; // Burnt Orange
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#e68a00";
+                ctx.fillText(i, tx, ty);
+                ctx.restore();
+                
+                // Hour Ticks
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.beginPath();
                 ctx.moveTo(Math.cos(angle) * (r * 1.02), Math.sin(angle) * (r * 1.02));
                 ctx.lineTo(Math.cos(angle) * (r * 1.08), Math.sin(angle) * (r * 1.08));
+                ctx.stroke();
+                ctx.restore();
+
+                // Half-Hour Ticks (Only Ticks)
+                const halfAngle = angle - (Math.PI / 24); // 7.5 degrees CCW
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02), Math.sin(halfAngle) * (r * 1.02));
+                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05), Math.sin(halfAngle) * (r * 1.05));
                 ctx.stroke();
                 ctx.restore();
             }
