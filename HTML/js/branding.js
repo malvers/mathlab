@@ -39,7 +39,8 @@ function getBriefingLookupKey(moduleKey) {
     const aliases = { 
         mandelbrot: "mandelbrot_deep",
         numberrecognition: "zahlenerkennung",
-        ann: "ann_labor"
+        ann: "ann_labor",
+        worldclock: "worldclock"
     };
     if (aliases[moduleKey]) return aliases[moduleKey];
     
