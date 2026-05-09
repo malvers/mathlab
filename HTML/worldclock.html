@@ -195,7 +195,9 @@
             ctx.drawImage(mapImg, -r, -r, size, size);
             ctx.restore();
 
-            // 2. Draw City Markers (Plaques)
+            ctx.restore(); // End map rotation
+
+            // 2. Draw City Markers (Plaques) - STATIC
             cities.forEach(city => {
                 const cityAngle = (city.lon) * Math.PI / 180 - Math.PI / 2;
                 const markerR = r * 0.9; 
@@ -215,8 +217,7 @@
 
                 ctx.save();
                 ctx.translate(mx, my);
-                ctx.rotate(-(mapRotation * Math.PI / 180 + cityAngle + Math.PI/2));
-                
+                // Plaque is static, text is upright
                 ctx.fillStyle = city.textColor || "white";
                 ctx.font = "bold 9px Orbitron";
                 ctx.textAlign = "center";
@@ -227,7 +228,6 @@
                 });
                 ctx.restore();
             });
-            ctx.restore(); // End map rotation
 
             // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
             ctx.fillStyle = "#aaa";
