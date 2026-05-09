@@ -1,6 +1,6 @@
 /* @AI-READONLY: CENTRAL BRANDING ENGINE - DO NOT MODIFY WITHOUT EXPLICIT USER COMMAND */
 /**
- * Cyber-Labor Branding Engine v5.3.8 (ULTRA Edition - Responsive Upgrade)
+ * Cyber-Labor Branding Engine v5.3.8 (Premium Edition - Responsive Upgrade)
  * Centralized branding and navigation component for Doc Alvers Laboratories.
  */
 function getBrandingCore() {
@@ -417,15 +417,18 @@ const CyberBranding = {
             </svg>
         `;
 
-        // Edit Button
-        const editBtn = document.createElement('div');
-        editBtn.className = 'nav-btn';
-        editBtn.title = 'Edit-Modus umschalten';
-        editBtn.onclick = () => this.requestEditAccess();
-        editBtn.innerHTML = `
+        // Donation Button (formerly heart in mini-rail)
+        const donateBtn = document.createElement('div');
+        donateBtn.className = 'nav-btn';
+        donateBtn.title = (typeof CyberI18n !== 'undefined') ? CyberI18n.get('ui.adopt_contact_btn_title') : "Ein Labor adoptieren!";
+        donateBtn.onclick = () => {
+            if (window.CyberUI && typeof window.CyberUI.showContactLabModal === 'function') {
+                window.CyberUI.showContactLabModal();
+            }
+        };
+        donateBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2C10.5 3.5 9.26 3 7.5 3A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"></path>
             </svg>
         `;
 
@@ -468,7 +471,7 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
-        nav.appendChild(editBtn);
+        nav.appendChild(donateBtn);
         nav.appendChild(bugBtn);
         nav.appendChild(briefingBtn);
 

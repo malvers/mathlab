@@ -17,7 +17,7 @@ class CyberUI {
             message: "Bildschirm zu klein für optimale Labor-Ansicht (empfohlen: mind. 980 × 620)"
         });
 
-        // Mini-rail (labs): language + contact + coffee. Without mini-rail but with #sidebar-header (tools, …): language in cyber-nav row.
+        // Mini-rail (labs): language + coffee. Without mini-rail but with #sidebar-header (tools, …): language in cyber-nav row.
         const tryInject = () => {
             const rail = document.getElementById('mini-rail');
             if (rail) {
@@ -26,7 +26,7 @@ class CyberUI {
                     return;
                 }
                 CyberUI.applyMiniRailMenuLabel();
-                CyberUI.injectContactHeartButton();
+                // CyberUI.injectContactHeartButton(); // Moved to top nav row
                 if (CyberUI.injectCoffeeButton()) {
                     console.log("☕ Cyber-Coffee injected.");
                 } else {
