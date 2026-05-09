@@ -201,7 +201,7 @@
             cities.forEach(city => {
                 // FLIPPED: Use -city.lon because the hour ring is reversed (CCW)
                 const cityAngle = (-city.lon) * Math.PI / 180 - Math.PI / 2;
-                const markerR = (r * 0.9) - 6; // Moved 6px inward
+                const markerR = (r * 0.9) - 7; // Moved 7px inward
                 const circleRadius = 38; // Back to standard size for all
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
@@ -248,13 +248,12 @@
                 
                 let lines = city.name.split('\n');
                 if (city.highlight) {
-                    const localTime = new Date(time.getTime() + (city.lon / 15 - 1) * 3600000 + 3600000);
-                    const timeStr = localTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                    const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
                     lines.push(timeStr);
                 }
 
-                ctx.fillStyle = (city.highlight) ? "#000616" : "#eee";
-                ctx.font = (city.highlight) ? "900 11px Orbitron" : "bold 11px Orbitron";
+                ctx.fillStyle = (city.highlight) ? "#333333" : "#eee";
+                ctx.font = (city.highlight) ? "900 12px Orbitron" : "bold 11px Orbitron";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 
@@ -270,14 +269,23 @@
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
                 const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15 - 4); 
-                const ty = Math.sin(angle) * (r * 1.15 - 4);
+                const tx = Math.cos(angle) * (r * 1.15 - 5); 
+                const ty = Math.sin(angle) * (r * 1.15 - 5);
                 
-                // All hours in Deeper Orange with Glow
+                let color = "#aaa";
+                let glow = false;
+                
+                if (i === 12) { color = "#ffaa00"; glow = true; }
+                else if (i === 6) { color = "#00aa00"; glow = true; }
+                else if (i === 24) { color = "#00aaaa"; glow = true; }
+                else if (i === 18) { color = "#aa00aa"; glow = true; }
+                
                 ctx.save();
-                ctx.fillStyle = "#e68a00"; // Burnt Orange
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = "#e68a00";
+                ctx.fillStyle = color;
+                if (glow) {
+                    ctx.shadowBlur = (i === 12) ? 15 : 10;
+                    ctx.shadowColor = color;
+                }
                 ctx.fillText(i, tx, ty);
                 ctx.restore();
                 
@@ -285,8 +293,8 @@
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * (r * 1.02 - 4), Math.sin(angle) * (r * 1.02 - 4));
-                ctx.lineTo(Math.cos(angle) * (r * 1.08 - 4), Math.sin(angle) * (r * 1.08 - 4));
+                ctx.moveTo(Math.cos(angle) * (r * 1.02 - 5), Math.sin(angle) * (r * 1.02 - 5));
+                ctx.lineTo(Math.cos(angle) * (r * 1.08 - 5), Math.sin(angle) * (r * 1.08 - 5));
                 ctx.stroke();
                 ctx.restore();
 
@@ -295,8 +303,8 @@
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - 4), Math.sin(halfAngle) * (r * 1.02 - 4));
-                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - 4), Math.sin(halfAngle) * (r * 1.05 - 4));
+                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - 5), Math.sin(halfAngle) * (r * 1.02 - 5));
+                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - 5), Math.sin(halfAngle) * (r * 1.05 - 5));
                 ctx.stroke();
                 ctx.restore();
             }
