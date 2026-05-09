@@ -128,31 +128,43 @@
         mapImg.onload = () => { mapLoaded = true; init(); };
 
         const cities = [
-            { name: "Ankara\nKairo", lon: 30, color: "black" },
-            { name: "Dresden", lon: 15, color: "#ffcc00", highlight: true },
-            { name: "Dakar\nMadeira", lon: 0, color: "black" }, // London/Dakar Slot
-            { name: "Azoren", lon: -15, color: "black" },
-            { name: "Kapverd.\nInseln", lon: -30, color: "black" },
-            { name: "Rio de\nJaneiro", lon: -45, color: "black" },
-            { name: "Caracas\nSantiago\nde Chile", lon: -60, color: "black" },
-            { name: "New York", lon: -75, color: "black" },
-            { name: "Chicago", lon: -90, color: "black" },
-            { name: "Santa Fé", lon: -105, color: "black" },
-            { name: "San\nFrancisco", lon: -120, color: "black" },
-            { name: "Dawson", lon: -135, color: "black" },
-            { name: "Fairbanks\nHonolulu", lon: -150, color: "black" },
-            { name: "Samoa", lon: -165, color: "black" },
-            { name: "Neu\nseeland", lon: 180, color: "black" },
-            { name: "Salomon-\ninseln", lon: 165, color: "black" },
-            { name: "Sydney", lon: 150, color: "black" },
-            { name: "Tokio", lon: 135, color: "black" },
-            { name: "Shanghai", lon: 120, color: "black" },
-            { name: "Bangkok", lon: 105, color: "black" },
-            { name: "Bombay\nKalkutta\n-30 Min", lon: 90, color: "black" }, // Moved to full hour slot 16
-            { name: "Karachi\nUralsk", lon: 75, color: "black" },
-            { name: "Baku", lon: 60, color: "black" },
-            { name: "Moskau\nBagdad", lon: 45, color: "black" }
+            { name: "Kairo", lon: 30, tz: "Africa/Cairo", color: "black" },
+            { name: "Dresden", lon: 15, tz: "Europe/Berlin", color: "#ffcc00", highlight: true },
+            { name: "Dakar", lon: 0, tz: "Africa/Dakar", color: "black" }, 
+            { name: "Azoren", lon: -15, tz: "Atlantic/Azores", color: "black" },
+            { name: "Kapverden", lon: -30, tz: "Atlantic/Cape_Verde", color: "black" },
+            { name: "Rio", lon: -45, tz: "America/Sao_Paulo", color: "black" },
+            { name: "Caracas", lon: -60, tz: "America/Caracas", color: "black" },
+            { name: "New York", lon: -75, tz: "America/New_York", color: "black" },
+            { name: "Chicago", lon: -90, tz: "America/Chicago", color: "black" },
+            { name: "Santa Fé", lon: -105, tz: "America/Denver", color: "black" },
+            { name: "San\nFrancisco", lon: -120, tz: "America/Los_Angeles", color: "black" },
+            { name: "Dawson", lon: -135, tz: "America/Dawson", color: "black" },
+            { name: "Honolulu", lon: -150, tz: "Pacific/Honolulu", color: "black" },
+            { name: "Samoa", lon: -165, tz: "Pacific/Samoa", color: "black" },
+            { name: "Neu\nseeland", lon: 180, tz: "Pacific/Auckland", color: "black" },
+            { name: "Salomon-\ninseln", lon: 165, tz: "Pacific/Guadalcanal", color: "black" },
+            { name: "Sydney", lon: 150, tz: "Australia/Sydney", color: "black" },
+            { name: "Tokio", lon: 135, tz: "Asia/Tokyo", color: "black" },
+            { name: "Shanghai", lon: 120, tz: "Asia/Shanghai", color: "black" },
+            { name: "Bangkok", lon: 105, tz: "Asia/Bangkok", color: "black" },
+            { name: "Bombay", lon: 90, tz: "Asia/Kolkata", color: "black" }, 
+            { name: "Karachi", lon: 75, tz: "Asia/Karachi", color: "black" },
+            { name: "Baku", lon: 60, tz: "Asia/Baku", color: "black" },
+            { name: "Bagdad", lon: 45, tz: "Asia/Baghdad", color: "black" }
         ];
+
+        function getDSTLabel(tz) {
+            if (!tz) return "";
+            try {
+                const parts = new Intl.DateTimeFormat('de-DE', {
+                    timeZone: tz,
+                    timeZoneName: 'long'
+                }).formatToParts(new Date());
+                const tzName = parts.find(p => p.type === 'timeZoneName').value;
+                return tzName.includes('Sommerzeit') ? "SZ" : "WZ";
+            } catch (e) { return ""; }
+        }
 
         let manualOffset = 0; // in minutes
         let autoRotation = 0;
@@ -304,8 +316,15 @@
                     const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
                     lines.push(timeStr);
                 }
-
-                ctx.fillStyle = (city.highlight) ? "#333333" : `rgb(${cityFontGray},${cityFontGray},${cityFontGray})`;
+                
+                const dst = getDSTLabel(city.tz);
+                if (city.highlight) {
+                    ctx.fillStyle = "#333333";
+                } else if (dst === "SZ") {
+                    ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
+                } else {
+                    ctx.fillStyle = `rgb(${cityFontGray},${cityFontGray},${cityFontGray})`;
+                }
                 ctx.font = (city.highlight) ? "900 12px Orbitron" : "bold 11px Orbitron";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
