@@ -174,6 +174,7 @@
         let isReturning = false;
         let cityFontGray = 200; // Dynamic gray for city labels
         let ringFontGray = 222; // Dynamic gray for standard ring hours
+        let selectedCity = null; // Currently clicked city
 
         function getDisplayTime() {
             const now = new Date();
@@ -188,9 +189,37 @@
         }
 
         canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - (rect.left + rect.width / 2);
+            const my = e.clientY - (rect.top + rect.height / 2);
+            const dist = Math.sqrt(mx*mx + my*my);
+            const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
+
+            // Hit test for cities
+            let hit = false;
+            const size = Math.min(rect.width, rect.height) * 0.8;
+            const r = size / 2;
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
+
+            cities.forEach(city => {
+                const cityAngle = (city.lon + mapRotation - 90);
+                let diff = (mouseAngle - cityAngle + 180) % 360 - 180;
+                if (diff < -180) diff += 360;
+                
+                // If distance is near the plaques (r*0.92) and angle is close
+                if (dist > r * 0.85 && dist < r * 1.05 && Math.abs(diff) < 6) {
+                    selectedCity = city;
+                    hit = true;
+                }
+            });
+
+            if (!hit) selectedCity = null;
+
             isMouseDown = true;
-            isReturning = false; // Stop returning when user clicks
-            lastMouseAngle = getMouseAngle(e);
+            isReturning = false; 
+            lastMouseAngle = Math.atan2(my, mx);
             autoRotationEnabled = false;
             const btn = document.getElementById('rotation-btn');
             if (btn) {
@@ -381,7 +410,99 @@
                 ctx.restore();
             }
 
-            ctx.restore(); // Final End Center Translate
+            ctx.restore(); // Restore from main translation
+            
+            // 7. Draw Central Selection Time Box (Absolute Center)
+            if (selectedCity) {
+                ctx.save();
+                ctx.translate(cx, cy);
+                
+                // --- Connecting Line ---
+                const cityAngle = (selectedCity.lon + mapRotation - 90) * Math.PI / 180;
+                const startX = Math.cos(cityAngle) * (r * 0.85); // Start slightly inside the plaque
+                const startY = Math.sin(cityAngle) * (r * 0.85);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]); // Dashed line for technical look
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(0, 0);
+                ctx.stroke();
+                ctx.setLineDash([]); // Reset
+                // -----------------------
+
+                const localStr = time.toLocaleTimeString('de-DE', { 
+                    timeZone: selectedCity.tz, 
+                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
+                });
+                const parts = localStr.split(':'); // [HH, MM, SS]
+                
+                const boxW = 160;
+                const boxH = 60;
+                
+                // Shadow/Glow
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = "rgba(0, 210, 255, 0.4)";
+                
+                // Background Box
+                ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
+                ctx.strokeStyle = "#00d2ff";
+                ctx.lineWidth = 2;
+                
+                const rBox = 10;
+                const x = -boxW/2, y = -boxH/2;
+                ctx.beginPath();
+                ctx.moveTo(x + rBox, y);
+                ctx.lineTo(x + boxW - rBox, y);
+                ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + rBox);
+                ctx.lineTo(x + boxW, y + boxH - rBox);
+                ctx.quadraticCurveTo(x + boxW, y + boxH, x + boxW - rBox, y + boxH);
+                ctx.lineTo(x + rBox, y + boxH);
+                ctx.quadraticCurveTo(x, y + boxH, x, y + boxH - rBox);
+                ctx.lineTo(x, y + rBox);
+                ctx.quadraticCurveTo(x, y, x + rBox, y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.shadowBlur = 0;
+                ctx.textAlign = "center";
+                
+                // City Name (Top)
+                ctx.fillStyle = "#00d2ff";
+                ctx.font = "bold 10px Orbitron";
+                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 0, -18);
+                
+                // --- Digit Widgets ---
+                const drawDigitBox = (val, xPos) => {
+                    const w = 34;
+                    const h = 30;
+                    ctx.fillStyle = "#001a33";
+                    ctx.strokeStyle = "rgba(0, 210, 255, 0.3)";
+                    ctx.beginPath();
+                    ctx.roundRect(xPos - w/2, 2, w, h, 4);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "900 16px Orbitron";
+                    ctx.fillText(val, xPos, 17);
+                };
+
+                drawDigitBox(parts[0], -40); // HH
+                drawDigitBox(parts[1], 0);   // MM
+                drawDigitBox(parts[2], 40);  // SS
+                
+                // Colons
+                ctx.fillStyle = "#00d2ff";
+                ctx.font = "bold 14px Orbitron";
+                ctx.fillText(":", -20, 17);
+                ctx.fillText(":", 20, 17);
+                
+                ctx.restore();
+            }
+
             requestAnimationFrame(draw);
         }
 
