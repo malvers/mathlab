@@ -205,20 +205,20 @@ class CyberRecorderEngine {
         
         const btnImport = document.createElement('button');
         btnImport.innerText = "📂";
-        btnImport.title = ".bin Datei laden";
+        btnImport.title = ".mls Datei laden";
         btnImport.style.cssText = btnStyle;
         btnImport.onclick = () => document.getElementById('cyber-recorder-file-input').click();
         
         const btnExport = document.createElement('button');
         btnExport.innerText = "💾";
-        btnExport.title = "Export als binäre .bin Datei";
+        btnExport.title = "Export als binäre .mls Datei";
         btnExport.style.cssText = btnStyle;
         btnExport.onclick = () => this.exportScript();
         
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.id = 'cyber-recorder-file-input';
-        fileInput.accept = '.bin'; // Mac OS erkennt .bin nativ, wodurch der Filter klappt!
+        fileInput.accept = '.mls';
         fileInput.style.display = 'none';
         fileInput.onchange = (e) => this.importScript(e);
 
@@ -462,9 +462,22 @@ class CyberRecorderEngine {
             const blob = new Blob([buffer], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
             
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            
+            let labName = "lab";
+            const pathParts = window.location.pathname.split('/');
+            const filePart = pathParts[pathParts.length - 1];
+            if (filePart) labName = filePart.replace('.html', '');
+            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `cyber-demo-${Date.now()}.bin`;
+            a.download = `script ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.mls`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -501,7 +514,6 @@ class CyberRecorderEngine {
         
         // Reset input so the same file can be selected again
         e.target.value = '';
-    }     e.target.value = '';
     }
 }
 
