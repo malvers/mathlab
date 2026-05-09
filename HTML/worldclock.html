@@ -175,6 +175,7 @@
         let cityFontGray = 200; // Dynamic gray for city labels
         let ringFontGray = 222; // Dynamic gray for standard ring hours
         let selectedCity = null; // Currently clicked city
+        let hoveredCity = null; // New for hover preview
 
         function getDisplayTime() {
             const now = new Date();
@@ -230,14 +231,39 @@
         });
 
         window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - (rect.left + rect.width / 2);
+            const my = e.clientY - (rect.top + rect.height / 2);
+
             if (isMouseDown) {
-                const currentAngle = getMouseAngle(e);
+                const currentAngle = Math.atan2(my, mx);
                 let delta = currentAngle - lastMouseAngle;
                 if (delta > Math.PI) delta -= Math.PI * 2;
                 if (delta < -Math.PI) delta += Math.PI * 2;
                 
                 manualOffset -= delta * (1440 / (Math.PI * 2));
                 lastMouseAngle = currentAngle;
+                hoveredCity = null;
+            } else {
+                // Hover hit-test
+                const dist = Math.sqrt(mx*mx + my*my);
+                const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
+                const size = Math.min(rect.width, rect.height) * 0.8;
+                const r = size / 2;
+                const time = getDisplayTime();
+                const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+                const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
+
+                let found = null;
+                cities.forEach(city => {
+                    const cityAngle = (-city.lon + mapRotation - 90);
+                    let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
+                    if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
+                        found = city;
+                    }
+                });
+                hoveredCity = found;
+                canvas.style.cursor = found ? 'pointer' : 'default';
             }
         });
 
@@ -351,7 +377,7 @@
                 } else if (dst === "SZ") {
                     ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
                 } else {
-                    ctx.fillStyle = `rgb(${cityFontGray},${cityFontGray},${cityFontGray})`;
+                    ctx.fillStyle = "#00d2ff"; // Cyan for Winter Time
                 }
                 ctx.font = (city.highlight) ? "900 12px Orbitron" : "bold 11px Orbitron";
                 ctx.textAlign = "center";
@@ -445,22 +471,17 @@
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
                 });
                 const parts = localStr.split(':'); // [HH, MM, SS]
+                                const boxW = 160;
+                const boxH = 80; // More height for "air"
+                const rBox = 5;
+                const teamYOffset = -52; // Recalculated to center the larger team
                 
-                const boxW = 160;
-                const boxH = 60;
-                
-                // Shadow/Glow
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = "rgba(0, 210, 255, 0.4)";
-                
-                // Background Box
+                // Background Box (Harmonized Style)
                 ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
-                ctx.strokeStyle = "#00d2ff";
-                ctx.lineWidth = 2;
-                
-                const rBox = 10;
-                const x = -boxW/2, y = -boxH/2;
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                ctx.lineWidth = 1;
                 ctx.beginPath();
+                const x = -boxW/2, y = -boxH/2 + teamYOffset;
                 ctx.moveTo(x + rBox, y);
                 ctx.lineTo(x + boxW - rBox, y);
                 ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + rBox);
@@ -474,30 +495,95 @@
                 ctx.fill();
                 ctx.stroke();
                 
-                ctx.shadowBlur = 0;
                 ctx.textAlign = "center";
                 
-                // City Name (Top)
-                ctx.fillStyle = "#00d2ff";
-                ctx.font = "bold 10px Orbitron";
-                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 0, -18);
+                // Status (Sommerzeit/Winterzeit)
+                const dstStatus = getDSTLabel(selectedCity.tz);
+                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
+                ctx.font = "900 10px Orbitron";
+                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "WINTERZEIT", 0, y + 18);
                 
-                // --- Digit Widgets (Pure Text Version) ---
+                // Querstrich (Separator)
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(-boxW/2 + 20, y + 26);
+                ctx.lineTo(boxW/2 - 20, y + 26);
+                ctx.stroke();
+
+                // City Name (Top)
+                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
+                ctx.font = "bold 12px Orbitron"; // Larger city name
+                ctx.fillText(selectedCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
+                
+                // --- Digit Widgets ---
                 const drawDigitBox = (val, xPos) => {
                     ctx.fillStyle = "#fff";
-                    ctx.font = "900 20px Orbitron"; // Slightly larger since boxes are gone
-                    ctx.fillText(val, xPos, 15);
+                    ctx.font = "900 20px Orbitron";
+                    ctx.fillText(val, xPos, y + 65);
                 };
 
                 drawDigitBox(parts[0], -40); // HH
                 drawDigitBox(parts[1], 0);   // MM
                 drawDigitBox(parts[2], 40);  // SS
                 
-                // Colons
+                // Colons (Restored)
                 ctx.fillStyle = "#00d2ff";
                 ctx.font = "bold 14px Orbitron";
-                ctx.fillText(":", -20, 11);
-                ctx.fillText(":", 20, 11);
+                ctx.fillText(":", -20, y + 61);
+                ctx.fillText(":", 20, y + 61);
+                
+                // --- Neighborhood Cities (Full Map Database) ---
+                const getRelatedCities = (tz) => {
+                    const db = {
+                        "Europe/Berlin": ["Paris", "Rom", "Madrid", "Wien", "Warschau"],
+                        "Europe/London": ["Lissabon", "Dublin", "Edinburgh", "Porto", "Belfast"],
+                        "America/New_York": ["Toronto", "Miami", "Washington", "Montreal", "Atlanta"],
+                        "America/Chicago": ["Dallas", "Houston", "Winnipeg", "Memphis", "Minneapolis"],
+                        "America/Denver": ["Phoenix", "Salt Lake City", "Calgary", "Edmonton", "El Paso"],
+                        "America/Los_Angeles": ["Vancouver", "Seattle", "Las Vegas", "San Diego", "Tijuana"],
+                        "America/Whitehorse": ["Whitehorse", "Inuvik", "Yellowknife", "Juneau", "Sitka"],
+                        "America/Sao_Paulo": ["Brasilia", "Buenos Aires", "Montevideo", "Asunción", "Santiago"],
+                        "America/Caracas": ["Santo Domingo", "San Juan", "Manaus", "Georgetown", "Paramaribo"],
+                        "Asia/Shanghai": ["Peking", "Singapur", "Hongkong", "Taipeh", "Perth"],
+                        "Asia/Tokyo": ["Seoul", "Osaka", "Sapporo", "Kyoto", "Nagoya"],
+                        "Asia/Dubai": ["Maskat", "Abu Dhabi", "Tiflis", "Baku", "Jerewan"],
+                        "Asia/Kolkata": ["Mumbai", "Neu-Delhi", "Bangalore", "Chennai", "Hyderabad"],
+                        "Asia/Baghdad": ["Kuwait", "Riad", "Aden", "Addis Abeba", "Nairobi"],
+                        "Asia/Karachi": ["Islamabad", "Taschkent", "Samarkand", "Duschanbe", "Kabul"],
+                        "Asia/Bangkok": ["Jakarta", "Hanoi", "Saigon", "Phnom Penh", "Vientiane"],
+                        "Australia/Sydney": ["Melbourne", "Brisbane", "Canberra", "Hobart", "Gold Coast"],
+                        "Pacific/Auckland": ["Wellington", "Christchurch", "Suva", "Nuku'alofa", "Apia"],
+                        "Pacific/Guadalcanal": ["Port Vila", "Nouméa", "Magadan", "Sachalin", "Kamtschatka"],
+                        "Pacific/Honolulu": ["Anchorage", "Papeete", "Rarotonga", "Adak", "Midway"],
+                        "Pacific/Samoa": ["Apia", "Pago Pago", "Niue", "Alofi", "Tokelau"],
+                        "Atlantic/Azores": ["Ponta Delgada", "Angra", "Horta", "Funchal", "Santa Cruz"],
+                        "Atlantic/Cape_Verde": ["Praia", "Mindelo", "Santa Maria", "Sal", "Boa Vista"],
+                        "Africa/Cairo": ["Athen", "Jerusalem", "Beirut", "Amman", "Johannesburg"],
+                        "Africa/Dakar": ["Abidjan", "Bamako", "Conakry", "Freetown", "Monrovia"]
+                    };
+                    return db[tz] || ["Metropol-Region", "Umland", "Lokaler Sektor"];
+                };
+
+                const neighbors = getRelatedCities(selectedCity.tz);
+                const nW = 160, nH = 90; // Increased height for larger font
+                const nx = -nW/2, ny = y + boxH + 5; 
+                
+                // Dark Background for the list (Harmonized)
+                ctx.fillStyle = "rgba(0, 15, 30, 0.9)";
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(nx, ny, nW, nH, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                ctx.font = "400 12px Orbitron"; // Regular weight
+                ctx.textAlign = "center";
+                
+                neighbors.forEach((city, i) => {
+                    ctx.fillText(city, 0, ny + 18 + (i * 16)); // Adjusted spacing
+                });;
                 
                 ctx.restore();
             }
