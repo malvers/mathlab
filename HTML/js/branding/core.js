@@ -80,8 +80,14 @@
 
             container.addEventListener("click", (e) => {
                 if (e.shiftKey) {
-                    const rec = document.getElementById('cyber-recorder-ui');
-                    if (rec) rec.style.display = rec.style.display === 'none' ? 'flex' : 'none';
+                    if (window.CyberRecorder) {
+                        CyberRecorder.toggle();
+                    } else {
+                        const s = document.createElement('script');
+                        s.src = resolveCyberHtmlAsset('js/cyber-recorder.js');
+                        s.onload = () => CyberRecorder.show();
+                        document.head.appendChild(s);
+                    }
                     return;
                 }
                 this.toggleFullscreen();

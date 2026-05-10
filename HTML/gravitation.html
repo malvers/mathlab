@@ -149,12 +149,10 @@
                 const geo = new THREE.BufferGeometry().setFromPoints([from, to]);
                 return new THREE.Line(geo, new THREE.LineBasicMaterial({ color, linewidth: 1 }));
             }
-            const headLen = 0.055, headWid = 0.018;
-            // Positive axes — 3D arrows
-            scene.add(new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), axisLen, 0xff4444, headLen, headWid));
-            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), axisLen, 0x44ff44, headLen, headWid));
-            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), axisLen, 0x4488ff, headLen, headWid));
-            // Negative axes — 3D arrows
+            const headLen = 0.18, headWid = 0.04;
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(1,0,0),  new THREE.Vector3(0,0,0), axisLen,    0xff4444, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0),  new THREE.Vector3(0,0,0), axisLen,    0x44ff44, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,1),  new THREE.Vector3(0,0,0), axisLen,    0x4488ff, headLen, headWid));
             scene.add(new THREE.ArrowHelper(new THREE.Vector3(-1,0,0), new THREE.Vector3(0,0,0), axisNegLen, 0xff4444, headLen, headWid));
             scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,-1,0), new THREE.Vector3(0,0,0), axisNegLen, 0x44ff44, headLen, headWid));
             scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), axisNegLen, 0x4488ff, headLen, headWid));
@@ -221,47 +219,49 @@
                 color: 0x224466, transparent: true, opacity: 0.5
             })));
 
-            // Measurement point M with downward red cone
+            // Measurement point M — cone only, no sphere
             const M = new THREE.Vector3(0.8, 1.8, 0.5);
             const coneH = 0.28;
 
-            // Dot at M
-            const mDot = new THREE.Mesh(
-                new THREE.SphereGeometry(0.04, 16, 16),
-                new THREE.MeshBasicMaterial({ color: 0xff2222 })
-            );
-            mDot.position.copy(M);
-            scene.add(mDot);
-
-            // Red cone tip pointing down, touching M
             const mCone = new THREE.Mesh(
                 new THREE.ConeGeometry(0.06, coneH, 20),
                 new THREE.MeshPhongMaterial({ color: 0xff2222, shininess: 60 })
             );
-            mCone.rotation.x = Math.PI;
+            mCone.rotation.x = Math.PI; // tip points down
             mCone.position.set(M.x, M.y + coneH / 2, M.z);
             scene.add(mCone);
 
-            // Coordinate label sprite next to M
+            // LaTeX-style coordinate label: italic serif vars, upright serif numbers
             function makeCoordSprite(pos) {
                 const c = document.createElement('canvas');
-                c.width = 220; c.height = 100;
+                c.width = 320; c.height = 110;
                 const ctx = c.getContext('2d');
-                ctx.font = 'bold 26px Orbitron, monospace';
-                ctx.fillStyle = '#ff6666';
-                ctx.textAlign = 'left';
+                const varFont  = 'italic 32px "Times New Roman", Georgia, serif';
+                const numFont  = '32px "Times New Roman", Georgia, serif';
+                const color    = '#ff8888';
+
+                function drawLine(varName, val, y) {
+                    ctx.font = varFont;  ctx.fillStyle = color;
+                    ctx.fillText(varName, 8, y);
+                    const vw = ctx.measureText(varName).width;
+                    ctx.font = numFont;
+                    ctx.fillText(` = ${val.toFixed(2)}`, 8 + vw, y);
+                }
+
                 ctx.textBaseline = 'top';
-                ctx.fillText(`x: ${pos.x.toFixed(2)}`, 8, 4);
-                ctx.fillText(`y: ${pos.y.toFixed(2)}`, 8, 36);
-                ctx.fillText(`z: ${pos.z.toFixed(2)}`, 8, 68);
+                drawLine('x', pos.x,  4);
+                drawLine('y', pos.y, 40);
+                drawLine('z', pos.z, 76);
+
                 const tex = new THREE.CanvasTexture(c);
                 const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
                 sp.renderOrder = 999;
-                sp.scale.set(0.55, 0.25, 1);
-                sp.position.set(pos.x + 0.38, pos.y, pos.z);
+                sp.scale.set(0.65, 0.22, 1);
+                sp.position.copy(pos); // updated each frame
                 return sp;
             }
-            scene.add(makeCoordSprite(M));
+            const coordSprite = makeCoordSprite(M);
+            scene.add(coordSprite);
 
             // --- Persistence ---
             const STORE = 'gravitation_view';
@@ -356,9 +356,13 @@
             };
 
             // --- Animate ---
+            const _camRight = new THREE.Vector3();
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
+                // Keep coord label glued to cone's right side in screen space
+                _camRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
+                coordSprite.position.copy(M).addScaledVector(_camRight, 0.38);
                 renderer.render(scene, camera);
             }
             animate();
