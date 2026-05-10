@@ -40,6 +40,7 @@
         </div>
     </nav>
 
+
     <aside id="side-panel" class="collapsed">
         <header id="sidebar-header"></header>
         <div id="ui-container"></div>
@@ -187,6 +188,21 @@
         let flagHitboxes = [];
         let hoveredFlagIndex = null; // Use index to distinguish same flags
 
+        let redCheckHitbox = null; // Hitbox of the in-popup ROT checkbox in canvas coords
+
+        const RED_STORAGE_KEY = 'worldclock.redCities';
+        try {
+            const saved = JSON.parse(localStorage.getItem(RED_STORAGE_KEY) || '[]');
+            const redSet = new Set(saved);
+            cities.forEach(c => { if (redSet.has(c.tz)) c.red = true; });
+        } catch (e) { /* ignore corrupt storage */ }
+        function persistRedCities() {
+            try {
+                const reds = cities.filter(c => c.red).map(c => c.tz);
+                localStorage.setItem(RED_STORAGE_KEY, JSON.stringify(reds));
+            } catch (e) { /* ignore */ }
+        }
+
         function getCountryName(flag) {
             const map = {
                 "🇫🇷": "Frankreich", "🇮🇹": "Italien", "🇪🇸": "Spanien", "🇦🇹": "Österreich", "🇵🇱": "Polen",
@@ -227,10 +243,21 @@
 
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
+            const mxCanvas = e.clientX - rect.left;
+            const myCanvas = e.clientY - rect.top;
             const mx = e.clientX - (rect.left + rect.width / 2);
             const my = e.clientY - (rect.top + rect.height / 2);
             const dist = Math.sqrt(mx*mx + my*my);
             const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
+
+            // ROT-Checkbox hit test (in popup, takes precedence)
+            if (redCheckHitbox && targetCity &&
+                mxCanvas >= redCheckHitbox.x && mxCanvas <= redCheckHitbox.x + redCheckHitbox.w &&
+                myCanvas >= redCheckHitbox.y && myCanvas <= redCheckHitbox.y + redCheckHitbox.h) {
+                targetCity.red = !targetCity.red;
+                persistRedCities();
+                return;
+            }
 
             // Hit test for cities
             let hit = false;
@@ -414,23 +441,26 @@
                 ctx.restore();
 
                 const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
-                if (city.highlight) {
-                    grad.addColorStop(0, '#ffaa00'); 
-                    grad.addColorStop(1, '#e68a00'); 
-                    
+                if (city.red) {
+                    grad.addColorStop(0, '#dd1144');
+                    grad.addColorStop(1, '#1c0008');
+                } else if (city.highlight) {
+                    grad.addColorStop(0, '#ffaa00');
+                    grad.addColorStop(1, '#e68a00');
+
                     ctx.save();
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = '#e68a00';
                 } else {
-                    grad.addColorStop(0, '#0033aa'); 
-                    grad.addColorStop(1, '#000811'); 
+                    grad.addColorStop(0, '#0033aa');
+                    grad.addColorStop(1, '#000811');
                 }
 
                 ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
                 ctx.fill();
-                if (city.highlight) ctx.restore();
+                if (city.highlight && !city.red) ctx.restore();
                 
                 ctx.save();
                 ctx.translate(mx, my);
@@ -522,13 +552,15 @@
             ctx.fillText("● WINTERZEIT", 20, 35);
             ctx.restore();
             
-            const activeCity = hoveredCity || selectedCity;
+            const activeCity = selectedCity;
             if (activeCity) {
                 targetCity = activeCity;
                 displayAlpha = Math.min(1, displayAlpha + 0.15);
             } else {
                 displayAlpha = Math.max(0, displayAlpha - 0.15);
             }
+
+            redCheckHitbox = null; // Reset; will be set when popup is drawn
 
             // 7. Draw Central Selection Time Box (Absolute Center)
             if (displayAlpha > 0 && targetCity) {
@@ -577,9 +609,41 @@
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                
+
+                // ROT-Checkbox (top-left of box)
+                const cbSize = 14;
+                const cbX = x + 8;
+                const cbY = y + 6;
+                ctx.save();
+                ctx.strokeStyle = targetCity.red ? "#550000" : "rgba(0, 210, 255, 0.7)";
+                ctx.lineWidth = 1;
+                ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+                ctx.beginPath();
+                ctx.rect(cbX, cbY, cbSize, cbSize);
+                ctx.fill();
+                ctx.stroke();
+                if (targetCity.red) {
+                    const cbGrad = ctx.createRadialGradient(
+                        cbX + cbSize/2, cbY + cbSize/2, 0,
+                        cbX + cbSize/2, cbY + cbSize/2, cbSize/2
+                    );
+                    cbGrad.addColorStop(0, '#ff2a2a');
+                    cbGrad.addColorStop(1, '#880000');
+                    ctx.fillStyle = cbGrad;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#ff0000';
+                    ctx.fillRect(cbX + 1, cbY + 1, cbSize - 2, cbSize - 2);
+                }
+                ctx.restore();
+                redCheckHitbox = {
+                    x: cx + cbX,
+                    y: cy + cbY,
+                    w: cbSize,
+                    h: cbSize
+                };
+
                 ctx.textAlign = "center";
-                
+
                 // Status (Sommerzeit/Winterzeit)
                 const dstStatus = getDSTLabel(targetCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
