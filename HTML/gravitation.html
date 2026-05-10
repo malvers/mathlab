@@ -369,7 +369,45 @@
             );
             scene.add(rayLine);
 
+            function ensureMOutside() {
+                const shape = document.getElementById('poly-shape')?.value || 'sphere';
+                const stretch = (typeof _sphereStretch !== 'undefined') ? _sphereStretch : 1.0;
+                let kBody = 1, kNewton = 1;
+                const r = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                if (shape === 'cuboid') {
+                    const sx = Math.abs(M.x) / 0.5;
+                    const sy = Math.abs(M.y) / 1.0;
+                    const sz = Math.abs(M.z) / (1.5 * stretch);
+                    const maxS = Math.max(sx, sy, sz);
+                    if (maxS < 1) kBody = 1.001 / Math.max(maxS, 1e-6);
+                    const V = 1 * 2 * 3 * stretch;
+                    const R_eq = Math.cbrt(3 * V / (4 * Math.PI));
+                    if (r < R_eq) kNewton = (R_eq * 1.001) / Math.max(r, 1e-6);
+                } else {
+                    const r2 = M.x*M.x + M.y*M.y + (M.z*M.z) / (stretch*stretch);
+                    if (r2 < 1) kBody = 1.001 / Math.max(Math.sqrt(r2), 1e-6);
+                    const R_eq = Math.cbrt(stretch);
+                    if (r < R_eq) kNewton = (R_eq * 1.001) / Math.max(r, 1e-6);
+                }
+                const k = Math.max(kBody, kNewton);
+                if (k > 1.0001) {
+                    M.x *= k; M.y *= k; M.z *= k;
+                    ['x', 'y', 'z'].forEach(ax => {
+                        const sl = document.getElementById(`m-${ax}-slider`);
+                        const vl = document.getElementById(`m-${ax}-val`);
+                        if (sl) sl.value = M[ax];
+                        if (vl) vl.textContent = M[ax].toFixed(2);
+                    });
+                    const d = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                    const dl = document.getElementById('m-dist-slider');
+                    const dv = document.getElementById('m-dist-val');
+                    if (dl) dl.value = d;
+                    if (dv) dv.textContent = d.toFixed(2);
+                }
+            }
+
             function updateM() {
+                ensureMOutside();
                 mCone.position.set(M.x, M.y, M.z);
                 connectionLines.forEach(line => {
                     const pos = line.geometry.attributes.position;
@@ -454,6 +492,12 @@
             CyberUI.createCard('ui-container', 'Ansicht',
                 makeSwitch('wire-toggle', 'GRADNETZ', true) +
                 makeSwitch('conn-toggle', 'VERBINDUNGEN', true) + `
+                <div style="display:flex; align-items:center; gap:6px; padding:6px 0 3px 0;">
+                    <span style="font-family:Orbitron; font-size:0.65rem; color:var(--neon-blue); letter-spacing:1px;">TRANSP</span>
+                    <input id="opacity-slider" type="range" min="0" max="1" step="0.01" value="0.15"
+                           style="flex:1; accent-color:var(--neon-blue); cursor:pointer;">
+                    <span id="opacity-val" style="font-family:Orbitron; font-size:0.65rem; color:#ccc; width:32px; text-align:right;">0.15</span>
+                </div>
                 <div style="margin-top:10px;">
                     <button class="cyber-btn" onclick="resetView()"
                             style="width:100%; padding:2px 8px; font-size:0.7rem;">
@@ -462,6 +506,21 @@
                 </div>`,
                 '#ffdd00'
             );
+
+            const _opacitySlider = document.getElementById('opacity-slider');
+            const _savedOpacity = localStorage.getItem('gravitation_opacity');
+            if (_savedOpacity) {
+                _opacitySlider.value = _savedOpacity;
+                document.getElementById('opacity-val').textContent = parseFloat(_savedOpacity).toFixed(2);
+                if (sphereMat) sphereMat.opacity = parseFloat(_savedOpacity);
+            }
+            _opacitySlider.addEventListener('input', function() {
+                const v = parseFloat(this.value);
+                document.getElementById('opacity-val').textContent = v.toFixed(2);
+                localStorage.setItem('gravitation_opacity', this.value);
+                if (sphereMat) sphereMat.opacity = v;
+                if (_polySphere) _polySphere.material.opacity = v;
+            });
 
             wireMesh.visible = true;
 
@@ -820,6 +879,7 @@
                 localStorage.setItem('gravitation_stretch', this.value);
                 if (_polyWire)   _polyWire.scale.z   = _sphereStretch;
                 if (_polySphere) _polySphere.scale.z = _sphereStretch;
+                updateM();
                 if (document.getElementById('poly-result').style.display !== 'none') runPolyederGz();
             });
 
@@ -982,6 +1042,11 @@
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
+                if (mCone) {
+                    const dist = camera.position.distanceTo(controls.target);
+                    const s = Math.max(2, dist / 6);
+                    mCone.scale.set(s, s, s);
+                }
                 renderer.render(scene, camera);
             }
             animate();
@@ -1019,18 +1084,25 @@
             function _updatePolyWire(shapeType, wSegs, hSegs) {
                 if (!_polyScene) return;
                 if (_polyWire) _polyScene.remove(_polyWire);
-                let geo;
+                let wireGeo, solidGeo;
                 if (shapeType === 'cuboid') {
-                    geo = new THREE.BoxGeometry(1, 1, 1);
+                    wireGeo  = new THREE.BoxGeometry(1, 2, 3);
+                    solidGeo = new THREE.BoxGeometry(1, 2, 3);
                 } else {
-                    geo = new THREE.SphereGeometry(1, wSegs, hSegs);
+                    wireGeo  = new THREE.SphereGeometry(1, wSegs, hSegs);
+                    solidGeo = new THREE.SphereGeometry(1, 64, 64);
                 }
                 _polyWire = new THREE.Mesh(
-                    geo,
+                    wireGeo,
                     new THREE.MeshBasicMaterial({color:0xff8833, wireframe:true, transparent:true, opacity:0.28})
                 );
                 _polyWire.scale.z = _sphereStretch;
                 _polyScene.add(_polyWire);
+                if (_polySphere) {
+                    _polySphere.geometry.dispose();
+                    _polySphere.geometry = solidGeo;
+                    _polySphere.scale.z = _sphereStretch;
+                }
             }
 
             function initPolyScene() {
@@ -1039,7 +1111,7 @@
                 const pc = document.getElementById('poly-canvas-container');
                 _polyScene = new THREE.Scene();
                 _polyScene.background = new THREE.Color(0x050a14);
-                _polyCamera = new THREE.PerspectiveCamera(45, pc.clientWidth/pc.clientHeight, 0.1, 100);
+                _polyCamera = new THREE.PerspectiveCamera(45, pc.clientWidth/pc.clientHeight, 0.1, 2000);
                 const _polySaved = JSON.parse(localStorage.getItem('gravitation_poly_view') || 'null');
                 if (_polySaved?.cam) {
                     _polyCamera.position.set(_polySaved.cam.x, _polySaved.cam.y, _polySaved.cam.z);
@@ -1113,7 +1185,16 @@
                     new THREE.LineBasicMaterial({color:0x00d2ff, transparent:true, opacity:0.5})
                 );
                 _polyScene.add(_polyRayLine);
-                (function polyLoop(){ requestAnimationFrame(polyLoop); _polyControls.update(); _polyRenderer.render(_polyScene,_polyCamera); })();
+                (function polyLoop(){
+                    requestAnimationFrame(polyLoop);
+                    _polyControls.update();
+                    if (_polyMCone) {
+                        const dist = _polyCamera.position.distanceTo(_polyControls.target);
+                        const s = Math.max(2, dist / 6); // scale relative to default zoom
+                        _polyMCone.scale.set(s, s, s);
+                    }
+                    _polyRenderer.render(_polyScene,_polyCamera);
+                })();
                 window.addEventListener('resize', ()=>{
                     if(!pc.clientWidth) return;
                     _polyCamera.aspect=pc.clientWidth/pc.clientHeight;
@@ -1183,7 +1264,7 @@
             // --- Polyeder Sidebar-Card ---
             CyberUI.createCard('sb-polyeder', 'Polyeder · gz', `
                 <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-family:Orbitron;">KÖRPER</div>
-                <select id="poly-shape" style="width:100%; background:#0d1e30; color:#eee;
+                <select id="poly-shape" onchange="localStorage.setItem('gravitation_poly_shape', this.value); updateM(); runPolyederGz()" style="width:100%; background:#0d1e30; color:#eee;
                     border:1px solid rgba(0,200,255,0.25); border-radius:8px;
                     padding:8px; font-family:Orbitron; font-size:0.8rem; margin-bottom:12px;
                     min-height:36px; height:36px; box-sizing:border-box;">
@@ -1224,13 +1305,14 @@
                     [-w/2, -h/2, -d/2], [w/2, -h/2, -d/2], [w/2, h/2, -d/2], [-w/2, h/2, -d/2],
                     [-w/2, -h/2, d/2],  [w/2, -h/2, d/2],  [w/2, h/2, d/2],  [-w/2, h/2, d/2]
                 ];
+                // CCW vom Außen-Blickwinkel → Außennormalen
                 const faces = [
-                    [0,1,2], [0,2,3],  // bottom
-                    [4,6,5], [4,7,6],  // top
-                    [0,4,5], [0,5,1],  // front
-                    [2,6,7], [2,7,3],  // back
-                    [0,3,7], [0,7,4],  // left
-                    [1,5,6], [1,6,2]   // right
+                    [0,3,2], [0,2,1],  // z=-d/2 (front, n=-z)
+                    [4,5,6], [4,6,7],  // z=+d/2 (back,  n=+z)
+                    [0,5,4], [0,1,5],  // y=-h/2 (bot,   n=-y)
+                    [3,6,2], [3,7,6],  // y=+h/2 (top,   n=+y)
+                    [0,7,3], [0,4,7],  // x=-w/2 (left,  n=-x)
+                    [1,6,5], [1,2,6]   // x=+w/2 (right, n=+x)
                 ];
                 return { vertices, faces };
             }
@@ -1261,8 +1343,8 @@
                 const gz = calculatePolyhedronGz(verticesM, faces, mArr, _sphereRho);
                 let R_equiv;
                 if (shapeType === 'cuboid') {
-                    const baseR = Math.cbrt(3 / (4 * Math.PI));  // unit cube equivalent sphere
-                    R_equiv = Rm * baseR * _sphereStretch;
+                    const V = CUB_W * CUB_H * CUB_D * _sphereStretch;  // volume in scene units (z-stretch)
+                    R_equiv = Rm * Math.cbrt(3 * V / (4 * Math.PI));
                 } else {
                     R_equiv = Rm * Math.cbrt(_sphereStretch);
                 }
