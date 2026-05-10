@@ -10,9 +10,11 @@ class CyberContainerCodec {
     static MAGIC = 0x435245_43; // "CREC"
     static VERSION = 1;
 
-    static encodeWithAudio(events, audioBlob = null) {
+    static async encodeWithAudio(events, audioBlob = null) {
         const eventBuffer = CyberBinaryCodec.encode(events);
-        const audioData = audioBlob ? new Uint8Array(audioBlob) : new Uint8Array(0);
+        const audioData = audioBlob && audioBlob.size > 0
+            ? new Uint8Array(await audioBlob.arrayBuffer())
+            : new Uint8Array(0);
 
         const totalSize = 4 + 1 + 4 + eventBuffer.byteLength + 4 + audioData.length;
         const container = new ArrayBuffer(totalSize);
@@ -952,14 +954,14 @@ class CyberRecorderEngine {
         }
     }
 
-    exportScript() {
+    async exportScript() {
         if (this.events.length === 0) {
             alert("Noch keine Events aufgezeichnet.");
             return;
         }
 
         try {
-            const containerBuffer = CyberContainerCodec.encodeWithAudio(this.events, this.audioBlob);
+            const containerBuffer = await CyberContainerCodec.encodeWithAudio(this.events, this.audioBlob);
             const blob = new Blob([containerBuffer], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
 
@@ -1080,36 +1082,6 @@ class CyberRecorderEngine {
     }
 
     exportAudio() { this.exportAudioMp3(); }
-            const url = URL.createObjectURL(this.audioBlob);
-
-            const now = new Date();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            const ss = String(now.getSeconds()).padStart(2, '0');
-
-            let labName = "lab";
-            const pathParts = window.location.pathname.split('/');
-            const filePart = pathParts[pathParts.length - 1];
-            if (filePart) labName = filePart.replace('.html', '');
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `audio ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.webm`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            this.addDebugLog(`💾 Audio exportiert: ${Math.round(this.audioBlob.size / 1024)}KB`);
-            console.log(`[CyberRecorder] Audio erfolgreich exportiert (${this.audioBlob.size} Bytes).`);
-        } catch (e) {
-            console.error("Audio Export Error:", e);
-            alert("Fehler beim Exportieren des Audios!");
-        }
-    }
 
     importScript(e) {
         const file = e.target.files[0];
