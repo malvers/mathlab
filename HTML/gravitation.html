@@ -219,49 +219,70 @@
                 color: 0x224466, transparent: true, opacity: 0.5
             })));
 
-            // Measurement point M — cone only, no sphere
-            const M = new THREE.Vector3(0.8, 1.8, 0.5);
+            // Measurement point M
+            const M = new THREE.Vector3(1.9, 1.9, 1.9);
             const coneH = 0.28;
 
             const mCone = new THREE.Mesh(
                 new THREE.ConeGeometry(0.06, coneH, 20),
                 new THREE.MeshPhongMaterial({ color: 0xff2222, shininess: 60 })
             );
-            mCone.rotation.x = Math.PI; // tip points down
+            mCone.rotation.x = Math.PI;
             mCone.position.set(M.x, M.y + coneH / 2, M.z);
             scene.add(mCone);
 
-            // LaTeX-style coordinate label: italic serif vars, upright serif numbers
-            function makeCoordSprite(pos) {
+            // Thin red line: cone tip → sign
+            scene.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(M.x, M.y, M.z),
+                    new THREE.Vector3(M.x, M.y - 0.22, M.z)
+                ]),
+                new THREE.LineBasicMaterial({ color: 0xff2222 })
+            ));
+
+            // Sign sprite — narrower, text centered
+            (function() {
+                const W = 200, H = 130, R = 8;
                 const c = document.createElement('canvas');
-                c.width = 320; c.height = 110;
+                c.width = W; c.height = H;
                 const ctx = c.getContext('2d');
-                const varFont  = 'italic 32px "Times New Roman", Georgia, serif';
-                const numFont  = '32px "Times New Roman", Georgia, serif';
-                const color    = '#ff8888';
 
-                function drawLine(varName, val, y) {
-                    ctx.font = varFont;  ctx.fillStyle = color;
-                    ctx.fillText(varName, 8, y);
-                    const vw = ctx.measureText(varName).width;
-                    ctx.font = numFont;
-                    ctx.fillText(` = ${val.toFixed(2)}`, 8 + vw, y);
+                // rounded rect background + border
+                ctx.beginPath();
+                ctx.moveTo(R, 0); ctx.lineTo(W-R, 0);
+                ctx.quadraticCurveTo(W, 0, W, R);
+                ctx.lineTo(W, H-R); ctx.quadraticCurveTo(W, H, W-R, H);
+                ctx.lineTo(R, H);   ctx.quadraticCurveTo(0, H, 0, H-R);
+                ctx.lineTo(0, R);   ctx.quadraticCurveTo(0, 0, R, 0);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(12,4,4,0.85)'; ctx.fill();
+                ctx.strokeStyle = '#ff2222'; ctx.lineWidth = 2.5; ctx.stroke();
+
+                // centered text: italic var + upright number
+                const varFont = 'italic 28px "Times New Roman", Georgia, serif';
+                const numFont = '28px "Times New Roman", Georgia, serif';
+
+                function drawRow(varName, val, y) {
+                    const numStr = ` = ${val.toFixed(2)}`;
+                    ctx.font = varFont;  const vw = ctx.measureText(varName).width;
+                    ctx.font = numFont;  const nw = ctx.measureText(numStr).width;
+                    const startX = (W - vw - nw) / 2;
+                    ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+                    ctx.font = varFont; ctx.fillStyle = '#ff5555'; ctx.fillText(varName, startX, y);
+                    ctx.font = numFont; ctx.fillStyle = '#ff2222'; ctx.fillText(numStr, startX + vw, y);
                 }
+                drawRow('x', M.x,  8);
+                drawRow('y', M.y, 46);
+                drawRow('z', M.z, 84);
 
-                ctx.textBaseline = 'top';
-                drawLine('x', pos.x,  4);
-                drawLine('y', pos.y, 40);
-                drawLine('z', pos.z, 76);
-
-                const tex = new THREE.CanvasTexture(c);
-                const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+                const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+                    map: new THREE.CanvasTexture(c), transparent: true, depthTest: false
+                }));
                 sp.renderOrder = 999;
-                sp.scale.set(0.65, 0.22, 1);
-                sp.position.copy(pos); // updated each frame
-                return sp;
-            }
-            const coordSprite = makeCoordSprite(M);
-            scene.add(coordSprite);
+                sp.scale.set(0.52, 0.34, 1);
+                sp.position.set(M.x, M.y - 0.22 - 0.17, M.z);
+                scene.add(sp);
+            })();
 
             // --- Persistence ---
             const STORE = 'gravitation_view';
@@ -280,6 +301,8 @@
             }
 
             controls.addEventListener('change', saveState);
+
+            wireMesh.visible = true;
 
             // --- Sidebar UI ---
             function makeSwitch(id, label, checked) {
@@ -318,26 +341,9 @@
                 thumb.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
             }
 
-            const wireOn = saved?.wire ?? true;
-
-            const CAM_DEFAULT = { x: 3.5, y: 4.0, z: 6.0 };
-            const SWITCHES_DEFAULT = { wire: true };
-
-            window.resetView = function() {
-                camera.position.set(CAM_DEFAULT.x, CAM_DEFAULT.y, CAM_DEFAULT.z);
-                camera.lookAt(0, 0, 0);
-                controls.target.set(0, 0, 0);
-                controls.update();
-
-                wireMesh.visible = SWITCHES_DEFAULT.wire;
-                document.getElementById('wire-toggle').checked = SWITCHES_DEFAULT.wire;
-                applySwitch('wire-toggle', SWITCHES_DEFAULT.wire);
-
-                saveState();
-            };
-
+            // --- Sidebar: Ansicht ---
             CyberUI.createCard('ui-container', 'Ansicht',
-                makeSwitch('wire-toggle', 'GRADNETZ', wireOn) + `
+                makeSwitch('wire-toggle', 'GRADNETZ', true) + `
                 <div style="margin-top:10px;">
                     <button class="cyber-btn" onclick="resetView()"
                             style="width:100%; border-color:#ff3366; color:#ff3366; padding:8px; font-size:0.7rem;">
@@ -346,23 +352,106 @@
                 </div>`
             );
 
-            wireMesh.visible = wireOn;
-            applySwitch('wire-toggle', wireOn);
-
+            wireMesh.visible = true;
             document.getElementById('wire-toggle')._cb = (on) => {
                 wireMesh.visible = on;
                 applySwitch('wire-toggle', on);
                 saveState();
             };
 
+            window.resetView = function() {
+                camera.position.set(3.5, 4.0, 6.0);
+                camera.lookAt(0, 0, 0);
+                controls.target.set(0, 0, 0);
+                controls.update();
+                wireMesh.visible = true;
+                document.getElementById('wire-toggle').checked = true;
+                applySwitch('wire-toggle', true);
+                saveState();
+            };
+
+            // --- Sidebar: Geometrie ---
+            let currentTriangle = [];
+            let connectionLines = [];
+            let connectionsOn = true;
+
+            window.newTriangle = function() {
+                currentTriangle.forEach(o => scene.remove(o));
+                connectionLines.forEach(o => scene.remove(o));
+                currentTriangle = [];
+                connectionLines = [];
+
+                const pts = randomPointsOnSphere(3);
+                const [a, b, c] = pts.map(p => new THREE.Vector3(...p));
+
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(
+                    new Float32Array([a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z]), 3
+                ));
+                geo.computeVertexNormals();
+                const color = new THREE.Color().setHSL(Math.random(), 0.9, 0.6);
+                const face = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+                    color, transparent: true, opacity: 0.35,
+                    side: THREE.DoubleSide, depthWrite: false
+                }));
+                const edge = new THREE.Line(
+                    new THREE.BufferGeometry().setFromPoints([a, b, c, a]),
+                    new THREE.LineBasicMaterial({ color })
+                );
+                scene.add(face);
+                scene.add(edge);
+                currentTriangle.push(face, edge);
+
+                // Gestrichelte Verbindungslinien Ecken → M
+                const lineMat = new THREE.LineDashedMaterial({
+                    color: 0xffffff, dashSize: 0.06, gapSize: 0.04,
+                    transparent: true, opacity: 0.5
+                });
+                [a, b, c].forEach(pt => {
+                    const line = new THREE.Line(
+                        new THREE.BufferGeometry().setFromPoints([pt, M]),
+                        lineMat
+                    );
+                    line.computeLineDistances();
+                    line.visible = connectionsOn;
+                    scene.add(line);
+                    connectionLines.push(line);
+                });
+            };
+
+            window.clearTriangle = function() {
+                currentTriangle.forEach(o => scene.remove(o));
+                connectionLines.forEach(o => scene.remove(o));
+                currentTriangle = [];
+                connectionLines = [];
+            };
+
+            CyberUI.createCard('ui-container', 'Geometrie', `
+                <div style="display:flex; gap:8px; align-items:stretch; margin-bottom:8px;">
+                    <button class="cyber-btn" onclick="newTriangle()"
+                            style="flex:1; padding:8px; font-size:0.7rem;">
+                        DREIECK
+                    </button>
+                    <button class="cyber-btn" onclick="clearTriangle()" title="Entfernen"
+                            style="width:36px; padding:0; border-color:#ff3366; color:#ff3366; display:flex; align-items:center; justify-content:center;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                ${makeSwitch('conn-toggle', 'VERBINDUNGEN', true)}
+            `);
+
+            document.getElementById('conn-toggle')._cb = (on) => {
+                connectionsOn = on;
+                applySwitch('conn-toggle', on);
+                connectionLines.forEach(l => l.visible = on);
+            };
+
             // --- Animate ---
-            const _camRight = new THREE.Vector3();
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
-                // Keep coord label glued to cone's right side in screen space
-                _camRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
-                coordSprite.position.copy(M).addScaledVector(_camRight, 0.38);
                 renderer.render(scene, camera);
             }
             animate();

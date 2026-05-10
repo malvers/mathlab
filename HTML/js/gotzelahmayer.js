@@ -76,6 +76,27 @@ function calculateTriangleGz(p1, p2, p3, m, rho = 2670) {
     return gz * SI_TO_MGAL;
 }
 
+/**
+ * Erzeugt n gleichverteilte Zufallspunkte auf der Einheitskugel.
+ * Methode: Normalverteilte Koordinaten → Normierung (Marsaglia).
+ * @param {number} n - Anzahl Punkte
+ * @param {number} r - Radius (Standard: 1)
+ * @returns {Array<[x, y, z]>}
+ */
+function randomPointsOnSphere(n = 1, r = 1) {
+    const points = [];
+    for (let i = 0; i < n; i++) {
+        // Box-Muller für normalverteilte Werte
+        const u1 = Math.random(), u2 = Math.random(), u3 = Math.random();
+        const x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        const y = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+        const z = Math.sqrt(-2 * Math.log(u3)) * Math.cos(2 * Math.PI * Math.random());
+        const len = Math.sqrt(x * x + y * y + z * z);
+        points.push([r * x / len, r * y / len, r * z / len]);
+    }
+    return points;
+}
+
 // Beispielaufruf:
 const p1 = [0, 0, 100];
 const p2 = [100, 0, 100];
