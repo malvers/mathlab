@@ -14,6 +14,14 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        #side-panel .cyber-btn {
+            min-height: unset !important;
+            padding: 8px 10px !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 1.5px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -29,11 +37,40 @@
 
     <aside id="side-panel">
         <header id="sidebar-header"></header>
-        <div id="ui-container"></div>
+        <div id="sb-scene"><div id="ui-container"></div></div>
+        <div id="sb-polyeder" style="display:none; overflow-y:auto; flex:1;"></div>
     </aside>
 
-    <main id="main-content">
-        <div id="canvas-container" style="width:100%; height:100%;"></div>
+    <main id="main-content" style="display:flex; flex-direction:column;">
+        <div id="tab-bar" style="
+            display:flex; gap:0; padding:0 8px; align-items:stretch;
+            background:#07111f; border-bottom:1px solid rgba(255,255,255,0.08);
+            flex-shrink:0;">
+            <button id="tab-btn-scene" onclick="switchTab('scene')" style="
+                font-family:Orbitron; font-size:0.6rem; letter-spacing:1px;
+                padding:11px 20px; border:none; border-radius:0; cursor:pointer;
+                background:transparent; color:#eee;
+                border-top:2px solid #f5a623;">SZENE</button>
+            <button id="tab-btn-polyeder" onclick="switchTab('polyeder')" style="
+                font-family:Orbitron; font-size:0.6rem; letter-spacing:1px;
+                padding:11px 20px; border:none; border-radius:0; cursor:pointer;
+                background:transparent; color:#555;
+                border-top:2px solid transparent;">POLYEDER</button>
+        </div>
+
+        <div id="tab-scene" style="flex:1; position:relative;">
+            <div id="canvas-container" style="width:100%; height:100%;"></div>
+            <div id="gz-result" style="
+                display:none; position:absolute; top:12px; left:12px;
+                padding:6px 14px; border-radius:4px;
+                background:#6b8e23; font-family:Orbitron; pointer-events:none;">
+                <div id="gz-val" style="font-size:1rem; color:#0a1628; letter-spacing:1px;">—</div>
+            </div>
+        </div>
+
+        <div id="tab-polyeder" style="flex:1; display:none; overflow:hidden;">
+            <div id="poly-canvas-container" style="width:100%; height:100%; position:relative;"></div>
+        </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -54,6 +91,8 @@
     <script src="js/branding/nav.js?v=542"></script>
     <script src="js/branding.js?v=542"></script>
     <script src="js/ui.js?v=544"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="js/TS.js"></script>
     <script src="js/gotzelahmayer.js"></script>
 
     <script>
@@ -336,7 +375,7 @@
                 makeSwitch('conn-toggle', 'VERBINDUNGEN', true) + `
                 <div style="margin-top:10px;">
                     <button class="cyber-btn" onclick="resetView()"
-                            style="width:100%; padding:8px; font-size:0.7rem;">
+                            style="width:100%; padding:2px 8px; font-size:0.7rem;">
                         RESET VIEW
                     </button>
                 </div>`,
@@ -354,6 +393,14 @@
                 connectionsOn = on;
                 applySwitch('conn-toggle', on);
                 connectionLines.forEach(l => l.visible = on);
+            };
+
+            window.resetPolyView = function() {
+                if (!_polyCamera) return;
+                _polyCamera.position.set(3.5, 4.0, 6.0);
+                _polyCamera.lookAt(0, 0, 0);
+                _polyControls.target.set(0, 0, 0);
+                _polyControls.update();
             };
 
             window.resetView = function() {
@@ -382,7 +429,7 @@
                     new Float32Array([a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z]), 3
                 ));
                 geo.computeVertexNormals();
-                const color = new THREE.Color().setHSL(Math.random(), 0.9, 0.6);
+                const color = new THREE.Color(0xffdd00);
                 const face = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
                     color, transparent: true, opacity: 0.35,
                     side: THREE.DoubleSide, depthWrite: false
@@ -426,7 +473,7 @@
             CyberUI.createCard('ui-container', 'Geometrie', `
 
                 <button class="cyber-btn" onclick="newTriangle()"
-                        style="width:100%; padding:8px; font-size:0.7rem;">
+                        style="width:100%; padding:2px 8px; font-size:0.7rem;">
                     ERZEUGE DREIECK
                 </button>
                 <div style="margin-top:8px;">
@@ -449,15 +496,7 @@
                         <span style="color:#4499ff;">Z</span><span id="dk-z-C" style="color:#eee;">&#8212;</span>
                     </div>
                 </div>
-                <div id="gz-result" style="
-                    margin-top:10px; padding:8px 10px; border-radius:4px;
-                    background:rgba(255,220,0,0.06); border:1px solid rgba(255,220,0,0.25);
-                    font-family:Orbitron; text-align:center; display:none;">
-                    <div style="font-size:0.6rem; color:#ffdd00; letter-spacing:2px; margin-bottom:4px;">gz (GÖTZE)</div>
-                    <div id="gz-val" style="font-size:1.1rem; color:#fff; letter-spacing:1px;">—</div>
-                    <div style="font-size:0.6rem; color:#888; margin-top:2px;">mGal</div>
-                </div>
-            `, '#ffdd00');
+            `, '#ffdd00', { collapsible: true });
 
             let _triVerts = null;
 
@@ -468,8 +507,9 @@
                     [a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z],
                     [M.x, M.y, M.z]
                 );
-                document.getElementById('gz-val').textContent = gz.toFixed(4) + ' mGal';
+                document.getElementById('gz-val').innerHTML = 'g<sub>z</sub> ' + gz.toFixed(4) + ' mGal';
                 document.getElementById('gz-result').style.display = 'block';
+                if (typeof updateNNPrediction === 'function') updateNNPrediction();
             }
 
             const fmtCoord = n => n < 0
@@ -484,6 +524,54 @@
                     document.getElementById('dk-z-' + l).innerHTML = v ? fmtCoord(v.z) : '—';
                 });
             }
+
+            // --- Sidebar: Trainingsdaten ---
+            // Float32Array: 13 floats/Eintrag — ax ay az  bx by bz  cx cy cz  mx my mz  gz
+            const TD_STRIDE = 13;
+            const TD_TOTAL  = 100000;
+            let _trainingData = null; // Float32Array when ready
+
+            window.generateTrainingData = function() {
+                _trainingData = new Float32Array(TD_TOTAL * TD_STRIDE);
+                const CHUNK = 200;
+
+                const btn  = document.getElementById('gen-td-btn');
+                const wrap = document.getElementById('td-progress-wrap');
+                const bar  = document.getElementById('td-bar');
+                const cnt  = document.getElementById('td-count');
+
+                btn.disabled = true;
+                btn.textContent = 'LÄUFT…';
+                wrap.style.display = 'block';
+                bar.style.width = '0%';
+                cnt.textContent = '0';
+
+                const mx = M.x, my = M.y, mz = M.z;
+
+                function runChunk(start) {
+                    const end = Math.min(start + CHUNK, TD_TOTAL);
+                    for (let i = start; i < end; i++) {
+                        const [a, b, c] = randomPointsOnSphere(3);
+                        const gz = calculateTriangleGz(a, b, c, [mx, my, mz]);
+                        const o = i * TD_STRIDE;
+                        _trainingData[o]   = a[0]; _trainingData[o+1] = a[1]; _trainingData[o+2] = a[2];
+                        _trainingData[o+3] = b[0]; _trainingData[o+4] = b[1]; _trainingData[o+5] = b[2];
+                        _trainingData[o+6] = c[0]; _trainingData[o+7] = c[1]; _trainingData[o+8] = c[2];
+                        _trainingData[o+9] = mx;   _trainingData[o+10]= my;   _trainingData[o+11]= mz;
+                        _trainingData[o+12]= gz;
+                    }
+                    bar.style.width = (end / TD_TOTAL * 100) + '%';
+                    cnt.textContent = end;
+                    if (end < TD_TOTAL) {
+                        requestAnimationFrame(() => runChunk(end));
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'ERZEUGE TRAININGSDATEN';
+                    }
+                }
+
+                requestAnimationFrame(() => runChunk(0));
+            };
 
             // --- Sidebar: Messpunkt M ---
             function makeSlider(axis, val) {
@@ -502,7 +590,7 @@
 
             const coordDisplay = `
                 <div style="padding:4px 8px 4px 10px;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.18);border-radius:4px;margin-bottom:8px;display:grid;grid-template-columns:16px 14px 56px 14px 56px 14px 56px;align-items:center;gap:2px 4px;font-family:Orbitron;font-size:0.75rem;letter-spacing:1px;">
-                    <span style="color:#eee;">M</span>
+                    <span style="color:#ffdd00;">M</span>
                     <span style="color:#ff4455;">X</span><span id="m-cx" style="color:#eee;">${fmtCoord(M.x)}</span>
                     <span style="color:#44ff88;">Y</span><span id="m-cy" style="color:#eee;">${fmtCoord(M.y)}</span>
                     <span style="color:#4499ff;">Z</span><span id="m-cz" style="color:#eee;">${fmtCoord(M.z)}</span>
@@ -513,8 +601,187 @@
                 makeSlider('X', M.x) +
                 makeSlider('Y', M.y) +
                 makeSlider('Z', M.z),
-                '#ffdd00'
+                '#ffdd00', { collapsible: true }
             );
+
+            CyberUI.createCard('ui-container', 'Trainingsdaten', `
+                <button class="cyber-btn" id="gen-td-btn" onclick="generateTrainingData()"
+                        style="width:100%; padding:2px 8px; font-size:0.55rem; white-space:nowrap;">
+                    ERZEUGE TRAININGSDATEN
+                </button>
+                <div id="td-progress-wrap" style="display:none; margin-top:10px;">
+                    <div style="font-family:Orbitron; font-size:0.6rem; color:#aaa; margin-bottom:5px; text-align:right;">
+                        <span id="td-count">0</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.05);
+                                border:1px solid rgba(255,221,0,0.25);
+                                border-radius:4px; height:7px; overflow:hidden;">
+                        <div id="td-bar" style="height:100%; width:0%;
+                                                background:linear-gradient(90deg,#ffdd00,#ff8800);
+                                                transition:width 0.05s;"></div>
+                    </div>
+                </div>
+            `, '#ffdd00');
+
+            // --- Sidebar: Neuronales Netz ---
+            CyberUI.createCard('ui-container', 'Neuronales Netz', `
+                <button class="cyber-btn" id="nn-train-btn" onclick="toggleNNTraining()"
+                        style="width:100%; padding:2px 8px; font-size:0.7rem;">
+                    TRAINIEREN
+                </button>
+                <div id="nn-stats" style="display:none; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between;
+                                font-family:Orbitron; font-size:0.6rem; color:#aaa; margin-bottom:2px;">
+                        <span>EPOCH</span><span id="nn-epoch">0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                                font-family:Orbitron; font-size:0.6rem; color:#aaa; margin-bottom:6px;">
+                        <span>LOSS</span><span id="nn-loss">—</span>
+                    </div>
+                    <canvas id="nn-loss-canvas" width="240" height="48"
+                            style="width:100%; height:48px; display:block;
+                                   border:1px solid rgba(255,221,0,0.15); border-radius:3px;">
+                    </canvas>
+                </div>
+                <div id="nn-pred-box" style="display:none; margin-top:10px; padding:8px 10px;
+                            border-radius:4px; background:rgba(255,220,0,0.04);
+                            border:1px solid rgba(255,220,0,0.2);">
+                    <div style="font-size:0.6rem; color:#ffdd00; font-family:Orbitron;
+                                letter-spacing:2px; margin-bottom:6px; text-align:center;">VORHERSAGE</div>
+                    <div style="display:flex; justify-content:space-between;
+                                font-family:Orbitron; font-size:0.6rem; color:#aaa;">
+                        <span>TRUE</span><span id="nn-true" style="color:#eee;">—</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                                font-family:Orbitron; font-size:0.6rem; color:#aaa; margin-top:3px;">
+                        <span>NN</span><span id="nn-pred-val" style="color:#ffdd00;">—</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                                font-family:Orbitron; font-size:0.6rem; color:#aaa; margin-top:3px;">
+                        <span>FEHLER</span><span id="nn-err" style="color:#ff8844;">—</span>
+                    </div>
+                </div>
+            `, '#ffdd00');
+
+            // --- KUGEL ---
+            let _sphereRho = 2670; // intern immer kg/m³
+
+            CyberUI.createCard('ui-container', 'Kugel', `
+                <div style="display:flex; align-items:center; gap:6px; padding:3px 0;">
+                    <input id="rho-slider" type="range" min="1.0" max="5.0" step="0.01" value="2.67"
+                           style="flex:1; accent-color:#f5a623; cursor:pointer;">
+                    <span id="rho-val" style="font-family:Orbitron; font-size:1rem; color:#eee; width:54px; text-align:right;">2.67</span>
+                    <span style="font-family:Orbitron; font-size:1rem; color:var(--neon-blue); white-space:nowrap;">g/cm³</span>
+                </div>
+                <span id="kugel-gz-val" style="display:none;"></span>
+            `, '#f5a623', { collapsible: true });
+
+            const _rhoSlider = document.getElementById('rho-slider');
+            const _savedRho = localStorage.getItem('gravitation_rho');
+            if (_savedRho) {
+                _rhoSlider.value = _savedRho;
+                _sphereRho = parseFloat(_savedRho) * 1000;
+                document.getElementById('rho-val').textContent = parseFloat(_savedRho).toFixed(2);
+            }
+
+            _rhoSlider.addEventListener('input', function() {
+                _sphereRho = parseFloat(this.value) * 1000;
+                document.getElementById('rho-val').textContent = parseFloat(this.value).toFixed(2);
+                localStorage.setItem('gravitation_rho', this.value);
+                recomputeKugelGz();
+            });
+            recomputeKugelGz();
+
+            function recomputeKugelGz() {
+                const { vertices, faces } = makeSpherePolyhedron(1, 32, 16);
+                const gz = calculatePolyhedronGz(vertices, faces, [M.x, M.y, M.z], _sphereRho);
+                document.getElementById('kugel-gz-val').textContent = gz.toFixed(6);
+            }
+
+            // Collapse-Status persistieren
+            (function persistCardState() {
+                const PKEY = 'gravitation_cards';
+                const saved = JSON.parse(localStorage.getItem(PKEY) || '{}');
+                document.querySelectorAll('.instrument-card.collapsible').forEach(card => {
+                    const titleEl = card.querySelector('.instrument-title');
+                    if (!titleEl) return;
+                    const key = titleEl.textContent.replace(/[▶▼◀]/g, '').trim();
+                    if (saved[key]) card.classList.add('collapsed');
+                    titleEl.addEventListener('click', () => {
+                        const state = JSON.parse(localStorage.getItem(PKEY) || '{}');
+                        state[key] = card.classList.contains('collapsed');
+                        localStorage.setItem(PKEY, JSON.stringify(state));
+                    });
+                });
+            })();
+
+            window.toggleNNTraining = function () {
+                const btn = document.getElementById('nn-train-btn');
+                if (GravTF.isRunning) {
+                    GravTF.stopTraining();
+                    btn.textContent = 'TRAINIEREN';
+                } else {
+                    if (!_trainingData) {
+                        const tdBtn = document.getElementById('gen-td-btn');
+                        if (tdBtn) {
+                            tdBtn.style.outline = '2px solid #ff4444';
+                            setTimeout(() => tdBtn.style.outline = '', 1200);
+                        }
+                        return;
+                    }
+                    document.getElementById('nn-stats').style.display = 'block';
+                    btn.textContent = 'STOP';
+                    GravTF.startTraining(_trainingData, {
+                        stepsPerFrame: 8,
+                        batchSize: 128,
+                        onStep: function ({ loss, epoch, lossHistory }) {
+                            document.getElementById('nn-epoch').textContent = epoch;
+                            document.getElementById('nn-loss').textContent = loss.toExponential(2);
+                            drawLossCanvas(lossHistory);
+                            updateNNPrediction();
+                        }
+                    });
+                }
+            };
+
+            function drawLossCanvas(history) {
+                const canvas = document.getElementById('nn-loss-canvas');
+                if (!canvas || history.length < 2) return;
+                const ctx = canvas.getContext('2d');
+                const W = canvas.width, H = canvas.height;
+                ctx.clearRect(0, 0, W, H);
+                const mn = Math.min(...history), mx = Math.max(...history);
+                const rng = mx - mn || 1;
+                ctx.strokeStyle = '#ffdd00';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                history.forEach((v, i) => {
+                    const x = (i / (history.length - 1)) * W;
+                    const y = H - ((v - mn) / rng) * (H - 4) - 2;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            }
+
+            function updateNNPrediction() {
+                if (!_triVerts || !GravTF.ready) {
+                    document.getElementById('nn-pred-box').style.display = 'none';
+                    return;
+                }
+                const [a, b, c] = _triVerts;
+                const inputs = [a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z, M.x, M.y, M.z];
+                const pred = GravTF.predict(inputs);
+                if (pred === null) return;
+                const trueGz = calculateTriangleGz(
+                    [a.x,a.y,a.z],[b.x,b.y,b.z],[c.x,c.y,c.z],[M.x,M.y,M.z]
+                );
+                const err = trueGz !== 0
+                    ? Math.abs((pred - trueGz) / trueGz) * 100 : 0;
+                document.getElementById('nn-true').textContent     = trueGz.toFixed(4) + ' mGal';
+                document.getElementById('nn-pred-val').textContent = pred.toFixed(4)   + ' mGal';
+                document.getElementById('nn-err').textContent      = err.toFixed(1)    + ' %';
+                document.getElementById('nn-pred-box').style.display = 'block';
+            }
 
             // Restore M from saved state
             if (saved?.m) {
@@ -544,6 +811,9 @@
                 document.getElementById('m-cx').innerHTML = fmtCoord(M.x);
                 document.getElementById('m-cy').innerHTML = fmtCoord(M.y);
                 document.getElementById('m-cz').innerHTML = fmtCoord(M.z);
+                recomputeKugelGz();
+                if (_polyMCone) _polyMCone.position.set(M.x, M.y + 0.09, M.z);
+                if (document.getElementById('poly-result').style.display !== 'none') runPolyederGz();
             };
 
             // --- Animate ---
@@ -566,6 +836,220 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, container.clientHeight);
             });
+
+            // --- Poly-Scene (lazy init) ---
+            let _polyInited = false, _polyRenderer = null, _polyScene = null,
+                _polyCamera = null, _polyControls = null, _polyWire = null, _polyMCone = null;
+
+            function _updatePolyWire(wSegs, hSegs) {
+                if (!_polyScene) return;
+                if (_polyWire) _polyScene.remove(_polyWire);
+                _polyWire = new THREE.Mesh(
+                    new THREE.SphereGeometry(1, wSegs, hSegs),
+                    new THREE.MeshBasicMaterial({color:0xff8833, wireframe:true, transparent:true, opacity:0.28})
+                );
+                _polyScene.add(_polyWire);
+            }
+
+            function initPolyScene() {
+                if (_polyInited) return;
+                _polyInited = true;
+                const pc = document.getElementById('poly-canvas-container');
+                _polyScene = new THREE.Scene();
+                _polyScene.background = new THREE.Color(0x050a14);
+                _polyCamera = new THREE.PerspectiveCamera(45, pc.clientWidth/pc.clientHeight, 0.1, 100);
+                _polyCamera.position.set(3.5, 4.0, 6.0); _polyCamera.lookAt(0,0,0);
+                _polyRenderer = new THREE.WebGLRenderer({antialias:true});
+                _polyRenderer.setSize(pc.clientWidth, pc.clientHeight);
+                _polyRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                pc.appendChild(_polyRenderer.domElement);
+                _polyControls = new THREE.OrbitControls(_polyCamera, _polyRenderer.domElement);
+                _polyControls.enableDamping = true;
+                _polyControls.dampingFactor = 0.08;
+                _polyControls.rotateSpeed = 0.6;
+                _polyControls.zoomSpeed = 1.2;
+                _polyControls.panSpeed = 0.8;
+                _polyControls.minDistance = 1.5;
+                _polyControls.maxDistance = 20;
+                _polyScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+                const dl=new THREE.DirectionalLight(0xffeedd,1.2); dl.position.set(3,5,4); _polyScene.add(dl);
+                _polyScene.add(new THREE.Mesh(new THREE.SphereGeometry(1,64,64),
+                    new THREE.MeshPhongMaterial({color:0xff6600,transparent:true,opacity:0.15,
+                        shininess:0,specular:new THREE.Color(0x000000),side:THREE.DoubleSide,depthWrite:false})));
+                _updatePolyWire(32, 16);
+                const aL=2.5, HL=0.18, HW=0.04;
+                [[1,0,0,0xff4444],[-1,0,0,0xff4444],[0,1,0,0x44ff44],[0,-1,0,0x44ff44],
+                 [0,0,1,0x4488ff],[0,0,-1,0x4488ff]].forEach(([x,y,z,c])=>
+                    _polyScene.add(new THREE.ArrowHelper(new THREE.Vector3(x,y,z),new THREE.Vector3(),aL,c,HL,HW)));
+                const lx=makeLabel('x','#ff6666'); lx.position.set(aL+0.22,0,0); _polyScene.add(lx);
+                const ly=makeLabel('y','#66ff66'); ly.position.set(0,aL+0.22,0); _polyScene.add(ly);
+                const lz=makeLabel('z','#6699ff'); lz.position.set(0,0,aL+0.22); _polyScene.add(lz);
+                [['x',0xff4444,'#ff6666'],['y',0x44ff44,'#66ff66'],['z',0x4488ff,'#6699ff']].forEach(([ax,hex,css])=>{
+                    [-2,-1,1,2].forEach(v=>{
+                        const t=0.06; let a,b;
+                        if(ax==='x'){a=new THREE.Vector3(v,-t,0);b=new THREE.Vector3(v,t,0);}
+                        if(ax==='y'){a=new THREE.Vector3(-t,v,0);b=new THREE.Vector3(t,v,0);}
+                        if(ax==='z'){a=new THREE.Vector3(-t,0,v);b=new THREE.Vector3(t,0,v);}
+                        _polyScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),
+                            new THREE.LineBasicMaterial({color:hex})));
+                        const lbl=makeLabel(String(v),css,1.0,true); lbl.scale.set(0.18,0.18,1);
+                        if(ax==='x') lbl.position.set(v,-0.22,0);
+                        if(ax==='y') lbl.position.set(-0.22,v,0);
+                        if(ax==='z') lbl.position.set(-0.22,0,v);
+                        _polyScene.add(lbl);
+                    });
+                });
+                _polyScene.add(new THREE.LineSegments(
+                    new THREE.EdgesGeometry(new THREE.BoxGeometry(4,4,4)),
+                    new THREE.LineBasicMaterial({color:0x224466,transparent:true,opacity:0.5})));
+                const mC=new THREE.Mesh(new THREE.ConeGeometry(0.04,0.18,20),
+                    new THREE.MeshPhongMaterial({color:0xff2222,shininess:60}));
+                mC.rotation.x=Math.PI; mC.position.set(M.x,M.y+0.09,M.z); _polyScene.add(mC);
+                _polyMCone = mC;
+                (function polyLoop(){ requestAnimationFrame(polyLoop); _polyControls.update(); _polyRenderer.render(_polyScene,_polyCamera); })();
+                window.addEventListener('resize', ()=>{
+                    if(!pc.clientWidth) return;
+                    _polyCamera.aspect=pc.clientWidth/pc.clientHeight;
+                    _polyCamera.updateProjectionMatrix();
+                    _polyRenderer.setSize(pc.clientWidth,pc.clientHeight);
+                });
+            }
+
+            // --- Tabs ---
+            window.switchTab = function(name) {
+                localStorage.setItem('gravitation_tab', name);
+                ['scene', 'polyeder'].forEach(t => {
+                    document.getElementById('tab-' + t).style.display = t === name ? (t === 'scene' ? 'block' : 'flex') : 'none';
+                    document.getElementById('tab-' + t).style.flex = t === name ? '1' : '';
+                    const btn = document.getElementById('tab-btn-' + t);
+                    btn.style.borderTop = t === name ? '2px solid #f5a623' : '2px solid transparent';
+                    btn.style.color     = t === name ? '#eee' : '#555';
+                });
+                document.getElementById('sb-scene').style.display    = name === 'scene'    ? '' : 'none';
+                document.getElementById('sb-polyeder').style.display  = name === 'polyeder' ? '' : 'none';
+
+                // Karten mitbewegen: Messpunkt M + Kugel
+                ['Messpunkt M', 'Kugel'].forEach(title => {
+                    const card = Array.from(document.querySelectorAll('.instrument-card')).find(c =>
+                        c.querySelector('.instrument-title')?.textContent.replace(/[▶▼◀]/g,'').trim() === title
+                    );
+                    if (card) {
+                        const target = name === 'scene'
+                            ? document.getElementById('ui-container')
+                            : document.getElementById('sb-polyeder');
+                        target.prepend(card);
+                    }
+                });
+                if (name === 'scene') setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+                if (name === 'polyeder') setTimeout(() => {
+                    initPolyScene();
+                    if (_polyRenderer) {
+                        const pc = document.getElementById('poly-canvas-container');
+                        _polyCamera.aspect = pc.clientWidth / pc.clientHeight;
+                        _polyCamera.updateProjectionMatrix();
+                        _polyRenderer.setSize(pc.clientWidth, pc.clientHeight);
+                    }
+                }, 0);
+            };
+
+            // Tab-Wahl wiederherstellen (nach Funktionsdefinition)
+            const _savedTab = localStorage.getItem('gravitation_tab');
+            if (_savedTab) switchTab(_savedTab);
+
+            // --- Polyeder Sidebar-Card ---
+            CyberUI.createCard('sb-polyeder', 'Polyeder · gz', `
+                <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px;">KÖRPER</div>
+                <select id="poly-shape" style="width:100%; background:#0d1e30; color:#eee;
+                    border:1px solid rgba(0,200,255,0.25); border-radius:3px;
+                    padding:5px 8px; font-family:Orbitron; font-size:0.6rem; margin-bottom:12px;">
+                    <option value="sphere">Kugel (r = 1)</option>
+                </select>
+                <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px;">SEGMENTE</div>
+                <select id="poly-segs" onchange="runPolyederGz()" style="width:100%; background:#0d1e30; color:#eee;
+                    border:1px solid rgba(0,200,255,0.25); border-radius:3px;
+                    padding:5px 8px; font-family:Orbitron; font-size:0.6rem; margin-bottom:12px;">
+                    <option value="16">16 × 8</option>
+                    <option value="32" selected>32 × 16</option>
+                    <option value="64">64 × 32</option>
+                    <option value="128">128 × 64</option>
+                </select>
+                <div style="display:flex; gap:6px; margin-bottom:16px;">
+                    <button class="cyber-btn" onclick="runPolyederGz()"
+                            style="flex:1; padding:8px; font-size:0.65rem;">
+                        BERECHNEN
+                    </button>
+                    <button class="cyber-btn" onclick="resetPolyView()"
+                            style="flex:1; padding:8px; font-size:0.65rem;">
+                        RESET VIEW
+                    </button>
+                </div>
+                <div id="poly-result" style="display:none;">
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">GÖTZE</div>
+                    <div style="background:#f5a623; border-radius:4px; padding:8px 12px;
+                                text-align:center; margin-bottom:10px;">
+                        <div id="poly-gz-val" style="font-size:1rem; color:#0a1628; letter-spacing:1px; font-family:Orbitron;">—</div>
+                    </div>
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">NEWTON (exakt)</div>
+                    <div style="background:#77b521; border-radius:4px; padding:8px 12px; text-align:center; margin-bottom:10px;">
+                        <div id="poly-newton-val" style="font-size:1rem; color:#0a1628; letter-spacing:1px; font-family:Orbitron;">—</div>
+                    </div>
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px;">ABWEICHUNG</div>
+                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+                                border-radius:4px; padding:6px 12px; text-align:center; margin-bottom:10px;">
+                        <div id="poly-diff-val" style="font-size:0.9rem; color:#eee; letter-spacing:1px; font-family:Orbitron;">—</div>
+                    </div>
+                </div>
+            `, '#f5a623');
+
+            // --- Polyeder gz ---
+            window.runPolyederGz = function() {
+                const wSegs = parseInt(document.getElementById('poly-segs').value);
+                const hSegs = wSegs / 2;
+                const Rkm   = 1;
+                const Rm    = Rkm * 1000;                               // scene unit → meters
+                const mArr  = [M.x * Rm, M.y * Rm, M.z * Rm];         // M in meters
+
+                const { vertices, faces } = makeSpherePolyhedron(1, wSegs, hSegs);
+                const verticesM = vertices.map(([vx, vy, vz]) => [vx * Rm, vy * Rm, vz * Rm]);
+
+                const gzNewt = calculateSphereNewton(Rm, _sphereRho, mArr);
+                // TODO: Debug Götze formula — currently giving ~6× too large
+                // const gz = calculatePolyhedronGz(verticesM, faces, mArr, _sphereRho);
+
+                const newtInside = isNaN(gzNewt);
+                const newtZero   = !newtInside && Math.abs(M.z) < 1e-6;
+                const diff       = newtZero ? null : 0;  // No comparison yet
+
+                _updatePolyWire(wSegs, hSegs);
+
+                // (Götze disabled — formula bug being debugged)
+                document.getElementById('poly-gz-val').innerHTML = '—';
+
+                let newtHTML;
+                if (newtInside) {
+                    newtHTML = '<span style="font-size:0.75rem;color:#ff6644;">P liegt innerhalb der Kugel</span>';
+                } else if (newtZero) {
+                    newtHTML = 'g<sub>z</sub> 0 <span style="font-size:0.55rem;color:#888;">'
+                             + '(M.z = 0: Symmetrie ↕ hebt sich auf)</span>';
+                } else {
+                    newtHTML = 'g<sub>z</sub> ' + gzNewt.toFixed(6) + ' mGal';
+                }
+                document.getElementById('poly-newton-val').innerHTML = newtHTML;
+
+                const diffEl = document.getElementById('poly-diff-val');
+                diffEl.textContent = '—';
+                diffEl.style.color = '#555';
+
+                const mDistKm = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                document.getElementById('poly-stats').innerHTML =
+                    'Facetten: ' + faces.length + ' &nbsp;·&nbsp; Vertices: ' + vertices.length
+                    + '<br>R = 1.00 km &nbsp;·&nbsp; |P| = ' + mDistKm.toFixed(2) + ' km'
+                    + '<br>Dichte: ' + (_sphereRho / 1000).toFixed(2) + ' g/cm³';
+                document.getElementById('poly-result').style.display = 'block';
+            };
+
+            runPolyederGz();
+
         });
     </script>
 </body>
