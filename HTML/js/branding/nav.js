@@ -111,23 +111,14 @@
             (() => {
                 const labName = window.location.pathname.split('/').pop().replace('.html', '');
                 const base = new URL('.', document.baseURI).href + 'recordings/';
-                const url = base + 'index.json';
-                console.log('[play-btn] checking', url, 'for lab', labName);
                 const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
+                xhr.open('GET', base + 'index.json', true);
                 xhr.responseType = 'json';
                 xhr.onload = () => {
-                    console.log('[play-btn] xhr loaded, status:', xhr.status, 'response:', xhr.response);
                     if (xhr.status !== 0 && xhr.status !== 200) return;
                     const index = xhr.response;
-                    if (index && index[labName]) {
-                        console.log('[play-btn] match found → showing button');
-                        playBtn.style.removeProperty('display');
-                    } else {
-                        console.log('[play-btn] no match for', labName, 'in', index ? Object.keys(index) : 'null index');
-                    }
+                    if (index && index[labName]) playBtn.style.removeProperty('display');
                 };
-                xhr.onerror = () => console.log('[play-btn] xhr error for', url);
                 xhr.send();
             })();
             playBtn.onclick = () => {
