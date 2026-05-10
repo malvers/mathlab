@@ -269,7 +269,14 @@ class CyberRecorderEngine {
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            cursor: pointer;
+            user-select: none;
         `;
+        title.onclick = () => {
+            if (!this.debugContainer) return;
+            const visible = this.debugContainer.style.display === 'flex';
+            this.debugContainer.style.display = visible ? 'none' : 'flex';
+        };
         titleContainer.appendChild(title);
 
         // Create debug box first so it's available for audioBtn
@@ -458,6 +465,7 @@ class CyberRecorderEngine {
 
         titleContainer.appendChild(audioBtn);
         this.audioCheckbox = audioBtn;
+        this.audioBtnSetState = setAudioBtnState;
         this.recordAudio = true;
         setAudioBtnState(true);
 
@@ -543,11 +551,8 @@ class CyberRecorderEngine {
         this.btnImport = btnImport;
         this.btnExport = btnExport;
 
-        // Show debug box by default since recordAudio starts as true
-        if (this.recordAudio && this.debugContainer && this.debugBox) {
-            this.debugContainer.style.display = 'flex';
-            this.debugBox.textContent = '🎤 Audio Debug Log\n' + '='.repeat(30) + '\n';
-        }
+        // Debug box default OFF
+        if (this.debugContainer) this.debugContainer.style.display = 'none';
 
         // Match debug container width to recorder UI
         requestAnimationFrame(() => {
@@ -640,6 +645,16 @@ class CyberRecorderEngine {
             this.audioChunks = [];
             this.audioBlob = null;
 
+            // Grey out mic button while waiting for permission
+            if (this.audioCheckbox) {
+                this.audioCheckbox.style.opacity = '0.4';
+                this.audioCheckbox.style.pointerEvents = 'none';
+                this.audioCheckbox.style.background = 'rgba(100,100,100,0.2)';
+                this.audioCheckbox.style.borderColor = 'rgba(150,150,150,0.4)';
+                this.audioCheckbox.style.color = '#888';
+                this.audioCheckbox.style.boxShadow = 'none';
+            }
+
             const audioConstraints = this.selectedDeviceId
                 ? { deviceId: { exact: this.selectedDeviceId } }
                 : true;
@@ -651,6 +666,13 @@ class CyberRecorderEngine {
                     this.addDebugLog(`   device: ${settings.deviceId?.slice(0,8)}... ${settings.sampleRate}Hz`);
                     // Refresh mic list now that we have permission
                     if (this._refreshMicList) this._refreshMicList();
+
+                    // Restore mic button to green (permission granted)
+                    if (this.audioCheckbox && this.audioBtnSetState) {
+                        this.audioCheckbox.style.opacity = '1';
+                        this.audioCheckbox.style.pointerEvents = 'auto';
+                        this.audioBtnSetState(true);
+                    }
                     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
                         ? 'audio/webm;codecs=opus' : 'audio/webm';
                     this.addDebugLog(`   codec: ${mimeType}`);
