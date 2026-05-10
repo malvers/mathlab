@@ -365,16 +365,25 @@ class CyberRecorderEngine {
         };
         this.micSelect = micSelect;
 
-        // Populate mic list
-        navigator.mediaDevices.enumerateDevices().then(devices => {
-            const mics = devices.filter(d => d.kind === 'audioinput');
-            mics.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.deviceId;
-                opt.textContent = d.label || `Mikrofon ${d.deviceId.slice(0,6)}`;
-                micSelect.appendChild(opt);
+        this._refreshMicList = () => {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                const mics = devices.filter(d => d.kind === 'audioinput');
+                micSelect.innerHTML = '';
+                mics.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.deviceId;
+                    opt.textContent = d.label || `Mikrofon ${d.deviceId.slice(0,6)}`;
+                    if (d.deviceId === this.selectedDeviceId) opt.selected = true;
+                    micSelect.appendChild(opt);
+                });
+                if (mics.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.textContent = '(Erst Record drücken)';
+                    micSelect.appendChild(opt);
+                }
             });
-        });
+        };
+        this._refreshMicList();
 
         debugHeader.appendChild(debugTitle);
         debugHeader.appendChild(micSelect);
@@ -507,7 +516,7 @@ class CyberRecorderEngine {
             e.preventDefault();
             e.stopPropagation();
             console.log("[AudioExport] Button clicked", { audioBlob: this.audioBlob?.size });
-            this.exportAudio();
+            this.exportAudioMp3();
         };
         
         const fileInput = document.createElement('input');
@@ -638,6 +647,8 @@ class CyberRecorderEngine {
                     const settings = track.getSettings();
                     this.addDebugLog(`✅ Stream: ${track.label}`);
                     this.addDebugLog(`   device: ${settings.deviceId?.slice(0,8)}... ${settings.sampleRate}Hz`);
+                    // Refresh mic list now that we have permission
+                    if (this._refreshMicList) this._refreshMicList();
                     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
                         ? 'audio/webm;codecs=opus' : 'audio/webm';
                     this.addDebugLog(`   codec: ${mimeType}`);
@@ -942,6 +953,46 @@ class CyberRecorderEngine {
     }
 
     exportScript() {
+        if (this.events.length === 0) {
+            alert("Noch keine Events aufgezeichnet.");
+            return;
+        }
+
+        try {
+            const containerBuffer = CyberContainerCodec.encodeWithAudio(this.events, this.audioBlob);
+            const blob = new Blob([containerBuffer], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm  = String(now.getMonth() + 1).padStart(2, '0');
+            const dd  = String(now.getDate()).padStart(2, '0');
+            const hh  = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss  = String(now.getSeconds()).padStart(2, '0');
+
+            let labName = "lab";
+            const filePart = window.location.pathname.split('/').pop();
+            if (filePart) labName = filePart.replace('.html', '');
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `script ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.mls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            const audioInfo = this.audioBlob ? ` + ${Math.round(this.audioBlob.size / 1024)}KB Audio` : '';
+            this.addDebugLog(`✅ .mls gespeichert (${Math.round(containerBuffer.byteLength / 1024)}KB${audioInfo})`);
+        } catch (e) {
+            console.error("Export Error:", e);
+            this.addDebugLog(`❌ Export Fehler: ${e.message}`);
+            alert("Fehler: " + e.message);
+        }
+    }
+
+    exportAudioMp3() {
         if (!this.audioBlob || this.audioBlob.size === 0) {
             alert("Kein Audio aufgezeichnet.");
             return;
@@ -1028,16 +1079,7 @@ class CyberRecorderEngine {
         }
     }
 
-    exportAudio() {
-        this.addDebugLog(`📥 exportAudio() aufgerufen. audioBlob: ${this.audioBlob ? this.audioBlob.size + ' bytes' : 'null'}`);
-
-        if (!this.audioBlob || this.audioBlob.size === 0) {
-            this.addDebugLog(`❌ Kein Audio vorhanden!`);
-            alert("Kein Audio aufgezeichnet.");
-            return;
-        }
-
-        try {
+    exportAudio() { this.exportAudioMp3(); }
             const url = URL.createObjectURL(this.audioBlob);
 
             const now = new Date();
