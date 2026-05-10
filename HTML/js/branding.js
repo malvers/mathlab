@@ -210,7 +210,7 @@ const CyberBranding = {
         if (window.CyberBrandingNav || this._navLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = resolveCyberHtmlAsset("js/branding/nav.js");
+        script.src = resolveCyberHtmlAsset("js/branding/nav.js") + "?v=" + Date.now();
         script.async = true;
         script.dataset.cyberBrandingNav = "1";
         script.onerror = () => {
@@ -226,7 +226,7 @@ const CyberBranding = {
         if (window.CyberBrandingOverlays || this._overlaysLoadRequested) return;
 
         const script = document.createElement("script");
-        script.src = resolveCyberHtmlAsset("js/branding/overlays.js");
+        script.src = resolveCyberHtmlAsset("js/branding/overlays.js") + "?v=" + Date.now();
         script.async = true;
         script.dataset.cyberBrandingOverlays = "1";
         script.onerror = () => {
