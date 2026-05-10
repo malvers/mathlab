@@ -610,4 +610,16 @@ class CyberRecorderEngine {
 }
 
 // Global instance
-window.CyberRecorder = new CyberRecorderEngine();
+const _rec = new CyberRecorderEngine();
+
+_rec.show = function() {
+    this.init();
+    if (this.ui) this.ui.style.display = 'flex';
+};
+
+_rec.toggle = function() {
+    if (!this.ui) { this.show(); return; }
+    this.ui.style.display = this.ui.style.display === 'none' ? 'flex' : 'none';
+};
+
+window.CyberRecorder = _rec;
