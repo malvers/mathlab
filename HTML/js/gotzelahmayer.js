@@ -55,9 +55,11 @@ function calculateTriangleGz(p1, p2, p3, m, rho = 2670) {
         sumLogTerms += dj * L;
     }
 
-    // 4. gz nach Götze & Lahmeyer
-    // TODO: Faktor 6 — Ursache noch zu klären (Ikosphäre-Implementierung pending)
-    return G * rho * (zp * omega - sumLogTerms) * SI_TO_MGAL / 6;
+    // 4. gz nach Götze & Lahmeyer (1988)
+    // g_z = G·ρ·Σ_faces n_z · (zp·Ω − Σ d·L)
+    // Der Faktor n[2] = z-Komponente der Außennormale ist essentiell:
+    // Gauss → g_z = −G·ρ·∮ (n_z/r) dS, mit S_face = zp·Ω − sumLogTerms = −∫_F(1/r)dS
+    return G * rho * n[2] * (zp * omega - sumLogTerms) * SI_TO_MGAL;
 }
 
 /**
@@ -188,23 +190,21 @@ function makeSpherePolyhedron(r = 1, subdivisions = 2, hSegs = undefined) {
 }
 
 /**
- * Analytische Lösung (Newton/Shell-Theorem) für den Betrag der Schwere
- * einer homogenen Vollkugel: |g| = G·M/r²
+ * Analytische Lösung (Newton/Shell-Theorem) für die z-Komponente der
+ * Schwere einer homogenen Vollkugel: g_z = -G·M·m_z/r³
  * Außerhalb der Kugel ist das Feld identisch mit einem Punktmasse-Feld im Zentrum.
- * Vorzeichen negativ → Feld zeigt von M zum Zentrum.
  * @param {number} R - Kugelradius [m]
  * @param {number} rho - Dichte [kg/m³]
  * @param {Array} m - Messpunkt [x, y, z]
- * @returns {number} |g| in mGal (mit negativem Vorzeichen)
+ * @returns {number} g_z in mGal
  */
 function calculateSphereNewton(R = 1, rho = 2670, m) {
     const G = 6.67430e-11;
     const SI_TO_MGAL = 100000;
     const M_total = (4 / 3) * Math.PI * R * R * R * rho;
-    const r2 = m[0]*m[0] + m[1]*m[1] + m[2]*m[2];
-    const r  = Math.sqrt(r2);
+    const r = Math.sqrt(m[0]*m[0] + m[1]*m[1] + m[2]*m[2]);
     if (r <= R) return NaN; // innerhalb der Kugel nicht definiert
-    return -G * M_total / r2 * SI_TO_MGAL;
+    return -G * M_total * m[2] / (r * r * r) * SI_TO_MGAL;
 }
 
 // Beispielaufruf:
