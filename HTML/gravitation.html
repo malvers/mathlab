@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Gravitation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container" style="width:100%; height:100%;"></div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js?v=542"></script>
+    <script src="js/branding/overlays.js?v=542"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js?v=542"></script>
+    <script src="js/branding.js?v=542"></script>
+    <script src="js/ui.js?v=544"></script>
+    <script src="js/gotzelahmayer.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        window.addEventListener('load', () => {
+            CyberBranding.init({
+                useExternalStyles: true,
+                title: CyberI18n.get('ui.coach_title'),
+                subtitle: 'Gravitation',
+            });
+            CyberUI.init();
+
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+                CyberLeftChrome.configure({ viewportOnlyZoom: true });
+            }
+
+            // --- Three.js Scene ---
+            const container = document.getElementById('canvas-container');
+
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050a14);
+
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(3.5, 4.0, 6.0);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = false;
+            controls.autoRotate = false;
+            controls.minDistance = 2;
+            controls.maxDistance = 20;
+
+            // Beleuchtung
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+            dirLight.position.set(3, 5, 4);
+            scene.add(dirLight);
+
+            const backLight = new THREE.DirectionalLight(0x4466ff, 0.4);
+            backLight.position.set(-3, -2, -4);
+            scene.add(backLight);
+
+            // Transparente orange Kugel Radius 1
+            const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
+            const sphereMat = new THREE.MeshPhongMaterial({
+                color: 0xff6600,
+                transparent: true,
+                opacity: 0.15,
+                shininess: 0,
+                specular: new THREE.Color(0x000000),
+                side: THREE.DoubleSide,
+                depthWrite: false,
+            });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            scene.add(sphere);
+
+            // Wireframe Umriss
+            const wireGeo = new THREE.SphereGeometry(1, 24, 16);
+            const wireMat = new THREE.MeshBasicMaterial({
+                color: 0xff8833,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15,
+            });
+            const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+            scene.add(wireMesh);
+
+            // Coordinate axes
+            const axisLen = 2.5;
+            const axisNegLen = axisLen;
+
+            function makeAxisLine(from, to, color) {
+                const geo = new THREE.BufferGeometry().setFromPoints([from, to]);
+                return new THREE.Line(geo, new THREE.LineBasicMaterial({ color, linewidth: 1 }));
+            }
+            const headLen = 0.055, headWid = 0.018;
+            // Positive axes — 3D arrows
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), axisLen, 0xff4444, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), axisLen, 0x44ff44, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), axisLen, 0x4488ff, headLen, headWid));
+            // Negative axes — 3D arrows
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(-1,0,0), new THREE.Vector3(0,0,0), axisNegLen, 0xff4444, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,-1,0), new THREE.Vector3(0,0,0), axisNegLen, 0x44ff44, headLen, headWid));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), axisNegLen, 0x4488ff, headLen, headWid));
+
+            // Axis labels — LaTeX-style sprites
+            // axis letters: italic serif; numbers: upright serif (LaTeX math mode convention)
+            function makeLabel(text, color, alpha = 1.0, isNumber = false) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.font = isNumber
+                    ? '56px "Times New Roman", Georgia, serif'
+                    : 'italic 72px "Times New Roman", Georgia, serif';
+                ctx.fillStyle = color;
+                ctx.globalAlpha = alpha;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, 64, 68);
+                const tex = new THREE.CanvasTexture(canvas);
+                const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+                const sprite = new THREE.Sprite(mat);
+                sprite.renderOrder = 999;
+                sprite.scale.set(0.22, 0.22, 1);
+                return sprite;
+            }
+
+            // Axis name labels at tips
+            const lx = makeLabel('x', '#ff6666'); lx.position.set(axisLen + 0.22, 0, 0); scene.add(lx);
+            const ly = makeLabel('y', '#66ff66'); ly.position.set(0, axisLen + 0.22, 0); scene.add(ly);
+            const lz = makeLabel('z', '#6699ff'); lz.position.set(0, 0, axisLen + 0.22); scene.add(lz);
+
+            // Tick marks + number labels at integers up to 2 (and -1)
+            function makeTick(pos, axis, color) {
+                const t = 0.06;
+                let a, b;
+                if (axis === 'x') { a = new THREE.Vector3(pos, -t, 0); b = new THREE.Vector3(pos,  t, 0); }
+                if (axis === 'y') { a = new THREE.Vector3(-t, pos, 0); b = new THREE.Vector3( t, pos, 0); }
+                if (axis === 'z') { a = new THREE.Vector3(-t, 0, pos); b = new THREE.Vector3( t, 0, pos); }
+                scene.add(makeAxisLine(a, b, color));
+            }
+
+            function addTicksForAxis(axis, color, hexColor) {
+                const posVals = [1, 2];
+                const negVals = [-1, -2];
+                [...posVals, ...negVals].forEach(v => {
+                    makeTick(v, axis, hexColor);
+                    const lbl = makeLabel(String(v), color, 1.0, true);
+                    lbl.scale.set(0.18, 0.18, 1);
+                    const off = 0.22;
+                    if (axis === 'x') lbl.position.set(v, -off, 0);
+                    if (axis === 'y') lbl.position.set(-off, v, 0);
+                    if (axis === 'z') lbl.position.set(-off, 0, v);
+                    scene.add(lbl);
+                });
+            }
+
+            addTicksForAxis('x', '#ff6666', 0xff4444);
+            addTicksForAxis('y', '#66ff66', 0x44ff44);
+            addTicksForAxis('z', '#6699ff', 0x4488ff);
+
+            // Wireframe reference cube −2…+2
+            const cubeEdges = new THREE.EdgesGeometry(new THREE.BoxGeometry(4, 4, 4));
+            scene.add(new THREE.LineSegments(cubeEdges, new THREE.LineBasicMaterial({
+                color: 0x224466, transparent: true, opacity: 0.5
+            })));
+
+            // Measurement point M with downward red cone
+            const M = new THREE.Vector3(0.8, 1.8, 0.5);
+            const coneH = 0.28;
+
+            // Dot at M
+            const mDot = new THREE.Mesh(
+                new THREE.SphereGeometry(0.04, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0xff2222 })
+            );
+            mDot.position.copy(M);
+            scene.add(mDot);
+
+            // Red cone tip pointing down, touching M
+            const mCone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.06, coneH, 20),
+                new THREE.MeshPhongMaterial({ color: 0xff2222, shininess: 60 })
+            );
+            mCone.rotation.x = Math.PI;
+            mCone.position.set(M.x, M.y + coneH / 2, M.z);
+            scene.add(mCone);
+
+            // Coordinate label sprite next to M
+            function makeCoordSprite(pos) {
+                const c = document.createElement('canvas');
+                c.width = 220; c.height = 100;
+                const ctx = c.getContext('2d');
+                ctx.font = 'bold 26px Orbitron, monospace';
+                ctx.fillStyle = '#ff6666';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`x: ${pos.x.toFixed(2)}`, 8, 4);
+                ctx.fillText(`y: ${pos.y.toFixed(2)}`, 8, 36);
+                ctx.fillText(`z: ${pos.z.toFixed(2)}`, 8, 68);
+                const tex = new THREE.CanvasTexture(c);
+                const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+                sp.renderOrder = 999;
+                sp.scale.set(0.55, 0.25, 1);
+                sp.position.set(pos.x + 0.38, pos.y, pos.z);
+                return sp;
+            }
+            scene.add(makeCoordSprite(M));
+
+            // --- Persistence ---
+            const STORE = 'gravitation_view';
+            const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+
+            if (saved?.cam) {
+                camera.position.set(saved.cam.x, saved.cam.y, saved.cam.z);
+                camera.lookAt(0, 0, 0);
+            }
+
+            function saveState() {
+                localStorage.setItem(STORE, JSON.stringify({
+                    cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+                    wire: wireMesh.visible,
+                }));
+            }
+
+            controls.addEventListener('change', saveState);
+
+            // --- Sidebar UI ---
+            function makeSwitch(id, label, checked) {
+                const on = checked;
+                return `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+                    <span style="font-family:Orbitron; font-size:0.7rem; color:var(--neon-blue); letter-spacing:1px;">${label}</span>
+                    <label style="position:relative; display:inline-block; width:40px; height:22px; cursor:pointer;">
+                        <input type="checkbox" id="${id}" ${on ? 'checked' : ''}
+                               style="opacity:0; width:0; height:0; position:absolute;"
+                               onchange="document.getElementById('${id}')._cb(this.checked)">
+                        <span id="${id}-knob" style="
+                            position:absolute; top:0; left:0; right:0; bottom:0;
+                            background:${on ? 'rgba(0,210,255,0.25)' : 'rgba(255,255,255,0.05)'};
+                            border:1px solid ${on ? 'rgba(0,210,255,0.5)' : 'rgba(255,255,255,0.2)'};
+                            border-radius:11px; transition:background 0.2s;">
+                            <span id="${id}-thumb" style="
+                                position:absolute; top:3px; left:3px;
+                                width:14px; height:14px;
+                                background:${on ? '#00d2ff' : 'rgba(255,255,255,0.3)'};
+                                border-radius:50%; transition:transform 0.2s;
+                                transform:${on ? 'translateX(18px)' : 'translateX(0)'};
+                            "></span>
+                        </span>
+                    </label>
+                </div>`;
+            }
+
+            function applySwitch(id, on) {
+                const knob = document.getElementById(id + '-knob');
+                const thumb = document.getElementById(id + '-thumb');
+                if (!knob) return;
+                knob.style.background = on ? 'rgba(0,210,255,0.25)' : 'rgba(255,255,255,0.05)';
+                knob.style.borderColor = on ? 'rgba(0,210,255,0.5)' : 'rgba(255,255,255,0.2)';
+                thumb.style.background = on ? '#00d2ff' : 'rgba(255,255,255,0.3)';
+                thumb.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
+            }
+
+            const wireOn = saved?.wire ?? true;
+
+            const CAM_DEFAULT = { x: 3.5, y: 4.0, z: 6.0 };
+            const SWITCHES_DEFAULT = { wire: true };
+
+            window.resetView = function() {
+                camera.position.set(CAM_DEFAULT.x, CAM_DEFAULT.y, CAM_DEFAULT.z);
+                camera.lookAt(0, 0, 0);
+                controls.target.set(0, 0, 0);
+                controls.update();
+
+                wireMesh.visible = SWITCHES_DEFAULT.wire;
+                document.getElementById('wire-toggle').checked = SWITCHES_DEFAULT.wire;
+                applySwitch('wire-toggle', SWITCHES_DEFAULT.wire);
+
+                saveState();
+            };
+
+            CyberUI.createCard('ui-container', 'Ansicht',
+                makeSwitch('wire-toggle', 'GRADNETZ', wireOn) + `
+                <div style="margin-top:10px;">
+                    <button class="cyber-btn" onclick="resetView()"
+                            style="width:100%; border-color:#ff3366; color:#ff3366; padding:8px; font-size:0.7rem;">
+                        RESET VIEW
+                    </button>
+                </div>`
+            );
+
+            wireMesh.visible = wireOn;
+            applySwitch('wire-toggle', wireOn);
+
+            document.getElementById('wire-toggle')._cb = (on) => {
+                wireMesh.visible = on;
+                applySwitch('wire-toggle', on);
+                saveState();
+            };
+
+            // --- Animate ---
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        });
+    </script>
+</body>
+
+</html>

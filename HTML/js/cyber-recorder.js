@@ -175,12 +175,28 @@ class CyberRecorderEngine {
             align-items: center;
         `;
         
+        if (!document.getElementById('cyber-recorder-style')) {
+            const s = document.createElement('style');
+            s.id = 'cyber-recorder-style';
+            s.textContent = `@keyframes rec-blink{0%,100%{opacity:1}50%{opacity:0}}.rec-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff3333;animation:rec-blink .7s ease-in-out infinite;vertical-align:middle;margin-right:6px;flex-shrink:0}`;
+            document.head.appendChild(s);
+        }
+
         const title = document.createElement('div');
         title.innerText = "RECORDER";
-        title.style.fontSize = "0.7rem";
-        title.style.color = "rgba(0, 210, 255, 0.8)";
-        title.style.marginRight = "5px";
+        title.style.cssText = `
+            font-size: 0.7rem;
+            color: rgba(0, 210, 255, 0.8);
+            letter-spacing: 1px;
+            width: 115px;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        `;
         ui.appendChild(title);
+        this.titleEl = title;
 
         const btnStyle = `
             background: rgba(0, 210, 255, 0.1);
@@ -293,11 +309,14 @@ class CyberRecorderEngine {
         this.startTime = performance.now();
         this.lastMouseTime = 0;
         
+        this.titleEl.innerHTML = '<span class="rec-dot"></span>RECORDING';
+        this.titleEl.style.color = '#ff4444';
+
         this.btnRec.innerHTML = REC_SVG.stop;
         this.btnRec.style.background = "rgba(255, 0, 0, 0.3)";
         this.btnRec.style.color = "#ff4444";
         this.btnRec.style.borderColor = "#ff4444";
-        
+
         this.btnPlay.style.opacity = "0.3";
         this.btnPlay.style.pointerEvents = "none";
         this.btnImport.style.opacity = "0.3";
@@ -347,26 +366,36 @@ class CyberRecorderEngine {
         
         this.mode = 'idle';
         if (this.ui) this.ui.style.display = 'flex';
-        
-        // Reset UI
+
+        this.titleEl.textContent = 'RECORDER';
+        this.titleEl.style.color = 'rgba(0, 210, 255, 0.8)';
+
         this.btnRec.innerHTML = REC_SVG.record;
         this.btnRec.style.background = "rgba(0, 210, 255, 0.1)";
         this.btnRec.style.color = "#00d2ff";
         this.btnRec.style.borderColor = "rgba(0, 210, 255, 0.4)";
         this.btnRec.style.opacity = "1";
         this.btnRec.style.pointerEvents = "auto";
-        
+
         this.btnPlay.innerHTML = REC_SVG.play;
-        this.btnPlay.style.background = "rgba(0, 210, 255, 0.1)";
-        this.btnPlay.style.color = "#00d2ff";
-        this.btnPlay.style.borderColor = "rgba(0, 210, 255, 0.4)";
         this.btnPlay.style.opacity = "1";
         this.btnPlay.style.pointerEvents = "auto";
-        
+
         this.btnImport.style.opacity = "1";
         this.btnImport.style.pointerEvents = "auto";
         this.btnExport.style.opacity = "1";
         this.btnExport.style.pointerEvents = "auto";
+
+        this._updatePlayBtn();
+    }
+
+    _updatePlayBtn() {
+        const ready = this.events.length > 0;
+        const svg = this.btnPlay.querySelector('svg');
+        if (svg) svg.style.color = ready ? '#00ff88' : '#00d2ff';
+        this.btnPlay.style.color = ready ? '#00ff88' : '#00d2ff';
+        this.btnPlay.style.borderColor = 'rgba(0,210,255,0.4)';
+        this.btnPlay.style.background = 'rgba(0,210,255,0.1)';
     }
 
     handleEvent(e) {
@@ -567,9 +596,7 @@ class CyberRecorderEngine {
                 console.log(`[CyberRecorder] Script erfolgreich geladen. ${this.events.length} Events gefunden.`);
                 
                 // Show brief confirmation
-                const oldColor = this.btnPlay.style.color;
-                this.btnPlay.style.color = "#00ff00";
-                setTimeout(() => this.btnPlay.style.color = oldColor, 1000);
+                this._updatePlayBtn();
             } catch (err) {
                 console.error("Import Error:", err);
                 alert("Fehler beim Laden der Datei! Bist du sicher, dass es ein gültiges Cyber-Skript ist?");
