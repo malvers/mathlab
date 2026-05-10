@@ -176,6 +176,7 @@
             controls.dynamicDampingFactor = 0.14;
             controls.minDistance = 2;
             controls.maxDistance = 20;
+            controls.handleResize();
 
             // Beleuchtung
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
@@ -438,6 +439,7 @@
                     _polyCamera.lookAt(0, 0, 0);
                     _polyControls.target.set(0, 0, 0);
                     _polyControls.update();
+                    localStorage.removeItem('gravitation_poly_view');
                     if (_polyWire) _polyWire.visible = true;
                     document.getElementById('wire-toggle').checked = true;
                     applySwitch('wire-toggle', true);
@@ -879,6 +881,7 @@
                 document.getElementById('m-cz').innerHTML = fmtCoord(M.z);
                 recomputeKugelGz();
                 if (_polyMCone) _polyMCone.position.set(M.x, M.y, M.z);
+                _updatePolyRay();
                 if (document.getElementById('poly-result').style.display !== 'none') runPolyederGz();
             };
 
@@ -901,11 +904,24 @@
                 camera.aspect = container.clientWidth / container.clientHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, container.clientHeight);
+                if (controls) controls.handleResize();
             });
 
             // --- Poly-Scene (lazy init) ---
             let _polyInited = false, _polyRenderer = null, _polyScene = null,
-                _polyCamera = null, _polyControls = null, _polyWire = null, _polyMCone = null;
+                _polyCamera = null, _polyControls = null, _polyWire = null, _polyMCone = null, _polyRayLine = null;
+
+            function _updatePolyRay() {
+                if (!_polyRayLine) return;
+                const len = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                if (len > 1e-6) {
+                    const k = 1000 / len;
+                    _polyRayLine.geometry.setFromPoints([
+                        new THREE.Vector3(0, 0, 0),
+                        new THREE.Vector3(M.x * k, M.y * k, M.z * k)
+                    ]);
+                }
+            }
 
             function _updatePolyWire(wSegs, hSegs) {
                 if (!_polyScene) return;
@@ -925,7 +941,13 @@
                 _polyScene = new THREE.Scene();
                 _polyScene.background = new THREE.Color(0x050a14);
                 _polyCamera = new THREE.PerspectiveCamera(45, pc.clientWidth/pc.clientHeight, 0.1, 100);
-                _polyCamera.position.set(3.5, 4.0, 6.0); _polyCamera.lookAt(0,0,0);
+                const _polySaved = JSON.parse(localStorage.getItem('gravitation_poly_view') || 'null');
+                if (_polySaved?.cam) {
+                    _polyCamera.position.set(_polySaved.cam.x, _polySaved.cam.y, _polySaved.cam.z);
+                } else {
+                    _polyCamera.position.set(3.5, 4.0, 6.0);
+                }
+                _polyCamera.lookAt(0,0,0);
                 _polyRenderer = new THREE.WebGLRenderer({antialias:true});
                 _polyRenderer.setSize(pc.clientWidth, pc.clientHeight);
                 _polyRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -938,6 +960,15 @@
                 _polyControls.dynamicDampingFactor = 0.14;
                 _polyControls.minDistance = 1.5;
                 _polyControls.maxDistance = 20;
+                if (_polySaved?.target) {
+                    _polyControls.target.set(_polySaved.target.x, _polySaved.target.y, _polySaved.target.z);
+                }
+                _polyControls.addEventListener('change', () => {
+                    localStorage.setItem('gravitation_poly_view', JSON.stringify({
+                        cam: { x: _polyCamera.position.x, y: _polyCamera.position.y, z: _polyCamera.position.z },
+                        target: { x: _polyControls.target.x, y: _polyControls.target.y, z: _polyControls.target.z }
+                    }));
+                });
                 _polyScene.add(new THREE.AmbientLight(0xffffff, 0.4));
                 const dl=new THREE.DirectionalLight(0xffeedd,1.2); dl.position.set(3,5,4); _polyScene.add(dl);
                 _polySphere = new THREE.Mesh(new THREE.SphereGeometry(1,64,64),
@@ -975,13 +1006,23 @@
                     new THREE.MeshPhongMaterial({color:0xff2222,shininess:60}));
                 mC.position.set(M.x,M.y,M.z); _polyScene.add(mC);
                 _polyMCone = mC;
+                _polyRayLine = new THREE.Line(
+                    new THREE.BufferGeometry().setFromPoints([
+                        new THREE.Vector3(0, 0, 0),
+                        new THREE.Vector3(M.x, M.y, M.z).normalize().multiplyScalar(1000)
+                    ]),
+                    new THREE.LineBasicMaterial({color:0x00d2ff, transparent:true, opacity:0.5})
+                );
+                _polyScene.add(_polyRayLine);
                 (function polyLoop(){ requestAnimationFrame(polyLoop); _polyControls.update(); _polyRenderer.render(_polyScene,_polyCamera); })();
                 window.addEventListener('resize', ()=>{
                     if(!pc.clientWidth) return;
                     _polyCamera.aspect=pc.clientWidth/pc.clientHeight;
                     _polyCamera.updateProjectionMatrix();
                     _polyRenderer.setSize(pc.clientWidth,pc.clientHeight);
+                    if (_polyControls) _polyControls.handleResize();
                 });
+                _polyControls.handleResize();
             }
 
             // --- Tabs ---
