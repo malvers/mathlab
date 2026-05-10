@@ -21,6 +21,35 @@
             font-size: 0.7rem !important;
             letter-spacing: 1.5px !important;
         }
+
+        .cyber-number-widget {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .cyber-digit-box {
+            width: 18px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 200, 255, 0.05);
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            border-radius: 3px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0a1628;
+            letter-spacing: 1px;
+        }
+
+        .cyber-digit-box.separator {
+            width: 10px;
+            background: transparent;
+            border: none;
+            color: #0a1628;
+        }
     </style>
 </head>
 
@@ -1006,16 +1035,16 @@
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">GÖTZE</div>
                     <div style="background:#f5a623; border-radius:4px; padding:10px 12px;
                                 text-align:center; margin-bottom:10px;">
-                        <div id="poly-gz-val" style="font-size:1.1rem; color:#0a1628; letter-spacing:1px; font-family:Orbitron; font-weight:600;">—</div>
+                        <div id="poly-gz-val" class="cyber-number-widget" style="justify-content:center;">—</div>
                     </div>
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">NEWTON (exakt)</div>
                     <div style="background:#77b521; border-radius:4px; padding:10px 12px; text-align:center; margin-bottom:10px;">
-                        <div id="poly-newton-val" style="font-size:1.1rem; color:#0a1628; letter-spacing:1px; font-family:Orbitron; font-weight:600;">—</div>
+                        <div id="poly-newton-val" class="cyber-number-widget" style="justify-content:center;">—</div>
                     </div>
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">ABWEICHUNG</div>
                     <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
                                 border-radius:4px; padding:10px 12px; text-align:center; margin-bottom:10px;">
-                        <div id="poly-diff-val" style="font-size:1.1rem; color:rgb(255,0,0); letter-spacing:1px; font-family:Orbitron; font-weight:600;">—</div>
+                        <div id="poly-diff-val" class="cyber-number-widget" style="justify-content:center; color:#ff0000;">—</div>
                     </div>
                 </div>
             `, '#f5a623');
@@ -1041,27 +1070,25 @@
 
                 _updatePolyWire(wSegs, hSegs);
 
-                document.getElementById('poly-gz-val').innerHTML =
-                    'g<sub>z</sub> ' + gz.toFixed(3) + ' mGal';
+                CyberUI.updateNumberWidget('poly-gz-val', gz, 3, 3);
 
-                let newtHTML;
                 if (newtInside) {
-                    newtHTML = '<span style="font-size:0.75rem;color:#ff6644;">P liegt innerhalb der Kugel</span>';
+                    document.getElementById('poly-newton-val').innerHTML =
+                        '<span style="font-size:0.75rem;color:#ff6644;">P innerhalb</span>';
                 } else if (newtZero) {
-                    newtHTML = 'g<sub>z</sub> 0 <span style="font-size:0.55rem;color:#888;">'
-                             + '(M.z = 0: Symmetrie ↕ hebt sich auf)</span>';
+                    document.getElementById('poly-newton-val').innerHTML =
+                        '<span style="font-size:0.65rem;color:#888;">Symmetrie</span>';
                 } else {
-                    newtHTML = 'g<sub>z</sub> ' + gzNewt.toFixed(3) + ' mGal';
+                    CyberUI.updateNumberWidget('poly-newton-val', gzNewt, 3, 3);
                 }
-                document.getElementById('poly-newton-val').innerHTML = newtHTML;
 
                 const diffEl = document.getElementById('poly-diff-val');
                 if (diff === null) {
-                    diffEl.textContent = '—';
-                    diffEl.style.color = '#555';
+                    diffEl.innerHTML = '<span style="font-size:0.7rem;">—</span>';
+                    diffEl.style.color = '#ff0000';
                 } else {
-                    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' %';
-                    diffEl.style.color = Math.abs(diff) < 1 ? '#44ff88' : Math.abs(diff) < 5 ? '#ffdd00' : '#ff6644';
+                    CyberUI.updateNumberWidget('poly-diff-val', Math.abs(diff), 2, 1);
+                    diffEl.style.color = '#ff0000';
                 }
 
                 document.getElementById('poly-result').style.display = 'block';
