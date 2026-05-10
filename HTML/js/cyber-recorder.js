@@ -144,6 +144,7 @@ class CyberRecorderEngine {
         console.log("⚛️ Cyber-Recorder Engine initialized.");
     }
 
+
     injectUI() {
         if (document.getElementById('cyber-recorder-ui')) return;
         
@@ -187,21 +188,21 @@ class CyberRecorderEngine {
 
         const btnRec = document.createElement('button');
         btnRec.innerText = "⏺";
-        btnRec.title = "Aufnahme starten";
+        btnRec.title = "Aufnahme starten / stoppen";
         btnRec.style.cssText = btnStyle;
-        btnRec.onclick = () => this.startRecording();
-        
-        const btnStop = document.createElement('button');
-        btnStop.innerText = "⏹";
-        btnStop.title = "Stopp";
-        btnStop.style.cssText = btnStyle;
-        btnStop.onclick = () => this.stop();
+        btnRec.onclick = () => {
+            if (this.mode === 'recording') this.stop();
+            else this.startRecording();
+        };
         
         const btnPlay = document.createElement('button');
         btnPlay.innerText = "▶️";
-        btnPlay.title = "Abspielen";
+        btnPlay.title = "Abspielen / stoppen";
         btnPlay.style.cssText = btnStyle;
-        btnPlay.onclick = () => this.play();
+        btnPlay.onclick = () => {
+            if (this.mode === 'playing') this.stop();
+            else this.play();
+        };
         
         const btnImport = document.createElement('button');
         btnImport.innerText = "📂";
@@ -223,7 +224,6 @@ class CyberRecorderEngine {
         fileInput.onchange = (e) => this.importScript(e);
 
         ui.appendChild(btnRec);
-        ui.appendChild(btnStop);
         ui.appendChild(btnPlay);
         ui.appendChild(btnImport);
         ui.appendChild(btnExport);
@@ -234,6 +234,8 @@ class CyberRecorderEngine {
         
         this.btnRec = btnRec;
         this.btnPlay = btnPlay;
+        this.btnImport = btnImport;
+        this.btnExport = btnExport;
 
         // Add Drag & Drop fallback!
         document.body.addEventListener('dragover', (e) => {
@@ -249,6 +251,7 @@ class CyberRecorderEngine {
             }
         });
     }
+
 
     injectGhostCursor() {
         if (document.getElementById('cyber-ghost-cursor')) return;
@@ -279,9 +282,17 @@ class CyberRecorderEngine {
         this.startTime = performance.now();
         this.lastMouseTime = 0;
         
+        this.btnRec.innerText = "⏹";
         this.btnRec.style.background = "rgba(255, 0, 0, 0.3)";
         this.btnRec.style.color = "#ff4444";
         this.btnRec.style.borderColor = "#ff4444";
+        
+        this.btnPlay.style.opacity = "0.3";
+        this.btnPlay.style.pointerEvents = "none";
+        this.btnImport.style.opacity = "0.3";
+        this.btnImport.style.pointerEvents = "none";
+        this.btnExport.style.opacity = "0.3";
+        this.btnExport.style.pointerEvents = "none";
 
         document.addEventListener('mousedown', this.boundHandleEvent, true);
         document.addEventListener('mousemove', this.boundHandleEvent, true);
@@ -310,19 +321,41 @@ class CyberRecorderEngine {
             document.removeEventListener('input', this.boundHandleEvent, true);
             document.removeEventListener('change', this.boundHandleEvent, true);
             
-            this.btnRec.style.background = "rgba(0, 210, 255, 0.1)";
-            this.btnRec.style.color = "#00d2ff";
-            this.btnRec.style.borderColor = "rgba(0, 210, 255, 0.4)";
-            
             console.log(`⏹ Recording stopped. Recorded ${this.events.length} events.`);
         } else if (this.mode === 'playing') {
             this.playTimers.forEach(t => clearTimeout(t));
             this.playTimers = [];
             this.ghostCursor.style.display = 'none';
-            this.btnPlay.style.background = "rgba(0, 210, 255, 0.1)";
             console.log("⏹ Playback aborted.");
         }
+        
+        if (this.abortHandler) {
+            document.removeEventListener('keydown', this.abortHandler);
+            this.abortHandler = null;
+        }
+        
         this.mode = 'idle';
+        if (this.ui) this.ui.style.display = 'flex';
+        
+        // Reset UI
+        this.btnRec.innerText = "⏺";
+        this.btnRec.style.background = "rgba(0, 210, 255, 0.1)";
+        this.btnRec.style.color = "#00d2ff";
+        this.btnRec.style.borderColor = "rgba(0, 210, 255, 0.4)";
+        this.btnRec.style.opacity = "1";
+        this.btnRec.style.pointerEvents = "auto";
+        
+        this.btnPlay.innerText = "▶️";
+        this.btnPlay.style.background = "rgba(0, 210, 255, 0.1)";
+        this.btnPlay.style.color = "#00d2ff";
+        this.btnPlay.style.borderColor = "rgba(0, 210, 255, 0.4)";
+        this.btnPlay.style.opacity = "1";
+        this.btnPlay.style.pointerEvents = "auto";
+        
+        this.btnImport.style.opacity = "1";
+        this.btnImport.style.pointerEvents = "auto";
+        this.btnExport.style.opacity = "1";
+        this.btnExport.style.pointerEvents = "auto";
     }
 
     handleEvent(e) {
@@ -330,6 +363,11 @@ class CyberRecorderEngine {
         
         // Ignore events on the recorder UI itself
         if (e.target && e.target.closest && e.target.closest('#cyber-recorder-ui')) return;
+        
+        // Do not record mouse events while SHIFT is pressed
+        if (e.shiftKey && (e.type.startsWith('mouse') || e.type === 'click')) {
+            return;
+        }
 
         const t = performance.now() - this.startTime;
         const ev = { type: e.type, t: Math.round(t) };
@@ -385,10 +423,26 @@ class CyberRecorderEngine {
         }
         this.mode = 'playing';
         this.playTimers = [];
-        this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
-        this.ghostCursor.style.display = 'block';
         
-        console.log("▶️ Playing script...");
+        this.btnPlay.innerText = "⏹";
+        this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
+        
+        this.btnRec.style.opacity = "0.3";
+        this.btnRec.style.pointerEvents = "none";
+        this.btnImport.style.opacity = "0.3";
+        this.btnImport.style.pointerEvents = "none";
+        this.btnExport.style.opacity = "0.3";
+        this.btnExport.style.pointerEvents = "none";
+
+        this.ghostCursor.style.display = 'block';
+        this.ui.style.display = 'none';
+        
+        console.log("▶️ Playing script... (Press ESC to abort)");
+        
+        this.abortHandler = (e) => {
+            if (e.key === 'Escape') this.stop();
+        };
+        document.addEventListener('keydown', this.abortHandler);
 
         this.events.forEach((ev, index) => {
             const timer = setTimeout(() => {
