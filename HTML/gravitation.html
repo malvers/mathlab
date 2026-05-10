@@ -231,58 +231,15 @@
             mCone.position.set(M.x, M.y + coneH / 2, M.z);
             scene.add(mCone);
 
-            // Thin red line: cone tip → sign
-            scene.add(new THREE.Line(
-                new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(M.x, M.y, M.z),
-                    new THREE.Vector3(M.x, M.y - 0.22, M.z)
-                ]),
-                new THREE.LineBasicMaterial({ color: 0xff2222 })
-            ));
-
-            // Sign sprite — narrower, text centered
-            (function() {
-                const W = 200, H = 130, R = 8;
-                const c = document.createElement('canvas');
-                c.width = W; c.height = H;
-                const ctx = c.getContext('2d');
-
-                // rounded rect background + border
-                ctx.beginPath();
-                ctx.moveTo(R, 0); ctx.lineTo(W-R, 0);
-                ctx.quadraticCurveTo(W, 0, W, R);
-                ctx.lineTo(W, H-R); ctx.quadraticCurveTo(W, H, W-R, H);
-                ctx.lineTo(R, H);   ctx.quadraticCurveTo(0, H, 0, H-R);
-                ctx.lineTo(0, R);   ctx.quadraticCurveTo(0, 0, R, 0);
-                ctx.closePath();
-                ctx.fillStyle = 'rgba(12,4,4,0.85)'; ctx.fill();
-                ctx.strokeStyle = '#ff2222'; ctx.lineWidth = 2.5; ctx.stroke();
-
-                // centered text: italic var + upright number
-                const varFont = 'italic 28px "Times New Roman", Georgia, serif';
-                const numFont = '28px "Times New Roman", Georgia, serif';
-
-                function drawRow(varName, val, y) {
-                    const numStr = ` = ${val.toFixed(2)}`;
-                    ctx.font = varFont;  const vw = ctx.measureText(varName).width;
-                    ctx.font = numFont;  const nw = ctx.measureText(numStr).width;
-                    const startX = (W - vw - nw) / 2;
-                    ctx.textBaseline = 'top'; ctx.textAlign = 'left';
-                    ctx.font = varFont; ctx.fillStyle = '#ff5555'; ctx.fillText(varName, startX, y);
-                    ctx.font = numFont; ctx.fillStyle = '#ff2222'; ctx.fillText(numStr, startX + vw, y);
-                }
-                drawRow('x', M.x,  8);
-                drawRow('y', M.y, 46);
-                drawRow('z', M.z, 84);
-
-                const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-                    map: new THREE.CanvasTexture(c), transparent: true, depthTest: false
-                }));
-                sp.renderOrder = 999;
-                sp.scale.set(0.52, 0.34, 1);
-                sp.position.set(M.x, M.y - 0.22 - 0.17, M.z);
-                scene.add(sp);
-            })();
+            function updateM() {
+                mCone.position.set(M.x, M.y + coneH / 2, M.z);
+                connectionLines.forEach(line => {
+                    const pos = line.geometry.attributes.position;
+                    pos.setXYZ(1, M.x, M.y, M.z);
+                    pos.needsUpdate = true;
+                    line.computeLineDistances();
+                });
+            }
 
             // --- Persistence ---
             const STORE = 'gravitation_view';
@@ -341,12 +298,18 @@
                 thumb.style.transform = on ? 'translateX(18px)' : 'translateX(0)';
             }
 
+            // --- Dreieck state (early, needed by Ansicht card) ---
+            let currentTriangle = [];
+            let connectionLines = [];
+            let connectionsOn = true;
+
             // --- Sidebar: Ansicht ---
             CyberUI.createCard('ui-container', 'Ansicht',
-                makeSwitch('wire-toggle', 'GRADNETZ', true) + `
+                makeSwitch('wire-toggle', 'GRADNETZ', true) +
+                makeSwitch('conn-toggle', 'VERBINDUNGEN', true) + `
                 <div style="margin-top:10px;">
                     <button class="cyber-btn" onclick="resetView()"
-                            style="width:100%; border-color:#ff3366; color:#ff3366; padding:8px; font-size:0.7rem;">
+                            style="width:100%; padding:8px; font-size:0.7rem;">
                         RESET VIEW
                     </button>
                 </div>`
@@ -357,6 +320,12 @@
                 wireMesh.visible = on;
                 applySwitch('wire-toggle', on);
                 saveState();
+            };
+
+            document.getElementById('conn-toggle')._cb = (on) => {
+                connectionsOn = on;
+                applySwitch('conn-toggle', on);
+                connectionLines.forEach(l => l.visible = on);
             };
 
             window.resetView = function() {
@@ -371,10 +340,6 @@
             };
 
             // --- Sidebar: Geometrie ---
-            let currentTriangle = [];
-            let connectionLines = [];
-            let connectionsOn = true;
-
             window.newTriangle = function() {
                 currentTriangle.forEach(o => scene.remove(o));
                 connectionLines.forEach(o => scene.remove(o));
@@ -427,25 +392,64 @@
             };
 
             CyberUI.createCard('ui-container', 'Geometrie', `
-                <div style="display:flex; gap:8px; align-items:stretch; margin-bottom:8px;">
-                    <button class="cyber-btn" onclick="newTriangle()"
-                            style="flex:1; padding:8px; font-size:0.7rem;">
-                        DREIECK
-                    </button>
-                    <button class="cyber-btn" onclick="clearTriangle()" title="Entfernen"
-                            style="width:36px; padding:0; border-color:#ff3366; color:#ff3366; display:flex; align-items:center; justify-content:center;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                </div>
-                ${makeSwitch('conn-toggle', 'VERBINDUNGEN', true)}
+                <button class="cyber-btn" onclick="newTriangle()"
+                        style="width:100%; padding:8px; font-size:0.7rem;">
+                    DREIECK
+                </button>
             `);
 
-            document.getElementById('conn-toggle')._cb = (on) => {
-                connectionsOn = on;
-                applySwitch('conn-toggle', on);
-                connectionLines.forEach(l => l.visible = on);
+            // --- Sidebar: Messpunkt M ---
+            function makeSlider(axis, val) {
+                return `
+                <div style="display:flex; align-items:center; gap:6px; padding:3px 0;">
+                    <span style="font-family:Orbitron; font-size:0.65rem; color:var(--neon-blue); width:10px;">${axis}</span>
+                    <input id="m-${axis.toLowerCase()}-slider" type="range"
+                           min="-2" max="2" step="0.1" value="${val}"
+                           style="flex:1; accent-color:var(--neon-blue); cursor:pointer;">
+                    <span id="m-${axis.toLowerCase()}-val"
+                          style="font-family:Orbitron; font-size:0.65rem; color:#ccc; width:28px; text-align:right;">
+                        ${val.toFixed(1)}
+                    </span>
+                </div>`;
+            }
+
+            const coordDisplay = `
+                <div id="m-coords" style="
+                    font-family: Orbitron, monospace; font-size: 0.75rem;
+                    text-align: center; padding: 6px 8px; margin-bottom: 8px;
+                    background: rgba(0,200,255,0.05);
+                    border: 1px solid rgba(0,200,255,0.18);
+                    border-radius: 4px; letter-spacing: 1px;">
+                    <span style="color:#ff4455;">X</span>&nbsp;<span id="m-cx" style="color:#eee;">${M.x.toFixed(1)}</span>
+                    &emsp;
+                    <span style="color:#44ff88;">Y</span>&nbsp;<span id="m-cy" style="color:#eee;">${M.y.toFixed(1)}</span>
+                    &emsp;
+                    <span style="color:#4499ff;">Z</span>&nbsp;<span id="m-cz" style="color:#eee;">${M.z.toFixed(1)}</span>
+                </div>`;
+
+            CyberUI.createCard('ui-container', 'Messpunkt M',
+                coordDisplay +
+                makeSlider('X', M.x) +
+                makeSlider('Y', M.y) +
+                makeSlider('Z', M.z)
+            );
+
+            ['x', 'y', 'z'].forEach(ax => {
+                document.getElementById(`m-${ax}-slider`).addEventListener('input', function() {
+                    M[ax] = parseFloat(this.value);
+                    document.getElementById(`m-${ax}-val`).textContent = M[ax].toFixed(1);
+                    updateM();
+                });
+            });
+
+            // keep coord display in sync whenever M changes
+            const origUpdateM = updateM;
+            updateM = function() {
+                origUpdateM();
+                const fmt = v => v.toFixed(1);
+                document.getElementById('m-cx').textContent = fmt(M.x);
+                document.getElementById('m-cy').textContent = fmt(M.y);
+                document.getElementById('m-cz').textContent = fmt(M.z);
             };
 
             // --- Animate ---
