@@ -157,8 +157,21 @@
         </div>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE_MOD from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        const THREE = { ...THREE_MOD, TrackballControls };
+        window.THREE = THREE;
+        window.dispatchEvent(new Event('three-ready'));
+    </script>
     <script src="js/cyber-left-chrome.js"></script>
     <script src="js/branding/briefings.js?v=542"></script>
     <script src="js/branding/overlays.js?v=542"></script>
@@ -507,19 +520,27 @@
                 '#ffdd00'
             );
 
-            const _opacitySlider = document.getElementById('opacity-slider');
-            const _savedOpacity = localStorage.getItem('gravitation_opacity');
-            if (_savedOpacity) {
-                _opacitySlider.value = _savedOpacity;
-                document.getElementById('opacity-val').textContent = parseFloat(_savedOpacity).toFixed(2);
-                if (sphereMat) sphereMat.opacity = parseFloat(_savedOpacity);
+            let _currentOpacity = 0.15;
+            const _savedOpacityRaw = localStorage.getItem('gravitation_opacity');
+            if (_savedOpacityRaw !== null) {
+                const v = parseFloat(_savedOpacityRaw);
+                if (!isNaN(v) && v >= 0 && v <= 1) _currentOpacity = v;
             }
+            const _opacitySlider = document.getElementById('opacity-slider');
+            _opacitySlider.value = String(_currentOpacity);
+            document.getElementById('opacity-val').textContent = _currentOpacity.toFixed(2);
+            sphereMat.opacity = _currentOpacity;
+            sphereMat.needsUpdate = true;
             _opacitySlider.addEventListener('input', function() {
-                const v = parseFloat(this.value);
-                document.getElementById('opacity-val').textContent = v.toFixed(2);
-                localStorage.setItem('gravitation_opacity', this.value);
-                if (sphereMat) sphereMat.opacity = v;
-                if (_polySphere) _polySphere.material.opacity = v;
+                _currentOpacity = parseFloat(this.value);
+                document.getElementById('opacity-val').textContent = _currentOpacity.toFixed(2);
+                localStorage.setItem('gravitation_opacity', String(_currentOpacity));
+                sphereMat.opacity = _currentOpacity;
+                sphereMat.needsUpdate = true;
+                if (_polySphere) {
+                    _polySphere.material.opacity = _currentOpacity;
+                    _polySphere.material.needsUpdate = true;
+                }
             });
 
             wireMesh.visible = true;
@@ -1037,6 +1058,7 @@
                 _updatePolyRay();
                 if (document.getElementById('poly-result').style.display !== 'none') runPolyederGz();
             };
+            window.updateM = updateM; // expose for inline onchange handlers
 
             // --- Animate ---
             function animate() {
@@ -1083,6 +1105,7 @@
 
             function _updatePolyWire(shapeType, wSegs, hSegs) {
                 if (!_polyScene) return;
+                const prevVisible = _polyWire ? _polyWire.visible : true;
                 if (_polyWire) _polyScene.remove(_polyWire);
                 let wireGeo, solidGeo;
                 if (shapeType === 'cuboid') {
@@ -1097,6 +1120,7 @@
                     new THREE.MeshBasicMaterial({color:0xff8833, wireframe:true, transparent:true, opacity:0.28})
                 );
                 _polyWire.scale.z = _sphereStretch;
+                _polyWire.visible = prevVisible;
                 _polyScene.add(_polyWire);
                 if (_polySphere) {
                     _polySphere.geometry.dispose();
@@ -1143,7 +1167,7 @@
                 _polyScene.add(new THREE.AmbientLight(0xffffff, 0.4));
                 const dl=new THREE.DirectionalLight(0xffeedd,1.2); dl.position.set(3,5,4); _polyScene.add(dl);
                 _polySphere = new THREE.Mesh(new THREE.SphereGeometry(1,64,64),
-                    new THREE.MeshPhongMaterial({color:0xff6600,transparent:true,opacity:0.15,
+                    new THREE.MeshPhongMaterial({color:0xff6600,transparent:true,opacity:_currentOpacity,
                         shininess:0,specular:new THREE.Color(0x000000),side:THREE.DoubleSide,depthWrite:false}));
                 _polySphere.scale.z = _sphereStretch;
                 _polyScene.add(_polySphere);
