@@ -681,7 +681,17 @@
                 coordDisplay +
                 makeSlider('X', M.x) +
                 makeSlider('Y', M.y) +
-                makeSlider('Z', M.z),
+                makeSlider('Z', M.z) +
+                `<div style="display:flex; align-items:center; gap:6px; padding:3px 0; margin-top:8px;">
+                    <span style="font-family:Orbitron; font-size:0.65rem; color:var(--neon-blue); width:10px;">d</span>
+                    <input id="m-dist-slider" type="range"
+                           min="1" max="100" step="0.1" value="3.29"
+                           style="flex:1; accent-color:var(--neon-blue); cursor:pointer;">
+                    <span id="m-dist-val"
+                          style="font-family:Orbitron; font-size:0.65rem; color:#ccc; width:28px; text-align:right;">
+                        3.29
+                    </span>
+                </div>`,
                 '#ffdd00', { collapsible: true }
             );
 
@@ -891,6 +901,8 @@
                 document.getElementById('nn-pred-box').style.display = 'block';
             }
 
+            const _distSlider = document.getElementById('m-dist-slider');
+
             // Restore M from saved state
             if (saved?.m) {
                 ['x', 'y', 'z'].forEach(ax => {
@@ -900,6 +912,11 @@
                     if (sl) sl.value = M[ax];
                     if (vl) vl.textContent = M[ax].toFixed(2);
                 });
+                const dist = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                if (_distSlider) {
+                    _distSlider.value = dist;
+                    document.getElementById('m-dist-val').textContent = dist.toFixed(2);
+                }
                 updateM();
             }
 
@@ -910,6 +927,27 @@
                     updateM();
                     saveState();
                 });
+            });
+            _distSlider.addEventListener('input', function() {
+                const newDist = parseFloat(this.value);
+                const currentDist = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                if (currentDist > 1e-6) {
+                    const scale = newDist / currentDist;
+                    M.x *= scale;
+                    M.y *= scale;
+                    M.z *= scale;
+                } else {
+                    M.x = newDist; M.y = 0; M.z = 0;
+                }
+                document.getElementById('m-dist-val').textContent = newDist.toFixed(2);
+                document.getElementById('m-x-slider').value = M.x;
+                document.getElementById('m-y-slider').value = M.y;
+                document.getElementById('m-z-slider').value = M.z;
+                document.getElementById('m-x-val').textContent = M.x.toFixed(2);
+                document.getElementById('m-y-val').textContent = M.y.toFixed(2);
+                document.getElementById('m-z-val').textContent = M.z.toFixed(2);
+                updateM();
+                saveState();
             });
 
             // keep coord display in sync whenever M changes
@@ -999,7 +1037,7 @@
                 _polyControls.staticMoving = false;
                 _polyControls.dynamicDampingFactor = 0.14;
                 _polyControls.minDistance = 1.5;
-                _polyControls.maxDistance = 20;
+                _polyControls.maxDistance = 500;
                 if (_polySaved?.target) {
                     _polyControls.target.set(_polySaved.target.x, _polySaved.target.y, _polySaved.target.z);
                 }
