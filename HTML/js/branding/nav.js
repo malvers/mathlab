@@ -106,22 +106,12 @@
             playBtn.onclick = () => {
                 const labName = window.location.pathname.split('/').pop().replace('.html', '');
                 const base = new URL('.', document.baseURI).href + 'recordings/';
-                const indexUrl = base + 'index.json';
-
-                console.log('[play-btn] labName:', JSON.stringify(labName));
-                console.log('[play-btn] base:', base);
-                console.log('[play-btn] indexUrl:', indexUrl);
-
                 const xhrGet = (url, type, cb) => {
                     const xhr = new XMLHttpRequest();
                     xhr.open('GET', url, true);
                     xhr.responseType = type;
-                    xhr.onload = () => {
-                        console.log('[play-btn] xhr load', url, 'status:', xhr.status, 'response:', xhr.response);
-                        if (xhr.status === 0 || xhr.status === 200) cb(xhr.response);
-                        else cb(null);
-                    };
-                    xhr.onerror = () => { console.log('[play-btn] xhr error', url); cb(null); };
+                    xhr.onload = () => { if (xhr.status === 0 || xhr.status === 200) cb(xhr.response); else cb(null); };
+                    xhr.onerror = () => cb(null);
                     xhr.send();
                 };
                 const loadRecorder = (cb) => {
@@ -131,22 +121,17 @@
                     s.onload = cb;
                     document.head.appendChild(s);
                 };
-                xhrGet(indexUrl, 'json', index => {
-                    if (!index) {
-                        alert('index.json konnte nicht geladen werden.\nURL: ' + indexUrl + '\n\nKonsole prüfen für Details.');
-                        return;
-                    }
-                    console.log('[play-btn] index keys:', Object.keys(index));
-                    if (!index[labName]) {
-                        alert('Kein Eintrag für Lab "' + labName + '" in index.json.\n\nVorhandene Keys:\n' + Object.keys(index).join('\n'));
+                xhrGet(base + 'index.json', 'json', index => {
+                    if (!index || !index[labName]) {
+                        alert('Kein Recording für dieses Lab gefunden.');
                         return;
                     }
                     const recordingUrl = base + index[labName];
-                    console.log('[play-btn] recordingUrl:', recordingUrl);
                     loadRecorder(() => {
                         CyberRecorder.init();
+                        CyberRecorder.userPlayMode = true;
                         xhrGet(recordingUrl, 'arraybuffer', buf => {
-                            if (!buf) { alert('Recording konnte nicht geladen werden:\n' + recordingUrl); return; }
+                            if (!buf) { alert('Recording konnte nicht geladen werden.'); return; }
                             const fakeEvt = { target: { files: [new File([buf], 'script.recording')], value: '' } };
                             CyberRecorder.importScript(fakeEvt);
                             setTimeout(() => CyberRecorder.play(), 200);

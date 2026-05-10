@@ -770,7 +770,9 @@ class CyberRecorderEngine {
         }
         
         this.mode = 'idle';
-        if (this.ui) this.ui.style.display = 'flex';
+        if (this.ui && !this.userPlayMode) this.ui.style.display = 'flex';
+        // user-mode playback ended → keep UI hidden, reset flag for next admin use
+        this.userPlayMode = false;
 
         this.titleEl.textContent = 'RECORDER';
         this.titleEl.style.color = 'rgba(0, 210, 255, 0.8)';
