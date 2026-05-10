@@ -115,35 +115,37 @@
             nav.appendChild(donateBtn);
             nav.appendChild(briefingBtn);
 
-            // Strategy: If a mini-rail exists, inject buttons directly into it
-            // in desired order (before coffee). Otherwise, use sidebar-header or floating.
             const miniRail = document.getElementById("mini-rail");
             if (miniRail) {
-                // Find the coffee button as insertion anchor (branding buttons go before it)
-                const coffeeBtn = miniRail.querySelector('.nav-btn-coffee');
+                queueMicrotask(() => {
+                    // 1. Move language to end first — it sits right after hamburger by default
+                    //    and would otherwise push QR/bug to position 2 when we insert before it.
+                    const langBtn = miniRail.querySelector('#rail-lang-display-btn');
+                    if (langBtn) miniRail.appendChild(langBtn);
 
-                // Desired order: home, back, briefing, donate, qr, bug (before coffee, then language at end)
-                const navButtons = [homeBtn, backBtn, briefingBtn, donateBtn, qrBtn, bugBtn];
-                navButtons.forEach(btn => {
-                    // Mark as branding-nav so we can identify them later
-                    btn.dataset.cyberBrandingNav = "1";
-                    if (coffeeBtn) {
-                        miniRail.insertBefore(btn, coffeeBtn);
-                    } else {
-                        miniRail.appendChild(btn);
-                    }
+                    // 2. Insert home→back→?→heart directly after the hamburger button.
+                    const hamburger = miniRail.firstElementChild;
+                    let anchor = hamburger;
+                    [homeBtn, backBtn, briefingBtn, donateBtn].forEach(btn => {
+                        btn.dataset.cyberBrandingNav = "1";
+                        miniRail.insertBefore(btn, anchor.nextSibling);
+                        anchor = btn;
+                    });
+
+                    // 3. Insert QR→bug after coffee (or after heart if coffee not present yet).
+                    const coffeeBtn = miniRail.querySelector('.coffee-btn');
+                    let anchor2 = coffeeBtn || anchor;
+                    [qrBtn, bugBtn].forEach(btn => {
+                        btn.dataset.cyberBrandingNav = "1";
+                        miniRail.insertBefore(btn, anchor2.nextSibling);
+                        anchor2 = btn;
+                    });
+
+                    // language is already last (moved in step 1)
+                    nav.style.display = "none";
+                    nav.classList.add("integrated");
+                    miniRail.appendChild(nav);
                 });
-
-                // Move language button to the end (after coffee) for desired visual order
-                const langBtn = miniRail.querySelector('#rail-lang-display-btn');
-                if (langBtn && coffeeBtn) {
-                    miniRail.appendChild(langBtn);
-                }
-
-                // Create a hidden nav element so hasCompleteBrandingNav() still works
-                nav.style.display = "none";
-                nav.classList.add("integrated");
-                miniRail.appendChild(nav);
             } else {
                 const sidebarHeader = document.getElementById("sidebar-header");
                 const sidebar = sidebarHeader ||

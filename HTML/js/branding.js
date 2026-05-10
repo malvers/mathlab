@@ -76,6 +76,13 @@ function isCyberNavComplete(navEl) {
 
 /** Stale/empty .cyber-nav fragments blocked full navigation injection (missing ? button). */
 function cleanupIncompleteBrandingNav() {
+    const miniRail = document.getElementById("mini-rail");
+    if (miniRail) {
+        const brandingBtns = miniRail.querySelectorAll("[data-cyber-branding-nav='1']");
+        if (brandingBtns.length > 0 && !miniRail.querySelector("[data-cyber-branding-nav='1'][title='Beschreibung anzeigen']")) {
+            brandingBtns.forEach((el) => el.remove());
+        }
+    }
     const host = getBrandingNavHost();
     if (host) {
         host.querySelectorAll(".cyber-nav").forEach((nav) => {
@@ -89,6 +96,8 @@ function cleanupIncompleteBrandingNav() {
 }
 
 function hasCompleteBrandingNav() {
+    const miniRail = document.getElementById("mini-rail");
+    if (miniRail && miniRail.querySelector("[data-cyber-branding-nav='1'][title='Beschreibung anzeigen']")) return true;
     const host = getBrandingNavHost();
     if (host) {
         return Array.from(host.querySelectorAll(".cyber-nav")).some((n) => isCyberNavComplete(n));
@@ -340,7 +349,14 @@ const CyberBranding = {
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
-        container.addEventListener('click', () => this.toggleFullscreen());
+        container.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+                const rec = document.getElementById('cyber-recorder-ui');
+                if (rec) rec.style.display = rec.style.display === 'none' ? 'flex' : 'none';
+                return;
+            }
+            this.toggleFullscreen();
+        });
         const anchor =
             document.getElementById('main-content') ||
             document.getElementById('workspace') ||

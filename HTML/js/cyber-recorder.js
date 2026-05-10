@@ -1,3 +1,11 @@
+const REC_SVG = {
+    record: `<svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>`,
+    stop:   `<svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg>`,
+    play:   `<svg width="20" height="20" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>`,
+    load:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9,14 12,17 15,14"/></svg>`,
+    save:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+};
+
 /**
  * Cyber-Binary Codec
  * Compresses macro events into a compact ArrayBuffer format.
@@ -158,7 +166,7 @@ class CyberRecorderEngine {
             border: 1px solid rgba(0, 210, 255, 0.4);
             border-radius: 8px;
             padding: 10px;
-            display: flex;
+            display: none;
             gap: 10px;
             z-index: 1000000;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
@@ -187,7 +195,7 @@ class CyberRecorderEngine {
         `;
 
         const btnRec = document.createElement('button');
-        btnRec.innerText = "⏺";
+        btnRec.innerHTML = REC_SVG.record;
         btnRec.title = "Aufnahme starten / stoppen";
         btnRec.style.cssText = btnStyle;
         btnRec.onclick = () => {
@@ -196,7 +204,7 @@ class CyberRecorderEngine {
         };
         
         const btnPlay = document.createElement('button');
-        btnPlay.innerText = "▶️";
+        btnPlay.innerHTML = REC_SVG.play;
         btnPlay.title = "Abspielen / stoppen";
         btnPlay.style.cssText = btnStyle;
         btnPlay.onclick = () => {
@@ -205,13 +213,13 @@ class CyberRecorderEngine {
         };
         
         const btnImport = document.createElement('button');
-        btnImport.innerText = "📂";
+        btnImport.innerHTML = REC_SVG.load;
         btnImport.title = ".mls Datei laden";
         btnImport.style.cssText = btnStyle;
         btnImport.onclick = () => document.getElementById('cyber-recorder-file-input').click();
         
         const btnExport = document.createElement('button');
-        btnExport.innerText = "💾";
+        btnExport.innerHTML = REC_SVG.save;
         btnExport.title = "Export als binäre .mls Datei";
         btnExport.style.cssText = btnStyle;
         btnExport.onclick = () => this.exportScript();
@@ -282,7 +290,7 @@ class CyberRecorderEngine {
         this.startTime = performance.now();
         this.lastMouseTime = 0;
         
-        this.btnRec.innerText = "⏹";
+        this.btnRec.innerHTML = REC_SVG.stop;
         this.btnRec.style.background = "rgba(255, 0, 0, 0.3)";
         this.btnRec.style.color = "#ff4444";
         this.btnRec.style.borderColor = "#ff4444";
@@ -338,14 +346,14 @@ class CyberRecorderEngine {
         if (this.ui) this.ui.style.display = 'flex';
         
         // Reset UI
-        this.btnRec.innerText = "⏺";
+        this.btnRec.innerHTML = REC_SVG.record;
         this.btnRec.style.background = "rgba(0, 210, 255, 0.1)";
         this.btnRec.style.color = "#00d2ff";
         this.btnRec.style.borderColor = "rgba(0, 210, 255, 0.4)";
         this.btnRec.style.opacity = "1";
         this.btnRec.style.pointerEvents = "auto";
         
-        this.btnPlay.innerText = "▶️";
+        this.btnPlay.innerHTML = REC_SVG.play;
         this.btnPlay.style.background = "rgba(0, 210, 255, 0.1)";
         this.btnPlay.style.color = "#00d2ff";
         this.btnPlay.style.borderColor = "rgba(0, 210, 255, 0.4)";
@@ -424,7 +432,7 @@ class CyberRecorderEngine {
         this.mode = 'playing';
         this.playTimers = [];
         
-        this.btnPlay.innerText = "⏹";
+        this.btnPlay.innerHTML = REC_SVG.stop;
         this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
         
         this.btnRec.style.opacity = "0.3";
