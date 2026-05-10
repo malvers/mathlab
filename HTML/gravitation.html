@@ -1063,9 +1063,7 @@
                 const gzNewt = calculateSphereNewton(Rm, _sphereRho, mArr);
 
                 const newtInside = isNaN(gzNewt);
-                const newtZero   = !newtInside && Math.abs(M.z) < 1e-6;
-                const diff       = (newtInside || newtZero) ? null
-                                 : (gz - gzNewt) / Math.abs(gzNewt) * 100;
+                const diff       = newtInside ? null : (gz - gzNewt) / Math.abs(gzNewt) * 100;
 
                 _updatePolyWire(wSegs, hSegs);
 
@@ -1074,8 +1072,6 @@
 
                 if (newtInside) {
                     document.getElementById('poly-newton-val').textContent = '(P innerhalb der Kugel)';
-                } else if (newtZero) {
-                    document.getElementById('poly-newton-val').textContent = '(M.z = 0, Symmetrie)';
                 } else {
                     document.getElementById('poly-newton-val').innerHTML =
                         '\\(g_z = ' + gzNewt.toFixed(3) + '\\,\\text{mGal}\\)';

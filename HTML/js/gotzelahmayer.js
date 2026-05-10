@@ -188,21 +188,23 @@ function makeSpherePolyhedron(r = 1, subdivisions = 2, hSegs = undefined) {
 }
 
 /**
- * Analytische Lösung (Newton/Shell-Theorem) für gz einer homogenen Vollkugel.
+ * Analytische Lösung (Newton/Shell-Theorem) für den Betrag der Schwere
+ * einer homogenen Vollkugel: |g| = G·M/r²
  * Außerhalb der Kugel ist das Feld identisch mit einem Punktmasse-Feld im Zentrum.
+ * Vorzeichen negativ → Feld zeigt von M zum Zentrum.
  * @param {number} R - Kugelradius [m]
  * @param {number} rho - Dichte [kg/m³]
  * @param {Array} m - Messpunkt [x, y, z]
- * @returns {number} gz in mGal
+ * @returns {number} |g| in mGal (mit negativem Vorzeichen)
  */
 function calculateSphereNewton(R = 1, rho = 2670, m) {
     const G = 6.67430e-11;
     const SI_TO_MGAL = 100000;
     const M_total = (4 / 3) * Math.PI * R * R * R * rho;
-    const r = Math.sqrt(m[0] * m[0] + m[1] * m[1] + m[2] * m[2]);
+    const r2 = m[0]*m[0] + m[1]*m[1] + m[2]*m[2];
+    const r  = Math.sqrt(r2);
     if (r <= R) return NaN; // innerhalb der Kugel nicht definiert
-    // Gravitationsfeld zeigt von M zum Zentrum: g = -G·M/r³ · m
-    return -G * M_total * m[2] / (r * r * r) * SI_TO_MGAL;
+    return -G * M_total / r2 * SI_TO_MGAL;
 }
 
 // Beispielaufruf:
