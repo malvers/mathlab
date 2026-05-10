@@ -507,13 +507,13 @@ class CyberRecorderEngine {
         
         const btnImport = document.createElement('button');
         btnImport.innerHTML = REC_SVG.load;
-        btnImport.title = ".mls Datei laden";
+        btnImport.title = ".recording Datei laden";
         btnImport.style.cssText = btnStyle;
         btnImport.onclick = () => document.getElementById('cyber-recorder-file-input').click();
         
         const btnExport = document.createElement('button');
         btnExport.innerHTML = REC_SVG.save;
-        btnExport.title = "Export als binäre .mls Datei";
+        btnExport.title = "Export als .recording Datei";
         btnExport.style.cssText = btnStyle;
         btnExport.onclick = () => this.exportScript();
 
@@ -532,7 +532,7 @@ class CyberRecorderEngine {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.id = 'cyber-recorder-file-input';
-        fileInput.accept = '.mls';
+        fileInput.accept = '.recording,.mls';
         fileInput.style.display = 'none';
         fileInput.onchange = (e) => this.importScript(e);
 
@@ -603,9 +603,6 @@ class CyberRecorderEngine {
     startRecording() {
         if (this.mode !== 'idle') return;
         this.mode = 'recording';
-        this.events = [];
-        this.startTime = performance.now();
-        this.lastMouseTime = 0;
         
         this.titleEl.innerHTML = '<span class="rec-dot"></span>RECORDING';
         this.titleEl.style.color = '#ff4444';
@@ -622,24 +619,26 @@ class CyberRecorderEngine {
         this.btnExport.style.opacity = "0.3";
         this.btnExport.style.pointerEvents = "none";
 
-        document.addEventListener('mousedown', this.boundHandleEvent, true);
-        document.addEventListener('mousemove', this.boundHandleEvent, true);
-        document.addEventListener('mouseup', this.boundHandleEvent, true);
-        document.addEventListener('click', this.boundHandleEvent, true);
-        document.addEventListener('input', this.boundHandleEvent, true);
-        document.addEventListener('change', this.boundHandleEvent, true);
+        const startMouseRecording = () => {
+            this.startTime = performance.now();
+            this.lastMouseTime = 0;
+            this.events = [];
+            this.events.push({
+                type: 'meta_init',
+                t: 0,
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+            document.addEventListener('mousedown', this.boundHandleEvent, true);
+            document.addEventListener('mousemove', this.boundHandleEvent, true);
+            document.addEventListener('mouseup', this.boundHandleEvent, true);
+            document.addEventListener('click', this.boundHandleEvent, true);
+            document.addEventListener('input', this.boundHandleEvent, true);
+            document.addEventListener('change', this.boundHandleEvent, true);
+            console.log("⏺ Mouse recording started...");
+        };
 
-        console.log("⏺ Recording started...");
-
-        // Record initial window size
-        this.events.push({
-            type: 'meta_init',
-            t: 0,
-            width: window.innerWidth,
-            height: window.innerHeight
-        });
-
-        // Start audio recording if enabled
+        // Start audio recording if enabled — mouse recording starts after mic granted
         if (this.recordAudio) {
             this.addDebugLog("📡 Requesting microphone...");
             this.audioChunks = [];
@@ -660,6 +659,7 @@ class CyberRecorderEngine {
                 : true;
             navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
                 .then((stream) => {
+                    startMouseRecording();
                     const track = stream.getAudioTracks()[0];
                     const settings = track.getSettings();
                     this.addDebugLog(`✅ Stream: ${track.label}`);
@@ -713,9 +713,18 @@ class CyberRecorderEngine {
                     this.addDebugLog(`❌ Mic error: ${err.name}`);
                     this.addDebugLog(`   ${err.message}`);
                     this.recordAudio = false;
-                    if (this.audioCheckbox) this.audioCheckbox.checked = false;
+                    if (this.audioBtnSetState) this.audioBtnSetState(false);
+                    if (this.audioCheckbox) {
+                        this.audioCheckbox.style.opacity = '1';
+                        this.audioCheckbox.style.pointerEvents = 'auto';
+                    }
+                    // Start mouse recording even without mic
+                    startMouseRecording();
                     alert(`Mikrofonzugriff verweigert: ${err.message}`);
                 });
+        } else {
+            // No audio — start mouse recording immediately
+            startMouseRecording();
         }
     }
 
@@ -1001,14 +1010,14 @@ class CyberRecorderEngine {
 
             const a = document.createElement('a');
             a.href = url;
-            a.download = `script ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.mls`;
+            a.download = `${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.recording`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
             const audioInfo = this.audioBlob ? ` + ${Math.round(this.audioBlob.size / 1024)}KB Audio` : '';
-            this.addDebugLog(`✅ .mls gespeichert (${Math.round(containerBuffer.byteLength / 1024)}KB${audioInfo})`);
+            this.addDebugLog(`✅ .recording gespeichert (${Math.round(containerBuffer.byteLength / 1024)}KB${audioInfo})`);
         } catch (e) {
             console.error("Export Error:", e);
             this.addDebugLog(`❌ Export Fehler: ${e.message}`);

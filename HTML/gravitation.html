@@ -303,6 +303,16 @@
             mCone.position.set(M.x, M.y, M.z);
             scene.add(mCone);
 
+            // Ray line from O through M, extended to 1000 units
+            const rayLine = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(M.x, M.y, M.z).normalize().multiplyScalar(1000)
+                ]),
+                new THREE.LineBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.5 })
+            );
+            scene.add(rayLine);
+
             function updateM() {
                 mCone.position.set(M.x, M.y, M.z);
                 connectionLines.forEach(line => {
@@ -310,6 +320,14 @@
                     pos.setXYZ(1, M.x, M.y, M.z);
                     pos.needsUpdate = true;
                 });
+                const len = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
+                if (len > 1e-6) {
+                    const k = 1000 / len;
+                    rayLine.geometry.setFromPoints([
+                        new THREE.Vector3(0, 0, 0),
+                        new THREE.Vector3(M.x * k, M.y * k, M.z * k)
+                    ]);
+                }
                 computeGz();
             }
 
