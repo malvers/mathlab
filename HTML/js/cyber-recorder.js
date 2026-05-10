@@ -212,7 +212,10 @@ class CyberRecorderEngine {
         const timestamp = new Date().toLocaleTimeString('de-DE');
         const line = `[${timestamp}] ${msg}\n`;
         this.debugBox.textContent += line;
-        this.debugBox.scrollTop = this.debugBox.scrollHeight;
+        // Auto-scroll to bottom
+        setTimeout(() => {
+            this.debugBox.scrollTop = this.debugBox.scrollHeight;
+        }, 0);
         console.log(msg);
     }
 
@@ -267,27 +270,185 @@ class CyberRecorderEngine {
         `;
         titleContainer.appendChild(title);
 
-        const audioCheckbox = document.createElement('input');
-        audioCheckbox.type = 'checkbox';
-        audioCheckbox.id = 'cyber-recorder-audio-toggle';
-        audioCheckbox.title = 'Ton aufnehmen';
-        audioCheckbox.style.cssText = `
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-            accent-color: #00d2ff;
+        // Create debug box first so it's available for audioBtn
+        const debugContainer = document.createElement('div');
+        debugContainer.id = 'cyber-recorder-debug-container';
+        debugContainer.style.cssText = `
+            position: fixed;
+            bottom: 220px;
+            top: auto;
+            right: 20px;
+            background: rgba(0, 40, 60, 0.95);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 6px;
+            display: none;
+            flex-direction: column;
+            width: 360px;
+            max-height: 600px;
+            z-index: 999999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
         `;
-        audioCheckbox.onchange = (e) => {
-            this.recordAudio = e.target.checked;
-            if (this.debugBox) {
-                this.debugBox.style.display = e.target.checked ? 'block' : 'none';
-                if (e.target.checked) {
+
+        const debugHeader = document.createElement('div');
+        debugHeader.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            flex-shrink: 0;
+        `;
+
+        const debugTitle = document.createElement('span');
+        debugTitle.textContent = '🎤 Debug';
+        debugTitle.style.cssText = `
+            font-size: 0.7rem;
+            color: rgba(0, 210, 255, 0.9);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        `;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        copyBtn.title = 'Logs kopieren';
+        copyBtn.style.cssText = `
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            border-radius: 3px;
+            padding: 4px 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        `;
+        copyBtn.onmouseover = () => {
+            copyBtn.style.background = 'rgba(0, 255, 136, 0.2)';
+            copyBtn.style.borderColor = '#00ff88';
+            copyBtn.style.color = '#00ff88';
+        };
+        copyBtn.onmouseout = () => {
+            copyBtn.style.background = 'rgba(0, 210, 255, 0.1)';
+            copyBtn.style.borderColor = 'rgba(0, 210, 255, 0.3)';
+            copyBtn.style.color = '#00d2ff';
+        };
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(debugBox.textContent).then(() => {
+                copyBtn.style.color = '#00ff88';
+                setTimeout(() => {
+                    copyBtn.style.color = '#00d2ff';
+                }, 500);
+            });
+        };
+
+        const micSelect = document.createElement('select');
+        micSelect.title = 'Mikrofon auswählen';
+        micSelect.style.cssText = `
+            background: rgba(0, 40, 60, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 0.6rem;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 6px;
+            max-width: 200px;
+        `;
+        micSelect.onchange = (e) => {
+            this.selectedDeviceId = e.target.value;
+            this.addDebugLog(`🎤 Gerät gewählt: ${e.target.options[e.target.selectedIndex].text}`);
+        };
+        this.micSelect = micSelect;
+
+        // Populate mic list
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            const mics = devices.filter(d => d.kind === 'audioinput');
+            mics.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.deviceId;
+                opt.textContent = d.label || `Mikrofon ${d.deviceId.slice(0,6)}`;
+                micSelect.appendChild(opt);
+            });
+        });
+
+        debugHeader.appendChild(debugTitle);
+        debugHeader.appendChild(micSelect);
+        debugHeader.appendChild(copyBtn);
+
+        const debugBox = document.createElement('div');
+        debugBox.id = 'cyber-recorder-debug';
+        debugBox.style.cssText = `
+            padding: 12px;
+            font-size: 0.7rem;
+            color: rgba(0, 210, 255, 0.9);
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.4;
+            overflow-y: auto;
+            flex: 1;
+        `;
+
+        debugContainer.appendChild(debugHeader);
+        debugContainer.appendChild(debugBox);
+        this.debugBox = debugBox;
+        this.debugContainer = debugContainer;
+        document.body.appendChild(debugContainer);
+
+        const audioBtn = document.createElement('button');
+        audioBtn.id = 'cyber-recorder-audio-toggle';
+        audioBtn.title = 'Ton aufnehmen';
+        audioBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`;
+        audioBtn.style.cssText = `
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            color: #00d2ff;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        `;
+
+        const setAudioBtnState = (enabled) => {
+            if (enabled) {
+                audioBtn.style.background = 'rgba(0, 255, 136, 0.2)';
+                audioBtn.style.borderColor = '#00ff88';
+                audioBtn.style.color = '#00ff88';
+                audioBtn.style.boxShadow = '0 0 10px rgba(0, 255, 136, 0.3)';
+            } else {
+                audioBtn.style.background = 'rgba(0, 210, 255, 0.1)';
+                audioBtn.style.borderColor = 'rgba(0, 210, 255, 0.4)';
+                audioBtn.style.color = '#00d2ff';
+                audioBtn.style.boxShadow = 'none';
+            }
+        };
+
+        audioBtn.onclick = () => {
+            this.recordAudio = !this.recordAudio;
+            setAudioBtnState(this.recordAudio);
+            if (this.debugContainer) {
+                this.debugContainer.style.display = this.recordAudio ? 'flex' : 'none';
+                if (this.recordAudio && this.debugBox) {
                     this.debugBox.textContent = '🎤 Audio Debug Log\n' + '='.repeat(30) + '\n';
                 }
             }
         };
-        titleContainer.appendChild(audioCheckbox);
-        this.audioCheckbox = audioCheckbox;
+
+        titleContainer.appendChild(audioBtn);
+        this.audioCheckbox = audioBtn;
+        this.recordAudio = true;
+        setAudioBtnState(true);
 
         ui.appendChild(titleContainer);
         this.titleEl = title;
@@ -336,6 +497,18 @@ class CyberRecorderEngine {
         btnExport.title = "Export als binäre .mls Datei";
         btnExport.style.cssText = btnStyle;
         btnExport.onclick = () => this.exportScript();
+
+        const btnAudioExport = document.createElement('button');
+        btnAudioExport.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`;
+        btnAudioExport.title = "Raw Audio herunterladen (.webm)";
+        btnAudioExport.style.cssText = btnStyle;
+        btnAudioExport.id = 'cyber-recorder-audio-export-btn';
+        btnAudioExport.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("[AudioExport] Button clicked", { audioBlob: this.audioBlob?.size });
+            this.exportAudio();
+        };
         
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
@@ -347,39 +520,31 @@ class CyberRecorderEngine {
         ui.appendChild(btnRec);
         ui.appendChild(btnPlay);
         ui.appendChild(btnExport);
+        ui.appendChild(btnAudioExport);
         ui.appendChild(btnImport);
         ui.appendChild(fileInput);
 
-        // Debug box
-        const debugBox = document.createElement('div');
-        debugBox.id = 'cyber-recorder-debug';
-        debugBox.style.cssText = `
-            background: rgba(0, 40, 60, 0.9);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            border-radius: 4px;
-            padding: 8px;
-            margin-top: 10px;
-            max-width: 300px;
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 0.65rem;
-            color: rgba(0, 210, 255, 0.8);
-            font-family: 'Courier New', monospace;
-            display: none;
-            white-space: pre-wrap;
-            word-break: break-all;
-            line-height: 1.3;
-        `;
-        ui.appendChild(debugBox);
-
         this.ui = ui;
-        this.debugBox = debugBox;
         document.body.appendChild(ui);
 
         this.btnRec = btnRec;
         this.btnPlay = btnPlay;
         this.btnImport = btnImport;
         this.btnExport = btnExport;
+
+        // Show debug box by default since recordAudio starts as true
+        if (this.recordAudio && this.debugContainer && this.debugBox) {
+            this.debugContainer.style.display = 'flex';
+            this.debugBox.textContent = '🎤 Audio Debug Log\n' + '='.repeat(30) + '\n';
+        }
+
+        // Match debug container width to recorder UI
+        requestAnimationFrame(() => {
+            if (this.ui && this.debugContainer) {
+                const w = this.ui.getBoundingClientRect().width;
+                if (w > 0) this.debugContainer.style.width = w + 'px';
+            }
+        });
 
         // Add Drag & Drop fallback!
         document.body.addEventListener('dragover', (e) => {
@@ -464,10 +629,19 @@ class CyberRecorderEngine {
             this.audioChunks = [];
             this.audioBlob = null;
 
-            navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false } })
+            const audioConstraints = this.selectedDeviceId
+                ? { deviceId: { exact: this.selectedDeviceId } }
+                : true;
+            navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
                 .then((stream) => {
-                    this.addDebugLog(`✅ Stream acquired: ${stream.getTracks().length} tracks`);
-                    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    const track = stream.getAudioTracks()[0];
+                    const settings = track.getSettings();
+                    this.addDebugLog(`✅ Stream: ${track.label}`);
+                    this.addDebugLog(`   device: ${settings.deviceId?.slice(0,8)}... ${settings.sampleRate}Hz`);
+                    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                        ? 'audio/webm;codecs=opus' : 'audio/webm';
+                    this.addDebugLog(`   codec: ${mimeType}`);
+                    this.mediaRecorder = new MediaRecorder(stream, { mimeType });
 
                     this.mediaRecorder.onerror = (e) => {
                         this.addDebugLog(`❌ MediaRecorder error: ${e.error}`);
@@ -519,11 +693,19 @@ class CyberRecorderEngine {
             document.removeEventListener('input', this.boundHandleEvent, true);
             document.removeEventListener('change', this.boundHandleEvent, true);
 
-            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                this.addDebugLog(`📥 Requesting final audio data...`);
-                this.mediaRecorder.requestData();
-                this.mediaRecorder.stop();
-                this.addDebugLog(`⏹️ MediaRecorder stopped.`);
+            this.addDebugLog(`🔍 mediaRecorder: ${this.mediaRecorder ? 'exists' : 'null'}, state: ${this.mediaRecorder?.state}`);
+
+            if (this.mediaRecorder) {
+                if (this.mediaRecorder.state === 'recording') {
+                    this.addDebugLog(`📥 Requesting final audio data...`);
+                    this.mediaRecorder.requestData();
+                    this.mediaRecorder.stop();
+                    this.addDebugLog(`⏹️ MediaRecorder stopped.`);
+                } else {
+                    this.addDebugLog(`⚠️ MediaRecorder state: ${this.mediaRecorder.state}`);
+                }
+            } else {
+                this.addDebugLog(`❌ mediaRecorder is null!`);
             }
 
             console.log(`⏹ Recording stopped. Recorded ${this.events.length} events.`);
@@ -665,17 +847,38 @@ class CyberRecorderEngine {
 
         // Start audio playback if available
         if (this.audioBlob && this.audioBlob.size > 0) {
-            console.log(`[Audio] Playing ${this.audioBlob.size} bytes...`);
+            this.addDebugLog(`▶️ Playing ${this.audioBlob.size} bytes...`);
             const audioUrl = URL.createObjectURL(this.audioBlob);
             this.audioElement = new Audio(audioUrl);
+
+            // Ensure audio is in DOM for some browsers
+            this.audioElement.style.display = 'none';
+            document.body.appendChild(this.audioElement);
+
             this.audioElement.onerror = (err) => {
-                console.error("Audio error:", err);
+                this.addDebugLog(`❌ Audio error: ${err.error?.message || err}`);
             };
-            this.audioElement.play().catch((err) => {
-                console.warn("Audio playback failed:", err);
-            });
+            this.audioElement.onplay = () => {
+                this.addDebugLog(`🔊 Audio playing!`);
+            };
+            this.audioElement.onended = () => {
+                this.addDebugLog(`⏹️ Audio ended`);
+            };
+            this.audioElement.volume = 1.0;
+            this.audioElement.autoplay = false;
+
+            const playPromise = this.audioElement.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        this.addDebugLog(`✅ Play promise resolved`);
+                    })
+                    .catch((err) => {
+                        this.addDebugLog(`❌ Play error: ${err.name}: ${err.message}`);
+                    });
+            }
         } else if (this.recordAudio) {
-            console.warn("[Audio] Recording was enabled but no audio blob found. Check microphone permissions.");
+            this.addDebugLog(`⚠️ No audio blob found!`);
         }
 
         this.events.forEach((ev, index) => {
@@ -739,15 +942,103 @@ class CyberRecorderEngine {
     }
 
     exportScript() {
-        if (this.events.length === 0) {
-            alert("Noch keine Events aufgezeichnet.");
+        if (!this.audioBlob || this.audioBlob.size === 0) {
+            alert("Kein Audio aufgezeichnet.");
             return;
         }
-        
+
+        const doExport = () => {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm   = String(now.getMonth() + 1).padStart(2, '0');
+            const dd   = String(now.getDate()).padStart(2, '0');
+            const hh   = String(now.getHours()).padStart(2, '0');
+            const min  = String(now.getMinutes()).padStart(2, '0');
+            const ss   = String(now.getSeconds()).padStart(2, '0');
+
+            let labName = "lab";
+            const filePart = window.location.pathname.split('/').pop();
+            if (filePart) labName = filePart.replace('.html', '');
+            const baseName = `audio ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
+
+            this.addDebugLog(`🎵 Konvertiere zu MP3...`);
+
+            const audioCtx = new AudioContext();
+            this.audioBlob.arrayBuffer().then(buf => {
+                audioCtx.decodeAudioData(buf, (decoded) => {
+                    const sampleRate = decoded.sampleRate;
+                    const numChannels = decoded.numberOfChannels;
+                    const length = decoded.length;
+                    this.addDebugLog(`🎚 Decoded: ${numChannels}ch, ${sampleRate}Hz, ${length} samples`);
+
+                    // Mix all channels to mono
+                    const mono = new Float32Array(length);
+                    for (let c = 0; c < numChannels; c++) {
+                        const ch = decoded.getChannelData(c);
+                        for (let i = 0; i < length; i++) mono[i] += ch[i];
+                    }
+                    if (numChannels > 1) {
+                        for (let i = 0; i < length; i++) mono[i] /= numChannels;
+                    }
+
+                    const mp3enc = new lamejs.Mp3Encoder(1, sampleRate, 128);
+                    const blockSize = 1152;
+                    const mp3Data = [];
+
+                    for (let i = 0; i < mono.length; i += blockSize) {
+                        const chunk = mono.subarray(i, i + blockSize);
+                        const int16 = new Int16Array(chunk.length);
+                        for (let j = 0; j < chunk.length; j++) {
+                            const s = Math.max(-1, Math.min(1, chunk[j]));
+                            int16[j] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                        }
+                        const encoded = mp3enc.encodeBuffer(int16);
+                        if (encoded.length > 0) mp3Data.push(new Int8Array(encoded));
+                    }
+
+                    const flushed = mp3enc.flush();
+                    if (flushed.length > 0) mp3Data.push(new Int8Array(flushed));
+
+                    const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                    const url = URL.createObjectURL(mp3Blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${baseName}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    this.addDebugLog(`✅ MP3 gespeichert: ${Math.round(mp3Blob.size / 1024)}KB`);
+                }, (err) => {
+                    this.addDebugLog(`❌ Decode-Fehler: ${err.message}`);
+                    alert("Audio-Dekodierung fehlgeschlagen: " + err.message);
+                });
+            });
+        };
+
+        if (window.lamejs) {
+            doExport();
+        } else {
+            this.addDebugLog(`📦 Lade lamejs...`);
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js';
+            s.onload = () => { this.addDebugLog(`✅ lamejs geladen`); doExport(); };
+            s.onerror = () => { this.addDebugLog(`❌ lamejs konnte nicht geladen werden`); };
+            document.head.appendChild(s);
+        }
+    }
+
+    exportAudio() {
+        this.addDebugLog(`📥 exportAudio() aufgerufen. audioBlob: ${this.audioBlob ? this.audioBlob.size + ' bytes' : 'null'}`);
+
+        if (!this.audioBlob || this.audioBlob.size === 0) {
+            this.addDebugLog(`❌ Kein Audio vorhanden!`);
+            alert("Kein Audio aufgezeichnet.");
+            return;
+        }
+
         try {
-            const containerBuffer = CyberContainerCodec.encodeWithAudio(this.events, this.audioBlob);
-            const blob = new Blob([containerBuffer], { type: 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(this.audioBlob);
 
             const now = new Date();
             const yyyy = now.getFullYear();
@@ -764,17 +1055,17 @@ class CyberRecorderEngine {
 
             const a = document.createElement('a');
             a.href = url;
-            a.download = `script ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.mls`;
+            a.download = `audio ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.webm`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            const audioInfo = this.audioBlob ? ` + ${Math.round(this.audioBlob.size / 1024)}KB Audio` : '';
-            console.log(`[CyberRecorder] Binärdatei erfolgreich generiert (${containerBuffer.byteLength} Bytes${audioInfo}).`);
+            this.addDebugLog(`💾 Audio exportiert: ${Math.round(this.audioBlob.size / 1024)}KB`);
+            console.log(`[CyberRecorder] Audio erfolgreich exportiert (${this.audioBlob.size} Bytes).`);
         } catch (e) {
-            console.error("Export Error:", e);
-            alert("Fehler beim Exportieren!");
+            console.error("Audio Export Error:", e);
+            alert("Fehler beim Exportieren des Audios!");
         }
     }
 
