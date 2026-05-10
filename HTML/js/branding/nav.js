@@ -95,6 +95,66 @@
             </svg>
         `;
 
+            // Play Recording Button (loads explanation .recording from recordings/index.json)
+            const playBtn = document.createElement("div");
+            playBtn.className = "nav-btn";
+            playBtn.title = "Erklärung abspielen";
+            playBtn.style.color = "#00ff88";
+            playBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+        `;
+            playBtn.onclick = () => {
+                const labName = window.location.pathname.split('/').pop().replace('.html', '');
+                const base = new URL('.', document.baseURI).href + 'recordings/';
+                const indexUrl = base + 'index.json';
+
+                console.log('[play-btn] labName:', JSON.stringify(labName));
+                console.log('[play-btn] base:', base);
+                console.log('[play-btn] indexUrl:', indexUrl);
+
+                const xhrGet = (url, type, cb) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', url, true);
+                    xhr.responseType = type;
+                    xhr.onload = () => {
+                        console.log('[play-btn] xhr load', url, 'status:', xhr.status, 'response:', xhr.response);
+                        if (xhr.status === 0 || xhr.status === 200) cb(xhr.response);
+                        else cb(null);
+                    };
+                    xhr.onerror = () => { console.log('[play-btn] xhr error', url); cb(null); };
+                    xhr.send();
+                };
+                const loadRecorder = (cb) => {
+                    if (window.CyberRecorder) { cb(); return; }
+                    const s = document.createElement('script');
+                    s.src = 'js/cyber-recorder.js';
+                    s.onload = cb;
+                    document.head.appendChild(s);
+                };
+                xhrGet(indexUrl, 'json', index => {
+                    if (!index) {
+                        alert('index.json konnte nicht geladen werden.\nURL: ' + indexUrl + '\n\nKonsole prüfen für Details.');
+                        return;
+                    }
+                    console.log('[play-btn] index keys:', Object.keys(index));
+                    if (!index[labName]) {
+                        alert('Kein Eintrag für Lab "' + labName + '" in index.json.\n\nVorhandene Keys:\n' + Object.keys(index).join('\n'));
+                        return;
+                    }
+                    const recordingUrl = base + index[labName];
+                    console.log('[play-btn] recordingUrl:', recordingUrl);
+                    loadRecorder(() => {
+                        CyberRecorder.init();
+                        xhrGet(recordingUrl, 'arraybuffer', buf => {
+                            if (!buf) { alert('Recording konnte nicht geladen werden:\n' + recordingUrl); return; }
+                            const fakeEvt = { target: { files: [new File([buf], 'script.recording')], value: '' } };
+                            CyberRecorder.importScript(fakeEvt);
+                            setTimeout(() => CyberRecorder.play(), 200);
+                        });
+                    });
+                });
+            };
+
             // Briefing Button
             const briefingBtn = document.createElement("div");
             briefingBtn.className = "nav-btn";
@@ -123,10 +183,10 @@
                     const langBtn = miniRail.querySelector('#rail-lang-display-btn');
                     if (langBtn) miniRail.appendChild(langBtn);
 
-                    // 2. Insert home→back→?→heart directly after the hamburger button.
+                    // 2. Insert play→home→back→?→heart directly after the hamburger button.
                     const hamburger = miniRail.firstElementChild;
                     let anchor = hamburger;
-                    [homeBtn, backBtn, briefingBtn, donateBtn].forEach(btn => {
+                    [playBtn, homeBtn, backBtn, briefingBtn, donateBtn].forEach(btn => {
                         btn.dataset.cyberBrandingNav = "1";
                         miniRail.insertBefore(btn, anchor.nextSibling);
                         anchor = btn;
