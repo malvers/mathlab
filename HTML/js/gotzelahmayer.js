@@ -80,6 +80,68 @@ function randomPointsOnSphere(n = 1, r = 1) {
     return points;
 }
 
+/**
+ * Summiert calculateTriangleGz über alle Facetten eines Polyeders.
+ * Format: vertices [[x,y,z],…], faces [[i,j,k],…] (Indexed Mesh)
+ */
+function calculatePolyhedronGz(vertices, faces, m, rho = 2670) {
+    let gz = 0;
+    for (const [i, j, k] of faces) {
+        gz += calculateTriangleGz(vertices[i], vertices[j], vertices[k], m, rho);
+    }
+    return gz;
+}
+
+/**
+ * Erzeugt eine UV-Kugel als Indexed Mesh.
+ * @param {number} r - Radius
+ * @param {number} wSegs - Längensegmente
+ * @param {number} hSegs - Breitensegmente
+ * @returns {{ vertices: Array, faces: Array }}
+ */
+function makeSpherePolyhedron(r = 1, wSegs = 32, hSegs = 16) {
+    const vertices = [];
+    const faces = [];
+
+    for (let h = 0; h <= hSegs; h++) {
+        const theta = h * Math.PI / hSegs;
+        const sinT = Math.sin(theta), cosT = Math.cos(theta);
+        for (let w = 0; w <= wSegs; w++) {
+            const phi = w * 2 * Math.PI / wSegs;
+            vertices.push([r * sinT * Math.cos(phi), r * cosT, r * sinT * Math.sin(phi)]);
+        }
+    }
+
+    for (let h = 0; h < hSegs; h++) {
+        for (let w = 0; w < wSegs; w++) {
+            const a = h * (wSegs + 1) + w;
+            const b = a + wSegs + 1;
+            faces.push([a, b, a + 1]);
+            faces.push([b, b + 1, a + 1]);
+        }
+    }
+
+    return { vertices, faces };
+}
+
+/**
+ * Analytische Lösung (Newton/Shell-Theorem) für gz einer homogenen Vollkugel.
+ * Außerhalb der Kugel ist das Feld identisch mit einem Punktmasse-Feld im Zentrum.
+ * @param {number} R - Kugelradius [m]
+ * @param {number} rho - Dichte [kg/m³]
+ * @param {Array} m - Messpunkt [x, y, z]
+ * @returns {number} gz in mGal
+ */
+function calculateSphereNewton(R = 1, rho = 2670, m) {
+    const G = 6.67430e-11;
+    const SI_TO_MGAL = 100000;
+    const M_total = (4 / 3) * Math.PI * R * R * R * rho;
+    const r = Math.sqrt(m[0] * m[0] + m[1] * m[1] + m[2] * m[2]);
+    if (r <= R) return NaN; // innerhalb der Kugel nicht definiert
+    // Gravitationsfeld zeigt von M zum Zentrum: g = -G·M/r³ · m
+    return -G * M_total * m[2] / (r * r * r) * SI_TO_MGAL;
+}
+
 // Beispielaufruf:
 const p1 = [0, 0, 100];
 const p2 = [100, 0, 100];
