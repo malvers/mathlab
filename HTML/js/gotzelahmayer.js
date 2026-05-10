@@ -56,7 +56,7 @@ function calculateTriangleGz(p1, p2, p3, m, rho = 2670) {
     }
 
     // 4. gz nach Götze & Lahmeyer
-    // TODO: factor 6 bug — empirical fix pending deeper investigation
+    // TODO: Faktor 6 — Ursache noch zu klären (Ikosphäre-Implementierung pending)
     return G * rho * (zp * omega - sumLogTerms) * SI_TO_MGAL / 6;
 }
 
@@ -94,33 +94,95 @@ function calculatePolyhedronGz(vertices, faces, m, rho = 2670) {
 }
 
 /**
- * Erzeugt eine UV-Kugel als Indexed Mesh.
+ * Erzeugt eine Ikosphäre (20 Dreiecke, rekursiv unterteilt).
+ * Fallback: wenn subdivisions undefined, nutze alte UV-Sphäre (wSegs-Parameter).
  * @param {number} r - Radius
- * @param {number} wSegs - Längensegmente
- * @param {number} hSegs - Breitensegmente
+ * @param {number} subdivisions - Unterteilungsebenen ODER wSegs (alte API)
+ * @param {number} hSegs - nur für alte API
  * @returns {{ vertices: Array, faces: Array }}
  */
-function makeSpherePolyhedron(r = 1, wSegs = 32, hSegs = 16) {
-    const vertices = [];
-    const faces = [];
-
-    for (let h = 0; h <= hSegs; h++) {
-        const theta = h * Math.PI / hSegs;
-        const sinT = Math.sin(theta), cosT = Math.cos(theta);
-        for (let w = 0; w <= wSegs; w++) {
-            const phi = w * 2 * Math.PI / wSegs;
-            vertices.push([r * sinT * Math.cos(phi), r * cosT, r * sinT * Math.sin(phi)]);
+function makeSpherePolyhedron(r = 1, subdivisions = 2, hSegs = undefined) {
+    // Fallback: alte API (wSegs, hSegs) statt neue (r, subdivisions)
+    if (hSegs !== undefined) {
+        const wSegs = subdivisions;
+        const vertices = [];
+        const faces = [];
+        for (let h = 0; h <= hSegs; h++) {
+            const theta = h * Math.PI / hSegs;
+            const sinT = Math.sin(theta), cosT = Math.cos(theta);
+            for (let w = 0; w <= wSegs; w++) {
+                const phi = w * 2 * Math.PI / wSegs;
+                vertices.push([r * sinT * Math.cos(phi), r * cosT, r * sinT * Math.sin(phi)]);
+            }
         }
+        for (let h = 0; h < hSegs; h++) {
+            for (let w = 0; w < wSegs; w++) {
+                const a = h * (wSegs + 1) + w;
+                const b = a + wSegs + 1;
+                faces.push([a, b, a + 1]);
+                faces.push([b, b + 1, a + 1]);
+            }
+        }
+        return { vertices, faces };
     }
 
-    for (let h = 0; h < hSegs; h++) {
-        for (let w = 0; w < wSegs; w++) {
-            const a = h * (wSegs + 1) + w;
-            const b = a + wSegs + 1;
-            faces.push([a, b, a + 1]);
-            faces.push([b, b + 1, a + 1]);
+    // Neue API: Ikosphäre
+    const phi = (1 + Math.sqrt(5)) / 2;
+
+    // 12 Ikosaeder-Vertices
+    const verts = [
+        [-1,  phi, -1], [ 1,  phi, -1], [-1,  phi,  1], [ 1,  phi,  1],
+        [-phi, -1,  1], [ phi, -1,  1], [-phi, -1, -1], [ phi, -1, -1],
+        [-phi,  1, -1], [ phi,  1, -1], [-phi,  1,  1], [ phi,  1,  1],
+    ];
+
+    // 20 Ikosaeder-Dreiecke
+    let faces = [
+        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
+        [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+        [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
+        [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1],
+    ];
+
+    let vertices = verts.map(v => v.slice());
+
+    // Rekursive Unterteilung
+    for (let s = 0; s < subdivisions; s++) {
+        const newFaces = [];
+        for (const [a, b, c] of faces) {
+            const ab = vertices.length;
+            const bc = ab + 1;
+            const ca = ab + 2;
+
+            vertices.push([
+                (vertices[a][0] + vertices[b][0]) / 2,
+                (vertices[a][1] + vertices[b][1]) / 2,
+                (vertices[a][2] + vertices[b][2]) / 2,
+            ]);
+            vertices.push([
+                (vertices[b][0] + vertices[c][0]) / 2,
+                (vertices[b][1] + vertices[c][1]) / 2,
+                (vertices[b][2] + vertices[c][2]) / 2,
+            ]);
+            vertices.push([
+                (vertices[c][0] + vertices[a][0]) / 2,
+                (vertices[c][1] + vertices[a][1]) / 2,
+                (vertices[c][2] + vertices[a][2]) / 2,
+            ]);
+
+            // Normalisieren auf Einheitssphäre
+            [ab, bc, ca].forEach(i => {
+                const len = Math.sqrt(vertices[i][0]**2 + vertices[i][1]**2 + vertices[i][2]**2);
+                vertices[i] = [vertices[i][0]/len, vertices[i][1]/len, vertices[i][2]/len];
+            });
+
+            newFaces.push([a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]);
         }
+        faces = newFaces;
     }
+
+    // Skalierung auf Radius r
+    vertices = vertices.map(v => [v[0]*r, v[1]*r, v[2]*r]);
 
     return { vertices, faces };
 }
