@@ -383,35 +383,49 @@
             );
 
             wireMesh.visible = true;
+
+            let _currentTab = 'scene';
+
             document.getElementById('wire-toggle')._cb = (on) => {
-                wireMesh.visible = on;
+                if (_currentTab === 'scene') {
+                    wireMesh.visible = on;
+                    saveState();
+                } else if (_currentTab === 'polyeder' && _polyWire) {
+                    _polyWire.visible = on;
+                }
                 applySwitch('wire-toggle', on);
-                saveState();
             };
 
             document.getElementById('conn-toggle')._cb = (on) => {
-                connectionsOn = on;
+                if (_currentTab === 'scene') {
+                    connectionsOn = on;
+                    connectionLines.forEach(l => l.visible = on);
+                } else if (_currentTab === 'polyeder' && _polyMCone) {
+                    _polyMCone.visible = on;
+                }
                 applySwitch('conn-toggle', on);
-                connectionLines.forEach(l => l.visible = on);
-            };
-
-            window.resetPolyView = function() {
-                if (!_polyCamera) return;
-                _polyCamera.position.set(3.5, 4.0, 6.0);
-                _polyCamera.lookAt(0, 0, 0);
-                _polyControls.target.set(0, 0, 0);
-                _polyControls.update();
             };
 
             window.resetView = function() {
-                camera.position.set(3.5, 4.0, 6.0);
-                camera.lookAt(0, 0, 0);
-                controls.target.set(0, 0, 0);
-                controls.update();
-                wireMesh.visible = true;
-                document.getElementById('wire-toggle').checked = true;
-                applySwitch('wire-toggle', true);
-                saveState();
+                if (_currentTab === 'polyeder') {
+                    if (!_polyCamera) return;
+                    _polyCamera.position.set(3.5, 4.0, 6.0);
+                    _polyCamera.lookAt(0, 0, 0);
+                    _polyControls.target.set(0, 0, 0);
+                    _polyControls.update();
+                    if (_polyWire) _polyWire.visible = true;
+                    document.getElementById('wire-toggle').checked = true;
+                    applySwitch('wire-toggle', true);
+                } else {
+                    camera.position.set(3.5, 4.0, 6.0);
+                    camera.lookAt(0, 0, 0);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    wireMesh.visible = true;
+                    document.getElementById('wire-toggle').checked = true;
+                    applySwitch('wire-toggle', true);
+                    saveState();
+                }
             };
 
             // --- Sidebar: Geometrie ---
@@ -917,6 +931,7 @@
 
             // --- Tabs ---
             window.switchTab = function(name) {
+                _currentTab = name;
                 localStorage.setItem('gravitation_tab', name);
                 ['scene', 'polyeder'].forEach(t => {
                     document.getElementById('tab-' + t).style.display = t === name ? (t === 'scene' ? 'block' : 'flex') : 'none';
@@ -928,8 +943,8 @@
                 document.getElementById('sb-scene').style.display    = name === 'scene'    ? '' : 'none';
                 document.getElementById('sb-polyeder').style.display  = name === 'polyeder' ? '' : 'none';
 
-                // Karten mitbewegen: Messpunkt M + Kugel
-                ['Messpunkt M', 'Kugel'].forEach(title => {
+                // Karten mitbewegen: Ansicht + Messpunkt M + Kugel
+                ['Ansicht', 'Messpunkt M', 'Kugel'].forEach(title => {
                     const card = Array.from(document.querySelectorAll('.instrument-card')).find(c =>
                         c.querySelector('.instrument-title')?.textContent.replace(/[▶▼◀]/g,'').trim() === title
                     );
@@ -940,7 +955,17 @@
                         target.prepend(card);
                     }
                 });
-                if (name === 'scene') setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+                if (name === 'scene') {
+                    setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+                    if (document.getElementById('wire-toggle')) {
+                        document.getElementById('wire-toggle').checked = wireMesh.visible;
+                        applySwitch('wire-toggle', wireMesh.visible);
+                    }
+                    if (document.getElementById('conn-toggle')) {
+                        document.getElementById('conn-toggle').checked = connectionsOn;
+                        applySwitch('conn-toggle', connectionsOn);
+                    }
+                }
                 if (name === 'polyeder') setTimeout(() => {
                     initPolyScene();
                     if (_polyRenderer) {
@@ -948,6 +973,14 @@
                         _polyCamera.aspect = pc.clientWidth / pc.clientHeight;
                         _polyCamera.updateProjectionMatrix();
                         _polyRenderer.setSize(pc.clientWidth, pc.clientHeight);
+                    }
+                    if (document.getElementById('wire-toggle')) {
+                        document.getElementById('wire-toggle').checked = _polyWire ? _polyWire.visible : true;
+                        applySwitch('wire-toggle', _polyWire ? _polyWire.visible : true);
+                    }
+                    if (document.getElementById('conn-toggle')) {
+                        document.getElementById('conn-toggle').checked = _polyMCone ? _polyMCone.visible : true;
+                        applySwitch('conn-toggle', _polyMCone ? _polyMCone.visible : true);
                     }
                 }, 0);
             };
@@ -972,13 +1005,15 @@
                     <option value="32" selected>32 × 16</option>
                     <option value="64">64 × 32</option>
                     <option value="128">128 × 64</option>
+                    <option value="256">256 × 128</option>
+                    <option value="512">512 × 256</option>
                 </select>
                 <div style="display:flex; gap:6px; margin-bottom:16px;">
                     <button class="cyber-btn" onclick="runPolyederGz()"
                             style="flex:1; padding:8px; font-size:0.65rem;">
                         BERECHNEN
                     </button>
-                    <button class="cyber-btn" onclick="resetPolyView()"
+                    <button class="cyber-btn" onclick="resetView()"
                             style="flex:1; padding:8px; font-size:0.65rem;">
                         RESET VIEW
                     </button>
@@ -998,6 +1033,8 @@
                                 border-radius:4px; padding:6px 12px; text-align:center; margin-bottom:10px;">
                         <div id="poly-diff-val" style="font-size:0.9rem; color:#eee; letter-spacing:1px; font-family:Orbitron;">—</div>
                     </div>
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; margin-top:8px;">STATS</div>
+                    <div id="poly-stats" style="font-size:0.55rem; color:#ccc; font-family:monospace; line-height:1.4;"></div>
                 </div>
             `, '#f5a623');
 
@@ -1012,18 +1049,18 @@
                 const { vertices, faces } = makeSpherePolyhedron(1, wSegs, hSegs);
                 const verticesM = vertices.map(([vx, vy, vz]) => [vx * Rm, vy * Rm, vz * Rm]);
 
+                const gz     = calculatePolyhedronGz(verticesM, faces, mArr, _sphereRho);
                 const gzNewt = calculateSphereNewton(Rm, _sphereRho, mArr);
-                // TODO: Debug Götze formula — currently giving ~6× too large
-                // const gz = calculatePolyhedronGz(verticesM, faces, mArr, _sphereRho);
 
                 const newtInside = isNaN(gzNewt);
                 const newtZero   = !newtInside && Math.abs(M.z) < 1e-6;
-                const diff       = newtZero ? null : 0;  // No comparison yet
+                const diff       = (newtInside || newtZero) ? null
+                                 : (gz - gzNewt) / Math.abs(gzNewt) * 100;
 
                 _updatePolyWire(wSegs, hSegs);
 
-                // (Götze disabled — formula bug being debugged)
-                document.getElementById('poly-gz-val').innerHTML = '—';
+                document.getElementById('poly-gz-val').innerHTML =
+                    'g<sub>z</sub> ' + gz.toFixed(6) + ' mGal';
 
                 let newtHTML;
                 if (newtInside) {
@@ -1037,8 +1074,13 @@
                 document.getElementById('poly-newton-val').innerHTML = newtHTML;
 
                 const diffEl = document.getElementById('poly-diff-val');
-                diffEl.textContent = '—';
-                diffEl.style.color = '#555';
+                if (diff === null) {
+                    diffEl.textContent = '—';
+                    diffEl.style.color = '#555';
+                } else {
+                    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' %';
+                    diffEl.style.color = Math.abs(diff) < 1 ? '#44ff88' : Math.abs(diff) < 5 ? '#ffdd00' : '#ff6644';
+                }
 
                 const mDistKm = Math.sqrt(M.x*M.x + M.y*M.y + M.z*M.z);
                 document.getElementById('poly-stats').innerHTML =
