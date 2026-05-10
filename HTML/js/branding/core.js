@@ -78,7 +78,14 @@
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
-            container.addEventListener("click", () => this.toggleFullscreen());
+            container.addEventListener("click", (e) => {
+                if (e.shiftKey) {
+                    const rec = document.getElementById('cyber-recorder-ui');
+                    if (rec) rec.style.display = rec.style.display === 'none' ? 'flex' : 'none';
+                    return;
+                }
+                this.toggleFullscreen();
+            });
             const anchor =
                 document.getElementById("main-content") ||
                 document.getElementById("workspace") ||

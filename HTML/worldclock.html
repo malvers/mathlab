@@ -69,6 +69,7 @@
     <script src="js/i18n-sw.js"></script>
     <script src="js/i18n-tr.js"></script>
     <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js?v=542"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-recorder.js?v=12"></script>
@@ -131,7 +132,7 @@
 
         const cities = [
             { name: "Kairo", lon: 30, tz: "Africa/Cairo", color: "black" },
-            { name: "Dresden", lon: 15, tz: "Europe/Berlin", color: "#ffcc00", highlight: true },
+            { name: "Dresden", lon: 15, tz: "Europe/Berlin", color: "#ffcc00" },
             { name: "Dakar", lon: 0, tz: "Africa/Dakar", color: "black" }, 
             { name: "Azoren", lon: -15, tz: "Atlantic/Azores", color: "black" },
             { name: "Kapverden", lon: -30, tz: "Atlantic/Cape_Verde", color: "black" },
@@ -167,6 +168,11 @@
                 return tzName.includes('Sommerzeit') ? "SZ" : "WZ";
             } catch (e) { return ""; }
         }
+
+        // Highlight the city matching the visitor's local timezone (fallback: Dresden)
+        const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const localCity = cities.find(c => c.tz === localTz) || cities.find(c => c.tz === "Europe/Berlin");
+        if (localCity) localCity.highlight = true;
 
         let manualOffset = 0; // in minutes
         let autoRotation = 0;
