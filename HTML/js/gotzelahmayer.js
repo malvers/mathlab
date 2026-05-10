@@ -121,8 +121,9 @@ function makeSpherePolyhedron(r = 1, subdivisions = 2, hSegs = undefined) {
             for (let w = 0; w < wSegs; w++) {
                 const a = h * (wSegs + 1) + w;
                 const b = a + wSegs + 1;
-                faces.push([a, b, a + 1]);
-                faces.push([b, b + 1, a + 1]);
+                // CCW von außen → Außennormalen (für Götze-Formel mit n_z)
+                faces.push([a, a + 1, b]);
+                faces.push([b, a + 1, b + 1]);
             }
         }
         return { vertices, faces };
