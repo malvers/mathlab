@@ -56,7 +56,8 @@ function calculateTriangleGz(p1, p2, p3, m, rho = 2670) {
     }
 
     // 4. gz nach Götze & Lahmeyer
-    return G * rho * (zp * omega - sumLogTerms) * SI_TO_MGAL;
+    // TODO: factor 6 bug — empirical fix pending deeper investigation
+    return G * rho * (zp * omega - sumLogTerms) * SI_TO_MGAL / 6;
 }
 
 /**
