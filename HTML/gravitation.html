@@ -965,6 +965,12 @@
             const _savedTab = localStorage.getItem('gravitation_tab');
             if (_savedTab) switchTab(_savedTab);
 
+            // Dreiecke-Auswahl wiederherstellen
+            const _savedPolySegs = localStorage.getItem('gravitation_poly_segs');
+            if (_savedPolySegs) {
+                document.getElementById('poly-segs').value = _savedPolySegs;
+            }
+
             // --- Polyeder Sidebar-Card ---
             CyberUI.createCard('sb-polyeder', 'Polyeder · gz', `
                 <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-family:Orbitron;">KÖRPER</div>
@@ -975,7 +981,7 @@
                     <option value="sphere">Kugel (r = 1)</option>
                 </select>
                 <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-family:Orbitron;">DREIECKE</div>
-                <select id="poly-segs" onchange="runPolyederGz()" style="width:100%; background:#0d1e30; color:#eee;
+                <select id="poly-segs" onchange="localStorage.setItem('gravitation_poly_segs', this.value); runPolyederGz()" style="width:100%; background:#0d1e30; color:#eee;
                     border:1px solid rgba(0,200,255,0.25); border-radius:3px;
                     padding:8px; font-family:Orbitron; font-size:0.8rem; margin-bottom:12px;
                     min-height:36px; height:36px; box-sizing:border-box;">
@@ -1009,7 +1015,7 @@
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">ABWEICHUNG</div>
                     <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
                                 border-radius:4px; padding:10px 12px; text-align:center; margin-bottom:10px;">
-                        <div id="poly-diff-val" style="font-size:1rem; color:rgb(255,0,0); letter-spacing:1px; font-family:Orbitron; font-weight:600;">—</div>
+                        <div id="poly-diff-val" style="font-size:1.1rem; color:rgb(255,0,0); letter-spacing:1px; font-family:Orbitron; font-weight:600;">—</div>
                     </div>
                 </div>
             `, '#f5a623');
