@@ -115,23 +115,54 @@
             nav.appendChild(donateBtn);
             nav.appendChild(briefingBtn);
 
-            const sidebarHeader = document.getElementById("sidebar-header");
-            const sidebar = sidebarHeader ||
-                document.getElementById("side-panel") ||
-                document.getElementById("sidebar") ||
-                document.querySelector("aside") ||
-                document.querySelector(".sidebar");
+            // Strategy: If a mini-rail exists, inject buttons directly into it
+            // in desired order (before coffee). Otherwise, use sidebar-header or floating.
+            const miniRail = document.getElementById("mini-rail");
+            if (miniRail) {
+                // Find the coffee button as insertion anchor (branding buttons go before it)
+                const coffeeBtn = miniRail.querySelector('.nav-btn-coffee');
 
-            if (sidebar) {
-                nav.classList.add("integrated");
-                if (sidebarHeader) {
-                    sidebarHeader.appendChild(nav);
-                } else {
-                    sidebar.prepend(nav);
+                // Desired order: home, back, briefing, donate, qr, bug (before coffee, then language at end)
+                const navButtons = [homeBtn, backBtn, briefingBtn, donateBtn, qrBtn, bugBtn];
+                navButtons.forEach(btn => {
+                    // Mark as branding-nav so we can identify them later
+                    btn.dataset.cyberBrandingNav = "1";
+                    if (coffeeBtn) {
+                        miniRail.insertBefore(btn, coffeeBtn);
+                    } else {
+                        miniRail.appendChild(btn);
+                    }
+                });
+
+                // Move language button to the end (after coffee) for desired visual order
+                const langBtn = miniRail.querySelector('#rail-lang-display-btn');
+                if (langBtn && coffeeBtn) {
+                    miniRail.appendChild(langBtn);
                 }
+
+                // Create a hidden nav element so hasCompleteBrandingNav() still works
+                nav.style.display = "none";
+                nav.classList.add("integrated");
+                miniRail.appendChild(nav);
             } else {
-                nav.classList.add("floating");
-                document.body.appendChild(nav);
+                const sidebarHeader = document.getElementById("sidebar-header");
+                const sidebar = sidebarHeader ||
+                    document.getElementById("side-panel") ||
+                    document.getElementById("sidebar") ||
+                    document.querySelector("aside") ||
+                    document.querySelector(".sidebar");
+
+                if (sidebar) {
+                    nav.classList.add("integrated");
+                    if (sidebarHeader) {
+                        sidebarHeader.appendChild(nav);
+                    } else {
+                        sidebar.prepend(nav);
+                    }
+                } else {
+                    nav.classList.add("floating");
+                    document.body.appendChild(nav);
+                }
             }
         }
     };
