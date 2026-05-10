@@ -104,6 +104,32 @@
             controls.minDistance = 2;
             controls.maxDistance = 20;
 
+            // Spin-on-release: fling to spin, click to stop
+            let _velBuf = [];
+            let _pointerDown = false;
+
+            renderer.domElement.addEventListener('pointerdown', () => {
+                _pointerDown = true;
+                _velBuf = [];
+                controls.autoRotate = false;
+            });
+
+            renderer.domElement.addEventListener('pointermove', (e) => {
+                if (!_pointerDown) return;
+                _velBuf.push(e.movementX);
+                if (_velBuf.length > 6) _velBuf.shift();
+            });
+
+            renderer.domElement.addEventListener('pointerup', () => {
+                _pointerDown = false;
+                if (_velBuf.length === 0) return;
+                const avg = _velBuf.reduce((s, v) => s + v, 0) / _velBuf.length;
+                if (Math.abs(avg) > 0.8) {
+                    controls.autoRotate = true;
+                    controls.autoRotateSpeed = avg * 0.14;
+                }
+            });
+
             // Beleuchtung
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
@@ -221,10 +247,10 @@
 
             // Measurement point M
             const M = new THREE.Vector3(1.9, 1.9, 1.9);
-            const coneH = 0.28;
+            const coneH = 0.18;
 
             const mCone = new THREE.Mesh(
-                new THREE.ConeGeometry(0.06, coneH, 20),
+                new THREE.ConeGeometry(0.04, coneH, 20),
                 new THREE.MeshPhongMaterial({ color: 0xff2222, shininess: 60 })
             );
             mCone.rotation.x = Math.PI;
@@ -237,8 +263,8 @@
                     const pos = line.geometry.attributes.position;
                     pos.setXYZ(1, M.x, M.y, M.z);
                     pos.needsUpdate = true;
-                    line.computeLineDistances();
                 });
+                computeGz();
             }
 
             // --- Persistence ---
@@ -254,6 +280,7 @@
                 localStorage.setItem(STORE, JSON.stringify({
                     cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
                     wire: wireMesh.visible,
+                    m: { x: M.x, y: M.y, z: M.z },
                 }));
             }
 
@@ -312,7 +339,8 @@
                             style="width:100%; padding:8px; font-size:0.7rem;">
                         RESET VIEW
                     </button>
-                </div>`
+                </div>`,
+                '#ffdd00'
             );
 
             wireMesh.visible = true;
@@ -340,13 +368,13 @@
             };
 
             // --- Sidebar: Geometrie ---
-            window.newTriangle = function() {
+            window.newTriangle = function(fixedPts) {
                 currentTriangle.forEach(o => scene.remove(o));
                 connectionLines.forEach(o => scene.remove(o));
                 currentTriangle = [];
                 connectionLines = [];
 
-                const pts = randomPointsOnSphere(3);
+                const pts = fixedPts || randomPointsOnSphere(3);
                 const [a, b, c] = pts.map(p => new THREE.Vector3(...p));
 
                 const geo = new THREE.BufferGeometry();
@@ -366,18 +394,19 @@
                 scene.add(face);
                 scene.add(edge);
                 currentTriangle.push(face, edge);
+                _triVerts = [a, b, c];
+                showTriangleCoords([a, b, c]);
+                computeGz();
 
-                // Gestrichelte Verbindungslinien Ecken → M
-                const lineMat = new THREE.LineDashedMaterial({
-                    color: 0xffffff, dashSize: 0.06, gapSize: 0.04,
-                    transparent: true, opacity: 0.5
+                // Verbindungslinien Ecken → M
+                const lineMat = new THREE.LineBasicMaterial({
+                    color: 0xffffff, transparent: true, opacity: 0.5
                 });
                 [a, b, c].forEach(pt => {
                     const line = new THREE.Line(
                         new THREE.BufferGeometry().setFromPoints([pt, M]),
                         lineMat
                     );
-                    line.computeLineDistances();
                     line.visible = connectionsOn;
                     scene.add(line);
                     connectionLines.push(line);
@@ -389,14 +418,72 @@
                 connectionLines.forEach(o => scene.remove(o));
                 currentTriangle = [];
                 connectionLines = [];
+                _triVerts = null;
+                showTriangleCoords(null);
+                document.getElementById('gz-result').style.display = 'none';
             };
 
             CyberUI.createCard('ui-container', 'Geometrie', `
+
                 <button class="cyber-btn" onclick="newTriangle()"
                         style="width:100%; padding:8px; font-size:0.7rem;">
-                    DREIECK
+                    ERZEUGE DREIECK
                 </button>
-            `);
+                <div style="margin-top:8px;">
+                    <div style="padding:4px 8px 4px 10px;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.18);border-radius:4px;margin-bottom:6px;display:grid;grid-template-columns:16px 14px 56px 14px 56px 14px 56px;align-items:center;gap:2px 4px;font-family:Orbitron;font-size:0.75rem;letter-spacing:1px;">
+                        <span style="color:#ffdd00;">A</span>
+                        <span style="color:#ff4455;">X</span><span id="dk-x-A" style="color:#eee;">&#8212;</span>
+                        <span style="color:#44ff88;">Y</span><span id="dk-y-A" style="color:#eee;">&#8212;</span>
+                        <span style="color:#4499ff;">Z</span><span id="dk-z-A" style="color:#eee;">&#8212;</span>
+                    </div>
+                    <div style="padding:4px 8px 4px 10px;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.18);border-radius:4px;margin-bottom:6px;display:grid;grid-template-columns:16px 14px 56px 14px 56px 14px 56px;align-items:center;gap:2px 4px;font-family:Orbitron;font-size:0.75rem;letter-spacing:1px;">
+                        <span style="color:#ffdd00;">B</span>
+                        <span style="color:#ff4455;">X</span><span id="dk-x-B" style="color:#eee;">&#8212;</span>
+                        <span style="color:#44ff88;">Y</span><span id="dk-y-B" style="color:#eee;">&#8212;</span>
+                        <span style="color:#4499ff;">Z</span><span id="dk-z-B" style="color:#eee;">&#8212;</span>
+                    </div>
+                    <div style="padding:4px 8px 4px 10px;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.18);border-radius:4px;margin-bottom:6px;display:grid;grid-template-columns:16px 14px 56px 14px 56px 14px 56px;align-items:center;gap:2px 4px;font-family:Orbitron;font-size:0.75rem;letter-spacing:1px;">
+                        <span style="color:#ffdd00;">C</span>
+                        <span style="color:#ff4455;">X</span><span id="dk-x-C" style="color:#eee;">&#8212;</span>
+                        <span style="color:#44ff88;">Y</span><span id="dk-y-C" style="color:#eee;">&#8212;</span>
+                        <span style="color:#4499ff;">Z</span><span id="dk-z-C" style="color:#eee;">&#8212;</span>
+                    </div>
+                </div>
+                <div id="gz-result" style="
+                    margin-top:10px; padding:8px 10px; border-radius:4px;
+                    background:rgba(255,220,0,0.06); border:1px solid rgba(255,220,0,0.25);
+                    font-family:Orbitron; text-align:center; display:none;">
+                    <div style="font-size:0.6rem; color:#ffdd00; letter-spacing:2px; margin-bottom:4px;">gz (GÖTZE)</div>
+                    <div id="gz-val" style="font-size:1.1rem; color:#fff; letter-spacing:1px;">—</div>
+                    <div style="font-size:0.6rem; color:#888; margin-top:2px;">mGal</div>
+                </div>
+            `, '#ffdd00');
+
+            let _triVerts = null;
+
+            function computeGz() {
+                if (!_triVerts) return;
+                const [a, b, c] = _triVerts;
+                const gz = calculateTriangleGz(
+                    [a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z],
+                    [M.x, M.y, M.z]
+                );
+                document.getElementById('gz-val').textContent = gz.toFixed(4) + ' mGal';
+                document.getElementById('gz-result').style.display = 'block';
+            }
+
+            const fmtCoord = n => n < 0
+                ? n.toFixed(2)
+                : '<span style="visibility:hidden">-</span>' + n.toFixed(2);
+
+            function showTriangleCoords(verts) {
+                ['A','B','C'].forEach((l, i) => {
+                    const v = verts ? verts[i] : null;
+                    document.getElementById('dk-x-' + l).innerHTML = v ? fmtCoord(v.x) : '—';
+                    document.getElementById('dk-y-' + l).innerHTML = v ? fmtCoord(v.y) : '—';
+                    document.getElementById('dk-z-' + l).innerHTML = v ? fmtCoord(v.z) : '—';
+                });
+            }
 
             // --- Sidebar: Messpunkt M ---
             function makeSlider(axis, val) {
@@ -408,37 +495,45 @@
                            style="flex:1; accent-color:var(--neon-blue); cursor:pointer;">
                     <span id="m-${axis.toLowerCase()}-val"
                           style="font-family:Orbitron; font-size:0.65rem; color:#ccc; width:28px; text-align:right;">
-                        ${val.toFixed(1)}
+                        ${val.toFixed(2)}
                     </span>
                 </div>`;
             }
 
             const coordDisplay = `
-                <div id="m-coords" style="
-                    font-family: Orbitron, monospace; font-size: 0.75rem;
-                    text-align: center; padding: 6px 8px; margin-bottom: 8px;
-                    background: rgba(0,200,255,0.05);
-                    border: 1px solid rgba(0,200,255,0.18);
-                    border-radius: 4px; letter-spacing: 1px;">
-                    <span style="color:#ff4455;">X</span>&nbsp;<span id="m-cx" style="color:#eee;">${M.x.toFixed(1)}</span>
-                    &emsp;
-                    <span style="color:#44ff88;">Y</span>&nbsp;<span id="m-cy" style="color:#eee;">${M.y.toFixed(1)}</span>
-                    &emsp;
-                    <span style="color:#4499ff;">Z</span>&nbsp;<span id="m-cz" style="color:#eee;">${M.z.toFixed(1)}</span>
+                <div style="padding:4px 8px 4px 10px;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.18);border-radius:4px;margin-bottom:8px;display:grid;grid-template-columns:16px 14px 56px 14px 56px 14px 56px;align-items:center;gap:2px 4px;font-family:Orbitron;font-size:0.75rem;letter-spacing:1px;">
+                    <span style="color:#eee;">M</span>
+                    <span style="color:#ff4455;">X</span><span id="m-cx" style="color:#eee;">${fmtCoord(M.x)}</span>
+                    <span style="color:#44ff88;">Y</span><span id="m-cy" style="color:#eee;">${fmtCoord(M.y)}</span>
+                    <span style="color:#4499ff;">Z</span><span id="m-cz" style="color:#eee;">${fmtCoord(M.z)}</span>
                 </div>`;
 
             CyberUI.createCard('ui-container', 'Messpunkt M',
                 coordDisplay +
                 makeSlider('X', M.x) +
                 makeSlider('Y', M.y) +
-                makeSlider('Z', M.z)
+                makeSlider('Z', M.z),
+                '#ffdd00'
             );
+
+            // Restore M from saved state
+            if (saved?.m) {
+                ['x', 'y', 'z'].forEach(ax => {
+                    M[ax] = saved.m[ax];
+                    const sl = document.getElementById(`m-${ax}-slider`);
+                    const vl = document.getElementById(`m-${ax}-val`);
+                    if (sl) sl.value = M[ax];
+                    if (vl) vl.textContent = M[ax].toFixed(2);
+                });
+                updateM();
+            }
 
             ['x', 'y', 'z'].forEach(ax => {
                 document.getElementById(`m-${ax}-slider`).addEventListener('input', function() {
                     M[ax] = parseFloat(this.value);
-                    document.getElementById(`m-${ax}-val`).textContent = M[ax].toFixed(1);
+                    document.getElementById(`m-${ax}-val`).textContent = M[ax].toFixed(2);
                     updateM();
+                    saveState();
                 });
             });
 
@@ -446,10 +541,9 @@
             const origUpdateM = updateM;
             updateM = function() {
                 origUpdateM();
-                const fmt = v => v.toFixed(1);
-                document.getElementById('m-cx').textContent = fmt(M.x);
-                document.getElementById('m-cy').textContent = fmt(M.y);
-                document.getElementById('m-cz').textContent = fmt(M.z);
+                document.getElementById('m-cx').innerHTML = fmtCoord(M.x);
+                document.getElementById('m-cy').innerHTML = fmtCoord(M.y);
+                document.getElementById('m-cz').innerHTML = fmtCoord(M.z);
             };
 
             // --- Animate ---
@@ -459,6 +553,13 @@
                 renderer.render(scene, camera);
             }
             animate();
+
+            // Startdreieck: gleichseitiges Dreieck in der XZ-Ebene (y=0), Radius 1
+            newTriangle([
+                [ 1,    0,  0                  ],
+                [-0.5,  0,  Math.sqrt(3) / 2   ],
+                [-0.5,  0, -Math.sqrt(3) / 2   ],
+            ]);
 
             window.addEventListener('resize', () => {
                 camera.aspect = container.clientWidth / container.clientHeight;
