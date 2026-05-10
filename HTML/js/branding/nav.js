@@ -96,13 +96,40 @@
         `;
 
             // Play Recording Button (loads explanation .recording from recordings/index.json)
+            // Hidden by default — shown only if recordings/index.json has an entry for this lab.
             const playBtn = document.createElement("div");
             playBtn.className = "nav-btn";
             playBtn.title = "Erklärung abspielen";
             playBtn.style.color = "#00ff88";
+            // Hidden by default — !important needed to beat #mini-rail .nav-btn { display: flex !important }
+            playBtn.style.setProperty('display', 'none', 'important');
             playBtn.innerHTML = `
             <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
         `;
+
+            // Async: check if a recording exists for this lab; show button if so.
+            (() => {
+                const labName = window.location.pathname.split('/').pop().replace('.html', '');
+                const base = new URL('.', document.baseURI).href + 'recordings/';
+                const url = base + 'index.json';
+                console.log('[play-btn] checking', url, 'for lab', labName);
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'json';
+                xhr.onload = () => {
+                    console.log('[play-btn] xhr loaded, status:', xhr.status, 'response:', xhr.response);
+                    if (xhr.status !== 0 && xhr.status !== 200) return;
+                    const index = xhr.response;
+                    if (index && index[labName]) {
+                        console.log('[play-btn] match found → showing button');
+                        playBtn.style.removeProperty('display');
+                    } else {
+                        console.log('[play-btn] no match for', labName, 'in', index ? Object.keys(index) : 'null index');
+                    }
+                };
+                xhr.onerror = () => console.log('[play-btn] xhr error for', url);
+                xhr.send();
+            })();
             playBtn.onclick = () => {
                 const labName = window.location.pathname.split('/').pop().replace('.html', '');
                 const base = new URL('.', document.baseURI).href + 'recordings/';
