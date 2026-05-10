@@ -6,6 +6,55 @@ const REC_SVG = {
     save:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 };
 
+class CyberContainerCodec {
+    static MAGIC = 0x435245_43; // "CREC"
+    static VERSION = 1;
+
+    static encodeWithAudio(events, audioBlob = null) {
+        const eventBuffer = CyberBinaryCodec.encode(events);
+        const audioData = audioBlob ? new Uint8Array(audioBlob) : new Uint8Array(0);
+
+        const totalSize = 4 + 1 + 4 + eventBuffer.byteLength + 4 + audioData.length;
+        const container = new ArrayBuffer(totalSize);
+        const view = new DataView(container);
+        const bytes = new Uint8Array(container);
+
+        let offset = 0;
+        view.setUint32(offset, this.MAGIC, true); offset += 4;
+        view.setUint8(offset, this.VERSION); offset += 1;
+        view.setUint32(offset, eventBuffer.byteLength, true); offset += 4;
+        bytes.set(new Uint8Array(eventBuffer), offset); offset += eventBuffer.byteLength;
+        view.setUint32(offset, audioData.length, true); offset += 4;
+        if (audioData.length > 0) bytes.set(audioData, offset);
+
+        return container;
+    }
+
+    static decodeContainer(buffer) {
+        const view = new DataView(buffer);
+        if (buffer.byteLength < 9) throw new Error("Invalid container: too small");
+
+        let offset = 0;
+        const magic = view.getUint32(offset, true); offset += 4;
+        if (magic !== this.MAGIC) throw new Error("Invalid container: wrong magic bytes");
+
+        const version = view.getUint8(offset); offset += 1;
+        if (version !== this.VERSION) throw new Error("Unsupported container version: " + version);
+
+        const eventsLen = view.getUint32(offset, true); offset += 4;
+        const eventBuffer = buffer.slice(offset, offset + eventsLen);
+        offset += eventsLen;
+
+        const audioLen = view.getUint32(offset, true); offset += 4;
+        const audioBuffer = audioLen > 0 ? buffer.slice(offset, offset + audioLen) : null;
+
+        return {
+            events: CyberBinaryCodec.decode(eventBuffer),
+            audio: audioBuffer
+        };
+    }
+}
+
 /**
  * Cyber-Binary Codec
  * Compresses macro events into a compact ArrayBuffer format.
@@ -142,14 +191,29 @@ class CyberRecorderEngine {
         this.ghostCursor = null;
         this.ui = null;
         this.playTimers = [];
-        
         this.boundHandleEvent = this.handleEvent.bind(this);
+
+        this.recordAudio = false;
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.audioBlob = null;
+        this.audioElement = null;
+        this.audioCheckbox = null;
     }
 
     init() {
         this.injectUI();
         this.injectGhostCursor();
         console.log("⚛️ Cyber-Recorder Engine initialized.");
+    }
+
+    addDebugLog(msg) {
+        if (!this.debugBox) return;
+        const timestamp = new Date().toLocaleTimeString('de-DE');
+        const line = `[${timestamp}] ${msg}\n`;
+        this.debugBox.textContent += line;
+        this.debugBox.scrollTop = this.debugBox.scrollHeight;
+        console.log(msg);
     }
 
 
@@ -182,20 +246,50 @@ class CyberRecorderEngine {
             document.head.appendChild(s);
         }
 
+        const titleContainer = document.createElement('div');
+        titleContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        `;
+
         const title = document.createElement('div');
         title.innerText = "RECORDER";
         title.style.cssText = `
             font-size: 0.7rem;
             color: rgba(0, 210, 255, 0.8);
             letter-spacing: 1px;
-            width: 115px;
             text-align: right;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            flex-shrink: 0;
         `;
-        ui.appendChild(title);
+        titleContainer.appendChild(title);
+
+        const audioCheckbox = document.createElement('input');
+        audioCheckbox.type = 'checkbox';
+        audioCheckbox.id = 'cyber-recorder-audio-toggle';
+        audioCheckbox.title = 'Ton aufnehmen';
+        audioCheckbox.style.cssText = `
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            accent-color: #00d2ff;
+        `;
+        audioCheckbox.onchange = (e) => {
+            this.recordAudio = e.target.checked;
+            if (this.debugBox) {
+                this.debugBox.style.display = e.target.checked ? 'block' : 'none';
+                if (e.target.checked) {
+                    this.debugBox.textContent = '🎤 Audio Debug Log\n' + '='.repeat(30) + '\n';
+                }
+            }
+        };
+        titleContainer.appendChild(audioCheckbox);
+        this.audioCheckbox = audioCheckbox;
+
+        ui.appendChild(titleContainer);
         this.titleEl = title;
 
         const btnStyle = `
@@ -256,9 +350,32 @@ class CyberRecorderEngine {
         ui.appendChild(btnImport);
         ui.appendChild(fileInput);
 
+        // Debug box
+        const debugBox = document.createElement('div');
+        debugBox.id = 'cyber-recorder-debug';
+        debugBox.style.cssText = `
+            background: rgba(0, 40, 60, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 10px;
+            max-width: 300px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.65rem;
+            color: rgba(0, 210, 255, 0.8);
+            font-family: 'Courier New', monospace;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.3;
+        `;
+        ui.appendChild(debugBox);
+
         this.ui = ui;
+        this.debugBox = debugBox;
         document.body.appendChild(ui);
-        
+
         this.btnRec = btnRec;
         this.btnPlay = btnPlay;
         this.btnImport = btnImport;
@@ -330,9 +447,9 @@ class CyberRecorderEngine {
         document.addEventListener('click', this.boundHandleEvent, true);
         document.addEventListener('input', this.boundHandleEvent, true);
         document.addEventListener('change', this.boundHandleEvent, true);
-        
+
         console.log("⏺ Recording started...");
-        
+
         // Record initial window size
         this.events.push({
             type: 'meta_init',
@@ -340,6 +457,57 @@ class CyberRecorderEngine {
             width: window.innerWidth,
             height: window.innerHeight
         });
+
+        // Start audio recording if enabled
+        if (this.recordAudio) {
+            this.addDebugLog("📡 Requesting microphone...");
+            this.audioChunks = [];
+            this.audioBlob = null;
+
+            navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false } })
+                .then((stream) => {
+                    this.addDebugLog(`✅ Stream acquired: ${stream.getTracks().length} tracks`);
+                    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+                    this.mediaRecorder.onerror = (e) => {
+                        this.addDebugLog(`❌ MediaRecorder error: ${e.error}`);
+                    };
+
+                    this.mediaRecorder.ondataavailable = (e) => {
+                        this.addDebugLog(`📦 ondataavailable: ${e.data.size} bytes`);
+                        if (e.data.size > 0) {
+                            this.audioChunks.push(e.data);
+                            const total = this.audioChunks.reduce((a,b) => a + b.size, 0);
+                            this.addDebugLog(`  → Total: ${this.audioChunks.length} chunks, ${total} bytes`);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        const totalSize = this.audioChunks.reduce((a,b) => a + b.size, 0);
+                        this.addDebugLog(`⏹️ onstop fired. ${this.audioChunks.length} chunks, ${totalSize} bytes`);
+                        if (totalSize > 0) {
+                            this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                            this.addDebugLog(`✅ Blob created: ${this.audioBlob.size} bytes`);
+                        } else {
+                            this.addDebugLog(`⚠️ No audio data collected!`);
+                        }
+                        stream.getTracks().forEach(track => {
+                            this.addDebugLog(`🛑 Stopping track: ${track.kind}`);
+                            track.stop();
+                        });
+                    };
+
+                    this.mediaRecorder.start();
+                    this.addDebugLog("🎤 Recording started!");
+                })
+                .catch((err) => {
+                    this.addDebugLog(`❌ Mic error: ${err.name}`);
+                    this.addDebugLog(`   ${err.message}`);
+                    this.recordAudio = false;
+                    if (this.audioCheckbox) this.audioCheckbox.checked = false;
+                    alert(`Mikrofonzugriff verweigert: ${err.message}`);
+                });
+        }
     }
 
     stop() {
@@ -350,12 +518,23 @@ class CyberRecorderEngine {
             document.removeEventListener('click', this.boundHandleEvent, true);
             document.removeEventListener('input', this.boundHandleEvent, true);
             document.removeEventListener('change', this.boundHandleEvent, true);
-            
+
+            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                this.addDebugLog(`📥 Requesting final audio data...`);
+                this.mediaRecorder.requestData();
+                this.mediaRecorder.stop();
+                this.addDebugLog(`⏹️ MediaRecorder stopped.`);
+            }
+
             console.log(`⏹ Recording stopped. Recorded ${this.events.length} events.`);
         } else if (this.mode === 'playing') {
             this.playTimers.forEach(t => clearTimeout(t));
             this.playTimers = [];
             this.ghostCursor.style.display = 'none';
+            if (this.audioElement) {
+                this.audioElement.pause();
+                this.audioElement = null;
+            }
             console.log("⏹ Playback aborted.");
         }
         
@@ -476,19 +655,33 @@ class CyberRecorderEngine {
 
         this.ghostCursor.style.display = 'block';
         this.ui.style.display = 'none';
-        
+
         console.log("▶️ Playing script... (Press ESC to abort)");
-        
+
         this.abortHandler = (e) => {
             if (e.key === 'Escape') this.stop();
         };
         document.addEventListener('keydown', this.abortHandler);
 
+        // Start audio playback if available
+        if (this.audioBlob && this.audioBlob.size > 0) {
+            console.log(`[Audio] Playing ${this.audioBlob.size} bytes...`);
+            const audioUrl = URL.createObjectURL(this.audioBlob);
+            this.audioElement = new Audio(audioUrl);
+            this.audioElement.onerror = (err) => {
+                console.error("Audio error:", err);
+            };
+            this.audioElement.play().catch((err) => {
+                console.warn("Audio playback failed:", err);
+            });
+        } else if (this.recordAudio) {
+            console.warn("[Audio] Recording was enabled but no audio blob found. Check microphone permissions.");
+        }
+
         this.events.forEach((ev, index) => {
             const timer = setTimeout(() => {
                 this.executeEvent(ev);
-                
-                // If it's the last event, stop playing
+
                 if (index === this.events.length - 1) {
                     this.stop();
                 }
@@ -552,10 +745,10 @@ class CyberRecorderEngine {
         }
         
         try {
-            const buffer = CyberBinaryCodec.encode(this.events);
-            const blob = new Blob([buffer], { type: 'application/octet-stream' });
+            const containerBuffer = CyberContainerCodec.encodeWithAudio(this.events, this.audioBlob);
+            const blob = new Blob([containerBuffer], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
-            
+
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -563,12 +756,12 @@ class CyberRecorderEngine {
             const hh = String(now.getHours()).padStart(2, '0');
             const min = String(now.getMinutes()).padStart(2, '0');
             const ss = String(now.getSeconds()).padStart(2, '0');
-            
+
             let labName = "lab";
             const pathParts = window.location.pathname.split('/');
             const filePart = pathParts[pathParts.length - 1];
             if (filePart) labName = filePart.replace('.html', '');
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `script ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}.mls`;
@@ -576,8 +769,9 @@ class CyberRecorderEngine {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            console.log(`[CyberRecorder] Binärdatei erfolgreich generiert (${buffer.byteLength} Bytes).`);
+
+            const audioInfo = this.audioBlob ? ` + ${Math.round(this.audioBlob.size / 1024)}KB Audio` : '';
+            console.log(`[CyberRecorder] Binärdatei erfolgreich generiert (${containerBuffer.byteLength} Bytes${audioInfo}).`);
         } catch (e) {
             console.error("Export Error:", e);
             alert("Fehler beim Exportieren!");
@@ -592,10 +786,26 @@ class CyberRecorderEngine {
         reader.onload = (event) => {
             try {
                 const buffer = event.target.result;
-                this.events = CyberBinaryCodec.decode(buffer);
-                console.log(`[CyberRecorder] Script erfolgreich geladen. ${this.events.length} Events gefunden.`);
-                
-                // Show brief confirmation
+                let events, audio;
+
+                try {
+                    const containerData = CyberContainerCodec.decodeContainer(buffer);
+                    events = containerData.events;
+                    audio = containerData.audio;
+                } catch (containerErr) {
+                    events = CyberBinaryCodec.decode(buffer);
+                    audio = null;
+                }
+
+                this.events = events;
+                if (audio) {
+                    this.audioBlob = new Blob([audio], { type: 'audio/webm' });
+                    console.log(`[CyberRecorder] Script geladen: ${this.events.length} Events + Audio (${Math.round(this.audioBlob.size / 1024)}KB).`);
+                } else {
+                    this.audioBlob = null;
+                    console.log(`[CyberRecorder] Script erfolgreich geladen. ${this.events.length} Events gefunden.`);
+                }
+
                 this._updatePlayBtn();
             } catch (err) {
                 console.error("Import Error:", err);

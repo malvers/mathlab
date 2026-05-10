@@ -123,6 +123,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
     <script src="js/TS.js"></script>
     <script src="js/gotzelahmayer.js"></script>
+    <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)']] }, startup: { typeset: false } };</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     <script>
         function toggleSidebar() {
@@ -990,16 +992,6 @@
                 }, 0);
             };
 
-            // Tab-Wahl wiederherstellen (nach Funktionsdefinition)
-            const _savedTab = localStorage.getItem('gravitation_tab');
-            if (_savedTab) switchTab(_savedTab);
-
-            // Dreiecke-Auswahl wiederherstellen
-            const _savedPolySegs = localStorage.getItem('gravitation_poly_segs');
-            if (_savedPolySegs) {
-                document.getElementById('poly-segs').value = _savedPolySegs;
-            }
-
             // --- Polyeder Sidebar-Card ---
             CyberUI.createCard('sb-polyeder', 'Polyeder · gz', `
                 <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-family:Orbitron;">KÖRPER</div>
@@ -1033,21 +1025,28 @@
                 </div>
                 <div id="poly-result" style="display:none;">
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">GÖTZE</div>
-                    <div style="background:#f5a623; border-radius:4px; padding:10px 12px;
-                                text-align:center; margin-bottom:10px;">
-                        <div id="poly-gz-val" class="cyber-number-widget" style="justify-content:center;">—</div>
+                    <div style="background:#f5a623; border-radius:4px; padding:10px 12px; margin-bottom:10px;">
+                        <div id="poly-gz-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#0a1628;">—</div>
                     </div>
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">NEWTON (exakt)</div>
-                    <div style="background:#77b521; border-radius:4px; padding:10px 12px; text-align:center; margin-bottom:10px;">
-                        <div id="poly-newton-val" class="cyber-number-widget" style="justify-content:center;">—</div>
+                    <div style="background:#77b521; border-radius:4px; padding:10px 12px; margin-bottom:10px;">
+                        <div id="poly-newton-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#0a1628;">—</div>
                     </div>
                     <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">ABWEICHUNG</div>
-                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
-                                border-radius:4px; padding:10px 12px; text-align:center; margin-bottom:10px;">
-                        <div id="poly-diff-val" class="cyber-number-widget" style="justify-content:center; color:#ff0000;">—</div>
+                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:10px 12px; margin-bottom:10px;">
+                        <div id="poly-diff-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#ff4444;">—</div>
                     </div>
                 </div>
             `, '#f5a623');
+
+            // Tab-Wahl + Dreiecke-Auswahl wiederherstellen (nach Card-Erstellung)
+            const _savedTab = localStorage.getItem('gravitation_tab');
+            const _savedPolySegs = localStorage.getItem('gravitation_poly_segs');
+            if (_savedPolySegs) {
+                const segsEl = document.getElementById('poly-segs');
+                if (segsEl) segsEl.value = _savedPolySegs;
+            }
+            if (_savedTab) switchTab(_savedTab);
 
             // --- Polyeder gz ---
             window.runPolyederGz = function() {
@@ -1070,26 +1069,30 @@
 
                 _updatePolyWire(wSegs, hSegs);
 
-                CyberUI.updateNumberWidget('poly-gz-val', gz, 3, 3);
+                document.getElementById('poly-gz-val').innerHTML =
+                    '\\(g_z = ' + gz.toFixed(3) + '\\,\\text{mGal}\\)';
 
                 if (newtInside) {
-                    document.getElementById('poly-newton-val').innerHTML =
-                        '<span style="font-size:0.75rem;color:#ff6644;">P innerhalb</span>';
+                    document.getElementById('poly-newton-val').textContent = '(P innerhalb der Kugel)';
                 } else if (newtZero) {
-                    document.getElementById('poly-newton-val').innerHTML =
-                        '<span style="font-size:0.65rem;color:#888;">Symmetrie</span>';
+                    document.getElementById('poly-newton-val').textContent = '(M.z = 0, Symmetrie)';
                 } else {
-                    CyberUI.updateNumberWidget('poly-newton-val', gzNewt, 3, 3);
+                    document.getElementById('poly-newton-val').innerHTML =
+                        '\\(g_z = ' + gzNewt.toFixed(3) + '\\,\\text{mGal}\\)';
                 }
 
                 const diffEl = document.getElementById('poly-diff-val');
                 if (diff === null) {
-                    diffEl.innerHTML = '<span style="font-size:0.7rem;">—</span>';
-                    diffEl.style.color = '#ff0000';
+                    diffEl.textContent = '—';
                 } else {
-                    CyberUI.updateNumberWidget('poly-diff-val', Math.abs(diff), 2, 1);
-                    diffEl.style.color = '#ff0000';
+                    diffEl.innerHTML = '\\(\\Delta = ' + Math.abs(diff).toFixed(2) + '\\,\\%\\)';
                 }
+
+                if (window.MathJax) MathJax.typesetPromise([
+                    document.getElementById('poly-gz-val'),
+                    document.getElementById('poly-newton-val'),
+                    diffEl
+                ]).catch(() => {});
 
                 document.getElementById('poly-result').style.display = 'block';
             };
