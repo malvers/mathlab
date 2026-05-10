@@ -138,7 +138,22 @@
         </div>
 
         <div id="tab-polyeder" style="flex:1; display:none; overflow:hidden;">
-            <div id="poly-canvas-container" style="width:100%; height:100%; position:relative;"></div>
+            <div id="poly-canvas-container" style="width:100%; height:100%; position:relative;">
+                <div id="poly-result" style="display:none; position:absolute; top:12px; left:12px; z-index:10; max-width:400px;">
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">NEWTON (exakt)</div>
+                    <div style="background:#77b521; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
+                        <div id="poly-newton-val" style="font-family:'Times New Roman',serif; font-size:1.2rem; color:#0a1628;">—</div>
+                    </div>
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">GÖTZE</div>
+                    <div style="background:#f5a623; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
+                        <div id="poly-gz-val" style="font-family:'Times New Roman',serif; font-size:1.2rem; color:#0a1628;">—</div>
+                    </div>
+                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">ABWEICHUNG</div>
+                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px 14px;">
+                        <div id="poly-diff-val" style="font-family:'Times New Roman',serif; font-size:1.2rem; color:#ff4444;">—</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -1001,11 +1016,17 @@
                 }
             }
 
-            function _updatePolyWire(wSegs, hSegs) {
+            function _updatePolyWire(shapeType, wSegs, hSegs) {
                 if (!_polyScene) return;
                 if (_polyWire) _polyScene.remove(_polyWire);
+                let geo;
+                if (shapeType === 'cuboid') {
+                    geo = new THREE.BoxGeometry(1, 1, 1);
+                } else {
+                    geo = new THREE.SphereGeometry(1, wSegs, hSegs);
+                }
                 _polyWire = new THREE.Mesh(
-                    new THREE.SphereGeometry(1, wSegs, hSegs),
+                    geo,
                     new THREE.MeshBasicMaterial({color:0xff8833, wireframe:true, transparent:true, opacity:0.28})
                 );
                 _polyWire.scale.z = _sphereStretch;
@@ -1054,7 +1075,7 @@
                         shininess:0,specular:new THREE.Color(0x000000),side:THREE.DoubleSide,depthWrite:false}));
                 _polySphere.scale.z = _sphereStretch;
                 _polyScene.add(_polySphere);
-                _updatePolyWire(32, 16);
+                _updatePolyWire('sphere', 32, 16);
                 const aL=2.5, HL=0.18, HW=0.04;
                 [[1,0,0,0xff4444],[-1,0,0,0xff4444],[0,1,0,0x44ff44],[0,-1,0,0x44ff44],
                  [0,0,1,0x4488ff],[0,0,-1,0x4488ff]].forEach(([x,y,z,c])=>
@@ -1167,6 +1188,7 @@
                     padding:8px; font-family:Orbitron; font-size:0.8rem; margin-bottom:12px;
                     min-height:36px; height:36px; box-sizing:border-box;">
                     <option value="sphere">Kugel (r = 1)</option>
+                    <option value="cuboid">Quader (1×2×3)</option>
                 </select>
                 <div style="font-size:0.5rem; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-family:Orbitron;">DREIECKE</div>
                 <select id="poly-segs" onchange="localStorage.setItem('gravitation_poly_segs', this.value); runPolyederGz()" style="width:100%; background:#0d1e30; color:#eee;
@@ -1186,20 +1208,6 @@
                         BERECHNEN
                     </button>
                 </div>
-                <div id="poly-result" style="display:none;">
-                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">GÖTZE</div>
-                    <div style="background:#f5a623; border-radius:4px; padding:10px 12px; margin-bottom:10px;">
-                        <div id="poly-gz-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#0a1628;">—</div>
-                    </div>
-                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">NEWTON (exakt)</div>
-                    <div style="background:#77b521; border-radius:4px; padding:10px 12px; margin-bottom:10px;">
-                        <div id="poly-newton-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#0a1628;">—</div>
-                    </div>
-                    <div style="font-size:0.5rem; color:#aaa; letter-spacing:1px; margin-bottom:4px; font-family:Orbitron;">ABWEICHUNG</div>
-                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:10px 12px; margin-bottom:10px;">
-                        <div id="poly-diff-val" style="font-family:'Times New Roman',serif; font-size:1.3rem; color:#ff4444;">—</div>
-                    </div>
-                </div>
             `, '#f5a623');
 
             // Tab-Wahl + Dreiecke-Auswahl wiederherstellen (nach Card-Erstellung)
@@ -1211,25 +1219,59 @@
             }
             if (_savedTab) switchTab(_savedTab);
 
+            function makeCuboidPolyhedron(w, h, d) {
+                const vertices = [
+                    [-w/2, -h/2, -d/2], [w/2, -h/2, -d/2], [w/2, h/2, -d/2], [-w/2, h/2, -d/2],
+                    [-w/2, -h/2, d/2],  [w/2, -h/2, d/2],  [w/2, h/2, d/2],  [-w/2, h/2, d/2]
+                ];
+                const faces = [
+                    [0,1,2], [0,2,3],  // bottom
+                    [4,6,5], [4,7,6],  // top
+                    [0,4,5], [0,5,1],  // front
+                    [2,6,7], [2,7,3],  // back
+                    [0,3,7], [0,7,4],  // left
+                    [1,5,6], [1,6,2]   // right
+                ];
+                return { vertices, faces };
+            }
+
             // --- Polyeder gz ---
             window.runPolyederGz = function() {
-                const wSegs = parseInt(document.getElementById('poly-segs').value);
-                const hSegs = wSegs / 2;
+                const shapeType = document.getElementById('poly-shape').value;
                 const Rkm   = 1;
                 const Rm    = Rkm * 1000;                               // scene unit → meters
                 const mArr  = [M.x * Rm, M.y * Rm, M.z * Rm];         // M in meters
 
-                const { vertices, faces } = makeSpherePolyhedron(1, wSegs, hSegs);
+                let vertices, faces, wSegs, hSegs;
+                const CUB_W = 1, CUB_H = 2, CUB_D = 3;
+                if (shapeType === 'cuboid') {
+                    const cub = makeCuboidPolyhedron(CUB_W, CUB_H, CUB_D);
+                    vertices = cub.vertices;
+                    faces = cub.faces;
+                } else {
+                    wSegs = parseInt(document.getElementById('poly-segs').value);
+                    hSegs = wSegs / 2;
+                    const sph = makeSpherePolyhedron(1, wSegs, hSegs);
+                    vertices = sph.vertices;
+                    faces = sph.faces;
+                }
+
                 const verticesM = vertices.map(([vx, vy, vz]) => [vx * Rm, vy * Rm, vz * Rm * _sphereStretch]);
 
                 const gz = calculatePolyhedronGz(verticesM, faces, mArr, _sphereRho);
-                const R_equiv = Rm * Math.cbrt(_sphereStretch);
+                let R_equiv;
+                if (shapeType === 'cuboid') {
+                    const baseR = Math.cbrt(3 / (4 * Math.PI));  // unit cube equivalent sphere
+                    R_equiv = Rm * baseR * _sphereStretch;
+                } else {
+                    R_equiv = Rm * Math.cbrt(_sphereStretch);
+                }
                 const gzNewt = calculateSphereNewton(R_equiv, _sphereRho, mArr);
 
                 const newtInside = isNaN(gzNewt);
                 const diff       = newtInside ? null : (gz - gzNewt) / Math.abs(gzNewt) * 100;
 
-                _updatePolyWire(wSegs, hSegs);
+                _updatePolyWire(shapeType, wSegs, hSegs);
 
                 document.getElementById('poly-gz-val').innerHTML =
                     '\\(g_z = ' + gz.toFixed(3) + '\\,\\text{mGal}\\)';
