@@ -92,6 +92,18 @@
 
 <body>
 
+    <!-- CITY INFO BOX (globe mode, left side) -->
+    <div id="city-info-box" style="position: fixed; left: 220px; top: 50%; transform: translateY(-50%); width: 240px; max-height: 65vh; background: rgba(0, 6, 22, 0.92); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 10px; z-index: 9999; display: none; flex-direction: column; font-family: 'Outfit', sans-serif; color: #e6edf3; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+        <div id="city-info-img-wrap" style="width: 100%; height: 130px; background: #000; overflow: hidden; display: none;">
+            <img id="city-info-img" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        </div>
+        <div style="padding: 10px 12px;">
+            <div id="city-info-title" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: #00d2ff; font-size: 0.9rem; margin-bottom: 4px; letter-spacing: 1px;"></div>
+            <div id="city-info-pop" style="font-family: 'Orbitron', sans-serif; font-weight: 400; color: #ffaa00; font-size: 0.7rem; margin-bottom: 6px; letter-spacing: 1px; display: none;"></div>
+            <div id="city-info-loading" style="font-size: 0.75rem; color: rgba(0, 210, 255, 0.6); font-style: italic; display: none;">Lade Info…</div>
+            <div id="city-info-extract" style="font-size: 0.78rem; line-height: 1.45; color: rgba(230, 237, 243, 0.85); max-height: 40vh; overflow-y: auto;"></div>
+        </div>
+    </div>
 
     <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
@@ -422,7 +434,91 @@
                 document.body.classList.remove('use-globe');
                 lockedCity = null;
                 if (globeInstance) globeInstance.ringsData([]).pointsData([]);
+                hideCityInfo();
             }
+        }
+
+        // --- City Info Box (Wikipedia) ---
+        let cityInfoCurrentName = null;
+        let cityInfoFetchToken = 0;
+        const CITY_INFO_OVERRIDES = {
+            "Kairo": "Kairo",
+            "Bombay": "Mumbai",
+            "Tokio": "Tokio",
+            "Bagdad": "Bagdad",
+            "Rio": "Rio de Janeiro",
+            "Neuseeland": "Neuseeland",
+            "Salomon-Inseln": "Salomonen",
+            "San Francisco": "San Francisco",
+            "Santa Fé": "Santa Fe (New Mexico)",
+            "Azoren": "Azoren",
+            "Kapverden": "Kap Verde",
+            "Samoa": "Samoa",
+            "Honolulu": "Honolulu",
+            "Dawson": "Dawson City",
+            "Karachi": "Karatschi",
+            "Baku": "Baku",
+            "Caracas": "Caracas",
+            "Shanghai": "Shanghai",
+            "Bangkok": "Bangkok",
+            "Sydney": "Sydney",
+            "Dakar": "Dakar",
+            "Dresden": "Dresden",
+            "New York": "New York City",
+            "Chicago": "Chicago"
+        };
+
+        function showCityInfo(cityName) {
+            if (!useGlobe) { hideCityInfo(); return; }
+            const cleanName = cityName.replace(/\n/g, ' ').trim();
+            if (cityInfoCurrentName === cleanName) {
+                document.getElementById('city-info-box').style.display = 'flex';
+                return;
+            }
+            cityInfoCurrentName = cleanName;
+            const token = ++cityInfoFetchToken;
+
+            const box = document.getElementById('city-info-box');
+            const titleEl = document.getElementById('city-info-title');
+            const extractEl = document.getElementById('city-info-extract');
+            const loadingEl = document.getElementById('city-info-loading');
+            const imgWrap = document.getElementById('city-info-img-wrap');
+            const imgEl = document.getElementById('city-info-img');
+
+            box.style.display = 'flex';
+            titleEl.textContent = cleanName.toUpperCase();
+            extractEl.textContent = '';
+            loadingEl.style.display = 'block';
+            imgWrap.style.display = 'none';
+
+            const query = CITY_INFO_OVERRIDES[cleanName] || cleanName;
+            const url = `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.ok ? r.json() : Promise.reject(r.status))
+                .then(data => {
+                    if (token !== cityInfoFetchToken) return; // stale
+                    loadingEl.style.display = 'none';
+                    if (data.title) titleEl.textContent = data.title.toUpperCase();
+                    extractEl.textContent = data.extract || 'Keine Beschreibung verfügbar.';
+                    if (data.thumbnail && data.thumbnail.source) {
+                        imgEl.src = data.thumbnail.source;
+                        imgWrap.style.display = 'block';
+                    } else if (data.originalimage && data.originalimage.source) {
+                        imgEl.src = data.originalimage.source;
+                        imgWrap.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    if (token !== cityInfoFetchToken) return;
+                    loadingEl.style.display = 'none';
+                    extractEl.textContent = 'Info nicht verfügbar (Wikipedia).';
+                });
+        }
+
+        function hideCityInfo() {
+            cityInfoCurrentName = null;
+            const box = document.getElementById('city-info-box');
+            if (box) box.style.display = 'none';
         }
         function syncGlobeSize() {
             if (!globeInstance) return;
@@ -577,6 +673,7 @@
                     myCanvas >= b.absY && myCanvas <= b.absY + b.h
                 );
                 if (clickedBox) {
+                    showCityInfo(clickedBox.name);
                     if (globeInstance && clickedBox.lat != null) {
                         const lat = clickedBox.lat, lng = clickedBox.lng;
                         lockedCity = { lat, lng };
@@ -634,6 +731,7 @@
                 // If distance is near the plaques and angle is close
                 if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
                     selectedCity = city;
+                    showCityInfo(city.name);
                     if (globeInstance) {
                         lockedCity = city;
                         const target = { lat: city.lat, lng: city.lon, altitude: 2.65 };
@@ -669,6 +767,7 @@
                     lockedCity = null;
                     if (globeInstance) globeInstance.ringsData([]).pointsData([]);
                 }
+                hideCityInfo();
             }
 
             isMouseDown = true;
