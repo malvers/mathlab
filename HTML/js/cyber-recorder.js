@@ -201,9 +201,19 @@ class CyberRecorderEngine {
         this.audioBlob = null;
         this.audioElement = null;
         this.audioCheckbox = null;
+        this.userPlayMode = false;
 
         this.recordedWidth = 0;
         this.recordedHeight = 0;
+        this.recordedUseGlobe = undefined;
+        this.originalUseGlobe = undefined;
+        this.recordingTime = 0;
+        this.playbackStartTime = 0;
+        this.pausedAt = 0;
+        this.originalDateNow = null;
+        this.inputBlockerOverlay = null;
+        this.originalPlayBtnOnclick = null;
+        this.selectedDeviceId = localStorage.getItem('cyberRecorderDeviceId') || '';
     }
 
     init() {
@@ -356,6 +366,34 @@ class CyberRecorderEngine {
             });
         };
 
+        const clearBtn = document.createElement('button');
+        clearBtn.innerHTML = '✕';
+        clearBtn.title = 'Debug log löschen';
+        clearBtn.style.cssText = `
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+        `;
+        clearBtn.onmouseover = () => {
+            clearBtn.style.background = 'rgba(255, 100, 0, 0.2)';
+            clearBtn.style.borderColor = '#ff6400';
+            clearBtn.style.color = '#ff6400';
+        };
+        clearBtn.onmouseout = () => {
+            clearBtn.style.background = 'rgba(0, 210, 255, 0.1)';
+            clearBtn.style.borderColor = 'rgba(0, 210, 255, 0.3)';
+            clearBtn.style.color = '#00d2ff';
+        };
+        clearBtn.onclick = () => {
+            debugBox.textContent = '';
+        };
+
         const micSelect = document.createElement('select');
         micSelect.title = 'Mikrofon auswählen';
         micSelect.style.cssText = `
@@ -373,6 +411,7 @@ class CyberRecorderEngine {
         `;
         micSelect.onchange = (e) => {
             this.selectedDeviceId = e.target.value;
+            localStorage.setItem('cyberRecorderDeviceId', this.selectedDeviceId);
             this.addDebugLog(`🎤 Gerät gewählt: ${e.target.options[e.target.selectedIndex].text}`);
         };
         this.micSelect = micSelect;
@@ -400,6 +439,7 @@ class CyberRecorderEngine {
         debugHeader.appendChild(debugTitle);
         debugHeader.appendChild(micSelect);
         debugHeader.appendChild(copyBtn);
+        debugHeader.appendChild(clearBtn);
 
         const debugBox = document.createElement('div');
         debugBox.id = 'cyber-recorder-debug';
@@ -531,7 +571,7 @@ class CyberRecorderEngine {
             e.preventDefault();
             e.stopPropagation();
             console.log("[AudioExport] Button clicked", { audioBlob: this.audioBlob?.size });
-            this.exportAudioMp3();
+            this.exportAudioWebM();
         };
         
         const fileInput = document.createElement('input');
@@ -608,7 +648,11 @@ class CyberRecorderEngine {
     startRecording() {
         if (this.mode !== 'idle') return;
         this.mode = 'recording';
-        
+
+        this.addDebugLog(`🔴 RECORDING START`);
+        this.addDebugLog(`   Audio: ${this.recordAudio ? 'enabled' : 'disabled'}`);
+        this.addDebugLog(`   Mic: ${this.selectedDeviceId || 'default'}`);
+
         this.titleEl.innerHTML = '<span class="rec-dot"></span>RECORDING';
         this.titleEl.style.color = '#ff4444';
 
@@ -628,12 +672,17 @@ class CyberRecorderEngine {
             this.startTime = performance.now();
             this.lastMouseTime = 0;
             this.events = [];
-            this.events.push({
+            const metaEvent = {
                 type: 'meta_init',
                 t: 0,
                 width: window.innerWidth,
-                height: window.innerHeight
-            });
+                height: window.innerHeight,
+                recordingTime: Date.now()
+            };
+            if (window.useGlobe !== undefined) {
+                metaEvent.useGlobe = window.useGlobe;
+            }
+            this.events.push(metaEvent);
 
             // Snapshot initial values of all form controls as t=0 change events,
             // so Replay restores them before playing the user's edits.
@@ -679,6 +728,30 @@ class CyberRecorderEngine {
             this.audioChunks = [];
             this.audioBlob = null;
 
+            // Show "do not talk" overlay while waiting for mic access
+            this.addDebugLog(`🎙️ Requesting microphone permission...`);
+            const doNotTalkOverlay = document.createElement('div');
+            doNotTalkOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 2rem;
+                color: #ff4444;
+                font-weight: bold;
+                text-align: center;
+                padding: 20px;
+            `;
+            doNotTalkOverlay.innerHTML = `🎤<br>DO NOT TALK<br><span style="font-size: 1rem; color: #ffaa00;">Waiting for microphone access...</span>`;
+            document.body.appendChild(doNotTalkOverlay);
+
             // Grey out mic button while waiting for permission
             if (this.audioCheckbox) {
                 this.audioCheckbox.style.opacity = '0.4';
@@ -694,6 +767,8 @@ class CyberRecorderEngine {
                 : true;
             navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
                 .then((stream) => {
+                    doNotTalkOverlay.remove();
+                    this.addDebugLog(`✅ Microphone access granted!`);
                     startMouseRecording();
                     const track = stream.getAudioTracks()[0];
                     const settings = track.getSettings();
@@ -730,8 +805,9 @@ class CyberRecorderEngine {
                         const totalSize = this.audioChunks.reduce((a,b) => a + b.size, 0);
                         this.addDebugLog(`⏹️ onstop fired. ${this.audioChunks.length} chunks, ${totalSize} bytes`);
                         if (totalSize > 0) {
-                            this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                            this.addDebugLog(`✅ Blob created: ${this.audioBlob.size} bytes`);
+                            const mimeType = this.mediaRecorder.mimeType || 'audio/webm;codecs=opus';
+                            this.audioBlob = new Blob(this.audioChunks, { type: mimeType });
+                            this.addDebugLog(`✅ Blob created: ${this.audioBlob.size} bytes (${mimeType})`);
                         } else {
                             this.addDebugLog(`⚠️ No audio data collected!`);
                         }
@@ -788,8 +864,10 @@ class CyberRecorderEngine {
                 if (this.mediaRecorder.state === 'recording') {
                     this.addDebugLog(`📥 Requesting final audio data...`);
                     this.mediaRecorder.requestData();
-                    this.mediaRecorder.stop();
-                    this.addDebugLog(`⏹️ MediaRecorder stopped.`);
+                    setTimeout(() => {
+                        this.mediaRecorder.stop();
+                        this.addDebugLog(`⏹️ MediaRecorder stopped.`);
+                    }, 50);
                 } else {
                     this.addDebugLog(`⚠️ MediaRecorder state: ${this.mediaRecorder.state}`);
                 }
@@ -797,14 +875,52 @@ class CyberRecorderEngine {
                 this.addDebugLog(`❌ mediaRecorder is null!`);
             }
 
+            this.addDebugLog(`⏹️ RECORDING STOPPED`);
+            this.addDebugLog(`   Events: ${this.events.length}`);
+            const durationMs = this.events.length > 0 ? this.events[this.events.length - 1].t : 0;
+            this.addDebugLog(`   Duration: ${(durationMs / 1000).toFixed(1)}s`);
             console.log(`⏹ Recording stopped. Recorded ${this.events.length} events.`);
         } else if (this.mode === 'playing') {
             this.playTimers.forEach(t => clearTimeout(t));
             this.playTimers = [];
             this.ghostCursor.style.display = 'none';
+
+            // Restore play button in mini-rail
+            if (window.cyberPlayBtn && this.originalPlayBtnOnclick) {
+                window.cyberPlayBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+        `;
+                window.cyberPlayBtn.style.color = "#00ff88";
+                window.cyberPlayBtn.title = "Erklärung abspielen";
+                window.cyberPlayBtn.onclick = this.originalPlayBtnOnclick;
+                this.addDebugLog(`🎛️ Play button restored`);
+            }
+            if (this.inputBlockerOverlay) {
+                this.inputBlockerOverlay.remove();
+                this.inputBlockerOverlay = null;
+
+                // Restore pointer-events on all elements
+                document.querySelectorAll('button, a, input, textarea, select, [onclick]').forEach(el => {
+                    if (el !== window.cyberPlayBtn) {
+                        el.style.pointerEvents = '';
+                    }
+                });
+
+                this.addDebugLog(`✅ Input unblocked`);
+            }
             if (this.audioElement) {
                 this.audioElement.pause();
                 this.audioElement = null;
+            }
+            if (this.originalDateNow) {
+                Date.now = this.originalDateNow;
+                this.originalDateNow = null;
+                this.addDebugLog(`⏰ Time restored to real time`);
+            }
+            if (this.originalUseGlobe !== undefined && window.useGlobe !== undefined) {
+                window.useGlobe = this.originalUseGlobe;
+                const mode = this.originalUseGlobe ? 'globe' : 'normal';
+                this.addDebugLog(`🌍 Mode restored to: ${mode}`);
             }
             console.log("⏹ Playback aborted.");
         }
@@ -924,10 +1040,16 @@ class CyberRecorderEngine {
         }
         this.mode = 'playing';
         this.playTimers = [];
-        
+
+        const durationSecs = (this.events.length > 0 ? this.events[this.events.length - 1].t / 1000 : 0).toFixed(1);
+        this.addDebugLog(`▶️ PLAYBACK START`);
+        this.addDebugLog(`   Events: ${this.events.length}`);
+        this.addDebugLog(`   Duration: ${durationSecs}s`);
+        this.addDebugLog(`   Audio: ${this.audioBlob ? (this.audioBlob.size / 1024).toFixed(0) + 'KB' : 'none'}`);
+
         this.btnPlay.innerHTML = REC_SVG.stop;
         this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
-        
+
         this.btnRec.style.opacity = "0.3";
         this.btnRec.style.pointerEvents = "none";
         this.btnImport.style.opacity = "0.3";
@@ -936,7 +1058,68 @@ class CyberRecorderEngine {
         this.btnExport.style.pointerEvents = "none";
 
         this.ghostCursor.style.display = 'block';
-        this.ui.style.display = 'none';
+        this.ui.style.display = this.userPlayMode ? 'none' : 'none';
+        if (this.userPlayMode) {
+            this.addDebugLog = () => {}; // Disable debug logging in user play mode
+        }
+
+        // Set recording time immediately if available
+        const metaInitEvent = this.events.find(ev => ev.type === 'meta_init');
+        if (metaInitEvent && metaInitEvent.recordingTime) {
+            this.recordingTime = metaInitEvent.recordingTime;
+            this.playbackStartTime = performance.now();
+            this.originalDateNow = Date.now;
+            const recordedTime = metaInitEvent.recordingTime;
+
+            Date.now = () => {
+                const elapsed = performance.now() - this.playbackStartTime;
+                return Math.round(recordedTime + elapsed);
+            };
+
+            const recordDate = new Date(recordedTime);
+            this.addDebugLog(`⏰ Time pre-set to: ${recordDate.toLocaleString('de-DE')}`);
+        } else {
+            this.addDebugLog(`⏰ No recording time found`);
+        }
+
+        // Control play button in mini-rail during playback
+        if (window.cyberPlayBtn) {
+            this.originalPlayBtnOnclick = window.cyberPlayBtn.onclick;
+            window.cyberPlayBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg>
+        `;
+            window.cyberPlayBtn.style.color = "#ff4444";
+            window.cyberPlayBtn.title = "Playback stoppen";
+            window.cyberPlayBtn.onclick = () => this.stop();
+            this.addDebugLog(`🎛️ Play button changed to STOP`);
+        }
+
+        // Block all input by setting pointer-events: none on everything
+        // (the STOP button will still be clickable because it's not in the blocked container)
+        const originalPointerEvents = new Map();
+
+        this.inputBlockerOverlay = document.createElement('div');
+        this.inputBlockerOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            pointer-events: none;
+            z-index: 50000;
+        `;
+
+        // Disable all interactive elements except the stop button
+        document.querySelectorAll('button, a, input, textarea, select, [onclick]').forEach(el => {
+            if (el !== window.cyberPlayBtn) {
+                originalPointerEvents.set(el, el.style.pointerEvents);
+                el.style.pointerEvents = 'none';
+            }
+        });
+
+        document.body.appendChild(this.inputBlockerOverlay);
+        this.addDebugLog(`🛑 Input blocked (only STOP button clickable)`);
 
         console.log("▶️ Playing script... (Press ESC to abort)");
 
@@ -948,49 +1131,66 @@ class CyberRecorderEngine {
         // Start audio playback if available
         if (this.audioBlob && this.audioBlob.size > 0) {
             this.addDebugLog(`▶️ Playing ${this.audioBlob.size} bytes...`);
-            const audioUrl = URL.createObjectURL(this.audioBlob);
-            this.audioElement = new Audio(audioUrl);
 
-            // Ensure audio is in DOM for some browsers
-            this.audioElement.style.display = 'none';
-            document.body.appendChild(this.audioElement);
+            setTimeout(() => {
+                const audioUrl = URL.createObjectURL(this.audioBlob);
 
-            this.audioElement.onerror = (err) => {
-                this.addDebugLog(`❌ Audio error: ${err.error?.message || err}`);
-            };
-            this.audioElement.onplay = () => {
-                this.addDebugLog(`🔊 Audio playing!`);
-            };
-            this.audioElement.onended = () => {
-                this.addDebugLog(`⏹️ Audio ended`);
-            };
-            this.audioElement.volume = 1.0;
-            this.audioElement.autoplay = false;
+                this.audioElement = document.createElement('audio');
+                this.audioElement.src = audioUrl;
+                this.audioElement.style.display = 'none';
+                document.body.appendChild(this.audioElement);
 
-            const playPromise = this.audioElement.play();
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        this.addDebugLog(`✅ Play promise resolved`);
-                    })
-                    .catch((err) => {
-                        this.addDebugLog(`❌ Play error: ${err.name}: ${err.message}`);
-                    });
-            }
+                this.audioElement.onerror = (err) => {
+                    this.addDebugLog(`❌ Audio error: ${err.error?.message || err}`);
+                };
+                this.audioElement.onloadstart = () => {
+                    this.addDebugLog(`⏳ Audio loading...`);
+                };
+                this.audioElement.onloadedmetadata = () => {
+                    this.addDebugLog(`✅ Audio loaded: ${this.audioElement.duration.toFixed(1)}s`);
+                };
+                this.audioElement.onplay = () => {
+                    this.addDebugLog(`🔊 Audio playing! (paused=${this.audioElement.paused}, volume=${this.audioElement.volume})`);
+                };
+                this.audioElement.ontimeupdate = () => {
+                    if (this.audioElement.currentTime > 0.5) {
+                        this.addDebugLog(`⏱️ Audio progress: ${this.audioElement.currentTime.toFixed(1)}s / ${this.audioElement.duration.toFixed(1)}s`);
+                        this.audioElement.ontimeupdate = null;
+                    }
+                };
+                this.audioElement.onended = () => {
+                    this.addDebugLog(`⏹️ Audio ended`);
+                };
+                this.audioElement.volume = 1.0;
+                this.audioElement.autoplay = false;
+
+                const playPromise = this.audioElement.play();
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            this.addDebugLog(`✅ Play promise resolved`);
+                        })
+                        .catch((err) => {
+                            this.addDebugLog(`❌ Play error: ${err.name}: ${err.message}`);
+                        });
+                }
+            }, 100);
         } else if (this.recordAudio) {
             this.addDebugLog(`⚠️ No audio blob found!`);
         }
 
-        this.events.forEach((ev, index) => {
-            const timer = setTimeout(() => {
-                this.executeEvent(ev);
+        setTimeout(() => {
+            this.events.forEach((ev, index) => {
+                const timer = setTimeout(() => {
+                    this.executeEvent(ev);
 
-                if (index === this.events.length - 1) {
-                    this.stop();
-                }
-            }, ev.t);
-            this.playTimers.push(timer);
-        });
+                    if (index === this.events.length - 1) {
+                        this.stop();
+                    }
+                }, ev.t);
+                this.playTimers.push(timer);
+            });
+        }, 50);
     }
 
     executeEvent(ev) {
@@ -1001,8 +1201,8 @@ class CyberRecorderEngine {
             if (this.recordedWidth > 0 && this.recordedHeight > 0) {
                 const scaleX = window.innerWidth / this.recordedWidth;
                 const scaleY = window.innerHeight / this.recordedHeight;
-                clientX = ev.clientX * scaleX;
-                clientY = ev.clientY * scaleY;
+                clientX = Math.round(ev.clientX * scaleX * 100) / 100;
+                clientY = Math.round(ev.clientY * scaleY * 100) / 100;
             }
 
             this.ghostCursor.style.left = clientX + 'px';
@@ -1054,10 +1254,33 @@ class CyberRecorderEngine {
         } else if (ev.type === 'meta_init') {
             this.recordedWidth = ev.width;
             this.recordedHeight = ev.height;
-            if (Math.abs(ev.width - window.innerWidth) > 50 || Math.abs(ev.height - window.innerHeight) > 50) {
-                const scaleX = (window.innerWidth / ev.width).toFixed(2);
-                const scaleY = (window.innerHeight / ev.height).toFixed(2);
-                console.log(`[CyberRecorder] Viewport scaling: ${ev.width}x${ev.height} → ${window.innerWidth}x${window.innerHeight} (scale: ${scaleX}x × ${scaleY}y)`);
+            this.recordedUseGlobe = ev.useGlobe;
+            this.recordingTime = ev.recordingTime || 0;
+
+            if (ev.useGlobe !== undefined && window.useGlobe !== undefined) {
+                this.originalUseGlobe = window.useGlobe;
+                const targetMode = ev.useGlobe;
+                const currentMode = window.useGlobe;
+
+                if (targetMode !== currentMode && typeof window.toggleGlobe === 'function') {
+                    setTimeout(() => {
+                        window.toggleGlobe();
+                        const mode = targetMode ? 'globe' : 'normal';
+                        this.addDebugLog(`🌍 Mode set to: ${mode}`);
+                    }, 50);
+                } else if (targetMode !== currentMode) {
+                    window.useGlobe = targetMode;
+                    const mode = targetMode ? 'globe' : 'normal';
+                    this.addDebugLog(`🌍 Mode set to: ${mode} (direct)`);
+                }
+            }
+
+            const scaleX = (window.innerWidth / ev.width).toFixed(4);
+            const scaleY = (window.innerHeight / ev.height).toFixed(4);
+            if (Math.abs(ev.width - window.innerWidth) > 1 || Math.abs(ev.height - window.innerHeight) > 1) {
+                console.log(`[CyberRecorder] Viewport scaling: ${ev.width}x${ev.height} → ${window.innerWidth}x${window.innerHeight}`);
+                console.log(`[CyberRecorder] Scale factors: X=${scaleX}, Y=${scaleY}`);
+                this.addDebugLog(`📏 Scaling: ${ev.width}x${ev.height} → ${window.innerWidth}x${window.innerHeight} (${scaleX}x, ${scaleY}y)`);
             }
         }
     }
@@ -1100,6 +1323,37 @@ class CyberRecorderEngine {
             this.addDebugLog(`❌ Export Fehler: ${e.message}`);
             alert("Fehler: " + e.message);
         }
+    }
+
+    exportAudioWebM() {
+        if (!this.audioBlob || this.audioBlob.size === 0) {
+            alert("Kein Audio aufgezeichnet.");
+            return;
+        }
+
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm   = String(now.getMonth() + 1).padStart(2, '0');
+        const dd   = String(now.getDate()).padStart(2, '0');
+        const hh   = String(now.getHours()).padStart(2, '0');
+        const min  = String(now.getMinutes()).padStart(2, '0');
+        const ss   = String(now.getSeconds()).padStart(2, '0');
+
+        let labName = "lab";
+        const filePart = window.location.pathname.split('/').pop();
+        if (filePart) labName = filePart.replace('.html', '');
+        const baseName = `audio ${labName} ${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
+
+        const url = URL.createObjectURL(this.audioBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${baseName}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.addDebugLog(`✅ Audio WebM exported (${Math.round(this.audioBlob.size / 1024)}KB)`);
     }
 
     exportAudioMp3() {
