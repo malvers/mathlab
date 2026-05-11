@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOC ALVERS MATHE-LABORE | World Clock</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@200;300;400;700;900&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -261,6 +261,7 @@
         let hoveredFlagIndex = null; // Use index to distinguish same flags
 
         let redCheckHitbox = null; // Hitbox of the in-popup ROT checkbox in canvas coords
+        let imprintHitbox = null;  // Hitbox of the "Impressum · ..." footer in canvas coords
 
         const RED_STORAGE_KEY = 'worldclock.redCities';
         try {
@@ -328,6 +329,14 @@
                 myCanvas >= redCheckHitbox.y && myCanvas <= redCheckHitbox.y + redCheckHitbox.h) {
                 targetCity.red = !targetCity.red;
                 persistRedCities();
+                return;
+            }
+
+            // Impressum hit test
+            if (imprintHitbox &&
+                mxCanvas >= imprintHitbox.x && mxCanvas <= imprintHitbox.x + imprintHitbox.w &&
+                myCanvas >= imprintHitbox.y && myCanvas <= imprintHitbox.y + imprintHitbox.h) {
+                window.location.href = 'impressum.html';
                 return;
             }
 
@@ -413,7 +422,12 @@
                 }
                 hoveredFlagIndex = foundFlagIdx;
 
-                canvas.style.cursor = (found || foundFlagIdx !== null) ? 'pointer' : 'default';
+                const mxCanvas = e.clientX - rect.left;
+                const myCanvas = e.clientY - rect.top;
+                const overImprint = imprintHitbox &&
+                    mxCanvas >= imprintHitbox.x && mxCanvas <= imprintHitbox.x + imprintHitbox.w &&
+                    myCanvas >= imprintHitbox.y && myCanvas <= imprintHitbox.y + imprintHitbox.h;
+                canvas.style.cursor = (found || foundFlagIdx !== null || overImprint) ? 'pointer' : 'default';
             }
         });
 
@@ -631,6 +645,24 @@
 
             ctx.fillStyle = "#00d2ff";
             ctx.fillText("NORMALZEIT", 20, 54);
+            ctx.restore();
+
+            // --- Impressum (centered below the clock) ---
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.font = "300 10px Raleway";
+            const imprintText = "Impressum · © Dr. Michael R. Alvers";
+            const imprintY = cy + r + 66;
+            const imprintMetrics = ctx.measureText(imprintText);
+            ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
+            ctx.fillText(imprintText, cx, imprintY);
+            imprintHitbox = {
+                x: cx - imprintMetrics.width / 2,
+                y: imprintY,
+                w: imprintMetrics.width,
+                h: 14
+            };
             ctx.restore();
             
             const activeCity = selectedCity;
