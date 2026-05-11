@@ -48,27 +48,36 @@
         /* Print Overrides */
         @media print {
             @page { margin: 0; size: auto; }
-            html, body { 
-                margin: 0 !important; padding: 0 !important; 
-                background: #000 !important; 
+            html, body {
+                margin: 0 !important; padding: 0 !important;
+                background: #000 !important;
+                width: 100% !important;
                 height: 100% !important;
                 overflow: hidden !important;
-            }
-            .container, .preview-container, .zoom-wrapper { 
-                margin: 0 !important; padding: 0 !important; 
-                width: 100% !important; height: 100% !important;
                 display: block !important;
+            }
+            .container, .preview-container, .zoom-wrapper {
+                margin: 0 !important; padding: 0 !important;
+                width: 100% !important; height: 100% !important;
+                max-width: none !important; max-height: none !important;
+                min-height: 0 !important;
+                display: block !important;
+                position: static !important;
+                overflow: hidden !important;
                 font-size: 0 !important;
                 line-height: 0 !important;
+                transform: none !important;
             }
             .controls, .hint, #editor-overlay, .format-tag { display: none !important; }
-            canvas { 
+            canvas {
                 display: block !important;
-                width: 100% !important; 
-                height: auto !important; 
-                max-height: 100% !important;
+                width: 100% !important;
+                height: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
                 box-shadow: none !important; border: none !important;
                 margin: 0 !important;
+                padding: 0 !important;
             }
         }
 
@@ -495,11 +504,11 @@
             if (isPortrait) {
                 posterWidth = 7000 / isoRatio; posterHeight = 7000;
                 document.getElementById('orientation-display').textContent = 'PORTRAIT';
-                document.getElementById('print-style').textContent = '@media print { @page { size: portrait; margin: 0; } }';
+                document.getElementById('print-style').textContent = `@media print { @page { size: ${currentFormat} portrait; margin: 0; } }`;
             } else {
                 posterWidth = 7000; posterHeight = 7000 / isoRatio;
                 document.getElementById('orientation-display').textContent = 'LANDSCAPE';
-                document.getElementById('print-style').textContent = '@media print { @page { size: landscape; margin: 0; } }';
+                document.getElementById('print-style').textContent = `@media print { @page { size: ${currentFormat} landscape; margin: 0; } }`;
             }
 
             canvas.width = posterWidth; canvas.height = posterHeight;
