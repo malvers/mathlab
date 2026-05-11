@@ -44,20 +44,20 @@
         body.school-ibb #school-logo-ibb {
             display: block;
             position: fixed;
-            top: 12px;
-            right: 16px;
-            height: 77px;
+            top: 1.5vmin;
+            right: 2vmin;
+            height: 9.6vmin;
             width: auto;
             z-index: 2500;
             pointer-events: none;
         }
         body.school-rahn #school-logo-rahn {
-            height: 85px;
+            height: 10.6vmin;
             /* Recolor entire SVG (alle Pfade) auf #E30613 */
             filter: brightness(0) saturate(100%) invert(13%) sepia(99%) saturate(7470%) hue-rotate(354deg) brightness(95%) contrast(89%);
         }
         body.school-ibb #school-logo-ibb {
-            top: 32px;
+            top: 4vmin;
         }
     </style>
     <script>
@@ -502,22 +502,30 @@
             ctx.restore();
 
             // 2. Draw City Markers (Plaques) - GLUED TO EARTH
+            // All sizes relative to r (clock radius) for responsive scaling
+            const diskR = r * 0.105;
+            const markerInset = r * 0.022;
+            const tipExtend = r * 0.019;
+            const baseInset = r * 0.038;
+            const cityFontNormal = Math.max(5, r * 0.030);
+            const cityFontHighlight = Math.max(6, r * 0.034);
+            const cityLineHeight = r * 0.038;
+            const cityShadowBlur = r * 0.031;
             cities.forEach(city => {
                 // FLIPPED: Use -city.lon because the hour ring is reversed (CCW)
                 const cityAngle = (-city.lon) * Math.PI / 180 - Math.PI / 2;
-                const markerR = (r * 0.9) - 7; // Moved 7px inward
-                const circleRadius = 38; // Back to standard size for all
+                const markerR = (r * 0.9) - markerInset;
+                const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
 
-                // Draw Precision Triangle (Pointer) - LARGER
+                // Draw Precision Triangle (Pointer)
                 ctx.save();
                 ctx.fillStyle = "white";
                 ctx.beginPath();
-                // Tip of triangle further out
-                const tipR = markerR + circleRadius + 6;
-                const baseR = markerR + circleRadius - 12;
-                const spread = 0.06; // Wider spread
+                const tipR = markerR + circleRadius + tipExtend;
+                const baseR = markerR + circleRadius - baseInset;
+                const spread = 0.06; // angular, no scaling needed
                 
                 ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
                 ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
@@ -536,14 +544,14 @@
                         grad.addColorStop(1, '#7a0309');
 
                         ctx.save();
-                        ctx.shadowBlur = 10;
+                        ctx.shadowBlur = cityShadowBlur;
                         ctx.shadowColor = '#E30613';
                     } else {
                         grad.addColorStop(0, '#ffaa00');
                         grad.addColorStop(1, '#e68a00');
 
                         ctx.save();
-                        ctx.shadowBlur = 10;
+                        ctx.shadowBlur = cityShadowBlur;
                         ctx.shadowColor = '#e68a00';
                     }
                 } else {
@@ -576,48 +584,55 @@
                 } else {
                     ctx.fillStyle = "#00d2ff"; // Cyan for Winter Time
                 }
-                ctx.font = (city.highlight) ? "900 12px Orbitron" : "bold 11px Orbitron";
+                ctx.font = (city.highlight)
+                    ? `900 ${cityFontHighlight}px Orbitron`
+                    : `bold ${cityFontNormal}px Orbitron`;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                
+
                 lines.forEach((line, i) => {
-                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * 14);
+                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight);
                 });
                 ctx.restore();
             });
             ctx.restore(); // End map rotation (Earth + Glued Markers)
-            // 3. Draw Numbers Ring (Static) - 80% Distance Adjustment
-            ctx.font = "400 28px Orbitron"; 
+            // 3. Draw Numbers Ring (Static) - relative sizes
+            const hourFontSize = Math.max(12, r * 0.0875);
+            const hourLabelInset = r * 0.022;
+            const tickInset = r * 0.016;
+            const hourGlow12 = r * 0.047;
+            const hourGlowOther = r * 0.031;
+            ctx.font = `400 ${hourFontSize}px Orbitron`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
                 const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15 - 7); 
-                const ty = Math.sin(angle) * (r * 1.15 - 7);
-                
+                const tx = Math.cos(angle) * (r * 1.15 - hourLabelInset);
+                const ty = Math.sin(angle) * (r * 1.15 - hourLabelInset);
+
                 let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
                 let glow = false;
-                
+
                 if (i === 12) { color = "#ffaa00"; glow = true; }
                 else if (i === 6) { color = "#00aa00"; glow = true; }
                 else if (i === 24) { color = "#00aaaa"; glow = true; }
                 else if (i === 18) { color = "#aa00aa"; glow = true; }
-                
+
                 ctx.save();
                 ctx.fillStyle = color;
                 if (glow) {
-                    ctx.shadowBlur = (i === 12) ? 15 : 10;
+                    ctx.shadowBlur = (i === 12) ? hourGlow12 : hourGlowOther;
                     ctx.shadowColor = color;
                 }
                 ctx.fillText(i, tx, ty);
                 ctx.restore();
-                
+
                 // Hour Ticks
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * (r * 1.02 - 5), Math.sin(angle) * (r * 1.02 - 5));
-                ctx.lineTo(Math.cos(angle) * (r * 1.08 - 5), Math.sin(angle) * (r * 1.08 - 5));
+                ctx.moveTo(Math.cos(angle) * (r * 1.02 - tickInset), Math.sin(angle) * (r * 1.02 - tickInset));
+                ctx.lineTo(Math.cos(angle) * (r * 1.08 - tickInset), Math.sin(angle) * (r * 1.08 - tickInset));
                 ctx.stroke();
                 ctx.restore();
 
@@ -626,34 +641,40 @@
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                 ctx.beginPath();
-                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - 5), Math.sin(halfAngle) * (r * 1.02 - 5));
-                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - 5), Math.sin(halfAngle) * (r * 1.05 - 5));
+                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - tickInset), Math.sin(halfAngle) * (r * 1.02 - tickInset));
+                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - tickInset), Math.sin(halfAngle) * (r * 1.05 - tickInset));
                 ctx.stroke();
                 ctx.restore();
             }
 
             ctx.restore(); // Restore from main translation
             
-            // --- Legend (Top Left) ---
+            // --- Legend (Top Left) - responsive to clock radius ---
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "top";
-            ctx.font = "800 15px Orbitron";
+            const legendFontSize = r * 0.047;
+            const legendX = r * 0.0625;
+            const legendY1 = r * 0.10;
+            const legendY2 = legendY1 + legendFontSize * 1.5;
+            ctx.font = `800 ${legendFontSize}px Orbitron`;
 
             ctx.fillStyle = "#ffaa00";
-            ctx.fillText("SOMMERZEIT", 20, 32);
+            ctx.fillText("SOMMERZEIT", legendX, legendY1);
 
             ctx.fillStyle = "#00d2ff";
-            ctx.fillText("NORMALZEIT", 20, 54);
+            ctx.fillText("NORMALZEIT", legendX, legendY2);
             ctx.restore();
 
             // --- Impressum (centered below the clock) ---
             ctx.save();
             ctx.textAlign = "center";
             ctx.textBaseline = "top";
-            ctx.font = "300 10px Raleway";
+            const imprintFontSize = r * 0.031;
+            const imprintGap = r * 0.21;
+            ctx.font = `300 ${imprintFontSize}px Raleway`;
             const imprintText = "Impressum · © Dr. Michael R. Alvers";
-            const imprintY = cy + r + 66;
+            const imprintY = cy + r + imprintGap;
             const imprintMetrics = ctx.measureText(imprintText);
             ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
             ctx.fillText(imprintText, cx, imprintY);
@@ -661,7 +682,7 @@
                 x: cx - imprintMetrics.width / 2,
                 y: imprintY,
                 w: imprintMetrics.width,
-                h: 14
+                h: imprintFontSize * 1.4
             };
             ctx.restore();
             
