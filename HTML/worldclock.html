@@ -860,8 +860,8 @@
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
             ctx.save();
-            ctx.strokeStyle = useGlobe ? "#00d2ff" : "rgba(180, 200, 220, 0.5)";
-            ctx.fillStyle = useGlobe ? "rgba(0, 210, 255, 0.15)" : "transparent";
+            ctx.strokeStyle = "#ffffff";
+            ctx.fillStyle = "transparent";
             ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
 
             // Outer circle (globe sphere)
@@ -870,8 +870,9 @@
             ctx.fill();
             ctx.stroke();
 
-            // 3 horizontal latitude lines
-            const latLines = [0.30, 0, -0.30];
+            // 5 horizontal latitude lines (thinner)
+            ctx.lineWidth = Math.max(0.5, legendFontSize * 0.04);
+            const latLines = [0.65, 0.30, 0, -0.30, -0.65];
             for (let lat of latLines) {
                 const offsetY = lat * iconR;
                 const lineWidth = iconR * Math.sqrt(1 - lat * lat) * 0.95;
@@ -880,6 +881,7 @@
                 ctx.lineTo(iconCx + lineWidth, iconCy + offsetY);
                 ctx.stroke();
             }
+            ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
 
             // Central vertical meridian
             ctx.beginPath();
