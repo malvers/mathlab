@@ -26,10 +26,58 @@
             border-color: rgba(0, 255, 255, 0.2);
             pointer-events: none; /* Don't block clicks */
         }
+        /* --- School Scheme: ?school=rahn | ?school=ibb --- */
+        body.has-school,
+        body.has-school #side-panel {
+            background: #e30613 !important;
+        }
+        body.has-school #canvas-container {
+            background: #000616 !important;
+        }
+        body.has-school .canvas-branding {
+            display: none !important;
+        }
+        .school-logo {
+            display: none;
+        }
+        body.school-rahn #school-logo-rahn,
+        body.school-ibb #school-logo-ibb {
+            display: block;
+            position: fixed;
+            top: 12px;
+            right: 16px;
+            height: 77px;
+            width: auto;
+            z-index: 2500;
+            pointer-events: none;
+        }
+        body.school-rahn #school-logo-rahn {
+            height: 85px;
+            /* Recolor entire SVG (alle Pfade) auf #E30613 */
+            filter: brightness(0) saturate(100%) invert(13%) sepia(99%) saturate(7470%) hue-rotate(354deg) brightness(95%) contrast(89%);
+        }
     </style>
+    <script>
+        (function () {
+            try {
+                const raw = new URLSearchParams(window.location.search).get('school');
+                const school = raw ? raw.toLowerCase() : null;
+                if (school) document.documentElement.dataset.school = school;
+                if (school === 'rahn' || school === 'ibb') {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        document.body.classList.add('has-school');
+                        document.body.classList.add('school-' + school);
+                    });
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
 </head>
 
 <body>
+    <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
+    <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
+
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -167,6 +215,27 @@
                 return tzName.includes('Sommerzeit') ? "SZ" : "WZ";
             } catch (e) { return ""; }
         }
+
+        const isRahnSchool = (new URLSearchParams(window.location.search).get('school') || '').toLowerCase() === 'rahn';
+
+        // URL-Parameter: ?name=Leipzig benennt Dresden um.
+        // Zusätzlich beliebig viele weitere Overrides per Stadtname als Schlüssel:
+        //   ?Tokio=Osaka&NewYork=Boston&Bombay=Mumbai
+        // (Schlüssel case-insensitive, Leerzeichen/Zeilenumbrüche werden ignoriert.)
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const norm = s => (s || '').toLowerCase().replace(/[\s\n]+/g, '');
+            const customName = params.get('name');
+            if (customName) {
+                const dresden = cities.find(c => c.tz === 'Europe/Berlin');
+                if (dresden) dresden.name = customName;
+            }
+            params.forEach((value, key) => {
+                if (key === 'name' || !value) return;
+                const target = cities.find(c => norm(c.name) === norm(key));
+                if (target) target.name = value;
+            });
+        } catch (e) { /* ignore */ }
 
         // Highlight the city matching the visitor's local timezone (fallback: Dresden)
         const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -445,12 +514,21 @@
                     grad.addColorStop(0, '#dd1144');
                     grad.addColorStop(1, '#1c0008');
                 } else if (city.highlight) {
-                    grad.addColorStop(0, '#ffaa00');
-                    grad.addColorStop(1, '#e68a00');
+                    if (isRahnSchool) {
+                        grad.addColorStop(0, '#E30613');
+                        grad.addColorStop(1, '#7a0309');
 
-                    ctx.save();
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#e68a00';
+                        ctx.save();
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = '#E30613';
+                    } else {
+                        grad.addColorStop(0, '#ffaa00');
+                        grad.addColorStop(1, '#e68a00');
+
+                        ctx.save();
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = '#e68a00';
+                    }
                 } else {
                     grad.addColorStop(0, '#0033aa');
                     grad.addColorStop(1, '#000811');
@@ -475,7 +553,7 @@
                 
                 const dst = getDSTLabel(city.tz);
                 if (city.highlight) {
-                    ctx.fillStyle = "#333333";
+                    ctx.fillStyle = isRahnSchool ? "#ffffff" : "#333333";
                 } else if (dst === "SZ") {
                     ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
                 } else {
@@ -543,13 +621,13 @@
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "top";
-            ctx.font = "800 10px Orbitron";
-            
+            ctx.font = "800 15px Orbitron";
+
             ctx.fillStyle = "#ffaa00";
-            ctx.fillText("● SOMMERZEIT", 20, 20);
-            
+            ctx.fillText("SOMMERZEIT", 20, 32);
+
             ctx.fillStyle = "#00d2ff";
-            ctx.fillText("● WINTERZEIT", 20, 35);
+            ctx.fillText("NORMALZEIT", 20, 54);
             ctx.restore();
             
             const activeCity = selectedCity;
@@ -644,11 +722,11 @@
 
                 ctx.textAlign = "center";
 
-                // Status (Sommerzeit/Winterzeit)
+                // Status (Sommerzeit/Normalzeit)
                 const dstStatus = getDSTLabel(targetCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "900 10px Orbitron";
-                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "WINTERZEIT", 0, y + 18);
+                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 18);
                 
                 // Querstrich (Separator)
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
