@@ -33,9 +33,11 @@
             width: 100%;
             aspect-ratio: 1;
             line-height: 0;
+            transform: scale(1.05);
+            transform-origin: center center;
         }
 
-        #digit-canvas {
+        #digit-canvas, #morph-canvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -98,6 +100,69 @@
             margin-top: 8px;
             min-height: 18px;
             letter-spacing: 0.06em;
+        }
+
+        /* Make sidebar buttons 30% flatter */
+        #side-panel .cyber-btn {
+            padding-top: 7px !important;
+            padding-bottom: 7px !important;
+        }
+
+        /* Toggle switch */
+        .switch-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: rgba(0, 210, 255, 0.7);
+            letter-spacing: 0.06em;
+        }
+
+        .switch {
+            position: relative;
+            width: 36px;
+            height: 18px;
+            display: inline-block;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .switch-slider::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 1px;
+            width: 12px;
+            height: 12px;
+            background: #00d2ff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch input:checked + .switch-slider {
+            background: rgba(173, 255, 47, 0.2);
+            border-color: #adff2f;
+        }
+
+        .switch input:checked + .switch-slider::before {
+            background: #adff2f;
+            transform: translateX(18px);
         }
 
         .digit-grid {
@@ -173,6 +238,7 @@
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
                     <canvas id="digit-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="morph-canvas" width="1000" height="1000"></canvas>
                 </div>
                 <div id="draw-hint">Zeichne — Maus oder Finger</div>
             </div>
@@ -217,7 +283,16 @@
 
         CyberUI.createCard('ui-container', 'POLYGON', `
             <button class="cyber-btn" onclick="extractOutline()"
-                style="width:100%;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINE</button>
+                style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINE</button>
+            <button class="cyber-btn" onclick="clearOutline()"
+                style="width:100%;border-color:rgba(255,136,0,0.5);color:#ff8800;">OUTLINE LÖSCHEN</button>
+            <label class="switch-row">
+                <span>POLY ANZEIGEN</span>
+                <span class="switch">
+                    <input type="checkbox" id="poly-toggle" checked onchange="onPolyToggle(this.checked)">
+                    <span class="switch-slider"></span>
+                </span>
+            </label>
             <div class="eps-row">
                 <label>ε</label>
                 <input type="range" id="eps-slider" min="1" max="50" value="8" step="0.5"
@@ -225,6 +300,19 @@
                 <span id="eps-val">8</span>
             </div>
             <div id="vert-count"></div>
+        `);
+
+        CyberUI.createCard('ui-container', 'MORPH', `
+            <button class="cyber-btn" onclick="startMorph()"
+                style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► MORPH</button>
+            <button class="cyber-btn" onclick="stopMorph()"
+                style="width:100%;margin-bottom:8px;border-color:rgba(255,136,0,0.5);color:#ff8800;">RESET</button>
+            <div class="eps-row">
+                <label>t</label>
+                <input type="range" id="morph-slider" min="0" max="100" value="0" step="1"
+                    oninput="onMorphSlider(this.value)">
+                <span id="morph-val">0</span>
+            </div>
         `);
 
         CyberUI.createCard('ui-container', 'ZIFFER', `
@@ -244,6 +332,8 @@
         const drawCtx = drawCanvas.getContext('2d');
         const digitCanvas = document.getElementById('digit-canvas');
         const digitCtx = digitCanvas.getContext('2d');
+        const morphCanvas = document.getElementById('morph-canvas');
+        const morphCtx = morphCanvas.getContext('2d');
         let isDrawing = false;
         let savedPixels = null; // ImageData snapshot before polygon is drawn
         let rawContour = null;  // pixel-level contour from Moore tracing
@@ -409,12 +499,59 @@
             drawPolygon();
         }
 
+        // Resample a polygon to exactly n evenly-spaced points along its perimeter
+        function resamplePolygon(poly, n) {
+            if (poly.length < 2 || n < 2) return poly.slice();
+            const cumLens = [0];
+            for (let i = 0; i < poly.length; i++) {
+                const [x1, y1] = poly[i];
+                const [x2, y2] = poly[(i + 1) % poly.length];
+                cumLens.push(cumLens[cumLens.length - 1] + Math.hypot(x2 - x1, y2 - y1));
+            }
+            const totalLen = cumLens[cumLens.length - 1];
+            if (totalLen === 0) return poly.slice();
+            const result = [];
+            for (let k = 0; k < n; k++) {
+                const targetDist = (k * totalLen) / n;
+                let segIdx = 0;
+                while (segIdx < poly.length && cumLens[segIdx + 1] < targetDist) segIdx++;
+                if (segIdx >= poly.length) segIdx = poly.length - 1;
+                const segStart = cumLens[segIdx];
+                const segLen = cumLens[segIdx + 1] - segStart;
+                const t = segLen > 0 ? (targetDist - segStart) / segLen : 0;
+                const [x1, y1] = poly[segIdx];
+                const [x2, y2] = poly[(segIdx + 1) % poly.length];
+                result.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t]);
+            }
+            return result;
+        }
+
         function drawPolygon() {
             if (!rawContour || !savedPixels) return;
             drawCtx.putImageData(savedPixels, 0, 0);
 
+            const showPoly = document.getElementById('poly-toggle')?.checked ?? true;
+
             const eps = +document.getElementById('eps-slider').value;
             let poly = rdp(rawContour, eps);
+            const rdpCount = poly.length;
+
+            // If target polygon exists: resample user polygon to match the LARGEST sub-polygon's count
+            let resampled = false;
+            const targetLargest = getLargestTargetSubPoly();
+            if (targetLargest && targetLargest.length >= 3) {
+                let openPoly = poly;
+                if (poly.length > 1 &&
+                    poly[0][0] === poly[poly.length - 1][0] &&
+                    poly[0][1] === poly[poly.length - 1][1]) {
+                    openPoly = poly.slice(0, -1);
+                }
+                poly = resamplePolygon(openPoly, targetLargest.length);
+                resampled = true;
+                userMorphPoly = poly.slice(); // save for morphing (still open here)
+            } else {
+                userMorphPoly = null;
+            }
 
             // Ensure closed polygon: add first point at end if not already closed
             if (poly.length > 2) {
@@ -426,31 +563,50 @@
                 }
             }
 
-            // Draw closed polygon outline
-            drawCtx.save();
-            drawCtx.strokeStyle = '#ff8800';
-            drawCtx.lineWidth = 2;
-            drawCtx.lineCap = 'round';
-            drawCtx.lineJoin = 'round';
-            drawCtx.beginPath();
-            drawCtx.moveTo(poly[0][0], poly[0][1]);
-            for (let i = 1; i < poly.length; i++) drawCtx.lineTo(poly[i][0], poly[i][1]);
-            drawCtx.closePath();
-            drawCtx.stroke();
-
-            // Vertices (skip duplicate closing point)
-            drawCtx.fillStyle = 'rgb(240, 0, 0)';
             const verts = (poly.length > 2 && poly[0][0] === poly[poly.length - 1][0] && poly[0][1] === poly[poly.length - 1][1])
                 ? poly.slice(0, -1)
                 : poly;
-            for (const [x, y] of verts) {
-                drawCtx.beginPath();
-                drawCtx.arc(x, y, 2, 0, Math.PI * 2);
-                drawCtx.fill();
-            }
-            drawCtx.restore();
 
-            document.getElementById('vert-count').textContent = `${verts.length} Vertices`;
+            // Apply baseline & horizontal alignment if target exists
+            let displayPoly = poly;
+            if (targetLargest) {
+                const ub = bboxOf(poly);
+                const tb = bboxOf(targetLargest);
+                const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
+                const dy = ub.maxY - tb.maxY;
+                displayPoly = poly.map(([x, y]) => [x - dx, y - dy]);
+            }
+
+            if (showPoly) {
+                // Draw closed polygon outline
+                drawCtx.save();
+                drawCtx.strokeStyle = '#ff8800';
+                drawCtx.lineWidth = 1;
+                drawCtx.lineCap = 'round';
+                drawCtx.lineJoin = 'round';
+                drawCtx.beginPath();
+                drawCtx.moveTo(displayPoly[0][0], displayPoly[0][1]);
+                for (let i = 1; i < displayPoly.length; i++) drawCtx.lineTo(displayPoly[i][0], displayPoly[i][1]);
+                drawCtx.closePath();
+                drawCtx.stroke();
+
+                // Vertices (skip duplicate closing point)
+                drawCtx.fillStyle = 'rgb(240, 0, 0)';
+                const displayVerts = (displayPoly.length > 2 && displayPoly[0][0] === displayPoly[displayPoly.length - 1][0] && displayPoly[0][1] === displayPoly[displayPoly.length - 1][1])
+                    ? displayPoly.slice(0, -1)
+                    : displayPoly;
+                for (const [x, y] of displayVerts) {
+                    drawCtx.beginPath();
+                    drawCtx.arc(x, y, 0.8, 0, Math.PI * 2);
+                    drawCtx.fill();
+                }
+                drawCtx.restore();
+            }
+
+            const countText = resampled
+                ? `${rdpCount} → ${verts.length} Vertices`
+                : `${verts.length} Vertices`;
+            document.getElementById('vert-count').textContent = countText;
         }
 
         function onEpsChange(val) {
@@ -459,9 +615,182 @@
             drawPolygon();
         }
 
+        function onPolyToggle(checked) {
+            try { localStorage.setItem('morph-poly-visible', checked ? '1' : '0'); } catch (_) {}
+            if (rawContour && savedPixels) drawPolygon();
+            if (selectedDigit !== null) drawTargetPolygon();
+        }
+
+        function clearOutline() {
+            if (savedPixels) drawCtx.putImageData(savedPixels, 0, 0);
+            savedPixels = null;
+            rawContour = null;
+            userMorphPoly = null;
+            document.getElementById('vert-count').textContent = '';
+            try { localStorage.removeItem('morph-outline'); } catch (_) {}
+        }
+
+        // ── Morph: alignment + animation ─────────────────────────────────────────────
+        function getLargestTargetSubPoly() {
+            if (!targetPolygon || targetPolygon.length === 0) return null;
+            let largest = targetPolygon[0];
+            for (const p of targetPolygon) if (p.length > largest.length) largest = p;
+            return largest;
+        }
+
+        // Rotate & possibly reverse target to minimize sum of vertex-distances to user
+        function alignTargetTo(userPoly, target) {
+            const n = userPoly.length;
+            if (target.length !== n) return target;
+            function bestRotation(t) {
+                let bestK = 0, bestDist = Infinity;
+                for (let k = 0; k < n; k++) {
+                    let dist = 0;
+                    for (let i = 0; i < n; i++) {
+                        const dx = userPoly[i][0] - t[(i + k) % n][0];
+                        const dy = userPoly[i][1] - t[(i + k) % n][1];
+                        dist += dx * dx + dy * dy;
+                        if (dist >= bestDist) break; // early-exit
+                    }
+                    if (dist < bestDist) { bestDist = dist; bestK = k; }
+                }
+                return { k: bestK, dist: bestDist };
+            }
+            const fwd = bestRotation(target);
+            const rev = [...target].reverse();
+            const bwd = bestRotation(rev);
+            if (bwd.dist < fwd.dist) {
+                return [...rev.slice(bwd.k), ...rev.slice(0, bwd.k)];
+            }
+            return [...target.slice(fwd.k), ...target.slice(0, fwd.k)];
+        }
+
+        function bboxOf(poly) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const [x, y] of poly) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+            return { minX, maxX, minY, maxY };
+        }
+
+        function prepareMorph() {
+            if (!targetPolygon) return false;
+            const target = getLargestTargetSubPoly();
+            if (!target) return false;
+            // Regenerate userMorphPoly from rawContour if missing or wrong size
+            if (!userMorphPoly || userMorphPoly.length !== target.length) {
+                if (!rawContour) return false;
+                const eps = +document.getElementById('eps-slider').value;
+                let basePoly = rdp(rawContour, eps);
+                if (basePoly.length > 1 &&
+                    basePoly[0][0] === basePoly[basePoly.length-1][0] &&
+                    basePoly[0][1] === basePoly[basePoly.length-1][1]) {
+                    basePoly = basePoly.slice(0, -1);
+                }
+                userMorphPoly = resamplePolygon(basePoly, target.length);
+            }
+            // Translate target: horizontally centered, baseline (bottom) aligned with user's
+            const ub = bboxOf(userMorphPoly);
+            const tb = bboxOf(target);
+            const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
+            const dy = ub.maxY - tb.maxY;
+            const translated = target.map(([x, y]) => [x + dx, y + dy]);
+            targetMorphPoly = alignTargetTo(userMorphPoly, translated);
+            return true;
+        }
+
+        function drawMorph(t) {
+            morphCtx.clearRect(0, 0, 1000, 1000);
+            if (!userMorphPoly || !targetMorphPoly) return;
+            const n = userMorphPoly.length;
+            morphCtx.save();
+            // Color interpolates: green (#adff2f) → white
+            const r = Math.round(173 + (255 - 173) * t);
+            const g = 255;
+            const b = Math.round(47 + (255 - 47) * t);
+            morphCtx.fillStyle = `rgb(${r},${g},${b})`;
+            morphCtx.beginPath();
+            for (let i = 0; i < n; i++) {
+                const ux = userMorphPoly[i][0], uy = userMorphPoly[i][1];
+                const tx = targetMorphPoly[i][0], ty = targetMorphPoly[i][1];
+                const x = ux + (tx - ux) * t;
+                const y = uy + (ty - uy) * t;
+                if (i === 0) morphCtx.moveTo(x, y);
+                else morphCtx.lineTo(x, y);
+            }
+            morphCtx.closePath();
+            morphCtx.fill();
+            morphCtx.restore();
+        }
+
+        function hideUserOutline() {
+            // Clear draw canvas completely (hide user art AND outline)
+            drawCtx.save();
+            drawCtx.fillStyle = '#000';
+            drawCtx.fillRect(0, 0, 1000, 1000);
+            drawCtx.restore();
+        }
+
+        function showUserOutline() {
+            // Restore user art + outline overlay
+            if (savedPixels) drawCtx.putImageData(savedPixels, 0, 0);
+            if (rawContour && savedPixels) drawPolygon();
+        }
+
+        function startMorph() {
+            if (!rawContour) extractOutline();
+            if (!prepareMorph()) {
+                console.warn('Morph nicht möglich — fehlt Outline oder Ziffer?');
+                return;
+            }
+            cancelAnimationFrame(morphRaf);
+            hideUserOutline();
+            morphStart = performance.now();
+            function tick() {
+                const elapsed = performance.now() - morphStart;
+                const t = Math.min(1, elapsed / MORPH_DURATION);
+                drawMorph(t);
+                document.getElementById('morph-slider').value = Math.round(t * 100);
+                document.getElementById('morph-val').textContent = Math.round(t * 100);
+                if (t < 1) morphRaf = requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        function stopMorph() {
+            cancelAnimationFrame(morphRaf);
+            morphRaf = null;
+            morphCtx.clearRect(0, 0, 1000, 1000);
+            document.getElementById('morph-slider').value = 0;
+            document.getElementById('morph-val').textContent = 0;
+            showUserOutline();
+        }
+
+        function onMorphSlider(val) {
+            cancelAnimationFrame(morphRaf);
+            morphRaf = null;
+            document.getElementById('morph-val').textContent = val;
+            if (+val === 0) {
+                morphCtx.clearRect(0, 0, 1000, 1000);
+                showUserOutline();
+                return;
+            }
+            if (!prepareMorph()) return;
+            hideUserOutline();
+            drawMorph(val / 100);
+        }
+
         let selectedDigit = null;
         let timesFont = null;
         let targetPolygon = null; // high-res polygon of the times digit, for morphing
+        let userMorphPoly = null;   // resampled user polygon (no closing point)
+        let targetMorphPoly = null; // largest target sub-polygon, aligned to userMorphPoly
+        let morphRaf = null;
+        let morphStart = 0;
+        const MORPH_DURATION = 2500;
 
         // ── Bézier sampling for vector path → polygon ────────────────────────────────
         function sampleQuadratic(p0, p1, p2, n) {
@@ -529,7 +858,7 @@
                 const probe = timesFont.getPath(String(d), 0, 0, fontSize);
                 const bbox = probe.getBoundingBox();
                 const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
-                const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
+                const offsetY = 580 - (bbox.y1 + bbox.y2) / 2;
                 const path = timesFont.getPath(String(d), offsetX, offsetY, fontSize);
                 path.fill = '#fff';
                 path.draw(digitCtx);
@@ -541,7 +870,7 @@
                 digitCtx.font = 'bold 640px "Times New Roman", serif';
                 digitCtx.textAlign = 'center';
                 digitCtx.textBaseline = 'middle';
-                digitCtx.fillText(String(d), 720, 500);
+                digitCtx.fillText(String(d), 720, 580);
                 digitCtx.restore();
 
                 // Extract polygon from rendered canvas
@@ -554,7 +883,7 @@
             }
 
             // Sub-sample each sub-polygon to a max count
-            const MAX_PTS = 200;
+            const MAX_PTS = 300;
             if (targetPolygon) {
                 targetPolygon = targetPolygon.map(poly => {
                     if (poly.length <= MAX_PTS) return poly;
@@ -571,16 +900,30 @@
             if (el) el.textContent = `${total} Vertices`;
 
             drawTargetPolygon();
+            if (rawContour && savedPixels) drawPolygon();
         }
 
         function drawTargetPolygon() {
             if (!targetPolygon) return;
+            const showTarget = document.getElementById('poly-toggle')?.checked ?? true;
+            if (!showTarget) return;
+
+            // Apply baseline & horizontal alignment if user polygon exists
+            let displayTarget = targetPolygon;
+            if (userMorphPoly) {
+                const ub = bboxOf(userMorphPoly);
+                const tb = bboxOf(getLargestTargetSubPoly());
+                const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
+                const dy = ub.maxY - tb.maxY;
+                displayTarget = targetPolygon.map(poly => poly.map(([x, y]) => [x - dx, y - dy]));
+            }
+
             digitCtx.save();
             digitCtx.strokeStyle = '#ff8800';
             digitCtx.lineWidth = 1;
             digitCtx.lineCap = 'round';
             digitCtx.lineJoin = 'round';
-            for (const poly of targetPolygon) {
+            for (const poly of displayTarget) {
                 digitCtx.beginPath();
                 digitCtx.moveTo(poly[0][0], poly[0][1]);
                 for (let i = 1; i < poly.length; i++) digitCtx.lineTo(poly[i][0], poly[i][1]);
@@ -588,7 +931,7 @@
                 digitCtx.stroke();
             }
             digitCtx.fillStyle = 'rgb(240, 0, 0)';
-            for (const poly of targetPolygon) {
+            for (const poly of displayTarget) {
                 for (const [x, y] of poly) {
                     digitCtx.beginPath();
                     digitCtx.arc(x, y, 0.8, 0, Math.PI * 2);
@@ -666,6 +1009,12 @@
                 const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
                 if (radio) radio.checked = true;
                 onDigitChange(+savedDigit);
+            }
+        } catch (_) {}
+        try {
+            const savedPoly = localStorage.getItem('morph-poly-visible');
+            if (savedPoly !== null) {
+                document.getElementById('poly-toggle').checked = savedPoly === '1';
             }
         } catch (_) {}
     </script>
