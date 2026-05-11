@@ -401,8 +401,8 @@ class CyberRecorderEngine {
         const debugBox = document.createElement('div');
         debugBox.id = 'cyber-recorder-debug';
         debugBox.style.cssText = `
-            padding: 18px;
-            font-size: 1.05rem;
+            padding: 12px;
+            font-size: 0.75rem;
             color: #ffffff;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
@@ -468,6 +468,8 @@ class CyberRecorderEngine {
         this.audioBtnSetState = setAudioBtnState;
         this.recordAudio = true;
         setAudioBtnState(true);
+        // Show debug panel from the start when mic is on by default
+        if (this.debugContainer) this.debugContainer.style.display = 'flex';
 
         ui.appendChild(titleContainer);
         this.titleEl = title;
@@ -551,8 +553,8 @@ class CyberRecorderEngine {
         this.btnImport = btnImport;
         this.btnExport = btnExport;
 
-        // Debug box default OFF
-        if (this.debugContainer) this.debugContainer.style.display = 'none';
+        // Debug box: show when mic is on (default), hidden when mic off
+        if (this.debugContainer) this.debugContainer.style.display = this.recordAudio ? 'flex' : 'none';
 
         // Match debug container width to recorder UI
         requestAnimationFrame(() => {
@@ -856,9 +858,13 @@ class CyberRecorderEngine {
             return;
         }
 
-        // DEBUG: log input/change events to verify they reach the recorder
+        // DEBUG: log input/change/click events to verify they reach the recorder
         if (e.type === 'input' || e.type === 'change') {
             this.addDebugLog(`📝 ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}> = "${e.target?.value}"`);
+        }
+        if (e.type === 'click' || e.type === 'mousedown') {
+            const cls = e.target?.className ? '.' + String(e.target.className).split(' ')[0] : '';
+            this.addDebugLog(`🖱  ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}${cls}> @${Math.round(e.clientX)},${Math.round(e.clientY)}`);
         }
 
         const t = performance.now() - this.startTime;
