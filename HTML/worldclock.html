@@ -70,7 +70,7 @@
             z-index: 0;
             pointer-events: none;
         }
-        body.use-globe #globe-stage { display: block; filter: brightness(0.65); }
+        body.use-globe #globe-stage { display: block; filter: brightness(0.55); }
         body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
     </style>
     <script>
@@ -104,14 +104,6 @@
     </div>
     <button id="debug-toggle" style="position: fixed; bottom: 20px; right: 20px; padding: 8px 12px; background: rgba(0, 210, 255, 0.2); border: 1px solid #00d2ff; color: #00d2ff; border-radius: 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 11px; z-index: 9998; letter-spacing: 1px;">DEBUG</button>
 
-    <!-- TEMP: DIM SLIDER -->
-    <div id="dim-slider-box" style="position: fixed; top: 20px; left: 20px; padding: 10px 14px; background: rgba(0, 6, 22, 0.9); border: 1px solid #00d2ff; border-radius: 8px; z-index: 9999; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00d2ff; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
-        <div style="display: flex; justify-content: space-between;">
-            <span>EARTH DIM</span>
-            <span id="dim-value">0.65</span>
-        </div>
-        <input id="dim-slider" type="range" min="0" max="1" step="0.05" value="0.65" style="width: 100%; accent-color: #00d2ff;">
-    </div>
 
     <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
@@ -256,8 +248,38 @@
         }
 
         const isRahnSchool = (new URLSearchParams(window.location.search).get('school') || '').toLowerCase() === 'rahn';
-        const useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
+        let useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
         let globeInstance = null;
+        let globeIconHitbox = null;
+
+        function initGlobeNow() {
+            if (globeInstance) return;
+            const stage = document.getElementById('globe-stage');
+            if (!stage || typeof Globe === 'undefined') return;
+            globeInstance = Globe()(stage)
+                .globeImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-blue-marble.jpg')
+                .bumpImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-topology.png')
+                .backgroundColor('rgba(0,0,0,0)')
+                .showAtmosphere(false)
+                .pointOfView({ lat: 89.99, lng: 0, altitude: 2.65 });
+            globeInstance.controls().enabled = false;
+            syncGlobeSize();
+            requestAnimationFrame(syncGlobeSize);
+            setTimeout(syncGlobeSize, 400);
+        }
+
+        function toggleGlobe() {
+            useGlobe = !useGlobe;
+            if (useGlobe) {
+                document.body.classList.add('use-globe');
+                initGlobeNow();
+            } else {
+                document.body.classList.remove('use-globe');
+                lockedCity = null;
+                if (globeInstance) globeInstance.ringsData([]).pointsData([]);
+            }
+            debugLog(`🌐 Globe view: ${useGlobe ? 'ON' : 'OFF'}`);
+        }
         function syncGlobeSize() {
             if (!globeInstance) return;
             const stage = document.getElementById('globe-stage');
@@ -357,13 +379,6 @@
             });
         });
 
-        // DIM SLIDER
-        document.getElementById('dim-slider').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('dim-value').textContent = val;
-            const stage = document.getElementById('globe-stage');
-            if (stage) stage.style.filter = `brightness(${val})`;
-        });
         let lastMouseAngle = 0;
         let isReturning = false;
         let cityFontGray = 200; // Dynamic gray for city labels
@@ -453,6 +468,16 @@
                 myCanvas >= imprintHitbox.y && myCanvas <= imprintHitbox.y + imprintHitbox.h) {
                 window.location.href = 'impressum.html';
                 return;
+            }
+
+            // Globe toggle icon hit test
+            if (globeIconHitbox) {
+                const dx = mxCanvas - globeIconHitbox.cx;
+                const dy = myCanvas - globeIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= globeIconHitbox.r) {
+                    toggleGlobe();
+                    return;
+                }
             }
 
             // Hit test for cities - rotate globe to city
@@ -577,7 +602,13 @@
                 const overImprint = imprintHitbox &&
                     mxCanvas >= imprintHitbox.x && mxCanvas <= imprintHitbox.x + imprintHitbox.w &&
                     myCanvas >= imprintHitbox.y && myCanvas <= imprintHitbox.y + imprintHitbox.h;
-                canvas.style.cursor = (found || foundFlagIdx !== null || overImprint) ? 'pointer' : 'default';
+                let overGlobeIcon = false;
+                if (globeIconHitbox) {
+                    const ddx = mxCanvas - globeIconHitbox.cx;
+                    const ddy = myCanvas - globeIconHitbox.cy;
+                    overGlobeIcon = Math.sqrt(ddx*ddx + ddy*ddy) <= globeIconHitbox.r;
+                }
+                canvas.style.cursor = (found || foundFlagIdx !== null || overImprint || overGlobeIcon) ? 'pointer' : 'default';
             }
         });
 
@@ -791,6 +822,17 @@
                 ctx.restore();
             }
 
+            // Thin circle at tic base (globe mode only)
+            if (useGlobe) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.arc(0, 0, r * 1.02 - tickInset, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
             ctx.restore(); // Restore from main translation
             
             // --- Legend (Top Left) - responsive to clock radius ---
@@ -808,6 +850,55 @@
 
             ctx.fillStyle = "#00d2ff";
             ctx.fillText("NORMALZEIT", legendX, legendY2);
+
+            // Globe Toggle Icon (right of legend)
+            const sommerW = ctx.measureText("SOMMERZEIT").width;
+            const normalW = ctx.measureText("NORMALZEIT").width;
+            const legendW = Math.max(sommerW, normalW);
+            const iconR = legendFontSize * 0.9;
+            const iconCx = legendX + legendW + iconR * 2.2;
+            const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
+
+            ctx.save();
+            ctx.strokeStyle = useGlobe ? "#00d2ff" : "rgba(180, 200, 220, 0.5)";
+            ctx.fillStyle = useGlobe ? "rgba(0, 210, 255, 0.15)" : "transparent";
+            ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
+
+            // Outer circle (globe sphere)
+            ctx.beginPath();
+            ctx.arc(iconCx, iconCy, iconR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 3 horizontal latitude lines
+            const latLines = [0.30, 0, -0.30];
+            for (let lat of latLines) {
+                const offsetY = lat * iconR;
+                const lineWidth = iconR * Math.sqrt(1 - lat * lat) * 0.95;
+                ctx.beginPath();
+                ctx.moveTo(iconCx - lineWidth, iconCy + offsetY);
+                ctx.lineTo(iconCx + lineWidth, iconCy + offsetY);
+                ctx.stroke();
+            }
+
+            // Central vertical meridian
+            ctx.beginPath();
+            ctx.moveTo(iconCx, iconCy - iconR);
+            ctx.lineTo(iconCx, iconCy + iconR);
+            ctx.stroke();
+
+            // Vertical ellipse (3D depth)
+            ctx.beginPath();
+            ctx.ellipse(iconCx, iconCy, iconR * 0.48, iconR, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Store hitbox in canvas coords (legend was translated by (-r, -r) earlier? check)
+            globeIconHitbox = {
+                cx: iconCx, cy: iconCy, r: iconR * 1.3
+            };
+
             ctx.restore();
 
             // --- Impressum (centered below the clock) ---
