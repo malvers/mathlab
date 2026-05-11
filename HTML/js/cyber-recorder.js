@@ -284,16 +284,16 @@ class CyberRecorderEngine {
         debugContainer.id = 'cyber-recorder-debug-container';
         debugContainer.style.cssText = `
             position: fixed;
-            bottom: 220px;
-            top: auto;
+            top: 20px;
+            bottom: 100px;
             right: 20px;
             background: rgba(0, 40, 60, 0.95);
             border: 1px solid rgba(0, 210, 255, 0.3);
             border-radius: 6px;
             display: none;
             flex-direction: column;
-            width: 360px;
-            max-height: 600px;
+            width: 1100px;
+            max-width: calc(100vw - 40px);
             z-index: 999999;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             overflow: hidden;
@@ -401,9 +401,9 @@ class CyberRecorderEngine {
         const debugBox = document.createElement('div');
         debugBox.id = 'cyber-recorder-debug';
         debugBox.style.cssText = `
-            padding: 12px;
-            font-size: 0.7rem;
-            color: rgba(0, 210, 255, 0.9);
+            padding: 18px;
+            font-size: 1.05rem;
+            color: #ffffff;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             word-break: break-all;
@@ -629,12 +629,42 @@ class CyberRecorderEngine {
                 width: window.innerWidth,
                 height: window.innerHeight
             });
+
+            // Snapshot initial values of all form controls as t=0 change events,
+            // so Replay restores them before playing the user's edits.
+            let snapped = 0;
+            document.querySelectorAll('input, textarea, select').forEach(el => {
+                if (el.closest('#cyber-recorder-ui')) return;
+                const path = this.getCssPath(el);
+                if (!path) return;
+                const ev = { type: 'change', t: 0, targetPath: path };
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    ev.value = el.checked;
+                } else {
+                    ev.value = el.value;
+                }
+                this.events.push(ev);
+                snapped++;
+            });
+            if (snapped > 0) this.addDebugLog(`📸 Snapshot: ${snapped} form controls @ t=0`);
             document.addEventListener('mousedown', this.boundHandleEvent, true);
             document.addEventListener('mousemove', this.boundHandleEvent, true);
             document.addEventListener('mouseup', this.boundHandleEvent, true);
             document.addEventListener('click', this.boundHandleEvent, true);
             document.addEventListener('input', this.boundHandleEvent, true);
             document.addEventListener('change', this.boundHandleEvent, true);
+            this.addDebugLog('🎯 Listeners installed (mouse+input+change)');
+            // Extra probes: parallel listeners on multiple levels to see where events stop
+            this._probeBody = (e) => this.addDebugLog(`🔬 body ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}>="${e.target?.value}"`);
+            this._probeWin = (e) => this.addDebugLog(`🌐 win ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}>="${e.target?.value}"`);
+            this._probeFocus = (e) => this.addDebugLog(`👁 ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}>`);
+            document.body.addEventListener('input', this._probeBody, true);
+            document.body.addEventListener('change', this._probeBody, true);
+            window.addEventListener('input', this._probeWin, true);
+            window.addEventListener('change', this._probeWin, true);
+            window.addEventListener('keydown', this._probeFocus, true);
+            window.addEventListener('focus', this._probeFocus, true);
+            window.addEventListener('focusin', this._probeFocus, true);
             console.log("⏺ Mouse recording started...");
         };
 
@@ -736,6 +766,16 @@ class CyberRecorderEngine {
             document.removeEventListener('click', this.boundHandleEvent, true);
             document.removeEventListener('input', this.boundHandleEvent, true);
             document.removeEventListener('change', this.boundHandleEvent, true);
+            if (this._probeBody) {
+                document.body.removeEventListener('input', this._probeBody, true);
+                document.body.removeEventListener('change', this._probeBody, true);
+                window.removeEventListener('input', this._probeWin, true);
+                window.removeEventListener('change', this._probeWin, true);
+                window.removeEventListener('keydown', this._probeFocus, true);
+                window.removeEventListener('focus', this._probeFocus, true);
+                window.removeEventListener('focusin', this._probeFocus, true);
+                this._probeBody = this._probeWin = this._probeFocus = null;
+            }
 
             this.addDebugLog(`🔍 mediaRecorder: ${this.mediaRecorder ? 'exists' : 'null'}, state: ${this.mediaRecorder?.state}`);
 
@@ -807,13 +847,18 @@ class CyberRecorderEngine {
 
     handleEvent(e) {
         if (this.mode !== 'recording') return;
-        
+
         // Ignore events on the recorder UI itself
         if (e.target && e.target.closest && e.target.closest('#cyber-recorder-ui')) return;
-        
+
         // Do not record mouse events while SHIFT is pressed
         if (e.shiftKey && (e.type.startsWith('mouse') || e.type === 'click')) {
             return;
+        }
+
+        // DEBUG: log input/change events to verify they reach the recorder
+        if (e.type === 'input' || e.type === 'change') {
+            this.addDebugLog(`📝 ${e.type} <${e.target?.tagName}#${e.target?.id || '-'}> = "${e.target?.value}"`);
         }
 
         const t = performance.now() - this.startTime;
@@ -976,6 +1021,13 @@ class CyberRecorderEngine {
                         target.checked = ev.value;
                     } else {
                         target.value = ev.value;
+                        // Place caret at the end so the new value isn't visually selected.
+                        if (typeof target.setSelectionRange === 'function') {
+                            try {
+                                const len = String(ev.value ?? '').length;
+                                target.setSelectionRange(len, len);
+                            } catch (_) {}
+                        }
                     }
                     target.dispatchEvent(new Event(ev.type, { bubbles: true }));
                 }

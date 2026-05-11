@@ -135,7 +135,7 @@
                 const loadRecorder = (cb) => {
                     if (window.CyberRecorder) { cb(); return; }
                     const s = document.createElement('script');
-                    s.src = 'js/cyber-recorder.js';
+                    s.src = 'js/cyber-recorder.js' + '?v=' + Date.now();
                     s.onload = cb;
                     document.head.appendChild(s);
                 };

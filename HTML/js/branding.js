@@ -270,21 +270,13 @@ const CyberBranding = {
         this.ensureOverlaysModuleLoaded();
         this.ensureBriefingModuleLoaded();
 
-        if (!window.__cyberRecorderKeyInstalled) {
-            window.__cyberRecorderKeyInstalled = true;
-            document.addEventListener('keydown', (e) => {
-                if (e.shiftKey && e.key === 'R') {
-                    if (window.CyberRecorder) {
-                        CyberRecorder.toggle();
-                    } else {
-                        const s = document.createElement('script');
-                        s.src = resolveCyberHtmlAsset('js/cyber-recorder.js');
-                        s.onload = () => CyberRecorder.show();
-                        document.head.appendChild(s);
-                    }
-                }
-            });
+        // Load recorder-key (Shift+R handler) if not already on the page
+        if (!window.__cyberRecorderKeyInstalled && !document.querySelector('script[src*="cyber-recorder-key"]')) {
+            const s = document.createElement('script');
+            s.src = resolveCyberHtmlAsset('js/cyber-recorder-key.js');
+            document.head.appendChild(s);
         }
+
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.init === "function") {
             brandingCore.init.call(this, config);
@@ -366,17 +358,6 @@ const CyberBranding = {
         `;
 
         container.addEventListener('click', (e) => {
-            if (e.shiftKey) {
-                if (window.CyberRecorder) {
-                    CyberRecorder.toggle();
-                } else {
-                    const s = document.createElement('script');
-                    s.src = resolveCyberHtmlAsset('js/cyber-recorder.js');
-                    s.onload = () => CyberRecorder.show();
-                    document.head.appendChild(s);
-                }
-                return;
-            }
             this.toggleFullscreen();
         });
         const anchor =
