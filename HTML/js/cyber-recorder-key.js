@@ -25,7 +25,8 @@
     function loadRecorder(cb) {
         if (window.CyberRecorder) { cb(); return; }
         const s = document.createElement('script');
-        s.src = getRecorderSrc();
+        // Cache-Buster: erzwingt frisches Laden bei jedem Aufruf
+        s.src = getRecorderSrc() + '?v=' + Date.now();
         s.onload = cb;
         document.head.appendChild(s);
     }
