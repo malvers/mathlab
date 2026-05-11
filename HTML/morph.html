@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Morph</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    <style>
+        #draw-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            cursor: crosshair;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
+            touch-action: none;
+        }
+
+        #canvas-stack {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            line-height: 0;
+        }
+
+        #digit-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border-radius: 10px;
+        }
+
+        #draw-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 80px 20px 20px;
+            box-sizing: border-box;
+        }
+
+        #draw-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+
+        .eps-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .eps-row label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: rgba(0, 210, 255, 0.7);
+        }
+
+        .eps-row input[type=range] {
+            flex: 1;
+            accent-color: #00d2ff;
+        }
+
+        .eps-row span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #00d2ff;
+            width: 28px;
+            text-align: right;
+        }
+
+        #vert-count {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: #adff2f;
+            text-align: center;
+            margin-top: 8px;
+            min-height: 18px;
+            letter-spacing: 0.06em;
+        }
+
+        .digit-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .digit-grid input[type=radio] {
+            display: none;
+        }
+
+        .digit-grid label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.55);
+            background: rgba(0, 210, 255, 0.04);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .digit-grid label:hover {
+            color: #00d2ff;
+            border-color: rgba(0, 210, 255, 0.6);
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .digit-grid input[type=radio]:checked + span {
+            color: #adff2f;
+        }
+
+        .digit-grid label:has(input:checked) {
+            color: #adff2f;
+            border-color: #adff2f;
+            background: rgba(173, 255, 47, 0.12);
+            box-shadow: 0 0 12px rgba(173, 255, 47, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <div id="draw-wrap">
+                <div id="canvas-stack">
+                    <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="digit-canvas" width="1000" height="1000"></canvas>
+                </div>
+                <div id="draw-hint">Zeichne — Maus oder Finger</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: 'Morph' });
+        CyberUI.init();
+        document.getElementById('coach-title-slot').textContent = 'Morph';
+        if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
+
+        CyberUI.createCard('ui-container', 'ZEICHNEN', `
+            <button class="cyber-btn" onclick="downloadPng()"
+                style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">PNG</button>
+            <button class="cyber-btn" onclick="clearDraw()"
+                style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
+        `);
+
+        CyberUI.createCard('ui-container', 'POLYGON', `
+            <button class="cyber-btn" onclick="extractOutline()"
+                style="width:100%;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINE</button>
+            <div class="eps-row">
+                <label>ε</label>
+                <input type="range" id="eps-slider" min="1" max="50" value="8" step="0.5"
+                    oninput="onEpsChange(this.value)">
+                <span id="eps-val">8</span>
+            </div>
+            <div id="vert-count"></div>
+        `);
+
+        CyberUI.createCard('ui-container', 'ZIFFER', `
+            <div class="digit-grid">
+                ${[1,2,3,4,5,6,7,8,9,0].map(d => `
+                    <label>
+                        <input type="radio" name="digit" value="${d}" onchange="onDigitChange(${d})">
+                        <span>${d}</span>
+                    </label>
+                `).join('')}
+            </div>
+            <div id="target-count" style="font-family:'Orbitron',sans-serif;font-size:12px;color:#ff8800;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
+        `);
+
+        // ── Drawing ─────────────────────────────────────────────────────────────────
+        const drawCanvas = document.getElementById('draw-canvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        const digitCanvas = document.getElementById('digit-canvas');
+        const digitCtx = digitCanvas.getContext('2d');
+        let isDrawing = false;
+        let savedPixels = null; // ImageData snapshot before polygon is drawn
+        let rawContour = null;  // pixel-level contour from Moore tracing
+        let saveTimer = null;   // debounce for auto-save
+
+        function initDraw() {
+            drawCtx.fillStyle = '#000';
+            drawCtx.fillRect(0, 0, 1000, 1000);
+            drawCtx.strokeStyle = '#adff2f';
+            drawCtx.lineWidth = 70;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+        }
+
+        function clearDraw() {
+            savedPixels = null;
+            rawContour = null;
+            document.getElementById('vert-count').textContent = '';
+            try { localStorage.removeItem('morph-outline'); } catch (_) {}
+            initDraw();
+        }
+
+        function getPos(e) {
+            const r = drawCanvas.getBoundingClientRect();
+            const sx = drawCanvas.width / r.width;
+            const sy = drawCanvas.height / r.height;
+            const s = e.touches ? e.touches[0] : e;
+            return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
+        }
+
+        function resetDrawState() {
+            savedPixels = null;
+            rawContour = null;
+            document.getElementById('vert-count').textContent = '';
+            try { localStorage.removeItem('morph-outline'); } catch (_) {}
+        }
+
+        drawCanvas.addEventListener('mousedown', e => {
+            if (savedPixels) { drawCtx.putImageData(savedPixels, 0, 0); resetDrawState(); }
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        });
+        drawCanvas.addEventListener('mousemove', e => {
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            scheduleAutoSave();
+        });
+        drawCanvas.addEventListener('mouseup', () => { isDrawing = false; });
+        drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+        drawCanvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (savedPixels) { drawCtx.putImageData(savedPixels, 0, 0); resetDrawState(); }
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        }, { passive: false });
+        drawCanvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            scheduleAutoSave();
+        }, { passive: false });
+        drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+
+        // ── Marching Squares Contour Extraction ───────────────────────────────────────
+        function getContour(grid, W, H) {
+            const contours = [];
+            const visited = new Uint8Array(W * H);
+
+            // Marching squares: scan 2x2 cells
+            for (let y = 0; y < H - 1; y++) {
+                for (let x = 0; x < W - 1; x++) {
+                    // 4 corners of cell: TL, TR, BR, BL
+                    const tl = grid[y * W + x];
+                    const tr = grid[y * W + (x + 1)];
+                    const br = grid[(y + 1) * W + (x + 1)];
+                    const bl = grid[(y + 1) * W + x];
+
+                    // Case number (4-bit bitmask)
+                    const cas = (tl << 3) | (tr << 2) | (br << 1) | bl;
+
+                    // Skip empty cells and fully-filled cells
+                    if (cas === 0 || cas === 15) continue;
+
+                    // Interpolate contour segments crossing this cell
+                    // For simplicity: just mark transitions
+                    if (tl !== tr) contours.push([x + 0.5, y]);
+                    if (tr !== br) contours.push([x + 1, y + 0.5]);
+                    if (br !== bl) contours.push([x + 0.5, y + 1]);
+                    if (bl !== tl) contours.push([x, y + 0.5]);
+                }
+            }
+
+            if (contours.length === 0) return [];
+
+            // Order contour points by proximity (simple chain)
+            const ordered = [contours[0]];
+            const used = new Set([0]);
+
+            for (let i = 1; i < contours.length; i++) {
+                const last = ordered[ordered.length - 1];
+                let best = -1, bestDist = Infinity;
+
+                for (let j = 0; j < contours.length; j++) {
+                    if (used.has(j)) continue;
+                    const dx = contours[j][0] - last[0];
+                    const dy = contours[j][1] - last[1];
+                    const dist = dx * dx + dy * dy;
+                    if (dist < bestDist) { bestDist = dist; best = j; }
+                }
+
+                if (best >= 0) {
+                    ordered.push(contours[best]);
+                    used.add(best);
+                } else break;
+            }
+
+            return ordered;
+        }
+
+        // ── Ramer–Douglas–Peucker simplification ─────────────────────────────────────
+        function ptLineDist([px, py], [ax, ay], [bx, by]) {
+            const dx = bx - ax, dy = by - ay;
+            const len2 = dx * dx + dy * dy;
+            if (len2 === 0) return Math.hypot(px - ax, py - ay);
+            return Math.abs(dy * px - dx * py + bx * ay - by * ax) / Math.sqrt(len2);
+        }
+
+        function rdp(pts, eps) {
+            if (pts.length < 3) return pts.slice();
+            let maxD = 0, idx = 1;
+            for (let i = 1; i < pts.length - 1; i++) {
+                const d = ptLineDist(pts[i], pts[0], pts[pts.length - 1]);
+                if (d > maxD) { maxD = d; idx = i; }
+            }
+            if (maxD > eps) {
+                const l = rdp(pts.slice(0, idx + 1), eps);
+                const r = rdp(pts.slice(idx), eps);
+                return [...l.slice(0, -1), ...r];
+            }
+            return [pts[0], pts[pts.length - 1]];
+        }
+
+        // ── Outline extraction & rendering ───────────────────────────────────────────
+        function extractOutline() {
+            const imgData = drawCtx.getImageData(0, 0, 1000, 1000);
+            savedPixels = imgData;
+
+            const grid = new Uint8Array(1000 * 1000);
+            for (let i = 0; i < 1000 * 1000; i++)
+                grid[i] = imgData.data[i * 4] > 30 ? 1 : 0;
+
+            rawContour = getContour(grid, 1000, 1000);
+
+            if (rawContour.length < 3) {
+                document.getElementById('vert-count').textContent = 'Nichts gefunden';
+                return;
+            }
+
+            try { localStorage.setItem('morph-outline', JSON.stringify(rawContour)); } catch (_) {}
+            drawPolygon();
+        }
+
+        function drawPolygon() {
+            if (!rawContour || !savedPixels) return;
+            drawCtx.putImageData(savedPixels, 0, 0);
+
+            const eps = +document.getElementById('eps-slider').value;
+            let poly = rdp(rawContour, eps);
+
+            // Ensure closed polygon: add first point at end if not already closed
+            if (poly.length > 2) {
+                const [fx, fy] = poly[0];
+                const [lx, ly] = poly[poly.length - 1];
+                const dist2 = (fx - lx) ** 2 + (fy - ly) ** 2;
+                if (dist2 > 4) {
+                    poly = [...poly, poly[0]];
+                }
+            }
+
+            // Draw closed polygon outline
+            drawCtx.save();
+            drawCtx.strokeStyle = '#ff8800';
+            drawCtx.lineWidth = 2;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+            drawCtx.beginPath();
+            drawCtx.moveTo(poly[0][0], poly[0][1]);
+            for (let i = 1; i < poly.length; i++) drawCtx.lineTo(poly[i][0], poly[i][1]);
+            drawCtx.closePath();
+            drawCtx.stroke();
+
+            // Vertices (skip duplicate closing point)
+            drawCtx.fillStyle = 'rgb(240, 0, 0)';
+            const verts = (poly.length > 2 && poly[0][0] === poly[poly.length - 1][0] && poly[0][1] === poly[poly.length - 1][1])
+                ? poly.slice(0, -1)
+                : poly;
+            for (const [x, y] of verts) {
+                drawCtx.beginPath();
+                drawCtx.arc(x, y, 2, 0, Math.PI * 2);
+                drawCtx.fill();
+            }
+            drawCtx.restore();
+
+            document.getElementById('vert-count').textContent = `${verts.length} Vertices`;
+        }
+
+        function onEpsChange(val) {
+            document.getElementById('eps-val').textContent = val;
+            try { localStorage.setItem('morph-eps', val); } catch (_) {}
+            drawPolygon();
+        }
+
+        let selectedDigit = null;
+        let timesFont = null;
+        let targetPolygon = null; // high-res polygon of the times digit, for morphing
+
+        // ── Bézier sampling for vector path → polygon ────────────────────────────────
+        function sampleQuadratic(p0, p1, p2, n) {
+            const pts = [];
+            for (let i = 1; i <= n; i++) {
+                const t = i / n, mt = 1 - t;
+                pts.push([
+                    mt*mt*p0[0] + 2*mt*t*p1[0] + t*t*p2[0],
+                    mt*mt*p0[1] + 2*mt*t*p1[1] + t*t*p2[1]
+                ]);
+            }
+            return pts;
+        }
+        function sampleCubic(p0, p1, p2, p3, n) {
+            const pts = [];
+            for (let i = 1; i <= n; i++) {
+                const t = i / n, mt = 1 - t;
+                pts.push([
+                    mt*mt*mt*p0[0] + 3*mt*mt*t*p1[0] + 3*mt*t*t*p2[0] + t*t*t*p3[0],
+                    mt*mt*mt*p0[1] + 3*mt*mt*t*p1[1] + 3*mt*t*t*p2[1] + t*t*t*p3[1]
+                ]);
+            }
+            return pts;
+        }
+        function pathToPolygons(path, samplesPerCurve = 30) {
+            const polys = [];
+            let cur = null;
+            let cx = 0, cy = 0, sx = 0, sy = 0;
+            for (const cmd of path.commands) {
+                switch (cmd.type) {
+                    case 'M':
+                        if (cur && cur.length) polys.push(cur);
+                        cur = [[cmd.x, cmd.y]];
+                        cx = sx = cmd.x; cy = sy = cmd.y;
+                        break;
+                    case 'L':
+                        cur.push([cmd.x, cmd.y]);
+                        cx = cmd.x; cy = cmd.y;
+                        break;
+                    case 'Q':
+                        cur.push(...sampleQuadratic([cx, cy], [cmd.x1, cmd.y1], [cmd.x, cmd.y], samplesPerCurve));
+                        cx = cmd.x; cy = cmd.y;
+                        break;
+                    case 'C':
+                        cur.push(...sampleCubic([cx, cy], [cmd.x1, cmd.y1], [cmd.x2, cmd.y2], [cmd.x, cmd.y], samplesPerCurve));
+                        cx = cmd.x; cy = cmd.y;
+                        break;
+                    case 'Z':
+                        cx = sx; cy = sy;
+                        break;
+                }
+            }
+            if (cur && cur.length) polys.push(cur);
+            return polys;
+        }
+
+        function onDigitChange(d) {
+            selectedDigit = d;
+            try { localStorage.setItem('morph-digit', String(d)); } catch (_) {}
+            digitCtx.clearRect(0, 0, 1000, 1000);
+
+            if (timesFont) {
+                // Vector render via opentype
+                const fontSize = 640;
+                const probe = timesFont.getPath(String(d), 0, 0, fontSize);
+                const bbox = probe.getBoundingBox();
+                const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
+                const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
+                const path = timesFont.getPath(String(d), offsetX, offsetY, fontSize);
+                path.fill = '#fff';
+                path.draw(digitCtx);
+                targetPolygon = pathToPolygons(path, 8);
+            } else {
+                // Fallback: canvas fillText + Marching Squares extraction
+                digitCtx.save();
+                digitCtx.fillStyle = '#fff';
+                digitCtx.font = 'bold 640px "Times New Roman", serif';
+                digitCtx.textAlign = 'center';
+                digitCtx.textBaseline = 'middle';
+                digitCtx.fillText(String(d), 720, 500);
+                digitCtx.restore();
+
+                // Extract polygon from rendered canvas
+                const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
+                const grid = new Uint8Array(1000 * 1000);
+                for (let i = 0; i < 1000 * 1000; i++)
+                    grid[i] = imgData.data[i * 4 + 3] > 30 ? 1 : 0;
+                const contour = getContour(grid, 1000, 1000);
+                targetPolygon = contour.length ? [contour] : null;
+            }
+
+            // Sub-sample each sub-polygon to a max count
+            const MAX_PTS = 200;
+            if (targetPolygon) {
+                targetPolygon = targetPolygon.map(poly => {
+                    if (poly.length <= MAX_PTS) return poly;
+                    const step = poly.length / MAX_PTS;
+                    const sub = [];
+                    for (let i = 0; i < MAX_PTS; i++) sub.push(poly[Math.round(i * step)]);
+                    return sub;
+                });
+            }
+
+            // Update vertex counter
+            const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
+            const el = document.getElementById('target-count');
+            if (el) el.textContent = `${total} Vertices`;
+
+            drawTargetPolygon();
+        }
+
+        function drawTargetPolygon() {
+            if (!targetPolygon) return;
+            digitCtx.save();
+            digitCtx.strokeStyle = '#ff8800';
+            digitCtx.lineWidth = 1;
+            digitCtx.lineCap = 'round';
+            digitCtx.lineJoin = 'round';
+            for (const poly of targetPolygon) {
+                digitCtx.beginPath();
+                digitCtx.moveTo(poly[0][0], poly[0][1]);
+                for (let i = 1; i < poly.length; i++) digitCtx.lineTo(poly[i][0], poly[i][1]);
+                digitCtx.closePath();
+                digitCtx.stroke();
+            }
+            digitCtx.fillStyle = 'rgb(240, 0, 0)';
+            for (const poly of targetPolygon) {
+                for (const [x, y] of poly) {
+                    digitCtx.beginPath();
+                    digitCtx.arc(x, y, 0.8, 0, Math.PI * 2);
+                    digitCtx.fill();
+                }
+            }
+            digitCtx.restore();
+        }
+
+        // Load Tinos (Times-compatible) font asynchronously
+        opentype.load('https://cdn.jsdelivr.net/gh/google/fonts/apache/tinos/Tinos-Bold.ttf', (err, font) => {
+            if (err) { console.warn('Tinos load failed:', err); return; }
+            timesFont = font;
+            if (selectedDigit !== null) onDigitChange(selectedDigit);
+        });
+
+        // ── Persistence ─────────────────────────────────────────────────────────────
+        function scheduleAutoSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                try {
+                    const data = drawCanvas.toDataURL('image/png');
+                    localStorage.setItem('morph-drawing', data);
+                } catch (_) {}
+            }, 500);
+        }
+
+        function downloadPng() {
+            const link = document.createElement('a');
+            link.href = drawCanvas.toDataURL('image/png');
+            link.download = 'morph-' + new Date().toISOString().slice(0, 10) + '.png';
+            link.click();
+        }
+
+        function loadFromStorage() {
+            try {
+                const data = localStorage.getItem('morph-drawing');
+                if (data) {
+                    const img = new Image();
+                    img.onload = () => {
+                        drawCtx.drawImage(img, 0, 0);
+                        restoreOutline();
+                    };
+                    img.src = data;
+                    return;
+                }
+            } catch (_) {}
+            restoreOutline();
+        }
+
+        function restoreOutline() {
+            try {
+                const data = localStorage.getItem('morph-outline');
+                if (data) {
+                    rawContour = JSON.parse(data);
+                    savedPixels = drawCtx.getImageData(0, 0, 1000, 1000);
+                    drawPolygon();
+                }
+            } catch (_) {}
+        }
+
+        // Boot
+        initDraw();
+        loadFromStorage();
+        try {
+            const savedEps = localStorage.getItem('morph-eps');
+            if (savedEps !== null) {
+                document.getElementById('eps-slider').value = savedEps;
+                document.getElementById('eps-val').textContent = savedEps;
+            }
+        } catch (_) {}
+        try {
+            const savedDigit = localStorage.getItem('morph-digit');
+            if (savedDigit !== null) {
+                const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
+                if (radio) radio.checked = true;
+                onDigitChange(+savedDigit);
+            }
+        } catch (_) {}
+    </script>
+</body>
+
+</html>

@@ -212,7 +212,14 @@
 
         // Schnelles Koordinaten-Lookup nach Name
         const neighborCoords = {};
-        neighborCities.forEach(c => { neighborCoords[c.name] = { lat: c.lat, lng: c.lng }; });
+        neighborCities.forEach(c => {
+            neighborCoords[c.name] = {
+                lat: c.lat,
+                lng: c.lng,
+                globeLat: c.lat,
+                globeLng: c.lng
+            };
+        });
 
         function getDSTLabel(tz) {
             if (!tz) return "";
@@ -246,19 +253,21 @@
             const _dresden = cities.find(c => c.name === 'Dresden');
             if (_dresden) {
                 lockedCity = _dresden;
+                const globeLat = _dresden.globeLat !== undefined ? _dresden.globeLat : _dresden.lat;
+                const globeLon = _dresden.globeLon !== undefined ? _dresden.globeLon : _dresden.lon;
                 requestAnimationFrame(() => {
                     if (globeInstance && lockedCity === _dresden) {
-                        globeInstance.pointOfView({ lat: _dresden.lat, lng: _dresden.lon, altitude: 2.65 }, 1000);
+                        globeInstance.pointOfView({ lat: globeLat, lng: globeLon, altitude: 2.65 }, 1000);
                     }
                 });
                 globeInstance
-                    .pointsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                    .pointsData([{ lat: globeLat, lng: globeLon }])
                     .pointLat('lat')
                     .pointLng('lng')
                     .pointColor(() => 'red')
                     .pointAltitude(0.01)
                     .pointRadius(0.6)
-                    .ringsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                    .ringsData([{ lat: globeLat, lng: globeLon }])
                     .ringColor(() => 'rgba(255, 0, 0, 1)')
                     .ringMaxRadius(5)
                     .ringPropagationSpeed(5)
@@ -268,6 +277,25 @@
             requestAnimationFrame(syncGlobeSize);
             setTimeout(syncGlobeSize, 400);
         }
+
+        window.resetGlobeCenter = function() {
+            if (!globeInstance) return;
+            const _dresden = cities.find(c => c.name === 'Dresden');
+            if (!_dresden) return;
+            const gLat = _dresden.globeLat !== undefined ? _dresden.globeLat : _dresden.lat;
+            const gLon = _dresden.globeLon !== undefined ? _dresden.globeLon : _dresden.lon;
+            lockedCity = _dresden;
+            globeManuallyDragged = false;
+            globeInstance.pointOfView({ lat: gLat, lng: gLon, altitude: 2.65 }, 1000);
+            globeInstance
+                .pointsData([{ lat: gLat, lng: gLon }])
+                .pointLat('lat').pointLng('lng')
+                .pointColor(() => 'red')
+                .pointAltitude(0.01).pointRadius(0.6)
+                .ringsData([{ lat: gLat, lng: gLon }])
+                .ringColor(() => 'rgba(255, 0, 0, 1)')
+                .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+        };
 
         window.toggleGlobe = function() {
             window.useGlobe = !window.useGlobe;
@@ -510,19 +538,21 @@
                     const _dresden = cities.find(c => c.name === 'Dresden');
                     if (_dresden) {
                         lockedCity = _dresden;
+                        const globeLat = _dresden.globeLat !== undefined ? _dresden.globeLat : _dresden.lat;
+                        const globeLon = _dresden.globeLon !== undefined ? _dresden.globeLon : _dresden.lon;
                         requestAnimationFrame(() => {
                             if (globeInstance && lockedCity === _dresden) {
-                                globeInstance.pointOfView({ lat: _dresden.lat, lng: _dresden.lon, altitude: 2.65 }, 1000);
+                                globeInstance.pointOfView({ lat: globeLat, lng: globeLon, altitude: 2.65 }, 1000);
                             }
                         });
                         globeInstance
-                            .pointsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                            .pointsData([{ lat: globeLat, lng: globeLon }])
                             .pointLat('lat')
                             .pointLng('lng')
                             .pointColor(() => 'red')
                             .pointAltitude(0.01)
                             .pointRadius(0.6)
-                            .ringsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                            .ringsData([{ lat: globeLat, lng: globeLon }])
                             .ringColor(() => 'rgba(255, 0, 0, 1)')
                             .ringMaxRadius(5)
                             .ringPropagationSpeed(5)
@@ -625,7 +655,7 @@
         }
 
         function getDisplayTime() {
-            const now = new Date();
+            const now = new Date(window.getPlaybackTime ? window.getPlaybackTime() : Date.now());
             return new Date(now.getTime() + manualOffset * 60000);
         }
 
@@ -664,7 +694,10 @@
                 if (clickedBox) {
                     showCityInfo(clickedBox.name);
                     if (globeInstance && clickedBox.lat != null) {
-                        const lat = clickedBox.lat, lng = clickedBox.lng;
+                        let lat = clickedBox.lat, lng = clickedBox.lng;
+                        // Use globe coordinates if available
+                        if (clickedBox.globeLat != null) lat = clickedBox.globeLat;
+                        if (clickedBox.globeLon != null) lng = clickedBox.globeLon;
                         lockedCity = { lat, lng };
                         requestAnimationFrame(() => {
                             if (globeInstance) globeInstance.pointOfView({ lat, lng, altitude: 2.65 }, 1000);
@@ -724,7 +757,9 @@
                     if (globeInstance) {
                         lockedCity = city;
                         globeManuallyDragged = false;
-                        const target = { lat: city.lat, lng: city.lon, altitude: 2.65 };
+                        const gLat = city.globeLat !== undefined ? city.globeLat : city.lat;
+                        const gLon = city.globeLon !== undefined ? city.globeLon : city.lon;
+                        const target = { lat: gLat, lng: gLon, altitude: 2.65 };
 
                         // Wait one frame so the render-loop pointOfView(.., 0) doesn't kill our animation
                         requestAnimationFrame(() => {
@@ -735,13 +770,13 @@
 
                         // Static red dot + pulsating ring (1s) at city location
                         globeInstance
-                            .pointsData([{ lat: city.lat, lng: city.lon }])
+                            .pointsData([{ lat: gLat, lng: gLon }])
                             .pointLat('lat')
                             .pointLng('lng')
                             .pointColor(() => 'red')
                             .pointAltitude(0.01)
                             .pointRadius(0.6)
-                            .ringsData([{ lat: city.lat, lng: city.lon }])
+                            .ringsData([{ lat: gLat, lng: gLon }])
                             .ringColor(() => 'rgba(255, 0, 0, 1)')
                             .ringMaxRadius(5)
                             .ringPropagationSpeed(5)
@@ -1489,6 +1524,8 @@
                         centerY: centerY,
                         lat: coords ? coords.lat : null,
                         lng: coords ? coords.lng : null,
+                        globeLat: coords ? coords.globeLat : null,
+                        globeLng: coords ? coords.globeLng : null,
                         name: item.name
                     });
                 });

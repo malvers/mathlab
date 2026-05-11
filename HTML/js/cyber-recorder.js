@@ -2,13 +2,14 @@ const REC_SVG = {
     record: `<svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>`,
     stop:   `<svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg>`,
     play:   `<svg width="20" height="20" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>`,
+    pause:  `<svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="4" width="4" height="16" fill="currentColor"/><rect x="15" y="4" width="4" height="16" fill="currentColor"/></svg>`,
     load:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>`,
     save:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 };
 
 class CyberContainerCodec {
     static MAGIC = 0x435245_43; // "CREC"
-    static VERSION = 1;
+    static VERSION = 2;
 
     static async encodeWithAudio(events, audioBlob = null) {
         const eventBuffer = CyberBinaryCodec.encode(events);
@@ -91,7 +92,7 @@ class CyberBinaryCodec {
         for (const ev of events) {
             totalBytes += 5; // type (1) + t (4)
             if (ev.type === 'meta_init') {
-                totalBytes += 4; // width (2) + height (2)
+                totalBytes += 13; // width (2) + height (2) + recordingTime (8) + useGlobe (1)
             } else if (ev.type.startsWith('mouse') || ev.type === 'click') {
                 totalBytes += 4; // clientX (2) + clientY (2)
             } else if (ev.type === 'input' || ev.type === 'change') {
@@ -121,6 +122,8 @@ class CyberBinaryCodec {
             if (ev.type === 'meta_init') {
                 view.setUint16(offset, ev.width, true); offset += 2;
                 view.setUint16(offset, ev.height, true); offset += 2;
+                view.setFloat64(offset, ev.recordingTime || 0, true); offset += 8;
+                view.setUint8(offset, ev.useGlobe ? 1 : 0); offset += 1;
             } else if (ev.type.startsWith('mouse') || ev.type === 'click') {
                 view.setUint16(offset, ev.clientX, true); offset += 2;
                 view.setUint16(offset, ev.clientY, true); offset += 2;
@@ -151,12 +154,14 @@ class CyberBinaryCodec {
             const typeId = view.getUint8(offset); offset += 1;
             const type = this.REVERSE_TYPES[typeId];
             const t = view.getUint32(offset, true); offset += 4;
-            
+
             const ev = { type, t };
 
             if (type === 'meta_init') {
                 ev.width = view.getUint16(offset, true); offset += 2;
                 ev.height = view.getUint16(offset, true); offset += 2;
+                ev.recordingTime = view.getFloat64(offset, true); offset += 8;
+                ev.useGlobe = view.getUint8(offset) === 1; offset += 1;
             } else if (type.startsWith('mouse') || type === 'click') {
                 ev.clientX = view.getUint16(offset, true); offset += 2;
                 ev.clientY = view.getUint16(offset, true); offset += 2;
@@ -224,13 +229,15 @@ class CyberRecorderEngine {
 
     addDebugLog(msg) {
         if (!this.debugBox) return;
-        const timestamp = new Date().toLocaleTimeString('de-DE');
-        const line = `[${timestamp}] ${msg}\n`;
+        const now = new Date();
+        const mm  = String(now.getMinutes()).padStart(2, '0');
+        const ss  = String(now.getSeconds()).padStart(2, '0');
+        const ms  = String(now.getMilliseconds()).padStart(3, '0');
+        // Strip emoji/icons from message
+        const clean = msg.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
+        const line = `[${mm}:${ss}:${ms}] ${clean}\n`;
         this.debugBox.textContent += line;
-        // Auto-scroll to bottom
-        setTimeout(() => {
-            this.debugBox.scrollTop = this.debugBox.scrollHeight;
-        }, 0);
+        setTimeout(() => { this.debugBox.scrollTop = this.debugBox.scrollHeight; }, 0);
         console.log(msg);
     }
 
@@ -287,8 +294,7 @@ class CyberRecorderEngine {
         `;
         title.onclick = () => {
             if (!this.debugContainer) return;
-            const visible = this.debugContainer.style.display === 'flex';
-            this.debugContainer.style.display = visible ? 'none' : 'flex';
+            setDebugVis(this.debugContainer.style.display !== 'flex');
         };
         titleContainer.appendChild(title);
 
@@ -331,8 +337,13 @@ class CyberRecorderEngine {
             font-weight: bold;
         `;
 
+        const setDebugVis = (show) => {
+            debugContainer.style.display = show ? 'flex' : 'none';
+            localStorage.setItem('cyberDebugVis', show ? '1' : '0');
+        };
+
         const copyBtn = document.createElement('button');
-        copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path></svg>`;
         copyBtn.title = 'Logs kopieren';
         copyBtn.style.cssText = `
             background: rgba(0, 210, 255, 0.1);
@@ -367,7 +378,7 @@ class CyberRecorderEngine {
         };
 
         const clearBtn = document.createElement('button');
-        clearBtn.innerHTML = '✕';
+        clearBtn.innerHTML = 'C';
         clearBtn.title = 'Debug log löschen';
         clearBtn.style.cssText = `
             background: rgba(0, 210, 255, 0.1);
@@ -436,10 +447,37 @@ class CyberRecorderEngine {
         };
         this._refreshMicList();
 
+        const closeDebugBtn = document.createElement('button');
+        closeDebugBtn.innerHTML = '✕';
+        closeDebugBtn.title = 'Debug schließen';
+        closeDebugBtn.style.cssText = `
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+        `;
+        closeDebugBtn.onmouseover = () => {
+            closeDebugBtn.style.background = 'rgba(255, 50, 50, 0.2)';
+            closeDebugBtn.style.borderColor = '#ff3333';
+            closeDebugBtn.style.color = '#ff3333';
+        };
+        closeDebugBtn.onmouseout = () => {
+            closeDebugBtn.style.background = 'rgba(0, 210, 255, 0.1)';
+            closeDebugBtn.style.borderColor = 'rgba(0, 210, 255, 0.3)';
+            closeDebugBtn.style.color = '#00d2ff';
+        };
+        closeDebugBtn.onclick = () => setDebugVis(false);
+
         debugHeader.appendChild(debugTitle);
         debugHeader.appendChild(micSelect);
         debugHeader.appendChild(copyBtn);
         debugHeader.appendChild(clearBtn);
+        debugHeader.appendChild(closeDebugBtn);
 
         const debugBox = document.createElement('div');
         debugBox.id = 'cyber-recorder-debug';
@@ -498,10 +536,10 @@ class CyberRecorderEngine {
         audioBtn.onclick = () => {
             this.recordAudio = !this.recordAudio;
             setAudioBtnState(this.recordAudio);
-            if (this.debugContainer) {
-                this.debugContainer.style.display = this.recordAudio ? 'flex' : 'none';
+            if (this.debugContainer && !this.userPlayMode) {
+                setDebugVis(this.recordAudio);
                 if (this.recordAudio && this.debugBox) {
-                    this.debugBox.textContent = '🎤 Audio Debug Log\n' + '='.repeat(30) + '\n';
+                    this.debugBox.textContent = 'Audio Debug Log\n' + '='.repeat(30) + '\n';
                 }
             }
         };
@@ -511,11 +549,38 @@ class CyberRecorderEngine {
         this.audioBtnSetState = setAudioBtnState;
         this.recordAudio = true;
         setAudioBtnState(true);
-        // Show debug panel from the start when mic is on by default
-        if (this.debugContainer) this.debugContainer.style.display = 'flex';
+        // Restore debug visibility from localStorage (unless user playback)
+        if (this.debugContainer && !this.userPlayMode) {
+            const saved = localStorage.getItem('cyberDebugVis');
+            setDebugVis(saved !== '0');
+        }
 
         ui.appendChild(titleContainer);
         this.titleEl = title;
+
+        // Timer display — always visible, styled like a button box
+        const timerDisplay = document.createElement('div');
+        timerDisplay.id = 'cyber-recorder-timer';
+        timerDisplay.style.cssText = `
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #00d2ff;
+            text-align: center;
+            padding: 5px 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 33px;
+            box-sizing: border-box;
+        `;
+        timerDisplay.textContent = '00:00:000';
+        ui.appendChild(timerDisplay);
+        this.timerDisplay = timerDisplay;
 
         const btnStyle = `
             background: rgba(0, 210, 255, 0.1);
@@ -546,8 +611,12 @@ class CyberRecorderEngine {
         btnPlay.title = "Abspielen / stoppen";
         btnPlay.style.cssText = btnStyle;
         btnPlay.onclick = () => {
-            if (this.mode === 'playing') this.stop();
-            else this.play();
+            if (this.mode === 'playing') {
+                if (this.paused) this._resumePlayback();
+                else this._pausePlayback();
+            } else {
+                this.play();
+            }
         };
         
         const btnImport = document.createElement('button');
@@ -581,10 +650,103 @@ class CyberRecorderEngine {
         fileInput.style.display = 'none';
         fileInput.onchange = (e) => this.importScript(e);
 
+        // Voice test button — speaks "eins" using Speech Synthesis
+        const btnVoice = document.createElement('button');
+        btnVoice.title = "Sprich 'eins'";
+        btnVoice.style.cssText = btnStyle;
+        btnVoice.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5 6 9H2v6h4l5 4V5z"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>`;
+
+        let voiceCounting = false;
+        let voiceCounter = 0;
+        this.voiceInterval = null;
+
+        const getGermanVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
+            return voices.find(v => v.lang === 'de-DE') || voices.find(v => v.lang.startsWith('de'));
+        };
+
+        const speakNumber = (n) => {
+            this.addDebugLog(`speaking: ${n}`);
+            const utterance = new SpeechSynthesisUtterance(String(n));
+            utterance.lang = 'de-DE';
+            utterance.volume = 1.0;
+            utterance.rate = 1.6;
+            const voice = getGermanVoice();
+            if (voice) utterance.voice = voice;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        };
+
+        this._startCounting = () => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) {
+                this.addDebugLog(`Waiting for voices...`);
+                window.speechSynthesis.onvoiceschanged = () => {
+                    window.speechSynthesis.onvoiceschanged = null;
+                    this._startCounting();
+                };
+                return;
+            }
+            const voice = getGermanVoice();
+            this.addDebugLog(`Counting started (${voice ? voice.name : 'default voice'})`);
+            voiceCounter = 1;
+            voiceCounting = true;
+            btnVoice.style.color = '#00ff88';
+            btnVoice.style.boxShadow = '0 0 10px rgba(0,255,136,0.5)';
+
+            speakNumber(voiceCounter);
+
+            this.voiceInterval = setInterval(() => {
+                voiceCounter++;
+                speakNumber(voiceCounter);
+            }, 1000);
+        };
+        const startCounting = () => this._startCounting();
+
+        btnVoice.onclick = () => {
+            if (!window.speechSynthesis) {
+                this.addDebugLog(`Speech Synthesis not available`);
+                return;
+            }
+            if (voiceCounting) {
+                clearInterval(this.voiceInterval);
+                this.voiceInterval = null;
+                voiceCounting = false;
+                window.speechSynthesis.cancel();
+                btnVoice.style.color = '#00d2ff';
+                btnVoice.style.boxShadow = 'none';
+                this.addDebugLog(`Stopped at ${voiceCounter}`);
+            } else {
+                // Test range 140-150
+                voiceCounter = 842;
+                voiceCounting = true;
+                btnVoice.style.color = '#00ff88';
+                btnVoice.style.boxShadow = '0 0 10px rgba(0,255,136,0.5)';
+                speakNumber(voiceCounter);
+                this.voiceInterval = setInterval(() => {
+                    voiceCounter++;
+                    speakNumber(voiceCounter);
+                    if (voiceCounter >= 845) {
+                        clearInterval(this.voiceInterval);
+                        this.voiceInterval = null;
+                        voiceCounting = false;
+                        btnVoice.style.color = '#00d2ff';
+                        btnVoice.style.boxShadow = 'none';
+                        this.addDebugLog(`Test done (842-845)`);
+                    }
+                }, 1000);
+            }
+        };
+
+        // ui.appendChild(btnVoice);
         ui.appendChild(btnRec);
         ui.appendChild(btnPlay);
         ui.appendChild(btnExport);
-        ui.appendChild(btnAudioExport);
+        // ui.appendChild(btnAudioExport);
         ui.appendChild(btnImport);
         ui.appendChild(fileInput);
 
@@ -596,8 +758,7 @@ class CyberRecorderEngine {
         this.btnImport = btnImport;
         this.btnExport = btnExport;
 
-        // Debug box: show when mic is on (default), hidden when mic off
-        if (this.debugContainer) this.debugContainer.style.display = this.recordAudio ? 'flex' : 'none';
+        // Debug box visibility already restored from localStorage above
 
         // Match debug container width to recorder UI
         requestAnimationFrame(() => {
@@ -683,6 +844,19 @@ class CyberRecorderEngine {
                 metaEvent.useGlobe = window.useGlobe;
             }
             this.events.push(metaEvent);
+
+            // Start timer display
+            this.timerInterval = setInterval(() => {
+                if (this.timerDisplay && this.startTime) {
+                    const elapsed = performance.now() - this.startTime;
+                    const totalMs = Math.floor(elapsed);
+                    const ms = totalMs % 1000;
+                    const totalSeconds = Math.floor(totalMs / 1000);
+                    const seconds = totalSeconds % 60;
+                    const minutes = Math.floor(totalSeconds / 60);
+                    this.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(ms).padStart(3, '0')}`;
+                }
+            }, 16);
 
             // Snapshot initial values of all form controls as t=0 change events,
             // so Replay restores them before playing the user's edits.
@@ -818,7 +992,9 @@ class CyberRecorderEngine {
                     };
 
                     this.mediaRecorder.start();
-                    this.addDebugLog("🎤 Recording started!");
+                    this.addDebugLog("Recording started!");
+                    // Auto-start voice counting now that mic is active
+                    // if (this._startCounting) this._startCounting();;
                 })
                 .catch((err) => {
                     this.addDebugLog(`❌ Mic error: ${err.name}`);
@@ -839,8 +1015,97 @@ class CyberRecorderEngine {
         }
     }
 
+    _startStopwatch() {
+        if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+        this.timerInterval = setInterval(() => {
+            if (!this.timerDisplay || !this._playStartAbsolute) return;
+            const elapsed = performance.now() - this._playStartAbsolute + (this._pausedElapsed || 0);
+            const totalMs = Math.floor(elapsed);
+            const ms = totalMs % 1000;
+            const totalSeconds = Math.floor(totalMs / 1000);
+            const seconds = totalSeconds % 60;
+            const minutes = Math.floor(totalSeconds / 60);
+            this.timerDisplay.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}:${String(ms).padStart(3,'0')}`;
+        }, 16);
+    }
+
+    _pausePlayback() {
+        if (this.mode !== 'playing' || this.paused) return;
+        this.paused = true;
+        this._pausedElapsed = (performance.now() - this._playStartAbsolute) + (this._pausedElapsed || 0);
+
+        this.playTimers.forEach(t => clearTimeout(t));
+        this.playTimers = [];
+
+        if (this.audioElement) this.audioElement.pause();
+
+        // Freeze playback time
+        if (this.originalDateNow) {
+            const frozen = this.recordingTime + this._pausedElapsed;
+            Date.now = () => Math.round(frozen);
+            window.getPlaybackTime = () => Math.round(frozen);
+        }
+
+        if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+
+        this.btnPlay.innerHTML = REC_SVG.play;
+        this.btnPlay.style.background = "rgba(255, 165, 0, 0.3)";
+        this.addDebugLog(`Paused at ${(this._pausedElapsed / 1000).toFixed(1)}s`);
+    }
+
+    _resumePlayback() {
+        if (this.mode !== 'playing' || !this.paused) return;
+        this.paused = false;
+        this._playStartAbsolute = performance.now();
+        const resumeOffset = this._pausedElapsed || 0;
+
+        // Restore advancing playback time
+        if (this.originalDateNow) {
+            const base = this.recordingTime + resumeOffset;
+            const start = this._playStartAbsolute;
+            const getPlaybackMs = () => Math.round(base + (performance.now() - start));
+            Date.now = getPlaybackMs;
+            window.getPlaybackTime = getPlaybackMs;
+        }
+
+        // Re-schedule remaining events
+        this.events.forEach((ev, index) => {
+            const remaining = ev.t - resumeOffset;
+            if (remaining > 0) {
+                const timer = setTimeout(() => {
+                    this.executeEvent(ev);
+                    if (index === this.events.length - 1) this.stop();
+                }, remaining);
+                this.playTimers.push(timer);
+            }
+        });
+
+        if (this.audioElement) this.audioElement.play();
+
+        if (!this.userPlayMode) this._startStopwatch();
+
+        this.btnPlay.innerHTML = REC_SVG.pause;
+        this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
+        this.addDebugLog(`Resumed from ${(resumeOffset / 1000).toFixed(1)}s`);
+    }
+
     stop() {
         if (this.mode === 'recording') {
+            // Stop timer
+            if (this.timerInterval) {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            }
+            if (this.timerDisplay) {
+                this.timerDisplay.textContent = '00:00:000';
+            }
+
+            // Stop voice counting (cancel speech AFTER audio is saved)
+            if (this.voiceInterval) {
+                clearInterval(this.voiceInterval);
+                this.voiceInterval = null;
+            }
+
             document.removeEventListener('mousedown', this.boundHandleEvent, true);
             document.removeEventListener('mousemove', this.boundHandleEvent, true);
             document.removeEventListener('mouseup', this.boundHandleEvent, true);
@@ -865,9 +1130,13 @@ class CyberRecorderEngine {
                     this.addDebugLog(`📥 Requesting final audio data...`);
                     this.mediaRecorder.requestData();
                     setTimeout(() => {
-                        this.mediaRecorder.stop();
-                        this.addDebugLog(`⏹️ MediaRecorder stopped.`);
-                    }, 50);
+                        this.mediaRecorder.requestData();
+                        setTimeout(() => {
+                            this.mediaRecorder.stop();
+                            if (window.speechSynthesis) window.speechSynthesis.cancel();
+                            this.addDebugLog(`MediaRecorder stopped.`);
+                        }, 300);
+                    }, 200);
                 } else {
                     this.addDebugLog(`⚠️ MediaRecorder state: ${this.mediaRecorder.state}`);
                 }
@@ -900,13 +1169,11 @@ class CyberRecorderEngine {
                 this.inputBlockerOverlay = null;
 
                 // Restore pointer-events on all elements
-                document.querySelectorAll('button, a, input, textarea, select, [onclick]').forEach(el => {
-                    if (el !== window.cyberPlayBtn) {
-                        el.style.pointerEvents = '';
-                    }
+                document.querySelectorAll('button, a, input, textarea, select, canvas, [onclick]').forEach(el => {
+                    el.style.pointerEvents = '';
                 });
 
-                this.addDebugLog(`✅ Input unblocked`);
+                this.addDebugLog(`Input unblocked`);
             }
             if (this.audioElement) {
                 this.audioElement.pause();
@@ -915,7 +1182,8 @@ class CyberRecorderEngine {
             if (this.originalDateNow) {
                 Date.now = this.originalDateNow;
                 this.originalDateNow = null;
-                this.addDebugLog(`⏰ Time restored to real time`);
+                window.getPlaybackTime = null;
+                this.addDebugLog(`Time restored to real time`);
             }
             if (this.originalUseGlobe !== undefined && window.useGlobe !== undefined) {
                 window.useGlobe = this.originalUseGlobe;
@@ -930,6 +1198,16 @@ class CyberRecorderEngine {
             this.abortHandler = null;
         }
         
+        // Stop stopwatch if running from admin playback
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        if (this.timerDisplay) this.timerDisplay.textContent = '00:00:000';
+        this.paused = false;
+        this._pausedElapsed = 0;
+        this._playStartAbsolute = null;
+
         this.mode = 'idle';
         if (this.ui && !this.userPlayMode) this.ui.style.display = 'flex';
         // user-mode playback ended → keep UI hidden, reset flag for next admin use
@@ -1047,7 +1325,8 @@ class CyberRecorderEngine {
         this.addDebugLog(`   Duration: ${durationSecs}s`);
         this.addDebugLog(`   Audio: ${this.audioBlob ? (this.audioBlob.size / 1024).toFixed(0) + 'KB' : 'none'}`);
 
-        this.btnPlay.innerHTML = REC_SVG.stop;
+        this.paused = false;
+        this.btnPlay.innerHTML = REC_SVG.pause;
         this.btnPlay.style.background = "rgba(0, 255, 0, 0.3)";
 
         this.btnRec.style.opacity = "0.3";
@@ -1058,9 +1337,13 @@ class CyberRecorderEngine {
         this.btnExport.style.pointerEvents = "none";
 
         this.ghostCursor.style.display = 'block';
-        this.ui.style.display = this.userPlayMode ? 'none' : 'none';
+        if (this.userPlayMode) this.ui.style.display = 'none';
+
         if (this.userPlayMode) {
-            this.addDebugLog = () => {}; // Disable debug logging in user play mode
+            this.addDebugLog = () => {}; // Disable debug logging
+            if (this.debugContainer) {
+                this.debugContainer.style.display = 'none'; // Hide debug panel for users
+            }
         }
 
         // Set recording time immediately if available
@@ -1071,15 +1354,23 @@ class CyberRecorderEngine {
             this.originalDateNow = Date.now;
             const recordedTime = metaInitEvent.recordingTime;
 
-            Date.now = () => {
+            const getPlaybackMs = () => {
                 const elapsed = performance.now() - this.playbackStartTime;
                 return Math.round(recordedTime + elapsed);
             };
+            Date.now = getPlaybackMs;
+            window.getPlaybackTime = getPlaybackMs;
 
             const recordDate = new Date(recordedTime);
             this.addDebugLog(`⏰ Time pre-set to: ${recordDate.toLocaleString('de-DE')}`);
         } else {
             this.addDebugLog(`⏰ No recording time found`);
+        }
+
+        // Stopwatch during admin playback
+        if (!this.userPlayMode) {
+            this._playStartAbsolute = performance.now();
+            this._startStopwatch();
         }
 
         // Control play button in mini-rail during playback
@@ -1094,32 +1385,26 @@ class CyberRecorderEngine {
             this.addDebugLog(`🎛️ Play button changed to STOP`);
         }
 
-        // Block all input by setting pointer-events: none on everything
-        // (the STOP button will still be clickable because it's not in the blocked container)
-        const originalPointerEvents = new Map();
+        // In user play mode: block all interactions except the mini-rail play/stop button
+        if (this.userPlayMode) {
+            // Overlay sits above everything to block canvas and other non-element areas
+            this.inputBlockerOverlay = document.createElement('div');
+            this.inputBlockerOverlay.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: transparent;
+                pointer-events: all;
+                z-index: 1500;
+                cursor: default;
+            `;
+            document.body.appendChild(this.inputBlockerOverlay);
 
-        this.inputBlockerOverlay = document.createElement('div');
-        this.inputBlockerOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            pointer-events: none;
-            z-index: 50000;
-        `;
-
-        // Disable all interactive elements except the stop button
-        document.querySelectorAll('button, a, input, textarea, select, [onclick]').forEach(el => {
-            if (el !== window.cyberPlayBtn) {
-                originalPointerEvents.set(el, el.style.pointerEvents);
-                el.style.pointerEvents = 'none';
-            }
-        });
-
-        document.body.appendChild(this.inputBlockerOverlay);
-        this.addDebugLog(`🛑 Input blocked (only STOP button clickable)`);
+            // Disable pointer-events on all interactive elements except cyberPlayBtn
+            document.querySelectorAll('button, a, input, textarea, select, canvas, [onclick]').forEach(el => {
+                if (el !== window.cyberPlayBtn) el.style.pointerEvents = 'none';
+            });
+        }
 
         console.log("▶️ Playing script... (Press ESC to abort)");
 
@@ -1180,13 +1465,11 @@ class CyberRecorderEngine {
         }
 
         setTimeout(() => {
+            this._playStartAbsolute = performance.now();
             this.events.forEach((ev, index) => {
                 const timer = setTimeout(() => {
                     this.executeEvent(ev);
-
-                    if (index === this.events.length - 1) {
-                        this.stop();
-                    }
+                    if (index === this.events.length - 1) this.stop();
                 }, ev.t);
                 this.playTimers.push(timer);
             });
@@ -1266,13 +1549,22 @@ class CyberRecorderEngine {
                     setTimeout(() => {
                         window.toggleGlobe();
                         const mode = targetMode ? 'globe' : 'normal';
-                        this.addDebugLog(`🌍 Mode set to: ${mode}`);
+                        this.addDebugLog(`Mode set to: ${mode}`);
+                        // Center globe on start position after mode switch
+                        if (targetMode && typeof window.resetGlobeCenter === 'function') {
+                            setTimeout(() => window.resetGlobeCenter(), 100);
+                        }
                     }, 50);
                 } else if (targetMode !== currentMode) {
                     window.useGlobe = targetMode;
                     const mode = targetMode ? 'globe' : 'normal';
-                    this.addDebugLog(`🌍 Mode set to: ${mode} (direct)`);
+                    this.addDebugLog(`Mode set to: ${mode} (direct)`);
                 }
+            }
+
+            // Always re-center globe at replay start
+            if (ev.useGlobe && typeof window.resetGlobeCenter === 'function') {
+                setTimeout(() => window.resetGlobeCenter(), 150);
             }
 
             const scaleX = (window.innerWidth / ev.width).toFixed(4);
