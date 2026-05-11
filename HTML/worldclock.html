@@ -506,6 +506,28 @@
                         .showAtmosphere(false)
                         .pointOfView({ lat: 89.99, lng: 0, altitude: 2.65 });
                     globeInstance.controls().enabled = false;
+                    // On startup: rotate to Dresden and show red dot
+                    const _dresden = cities.find(c => c.name === 'Dresden');
+                    if (_dresden) {
+                        lockedCity = _dresden;
+                        requestAnimationFrame(() => {
+                            if (globeInstance && lockedCity === _dresden) {
+                                globeInstance.pointOfView({ lat: _dresden.lat, lng: _dresden.lon, altitude: 2.65 }, 1000);
+                            }
+                        });
+                        globeInstance
+                            .pointsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                            .pointLat('lat')
+                            .pointLng('lng')
+                            .pointColor(() => 'red')
+                            .pointAltitude(0.01)
+                            .pointRadius(0.6)
+                            .ringsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                            .ringColor(() => 'rgba(255, 0, 0, 1)')
+                            .ringMaxRadius(5)
+                            .ringPropagationSpeed(5)
+                            .ringRepeatPeriod(1000);
+                    }
                     // Force exact size & re-sync after layout settles
                     syncGlobeSize();
                     requestAnimationFrame(syncGlobeSize);
