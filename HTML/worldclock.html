@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
+    <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
     <style>
         body, #canvas-container, #side-panel {
             background: #000616 !important; /* EXACT match for NASA image background */
@@ -59,6 +62,16 @@
         body.school-ibb #school-logo-ibb {
             top: 4vmin;
         }
+        /* --- Globe Mode: ?globe=1 --- */
+        #globe-stage {
+            position: absolute;
+            inset: 0;
+            display: none;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body.use-globe #globe-stage { display: block; filter: brightness(0.65); }
+        body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
     </style>
     <script>
         (function () {
@@ -78,6 +91,28 @@
 </head>
 
 <body>
+    <!-- DEBUG PANEL -->
+    <div id="debug-panel" style="position: fixed; bottom: 20px; right: 20px; width: 400px; max-height: 300px; background: rgba(0, 6, 22, 0.95); border: 1px solid #00d2ff; border-radius: 8px; z-index: 9999; display: none; flex-direction: column; font-family: 'Courier New', monospace; font-size: 11px; color: #00d2ff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #00d2ff; background: rgba(0, 210, 255, 0.1);">
+            <span style="font-weight: bold;">DEBUG</span>
+            <div style="display: flex; gap: 8px;">
+                <button id="debug-copy" style="background: none; border: none; color: #00d2ff; cursor: pointer; font-size: 12px; padding: 0;">📋</button>
+                <button id="debug-close" style="background: none; border: none; color: #00d2ff; cursor: pointer; font-size: 16px; padding: 0;">✕</button>
+            </div>
+        </div>
+        <div id="debug-output" style="overflow-y: auto; padding: 8px 12px; flex: 1; background: rgba(0, 0, 0, 0.3);"></div>
+    </div>
+    <button id="debug-toggle" style="position: fixed; bottom: 20px; right: 20px; padding: 8px 12px; background: rgba(0, 210, 255, 0.2); border: 1px solid #00d2ff; color: #00d2ff; border-radius: 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 11px; z-index: 9998; letter-spacing: 1px;">DEBUG</button>
+
+    <!-- TEMP: DIM SLIDER -->
+    <div id="dim-slider-box" style="position: fixed; top: 20px; left: 20px; padding: 10px 14px; background: rgba(0, 6, 22, 0.9); border: 1px solid #00d2ff; border-radius: 8px; z-index: 9999; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00d2ff; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
+        <div style="display: flex; justify-content: space-between;">
+            <span>EARTH DIM</span>
+            <span id="dim-value">0.65</span>
+        </div>
+        <input id="dim-slider" type="range" min="0" max="1" step="0.05" value="0.65" style="width: 100%; accent-color: #00d2ff;">
+    </div>
+
     <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
 
@@ -104,6 +139,7 @@
                 <div class="coach-title" id="coach-title-slot"></div>
                 <div id="coach-content" class="coach-message"></div>
             </div>
+            <div id="globe-stage"></div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -181,30 +217,30 @@
         mapImg.onload = () => { mapLoaded = true; init(); };
 
         const cities = [
-            { name: "Kairo", lon: 30, tz: "Africa/Cairo", color: "black" },
-            { name: "Dresden", lon: 15, tz: "Europe/Berlin", color: "#ffcc00" },
-            { name: "Dakar", lon: 0, tz: "Africa/Dakar", color: "black" }, 
-            { name: "Azoren", lon: -15, tz: "Atlantic/Azores", color: "black" },
-            { name: "Kapverden", lon: -30, tz: "Atlantic/Cape_Verde", color: "black" },
-            { name: "Rio", lon: -45, tz: "America/Sao_Paulo", color: "black" },
-            { name: "Caracas", lon: -60, tz: "America/Caracas", color: "black" },
-            { name: "New York", lon: -75, tz: "America/New_York", color: "black" },
-            { name: "Chicago", lon: -90, tz: "America/Chicago", color: "black" },
-            { name: "Santa Fé", lon: -105, tz: "America/Denver", color: "black" },
-            { name: "San\nFrancisco", lon: -120, tz: "America/Los_Angeles", color: "black" },
-            { name: "Dawson", lon: -135, tz: "America/Dawson", color: "black" },
-            { name: "Honolulu", lon: -150, tz: "Pacific/Honolulu", color: "black" },
-            { name: "Samoa", lon: -165, tz: "Pacific/Samoa", color: "black" },
-            { name: "Neu\nseeland", lon: 180, tz: "Pacific/Auckland", color: "black" },
-            { name: "Salomon-\ninseln", lon: 165, tz: "Pacific/Guadalcanal", color: "black" },
-            { name: "Sydney", lon: 150, tz: "Australia/Sydney", color: "black" },
-            { name: "Tokio", lon: 135, tz: "Asia/Tokyo", color: "black" },
-            { name: "Shanghai", lon: 120, tz: "Asia/Shanghai", color: "black" },
-            { name: "Bangkok", lon: 105, tz: "Asia/Bangkok", color: "black" },
-            { name: "Bombay", lon: 90, tz: "Asia/Kolkata", color: "black" }, 
-            { name: "Karachi", lon: 75, tz: "Asia/Karachi", color: "black" },
-            { name: "Baku", lon: 60, tz: "Asia/Baku", color: "black" },
-            { name: "Bagdad", lon: 45, tz: "Asia/Baghdad", color: "black" }
+            { name: "Kairo", lat: 30, lon: 30, tz: "Africa/Cairo", color: "black" },
+            { name: "Dresden", lat: 51, lon: 15, tz: "Europe/Berlin", color: "#ffcc00" },
+            { name: "Dakar", lat: 14, lon: 0, tz: "Africa/Dakar", color: "black" },
+            { name: "Azoren", lat: 38, lon: -15, tz: "Atlantic/Azores", color: "black" },
+            { name: "Kapverden", lat: 16, lon: -30, tz: "Atlantic/Cape_Verde", color: "black" },
+            { name: "Rio", lat: -23, lon: -45, tz: "America/Sao_Paulo", color: "black" },
+            { name: "Caracas", lat: 10, lon: -60, tz: "America/Caracas", color: "black" },
+            { name: "New York", lat: 41, lon: -75, tz: "America/New_York", color: "black" },
+            { name: "Chicago", lat: 42, lon: -90, tz: "America/Chicago", color: "black" },
+            { name: "Santa Fé", lat: 35, lon: -105, tz: "America/Denver", color: "black" },
+            { name: "San\nFrancisco", lat: 37, lon: -120, tz: "America/Los_Angeles", color: "black" },
+            { name: "Dawson", lat: 64, lon: -135, tz: "America/Dawson", color: "black" },
+            { name: "Honolulu", lat: 21, lon: -150, tz: "Pacific/Honolulu", color: "black" },
+            { name: "Samoa", lat: -14, lon: -165, tz: "Pacific/Samoa", color: "black" },
+            { name: "Neu\nseeland", lat: -41, lon: 180, tz: "Pacific/Auckland", color: "black" },
+            { name: "Salomon-\ninseln", lat: -9, lon: 165, tz: "Pacific/Guadalcanal", color: "black" },
+            { name: "Sydney", lat: -33, lon: 150, tz: "Australia/Sydney", color: "black" },
+            { name: "Tokio", lat: 35, lon: 135, tz: "Asia/Tokyo", color: "black" },
+            { name: "Shanghai", lat: 31, lon: 120, tz: "Asia/Shanghai", color: "black" },
+            { name: "Bangkok", lat: 13, lon: 105, tz: "Asia/Bangkok", color: "black" },
+            { name: "Bombay", lat: 19, lon: 90, tz: "Asia/Kolkata", color: "black" },
+            { name: "Karachi", lat: 24, lon: 75, tz: "Asia/Karachi", color: "black" },
+            { name: "Baku", lat: 40, lon: 60, tz: "Asia/Baku", color: "black" },
+            { name: "Bagdad", lat: 33, lon: 45, tz: "Asia/Baghdad", color: "black" }
         ];
 
         function getDSTLabel(tz) {
@@ -220,6 +256,38 @@
         }
 
         const isRahnSchool = (new URLSearchParams(window.location.search).get('school') || '').toLowerCase() === 'rahn';
+        const useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
+        let globeInstance = null;
+        function syncGlobeSize() {
+            if (!globeInstance) return;
+            const stage = document.getElementById('globe-stage');
+            const rect = stage.getBoundingClientRect();
+            globeInstance.width(rect.width).height(rect.height);
+        }
+        if (useGlobe) {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('use-globe');
+                (function initGlobeWhenReady() {
+                    if (typeof Globe === 'undefined') {
+                        setTimeout(initGlobeWhenReady, 50);
+                        return;
+                    }
+                    const stage = document.getElementById('globe-stage');
+                    globeInstance = Globe()(stage)
+                        .globeImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-blue-marble.jpg')
+                        .bumpImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-topology.png')
+                        .backgroundColor('rgba(0,0,0,0)')
+                        .showAtmosphere(false)
+                        .pointOfView({ lat: 89.99, lng: 0, altitude: 2.65 });
+                    globeInstance.controls().enabled = false;
+                    // Force exact size & re-sync after layout settles
+                    syncGlobeSize();
+                    requestAnimationFrame(syncGlobeSize);
+                    setTimeout(syncGlobeSize, 400);
+                    window.addEventListener('resize', syncGlobeSize);
+                })();
+            });
+        }
 
         // URL-Parameter: ?name=Leipzig benennt Dresden um.
         // Zusätzlich beliebig viele weitere Overrides per Stadtname als Schlüssel:
@@ -249,6 +317,53 @@
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
+        let globeRotationTimeout = null;
+        let lockedCity = null; // Globe stays pointed at this city until clicked elsewhere
+
+        // DEBUG PANEL
+        function debugLog(msg, data = null) {
+            const output = document.getElementById('debug-output');
+            const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const line = document.createElement('div');
+            line.style.marginBottom = '4px';
+            line.style.color = '#00d2ff';
+            line.innerHTML = `<span style="color: #666;">[${time}]</span> ${msg}${data ? ' ' + JSON.stringify(data) : ''}`;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+            console.log(`[DEBUG] ${msg}`, data);
+        }
+
+        document.getElementById('debug-toggle').addEventListener('click', () => {
+            const panel = document.getElementById('debug-panel');
+            const toggle = document.getElementById('debug-toggle');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'flex';
+                toggle.style.display = 'none';
+            }
+        });
+
+        document.getElementById('debug-close').addEventListener('click', () => {
+            const panel = document.getElementById('debug-panel');
+            const toggle = document.getElementById('debug-toggle');
+            panel.style.display = 'none';
+            toggle.style.display = 'block';
+        });
+
+        document.getElementById('debug-copy').addEventListener('click', () => {
+            const output = document.getElementById('debug-output');
+            const text = Array.from(output.children).map(el => el.textContent).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                debugLog('✓ Copied to clipboard');
+            });
+        });
+
+        // DIM SLIDER
+        document.getElementById('dim-slider').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('dim-value').textContent = val;
+            const stage = document.getElementById('globe-stage');
+            if (stage) stage.style.filter = `brightness(${val})`;
+        });
         let lastMouseAngle = 0;
         let isReturning = false;
         let cityFontGray = 200; // Dynamic gray for city labels
@@ -340,7 +455,7 @@
                 return;
             }
 
-            // Hit test for cities
+            // Hit test for cities - rotate globe to city
             let hit = false;
             const size = Math.min(rect.width, rect.height) * 0.8;
             const r = size / 2;
@@ -351,15 +466,50 @@
             cities.forEach(city => {
                 const cityAngle = (-city.lon + mapRotation - 90);
                 let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
-                
+
                 // If distance is near the plaques and angle is close
                 if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
-                    selectedCity = city;
+                    debugLog(`🔄 Click: ${city.name}`, { lat: city.lat, lng: city.lon });
+                    if (globeInstance) {
+                        lockedCity = city;
+                        const target = { lat: city.lat, lng: city.lon, altitude: 2.65 };
+                        debugLog(`↪ Locked + rotating to ${city.name}`);
+
+                        // Wait one frame so the render-loop pointOfView(.., 0) doesn't kill our animation
+                        requestAnimationFrame(() => {
+                            if (globeInstance && lockedCity === city) {
+                                globeInstance.pointOfView(target, 1000);
+                            }
+                        });
+
+                        // Static red dot + pulsating ring (1s) at city location
+                        globeInstance
+                            .pointsData([{ lat: city.lat, lng: city.lon }])
+                            .pointLat('lat')
+                            .pointLng('lng')
+                            .pointColor(() => 'red')
+                            .pointAltitude(0.01)
+                            .pointRadius(0.6)
+                            .ringsData([{ lat: city.lat, lng: city.lon }])
+                            .ringColor(() => 'rgba(255, 0, 0, 1)')
+                            .ringMaxRadius(5)
+                            .ringPropagationSpeed(5)
+                            .ringRepeatPeriod(1000);
+                    } else {
+                        debugLog(`⚠️ No globe instance`);
+                    }
                     hit = true;
                 }
             });
 
-            if (!hit) selectedCity = null;
+            if (!hit) {
+                selectedCity = null;
+                if (lockedCity) {
+                    lockedCity = null;
+                    debugLog(`🔓 Globe unlocked`);
+                    if (globeInstance) globeInstance.ringsData([]).pointsData([]);
+                }
+            }
 
             isMouseDown = true;
             isReturning = false; 
@@ -465,20 +615,7 @@
             ctx.save();
             ctx.translate(cx, cy);
 
-            // --- Draw Pulsing Glow Under Earth ---
-            const pulse = (Math.sin(Date.now() / 1800) + 1) / 2; // 0 to 1, slower
-            const glowR = r + 5 + (10 * pulse); // tighter, less expansion
-            
-            ctx.save();
-            const glowGrad = ctx.createRadialGradient(0, 0, r * 0.98, 0, 0, glowR);
-            glowGrad.addColorStop(0, `rgba(0, 210, 255, ${0.15 + 0.15 * pulse})`); // lower opacity
-            glowGrad.addColorStop(1, 'rgba(0, 210, 255, 0)');
-            
-            ctx.fillStyle = glowGrad;
-            ctx.beginPath();
-            ctx.arc(0, 0, glowR, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            // (Glow removed)
 
             // 1. Draw Map (Rotating)
             if (autoRotationEnabled) autoRotation -= 0.02; 
@@ -498,8 +635,15 @@
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.clip();
             
-            ctx.drawImage(mapImg, -r, -r, size, size);
+            if (!useGlobe) {
+                ctx.drawImage(mapImg, -r, -r, size, size);
+            }
             ctx.restore();
+            if (useGlobe && globeInstance) {
+                if (!lockedCity) {
+                    globeInstance.pointOfView({ lat: 90, lng: -mapRotation, altitude: 2.65 }, 0);
+                }
+            }
 
             // 2. Draw City Markers (Plaques) - GLUED TO EARTH
             // All sizes relative to r (clock radius) for responsive scaling
@@ -686,6 +830,8 @@
             };
             ctx.restore();
             
+            // DEBUG: targetCity update temporarily disabled
+            /*
             const activeCity = selectedCity;
             if (activeCity) {
                 targetCity = activeCity;
@@ -693,6 +839,8 @@
             } else {
                 displayAlpha = Math.max(0, displayAlpha - 0.15);
             }
+            */
+            displayAlpha = Math.max(0, displayAlpha - 0.15);
 
             redCheckHitbox = null; // Reset; will be set when popup is drawn
 
