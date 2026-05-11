@@ -91,18 +91,6 @@
 </head>
 
 <body>
-    <!-- DEBUG PANEL -->
-    <div id="debug-panel" style="position: fixed; bottom: 20px; right: 20px; width: 400px; max-height: 300px; background: rgba(0, 6, 22, 0.95); border: 1px solid #00d2ff; border-radius: 8px; z-index: 9999; display: none; flex-direction: column; font-family: 'Courier New', monospace; font-size: 11px; color: #00d2ff;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #00d2ff; background: rgba(0, 210, 255, 0.1);">
-            <span style="font-weight: bold;">DEBUG</span>
-            <div style="display: flex; gap: 8px;">
-                <button id="debug-copy" style="background: none; border: none; color: #00d2ff; cursor: pointer; font-size: 12px; padding: 0;">📋</button>
-                <button id="debug-close" style="background: none; border: none; color: #00d2ff; cursor: pointer; font-size: 16px; padding: 0;">✕</button>
-            </div>
-        </div>
-        <div id="debug-output" style="overflow-y: auto; padding: 8px 12px; flex: 1; background: rgba(0, 0, 0, 0.3);"></div>
-    </div>
-    <button id="debug-toggle" style="position: fixed; bottom: 20px; right: 20px; padding: 8px 12px; background: rgba(0, 210, 255, 0.2); border: 1px solid #00d2ff; color: #00d2ff; border-radius: 6px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 11px; z-index: 9998; letter-spacing: 1px;">DEBUG</button>
 
 
     <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
@@ -235,6 +223,163 @@
             { name: "Bagdad", lat: 33, lon: 45, tz: "Asia/Baghdad", color: "black" }
         ];
 
+        // Koordinaten für Popup-Nachbarstädte (für Globe-Rotation)
+        const neighborCities = [
+            // Europe/Berlin
+            { name: "Paris",      lat: 48.9, lng:   2.3 },
+            { name: "Rom",        lat: 41.9, lng:  12.5 },
+            { name: "Madrid",     lat: 40.4, lng:  -3.7 },
+            { name: "Wien",       lat: 48.2, lng:  16.4 },
+            { name: "Warschau",   lat: 52.2, lng:  21.0 },
+            // Europe/London
+            { name: "Lissabon",   lat: 38.7, lng:  -9.1 },
+            { name: "Dublin",     lat: 53.3, lng:  -6.3 },
+            { name: "Edinburgh",  lat: 55.9, lng:  -3.2 },
+            { name: "Porto",      lat: 41.2, lng:  -8.6 },
+            { name: "Belfast",    lat: 54.6, lng:  -5.9 },
+            // America/New_York
+            { name: "Toronto",    lat: 43.7, lng: -79.4 },
+            { name: "Miami",      lat: 25.8, lng: -80.2 },
+            { name: "Washington", lat: 38.9, lng: -77.0 },
+            { name: "Montreal",   lat: 45.5, lng: -73.6 },
+            { name: "Atlanta",    lat: 33.7, lng: -84.4 },
+            // America/Chicago
+            { name: "Dallas",     lat: 32.8, lng: -96.8 },
+            { name: "Houston",    lat: 29.8, lng: -95.4 },
+            { name: "Winnipeg",   lat: 49.9, lng: -97.1 },
+            { name: "Memphis",    lat: 35.1, lng: -90.0 },
+            { name: "Minneapolis",lat: 44.9, lng: -93.2 },
+            // America/Denver
+            { name: "Phoenix",    lat: 33.4, lng:-112.1 },
+            { name: "Salt Lake",  lat: 40.8, lng:-111.9 },
+            { name: "Calgary",    lat: 51.0, lng:-114.1 },
+            { name: "Edmonton",   lat: 53.5, lng:-113.5 },
+            { name: "El Paso",    lat: 31.8, lng:-106.4 },
+            // America/Los_Angeles
+            { name: "Vancouver",  lat: 49.2, lng:-123.1 },
+            { name: "Seattle",    lat: 47.6, lng:-122.3 },
+            { name: "Las Vegas",  lat: 36.2, lng:-115.1 },
+            { name: "San Diego",  lat: 32.7, lng:-117.2 },
+            { name: "Tijuana",    lat: 32.5, lng:-117.0 },
+            // America/Dawson
+            { name: "Whitehorse", lat: 60.7, lng:-135.1 },
+            { name: "Inuvik",     lat: 68.4, lng:-133.7 },
+            { name: "Yellowknife",lat: 62.5, lng:-114.4 },
+            { name: "Juneau",     lat: 58.3, lng:-134.4 },
+            { name: "Sitka",      lat: 57.1, lng:-135.3 },
+            // America/Sao_Paulo
+            { name: "Brasilia",   lat:-15.8, lng: -47.9 },
+            { name: "B. Aires",   lat:-34.6, lng: -58.4 },
+            { name: "Montevideo", lat:-34.9, lng: -56.2 },
+            { name: "Asunción",   lat:-25.3, lng: -57.6 },
+            { name: "Santiago",   lat:-33.5, lng: -70.7 },
+            // America/Caracas
+            { name: "S. Domingo", lat: 18.5, lng: -69.9 },
+            { name: "San Juan",   lat: 18.5, lng: -66.1 },
+            { name: "Manaus",     lat: -3.1, lng: -60.0 },
+            { name: "Georgetown", lat:  6.8, lng: -58.2 },
+            { name: "Paramaribo", lat:  5.8, lng: -55.2 },
+            // Asia/Shanghai
+            { name: "Peking",     lat: 39.9, lng: 116.4 },
+            { name: "Singapur",   lat:  1.3, lng: 103.8 },
+            { name: "Hongkong",   lat: 22.3, lng: 114.2 },
+            { name: "Taipeh",     lat: 25.0, lng: 121.5 },
+            { name: "Perth",      lat:-31.9, lng: 115.9 },
+            // Asia/Tokyo
+            { name: "Seoul",      lat: 37.6, lng: 127.0 },
+            { name: "Osaka",      lat: 34.7, lng: 135.5 },
+            { name: "Sapporo",    lat: 43.1, lng: 141.4 },
+            { name: "Kyoto",      lat: 35.0, lng: 135.8 },
+            { name: "Nagoya",     lat: 35.2, lng: 136.9 },
+            // Asia/Dubai
+            { name: "Maskat",     lat: 23.6, lng:  58.6 },
+            { name: "Abu Dhabi",  lat: 24.5, lng:  54.4 },
+            { name: "Tiflis",     lat: 41.7, lng:  44.8 },
+            { name: "Baku",       lat: 40.4, lng:  49.9 },
+            { name: "Jerewan",    lat: 40.2, lng:  44.5 },
+            // Asia/Kolkata
+            { name: "Mumbai",     lat: 19.1, lng:  72.9 },
+            { name: "Neu-Delhi",  lat: 28.6, lng:  77.2 },
+            { name: "Bangalore",  lat: 12.9, lng:  77.6 },
+            { name: "Chennai",    lat: 13.1, lng:  80.3 },
+            { name: "Hyderabad",  lat: 17.4, lng:  78.5 },
+            // Asia/Baghdad
+            { name: "Kuwait",     lat: 29.4, lng:  47.9 },
+            { name: "Riad",       lat: 24.7, lng:  46.7 },
+            { name: "Aden",       lat: 12.8, lng:  45.0 },
+            { name: "Addis Abeba",lat:  9.0, lng:  38.7 },
+            { name: "Nairobi",    lat: -1.3, lng:  36.8 },
+            // Asia/Karachi
+            { name: "Islamabad",  lat: 33.7, lng:  73.1 },
+            { name: "Taschkent",  lat: 41.3, lng:  69.3 },
+            { name: "Samarkand",  lat: 39.7, lng:  66.9 },
+            { name: "Duschanbe",  lat: 38.6, lng:  68.8 },
+            { name: "Kabul",      lat: 34.5, lng:  69.2 },
+            // Asia/Bangkok
+            { name: "Jakarta",    lat: -6.2, lng: 106.8 },
+            { name: "Hanoi",      lat: 21.0, lng: 105.8 },
+            { name: "Saigon",     lat: 10.8, lng: 106.7 },
+            { name: "Phnom Penh", lat: 11.6, lng: 104.9 },
+            { name: "Vientiane",  lat: 18.0, lng: 102.6 },
+            // Australia/Sydney
+            { name: "Melbourne",  lat:-37.8, lng: 145.0 },
+            { name: "Brisbane",   lat:-27.5, lng: 153.0 },
+            { name: "Canberra",   lat:-35.3, lng: 149.1 },
+            { name: "Hobart",     lat:-42.9, lng: 147.3 },
+            { name: "Gold Coast", lat:-28.0, lng: 153.4 },
+            // Pacific/Auckland
+            { name: "Wellington",    lat:-41.3, lng: 174.8 },
+            { name: "Christchurch",  lat:-43.5, lng: 172.6 },
+            { name: "Suva",          lat:-18.1, lng: 178.4 },
+            { name: "Nuku'alofa",    lat:-21.1, lng:-175.2 },
+            { name: "Apia",          lat:-13.8, lng:-172.1 },
+            // Pacific/Guadalcanal
+            { name: "Port Vila",     lat:-17.7, lng: 168.3 },
+            { name: "Nouméa",        lat:-22.3, lng: 166.5 },
+            { name: "Magadan",       lat: 59.6, lng: 150.8 },
+            { name: "Sachalin",      lat: 50.7, lng: 142.7 },
+            { name: "Kamtschatka",   lat: 53.0, lng: 158.7 },
+            // Pacific/Honolulu
+            { name: "Anchorage",  lat: 61.2, lng:-149.9 },
+            { name: "Papeete",    lat:-17.5, lng:-149.6 },
+            { name: "Rarotonga",  lat:-21.2, lng:-159.8 },
+            { name: "Adak",       lat: 51.9, lng:-176.6 },
+            { name: "Midway",     lat: 28.2, lng:-177.4 },
+            // Pacific/Samoa
+            { name: "Pago Pago",  lat:-14.3, lng:-170.7 },
+            { name: "Niue",       lat:-19.1, lng:-169.9 },
+            { name: "Alofi",      lat:-19.1, lng:-169.9 },
+            { name: "Tokelau",    lat: -9.2, lng:-171.8 },
+            // Atlantic/Azores
+            { name: "Ponta Delgada", lat: 37.7, lng: -25.7 },
+            { name: "Angra",         lat: 38.7, lng: -27.2 },
+            { name: "Horta",         lat: 38.5, lng: -28.6 },
+            { name: "Funchal",       lat: 32.6, lng: -16.9 },
+            { name: "Santa Cruz",    lat: 28.5, lng: -16.3 },
+            // Atlantic/Cape_Verde
+            { name: "Praia",       lat: 14.9, lng: -23.5 },
+            { name: "Mindelo",     lat: 16.9, lng: -25.0 },
+            { name: "Santa Maria", lat: 16.6, lng: -22.9 },
+            { name: "Sal",         lat: 16.7, lng: -22.9 },
+            { name: "Boa Vista",   lat: 16.1, lng: -22.8 },
+            // Africa/Cairo
+            { name: "Athen",         lat: 37.9, lng:  23.7 },
+            { name: "Jerusalem",     lat: 31.8, lng:  35.2 },
+            { name: "Beirut",        lat: 33.9, lng:  35.5 },
+            { name: "Amman",         lat: 31.9, lng:  35.9 },
+            { name: "Johannesburg",  lat:-26.2, lng:  28.0 },
+            // Africa/Dakar
+            { name: "Abidjan",    lat:  5.3, lng:  -4.0 },
+            { name: "Bamako",     lat: 12.6, lng:  -8.0 },
+            { name: "Conakry",    lat:  9.5, lng: -13.7 },
+            { name: "Freetown",   lat:  8.5, lng: -13.2 },
+            { name: "Monrovia",   lat:  6.3, lng: -10.8 },
+        ];
+
+        // Schnelles Koordinaten-Lookup nach Name
+        const neighborCoords = {};
+        neighborCities.forEach(c => { neighborCoords[c.name] = { lat: c.lat, lng: c.lng }; });
+
         function getDSTLabel(tz) {
             if (!tz) return "";
             try {
@@ -278,7 +423,6 @@
                 lockedCity = null;
                 if (globeInstance) globeInstance.ringsData([]).pointsData([]);
             }
-            debugLog(`🌐 Globe view: ${useGlobe ? 'ON' : 'OFF'}`);
         }
         function syncGlobeSize() {
             if (!globeInstance) return;
@@ -341,43 +485,6 @@
         let isMouseDown = false;
         let globeRotationTimeout = null;
         let lockedCity = null; // Globe stays pointed at this city until clicked elsewhere
-
-        // DEBUG PANEL
-        function debugLog(msg, data = null) {
-            const output = document.getElementById('debug-output');
-            const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const line = document.createElement('div');
-            line.style.marginBottom = '4px';
-            line.style.color = '#00d2ff';
-            line.innerHTML = `<span style="color: #666;">[${time}]</span> ${msg}${data ? ' ' + JSON.stringify(data) : ''}`;
-            output.appendChild(line);
-            output.scrollTop = output.scrollHeight;
-            console.log(`[DEBUG] ${msg}`, data);
-        }
-
-        document.getElementById('debug-toggle').addEventListener('click', () => {
-            const panel = document.getElementById('debug-panel');
-            const toggle = document.getElementById('debug-toggle');
-            if (panel.style.display === 'none' || panel.style.display === '') {
-                panel.style.display = 'flex';
-                toggle.style.display = 'none';
-            }
-        });
-
-        document.getElementById('debug-close').addEventListener('click', () => {
-            const panel = document.getElementById('debug-panel');
-            const toggle = document.getElementById('debug-toggle');
-            panel.style.display = 'none';
-            toggle.style.display = 'block';
-        });
-
-        document.getElementById('debug-copy').addEventListener('click', () => {
-            const output = document.getElementById('debug-output');
-            const text = Array.from(output.children).map(el => el.textContent).join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                debugLog('✓ Copied to clipboard');
-            });
-        });
 
         let lastMouseAngle = 0;
         let isReturning = false;
@@ -462,6 +569,38 @@
                 return;
             }
 
+            // Flag/neighbor city click → rotate globe
+            if (flagHitboxes.length > 0) {
+                const clickedBox = flagHitboxes.find(b =>
+                    b.absX != null &&
+                    mxCanvas >= b.absX && mxCanvas <= b.absX + b.w &&
+                    myCanvas >= b.absY && myCanvas <= b.absY + b.h
+                );
+                if (clickedBox) {
+                    if (globeInstance && clickedBox.lat != null) {
+                        const lat = clickedBox.lat, lng = clickedBox.lng;
+                        lockedCity = { lat, lng };
+                        requestAnimationFrame(() => {
+                            if (globeInstance) globeInstance.pointOfView({ lat, lng, altitude: 2.65 }, 1000);
+                        });
+                        // Update red dot + pulsating ring to new city
+                        globeInstance
+                            .pointsData([{ lat, lng }])
+                            .pointLat('lat')
+                            .pointLng('lng')
+                            .pointColor(() => 'red')
+                            .pointAltitude(0.01)
+                            .pointRadius(0.6)
+                            .ringsData([{ lat, lng }])
+                            .ringColor(() => 'rgba(255, 0, 0, 1)')
+                            .ringMaxRadius(5)
+                            .ringPropagationSpeed(5)
+                            .ringRepeatPeriod(1000);
+                    }
+                    return;
+                }
+            }
+
             // Impressum hit test
             if (imprintHitbox &&
                 mxCanvas >= imprintHitbox.x && mxCanvas <= imprintHitbox.x + imprintHitbox.w &&
@@ -494,11 +633,10 @@
 
                 // If distance is near the plaques and angle is close
                 if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
-                    debugLog(`🔄 Click: ${city.name}`, { lat: city.lat, lng: city.lon });
+                    selectedCity = city;
                     if (globeInstance) {
                         lockedCity = city;
                         const target = { lat: city.lat, lng: city.lon, altitude: 2.65 };
-                        debugLog(`↪ Locked + rotating to ${city.name}`);
 
                         // Wait one frame so the render-loop pointOfView(.., 0) doesn't kill our animation
                         requestAnimationFrame(() => {
@@ -520,8 +658,6 @@
                             .ringMaxRadius(5)
                             .ringPropagationSpeed(5)
                             .ringRepeatPeriod(1000);
-                    } else {
-                        debugLog(`⚠️ No globe instance`);
                     }
                     hit = true;
                 }
@@ -531,7 +667,6 @@
                 selectedCity = null;
                 if (lockedCity) {
                     lockedCity = null;
-                    debugLog(`🔓 Globe unlocked`);
                     if (globeInstance) globeInstance.ringsData([]).pointsData([]);
                 }
             }
@@ -586,10 +721,14 @@
                 });
                 hoveredCity = found;
 
+                const mxC = e.clientX - rect.left;
+                const myC = e.clientY - rect.top;
                 let foundFlagIdx = null;
                 if (targetCity && displayAlpha > 0.5) {
                     for (let box of flagHitboxes) {
-                        if (mx >= box.x && mx <= box.x + box.w && my >= box.y && my <= box.y + box.h) {
+                        if (box.absX != null &&
+                            mxC >= box.absX && mxC <= box.absX + box.w &&
+                            myC >= box.absY && myC <= box.absY + box.h) {
                             foundFlagIdx = box.index;
                             break;
                         }
@@ -757,7 +896,7 @@
                 } else if (dst === "SZ") {
                     ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
                 } else {
-                    ctx.fillStyle = "#00d2ff"; // Cyan for Winter Time
+                    ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // Light gray for Winter Time
                 }
                 ctx.font = (city.highlight)
                     ? `900 ${cityFontHighlight}px Orbitron`
@@ -788,10 +927,7 @@
                 let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
                 let glow = false;
 
-                if (i === 12) { color = "#ffaa00"; glow = true; }
-                else if (i === 6) { color = "#00aa00"; glow = true; }
-                else if (i === 24) { color = "#00aaaa"; glow = true; }
-                else if (i === 18) { color = "#aa00aa"; glow = true; }
+                if (i === 12 || i === 6 || i === 18 || i === 24) { color = "#ffaa00"; glow = true; }
 
                 ctx.save();
                 ctx.fillStyle = color;
@@ -848,7 +984,7 @@
             ctx.fillStyle = "#ffaa00";
             ctx.fillText("SOMMERZEIT", legendX, legendY1);
 
-            ctx.fillStyle = "#00d2ff";
+            ctx.fillStyle = "rgba(220, 220, 220, 0.9)";
             ctx.fillText("NORMALZEIT", legendX, legendY2);
 
             // Globe Toggle Icon (right of legend)
@@ -860,7 +996,7 @@
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
             ctx.save();
-            ctx.strokeStyle = "#ffffff";
+            ctx.strokeStyle = useGlobe ? "#00d2ff" : "#888888";
             ctx.fillStyle = "transparent";
             ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
 
@@ -923,8 +1059,6 @@
             };
             ctx.restore();
             
-            // DEBUG: targetCity update temporarily disabled
-            /*
             const activeCity = selectedCity;
             if (activeCity) {
                 targetCity = activeCity;
@@ -932,27 +1066,32 @@
             } else {
                 displayAlpha = Math.max(0, displayAlpha - 0.15);
             }
-            */
-            displayAlpha = Math.max(0, displayAlpha - 0.15);
 
             redCheckHitbox = null; // Reset; will be set when popup is drawn
 
-            // 7. Draw Central Selection Time Box (Absolute Center)
+            // 7. Draw Central Selection Time Box
             if (displayAlpha > 0 && targetCity) {
                 ctx.save();
                 ctx.globalAlpha = displayAlpha;
-                ctx.translate(cx, cy);
-                                // --- Connecting Line ---
-                const cityAngle = (-targetCity.lon + mapRotation - 90) * Math.PI / 180;
-                const startX = Math.cos(cityAngle) * (r * 0.78); 
-                const startY = Math.sin(cityAngle) * (r * 0.78);
-                
-                ctx.beginPath();
-                ctx.strokeStyle = "#aaaaaa"; // Solid Gray
-                ctx.lineWidth = 1;
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(0, 0);
-                ctx.stroke();
+
+                // Position: center in normal mode, right side in globe mode
+                const popupX = useGlobe ? cx + r * 1.2 + 90 : cx;
+                const popupY = cy;
+                ctx.translate(popupX, popupY);
+
+                // Connecting Line (only in normal mode)
+                if (!useGlobe) {
+                    const cityAngle = (-targetCity.lon + mapRotation - 90) * Math.PI / 180;
+                    const startX = Math.cos(cityAngle) * (r * 0.78);
+                    const startY = Math.sin(cityAngle) * (r * 0.78);
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#aaaaaa"; // Solid Gray
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(0, 0);
+                    ctx.stroke();
+                }
                 // -----------------------
 
                 const localStr = time.toLocaleTimeString('de-DE', { 
@@ -1011,8 +1150,8 @@
                 }
                 ctx.restore();
                 redCheckHitbox = {
-                    x: cx + cbX,
-                    y: cy + cbY,
+                    x: popupX + cbX,
+                    y: popupY + cbY,
                     w: cbSize,
                     h: cbSize
                 };
@@ -1021,7 +1160,7 @@
 
                 // Status (Sommerzeit/Normalzeit)
                 const dstStatus = getDSTLabel(targetCity.tz);
-                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
+                ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 18);
                 
@@ -1058,107 +1197,107 @@
                 const getRelatedCities = (tz) => {
                     const db = {
                         "Europe/Berlin": [
-                            {name: "Paris", f: "🇫🇷"}, {name: "Rom", f: "🇮🇹"}, 
-                            {name: "Madrid", f: "🇪🇸"}, {name: "Wien", f: "🇦🇹"}, {name: "Warschau", f: "🇵🇱"}
+                            {name: "Paris", f: "🇫🇷", lat: 48.9, lng: 2.3}, {name: "Rom", f: "🇮🇹", lat: 41.9, lng: 12.5},
+                            {name: "Madrid", f: "🇪🇸", lat: 40.4, lng: -3.7}, {name: "Wien", f: "🇦🇹", lat: 48.2, lng: 16.4}, {name: "Warschau", f: "🇵🇱", lat: 52.2, lng: 21.0}
                         ],
                         "Europe/London": [
-                            {name: "Lissabon", f: "🇵🇹"}, {name: "Dublin", f: "🇮🇪"}, 
-                            {name: "Edinburgh", f: "🇬🇧"}, {name: "Porto", f: "🇵🇹"}, {name: "Belfast", f: "🇬🇧"}
+                            {name: "Lissabon", f: "🇵🇹", lat: 38.7, lng: -9.1}, {name: "Dublin", f: "🇮🇪", lat: 53.3, lng: -6.3},
+                            {name: "Edinburgh", f: "🇬🇧", lat: 55.9, lng: -3.2}, {name: "Porto", f: "🇵🇹", lat: 41.2, lng: -8.6}, {name: "Belfast", f: "🇬🇧", lat: 54.6, lng: -5.9}
                         ],
                         "America/New_York": [
-                            {name: "Toronto", f: "🇨🇦"}, {name: "Miami", f: "🇺🇸"}, 
-                            {name: "Washington", f: "🇺🇸"}, {name: "Montreal", f: "🇨🇦"}, {name: "Atlanta", f: "🇺🇸"}
+                            {name: "Toronto", f: "🇨🇦", lat: 43.7, lng: -79.4}, {name: "Miami", f: "🇺🇸", lat: 25.8, lng: -80.2},
+                            {name: "Washington", f: "🇺🇸", lat: 38.9, lng: -77.0}, {name: "Montreal", f: "🇨🇦", lat: 45.5, lng: -73.6}, {name: "Atlanta", f: "🇺🇸", lat: 33.7, lng: -84.4}
                         ],
                         "America/Chicago": [
-                            {name: "Dallas", f: "🇺🇸"}, {name: "Houston", f: "🇺🇸"}, 
-                            {name: "Winnipeg", f: "🇨🇦"}, {name: "Memphis", f: "🇺🇸"}, {name: "Minneapolis", f: "🇺🇸"}
+                            {name: "Dallas", f: "🇺🇸", lat: 32.8, lng: -96.8}, {name: "Houston", f: "🇺🇸", lat: 29.8, lng: -95.4},
+                            {name: "Winnipeg", f: "🇨🇦", lat: 49.9, lng: -97.1}, {name: "Memphis", f: "🇺🇸", lat: 35.1, lng: -90.0}, {name: "Minneapolis", f: "🇺🇸", lat: 44.9, lng: -93.2}
                         ],
                         "America/Denver": [
-                            {name: "Phoenix", f: "🇺🇸"}, {name: "Salt Lake", f: "🇺🇸"}, 
-                            {name: "Calgary", f: "🇨🇦"}, {name: "Edmonton", f: "🇨🇦"}, {name: "El Paso", f: "🇺🇸"}
+                            {name: "Phoenix", f: "🇺🇸", lat: 33.4, lng: -112.1}, {name: "Salt Lake", f: "🇺🇸", lat: 40.8, lng: -111.9},
+                            {name: "Calgary", f: "🇨🇦", lat: 51.0, lng: -114.1}, {name: "Edmonton", f: "🇨🇦", lat: 53.5, lng: -113.5}, {name: "El Paso", f: "🇺🇸", lat: 31.8, lng: -106.4}
                         ],
                         "America/Los_Angeles": [
-                            {name: "Vancouver", f: "🇨🇦"}, {name: "Seattle", f: "🇺🇸"}, 
-                            {name: "Las Vegas", f: "🇺🇸"}, {name: "San Diego", f: "🇺🇸"}, {name: "Tijuana", f: "🇲🇽"}
+                            {name: "Vancouver", f: "🇨🇦", lat: 49.2, lng: -123.1}, {name: "Seattle", f: "🇺🇸", lat: 47.6, lng: -122.3},
+                            {name: "Las Vegas", f: "🇺🇸", lat: 36.2, lng: -115.1}, {name: "San Diego", f: "🇺🇸", lat: 32.7, lng: -117.2}, {name: "Tijuana", f: "🇲🇽", lat: 32.5, lng: -117.0}
                         ],
                         "America/Dawson": [
-                            {name: "Whitehorse", f: "🇨🇦"}, {name: "Inuvik", f: "🇨🇦"},
-                            {name: "Yellowknife", f: "🇨🇦"}, {name: "Juneau", f: "🇺🇸"}, {name: "Sitka", f: "🇺🇸"}
+                            {name: "Whitehorse", f: "🇨🇦", lat: 60.7, lng: -135.1}, {name: "Inuvik", f: "🇨🇦", lat: 68.4, lng: -133.7},
+                            {name: "Yellowknife", f: "🇨🇦", lat: 62.5, lng: -114.4}, {name: "Juneau", f: "🇺🇸", lat: 58.3, lng: -134.4}, {name: "Sitka", f: "🇺🇸", lat: 57.1, lng: -135.3}
                         ],
                         "America/Sao_Paulo": [
-                            {name: "Brasilia", f: "🇧🇷"}, {name: "B. Aires", f: "🇦🇷"}, 
-                            {name: "Montevideo", f: "🇺🇾"}, {name: "Asunción", f: "🇵🇾"}, {name: "Santiago", f: "🇨🇱"}
+                            {name: "Brasilia", f: "🇧🇷", lat: -15.8, lng: -47.9}, {name: "B. Aires", f: "🇦🇷", lat: -34.6, lng: -58.4},
+                            {name: "Montevideo", f: "🇺🇾", lat: -34.9, lng: -56.2}, {name: "Asunción", f: "🇵🇾", lat: -25.3, lng: -57.6}, {name: "Santiago", f: "🇨🇱", lat: -33.5, lng: -70.7}
                         ],
                         "America/Caracas": [
-                            {name: "S. Domingo", f: "🇩🇴"}, {name: "San Juan", f: "🇵🇷"}, 
-                            {name: "Manaus", f: "🇧🇷"}, {name: "Georgetown", f: "🇬🇾"}, {name: "Paramaribo", f: "🇸🇷"}
+                            {name: "S. Domingo", f: "🇩🇴", lat: 18.5, lng: -69.9}, {name: "San Juan", f: "🇵🇷", lat: 18.5, lng: -66.1},
+                            {name: "Manaus", f: "🇧🇷", lat: -3.1, lng: -60.0}, {name: "Georgetown", f: "🇬🇾", lat: 6.8, lng: -58.2}, {name: "Paramaribo", f: "🇸🇷", lat: 5.8, lng: -55.2}
                         ],
                         "Asia/Shanghai": [
-                            {name: "Peking", f: "🇨🇳"}, {name: "Singapur", f: "🇸🇬"}, 
-                            {name: "Hongkong", f: "🇭🇰"}, {name: "Taipeh", f: "🇹🇼"}, {name: "Perth", f: "🇦🇺"}
+                            {name: "Peking", f: "🇨🇳", lat: 39.9, lng: 116.4}, {name: "Singapur", f: "🇸🇬", lat: 1.3, lng: 103.8},
+                            {name: "Hongkong", f: "🇭🇰", lat: 22.3, lng: 114.2}, {name: "Taipeh", f: "🇹🇼", lat: 25.0, lng: 121.5}, {name: "Perth", f: "🇦🇺", lat: -31.9, lng: 115.9}
                         ],
                         "Asia/Tokyo": [
-                            {name: "Seoul", f: "🇰🇷"}, {name: "Osaka", f: "🇯🇵"}, 
-                            {name: "Sapporo", f: "🇯🇵"}, {name: "Kyoto", f: "🇯🇵"}, {name: "Nagoya", f: "🇯🇵"}
+                            {name: "Seoul", f: "🇰🇷", lat: 37.6, lng: 127.0}, {name: "Osaka", f: "🇯🇵", lat: 34.7, lng: 135.5},
+                            {name: "Sapporo", f: "🇯🇵", lat: 43.1, lng: 141.4}, {name: "Kyoto", f: "🇯🇵", lat: 35.0, lng: 135.8}, {name: "Nagoya", f: "🇯🇵", lat: 35.2, lng: 136.9}
                         ],
                         "Asia/Dubai": [
-                            {name: "Maskat", f: "🇴🇲"}, {name: "Abu Dhabi", f: "🇦🇪"}, 
-                            {name: "Tiflis", f: "🇬🇪"}, {name: "Baku", f: "🇦🇿"}, {name: "Jerewan", f: "🇦🇲"}
+                            {name: "Maskat", f: "🇴🇲", lat: 23.6, lng: 58.6}, {name: "Abu Dhabi", f: "🇦🇪", lat: 24.5, lng: 54.4},
+                            {name: "Tiflis", f: "🇬🇪", lat: 41.7, lng: 44.8}, {name: "Baku", f: "🇦🇿", lat: 40.4, lng: 49.9}, {name: "Jerewan", f: "🇦🇲", lat: 40.2, lng: 44.5}
                         ],
                         "Asia/Kolkata": [
-                            {name: "Mumbai", f: "🇮🇳"}, {name: "Neu-Delhi", f: "🇮🇳"}, 
-                            {name: "Bangalore", f: "🇮🇳"}, {name: "Chennai", f: "🇮🇳"}, {name: "Hyderabad", f: "🇮🇳"}
+                            {name: "Mumbai", f: "🇮🇳", lat: 19.1, lng: 72.9}, {name: "Neu-Delhi", f: "🇮🇳", lat: 28.6, lng: 77.2},
+                            {name: "Bangalore", f: "🇮🇳", lat: 12.9, lng: 77.6}, {name: "Chennai", f: "🇮🇳", lat: 13.1, lng: 80.3}, {name: "Hyderabad", f: "🇮🇳", lat: 17.4, lng: 78.5}
                         ],
                         "Asia/Baghdad": [
-                            {name: "Kuwait", f: "🇰🇼"}, {name: "Riad", f: "🇸🇦"}, 
-                            {name: "Aden", f: "🇾🇪"}, {name: "Addis Abeba", f: "🇪🇹"}, {name: "Nairobi", f: "🇰🇪"}
+                            {name: "Kuwait", f: "🇰🇼", lat: 29.4, lng: 47.9}, {name: "Riad", f: "🇸🇦", lat: 24.7, lng: 46.7},
+                            {name: "Aden", f: "🇾🇪", lat: 12.8, lng: 45.0}, {name: "Addis Abeba", f: "🇪🇹", lat: 9.0, lng: 38.7}, {name: "Nairobi", f: "🇰🇪", lat: -1.3, lng: 36.8}
                         ],
                         "Asia/Karachi": [
-                            {name: "Islamabad", f: "🇵🇰"}, {name: "Taschkent", f: "🇺🇿"}, 
-                            {name: "Samarkand", f: "🇺🇿"}, {name: "Duschanbe", f: "🇹🇯"}, {name: "Kabul", f: "🇦🇫"}
+                            {name: "Islamabad", f: "🇵🇰", lat: 33.7, lng: 73.1}, {name: "Taschkent", f: "🇺🇿", lat: 41.3, lng: 69.3},
+                            {name: "Samarkand", f: "🇺🇿", lat: 39.7, lng: 66.9}, {name: "Duschanbe", f: "🇹🇯", lat: 38.6, lng: 68.8}, {name: "Kabul", f: "🇦🇫", lat: 34.5, lng: 69.2}
                         ],
                         "Asia/Bangkok": [
-                            {name: "Jakarta", f: "🇮🇩"}, {name: "Hanoi", f: "🇻🇳"}, 
-                            {name: "Saigon", f: "🇻🇳"}, {name: "Phnom Penh", f: "🇰🇭"}, {name: "Vientiane", f: "🇱🇦"}
+                            {name: "Jakarta", f: "🇮🇩", lat: -6.2, lng: 106.8}, {name: "Hanoi", f: "🇻🇳", lat: 21.0, lng: 105.8},
+                            {name: "Saigon", f: "🇻🇳", lat: 10.8, lng: 106.7}, {name: "Phnom Penh", f: "🇰🇭", lat: 11.6, lng: 104.9}, {name: "Vientiane", f: "🇱🇦", lat: 18.0, lng: 102.6}
                         ],
                         "Australia/Sydney": [
-                            {name: "Melbourne", f: "🇦🇺"}, {name: "Brisbane", f: "🇦🇺"}, 
-                            {name: "Canberra", f: "🇦🇺"}, {name: "Hobart", f: "🇦🇺"}, {name: "Gold Coast", f: "🇦🇺"}
+                            {name: "Melbourne", f: "🇦🇺", lat: -37.8, lng: 145.0}, {name: "Brisbane", f: "🇦🇺", lat: -27.5, lng: 153.0},
+                            {name: "Canberra", f: "🇦🇺", lat: -35.3, lng: 149.1}, {name: "Hobart", f: "🇦🇺", lat: -42.9, lng: 147.3}, {name: "Gold Coast", f: "🇦🇺", lat: -28.0, lng: 153.4}
                         ],
                         "Pacific/Auckland": [
-                            {name: "Wellington", f: "🇳🇿"}, {name: "Christchurch", f: "🇳🇿"}, 
-                            {name: "Suva", f: "🇫🇯"}, {name: "Nuku'alofa", f: "🇹🇴"}, {name: "Apia", f: "🇼🇸"}
+                            {name: "Wellington", f: "🇳🇿", lat: -41.3, lng: 174.8}, {name: "Christchurch", f: "🇳🇿", lat: -43.5, lng: 172.6},
+                            {name: "Suva", f: "🇫🇯", lat: -18.1, lng: 178.4}, {name: "Nuku'alofa", f: "🇹🇴", lat: -21.1, lng: -175.2}, {name: "Apia", f: "🇼🇸", lat: -13.8, lng: -172.1}
                         ],
                         "Pacific/Guadalcanal": [
-                            {name: "Port Vila", f: "🇻🇺"}, {name: "Nouméa", f: "🇳🇨"}, 
-                            {name: "Magadan", f: "🇷🇺"}, {name: "Sachalin", f: "🇷🇺"}, {name: "Kamtschatka", f: "🇷🇺"}
+                            {name: "Port Vila", f: "🇻🇺", lat: -17.7, lng: 168.3}, {name: "Nouméa", f: "🇳🇨", lat: -22.3, lng: 166.5},
+                            {name: "Magadan", f: "🇷🇺", lat: 59.6, lng: 150.8}, {name: "Sachalin", f: "🇷🇺", lat: 50.7, lng: 142.7}, {name: "Kamtschatka", f: "🇷🇺", lat: 53.0, lng: 158.7}
                         ],
                         "Pacific/Honolulu": [
-                            {name: "Anchorage", f: "🇺🇸"}, {name: "Papeete", f: "🇵🇫"}, 
-                            {name: "Rarotonga", f: "🇨🇰"}, {name: "Adak", f: "🇺🇸"}, {name: "Midway", f: "🇺🇸"}
+                            {name: "Anchorage", f: "🇺🇸", lat: 61.2, lng: -149.9}, {name: "Papeete", f: "🇵🇫", lat: -17.5, lng: -149.6},
+                            {name: "Rarotonga", f: "🇨🇰", lat: -21.2, lng: -159.8}, {name: "Adak", f: "🇺🇸", lat: 51.9, lng: -176.6}, {name: "Midway", f: "🇺🇸", lat: 28.2, lng: -177.4}
                         ],
                         "Pacific/Samoa": [
-                            {name: "Apia", f: "🇼🇸"}, {name: "Pago Pago", f: "🇦🇸"}, 
-                            {name: "Niue", f: "🇳🇺"}, {name: "Alofi", f: "🇳🇺"}, {name: "Tokelau", f: "🇹🇰"}
+                            {name: "Apia", f: "🇼🇸", lat: -13.8, lng: -172.1}, {name: "Pago Pago", f: "🇦🇸", lat: -14.3, lng: -170.7},
+                            {name: "Niue", f: "🇳🇺", lat: -19.1, lng: -169.9}, {name: "Alofi", f: "🇳🇺", lat: -19.1, lng: -169.9}, {name: "Tokelau", f: "🇹🇰", lat: -9.2, lng: -171.8}
                         ],
                         "Atlantic/Azores": [
-                            {name: "Ponta Delgada", f: "🇵🇹"}, {name: "Angra", f: "🇵🇹"}, 
-                            {name: "Horta", f: "🇵🇹"}, {name: "Funchal", f: "🇵🇹"}, {name: "Santa Cruz", f: "🇵🇹"}
+                            {name: "Ponta Delgada", f: "🇵🇹", lat: 37.7, lng: -25.7}, {name: "Angra", f: "🇵🇹", lat: 38.7, lng: -27.2},
+                            {name: "Horta", f: "🇵🇹", lat: 38.5, lng: -28.6}, {name: "Funchal", f: "🇵🇹", lat: 32.6, lng: -16.9}, {name: "Santa Cruz", f: "🇵🇹", lat: 28.5, lng: -16.3}
                         ],
                         "Atlantic/Cape_Verde": [
-                            {name: "Praia", f: "🇨🇻"}, {name: "Mindelo", f: "🇨🇻"}, 
-                            {name: "Santa Maria", f: "🇨🇻"}, {name: "Sal", f: "🇨🇻"}, {name: "Boa Vista", f: "🇨🇻"}
+                            {name: "Praia", f: "🇨🇻", lat: 14.9, lng: -23.5}, {name: "Mindelo", f: "🇨🇻", lat: 16.9, lng: -25.0},
+                            {name: "Santa Maria", f: "🇨🇻", lat: 16.6, lng: -22.9}, {name: "Sal", f: "🇨🇻", lat: 16.7, lng: -22.9}, {name: "Boa Vista", f: "🇨🇻", lat: 16.1, lng: -22.8}
                         ],
                         "Africa/Cairo": [
-                            {name: "Athen", f: "🇬🇷"}, {name: "Jerusalem", f: "🇮🇱"}, 
-                            {name: "Beirut", f: "🇱🇧"}, {name: "Amman", f: "🇯🇴"}, {name: "Johannesburg", f: "🇿🇦"}
+                            {name: "Athen", f: "🇬🇷", lat: 37.9, lng: 23.7}, {name: "Jerusalem", f: "🇮🇱", lat: 31.8, lng: 35.2},
+                            {name: "Beirut", f: "🇱🇧", lat: 33.9, lng: 35.5}, {name: "Amman", f: "🇯🇴", lat: 31.9, lng: 35.9}, {name: "Johannesburg", f: "🇿🇦", lat: -26.2, lng: 28.0}
                         ],
                         "Africa/Dakar": [
-                            {name: "Abidjan", f: "🇨🇮"}, {name: "Bamako", f: "🇲🇱"}, 
-                            {name: "Conakry", f: "🇬🇳"}, {name: "Freetown", f: "🇸🇱"}, {name: "Monrovia", f: "🇱🇷"}
+                            {name: "Abidjan", f: "🇨🇮", lat: 5.3, lng: -4.0}, {name: "Bamako", f: "🇲🇱", lat: 12.6, lng: -8.0},
+                            {name: "Conakry", f: "🇬🇳", lat: 9.5, lng: -13.7}, {name: "Freetown", f: "🇸🇱", lat: 8.5, lng: -13.2}, {name: "Monrovia", f: "🇱🇷", lat: 6.3, lng: -10.8}
                         ]
                     };
-                    return db[tz] || [{name: "Metropol-Region", f: "🌐"}];
+                    return db[tz] || [{name: "Metropol-Region", f: "🌐", lat: 0, lng: 0}];
                 };
 
                 const neighbors = getRelatedCities(targetCity.tz);
@@ -1195,14 +1334,26 @@
                     ctx.fillText(item.f, nx + nW - 10, centerY + 1);
 
                     // Save hitbox perfectly centered on the row
+                    // x/y: popup-translate-relative (for legacy hover check)
+                    // absX/absY: canvas-absolute (for click hit-test, account for popupX/popupY translate)
+                    const coords = neighborCoords[item.name];
+                    const hbX = nx + 10;       // covers entire row (city name + flag area)
+                    const hbY = centerY - 13;
+                    const hbW = nW - 20;
+                    const hbH = 26;
                     flagHitboxes.push({
-                        x: nx + nW - 40,
-                        y: centerY - 13,
-                        w: 35,
-                        h: 26,
+                        x: hbX,
+                        y: hbY,
+                        w: hbW,
+                        h: hbH,
+                        absX: popupX + hbX,
+                        absY: popupY + hbY,
                         countryCode: item.f,
                         index: i,
-                        centerY: centerY
+                        centerY: centerY,
+                        lat: coords ? coords.lat : null,
+                        lng: coords ? coords.lng : null,
+                        name: item.name
                     });
                 });
                 
