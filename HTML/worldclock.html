@@ -227,7 +227,7 @@
         }
 
         const isRahnSchool = (new URLSearchParams(window.location.search).get('school') || '').toLowerCase() === 'rahn';
-        let useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
+        window.useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
         let globeInstance = null;
         let globeIconHitbox = null;
 
@@ -269,9 +269,9 @@
             setTimeout(syncGlobeSize, 400);
         }
 
-        function toggleGlobe() {
-            useGlobe = !useGlobe;
-            if (useGlobe) {
+        window.toggleGlobe = function() {
+            window.useGlobe = !window.useGlobe;
+            if (window.useGlobe) {
                 document.body.classList.add('use-globe');
                 initGlobeNow();
             } else {
@@ -280,7 +280,7 @@
                 if (globeInstance) globeInstance.ringsData([]).pointsData([]);
                 hideCityInfo();
             }
-        }
+        };
 
         // --- City Info Box (Wikipedia) ---
         let cityInfoCurrentName = null;
@@ -345,7 +345,7 @@
         }
 
         function showCityInfo(cityName) {
-            if (!useGlobe) { hideCityInfo(); return; }
+            if (!window.useGlobe) { hideCityInfo(); return; }
             const cleanName = cityName.replace(/\n/g, ' ').trim();
             if (cityInfoCurrentName === cleanName) {
                 const box = document.getElementById('city-info-box');
@@ -490,7 +490,7 @@
             const rect = stage.getBoundingClientRect();
             globeInstance.width(rect.width).height(rect.height);
         }
-        if (useGlobe) {
+        if (window.useGlobe) {
             document.addEventListener('DOMContentLoaded', () => {
                 document.body.classList.add('use-globe');
                 (function initGlobeWhenReady() {
@@ -783,7 +783,7 @@
 
             if (isMouseDown) {
                 // Globe mode is handled by globe.gl's TrackballControls directly
-                if (!useGlobe) {
+                if (!window.useGlobe) {
                     const currentAngle = Math.atan2(my, mx);
                     let delta = currentAngle - lastMouseAngle;
                     if (delta > Math.PI) delta -= Math.PI * 2;
@@ -843,7 +843,7 @@
                 canvas.style.cursor = onHittable ? 'pointer' : 'default';
                 // In globe mode, only capture pointer events when over a hittable element
                 // so TrackballControls receives events for empty-area drags
-                if (useGlobe) {
+                if (window.useGlobe) {
                     document.body.classList.toggle('canvas-hit', onHittable);
                 }
             }
@@ -939,11 +939,11 @@
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.clip();
             
-            if (!useGlobe) {
+            if (!window.useGlobe) {
                 ctx.drawImage(mapImg, -r, -r, size, size);
             }
             ctx.restore();
-            if (useGlobe && globeInstance) {
+            if (window.useGlobe && globeInstance) {
                 if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
                     globeLat = 90;
                     globeLng = -mapRotation;
@@ -1095,7 +1095,7 @@
             }
 
             // Thin circle at tic base (globe mode only)
-            if (useGlobe) {
+            if (window.useGlobe) {
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
                 ctx.lineWidth = 0.5;
@@ -1132,7 +1132,7 @@
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
             ctx.save();
-            ctx.strokeStyle = useGlobe ? "#00d2ff" : "#888888";
+            ctx.strokeStyle = window.useGlobe ? "#00d2ff" : "#888888";
             ctx.fillStyle = "transparent";
             ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
 
@@ -1211,12 +1211,12 @@
                 ctx.globalAlpha = displayAlpha;
 
                 // Position: center in normal mode, right side in globe mode
-                const popupX = useGlobe ? cx + r * 1.2 + 90 : cx;
+                const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
                 const popupY = cy;
                 ctx.translate(popupX, popupY);
 
                 // Connecting Line (only in normal mode)
-                if (!useGlobe) {
+                if (!window.useGlobe) {
                     const cityAngle = (-targetCity.lon + mapRotation - 90) * Math.PI / 180;
                     const startX = Math.cos(cityAngle) * (r * 0.78);
                     const startY = Math.sin(cityAngle) * (r * 0.78);
