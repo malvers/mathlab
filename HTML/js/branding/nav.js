@@ -147,8 +147,8 @@
                     }
                     const recordingUrl = base + index[labName];
                     loadRecorder(() => {
-                        CyberRecorder.init();
                         CyberRecorder.userPlayMode = true;
+                        CyberRecorder.init();
                         xhrGet(recordingUrl, 'arraybuffer', buf => {
                             if (!buf) { alert('Recording konnte nicht geladen werden.'); return; }
                             const fakeEvt = { target: { files: [new File([buf], 'script.recording')], value: '' } };

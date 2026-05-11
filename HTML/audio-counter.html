@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Counter</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000616;
+            font-family: 'Orbitron', monospace;
+            color: #00d2ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid rgba(0, 210, 255, 0.6);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin: 0 0 30px 0;
+            letter-spacing: 2px;
+        }
+        .counter-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 30px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 30px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.6);
+            color: #00d2ff;
+            padding: 12px 24px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button.playing {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        .settings {
+            margin: 20px 0;
+            text-align: left;
+        }
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        label {
+            font-size: 0.9rem;
+            color: rgba(0, 210, 255, 0.9);
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 210, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+        input[type="number"] {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            color: #00ff88;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: 'Orbitron', monospace;
+            width: 60px;
+            text-align: center;
+        }
+        .value-display {
+            color: #00ff88;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: right;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: rgba(0, 210, 255, 0.7);
+            min-height: 20px;
+        }
+        .status.active {
+            color: #00ff88;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- DEBUG PANEL -->
+    <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; width: 300px; background: rgba(0,0,0,0.9); border: 1px solid #00ff88; border-radius: 4px; padding: 10px; color: #00ff88; font-family: monospace; font-size: 11px; max-height: 200px; overflow-y: auto; z-index: 9999;">
+        <div style="font-weight: bold; margin-bottom: 5px;">DEBUG</div>
+        <div id="debugLog" style="white-space: pre-wrap; word-break: break-all;"></div>
+    </div>
+
+    <div class="container">
+        <h1>AUDIO COUNTER</h1>
+
+        <div class="counter-display" id="display">0</div>
+
+        <div class="controls">
+            <button id="startBtn" onclick="start()">▶ START</button>
+            <button id="stopBtn" onclick="stop()" disabled>⏹ STOP</button>
+            <button onclick="reset()">↻ RESET</button>
+        </div>
+
+        <div class="settings">
+            <div class="setting-row">
+                <label>Interval (ms):</label>
+                <input type="number" id="interval" value="2000" min="500" max="10000" step="100">
+                <div class="value-display" id="intervalDisplay">2000</div>
+            </div>
+
+            <div class="setting-row">
+                <label>Speed:</label>
+                <input type="range" id="speed" value="1" min="0.5" max="2" step="0.1" oninput="updateSpeedDisplay()">
+                <div class="value-display" id="speedDisplay">1.0x</div>
+            </div>
+
+            <div class="setting-row">
+                <label>Volume:</label>
+                <input type="range" id="volume" value="1" min="0" max="1" step="0.1" oninput="updateVolumeDisplay()">
+                <div class="value-display" id="volumeDisplay">100%</div>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let counter = 0;
+        let isRunning = false;
+        let timerInterval = null;
+        let utterance = null;
+
+        function addDebug(msg) {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString('de-DE');
+            debugLog.textContent += `[${timestamp}] ${msg}\n`;
+            debugLog.parentElement.scrollTop = debugLog.parentElement.scrollHeight;
+            console.log(msg);
+        }
+
+        function initDebug() {
+            addDebug('🔧 Audio Counter initialized');
+            addDebug(`✓ Speech Synthesis: ${window.speechSynthesis ? 'available' : 'NOT available'}`);
+            if (window.speechSynthesis) {
+                const voices = window.speechSynthesis.getVoices();
+                addDebug(`✓ Voices loaded: ${voices.length}`);
+                const germanVoices = voices.filter(v => v.lang.startsWith('de'));
+                addDebug(`✓ German voices: ${germanVoices.length}`);
+                germanVoices.forEach((v, i) => {
+                    addDebug(`  ${i+1}. ${v.name} (${v.lang})`);
+                });
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = counter;
+        }
+
+        function updateIntervalDisplay() {
+            document.getElementById('intervalDisplay').textContent =
+                document.getElementById('interval').value;
+        }
+
+        function updateSpeedDisplay() {
+            const speed = document.getElementById('speed').value;
+            document.getElementById('speedDisplay').textContent = parseFloat(speed).toFixed(1) + 'x';
+        }
+
+        function updateVolumeDisplay() {
+            const vol = Math.round(document.getElementById('volume').value * 100);
+            document.getElementById('volumeDisplay').textContent = vol + '%';
+        }
+
+        function speak(number) {
+            addDebug(`🗣️ Speaking number: ${number}`);
+
+            if (!window.speechSynthesis) {
+                addDebug(`❌ Speech Synthesis not available`);
+                return;
+            }
+
+            // Cancel any previous speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(String(number));
+            utterance.lang = 'de-DE';
+            utterance.rate = parseFloat(document.getElementById('speed').value);
+            utterance.volume = parseFloat(document.getElementById('volume').value);
+            utterance.pitch = 1;
+
+            const voices = window.speechSynthesis.getVoices();
+            addDebug(`  Available voices: ${voices.length}`);
+
+            const germanVoice = voices.find(v => v.lang.startsWith('de'));
+            if (germanVoice) {
+                utterance.voice = germanVoice;
+                addDebug(`  ✓ Using German voice: ${germanVoice.name}`);
+            } else {
+                addDebug(`  ⚠️ No German voice, using default`);
+            }
+
+            utterance.onstart = () => {
+                addDebug(`  ▶️ Speaking started`);
+            };
+            utterance.onend = () => {
+                addDebug(`  ✓ Speaking ended`);
+            };
+            utterance.onerror = (e) => {
+                addDebug(`  ❌ Speech error: ${e.error}`);
+            };
+
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                addDebug(`  ❌ Exception: ${e.message}`);
+            }
+        }
+
+        function start() {
+            if (isRunning) return;
+
+            addDebug('▶ START clicked');
+
+            // Check if speech synthesis is available
+            if (!window.speechSynthesis) {
+                addDebug('❌ Speech Synthesis nicht verfügbar!');
+                alert('Speech Synthesis nicht verfügbar in diesem Browser!');
+                return;
+            }
+
+            // Check available voices
+            const voices = window.speechSynthesis.getVoices();
+            addDebug(`📢 Checking voices: ${voices.length} available`);
+            if (voices.length === 0) {
+                addDebug('❌ Keine Stimmen verfügbar!');
+                alert('Keine Stimmen verfügbar! Bitte Browser neu laden.');
+                return;
+            }
+
+            addDebug('✓ Starting counter...');
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('playing');
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('interval').disabled = true;
+            document.getElementById('status').textContent = '▶ Running...';
+            document.getElementById('status').classList.add('active');
+
+            function nextCount() {
+                counter++;
+                updateDisplay();
+                speak(counter);
+
+                if (isRunning) {
+                    const interval = parseInt(document.getElementById('interval').value);
+                    timerInterval = setTimeout(nextCount, interval);
+                }
+            }
+
+            nextCount();
+        }
+
+        function stop() {
+            if (!isRunning) return;
+            isRunning = false;
+            window.speechSynthesis.cancel();
+            if (timerInterval) clearTimeout(timerInterval);
+            timerInterval = null;
+
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('playing');
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('interval').disabled = false;
+            document.getElementById('status').textContent = '⏹ Stopped';
+            document.getElementById('status').classList.remove('active');
+        }
+
+        function reset() {
+            stop();
+            counter = 0;
+            updateDisplay();
+            document.getElementById('status').textContent = '';
+            document.getElementById('status').classList.remove('active');
+        }
+
+        // Initialize displays
+        updateIntervalDisplay();
+        updateSpeedDisplay();
+        updateVolumeDisplay();
+
+        // Initialize debug
+        initDebug();
+
+        // Interval input live update
+        document.getElementById('interval').addEventListener('input', updateIntervalDisplay);
+    </script>
+</body>
+</html>
