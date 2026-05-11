@@ -70,9 +70,8 @@
             z-index: 0;
             pointer-events: none;
         }
-        body.use-globe #globe-stage { display: block; filter: brightness(0.55); pointer-events: auto; }
-        body.use-globe #canvas { position: relative; z-index: 1; background: transparent; pointer-events: none; }
-        body.use-globe.canvas-hit #canvas { pointer-events: auto; }
+        body.use-globe #globe-stage { display: block; filter: brightness(0.55); }
+        body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
     </style>
     <script>
         (function () {
@@ -151,7 +150,7 @@
     <script src="js/i18n-sw.js"></script>
     <script src="js/i18n-tr.js"></script>
     <script src="js/i18n-nl.js"></script>
-    <script src="js/branding/nav.js?v=542"></script>
+    <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/world-cities.js"></script>
@@ -241,34 +240,30 @@
                 .bumpImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-topology.png')
                 .backgroundColor('rgba(0,0,0,0)')
                 .showAtmosphere(false)
-                .pointOfView({ lat: 51, lng: 15, altitude: 2.65 });
-            const _c = globeInstance.controls();
-            _c.enabled = true;
-            _c.noZoom = true;
-            _c.noPan = true;
-            _c.rotateSpeed = -3.0;
-            _c.dynamicDampingFactor = 0.14;
-            _c.staticMoving = false;
-            if (typeof _c.handleResize === 'function') _c.handleResize();
-            // Stop auto-rotation when user starts dragging the globe directly
-            const _stopAutoRot = () => { globeManuallyDragged = true; lockedCity = null; };
-            const _globeDom = globeInstance.renderer().domElement;
-            _globeDom.addEventListener('mousedown', _stopAutoRot, true);
-            _globeDom.addEventListener('pointerdown', _stopAutoRot, true);
-            _globeDom.addEventListener('touchstart', _stopAutoRot, true);
-            // Red dot + pulsating ring at Dresden on startup
-            globeInstance
-                .pointsData([{ lat: 51, lng: 15 }])
-                .pointLat('lat')
-                .pointLng('lng')
-                .pointColor(() => 'red')
-                .pointAltitude(0.01)
-                .pointRadius(0.6)
-                .ringsData([{ lat: 51, lng: 15 }])
-                .ringColor(() => 'rgba(255, 0, 0, 1)')
-                .ringMaxRadius(5)
-                .ringPropagationSpeed(5)
-                .ringRepeatPeriod(1000);
+                .pointOfView({ lat: 89.99, lng: 0, altitude: 2.65 });
+            globeInstance.controls().enabled = false;
+            // On startup: rotate to Dresden and show red dot
+            const _dresden = cities.find(c => c.name === 'Dresden');
+            if (_dresden) {
+                lockedCity = _dresden;
+                requestAnimationFrame(() => {
+                    if (globeInstance && lockedCity === _dresden) {
+                        globeInstance.pointOfView({ lat: _dresden.lat, lng: _dresden.lon, altitude: 2.65 }, 1000);
+                    }
+                });
+                globeInstance
+                    .pointsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                    .pointLat('lat')
+                    .pointLng('lng')
+                    .pointColor(() => 'red')
+                    .pointAltitude(0.01)
+                    .pointRadius(0.6)
+                    .ringsData([{ lat: _dresden.lat, lng: _dresden.lon }])
+                    .ringColor(() => 'rgba(255, 0, 0, 1)')
+                    .ringMaxRadius(5)
+                    .ringPropagationSpeed(5)
+                    .ringRepeatPeriod(1000);
+            }
             syncGlobeSize();
             requestAnimationFrame(syncGlobeSize);
             setTimeout(syncGlobeSize, 400);
@@ -509,34 +504,8 @@
                         .bumpImageUrl('https://unpkg.com/three-globe@2.27.0/example/img/earth-topology.png')
                         .backgroundColor('rgba(0,0,0,0)')
                         .showAtmosphere(false)
-                        .pointOfView({ lat: 51, lng: 15, altitude: 2.65 });
-                    const _c = globeInstance.controls();
-            _c.enabled = true;
-            _c.noZoom = true;
-            _c.noPan = true;
-            _c.rotateSpeed = -3.0;
-            _c.dynamicDampingFactor = 0.14;
-            _c.staticMoving = false;
-            if (typeof _c.handleResize === 'function') _c.handleResize();
-            // Stop auto-rotation when user starts dragging the globe directly
-            const _stopAutoRot = () => { globeManuallyDragged = true; lockedCity = null; };
-            const _globeDom = globeInstance.renderer().domElement;
-            _globeDom.addEventListener('mousedown', _stopAutoRot, true);
-            _globeDom.addEventListener('pointerdown', _stopAutoRot, true);
-            _globeDom.addEventListener('touchstart', _stopAutoRot, true);
-            // Red dot + pulsating ring at Dresden on startup
-            globeInstance
-                .pointsData([{ lat: 51, lng: 15 }])
-                .pointLat('lat')
-                .pointLng('lng')
-                .pointColor(() => 'red')
-                .pointAltitude(0.01)
-                .pointRadius(0.6)
-                .ringsData([{ lat: 51, lng: 15 }])
-                .ringColor(() => 'rgba(255, 0, 0, 1)')
-                .ringMaxRadius(5)
-                .ringPropagationSpeed(5)
-                .ringRepeatPeriod(1000);
+                        .pointOfView({ lat: 89.99, lng: 0, altitude: 2.65 });
+                    globeInstance.controls().enabled = false;
                     // Force exact size & re-sync after layout settles
                     syncGlobeSize();
                     requestAnimationFrame(syncGlobeSize);
@@ -767,12 +736,6 @@
                     if (globeInstance) globeInstance.ringsData([]).pointsData([]);
                 }
                 hideCityInfo();
-
-                // In globe mode, empty-area drags go to globe.gl via pointer-events: none on canvas
-                if (useGlobe && globeInstance) {
-                    globeManuallyDragged = true;
-                    return;
-                }
             }
 
             isMouseDown = true;
@@ -958,7 +921,13 @@
                 ctx.drawImage(mapImg, -r, -r, size, size);
             }
             ctx.restore();
-            // Auto-rotation disabled: globe starts at Dresden (set in init) and stays there until user drags
+            if (useGlobe && globeInstance) {
+                if (!lockedCity && !isMouseDown && !globeManuallyDragged) {
+                    globeLat = 90;
+                    globeLng = -mapRotation;
+                    globeInstance.pointOfView({ lat: globeLat, lng: globeLng, altitude: 2.65 }, 0);
+                }
+            }
 
             // 2. Draw City Markers (Plaques) - GLUED TO EARTH
             // All sizes relative to r (clock radius) for responsive scaling
