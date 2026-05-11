@@ -201,6 +201,9 @@ class CyberRecorderEngine {
         this.audioBlob = null;
         this.audioElement = null;
         this.audioCheckbox = null;
+
+        this.recordedWidth = 0;
+        this.recordedHeight = 0;
     }
 
     init() {
@@ -992,9 +995,19 @@ class CyberRecorderEngine {
 
     executeEvent(ev) {
         if (ev.type.startsWith('mouse') || ev.type === 'click') {
-            this.ghostCursor.style.left = ev.clientX + 'px';
-            this.ghostCursor.style.top = ev.clientY + 'px';
-            
+            let clientX = ev.clientX;
+            let clientY = ev.clientY;
+
+            if (this.recordedWidth > 0 && this.recordedHeight > 0) {
+                const scaleX = window.innerWidth / this.recordedWidth;
+                const scaleY = window.innerHeight / this.recordedHeight;
+                clientX = ev.clientX * scaleX;
+                clientY = ev.clientY * scaleY;
+            }
+
+            this.ghostCursor.style.left = clientX + 'px';
+            this.ghostCursor.style.top = clientY + 'px';
+
             if (ev.type === 'mousedown') {
                 this.ghostCursor.style.width = '12px';
                 this.ghostCursor.style.height = '12px';
@@ -1004,16 +1017,16 @@ class CyberRecorderEngine {
                 this.ghostCursor.style.height = '16px';
                 this.ghostCursor.style.background = 'rgba(0, 210, 255, 0.6)';
             }
-            
+
             // Re-dispatch event onto the element underneath
             // Temporarily hide ghost cursor so we don't pick it up
             this.ghostCursor.style.display = 'none';
-            const target = document.elementFromPoint(ev.clientX, ev.clientY) || document.body;
+            const target = document.elementFromPoint(clientX, clientY) || document.body;
             this.ghostCursor.style.display = 'block';
 
             const synthEvent = new MouseEvent(ev.type, {
-                clientX: ev.clientX,
-                clientY: ev.clientY,
+                clientX: clientX,
+                clientY: clientY,
                 bubbles: true,
                 cancelable: true,
                 view: window
@@ -1039,8 +1052,12 @@ class CyberRecorderEngine {
                 }
             }
         } else if (ev.type === 'meta_init') {
+            this.recordedWidth = ev.width;
+            this.recordedHeight = ev.height;
             if (Math.abs(ev.width - window.innerWidth) > 50 || Math.abs(ev.height - window.innerHeight) > 50) {
-                console.warn(`[CyberRecorder] Window size mismatch! Recorded at ${ev.width}x${ev.height}, current is ${window.innerWidth}x${window.innerHeight}. Replay might be slightly off for absolute clicks.`);
+                const scaleX = (window.innerWidth / ev.width).toFixed(2);
+                const scaleY = (window.innerHeight / ev.height).toFixed(2);
+                console.log(`[CyberRecorder] Viewport scaling: ${ev.width}x${ev.height} → ${window.innerWidth}x${window.innerHeight} (scale: ${scaleX}x × ${scaleY}y)`);
             }
         }
     }
