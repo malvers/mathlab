@@ -35,6 +35,7 @@ function clearDraw() {
     rawContours = null;
     userMorphPoly = null;
     userMorphPolys = null;
+    if (typeof updateMatching === 'function') updateMatching();
     document.getElementById('vert-count').textContent = '';
     const objVal = document.getElementById('obj-value');
     if (objVal) objVal.textContent = '0';
@@ -65,6 +66,7 @@ function resetDrawState() {
     savedPixels = null;
     rawContour = null;
     rawContours = null;
+    if (typeof updateMatching === 'function') updateMatching();
     document.getElementById('vert-count').textContent = '';
     document.getElementById('obj-value').textContent = '0';
     try {
@@ -128,10 +130,14 @@ function extractOutline() {
 
         if (!rawContours || rawContours.length === 0) {
             rawContour = null;
+            if (typeof updateMatching === 'function') updateMatching();
             document.getElementById('vert-count').textContent = 'Nichts gefunden';
             DebugWindow.log('⚠️ extractOutline: no contours found');
             return;
         }
+
+        // Re-pair user↔target with Hungarian and refresh colour indices.
+        if (typeof updateMatching === 'function') updateMatching();
 
         // Pick the largest as the "main" contour (used for morphing reference)
         rawContour = rawContours[0];
@@ -235,7 +241,9 @@ function drawPolygon() {
         const verts = isClosed ? poly.slice(0, -1) : poly;
         totalFinalVerts += verts.length;
 
-        const color = regionColor(ci);
+        const cIdx = (typeof userColorIdx !== 'undefined' && userColorIdx[ci] !== undefined)
+            ? userColorIdx[ci] : ci;
+        const color = regionColor(cIdx);
 
         if (showPoly) {
             const showLines = document.getElementById('lines-toggle')?.checked ?? true;

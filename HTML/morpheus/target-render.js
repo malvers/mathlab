@@ -69,8 +69,11 @@ function onDigitChange(d) {
         });
     }
 
-    // Canonical sort — keeps region colors consistent across user/target/morph.
+    // Canonical sort — deterministic baseline; Hungarian (updateMatching)
+    // assigns colours independently of storage order so it survives reshuffling.
     if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
+
+    if (typeof updateMatching === 'function') updateMatching();
 
     const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
     const el = document.getElementById('target-count');
@@ -135,6 +138,8 @@ function extractAndUpdatePolygon() {
     }
 
     if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
+
+    if (typeof updateMatching === 'function') updateMatching();
 
     const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
     DebugWindow.log(`✓ Resampled to ${total} vertices (max: ${TARGET_MAX_PTS})`);
@@ -263,7 +268,9 @@ function drawTargetPolygon() {
     outlineCtx.lineCap = 'round';
     outlineCtx.lineJoin = 'round';
     for (let i = 0; i < targetPolygon.length; i++) {
-        const color = regionColor(i);
+        const cIdx = (typeof targetColorIdx !== 'undefined' && targetColorIdx[i] !== undefined)
+            ? targetColorIdx[i] : i;
+        const color = regionColor(cIdx);
         const poly = targetPolygon[i];
         if (showLines) {
             outlineCtx.strokeStyle = color;
