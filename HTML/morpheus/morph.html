@@ -24,10 +24,10 @@
     <!-- Morpheus modules -->
     <script src="geometry.js"></script>
     <script src="contours.js"></script>
+    <script src="count-objects.js"></script>
     <script src="morph-engine.js"></script>
     <script src="target-render.js"></script>
     <script src="user-draw.js"></script>
-    <script src="count-objects.js"></script>
 </head>
 
 <body>
@@ -65,6 +65,10 @@
             <div id="similarity-box">
                 <div class="sim-value" id="sim-value">0%</div>
                 <div class="sim-label" id="sim-label"></div>
+            </div>
+            <div id="object-count-box">
+                <div class="obj-value" id="obj-value">0</div>
+                <div class="obj-label">Objekte</div>
             </div>
         </div>
     </main>
@@ -159,17 +163,66 @@
                     </label>
                 `).join('')}
                 ${[
+                    // Big operators
                     { latex: '\\surd', text: '\\sqrt', title: 'surd' },
                     { latex: '\\sqrt{\\phantom{x}}', text: '\\sqrt{\\phantom{x}}', title: 'sqrt + bar' },
                     { latex: '\\int', text: '\\int', title: 'integral' },
+                    { latex: '\\oint', text: '\\oint', title: 'closed integral' },
                     { latex: '\\sum', text: '\\sum', title: 'sum' },
                     { latex: '\\prod', text: '\\prod', title: 'product' },
-                    { latex: '\\oint', text: '\\oint', title: 'closed integral' },
                     { latex: '\\partial', text: '\\partial', title: 'partial' },
                     { latex: '\\nabla', text: '\\nabla', title: 'nabla' },
                     { latex: '\\infty', text: '\\infty', title: 'infinity' },
-                    { latex: '\\pi', text: '\\pi', title: 'pi' },
-                    { latex: '\\Omega', text: '\\Omega', title: 'Omega' }
+                    { latex: '\\propto', text: '\\propto', title: 'proportional' },
+                    // Greek lowercase
+                    { latex: '\\alpha',   text: '\\alpha',   title: 'alpha' },
+                    { latex: '\\beta',    text: '\\beta',    title: 'beta' },
+                    { latex: '\\gamma',   text: '\\gamma',   title: 'gamma' },
+                    { latex: '\\delta',   text: '\\delta',   title: 'delta' },
+                    { latex: '\\epsilon', text: '\\epsilon', title: 'epsilon' },
+                    { latex: '\\theta',   text: '\\theta',   title: 'theta' },
+                    { latex: '\\lambda',  text: '\\lambda',  title: 'lambda' },
+                    { latex: '\\mu',      text: '\\mu',      title: 'mu' },
+                    { latex: '\\pi',      text: '\\pi',      title: 'pi' },
+                    { latex: '\\rho',     text: '\\rho',     title: 'rho' },
+                    { latex: '\\sigma',   text: '\\sigma',   title: 'sigma' },
+                    { latex: '\\phi',     text: '\\phi',     title: 'phi' },
+                    { latex: '\\psi',     text: '\\psi',     title: 'psi' },
+                    { latex: '\\omega',   text: '\\omega',   title: 'omega' },
+                    // Greek uppercase
+                    { latex: '\\Gamma',  text: '\\Gamma',  title: 'Gamma' },
+                    { latex: '\\Delta',  text: '\\Delta',  title: 'Delta' },
+                    { latex: '\\Theta',  text: '\\Theta',  title: 'Theta' },
+                    { latex: '\\Lambda', text: '\\Lambda', title: 'Lambda' },
+                    { latex: '\\Xi',     text: '\\Xi',     title: 'Xi' },
+                    { latex: '\\Phi',    text: '\\Phi',    title: 'Phi' },
+                    { latex: '\\Psi',    text: '\\Psi',    title: 'Psi' },
+                    { latex: '\\Omega',  text: '\\Omega',  title: 'Omega' },
+                    // Relations / set theory
+                    { latex: '\\pm',     text: '\\pm',     title: 'plus-minus' },
+                    { latex: '\\leq',    text: '\\leq',    title: 'less or equal' },
+                    { latex: '\\geq',    text: '\\geq',    title: 'greater or equal' },
+                    { latex: '\\neq',    text: '\\neq',    title: 'not equal' },
+                    { latex: '\\approx', text: '\\approx', title: 'approximately' },
+                    { latex: '\\equiv',  text: '\\equiv',  title: 'identical' },
+                    { latex: '\\in',     text: '\\in',     title: 'element of' },
+                    { latex: '\\subset', text: '\\subset', title: 'subset' },
+                    { latex: '\\cup',    text: '\\cup',    title: 'union' },
+                    { latex: '\\cap',    text: '\\cap',    title: 'intersection' },
+                    { latex: '\\emptyset', text: '\\emptyset', title: 'empty set' },
+                    // Logic + arrows
+                    { latex: '\\forall',     text: '\\forall',     title: 'for all' },
+                    { latex: '\\exists',     text: '\\exists',     title: 'exists' },
+                    { latex: '\\rightarrow', text: '\\rightarrow', title: 'right arrow' },
+                    { latex: '\\Rightarrow', text: '\\Rightarrow', title: 'implies' },
+                    { latex: '\\Leftrightarrow', text: '\\Leftrightarrow', title: 'iff' },
+                    // Number sets
+                    { latex: '\\mathbb{R}', text: '\\mathbb{R}', title: 'reals' },
+                    { latex: '\\mathbb{N}', text: '\\mathbb{N}', title: 'naturals' },
+                    { latex: '\\mathbb{Z}', text: '\\mathbb{Z}', title: 'integers' },
+                    { latex: '\\mathbb{Q}', text: '\\mathbb{Q}', title: 'rationals' },
+                    { latex: '\\mathbb{C}', text: '\\mathbb{C}', title: 'complex' },
+                    { latex: '\\hbar',      text: '\\hbar',      title: 'h-bar' }
                 ].map((sym, i) => `
                     <label class="latex-label" title="${sym.title}">
                         <input type="radio" name="digit" value="latex-${i}" onclick="setTextInput(this.dataset.latex)" data-latex="${sym.text}">
@@ -274,6 +327,7 @@
             userMorphPoly = null;
             userMorphPolys = null;
             document.getElementById('vert-count').textContent = '';
+            document.getElementById('obj-value').textContent = '0';
             try {
                 localStorage.removeItem('morph-outline');
                 localStorage.removeItem('morph-outlines');
@@ -480,6 +534,11 @@
                 if (rawContour) {
                     savedPixels = drawCtx.getImageData(0, 0, 1000, 1000);
                     drawPolygon();
+                    if (typeof countDrawnObjects === 'function') {
+                        const count = countDrawnObjects();
+                        const objVal = document.getElementById('obj-value');
+                        if (objVal) objVal.textContent = count;
+                    }
                 }
             } catch (_) {}
         }
@@ -515,6 +574,7 @@
         initDraw();
         setupUserDrawingEvents();
         loadFromStorage();
+        if (typeof countObjectsFromCanvas === 'function') countObjectsFromCanvas();
         try {
             const savedEps = localStorage.getItem('morph-eps');
             if (savedEps !== null) {

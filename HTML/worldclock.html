@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <script src="js/debug-window.js"></script>
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
     <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
@@ -1529,25 +1530,7 @@
                             {name: "Conakry", f: "🇬🇳", lat: 9.5, lng: -13.7}, {name: "Freetown", f: "🇸🇱", lat: 8.5, lng: -13.2}, {name: "Monrovia", f: "🇱🇷", lat: 6.3, lng: -10.8}
                         ]
                     };
-                    if (db[tz]) return db[tz];
-                    // On-the-fly: nähstgelegene aus cities + neighborCities (instant)
-                    if (!targetCity) return [];
-                    const cLat = targetCity.globeLat ?? targetCity.lat;
-                    const cLon = targetCity.globeLon ?? targetCity.lon;
-                    const pool = [
-                        ...cities.map(c => ({ name: c.name.replace(/\n/g,' '), lat: c.globeLat ?? c.lat, lng: c.globeLon ?? c.lon })),
-                        ...(typeof neighborCities !== 'undefined' ? neighborCities.map(c => ({ name: c.name, lat: c.globeLat ?? c.lat, lng: c.globeLng ?? c.lng })) : [])
-                    ];
-                    const dist = (a, b) => {
-                        const dLat = a.lat - b.lat, dLng = a.lng - b.lng;
-                        return dLat * dLat + dLng * dLng;
-                    };
-                    return pool
-                        .filter(p => p.name.toLowerCase() !== (targetCity.name||'').toLowerCase().replace(/\n/g,' '))
-                        .map(p => ({ ...p, d: dist(p, { lat: cLat, lng: cLon }) }))
-                        .sort((a, b) => a.d - b.d)
-                        .slice(0, 5)
-                        .map(p => ({ name: p.name, f: '📍', lat: p.lat, lng: p.lng }));
+                    return db[tz] || (window._neighborCache?.[tz]) || [];
                 };
 
                 const neighbors = getRelatedCities(targetCity.tz);
@@ -1788,28 +1771,50 @@
                                     .ringColor(() => 'rgba(255,0,0,1)')
                                     .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
                             }
+                            DebugWindow.log(`▶ Search-Klick: ${name} (lat=${lat}, lon=${lon})`);
                             fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`)
                                 .then(r => r.json())
                                 .then(async d => {
                                     const tz = d.timeZone || 'UTC';
+                                    DebugWindow.log(`  timeapi.io → tz=${tz}`);
                                     loadingCity.tz = tz;
                                     selectedCity = loadingCity;
-                                    // Pre-fetch neighbors if not in DB
-                                    if (!RELATED_CITIES_DB[tz] && !window._neighborCache?.[tz]) {
+                                    if (RELATED_CITIES_DB[tz]) {
+                                        DebugWindow.log(`  ✓ DB-Treffer für ${tz}, kein Overpass nötig`);
+                                    } else if (window._neighborCache?.[tz]) {
+                                        DebugWindow.log(`  ✓ Cache-Treffer für ${tz} (${window._neighborCache[tz].length} Städte)`);
+                                    } else {
                                         try {
-                                            const _q = `[out:json][timeout:10];(node(around:300000,${lat},${lon})[place=city];node(around:300000,${lat},${lon})[place=town];);out 5;`;
-                                            const nr = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: _q });
+                                            DebugWindow.log(`  Photon /reverse lat=${lat} lon=${lon}`);
+                                            const t0 = performance.now();
+                                            const nr = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&limit=12&radius=200&layer=city`);
+                                            DebugWindow.log(`  Photon HTTP ${nr.status} (${Math.round(performance.now() - t0)}ms)`);
                                             const nd = await nr.json();
+                                            const feats = nd.features || [];
+                                            DebugWindow.log(`  Photon features: ${feats.length}`);
+                                            // Country-code → Flag emoji
+                                            const ccToFlag = cc => cc ? String.fromCodePoint(...cc.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '📍';
                                             if (!window._neighborCache) window._neighborCache = {};
-                                            window._neighborCache[tz] = nd.elements
-                                                .filter(e => e.tags?.name)
+                                            window._neighborCache[tz] = feats
+                                                .filter(f => f.properties?.name && f.properties.name.toLowerCase() !== name.toLowerCase())
                                                 .slice(0, 5)
-                                                .map(e => ({ name: e.tags.name, f: '📍', lat: e.lat, lng: e.lon }));
-                                        } catch (_) {}
+                                                .map(f => ({
+                                                    name: f.properties.name,
+                                                    f: ccToFlag(f.properties.countrycode),
+                                                    lat: f.geometry.coordinates[1],
+                                                    lng: f.geometry.coordinates[0]
+                                                }));
+                                            DebugWindow.log(`  ✓ Cache[${tz}]: ${window._neighborCache[tz].map(c => c.name).join(', ') || 'LEER'}`);
+                                        } catch (err) {
+                                            DebugWindow.log(`  ✗ Photon-Fehler: ${err.message}`);
+                                        }
                                     }
                                     showCityInfo(name);
                                 })
-                                .catch(() => showCityInfo(name));
+                                .catch(err => {
+                                    DebugWindow.log(`  ✗ timeapi.io-Fehler: ${err.message}`);
+                                    showCityInfo(name);
+                                });
                         }
                         input.value = item.label;
                         drop.style.display = 'none';
