@@ -900,8 +900,7 @@
         }
 
         function drawFrame() {
-            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
-            /*
+            // DEBUG overlay
             const _dbg = document.getElementById('size-debug') || (function () {
                 const d = document.createElement('div');
                 d.id = 'size-debug';
@@ -917,11 +916,6 @@
             const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
             const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
             const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
-            _dbg.textContent =
-                `vw:${window.innerWidth}×${window.innerHeight}  vvp:${_vv ? Math.round(_vv.width) + '×' + Math.round(_vv.height) : '-'}  dpr:${window.devicePixelRatio}\n` +
-                `chrome:${Math.round(_chR.width)}×${Math.round(_chR.height)}  main:${Math.round(_mcR.width)}×${Math.round(_mcR.height)}  canvas:${Math.round(_cr.width)}×${Math.round(_cr.height)}\n` +
-                `scale:${(+_scale).toFixed(3)}  natW:${_nat}`;
-            */
 
             if (!mapLoaded) return;
 
@@ -1162,6 +1156,42 @@
             const sommerW = ctx.measureText("SOMMERZEIT").width;
             const normalW = ctx.measureText("NORMALZEIT").width;
             const legendW = Math.max(sommerW, normalW);
+
+            // Search input (HTML-Overlay, genau unter NORMALZEIT)
+            const _si = document.getElementById('wc-search') || (() => {
+                const el = document.createElement('input');
+                el.id = 'wc-search';
+                el.type = 'text';
+                el.placeholder = 'Suchen…';
+                el.autocomplete = 'off';
+                el.style.cssText = 'position:fixed;background:rgba(0,10,30,0.92);color:#00d2ff;border:1px solid rgba(0,210,255,0.55);border-radius:4px;font-family:Orbitron,sans-serif;letter-spacing:0.05em;outline:none;padding:3px 8px;pointer-events:auto;z-index:1000;box-sizing:border-box;';
+                document.body.appendChild(el);
+                return el;
+            })();
+            const _cr2 = canvas.getBoundingClientRect();
+            const _sx = _cr2.width / canvas.width;
+            const _sy = _cr2.height / canvas.height;
+            const _siLeft  = legendX * _sx + _cr2.left + 10;
+            const _siTop   = (legendY2 + legendFontSize * 3.0) * _sy + _cr2.top + 34;
+            const _siW     = legendW * _sx * 2;
+            const _siH     = legendFontSize * 1.8 * _sy + 10;
+            _si.style.left     = _siLeft + 'px';
+            _si.style.top      = _siTop + 'px';
+            _si.style.width    = _siW + 'px';
+            _si.style.fontSize = (legendFontSize * 1.1 * _sy) + 'px';
+            _si.style.height   = _siH + 'px';
+
+            const _vv2 = window.visualViewport;
+            _dbg.textContent =
+                `vw:${window.innerWidth}×${window.innerHeight}  dpr:${window.devicePixelRatio}\n` +
+                `chrome:${Math.round(_chR.width)}×${Math.round(_chR.height)}  main:${Math.round(_mcR.width)}×${Math.round(_mcR.height)}\n` +
+                `canvas BRC: ${Math.round(_cr2.left)},${Math.round(_cr2.top)} ${Math.round(_cr2.width)}×${Math.round(_cr2.height)}\n` +
+                `canvas px: ${canvas.width}×${canvas.height}  scale:${(+_scale).toFixed(3)}\n` +
+                `legendX:${Math.round(legendX)} legendY2:${Math.round(legendY2)} legendW:${Math.round(legendW)}\n` +
+                `_sx:${_sx.toFixed(3)} _sy:${_sy.toFixed(3)}\n` +
+                `wc-search: left=${Math.round(_siLeft)} top=${Math.round(_siTop)} w=${Math.round(_siW)} h=${Math.round(_siH)}\n` +
+                `wc-search el: ${document.getElementById('wc-search') ? 'EXISTS' : 'MISSING'}`;
+
             const iconR = legendFontSize * 0.9;
             const iconCx = legendX + legendW + iconR * 2.2;
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
@@ -1334,12 +1364,27 @@
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 18);
-                
+
+                // Search box unter NORMALZEIT
+                const searchBoxW = 115;
+                const searchBoxH = 14;
+                const searchBoxY = y + 20;
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.6)";
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.rect(-searchBoxW/2, searchBoxY, searchBoxW, searchBoxH);
+                ctx.stroke();
+                // Search icon / text
+                ctx.fillStyle = "#00d2ff";
+                ctx.font = "normal 9px Orbitron";
+                ctx.textAlign = "center";
+                ctx.fillText("🔍 Suchen", 0, searchBoxY + 10);
+
                 // Querstrich (Separator)
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
                 ctx.beginPath();
-                ctx.moveTo(-boxW/2 + 20, y + 26);
-                ctx.lineTo(boxW/2 - 20, y + 26);
+                ctx.moveTo(-boxW/2 + 20, y + 35);
+                ctx.lineTo(boxW/2 - 20, y + 35);
                 ctx.stroke();
 
                 // City Name (Top)
@@ -1651,8 +1696,59 @@
                 updateCityInfoBoxPosition();
             });
         });
+        // Search autocomplete
+        (function initSearch() {
+            function trySetup() {
+                const input = document.getElementById('wc-search');
+                if (!input) { setTimeout(trySetup, 100); return; }
+
+                const drop = document.createElement('div');
+                drop.id = 'wc-search-drop';
+                drop.style.cssText = 'position:fixed;background:rgba(0,10,30,0.97);border:1px solid rgba(0,210,255,0.55);border-top:none;border-radius:0 0 6px 6px;font-family:Orbitron,sans-serif;font-size:11px;color:#00d2ff;z-index:1001;display:none;overflow-y:auto;max-height:180px;box-sizing:border-box;';
+                document.body.appendChild(drop);
+
+                function updateDrop() {
+                    const q = input.value.trim().toLowerCase();
+                    drop.style.left  = input.style.left;
+                    drop.style.top   = (parseFloat(input.style.top) + parseFloat(input.style.height || 20)) + 'px';
+                    drop.style.width = input.style.width;
+
+                    if (!q) { drop.style.display = 'none'; return; }
+
+                    const matches = cities.filter(c =>
+                        c.name.replace(/\n/g, ' ').toLowerCase().includes(q)
+                    );
+                    if (!matches.length) { drop.style.display = 'none'; return; }
+
+                    drop.innerHTML = '';
+                    matches.forEach(city => {
+                        const item = document.createElement('div');
+                        item.textContent = city.name.replace(/\n/g, ' ');
+                        item.style.cssText = 'padding:6px 10px;cursor:pointer;border-bottom:1px solid rgba(0,210,255,0.1);letter-spacing:0.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                        item.addEventListener('mouseenter', () => item.style.background = 'rgba(0,210,255,0.15)');
+                        item.addEventListener('mouseleave', () => item.style.background = '');
+                        item.addEventListener('mousedown', () => {
+                            selectedCity = city;
+                            showCityInfo(city.name);
+                            input.value = city.name.replace(/\n/g, ' ');
+                            drop.style.display = 'none';
+                        });
+                        drop.appendChild(item);
+                    });
+                    drop.style.display = 'block';
+                }
+
+                input.addEventListener('input', updateDrop);
+                document.addEventListener('mousedown', e => {
+                    if (!drop.contains(e.target) && e.target !== input)
+                        drop.style.display = 'none';
+                });
+            }
+            trySetup();
+        })();
+
         document.fonts.ready.then(init);
-        
+
         // UI Controls & Interaction
         CyberUI.on('reset', manualReset);
     </script>
