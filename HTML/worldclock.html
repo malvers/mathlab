@@ -900,7 +900,8 @@
         }
 
         function drawFrame() {
-            // DEBUG overlay
+            // DEBUG overlay (zum Aktivieren das /* … */ entfernen)
+            /*
             const _dbg = document.getElementById('size-debug') || (function () {
                 const d = document.createElement('div');
                 d.id = 'size-debug';
@@ -916,6 +917,7 @@
             const _chR = _ch ? _ch.getBoundingClientRect() : { width: 0, height: 0 };
             const _scale = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-scale').trim();
             const _nat = getComputedStyle(document.documentElement).getPropertyValue('--cyber-left-natural-w').trim();
+            */
 
             if (!mapLoaded) return;
 
@@ -1174,7 +1176,7 @@
             const _sy = _cr2.height / canvas.height;
             const _siLeft  = legendX * _sx + _cr2.left + 10;
             const _siTop   = (legendY2 + legendFontSize * 3.0) * _sy + _cr2.top + 34;
-            const _siW     = legendW * _sx * 2;
+            const _siW     = legendW * _sx * 2 + 50;
             const _siH     = legendFontSize * 1.8 * _sy + 10;
             _si.style.left     = _siLeft + 'px';
             _si.style.top      = _siTop + 'px';
@@ -1182,16 +1184,16 @@
             _si.style.fontSize = (legendFontSize * 1.1 * _sy) + 'px';
             _si.style.height   = _siH + 'px';
 
-            const _vv2 = window.visualViewport;
+            /* debug output disabled
             _dbg.textContent =
                 `vw:${window.innerWidth}×${window.innerHeight}  dpr:${window.devicePixelRatio}\n` +
                 `chrome:${Math.round(_chR.width)}×${Math.round(_chR.height)}  main:${Math.round(_mcR.width)}×${Math.round(_mcR.height)}\n` +
                 `canvas BRC: ${Math.round(_cr2.left)},${Math.round(_cr2.top)} ${Math.round(_cr2.width)}×${Math.round(_cr2.height)}\n` +
-                `canvas px: ${canvas.width}×${canvas.height}  scale:${(+_scale).toFixed(3)}\n` +
+                `canvas px: ${canvas.width}×${canvas.height}\n` +
                 `legendX:${Math.round(legendX)} legendY2:${Math.round(legendY2)} legendW:${Math.round(legendW)}\n` +
                 `_sx:${_sx.toFixed(3)} _sy:${_sy.toFixed(3)}\n` +
-                `wc-search: left=${Math.round(_siLeft)} top=${Math.round(_siTop)} w=${Math.round(_siW)} h=${Math.round(_siH)}\n` +
-                `wc-search el: ${document.getElementById('wc-search') ? 'EXISTS' : 'MISSING'}`;
+                `wc-search: left=${Math.round(_siLeft)} top=${Math.round(_siTop)} w=${Math.round(_siW)} h=${Math.round(_siH)}`;
+            */
 
             const iconR = legendFontSize * 0.9;
             const iconCx = legendX + legendW + iconR * 2.2;
@@ -1686,8 +1688,10 @@
         (function initSearch() {
             let nominatimTimer = null;
             let lastNominatimResults = [];
+            let currentItems = [];
 
             function renderDrop(drop, input, items) {
+                currentItems = items;
                 drop.style.left  = input.style.left;
                 drop.style.top   = (parseFloat(input.style.top) + parseFloat(input.style.height || 20)) + 'px';
                 drop.style.width = input.style.width;
@@ -1727,6 +1731,7 @@
                             const loadingCity = { name, lat, lon, globeLat: lat, globeLon: lon, tz: 'UTC', color: '#00d2ff' };
                             selectedCity = loadingCity;
                             if (globeInstance) {
+                                lockedCity = loadingCity;
                                 globeManuallyDragged = false;
                                 globeInstance.pointOfView({ lat, lng: lon, altitude: 2.65 }, 1000);
                                 globeInstance
@@ -1780,7 +1785,7 @@
                     nominatimTimer = setTimeout(async () => {
                         try {
                             const res = await fetch(
-                                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1`,
+                                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&featuretype=settlement`,
                                 { headers: { 'Accept-Language': 'de' } }
                             );
                             const data = await res.json();
@@ -1800,6 +1805,14 @@
                             renderDrop(drop, input, all);
                         } catch (_) { /* Nominatim nicht verfügbar */ }
                     }, 400);
+                });
+
+                input.addEventListener('keydown', e => {
+                    if (e.key !== 'Enter') return;
+                    const real = currentItems.filter(i => i.city || i.nominatim);
+                    if (real.length !== 1) return;
+                    e.preventDefault();
+                    drop.querySelector('div')?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
                 });
 
                 document.addEventListener('mousedown', e => {
