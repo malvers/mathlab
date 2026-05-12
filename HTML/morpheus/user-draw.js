@@ -76,60 +76,48 @@ function resetDrawState() {
 function countObjectsFromCanvas() {
     requestAnimationFrame(() => {
         try {
-            const imgData = drawCtx.getImageData(0, 0, 1000, 1000);
-            const grid = new Uint8Array(1000 * 1000);
+            // Downsample to 200×200 for fast connected-components count
+            const S = 200;
+            const off = document.createElement('canvas');
+            off.width = S; off.height = S;
+            const ctx2 = off.getContext('2d');
+            ctx2.drawImage(drawCtx.canvas, 0, 0, S, S);
+            const imgData = ctx2.getImageData(0, 0, S, S);
+            const grid = new Uint8Array(S * S);
             let filledCount = 0;
-            for (let i = 0; i < 1000 * 1000; i++) {
+            for (let i = 0; i < S * S; i++) {
                 const v = imgData.data[i * 4] > 30 ? 1 : 0;
                 grid[i] = v;
                 if (v) filledCount++;
             }
-            DebugWindow.log(`📊 countObjectsFromCanvas: ${filledCount} pixels`);
+            DebugWindow.log(`📊 countObjectsFromCanvas: ${filledCount} pixels (${S}×${S})`);
             if (filledCount === 0) {
                 document.getElementById('obj-value').textContent = '0';
                 DebugWindow.log('  → 0 objects (empty canvas)');
                 return;
             }
-            const contours = getContoursWithHoles(grid, 1000, 1000);
-            DebugWindow.log(`  → ${contours.length} contour(s) found`);
-            if (typeof countDrawnObjects === 'function' && contours.length > 0) {
-                const tempRawContours = contours;
-                const classifyContours = (cs) => {
-                    if (!cs || cs.length === 0) return { outers: [] };
-                    const pointInPoly = (pt, poly) => {
-                        const [x, y] = pt;
-                        let inside = false;
-                        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-                            const [xi, yi] = poly[i], [xj, yj] = poly[j];
-                            const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi);
-                            if (intersect) inside = !inside;
-                        }
-                        return inside;
-                    };
-                    const cent = cs.map(p => {
-                        let sx = 0, sy = 0;
-                        for (const [x, y] of p) { sx += x; sy += y; }
-                        return [sx / p.length, sy / p.length];
-                    });
-                    const parent = new Array(cs.length).fill(-1);
-                    for (let i = 0; i < cs.length; i++) {
-                        for (let j = 0; j < cs.length; j++) {
-                            if (i === j || parent[i] !== -1) continue;
-                            if (pointInPoly(cent[i], cs[j])) parent[i] = j;
-                        }
+            // Flood-fill to count separate connected regions
+            const visited = new Uint8Array(S * S);
+            let count = 0;
+            const stack = [];
+            for (let i = 0; i < S * S; i++) {
+                if (grid[i] && !visited[i]) {
+                    count++;
+                    stack.push(i);
+                    while (stack.length) {
+                        const idx = stack.pop();
+                        if (visited[idx]) continue;
+                        visited[idx] = 1;
+                        const x = idx % S, y = (idx / S) | 0;
+                        if (x > 0     && grid[idx - 1] && !visited[idx - 1]) stack.push(idx - 1);
+                        if (x < S - 1 && grid[idx + 1] && !visited[idx + 1]) stack.push(idx + 1);
+                        if (y > 0     && grid[idx - S] && !visited[idx - S]) stack.push(idx - S);
+                        if (y < S - 1 && grid[idx + S] && !visited[idx + S]) stack.push(idx + S);
                     }
-                    const outers = [];
-                    for (let i = 0; i < cs.length; i++) {
-                        if (parent[i] === -1) outers.push({ idx: i });
-                    }
-                    return { outers };
-                };
-                const { outers } = classifyContours(tempRawContours);
-                document.getElementById('obj-value').textContent = outers.length;
-                DebugWindow.log(`  ✓ Updated obj-value to ${outers.length}`);
-            } else {
-                DebugWindow.log(`  ⚠ countDrawnObjects not available or no contours`);
+                }
             }
+            document.getElementById('obj-value').textContent = count;
+            DebugWindow.log(`  ✓ ${count} object(s)`);
         } catch (e) {
             DebugWindow.log(`❌ countObjectsFromCanvas error: ${e.message}`);
         }
@@ -375,7 +363,7 @@ function setupUserDrawingEvents() {
         scheduleAutoSave();
     });
     drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; countObjectsFromCanvas(); });
-    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; countObjectsFromCanvas(); });
+    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
 
     drawCanvas.addEventListener('touchstart', e => {
         e.preventDefault();
