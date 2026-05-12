@@ -25,6 +25,7 @@
     <script src="geometry.js"></script>
     <script src="contours.js"></script>
     <script src="count-objects.js"></script>
+    <script src="matching.js"></script>
     <script src="morph-engine.js"></script>
     <script src="target-render.js"></script>
     <script src="user-draw.js"></script>
@@ -298,6 +299,12 @@
         let rawContour = null;  // largest sub-polygon (for morphing reference)
         let rawContours = null; // ALL sub-polygons (outer + holes), topology-aware
         let saveTimer = null;   // debounce for auto-save
+        // Hungarian-matching state (matching.js): colour index per contour,
+        // decoupled from storage order so static drawing + morph share colours.
+        let userColorIdx = [];      // [i] = colour idx for rawContours[i]
+        let targetColorIdx = [];    // [i] = colour idx for targetPolygon[i]
+        let morphColorIdx = [];     // [r] = colour idx for userMorphPolys[r] / targetMorphPolys[r]
+        let userToTargetMatch = []; // [i] = j: rawContours[i] paired with targetPolygon[j] (-1 = unmatched)
 
         // (initDraw, clearDraw, getPos, resetDrawState, extractOutline, drawPolygon,
         //  hideUserOutline, showUserOutline, setupUserDrawingEvents
@@ -465,6 +472,7 @@
             rawContours = null;
             userMorphPoly = null;
             userMorphPolys = null;
+            if (typeof updateMatching === 'function') updateMatching();
             document.getElementById('vert-count').textContent = '';
             document.getElementById('obj-value').textContent = '0';
             try {
@@ -750,6 +758,7 @@
                 }
                 if (rawContour) {
                     savedPixels = drawCtx.getImageData(0, 0, 1000, 1000);
+                    if (typeof updateMatching === 'function') updateMatching();
                     drawPolygon();
                     if (typeof countDrawnObjects === 'function') {
                         const count = countDrawnObjects();

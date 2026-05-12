@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Equation OCR</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="../js/cyber-layout.css">
+    <link rel="stylesheet" href="../js/buttons-ultra.css">
+    <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="../js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="../js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="../js/debug-window.js"></script>
+
+    <style>
+        #draw-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            cursor: crosshair;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
+            touch-action: none;
+        }
+        #canvas-stack {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            line-height: 0;
+        }
+        #draw-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 80px 20px 20px;
+            box-sizing: border-box;
+        }
+        #result-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(0, 210, 255, 0.5);
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: #00d2ff;
+            z-index: 50;
+            font-family: 'Outfit', sans-serif;
+            min-height: 80px;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+        #result-box .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: rgba(0, 210, 255, 0.6);
+            margin-bottom: 8px;
+        }
+        #result-latex {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #adff2f;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        #result-render {
+            font-size: 28px;
+            color: #F4C430;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .api-input {
+            width: 100%;
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #00d2ff;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border-radius: 4px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .api-input:focus {
+            border-color: #00d2ff;
+        }
+        #draw-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+        .eps-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .eps-row label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: rgba(0, 210, 255, 0.7);
+        }
+        .eps-row input[type=range] {
+            flex: 1;
+            accent-color: #00d2ff;
+        }
+        .eps-row span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #00d2ff;
+            width: 28px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <div id="draw-wrap">
+                <div id="canvas-stack">
+                    <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                </div>
+                <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
+            </div>
+            <div id="result-box">
+                <div class="label">LATEX</div>
+                <div id="result-latex">—</div>
+                <div id="result-render"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/cyber-left-chrome.js"></script>
+    <script src="../js/branding/briefings.js"></script>
+    <script src="../js/branding/overlays.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/i18n-de.js"></script>
+    <script src="../js/i18n-en.js"></script>
+    <script src="../js/i18n-es.js"></script>
+    <script src="../js/i18n-fr.js"></script>
+    <script src="../js/i18n-it.js"></script>
+    <script src="../js/i18n-pt.js"></script>
+    <script src="../js/i18n-sw.js"></script>
+    <script src="../js/i18n-tr.js"></script>
+    <script src="../js/i18n-nl.js"></script>
+    <script src="../js/branding/nav.js"></script>
+    <script src="../js/branding.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: CyberI18n.get('ui.coach_title'), subtitle: 'Equation OCR' });
+        CyberUI.init();
+        document.getElementById('coach-title-slot').textContent = 'Equation OCR';
+        if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
+
+        CyberUI.createCard('ui-container', 'ZEICHNEN', `
+            <button class="cyber-btn" onclick="clearDraw()"
+                style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
+            <div class="eps-row">
+                <label>Stift</label>
+                <input type="range" id="stroke-slider" min="1" max="30" value="8" step="1"
+                    oninput="onStrokeChange(this.value)">
+                <span id="stroke-val">8</span>
+            </div>
+        `, '#00d2ff', { collapsible: true });
+
+        CyberUI.createCard('ui-container', 'MATHPIX API', `
+            <input type="text" id="mp-app-id" class="api-input" placeholder="app_id" autocomplete="off">
+            <input type="password" id="mp-app-key" class="api-input" placeholder="app_key" autocomplete="off">
+            <button class="cyber-btn" onclick="recognize()"
+                style="width:100%;margin-top:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► ERKENNEN</button>
+        `, '#00d2ff', { collapsible: true });
+
+        const FORMULA_TITLES = [
+            'Einstein', 'Bruch', 'Quadratische Formel', 'Eulersche Identität', 'Pythagoras',
+            'Taylor e^x', 'Gauss-Integral', 'Binomialkoeffizient', 'Potenzregel', 'Bestimmtes Integral',
+            'Newton Gravitation', 'Schrödinger', 'Maxwell (Gauß)', 'Maxwell (Ampère)'
+        ];
+        CyberUI.createCard('ui-container', 'PRESETS', `
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+                ${FORMULA_TITLES.map((t, i) => `
+                    <button class="cyber-btn" onclick="loadPreset(${i})"
+                        title="${t}"
+                        style="padding:6px 0;font-size:11px;min-height:30px;">${i}</button>
+                `).join('')}
+            </div>
+        `, '#F4C430', { collapsible: true });
+
+        // ── Draw state ──────────────────────────────────────────────────────────
+        const drawCanvas = document.getElementById('draw-canvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        let isDrawing = false;
+
+        function initDraw() {
+            drawCtx.fillStyle = '#fff'; // weiß für Mathpix-OCR
+            drawCtx.fillRect(0, 0, 1000, 1000);
+            drawCtx.strokeStyle = '#000';
+            const strokeEl = document.getElementById('stroke-slider');
+            drawCtx.lineWidth = strokeEl ? +strokeEl.value : 8;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+        }
+
+        function clearDraw() {
+            initDraw();
+            document.getElementById('result-latex').textContent = '—';
+            document.getElementById('result-render').innerHTML = '';
+        }
+
+        // Lade Preset-PNG, ersetze grün/farbig → schwarz auf weiß für Mathpix-OCR
+        function loadPreset(idx) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                // Erst Bild auf temp canvas zeichnen, Pixel manipulieren
+                const tmp = document.createElement('canvas');
+                tmp.width = img.width; tmp.height = img.height;
+                const tctx = tmp.getContext('2d');
+                tctx.drawImage(img, 0, 0);
+                const id = tctx.getImageData(0, 0, tmp.width, tmp.height);
+                const d = id.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    const r = d[i], g = d[i+1], b = d[i+2];
+                    // Heller Pixel (gezeichnet) → schwarz, dunkel (BG) → weiß
+                    const brightness = (r + g + b) / 3;
+                    if (brightness > 40) { d[i] = d[i+1] = d[i+2] = 0; d[i+3] = 255; }
+                    else                  { d[i] = d[i+1] = d[i+2] = 255; d[i+3] = 255; }
+                }
+                tctx.putImageData(id, 0, 0);
+                // Auf draw-canvas
+                drawCtx.fillStyle = '#fff';
+                drawCtx.fillRect(0, 0, 1000, 1000);
+                drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
+                DebugWindow.log(`✓ Preset ${idx} geladen: ${FORMULA_TITLES[idx]}`);
+            };
+            img.onerror = () => DebugWindow.log(`✗ Preset ${idx} konnte nicht geladen werden`);
+            img.src = `presets/formula-${idx}.png`;
+            DebugWindow.log(`▶ Lade Preset ${idx} (${FORMULA_TITLES[idx]})`);
+        }
+
+        function onStrokeChange(v) {
+            document.getElementById('stroke-val').textContent = v;
+            drawCtx.lineWidth = +v;
+            try { localStorage.setItem('eocr-stroke', v); } catch (_) {}
+        }
+
+        function getPos(e) {
+            const r = drawCanvas.getBoundingClientRect();
+            const sx = drawCanvas.width / r.width;
+            const sy = drawCanvas.height / r.height;
+            const s = e.touches ? e.touches[0] : e;
+            return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
+        }
+
+        drawCanvas.addEventListener('mousedown', e => {
+            isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        });
+        drawCanvas.addEventListener('mousemove', e => {
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+        });
+        drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
+        drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+        drawCanvas.addEventListener('touchstart', e => {
+            e.preventDefault(); isDrawing = true;
+            drawCtx.beginPath();
+            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
+        }, { passive: false });
+        drawCanvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+        }, { passive: false });
+        drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+
+        // ── Mathpix-OCR ─────────────────────────────────────────────────────────
+        async function recognize() {
+            const appId  = document.getElementById('mp-app-id').value.trim();
+            const appKey = document.getElementById('mp-app-key').value.trim();
+            if (!appId || !appKey) {
+                DebugWindow.log('⚠ app_id / app_key fehlen');
+                document.getElementById('result-latex').textContent = '⚠ API-Credentials fehlen';
+                return;
+            }
+            try { localStorage.setItem('eocr-app-id', appId); } catch (_) {}
+            try { localStorage.setItem('eocr-app-key', appKey); } catch (_) {}
+
+            const src = drawCanvas.toDataURL('image/png');
+            DebugWindow.log('▶ Mathpix /v3/text');
+            document.getElementById('result-latex').textContent = '⏳ Lade…';
+            document.getElementById('result-render').innerHTML = '';
+            try {
+                const t0 = performance.now();
+                const res = await fetch('https://api.mathpix.com/v3/text', {
+                    method: 'POST',
+                    headers: {
+                        'app_id':  appId,
+                        'app_key': appKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        src,
+                        formats: ['text', 'latex_styled'],
+                        data_options: { include_latex: true }
+                    })
+                });
+                DebugWindow.log(`  HTTP ${res.status} (${Math.round(performance.now() - t0)}ms)`);
+                const data = await res.json();
+                DebugWindow.log(`  result: ${JSON.stringify(data).slice(0, 200)}`);
+                const latex = data.latex_styled || data.text || '(leer)';
+                document.getElementById('result-latex').textContent = latex;
+                try {
+                    katex.render(latex.replace(/^\\\(|\\\)$/g, '').trim(), document.getElementById('result-render'), {
+                        throwOnError: false, displayMode: true
+                    });
+                } catch (e) {
+                    document.getElementById('result-render').textContent = latex;
+                }
+                DebugWindow.log(`✓ LaTeX: ${latex}`);
+            } catch (err) {
+                DebugWindow.log(`✗ Mathpix-Fehler: ${err.message}`);
+                document.getElementById('result-latex').textContent = `Fehler: ${err.message}`;
+            }
+        }
+
+        // Restore credentials from localStorage
+        try {
+            const id  = localStorage.getItem('eocr-app-id');
+            const key = localStorage.getItem('eocr-app-key');
+            if (id)  document.getElementById('mp-app-id').value = id;
+            if (key) document.getElementById('mp-app-key').value = key;
+            const s = localStorage.getItem('eocr-stroke');
+            if (s) { document.getElementById('stroke-slider').value = s; document.getElementById('stroke-val').textContent = s; }
+        } catch (_) {}
+
+        initDraw();
+    </script>
+</body>
+
+</html>

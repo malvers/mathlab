@@ -21,7 +21,13 @@ const REGION_COLORS = [
     '#ff6060', // coral
     '#60a0ff', // light blue
 ];
-function regionColor(idx) { return REGION_COLORS[idx % REGION_COLORS.length]; }
+function regionColor(idx) {
+    // Robust against undefined/NaN/negative inputs — colour arrays may be
+    // briefly out of sync during boot.
+    if (typeof idx !== 'number' || !isFinite(idx)) idx = 0;
+    const n = REGION_COLORS.length;
+    return REGION_COLORS[((idx % n) + n) % n];
+}
 
 function getLargestTargetSubPoly() {
     if (!targetPolygon || targetPolygon.length === 0) return null;
@@ -58,8 +64,13 @@ function alignTargetTo(userPoly, target) {
 }
 
 // Build userMorphPolys[] and targetMorphPolys[] from current state.
-// Uses canonical sort: index i is the same region (outer / top hole / ...)
-// across user and target — so colors stay consistent.
+//
+// Pairing strategy: Hungarian bipartite matching (see matching.js).
+// rawContours and targetPolygon are kept in canonical sort order by their
+// respective producers; the matching authority is updateMatching(), which
+// stores userToTargetMatch[i] = j (target index paired with user contour i,
+// -1 if no pair). This function consumes that map so the morph pairing
+// agrees with the static colour assignment.
 function prepareMorph() {
     if (!targetPolygon) return false;
     const sourceContours = (rawContours && rawContours.length > 0)
@@ -72,66 +83,89 @@ function prepareMorph() {
 
     const eps = +(document.getElementById('eps-slider')?.value ?? 1);
 
-    // RDP-simplify and unclose each user contour
-    const userSimplified = sourceContours
-        .filter(c => c && c.length >= 3)
-        .map(p => {
-            let s = rdp(p, eps);
-            if (s.length > 1 &&
-                s[0][0] === s[s.length - 1][0] &&
-                s[0][1] === s[s.length - 1][1]) {
-                s = s.slice(0, -1);
-            }
-            return s;
-        })
-        .filter(p => p.length >= 3);
-    if (userSimplified.length === 0) return false;
+    // RDP-simplify in place (preserve array length so userToTargetMatch indices
+    // remain valid). Bad entries become length-0 and are skipped in the loop.
+    const userSimplified = sourceContours.map(p => {
+        if (!p || p.length < 3) return [];
+        let s = rdp(p, eps);
+        if (s.length > 1 &&
+            s[0][0] === s[s.length - 1][0] &&
+            s[0][1] === s[s.length - 1][1]) {
+            s = s.slice(0, -1);
+        }
+        return s;
+    });
 
-    // Canonical sort — outer first, holes by Y ascending.
-    const userSorted = sortContoursCanonical(userSimplified);
-    const targetSorted = sortContoursCanonical(targetPolys);
-
-    // Translate ALL target polygons LEFT of the times outline (X only).
-    // Keep Y as-is — the target is already correctly positioned (baseline aligned).
-    const tb = bboxOfMultiPoly(targetSorted);
+    // Translate ALL target polygons LEFT of the user (X only).
+    const tb = bboxOfMultiPoly(targetPolys);
     const gap = 100;
     const dxTarget = tb.minX - gap - tb.maxX;
-    const targetTranslated = targetSorted.map(p =>
+    const targetTranslated = targetPolys.map(p =>
         p.map(([x, y]) => [x + dxTarget, y])
     );
 
-    // Direct index pairing — canonical sort guarantees i-th user region
-    // corresponds to i-th target region.
+    // Use the global Hungarian assignment from matching.js. Fall back to a
+    // fresh match if the global is stale (e.g. matching.js not yet run) or to
+    // identity pairing if matching.js is missing entirely.
+    let assign;
+    if (typeof userToTargetMatch !== 'undefined' &&
+        userToTargetMatch.length === sourceContours.length) {
+        assign = userToTargetMatch.slice();
+    } else if (typeof matchContours === 'function') {
+        assign = matchContours(userSimplified, targetTranslated);
+    } else {
+        assign = userSimplified.map((_, i) => i < targetTranslated.length ? i : -1);
+    }
+
     const newUserPolys = [];
     const newTargetPolys = [];
-    const nRegions = Math.max(userSorted.length, targetTranslated.length);
+    const newColors = [];
+    const targetUsed = new Set();
 
-    for (let i = 0; i < nRegions; i++) {
-        const u = userSorted[i];
-        const t = targetTranslated[i];
+    for (let i = 0; i < userSimplified.length; i++) {
+        const u = userSimplified[i];
+        if (u.length < 3) continue;
+        const colorIdx = (typeof userColorIdx !== 'undefined' && userColorIdx[i] !== undefined)
+            ? userColorIdx[i] : i;
+        const j = assign[i];
 
-        if (u && t) {
+        if (j >= 0 && j < targetTranslated.length && !targetUsed.has(j)) {
+            const t = targetTranslated[j];
             const resampledU = resamplePolygon(u, t.length);
             const alignedT = alignTargetTo(resampledU, t);
             newUserPolys.push(resampledU);
             newTargetPolys.push(alignedT);
-        } else if (u) {
+            newColors.push(colorIdx);
+            targetUsed.add(j);
+        } else {
+            // Unmatched user → collapses to its own centroid at t=1.
             const c = centroid(u);
             newUserPolys.push(u);
             newTargetPolys.push(u.map(() => [c[0], c[1]]));
-        } else if (t) {
-            const c = centroid(t);
-            newUserPolys.push(t.map(() => [c[0], c[1]]));
-            newTargetPolys.push(t);
+            newColors.push(colorIdx);
         }
     }
+    // Unmatched targets emerge from their own centroid at t=0.
+    for (let j = 0; j < targetTranslated.length; j++) {
+        if (targetUsed.has(j)) continue;
+        const t = targetTranslated[j];
+        const c = centroid(t);
+        newUserPolys.push(t.map(() => [c[0], c[1]]));
+        newTargetPolys.push(t);
+        const colorIdx = (typeof targetColorIdx !== 'undefined' && targetColorIdx[j] !== undefined)
+            ? targetColorIdx[j] : (sourceContours.length + j);
+        newColors.push(colorIdx);
+    }
+
+    if (newUserPolys.length === 0) return false;
 
     userMorphPolys = newUserPolys;
     targetMorphPolys = newTargetPolys;
+    morphColorIdx = newColors;
     userMorphPoly = userMorphPolys[0] || null;
     targetMorphPoly = targetMorphPolys[0] || null;
 
-    DebugWindow.log(`✓ prepareMorph: ${nRegions} region(s) matched`);
+    DebugWindow.log(`✓ prepareMorph: ${userMorphPolys.length} region(s), ${targetUsed.size} paired by Hungarian`);
     return true;
 }
 
@@ -184,6 +218,9 @@ function drawMorph(t, forceLines, forcePoints) {
             targetMorphPolys = targetMorphPolys.filter((_, i) => keep[i]);
             userMorphPoly = userMorphPolys[0] || null;
             targetMorphPoly = targetMorphPolys[0] || null;
+            if (typeof morphColorIdx !== 'undefined' && morphColorIdx.length === origLen) {
+                morphColorIdx = morphColorIdx.filter((_, i) => keep[i]);
+            }
             if (typeof rawContours !== 'undefined' && rawContours &&
                 rawContours.length === origLen) {
                 rawContours = rawContours.filter((_, i) => keep[i]);
@@ -240,7 +277,9 @@ function drawMorph(t, forceLines, forcePoints) {
         morphCtx.lineCap = 'round';
         morphCtx.lineJoin = 'round';
         for (let r = 0; r < allInterp.length; r++) {
-            const color = regionColor(r);
+            const cIdx = (typeof morphColorIdx !== 'undefined' && morphColorIdx[r] !== undefined)
+                ? morphColorIdx[r] : r;
+            const color = regionColor(cIdx);
             if (showLines) {
                 morphCtx.strokeStyle = color;
                 morphCtx.beginPath();
