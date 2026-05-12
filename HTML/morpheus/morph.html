@@ -350,6 +350,11 @@
             if (e.key === 'Escape') {
                 clearDraw();
             }
+            if ((e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                savePreset();
+            }
         }, true);
 
         function onStrokeChange(val) {
@@ -554,8 +559,16 @@
             drawMorph(val / 100);
         }
 
+        let currentPresetIndex = null;
+        try {
+            const v = localStorage.getItem('morph-current-preset');
+            if (v !== null) currentPresetIndex = +v;
+        } catch (_) {}
+
         function loadPreset(index) {
             clearDraw();
+            currentPresetIndex = index;
+            try { localStorage.setItem('morph-current-preset', String(index)); } catch (_) {}
             const img = new Image();
             img.onload = () => {
                 const w = 500, h = 500;
@@ -566,8 +579,59 @@
             };
             img.onerror = () => {
                 DebugWindow.log(`❌ FEHLT: presets/formula-${index}.png konnte nicht geladen werden!`);
+                currentPresetIndex = null;
+                try { localStorage.removeItem('morph-current-preset'); } catch (_) {}
             };
             img.src = `presets/formula-${index}.png`;
+        }
+
+        function savePreset() {
+            DebugWindow.log(`💾 savePreset() called, currentPresetIndex=${currentPresetIndex}`);
+            if (currentPresetIndex === null) {
+                DebugWindow.log('⚠️ Kein Preset geladen — Formel-Button klicken um Preset-Index zu setzen');
+                return;
+            }
+            // 1. Read 1000×1000 canvas, find bounding box of non-black content
+            const imgData = drawCtx.getImageData(0, 0, 1000, 1000);
+            const d = imgData.data;
+            let minX = 1000, minY = 1000, maxX = -1, maxY = -1;
+            for (let y = 0; y < 1000; y++) {
+                for (let x = 0; x < 1000; x++) {
+                    const i = (y * 1000 + x) * 4;
+                    if (d[i] > 30 || d[i+1] > 30 || d[i+2] > 30) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (maxX < 0) {
+                DebugWindow.log('⚠️ Canvas ist leer — nichts zu speichern');
+                return;
+            }
+            const cw = maxX - minX + 1;
+            const ch = maxY - minY + 1;
+            DebugWindow.log(`  content bbox: ${minX},${minY} → ${maxX},${maxY}  (${cw}×${ch})`);
+            // 2. Build output canvas 1000×1000 black, paste content scaled with 60px margin
+            const out = document.createElement('canvas');
+            out.width = 1000; out.height = 1000;
+            const oc = out.getContext('2d');
+            oc.fillStyle = '#000';
+            oc.fillRect(0, 0, 1000, 1000);
+            const MARGIN = 60;
+            const scale = Math.min((1000 - 2*MARGIN) / cw, (1000 - 2*MARGIN) / ch);
+            const nw = cw * scale, nh = ch * scale;
+            const ox = (1000 - nw) / 2, oy = (1000 - nh) / 2;
+            oc.imageSmoothingEnabled = true;
+            oc.imageSmoothingQuality = 'high';
+            oc.drawImage(drawCanvas, minX, minY, cw, ch, ox, oy, nw, nh);
+            // 3. Download
+            const link = document.createElement('a');
+            link.href = out.toDataURL('image/png');
+            link.download = `formula-${currentPresetIndex}.png`;
+            link.click();
+            DebugWindow.log(`💾 Download: formula-${currentPresetIndex}.png  (cropped+rescaled ${cw}×${ch} → ${Math.round(nw)}×${Math.round(nh)} @ ${Math.round(ox)},${Math.round(oy)})`);
         }
 
         let eraserMode = false;
