@@ -125,6 +125,8 @@ function extractOutline() {
         } catch (_) {}
         drawPolygon();
         if (selectedDigit !== null) drawTargetPolygon();
+        // Topological object count (separate drawn shapes, not contours)
+        if (typeof logDrawnObjects === 'function') logDrawnObjects();
         DebugWindow.log('✓ extractOutline done');
     } catch (e) {
         DebugWindow.log(`❌ extractOutline error: ${e.message}`);
