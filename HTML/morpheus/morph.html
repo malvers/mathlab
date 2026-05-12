@@ -59,6 +59,8 @@
                     <canvas id="digit-canvas" width="1000" height="1000"></canvas>
                     <canvas id="outline-canvas" width="1000" height="1000"></canvas>
                     <canvas id="morph-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="colorado-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="cursor-canvas" width="1000" height="1000"></canvas>
                 </div>
                 <div id="draw-hint">Zeichne — Maus oder Finger</div>
             </div>
@@ -69,6 +71,10 @@
             <div id="object-count-box">
                 <div class="obj-value" id="obj-value">0</div>
                 <div class="obj-label">Objekte</div>
+            </div>
+            <div id="latex-count-box">
+                <div class="lat-value" id="lat-value">0</div>
+                <div class="lat-label">Objekte</div>
             </div>
         </div>
     </main>
@@ -236,6 +242,34 @@
             <div id="target-count" style="display:none;font-family:'Orbitron',sans-serif;font-size:12px;color:#F4C430;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
         `, '#00d2ff', { collapsible: true });
 
+        CyberUI.createCard('ui-container', 'FORMELN', `
+            <div class="digit-grid formula-grid">
+                ${[
+                    { latex: 'E=mc^2',                                 text: 'E=mc^2',                                title: 'Einstein' },
+                    { latex: '\\frac{a}{b}',                                    text: '\\frac{a}{b}',                                    title: 'Bruch' },
+                    { latex: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',  text: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',  title: 'Quadratische Formel' },
+                    { latex: 'e^{i\\pi}+1=0',                         text: 'e^{i\\pi}+1=0',                         title: 'Eulersche Identität' },
+                    { latex: 'a^2+b^2=c^2',                           text: 'a^2+b^2=c^2',                           title: 'Pythagoras' },
+                    { latex: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}', text: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}', title: 'Taylor e^x' },
+                    { latex: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}', text: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}', title: 'Gauss-Integral' },
+                    { latex: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',    text: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',    title: 'Binomialkoeffizient' },
+                    { latex: '\\frac{d}{dx}x^n=nx^{n-1}',             text: '\\frac{d}{dx}x^n=nx^{n-1}',             title: 'Potenzregel' },
+                    { latex: '\\int_a^b f(x)\\,dx',                   text: '\\int_a^b f(x)\\,dx',                   title: 'Bestimmtes Integral' },
+                    { latex: 'F=G\\frac{m_1 m_2}{r^2}',               text: 'F=G\\frac{m_1 m_2}{r^2}',               title: 'Newton Gravitation' },
+                    { latex: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', text: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', title: 'Schrödinger' },
+                    { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', text: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', title: 'Maxwell (Gauß)' },
+                    { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', text: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', title: 'Maxwell (Ampère)' },
+                    { latex: 'S=-k_B\\sum_i p_i\\ln p_i',             text: 'S=-k_B\\sum_i p_i\\ln p_i',             title: 'Entropie (Boltzmann)' },
+                    { latex: '\\Delta x\\,\\Delta p\\geq\\frac{\\hbar}{2}', text: '\\Delta x\\,\\Delta p\\geq\\frac{\\hbar}{2}', title: 'Heisenberg' },
+                ].map((sym, i) => `
+                    <label class="latex-label" title="${sym.title}">
+                        <input type="radio" name="digit" value="formula-${i}" onclick="setTextInput(this.dataset.latex)" data-latex="${sym.text}">
+                        <span class="latex-render" data-latex="${sym.latex}"></span>
+                    </label>
+                `).join('')}
+            </div>
+        `, '#00d2ff', { collapsible: true });
+
         // ── Drawing ─────────────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
         const drawCtx = drawCanvas.getContext('2d');
@@ -255,18 +289,61 @@
         //  hideUserOutline, showUserOutline, setupUserDrawingEvents
         //  moved to morpheus/user-draw.js)
 
-        // Pause running morph animation on Spacebar press.
         document.addEventListener('keydown', e => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
             if (e.code === 'Space' || e.key === ' ') {
-                if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+                e.preventDefault();
                 if (morphRaf !== null) {
-                    e.preventDefault();
                     cancelAnimationFrame(morphRaf);
                     morphRaf = null;
                     DebugWindow.log('⏸ Morph paused (Space)');
+                } else {
+                    DebugWindow.log('▶ Morph started (Space)');
+                    startMorph();
                 }
             }
-        });
+            if (e.key === 'l' || e.key === 'L') {
+                const t = document.getElementById('lines-toggle');
+                if (t) { t.checked = !t.checked; onLinesToggle(t.checked); }
+            }
+            if (e.key === 'p' || e.key === 'P') {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                const t = document.getElementById('points-toggle');
+                if (t) { t.checked = !t.checked; onPointsToggle(t.checked); }
+            }
+            if ((e.key === 'c' || e.key === 'C') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                coloradoMode = !coloradoMode;
+                drawColorado();
+                DebugWindow.log(coloradoMode ? '🌈 Colorado ON' : '🌈 Colorado OFF');
+            }
+            if ((e.key === 'r' || e.key === 'R') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                eraserMode = !eraserMode;
+                const dc = document.getElementById('draw-canvas');
+                const cursorEraser = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='4' y='12' width='14' height='8' rx='1' fill='white' stroke='%23aaa' stroke-width='1'/%3E%3Cpath d='M7 12 L14 4 L20 10 L13 18' fill='%23ddd' stroke='%23aaa' stroke-width='1'/%3E%3C/svg%3E\") 4 20, cell";
+                const cursorPencil = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' fill='white'/%3E%3C/svg%3E\") 0 24, crosshair";
+                if (eraserMode) {
+                    drawCtx.strokeStyle = '#000000';
+                    drawCtx.lineWidth = 40;
+                    if (dc) dc.style.cursor = cursorEraser;
+                    document.getElementById('draw-hint').textContent = '🧹 ERASER — R zum Beenden';
+                } else {
+                    drawCtx.strokeStyle = '#adff2f';
+                    const sl = document.getElementById('stroke-slider');
+                    drawCtx.lineWidth = sl ? +sl.value : 6;
+                    if (dc) dc.style.cursor = cursorPencil;
+                    document.getElementById('draw-hint').textContent = 'Zeichne — Maus oder Finger';
+                }
+                DebugWindow.log(eraserMode ? '🧹 Eraser ON (20px)' : '✏️ Draw ON');
+            }
+            if (e.key === 'Escape') {
+                clearDraw();
+            }
+        }, true);
 
         function onStrokeChange(val) {
             document.getElementById('stroke-val').textContent = val;
@@ -456,6 +533,7 @@
             drawMorph(val / 100);
         }
 
+        let eraserMode = false;
         let selectedDigit = null;
         let timesFont = null;
         let targetPolygon = null; // high-res polygon of the times digit, for morphing
@@ -572,7 +650,11 @@
 
         // Boot
         initDraw();
+        initCursorCanvas();
+        initColoradoCanvas();
         setupUserDrawingEvents();
+        { const dc = document.getElementById('draw-canvas');
+          if (dc) dc.style.cursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' fill='white'/%3E%3C/svg%3E\") 0 24, crosshair"; }
         loadFromStorage();
         try {
             const savedEps = localStorage.getItem('morph-eps');
@@ -594,9 +676,10 @@
             const savedDigit = localStorage.getItem('morph-digit');
             if (savedText !== null) {
                 document.getElementById('text-input').value = savedText;
-                // Check matching latex radio button
-                const radio = document.querySelector(`input[name="digit"][data-latex="${savedText}"]`);
-                if (radio) radio.checked = true;
+                // Check matching radio button (querySelector fails with LaTeX special chars)
+                for (const r of document.querySelectorAll('input[name="digit"][data-latex]')) {
+                    if (r.dataset.latex === savedText) { r.checked = true; break; }
+                }
                 onTextInput(savedText);
             } else if (savedDigit !== null) {
                 const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
