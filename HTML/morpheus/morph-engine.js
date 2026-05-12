@@ -159,7 +159,56 @@ function drawMorph(t, forceLines, forcePoints) {
 
     morphCtx.save();
 
-    // Interpolate each region separately
+    // Helper: signed area magnitude (shoelace)
+    const polyArea = poly => {
+        let a = 0;
+        for (let i = 0; i < poly.length; i++) {
+            const [x1, y1] = poly[i];
+            const [x2, y2] = poly[(i + 1) % poly.length];
+            a += (x2 - x1) * (y2 + y1);
+        }
+        return Math.abs(a) / 2;
+    };
+
+    // At t=1, DELETE zero-area (collapsed-to-point) regions from state
+    // BEFORE rendering — they no longer exist in the morph.
+    let pruned = 0;
+    if (t >= 1) {
+        // Region's actual rendered area at t=1 = polyArea on the interpolated polygon
+        // (== targetMorphPolys[r] since at t=1 we are fully at target).
+        const targetAreas = targetMorphPolys.map(polyArea);
+        DebugWindow.log(`  pruning check — targetAreas: [${targetAreas.map(Math.round).join(', ')}]`);
+        const keep = targetAreas.map(a => a > 0);
+        pruned = targetAreas.length - keep.filter(Boolean).length;
+        if (pruned > 0) {
+            const origLen = userMorphPolys.length;
+            userMorphPolys = userMorphPolys.filter((_, i) => keep[i]);
+            targetMorphPolys = targetMorphPolys.filter((_, i) => keep[i]);
+            userMorphPoly = userMorphPolys[0] || null;
+            targetMorphPoly = targetMorphPolys[0] || null;
+            if (typeof rawContours !== 'undefined' && rawContours &&
+                rawContours.length === origLen) {
+                rawContours = rawContours.filter((_, i) => keep[i]);
+                rawContour = rawContours[0] || null;
+                DebugWindow.log(`  rawContours pruned: ${origLen} → ${rawContours.length}`);
+            } else {
+                DebugWindow.log(`  ⚠ rawContours NOT pruned (counts didn't align: rawContours.length=${rawContours?.length}, origLen=${origLen})`);
+            }
+            // Also clear the outline overlay so old colored points/lines vanish
+            if (typeof outlineCtx !== 'undefined') {
+                outlineCtx.clearRect(0, 0, 1000, 1000);
+                if (typeof drawTargetPolygon === 'function') drawTargetPolygon();
+                DebugWindow.log(`  outline-canvas cleared + redrawn`);
+            }
+        }
+    }
+
+    if (userMorphPolys.length === 0) {
+        morphCtx.restore();
+        return;
+    }
+
+    // Interpolate each (surviving) region
     const allInterp = [];
     for (let r = 0; r < userMorphPolys.length; r++) {
         const u = userMorphPolys[r];
@@ -224,7 +273,7 @@ function drawMorph(t, forceLines, forcePoints) {
     }
     morphCtx.restore();
 
-    // Similarity in % — updated EVERY frame, shown in the corner box.
+    // Similarity in % — updated EVERY frame
     let totalDist = 0, totalPts = 0;
     for (let r = 0; r < allInterp.length; r++) {
         const u = allInterp[r];
@@ -245,41 +294,14 @@ function drawMorph(t, forceLines, forcePoints) {
     const simBoxVal = document.getElementById('sim-value');
     if (simBoxVal) simBoxVal.textContent = sim + '%';
 
-    // At the END of the morph, prune zero-area regions (collapsed points)
+    // Final debug log
     if (t >= 1) {
-        const regionAreas = allInterp.map(poly => {
-            let a = 0;
-            for (let i = 0; i < poly.length; i++) {
-                const [x1, y1] = poly[i];
-                const [x2, y2] = poly[(i + 1) % poly.length];
-                a += (x2 - x1) * (y2 + y1);
-            }
-            return Math.round(Math.abs(a) / 2);
-        });
-        const keep = regionAreas.map(a => a > 0);
-        const pruned = regionAreas.length - keep.filter(Boolean).length;
-
-        DebugWindow.log(`🎬 t=100% | sim: ${sim}% (avg dist ${Math.round(avgDist)}px) | ${keep.filter(Boolean).length} region(s)`);
-        regionAreas.forEach((a, i) => {
-            if (!keep[i]) return;
+        DebugWindow.log(`🎬 t=100% | sim: ${sim}% (avg dist ${Math.round(avgDist)}px) | ${allInterp.length} region(s)`);
+        allInterp.forEach((poly, i) => {
+            const a = Math.round(polyArea(poly));
             const role = i === 0 ? 'outer' : `hole ${i}`;
             DebugWindow.log(`  region ${i} (${role}): ${a} px²`);
         });
-
-        if (pruned > 0) {
-            userMorphPolys = userMorphPolys.filter((_, i) => keep[i]);
-            targetMorphPolys = targetMorphPolys.filter((_, i) => keep[i]);
-            userMorphPoly = userMorphPolys[0] || null;
-            targetMorphPoly = targetMorphPolys[0] || null;
-            // Also prune rawContours (only when counts align) so outlines
-            // match when stopMorph restores the user drawing. We do NOT call
-            // drawPolygon() here — that would resurrect the hidden user art.
-            if (typeof rawContours !== 'undefined' && rawContours &&
-                rawContours.length === regionAreas.length) {
-                rawContours = rawContours.filter((_, i) => keep[i]);
-                rawContour = rawContours[0] || null;
-            }
-            DebugWindow.log(`  🗑 deleted ${pruned} zero-area region(s)`);
-        }
+        if (pruned > 0) DebugWindow.log(`  🗑 deleted ${pruned} zero-area region(s)`);
     }
 }
