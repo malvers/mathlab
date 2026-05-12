@@ -121,25 +121,16 @@ function getContour(grid, W, H) {
 }
 
 // CANONICAL sort for stable region identity across user-drawing, target, morph.
-// Index 0 = OUTER (largest by vertex count).
-// Index 1+ = HOLES, sorted by centroid Y ascending (top to bottom), X as tiebreaker.
-// Guarantees colors stay consistent: i-th region is always the SAME region.
+// Sorts all contours by centroid X (left → right), Y as tiebreaker.
+// This keeps color assignment consistent for formulas and multi-glyph text:
+// both user-drawn and LaTeX-rendered contours of the same formula will share
+// the same left-to-right index order.
 function sortContoursCanonical(contours) {
     if (!contours || contours.length <= 1) return contours;
-    let largestIdx = 0;
-    for (let i = 1; i < contours.length; i++) {
-        if (contours[i].length > contours[largestIdx].length) largestIdx = i;
-    }
-    const outer = contours[largestIdx];
-    const holes = [];
-    for (let i = 0; i < contours.length; i++) {
-        if (i !== largestIdx) holes.push(contours[i]);
-    }
-    holes.sort((a, b) => {
+    return [...contours].sort((a, b) => {
         const ca = centroid(a);
         const cb = centroid(b);
-        if (Math.abs(ca[1] - cb[1]) > 5) return ca[1] - cb[1];
-        return ca[0] - cb[0];
+        if (Math.abs(ca[0] - cb[0]) > 5) return ca[0] - cb[0];
+        return ca[1] - cb[1];
     });
-    return [outer, ...holes];
 }
