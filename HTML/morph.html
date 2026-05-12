@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/debug-window.js"></script>
     <style>
         #draw-canvas {
             display: block;
@@ -219,26 +223,38 @@
             box-shadow: 0 0 12px rgba(173, 255, 47, 0.3);
         }
 
-        /* Collapsible cards */
-        .cyber-card {
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+        /* LaTeX labels inside digit-grid — visually match digit size */
+        .digit-grid .latex-label {
+            font-size: 20px !important;
         }
-        .cyber-card.collapsed {
-            max-height: 50px !important;
+        .digit-grid .latex-render {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
-        .cyber-card h3 {
+        .digit-grid .latex-render .katex {
+            color: inherit;
+            line-height: 1.2;
+            font-size: 1em;
+        }
+
+        /* Collapsible instrument cards */
+        .instrument-card.collapsible .instrument-title {
             cursor: pointer;
             user-select: none;
         }
-        .cyber-card h3::before {
-            content: '▼ ';
+        .instrument-card.collapsible .toggle-icon {
             display: inline-block;
-            transition: transform 0.3s;
-            margin-right: 5px;
+            transition: transform 0.2s ease;
+            margin-right: 6px;
+            font-size: 10px;
         }
-        .cyber-card.collapsed h3::before {
-            transform: rotate(-90deg);
+        .instrument-card.collapsible:not(.collapsed) .toggle-icon {
+            transform: rotate(90deg);
+        }
+        .instrument-card.collapsible.collapsed .card-content {
+            display: none;
         }
     </style>
 </head>
@@ -309,7 +325,7 @@
         CyberUI.createCard('ui-container', 'ZEICHNEN', `
             <button class="cyber-btn" onclick="clearDraw()"
                 style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
-        `);
+        `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'OUTLINES', `
             <button class="cyber-btn" onclick="extractOutline()"
@@ -330,14 +346,14 @@
                 <span id="eps-val">8</span>
             </div>
             <div id="vert-count"></div>
-        `);
+        `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'MORPH', `
             <button class="cyber-btn" onclick="startMorph()"
                 style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► MORPH</button>
             <div class="eps-row">
                 <label>t</label>
-                <input type="range" id="morph-slider" min="0" max="100" value="0" step="1"
+                <input type="range" id="morph-slider" min="1" max="100" value="1" step="1"
                     oninput="onMorphSlider(this.value)">
                 <span id="morph-val">0</span>
             </div>
@@ -345,7 +361,7 @@
                 <label>Ähnlichkeit</label>
                 <span id="morph-similarity">0%</span>
             </div>
-        `);
+        `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'ZIFFER', `
             <div class="digit-grid">
@@ -355,12 +371,30 @@
                         <span>${d}</span>
                     </label>
                 `).join('')}
+                ${[
+                    { latex: '\\surd', text: '\\sqrt', title: 'surd' },
+                    { latex: '\\sqrt{\\phantom{x}}', text: '\\sqrt{\\phantom{x}}', title: 'sqrt + bar' },
+                    { latex: '\\int', text: '\\int', title: 'integral' },
+                    { latex: '\\sum', text: '\\sum', title: 'sum' },
+                    { latex: '\\prod', text: '\\prod', title: 'product' },
+                    { latex: '\\oint', text: '\\oint', title: 'closed integral' },
+                    { latex: '\\partial', text: '\\partial', title: 'partial' },
+                    { latex: '\\nabla', text: '\\nabla', title: 'nabla' },
+                    { latex: '\\infty', text: '\\infty', title: 'infinity' },
+                    { latex: '\\pi', text: '\\pi', title: 'pi' },
+                    { latex: '\\Omega', text: '\\Omega', title: 'Omega' }
+                ].map((sym, i) => `
+                    <label class="latex-label" title="${sym.title}">
+                        <input type="radio" name="digit" value="latex-${i}" onclick="setTextInput(this.dataset.latex)" data-latex="${sym.text}">
+                        <span class="latex-render" data-latex="${sym.latex}"></span>
+                    </label>
+                `).join('')}
             </div>
             <input type="text" id="text-input" placeholder="Text/LaTeX..."
                 style="width:100%;margin-top:8px;padding:6px 10px;background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.4);color:#00d2ff;font-family:'Orbitron',monospace;font-size:12px;border-radius:4px;"
                 oninput="onTextInput(this.value)">
             <div id="target-count" style="display:none;font-family:'Orbitron',sans-serif;font-size:12px;color:#F4C430;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
-        `);
+        `, '#00d2ff', { collapsible: true });
 
         // ── Drawing ─────────────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
@@ -371,7 +405,8 @@
         const morphCtx = morphCanvas.getContext('2d');
         let isDrawing = false;
         let savedPixels = null; // ImageData snapshot before polygon is drawn
-        let rawContour = null;  // pixel-level contour from Moore tracing
+        let rawContour = null;  // largest sub-polygon (for morphing reference)
+        let rawContours = null; // ALL sub-polygons (outer + holes), topology-aware
         let saveTimer = null;   // debounce for auto-save
 
         function initDraw() {
@@ -389,9 +424,13 @@
             morphRaf = null;
             savedPixels = null;
             rawContour = null;
+            rawContours = null;
             userMorphPoly = null;
             document.getElementById('vert-count').textContent = '';
-            try { localStorage.removeItem('morph-outline'); } catch (_) {}
+            try {
+                localStorage.removeItem('morph-outline');
+                localStorage.removeItem('morph-outlines');
+            } catch (_) {}
             initDraw();
             // Also clear the times outline overlay (digit fill stays)
             const toggle = document.getElementById('poly-toggle');
@@ -421,8 +460,12 @@
         function resetDrawState() {
             savedPixels = null;
             rawContour = null;
+            rawContours = null;
             document.getElementById('vert-count').textContent = '';
-            try { localStorage.removeItem('morph-outline'); } catch (_) {}
+            try {
+                localStorage.removeItem('morph-outline');
+                localStorage.removeItem('morph-outlines');
+            } catch (_) {}
         }
 
         drawCanvas.addEventListener('mousedown', e => {
@@ -455,59 +498,128 @@
         drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
 
         // ── Marching Squares Contour Extraction ───────────────────────────────────────
+        // Returns flat ordered points (backward-compatible single-contour version)
         function getContour(grid, W, H) {
-            const contours = [];
-            const visited = new Uint8Array(W * H);
+            const all = getContoursWithHoles(grid, W, H);
+            if (all.length === 0) return [];
+            // Return concatenation? No — return only the largest (outer) to preserve old behavior
+            // But for hole support we need all. Return largest for legacy single-poly callers.
+            let largest = all[0];
+            for (const c of all) if (c.length > largest.length) largest = c;
+            return largest;
+        }
 
-            // Marching squares: scan 2x2 cells
+        // Topology-aware boundary tracing using Marching Squares with proper edge linking.
+        // Returns multiple disjoint closed contours (outer + holes) — no bridges between them.
+        function getContoursWithHoles(grid, W, H) {
+            // Step 1: For each cell, generate line segments based on marching-squares case.
+            // Each segment is [pt1, pt2] where pts are at edge midpoints.
+            // Cell case bits (msb first): TL TR BR BL
+            const segments = [];
+
             for (let y = 0; y < H - 1; y++) {
                 for (let x = 0; x < W - 1; x++) {
-                    // 4 corners of cell: TL, TR, BR, BL
                     const tl = grid[y * W + x];
                     const tr = grid[y * W + (x + 1)];
                     const br = grid[(y + 1) * W + (x + 1)];
                     const bl = grid[(y + 1) * W + x];
-
-                    // Case number (4-bit bitmask)
                     const cas = (tl << 3) | (tr << 2) | (br << 1) | bl;
-
-                    // Skip empty cells and fully-filled cells
                     if (cas === 0 || cas === 15) continue;
 
-                    // Interpolate contour segments crossing this cell
-                    // For simplicity: just mark transitions
-                    if (tl !== tr) contours.push([x + 0.5, y]);
-                    if (tr !== br) contours.push([x + 1, y + 0.5]);
-                    if (br !== bl) contours.push([x + 0.5, y + 1]);
-                    if (bl !== tl) contours.push([x, y + 0.5]);
+                    const top    = [x + 0.5, y];
+                    const right  = [x + 1,   y + 0.5];
+                    const bottom = [x + 0.5, y + 1];
+                    const left   = [x,       y + 0.5];
+
+                    switch (cas) {
+                        // Single-corner cases (one filled corner)
+                        case 1:  segments.push([left, bottom]); break;            // BL
+                        case 2:  segments.push([bottom, right]); break;           // BR
+                        case 4:  segments.push([top, right]); break;              // TR
+                        case 8:  segments.push([top, left]); break;               // TL
+
+                        // Three-corner cases (one outside corner)
+                        case 7:  segments.push([left, top]); break;               // TR+BR+BL
+                        case 11: segments.push([right, top]); break;              // TL+BR+BL
+                        case 13: segments.push([right, bottom]); break;           // TL+TR+BL
+                        case 14: segments.push([bottom, left]); break;            // TL+TR+BR
+
+                        // Two-corner adjacent (horizontal/vertical)
+                        case 3:  segments.push([left, right]); break;             // BL+BR
+                        case 12: segments.push([left, right]); break;             // TL+TR
+                        case 6:  segments.push([top, bottom]); break;             // TR+BR
+                        case 9:  segments.push([top, bottom]); break;             // TL+BL
+
+                        // Saddle cases (ambiguous diagonal — pick local disambiguation)
+                        // Case 5 = TR+BL (anti-diagonal): keep two separate segments
+                        case 5:
+                            segments.push([top, right]);
+                            segments.push([left, bottom]);
+                            break;
+                        // Case 10 = TL+BR (main diagonal)
+                        case 10:
+                            segments.push([top, left]);
+                            segments.push([right, bottom]);
+                            break;
+                    }
                 }
             }
 
-            if (contours.length === 0) return [];
+            if (segments.length === 0) return [];
 
-            // Order contour points by proximity (simple chain)
-            const ordered = [contours[0]];
-            const used = new Set([0]);
-
-            for (let i = 1; i < contours.length; i++) {
-                const last = ordered[ordered.length - 1];
-                let best = -1, bestDist = Infinity;
-
-                for (let j = 0; j < contours.length; j++) {
-                    if (used.has(j)) continue;
-                    const dx = contours[j][0] - last[0];
-                    const dy = contours[j][1] - last[1];
-                    const dist = dx * dx + dy * dy;
-                    if (dist < bestDist) { bestDist = dist; best = j; }
+            // Step 2: Build endpoint→segment-indices map for chaining.
+            // Use a numeric key that's collision-free for our domain (W,H ≤ ~2000, halves):
+            const ptKey = pt => pt[0] * 1e6 + pt[1];
+            const endpointMap = new Map();
+            for (let i = 0; i < segments.length; i++) {
+                for (let e = 0; e < 2; e++) {
+                    const k = ptKey(segments[i][e]);
+                    if (!endpointMap.has(k)) endpointMap.set(k, []);
+                    endpointMap.get(k).push(i);
                 }
-
-                if (best >= 0) {
-                    ordered.push(contours[best]);
-                    used.add(best);
-                } else break;
             }
 
-            return ordered;
+            // Step 3: Walk segments to build closed contours.
+            // Each segment is consumed exactly once. Multiple disjoint loops emerge naturally.
+            const used = new Uint8Array(segments.length);
+            const contours = [];
+
+            for (let startIdx = 0; startIdx < segments.length; startIdx++) {
+                if (used[startIdx]) continue;
+                used[startIdx] = 1;
+
+                const startPt = segments[startIdx][0];
+                const startKey = ptKey(startPt);
+                const contour = [startPt];
+                let currentPt = segments[startIdx][1];
+                contour.push(currentPt);
+
+                let safety = 0;
+                const maxSteps = segments.length + 2;
+
+                while (safety++ < maxSteps) {
+                    const k = ptKey(currentPt);
+                    if (k === startKey) break; // Closed loop
+
+                    const candidates = endpointMap.get(k);
+                    if (!candidates) break;
+
+                    let nextSegIdx = -1;
+                    for (const ci of candidates) {
+                        if (!used[ci]) { nextSegIdx = ci; break; }
+                    }
+                    if (nextSegIdx < 0) break;
+                    used[nextSegIdx] = 1;
+
+                    const seg = segments[nextSegIdx];
+                    currentPt = (ptKey(seg[0]) === k) ? seg[1] : seg[0];
+                    contour.push(currentPt);
+                }
+
+                if (contour.length >= 5) contours.push(contour);
+            }
+
+            return contours;
         }
 
         // ── Ramer–Douglas–Peucker simplification ─────────────────────────────────────
@@ -542,14 +654,32 @@
             for (let i = 0; i < 1000 * 1000; i++)
                 grid[i] = imgData.data[i * 4] > 30 ? 1 : 0;
 
-            rawContour = getContour(grid, 1000, 1000);
+            // Topology-aware extraction: get ALL contours (outer + holes)
+            rawContours = getContoursWithHoles(grid, 1000, 1000);
+
+            if (!rawContours || rawContours.length === 0) {
+                rawContour = null;
+                document.getElementById('vert-count').textContent = 'Nichts gefunden';
+                DebugWindow.log('⚠️ extractOutline: no contours found');
+                return;
+            }
+
+            // Pick the largest as the "main" contour (used for morphing reference)
+            rawContour = rawContours[0];
+            for (const c of rawContours) {
+                if (c.length > rawContour.length) rawContour = c;
+            }
+            DebugWindow.log(`✓ extractOutline: ${rawContours.length} contour(s), largest=${rawContour.length} pts`);
 
             if (rawContour.length < 3) {
                 document.getElementById('vert-count').textContent = 'Nichts gefunden';
                 return;
             }
 
-            try { localStorage.setItem('morph-outline', JSON.stringify(rawContour)); } catch (_) {}
+            try {
+                localStorage.setItem('morph-outline', JSON.stringify(rawContour));
+                localStorage.setItem('morph-outlines', JSON.stringify(rawContours));
+            } catch (_) {}
             drawPolygon();
         }
 
@@ -606,100 +736,134 @@
             return crosses;
         }
 
+        // Distinct colors per contour region. Chosen to contrast with user-green (#adff2f),
+        // times-yellow (#F4C430), morph-green (#adff2f), and black background.
+        const REGION_COLORS = [
+            '#ff3030', // red
+            '#30c4ff', // bright cyan-blue
+            '#ff30c8', // magenta
+            '#ff9030', // orange
+            '#a060ff', // purple
+            '#30ffd0', // turquoise
+            '#ff6060', // coral
+            '#60a0ff', // light blue
+        ];
+        function regionColor(idx) { return REGION_COLORS[idx % REGION_COLORS.length]; }
+
         function drawPolygon() {
-            if (!rawContour || !savedPixels) return;
+            if ((!rawContour && !rawContours) || !savedPixels) return;
             drawCtx.putImageData(savedPixels, 0, 0);
 
             const showPoly = document.getElementById('poly-toggle')?.checked ?? true;
-
             const eps = +document.getElementById('eps-slider').value;
-            let poly = rdp(rawContour, eps);
-            const rdpCount = poly.length;
 
-            // If target polygon exists: resample user polygon to match the LARGEST sub-polygon's count
-            let resampled = false;
+            // Multi-polygon support: use rawContours if available, else fallback to single rawContour
+            const contours = (rawContours && rawContours.length > 0)
+                ? rawContours
+                : (rawContour && rawContour.length >= 3 ? [rawContour] : []);
+            if (contours.length === 0) return;
+
+            // Find largest contour index — that's the one used for morphing (resampled to target)
+            let largestIdx = 0;
+            for (let i = 1; i < contours.length; i++) {
+                if (contours[i].length > contours[largestIdx].length) largestIdx = i;
+            }
+
             const targetLargest = getLargestTargetSubPoly();
-            if (targetLargest && targetLargest.length >= 3) {
-                let openPoly = poly;
-                if (poly.length > 1 &&
-                    poly[0][0] === poly[poly.length - 1][0] &&
-                    poly[0][1] === poly[poly.length - 1][1]) {
-                    openPoly = poly.slice(0, -1);
+            let totalRdpVerts = 0, totalFinalVerts = 0, totalCrosses = 0;
+            let resampled = false;
+            userMorphPoly = null;
+
+            drawCtx.save();
+            drawCtx.lineWidth = 1;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+
+            // Process each contour separately (no bridges, proper topology)
+            for (let ci = 0; ci < contours.length; ci++) {
+                const rc = contours[ci];
+                if (!rc || rc.length < 3) continue;
+
+                let poly = rdp(rc, eps);
+                totalRdpVerts += poly.length;
+
+                // Only the LARGEST contour is resampled to match target for morphing
+                if (ci === largestIdx && targetLargest && targetLargest.length >= 3) {
+                    let openPoly = poly;
+                    if (poly.length > 1 &&
+                        poly[0][0] === poly[poly.length - 1][0] &&
+                        poly[0][1] === poly[poly.length - 1][1]) {
+                        openPoly = poly.slice(0, -1);
+                    }
+                    poly = resamplePolygon(openPoly, targetLargest.length);
+                    resampled = true;
+                    userMorphPoly = poly.slice();
                 }
-                poly = resamplePolygon(openPoly, targetLargest.length);
-                resampled = true;
-                userMorphPoly = poly.slice(); // save for morphing (still open here)
-            } else {
-                userMorphPoly = null;
-            }
 
-            // Ensure closed polygon: add first point at end if not already closed
-            if (poly.length > 2) {
-                const [fx, fy] = poly[0];
-                const [lx, ly] = poly[poly.length - 1];
-                const dist2 = (fx - lx) ** 2 + (fy - ly) ** 2;
-                if (dist2 > 4) {
-                    poly = [...poly, poly[0]];
-                }
-            }
-
-            const verts = (poly.length > 2 && poly[0][0] === poly[poly.length - 1][0] && poly[0][1] === poly[poly.length - 1][1])
-                ? poly.slice(0, -1)
-                : poly;
-
-            // Show the outline at the user's drawn position (no alignment to times)
-            const displayPoly = poly;
-
-            if (showPoly) {
-                // Draw closed polygon outline
-                drawCtx.save();
-                drawCtx.strokeStyle = '#808080';
-                drawCtx.lineWidth = 1;
-                drawCtx.lineCap = 'round';
-                drawCtx.lineJoin = 'round';
-                drawCtx.beginPath();
-                drawCtx.moveTo(displayPoly[0][0], displayPoly[0][1]);
-                for (let i = 1; i < displayPoly.length; i++) drawCtx.lineTo(displayPoly[i][0], displayPoly[i][1]);
-                drawCtx.closePath();
-                drawCtx.stroke();
-
-                // Vertices (skip duplicate closing point)
-                drawCtx.fillStyle = 'rgb(240, 0, 0)';
-                const displayVerts = (displayPoly.length > 2 && displayPoly[0][0] === displayPoly[displayPoly.length - 1][0] && displayPoly[0][1] === displayPoly[displayPoly.length - 1][1])
-                    ? displayPoly.slice(0, -1)
-                    : displayPoly;
-                for (const [x, y] of displayVerts) {
-                    drawCtx.beginPath();
-                    drawCtx.arc(x, y, 1.6, 0, Math.PI * 2);
-                    drawCtx.fill();
-                }
-                drawCtx.restore();
-            }
-
-            // Self-intersection check: highlight any crossing edges in red.
-            const crosses = findSelfIntersections(displayPoly);
-            if (crosses.length > 0) {
-                drawCtx.save();
-                drawCtx.strokeStyle = 'rgba(255, 0, 0, 0.95)';
-                drawCtx.lineWidth = 2;
-                const seen = new Set();
-                for (const [i, j] of crosses) {
-                    for (const k of [i, j]) {
-                        if (seen.has(k)) continue;
-                        seen.add(k);
-                        drawCtx.beginPath();
-                        drawCtx.moveTo(displayPoly[k][0],     displayPoly[k][1]);
-                        drawCtx.lineTo(displayPoly[k + 1][0], displayPoly[k + 1][1]);
-                        drawCtx.stroke();
+                // Ensure closed polygon
+                if (poly.length > 2) {
+                    const [fx, fy] = poly[0];
+                    const [lx, ly] = poly[poly.length - 1];
+                    if ((fx - lx) ** 2 + (fy - ly) ** 2 > 4) {
+                        poly = [...poly, poly[0]];
                     }
                 }
-                drawCtx.restore();
+
+                const isClosed = poly.length > 2 &&
+                    poly[0][0] === poly[poly.length - 1][0] &&
+                    poly[0][1] === poly[poly.length - 1][1];
+                const verts = isClosed ? poly.slice(0, -1) : poly;
+                totalFinalVerts += verts.length;
+
+                const color = regionColor(ci);
+
+                if (showPoly) {
+                    // Stroke in region-specific color, 2pt
+                    drawCtx.strokeStyle = color;
+                    drawCtx.lineWidth = 2;
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(poly[0][0], poly[0][1]);
+                    for (let i = 1; i < poly.length; i++) drawCtx.lineTo(poly[i][0], poly[i][1]);
+                    drawCtx.closePath();
+                    drawCtx.stroke();
+
+                    // Vertices in region-specific color
+                    drawCtx.fillStyle = color;
+                    for (const [x, y] of verts) {
+                        drawCtx.beginPath();
+                        drawCtx.arc(x, y, 1.0, 0, Math.PI * 2);
+                        drawCtx.fill();
+                    }
+                }
+
+                // Per-polygon self-intersection check
+                const crosses = findSelfIntersections(poly);
+                if (crosses.length > 0) {
+                    totalCrosses += crosses.length;
+                    drawCtx.save();
+                    drawCtx.strokeStyle = 'rgba(255, 0, 0, 0.95)';
+                    drawCtx.lineWidth = 2;
+                    const seen = new Set();
+                    for (const [i, j] of crosses) {
+                        for (const k of [i, j]) {
+                            if (seen.has(k)) continue;
+                            seen.add(k);
+                            drawCtx.beginPath();
+                            drawCtx.moveTo(poly[k][0],     poly[k][1]);
+                            drawCtx.lineTo(poly[k + 1][0], poly[k + 1][1]);
+                            drawCtx.stroke();
+                        }
+                    }
+                    drawCtx.restore();
+                }
             }
 
+            drawCtx.restore();
+
             const countText = resampled
-                ? `${rdpCount} → ${verts.length} Vertices`
-                : `${verts.length} Vertices`;
-            const crossText = crosses.length > 0 ? `  ⚠ ${crosses.length} Cross${crosses.length > 1 ? 'es' : ''}` : '';
+                ? `${totalRdpVerts} → ${totalFinalVerts} Vertices (${contours.length} loops)`
+                : `${totalFinalVerts} Vertices (${contours.length} loops)`;
+            const crossText = totalCrosses > 0 ? `  ⚠ ${totalCrosses} Cross${totalCrosses > 1 ? 'es' : ''}` : '';
             document.getElementById('vert-count').textContent = countText + crossText;
         }
 
@@ -731,6 +895,7 @@
             // Clear drawing (Kunst) + user outline
             savedPixels = null;
             rawContour = null;
+            rawContours = null;
             userMorphPoly = null;
             document.getElementById('vert-count').textContent = '';
             try { localStorage.removeItem('morph-outline'); } catch (_) {}
@@ -864,11 +1029,7 @@
             if (!userMorphPoly || !targetMorphPoly) return;
             const n = userMorphPoly.length;
             morphCtx.save();
-            // Color interpolates: green (#adff2f) → white
-            const r = Math.round(173 + (255 - 173) * t);
-            const g = 255;
-            const b = Math.round(47 + (255 - 47) * t);
-            morphCtx.fillStyle = `rgb(${r},${g},${b})`;
+            morphCtx.fillStyle = '#adff2f';
             morphCtx.beginPath();
             const pts = [];
             for (let i = 0; i < n; i++) {
@@ -904,6 +1065,9 @@
             const sim = calculateSimilarity(pts, targetMorphPoly);
             const simEl = document.getElementById('morph-similarity');
             if (simEl) simEl.textContent = sim + '%';
+            if (t === 0 || t === 1 || Math.round(t * 100) % 20 === 0) {
+                DebugWindow.log(`🎬 t=${Math.round(t * 100)}% | Similarity: ${sim}%`);
+            }
         }
 
         function hideUserOutline() {
@@ -921,11 +1085,13 @@
         }
 
         function startMorph() {
+            DebugWindow.log('▶ START MORPH');
             if (!rawContour) extractOutline();
             if (!prepareMorph()) {
-                console.warn('Morph nicht möglich — fehlt Outline oder Ziffer?');
+                DebugWindow.log('❌ Morph failed: missing outline or digit');
                 return;
             }
+            DebugWindow.log(`✓ Morph setup ready (${MORPH_DURATION}ms)`);
             cancelAnimationFrame(morphRaf);
             // Redraw digit without outline
             if (selectedDigit !== null && timesFont) {
@@ -965,13 +1131,28 @@
         }
 
         function stopMorph() {
+            DebugWindow.log('⏹ STOP MORPH');
             cancelAnimationFrame(morphRaf);
             morphRaf = null;
             morphCtx.clearRect(0, 0, 1000, 1000);
-            document.getElementById('morph-slider').value = 0;
-            document.getElementById('morph-val').textContent = 0;
+            document.getElementById('morph-slider').value = 1;
+            document.getElementById('morph-val').textContent = 1;
             // Redraw digit with outline
             if (selectedDigit !== null) drawTargetPolygon();
+            showUserOutline();
+            DebugWindow.log('✓ Morph stopped, user outline restored');
+        }
+
+        function clearMorphFigure() {
+            cancelAnimationFrame(morphRaf);
+            morphRaf = null;
+            morphCtx.clearRect(0, 0, 1000, 1000);
+            document.getElementById('morph-slider').value = 1;
+            document.getElementById('morph-val').textContent = 1;
+            const simEl = document.getElementById('morph-similarity');
+            if (simEl) simEl.textContent = '0%';
+            targetMorphPoly = null;
+            userMorphPoly = null;
             showUserOutline();
         }
 
@@ -1075,7 +1256,12 @@
 
         function onDigitChange(d) {
             selectedDigit = d;
-            try { localStorage.setItem('morph-digit', String(d)); } catch (_) {}
+            clearMorphFigure();
+            try {
+                localStorage.setItem('morph-digit', String(d));
+                localStorage.removeItem('morph-text');
+                document.getElementById('text-input').value = '';
+            } catch (_) {}
             digitCtx.clearRect(0, 0, 1000, 1000);
 
             if (timesFont) {
@@ -1099,13 +1285,13 @@
                 digitCtx.fillText(String(d), 720, 580);
                 digitCtx.restore();
 
-                // Extract polygon from rendered canvas
+                // Extract polygons (topology-aware: outer + holes)
                 const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
                 const grid = new Uint8Array(1000 * 1000);
                 for (let i = 0; i < 1000 * 1000; i++)
                     grid[i] = imgData.data[i * 4 + 3] > 30 ? 1 : 0;
-                const contour = getContour(grid, 1000, 1000);
-                targetPolygon = contour.length ? [contour] : null;
+                const contours = getContoursWithHoles(grid, 1000, 1000);
+                targetPolygon = contours.length ? contours : null;
             }
 
             // Sub-sample each sub-polygon to a max count
@@ -1129,34 +1315,48 @@
             if (rawContour && savedPixels) drawPolygon();
         }
 
+        function setTextInput(latex) {
+            const input = document.getElementById('text-input');
+            input.value = latex;
+            try {
+                localStorage.setItem('morph-text', latex);
+                localStorage.removeItem('morph-digit');
+            } catch (_) {}
+            onTextInput(latex);
+        }
+
         function onTextInput(text) {
             selectedDigit = null;
+            clearMorphFigure();
+            DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
             if (!text || text.trim() === '') {
+                DebugWindow.log('⊘ Empty input');
                 digitCtx.clearRect(0, 0, 1000, 1000);
                 targetPolygon = null;
                 drawTargetPolygon();
                 return;
             }
+            renderLatexToCanvas(text);
+        }
 
-            digitCtx.clearRect(0, 0, 1000, 1000);
-            digitCtx.save();
-            digitCtx.fillStyle = '#F4C430';
-            const fontSize = 640;
-            digitCtx.font = `bold ${fontSize}px "Times New Roman", serif`;
-            digitCtx.textAlign = 'center';
-            digitCtx.textBaseline = 'middle';
-            digitCtx.fillText(text, 720, 580);
-            digitCtx.restore();
-
-            // Extract polygon from rendered canvas
+        function extractAndUpdatePolygon() {
+            DebugWindow.log('📊 Extracting polygons (topology-aware)...');
             const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
             const grid = new Uint8Array(1000 * 1000);
             for (let i = 0; i < 1000 * 1000; i++)
                 grid[i] = imgData.data[i * 4 + 3] > 30 ? 1 : 0;
-            const contour = getContour(grid, 1000, 1000);
-            targetPolygon = contour.length ? [contour] : null;
+            const contours = getContoursWithHoles(grid, 1000, 1000);
+            targetPolygon = contours.length ? contours : null;
 
-            // Sub-sample each sub-polygon to a max count
+            if (!targetPolygon) {
+                DebugWindow.log('⚠️ No polygons detected');
+                return;
+            }
+
+            DebugWindow.log(`✓ Found ${contours.length} contour(s) (outer + holes)`);
+            const totalVerts = contours.reduce((s, c) => s + c.length, 0);
+            DebugWindow.log(`  Total vertices: ${totalVerts}`);
+
             const MAX_PTS = 300;
             if (targetPolygon) {
                 targetPolygon = targetPolygon.map(poly => {
@@ -1167,14 +1367,110 @@
                     return sub;
                 });
             }
-
-            // Update vertex counter
             const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
+            DebugWindow.log(`✓ Resampled to ${total} vertices (max: 300)`);
+
             const el = document.getElementById('target-count');
             if (el) el.textContent = `${total} Vertices`;
-
             drawTargetPolygon();
             if (rawContour && savedPixels) drawPolygon();
+        }
+
+        function renderLatexToCanvas(text) {
+            digitCtx.clearRect(0, 0, 1000, 1000);
+            DebugWindow.log(`📝 Input: "${text}"`);
+            DebugWindow.log(`KaTeX: ${typeof katex !== 'undefined' ? '✓' : '✗'} | html2canvas: ${typeof html2canvas !== 'undefined' ? '✓' : '✗'}`);
+
+            if (typeof katex === 'undefined') {
+                DebugWindow.log('⚠️ KaTeX not loaded');
+                renderPlainText(text);
+                return;
+            }
+            if (typeof html2canvas === 'undefined') {
+                DebugWindow.log('⚠️ html2canvas not loaded');
+                renderPlainText(text);
+                return;
+            }
+
+            // Handle special cases: \sqrt alone → \surd (just the root symbol)
+            let processedText = text.trim();
+            if (processedText === '\\sqrt') {
+                processedText = '\\surd';
+                DebugWindow.log('🔄 Converting \\sqrt → \\surd (root symbol only)');
+            }
+
+            try {
+                DebugWindow.log('🔄 Rendering KaTeX...');
+                const html = katex.renderToString(processedText, { throwOnError: true, displayMode: true });
+                DebugWindow.log('✓ KaTeX HTML generated');
+
+                // Create visible offscreen div with KaTeX HTML
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                wrapper.style.cssText = `
+                    position: fixed;
+                    left: -10000px;
+                    top: 0;
+                    background: transparent;
+                    color: #F4C430;
+                    font-size: 400px;
+                    padding: 60px;
+                    display: inline-block;
+                    line-height: 1;
+                `;
+                document.body.appendChild(wrapper);
+
+                // Wait a tick for rendering
+                setTimeout(() => {
+                    const rect = wrapper.getBoundingClientRect();
+                    DebugWindow.log(`DOM size: ${Math.round(rect.width)}×${Math.round(rect.height)}px`);
+
+                    html2canvas(wrapper, {
+                        backgroundColor: null,
+                        scale: 1,
+                        logging: false,
+                        width: rect.width,
+                        height: rect.height
+                    }).then(canvas => {
+                        DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
+
+                        // Scale to fit on digit canvas — match Times digit size (~640px tall)
+                        const maxW = 900, maxH = 800;
+                        const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
+                        const w = canvas.width * scale;
+                        const h = canvas.height * scale;
+                        const x = 720 - w / 2;
+                        const y = 580 - h / 2;
+
+                        digitCtx.drawImage(canvas, x, y, w, h);
+                        document.body.removeChild(wrapper);
+                        DebugWindow.log(`✓ Drawn at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}×${Math.round(h)}px`);
+                        extractAndUpdatePolygon();
+                    }).catch(err => {
+                        DebugWindow.log(`❌ html2canvas error: ${err.message}`);
+                        document.body.removeChild(wrapper);
+                        renderPlainText(text);
+                    });
+                }, 50);
+            } catch (e) {
+                DebugWindow.log(`❌ KaTeX error: ${e.message}`);
+                renderPlainText(text);
+            }
+        }
+
+        function renderPlainText(text) {
+            DebugWindow.log(`📄 Fallback to plain text: "${text}"`);
+            digitCtx.clearRect(0, 0, 1000, 1000);
+            digitCtx.save();
+            digitCtx.fillStyle = '#F4C430';
+            const fontSize = 640;
+            digitCtx.font = `bold ${fontSize}px "Times New Roman", serif`;
+            digitCtx.textAlign = 'center';
+            digitCtx.textBaseline = 'middle';
+            digitCtx.fillText(text, 720, 580);
+            digitCtx.restore();
+            DebugWindow.log('✓ Text rendered');
+            extractAndUpdatePolygon();
         }
 
         function drawTargetPolygon() {
@@ -1186,22 +1482,24 @@
             const displayTarget = targetPolygon;
 
             digitCtx.save();
-            digitCtx.strokeStyle = '#808080';
-            digitCtx.lineWidth = 1;
+            digitCtx.lineWidth = 2;
             digitCtx.lineCap = 'round';
             digitCtx.lineJoin = 'round';
-            for (const poly of displayTarget) {
+            // Stroke + vertices per region, each in its own color
+            for (let i = 0; i < displayTarget.length; i++) {
+                const color = regionColor(i);
+                const poly = displayTarget[i];
+                digitCtx.strokeStyle = color;
                 digitCtx.beginPath();
                 digitCtx.moveTo(poly[0][0], poly[0][1]);
-                for (let i = 1; i < poly.length; i++) digitCtx.lineTo(poly[i][0], poly[i][1]);
+                for (let j = 1; j < poly.length; j++) digitCtx.lineTo(poly[j][0], poly[j][1]);
                 digitCtx.closePath();
                 digitCtx.stroke();
-            }
-            digitCtx.fillStyle = 'rgb(240, 0, 0)';
-            for (const poly of displayTarget) {
+
+                digitCtx.fillStyle = color;
                 for (const [x, y] of poly) {
                     digitCtx.beginPath();
-                    digitCtx.arc(x, y, 1.6, 0, Math.PI * 2);
+                    digitCtx.arc(x, y, 1.0, 0, Math.PI * 2);
                     digitCtx.fill();
                 }
             }
@@ -1251,36 +1549,53 @@
 
         function restoreOutline() {
             try {
-                const data = localStorage.getItem('morph-outline');
-                if (data) {
-                    rawContour = JSON.parse(data);
+                const allData = localStorage.getItem('morph-outlines');
+                if (allData) {
+                    rawContours = JSON.parse(allData);
+                    if (rawContours && rawContours.length > 0) {
+                        rawContour = rawContours[0];
+                        for (const c of rawContours) {
+                            if (c.length > rawContour.length) rawContour = c;
+                        }
+                    }
+                } else {
+                    const data = localStorage.getItem('morph-outline');
+                    if (data) {
+                        rawContour = JSON.parse(data);
+                        rawContours = [rawContour];
+                    }
+                }
+                if (rawContour) {
                     savedPixels = drawCtx.getImageData(0, 0, 1000, 1000);
                     drawPolygon();
                 }
             } catch (_) {}
         }
 
-        // Make cards collapsible
+        // Make cards collapsible with state persistence
         function makeCardsCollapsible() {
-            const cards = document.querySelectorAll('.cyber-card');
+            const cards = document.querySelectorAll('.instrument-card.collapsible');
             cards.forEach(card => {
-                const header = card.querySelector('h3');
-                if (header) {
-                    header.addEventListener('click', () => {
-                        card.classList.toggle('collapsed');
-                        try {
-                            const cardTitle = header.textContent.trim();
-                            const isCollapsed = card.classList.contains('collapsed');
-                            localStorage.setItem('card-' + cardTitle, isCollapsed ? '1' : '0');
-                        } catch (_) {}
-                    });
-                    // Restore collapsed state
+                const titleEl = card.querySelector('.instrument-title');
+                if (!titleEl) return;
+
+                // Extract title text (without icon)
+                const cardKey = titleEl.textContent.trim().replace(/^▶\s*/, '');
+
+                // Restore collapsed state from localStorage
+                try {
+                    const isCollapsed = localStorage.getItem('morph-card-' + cardKey) === '1';
+                    if (isCollapsed) card.classList.add('collapsed');
+                    else card.classList.remove('collapsed');
+                } catch (_) {}
+
+                // Persist on toggle (note: ui.js already adds the click handler that toggles)
+                titleEl.addEventListener('click', () => {
                     try {
-                        const cardTitle = header.textContent.trim();
-                        const isCollapsed = localStorage.getItem('card-' + cardTitle) === '1';
-                        if (isCollapsed) card.classList.add('collapsed');
+                        const isCollapsed = card.classList.contains('collapsed');
+                        localStorage.setItem('morph-card-' + cardKey, isCollapsed ? '1' : '0');
                     } catch (_) {}
-                }
+                });
             });
         }
 
@@ -1295,8 +1610,15 @@
             }
         } catch (_) {}
         try {
+            const savedText = localStorage.getItem('morph-text');
             const savedDigit = localStorage.getItem('morph-digit');
-            if (savedDigit !== null) {
+            if (savedText !== null) {
+                document.getElementById('text-input').value = savedText;
+                // Check matching latex radio button
+                const radio = document.querySelector(`input[name="digit"][data-latex="${savedText}"]`);
+                if (radio) radio.checked = true;
+                onTextInput(savedText);
+            } else if (savedDigit !== null) {
                 const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
                 if (radio) radio.checked = true;
                 onDigitChange(+savedDigit);
@@ -1309,6 +1631,21 @@
             }
         } catch (_) {}
         makeCardsCollapsible();
+        renderLatexButtons();
+
+        function renderLatexButtons() {
+            if (typeof katex === 'undefined') return;
+            document.querySelectorAll('.latex-render[data-latex]').forEach(el => {
+                try {
+                    katex.render(el.dataset.latex, el, {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                } catch (e) {
+                    el.textContent = el.dataset.latex;
+                }
+            });
+        }
     </script>
 </body>
 
