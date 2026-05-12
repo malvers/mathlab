@@ -117,6 +117,12 @@
                     oninput="onStrokeChange(this.value)">
                 <span id="stroke-val">6</span>
             </div>
+            <div class="eps-row">
+                <label>Target</label>
+                <input type="range" id="target-scale-slider" min="20" max="150" value="100" step="5"
+                    oninput="onTargetScaleChange(this.value)">
+                <span id="target-scale-val">100</span>
+            </div>
         `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'OUTLINES', `
@@ -259,8 +265,6 @@
                     { latex: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', text: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', title: 'Schrödinger', preset: 11 },
                     { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', text: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', title: 'Maxwell (Gauß)', preset: 12 },
                     { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', text: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', title: 'Maxwell (Ampère)', preset: 13 },
-                    { latex: 'S=-k_B\\sum_i p_i\\ln p_i',             text: 'S=-k_B\\sum_i p_i\\ln p_i',             title: 'Entropie (Boltzmann)', preset: null },
-                    { latex: '\\Delta x\\,\\Delta p\\geq\\frac{\\hbar}{2}', text: '\\Delta x\\,\\Delta p\\geq\\frac{\\hbar}{2}', title: 'Heisenberg', preset: null },
                 ].map((sym, i) => `
                     <label class="latex-label" title="${sym.title}${sym.preset !== null ? ' ✍' : ''}">
                         <input type="radio" name="digit" value="formula-${i}"
@@ -352,6 +356,20 @@
             document.getElementById('stroke-val').textContent = val;
             drawCtx.lineWidth = +val;
             try { localStorage.setItem('morph-stroke', val); } catch (_) {}
+        }
+
+        let targetScale = 1.0;
+        function onTargetScaleChange(val) {
+            document.getElementById('target-scale-val').textContent = val;
+            targetScale = +val / 100;
+            try { localStorage.setItem('morph-target-scale', val); } catch (_) {}
+            // Re-render the target with new scale
+            if (selectedDigit !== null) {
+                onDigitChange(selectedDigit);
+            } else {
+                const text = document.getElementById('text-input').value;
+                if (text && text.trim() !== '') onTextInput(text);
+            }
         }
 
         function onEpsChange(val) {
@@ -543,13 +561,11 @@
                 const w = 500, h = 500;
                 const x = 16, y = (1000 - h) / 2;
                 drawCtx.drawImage(img, x, y, w, h);
-                // Debug: bounding box around the drawn preset image
-                drawCtx.save();
-                drawCtx.strokeStyle = '#ff00ff';
-                drawCtx.lineWidth = 3;
-                drawCtx.strokeRect(x, y, w, h);
-                drawCtx.restore();
+                DebugWindow.log(`✓ Preset formula-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
                 scheduleAutoSave();
+            };
+            img.onerror = () => {
+                DebugWindow.log(`❌ FEHLT: presets/formula-${index}.png konnte nicht geladen werden!`);
             };
             img.src = `presets/formula-${index}.png`;
         }
@@ -690,6 +706,14 @@
                 document.getElementById('stroke-slider').value = savedStroke;
                 document.getElementById('stroke-val').textContent = savedStroke;
                 drawCtx.lineWidth = +savedStroke;
+            }
+        } catch (_) {}
+        try {
+            const savedTargetScale = localStorage.getItem('morph-target-scale');
+            if (savedTargetScale !== null) {
+                document.getElementById('target-scale-slider').value = savedTargetScale;
+                document.getElementById('target-scale-val').textContent = savedTargetScale;
+                targetScale = +savedTargetScale / 100;
             }
         } catch (_) {}
         try {

@@ -28,9 +28,10 @@ function onDigitChange(d) {
     } catch (_) {}
     digitCtx.clearRect(0, 0, 1000, 1000);
 
+    const scale = (typeof targetScale !== 'undefined') ? targetScale : 1.0;
     if (timesFont) {
         // Vector render via opentype
-        const fontSize = 640;
+        const fontSize = 640 * scale;
         const probe = timesFont.getPath(String(d), 0, 0, fontSize);
         const bbox = probe.getBoundingBox();
         const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
@@ -43,7 +44,7 @@ function onDigitChange(d) {
         // Fallback: canvas fillText + Marching Squares extraction
         digitCtx.save();
         digitCtx.fillStyle = '#F4C430';
-        digitCtx.font = 'bold 640px "Times New Roman", serif';
+        digitCtx.font = `bold ${640 * scale}px "Times New Roman", serif`;
         digitCtx.textAlign = 'center';
         digitCtx.textBaseline = 'middle';
         digitCtx.fillText(String(d), 720, 500);
@@ -208,7 +209,8 @@ function renderLatexToCanvas(text) {
                 DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
 
                 // Match Times digit size (~640px tall) — halved for formulas
-                const maxW = 450, maxH = 400;
+                const ts = (typeof targetScale !== 'undefined') ? targetScale : 1.0;
+                const maxW = 450 * ts, maxH = 400 * ts;
                 const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
                 const w = canvas.width * scale;
                 const h = canvas.height * scale;
@@ -236,7 +238,8 @@ function renderPlainText(text) {
     digitCtx.clearRect(0, 0, 1000, 1000);
     digitCtx.save();
     digitCtx.fillStyle = '#F4C430';
-    const fontSize = 640;
+    const ts = (typeof targetScale !== 'undefined') ? targetScale : 1.0;
+    const fontSize = 640 * ts;
     digitCtx.font = `bold ${fontSize}px "Times New Roman", serif`;
     digitCtx.textAlign = 'center';
     digitCtx.textBaseline = 'middle';
