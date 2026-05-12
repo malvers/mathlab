@@ -19,7 +19,7 @@
     transform-origin: center center;
 }
 
-#digit-canvas, #outline-canvas, #morph-canvas {
+#digit-canvas, #outline-canvas, #morph-canvas, #colorado-canvas, #cursor-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -205,16 +205,16 @@
    floats over whatever layout - independent of the square canvas-stack. */
 #similarity-box {
     position: absolute;
-    top: 30px;
-    left: 30px;
+    top: 20px;
+    left: 20px;
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(0, 210, 255, 0.5);
     border-radius: 8px;
-    padding: 14px 22px;
+    padding: 8px 12px;
     text-align: center;
     color: #00d2ff;
     pointer-events: none;
-    width: 200px;
+    width: 144px;
     box-sizing: border-box;
     line-height: 1;
     z-index: 50;
@@ -223,7 +223,7 @@
 #similarity-box .sim-value {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
-    font-size: 56px;
+    font-size: 50px;
     font-weight: 700;
     color: #00d2ff;
     line-height: 1;
@@ -231,45 +231,94 @@
 #similarity-box .sim-label {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
-    font-size: 18px;
+    font-size: 16px;
     color: rgba(0, 210, 255, 0.85);
     margin-top: 6px;
     line-height: 1;
 }
 
-/* Object count overlay: top-left of canvas, right of similarity box */
-#object-count-box {
+/* LaTeX object count overlay: below art-objects box */
+#latex-count-box {
     position: absolute;
-    top: 30px;
-    left: 260px;
+    top: 238px;
+    left: 20px;
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(244, 196, 48, 0.5);
     border-radius: 8px;
-    padding: 14px 22px;
+    padding: 8px 12px;
     text-align: center;
     color: #F4C430;
     pointer-events: none;
-    width: 200px;
+    width: 144px;
     box-sizing: border-box;
     line-height: 1;
     z-index: 50;
     box-shadow: 0 0 20px rgba(244, 196, 48, 0.2);
 }
+#latex-count-box .lat-value {
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    font-size: 50px;
+    font-weight: 700;
+    color: #F4C430;
+    line-height: 1;
+}
+#latex-count-box .lat-label {
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    font-size: 16px;
+    color: rgba(244, 196, 48, 0.85);
+    margin-top: 6px;
+    line-height: 1;
+}
+
+/* Object count overlay: below similarity box */
+#object-count-box {
+    position: absolute;
+    top: 129px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(173, 255, 47, 0.5);
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-align: center;
+    color: #adff2f;
+    pointer-events: none;
+    width: 144px;
+    box-sizing: border-box;
+    line-height: 1;
+    z-index: 50;
+    box-shadow: 0 0 20px rgba(173, 255, 47, 0.2);
+}
 #object-count-box .obj-value {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
-    font-size: 56px;
+    font-size: 50px;
     font-weight: 700;
-    color: #F4C430;
+    color: #adff2f;
     line-height: 1;
 }
 #object-count-box .obj-label {
     font-family: 'Times New Roman', Times, serif;
     font-style: italic;
-    font-size: 18px;
-    color: rgba(244, 196, 48, 0.85);
+    font-size: 16px;
+    color: rgba(173, 255, 47, 0.85);
     margin-top: 6px;
     line-height: 1;
+}
+
+/* Formula grid: one column, taller buttons */
+.formula-grid {
+    grid-template-columns: 1fr !important;
+}
+.formula-grid .latex-label {
+    padding: 14px 16px !important;
+    justify-content: center !important;
+    font-size: 9px !important;
+    min-height: auto !important;
+}
+.formula-grid .latex-render {
+    height: auto !important;
 }
 
 /* LaTeX labels inside digit-grid — visually match digit size */

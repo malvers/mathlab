@@ -140,6 +140,10 @@ function extractAndUpdatePolygon() {
 
     const el = document.getElementById('target-count');
     if (el) el.textContent = `${total} Vertices`;
+    const latVal = document.getElementById('lat-value');
+    if (latVal && typeof classifyContours === 'function') {
+        latVal.textContent = classifyContours(targetPolygon).outers.length;
+    }
     drawTargetPolygon();
     if (rawContour && savedPixels) drawPolygon();
 }
@@ -203,8 +207,8 @@ function renderLatexToCanvas(text) {
             }).then(canvas => {
                 DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
 
-                // Match Times digit size (~640px tall)
-                const maxW = 900, maxH = 800;
+                // Match Times digit size (~640px tall) — halved for formulas
+                const maxW = 450, maxH = 400;
                 const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
                 const w = canvas.width * scale;
                 const h = canvas.height * scale;

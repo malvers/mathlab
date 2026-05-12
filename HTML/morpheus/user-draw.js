@@ -73,57 +73,6 @@ function resetDrawState() {
     } catch (_) {}
 }
 
-function countObjectsFromCanvas() {
-    requestAnimationFrame(() => {
-        try {
-            // Downsample to 200×200 for fast connected-components count
-            const S = 200;
-            const off = document.createElement('canvas');
-            off.width = S; off.height = S;
-            const ctx2 = off.getContext('2d');
-            ctx2.drawImage(drawCtx.canvas, 0, 0, S, S);
-            const imgData = ctx2.getImageData(0, 0, S, S);
-            const grid = new Uint8Array(S * S);
-            let filledCount = 0;
-            for (let i = 0; i < S * S; i++) {
-                const v = imgData.data[i * 4] > 30 ? 1 : 0;
-                grid[i] = v;
-                if (v) filledCount++;
-            }
-            DebugWindow.log(`📊 countObjectsFromCanvas: ${filledCount} pixels (${S}×${S})`);
-            if (filledCount === 0) {
-                document.getElementById('obj-value').textContent = '0';
-                DebugWindow.log('  → 0 objects (empty canvas)');
-                return;
-            }
-            // Flood-fill to count separate connected regions
-            const visited = new Uint8Array(S * S);
-            let count = 0;
-            const stack = [];
-            for (let i = 0; i < S * S; i++) {
-                if (grid[i] && !visited[i]) {
-                    count++;
-                    stack.push(i);
-                    while (stack.length) {
-                        const idx = stack.pop();
-                        if (visited[idx]) continue;
-                        visited[idx] = 1;
-                        const x = idx % S, y = (idx / S) | 0;
-                        if (x > 0     && grid[idx - 1] && !visited[idx - 1]) stack.push(idx - 1);
-                        if (x < S - 1 && grid[idx + 1] && !visited[idx + 1]) stack.push(idx + 1);
-                        if (y > 0     && grid[idx - S] && !visited[idx - S]) stack.push(idx - S);
-                        if (y < S - 1 && grid[idx + S] && !visited[idx + S]) stack.push(idx + S);
-                    }
-                }
-            }
-            document.getElementById('obj-value').textContent = count;
-            DebugWindow.log(`  ✓ ${count} object(s)`);
-        } catch (e) {
-            DebugWindow.log(`❌ countObjectsFromCanvas error: ${e.message}`);
-        }
-    });
-}
-
 // Translate event → canvas pixel coordinates (handles CSS scaling).
 function getPos(e) {
     const r = drawCanvas.getBoundingClientRect();
@@ -348,6 +297,76 @@ function showUserOutline() {
     if (rawContour && savedPixels) drawPolygon();
 }
 
+// ── Colorado: flood-fill regions with distinct colors directly on draw-canvas ─
+let coloradoMode = false;
+let coloradoSavedPixels = null;
+
+const COLORADO_COLORS = [
+    [255,60,60], [60,180,255], [255,210,0],
+    [60,255,100], [255,120,0], [180,80,255],
+    [0,220,200], [255,80,160], [160,255,60],
+    [80,130,255], [255,180,80], [60,255,180]
+];
+
+function drawColorado() {
+    if (coloradoMode) {
+        coloradoSavedPixels = drawCtx.getImageData(0, 0, 1000, 1000);
+        const imgData = drawCtx.getImageData(0, 0, 1000, 1000);
+        const data = imgData.data;
+        const W = 1000, H = 1000;
+        const grid = new Uint8Array(W * H);
+        for (let i = 0; i < W * H; i++) grid[i] = data[i * 4] > 30 || data[i*4+1] > 30 || data[i*4+2] > 30 ? 1 : 0;
+
+        const visited = new Uint8Array(W * H);
+        let ci = 0;
+        const stack = [];
+        for (let i = 0; i < W * H; i++) {
+            if (grid[i] && !visited[i]) {
+                const [r, g, b] = COLORADO_COLORS[ci % COLORADO_COLORS.length];
+                stack.push(i);
+                while (stack.length) {
+                    const idx = stack.pop();
+                    if (visited[idx]) continue;
+                    visited[idx] = 1;
+                    data[idx*4] = r; data[idx*4+1] = g; data[idx*4+2] = b; data[idx*4+3] = 255;
+                    const x = idx % W, y = (idx / W) | 0;
+                    if (x > 0     && grid[idx-1] && !visited[idx-1]) stack.push(idx-1);
+                    if (x < W-1   && grid[idx+1] && !visited[idx+1]) stack.push(idx+1);
+                    if (y > 0     && grid[idx-W] && !visited[idx-W]) stack.push(idx-W);
+                    if (y < H-1   && grid[idx+W] && !visited[idx+W]) stack.push(idx+W);
+                }
+                ci++;
+            }
+        }
+        drawCtx.putImageData(imgData, 0, 0);
+    } else {
+        if (coloradoSavedPixels) drawCtx.putImageData(coloradoSavedPixels, 0, 0);
+        coloradoSavedPixels = null;
+    }
+}
+
+function initColoradoCanvas() {} // kept for boot compat
+
+// ── Eraser cursor circle on cursor-canvas ───────────────────────────────────
+let cursorCanvas, cursorCtx;
+function initCursorCanvas() {
+    cursorCanvas = document.getElementById('cursor-canvas');
+    cursorCtx = cursorCanvas ? cursorCanvas.getContext('2d') : null;
+}
+
+function drawEraserCursor(x, y) {
+    if (!cursorCtx) return;
+    cursorCtx.clearRect(0, 0, 1000, 1000);
+    if (!eraserMode) return;
+    cursorCtx.save();
+    cursorCtx.beginPath();
+    cursorCtx.arc(x, y, 20, 0, Math.PI * 2);
+    cursorCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    cursorCtx.lineWidth = 2;
+    cursorCtx.stroke();
+    cursorCtx.restore();
+}
+
 // ── Install drawing event listeners on draw-canvas ──────────────────────────
 // Called once at boot, after drawCanvas + drawCtx are defined.
 function setupUserDrawingEvents() {
@@ -358,12 +377,14 @@ function setupUserDrawingEvents() {
         const p = getPos(e); drawCtx.moveTo(p.x, p.y);
     });
     drawCanvas.addEventListener('mousemove', e => {
+        const p = getPos(e);
+        drawEraserCursor(p.x, p.y);
         if (!isDrawing) return;
-        const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+        drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         scheduleAutoSave();
     });
-    drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; countObjectsFromCanvas(); });
-    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+    drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
+    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; if (cursorCtx) cursorCtx.clearRect(0, 0, 1000, 1000); });
 
     drawCanvas.addEventListener('touchstart', e => {
         e.preventDefault();
@@ -378,5 +399,5 @@ function setupUserDrawingEvents() {
         const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         scheduleAutoSave();
     }, { passive: false });
-    drawCanvas.addEventListener('touchend', () => { isDrawing = false; countObjectsFromCanvas(); });
+    drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
 }
