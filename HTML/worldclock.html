@@ -603,6 +603,18 @@
         let globeLng = 0;      // Current globe view longitude (used by auto-rotation before user drag)
         let globeManuallyDragged = false;  // Once true, TrackballControls owns the camera
         let isReturning = false;
+        let rotateToTarget = null; // { target: degrees, done: false }
+
+        function rotateToCityLon(lon) {
+            const time = getDisplayTime();
+            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            const baseRotation = (12 - (utcHours + 1)) * 15;
+            // Desired autoRotation so city appears at top (12 o'clock = angle 0)
+            const desired = lon + 90 - baseRotation;
+            // Shortest path
+            let delta = ((desired - autoRotation) % 360 + 540) % 360 - 180;
+            rotateToTarget = { end: autoRotation + delta };
+        }
         let cityFontGray = 200; // Dynamic gray for city labels
         let ringFontGray = 222; // Dynamic gray for standard ring hours
         let selectedCity = null; // Currently clicked city
@@ -926,6 +938,17 @@
                     isReturning = false;
                 } else {
                     manualOffset *= 0.92; // Smooth exponential decay back to 0
+                }
+            }
+
+            // Smooth rotate-to animation
+            if (rotateToTarget) {
+                const diff = rotateToTarget.end - autoRotation;
+                if (Math.abs(diff) < 0.1) {
+                    autoRotation = rotateToTarget.end;
+                    rotateToTarget = null;
+                } else {
+                    autoRotation += diff * 0.07;
                 }
             }
 
@@ -1365,26 +1388,11 @@
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 18);
 
-                // Search box unter NORMALZEIT
-                const searchBoxW = 115;
-                const searchBoxH = 14;
-                const searchBoxY = y + 20;
-                ctx.strokeStyle = "rgba(0, 210, 255, 0.6)";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.rect(-searchBoxW/2, searchBoxY, searchBoxW, searchBoxH);
-                ctx.stroke();
-                // Search icon / text
-                ctx.fillStyle = "#00d2ff";
-                ctx.font = "normal 9px Orbitron";
-                ctx.textAlign = "center";
-                ctx.fillText("🔍 Suchen", 0, searchBoxY + 10);
-
                 // Querstrich (Separator)
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
                 ctx.beginPath();
-                ctx.moveTo(-boxW/2 + 20, y + 35);
-                ctx.lineTo(boxW/2 - 20, y + 35);
+                ctx.moveTo(-boxW/2 + 20, y + 26);
+                ctx.lineTo(boxW/2 - 20, y + 26);
                 ctx.stroke();
 
                 // City Name (Top)
@@ -1696,49 +1704,104 @@
                 updateCityInfoBoxPosition();
             });
         });
-        // Search autocomplete
+        // Search autocomplete (lokale Städte + Nominatim-Fallback)
         (function initSearch() {
+            let nominatimTimer = null;
+            let lastNominatimResults = [];
+
+            function renderDrop(drop, input, items) {
+                drop.style.left  = input.style.left;
+                drop.style.top   = (parseFloat(input.style.top) + parseFloat(input.style.height || 20)) + 'px';
+                drop.style.width = input.style.width;
+                drop.innerHTML   = '';
+                if (!items.length) { drop.style.display = 'none'; return; }
+
+                items.forEach(item => {
+                    const el = document.createElement('div');
+                    el.style.cssText = 'padding:6px 10px;cursor:pointer;border-bottom:1px solid rgba(0,210,255,0.1);letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                    if (item.sub) {
+                        el.innerHTML = `<span style="color:#00d2ff">${item.label}</span><span style="color:rgba(0,210,255,0.45);font-size:9px;margin-left:6px">${item.sub}</span>`;
+                    } else {
+                        el.textContent = item.label;
+                    }
+                    el.addEventListener('mouseenter', () => el.style.background = 'rgba(0,210,255,0.15)');
+                    el.addEventListener('mouseleave', () => el.style.background = '');
+                    el.addEventListener('mousedown', () => {
+                        if (item.city) {
+                            selectedCity = item.city;
+                            showCityInfo(item.city.name);
+                            rotateToCityLon(item.city.lon);
+                        } else if (item.nominatim) {
+                            // Zeitzone via timeapi.io nachladen
+                            const { lat, lon, name } = item.nominatim;
+                            const loadingCity = { name, lat, lon, globeLat: lat, globeLon: lon, tz: 'UTC', color: '#00d2ff' };
+                            selectedCity = loadingCity;
+                            rotateToCityLon(lon);
+                            fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`)
+                                .then(r => r.json())
+                                .then(d => {
+                                    loadingCity.tz = d.timeZone || 'UTC';
+                                    selectedCity = loadingCity;
+                                    showCityInfo(name);
+                                })
+                                .catch(() => showCityInfo(name));
+                        }
+                        input.value = item.label;
+                        drop.style.display = 'none';
+                    });
+                    drop.appendChild(el);
+                });
+                drop.style.display = 'block';
+            }
+
             function trySetup() {
                 const input = document.getElementById('wc-search');
                 if (!input) { setTimeout(trySetup, 100); return; }
 
                 const drop = document.createElement('div');
                 drop.id = 'wc-search-drop';
-                drop.style.cssText = 'position:fixed;background:rgba(0,10,30,0.97);border:1px solid rgba(0,210,255,0.55);border-top:none;border-radius:0 0 6px 6px;font-family:Orbitron,sans-serif;font-size:11px;color:#00d2ff;z-index:1001;display:none;overflow-y:auto;max-height:180px;box-sizing:border-box;';
+                drop.style.cssText = 'position:fixed;background:rgba(0,10,30,0.97);border:1px solid rgba(0,210,255,0.55);border-top:none;border-radius:0 0 6px 6px;font-family:Orbitron,sans-serif;font-size:11px;color:#00d2ff;z-index:1001;display:none;overflow-y:auto;max-height:200px;box-sizing:border-box;';
                 document.body.appendChild(drop);
 
-                function updateDrop() {
-                    const q = input.value.trim().toLowerCase();
-                    drop.style.left  = input.style.left;
-                    drop.style.top   = (parseFloat(input.style.top) + parseFloat(input.style.height || 20)) + 'px';
-                    drop.style.width = input.style.width;
-
+                input.addEventListener('input', () => {
+                    const q = input.value.trim();
                     if (!q) { drop.style.display = 'none'; return; }
+                    const ql = q.toLowerCase();
 
-                    const matches = cities.filter(c =>
-                        c.name.replace(/\n/g, ' ').toLowerCase().includes(q)
-                    );
-                    if (!matches.length) { drop.style.display = 'none'; return; }
+                    // Lokale Treffer sofort
+                    const local = cities
+                        .filter(c => c.name.replace(/\n/g, ' ').toLowerCase().includes(ql))
+                        .map(c => ({ label: c.name.replace(/\n/g, ' '), city: c }));
 
-                    drop.innerHTML = '';
-                    matches.forEach(city => {
-                        const item = document.createElement('div');
-                        item.textContent = city.name.replace(/\n/g, ' ');
-                        item.style.cssText = 'padding:6px 10px;cursor:pointer;border-bottom:1px solid rgba(0,210,255,0.1);letter-spacing:0.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-                        item.addEventListener('mouseenter', () => item.style.background = 'rgba(0,210,255,0.15)');
-                        item.addEventListener('mouseleave', () => item.style.background = '');
-                        item.addEventListener('mousedown', () => {
-                            selectedCity = city;
-                            showCityInfo(city.name);
-                            input.value = city.name.replace(/\n/g, ' ');
-                            drop.style.display = 'none';
-                        });
-                        drop.appendChild(item);
-                    });
-                    drop.style.display = 'block';
-                }
+                    renderDrop(drop, input, local.length ? local : [{ label: '⏳ Suche…' }]);
 
-                input.addEventListener('input', updateDrop);
+                    // Nominatim nach 400ms Pause
+                    clearTimeout(nominatimTimer);
+                    nominatimTimer = setTimeout(async () => {
+                        try {
+                            const res = await fetch(
+                                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1`,
+                                { headers: { 'Accept-Language': 'de' } }
+                            );
+                            const data = await res.json();
+                            const remote = data.map(r => ({
+                                label: r.display_name.split(',')[0].trim(),
+                                sub: r.display_name.split(',').slice(1, 3).join(',').trim(),
+                                nominatim: {
+                                    name: r.display_name.split(',')[0].trim(),
+                                    display: r.display_name,
+                                    lat: parseFloat(r.lat),
+                                    lon: parseFloat(r.lon)
+                                }
+                            }));
+                            const all = [...local, ...remote.filter(r =>
+                                !local.some(l => l.label.toLowerCase() === r.label.toLowerCase())
+                            )];
+                            renderDrop(drop, input, all);
+                        } catch (_) { /* Nominatim nicht verfügbar */ }
+                    }, 400);
+                });
+
                 document.addEventListener('mousedown', e => {
                     if (!drop.contains(e.target) && e.target !== input)
                         drop.style.display = 'none';
