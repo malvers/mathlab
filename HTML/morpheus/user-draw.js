@@ -98,7 +98,30 @@ function extractOutline() {
         // Topology-aware extraction: get ALL contours (outer + holes)
         const rawList = getContoursWithHoles(grid, 1000, 1000);
         DebugWindow.log(`  getContoursWithHoles → ${rawList.length} contour(s)`);
-        rawContours = sortContoursCanonical(rawList);
+
+        // Compute area (shoelace) of every contour for debug + filtering
+        const polyArea = poly => {
+            let a = 0;
+            for (let i = 0; i < poly.length; i++) {
+                const [x1, y1] = poly[i];
+                const [x2, y2] = poly[(i + 1) % poly.length];
+                a += (x2 - x1) * (y2 + y1);
+            }
+            return Math.abs(a) / 2;
+        };
+        const areas = rawList.map(polyArea);
+        // Log sorted desc so big shapes come first
+        const sortedAreas = [...areas].sort((a, b) => b - a).map(Math.round);
+        DebugWindow.log(`  areas (px²): ${sortedAreas.join(', ')}`);
+
+        // Filter out tiny specks (noise) — CAUTION: threshold tuned to keep
+        // intentional small dots (i-dot, j-dot, periods) intact.
+        const MIN_AREA = 100;
+        const filtered = rawList.filter((_, i) => areas[i] >= MIN_AREA);
+        const dropped = rawList.length - filtered.length;
+        if (dropped > 0) DebugWindow.log(`  ⚠ dropped ${dropped} tiny contour(s) (< ${MIN_AREA}px²)`);
+
+        rawContours = sortContoursCanonical(filtered);
 
         if (!rawContours || rawContours.length === 0) {
             rawContour = null;
