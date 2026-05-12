@@ -102,10 +102,19 @@
             letter-spacing: 0.06em;
         }
 
-        /* Make sidebar buttons 30% flatter */
+        /* Make sidebar buttons 30% flatter (overrides buttons-ultra.css min-height) */
         #side-panel .cyber-btn {
-            padding-top: 7px !important;
-            padding-bottom: 7px !important;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+            min-height: 40px !important;
+        }
+        #side-panel .digit-grid .cyber-btn,
+        #side-panel div[class*="grid"] .cyber-btn {
+            min-height: 34px !important;
+        }
+        #side-panel .digit-grid label {
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
         }
 
         /* Toggle switch */
@@ -275,8 +284,6 @@
         if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
         CyberUI.createCard('ui-container', 'ZEICHNEN', `
-            <button class="cyber-btn" onclick="downloadPng()"
-                style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">PNG</button>
             <button class="cyber-btn" onclick="clearDraw()"
                 style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
         `);
@@ -285,7 +292,7 @@
             <button class="cyber-btn" onclick="extractOutline()"
                 style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINE</button>
             <button class="cyber-btn" onclick="clearOutline()"
-                style="width:100%;border-color:rgba(255,136,0,0.5);color:#ff8800;">OUTLINE LÖSCHEN</button>
+                style="width:100%;border-color:rgba(244,196,48,0.5);color:#F4C430;">OUTLINE LÖSCHEN</button>
             <label class="switch-row">
                 <span>POLY ANZEIGEN</span>
                 <span class="switch">
@@ -306,7 +313,7 @@
             <button class="cyber-btn" onclick="startMorph()"
                 style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► MORPH</button>
             <button class="cyber-btn" onclick="stopMorph()"
-                style="width:100%;margin-bottom:8px;border-color:rgba(255,136,0,0.5);color:#ff8800;">RESET</button>
+                style="width:100%;margin-bottom:8px;border-color:rgba(244,196,48,0.5);color:#F4C430;">RESET</button>
             <div class="eps-row">
                 <label>t</label>
                 <input type="range" id="morph-slider" min="0" max="100" value="0" step="1"
@@ -324,7 +331,7 @@
                     </label>
                 `).join('')}
             </div>
-            <div id="target-count" style="font-family:'Orbitron',sans-serif;font-size:12px;color:#ff8800;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
+            <div id="target-count" style="font-family:'Orbitron',sans-serif;font-size:12px;color:#F4C430;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
         `);
 
         // ── Drawing ─────────────────────────────────────────────────────────────────
@@ -567,21 +574,14 @@
                 ? poly.slice(0, -1)
                 : poly;
 
-            // Apply baseline & horizontal alignment if target exists
-            let displayPoly = poly;
-            if (targetLargest) {
-                const ub = bboxOf(poly);
-                const tb = bboxOf(targetLargest);
-                const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
-                const dy = ub.maxY - tb.maxY;
-                displayPoly = poly.map(([x, y]) => [x - dx, y - dy]);
-            }
+            // Show the outline at the user's drawn position (no alignment to times)
+            const displayPoly = poly;
 
             if (showPoly) {
                 // Draw closed polygon outline
                 drawCtx.save();
-                drawCtx.strokeStyle = '#ff8800';
-                drawCtx.lineWidth = 1;
+                drawCtx.strokeStyle = '#808080';
+                drawCtx.lineWidth = 3;
                 drawCtx.lineCap = 'round';
                 drawCtx.lineJoin = 'round';
                 drawCtx.beginPath();
@@ -679,26 +679,31 @@
         function prepareMorph() {
             if (!targetPolygon) return false;
             const target = getLargestTargetSubPoly();
-            if (!target) return false;
-            // Regenerate userMorphPoly from rawContour if missing or wrong size
-            if (!userMorphPoly || userMorphPoly.length !== target.length) {
-                if (!rawContour) return false;
-                const eps = +document.getElementById('eps-slider').value;
-                let basePoly = rdp(rawContour, eps);
-                if (basePoly.length > 1 &&
-                    basePoly[0][0] === basePoly[basePoly.length-1][0] &&
-                    basePoly[0][1] === basePoly[basePoly.length-1][1]) {
-                    basePoly = basePoly.slice(0, -1);
-                }
-                userMorphPoly = resamplePolygon(basePoly, target.length);
+            if (!target || !rawContour) return false;
+            // Always regenerate userMorphPoly fresh from rawContour to avoid
+            // cumulative translation across multiple prepareMorph calls.
+            const eps = +document.getElementById('eps-slider').value;
+            let basePoly = rdp(rawContour, eps);
+            if (basePoly.length > 1 &&
+                basePoly[0][0] === basePoly[basePoly.length-1][0] &&
+                basePoly[0][1] === basePoly[basePoly.length-1][1]) {
+                basePoly = basePoly.slice(0, -1);
             }
-            // Translate target: horizontally centered, baseline (bottom) aligned with user's
+            userMorphPoly = resamplePolygon(basePoly, target.length);
+            // Translate BOTH user and target morph polygons to the LEFT of the times outline,
+            // baseline-aligned. The original `targetPolygon` (drawn as orange outline) stays
+            // at the times position; we only translate the COPY used for morphing.
             const ub = bboxOf(userMorphPoly);
             const tb = bboxOf(target);
-            const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
-            const dy = ub.maxY - tb.maxY;
-            const translated = target.map(([x, y]) => [x + dx, y + dy]);
-            targetMorphPoly = alignTargetTo(userMorphPoly, translated);
+            const gap = 100;
+            const dxUser = tb.minX - gap - ub.maxX;
+            const dyUser = tb.maxY - ub.maxY;
+            userMorphPoly = userMorphPoly.map(([x, y]) => [x + dxUser, y + dyUser]);
+            // Translate target so its right edge sits gap-pixels left of the times outline,
+            // sharing the same baseline.
+            const dxTarget = tb.minX - gap - tb.maxX;
+            const targetTranslated = target.map(([x, y]) => [x + dxTarget, y]);
+            targetMorphPoly = alignTargetTo(userMorphPoly, targetTranslated);
             return true;
         }
 
@@ -747,7 +752,7 @@
                 return;
             }
             cancelAnimationFrame(morphRaf);
-            hideUserOutline();
+            document.getElementById('digit-canvas').style.display = 'none';
             morphStart = performance.now();
             function tick() {
                 const elapsed = performance.now() - morphStart;
@@ -775,11 +780,9 @@
             document.getElementById('morph-val').textContent = val;
             if (+val === 0) {
                 morphCtx.clearRect(0, 0, 1000, 1000);
-                showUserOutline();
                 return;
             }
             if (!prepareMorph()) return;
-            hideUserOutline();
             drawMorph(val / 100);
         }
 
@@ -860,13 +863,13 @@
                 const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
                 const offsetY = 580 - (bbox.y1 + bbox.y2) / 2;
                 const path = timesFont.getPath(String(d), offsetX, offsetY, fontSize);
-                path.fill = '#fff';
+                path.fill = '#F4C430';
                 path.draw(digitCtx);
                 targetPolygon = pathToPolygons(path, 8);
             } else {
                 // Fallback: canvas fillText + Marching Squares extraction
                 digitCtx.save();
-                digitCtx.fillStyle = '#fff';
+                digitCtx.fillStyle = '#F4C430';
                 digitCtx.font = 'bold 640px "Times New Roman", serif';
                 digitCtx.textAlign = 'center';
                 digitCtx.textBaseline = 'middle';
@@ -919,8 +922,8 @@
             }
 
             digitCtx.save();
-            digitCtx.strokeStyle = '#ff8800';
-            digitCtx.lineWidth = 1;
+            digitCtx.strokeStyle = '#808080';
+            digitCtx.lineWidth = 3;
             digitCtx.lineCap = 'round';
             digitCtx.lineJoin = 'round';
             for (const poly of displayTarget) {
