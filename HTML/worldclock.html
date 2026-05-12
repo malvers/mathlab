@@ -603,18 +603,6 @@
         let globeLng = 0;      // Current globe view longitude (used by auto-rotation before user drag)
         let globeManuallyDragged = false;  // Once true, TrackballControls owns the camera
         let isReturning = false;
-        let rotateToTarget = null; // { target: degrees, done: false }
-
-        function rotateToCityLon(lon) {
-            const time = getDisplayTime();
-            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-            const baseRotation = (12 - (utcHours + 1)) * 15;
-            // Desired autoRotation so city appears at top (12 o'clock = angle 0)
-            const desired = lon + 90 - baseRotation;
-            // Shortest path
-            let delta = ((desired - autoRotation) % 360 + 540) % 360 - 180;
-            rotateToTarget = { end: autoRotation + delta };
-        }
         let cityFontGray = 200; // Dynamic gray for city labels
         let ringFontGray = 222; // Dynamic gray for standard ring hours
         let selectedCity = null; // Currently clicked city
@@ -941,16 +929,6 @@
                 }
             }
 
-            // Smooth rotate-to animation
-            if (rotateToTarget) {
-                const diff = rotateToTarget.end - autoRotation;
-                if (Math.abs(diff) < 0.1) {
-                    autoRotation = rotateToTarget.end;
-                    rotateToTarget = null;
-                } else {
-                    autoRotation += diff * 0.07;
-                }
-            }
 
             const time = getDisplayTime();
             const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
@@ -1730,13 +1708,35 @@
                         if (item.city) {
                             selectedCity = item.city;
                             showCityInfo(item.city.name);
-                            rotateToCityLon(item.city.lon);
+                            if (globeInstance) {
+                                lockedCity = item.city;
+                                globeManuallyDragged = false;
+                                const gLat = item.city.globeLat, gLng = item.city.globeLon;
+                                globeInstance.pointOfView({ lat: gLat, lng: gLng, altitude: 2.65 }, 1000);
+                                globeInstance
+                                    .pointsData([{ lat: gLat, lng: gLng }])
+                                    .pointLat('lat').pointLng('lng')
+                                    .pointColor(() => 'red').pointAltitude(0.01).pointRadius(0.6)
+                                    .ringsData([{ lat: gLat, lng: gLng }])
+                                    .ringColor(() => 'rgba(255,0,0,1)')
+                                    .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+                            }
                         } else if (item.nominatim) {
                             // Zeitzone via timeapi.io nachladen
                             const { lat, lon, name } = item.nominatim;
                             const loadingCity = { name, lat, lon, globeLat: lat, globeLon: lon, tz: 'UTC', color: '#00d2ff' };
                             selectedCity = loadingCity;
-                            rotateToCityLon(lon);
+                            if (globeInstance) {
+                                globeManuallyDragged = false;
+                                globeInstance.pointOfView({ lat, lng: lon, altitude: 2.65 }, 1000);
+                                globeInstance
+                                    .pointsData([{ lat, lng: lon }])
+                                    .pointLat('lat').pointLng('lng')
+                                    .pointColor(() => 'red').pointAltitude(0.01).pointRadius(0.6)
+                                    .ringsData([{ lat, lng: lon }])
+                                    .ringColor(() => 'rgba(255,0,0,1)')
+                                    .ringMaxRadius(5).ringPropagationSpeed(5).ringRepeatPeriod(1000);
+                            }
                             fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`)
                                 .then(r => r.json())
                                 .then(d => {
