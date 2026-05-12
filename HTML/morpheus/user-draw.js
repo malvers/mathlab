@@ -36,6 +36,8 @@ function clearDraw() {
     userMorphPoly = null;
     userMorphPolys = null;
     document.getElementById('vert-count').textContent = '';
+    const objVal = document.getElementById('obj-value');
+    if (objVal) objVal.textContent = '0';
     try {
         localStorage.removeItem('morph-outline');
         localStorage.removeItem('morph-outlines');
@@ -64,10 +66,74 @@ function resetDrawState() {
     rawContour = null;
     rawContours = null;
     document.getElementById('vert-count').textContent = '';
+    document.getElementById('obj-value').textContent = '0';
     try {
         localStorage.removeItem('morph-outline');
         localStorage.removeItem('morph-outlines');
     } catch (_) {}
+}
+
+function countObjectsFromCanvas() {
+    requestAnimationFrame(() => {
+        try {
+            const imgData = drawCtx.getImageData(0, 0, 1000, 1000);
+            const grid = new Uint8Array(1000 * 1000);
+            let filledCount = 0;
+            for (let i = 0; i < 1000 * 1000; i++) {
+                const v = imgData.data[i * 4] > 30 ? 1 : 0;
+                grid[i] = v;
+                if (v) filledCount++;
+            }
+            DebugWindow.log(`📊 countObjectsFromCanvas: ${filledCount} pixels`);
+            if (filledCount === 0) {
+                document.getElementById('obj-value').textContent = '0';
+                DebugWindow.log('  → 0 objects (empty canvas)');
+                return;
+            }
+            const contours = getContoursWithHoles(grid, 1000, 1000);
+            DebugWindow.log(`  → ${contours.length} contour(s) found`);
+            if (typeof countDrawnObjects === 'function' && contours.length > 0) {
+                const tempRawContours = contours;
+                const classifyContours = (cs) => {
+                    if (!cs || cs.length === 0) return { outers: [] };
+                    const pointInPoly = (pt, poly) => {
+                        const [x, y] = pt;
+                        let inside = false;
+                        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                            const [xi, yi] = poly[i], [xj, yj] = poly[j];
+                            const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi);
+                            if (intersect) inside = !inside;
+                        }
+                        return inside;
+                    };
+                    const cent = cs.map(p => {
+                        let sx = 0, sy = 0;
+                        for (const [x, y] of p) { sx += x; sy += y; }
+                        return [sx / p.length, sy / p.length];
+                    });
+                    const parent = new Array(cs.length).fill(-1);
+                    for (let i = 0; i < cs.length; i++) {
+                        for (let j = 0; j < cs.length; j++) {
+                            if (i === j || parent[i] !== -1) continue;
+                            if (pointInPoly(cent[i], cs[j])) parent[i] = j;
+                        }
+                    }
+                    const outers = [];
+                    for (let i = 0; i < cs.length; i++) {
+                        if (parent[i] === -1) outers.push({ idx: i });
+                    }
+                    return { outers };
+                };
+                const { outers } = classifyContours(tempRawContours);
+                document.getElementById('obj-value').textContent = outers.length;
+                DebugWindow.log(`  ✓ Updated obj-value to ${outers.length}`);
+            } else {
+                DebugWindow.log(`  ⚠ countDrawnObjects not available or no contours`);
+            }
+        } catch (e) {
+            DebugWindow.log(`❌ countObjectsFromCanvas error: ${e.message}`);
+        }
+    });
 }
 
 // Translate event → canvas pixel coordinates (handles CSS scaling).
@@ -150,6 +216,11 @@ function extractOutline() {
         if (selectedDigit !== null) drawTargetPolygon();
         // Topological object count (separate drawn shapes, not contours)
         if (typeof logDrawnObjects === 'function') logDrawnObjects();
+        if (typeof countDrawnObjects === 'function') {
+            const count = countDrawnObjects();
+            const objVal = document.getElementById('obj-value');
+            if (objVal) objVal.textContent = count;
+        }
         DebugWindow.log('✓ extractOutline done');
     } catch (e) {
         DebugWindow.log(`❌ extractOutline error: ${e.message}`);
@@ -303,8 +374,8 @@ function setupUserDrawingEvents() {
         const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         scheduleAutoSave();
     });
-    drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
-    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+    drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; countObjectsFromCanvas(); });
+    drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; countObjectsFromCanvas(); });
 
     drawCanvas.addEventListener('touchstart', e => {
         e.preventDefault();
@@ -319,5 +390,5 @@ function setupUserDrawingEvents() {
         const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         scheduleAutoSave();
     }, { passive: false });
-    drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+    drawCanvas.addEventListener('touchend', () => { isDrawing = false; countObjectsFromCanvas(); });
 }

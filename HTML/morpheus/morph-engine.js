@@ -171,14 +171,12 @@ function drawMorph(t, forceLines, forcePoints) {
     };
 
     // At t=1, DELETE zero-area (collapsed-to-point) regions from state
-    // BEFORE rendering — they no longer exist in the morph.
+    // BEFORE rendering — threshold 1 px² to be safe (real regions have ≥100).
     let pruned = 0;
     if (t >= 1) {
-        // Region's actual rendered area at t=1 = polyArea on the interpolated polygon
-        // (== targetMorphPolys[r] since at t=1 we are fully at target).
         const targetAreas = targetMorphPolys.map(polyArea);
         DebugWindow.log(`  pruning check — targetAreas: [${targetAreas.map(Math.round).join(', ')}]`);
-        const keep = targetAreas.map(a => a > 0);
+        const keep = targetAreas.map(a => a >= 1);
         pruned = targetAreas.length - keep.filter(Boolean).length;
         if (pruned > 0) {
             const origLen = userMorphPolys.length;
@@ -191,14 +189,6 @@ function drawMorph(t, forceLines, forcePoints) {
                 rawContours = rawContours.filter((_, i) => keep[i]);
                 rawContour = rawContours[0] || null;
                 DebugWindow.log(`  rawContours pruned: ${origLen} → ${rawContours.length}`);
-            } else {
-                DebugWindow.log(`  ⚠ rawContours NOT pruned (counts didn't align: rawContours.length=${rawContours?.length}, origLen=${origLen})`);
-            }
-            // Also clear the outline overlay so old colored points/lines vanish
-            if (typeof outlineCtx !== 'undefined') {
-                outlineCtx.clearRect(0, 0, 1000, 1000);
-                if (typeof drawTargetPolygon === 'function') drawTargetPolygon();
-                DebugWindow.log(`  outline-canvas cleared + redrawn`);
             }
         }
     }
