@@ -224,7 +224,7 @@ function drawMorph(t, forceLines, forcePoints) {
     }
     morphCtx.restore();
 
-    // Similarity (weighted avg across all regions)
+    // Similarity in % — updated EVERY frame, shown in the corner box.
     let totalDist = 0, totalPts = 0;
     for (let r = 0; r < allInterp.length; r++) {
         const u = allInterp[r];
@@ -244,7 +244,42 @@ function drawMorph(t, forceLines, forcePoints) {
     if (simEl) simEl.textContent = sim + '%';
     const simBoxVal = document.getElementById('sim-value');
     if (simBoxVal) simBoxVal.textContent = sim + '%';
-    if (t === 0 || t === 1 || Math.round(t * 100) % 20 === 0) {
-        DebugWindow.log(`🎬 t=${Math.round(t * 100)}% | ${allInterp.length} region(s) | Sim: ${sim}%`);
+
+    // At the END of the morph, prune zero-area regions (collapsed points)
+    if (t >= 1) {
+        const regionAreas = allInterp.map(poly => {
+            let a = 0;
+            for (let i = 0; i < poly.length; i++) {
+                const [x1, y1] = poly[i];
+                const [x2, y2] = poly[(i + 1) % poly.length];
+                a += (x2 - x1) * (y2 + y1);
+            }
+            return Math.round(Math.abs(a) / 2);
+        });
+        const keep = regionAreas.map(a => a > 0);
+        const pruned = regionAreas.length - keep.filter(Boolean).length;
+
+        DebugWindow.log(`🎬 t=100% | sim: ${sim}% (avg dist ${Math.round(avgDist)}px) | ${keep.filter(Boolean).length} region(s)`);
+        regionAreas.forEach((a, i) => {
+            if (!keep[i]) return;
+            const role = i === 0 ? 'outer' : `hole ${i}`;
+            DebugWindow.log(`  region ${i} (${role}): ${a} px²`);
+        });
+
+        if (pruned > 0) {
+            userMorphPolys = userMorphPolys.filter((_, i) => keep[i]);
+            targetMorphPolys = targetMorphPolys.filter((_, i) => keep[i]);
+            userMorphPoly = userMorphPolys[0] || null;
+            targetMorphPoly = targetMorphPolys[0] || null;
+            // Also prune rawContours (only when counts align) so outlines
+            // match when stopMorph restores the user drawing. We do NOT call
+            // drawPolygon() here — that would resurrect the hidden user art.
+            if (typeof rawContours !== 'undefined' && rawContours &&
+                rawContours.length === regionAreas.length) {
+                rawContours = rawContours.filter((_, i) => keep[i]);
+                rawContour = rawContours[0] || null;
+            }
+            DebugWindow.log(`  🗑 deleted ${pruned} zero-area region(s)`);
+        }
     }
 }
