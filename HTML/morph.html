@@ -232,11 +232,13 @@
             background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(0, 210, 255, 0.5);
             border-radius: 8px;
-            padding: 14px 22px;
+            padding: 10px 22px;
             text-align: center;
             color: #00d2ff;
             pointer-events: none;
-            min-width: 100px;
+            min-width: 160px;
+            height: 10px;
+            overflow: hidden;
             line-height: 1;
             z-index: 50;
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
@@ -1928,6 +1930,15 @@
                     katex.render('\\textit{\\"Ahnlichkeit}', simLabel, { throwOnError: false });
                 } catch (_) {
                     simLabel.textContent = 'Ähnlichkeit';
+                }
+            }
+            // Render initial sim-value "0%" in LaTeX italic style
+            const simBoxVal = document.getElementById('sim-value');
+            if (simBoxVal) {
+                try {
+                    katex.render('\\mathit{0\\%}', simBoxVal, { throwOnError: false });
+                } catch (_) {
+                    simBoxVal.textContent = '0%';
                 }
             }
         }
