@@ -355,6 +355,20 @@
                 e.preventDefault();
                 savePreset();
             }
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                const radios = document.querySelectorAll('input[name="digit"][value^="formula-"]');
+                if (radios.length === 0) return;
+                let curIdx = -1;
+                for (let i = 0; i < radios.length; i++) {
+                    if (radios[i].checked) { curIdx = i; break; }
+                }
+                const dir = e.key === 'ArrowDown' ? 1 : -1;
+                const next = (curIdx + dir + radios.length) % radios.length;
+                radios[next].checked = true;
+                radios[next].click();
+            }
         }, true);
 
         function onStrokeChange(val) {
@@ -576,6 +590,8 @@
                 drawCtx.drawImage(img, x, y, w, h);
                 DebugWindow.log(`✓ Preset formula-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
                 scheduleAutoSave();
+                DebugWindow.log(`▶ Auto-extrahiere Outlines für formula-${index}.png`);
+                extractOutline();
             };
             img.onerror = () => {
                 DebugWindow.log(`❌ FEHLT: presets/formula-${index}.png konnte nicht geladen werden!`);
