@@ -168,7 +168,13 @@ function extractOutline() {
 // ── Render user polygon overlay (multi-region with colors + crossings) ──────
 function drawPolygon() {
     if ((!rawContour && !rawContours) || !savedPixels) return;
-    drawCtx.putImageData(savedPixels, 0, 0);
+    const showArt = document.getElementById('art-toggle')?.checked ?? true;
+    if (showArt) {
+        drawCtx.putImageData(savedPixels, 0, 0);
+    } else {
+        drawCtx.fillStyle = '#000';
+        drawCtx.fillRect(0, 0, 1000, 1000);
+    }
 
     const showPoly = document.getElementById('poly-toggle')?.checked ?? true;
     const eps = +(document.getElementById('eps-slider')?.value ?? 1);
@@ -236,7 +242,7 @@ function drawPolygon() {
             const showPoints = document.getElementById('points-toggle')?.checked ?? true;
             if (showLines) {
                 drawCtx.strokeStyle = color;
-                drawCtx.lineWidth = 2;
+                drawCtx.lineWidth = 1.5;
                 drawCtx.beginPath();
                 drawCtx.moveTo(poly[0][0], poly[0][1]);
                 for (let i = 1; i < poly.length; i++) drawCtx.lineTo(poly[i][0], poly[i][1]);

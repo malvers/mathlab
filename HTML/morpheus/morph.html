@@ -125,7 +125,7 @@
             </div>
         `, '#00d2ff', { collapsible: true });
 
-        CyberUI.createCard('ui-container', 'OUTLINES', `
+        CyberUI.createCard('ui-container', 'MATHEMATISCHE ZEICHEN', `
             <button class="cyber-btn" onclick="extractOutline()"
                 style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINES GENERIEREN</button>
             <button class="cyber-btn" onclick="clearOutline()"
@@ -141,6 +141,13 @@
                 <span>PUNKTE</span>
                 <span class="switch">
                     <input type="checkbox" id="points-toggle" checked onchange="onPointsToggle(this.checked)">
+                    <span class="switch-slider"></span>
+                </span>
+            </label>
+            <label class="switch-row">
+                <span>PIXEL</span>
+                <span class="switch">
+                    <input type="checkbox" id="art-toggle" checked onchange="onArtToggle(this.checked)">
                     <span class="switch-slider"></span>
                 </span>
             </label>
@@ -369,6 +376,12 @@
                 radios[next].checked = true;
                 radios[next].click();
             }
+            if ((e.key === 'k' || e.key === 'K') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                const toggle = document.getElementById('art-toggle');
+                if (toggle) { toggle.checked = !toggle.checked; onArtToggle(toggle.checked); }
+            }
         }, true);
 
         function onStrokeChange(val) {
@@ -404,6 +417,15 @@
 
         function onPointsToggle(checked) {
             try { localStorage.setItem('morph-points-visible', checked ? '1' : '0'); } catch (_) {}
+            refreshOutlines();
+        }
+
+        function onArtToggle(checked) {
+            try { localStorage.setItem('morph-art-visible', checked ? '1' : '0'); } catch (_) {}
+            // Target glyph (yellow on digit-canvas): hide via CSS opacity
+            const dc = document.getElementById('digit-canvas');
+            if (dc) dc.style.opacity = checked ? '1' : '0';
+            // User art on draw-canvas: handled inside drawPolygon (fills black when off)
             refreshOutlines();
         }
 
@@ -477,7 +499,7 @@
                 const fontSize = 640;
                 const probe = timesFont.getPath(String(selectedDigit), 0, 0, fontSize);
                 const bbox = probe.getBoundingBox();
-                const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
+                const offsetX = 760 - (bbox.x1 + bbox.x2) / 2;
                 const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
                 const path = timesFont.getPath(String(selectedDigit), offsetX, offsetY, fontSize);
                 path.fill = '#F4C430';
@@ -490,7 +512,7 @@
                 digitCtx.font = 'bold 640px "Times New Roman", serif';
                 digitCtx.textAlign = 'center';
                 digitCtx.textBaseline = 'middle';
-                digitCtx.fillText(String(selectedDigit), 720, 500);
+                digitCtx.fillText(String(selectedDigit), 760, 500);
                 digitCtx.restore();
             }
             // Draw times outline if toggle is on
@@ -554,7 +576,7 @@
                 const fontSize = 640;
                 const probe = timesFont.getPath(String(selectedDigit), 0, 0, fontSize);
                 const bbox = probe.getBoundingBox();
-                const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
+                const offsetX = 760 - (bbox.x1 + bbox.x2) / 2;
                 const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
                 const path = timesFont.getPath(String(selectedDigit), offsetX, offsetY, fontSize);
                 path.fill = '#F4C430';
@@ -567,7 +589,7 @@
                 digitCtx.font = 'bold 640px "Times New Roman", serif';
                 digitCtx.textAlign = 'center';
                 digitCtx.textBaseline = 'middle';
-                digitCtx.fillText(String(selectedDigit), 720, 500);
+                digitCtx.fillText(String(selectedDigit), 760, 500);
                 digitCtx.restore();
             }
             drawMorph(val / 100);
@@ -825,6 +847,14 @@
         try {
             const savedPoints = localStorage.getItem('morph-points-visible');
             if (savedPoints !== null) document.getElementById('points-toggle').checked = savedPoints === '1';
+        } catch (_) {}
+        try {
+            const savedArt = localStorage.getItem('morph-art-visible');
+            if (savedArt !== null) {
+                document.getElementById('art-toggle').checked = savedArt === '1';
+                const dc = document.getElementById('digit-canvas');
+                if (dc) dc.style.opacity = savedArt === '1' ? '1' : '0';
+            }
         } catch (_) {}
         makeCardsCollapsible();
         renderLatexButtons();

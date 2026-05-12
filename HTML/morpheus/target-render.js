@@ -34,7 +34,7 @@ function onDigitChange(d) {
         const fontSize = 640 * scale;
         const probe = timesFont.getPath(String(d), 0, 0, fontSize);
         const bbox = probe.getBoundingBox();
-        const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
+        const offsetX = 760 - (bbox.x1 + bbox.x2) / 2;
         const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
         const path = timesFont.getPath(String(d), offsetX, offsetY, fontSize);
         path.fill = '#F4C430';
@@ -47,7 +47,7 @@ function onDigitChange(d) {
         digitCtx.font = `bold ${640 * scale}px "Times New Roman", serif`;
         digitCtx.textAlign = 'center';
         digitCtx.textBaseline = 'middle';
-        digitCtx.fillText(String(d), 720, 500);
+        digitCtx.fillText(String(d), 760, 500);
         digitCtx.restore();
 
         const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
@@ -214,7 +214,7 @@ function renderLatexToCanvas(text) {
                 const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
                 const w = canvas.width * scale;
                 const h = canvas.height * scale;
-                const x = 720 - w / 2;
+                const x = 760 - w / 2;
                 const y = 500 - h / 2;
 
                 digitCtx.drawImage(canvas, x, y, w, h);
@@ -243,7 +243,7 @@ function renderPlainText(text) {
     digitCtx.font = `bold ${fontSize}px "Times New Roman", serif`;
     digitCtx.textAlign = 'center';
     digitCtx.textBaseline = 'middle';
-    digitCtx.fillText(text, 720, 500);
+    digitCtx.fillText(text, 760, 500);
     digitCtx.restore();
     DebugWindow.log('✓ Text rendered');
     extractAndUpdatePolygon();
@@ -259,7 +259,7 @@ function drawTargetPolygon() {
     if (!showLines && !showPoints) return;
 
     outlineCtx.save();
-    outlineCtx.lineWidth = 2;
+    outlineCtx.lineWidth = 1.5;
     outlineCtx.lineCap = 'round';
     outlineCtx.lineJoin = 'round';
     for (let i = 0; i < targetPolygon.length; i++) {
