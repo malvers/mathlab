@@ -8,17 +8,23 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="resources/favicon.png">
-    <link rel="stylesheet" href="js/cyber-layout.css">
-    <link rel="stylesheet" href="js/buttons-ultra.css">
-    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
-    <link rel="stylesheet" href="js/branding.styles.extracted.css">
-    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="../js/cyber-layout.css">
+    <link rel="stylesheet" href="../js/buttons-ultra.css">
+    <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="../js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="../js/lab-shell-minimal.css">
     <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="js/debug-window.js"></script>
+    <script src="../js/debug-window.js"></script>
+    <!-- Morpheus modules (extracted from inline script) -->
+    <script src="geometry.js"></script>
+    <script src="contours.js"></script>
+    <script src="morph-engine.js"></script>
+    <script src="target-render.js"></script>
+    <script src="count-objects.js"></script>
     <style>
         #draw-canvas {
             display: block;
@@ -231,14 +237,12 @@
             left: 30px;
             background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(0, 210, 255, 0.5);
-            border-radius: 8px;
-            padding: 10px 22px;
+            border-radius: 12px;
+            padding: 24px 36px;
             text-align: center;
             color: #00d2ff;
             pointer-events: none;
-            min-width: 160px;
-            height: 10px;
-            overflow: hidden;
+            min-width: 200px;
             line-height: 1;
             z-index: 50;
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
@@ -246,7 +250,7 @@
         #similarity-box .sim-value {
             font-family: 'KaTeX_Math', 'Times New Roman', serif;
             font-style: italic;
-            font-size: 56px;
+            font-size: 96px;
             font-weight: 700;
             color: #00d2ff;
             line-height: 1;
@@ -254,9 +258,9 @@
         #similarity-box .sim-label {
             font-family: 'KaTeX_Math', 'Times New Roman', serif;
             font-style: italic;
-            font-size: 16px;
+            font-size: 28px;
             color: rgba(0, 210, 255, 0.85);
-            margin-top: 4px;
+            margin-top: 10px;
             line-height: 1;
         }
 
@@ -335,22 +339,22 @@
         </div>
     </main>
 
-    <script src="js/cyber-left-chrome.js"></script>
-    <script src="js/branding/briefings.js"></script>
-    <script src="js/branding/overlays.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/i18n-de.js"></script>
-    <script src="js/i18n-en.js"></script>
-    <script src="js/i18n-es.js"></script>
-    <script src="js/i18n-fr.js"></script>
-    <script src="js/i18n-it.js"></script>
-    <script src="js/i18n-pt.js"></script>
-    <script src="js/i18n-sw.js"></script>
-    <script src="js/i18n-tr.js"></script>
-    <script src="js/i18n-nl.js"></script>
-    <script src="js/branding/nav.js"></script>
-    <script src="js/branding.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="../js/cyber-left-chrome.js"></script>
+    <script src="../js/branding/briefings.js"></script>
+    <script src="../js/branding/overlays.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/i18n-de.js"></script>
+    <script src="../js/i18n-en.js"></script>
+    <script src="../js/i18n-es.js"></script>
+    <script src="../js/i18n-fr.js"></script>
+    <script src="../js/i18n-it.js"></script>
+    <script src="../js/i18n-pt.js"></script>
+    <script src="../js/i18n-sw.js"></script>
+    <script src="../js/i18n-tr.js"></script>
+    <script src="../js/i18n-nl.js"></script>
+    <script src="../js/branding/nav.js"></script>
+    <script src="../js/branding.js"></script>
+    <script src="../js/ui.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -570,155 +574,8 @@
         }, { passive: false });
         drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
 
-        // ── Marching Squares Contour Extraction ───────────────────────────────────────
-        // Returns flat ordered points (backward-compatible single-contour version)
-        function getContour(grid, W, H) {
-            const all = getContoursWithHoles(grid, W, H);
-            if (all.length === 0) return [];
-            // Return concatenation? No — return only the largest (outer) to preserve old behavior
-            // But for hole support we need all. Return largest for legacy single-poly callers.
-            let largest = all[0];
-            for (const c of all) if (c.length > largest.length) largest = c;
-            return largest;
-        }
-
-        // Topology-aware boundary tracing using Marching Squares with proper edge linking.
-        // Returns multiple disjoint closed contours (outer + holes) — no bridges between them.
-        function getContoursWithHoles(grid, W, H) {
-            // Step 1: For each cell, generate line segments based on marching-squares case.
-            // Each segment is [pt1, pt2] where pts are at edge midpoints.
-            // Cell case bits (msb first): TL TR BR BL
-            const segments = [];
-
-            for (let y = 0; y < H - 1; y++) {
-                for (let x = 0; x < W - 1; x++) {
-                    const tl = grid[y * W + x];
-                    const tr = grid[y * W + (x + 1)];
-                    const br = grid[(y + 1) * W + (x + 1)];
-                    const bl = grid[(y + 1) * W + x];
-                    const cas = (tl << 3) | (tr << 2) | (br << 1) | bl;
-                    if (cas === 0 || cas === 15) continue;
-
-                    const top    = [x + 0.5, y];
-                    const right  = [x + 1,   y + 0.5];
-                    const bottom = [x + 0.5, y + 1];
-                    const left   = [x,       y + 0.5];
-
-                    switch (cas) {
-                        // Single-corner cases (one filled corner)
-                        case 1:  segments.push([left, bottom]); break;            // BL
-                        case 2:  segments.push([bottom, right]); break;           // BR
-                        case 4:  segments.push([top, right]); break;              // TR
-                        case 8:  segments.push([top, left]); break;               // TL
-
-                        // Three-corner cases (one outside corner)
-                        case 7:  segments.push([left, top]); break;               // TR+BR+BL
-                        case 11: segments.push([right, top]); break;              // TL+BR+BL
-                        case 13: segments.push([right, bottom]); break;           // TL+TR+BL
-                        case 14: segments.push([bottom, left]); break;            // TL+TR+BR
-
-                        // Two-corner adjacent (horizontal/vertical)
-                        case 3:  segments.push([left, right]); break;             // BL+BR
-                        case 12: segments.push([left, right]); break;             // TL+TR
-                        case 6:  segments.push([top, bottom]); break;             // TR+BR
-                        case 9:  segments.push([top, bottom]); break;             // TL+BL
-
-                        // Saddle cases (ambiguous diagonal — pick local disambiguation)
-                        // Case 5 = TR+BL (anti-diagonal): keep two separate segments
-                        case 5:
-                            segments.push([top, right]);
-                            segments.push([left, bottom]);
-                            break;
-                        // Case 10 = TL+BR (main diagonal)
-                        case 10:
-                            segments.push([top, left]);
-                            segments.push([right, bottom]);
-                            break;
-                    }
-                }
-            }
-
-            if (segments.length === 0) return [];
-
-            // Step 2: Build endpoint→segment-indices map for chaining.
-            // Use a numeric key that's collision-free for our domain (W,H ≤ ~2000, halves):
-            const ptKey = pt => pt[0] * 1e6 + pt[1];
-            const endpointMap = new Map();
-            for (let i = 0; i < segments.length; i++) {
-                for (let e = 0; e < 2; e++) {
-                    const k = ptKey(segments[i][e]);
-                    if (!endpointMap.has(k)) endpointMap.set(k, []);
-                    endpointMap.get(k).push(i);
-                }
-            }
-
-            // Step 3: Walk segments to build closed contours.
-            // Each segment is consumed exactly once. Multiple disjoint loops emerge naturally.
-            const used = new Uint8Array(segments.length);
-            const contours = [];
-
-            for (let startIdx = 0; startIdx < segments.length; startIdx++) {
-                if (used[startIdx]) continue;
-                used[startIdx] = 1;
-
-                const startPt = segments[startIdx][0];
-                const startKey = ptKey(startPt);
-                const contour = [startPt];
-                let currentPt = segments[startIdx][1];
-                contour.push(currentPt);
-
-                let safety = 0;
-                const maxSteps = segments.length + 2;
-
-                while (safety++ < maxSteps) {
-                    const k = ptKey(currentPt);
-                    if (k === startKey) break; // Closed loop
-
-                    const candidates = endpointMap.get(k);
-                    if (!candidates) break;
-
-                    let nextSegIdx = -1;
-                    for (const ci of candidates) {
-                        if (!used[ci]) { nextSegIdx = ci; break; }
-                    }
-                    if (nextSegIdx < 0) break;
-                    used[nextSegIdx] = 1;
-
-                    const seg = segments[nextSegIdx];
-                    currentPt = (ptKey(seg[0]) === k) ? seg[1] : seg[0];
-                    contour.push(currentPt);
-                }
-
-                if (contour.length >= 5) contours.push(contour);
-            }
-
-            return contours;
-        }
-
-        // ── Ramer–Douglas–Peucker simplification ─────────────────────────────────────
-        function ptLineDist([px, py], [ax, ay], [bx, by]) {
-            const dx = bx - ax, dy = by - ay;
-            const len2 = dx * dx + dy * dy;
-            if (len2 === 0) return Math.hypot(px - ax, py - ay);
-            return Math.abs(dy * px - dx * py + bx * ay - by * ax) / Math.sqrt(len2);
-        }
-
-        function rdp(pts, eps) {
-            if (pts.length < 3) return pts.slice();
-            let maxD = 0, idx = 1;
-            for (let i = 1; i < pts.length - 1; i++) {
-                const d = ptLineDist(pts[i], pts[0], pts[pts.length - 1]);
-                if (d > maxD) { maxD = d; idx = i; }
-            }
-            if (maxD > eps) {
-                const l = rdp(pts.slice(0, idx + 1), eps);
-                const r = rdp(pts.slice(idx), eps);
-                return [...l.slice(0, -1), ...r];
-            }
-            return [pts[0], pts[pts.length - 1]];
-        }
-
         // ── Outline extraction & rendering ───────────────────────────────────────────
+        // (Marching Squares + RDP helpers moved to morpheus/contours.js + morpheus/geometry.js)
         function extractOutline() {
             DebugWindow.log('▶ extractOutline called');
             try {
@@ -771,72 +628,9 @@
             }
         }
 
-        // Resample a polygon to exactly n evenly-spaced points along its perimeter
-        function resamplePolygon(poly, n) {
-            if (poly.length < 2 || n < 2) return poly.slice();
-            const cumLens = [0];
-            for (let i = 0; i < poly.length; i++) {
-                const [x1, y1] = poly[i];
-                const [x2, y2] = poly[(i + 1) % poly.length];
-                cumLens.push(cumLens[cumLens.length - 1] + Math.hypot(x2 - x1, y2 - y1));
-            }
-            const totalLen = cumLens[cumLens.length - 1];
-            if (totalLen === 0) return poly.slice();
-            const result = [];
-            for (let k = 0; k < n; k++) {
-                const targetDist = (k * totalLen) / n;
-                let segIdx = 0;
-                while (segIdx < poly.length && cumLens[segIdx + 1] < targetDist) segIdx++;
-                if (segIdx >= poly.length) segIdx = poly.length - 1;
-                const segStart = cumLens[segIdx];
-                const segLen = cumLens[segIdx + 1] - segStart;
-                const t = segLen > 0 ? (targetDist - segStart) / segLen : 0;
-                const [x1, y1] = poly[segIdx];
-                const [x2, y2] = poly[(segIdx + 1) % poly.length];
-                result.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t]);
-            }
-            return result;
-        }
+        // (resamplePolygon + findSelfIntersections moved to morpheus/geometry.js)
 
-        // Returns array of crossing-pairs [i, j] where segments (poly[i], poly[i+1])
-        // and (poly[j], poly[j+1]) intersect. Adjacent edges (sharing an endpoint) are skipped.
-        function findSelfIntersections(poly) {
-            const n = poly.length;
-            if (n < 4) return [];
-            const ccw = (p, q, r) =>
-                (q[0] - p[0]) * (r[1] - p[1]) - (r[0] - p[0]) * (q[1] - p[1]);
-            const intersect = (a, b, c, d) => {
-                const d1 = ccw(c, d, a), d2 = ccw(c, d, b);
-                const d3 = ccw(a, b, c), d4 = ccw(a, b, d);
-                return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-                       ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
-            };
-            const crosses = [];
-            for (let i = 0; i < n - 1; i++) {
-                for (let j = i + 2; j < n - 1; j++) {
-                    // Skip the wrap-around adjacency between last and first segment
-                    if (i === 0 && j === n - 2) continue;
-                    if (intersect(poly[i], poly[i + 1], poly[j], poly[j + 1])) {
-                        crosses.push([i, j]);
-                    }
-                }
-            }
-            return crosses;
-        }
-
-        // Distinct colors per contour region. Chosen to contrast with user-green (#adff2f),
-        // times-yellow (#F4C430), morph-green (#adff2f), and black background.
-        const REGION_COLORS = [
-            '#ff3030', // red
-            '#30c4ff', // bright cyan-blue
-            '#ff30c8', // magenta
-            '#ff9030', // orange
-            '#a060ff', // purple
-            '#30ffd0', // turquoise
-            '#ff6060', // coral
-            '#60a0ff', // light blue
-        ];
-        function regionColor(idx) { return REGION_COLORS[idx % REGION_COLORS.length]; }
+        // (REGION_COLORS, regionColor moved to morpheus/morph-engine.js)
 
         function drawPolygon() {
             if ((!rawContour && !rawContours) || !savedPixels) return;
@@ -1034,289 +828,8 @@
         }
 
         // ── Morph: alignment + animation ─────────────────────────────────────────────
-        function getLargestTargetSubPoly() {
-            if (!targetPolygon || targetPolygon.length === 0) return null;
-            let largest = targetPolygon[0];
-            for (const p of targetPolygon) if (p.length > largest.length) largest = p;
-            return largest;
-        }
-
-        // Rotate & possibly reverse target to minimize sum of vertex-distances to user
-        function alignTargetTo(userPoly, target) {
-            const n = userPoly.length;
-            if (target.length !== n) return target;
-            function bestRotation(t) {
-                let bestK = 0, bestDist = Infinity;
-                for (let k = 0; k < n; k++) {
-                    let dist = 0;
-                    for (let i = 0; i < n; i++) {
-                        const dx = userPoly[i][0] - t[(i + k) % n][0];
-                        const dy = userPoly[i][1] - t[(i + k) % n][1];
-                        dist += dx * dx + dy * dy;
-                        if (dist >= bestDist) break; // early-exit
-                    }
-                    if (dist < bestDist) { bestDist = dist; bestK = k; }
-                }
-                return { k: bestK, dist: bestDist };
-            }
-            const fwd = bestRotation(target);
-            const rev = [...target].reverse();
-            const bwd = bestRotation(rev);
-            if (bwd.dist < fwd.dist) {
-                return [...rev.slice(bwd.k), ...rev.slice(0, bwd.k)];
-            }
-            return [...target.slice(fwd.k), ...target.slice(0, fwd.k)];
-        }
-
-        function centroid(poly) {
-            if (!poly || poly.length === 0) return [0, 0];
-            let sx = 0, sy = 0;
-            for (const [x, y] of poly) { sx += x; sy += y; }
-            return [sx / poly.length, sy / poly.length];
-        }
-
-        // CANONICAL sort for stable region identity across user-drawing, target, morph.
-        // Index 0 = OUTER (largest by vertex count).
-        // Index 1+ = HOLES, sorted by centroid Y ascending (top to bottom), X as tiebreaker.
-        // This guarantees colors stay consistent: i-th region is always the SAME region.
-        function sortContoursCanonical(contours) {
-            if (!contours || contours.length <= 1) return contours;
-            let largestIdx = 0;
-            for (let i = 1; i < contours.length; i++) {
-                if (contours[i].length > contours[largestIdx].length) largestIdx = i;
-            }
-            const outer = contours[largestIdx];
-            const holes = [];
-            for (let i = 0; i < contours.length; i++) {
-                if (i !== largestIdx) holes.push(contours[i]);
-            }
-            holes.sort((a, b) => {
-                const ca = centroid(a);
-                const cb = centroid(b);
-                if (Math.abs(ca[1] - cb[1]) > 5) return ca[1] - cb[1];
-                return ca[0] - cb[0];
-            });
-            return [outer, ...holes];
-        }
-
-        function bboxOfMultiPoly(polys) {
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            for (const p of polys) {
-                for (const [x, y] of p) {
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                }
-            }
-            return { minX, maxX, minY, maxY };
-        }
-
-        function bboxOf(poly) {
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            for (const [x, y] of poly) {
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
-            }
-            return { minX, maxX, minY, maxY };
-        }
-
-        function prepareMorph() {
-            if (!targetPolygon) return false;
-            // Use rawContours if available, else fallback to single rawContour
-            const sourceContours = (rawContours && rawContours.length > 0)
-                ? rawContours
-                : (rawContour && rawContour.length >= 3 ? [rawContour] : []);
-            if (sourceContours.length === 0) return false;
-
-            const targetPolys = (targetPolygon || []).filter(p => p && p.length >= 3);
-            if (targetPolys.length === 0) return false;
-
-            const eps = +(document.getElementById('eps-slider')?.value ?? 1);
-
-            // RDP-simplify and unclose each user contour
-            const userSimplified = sourceContours
-                .filter(c => c && c.length >= 3)
-                .map(p => {
-                    let s = rdp(p, eps);
-                    if (s.length > 1 &&
-                        s[0][0] === s[s.length - 1][0] &&
-                        s[0][1] === s[s.length - 1][1]) {
-                        s = s.slice(0, -1);
-                    }
-                    return s;
-                })
-                .filter(p => p.length >= 3);
-            if (userSimplified.length === 0) return false;
-
-            // Apply CANONICAL sort to both (outer first, holes by Y ascending).
-            // This is identical to the sort applied at extraction time, so indices
-            // here match indices used by drawPolygon/drawTargetPolygon (=> colors stay consistent).
-            const userSorted = sortContoursCanonical(userSimplified);
-            const targetSorted = sortContoursCanonical(targetPolys);
-
-            // Translate ALL target polygons LEFT of the times outline (X only).
-            // Keep Y as-is — the target is already correctly positioned (baseline aligned
-            // with how it was rendered on the digit canvas). Adjusting Y here would shift
-            // it off the hard baseline.
-            const tb = bboxOfMultiPoly(targetSorted);
-            const gap = 100;
-            const dxTarget = tb.minX - gap - tb.maxX;
-            const targetTranslated = targetSorted.map(p =>
-                p.map(([x, y]) => [x + dxTarget, y])
-            );
-
-            // Direct index pairing — canonical sort guarantees i-th user region
-            // corresponds to i-th target region (same role: outer / top hole / bottom hole / ...).
-            const newUserPolys = [];
-            const newTargetPolys = [];
-            const nRegions = Math.max(userSorted.length, targetTranslated.length);
-
-            for (let i = 0; i < nRegions; i++) {
-                const u = userSorted[i];
-                const t = targetTranslated[i];
-
-                if (u && t) {
-                    const resampledU = resamplePolygon(u, t.length);
-                    const alignedT = alignTargetTo(resampledU, t);
-                    newUserPolys.push(resampledU);
-                    newTargetPolys.push(alignedT);
-                } else if (u) {
-                    const c = centroid(u);
-                    newUserPolys.push(u);
-                    newTargetPolys.push(u.map(() => [c[0], c[1]]));
-                } else if (t) {
-                    const c = centroid(t);
-                    newUserPolys.push(t.map(() => [c[0], c[1]]));
-                    newTargetPolys.push(t);
-                }
-            }
-
-            userMorphPolys = newUserPolys;
-            targetMorphPolys = newTargetPolys;
-            // Legacy single-poly references (= largest)
-            userMorphPoly = userMorphPolys[0] || null;
-            targetMorphPoly = targetMorphPolys[0] || null;
-
-            DebugWindow.log(`✓ prepareMorph: ${nRegions} region(s) matched`);
-            return true;
-        }
-
-        function calculateSimilarity(morphPts, targetPts) {
-            if (!morphPts || !targetPts || morphPts.length === 0) return 0;
-            let sumDist = 0;
-            const n = Math.min(morphPts.length, targetPts.length);
-            for (let i = 0; i < n; i++) {
-                const dx = morphPts[i][0] - targetPts[i][0];
-                const dy = morphPts[i][1] - targetPts[i][1];
-                sumDist += Math.sqrt(dx * dx + dy * dy);
-            }
-            const avgDist = sumDist / n;
-            // Normalize: 0 distance = 100% similar, 150 pixels distance = 0% similar
-            const maxDist = 150;
-            const similarity = Math.max(0, Math.min(100, 100 * (1 - avgDist / maxDist)));
-            return Math.round(similarity);
-        }
-
-        function drawMorph(t, forceLines, forcePoints) {
-            morphCtx.clearRect(0, 0, 1000, 1000);
-            if (!userMorphPolys || !targetMorphPolys || userMorphPolys.length === 0) return;
-
-            morphCtx.save();
-
-            // Interpolate each region separately
-            const allInterp = [];
-            for (let r = 0; r < userMorphPolys.length; r++) {
-                const u = userMorphPolys[r];
-                const tg = targetMorphPolys[r];
-                const n = u.length;
-                const pts = new Array(n);
-                for (let i = 0; i < n; i++) {
-                    const ux = u[i][0], uy = u[i][1];
-                    const tx = tg[i][0], ty = tg[i][1];
-                    pts[i] = [ux + (tx - ux) * t, uy + (ty - uy) * t];
-                }
-                allInterp.push(pts);
-            }
-
-            // Fill all regions in ONE path with evenodd rule —
-            // outer fills, holes XOR-cancel to become transparent.
-            // Color morph: green (#adff2f) → target-yellow (#F4C430) over t∈[0,1]
-            const cr = Math.round(173 + (244 - 173) * t);
-            const cg = Math.round(255 + (196 - 255) * t);
-            const cb = Math.round(47  + (48  - 47 ) * t);
-            morphCtx.fillStyle = `rgb(${cr},${cg},${cb})`;
-            morphCtx.beginPath();
-            for (const pts of allInterp) {
-                morphCtx.moveTo(pts[0][0], pts[0][1]);
-                for (let i = 1; i < pts.length; i++) morphCtx.lineTo(pts[i][0], pts[i][1]);
-                morphCtx.closePath();
-            }
-            morphCtx.fill('evenodd');
-
-            // Outline overlay per region controlled by LINES / POINTS switches (overrideable)
-            const showLines = forceLines !== undefined ? forceLines : (document.getElementById('lines-toggle')?.checked ?? true);
-            const showPoints = forcePoints !== undefined ? forcePoints : (document.getElementById('points-toggle')?.checked ?? true);
-            if (showLines || showPoints) {
-                morphCtx.lineWidth = 2;
-                morphCtx.lineCap = 'round';
-                morphCtx.lineJoin = 'round';
-                for (let r = 0; r < allInterp.length; r++) {
-                    const color = regionColor(r);
-                    if (showLines) {
-                        morphCtx.strokeStyle = color;
-                        morphCtx.beginPath();
-                        morphCtx.moveTo(allInterp[r][0][0], allInterp[r][0][1]);
-                        for (let i = 1; i < allInterp[r].length; i++) {
-                            morphCtx.lineTo(allInterp[r][i][0], allInterp[r][i][1]);
-                        }
-                        morphCtx.closePath();
-                        morphCtx.stroke();
-                    }
-                    if (showPoints) {
-                        morphCtx.fillStyle = color;
-                        for (const [x, y] of allInterp[r]) {
-                            morphCtx.beginPath();
-                            morphCtx.arc(x, y, 1.6, 0, Math.PI * 2);
-                            morphCtx.fill();
-                        }
-                    }
-                }
-            }
-            morphCtx.restore();
-
-            // Similarity: weighted avg across all regions
-            let totalDist = 0, totalPts = 0;
-            for (let r = 0; r < allInterp.length; r++) {
-                const u = allInterp[r];
-                const tg = targetMorphPolys[r];
-                const n = Math.min(u.length, tg.length);
-                for (let i = 0; i < n; i++) {
-                    const dx = u[i][0] - tg[i][0];
-                    const dy = u[i][1] - tg[i][1];
-                    totalDist += Math.sqrt(dx * dx + dy * dy);
-                }
-                totalPts += n;
-            }
-            const avgDist = totalPts > 0 ? totalDist / totalPts : 0;
-            const sim = Math.round(Math.max(0, Math.min(100, 100 * (1 - avgDist / 150))));
-
-            const simEl = document.getElementById('morph-similarity');
-            if (simEl) simEl.textContent = sim + '%';
-            const simBoxVal = document.getElementById('sim-value');
-            if (simBoxVal) {
-                try {
-                    katex.render('\\mathit{' + sim + '\\%}', simBoxVal, { throwOnError: false });
-                } catch (_) {
-                    simBoxVal.textContent = sim + '%';
-                }
-            }
-            if (t === 0 || t === 1 || Math.round(t * 100) % 20 === 0) {
-                DebugWindow.log(`🎬 t=${Math.round(t * 100)}% | ${allInterp.length} region(s) | Sim: ${sim}%`);
-            }
-        }
+        // (prepareMorph, drawMorph, alignTargetTo, getLargestTargetSubPoly,
+        //  calculateSimilarity moved to morpheus/morph-engine.js)
 
         function hideUserOutline() {
             // Clear draw canvas completely (hide user art AND outline)
@@ -1449,324 +962,12 @@
         let targetMorphPolys = null;// per-region target polygons (matched 1:1, translated/aligned)
         let morphRaf = null;
         let morphStart = 0;
-        const MORPH_DURATION = 2500;
+        // MORPH_DURATION + REGION_COLORS + regionColor live in morpheus/morph-engine.js
 
-        // ── Bézier sampling for vector path → polygon ────────────────────────────────
-        function sampleQuadratic(p0, p1, p2, n) {
-            const pts = [];
-            for (let i = 1; i <= n; i++) {
-                const t = i / n, mt = 1 - t;
-                pts.push([
-                    mt*mt*p0[0] + 2*mt*t*p1[0] + t*t*p2[0],
-                    mt*mt*p0[1] + 2*mt*t*p1[1] + t*t*p2[1]
-                ]);
-            }
-            return pts;
-        }
-        function sampleCubic(p0, p1, p2, p3, n) {
-            const pts = [];
-            for (let i = 1; i <= n; i++) {
-                const t = i / n, mt = 1 - t;
-                pts.push([
-                    mt*mt*mt*p0[0] + 3*mt*mt*t*p1[0] + 3*mt*t*t*p2[0] + t*t*t*p3[0],
-                    mt*mt*mt*p0[1] + 3*mt*mt*t*p1[1] + 3*mt*t*t*p2[1] + t*t*t*p3[1]
-                ]);
-            }
-            return pts;
-        }
-        function pathToPolygons(path, samplesPerCurve = 30) {
-            const polys = [];
-            let cur = null;
-            let cx = 0, cy = 0, sx = 0, sy = 0;
-            for (const cmd of path.commands) {
-                switch (cmd.type) {
-                    case 'M':
-                        if (cur && cur.length) polys.push(cur);
-                        cur = [[cmd.x, cmd.y]];
-                        cx = sx = cmd.x; cy = sy = cmd.y;
-                        break;
-                    case 'L':
-                        cur.push([cmd.x, cmd.y]);
-                        cx = cmd.x; cy = cmd.y;
-                        break;
-                    case 'Q':
-                        cur.push(...sampleQuadratic([cx, cy], [cmd.x1, cmd.y1], [cmd.x, cmd.y], samplesPerCurve));
-                        cx = cmd.x; cy = cmd.y;
-                        break;
-                    case 'C':
-                        cur.push(...sampleCubic([cx, cy], [cmd.x1, cmd.y1], [cmd.x2, cmd.y2], [cmd.x, cmd.y], samplesPerCurve));
-                        cx = cmd.x; cy = cmd.y;
-                        break;
-                    case 'Z':
-                        cx = sx; cy = sy;
-                        break;
-                }
-            }
-            if (cur && cur.length) polys.push(cur);
-            return polys;
-        }
+        // (sampleQuadratic, sampleCubic, pathToPolygons moved to morpheus/geometry.js)
 
-        function onDigitChange(d) {
-            selectedDigit = d;
-            clearMorphFigure();
-            try {
-                localStorage.setItem('morph-digit', String(d));
-                localStorage.removeItem('morph-text');
-                document.getElementById('text-input').value = '';
-            } catch (_) {}
-            digitCtx.clearRect(0, 0, 1000, 1000);
-
-            if (timesFont) {
-                // Vector render via opentype
-                const fontSize = 640;
-                const probe = timesFont.getPath(String(d), 0, 0, fontSize);
-                const bbox = probe.getBoundingBox();
-                const offsetX = 720 - (bbox.x1 + bbox.x2) / 2;
-                const offsetY = 500 - (bbox.y1 + bbox.y2) / 2;
-                const path = timesFont.getPath(String(d), offsetX, offsetY, fontSize);
-                path.fill = '#F4C430';
-                path.draw(digitCtx);
-                targetPolygon = pathToPolygons(path, 8);
-            } else {
-                // Fallback: canvas fillText + Marching Squares extraction
-                digitCtx.save();
-                digitCtx.fillStyle = '#F4C430';
-                digitCtx.font = 'bold 640px "Times New Roman", serif';
-                digitCtx.textAlign = 'center';
-                digitCtx.textBaseline = 'middle';
-                digitCtx.fillText(String(d), 720, 500);
-                digitCtx.restore();
-
-                // Extract polygons (topology-aware: outer + holes)
-                const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
-                const grid = new Uint8Array(1000 * 1000);
-                for (let i = 0; i < 1000 * 1000; i++)
-                    grid[i] = imgData.data[i * 4 + 3] > 30 ? 1 : 0;
-                const contours = getContoursWithHoles(grid, 1000, 1000);
-                targetPolygon = contours.length ? contours : null;
-            }
-
-            // Sub-sample each sub-polygon to a max count
-            const MAX_PTS = 300;
-            if (targetPolygon) {
-                targetPolygon = targetPolygon.map(poly => {
-                    if (poly.length <= MAX_PTS) return poly;
-                    const step = poly.length / MAX_PTS;
-                    const sub = [];
-                    for (let i = 0; i < MAX_PTS; i++) sub.push(poly[Math.round(i * step)]);
-                    return sub;
-                });
-            }
-
-            // Apply canonical sort so colors stay consistent across user/target/morph
-            if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
-
-            // Update vertex counter
-            const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
-            const el = document.getElementById('target-count');
-            if (el) el.textContent = `${total} Vertices`;
-
-            drawTargetPolygon();
-            if (rawContour && savedPixels) drawPolygon();
-        }
-
-        function setTextInput(latex) {
-            const input = document.getElementById('text-input');
-            input.value = latex;
-            try {
-                localStorage.setItem('morph-text', latex);
-                localStorage.removeItem('morph-digit');
-            } catch (_) {}
-            onTextInput(latex);
-        }
-
-        function onTextInput(text) {
-            selectedDigit = null;
-            clearMorphFigure();
-            DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-            if (!text || text.trim() === '') {
-                DebugWindow.log('⊘ Empty input');
-                digitCtx.clearRect(0, 0, 1000, 1000);
-                targetPolygon = null;
-                drawTargetPolygon();
-                return;
-            }
-            renderLatexToCanvas(text);
-        }
-
-        function extractAndUpdatePolygon() {
-            DebugWindow.log('📊 Extracting polygons (topology-aware)...');
-            const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
-            const grid = new Uint8Array(1000 * 1000);
-            for (let i = 0; i < 1000 * 1000; i++)
-                grid[i] = imgData.data[i * 4 + 3] > 30 ? 1 : 0;
-            const contours = getContoursWithHoles(grid, 1000, 1000);
-            targetPolygon = contours.length ? contours : null;
-
-            if (!targetPolygon) {
-                DebugWindow.log('⚠️ No polygons detected');
-                return;
-            }
-
-            DebugWindow.log(`✓ Found ${contours.length} contour(s) (outer + holes)`);
-            const totalVerts = contours.reduce((s, c) => s + c.length, 0);
-            DebugWindow.log(`  Total vertices: ${totalVerts}`);
-
-            const MAX_PTS = 300;
-            if (targetPolygon) {
-                targetPolygon = targetPolygon.map(poly => {
-                    if (poly.length <= MAX_PTS) return poly;
-                    const step = poly.length / MAX_PTS;
-                    const sub = [];
-                    for (let i = 0; i < MAX_PTS; i++) sub.push(poly[Math.round(i * step)]);
-                    return sub;
-                });
-            }
-
-            // Apply canonical sort so colors stay consistent across user/target/morph
-            if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
-
-            const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
-            DebugWindow.log(`✓ Resampled to ${total} vertices (max: 300)`);
-
-            const el = document.getElementById('target-count');
-            if (el) el.textContent = `${total} Vertices`;
-            drawTargetPolygon();
-            if (rawContour && savedPixels) drawPolygon();
-        }
-
-        function renderLatexToCanvas(text) {
-            digitCtx.clearRect(0, 0, 1000, 1000);
-            DebugWindow.log(`📝 Input: "${text}"`);
-            DebugWindow.log(`KaTeX: ${typeof katex !== 'undefined' ? '✓' : '✗'} | html2canvas: ${typeof html2canvas !== 'undefined' ? '✓' : '✗'}`);
-
-            if (typeof katex === 'undefined') {
-                DebugWindow.log('⚠️ KaTeX not loaded');
-                renderPlainText(text);
-                return;
-            }
-            if (typeof html2canvas === 'undefined') {
-                DebugWindow.log('⚠️ html2canvas not loaded');
-                renderPlainText(text);
-                return;
-            }
-
-            // Handle special cases: \sqrt alone → \surd (just the root symbol)
-            let processedText = text.trim();
-            if (processedText === '\\sqrt') {
-                processedText = '\\surd';
-                DebugWindow.log('🔄 Converting \\sqrt → \\surd (root symbol only)');
-            }
-
-            try {
-                DebugWindow.log('🔄 Rendering KaTeX...');
-                const html = katex.renderToString(processedText, { throwOnError: true, displayMode: true });
-                DebugWindow.log('✓ KaTeX HTML generated');
-
-                // Create visible offscreen div with KaTeX HTML
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = html;
-                wrapper.style.cssText = `
-                    position: fixed;
-                    left: -10000px;
-                    top: 0;
-                    background: transparent;
-                    color: #F4C430;
-                    font-size: 400px;
-                    padding: 60px;
-                    display: inline-block;
-                    line-height: 1;
-                `;
-                document.body.appendChild(wrapper);
-
-                // Wait a tick for rendering
-                setTimeout(() => {
-                    const rect = wrapper.getBoundingClientRect();
-                    DebugWindow.log(`DOM size: ${Math.round(rect.width)}×${Math.round(rect.height)}px`);
-
-                    html2canvas(wrapper, {
-                        backgroundColor: null,
-                        scale: 1,
-                        logging: false,
-                        width: rect.width,
-                        height: rect.height
-                    }).then(canvas => {
-                        DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
-
-                        // Scale to fit on digit canvas — match Times digit size (~640px tall)
-                        const maxW = 900, maxH = 800;
-                        const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
-                        const w = canvas.width * scale;
-                        const h = canvas.height * scale;
-                        const x = 720 - w / 2;
-                        const y = 500 - h / 2;
-
-                        digitCtx.drawImage(canvas, x, y, w, h);
-                        document.body.removeChild(wrapper);
-                        DebugWindow.log(`✓ Drawn at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}×${Math.round(h)}px`);
-                        extractAndUpdatePolygon();
-                    }).catch(err => {
-                        DebugWindow.log(`❌ html2canvas error: ${err.message}`);
-                        document.body.removeChild(wrapper);
-                        renderPlainText(text);
-                    });
-                }, 50);
-            } catch (e) {
-                DebugWindow.log(`❌ KaTeX error: ${e.message}`);
-                renderPlainText(text);
-            }
-        }
-
-        function renderPlainText(text) {
-            DebugWindow.log(`📄 Fallback to plain text: "${text}"`);
-            digitCtx.clearRect(0, 0, 1000, 1000);
-            digitCtx.save();
-            digitCtx.fillStyle = '#F4C430';
-            const fontSize = 640;
-            digitCtx.font = `bold ${fontSize}px "Times New Roman", serif`;
-            digitCtx.textAlign = 'center';
-            digitCtx.textBaseline = 'middle';
-            digitCtx.fillText(text, 720, 500);
-            digitCtx.restore();
-            DebugWindow.log('✓ Text rendered');
-            extractAndUpdatePolygon();
-        }
-
-        function drawTargetPolygon() {
-            // Always clear the outline overlay first — no stale lines remain
-            outlineCtx.clearRect(0, 0, 1000, 1000);
-            if (!targetPolygon) return;
-
-            const showLines = document.getElementById('lines-toggle')?.checked ?? true;
-            const showPoints = document.getElementById('points-toggle')?.checked ?? true;
-            if (!showLines && !showPoints) return;
-
-            outlineCtx.save();
-            outlineCtx.lineWidth = 2;
-            outlineCtx.lineCap = 'round';
-            outlineCtx.lineJoin = 'round';
-            for (let i = 0; i < targetPolygon.length; i++) {
-                const color = regionColor(i);
-                const poly = targetPolygon[i];
-                if (showLines) {
-                    outlineCtx.strokeStyle = color;
-                    outlineCtx.beginPath();
-                    outlineCtx.moveTo(poly[0][0], poly[0][1]);
-                    for (let j = 1; j < poly.length; j++) outlineCtx.lineTo(poly[j][0], poly[j][1]);
-                    outlineCtx.closePath();
-                    outlineCtx.stroke();
-                }
-                if (showPoints) {
-                    outlineCtx.fillStyle = color;
-                    for (const [x, y] of poly) {
-                        outlineCtx.beginPath();
-                        outlineCtx.arc(x, y, 1.6, 0, Math.PI * 2);
-                        outlineCtx.fill();
-                    }
-                }
-            }
-            outlineCtx.restore();
-        }
+        // (onDigitChange, onTextInput, setTextInput, renderLatexToCanvas, renderPlainText,
+        //  extractAndUpdatePolygon, drawTargetPolygon moved to morpheus/target-render.js)
 
         // Load Tinos (Times-compatible) font asynchronously
         opentype.load('https://cdn.jsdelivr.net/gh/google/fonts/apache/tinos/Tinos-Bold.ttf', (err, font) => {
@@ -1923,24 +1124,12 @@
                     el.textContent = el.dataset.latex;
                 }
             });
-            // Render the similarity label "Ähnlichkeit" in LaTeX italic style
+            // Similarity label + value — plain text with CSS-based LaTeX-look
+            // (KaTeX_Math font + italic styling does the LaTeX appearance).
             const simLabel = document.getElementById('sim-label');
-            if (simLabel) {
-                try {
-                    katex.render('\\textit{\\"Ahnlichkeit}', simLabel, { throwOnError: false });
-                } catch (_) {
-                    simLabel.textContent = 'Ähnlichkeit';
-                }
-            }
-            // Render initial sim-value "0%" in LaTeX italic style
+            if (simLabel) simLabel.textContent = 'Ähnlichkeit';
             const simBoxVal = document.getElementById('sim-value');
-            if (simBoxVal) {
-                try {
-                    katex.render('\\mathit{0\\%}', simBoxVal, { throwOnError: false });
-                } catch (_) {
-                    simBoxVal.textContent = '0%';
-                }
-            }
+            if (simBoxVal) simBoxVal.textContent = '0%';
         }
     </script>
 </body>
