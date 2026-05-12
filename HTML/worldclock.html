@@ -634,6 +634,34 @@
             "Africa/Dakar":        [{name:"Abidjan",f:"🇨🇮",lat:5.3,lng:-4.0},{name:"Bamako",f:"🇲🇱",lat:12.6,lng:-8.0},{name:"Conakry",f:"🇬🇳",lat:9.5,lng:-13.7},{name:"Freetown",f:"🇸🇱",lat:8.5,lng:-13.2},{name:"Monrovia",f:"🇱🇷",lat:6.3,lng:-10.8}]
         };
 
+        // Pre-fetch Nachbarstädte via Photon falls TZ nicht in RELATED_CITIES_DB
+        async function ensureNeighborsForTZ(tz, lat, lon, excludeName) {
+            if (!tz || RELATED_CITIES_DB[tz]) return;
+            if (window._neighborCache?.[tz]) return;
+            try {
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log(`  Photon /reverse für ${tz} (${lat}, ${lon})`);
+                const t0 = performance.now();
+                const nr = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&limit=12&radius=200&layer=city`);
+                const nd = await nr.json();
+                const feats = nd.features || [];
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log(`  Photon HTTP ${nr.status} (${Math.round(performance.now() - t0)}ms), features: ${feats.length}`);
+                const ccToFlag = cc => cc ? String.fromCodePoint(...cc.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '📍';
+                if (!window._neighborCache) window._neighborCache = {};
+                window._neighborCache[tz] = feats
+                    .filter(f => f.properties?.name && f.properties.name.toLowerCase() !== (excludeName || '').toLowerCase())
+                    .slice(0, 5)
+                    .map(f => ({
+                        name: f.properties.name,
+                        f: ccToFlag(f.properties.countrycode),
+                        lat: f.geometry.coordinates[1],
+                        lng: f.geometry.coordinates[0]
+                    }));
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log(`  ✓ Cache[${tz}]: ${window._neighborCache[tz].map(c => c.name).join(', ') || 'LEER'}`);
+            } catch (err) {
+                if (typeof DebugWindow !== 'undefined') DebugWindow.log(`  ✗ Photon-Fehler: ${err.message}`);
+            }
+        }
+
         let selectedCity = null; // Currently clicked city
         let hoveredCity = null; // New for hover preview
         let targetCity = null;  // Last city to show during fade-out
@@ -782,6 +810,7 @@
                 // If distance is near the plaques and angle is close
                 if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
                     selectedCity = city;
+                    ensureNeighborsForTZ(city.tz, city.globeLat ?? city.lat, city.globeLon ?? city.lon, city.name);
                     showCityInfo(city.name);
                     if (globeInstance) {
                         lockedCity = city;
