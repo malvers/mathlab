@@ -93,6 +93,7 @@
         }
 
         #vert-count {
+            display: none;
             font-family: 'Orbitron', sans-serif;
             font-size: 12px;
             color: #adff2f;
@@ -288,11 +289,11 @@
                 style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
         `);
 
-        CyberUI.createCard('ui-container', 'POLYGON', `
+        CyberUI.createCard('ui-container', 'OUTLINES', `
             <button class="cyber-btn" onclick="extractOutline()"
                 style="width:100%;margin-bottom:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">OUTLINE</button>
             <button class="cyber-btn" onclick="clearOutline()"
-                style="width:100%;border-color:rgba(244,196,48,0.5);color:#F4C430;">OUTLINE LÖSCHEN</button>
+                style="width:100%;border-color:rgba(244,196,48,0.5);color:#F4C430;">OUTLINES LÖSCHEN</button>
             <label class="switch-row">
                 <span>POLY ANZEIGEN</span>
                 <span class="switch">
@@ -331,7 +332,7 @@
                     </label>
                 `).join('')}
             </div>
-            <div id="target-count" style="font-family:'Orbitron',sans-serif;font-size:12px;color:#F4C430;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
+            <div id="target-count" style="display:none;font-family:'Orbitron',sans-serif;font-size:12px;color:#F4C430;text-align:center;margin-top:10px;min-height:18px;letter-spacing:0.06em;"></div>
         `);
 
         // ── Drawing ─────────────────────────────────────────────────────────────────
@@ -350,17 +351,36 @@
             drawCtx.fillStyle = '#000';
             drawCtx.fillRect(0, 0, 1000, 1000);
             drawCtx.strokeStyle = '#adff2f';
-            drawCtx.lineWidth = 70;
+            drawCtx.lineWidth = 3;
             drawCtx.lineCap = 'round';
             drawCtx.lineJoin = 'round';
         }
 
         function clearDraw() {
+            // Stop any in-progress morph animation
+            cancelAnimationFrame(morphRaf);
+            morphRaf = null;
             savedPixels = null;
             rawContour = null;
+            userMorphPoly = null;
             document.getElementById('vert-count').textContent = '';
             try { localStorage.removeItem('morph-outline'); } catch (_) {}
             initDraw();
+            // Also clear the times outline overlay (digit fill stays)
+            const toggle = document.getElementById('poly-toggle');
+            if (selectedDigit !== null && toggle) {
+                const wasChecked = toggle.checked;
+                toggle.checked = false;
+                onDigitChange(selectedDigit);
+                toggle.checked = wasChecked;
+            }
+            // Clear morphed figure
+            morphCtx.clearRect(0, 0, 1000, 1000);
+            targetMorphPoly = null;
+            const sl = document.getElementById('morph-slider');
+            const mv = document.getElementById('morph-val');
+            if (sl) sl.value = 0;
+            if (mv) mv.textContent = 0;
         }
 
         function getPos(e) {
@@ -533,6 +553,32 @@
             return result;
         }
 
+        // Returns array of crossing-pairs [i, j] where segments (poly[i], poly[i+1])
+        // and (poly[j], poly[j+1]) intersect. Adjacent edges (sharing an endpoint) are skipped.
+        function findSelfIntersections(poly) {
+            const n = poly.length;
+            if (n < 4) return [];
+            const ccw = (p, q, r) =>
+                (q[0] - p[0]) * (r[1] - p[1]) - (r[0] - p[0]) * (q[1] - p[1]);
+            const intersect = (a, b, c, d) => {
+                const d1 = ccw(c, d, a), d2 = ccw(c, d, b);
+                const d3 = ccw(a, b, c), d4 = ccw(a, b, d);
+                return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+                       ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+            };
+            const crosses = [];
+            for (let i = 0; i < n - 1; i++) {
+                for (let j = i + 2; j < n - 1; j++) {
+                    // Skip the wrap-around adjacency between last and first segment
+                    if (i === 0 && j === n - 2) continue;
+                    if (intersect(poly[i], poly[i + 1], poly[j], poly[j + 1])) {
+                        crosses.push([i, j]);
+                    }
+                }
+            }
+            return crosses;
+        }
+
         function drawPolygon() {
             if (!rawContour || !savedPixels) return;
             drawCtx.putImageData(savedPixels, 0, 0);
@@ -581,7 +627,7 @@
                 // Draw closed polygon outline
                 drawCtx.save();
                 drawCtx.strokeStyle = '#808080';
-                drawCtx.lineWidth = 3;
+                drawCtx.lineWidth = 1;
                 drawCtx.lineCap = 'round';
                 drawCtx.lineJoin = 'round';
                 drawCtx.beginPath();
@@ -603,10 +649,31 @@
                 drawCtx.restore();
             }
 
+            // Self-intersection check: highlight any crossing edges in red.
+            const crosses = findSelfIntersections(displayPoly);
+            if (crosses.length > 0) {
+                drawCtx.save();
+                drawCtx.strokeStyle = 'rgba(255, 0, 0, 0.95)';
+                drawCtx.lineWidth = 2;
+                const seen = new Set();
+                for (const [i, j] of crosses) {
+                    for (const k of [i, j]) {
+                        if (seen.has(k)) continue;
+                        seen.add(k);
+                        drawCtx.beginPath();
+                        drawCtx.moveTo(displayPoly[k][0],     displayPoly[k][1]);
+                        drawCtx.lineTo(displayPoly[k + 1][0], displayPoly[k + 1][1]);
+                        drawCtx.stroke();
+                    }
+                }
+                drawCtx.restore();
+            }
+
             const countText = resampled
                 ? `${rdpCount} → ${verts.length} Vertices`
                 : `${verts.length} Vertices`;
-            document.getElementById('vert-count').textContent = countText;
+            const crossText = crosses.length > 0 ? `  ⚠ ${crosses.length} Cross${crosses.length > 1 ? 'es' : ''}` : '';
+            document.getElementById('vert-count').textContent = countText + crossText;
         }
 
         function onEpsChange(val) {
@@ -617,17 +684,35 @@
 
         function onPolyToggle(checked) {
             try { localStorage.setItem('morph-poly-visible', checked ? '1' : '0'); } catch (_) {}
+            // User outline (Kunst): drawPolygon() restores savedPixels first, so off-state clears it.
             if (rawContour && savedPixels) drawPolygon();
-            if (selectedDigit !== null) drawTargetPolygon();
+            // Times outline: re-render the digit canvas fully — drawTargetPolygon inside
+            // respects the toggle, so the overlay disappears when off.
+            if (selectedDigit !== null) onDigitChange(selectedDigit);
         }
 
         function clearOutline() {
-            if (savedPixels) drawCtx.putImageData(savedPixels, 0, 0);
+            // Stop any in-progress morph animation
+            cancelAnimationFrame(morphRaf);
+            morphRaf = null;
+            // Clear drawing (Kunst) + user outline
             savedPixels = null;
             rawContour = null;
             userMorphPoly = null;
             document.getElementById('vert-count').textContent = '';
             try { localStorage.removeItem('morph-outline'); } catch (_) {}
+            initDraw();
+            // Clear times canvas completely (digit fill + outline)
+            digitCtx.clearRect(0, 0, 1000, 1000);
+            targetPolygon = null;
+            // Clear morphed figure
+            morphCtx.clearRect(0, 0, 1000, 1000);
+            targetMorphPoly = null;
+            // Reset morph slider
+            const sl = document.getElementById('morph-slider');
+            const mv = document.getElementById('morph-val');
+            if (sl) sl.value = 0;
+            if (mv) mv.textContent = 0;
         }
 
         // ── Morph: alignment + animation ─────────────────────────────────────────────
@@ -690,17 +775,12 @@
                 basePoly = basePoly.slice(0, -1);
             }
             userMorphPoly = resamplePolygon(basePoly, target.length);
-            // Translate BOTH user and target morph polygons to the LEFT of the times outline,
-            // baseline-aligned. The original `targetPolygon` (drawn as orange outline) stays
-            // at the times position; we only translate the COPY used for morphing.
-            const ub = bboxOf(userMorphPoly);
+            // userMorphPoly stays at its ORIGINAL drawn position (t=0).
+            // targetMorphPoly is positioned LEFT of the times outline, baseline-aligned (t=1).
+            // The morph interpolates position AND shape, so the figure animates from the
+            // user's drawn position to the final left-of-times position.
             const tb = bboxOf(target);
             const gap = 100;
-            const dxUser = tb.minX - gap - ub.maxX;
-            const dyUser = tb.maxY - ub.maxY;
-            userMorphPoly = userMorphPoly.map(([x, y]) => [x + dxUser, y + dyUser]);
-            // Translate target so its right edge sits gap-pixels left of the times outline,
-            // sharing the same baseline.
             const dxTarget = tb.minX - gap - tb.maxX;
             const targetTranslated = target.map(([x, y]) => [x + dxTarget, y]);
             targetMorphPoly = alignTargetTo(userMorphPoly, targetTranslated);
@@ -718,16 +798,34 @@
             const b = Math.round(47 + (255 - 47) * t);
             morphCtx.fillStyle = `rgb(${r},${g},${b})`;
             morphCtx.beginPath();
+            const pts = [];
             for (let i = 0; i < n; i++) {
                 const ux = userMorphPoly[i][0], uy = userMorphPoly[i][1];
                 const tx = targetMorphPoly[i][0], ty = targetMorphPoly[i][1];
                 const x = ux + (tx - ux) * t;
                 const y = uy + (ty - uy) * t;
+                pts.push([x, y]);
                 if (i === 0) morphCtx.moveTo(x, y);
                 else morphCtx.lineTo(x, y);
             }
             morphCtx.closePath();
             morphCtx.fill();
+
+            // Outline overlay — only when POLY ANZEIGEN switch is ON
+            const showPoly = document.getElementById('poly-toggle')?.checked ?? true;
+            if (showPoly) {
+                morphCtx.strokeStyle = '#808080';
+                morphCtx.lineWidth = 1;
+                morphCtx.lineCap = 'round';
+                morphCtx.lineJoin = 'round';
+                morphCtx.stroke();
+                morphCtx.fillStyle = 'rgb(240, 0, 0)';
+                for (const [x, y] of pts) {
+                    morphCtx.beginPath();
+                    morphCtx.arc(x, y, 0.8, 0, Math.PI * 2);
+                    morphCtx.fill();
+                }
+            }
             morphCtx.restore();
         }
 
@@ -771,6 +869,7 @@
             morphCtx.clearRect(0, 0, 1000, 1000);
             document.getElementById('morph-slider').value = 0;
             document.getElementById('morph-val').textContent = 0;
+            document.getElementById('digit-canvas').style.display = '';
             showUserOutline();
         }
 
@@ -780,9 +879,11 @@
             document.getElementById('morph-val').textContent = val;
             if (+val === 0) {
                 morphCtx.clearRect(0, 0, 1000, 1000);
-                return;
+                document.getElementById('digit-canvas').style.display = '';
+                    return;
             }
             if (!prepareMorph()) return;
+            document.getElementById('digit-canvas').style.display = 'none';
             drawMorph(val / 100);
         }
 
@@ -911,19 +1012,12 @@
             const showTarget = document.getElementById('poly-toggle')?.checked ?? true;
             if (!showTarget) return;
 
-            // Apply baseline & horizontal alignment if user polygon exists
-            let displayTarget = targetPolygon;
-            if (userMorphPoly) {
-                const ub = bboxOf(userMorphPoly);
-                const tb = bboxOf(getLargestTargetSubPoly());
-                const dx = (ub.minX + ub.maxX) / 2 - (tb.minX + tb.maxX) / 2;
-                const dy = ub.maxY - tb.maxY;
-                displayTarget = targetPolygon.map(poly => poly.map(([x, y]) => [x - dx, y - dy]));
-            }
+            // Show times outline at its natural times position (no alignment shift)
+            const displayTarget = targetPolygon;
 
             digitCtx.save();
             digitCtx.strokeStyle = '#808080';
-            digitCtx.lineWidth = 3;
+            digitCtx.lineWidth = 1;
             digitCtx.lineCap = 'round';
             digitCtx.lineJoin = 'round';
             for (const poly of displayTarget) {
