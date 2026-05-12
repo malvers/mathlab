@@ -1529,7 +1529,25 @@
                             {name: "Conakry", f: "🇬🇳", lat: 9.5, lng: -13.7}, {name: "Freetown", f: "🇸🇱", lat: 8.5, lng: -13.2}, {name: "Monrovia", f: "🇱🇷", lat: 6.3, lng: -10.8}
                         ]
                     };
-                    return db[tz] || (window._neighborCache?.[tz]) || [];
+                    if (db[tz]) return db[tz];
+                    // On-the-fly: nähstgelegene aus cities + neighborCities (instant)
+                    if (!targetCity) return [];
+                    const cLat = targetCity.globeLat ?? targetCity.lat;
+                    const cLon = targetCity.globeLon ?? targetCity.lon;
+                    const pool = [
+                        ...cities.map(c => ({ name: c.name.replace(/\n/g,' '), lat: c.globeLat ?? c.lat, lng: c.globeLon ?? c.lon })),
+                        ...(typeof neighborCities !== 'undefined' ? neighborCities.map(c => ({ name: c.name, lat: c.globeLat ?? c.lat, lng: c.globeLng ?? c.lng })) : [])
+                    ];
+                    const dist = (a, b) => {
+                        const dLat = a.lat - b.lat, dLng = a.lng - b.lng;
+                        return dLat * dLat + dLng * dLng;
+                    };
+                    return pool
+                        .filter(p => p.name.toLowerCase() !== (targetCity.name||'').toLowerCase().replace(/\n/g,' '))
+                        .map(p => ({ ...p, d: dist(p, { lat: cLat, lng: cLon }) }))
+                        .sort((a, b) => a.d - b.d)
+                        .slice(0, 5)
+                        .map(p => ({ name: p.name, f: '📍', lat: p.lat, lng: p.lng }));
                 };
 
                 const neighbors = getRelatedCities(targetCity.tz);
