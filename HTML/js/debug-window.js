@@ -30,14 +30,14 @@ const DebugWindow = (() => {
         debugEl.style.cssText = `
             position: fixed;
             ${positionStyle}
-            width: ${w};
+            width: ${collapsed ? '50px' : w};
             height: ${h};
             background: rgba(0, 0, 0, 0.95);
             border: 2px solid #6BA043;
             color: #6BA043;
             font-family: Arial, sans-serif;
             font-size: 11px;
-            padding: 10px;
+            padding: ${collapsed ? '4px' : '10px'};
             border-radius: 6px;
             z-index: 99999;
             display: flex;
@@ -45,17 +45,17 @@ const DebugWindow = (() => {
             box-shadow: 0 0 20px rgba(107, 160, 67, 0.3);
             resize: ${collapsed ? 'none' : 'both'};
             overflow: hidden;
-            transition: height 0.25s ease;
+            transition: height 0.25s ease, width 0.25s ease;
         `;
 
         const header = document.createElement('div');
         header.style.cssText = `
             display: flex;
-            justify-content: space-between;
+            justify-content: ${collapsed ? 'center' : 'space-between'};
             align-items: center;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(107, 160, 67, 0.3);
+            margin-bottom: ${collapsed ? '0' : '8px'};
+            padding-bottom: ${collapsed ? '0' : '6px'};
+            border-bottom: ${collapsed ? 'none' : '1px solid rgba(107, 160, 67, 0.3)'};
             cursor: move;
             user-select: none;
         `;
@@ -63,6 +63,7 @@ const DebugWindow = (() => {
         const title = document.createElement('span');
         title.textContent = '🐛 DEBUG';
         title.style.flex = '1';
+        title.style.display = collapsed ? 'none' : 'block';
         header.appendChild(title);
 
         const btnGroup = document.createElement('div');
@@ -80,7 +81,7 @@ const DebugWindow = (() => {
             cursor: pointer;
             padding: 4px;
             border-radius: 3px;
-            display: flex;
+            display: ${collapsed ? 'none' : 'flex'};
             align-items: center;
             justify-content: center;
         `;
@@ -107,6 +108,7 @@ const DebugWindow = (() => {
             font-size: 12px;
             padding: 0;
             border-radius: 3px;
+            display: ${collapsed ? 'none' : 'block'};
         `;
         btnClear.onclick = (e) => {
             e.stopPropagation();
@@ -160,10 +162,26 @@ const DebugWindow = (() => {
         let offsetX = 0, offsetY = 0;
         let isMouseDown = false;
 
-        header.addEventListener('mousedown', (e) => {
+        const startDrag = (e) => {
             isMouseDown = true;
             offsetX = e.clientX - element.offsetLeft;
             offsetY = e.clientY - element.offsetTop;
+        };
+
+        header.addEventListener('mousedown', startDrag);
+
+        // Auch am Rand greifen zum Verschieben
+        element.addEventListener('mousedown', (e) => {
+            const rect = element.getBoundingClientRect();
+            const DRAG_MARGIN = 8;
+            const inLeft = e.clientX - rect.left < DRAG_MARGIN;
+            const inRight = e.clientX - rect.right > -DRAG_MARGIN;
+            const inTop = e.clientY - rect.top < DRAG_MARGIN;
+            const inBottom = e.clientY - rect.bottom > -DRAG_MARGIN;
+
+            if ((inLeft || inRight || inTop || inBottom) && e.target === element) {
+                startDrag(e);
+            }
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -224,21 +242,47 @@ const DebugWindow = (() => {
         if (!debugEl) init();
         const content = document.getElementById('debug-content');
         const btn = document.getElementById('debug-collapse-btn');
+        const title = debugEl.querySelector('span');
+        const btnCopy = debugEl.querySelectorAll('button')[0];
+        const btnClear = debugEl.querySelectorAll('button')[1];
+        const header = debugEl.querySelector('div');
 
         if (!collapsed) {
             // Collapsing: save current height, shrink to header
             prevHeight = debugEl.style.height || debugEl.offsetHeight + 'px';
             collapsed = true;
             debugEl.style.height = '40px';
+            debugEl.style.width = '50px';
+            debugEl.style.padding = '4px';
             debugEl.style.resize = 'none';
             content.style.display = 'none';
+            if (title) title.style.display = 'none';
+            if (btnCopy) btnCopy.style.display = 'none';
+            if (btnClear) btnClear.style.display = 'none';
+            if (header) {
+                header.style.justifyContent = 'center';
+                header.style.marginBottom = '0';
+                header.style.paddingBottom = '0';
+                header.style.borderBottom = 'none';
+            }
             if (btn) btn.textContent = '▲';
         } else {
             // Expanding: restore previous height
             collapsed = false;
             debugEl.style.height = prevHeight;
+            debugEl.style.width = '400px';
+            debugEl.style.padding = '10px';
             debugEl.style.resize = 'both';
             content.style.display = 'block';
+            if (title) title.style.display = 'block';
+            if (btnCopy) btnCopy.style.display = 'flex';
+            if (btnClear) btnClear.style.display = 'block';
+            if (header) {
+                header.style.justifyContent = 'space-between';
+                header.style.marginBottom = '8px';
+                header.style.paddingBottom = '6px';
+                header.style.borderBottom = '1px solid rgba(107, 160, 67, 0.3)';
+            }
             if (btn) btn.textContent = '▼';
         }
 

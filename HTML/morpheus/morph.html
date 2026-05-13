@@ -141,6 +141,12 @@
                     oninput="onMergeChange(this.value)">
                 <span id="merge-val">4</span>
             </div>
+            <div class="eps-row">
+                <label>Schwelle</label>
+                <input type="range" id="threshold-slider" min="5" max="50" value="20" step="1"
+                    oninput="onThresholdChange(this.value)">
+                <span id="threshold-val">20</span>
+            </div>
         `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'MATHEMATISCHE ZEICHEN', `
@@ -151,14 +157,14 @@
             <label class="switch-row">
                 <span>LINIE</span>
                 <span class="switch">
-                    <input type="checkbox" id="lines-toggle" checked onchange="onPointsToggle(this.checked)">
+                    <input type="checkbox" id="lines-toggle" checked onchange="onLinesToggle(this.checked)">
                     <span class="switch-slider"></span>
                 </span>
             </label>
             <label class="switch-row">
                 <span>PUNKTE</span>
                 <span class="switch">
-                    <input type="checkbox" id="points-toggle" checked onchange="onLinesToggle(this.checked)">
+                    <input type="checkbox" id="points-toggle" checked onchange="onPointsToggle(this.checked)">
                     <span class="switch-slider"></span>
                 </span>
             </label>
@@ -169,10 +175,17 @@
                     <span class="switch-slider"></span>
                 </span>
             </label>
+            <label class="switch-row">
+                <span>POLYGONE FÜLLEN</span>
+                <span class="switch">
+                    <input type="checkbox" id="fill-toggle" onchange="onFillToggle(this.checked)">
+                    <span class="switch-slider"></span>
+                </span>
+            </label>
             <!--
             <div class="eps-row">
                 <label>ε</label>
-                <input type="range" id="eps-slider" min="1" max="50" value="8" step="0.5"
+                <input type="range" id="eps-slider" min="1" max="50" value="1" step="0.5"
                     oninput="onEpsChange(this.value)">
                 <span id="eps-val">8</span>
             </div>
@@ -454,9 +467,11 @@
             const linesT = document.getElementById('lines-toggle');
             const pointsT = document.getElementById('points-toggle');
             const artT = document.getElementById('art-toggle');
+            const fillT = document.getElementById('fill-toggle');
             if (linesT && !linesT.checked) { linesT.checked = true; onLinesToggle(true); }
             if (pointsT && !pointsT.checked) { pointsT.checked = true; onPointsToggle(true); }
             if (artT && !artT.checked) { artT.checked = true; onArtToggle(true); }
+            if (fillT && fillT.checked) { fillT.checked = false; onFillToggle(false); }
             // Re-apply sidebar chrome scale (in case it drifted)
             if (window.CyberLeftChrome?.publishResolvedScale) {
                 window.CyberLeftChrome.publishResolvedScale();
@@ -475,6 +490,13 @@
             try { localStorage.setItem('morph-merge', val); } catch (_) {}
             // Re-run outline extraction so the new radius takes effect immediately.
             if (savedPixels) extractOutline();
+        }
+
+        function onThresholdChange(val) {
+            document.getElementById('threshold-val').textContent = val;
+            try { localStorage.setItem('morph-threshold', val); } catch (_) {}
+            // Re-render draw20 overlays with the new threshold.
+            if (window.redrawDraw20) window.redrawDraw20();
         }
 
         // Drawing-mode toggle (pencil icon, top-right of ZEICHNEN card).
@@ -575,6 +597,12 @@
             renderAll();
         }
 
+        function onFillToggle(checked) {
+            DebugWindow.log(`🎚 onFillToggle: ${checked ? 'ON' : 'OFF'}`);
+            try { localStorage.setItem('morph-fill-visible', checked ? '1' : '0'); } catch (_) {}
+            renderAll();
+        }
+
         function onArtToggle(checked) {
             try { localStorage.setItem('morph-art-visible', checked ? '1' : '0'); } catch (_) {}
             // Capture the raw drawing once so toggling back ON restores it.
@@ -589,9 +617,13 @@
         // state + toggle values. Pure render — never mutates state.
         function renderAll() {
             const showArt = document.getElementById('art-toggle')?.checked ?? true;
-            const showLines = document.getElementById('lines-toggle')?.checked ?? true;
-            const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+            const showLines = document.getElementById('points-toggle')?.checked ?? true;
+            const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
             DebugWindow.log(`🔄 renderAll: LINIE=${showLines}, PUNKTE=${showPoints}, PIXEL=${showArt}`);
+
+            // Apply PIXEL toggle to both draw-canvas and digit-canvas
+            const dc = document.getElementById('digit-canvas');
+            if (dc) dc.style.opacity = showArt ? '1' : '0';
 
             // 1) draw-canvas: art background + user outline overlay
             if (rawContour && savedPixels) {
@@ -975,10 +1007,34 @@
         let lastPanX = 0, lastPanY = 0;
         const drawWrap = document.getElementById('draw-wrap');
 
+        // Restore zoom/pan from localStorage
+        try {
+            const savedScale = localStorage.getItem('morph-canvas-scale');
+            const savedPanX = localStorage.getItem('morph-canvas-panX');
+            const savedPanY = localStorage.getItem('morph-canvas-panY');
+            if (savedScale !== null) canvasScale = +savedScale;
+            if (savedPanX !== null) panX = +savedPanX;
+            if (savedPanY !== null) panY = +savedPanY;
+            if (drawWrap) {
+                drawWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
+                drawWrap.style.transformOrigin = 'center center';
+            }
+            DebugWindow.log(`🔍 Canvas restore: scale=${canvasScale}, pan=(${panX}, ${panY})`);
+        } catch (_) {}
+
+        function saveZoomPan() {
+            try {
+                localStorage.setItem('morph-canvas-scale', canvasScale);
+                localStorage.setItem('morph-canvas-panX', panX);
+                localStorage.setItem('morph-canvas-panY', panY);
+            } catch (_) {}
+        }
+
         function updateTransform() {
             if (!drawWrap) return;
             drawWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
             drawWrap.style.transformOrigin = 'center center';
+            saveZoomPan();
         }
 
         const canvasStack = document.getElementById('canvas-stack');
@@ -1064,6 +1120,13 @@
             }
         } catch (_) {}
         try {
+            const savedThreshold = localStorage.getItem('morph-threshold');
+            if (savedThreshold !== null) {
+                document.getElementById('threshold-slider').value = savedThreshold;
+                document.getElementById('threshold-val').textContent = savedThreshold;
+            }
+        } catch (_) {}
+        try {
             const savedDraw = localStorage.getItem('morph-draw-enabled');
             drawingEnabled = savedDraw === '1';
         } catch (_) {}
@@ -1097,6 +1160,10 @@
         try {
             const savedPoints = localStorage.getItem('morph-points-visible');
             if (savedPoints !== null) document.getElementById('points-toggle').checked = savedPoints === '1';
+        } catch (_) {}
+        try {
+            const savedFill = localStorage.getItem('morph-fill-visible');
+            if (savedFill !== null) document.getElementById('fill-toggle').checked = savedFill === '1';
         } catch (_) {}
         try {
             const savedArt = localStorage.getItem('morph-art-visible');

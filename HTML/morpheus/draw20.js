@@ -13,6 +13,10 @@
         if (typeof DebugWindow !== 'undefined') DebugWindow.log('[draw20] ' + msg);
     }
 
+    function getThreshold() {
+        return +(document.getElementById('threshold-slider')?.value ?? 20);
+    }
+
     function init() {
         dbg('init called');
         const host = document.getElementById('canvas-container');
@@ -20,7 +24,17 @@
 
         // Mouse-zoom state — declared up top so drawBBox closures see it
         // initialized regardless of which async path fires first.
-        let zoom = 1, panX = 0, panY = 0;
+        let zoom = +(localStorage.getItem('draw20-zoom') ?? 1);
+        let panX = +(localStorage.getItem('draw20-panX') ?? 0);
+        let panY = +(localStorage.getItem('draw20-panY') ?? 0);
+
+        function saveZoomPan() {
+            try {
+                localStorage.setItem('draw20-zoom', zoom);
+                localStorage.setItem('draw20-panX', panX);
+                localStorage.setItem('draw20-panY', panY);
+            } catch (_) {}
+        }
 
         const wrap = document.createElement('div');
         wrap.id = 'draw20-wrap';
@@ -44,12 +58,19 @@
             mix-blend-mode: screen;
         `;
 
-        const tex = document.createElement('div');
+        // tex is now an <img> displaying the offscreen-rendered LaTeX canvas
+        // (data URL). The SAME canvas is the source for contour extraction —
+        // this guarantees pixel-perfect alignment between display and contours
+        // (no two-render discrepancy from a separate html2canvas pass).
+        const tex = document.createElement('img');
         tex.style.cssText = `
-            color: ${INK_COLOR};
-            font-size: clamp(16px, 2.59vw, 52px);
-            line-height: 1;
+            max-height: 43vh;
+            max-width: 29vw;
+            object-fit: contain;
         `;
+        // Stash the rendered offscreen canvas for re-use during contour
+        // extraction (avoids re-rendering, and keeps coords identical).
+        let latexCanvas = null;
 
         wrap.appendChild(pix);
         wrap.appendChild(tex);
@@ -69,36 +90,76 @@
         `;
         wrap.appendChild(overlay);
 
+        // Render LaTeX offscreen (KaTeX → html2canvas) and use the resulting
+        // canvas as BOTH the displayed image (tex.src = dataURL) and the
+        // source for contour extraction (latexCanvas). Returns a Promise that
+        // resolves once tex.src has been set.
         function renderLatex(latex) {
-            if (typeof katex === 'undefined') {
-                setTimeout(() => renderLatex(latex), 50);
-                return;
-            }
-            tex.innerHTML = katex.renderToString(latex, {
-                displayMode: true,
-                throwOnError: false,
-            });
-            tex.querySelectorAll('.katex, .katex *').forEach(el => {
-                el.style.color = INK_COLOR;
+            return new Promise(resolve => {
+                if (typeof katex === 'undefined' || typeof html2canvas === 'undefined') {
+                    setTimeout(() => renderLatex(latex).then(resolve), 50);
+                    return;
+                }
+                let processed = latex.trim();
+                if (processed === '\\sqrt') processed = '\\surd';
+                let html;
+                try { html = katex.renderToString(processed, { throwOnError: false, displayMode: true }); }
+                catch (e) { resolve(null); return; }
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                wrapper.style.cssText = `
+                    position: fixed; left: -10000px; top: 0;
+                    background: transparent; color: ${INK_COLOR};
+                    font-size: 400px; padding: 60px;
+                    display: inline-block; line-height: 1;
+                `;
+                document.body.appendChild(wrapper);
+                setTimeout(() => {
+                    const rect = wrapper.getBoundingClientRect();
+                    html2canvas(wrapper, {
+                        backgroundColor: null, scale: 1, logging: false,
+                        width: rect.width, height: rect.height
+                    }).then(canvas => {
+                        document.body.removeChild(wrapper);
+                        latexCanvas = canvas;
+                        tex.onload = () => resolve(canvas);
+                        tex.src = canvas.toDataURL();
+                    }).catch(() => {
+                        try { document.body.removeChild(wrapper); } catch (_) {}
+                        resolve(null);
+                    });
+                }, 50);
             });
         }
 
-        function computeImageBBox(img) {
-            const cw = img.naturalWidth, ch = img.naturalHeight;
-            if (!cw || !ch) return null;
-            const c = document.createElement('canvas');
-            c.width = cw; c.height = ch;
-            const ctx = c.getContext('2d');
-            ctx.drawImage(img, 0, 0);
+        // Compute the content bbox of an image (or canvas) by scanning a
+        // chosen channel. PNG presets use 'red' (black background, coloured
+        // ink, alpha is uniformly 255). LaTeX canvas uses 'alpha' (transparent
+        // background, ink alpha varies). Pass canvas directly to avoid an
+        // extra drawImage round-trip.
+        function computeContentBBox(source, channel) {
+            let cw, ch, ctx;
+            if (source instanceof HTMLCanvasElement) {
+                cw = source.width; ch = source.height;
+                ctx = source.getContext('2d');
+            } else {
+                cw = source.naturalWidth; ch = source.naturalHeight;
+                if (!cw || !ch) return null;
+                const c = document.createElement('canvas');
+                c.width = cw; c.height = ch;
+                ctx = c.getContext('2d');
+                ctx.drawImage(source, 0, 0);
+            }
             let data;
             try { data = ctx.getImageData(0, 0, cw, ch).data; }
             catch (e) { return null; }
+            const off = channel === 'alpha' ? 3 : 0;
+            const t = getThreshold();
             let minX = cw, minY = ch, maxX = -1, maxY = -1;
             for (let y = 0; y < ch; y++) {
                 for (let x = 0; x < cw; x++) {
                     const i = (y * cw + x) * 4;
-                    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-                    if (a > 16 && (r + g + b) > 60) {
+                    if (data[i + off] > t) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
                         if (y < minY) minY = y;
@@ -109,6 +170,8 @@
             if (maxX < 0) return null;
             return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1, cw, ch };
         }
+        // PNG path keeps the red-channel test.
+        function computeImageBBox(img) { return computeContentBBox(img, 'red'); }
 
         function mapImageBBoxToViewport(img, bbox) {
             const r = img.getBoundingClientRect();
@@ -158,10 +221,15 @@
                 try { data = ctx.getImageData(0, 0, cw, ch).data; }
                 catch (e) { return null; }
                 let minX = cw, minY = ch, maxX = -1, maxY = -1;
+                const t = getThreshold();
                 for (let y = 0; y < ch; y++) {
                     for (let x = 0; x < cw; x++) {
                         const i = (y * cw + x) * 4;
-                        if (data[i + 3] > 16) {
+                        // Match the offscreen contour grid threshold so the
+                        // mapping target (this rect) and source (cb in
+                        // extractLatexContours) share the same definition of
+                        // "ink" — otherwise the contours land off-glyph.
+                        if (data[i + 3] > t) {
                             if (x < minX) minX = x;
                             if (x > maxX) maxX = x;
                             if (y < minY) minY = y;
@@ -182,39 +250,263 @@
             }).catch(() => null);
         }
 
+        // Engine-mirroring grid builders. Two thresholds match what the legacy
+        // engine uses on its two distinct surfaces:
+        //   - PNG / drawing (user-draw.js extractOutline):  RED channel > 30
+        //   - LaTeX html2canvas snapshot (target-render.js):  ALPHA > 30
+        function canvasToGridRed(c) {
+            const cw = c.width, ch = c.height;
+            let data;
+            try { data = c.getContext('2d').getImageData(0, 0, cw, ch).data; }
+            catch (e) { return null; }
+            const grid = new Uint8Array(cw * ch);
+            const t = getThreshold();
+            for (let i = 0; i < cw * ch; i++) grid[i] = data[i * 4] > t ? 1 : 0;
+            return { grid, W: cw, H: ch };
+        }
+        function canvasToGridAlpha(c) {
+            const cw = c.width, ch = c.height;
+            let data;
+            try { data = c.getContext('2d').getImageData(0, 0, cw, ch).data; }
+            catch (e) { return null; }
+            const grid = new Uint8Array(cw * ch);
+            const t = getThreshold();
+            for (let i = 0; i < cw * ch; i++) grid[i] = data[i * 4 + 3] > t ? 1 : 0;
+            return { grid, W: cw, H: ch };
+        }
+
+        // Shoelace area (matches user-draw.js polyArea).
+        function polyArea(poly) {
+            let a = 0;
+            for (let i = 0; i < poly.length; i++) {
+                const [x1, y1] = poly[i];
+                const [x2, y2] = poly[(i + 1) % poly.length];
+                a += (x2 - x1) * (y2 + y1);
+            }
+            return Math.abs(a) / 2;
+        }
+
+        // Stride-based downsample to ≤ maxPts (matches target-render.js).
+        function strideResample(poly, maxPts) {
+            if (poly.length <= maxPts) return poly;
+            const step = poly.length / maxPts;
+            const sub = [];
+            for (let i = 0; i < maxPts; i++) sub.push(poly[Math.round(i * step)]);
+            return sub;
+        }
+
+        // Mirrors user-draw.js extractOutline: red-channel > 30 → morphClose
+        // (merge slider) → getContoursWithHoles → area filter → canonical sort.
+        // Then rdp(eps) for visualization (engine applies this at morph stage).
+        function extractPNGContours(canvas) {
+            const g = canvasToGridRed(canvas);
+            if (!g) return [];
+            const mergeEl = document.getElementById('merge-slider');
+            const closeR = mergeEl ? +mergeEl.value : 4;
+            const grid = (closeR > 0 && typeof morphClose === 'function')
+                ? morphClose(g.grid, g.W, g.H, closeR) : g.grid;
+            if (typeof getContoursWithHoles !== 'function') return [];
+            const raw = getContoursWithHoles(grid, g.W, g.H);
+            const areaScale = (g.W * g.H) / (1000 * 1000);
+            const MIN_AREA = 10 * areaScale;
+            const filtered = raw.filter(p => polyArea(p) >= MIN_AREA);
+            let sorted = (typeof sortContoursCanonical === 'function')
+                ? sortContoursCanonical(filtered) : filtered;
+            const eps = +(document.getElementById('eps-slider')?.value ?? 1);
+            if (typeof rdp === 'function' && eps > 0) {
+                sorted = sorted.map(p => (p && p.length >= 3) ? rdp(p, eps) : p);
+            }
+            const totalV = sorted.reduce((s, p) => s + (p ? p.length : 0), 0);
+            dbg(`PNG: raw=${raw.length}, filtered=${filtered.length}, rdp(eps=${eps}) → ${totalV} verts`);
+            return sorted;
+        }
+
+        // Extract LaTeX contours from the SAME canvas that we display in `tex`
+        // (latexCanvas, set by renderLatex). No second html2canvas pass → no
+        // alignment drift. Mirrors the engine's target-render pipeline:
+        // alpha-grid → getContoursWithHoles → stride-resample → canonical sort
+        // → RDP. Returns null synchronously when no canvas is ready yet.
+        const TARGET_MAX_PTS = 300;
+        function extractLatexContours() {
+            if (!latexCanvas) return null;
+            const g = canvasToGridAlpha(latexCanvas);
+            if (!g) return null;
+            let contours = (typeof getContoursWithHoles === 'function')
+                ? getContoursWithHoles(g.grid, g.W, g.H) : [];
+            const rawCount = contours.length;
+            contours = contours.map(p => strideResample(p, TARGET_MAX_PTS));
+            contours = (typeof sortContoursCanonical === 'function')
+                ? sortContoursCanonical(contours) : contours;
+            const eps = +(document.getElementById('eps-slider')?.value ?? 1);
+            if (typeof rdp === 'function' && eps > 0) {
+                contours = contours.map(p => (p && p.length >= 3) ? rdp(p, eps) : p);
+            }
+            const totalV = contours.reduce((s, p) => s + (p ? p.length : 0), 0);
+            dbg(`LaTeX: raw=${rawCount}, rdp(eps=${eps}) → ${totalV} verts`);
+            return { contours, W: g.W, H: g.H };
+        }
+
+        // Draw contours (array of polylines, each an array of [x,y] points in
+        // source-canvas pixels) onto the overlay, transforming source-canvas
+        // coords through mapFn(x, y) → wrap-local {x, y}.
+        //
+        // Holes are handled correctly: classifyContours() identifies outer vs
+        // hole regions. For each outer, we emit ONE <path> with the outer +
+        // its holes as subpaths and fill-rule="evenodd", so the holes XOR-out
+        // of the fill (same idea as morph-engine.js fill('evenodd')). The
+        // per-contour stroke/points stay individual so each region keeps its
+        // own color.
+        function drawContours(contours, mapFn, label) {
+            if (!contours || contours.length === 0) return;
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const z = zoom || 1;
+            const sw = String(1 / z);
+            const pr = 2 / z;
+            const col = (i) => (typeof regionColor === 'function')
+                ? regionColor(i) : INK_COLOR;
+
+            // Pre-compute the mapped coords for every contour once.
+            const mappedAll = contours.map(c =>
+                (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
+            );
+
+            // Classify into outers + holes (uses raw source-pixel coords —
+            // mapFn is monotonic so containment is preserved).
+            const classified = (typeof classifyContours === 'function')
+                ? classifyContours(contours)
+                : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
+
+            // ── FILL: one <path> per outer group (outer + its holes), drawn
+            // first so strokes/points render on top.
+            for (const outer of classified.outers) {
+                const oc = mappedAll[outer.idx];
+                if (!oc) continue;
+                const parts = [oc, ...outer.holes.map(hi => mappedAll[hi]).filter(Boolean)];
+                const d = parts.map(pts => {
+                    let s = `M ${pts[0].x} ${pts[0].y}`;
+                    for (let k = 1; k < pts.length; k++) s += ` L ${pts[k].x} ${pts[k].y}`;
+                    return s + ' Z';
+                }).join(' ');
+                const path = document.createElementNS(svgNS, 'path');
+                path.setAttribute('d', d);
+                path.setAttribute('fill-rule', 'evenodd');
+                path.setAttribute('fill', col(outer.idx));
+                path.setAttribute('stroke', 'none');
+                path.dataset.kind = 'fill';
+                overlay.appendChild(path);
+            }
+
+            // ── STROKE + POINTS: one polygon + N circles per contour (own colour).
+            let totalVerts = 0;
+            for (let i = 0; i < contours.length; i++) {
+                const mapped = mappedAll[i];
+                if (!mapped) continue;
+                const colour = col(i);
+                const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
+                const poly = document.createElementNS(svgNS, 'polygon');
+                poly.setAttribute('points', pts);
+                poly.setAttribute('fill', 'none');
+                poly.setAttribute('stroke', colour);
+                poly.setAttribute('stroke-width', sw);
+                poly.setAttribute('stroke-linejoin', 'round');
+                overlay.appendChild(poly);
+
+                for (const m of mapped) {
+                    const dot = document.createElementNS(svgNS, 'circle');
+                    dot.setAttribute('cx', m.x);
+                    dot.setAttribute('cy', m.y);
+                    dot.setAttribute('r', pr);
+                    dot.setAttribute('fill', colour);
+                    dot.dataset.kind = 'point';
+                    overlay.appendChild(dot);
+                    totalVerts++;
+                }
+            }
+            dbg(`outlines ${label}: ${contours.length} contour(s), ${totalVerts} verts, ${classified.outers.length} outer(s), ${classified.holes.length} hole(s)`);
+            applyLinesToggle();
+            applyPointsToggle();
+            applyFillToggle();
+        }
+
         function renderBBoxes() {
             while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
 
+            // ── PNG (engine: user-draw.js extractOutline) ─────────────────
             if (pix.complete && pix.naturalWidth) {
                 const bbox = computeImageBBox(pix);
                 if (bbox) drawBBox(mapImageBBoxToViewport(pix, bbox), 'png');
+
+                const pc = document.createElement('canvas');
+                pc.width = pix.naturalWidth;
+                pc.height = pix.naturalHeight;
+                pc.getContext('2d').drawImage(pix, 0, 0);
+                const contours = extractPNGContours(pc);
+                if (contours.length) {
+                    // Map source-pixel coords through object-fit:contain
+                    // scaling, then through the wrap-local conversion.
+                    const r = pix.getBoundingClientRect();
+                    const wrapRect = wrap.getBoundingClientRect();
+                    const scale = Math.min(r.width / pix.naturalWidth, r.height / pix.naturalHeight);
+                    const renderW = pix.naturalWidth * scale;
+                    const renderH = pix.naturalHeight * scale;
+                    const offX = r.left + (r.width - renderW) / 2;
+                    const offY = r.top + (r.height - renderH) / 2;
+                    const z = zoom || 1;
+                    const mapFn = (x, y) => ({
+                        x: (offX + x * scale - wrapRect.left) / z,
+                        y: (offY + y * scale - wrapRect.top) / z,
+                    });
+                    drawContours(contours, mapFn, 'png');
+                }
             }
 
-            const katexEl = tex.querySelector('.katex');
-            if (katexEl) {
-                computeElementInkBBox(katexEl).then(rect => {
-                    if (rect) drawBBox(rect, 'latex');
-                });
+            // ── LaTeX: tex img sources from latexCanvas (same canvas the
+            // contours come from). Use the same PNG-style mapping so display
+            // and contours share one coordinate system → perfect alignment.
+            if (tex.complete && tex.naturalWidth && latexCanvas) {
+                // BBox via alpha channel (matches canvasToGridAlpha used by
+                // contour extraction so the rectangle and the contours share
+                // exactly the same definition of "ink").
+                const bbox = computeContentBBox(latexCanvas, 'alpha');
+                if (bbox) drawBBox(mapImageBBoxToViewport(tex, bbox), 'latex');
+
+                const res = extractLatexContours();
+                if (res && res.contours.length) {
+                    const r = tex.getBoundingClientRect();
+                    const wrapRect = wrap.getBoundingClientRect();
+                    const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
+                    const renderW = tex.naturalWidth * scale;
+                    const renderH = tex.naturalHeight * scale;
+                    const offX = r.left + (r.width - renderW) / 2;
+                    const offY = r.top + (r.height - renderH) / 2;
+                    const z = zoom || 1;
+                    const mapFn = (x, y) => ({
+                        x: (offX + x * scale - wrapRect.left) / z,
+                        y: (offY + y * scale - wrapRect.top) / z,
+                    });
+                    drawContours(res.contours, mapFn, 'latex');
+                }
             }
         }
 
         // Coordinated setter: switch both panes to a new formula and re-render
-        // the bounding boxes once both panes have settled.
+        // the bounding boxes once BOTH images have loaded (pix from preset PNG,
+        // tex from rendered LaTeX canvas data-URL).
         function setFormula(latex, presetIndex) {
             dbg(`setFormula latex="${latex}" preset=${presetIndex}`);
-            renderLatex(latex);
+            tex.dataset.latex = latex;
+            const latexReady = renderLatex(latex);
             const url = `presets/formula-${presetIndex}.png`;
-            if (pix.src.endsWith(url)) {
-                // PNG didn't change — still re-run bboxes (latex may have).
+            const pixReady = new Promise(resolve => {
+                if (pix.src.endsWith(url)) { resolve(); return; }
+                pix.onload = () => resolve();
+                pix.onerror = () => { dbg(`PNG load FAILED: ${url}`); resolve(); };
+                pix.src = url;
+                pix.alt = latex;
+            });
+            Promise.all([latexReady, pixReady]).then(() => {
                 requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
-                return;
-            }
-            pix.onload = () => {
-                requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
-            };
-            pix.onerror = () => dbg(`PNG load FAILED: ${url}`);
-            pix.src = url;
-            pix.alt = latex;
+            });
         }
 
         // Wire up the existing formula radio grid: any change selects a new
@@ -257,12 +549,71 @@
         }
         tryAttach();
 
+        // ── LINIE / PUNKTE / PIXEL toggles control overlay element visibility.
+        // The gray bboxes (rects) stay visible regardless.
+        function applyLinesToggle() {
+            const t = document.getElementById('lines-toggle');
+            const show = t ? t.checked : true;
+            overlay.querySelectorAll('polygon').forEach(p => {
+                p.style.display = show ? '' : 'none';
+            });
+        }
+        function applyPointsToggle() {
+            const t = document.getElementById('points-toggle');
+            const show = t ? t.checked : true;
+            overlay.querySelectorAll('circle[data-kind="point"]').forEach(p => {
+                p.style.display = show ? '' : 'none';
+            });
+        }
+        // PIXEL toggle: show/hide the raw PNG (handwriting) and LaTeX glyphs.
+        // Vector outlines + bbox stay so the user can see contours alone.
+        function applyArtToggle() {
+            const t = document.getElementById('art-toggle');
+            const show = t ? t.checked : true;
+            pix.style.visibility = show ? '' : 'hidden';
+            tex.style.visibility = show ? '' : 'hidden';
+        }
+        // POLYGONE FÜLLEN: show/hide the grouped fill paths emitted by
+        // drawContours (one path per outer, with its holes as evenodd
+        // subpaths). Per-contour stroke polygons stay unchanged.
+        function applyFillToggle() {
+            const t = document.getElementById('fill-toggle');
+            const fill = t ? t.checked : false;
+            overlay.querySelectorAll('path[data-kind="fill"]').forEach(p => {
+                p.style.display = fill ? '' : 'none';
+            });
+        }
+        function attachToggles() {
+            const lt = document.getElementById('lines-toggle');
+            const pt = document.getElementById('points-toggle');
+            const at = document.getElementById('art-toggle');
+            const ft = document.getElementById('fill-toggle');
+            if (!lt || !pt || !at || !ft) { setTimeout(attachToggles, 50); return; }
+            lt.addEventListener('change', applyLinesToggle);
+            pt.addEventListener('change', applyPointsToggle);
+            at.addEventListener('change', applyArtToggle);
+            ft.addEventListener('change', applyFillToggle);
+            applyLinesToggle();
+            applyPointsToggle();
+            applyArtToggle();
+            applyFillToggle();
+            dbg('lines + points + pixel + fill toggles wired');
+        }
+        attachToggles();
+
         // ── Mouse-anchored zoom ─────────────────────────────────────────────
         // The wheel anchors the zoom at the cursor: the world point under the
         // mouse stays put. Transform is applied to `wrap` (transform-origin
         // 0 0), so pix + tex + overlay all scale together — vector-effect on
         // the SVG strokes keeps the bbox lines crisp at any zoom.
         wrap.style.transformOrigin = '0 0';
+        // Apply the restored zoom/pan from localStorage immediately so the
+        // very first renderBBoxes sees a wrap rect that matches the current
+        // zoom state. Without this, drawBBox divides by z but wrapRect is
+        // still pre-transform → tiny bbox at top-left.
+        if (zoom !== 1 || panX !== 0 || panY !== 0) {
+            wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+        }
         // wrap has pointer-events: none — wheel events fall through to host.
         host.addEventListener('wheel', (e) => {
             e.preventDefault();
@@ -278,17 +629,30 @@
             panX = mx - newZoom * wx;
             panY = my - newZoom * wy;
             zoom = newZoom;
+            saveZoomPan();
             wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
-            // Counter-scale stroke width so the bbox lines stay 1 screen pixel.
-            overlay.querySelectorAll('rect').forEach(r => {
-                r.setAttribute('stroke-width', String(1 / zoom));
+            // Counter-scale stroke width so all overlay lines stay 1 screen px.
+            const sw = String(1 / zoom);
+            overlay.querySelectorAll('rect, polygon, polyline, path').forEach(r => {
+                r.setAttribute('stroke-width', sw);
+            });
+            // Counter-scale vertex dots so they stay constant screen size.
+            const pr = String(2 / zoom);
+            overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                c.setAttribute('r', pr);
             });
         }, { passive: false });
         // Double-click and ESC both reset the view.
         function resetZoom() {
             zoom = 1; panX = 0; panY = 0;
+            saveZoomPan();
             wrap.style.transform = '';
-            overlay.querySelectorAll('rect').forEach(r => r.setAttribute('stroke-width', '1'));
+            overlay.querySelectorAll('rect, polygon, polyline, path').forEach(r => {
+                r.setAttribute('stroke-width', '1');
+            });
+            overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                c.setAttribute('r', '2');
+            });
         }
         host.addEventListener('dblclick', resetZoom);
         document.addEventListener('keydown', (e) => {
@@ -318,9 +682,14 @@
             if (!dragging) return;
             dragging = false;
             host.style.cursor = 'grab';
+            saveZoomPan();
         });
 
         window.addEventListener('resize', renderBBoxes);
+
+        // Expose redraw function for threshold slider.
+        window.redrawDraw20 = renderBBoxes;
+
         dbg('✓ wrap appended');
     }
 

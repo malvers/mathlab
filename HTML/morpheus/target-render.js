@@ -321,8 +321,8 @@ function renderPlainText(text) {
 function drawTargetPolygon() {
     outlineCtx.clearRect(0, 0, 1000, 1000);
 
-    const showLines = document.getElementById('lines-toggle')?.checked ?? true;
-    const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+    const showLines = document.getElementById('points-toggle')?.checked ?? true;
+    const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
     DebugWindow.log(`  drawTargetPolygon: LINIE=${showLines}, PUNKTE=${showPoints}`);
 
     // Bounding boxes (count as "lines" — follow LINIE switch).
@@ -373,6 +373,28 @@ function drawTargetPolygon() {
     }
 
     if (!targetPolygon) return;
+
+    // POLYGONE FÜLLEN: paint all target sub-polygons into a single evenodd
+    // path so inner holes XOR-cancel from outer fills.
+    const showFill = document.getElementById('fill-toggle')?.checked ?? false;
+    DebugWindow.log(`    → drawTargetPolygon fill check: showFill=${showFill}, polys=${targetPolygon.length}`);
+    if (showFill) {
+        outlineCtx.save();
+        outlineCtx.fillStyle = '#F4C430';
+        outlineCtx.beginPath();
+        let drawn = 0;
+        for (const poly of targetPolygon) {
+            if (!poly || poly.length < 3) continue;
+            outlineCtx.moveTo(poly[0][0], poly[0][1]);
+            for (let j = 1; j < poly.length; j++) outlineCtx.lineTo(poly[j][0], poly[j][1]);
+            outlineCtx.closePath();
+            drawn++;
+        }
+        outlineCtx.fill('evenodd');
+        outlineCtx.restore();
+        DebugWindow.log(`    → drawTargetPolygon FILL drawn for ${drawn} polys`);
+    }
+
     if (!showLines && !showPoints) return;
 
     outlineCtx.save();

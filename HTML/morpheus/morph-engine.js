@@ -272,10 +272,10 @@ function drawMorph(t, forceLines, forcePoints) {
     // Outline overlay per region (LINES / POINTS switches, overrideable)
     const showLines = forceLines !== undefined
         ? forceLines
-        : (document.getElementById('lines-toggle')?.checked ?? true);
+        : (document.getElementById('points-toggle')?.checked ?? true);
     const showPoints = forcePoints !== undefined
         ? forcePoints
-        : (document.getElementById('points-toggle')?.checked ?? true);
+        : (document.getElementById('lines-toggle')?.checked ?? true);
     if (showLines || showPoints) {
         const lw = (typeof outlineWidth !== 'undefined') ? outlineWidth : 1.5;
         morphCtx.lineWidth = lw;
