@@ -18,6 +18,10 @@
         const host = document.getElementById('canvas-container');
         if (!host) { dbg('ABORT: no canvas-container'); return; }
 
+        // Mouse-zoom state — declared up top so drawBBox closures see it
+        // initialized regardless of which async path fires first.
+        let zoom = 1, panX = 0, panY = 0;
+
         const wrap = document.createElement('div');
         wrap.id = 'draw20-wrap';
         wrap.style.cssText = `
@@ -122,15 +126,20 @@
         }
 
         function drawBBox(rect, label) {
+            // The input rect is in viewport (post-transform) coords. The overlay
+            // SVG lives inside `wrap`, which gets translate+scale applied, so we
+            // must convert into wrap's pre-transform local space by dividing by
+            // the current zoom.
             const wrapRect = wrap.getBoundingClientRect();
+            const z = zoom || 1;
             const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            r.setAttribute('x', rect.left - wrapRect.left);
-            r.setAttribute('y', rect.top - wrapRect.top);
-            r.setAttribute('width', rect.width);
-            r.setAttribute('height', rect.height);
+            r.setAttribute('x', (rect.left - wrapRect.left) / z);
+            r.setAttribute('y', (rect.top - wrapRect.top) / z);
+            r.setAttribute('width', rect.width / z);
+            r.setAttribute('height', rect.height / z);
             r.setAttribute('fill', 'none');
             r.setAttribute('stroke', '#888');
-            r.setAttribute('stroke-width', '1');
+            r.setAttribute('stroke-width', String(1 / (zoom || 1)));
             overlay.appendChild(r);
             dbg(`bbox ${label}: ${Math.round(rect.width)}×${Math.round(rect.height)}`);
         }
@@ -247,6 +256,69 @@
             }
         }
         tryAttach();
+
+        // ── Mouse-anchored zoom ─────────────────────────────────────────────
+        // The wheel anchors the zoom at the cursor: the world point under the
+        // mouse stays put. Transform is applied to `wrap` (transform-origin
+        // 0 0), so pix + tex + overlay all scale together — vector-effect on
+        // the SVG strokes keeps the bbox lines crisp at any zoom.
+        wrap.style.transformOrigin = '0 0';
+        // wrap has pointer-events: none — wheel events fall through to host.
+        host.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const hr = host.getBoundingClientRect();
+            const mx = e.clientX - hr.left;
+            const my = e.clientY - hr.top;
+            const factor = Math.exp(-e.deltaY * 0.001);
+            const newZoom = Math.max(1, Math.min(10, zoom * factor));
+            // world point currently under the mouse:
+            const wx = (mx - panX) / zoom;
+            const wy = (my - panY) / zoom;
+            // keep that world point under the mouse after the zoom change:
+            panX = mx - newZoom * wx;
+            panY = my - newZoom * wy;
+            zoom = newZoom;
+            wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+            // Counter-scale stroke width so the bbox lines stay 1 screen pixel.
+            overlay.querySelectorAll('rect').forEach(r => {
+                r.setAttribute('stroke-width', String(1 / zoom));
+            });
+        }, { passive: false });
+        // Double-click and ESC both reset the view.
+        function resetZoom() {
+            zoom = 1; panX = 0; panY = 0;
+            wrap.style.transform = '';
+            overlay.querySelectorAll('rect').forEach(r => r.setAttribute('stroke-width', '1'));
+        }
+        host.addEventListener('dblclick', resetZoom);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') resetZoom();
+        });
+
+        // ── Left-mouse-button pan ───────────────────────────────────────────
+        let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+        host.style.cursor = 'grab';
+        host.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            dragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            panStartX = panX;
+            panStartY = panY;
+            host.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            panX = panStartX + (e.clientX - dragStartX);
+            panY = panStartY + (e.clientY - dragStartY);
+            wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+        });
+        window.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            host.style.cursor = 'grab';
+        });
 
         window.addEventListener('resize', renderBBoxes);
         dbg('✓ wrap appended');
