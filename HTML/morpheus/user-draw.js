@@ -213,8 +213,8 @@ function drawPolygon() {
         : (rawContour && rawContour.length >= 3 ? [rawContour] : []);
     if (contours.length === 0) return;
 
-    const showLines_dbg = document.getElementById('lines-toggle')?.checked ?? true;
-    const showPoints_dbg = document.getElementById('points-toggle')?.checked ?? true;
+    const showLines_dbg = document.getElementById('points-toggle')?.checked ?? true;
+    const showPoints_dbg = document.getElementById('lines-toggle')?.checked ?? true;
     DebugWindow.log(`  drawPolygon: LINIE=${showLines_dbg}, PUNKTE=${showPoints_dbg} (${contours.length} contours)`);
 
     // Largest contour = the one resampled to match target (for morphing)
@@ -232,6 +232,27 @@ function drawPolygon() {
     drawCtx.lineWidth = 1;
     drawCtx.lineCap = 'round';
     drawCtx.lineJoin = 'round';
+
+    // POLYGONE FÜLLEN: paint all contours into a single evenodd path so
+    // holes (inner contours) XOR-cancel from the outer fills.
+    const showFill = document.getElementById('fill-toggle')?.checked ?? false;
+    DebugWindow.log(`    → drawPolygon fill check: showFill=${showFill}, contours=${contours.length}`);
+    if (showFill) {
+        drawCtx.save();
+        drawCtx.fillStyle = '#adff2f';
+        drawCtx.beginPath();
+        let drawn = 0;
+        for (const rc of contours) {
+            if (!rc || rc.length < 3) continue;
+            drawCtx.moveTo(rc[0][0], rc[0][1]);
+            for (let i = 1; i < rc.length; i++) drawCtx.lineTo(rc[i][0], rc[i][1]);
+            drawCtx.closePath();
+            drawn++;
+        }
+        drawCtx.fill('evenodd');
+        drawCtx.restore();
+        DebugWindow.log(`    → drawPolygon FILL drawn for ${drawn} contours`);
+    }
 
     for (let ci = 0; ci < contours.length; ci++) {
         const rc = contours[ci];
@@ -279,7 +300,7 @@ function drawPolygon() {
         if (showPoly) {
             const showLines = document.getElementById('points-toggle')?.checked ?? true;
             const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
-            if (showLines) {
+            if (showPoints) {
                 DebugWindow.log(`    → rendering lines for contour ${ci}`);
                 drawCtx.strokeStyle = color;
                 drawCtx.lineWidth = (typeof outlineWidth !== 'undefined') ? outlineWidth : 1.5;
@@ -289,7 +310,7 @@ function drawPolygon() {
                 drawCtx.closePath();
                 drawCtx.stroke();
             }
-            if (showPoints) {
+            if (showLines) {
                 DebugWindow.log(`    → rendering points for contour ${ci}`);
                 drawCtx.fillStyle = color;
                 for (const [x, y] of verts) {
