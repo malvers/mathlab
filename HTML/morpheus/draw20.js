@@ -522,15 +522,16 @@
             applyFillToggle();
         }
 
-        // Cross-pane region highlighting via a yellow glow (CSS drop-shadow
-        // filter applied to every element sharing the matchId: polygons,
-        // fill paths, and vertex circles). The glow is visible regardless
-        // of which toggles are on, and reads as the project's λ-yellow.
-        // Additionally toggles the visibility of the corresponding match-line
-        // — those are hidden by default and only revealed on hover.
+        // Cross-pane region highlighting. Yellow glow = "you and your partner".
+        // ORPHANS are explicitly excluded — hovering an orphan gives NO glow
+        // (the red dashed circle is its permanent marker; glow would falsely
+        // imply a partnership). The set of orphan matchIds is updated by
+        // renderBBoxes after computing idToPair.
         const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
+        const orphanMatchIds = new Set();
         function setMatchHighlight(matchId, on) {
             if (matchId === undefined || matchId === '' || matchId === '-1') return;
+            if (orphanMatchIds.has(String(matchId))) return; // orphan: no glow
             overlay.querySelectorAll(
                 `[data-match-id="${matchId}"]`
             ).forEach(el => {
@@ -549,8 +550,12 @@
         function onOverlayHover(e) {
             const t = e.target;
             const mid = (t && t.dataset) ? t.dataset.matchId : '';
+            const src = (t && t.dataset) ? t.dataset.source : '';
             const valid = mid && mid !== '-1';
             const next = (e.type === 'mouseover' && valid) ? mid : null;
+            if (e.type === 'mouseover') {
+                dbg(`hover tgt=${t.tagName} kind=${t.dataset && t.dataset.kind || '-'} src=${src} mid=${mid}`);
+            }
             if (next === activeMatchId) return;
             if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
             if (next !== null) setMatchHighlight(next, true);
@@ -634,28 +639,148 @@
                 pDesc = pOuters.map(p => PlausibilCheck.shapeDescriptor(p, pBB));
                 lDesc = lOuters.map(p => PlausibilCheck.shapeDescriptor(p, lBB));
                 const N = pDesc.length, M = lDesc.length;
+
+                // ── Stage 0: reading-order ranks. Sorting by (cx + 0.3·cy)
+                // gives a useful left-to-right + slight-vertical-bias linear
+                // order that matches how formulas are read.
+                const rankOf = (desc) => {
+                    const keyed = desc.map((d, i) => ({ i, k: d.nx + 0.3 * d.ny }));
+                    keyed.sort((a, b) => a.k - b.k);
+                    const r = new Array(desc.length);
+                    for (let k = 0; k < keyed.length; k++) r[keyed[k].i] = k;
+                    return r;
+                };
+                const pRank = rankOf(pDesc);
+                const lRank = rankOf(lDesc);
+                const ORDER_WEIGHT = 0.15;
+
+                // Cost = shape-plausibility cost + reading-order penalty.
+                // The order term is BUILT INTO the cost matrix so Hungarian
+                // already prefers in-order pairings, dramatically reducing
+                // crossings in the initial solution.
                 const cost = new Array(N);
                 for (let i = 0; i < N; i++) {
                     cost[i] = new Array(M);
                     for (let j = 0; j < M; j++) {
-                        cost[i][j] = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
+                        const base = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
+                        const ord = Math.abs(pRank[i] / Math.max(1, N - 1) - lRank[j] / Math.max(1, M - 1));
+                        cost[i][j] = base + ORDER_WEIGHT * ord;
                     }
                 }
                 assign = hungarian(cost);
-                // Post-filter: any pair that crossed a veto (cost ≥ 1e5) is
-                // unset → that PNG outer becomes an orphan, NOT mapped to
-                // an absurd partner. Threshold is well below the 1e6 veto
-                // multiplier in PlausibilCheck.pairCost.
+
+                // Post-filter: veto-bust to orphan.
                 const VETO_COST = 1e5;
                 for (let i = 0; i < N; i++) {
                     const j = assign[i];
                     if (j >= 0 && j < M && cost[i][j] >= VETO_COST) {
                         assign[i] = -1;
                         dbg(`  VETO PNG#${i} ↮ LaTeX#${j} (cost=${cost[i][j].toExponential(1)} — shape incompatible)`);
-                    } else {
-                        const c = (j >= 0 && j < M) ? cost[i][j].toFixed(2) : '—';
-                        dbg(`  PNG#${i} → LaTeX#${j} cost=${c}`);
                     }
+                }
+
+                // ── Stage 2: uncrossing-swap pass.
+                let swaps = 0, sweeps = 0;
+                let changed = true;
+                while (changed && sweeps < 8) {
+                    changed = false;
+                    sweeps++;
+                    for (let i = 0; i < N; i++) {
+                        const j = assign[i];
+                        if (j < 0) continue;
+                        for (let k = i + 1; k < N; k++) {
+                            const l = assign[k];
+                            if (l < 0) continue;
+                            const cross = (pDesc[i].ny < pDesc[k].ny) !== (lDesc[j].ny < lDesc[l].ny);
+                            if (!cross) continue;
+                            const orig = cost[i][j] + cost[k][l];
+                            const swap = cost[i][l] + cost[k][j];
+                            if (swap <= orig + 1e-6) {
+                                assign[i] = l;
+                                assign[k] = j;
+                                changed = true;
+                                swaps++;
+                            }
+                        }
+                    }
+                }
+                dbg(`Uncrossing: ${swaps} swap(s) over ${sweeps} sweep(s)`);
+
+                // ── Stage 3: rescue pass on the leftover orphans.
+                // Hungarian's global optimum can sacrifice perfectly-plausible
+                // pairs to minimise total cost — re-run Hungarian on just the
+                // orphans with RELAXED vetoes (5× elong, 20× size — was 3× /
+                // 10×) and no reading-order term (orphans are by definition
+                // out-of-order). Only accept pairs that still beat the relaxed
+                // veto — absurd matches are still rejected.
+                const pngOrphIdx = [];
+                const latClaimed = new Set();
+                for (let i = 0; i < N; i++) {
+                    if (assign[i] < 0) pngOrphIdx.push(i);
+                    else latClaimed.add(assign[i]);
+                }
+                const latOrphIdx = [];
+                for (let j = 0; j < M; j++) if (!latClaimed.has(j)) latOrphIdx.push(j);
+
+                if (pngOrphIdx.length && latOrphIdx.length) {
+                    const REL_ELONG = Math.log(5);
+                    const REL_SIZE  = Math.log(20);
+                    const RN = pngOrphIdx.length, RM = latOrphIdx.length;
+                    const cost2 = new Array(RN);
+                    for (let pi = 0; pi < RN; pi++) {
+                        cost2[pi] = new Array(RM);
+                        const a = pDesc[pngOrphIdx[pi]];
+                        for (let li = 0; li < RM; li++) {
+                            const b = lDesc[latOrphIdx[li]];
+                            const elongR = Math.abs(Math.log(a.elong / b.elong));
+                            const sizeR  = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
+                            let veto = 0;
+                            if (elongR > REL_ELONG) veto += 1e6 * (elongR - REL_ELONG);
+                            if (sizeR  > REL_SIZE)  veto += 1e6 * (sizeR  - REL_SIZE);
+                            const pl = PlausibilCheck.pairPlausibility(a, b);
+                            cost2[pi][li] = (1 - pl.score) + veto;
+                        }
+                    }
+                    const assign2 = hungarian(cost2);
+                    let rescued = 0;
+                    for (let pi = 0; pi < RN; pi++) {
+                        const li = assign2[pi];
+                        if (li !== undefined && li >= 0 && li < RM
+                            && cost2[pi][li] < VETO_COST) {
+                            const i = pngOrphIdx[pi];
+                            const j = latOrphIdx[li];
+                            assign[i] = j;
+                            rescued++;
+                            dbg(`  RESCUE PNG#${i} → LaTeX#${j} cost=${cost2[pi][li].toFixed(2)}`);
+                        }
+                    }
+                    dbg(`Rescue: ${rescued}/${Math.min(RN, RM)} orphan pairings found`);
+                }
+
+                // ── Stage 4: drop suspect pairs.
+                // A pair below the suspect threshold (0.45) is essentially a
+                // false match — clearer to the user that BOTH glyphs become
+                // orphans (both get a red dashed circle) than to show a
+                // misleading red match-line. Prevents the "PNG-b orphan but
+                // LaTeX-b paired with junk" inconsistency.
+                let dropped = 0;
+                for (let i = 0; i < N; i++) {
+                    const j = assign[i];
+                    if (j < 0) continue;
+                    const pl = PlausibilCheck.pairPlausibility(pDesc[i], lDesc[j]);
+                    if (pl.score < 0.45) {
+                        assign[i] = -1;
+                        dropped++;
+                        dbg(`  DROP-SUSPECT PNG#${i} ↮ LaTeX#${j} score=${(pl.score*100).toFixed(0)}%`);
+                    }
+                }
+                if (dropped) dbg(`Suspect-drop: ${dropped} pair(s) dissolved → orphans`);
+
+                // Final per-pair log.
+                for (let i = 0; i < N; i++) {
+                    const j = assign[i];
+                    const c = (j >= 0 && j < M) ? cost[i][j].toFixed(2) : '—';
+                    dbg(`  PNG#${i} → LaTeX#${j} cost=${c}`);
                 }
             }
 
@@ -730,6 +855,13 @@
             const matchInfo = computeMatchIds(pngContours, latexContoursList);
             const { pngId, latId, idToPair, plausibility } = matchInfo;
             dbg(`Hungarian: png=${pngContours?.length || 0} latex=${latexContoursList?.length || 0}`);
+
+            // Refresh the orphan-id set so setMatchHighlight knows which mids
+            // are orphans (and must skip the yellow glow on hover).
+            orphanMatchIds.clear();
+            for (const [id, pair] of idToPair) {
+                if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+            }
 
             // Centroid maps populated by drawContours — used afterwards to
             // draw cross-pane match lines (centroid PNG ↔ centroid LaTeX).
