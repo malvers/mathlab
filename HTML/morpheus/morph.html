@@ -31,6 +31,7 @@
     <script src="morph-engine.js"></script>
     <script src="target-render.js"></script>
     <script src="user-draw.js"></script>
+    <script src="draw20.js"></script>
 </head>
 
 <body>
@@ -150,14 +151,14 @@
             <label class="switch-row">
                 <span>LINIE</span>
                 <span class="switch">
-                    <input type="checkbox" id="lines-toggle" checked onchange="onLinesToggle(this.checked)">
+                    <input type="checkbox" id="lines-toggle" checked onchange="onPointsToggle(this.checked)">
                     <span class="switch-slider"></span>
                 </span>
             </label>
             <label class="switch-row">
                 <span>PUNKTE</span>
                 <span class="switch">
-                    <input type="checkbox" id="points-toggle" checked onchange="onPointsToggle(this.checked)">
+                    <input type="checkbox" id="points-toggle" checked onchange="onLinesToggle(this.checked)">
                     <span class="switch-slider"></span>
                 </span>
             </label>
@@ -384,7 +385,7 @@
                 DebugWindow.log(eraserMode ? '🧹 Eraser ON (20px)' : '✏️ Draw ON');
             }
             if (e.key === 'Escape') {
-                clearDraw();
+                resetView();
             }
             if ((e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
                 e.stopImmediatePropagation();
@@ -421,6 +422,47 @@
                 if (toggle) { toggle.checked = !toggle.checked; onArtToggle(toggle.checked); }
             }
         }, true);
+
+        // Reset view: restore the default visual state without touching the
+        // drawing. Stops any running morph animation, snaps the morph slider
+        // back to 0, hides the morph layer, clears Colorado overlay, brings
+        // pixel/lines/points toggles + sliders back to defaults, re-runs the
+        // sidebar-chrome scale calculation (in case it drifted).
+        function resetView() {
+            try { cancelAnimationFrame(morphRaf); morphRaf = null; } catch (_) {}
+            try { morphCtx.clearRect(0, 0, 1000, 1000); } catch (_) {}
+            const sl = document.getElementById('morph-slider');
+            const mv = document.getElementById('morph-val');
+            if (sl) sl.value = 1;
+            if (mv) mv.textContent = 0;
+            // Colorado off
+            if (typeof coloradoMode !== 'undefined' && coloradoMode) {
+                coloradoMode = false;
+                if (typeof drawColorado === 'function') drawColorado();
+            }
+            // Eraser off (back to pencil)
+            if (typeof eraserMode !== 'undefined' && eraserMode) {
+                eraserMode = false;
+                drawCtx.strokeStyle = '#adff2f';
+                const ssl = document.getElementById('stroke-slider');
+                drawCtx.lineWidth = ssl ? +ssl.value : 6;
+                const dc = document.getElementById('draw-canvas');
+                if (dc) dc.style.cursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' fill='white'/%3E%3C/svg%3E\") 0 24, crosshair";
+                document.getElementById('draw-hint').textContent = 'Zeichne — Maus oder Finger';
+            }
+            // Toggles back to defaults
+            const linesT = document.getElementById('lines-toggle');
+            const pointsT = document.getElementById('points-toggle');
+            const artT = document.getElementById('art-toggle');
+            if (linesT && !linesT.checked) { linesT.checked = true; onLinesToggle(true); }
+            if (pointsT && !pointsT.checked) { pointsT.checked = true; onPointsToggle(true); }
+            if (artT && !artT.checked) { artT.checked = true; onArtToggle(true); }
+            // Re-apply sidebar chrome scale (in case it drifted)
+            if (window.CyberLeftChrome?.publishResolvedScale) {
+                window.CyberLeftChrome.publishResolvedScale();
+            }
+            DebugWindow.log('↺ View reset');
+        }
 
         function onStrokeChange(val) {
             document.getElementById('stroke-val').textContent = val;

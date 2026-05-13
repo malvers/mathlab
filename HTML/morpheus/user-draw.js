@@ -17,8 +17,8 @@
 
 // ── Init / clear ────────────────────────────────────────────────────────────
 function initDraw() {
-    drawCtx.fillStyle = '#000';
-    drawCtx.fillRect(0, 0, 1000, 1000);
+    // Transparent canvas — strokes appear floating over the cyber-grid HG.
+    drawCtx.clearRect(0, 0, 1000, 1000);
     drawCtx.strokeStyle = '#adff2f';
     const strokeEl = document.getElementById('stroke-slider');
     drawCtx.lineWidth = strokeEl ? +strokeEl.value : 6;
@@ -201,8 +201,8 @@ function drawPolygon() {
     if (showArt) {
         drawCtx.putImageData(savedPixels, 0, 0);
     } else {
-        drawCtx.fillStyle = '#000';
-        drawCtx.fillRect(0, 0, 1000, 1000);
+        // Transparent — outlines float over the cyber-grid HG.
+        drawCtx.clearRect(0, 0, 1000, 1000);
     }
 
     const showPoly = document.getElementById('poly-toggle')?.checked ?? true;
@@ -277,8 +277,8 @@ function drawPolygon() {
         const color = regionColor(cIdx);
 
         if (showPoly) {
-            const showLines = document.getElementById('lines-toggle')?.checked ?? true;
-            const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+            const showLines = document.getElementById('points-toggle')?.checked ?? true;
+            const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
             if (showLines) {
                 DebugWindow.log(`    → rendering lines for contour ${ci}`);
                 drawCtx.strokeStyle = color;
@@ -334,8 +334,8 @@ function drawPolygon() {
 // ── Hide / show user art (used during morphing) ─────────────────────────────
 function hideUserOutline() {
     drawCtx.save();
-    drawCtx.fillStyle = '#000';
-    drawCtx.fillRect(0, 0, 1000, 1000);
+    // Transparent — strokes cleared during morph; cyber-grid shows through.
+    drawCtx.clearRect(0, 0, 1000, 1000);
     drawCtx.restore();
 }
 

@@ -1,24 +1,44 @@
+/* === draw20 rebuild: hide legacy canvas-stack + overlay boxes ============
+   Old drawing/morph stack, the 3 overlay boxes, and the cyber-grid pattern
+   overlay are dormant; the new draw20.js owns the right pane (plain
+   dark-blue). Remove to restore. */
+#canvas-container {
+    position: relative;
+    background: rgb(0, 0, 20) !important;
+}
+#canvas-container > * {
+    display: none !important;
+}
+#canvas-container > #draw20-wrap {
+    display: flex !important;
+}
+/* ========================================================================= */
+
 #draw-canvas {
     display: block;
     width: 100%;
     height: 100%;
-    background: #000;
+    /* Transparent — strokes float over the cyber-grid background */
+    background: transparent;
     cursor: crosshair;
-    border-radius: 10px;
-    border: 2px solid rgba(0, 210, 255, 0.5);
-    box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
     touch-action: none;
 }
 
 #canvas-stack {
-    /* Full-bleed: occupies the entire canvas-container (= cyber-grid area).
-       No aspect-ratio, no transform — the canvas is whatever shape the
-       background is. Internal canvas pixels stay at 1000×1000 so drawing
-       coordinates and target rendering positions don't have to change;
-       getPos() in user-draw.js maps mouse → canvas pixels via
-       canvas.width / rect.width (handles browser-zoom too). */
-    position: absolute;
-    inset: 0;
+    /* Bypass the flex/grid/canvas-container chain entirely: position fixed to
+       the viewport, sidebar-aware via the live CSS vars cyber-left-chrome.js
+       maintains (--cyber-left-natural-w * --cyber-left-scale). With this we
+       always get the full main-content area — independent of any
+       overflow/contain/max-* constraint in the ancestor chain.
+       Internal canvas pixels stay 1000×1000; getPos() in user-draw.js maps
+       mouse → canvas pixels via canvas.width / rect.width, so the drawing
+       logic, target rendering positions, etc. are untouched. */
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: calc(var(--cyber-left-natural-w, 416px) * var(--cyber-left-scale, 1) + 5px);
+    z-index: 5;
     line-height: 0;
 }
 
