@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="../js/debug-window.js"></script>
     <!-- Local API keys (gitignored). Missing file is fine — onerror swallows the 404. -->
     <script src="apikey.local.js" onerror="this.remove()"></script>
@@ -296,6 +297,17 @@
         </div>
     </main>
 
+    <!-- Cost warning overlay — fullscreen modal, blocks until acknowledged. -->
+    <div id="cost-warning" style="display:none;position:fixed;inset:0;background:rgba(2,4,16,0.85);backdrop-filter:blur(6px);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:#020410;border:2px solid #C41E3A;border-radius:10px;box-shadow:0 0 60px rgba(196,30,58,0.6),0 0 120px rgba(196,30,58,0.3);padding:32px 40px;max-width:520px;color:#fff;font-family:Arial,sans-serif;text-align:center;">
+            <div style="font-size:48px;color:#C41E3A;line-height:1;margin-bottom:14px;">⚠</div>
+            <div style="font-size:20px;font-weight:700;color:#C41E3A;letter-spacing:0.04em;margin-bottom:18px;">KOSTEN-WARNUNG</div>
+            <div id="cost-warning-text" style="font-size:15px;line-height:1.5;color:#fff;margin-bottom:24px;"></div>
+            <button onclick="dismissCostWarning()"
+                style="background:#C41E3A;border:none;color:#fff;padding:10px 32px;border-radius:5px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:0.1em;cursor:pointer;">VERSTANDEN</button>
+        </div>
+    </div>
+
     <script src="../js/cyber-left-chrome.js"></script>
     <script src="../js/branding/briefings.js"></script>
     <script src="../js/branding/overlays.js"></script>
@@ -424,6 +436,58 @@
             { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}',                                                                         title: 'Maxwell (Gauß)' },
             { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}',                                        title: 'Maxwell (Ampère)' }
         ];
+        // Complex formulas — rendered live via KaTeX + html2canvas onto the
+        // draw-canvas. No preset PNGs needed.
+        const COMPLEX_FORMULAS = [
+            { latex: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                          title: 'Riemann ζ' },
+            { latex: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                         title: 'Dirac' },
+            { latex: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                              title: 'Cauchy-Integral' },
+            { latex: 'R_{\\mu\\nu}-\\tfrac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                          title: 'Einstein-Feldgleichungen' },
+            { latex: '\\rho\\!\\left(\\frac{\\partial\\mathbf{v}}{\\partial t}+\\mathbf{v}\\!\\cdot\\!\\nabla\\mathbf{v}\\right)=-\\nabla p+\\mu\\nabla^2\\mathbf{v}+\\mathbf{f}', title: 'Navier–Stokes' }
+        ];
+        CyberUI.createCard('ui-container', 'KOMPLEX', `
+            <div class="digit-grid">
+                ${COMPLEX_FORMULAS.map((sym, i) => `
+                    <label class="latex-label" title="${sym.title}">
+                        <input type="radio" name="complex-formula" value="complex-${i}"
+                            onclick="loadComplexPreset(${i})">
+                        <span class="latex-render" data-latex="${sym.latex}"></span>
+                    </label>
+                `).join('')}
+            </div>
+        `, '#F4C430', { collapsible: true });
+
+        // Render KaTeX to draw-canvas via html2canvas. Used by the KOMPLEX card
+        // for equations that have no preset PNG. Output: green-on-darkblue, fit
+        // to canvas with 60 px margin (same look as drawn / preset content).
+        function loadKatexToCanvas(latex, title) {
+            DebugWindow.log(`▶ Render Komplex: ${title}`);
+            const tmp = document.createElement('div');
+            tmp.style.cssText = 'position:fixed;left:-10000px;top:0;padding:40px;background:#020410;color:#adff2f;font-size:60px;line-height:1.4;white-space:nowrap;';
+            document.body.appendChild(tmp);
+            try { katex.render(latex, tmp, { throwOnError: false, displayMode: true }); }
+            catch (e) { tmp.textContent = latex; }
+            // Give KaTeX a tick to lay out before html2canvas captures it.
+            setTimeout(() => {
+                html2canvas(tmp, { backgroundColor: '#020410', scale: 2, logging: false }).then(snap => {
+                    drawCtx.fillStyle = '#020410';
+                    drawCtx.fillRect(0, 0, 1000, 1000);
+                    const MARGIN = 60;
+                    const sc = Math.min((1000 - 2*MARGIN) / snap.width, (1000 - 2*MARGIN) / snap.height);
+                    const nw = snap.width * sc, nh = snap.height * sc;
+                    const ox = (1000 - nw) / 2, oy = (1000 - nh) / 2;
+                    drawCtx.imageSmoothingEnabled = true;
+                    drawCtx.imageSmoothingQuality = 'high';
+                    drawCtx.drawImage(snap, ox, oy, nw, nh);
+                    document.body.removeChild(tmp);
+                    DebugWindow.log(`✓ ${title} aufs Canvas (${Math.round(nw)}×${Math.round(nh)})`);
+                }).catch(err => {
+                    if (tmp.parentNode) document.body.removeChild(tmp);
+                    DebugWindow.log(`✗ html2canvas-Fehler: ${err.message}`);
+                });
+            }, 50);
+        }
+
         CyberUI.createCard('ui-container', 'FORMELN', `
             <div class="digit-grid formula-grid">
                 ${FORMULAS.map((sym, i) => `
@@ -466,12 +530,14 @@
             document.getElementById('result-render').innerHTML = '';
         }
 
-        // Lade Preset-PNG, ersetze grün/farbig → schwarz auf weiß für die OCR
-        function loadPreset(idx) {
+        // Shared PNG-loader: takes any bright-on-dark preset PNG and recolors
+        // it to green-on-darkblue on the draw-canvas. Used by both the simple
+        // FORMELN card (formula-N.png) and the KOMPLEX card (complex-N.png).
+        function loadPNGPreset(path, title) {
+            DebugWindow.log(`▶ Lade ${path} (${title})`);
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => {
-                // Erst Bild auf temp canvas zeichnen, Pixel manipulieren
                 const tmp = document.createElement('canvas');
                 tmp.width = img.width; tmp.height = img.height;
                 const tctx = tmp.getContext('2d');
@@ -479,22 +545,27 @@
                 const id = tctx.getImageData(0, 0, tmp.width, tmp.height);
                 const d = id.data;
                 for (let i = 0; i < d.length; i += 4) {
-                    const r = d[i], g = d[i+1], b = d[i+2];
                     // Bright pixel (drawn stroke) → green, dark (bg) → dark blue.
-                    const brightness = (r + g + b) / 3;
-                    if (brightness > 40) { d[i] = 173; d[i+1] = 255; d[i+2] = 47;  d[i+3] = 255; }
-                    else                 { d[i] = 2;   d[i+1] = 4;   d[i+2] = 16;  d[i+3] = 255; }
+                    const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
+                    if (brightness > 40) { d[i] = 173; d[i+1] = 255; d[i+2] = 47; }
+                    else                 { d[i] = 2;   d[i+1] = 4;   d[i+2] = 16; }
+                    d[i+3] = 255;
                 }
                 tctx.putImageData(id, 0, 0);
-                // Auf draw-canvas
                 drawCtx.fillStyle = '#020410';
                 drawCtx.fillRect(0, 0, 1000, 1000);
                 drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
-                DebugWindow.log(`✓ Preset ${idx} geladen: ${FORMULAS[idx]?.title ?? '?'}`);
+                DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height})`);
             };
-            img.onerror = () => DebugWindow.log(`✗ Preset ${idx} konnte nicht geladen werden`);
-            img.src = `presets/formula-${idx}.png`;
-            DebugWindow.log(`▶ Lade Preset ${idx} (${FORMULAS[idx]?.title ?? '?'})`);
+            img.onerror = () => DebugWindow.log(`✗ ${path} konnte nicht geladen werden`);
+            img.src = path;
+        }
+
+        function loadPreset(idx) {
+            loadPNGPreset(`presets/formula-${idx}.png`, FORMULAS[idx]?.title ?? '?');
+        }
+        function loadComplexPreset(idx) {
+            loadPNGPreset(`presets/complex-${idx}.png`, COMPLEX_FORMULAS[idx]?.title ?? '?');
         }
 
         function onStrokeChange(v) {
@@ -562,9 +633,15 @@
         let costAllTime = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
         let costLastUSD = 0;
         let costLastTok = 0;
+        // Internal warning threshold — remind user every $1 spent to cross-check
+        // against Google Cloud Console. Hardcoded, not user-configurable.
+        const COST_REMIND_INTERVAL_USD = 1.00;
+        let costLastReminderUSD = 0;
         try {
             const saved = localStorage.getItem('eocr-cost-alltime');
             if (saved) costAllTime = JSON.parse(saved);
+            const lastRem = localStorage.getItem('eocr-cost-last-reminder');
+            if (lastRem !== null) costLastReminderUSD = parseFloat(lastRem) || 0;
         } catch (_) {}
         try {
             const lim = localStorage.getItem('eocr-cost-limit');
@@ -622,6 +699,7 @@
             try { localStorage.setItem('eocr-cost-alltime', JSON.stringify(costAllTime)); } catch (_) {}
             DebugWindow.log(`  💰 ${inTok} in + ${outTok} out = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
             updateCostUI();
+            maybeShowCostWarning();
             // Warn if all-time crosses the limit on THIS call
             const limitEl = document.getElementById('cost-limit');
             const limit = limitEl ? parseFloat(limitEl.value) : NaN;
@@ -633,9 +711,34 @@
         function resetCostCounter() {
             if (!confirm('All-time-Counter wirklich auf 0 setzen?')) return;
             costAllTime = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
+            costLastReminderUSD = 0;
             try { localStorage.removeItem('eocr-cost-alltime'); } catch (_) {}
+            try { localStorage.removeItem('eocr-cost-last-reminder'); } catch (_) {}
+            dismissCostWarning();
             DebugWindow.log('🔄 All-time-Counter reset');
             updateCostUI();
+        }
+
+        // Show the red warning banner when all-time crosses the next $1 mark.
+        // costLastReminderUSD tracks the highest threshold already shown for —
+        // ensures user gets reminded again at $2, $3, … without re-triggering
+        // for the same dollar.
+        function maybeShowCostWarning() {
+            const nextThreshold = Math.floor(costAllTime.usd / COST_REMIND_INTERVAL_USD) * COST_REMIND_INTERVAL_USD;
+            if (nextThreshold <= costLastReminderUSD || nextThreshold < COST_REMIND_INTERVAL_USD) return;
+            const box = document.getElementById('cost-warning');
+            const txt = document.getElementById('cost-warning-text');
+            if (!box || !txt) return;
+            txt.innerHTML = `Du hast jetzt <b style="color:#ff7088;">über $${nextThreshold.toFixed(2)}</b> verbraucht.<br><br>Bitte gegen <b>console.cloud.google.com → Billing</b> querverifizieren.`;
+            box.style.display = 'flex';
+            DebugWindow.log(`⚠️ COST WARNUNG: $${costAllTime.usd.toFixed(4)} überschritten Schwelle $${nextThreshold.toFixed(2)}`);
+        }
+        function dismissCostWarning() {
+            const box = document.getElementById('cost-warning');
+            if (box) box.style.display = 'none';
+            // Lock the threshold so it doesn't pop again for this $1-bucket.
+            costLastReminderUSD = Math.floor(costAllTime.usd / COST_REMIND_INTERVAL_USD) * COST_REMIND_INTERVAL_USD;
+            try { localStorage.setItem('eocr-cost-last-reminder', String(costLastReminderUSD)); } catch (_) {}
         }
 
         function onCostLimitChange(v) {
@@ -643,8 +746,10 @@
             updateCostUI();
         }
 
-        // Show initial values
+        // Show initial values + re-check warning state (in case we crossed
+        // the threshold in a previous session and never acknowledged it).
         updateCostUI();
+        maybeShowCostWarning();
 
         // ── Render helper (shared by recognize + debugRender) ───────────────────
         function renderLatex(latex) {
