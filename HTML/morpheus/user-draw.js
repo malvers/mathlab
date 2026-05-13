@@ -35,6 +35,7 @@ function clearDraw() {
     rawContours = null;
     userMorphPoly = null;
     userMorphPolys = null;
+    userReadingOrder = [];
     if (typeof updateMatching === 'function') updateMatching();
     document.getElementById('vert-count').textContent = '';
     const objVal = document.getElementById('obj-value');
@@ -66,6 +67,7 @@ function resetDrawState() {
     savedPixels = null;
     rawContour = null;
     rawContours = null;
+    userReadingOrder = [];
     if (typeof updateMatching === 'function') updateMatching();
     document.getElementById('vert-count').textContent = '';
     document.getElementById('obj-value').textContent = '0';
@@ -100,8 +102,17 @@ function extractOutline() {
         }
         DebugWindow.log(`  grid: ${filledCount} filled pixels`);
 
+        // Morphological closing — merge stroke fragments (e.g. 'm' written as
+        // two arcs becomes one contour). Visible drawing stays untouched.
+        const mergeEl = document.getElementById('merge-slider');
+        const closeR = mergeEl ? +mergeEl.value : 4;
+        const workingGrid = (closeR > 0 && typeof morphClose === 'function')
+            ? morphClose(grid, 1000, 1000, closeR)
+            : grid;
+        if (closeR > 0) DebugWindow.log(`  morph-close r=${closeR} (bridges gaps ≤ ${2 * closeR}px)`);
+
         // Topology-aware extraction: get ALL contours (outer + holes)
-        const rawList = getContoursWithHoles(grid, 1000, 1000);
+        const rawList = getContoursWithHoles(workingGrid, 1000, 1000);
         DebugWindow.log(`  getContoursWithHoles → ${rawList.length} contour(s)`);
 
         // Compute area (shoelace) of every contour for debug + filtering
@@ -130,10 +141,22 @@ function extractOutline() {
 
         if (!rawContours || rawContours.length === 0) {
             rawContour = null;
+            userReadingOrder = [];
             if (typeof updateMatching === 'function') updateMatching();
             document.getElementById('vert-count').textContent = 'Nichts gefunden';
             DebugWindow.log('⚠️ extractOutline: no contours found');
             return;
+        }
+
+        // Spatial reading-order inference (detects fraction bars & groups
+        // above/below). Provides the dominant cue for matching duplicate
+        // symbols (∂…∂) when geometric position alone is ambiguous.
+        if (typeof inferSpatialReadingOrder === 'function') {
+            userReadingOrder = inferSpatialReadingOrder(rawContours);
+            const haveOrder = userReadingOrder.some(v => v >= 0);
+            DebugWindow.log(`📖 user reading-order: ${haveOrder ? '[' + userReadingOrder.join(',') + ']' : '(none)'}`);
+        } else {
+            userReadingOrder = [];
         }
 
         // Re-pair user↔target with Hungarian and refresh colour indices.
@@ -210,10 +233,15 @@ function drawPolygon() {
         const rc = contours[ci];
         if (!rc || rc.length < 3) continue;
 
-        let poly = rdp(rc, eps);
+        // Display uses raw marching-squares vertices so the polygon overlay
+        // hugs every pixel-level curve. prepareMorph runs its own RDP for the
+        // animation, so simplifying here would only throw display detail away.
+        let poly = rc.slice();
         totalRdpVerts += poly.length;
 
-        // Only the largest is resampled to match target's vertex count
+        // Legacy single-poly morph reference still gets resampled to match
+        // target's largest (used by older code paths; prepareMorph itself
+        // builds userMorphPolys independently).
         if (ci === largestIdx && targetLargest && targetLargest.length >= 3) {
             let openPoly = poly;
             if (poly.length > 1 &&
@@ -221,9 +249,8 @@ function drawPolygon() {
                 poly[0][1] === poly[poly.length - 1][1]) {
                 openPoly = poly.slice(0, -1);
             }
-            poly = resamplePolygon(openPoly, targetLargest.length);
+            userMorphPoly = resamplePolygon(openPoly, targetLargest.length);
             resampled = true;
-            userMorphPoly = poly.slice();
         }
 
         // Close polygon if needed

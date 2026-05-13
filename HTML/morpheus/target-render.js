@@ -17,6 +17,12 @@
 // Max polygon vertex count per sub-region (downsampling cap)
 const TARGET_MAX_PTS = 300;
 
+// Outline stroke width (controlled by Left/Right arrows)
+let outlineWidth = 1.5;
+
+// Bounding box of the rendered LaTeX formula (set by renderLatexToCanvas)
+let formulaBbox = null;
+
 // ── Times digit selection (vector via opentype, fallback canvas+marching) ───
 function onDigitChange(d) {
     selectedDigit = d;
@@ -27,6 +33,7 @@ function onDigitChange(d) {
         document.getElementById('text-input').value = '';
     } catch (_) {}
     digitCtx.clearRect(0, 0, 1000, 1000);
+    formulaBbox = null;
 
     const scale = (typeof targetScale !== 'undefined') ? targetScale : 1.0;
     if (timesFont) {
@@ -73,6 +80,10 @@ function onDigitChange(d) {
     // assigns colours independently of storage order so it survives reshuffling.
     if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
 
+    // Digit path has no LaTeX → no reading-order; clear stale state.
+    targetReadingOrder = targetPolygon ? new Array(targetPolygon.length).fill(-1) : [];
+    katexAtomBboxes = null;
+
     if (typeof updateMatching === 'function') updateMatching();
 
     const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
@@ -102,6 +113,7 @@ function onTextInput(text) {
         DebugWindow.log('⊘ Empty input');
         digitCtx.clearRect(0, 0, 1000, 1000);
         targetPolygon = null;
+        formulaBbox = null;
         drawTargetPolygon();
         return;
     }
@@ -138,6 +150,18 @@ function extractAndUpdatePolygon() {
     }
 
     if (targetPolygon) targetPolygon = sortContoursCanonical(targetPolygon);
+
+    // Map each target contour to its KaTeX atom (captured pre-html2canvas
+    // and transformed to digit-canvas coords). The atom's reading-order
+    // position is what lets matching.js distinguish duplicate symbols.
+    if (targetPolygon && typeof assignContoursToAtoms === 'function'
+        && katexAtomBboxes && katexAtomBboxes.length > 0) {
+        targetReadingOrder = assignContoursToAtoms(targetPolygon, katexAtomBboxes);
+        const haveOrder = targetReadingOrder.some(v => v >= 0);
+        DebugWindow.log(`📖 target reading-order: ${haveOrder ? '[' + targetReadingOrder.join(',') + ']' : '(none)'} | ${katexAtomBboxes.length} atom(s)`);
+    } else {
+        targetReadingOrder = targetPolygon ? new Array(targetPolygon.length).fill(-1) : [];
+    }
 
     if (typeof updateMatching === 'function') updateMatching();
 
@@ -204,6 +228,13 @@ function renderLatexToCanvas(text) {
             const rect = wrapper.getBoundingClientRect();
             DebugWindow.log(`DOM size: ${Math.round(rect.width)}×${Math.round(rect.height)}px`);
 
+            // Capture reading-order atoms from the live DOM BEFORE html2canvas
+            // (after which the wrapper is destroyed). Bboxes are wrapper-relative
+            // and get transformed to digit-canvas coords below.
+            const rawAtoms = (typeof extractKatexAtomBboxes === 'function')
+                ? extractKatexAtomBboxes(wrapper) : [];
+            DebugWindow.log(`🔤 KaTeX atoms in reading order: ${rawAtoms.map(a => a.text).join(' ')}`);
+
             html2canvas(wrapper, {
                 backgroundColor: null,
                 scale: 1,
@@ -213,16 +244,46 @@ function renderLatexToCanvas(text) {
             }).then(canvas => {
                 DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
 
+                // Find actual content bounding box (trim padding)
+                const canvasCtx = canvas.getContext('2d');
+                const imgData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imgData.data;
+                let minX = canvas.width, minY = canvas.height, maxX = -1, maxY = -1;
+                for (let i = 0; i < data.length; i += 4) {
+                    if (data[i + 3] > 30) {
+                        const idx = i / 4;
+                        const x = idx % canvas.width;
+                        const y = Math.floor(idx / canvas.width);
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+
+                // Use content bbox or fallback to full canvas
+                const contentW = maxX >= minX ? maxX - minX + 1 : canvas.width;
+                const contentH = maxY >= minY ? maxY - minY + 1 : canvas.height;
+                const contentX = maxX >= minX ? minX : 0;
+                const contentY = maxY >= minY ? minY : 0;
+
                 // Match Times digit size (~640px tall) — halved for formulas
                 const ts = (typeof targetScale !== 'undefined') ? targetScale : 1.0;
                 const maxW = 450 * ts, maxH = 400 * ts;
-                const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
-                const w = canvas.width * scale;
-                const h = canvas.height * scale;
+                const scale = Math.min(maxW / contentW, maxH / contentH);
+                const w = contentW * scale;
+                const h = contentH * scale;
                 const x = 760 - w / 2;
                 const y = 500 - h / 2;
 
-                digitCtx.drawImage(canvas, x, y, w, h);
+                // Apply the same blit transform to the atom bboxes — they now
+                // live in digit-canvas coords and can be overlapped with the
+                // contours that extractAndUpdatePolygon will produce.
+                katexAtomBboxes = (typeof transformAtomBboxes === 'function')
+                    ? transformAtomBboxes(rawAtoms, scale, x, y) : null;
+
+                digitCtx.drawImage(canvas, contentX, contentY, contentW, contentH, x, y, w, h);
+                formulaBbox = { x, y, w, h };
                 document.body.removeChild(wrapper);
                 DebugWindow.log(`✓ Drawn at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}×${Math.round(h)}px`);
                 extractAndUpdatePolygon();
@@ -250,6 +311,8 @@ function renderPlainText(text) {
     digitCtx.textBaseline = 'middle';
     digitCtx.fillText(text, 760, 500);
     digitCtx.restore();
+    // Plain-text fallback has no KaTeX structure → no atom bboxes.
+    katexAtomBboxes = null;
     DebugWindow.log('✓ Text rendered');
     extractAndUpdatePolygon();
 }
@@ -257,10 +320,58 @@ function renderPlainText(text) {
 // ── Outline overlay (rendered on outline-canvas, not digit-canvas) ──────────
 function drawTargetPolygon() {
     outlineCtx.clearRect(0, 0, 1000, 1000);
-    if (!targetPolygon) return;
 
     const showLines = document.getElementById('lines-toggle')?.checked ?? true;
     const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+
+    // Bounding boxes (count as "lines" — follow LINIE switch).
+    // Source of truth for the user bbox is savedPixels when available
+    // (so PIXEL OFF doesn't make it disappear); fall back to live draw-canvas.
+    if (showLines) {
+        // User formula bbox — pixel-level scan of saved/live drawing.
+        const src = (typeof savedPixels !== 'undefined' && savedPixels)
+            ? savedPixels
+            : ((typeof drawCanvasHasContent === 'function' && drawCanvasHasContent())
+                ? drawCtx.getImageData(0, 0, 1000, 1000)
+                : null);
+        if (src) {
+            const data = src.data;
+            let minX = 1000, minY = 1000, maxX = -1, maxY = -1;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 30 || data[i + 1] > 30 || data[i + 2] > 30) {
+                    const idx = i / 4;
+                    const x = idx % 1000;
+                    const y = Math.floor(idx / 1000);
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+            if (maxX >= minX && maxY >= minY) {
+                outlineCtx.save();
+                outlineCtx.strokeStyle = '#adff2f';
+                outlineCtx.lineWidth = outlineWidth;
+                outlineCtx.lineCap = 'round';
+                outlineCtx.lineJoin = 'round';
+                outlineCtx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+                outlineCtx.restore();
+            }
+        }
+
+        // LaTeX formula bbox.
+        if (formulaBbox) {
+            outlineCtx.save();
+            outlineCtx.strokeStyle = '#00d2ff';
+            outlineCtx.lineWidth = outlineWidth;
+            outlineCtx.lineCap = 'round';
+            outlineCtx.lineJoin = 'round';
+            outlineCtx.strokeRect(formulaBbox.x, formulaBbox.y, formulaBbox.w, formulaBbox.h);
+            outlineCtx.restore();
+        }
+    }
+
+    if (!targetPolygon) return;
     if (!showLines && !showPoints) return;
 
     outlineCtx.save();

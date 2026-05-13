@@ -1623,6 +1623,25 @@
 <body class="cyber-hub index-mission">
     <div id="planet-overlay"></div>
 
+    <script>
+        function toggleFullscreen() {
+            const doc = window.document, docEl = doc.documentElement;
+            const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+            if (!isFs) {
+                if (docEl.requestFullscreen) docEl.requestFullscreen();
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            } else {
+                if (doc.exitFullscreen) doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+            }
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key && e.key.toLowerCase() === 'f' &&
+                !['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName) &&
+                !e.target.isContentEditable) toggleFullscreen();
+        });
+    </script>
+
     <!-- Video Background (Galaxy) -->
     <!-- Use local video `galaxy.mp4` in your folder if available; poster is fallback. -->
     <video id="bg-video" autoplay loop muted playsinline
@@ -1685,6 +1704,14 @@
 
     <!-- Top Action Buttons -->
     <div class="index-fixed-corner index-fixed-corner--right">
+        <!-- Fullscreen toggle -->
+        <div class="contact-btn" onclick="toggleFullscreen()" title="Vollbildmodus (F)"
+            style="position: static; padding: 0; width: 38px; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 3h6v6M9 21H3v-6M21 9V3h-6M3 15v6h6"/>
+            </svg>
+        </div>
         <!-- QR code for this page -->
         <div class="contact-btn" id="btn-qr" onclick="openIndexQrOverlay()" title="QR-Code dieser Seite"
             style="position: static; padding: 0; width: 38px; justify-content: center;">
