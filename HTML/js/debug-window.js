@@ -33,16 +33,16 @@ const DebugWindow = (() => {
             width: ${w};
             height: ${h};
             background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #00d2ff;
-            color: #00d2ff;
-            font-family: 'Orbitron', monospace;
+            border: 2px solid #6BA043;
+            color: #6BA043;
+            font-family: Arial, sans-serif;
             font-size: 11px;
             padding: 10px;
             border-radius: 6px;
             z-index: 99999;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 20px rgba(107, 160, 67, 0.3);
             resize: ${collapsed ? 'none' : 'both'};
             overflow: hidden;
             transition: height 0.25s ease;
@@ -55,7 +55,7 @@ const DebugWindow = (() => {
             align-items: center;
             margin-bottom: 8px;
             padding-bottom: 6px;
-            border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            border-bottom: 1px solid rgba(107, 160, 67, 0.3);
             cursor: move;
             user-select: none;
         `;
@@ -69,18 +69,16 @@ const DebugWindow = (() => {
         btnGroup.style.cssText = `display: flex; gap: 4px;`;
 
         const btnCopy = document.createElement('button');
-        btnCopy.textContent = '📋';
+        btnCopy.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="9" height="10" rx="1"/><rect x="5" y="2" width="9" height="10" rx="1"/></svg>`;
         btnCopy.title = 'Copy to clipboard';
         btnCopy.style.cssText = `
             background: transparent;
-            border: 1px solid #00d2ff;
-            color: #00d2ff;
+            border: 1px solid #6BA043;
+            color: #6BA043;
             width: 28px;
             height: 24px;
             cursor: pointer;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 0;
+            padding: 4px;
             border-radius: 3px;
             display: flex;
             align-items: center;
@@ -90,7 +88,7 @@ const DebugWindow = (() => {
             e.stopPropagation();
             navigator.clipboard.writeText(logs.join('\n')).then(() => {
                 btnCopy.textContent = '✓';
-                setTimeout(() => { btnCopy.textContent = '📋'; }, 1500);
+                setTimeout(() => { btnCopy.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="9" height="10" rx="1"/><rect x="5" y="2" width="9" height="10" rx="1"/></svg>`; }, 1500);
             });
         };
         btnGroup.appendChild(btnCopy);
@@ -100,8 +98,8 @@ const DebugWindow = (() => {
         btnClear.title = 'Clear logs';
         btnClear.style.cssText = `
             background: transparent;
-            border: 1px solid #00d2ff;
-            color: #00d2ff;
+            border: 1px solid #6BA043;
+            color: #6BA043;
             width: 28px;
             height: 24px;
             cursor: pointer;
@@ -122,8 +120,8 @@ const DebugWindow = (() => {
         btnCollapse.title = 'Collapse/Expand';
         btnCollapse.style.cssText = `
             background: transparent;
-            border: 1px solid #00d2ff;
-            color: #00d2ff;
+            border: 1px solid #6BA043;
+            color: #6BA043;
             width: 28px;
             height: 24px;
             cursor: pointer;

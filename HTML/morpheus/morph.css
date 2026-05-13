@@ -11,12 +11,15 @@
 }
 
 #canvas-stack {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
+    /* Full-bleed: occupies the entire canvas-container (= cyber-grid area).
+       No aspect-ratio, no transform — the canvas is whatever shape the
+       background is. Internal canvas pixels stay at 1000×1000 so drawing
+       coordinates and target rendering positions don't have to change;
+       getPos() in user-draw.js maps mouse → canvas pixels via
+       canvas.width / rect.width (handles browser-zoom too). */
+    position: absolute;
+    inset: 0;
     line-height: 0;
-    transform: scale(1.05);
-    transform-origin: center center;
 }
 
 #digit-canvas, #outline-canvas, #morph-canvas, #colorado-canvas, #cursor-canvas {
@@ -32,13 +35,8 @@
 #draw-wrap {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 80px 20px 20px;
-    box-sizing: border-box;
+    /* No padding / flex centering — canvas-stack is absolute inset:0 and
+       fills the whole area; draw-hint is repositioned as an overlay. */
 }
 
 #draw-hint {

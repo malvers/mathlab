@@ -213,6 +213,10 @@ function drawPolygon() {
         : (rawContour && rawContour.length >= 3 ? [rawContour] : []);
     if (contours.length === 0) return;
 
+    const showLines_dbg = document.getElementById('lines-toggle')?.checked ?? true;
+    const showPoints_dbg = document.getElementById('points-toggle')?.checked ?? true;
+    DebugWindow.log(`  drawPolygon: LINIE=${showLines_dbg}, PUNKTE=${showPoints_dbg} (${contours.length} contours)`);
+
     // Largest contour = the one resampled to match target (for morphing)
     let largestIdx = 0;
     for (let i = 1; i < contours.length; i++) {
@@ -276,8 +280,9 @@ function drawPolygon() {
             const showLines = document.getElementById('lines-toggle')?.checked ?? true;
             const showPoints = document.getElementById('points-toggle')?.checked ?? true;
             if (showLines) {
+                DebugWindow.log(`    → rendering lines for contour ${ci}`);
                 drawCtx.strokeStyle = color;
-                drawCtx.lineWidth = 1.5;
+                drawCtx.lineWidth = (typeof outlineWidth !== 'undefined') ? outlineWidth : 1.5;
                 drawCtx.beginPath();
                 drawCtx.moveTo(poly[0][0], poly[0][1]);
                 for (let i = 1; i < poly.length; i++) drawCtx.lineTo(poly[i][0], poly[i][1]);
@@ -285,10 +290,11 @@ function drawPolygon() {
                 drawCtx.stroke();
             }
             if (showPoints) {
+                DebugWindow.log(`    → rendering points for contour ${ci}`);
                 drawCtx.fillStyle = color;
                 for (const [x, y] of verts) {
                     drawCtx.beginPath();
-                    drawCtx.arc(x, y, 1.6, 0, Math.PI * 2);
+                    drawCtx.arc(x, y, (typeof outlineWidth !== 'undefined') ? outlineWidth : 1.6, 0, Math.PI * 2);
                     drawCtx.fill();
                 }
             }

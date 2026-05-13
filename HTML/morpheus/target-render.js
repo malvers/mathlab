@@ -323,6 +323,7 @@ function drawTargetPolygon() {
 
     const showLines = document.getElementById('lines-toggle')?.checked ?? true;
     const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+    DebugWindow.log(`  drawTargetPolygon: LINIE=${showLines}, PUNKTE=${showPoints}`);
 
     // Bounding boxes (count as "lines" — follow LINIE switch).
     // Source of truth for the user bbox is savedPixels when available
@@ -375,15 +376,17 @@ function drawTargetPolygon() {
     if (!showLines && !showPoints) return;
 
     outlineCtx.save();
-    outlineCtx.lineWidth = 1.5;
+    outlineCtx.lineWidth = outlineWidth;
     outlineCtx.lineCap = 'round';
     outlineCtx.lineJoin = 'round';
+    let linesDrawn = 0, pointsDrawn = 0;
     for (let i = 0; i < targetPolygon.length; i++) {
         const cIdx = (typeof targetColorIdx !== 'undefined' && targetColorIdx[i] !== undefined)
             ? targetColorIdx[i] : i;
         const color = regionColor(cIdx);
         const poly = targetPolygon[i];
         if (showLines) {
+            linesDrawn++;
             outlineCtx.strokeStyle = color;
             outlineCtx.beginPath();
             outlineCtx.moveTo(poly[0][0], poly[0][1]);
@@ -392,13 +395,17 @@ function drawTargetPolygon() {
             outlineCtx.stroke();
         }
         if (showPoints) {
+            pointsDrawn++;
             outlineCtx.fillStyle = color;
             for (const [x, y] of poly) {
                 outlineCtx.beginPath();
-                outlineCtx.arc(x, y, 1.6, 0, Math.PI * 2);
+                outlineCtx.arc(x, y, outlineWidth, 0, Math.PI * 2);
                 outlineCtx.fill();
             }
         }
+    }
+    if (linesDrawn > 0 || pointsDrawn > 0) {
+        DebugWindow.log(`    → target: ${linesDrawn} polygons with lines, ${pointsDrawn} with points`);
     }
     outlineCtx.restore();
 }
