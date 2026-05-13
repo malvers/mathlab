@@ -58,6 +58,10 @@
         let panX = +(localStorage.getItem('draw20-panX') ?? 0);
         let panY = +(localStorage.getItem('draw20-panY') ?? 0);
 
+        // Most-recent render data — populated by renderBBoxes, consumed by
+        // openPolygonRing (the extra-window diagnostic view).
+        let lastRenderData = null;
+
         function saveZoomPan() {
             try {
                 localStorage.setItem('draw20-zoom', zoom);
@@ -550,12 +554,8 @@
         function onOverlayHover(e) {
             const t = e.target;
             const mid = (t && t.dataset) ? t.dataset.matchId : '';
-            const src = (t && t.dataset) ? t.dataset.source : '';
             const valid = mid && mid !== '-1';
             const next = (e.type === 'mouseover' && valid) ? mid : null;
-            if (e.type === 'mouseover') {
-                dbg(`hover tgt=${t.tagName} kind=${t.dataset && t.dataset.kind || '-'} src=${src} mid=${mid}`);
-            }
             if (next === activeMatchId) return;
             if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
             if (next !== null) setMatchHighlight(next, true);
@@ -636,8 +636,16 @@
                 && typeof hungarian === 'function') {
                 const pBB = PlausibilCheck.equationBBox(pOuters);
                 const lBB = PlausibilCheck.equationBBox(lOuters);
-                pDesc = pOuters.map(p => PlausibilCheck.shapeDescriptor(p, pBB));
-                lDesc = lOuters.map(p => PlausibilCheck.shapeDescriptor(p, lBB));
+                // Pass each outer's HOLE polygons too — the descriptor needs
+                // them for hole-count / hole-area-fraction features.
+                pDesc = pClass.outers.map(o => PlausibilCheck.shapeDescriptor(
+                    png[o.idx],
+                    (o.holes || []).map(hi => png[hi]).filter(Boolean),
+                    pBB));
+                lDesc = lClass.outers.map(o => PlausibilCheck.shapeDescriptor(
+                    lat[o.idx],
+                    (o.holes || []).map(hi => lat[hi]).filter(Boolean),
+                    lBB));
                 const N = pDesc.length, M = lDesc.length;
 
                 // ── Stage 0: reading-order ranks. Sorting by (cx + 0.3·cy)
@@ -706,25 +714,34 @@
                 }
                 dbg(`Uncrossing: ${swaps} swap(s) over ${sweeps} sweep(s)`);
 
-                // ── Stage 3: rescue pass on the leftover orphans.
-                // Hungarian's global optimum can sacrifice perfectly-plausible
-                // pairs to minimise total cost — re-run Hungarian on just the
-                // orphans with RELAXED vetoes (5× elong, 20× size — was 3× /
-                // 10×) and no reading-order term (orphans are by definition
-                // out-of-order). Only accept pairs that still beat the relaxed
-                // veto — absurd matches are still rejected.
-                const pngOrphIdx = [];
-                const latClaimed = new Set();
-                for (let i = 0; i < N; i++) {
-                    if (assign[i] < 0) pngOrphIdx.push(i);
-                    else latClaimed.add(assign[i]);
-                }
-                const latOrphIdx = [];
-                for (let j = 0; j < M; j++) if (!latClaimed.has(j)) latOrphIdx.push(j);
+                // ── Stages 3 + 4 iterated until stable.
+                //
+                // Stage 3: RESCUE — re-run Hungarian on remaining orphans
+                //   with RELAXED vetoes (5× elong, 20× size, no order term).
+                //   Catches good pairs Hungarian sacrificed for global cost.
+                //
+                // Stage 4: SUSPECT-DROP — break any pair whose plausibility
+                //   score falls below 0.55. Both glyphs become orphans →
+                //   visible as red dashed circles, no misleading match-line.
+                //
+                // Iterate (rescue → drop → rescue → drop ...) until no
+                // assignment changes. Each suspect-drop frees up a LaTeX
+                // outer that the next rescue might pair with a previously
+                // orphaned PNG (the b-orphan / b-claimed-by-junk inversion).
+                const SUSPECT_THRESHOLD = 0.55;
+                const REL_ELONG = Math.log(5);
+                const REL_SIZE  = Math.log(20);
 
-                if (pngOrphIdx.length && latOrphIdx.length) {
-                    const REL_ELONG = Math.log(5);
-                    const REL_SIZE  = Math.log(20);
+                function runRescue() {
+                    const pngOrphIdx = [], latClaimed = new Set();
+                    for (let i = 0; i < N; i++) {
+                        if (assign[i] < 0) pngOrphIdx.push(i);
+                        else latClaimed.add(assign[i]);
+                    }
+                    const latOrphIdx = [];
+                    for (let j = 0; j < M; j++) if (!latClaimed.has(j)) latOrphIdx.push(j);
+                    if (!pngOrphIdx.length || !latOrphIdx.length) return 0;
+
                     const RN = pngOrphIdx.length, RM = latOrphIdx.length;
                     const cost2 = new Array(RN);
                     for (let pi = 0; pi < RN; pi++) {
@@ -734,9 +751,15 @@
                             const b = lDesc[latOrphIdx[li]];
                             const elongR = Math.abs(Math.log(a.elong / b.elong));
                             const sizeR  = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
+                            const dh = Math.abs(a.holes - b.holes);
+                            const dmY = Math.abs(a.massY - b.massY);
+                            const dmX = Math.abs(a.massX - b.massX);
                             let veto = 0;
                             if (elongR > REL_ELONG) veto += 1e6 * (elongR - REL_ELONG);
                             if (sizeR  > REL_SIZE)  veto += 1e6 * (sizeR  - REL_SIZE);
+                            if (dh >= 2)            veto += 1e6 * (dh - 1);
+                            if (dmY > 0.9)          veto += 1e6 * (dmY - 0.9);
+                            if (dmX > 1.3)          veto += 1e6 * (dmX - 1.3);
                             const pl = PlausibilCheck.pairPlausibility(a, b);
                             cost2[pi][li] = (1 - pl.score) + veto;
                         }
@@ -747,41 +770,44 @@
                         const li = assign2[pi];
                         if (li !== undefined && li >= 0 && li < RM
                             && cost2[pi][li] < VETO_COST) {
-                            const i = pngOrphIdx[pi];
-                            const j = latOrphIdx[li];
-                            assign[i] = j;
-                            rescued++;
-                            dbg(`  RESCUE PNG#${i} → LaTeX#${j} cost=${cost2[pi][li].toFixed(2)}`);
+                            const a = pDesc[pngOrphIdx[pi]];
+                            const b = lDesc[latOrphIdx[li]];
+                            const pl = PlausibilCheck.pairPlausibility(a, b);
+                            if (pl.score >= SUSPECT_THRESHOLD) {
+                                assign[pngOrphIdx[pi]] = latOrphIdx[li];
+                                rescued++;
+                                dbg(`  RESCUE PNG#${pngOrphIdx[pi]} → LaTeX#${latOrphIdx[li]} score=${(pl.score*100).toFixed(0)}%`);
+                            }
                         }
                     }
-                    dbg(`Rescue: ${rescued}/${Math.min(RN, RM)} orphan pairings found`);
+                    return rescued;
                 }
 
-                // ── Stage 4: drop suspect pairs.
-                // A pair below the suspect threshold (0.45) is essentially a
-                // false match — clearer to the user that BOTH glyphs become
-                // orphans (both get a red dashed circle) than to show a
-                // misleading red match-line. Prevents the "PNG-b orphan but
-                // LaTeX-b paired with junk" inconsistency.
-                let dropped = 0;
-                for (let i = 0; i < N; i++) {
-                    const j = assign[i];
-                    if (j < 0) continue;
-                    const pl = PlausibilCheck.pairPlausibility(pDesc[i], lDesc[j]);
-                    if (pl.score < 0.45) {
-                        assign[i] = -1;
-                        dropped++;
-                        dbg(`  DROP-SUSPECT PNG#${i} ↮ LaTeX#${j} score=${(pl.score*100).toFixed(0)}%`);
+                function runSuspectDrop() {
+                    let dropped = 0;
+                    for (let i = 0; i < N; i++) {
+                        const j = assign[i];
+                        if (j < 0) continue;
+                        const pl = PlausibilCheck.pairPlausibility(pDesc[i], lDesc[j]);
+                        if (pl.score < SUSPECT_THRESHOLD) {
+                            assign[i] = -1;
+                            dropped++;
+                            dbg(`  DROP-SUSPECT PNG#${i} ↮ LaTeX#${j} score=${(pl.score*100).toFixed(0)}%`);
+                        }
                     }
+                    return dropped;
                 }
-                if (dropped) dbg(`Suspect-drop: ${dropped} pair(s) dissolved → orphans`);
 
-                // Final per-pair log.
-                for (let i = 0; i < N; i++) {
-                    const j = assign[i];
-                    const c = (j >= 0 && j < M) ? cost[i][j].toFixed(2) : '—';
-                    dbg(`  PNG#${i} → LaTeX#${j} cost=${c}`);
+                let iter = 0, totalRescued = 0, totalDropped = 0;
+                while (iter < 5) {
+                    iter++;
+                    const dropped = runSuspectDrop();
+                    const rescued = runRescue();
+                    totalDropped += dropped;
+                    totalRescued += rescued;
+                    if (dropped === 0 && rescued === 0) break;
                 }
+                dbg(`Refine-loop: ${iter} iter(s), ${totalRescued} rescued, ${totalDropped} dropped`);
             }
 
             const usedLatex = new Set();
@@ -814,23 +840,160 @@
                 idToPair.set(id, { png: -1, lat: j });
             }
 
-            // Run plausibility check on the resulting pairing — independent of
-            // the cost-matrix used by Hungarian (different metric → catches
-            // bad pairs that the matcher accepted just to minimise total cost).
+            // Run plausibility check on the resulting pairing — using the
+            // SAME descriptors the cost matrix used. Verdicts are reported
+            // for diagnostics and used for line styling.
             let plausibility = null;
-            if (typeof PlausibilCheck !== 'undefined') {
+            if (typeof PlausibilCheck !== 'undefined' && pDesc.length) {
                 const pairing = new Array(pOuters.length).fill(-1);
                 for (let oi = 0; oi < pClass.outers.length; oi++) {
                     pairing[oi] = assign[oi] === undefined ? -1 : assign[oi];
                 }
-                plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing);
+                plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing, pDesc, lDesc);
                 dbg(PlausibilCheck.summarize(plausibility));
-                for (const m of plausibility.matches) dbg(PlausibilCheck.describeMatch(m));
+                // Only dump suspect matches + orphans (the actionable ones).
+                for (const m of plausibility.matches) {
+                    if (m.verdict !== 'ok') dbg(PlausibilCheck.describeMatch(m));
+                }
                 for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
                 for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
             }
 
             return { pngId, latId, idToPair, plausibility, pClass, lClass };
+        }
+
+        // ── Polygon-Ring diagnostic view ───────────────────────────────────
+        // Opens a separate window showing every PNG and LaTeX OUTER polygon
+        // arranged around a circle. Each slot has its label (PNG#N / LaTeX#M),
+        // matchId (= shared colour), and plausibility score for paired ones.
+        // Orphans get a red dashed border. Holes are rendered inside their
+        // outer so the shape reads correctly.
+        function openPolygonRing() {
+            if (!lastRenderData) {
+                alert('Noch keine Polygon-Daten — bitte erst eine Formel laden.');
+                return;
+            }
+            const { pngContours, latexContours, pClass, lClass,
+                    pngId, latId, idToPair, plausibility } = lastRenderData;
+
+            // Build a flat list of items {polys, matchId, label, score, orphan}.
+            const items = [];
+            const orphanLookup = new Set();
+            for (const [id, pair] of idToPair) {
+                if (pair.png < 0 || pair.lat < 0) orphanLookup.add(id);
+            }
+            const scoreById = new Map();
+            if (plausibility) {
+                for (const m of plausibility.matches) {
+                    for (const [id, pair] of idToPair) {
+                        if (pair.png === m.pngIdx) {
+                            scoreById.set(id, { score: m.score, verdict: m.verdict });
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (pngContours && pClass) {
+                for (let oi = 0; oi < pClass.outers.length; oi++) {
+                    const o = pClass.outers[oi];
+                    const id = pngId[o.idx];
+                    items.push({
+                        outer: pngContours[o.idx],
+                        holes: (o.holes || []).map(hi => pngContours[hi]).filter(Boolean),
+                        label: `P${oi}`,
+                        matchId: id,
+                        score: scoreById.get(id),
+                        orphan: orphanLookup.has(id) && idToPair.get(id).lat < 0,
+                    });
+                }
+            }
+            if (latexContours && lClass) {
+                for (let oi = 0; oi < lClass.outers.length; oi++) {
+                    const o = lClass.outers[oi];
+                    const id = latId[o.idx];
+                    items.push({
+                        outer: latexContours[o.idx],
+                        holes: (o.holes || []).map(hi => latexContours[hi]).filter(Boolean),
+                        label: `L${oi}`,
+                        matchId: id,
+                        score: scoreById.get(id),
+                        orphan: orphanLookup.has(id) && idToPair.get(id).png < 0,
+                    });
+                }
+            }
+            if (!items.length) {
+                alert('Keine Outer-Polygone zum Anzeigen.');
+                return;
+            }
+
+            // Layout: items distributed around a circle.
+            const W = 1400, H = 1000;
+            const cx = W / 2, cy = H / 2;
+            const N = items.length;
+            const R = Math.min(W, H) * 0.40;
+            // Each polygon fits in a square cell — size based on arc length so
+            // cells don't overlap. Clamped so very-few-items don't get huge.
+            const cellHalf = Math.min(80, Math.max(30, (2 * Math.PI * R) / (N * 2.4)));
+
+            const svgPieces = [];
+
+            items.forEach((it, i) => {
+                const angle = -Math.PI / 2 + i * 2 * Math.PI / N;
+                const px = cx + R * Math.cos(angle);
+                const py = cy + R * Math.sin(angle);
+                const colour = it.matchId >= 0 ? paletteColor(it.matchId) : '#888';
+
+                // Compute outer bbox for normalization.
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const [x, y] of it.outer) {
+                    if (x < minX) minX = x; if (x > maxX) maxX = x;
+                    if (y < minY) minY = y; if (y > maxY) maxY = y;
+                }
+                const w = maxX - minX, h = maxY - minY;
+                const scale = Math.min((cellHalf * 1.8) / Math.max(1, w),
+                                       (cellHalf * 1.8) / Math.max(1, h));
+                const ox = (minX + maxX) / 2;
+                const oy = (minY + maxY) / 2;
+                const place = (poly) => poly.map(([x, y]) =>
+                    `${px + (x - ox) * scale},${py + (y - oy) * scale}`).join(' ');
+
+                // Path: outer + holes with evenodd → holes punch through.
+                let d = `M ${place(it.outer).split(' ').join(' L ')} Z`;
+                for (const hp of it.holes) {
+                    d += ` M ${place(hp).split(' ').join(' L ')} Z`;
+                }
+                svgPieces.push(
+                    `<path d="${d}" fill="${colour}" fill-rule="evenodd" stroke="none"/>`
+                );
+
+                // Cell border — red dashed for orphans, none for paired
+                // (transparent / invisible).
+                if (it.orphan) {
+                    svgPieces.push(
+                        `<rect x="${px - cellHalf}" y="${py - cellHalf}" width="${cellHalf * 2}" height="${cellHalf * 2}" fill="none" stroke="#ff3030" stroke-width="2" stroke-dasharray="4,3" rx="6"/>`
+                    );
+                }
+
+                // No labels — only the polygon + cell border. Identity comes
+                // from the palette colour (paired = shared hue) and the cell
+                // border style (red dashed = orphan).
+            });
+
+            const win = window.open('', 'draw20-polygon-ring', `width=${W},height=${H + 60}`);
+            if (!win) { alert('Popup wurde blockiert.'); return; }
+            win.document.open();
+            win.document.write(`<!DOCTYPE html><html lang="de"><head>
+<meta charset="utf-8"><title>Polygon Ring (${N} outers)</title>
+<style>
+  body { margin: 0; padding: 0; background: #000010; color: #aaa; font-family: 'Orbitron', sans-serif; }
+  .hdr { padding: 8px 16px; font-size: 12px; color: #00d2ff; border-bottom: 1px solid #222; }
+  svg { display: block; background: #000010; }
+</style></head><body>
+<div class="hdr">Polygon Ring — ${N} outer polygons (PNG: ${pClass ? pClass.outers.length : 0}, LaTeX: ${lClass ? lClass.outers.length : 0})</div>
+<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${svgPieces.join('')}</svg>
+</body></html>`);
+            win.document.close();
         }
 
         function renderBBoxes() {
@@ -853,8 +1016,15 @@
             }
 
             const matchInfo = computeMatchIds(pngContours, latexContoursList);
-            const { pngId, latId, idToPair, plausibility } = matchInfo;
+            const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
             dbg(`Hungarian: png=${pngContours?.length || 0} latex=${latexContoursList?.length || 0}`);
+
+            // Stash the most-recent render data so the polygon-ring view can
+            // grab it without re-running the matcher.
+            lastRenderData = {
+                pngContours, latexContours: latexContoursList,
+                pClass, lClass, pngId, latId, idToPair, plausibility,
+            };
 
             // Refresh the orphan-id set so setMatchHighlight knows which mids
             // are orphans (and must skip the yellow glow on hover).
@@ -968,10 +1138,15 @@
                 r.dataset.matchId = String(mid);
                 overlay.appendChild(r);
             };
+            let pngOrphCount = 0, latOrphCount = 0;
             for (const [id, pair] of idToPair) {
-                if (pair.png >= 0 && pair.lat < 0) markOrphan(pngCentroids, id);
-                else if (pair.lat >= 0 && pair.png < 0) markOrphan(latCentroids, id);
+                if (pair.png >= 0 && pair.lat < 0) {
+                    if (pngCentroids.has(id)) { markOrphan(pngCentroids, id); pngOrphCount++; }
+                } else if (pair.lat >= 0 && pair.png < 0) {
+                    if (latCentroids.has(id)) { markOrphan(latCentroids, id); latOrphCount++; }
+                }
             }
+            dbg(`Orphans: png=${pngOrphCount} lat=${latOrphCount}`);
 
             updateInfoBoxes(pngContours, latexContoursList);
         }
@@ -1178,6 +1353,35 @@
 
         // Expose redraw function for threshold slider.
         window.redrawDraw20 = renderBBoxes;
+        // Expose the diagnostic ring-view (also bound to a floating button).
+        window.openPolygonRing = openPolygonRing;
+
+        // Floating button — top-right of the viewport, opens the polygon-ring
+        // diagnostic window. Appended to <body> with position: fixed so the
+        // `#canvas-container > * { display: none !important }` rule cannot
+        // hide it.
+        const ringBtn = document.createElement('button');
+        ringBtn.textContent = 'RING';
+        ringBtn.title = 'Alle Outer-Polygone im Ring anzeigen (neues Fenster)';
+        ringBtn.style.cssText = `
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 9999;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #00d2ff;
+            border: 1px solid #00d2ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+        `;
+        ringBtn.addEventListener('click', openPolygonRing);
+        document.body.appendChild(ringBtn);
 
         dbg('✓ wrap appended');
     }
