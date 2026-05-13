@@ -410,9 +410,9 @@
                 e.preventDefault();
                 const delta = e.key === 'ArrowRight' ? 0.15 : -0.15;
                 outlineWidth = Math.max(0.25, Math.min(4, outlineWidth + delta));
+                try { localStorage.setItem('morph-outline-width', String(outlineWidth)); } catch (_) {}
                 DebugWindow.log(`📏 Outline width: ${outlineWidth.toFixed(2)}px`);
-                drawTargetPolygon();
-                if (rawContour && savedPixels) drawPolygon();
+                renderAll();
             }
             if ((e.key === 'k' || e.key === 'K') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
                 e.stopImmediatePropagation();
@@ -520,12 +520,14 @@
         }
 
         function onLinesToggle(checked) {
+            DebugWindow.log(`🎚 onLinesToggle: ${checked ? 'ON' : 'OFF'}`);
             try { localStorage.setItem('morph-lines-visible', checked ? '1' : '0'); } catch (_) {}
             if (checked) ensureUserOutlines();
             renderAll();
         }
 
         function onPointsToggle(checked) {
+            DebugWindow.log(`🎚 onPointsToggle: ${checked ? 'ON' : 'OFF'}`);
             try { localStorage.setItem('morph-points-visible', checked ? '1' : '0'); } catch (_) {}
             if (checked) ensureUserOutlines();
             renderAll();
@@ -545,6 +547,9 @@
         // state + toggle values. Pure render — never mutates state.
         function renderAll() {
             const showArt = document.getElementById('art-toggle')?.checked ?? true;
+            const showLines = document.getElementById('lines-toggle')?.checked ?? true;
+            const showPoints = document.getElementById('points-toggle')?.checked ?? true;
+            DebugWindow.log(`🔄 renderAll: LINIE=${showLines}, PUNKTE=${showPoints}, PIXEL=${showArt}`);
 
             // 1) draw-canvas: art background + user outline overlay
             if (rawContour && savedPixels) {
@@ -1057,6 +1062,13 @@
                 document.getElementById('art-toggle').checked = savedArt === '1';
                 const dc = document.getElementById('digit-canvas');
                 if (dc) dc.style.opacity = savedArt === '1' ? '1' : '0';
+            }
+        } catch (_) {}
+        try {
+            const savedOutlineWidth = localStorage.getItem('morph-outline-width');
+            if (savedOutlineWidth !== null) {
+                const v = parseFloat(savedOutlineWidth);
+                if (isFinite(v)) outlineWidth = Math.max(0.25, Math.min(4, v));
             }
         } catch (_) {}
         makeCardsCollapsible();

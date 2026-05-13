@@ -299,7 +299,7 @@ function drawMorph(t, forceLines, forcePoints) {
                 morphCtx.fillStyle = color;
                 for (const [x, y] of allInterp[r]) {
                     morphCtx.beginPath();
-                    morphCtx.arc(x, y, 1.6, 0, Math.PI * 2);
+                    morphCtx.arc(x, y, lw, 0, Math.PI * 2);
                     morphCtx.fill();
                 }
             }
