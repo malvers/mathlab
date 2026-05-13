@@ -38,6 +38,11 @@
 
         const wrap = document.createElement('div');
         wrap.id = 'draw20-wrap';
+        // pointer-events: auto on wrap so the overlay polygons can receive
+        // hover events. Mouse events still bubble up to `host`, where wheel/
+        // drag listeners live (bubbling is independent of pointer-events
+        // targeting). pix/tex get pointer-events: none individually so the
+        // images themselves never become event targets.
         wrap.style.cssText = `
             position: absolute;
             inset: 0;
@@ -46,16 +51,18 @@
             justify-content: center;
             gap: clamp(20px, 4vw, 80px);
             z-index: 10;
-            pointer-events: none;
             background: rgb(0, 0, 20);
         `;
 
         const pix = document.createElement('img');
+        pix.draggable = false;
         pix.style.cssText = `
             max-height: 43vh;
             max-width: 29vw;
             object-fit: contain;
             mix-blend-mode: screen;
+            pointer-events: none;
+            user-select: none;
         `;
 
         // tex is now an <img> displaying the offscreen-rendered LaTeX canvas
@@ -63,10 +70,13 @@
         // this guarantees pixel-perfect alignment between display and contours
         // (no two-render discrepancy from a separate html2canvas pass).
         const tex = document.createElement('img');
+        tex.draggable = false;
         tex.style.cssText = `
             max-height: 43vh;
             max-width: 29vw;
             object-fit: contain;
+            pointer-events: none;
+            user-select: none;
         `;
         // Stash the rendered offscreen canvas for re-use during contour
         // extraction (avoids re-rendering, and keeps coords identical).
@@ -77,7 +87,10 @@
         host.appendChild(wrap);
 
         // Extra drawing layer: vector bounding boxes around the actual character
-        // pixels of both the PNG and the LaTeX render.
+        // pixels of both the PNG and the LaTeX render. The <svg> itself uses
+        // pointer-events: auto so polygons inside it can receive hover events;
+        // wheel/drag still work on `host` because mouse events bubble up from
+        // overlay → wrap → host regardless of who is the event target.
         const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         overlay.id = 'draw20-overlay';
         overlay.style.cssText = `
@@ -86,7 +99,7 @@
             width: 100%;
             height: 100%;
             z-index: 11;
-            pointer-events: none;
+            pointer-events: auto;
         `;
         wrap.appendChild(overlay);
 
@@ -356,6 +369,12 @@
         // of the fill (same idea as morph-engine.js fill('evenodd')). The
         // per-contour stroke/points stay individual so each region keeps its
         // own color.
+        //
+        // `label` ('png' or 'latex') tags polygons + fill paths via
+        // data-source. Each element also carries data-match-id = the outer's
+        // index in the classified outers list (holes inherit their parent's
+        // id), so cross-pane hover highlighting can pair regions: PNG outer
+        // #N ↔ LaTeX outer #N (both sets are canonical-sorted left-to-right).
         function drawContours(contours, mapFn, label) {
             if (!contours || contours.length === 0) return;
             const svgNS = 'http://www.w3.org/2000/svg';
@@ -365,20 +384,26 @@
             const col = (i) => (typeof regionColor === 'function')
                 ? regionColor(i) : INK_COLOR;
 
-            // Pre-compute the mapped coords for every contour once.
             const mappedAll = contours.map(c =>
                 (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
             );
 
-            // Classify into outers + holes (uses raw source-pixel coords —
-            // mapFn is monotonic so containment is preserved).
             const classified = (typeof classifyContours === 'function')
                 ? classifyContours(contours)
                 : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
 
-            // ── FILL: one <path> per outer group (outer + its holes), drawn
-            // first so strokes/points render on top.
-            for (const outer of classified.outers) {
+            // Build matchId: outer's matchId = its position in outers list;
+            // holes inherit their parent outer's matchId.
+            const matchId = new Array(contours.length).fill(-1);
+            for (let oi = 0; oi < classified.outers.length; oi++) {
+                const outer = classified.outers[oi];
+                matchId[outer.idx] = oi;
+                for (const hi of outer.holes) matchId[hi] = oi;
+            }
+
+            // ── FILL: one <path> per outer group (outer + its holes).
+            for (let oi = 0; oi < classified.outers.length; oi++) {
+                const outer = classified.outers[oi];
                 const oc = mappedAll[outer.idx];
                 if (!oc) continue;
                 const parts = [oc, ...outer.holes.map(hi => mappedAll[hi]).filter(Boolean)];
@@ -393,10 +418,12 @@
                 path.setAttribute('fill', col(outer.idx));
                 path.setAttribute('stroke', 'none');
                 path.dataset.kind = 'fill';
+                path.dataset.source = label;
+                path.dataset.matchId = String(oi);
                 overlay.appendChild(path);
             }
 
-            // ── STROKE + POINTS: one polygon + N circles per contour (own colour).
+            // ── STROKE + POINTS: one polygon + N circles per contour.
             let totalVerts = 0;
             for (let i = 0; i < contours.length; i++) {
                 const mapped = mappedAll[i];
@@ -409,7 +436,12 @@
                 poly.setAttribute('stroke', colour);
                 poly.setAttribute('stroke-width', sw);
                 poly.setAttribute('stroke-linejoin', 'round');
+                poly.dataset.source = label;
+                poly.dataset.matchId = String(matchId[i]);
+                poly.style.pointerEvents = 'all';
+                poly.style.cursor = 'pointer';
                 overlay.appendChild(poly);
+                if (i === 0) dbg(`poly0 ${label} pe=${poly.style.pointerEvents} mid=${matchId[i]} pts=${mapped.length}`);
 
                 for (const m of mapped) {
                     const dot = document.createElementNS(svgNS, 'circle');
@@ -418,6 +450,8 @@
                     dot.setAttribute('r', pr);
                     dot.setAttribute('fill', colour);
                     dot.dataset.kind = 'point';
+                    dot.dataset.source = label;
+                    dot.dataset.matchId = String(matchId[i]);
                     overlay.appendChild(dot);
                     totalVerts++;
                 }
@@ -428,8 +462,99 @@
             applyFillToggle();
         }
 
+        // Cross-pane region highlighting: hovering any polygon in either pane
+        // thickens both polygons sharing the same matchId (PNG outer #N ↔
+        // LaTeX outer #N). Stroke-width is stored on the dataset so we can
+        // restore it on leave (it varies with current zoom).
+        function setMatchHighlight(matchId, on) {
+            if (matchId === undefined || matchId === '' || matchId === '-1') return;
+            const z = zoom || 1;
+            const sw = 1 / z;
+            const hi = 3 / z;
+            overlay.querySelectorAll(
+                `polygon[data-match-id="${matchId}"]`
+            ).forEach(p => {
+                p.setAttribute('stroke-width', String(on ? hi : sw));
+            });
+            overlay.querySelectorAll(
+                `circle[data-kind="point"][data-match-id="${matchId}"]`
+            ).forEach(c => {
+                c.setAttribute('r', String(on ? (4 / z) : (2 / z)));
+            });
+        }
+        // Currently-highlighted matchId (toggled by cmd-click).
+        let activeMatchId = null;
+        function onPolyClick(e) {
+            // Plain left-click: no-op (lets pan-drag work). Cmd / Ctrl + click
+            // is the diagnostic trigger — confirms events reach the polygon
+            // and toggles a persistent highlight on the matching region.
+            const isMeta = e.metaKey || e.ctrlKey;
+            const src = e.currentTarget.dataset.source;
+            const mid = e.currentTarget.dataset.matchId;
+            dbg(`CLICK src=${src} mid=${mid} meta=${e.metaKey} ctrl=${e.ctrlKey} btn=${e.button}`);
+            if (!isMeta) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (activeMatchId === mid) {
+                setMatchHighlight(mid, false);
+                activeMatchId = null;
+            } else {
+                if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
+                setMatchHighlight(mid, true);
+                activeMatchId = mid;
+            }
+        }
+
+        // Similarity metric: normalize both contour sets to the same
+        // [-1, 1] box (preserving aspect via normalizeForMatching), then
+        // average the centroid distance between paired outers (smallest-area
+        // index match). Result mapped to 0–100% with maxDist = 0.5.
+        function computeSimilarity(pngContours, latexContours) {
+            if (!pngContours || !latexContours
+                || pngContours.length === 0 || latexContours.length === 0
+                || typeof classifyContours !== 'function'
+                || typeof normalizeForMatching !== 'function'
+                || typeof centroid !== 'function') return 0;
+            const pOuters = classifyContours(pngContours).outers
+                .map(o => pngContours[o.idx]).filter(Boolean);
+            const lOuters = classifyContours(latexContours).outers
+                .map(o => latexContours[o.idx]).filter(Boolean);
+            if (!pOuters.length || !lOuters.length) return 0;
+            const pNorm = normalizeForMatching(pOuters);
+            const lNorm = normalizeForMatching(lOuters);
+            const n = Math.min(pNorm.length, lNorm.length);
+            let sum = 0;
+            for (let i = 0; i < n; i++) {
+                const a = centroid(pNorm[i]);
+                const b = centroid(lNorm[i]);
+                sum += Math.hypot(a[0] - b[0], a[1] - b[1]);
+            }
+            const avg = sum / n;
+            // Count mismatch penalty: missing/extra outers count as max dist.
+            const missing = Math.abs(pNorm.length - lNorm.length);
+            const penalty = missing * 0.5;
+            const effDist = (avg * n + penalty) / Math.max(n + missing, 1);
+            const maxDist = 0.5;
+            return Math.max(0, Math.min(100, Math.round(100 * (1 - effDist / maxDist))));
+        }
+
+        function updateInfoBoxes(pngContours, latexContours) {
+            const objVal = document.getElementById('obj-value');
+            const latVal = document.getElementById('lat-value');
+            const simVal = document.getElementById('sim-value');
+            const pOuters = (pngContours && typeof classifyContours === 'function')
+                ? classifyContours(pngContours).outers.length : 0;
+            const lOuters = (latexContours && typeof classifyContours === 'function')
+                ? classifyContours(latexContours).outers.length : 0;
+            if (objVal) objVal.textContent = pOuters;
+            if (latVal) latVal.textContent = lOuters;
+            if (simVal) simVal.textContent = computeSimilarity(pngContours, latexContours) + '%';
+        }
+
         function renderBBoxes() {
             while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+            let pngContours = null;
+            let latexContoursList = null;
 
             // ── PNG (engine: user-draw.js extractOutline) ─────────────────
             if (pix.complete && pix.naturalWidth) {
@@ -440,8 +565,8 @@
                 pc.width = pix.naturalWidth;
                 pc.height = pix.naturalHeight;
                 pc.getContext('2d').drawImage(pix, 0, 0);
-                const contours = extractPNGContours(pc);
-                if (contours.length) {
+                pngContours = extractPNGContours(pc);
+                if (pngContours.length) {
                     // Map source-pixel coords through object-fit:contain
                     // scaling, then through the wrap-local conversion.
                     const r = pix.getBoundingClientRect();
@@ -456,7 +581,7 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(contours, mapFn, 'png');
+                    drawContours(pngContours, mapFn, 'png');
                 }
             }
 
@@ -472,6 +597,7 @@
 
                 const res = extractLatexContours();
                 if (res && res.contours.length) {
+                    latexContoursList = res.contours;
                     const r = tex.getBoundingClientRect();
                     const wrapRect = wrap.getBoundingClientRect();
                     const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
@@ -484,9 +610,11 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(res.contours, mapFn, 'latex');
+                    drawContours(latexContoursList, mapFn, 'latex');
                 }
             }
+
+            updateInfoBoxes(pngContours, latexContoursList);
         }
 
         // Coordinated setter: switch both panes to a new formula and re-render
@@ -663,7 +791,15 @@
         let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
         host.style.cursor = 'grab';
         host.addEventListener('mousedown', (e) => {
+            // Diagnostic: log every mousedown so we can see which element is
+            // the actual event target (helps debug pointer-events issues).
+            const tgt = e.target;
+            const tag = tgt && tgt.tagName;
+            const mid = tgt && tgt.dataset ? tgt.dataset.matchId : '';
+            const src = tgt && tgt.dataset ? tgt.dataset.source : '';
+            dbg(`MOUSEDOWN target=${tag} src=${src} mid=${mid} btn=${e.button} meta=${e.metaKey}`);
             if (e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey) return; // let the polygon click handler run
             dragging = true;
             dragStartX = e.clientX;
             dragStartY = e.clientY;
