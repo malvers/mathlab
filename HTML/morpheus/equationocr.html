@@ -33,8 +33,9 @@
         }
         #canvas-stack {
             position: relative;
-            width: 100%;
-            aspect-ratio: 1;
+            width: 80%;
+            max-width: 80vh;
+            height: 80%;
             line-height: 0;
         }
         #draw-wrap {
@@ -43,44 +44,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 14px;
             padding: 80px 20px 20px;
             box-sizing: border-box;
         }
         #result-box {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            position: relative;
+            width: 80%;
+            max-width: 80vh;
             background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(0, 210, 255, 0.5);
             border-radius: 8px;
-            padding: 16px 20px;
             color: #00d2ff;
-            z-index: 50;
             font-family: 'Outfit', sans-serif;
-            min-height: 80px;
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            overflow: hidden;
+        }
+        #result-box .pane {
+            padding: 18px 22px;
+        }
+        #result-box .pane + .pane {
+            border-top: 1px solid rgba(0, 210, 255, 0.3);
         }
         #result-box .label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 0.1em;
             color: rgba(0, 210, 255, 0.6);
             margin-bottom: 8px;
         }
         #result-latex {
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 20px;
             color: #adff2f;
             word-break: break-all;
-            margin-bottom: 10px;
+            line-height: 1.4;
         }
         #result-render {
-            font-size: 28px;
+            font-size: 32px;
             color: #F4C430;
-            min-height: 40px;
+            min-height: 50px;
             display: flex;
             align-items: center;
         }
@@ -128,6 +132,16 @@
             width: 28px;
             text-align: right;
         }
+        /* Preset-Buttons: kompakt, quadratisch */
+        .preset-btn {
+            padding: 0 !important;
+            min-height: 32px !important;
+            min-width: 0 !important;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -155,15 +169,16 @@
                 <div id="coach-content" class="coach-message"></div>
             </div>
             <div id="draw-wrap">
+                <div id="result-box">
+                    <div class="pane">
+                        <div class="label">LATEX</div>
+                        <div id="result-latex">—</div>
+                    </div>
+                </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
                 </div>
                 <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
-            </div>
-            <div id="result-box">
-                <div class="label">LATEX</div>
-                <div id="result-latex">—</div>
-                <div id="result-render"></div>
             </div>
         </div>
     </main>
@@ -221,11 +236,11 @@
             'Newton Gravitation', 'Schrödinger', 'Maxwell (Gauß)', 'Maxwell (Ampère)'
         ];
         CyberUI.createCard('ui-container', 'PRESETS', `
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
                 ${FORMULA_TITLES.map((t, i) => `
-                    <button class="cyber-btn" onclick="loadPreset(${i})"
+                    <button class="cyber-btn preset-btn" onclick="loadPreset(${i})"
                         title="${t}"
-                        style="padding:6px 0;font-size:11px;min-height:30px;">${i}</button>
+                        style="padding:0;min-height:32px;min-width:0;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:0;line-height:1;">${i}</button>
                 `).join('')}
             </div>
         `, '#F4C430', { collapsible: true });

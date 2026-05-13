@@ -27,30 +27,45 @@ function normalizeForMatching(polys) {
 }
 
 // ── Descriptor: centroid + size + aspect (in normalized space) ──────────────
-function regionDescriptor(poly) {
+// orderIdx is the contour's position in the formula's reading order (from
+// reading-order.js), or -1 if unknown. uMax/tMax let us normalize order
+// differences to [0,1] when user and target have different counts.
+function regionDescriptor(poly, orderIdx, orderTotal) {
     const c = centroid(poly);
     const a = Math.abs(signedArea(poly));
     const bb = bboxOf(poly);
     const w = bb.maxX - bb.minX;
     const h = bb.maxY - bb.minY;
-    return { cx: c[0], cy: c[1], area: a, w, h };
+    return {
+        cx: c[0], cy: c[1], area: a, w, h,
+        orderIdx: (typeof orderIdx === 'number') ? orderIdx : -1,
+        orderTotal: orderTotal > 0 ? orderTotal : 1,
+    };
 }
 
 // ── Pairwise cost: low = good match ─────────────────────────────────────────
+// Geometry: spatial dominates with area+aspect as tiebreakers.
+// Reading order: when BOTH sides have a valid order, |Δposition| (normalised
+// to [0,1]) is added with a heavy weight — strong enough to overrule a
+// position match between identical duplicates (the ∂…∂ case).
 function regionCost(u, t) {
-    // Spatial: dominant; normalized polygons live in [-1, 1] so distance ≤ ~2.83.
     const dx = u.cx - t.cx;
     const dy = u.cy - t.cy;
     const spatial = Math.sqrt(dx * dx + dy * dy);
-    // Area: log-ratio of normalized areas, clamped to [0, 2].
     const areaRatio = Math.log((u.area + 0.001) / (t.area + 0.001));
     const areaPen = Math.min(2, Math.abs(areaRatio));
-    // Aspect: difference in log(w/h), clamped to [0, 2].
     const ua = Math.log((u.w + 0.001) / (u.h + 0.001));
     const ta = Math.log((t.w + 0.001) / (t.h + 0.001));
     const aspectPen = Math.min(2, Math.abs(ua - ta));
-    // Weighted sum — spatial dominates, area+aspect break ties.
-    return spatial + 0.25 * areaPen + 0.15 * aspectPen;
+    let cost = spatial + 0.25 * areaPen + 0.15 * aspectPen;
+    if (u.orderIdx >= 0 && t.orderIdx >= 0) {
+        const uPos = u.orderIdx / u.orderTotal;
+        const tPos = t.orderIdx / t.orderTotal;
+        // Weight tuned so a 20% order gap (~2 positions out of 10) costs more
+        // than the worst plausible position+area+aspect mismatch (~3).
+        cost += 4.0 * Math.abs(uPos - tPos);
+    }
+    return cost;
 }
 
 // ── Hungarian (Kuhn-Munkres) on rectangular cost matrix ─────────────────────
@@ -121,7 +136,10 @@ function hungarian(costMatrix) {
 }
 
 // ── High-level: match user contours → target contours ───────────────────────
-function matchContours(userPolys, targetPolys) {
+// userOrder / targetOrder are arrays of reading-order indices (one per polygon,
+// -1 = unknown). When both have meaningful order info, regionCost folds in a
+// dominant order-distance term.
+function matchContours(userPolys, targetPolys, userOrder, targetOrder) {
     if (!userPolys || !targetPolys) return [];
     const N = userPolys.length, M = targetPolys.length;
     if (N === 0) return [];
@@ -129,8 +147,15 @@ function matchContours(userPolys, targetPolys) {
 
     const userNorm = normalizeForMatching(userPolys);
     const targetNorm = normalizeForMatching(targetPolys);
-    const userDesc = userNorm.map(regionDescriptor);
-    const targetDesc = targetNorm.map(regionDescriptor);
+
+    // Reading-order totals — used to normalise the order-distance term so user
+    // and target with different counts (e.g. user drew = as one stroke, KaTeX
+    // renders it as one .mrel atom) can still align by relative position.
+    const uMax = (userOrder && userOrder.length) ? Math.max(1, ...userOrder.map(o => o >= 0 ? o : -1), 0) + 1 : 1;
+    const tMax = (targetOrder && targetOrder.length) ? Math.max(1, ...targetOrder.map(o => o >= 0 ? o : -1), 0) + 1 : 1;
+
+    const userDesc = userNorm.map((p, i) => regionDescriptor(p, userOrder ? userOrder[i] : -1, uMax));
+    const targetDesc = targetNorm.map((p, i) => regionDescriptor(p, targetOrder ? targetOrder[i] : -1, tMax));
 
     const cost = new Array(N);
     for (let i = 0; i < N; i++) {
@@ -160,7 +185,15 @@ function updateMatching() {
 
     if (!haveUser || !haveTarget) return;
 
-    const assign = matchContours(rawContours, targetPolygon);
+    // Pick up reading-order globals if reading-order.js produced them.
+    const uOrder = (typeof userReadingOrder !== 'undefined' &&
+        userReadingOrder && userReadingOrder.length === rawContours.length)
+        ? userReadingOrder : null;
+    const tOrder = (typeof targetReadingOrder !== 'undefined' &&
+        targetReadingOrder && targetReadingOrder.length === targetPolygon.length)
+        ? targetReadingOrder : null;
+
+    const assign = matchContours(rawContours, targetPolygon, uOrder, tOrder);
     userToTargetMatch = assign;
 
     targetColorIdx = new Array(targetPolygon.length).fill(-1);

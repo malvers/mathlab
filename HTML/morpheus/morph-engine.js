@@ -253,17 +253,21 @@ function drawMorph(t, forceLines, forcePoints) {
     // Fill all regions in ONE path with evenodd rule —
     // outer fills, holes XOR-cancel to become transparent.
     // Color morph: green (#adff2f) → target-yellow (#F4C430) over t∈[0,1].
-    const cr = Math.round(173 + (244 - 173) * t);
-    const cg = Math.round(255 + (196 - 255) * t);
-    const cb = Math.round(47  + (48  - 47 ) * t);
-    morphCtx.fillStyle = `rgb(${cr},${cg},${cb})`;
-    morphCtx.beginPath();
-    for (const pts of allInterp) {
-        morphCtx.moveTo(pts[0][0], pts[0][1]);
-        for (let i = 1; i < pts.length; i++) morphCtx.lineTo(pts[i][0], pts[i][1]);
-        morphCtx.closePath();
+    // PIXEL switch hides the fill (the morph's "pixel art" equivalent).
+    const showArt = document.getElementById('art-toggle')?.checked ?? true;
+    if (showArt) {
+        const cr = Math.round(173 + (244 - 173) * t);
+        const cg = Math.round(255 + (196 - 255) * t);
+        const cb = Math.round(47  + (48  - 47 ) * t);
+        morphCtx.fillStyle = `rgb(${cr},${cg},${cb})`;
+        morphCtx.beginPath();
+        for (const pts of allInterp) {
+            morphCtx.moveTo(pts[0][0], pts[0][1]);
+            for (let i = 1; i < pts.length; i++) morphCtx.lineTo(pts[i][0], pts[i][1]);
+            morphCtx.closePath();
+        }
+        morphCtx.fill('evenodd');
     }
-    morphCtx.fill('evenodd');
 
     // Outline overlay per region (LINES / POINTS switches, overrideable)
     const showLines = forceLines !== undefined
@@ -273,7 +277,8 @@ function drawMorph(t, forceLines, forcePoints) {
         ? forcePoints
         : (document.getElementById('points-toggle')?.checked ?? true);
     if (showLines || showPoints) {
-        morphCtx.lineWidth = 2;
+        const lw = (typeof outlineWidth !== 'undefined') ? outlineWidth : 1.5;
+        morphCtx.lineWidth = lw;
         morphCtx.lineCap = 'round';
         morphCtx.lineJoin = 'round';
         for (let r = 0; r < allInterp.length; r++) {
