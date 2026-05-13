@@ -142,15 +142,43 @@
             width: 28px;
             text-align: right;
         }
-        /* Preset-Buttons: kompakt, quadratisch */
-        .preset-btn {
-            padding: 0 !important;
-            min-height: 32px !important;
-            min-width: 0 !important;
-            aspect-ratio: 1;
+        /* Formula grid — copied from morph.css (digit-grid + formula-grid) */
+        .digit-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+        .digit-grid input[type=radio] { display: none; }
+        .digit-grid label {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 14px 16px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.55);
+            background: rgba(0, 210, 255, 0.04);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .digit-grid label:hover {
+            color: #00d2ff;
+            border-color: rgba(0, 210, 255, 0.6);
+            background: rgba(0, 210, 255, 0.1);
+        }
+        .digit-grid label:has(input:checked) {
+            color: #adff2f;
+            border-color: #adff2f;
+            background: rgba(173, 255, 47, 0.12);
+            box-shadow: 0 0 12px rgba(173, 255, 47, 0.3);
+        }
+        .digit-grid .latex-render .katex {
+            color: inherit;
+            line-height: 1;
         }
     </style>
 </head>
@@ -239,34 +267,77 @@
 
         CyberUI.createCard('ui-container', 'GOOGLE GEMINI API', `
             <input type="password" id="g-api-key" class="api-input" placeholder="API key (aistudio.google.com/apikey)" autocomplete="off">
-            <div class="eps-row" style="margin-top:8px;">
-                <label>Model</label>
-                <select id="g-model" class="api-input" style="flex:1;width:auto;margin-top:0;">
-                    <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                    <option value="gemini-2.5-pro">gemini-2.5-pro</option>
-                    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                </select>
-            </div>
+            <select id="g-model" class="api-input" style="margin-top:6px;">
+                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            </select>
             <button class="cyber-btn" onclick="recognize()"
                 style="width:100%;margin-top:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► ERKENNEN</button>
-            <button class="cyber-btn" onclick="debugRender()"
-                style="width:100%;margin-top:6px;border-color:rgba(244,196,48,0.5);color:#F4C430;">DEBUG (gespeichertes LaTeX rendern)</button>
         `, '#00d2ff', { collapsible: true });
 
-        const FORMULA_TITLES = [
-            'Einstein', 'Bruch', 'Quadratische Formel', 'Eulersche Identität', 'Pythagoras',
-            'Taylor e^x', 'Gauss-Integral', 'Binomialkoeffizient', 'Potenzregel', 'Bestimmtes Integral',
-            'Newton Gravitation', 'Schrödinger', 'Maxwell (Gauß)', 'Maxwell (Ampère)'
+        CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
+            <div style="font-family:'Orbitron',sans-serif;font-size:15px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
+                <div style="display:flex;justify-content:space-between;gap:10px;">
+                    <span>Letzter Call:</span>
+                    <span id="cost-last" style="color:#adff2f;font-weight:700;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:10px;">
+                    <span>Session:</span>
+                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:10px;">
+                    <span>All-time:</span>
+                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;">—</span>
+                </div>
+            </div>
+            <div class="eps-row" style="margin-top:14px;">
+                <label style="font-size:13px;">Limit $</label>
+                <input type="number" id="cost-limit" step="0.01" min="0" value="1.00"
+                    style="flex:1;padding:6px 10px;background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.3);color:#00d2ff;font-family:'Courier New',monospace;font-size:13px;border-radius:4px;outline:none;"
+                    oninput="onCostLimitChange(this.value)">
+            </div>
+            <button class="cyber-btn" onclick="resetCostCounter()"
+                style="width:100%;margin-top:10px;border-color:rgba(0,210,255,0.5);color:#00d2ff;">RESET COUNTER</button>
+        `, '#F4C430', { collapsible: true });
+
+        // Formula list — same shape & order as morph.html FORMELN card.
+        const FORMULAS = [
+            { latex: 'E=mc^2',                                                                                                                title: 'Einstein' },
+            { latex: '\\frac{a}{b}',                                                                                                          title: 'Bruch' },
+            { latex: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',                                                                                   title: 'Quadratische Formel' },
+            { latex: 'e^{i\\pi}+1=0',                                                                                                         title: 'Eulersche Identität' },
+            { latex: 'a^2+b^2=c^2',                                                                                                           title: 'Pythagoras' },
+            { latex: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}',                                                                              title: 'Taylor e^x' },
+            { latex: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}',                                                                     title: 'Gauss-Integral' },
+            { latex: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',                                                                                    title: 'Binomialkoeffizient' },
+            { latex: '\\frac{d}{dx}x^n=nx^{n-1}',                                                                                             title: 'Potenzregel' },
+            { latex: '\\int_a^b f(x)\\,dx',                                                                                                   title: 'Bestimmtes Integral' },
+            { latex: 'F=G\\frac{m_1 m_2}{r^2}',                                                                                               title: 'Newton Gravitation' },
+            { latex: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi',                                                               title: 'Schrödinger' },
+            { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}',                                                                         title: 'Maxwell (Gauß)' },
+            { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}',                                        title: 'Maxwell (Ampère)' }
         ];
-        CyberUI.createCard('ui-container', 'PRESETS', `
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-                ${FORMULA_TITLES.map((t, i) => `
-                    <button class="cyber-btn preset-btn" onclick="loadPreset(${i})"
-                        title="${t}"
-                        style="padding:0;min-height:32px;min-width:0;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:0;line-height:1;">${i}</button>
+        CyberUI.createCard('ui-container', 'FORMELN', `
+            <div class="digit-grid formula-grid">
+                ${FORMULAS.map((sym, i) => `
+                    <label class="latex-label" title="${sym.title}">
+                        <input type="radio" name="formula" value="formula-${i}" onclick="loadPreset(${i})">
+                        <span class="latex-render" data-latex="${sym.latex}"></span>
+                    </label>
                 `).join('')}
             </div>
         `, '#F4C430', { collapsible: true });
+
+        // Render KaTeX into the formula buttons after the card exists.
+        function renderFormulaButtons() {
+            if (typeof katex === 'undefined') return;
+            document.querySelectorAll('.latex-render[data-latex]').forEach(el => {
+                try { katex.render(el.dataset.latex, el, { throwOnError: false, displayMode: false }); }
+                catch (e) { el.textContent = el.dataset.latex; }
+            });
+        }
+        renderFormulaButtons();
 
         // ── Draw state ──────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
@@ -357,6 +428,92 @@
         }, { passive: false });
         drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
 
+        // ── Cost control ────────────────────────────────────────────────────────
+        // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
+        const GEMINI_PRICING = {
+            'gemini-2.5-flash': { in: 0.30,  out: 2.50  },
+            'gemini-2.5-pro':   { in: 1.25,  out: 10.00 },
+            'gemini-2.0-flash': { in: 0.10,  out: 0.40  }
+        };
+
+        // Session counters (reset on reload). All-time counters in localStorage.
+        let costSession = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
+        let costAllTime = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
+        let costLastUSD = 0;
+        try {
+            const saved = localStorage.getItem('eocr-cost-alltime');
+            if (saved) costAllTime = JSON.parse(saved);
+        } catch (_) {}
+        try {
+            const lim = localStorage.getItem('eocr-cost-limit');
+            if (lim) document.getElementById('cost-limit').value = lim;
+        } catch (_) {}
+
+        function fmtUSD(v) {
+            // Below $1, show cents (1 USD = 100 ct) — easier to read for small amounts.
+            if (v < 1) return (v * 100).toFixed(2) + ' ct';
+            return '$' + v.toFixed(2);
+        }
+        function fmtCount(c) { return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd); }
+
+        function updateCostUI() {
+            document.getElementById('cost-last').textContent =
+                costLastUSD > 0 ? fmtUSD(costLastUSD) : '—';
+            document.getElementById('cost-session').textContent =
+                costSession.calls > 0 ? fmtCount(costSession) : '—';
+            document.getElementById('cost-alltime').textContent =
+                costAllTime.calls > 0 ? fmtCount(costAllTime) : '—';
+            // Limit warning — red text when exceeded
+            const limit = parseFloat(document.getElementById('cost-limit').value);
+            const el = document.getElementById('cost-alltime');
+            if (isFinite(limit) && limit > 0 && costAllTime.usd >= limit) {
+                el.style.color = '#C41E3A';
+                el.style.fontWeight = 'bold';
+            } else {
+                el.style.color = '#F4C430';
+                el.style.fontWeight = '';
+            }
+        }
+
+        // Called after a successful Gemini response. usage = data.usageMetadata.
+        function trackCost(model, usage) {
+            if (!usage) {
+                DebugWindow.log('  ⚠ keine usageMetadata in der Antwort');
+                return;
+            }
+            const inTok  = +usage.promptTokenCount    || 0;
+            const outTok = +usage.candidatesTokenCount || 0;
+            const p = GEMINI_PRICING[model] || GEMINI_PRICING['gemini-2.5-flash'];
+            const usd = (inTok * p.in + outTok * p.out) / 1_000_000;
+            costLastUSD = usd;
+            costSession.calls++;  costSession.inTok += inTok;  costSession.outTok += outTok;  costSession.usd += usd;
+            costAllTime.calls++;  costAllTime.inTok += inTok;  costAllTime.outTok += outTok;  costAllTime.usd += usd;
+            try { localStorage.setItem('eocr-cost-alltime', JSON.stringify(costAllTime)); } catch (_) {}
+            DebugWindow.log(`  💰 ${inTok} in + ${outTok} out = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
+            updateCostUI();
+            // Warn if all-time crosses the limit on THIS call
+            const limit = parseFloat(document.getElementById('cost-limit').value);
+            if (isFinite(limit) && limit > 0 && costAllTime.usd >= limit && (costAllTime.usd - usd) < limit) {
+                DebugWindow.log(`⚠️ LIMIT $${limit.toFixed(2)} überschritten (all-time: ${fmtUSD(costAllTime.usd)})`);
+            }
+        }
+
+        function resetCostCounter() {
+            if (!confirm('All-time-Counter wirklich auf 0 setzen?')) return;
+            costAllTime = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
+            try { localStorage.removeItem('eocr-cost-alltime'); } catch (_) {}
+            DebugWindow.log('🔄 All-time-Counter reset');
+            updateCostUI();
+        }
+
+        function onCostLimitChange(v) {
+            try { localStorage.setItem('eocr-cost-limit', v); } catch (_) {}
+            updateCostUI();
+        }
+
+        // Show initial values
+        updateCostUI();
+
         // ── Render helper (shared by recognize + debugRender) ───────────────────
         function renderLatex(latex) {
             const target = document.getElementById('result-render');
@@ -367,17 +524,6 @@
                 target.textContent = latex;
                 DebugWindow.log(`⚠ katex.render threw: ${e.message}`);
             }
-        }
-
-        // DEBUG: render whatever LaTeX is saved in localStorage. Falls back to
-        // Einstein if nothing's been saved yet — so the render path can be
-        // tested in isolation without burning a Gemini call.
-        function debugRender() {
-            const saved = (() => { try { return localStorage.getItem('eocr-last-latex'); } catch (_) { return null; } })();
-            const latex = saved || 'E = mc^2';
-            DebugWindow.log(`🐞 DEBUG render: ${latex}${saved ? '' : ' (Fallback — nichts gespeichert)'}`);
-            document.getElementById('result-latex').textContent = latex;
-            renderLatex(latex);
         }
 
         // ── Gemini OCR ──────────────────────────────────────────────────────────
@@ -455,16 +601,12 @@
                     document.getElementById('result-latex').textContent = `Fehler: ${msg}`;
                     return;
                 }
+                trackCost(model, data?.usageMetadata);
                 const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '(leer)';
                 DebugWindow.log(`  raw: ${raw.slice(0, 200)}`);
                 const latex = unwrapLatex(raw);
                 document.getElementById('result-latex').textContent = latex;
                 renderLatex(latex);
-                // Save last non-empty result so DEBUG button can replay it.
-                if (latex && latex !== '(empty)' && latex !== '(leer)') {
-                    try { localStorage.setItem('eocr-last-latex', latex); } catch (_) {}
-                    DebugWindow.log(`💾 LaTeX gespeichert (eocr-last-latex)`);
-                }
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
@@ -487,6 +629,27 @@
             const s = localStorage.getItem('eocr-stroke');
             if (s) { document.getElementById('stroke-slider').value = s; document.getElementById('stroke-val').textContent = s; }
         } catch (_) {}
+
+        // Persist card collapse state — same pattern as morph.html
+        function makeCardsCollapsible() {
+            document.querySelectorAll('.instrument-card.collapsible').forEach(card => {
+                const titleEl = card.querySelector('.instrument-title');
+                if (!titleEl) return;
+                const cardKey = titleEl.textContent.trim().replace(/^▶\s*/, '');
+                try {
+                    const isCollapsed = localStorage.getItem('eocr-card-' + cardKey) === '1';
+                    if (isCollapsed) card.classList.add('collapsed');
+                    else card.classList.remove('collapsed');
+                } catch (_) {}
+                titleEl.addEventListener('click', () => {
+                    try {
+                        const isCollapsed = card.classList.contains('collapsed');
+                        localStorage.setItem('eocr-card-' + cardKey, isCollapsed ? '1' : '0');
+                    } catch (_) {}
+                });
+            });
+        }
+        makeCardsCollapsible();
 
         initDraw();
     </script>

@@ -102,6 +102,12 @@
             pointer-events: auto;
         `;
         wrap.appendChild(overlay);
+        // Single delegated hover listener for the whole overlay — handles
+        // both <polygon> outlines and <path> fills via e.target.dataset.
+        // mouseover / mouseout bubble (unlike mouseenter / mouseleave) so a
+        // single listener at the parent catches every child transition.
+        overlay.addEventListener('mouseover', onOverlayHover);
+        overlay.addEventListener('mouseout', onOverlayHover);
 
         // Render LaTeX offscreen (KaTeX → html2canvas) and use the resulting
         // canvas as BOTH the displayed image (tex.src = dataURL) and the
@@ -441,7 +447,6 @@
                 poly.style.pointerEvents = 'all';
                 poly.style.cursor = 'pointer';
                 overlay.appendChild(poly);
-                if (i === 0) dbg(`poly0 ${label} pe=${poly.style.pointerEvents} mid=${matchId[i]} pts=${mapped.length}`);
 
                 for (const m of mapped) {
                     const dot = document.createElementNS(svgNS, 'circle');
@@ -462,47 +467,52 @@
             applyFillToggle();
         }
 
-        // Cross-pane region highlighting: hovering any polygon in either pane
-        // thickens both polygons sharing the same matchId (PNG outer #N ↔
-        // LaTeX outer #N). Stroke-width is stored on the dataset so we can
-        // restore it on leave (it varies with current zoom).
+        // Cross-pane region highlighting. Three visual hits so the highlight
+        // is visible regardless of which toggles are on:
+        //   • polygon stroke thickens to 3× (visible when LINIE is on)
+        //   • vertex circles enlarge (visible when PUNKTE is on)
+        //   • fill path gets a thick white halo stroke (visible when FÜLLEN is
+        //     on — the polygon's own stroke is the same colour as the fill
+        //     underneath, so a contrasting halo is needed to see it).
         function setMatchHighlight(matchId, on) {
             if (matchId === undefined || matchId === '' || matchId === '-1') return;
             const z = zoom || 1;
-            const sw = 1 / z;
-            const hi = 3 / z;
             overlay.querySelectorAll(
                 `polygon[data-match-id="${matchId}"]`
             ).forEach(p => {
-                p.setAttribute('stroke-width', String(on ? hi : sw));
+                p.setAttribute('stroke-width', String((on ? 3 : 1) / z));
             });
             overlay.querySelectorAll(
                 `circle[data-kind="point"][data-match-id="${matchId}"]`
             ).forEach(c => {
-                c.setAttribute('r', String(on ? (4 / z) : (2 / z)));
+                c.setAttribute('r', String((on ? 4 : 2) / z));
+            });
+            overlay.querySelectorAll(
+                `path[data-kind="fill"][data-match-id="${matchId}"]`
+            ).forEach(p => {
+                if (on) {
+                    p.setAttribute('stroke', '#fff');
+                    p.setAttribute('stroke-width', String(4 / z));
+                } else {
+                    p.setAttribute('stroke', 'none');
+                    p.removeAttribute('stroke-width');
+                }
             });
         }
-        // Currently-highlighted matchId (toggled by cmd-click).
+        // Currently-highlighted matchId. Single delegated mouseover/mouseout
+        // listener on overlay catches every child transition (path or polygon)
+        // via e.target. We track the active id so moves between sibling
+        // elements (e.g. polygon → its own fill path) don't flicker.
         let activeMatchId = null;
-        function onPolyClick(e) {
-            // Plain left-click: no-op (lets pan-drag work). Cmd / Ctrl + click
-            // is the diagnostic trigger — confirms events reach the polygon
-            // and toggles a persistent highlight on the matching region.
-            const isMeta = e.metaKey || e.ctrlKey;
-            const src = e.currentTarget.dataset.source;
-            const mid = e.currentTarget.dataset.matchId;
-            dbg(`CLICK src=${src} mid=${mid} meta=${e.metaKey} ctrl=${e.ctrlKey} btn=${e.button}`);
-            if (!isMeta) return;
-            e.preventDefault();
-            e.stopPropagation();
-            if (activeMatchId === mid) {
-                setMatchHighlight(mid, false);
-                activeMatchId = null;
-            } else {
-                if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
-                setMatchHighlight(mid, true);
-                activeMatchId = mid;
-            }
+        function onOverlayHover(e) {
+            const t = e.target;
+            const mid = (t && t.dataset) ? t.dataset.matchId : '';
+            const valid = mid && mid !== '-1';
+            const next = (e.type === 'mouseover' && valid) ? mid : null;
+            if (next === activeMatchId) return;
+            if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
+            if (next !== null) setMatchHighlight(next, true);
+            activeMatchId = next;
         }
 
         // Similarity metric: normalize both contour sets to the same
@@ -791,15 +801,7 @@
         let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
         host.style.cursor = 'grab';
         host.addEventListener('mousedown', (e) => {
-            // Diagnostic: log every mousedown so we can see which element is
-            // the actual event target (helps debug pointer-events issues).
-            const tgt = e.target;
-            const tag = tgt && tgt.tagName;
-            const mid = tgt && tgt.dataset ? tgt.dataset.matchId : '';
-            const src = tgt && tgt.dataset ? tgt.dataset.source : '';
-            dbg(`MOUSEDOWN target=${tag} src=${src} mid=${mid} btn=${e.button} meta=${e.metaKey}`);
             if (e.button !== 0) return;
-            if (e.metaKey || e.ctrlKey) return; // let the polygon click handler run
             dragging = true;
             dragStartX = e.clientX;
             dragStartY = e.clientY;
