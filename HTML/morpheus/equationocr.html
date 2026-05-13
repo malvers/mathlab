@@ -42,6 +42,34 @@
             aspect-ratio: 1 / 1;
             line-height: 0;
         }
+        /* Floating ERKENNEN button — bottom-center overlay on the canvas.
+           Canvas is WHITE in this lab (for OCR contrast), so the button needs
+           a solid dark background to stay readable — unlike morph where the
+           canvas is dark and the default faint bg works fine. */
+        #canvas-recognize-btn {
+            position: absolute;
+            left: 50%;
+            bottom: 16px;
+            transform: translateX(-50%);
+            width: auto !important;
+            min-width: 260px;
+            border: 2px solid #adff2f !important;
+            color: #adff2f !important;
+            background: rgba(8, 20, 42, 0.92) !important;
+            box-shadow: 0 0 20px rgba(173, 255, 47, 0.35) !important;
+            z-index: 30;
+        }
+        /* Hover: button stays visually identical — only the glow intensifies. */
+        #canvas-recognize-btn:hover {
+            background: rgba(8, 20, 42, 0.92) !important;
+            border: 2px solid #adff2f !important;
+            color: #adff2f !important;
+            box-shadow: 0 0 40px rgba(173, 255, 47, 0.75) !important;
+            transform: translateX(-50%) !important;
+        }
+        #canvas-recognize-btn:active {
+            transform: translateX(-50%) scale(0.98) !important;
+        }
         #draw-wrap {
             position: absolute;
             inset: 0;
@@ -89,9 +117,12 @@
         #result-render {
             font-size: 32px;
             color: #F4C430;
-            min-height: 50px;
+            height: 96px;
             text-align: center;
-            overflow-x: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
         }
         /* KaTeX inherits page font-family otherwise — force its own glyphs */
         #result-render .katex,
@@ -142,6 +173,14 @@
             width: 28px;
             text-align: right;
         }
+        /* Page-local cyber-btn override — only inside equationocr.html.
+           buttons-ultra.css enforces min-height 58px globally; we make them
+           flatter here without touching the central rule (morph etc. stay 58px). */
+        .cyber-btn {
+            min-height: 42px !important;
+            padding: 10px 18px !important;
+        }
+
         /* Formula grid — copied from morph.css (digit-grid + formula-grid) */
         .digit-grid {
             display: grid;
@@ -219,6 +258,7 @@
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">► ERKENNEN</button>
                 </div>
                 <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
             </div>
@@ -263,18 +303,51 @@
                     oninput="onStrokeChange(this.value)">
                 <span id="stroke-val">8</span>
             </div>
+            <div class="eps-row">
+                <label>Scale</label>
+                <input type="range" id="canvas-scale-slider" min="10" max="100" value="50" step="5"
+                    oninput="onCanvasScaleChange(this.value)">
+                <span id="canvas-scale-val">50</span><span style="opacity:0.6;">%</span>
+            </div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.6);text-align:right;margin-top:2px;">
+                <span id="canvas-scale-size">500×500</span> px an Gemini
+            </div>
         `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'GOOGLE GEMINI API', `
             <input type="password" id="g-api-key" class="api-input" placeholder="API key (aistudio.google.com/apikey)" autocomplete="off">
-            <select id="g-model" class="api-input" style="margin-top:6px;">
-                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
-                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <select id="g-model" class="api-input" style="margin-top:6px;" onchange="updateGeminiTitle()">
+                <option value="gemini-2.5-flash">2.5-flash</option>
+                <option value="gemini-2.5-pro">2.5-pro</option>
+                <option value="gemini-2.0-flash">2.0-flash</option>
             </select>
-            <button class="cyber-btn" onclick="recognize()"
-                style="width:100%;margin-top:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► ERKENNEN</button>
+            <div id="g-price-info" style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.65);text-align:right;margin-top:4px;letter-spacing:0.04em;">
+                — per Mio. Token
+            </div>
         `, '#00d2ff', { collapsible: true });
+
+        // Reflect the selected model in the card title (replaces "API" with e.g. "2.5-FLASH").
+        // Also updates the small price-info line below the dropdown — that's where
+        // the per-1M-token rates live now that they're out of the option text.
+        function updateGeminiTitle() {
+            const sel = document.getElementById('g-model');
+            if (!sel) return;
+            const model = sel.value;
+            const suffix = model.replace(/^gemini-/, '').toUpperCase();
+            const card = sel.closest('.instrument-card');
+            const titleEl = card?.querySelector('.instrument-title');
+            if (titleEl) {
+                const icon = titleEl.querySelector('.toggle-icon');
+                titleEl.innerHTML = '';
+                if (icon) titleEl.appendChild(icon);
+                titleEl.appendChild(document.createTextNode(' GOOGLE GEMINI ' + suffix));
+            }
+            const priceEl = document.getElementById('g-price-info');
+            const price = (typeof GEMINI_PRICING !== 'undefined') ? GEMINI_PRICING[model] : null;
+            if (priceEl && price) {
+                priceEl.textContent = `$${price.in} in / $${price.out} out — per Mio. Token`;
+            }
+        }
 
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
             <div style="font-family:'Orbitron',sans-serif;font-size:15px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
@@ -287,16 +360,19 @@
                     <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;">—</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:10px;">
-                    <span>All-time:</span>
+                    <span>Counter:</span>
                     <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;">—</span>
                 </div>
             </div>
+            <!--
             <div class="eps-row" style="margin-top:14px;">
                 <label style="font-size:13px;">Limit $</label>
                 <input type="number" id="cost-limit" step="0.01" min="0" value="1.00"
                     style="flex:1;padding:6px 10px;background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.3);color:#00d2ff;font-family:'Courier New',monospace;font-size:13px;border-radius:4px;outline:none;"
                     oninput="onCostLimitChange(this.value)">
             </div>
+            -->
+
             <button class="cyber-btn" onclick="resetCostCounter()"
                 style="width:100%;margin-top:10px;border-color:rgba(0,210,255,0.5);color:#00d2ff;">RESET COUNTER</button>
         `, '#F4C430', { collapsible: true });
@@ -384,17 +460,35 @@
                 drawCtx.fillStyle = '#fff';
                 drawCtx.fillRect(0, 0, 1000, 1000);
                 drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
-                DebugWindow.log(`✓ Preset ${idx} geladen: ${FORMULA_TITLES[idx]}`);
+                DebugWindow.log(`✓ Preset ${idx} geladen: ${FORMULAS[idx]?.title ?? '?'}`);
             };
             img.onerror = () => DebugWindow.log(`✗ Preset ${idx} konnte nicht geladen werden`);
             img.src = `presets/formula-${idx}.png`;
-            DebugWindow.log(`▶ Lade Preset ${idx} (${FORMULA_TITLES[idx]})`);
+            DebugWindow.log(`▶ Lade Preset ${idx} (${FORMULAS[idx]?.title ?? '?'})`);
         }
 
         function onStrokeChange(v) {
             document.getElementById('stroke-val').textContent = v;
             drawCtx.lineWidth = +v;
             try { localStorage.setItem('eocr-stroke', v); } catch (_) {}
+        }
+
+        // Downsample factor (10–100 %). Stays in localStorage. Default 50 %.
+        // Slider drives BOTH: (a) visual scale of the canvas on screen (CSS
+        // transform — live preview of what gets sent), (b) actual pixel
+        // downsampling at send-time in recognize().
+        function onCanvasScaleChange(v) {
+            document.getElementById('canvas-scale-val').textContent = v;
+            const px = Math.round(1000 * (+v / 100));
+            const sizeEl = document.getElementById('canvas-scale-size');
+            if (sizeEl) sizeEl.textContent = `${px}×${px}`;
+            // Visual scale — shrink/grow the canvas inside its container.
+            const dc = document.getElementById('draw-canvas');
+            if (dc) {
+                dc.style.transform = `scale(${(+v) / 100})`;
+                dc.style.transformOrigin = 'center center';
+            }
+            try { localStorage.setItem('eocr-canvas-scale', v); } catch (_) {}
         }
 
         function getPos(e) {
@@ -446,7 +540,8 @@
         } catch (_) {}
         try {
             const lim = localStorage.getItem('eocr-cost-limit');
-            if (lim) document.getElementById('cost-limit').value = lim;
+            const limEl = document.getElementById('cost-limit');
+            if (lim && limEl) limEl.value = lim;
         } catch (_) {}
 
         function fmtUSD(v) {
@@ -463,8 +558,9 @@
                 costSession.calls > 0 ? fmtCount(costSession) : '—';
             document.getElementById('cost-alltime').textContent =
                 costAllTime.calls > 0 ? fmtCount(costAllTime) : '—';
-            // Limit warning — red text when exceeded
-            const limit = parseFloat(document.getElementById('cost-limit').value);
+            // Limit warning — red text when exceeded (input is commented out, defaults to no limit)
+            const limitEl = document.getElementById('cost-limit');
+            const limit = limitEl ? parseFloat(limitEl.value) : NaN;
             const el = document.getElementById('cost-alltime');
             if (isFinite(limit) && limit > 0 && costAllTime.usd >= limit) {
                 el.style.color = '#C41E3A';
@@ -492,7 +588,8 @@
             DebugWindow.log(`  💰 ${inTok} in + ${outTok} out = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
             updateCostUI();
             // Warn if all-time crosses the limit on THIS call
-            const limit = parseFloat(document.getElementById('cost-limit').value);
+            const limitEl = document.getElementById('cost-limit');
+            const limit = limitEl ? parseFloat(limitEl.value) : NaN;
             if (isFinite(limit) && limit > 0 && costAllTime.usd >= limit && (costAllTime.usd - usd) < limit) {
                 DebugWindow.log(`⚠️ LIMIT $${limit.toFixed(2)} überschritten (all-time: ${fmtUSD(costAllTime.usd)})`);
             }
@@ -551,8 +648,25 @@
             try { localStorage.setItem('eocr-g-key', apiKey); } catch (_) {}
             try { localStorage.setItem('eocr-g-model', model); } catch (_) {}
 
+            // Optionally downsample the canvas before sending — fewer pixels
+            // → potentially fewer image tiles → cheaper. Slider 10–100 %.
+            const scalePct = +(document.getElementById('canvas-scale-slider')?.value ?? 100);
+            let dataUrl;
+            if (scalePct < 100) {
+                const w = Math.round(drawCanvas.width  * scalePct / 100);
+                const h = Math.round(drawCanvas.height * scalePct / 100);
+                const tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h;
+                const tctx = tmp.getContext('2d');
+                tctx.imageSmoothingEnabled = true;
+                tctx.imageSmoothingQuality = 'high';
+                tctx.drawImage(drawCanvas, 0, 0, w, h);
+                dataUrl = tmp.toDataURL('image/png');
+                DebugWindow.log(`▾ Downsample ${drawCanvas.width}×${drawCanvas.height} → ${w}×${h} (${scalePct}%)`);
+            } else {
+                dataUrl = drawCanvas.toDataURL('image/png');
+            }
             // Gemini wants bare base64 in inline_data — strip the data-URL prefix.
-            const dataUrl = drawCanvas.toDataURL('image/png');
             const b64 = dataUrl.split(',', 2)[1];
 
             DebugWindow.log(`▶ Gemini ${model} (key: …${apiKey.slice(-4)}, b64: ${b64.length} chars)`);
@@ -625,9 +739,14 @@
             const model = localStorage.getItem('eocr-g-model');
             if (key)   document.getElementById('g-api-key').value = key;
             if (model) document.getElementById('g-model').value = model;
+            updateGeminiTitle();
             if (keyFile && !keyLS) DebugWindow.log('🔑 Key aus apikey.local.js geladen');
             const s = localStorage.getItem('eocr-stroke');
             if (s) { document.getElementById('stroke-slider').value = s; document.getElementById('stroke-val').textContent = s; }
+            const sc = localStorage.getItem('eocr-canvas-scale');
+            const scInit = sc !== null ? sc : '50';
+            const slSc = document.getElementById('canvas-scale-slider');
+            if (slSc) { slSc.value = scInit; onCanvasScaleChange(scInit); }
         } catch (_) {}
 
         // Persist card collapse state — same pattern as morph.html
