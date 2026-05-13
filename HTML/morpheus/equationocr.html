@@ -26,7 +26,7 @@
             display: block;
             width: 100%;
             height: 100%;
-            background: #000;
+            background: #020410;
             cursor: crosshair;
             border-radius: 10px;
             border: 2px solid rgba(0, 210, 255, 0.5);
@@ -53,18 +53,18 @@
             transform: translateX(-50%);
             width: auto !important;
             min-width: 260px;
-            border: 2px solid #adff2f !important;
+            border: 0.5px solid #adff2f !important;
             color: #adff2f !important;
             background: rgba(8, 20, 42, 0.92) !important;
-            box-shadow: 0 0 20px rgba(173, 255, 47, 0.35) !important;
+            box-shadow: 0 0 6px rgba(173, 255, 47, 0.18) !important;
             z-index: 30;
         }
         /* Hover: button stays visually identical — only the glow intensifies. */
         #canvas-recognize-btn:hover {
             background: rgba(8, 20, 42, 0.92) !important;
-            border: 2px solid #adff2f !important;
+            border: 0.5px solid #adff2f !important;
             color: #adff2f !important;
-            box-shadow: 0 0 40px rgba(173, 255, 47, 0.75) !important;
+            box-shadow: 0 0 14px rgba(173, 255, 47, 0.4) !important;
             transform: translateX(-50%) !important;
         }
         #canvas-recognize-btn:active {
@@ -86,7 +86,7 @@
             width: 80%;
             max-width: 80vh;
             flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: #020410;
             border: 1px solid rgba(0, 210, 255, 0.5);
             border-radius: 8px;
             color: #00d2ff;
@@ -113,16 +113,20 @@
             color: #adff2f;
             word-break: break-all;
             line-height: 1.4;
+            height: 30px;
+            overflow: auto;
+            display: flex;
+            align-items: center;
         }
         #result-render {
-            font-size: 32px;
+            font-size: 24px;
             color: #F4C430;
             height: 96px;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: auto;
+            overflow: hidden;
         }
         /* KaTeX inherits page font-family otherwise — force its own glyphs */
         #result-render .katex,
@@ -173,6 +177,34 @@
             width: 28px;
             text-align: right;
         }
+        /* Tiny RESET button — sits at the top-right of the KOSTENKONTROLLE card,
+           next to the title. Overrides cyber-btn defaults (which would fill width). */
+        #reset-cost-btn {
+            position: absolute !important;
+            top: 6px !important;
+            right: 12px !important;
+            width: auto !important;
+            min-width: 0 !important;
+            min-height: 22px !important;
+            padding: 3px 10px !important;
+            font-size: 10px !important;
+            letter-spacing: 1.5px !important;
+            background: rgba(8, 20, 42, 0.6) !important;
+            border: 1px solid rgba(244, 196, 48, 0.5) !important;
+            color: #F4C430 !important;
+            border-radius: 4px !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            z-index: 5;
+        }
+        #reset-cost-btn:hover {
+            background: rgba(244, 196, 48, 0.12) !important;
+            border-color: #F4C430 !important;
+            color: #F4C430 !important;
+            box-shadow: 0 0 8px rgba(244, 196, 48, 0.35) !important;
+            transform: none !important;
+        }
+
         /* Page-local cyber-btn override — only inside equationocr.html.
            buttons-ultra.css enforces min-height 58px globally; we make them
            flatter here without touching the central rule (morph etc. stay 58px). */
@@ -249,10 +281,9 @@
                 <div id="result-box">
                     <div class="pane">
                         <div class="label">LATEX</div>
-                        <div id="result-latex">—</div>
+                        <div id="result-latex"></div>
                     </div>
                     <div class="pane">
-                        <div class="label">RENDERED</div>
                         <div id="result-render"></div>
                     </div>
                 </div>
@@ -318,8 +349,8 @@
             <input type="password" id="g-api-key" class="api-input" placeholder="API key (aistudio.google.com/apikey)" autocomplete="off">
             <select id="g-model" class="api-input" style="margin-top:6px;" onchange="updateGeminiTitle()">
                 <option value="gemini-2.5-flash">2.5-flash</option>
+                <option value="gemini-2.5-flash-lite">2.5-flash-lite</option>
                 <option value="gemini-2.5-pro">2.5-pro</option>
-                <option value="gemini-2.0-flash">2.0-flash</option>
             </select>
             <div id="g-price-info" style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.65);text-align:right;margin-top:4px;letter-spacing:0.04em;">
                 — per Mio. Token
@@ -350,18 +381,18 @@
         }
 
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
-            <div style="font-family:'Orbitron',sans-serif;font-size:15px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
+            <div style="font-family:Arial,sans-serif;font-size:17px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
                 <div style="display:flex;justify-content:space-between;gap:10px;">
                     <span>Letzter Call:</span>
-                    <span id="cost-last" style="color:#adff2f;font-weight:700;">—</span>
+                    <span id="cost-last" style="color:#adff2f;font-weight:700;">0</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:10px;">
                     <span>Session:</span>
-                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;">—</span>
+                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;">0</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:10px;">
                     <span>Counter:</span>
-                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;">—</span>
+                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;">0</span>
                 </div>
             </div>
             <!--
@@ -373,8 +404,7 @@
             </div>
             -->
 
-            <button class="cyber-btn" onclick="resetCostCounter()"
-                style="width:100%;margin-top:10px;border-color:rgba(0,210,255,0.5);color:#00d2ff;">RESET COUNTER</button>
+            <button class="cyber-btn" id="reset-cost-btn" onclick="resetCostCounter()" title="Counter zurücksetzen">RESET</button>
         `, '#F4C430', { collapsible: true });
 
         // Formula list — same shape & order as morph.html FORMELN card.
@@ -421,9 +451,9 @@
         let isDrawing = false;
 
         function initDraw() {
-            drawCtx.fillStyle = '#fff'; // white background — better OCR contrast for Gemini
+            drawCtx.fillStyle = '#020410'; // dark blue background — matches cyber theme
             drawCtx.fillRect(0, 0, 1000, 1000);
-            drawCtx.strokeStyle = '#000';
+            drawCtx.strokeStyle = '#adff2f'; // neon green strokes
             const strokeEl = document.getElementById('stroke-slider');
             drawCtx.lineWidth = strokeEl ? +strokeEl.value : 8;
             drawCtx.lineCap = 'round';
@@ -432,7 +462,7 @@
 
         function clearDraw() {
             initDraw();
-            document.getElementById('result-latex').textContent = '—';
+            document.getElementById('result-latex').textContent = '';
             document.getElementById('result-render').innerHTML = '';
         }
 
@@ -450,14 +480,14 @@
                 const d = id.data;
                 for (let i = 0; i < d.length; i += 4) {
                     const r = d[i], g = d[i+1], b = d[i+2];
-                    // Heller Pixel (gezeichnet) → schwarz, dunkel (BG) → weiß
+                    // Bright pixel (drawn stroke) → green, dark (bg) → dark blue.
                     const brightness = (r + g + b) / 3;
-                    if (brightness > 40) { d[i] = d[i+1] = d[i+2] = 0; d[i+3] = 255; }
-                    else                  { d[i] = d[i+1] = d[i+2] = 255; d[i+3] = 255; }
+                    if (brightness > 40) { d[i] = 173; d[i+1] = 255; d[i+2] = 47;  d[i+3] = 255; }
+                    else                 { d[i] = 2;   d[i+1] = 4;   d[i+2] = 16;  d[i+3] = 255; }
                 }
                 tctx.putImageData(id, 0, 0);
                 // Auf draw-canvas
-                drawCtx.fillStyle = '#fff';
+                drawCtx.fillStyle = '#020410';
                 drawCtx.fillRect(0, 0, 1000, 1000);
                 drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
                 DebugWindow.log(`✓ Preset ${idx} geladen: ${FORMULAS[idx]?.title ?? '?'}`);
@@ -474,20 +504,17 @@
         }
 
         // Downsample factor (10–100 %). Stays in localStorage. Default 50 %.
-        // Slider drives BOTH: (a) visual scale of the canvas on screen (CSS
-        // transform — live preview of what gets sent), (b) actual pixel
-        // downsampling at send-time in recognize().
+        // Slider affects ONLY what gets sent to Gemini — the canvas keeps
+        // displaying the formula at full size for the user.
         function onCanvasScaleChange(v) {
             document.getElementById('canvas-scale-val').textContent = v;
             const px = Math.round(1000 * (+v / 100));
             const sizeEl = document.getElementById('canvas-scale-size');
             if (sizeEl) sizeEl.textContent = `${px}×${px}`;
-            // Visual scale — shrink/grow the canvas inside its container.
+            // Clear any stale inline transform from older code paths — the
+            // visible canvas now stays at full size regardless of slider.
             const dc = document.getElementById('draw-canvas');
-            if (dc) {
-                dc.style.transform = `scale(${(+v) / 100})`;
-                dc.style.transformOrigin = 'center center';
-            }
+            if (dc) dc.style.transform = '';
             try { localStorage.setItem('eocr-canvas-scale', v); } catch (_) {}
         }
 
@@ -525,15 +552,16 @@
         // ── Cost control ────────────────────────────────────────────────────────
         // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
         const GEMINI_PRICING = {
-            'gemini-2.5-flash': { in: 0.30,  out: 2.50  },
-            'gemini-2.5-pro':   { in: 1.25,  out: 10.00 },
-            'gemini-2.0-flash': { in: 0.10,  out: 0.40  }
+            'gemini-2.5-flash':      { in: 0.30, out: 2.50  },
+            'gemini-2.5-flash-lite': { in: 0.10, out: 0.40  },
+            'gemini-2.5-pro':        { in: 1.25, out: 10.00 }
         };
 
         // Session counters (reset on reload). All-time counters in localStorage.
         let costSession = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
         let costAllTime = { calls: 0, inTok: 0, outTok: 0, usd: 0 };
         let costLastUSD = 0;
+        let costLastTok = 0;
         try {
             const saved = localStorage.getItem('eocr-cost-alltime');
             if (saved) costAllTime = JSON.parse(saved);
@@ -549,15 +577,21 @@
             if (v < 1) return (v * 100).toFixed(2) + ' ct';
             return '$' + v.toFixed(2);
         }
-        function fmtCount(c) { return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd); }
+        function fmtTok(n) {
+            // < 1000: raw number. 1000–9999: e.g. 1.5K tok. ≥10000: integer K tok.
+            if (n < 1000) return n + ' tok';
+            const k = n / 1000;
+            return (k >= 10 ? Math.round(k) : (Math.round(k * 10) / 10)) + 'K tok';
+        }
+        function fmtCount(c) { return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd) + ' ' + fmtTok(c.inTok + c.outTok); }
 
         function updateCostUI() {
             document.getElementById('cost-last').textContent =
-                costLastUSD > 0 ? fmtUSD(costLastUSD) : '—';
+                costLastUSD > 0 ? `${fmtUSD(costLastUSD)} ${fmtTok(costLastTok)}` : '0';
             document.getElementById('cost-session').textContent =
-                costSession.calls > 0 ? fmtCount(costSession) : '—';
+                costSession.calls > 0 ? fmtCount(costSession) : '0';
             document.getElementById('cost-alltime').textContent =
-                costAllTime.calls > 0 ? fmtCount(costAllTime) : '—';
+                costAllTime.calls > 0 ? fmtCount(costAllTime) : '0';
             // Limit warning — red text when exceeded (input is commented out, defaults to no limit)
             const limitEl = document.getElementById('cost-limit');
             const limit = limitEl ? parseFloat(limitEl.value) : NaN;
@@ -582,6 +616,7 @@
             const p = GEMINI_PRICING[model] || GEMINI_PRICING['gemini-2.5-flash'];
             const usd = (inTok * p.in + outTok * p.out) / 1_000_000;
             costLastUSD = usd;
+            costLastTok = inTok + outTok;
             costSession.calls++;  costSession.inTok += inTok;  costSession.outTok += outTok;  costSession.usd += usd;
             costAllTime.calls++;  costAllTime.inTok += inTok;  costAllTime.outTok += outTok;  costAllTime.usd += usd;
             try { localStorage.setItem('eocr-cost-alltime', JSON.stringify(costAllTime)); } catch (_) {}
@@ -648,24 +683,31 @@
             try { localStorage.setItem('eocr-g-key', apiKey); } catch (_) {}
             try { localStorage.setItem('eocr-g-model', model); } catch (_) {}
 
-            // Optionally downsample the canvas before sending — fewer pixels
-            // → potentially fewer image tiles → cheaper. Slider 10–100 %.
+            // Pipeline before sending: (a) optional downsample via slider,
+            // (b) convert the cyber-themed canvas (green-on-darkblue) to
+            // pure b/w so Gemini sees a clean high-contrast OCR image.
             const scalePct = +(document.getElementById('canvas-scale-slider')?.value ?? 100);
-            let dataUrl;
-            if (scalePct < 100) {
-                const w = Math.round(drawCanvas.width  * scalePct / 100);
-                const h = Math.round(drawCanvas.height * scalePct / 100);
-                const tmp = document.createElement('canvas');
-                tmp.width = w; tmp.height = h;
-                const tctx = tmp.getContext('2d');
-                tctx.imageSmoothingEnabled = true;
-                tctx.imageSmoothingQuality = 'high';
-                tctx.drawImage(drawCanvas, 0, 0, w, h);
-                dataUrl = tmp.toDataURL('image/png');
-                DebugWindow.log(`▾ Downsample ${drawCanvas.width}×${drawCanvas.height} → ${w}×${h} (${scalePct}%)`);
-            } else {
-                dataUrl = drawCanvas.toDataURL('image/png');
+            const w = Math.round(drawCanvas.width  * scalePct / 100);
+            const h = Math.round(drawCanvas.height * scalePct / 100);
+            const tmp = document.createElement('canvas');
+            tmp.width = w; tmp.height = h;
+            const tctx = tmp.getContext('2d');
+            tctx.imageSmoothingEnabled = true;
+            tctx.imageSmoothingQuality = 'high';
+            tctx.drawImage(drawCanvas, 0, 0, w, h);
+            const id = tctx.getImageData(0, 0, w, h);
+            const dpx = id.data;
+            for (let i = 0; i < dpx.length; i += 4) {
+                const brightness = (dpx[i] + dpx[i+1] + dpx[i+2]) / 3;
+                // Bright (green stroke, incl. anti-aliased edges) → black.
+                // Dark (dark-blue bg) → white.
+                if (brightness > 60) { dpx[i] = dpx[i+1] = dpx[i+2] = 0;   }
+                else                 { dpx[i] = dpx[i+1] = dpx[i+2] = 255; }
+                dpx[i+3] = 255;
             }
+            tctx.putImageData(id, 0, 0);
+            const dataUrl = tmp.toDataURL('image/png');
+            DebugWindow.log(`▾ ${drawCanvas.width}×${drawCanvas.height} → ${w}×${h} (${scalePct}%) + b/w`);
             // Gemini wants bare base64 in inline_data — strip the data-URL prefix.
             const b64 = dataUrl.split(',', 2)[1];
 
@@ -736,9 +778,19 @@
             const keyFile = (typeof window.GEMINI_API_KEY === 'string' && window.GEMINI_API_KEY.trim())
                 ? window.GEMINI_API_KEY.trim() : '';
             const key   = keyLS || keyFile;
-            const model = localStorage.getItem('eocr-g-model');
+            // Validate restored model — if it points at a deprecated/removed
+            // option (e.g. gemini-2.0-flash after the 2.0 sunset), discard it
+            // and fall back to whatever the dropdown's first option is.
+            const modelSaved = localStorage.getItem('eocr-g-model');
+            const modelEl = document.getElementById('g-model');
+            const validModels = Array.from(modelEl.options).map(o => o.value);
+            const model = validModels.includes(modelSaved) ? modelSaved : null;
             if (key)   document.getElementById('g-api-key').value = key;
-            if (model) document.getElementById('g-model').value = model;
+            if (model) modelEl.value = model;
+            else if (modelSaved) {
+                try { localStorage.removeItem('eocr-g-model'); } catch (_) {}
+                DebugWindow.log(`⚠ Gespeichertes Modell "${modelSaved}" nicht mehr verfügbar — Default geladen`);
+            }
             updateGeminiTitle();
             if (keyFile && !keyLS) DebugWindow.log('🔑 Key aus apikey.local.js geladen');
             const s = localStorage.getItem('eocr-stroke');
