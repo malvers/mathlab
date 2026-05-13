@@ -8,6 +8,36 @@
     const DEFAULT_LATEX = 'E=mc^2';
     const DEFAULT_PRESET = 0;
     const INK_COLOR = '#F4C430';
+    // 20 maximally-distinguishable colours (Sasha Trubetskoy palette, with
+    // the original yellow swapped for a saturated gold so it doesn't collide
+    // with INK_COLOR). Indexed by matchId — PNG outer #N and LaTeX outer #N
+    // share the same palette slot, so paired regions glow in the same hue.
+    const REGION_PALETTE = [
+        '#e6194B', // red
+        '#3cb44b', // green
+        '#4363d8', // blue
+        '#f58231', // orange
+        '#911eb4', // purple
+        '#42d4f4', // cyan
+        '#f032e6', // magenta
+        '#bfef45', // lime
+        '#fabed4', // pink
+        '#469990', // teal
+        '#dcbeff', // lavender
+        '#9A6324', // brown
+        '#800000', // maroon
+        '#aaffc3', // mint
+        '#808000', // olive
+        '#ffd8b1', // apricot
+        '#000075', // navy
+        '#a9a9a9', // gray
+        '#e67e22', // pumpkin
+        '#1abc9c', // turquoise
+    ];
+    function paletteColor(i) {
+        const n = REGION_PALETTE.length;
+        return REGION_PALETTE[((i % n) + n) % n];
+    }
 
     function dbg(msg) {
         if (typeof DebugWindow !== 'undefined') DebugWindow.log('[draw20] ' + msg);
@@ -381,14 +411,22 @@
         // index in the classified outers list (holes inherit their parent's
         // id), so cross-pane hover highlighting can pair regions: PNG outer
         // #N ↔ LaTeX outer #N (both sets are canonical-sorted left-to-right).
-        function drawContours(contours, mapFn, label) {
+        // drawContours accepts an optional `matchIdByContour` array
+        // (length = contours.length) that maps each contour index to the
+        // shared cross-pane matchId. When omitted, falls back to numbering
+        // outers in canonical order (legacy single-pane behaviour). The
+        // shared map is built by renderBBoxes via Hungarian assignment so
+        // PNG outer #N ↔ LaTeX outer #M get the same matchId.
+        //
+        // `centroidsOut` (optional Map<matchId,[x,y]>) is populated with the
+        // wrap-local centroid of each outer's mapped polygon so the caller
+        // can draw cross-pane match lines.
+        function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut) {
             if (!contours || contours.length === 0) return;
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = zoom || 1;
             const sw = String(1 / z);
             const pr = 2 / z;
-            const col = (i) => (typeof regionColor === 'function')
-                ? regionColor(i) : INK_COLOR;
 
             const mappedAll = contours.map(c =>
                 (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
@@ -398,14 +436,23 @@
                 ? classifyContours(contours)
                 : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
 
-            // Build matchId: outer's matchId = its position in outers list;
-            // holes inherit their parent outer's matchId.
-            const matchId = new Array(contours.length).fill(-1);
-            for (let oi = 0; oi < classified.outers.length; oi++) {
-                const outer = classified.outers[oi];
-                matchId[outer.idx] = oi;
-                for (const hi of outer.holes) matchId[hi] = oi;
+            // matchId per contour: from override if provided (Hungarian),
+            // else legacy "outer position" numbering. Holes always inherit
+            // their parent outer's id.
+            let matchId;
+            if (matchIdByContour && matchIdByContour.length === contours.length) {
+                matchId = matchIdByContour;
+            } else {
+                matchId = new Array(contours.length).fill(-1);
+                for (let oi = 0; oi < classified.outers.length; oi++) {
+                    const outer = classified.outers[oi];
+                    matchId[outer.idx] = oi;
+                    for (const hi of outer.holes) matchId[hi] = oi;
+                }
             }
+            const colourOf = (i) => (matchId[i] >= 0)
+                ? paletteColor(matchId[i])
+                : INK_COLOR;
 
             // ── FILL: one <path> per outer group (outer + its holes).
             for (let oi = 0; oi < classified.outers.length; oi++) {
@@ -418,15 +465,24 @@
                     for (let k = 1; k < pts.length; k++) s += ` L ${pts[k].x} ${pts[k].y}`;
                     return s + ' Z';
                 }).join(' ');
+                const mid = matchId[outer.idx];
                 const path = document.createElementNS(svgNS, 'path');
                 path.setAttribute('d', d);
                 path.setAttribute('fill-rule', 'evenodd');
-                path.setAttribute('fill', col(outer.idx));
+                path.setAttribute('fill', paletteColor(mid));
                 path.setAttribute('stroke', 'none');
                 path.dataset.kind = 'fill';
                 path.dataset.source = label;
-                path.dataset.matchId = String(oi);
+                path.dataset.matchId = String(mid);
                 overlay.appendChild(path);
+
+                // Record the outer's centroid (wrap-local) so renderBBoxes
+                // can draw a line between paired centroids across the panes.
+                if (centroidsOut) {
+                    let sx = 0, sy = 0;
+                    for (const m of oc) { sx += m.x; sy += m.y; }
+                    centroidsOut.set(mid, [sx / oc.length, sy / oc.length]);
+                }
             }
 
             // ── STROKE + POINTS: one polygon + N circles per contour.
@@ -434,7 +490,7 @@
             for (let i = 0; i < contours.length; i++) {
                 const mapped = mappedAll[i];
                 if (!mapped) continue;
-                const colour = col(i);
+                const colour = colourOf(i);
                 const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
                 const poly = document.createElementNS(svgNS, 'polygon');
                 poly.setAttribute('points', pts);
@@ -445,7 +501,6 @@
                 poly.dataset.source = label;
                 poly.dataset.matchId = String(matchId[i]);
                 poly.style.pointerEvents = 'all';
-                poly.style.cursor = 'pointer';
                 overlay.appendChild(poly);
 
                 for (const m of mapped) {
@@ -467,35 +522,22 @@
             applyFillToggle();
         }
 
-        // Cross-pane region highlighting. Three visual hits so the highlight
-        // is visible regardless of which toggles are on:
-        //   • polygon stroke thickens to 3× (visible when LINIE is on)
-        //   • vertex circles enlarge (visible when PUNKTE is on)
-        //   • fill path gets a thick white halo stroke (visible when FÜLLEN is
-        //     on — the polygon's own stroke is the same colour as the fill
-        //     underneath, so a contrasting halo is needed to see it).
+        // Cross-pane region highlighting via a yellow glow (CSS drop-shadow
+        // filter applied to every element sharing the matchId: polygons,
+        // fill paths, and vertex circles). The glow is visible regardless
+        // of which toggles are on, and reads as the project's λ-yellow.
+        // Additionally toggles the visibility of the corresponding match-line
+        // — those are hidden by default and only revealed on hover.
+        const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
         function setMatchHighlight(matchId, on) {
             if (matchId === undefined || matchId === '' || matchId === '-1') return;
-            const z = zoom || 1;
             overlay.querySelectorAll(
-                `polygon[data-match-id="${matchId}"]`
-            ).forEach(p => {
-                p.setAttribute('stroke-width', String((on ? 3 : 1) / z));
-            });
-            overlay.querySelectorAll(
-                `circle[data-kind="point"][data-match-id="${matchId}"]`
-            ).forEach(c => {
-                c.setAttribute('r', String((on ? 4 : 2) / z));
-            });
-            overlay.querySelectorAll(
-                `path[data-kind="fill"][data-match-id="${matchId}"]`
-            ).forEach(p => {
-                if (on) {
-                    p.setAttribute('stroke', '#fff');
-                    p.setAttribute('stroke-width', String(4 / z));
+                `[data-match-id="${matchId}"]`
+            ).forEach(el => {
+                if (el.dataset.kind === 'match-line') {
+                    el.style.display = on ? '' : 'none';
                 } else {
-                    p.setAttribute('stroke', 'none');
-                    p.removeAttribute('stroke-width');
+                    el.style.filter = on ? GLOW_FILTER : '';
                 }
             });
         }
@@ -561,24 +603,145 @@
             if (simVal) simVal.textContent = computeSimilarity(pngContours, latexContours) + '%';
         }
 
+        // Build per-contour matchId arrays. The cost matrix for Hungarian
+        // uses the SAME shape descriptor (size / elongation / position /
+        // fuzz) as plausibilcheck.js — with hard vetoes for impossible
+        // pairs (e.g. a "2" onto a √-overbar — elongation differs ≥3×).
+        // Hungarian still produces a full assignment, but any pair whose
+        // cost crosses the veto threshold is forcibly rejected after the
+        // fact (treated as orphan instead of an absurd pair).
+        function computeMatchIds(pngContours, latexContours) {
+            const safe = (c) => Array.isArray(c) ? c : [];
+            const png = safe(pngContours);
+            const lat = safe(latexContours);
+            const pClass = (typeof classifyContours === 'function')
+                ? classifyContours(png) : { outers: png.map((_,i) => ({ idx: i, holes: [] })), holes: [] };
+            const lClass = (typeof classifyContours === 'function')
+                ? classifyContours(lat) : { outers: lat.map((_,i) => ({ idx: i, holes: [] })), holes: [] };
+            const pngId = new Array(png.length).fill(-1);
+            const latId = new Array(lat.length).fill(-1);
+
+            const pOuters = pClass.outers.map(o => png[o.idx]);
+            const lOuters = lClass.outers.map(o => lat[o.idx]);
+
+            let assign = [];
+            let pDesc = [], lDesc = [];
+            if (pOuters.length && lOuters.length
+                && typeof PlausibilCheck !== 'undefined'
+                && typeof hungarian === 'function') {
+                const pBB = PlausibilCheck.equationBBox(pOuters);
+                const lBB = PlausibilCheck.equationBBox(lOuters);
+                pDesc = pOuters.map(p => PlausibilCheck.shapeDescriptor(p, pBB));
+                lDesc = lOuters.map(p => PlausibilCheck.shapeDescriptor(p, lBB));
+                const N = pDesc.length, M = lDesc.length;
+                const cost = new Array(N);
+                for (let i = 0; i < N; i++) {
+                    cost[i] = new Array(M);
+                    for (let j = 0; j < M; j++) {
+                        cost[i][j] = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
+                    }
+                }
+                assign = hungarian(cost);
+                // Post-filter: any pair that crossed a veto (cost ≥ 1e5) is
+                // unset → that PNG outer becomes an orphan, NOT mapped to
+                // an absurd partner. Threshold is well below the 1e6 veto
+                // multiplier in PlausibilCheck.pairCost.
+                const VETO_COST = 1e5;
+                for (let i = 0; i < N; i++) {
+                    const j = assign[i];
+                    if (j >= 0 && j < M && cost[i][j] >= VETO_COST) {
+                        assign[i] = -1;
+                        dbg(`  VETO PNG#${i} ↮ LaTeX#${j} (cost=${cost[i][j].toExponential(1)} — shape incompatible)`);
+                    } else {
+                        const c = (j >= 0 && j < M) ? cost[i][j].toFixed(2) : '—';
+                        dbg(`  PNG#${i} → LaTeX#${j} cost=${c}`);
+                    }
+                }
+            }
+
+            const usedLatex = new Set();
+            let nextId = 0;
+            // Track id ↔ (pngOuterIdx, latexOuterIdx) so the plausibility
+            // report can be indexed by matchId in renderBBoxes.
+            const idToPair = new Map();
+            for (let oi = 0; oi < pClass.outers.length; oi++) {
+                const id = nextId++;
+                const po = pClass.outers[oi];
+                pngId[po.idx] = id;
+                for (const hi of po.holes) pngId[hi] = id;
+                const j = assign[oi];
+                if (j !== undefined && j >= 0 && j < lClass.outers.length && !usedLatex.has(j)) {
+                    const lo = lClass.outers[j];
+                    latId[lo.idx] = id;
+                    for (const hi of lo.holes) latId[hi] = id;
+                    usedLatex.add(j);
+                    idToPair.set(id, { png: oi, lat: j });
+                } else {
+                    idToPair.set(id, { png: oi, lat: -1 });
+                }
+            }
+            for (let j = 0; j < lClass.outers.length; j++) {
+                if (usedLatex.has(j)) continue;
+                const id = nextId++;
+                const lo = lClass.outers[j];
+                latId[lo.idx] = id;
+                for (const hi of lo.holes) latId[hi] = id;
+                idToPair.set(id, { png: -1, lat: j });
+            }
+
+            // Run plausibility check on the resulting pairing — independent of
+            // the cost-matrix used by Hungarian (different metric → catches
+            // bad pairs that the matcher accepted just to minimise total cost).
+            let plausibility = null;
+            if (typeof PlausibilCheck !== 'undefined') {
+                const pairing = new Array(pOuters.length).fill(-1);
+                for (let oi = 0; oi < pClass.outers.length; oi++) {
+                    pairing[oi] = assign[oi] === undefined ? -1 : assign[oi];
+                }
+                plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing);
+                dbg(PlausibilCheck.summarize(plausibility));
+                for (const m of plausibility.matches) dbg(PlausibilCheck.describeMatch(m));
+                for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
+                for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
+            }
+
+            return { pngId, latId, idToPair, plausibility, pClass, lClass };
+        }
+
         function renderBBoxes() {
             while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
             let pngContours = null;
             let latexContoursList = null;
 
-            // ── PNG (engine: user-draw.js extractOutline) ─────────────────
+            // ── Extract contours from both panes FIRST so we can match
+            // before drawing (shared matchIds drive both colour + hover pair).
             if (pix.complete && pix.naturalWidth) {
-                const bbox = computeImageBBox(pix);
-                if (bbox) drawBBox(mapImageBBoxToViewport(pix, bbox), 'png');
-
                 const pc = document.createElement('canvas');
                 pc.width = pix.naturalWidth;
                 pc.height = pix.naturalHeight;
                 pc.getContext('2d').drawImage(pix, 0, 0);
                 pngContours = extractPNGContours(pc);
-                if (pngContours.length) {
-                    // Map source-pixel coords through object-fit:contain
-                    // scaling, then through the wrap-local conversion.
+            }
+            if (tex.complete && tex.naturalWidth && latexCanvas) {
+                const res = extractLatexContours();
+                if (res && res.contours.length) latexContoursList = res.contours;
+            }
+
+            const matchInfo = computeMatchIds(pngContours, latexContoursList);
+            const { pngId, latId, idToPair, plausibility } = matchInfo;
+            dbg(`Hungarian: png=${pngContours?.length || 0} latex=${latexContoursList?.length || 0}`);
+
+            // Centroid maps populated by drawContours — used afterwards to
+            // draw cross-pane match lines (centroid PNG ↔ centroid LaTeX).
+            const pngCentroids = new Map();
+            const latCentroids = new Map();
+
+            // ── PNG render
+            if (pix.complete && pix.naturalWidth) {
+                const bbox = computeImageBBox(pix);
+                if (bbox) drawBBox(mapImageBBoxToViewport(pix, bbox), 'png');
+
+                if (pngContours && pngContours.length) {
                     const r = pix.getBoundingClientRect();
                     const wrapRect = wrap.getBoundingClientRect();
                     const scale = Math.min(r.width / pix.naturalWidth, r.height / pix.naturalHeight);
@@ -591,23 +754,16 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(pngContours, mapFn, 'png');
+                    drawContours(pngContours, mapFn, 'png', pngId, pngCentroids);
                 }
             }
 
-            // ── LaTeX: tex img sources from latexCanvas (same canvas the
-            // contours come from). Use the same PNG-style mapping so display
-            // and contours share one coordinate system → perfect alignment.
+            // ── LaTeX render
             if (tex.complete && tex.naturalWidth && latexCanvas) {
-                // BBox via alpha channel (matches canvasToGridAlpha used by
-                // contour extraction so the rectangle and the contours share
-                // exactly the same definition of "ink").
                 const bbox = computeContentBBox(latexCanvas, 'alpha');
                 if (bbox) drawBBox(mapImageBBoxToViewport(tex, bbox), 'latex');
 
-                const res = extractLatexContours();
-                if (res && res.contours.length) {
-                    latexContoursList = res.contours;
+                if (latexContoursList && latexContoursList.length) {
                     const r = tex.getBoundingClientRect();
                     const wrapRect = wrap.getBoundingClientRect();
                     const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
@@ -620,8 +776,69 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(latexContoursList, mapFn, 'latex');
+                    drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids);
                 }
+            }
+
+            // ── Match lines: hidden by default, only the hovered pair's line
+            // is revealed (via setMatchHighlight). Solid stroke; colour =
+            // palette for ok/meh, bright red for suspect (the plausibility
+            // verdict still affects colour, just not visibility).
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const z = zoom || 1;
+            const verdictById = new Map();
+            if (plausibility) {
+                for (const m of plausibility.matches) {
+                    for (const [id, pair] of idToPair) {
+                        if (pair.png === m.pngIdx) {
+                            verdictById.set(id, { verdict: m.verdict, score: m.score });
+                            break;
+                        }
+                    }
+                }
+            }
+            for (const [mid, p] of pngCentroids) {
+                const l = latCentroids.get(mid);
+                if (!l) continue;
+                const v = verdictById.get(mid);
+                const verdict = v ? v.verdict : 'ok';
+                const score = v ? v.score : 1;
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', p[0]);
+                line.setAttribute('y1', p[1]);
+                line.setAttribute('x2', l[0]);
+                line.setAttribute('y2', l[1]);
+                line.setAttribute('stroke', verdict === 'suspect' ? '#ff3030' : paletteColor(mid));
+                line.setAttribute('stroke-width', String((verdict === 'suspect' ? 2 : 1.5) / z));
+                line.setAttribute('opacity', '0.9');
+                line.style.display = 'none';
+                line.dataset.kind = 'match-line';
+                line.dataset.matchId = String(mid);
+                line.dataset.verdict = verdict;
+                line.dataset.score = score.toFixed(2);
+                overlay.appendChild(line);
+            }
+            // Orphan markers: an outer that has no partner in the other pane
+            // gets a red dashed ring at its centroid. "pur nerd" indeed.
+            const markOrphan = (centroidMap, mid) => {
+                const c = centroidMap.get(mid);
+                if (!c) return;
+                const r = document.createElementNS(svgNS, 'circle');
+                r.setAttribute('cx', c[0]);
+                r.setAttribute('cy', c[1]);
+                r.setAttribute('r', String(14 / z));
+                r.setAttribute('fill', 'none');
+                r.setAttribute('stroke', '#ff3030');
+                r.setAttribute('stroke-width', String(2 / z));
+                r.setAttribute('stroke-dasharray', `${3 / z},${3 / z}`);
+                r.setAttribute('opacity', '0.85');
+                r.dataset.kind = 'orphan';
+                r.dataset.matchId = String(mid);
+                overlay.appendChild(r);
+            };
+            for (const [id, pair] of idToPair) {
+                if (pair.png >= 0 && pair.lat < 0) markOrphan(pngCentroids, id);
+                else if (pair.lat >= 0 && pair.png < 0) markOrphan(latCentroids, id);
             }
 
             updateInfoBoxes(pngContours, latexContoursList);
@@ -798,8 +1015,10 @@
         });
 
         // ── Left-mouse-button pan ───────────────────────────────────────────
+        // Default cursor is crosshair; switches to grabbing only while
+        // actively dragging the pane.
         let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
-        host.style.cursor = 'grab';
+        host.style.cursor = 'crosshair';
         host.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
             dragging = true;
@@ -819,7 +1038,7 @@
         window.addEventListener('mouseup', () => {
             if (!dragging) return;
             dragging = false;
-            host.style.cursor = 'grab';
+            host.style.cursor = 'crosshair';
             saveZoomPan();
         });
 
