@@ -18,6 +18,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="../js/debug-window.js"></script>
+    <!-- Local API keys (gitignored). Missing file is fine — onerror swallows the 404. -->
+    <script src="apikey.local.js" onerror="this.remove()"></script>
 
     <style>
         #draw-canvas {
@@ -35,7 +37,9 @@
             position: relative;
             width: 80%;
             max-width: 80vh;
-            height: 80%;
+            flex: 1 1 auto;
+            min-height: 0;
+            aspect-ratio: 1 / 1;
             line-height: 0;
         }
         #draw-wrap {
@@ -53,6 +57,7 @@
             position: relative;
             width: 80%;
             max-width: 80vh;
+            flex-shrink: 0;
             background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(0, 210, 255, 0.5);
             border-radius: 8px;
@@ -85,8 +90,13 @@
             font-size: 32px;
             color: #F4C430;
             min-height: 50px;
-            display: flex;
-            align-items: center;
+            text-align: center;
+            overflow-x: auto;
+        }
+        /* KaTeX inherits page font-family otherwise — force its own glyphs */
+        #result-render .katex,
+        #result-render .katex-display {
+            color: #F4C430;
         }
         .api-input {
             width: 100%;
@@ -174,6 +184,10 @@
                         <div class="label">LATEX</div>
                         <div id="result-latex">—</div>
                     </div>
+                    <div class="pane">
+                        <div class="label">RENDERED</div>
+                        <div id="result-render"></div>
+                    </div>
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
@@ -223,11 +237,20 @@
             </div>
         `, '#00d2ff', { collapsible: true });
 
-        CyberUI.createCard('ui-container', 'MATHPIX API', `
-            <input type="text" id="mp-app-id" class="api-input" placeholder="app_id" autocomplete="off">
-            <input type="password" id="mp-app-key" class="api-input" placeholder="app_key" autocomplete="off">
+        CyberUI.createCard('ui-container', 'GOOGLE GEMINI API', `
+            <input type="password" id="g-api-key" class="api-input" placeholder="API key (aistudio.google.com/apikey)" autocomplete="off">
+            <div class="eps-row" style="margin-top:8px;">
+                <label>Model</label>
+                <select id="g-model" class="api-input" style="flex:1;width:auto;margin-top:0;">
+                    <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                    <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                </select>
+            </div>
             <button class="cyber-btn" onclick="recognize()"
                 style="width:100%;margin-top:8px;border-color:rgba(173,255,47,0.5);color:#adff2f;">► ERKENNEN</button>
+            <button class="cyber-btn" onclick="debugRender()"
+                style="width:100%;margin-top:6px;border-color:rgba(244,196,48,0.5);color:#F4C430;">DEBUG (gespeichertes LaTeX rendern)</button>
         `, '#00d2ff', { collapsible: true });
 
         const FORMULA_TITLES = [
@@ -251,7 +274,7 @@
         let isDrawing = false;
 
         function initDraw() {
-            drawCtx.fillStyle = '#fff'; // weiß für Mathpix-OCR
+            drawCtx.fillStyle = '#fff'; // white background — better OCR contrast for Gemini
             drawCtx.fillRect(0, 0, 1000, 1000);
             drawCtx.strokeStyle = '#000';
             const strokeEl = document.getElementById('stroke-slider');
@@ -266,7 +289,7 @@
             document.getElementById('result-render').innerHTML = '';
         }
 
-        // Lade Preset-PNG, ersetze grün/farbig → schwarz auf weiß für Mathpix-OCR
+        // Lade Preset-PNG, ersetze grün/farbig → schwarz auf weiß für die OCR
         function loadPreset(idx) {
             const img = new Image();
             img.crossOrigin = 'anonymous';
@@ -334,62 +357,133 @@
         }, { passive: false });
         drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
 
-        // ── Mathpix-OCR ─────────────────────────────────────────────────────────
+        // ── Render helper (shared by recognize + debugRender) ───────────────────
+        function renderLatex(latex) {
+            const target = document.getElementById('result-render');
+            target.innerHTML = '';
+            try {
+                katex.render(latex, target, { throwOnError: false, displayMode: true });
+            } catch (e) {
+                target.textContent = latex;
+                DebugWindow.log(`⚠ katex.render threw: ${e.message}`);
+            }
+        }
+
+        // DEBUG: render whatever LaTeX is saved in localStorage. Falls back to
+        // Einstein if nothing's been saved yet — so the render path can be
+        // tested in isolation without burning a Gemini call.
+        function debugRender() {
+            const saved = (() => { try { return localStorage.getItem('eocr-last-latex'); } catch (_) { return null; } })();
+            const latex = saved || 'E = mc^2';
+            DebugWindow.log(`🐞 DEBUG render: ${latex}${saved ? '' : ' (Fallback — nichts gespeichert)'}`);
+            document.getElementById('result-latex').textContent = latex;
+            renderLatex(latex);
+        }
+
+        // ── Gemini OCR ──────────────────────────────────────────────────────────
+        // Strip a single $...$, $$...$$, \(...\) or \[...\] wrapper if Gemini added one.
+        function unwrapLatex(s) {
+            s = s.trim();
+            // Remove markdown code fences ```latex ... ``` if present
+            const fence = s.match(/^```(?:latex|tex)?\s*([\s\S]*?)\s*```$/i);
+            if (fence) s = fence[1].trim();
+            if (s.startsWith('$$') && s.endsWith('$$')) return s.slice(2, -2).trim();
+            if (s.startsWith('$')  && s.endsWith('$'))  return s.slice(1, -1).trim();
+            if (s.startsWith('\\(') && s.endsWith('\\)')) return s.slice(2, -2).trim();
+            if (s.startsWith('\\[') && s.endsWith('\\]')) return s.slice(2, -2).trim();
+            return s;
+        }
+
         async function recognize() {
-            const appId  = document.getElementById('mp-app-id').value.trim();
-            const appKey = document.getElementById('mp-app-key').value.trim();
-            if (!appId || !appKey) {
-                DebugWindow.log('⚠ app_id / app_key fehlen');
-                document.getElementById('result-latex').textContent = '⚠ API-Credentials fehlen';
+            const apiKey = document.getElementById('g-api-key').value.trim();
+            const model  = document.getElementById('g-model').value;
+            if (!apiKey) {
+                DebugWindow.log('⚠ API key fehlt');
+                document.getElementById('result-latex').textContent = '⚠ API-Key fehlt';
                 return;
             }
-            try { localStorage.setItem('eocr-app-id', appId); } catch (_) {}
-            try { localStorage.setItem('eocr-app-key', appKey); } catch (_) {}
+            try { localStorage.setItem('eocr-g-key', apiKey); } catch (_) {}
+            try { localStorage.setItem('eocr-g-model', model); } catch (_) {}
 
-            const src = drawCanvas.toDataURL('image/png');
-            DebugWindow.log('▶ Mathpix /v3/text');
+            // Gemini wants bare base64 in inline_data — strip the data-URL prefix.
+            const dataUrl = drawCanvas.toDataURL('image/png');
+            const b64 = dataUrl.split(',', 2)[1];
+
+            DebugWindow.log(`▶ Gemini ${model} (key: …${apiKey.slice(-4)}, b64: ${b64.length} chars)`);
+            console.log('Gemini recognize() start', { model, keyTail: apiKey.slice(-4), b64Len: b64.length });
             document.getElementById('result-latex').textContent = '⏳ Lade…';
             document.getElementById('result-render').innerHTML = '';
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const prompt =
+                "This image contains a single handwritten or printed mathematical equation. " +
+                "Return ONLY the equation as LaTeX, with no surrounding text, no markdown code fences, " +
+                "no $ or \\( delimiters. Use standard LaTeX commands (e.g. \\frac, \\sqrt, \\sum, \\int). " +
+                "If the image is empty or unreadable, return exactly: (empty)";
+            // Gemini REST API expects camelCase: inlineData, mimeType, generationConfig.
+            const body = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inlineData: { mimeType: 'image/png', data: b64 } }
+                    ]
+                }],
+                generationConfig: { temperature: 0 }
+            };
             try {
                 const t0 = performance.now();
-                const res = await fetch('https://api.mathpix.com/v3/text', {
+                DebugWindow.log(`  → fetch POST ${model}:generateContent`);
+                const res = await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'app_id':  appId,
-                        'app_key': appKey,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        src,
-                        formats: ['text', 'latex_styled'],
-                        data_options: { include_latex: true }
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
                 });
-                DebugWindow.log(`  HTTP ${res.status} (${Math.round(performance.now() - t0)}ms)`);
-                const data = await res.json();
-                DebugWindow.log(`  result: ${JSON.stringify(data).slice(0, 200)}`);
-                const latex = data.latex_styled || data.text || '(leer)';
+                DebugWindow.log(`  ← HTTP ${res.status} ${res.statusText} (${Math.round(performance.now() - t0)}ms)`);
+                console.log('Gemini response', res.status, res.statusText);
+                const text = await res.text();
+                DebugWindow.log(`  body: ${text.slice(0, 240)}`);
+                let data;
+                try { data = JSON.parse(text); }
+                catch (e) {
+                    DebugWindow.log(`✗ JSON parse failed: ${e.message}`);
+                    document.getElementById('result-latex').textContent = `Fehler: invalid JSON (${res.status})`;
+                    return;
+                }
+                if (!res.ok) {
+                    const msg = data?.error?.message || `HTTP ${res.status}`;
+                    DebugWindow.log(`✗ Gemini-Fehler: ${msg}`);
+                    document.getElementById('result-latex').textContent = `Fehler: ${msg}`;
+                    return;
+                }
+                const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '(leer)';
+                DebugWindow.log(`  raw: ${raw.slice(0, 200)}`);
+                const latex = unwrapLatex(raw);
                 document.getElementById('result-latex').textContent = latex;
-                try {
-                    katex.render(latex.replace(/^\\\(|\\\)$/g, '').trim(), document.getElementById('result-render'), {
-                        throwOnError: false, displayMode: true
-                    });
-                } catch (e) {
-                    document.getElementById('result-render').textContent = latex;
+                renderLatex(latex);
+                // Save last non-empty result so DEBUG button can replay it.
+                if (latex && latex !== '(empty)' && latex !== '(leer)') {
+                    try { localStorage.setItem('eocr-last-latex', latex); } catch (_) {}
+                    DebugWindow.log(`💾 LaTeX gespeichert (eocr-last-latex)`);
                 }
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
             } catch (err) {
-                DebugWindow.log(`✗ Mathpix-Fehler: ${err.message}`);
+                DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
+                console.error('Gemini fetch error', err);
                 document.getElementById('result-latex').textContent = `Fehler: ${err.message}`;
             }
         }
 
-        // Restore credentials from localStorage
+        // Restore credentials: localStorage wins; fall back to window.GEMINI_API_KEY
+        // from apikey.local.js (gitignored) so the key survives a localStorage wipe.
         try {
-            const id  = localStorage.getItem('eocr-app-id');
-            const key = localStorage.getItem('eocr-app-key');
-            if (id)  document.getElementById('mp-app-id').value = id;
-            if (key) document.getElementById('mp-app-key').value = key;
+            const keyLS  = localStorage.getItem('eocr-g-key');
+            const keyFile = (typeof window.GEMINI_API_KEY === 'string' && window.GEMINI_API_KEY.trim())
+                ? window.GEMINI_API_KEY.trim() : '';
+            const key   = keyLS || keyFile;
+            const model = localStorage.getItem('eocr-g-model');
+            if (key)   document.getElementById('g-api-key').value = key;
+            if (model) document.getElementById('g-model').value = model;
+            if (keyFile && !keyLS) DebugWindow.log('🔑 Key aus apikey.local.js geladen');
             const s = localStorage.getItem('eocr-stroke');
             if (s) { document.getElementById('stroke-slider').value = s; document.getElementById('stroke-val').textContent = s; }
         } catch (_) {}
