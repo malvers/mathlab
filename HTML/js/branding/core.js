@@ -74,8 +74,8 @@
             // ENTER FS: brackets at outer TR + BL corners, opening toward center.
             // EXIT FS:  same diagonal but inverted — brackets sit closer to center
             //           with their apex pointing inward (legs open outward).
-            const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
-            const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
+            const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
+            const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
             const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
             const container = document.createElement("div");

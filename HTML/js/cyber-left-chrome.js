@@ -23,14 +23,14 @@
 (function () {
     'use strict';
 
-    var NATURAL_EXPANDED = 66 + 350;
+    var NATURAL_EXPANDED = 66 + 356;
     /** Rail-only width when SB collapsed — same 66px track as expanded chrome (single --cyber-left-scale applies to both). */
     var NATURAL_COLLAPSED = 66;
 
     var DEFAULT_MIN = 0.48;
-    var DEFAULT_MAX = 1.35;
+    var DEFAULT_MAX = 1.12; // Caps left chrome at ~472px (66 mini-rail + 406 sidebar buffer)
     var SAFETY_MIN = 0.05;
-    var SAFETY_MAX = 10;
+    var SAFETY_MAX = 1.12; // Hard cap — prevents any code path (manual zoom, etc.) from growing beyond 472px
 
     /**
      * proportionalChrome: left width ≈ vw × leftViewportFraction × autoRelativeToFit.
@@ -89,7 +89,8 @@
             if (avail < 80) avail = 80;
             raw = avail / NATURAL_EXPANDED;
         }
-        return Math.min(SAFETY_MAX, Math.max(SAFETY_MIN, Math.min(DEFAULT_MAX, raw)));
+        // Hard cap at 1.0 — left chrome never grows beyond natural width (no zoom on big windows)
+        return Math.min(1.0, Math.max(SAFETY_MIN, raw));
     }
 
     function publishResolvedScale() {
