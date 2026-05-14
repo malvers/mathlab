@@ -296,7 +296,21 @@
         if (stiftClearBtn) stiftClearBtn.addEventListener('click', clearStrokes);
 
         applyStiftState();
-        requestAnimationFrame(resizeStift);
+        requestAnimationFrame(() => {
+            resizeStift();
+            // Outlines beim Reload wiederherstellen: wenn beim letzten Klick
+            // auf OUTLINES GENERIEREN das Flag gesetzt wurde UND noch Striche
+            // im Canvas sind, automatisch neu extrahieren. (Re-extract aus den
+            // frisch gemalten Pixeln ist günstiger als die Kontur-Daten zu
+            // persistieren — und vermeidet Skalierungs-Drift bei anderer
+            // Fenstergröße.)
+            try {
+                if (localStorage.getItem('draw20-outlines-active') === '1' && strokes.length > 0
+                    && typeof extractStiftOutlines === 'function') {
+                    extractStiftOutlines();
+                }
+            } catch (_) {}
+        });
         window.addEventListener('resize', resizeStift);
 
         // ── Stift-Outlines: gleiche Pipeline wie extractPNGContours ─────────
@@ -1963,6 +1977,31 @@
             if (t < MORPH_EPS) {
                 srcEl.style.opacity = '1';
                 tex.style.opacity = '0';
+                // Pre-Morph-Vorschau: zeige die N Korrespondenz-Linien pro
+                // Outer-Pair, die der Morph später interpoliert. So sieht
+                // der User, was wohin gehen wird.
+                const svgNS = 'http://www.w3.org/2000/svg';
+                const N = 60;
+                const z = zoom || 1;
+                const sw = String(0.8 / z);
+                for (const pair of pairs) {
+                    const p = resampleClosed(pair[srcKey], N);
+                    let l = resampleClosed(pair[dstKey], N);
+                    if (p.length < 3 || l.length < 3) continue;
+                    l = alignStart(l, p[0]);
+                    const color = paletteColor(pair.mid);
+                    for (let i = 0; i < N; i++) {
+                        const ln = document.createElementNS(svgNS, 'line');
+                        ln.setAttribute('x1', p[i].x.toFixed(2));
+                        ln.setAttribute('y1', p[i].y.toFixed(2));
+                        ln.setAttribute('x2', l[i].x.toFixed(2));
+                        ln.setAttribute('y2', l[i].y.toFixed(2));
+                        ln.setAttribute('stroke', color);
+                        ln.setAttribute('stroke-width', sw);
+                        ln.setAttribute('stroke-opacity', '0.45');
+                        morphLayer.appendChild(ln);
+                    }
+                }
                 return;
             }
             if (t > 1 - MORPH_EPS) {
@@ -2331,7 +2370,7 @@
             wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
             // Counter-scale stroke width so all overlay lines stay 1 screen px.
             const sw = String(1 / zoom);
-            overlay.querySelectorAll('rect, polygon, polyline, path').forEach(r => {
+            overlay.querySelectorAll('rect, polygon, polyline, path, line').forEach(r => {
                 r.setAttribute('stroke-width', sw);
             });
             // Counter-scale vertex dots so they stay constant screen size.
@@ -2354,7 +2393,7 @@
             zoom = 1; panX = 0; panY = 0;
             saveZoomPan();
             wrap.style.transform = '';
-            overlay.querySelectorAll('rect, polygon, polyline, path').forEach(r => {
+            overlay.querySelectorAll('rect, polygon, polyline, path, line').forEach(r => {
                 r.setAttribute('stroke-width', '1');
             });
             overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
