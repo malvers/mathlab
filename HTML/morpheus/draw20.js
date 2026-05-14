@@ -8,12 +8,11 @@
     const DEFAULT_LATEX = 'E=mc^2';
     const DEFAULT_PRESET = 0;
     const INK_COLOR = '#F4C430';
-    // 20 maximally-distinguishable colours (Sasha Trubetskoy palette, with
-    // the original yellow swapped for a saturated gold so it doesn't collide
-    // with INK_COLOR). Indexed by matchId — PNG outer #N and LaTeX outer #N
-    // share the same palette slot, so paired regions glow in the same hue.
+    // 20 maximally-distinguishable colours — RED-FREE on purpose so orphans
+    // (rendered in a saturated knallrot with glow) cannot be confused with
+    // any paired-region colour. Indexed by matchId — PNG outer #N and LaTeX
+    // outer #N share the same palette slot, so paired regions match in hue.
     const REGION_PALETTE = [
-        '#e6194B', // red
         '#3cb44b', // green
         '#4363d8', // blue
         '#f58231', // orange
@@ -21,19 +20,22 @@
         '#42d4f4', // cyan
         '#f032e6', // magenta
         '#bfef45', // lime
-        '#fabed4', // pink
         '#469990', // teal
         '#dcbeff', // lavender
         '#9A6324', // brown
-        '#800000', // maroon
         '#aaffc3', // mint
         '#808000', // olive
         '#ffd8b1', // apricot
-        '#000075', // navy
+        '#E040FB', // bright violet (replaces navy — too close to dark-blue bg)
         '#a9a9a9', // gray
-        '#e67e22', // pumpkin
         '#1abc9c', // turquoise
+        '#7B68EE', // slate blue (replaces red)
+        '#A1887F', // light warm brown (replaces maroon)
+        '#85C1E9', // sky blue (replaces pumpkin)
+        '#3D9970', // forest green (replaces pink)
     ];
+    const ORPHAN_COLOR = '#FF1744';
+    const ORPHAN_GLOW = 'drop-shadow(0 0 3px #FF1744)';
     function paletteColor(i) {
         const n = REGION_PALETTE.length;
         return REGION_PALETTE[((i % n) + n) % n];
@@ -136,6 +138,12 @@
             pointer-events: auto;
         `;
         wrap.appendChild(overlay);
+        // Dedicated layer for the morph (interpolated polygons between PNG
+        // and LaTeX matched pairs). Appended early so it sits BELOW the
+        // outline/point/match-line elements drawn by drawContours.
+        const morphLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        morphLayer.id = 'morph-layer';
+        overlay.appendChild(morphLayer);
         // Single delegated hover listener for the whole overlay — handles
         // both <polygon> outlines and <path> fills via e.target.dataset.
         // mouseover / mouseout bubble (unlike mouseenter / mouseleave) so a
@@ -425,7 +433,10 @@
         // `centroidsOut` (optional Map<matchId,[x,y]>) is populated with the
         // wrap-local centroid of each outer's mapped polygon so the caller
         // can draw cross-pane match lines.
-        function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut) {
+        // `pointsOut` (optional Map<matchId, mapped-point-array>) stores the
+        // wrap-local point array per outer — used by renderMorph() for the
+        // pair-wise interpolation between PNG and LaTeX matched outers.
+        function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut) {
             if (!contours || contours.length === 0) return;
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = zoom || 1;
@@ -454,9 +465,12 @@
                     for (const hi of outer.holes) matchId[hi] = oi;
                 }
             }
-            const colourOf = (i) => (matchId[i] >= 0)
-                ? paletteColor(matchId[i])
-                : INK_COLOR;
+            const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
+            const colourOf = (i) => {
+                const mid = matchId[i];
+                if (mid < 0) return INK_COLOR;
+                return isOrphanMid(mid) ? ORPHAN_COLOR : paletteColor(mid);
+            };
 
             // ── FILL: one <path> per outer group (outer + its holes).
             for (let oi = 0; oi < classified.outers.length; oi++) {
@@ -470,23 +484,24 @@
                     return s + ' Z';
                 }).join(' ');
                 const mid = matchId[outer.idx];
+                const orphan = isOrphanMid(mid);
                 const path = document.createElementNS(svgNS, 'path');
                 path.setAttribute('d', d);
                 path.setAttribute('fill-rule', 'evenodd');
-                path.setAttribute('fill', paletteColor(mid));
+                path.setAttribute('fill', orphan ? ORPHAN_COLOR : paletteColor(mid));
                 path.setAttribute('stroke', 'none');
+                if (orphan) path.style.filter = ORPHAN_GLOW;
                 path.dataset.kind = 'fill';
                 path.dataset.source = label;
                 path.dataset.matchId = String(mid);
                 overlay.appendChild(path);
 
-                // Record the outer's centroid (wrap-local) so renderBBoxes
-                // can draw a line between paired centroids across the panes.
                 if (centroidsOut) {
                     let sx = 0, sy = 0;
                     for (const m of oc) { sx += m.x; sy += m.y; }
                     centroidsOut.set(mid, [sx / oc.length, sy / oc.length]);
                 }
+                if (pointsOut) pointsOut.set(mid, oc);
             }
 
             // ── STROKE + POINTS: one polygon + N circles per contour.
@@ -494,6 +509,8 @@
             for (let i = 0; i < contours.length; i++) {
                 const mapped = mappedAll[i];
                 if (!mapped) continue;
+                const mid = matchId[i];
+                const orphan = isOrphanMid(mid);
                 const colour = colourOf(i);
                 const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
                 const poly = document.createElementNS(svgNS, 'polygon');
@@ -502,8 +519,9 @@
                 poly.setAttribute('stroke', colour);
                 poly.setAttribute('stroke-width', sw);
                 poly.setAttribute('stroke-linejoin', 'round');
+                if (orphan) poly.style.filter = ORPHAN_GLOW;
                 poly.dataset.source = label;
-                poly.dataset.matchId = String(matchId[i]);
+                poly.dataset.matchId = String(mid);
                 poly.style.pointerEvents = 'all';
                 overlay.appendChild(poly);
 
@@ -513,9 +531,10 @@
                     dot.setAttribute('cy', m.y);
                     dot.setAttribute('r', pr);
                     dot.setAttribute('fill', colour);
+                    if (orphan) dot.style.filter = ORPHAN_GLOW;
                     dot.dataset.kind = 'point';
                     dot.dataset.source = label;
-                    dot.dataset.matchId = String(matchId[i]);
+                    dot.dataset.matchId = String(mid);
                     overlay.appendChild(dot);
                     totalVerts++;
                 }
@@ -608,13 +627,17 @@
             if (simVal) simVal.textContent = computeSimilarity(pngContours, latexContours) + '%';
         }
 
-        // Build per-contour matchId arrays. The cost matrix for Hungarian
-        // uses the SAME shape descriptor (size / elongation / position /
-        // fuzz) as plausibilcheck.js — with hard vetoes for impossible
-        // pairs (e.g. a "2" onto a √-overbar — elongation differs ≥3×).
-        // Hungarian still produces a full assignment, but any pair whose
-        // cost crosses the veto threshold is forcibly rejected after the
-        // fact (treated as orphan instead of an absurd pair).
+        // Master switch — when false, Hungarian / vetoes / uncrossing /
+        // rescue / suspect-drop are all bypassed. Each PNG and LaTeX outer
+        // gets its own unique id (no cross-pane pairing) and renders with
+        // a unique palette colour. Used to verify that every character is
+        // detected and contour-extracted, without matching artefacts.
+        const MATCHING_ENABLED = true;
+
+        // Build per-contour matchId arrays. When MATCHING_ENABLED, the cost
+        // matrix uses the same shape descriptors (size / elongation / position
+        // / fuzz) as plausibilcheck.js with hard vetoes for impossible pairs
+        // — Hungarian + uncrossing + rescue + suspect-drop refine until stable.
         function computeMatchIds(pngContours, latexContours) {
             const safe = (c) => Array.isArray(c) ? c : [];
             const png = safe(pngContours);
@@ -631,7 +654,8 @@
 
             let assign = [];
             let pDesc = [], lDesc = [];
-            if (pOuters.length && lOuters.length
+            if (MATCHING_ENABLED
+                && pOuters.length && lOuters.length
                 && typeof PlausibilCheck !== 'undefined'
                 && typeof hungarian === 'function') {
                 const pBB = PlausibilCheck.equationBBox(pOuters);
@@ -699,15 +723,30 @@
                         for (let k = i + 1; k < N; k++) {
                             const l = assign[k];
                             if (l < 0) continue;
-                            const cross = (pDesc[i].ny < pDesc[k].ny) !== (lDesc[j].ny < lDesc[l].ny);
-                            if (!cross) continue;
-                            const orig = cost[i][j] + cost[k][l];
-                            const swap = cost[i][l] + cost[k][j];
-                            if (swap <= orig + 1e-6) {
-                                assign[i] = l;
-                                assign[k] = j;
-                                changed = true;
-                                swaps++;
+                            // Detect crossings on EITHER axis: X-order
+                            // inversion (formula left-to-right reading flow)
+                            // OR Y-order inversion (vertical structures like
+                            // fractions). Either is a strong indicator that
+                            // the two pairs are swapped.
+                            const crossX = (pDesc[i].nx < pDesc[k].nx) !== (lDesc[j].nx < lDesc[l].nx);
+                            const crossY = (pDesc[i].ny < pDesc[k].ny) !== (lDesc[j].ny < lDesc[l].ny);
+                            if (!crossX && !crossY) continue;
+                            // Only refuse the swap when it would create a
+                            // veto-level pair (cost ≥ 1e5 — fundamentally
+                            // incompatible shapes). For ALL other cases
+                            // accept it — Hungarian is globally optimal so a
+                            // local swap inevitably raises total cost, but
+                            // crossings are a stronger reading-order signal
+                            // than tiny cost deltas. No cost cap.
+                            if (cost[i][l] >= VETO_COST || cost[k][j] >= VETO_COST) continue;
+                            assign[i] = l;
+                            assign[k] = j;
+                            changed = true;
+                            swaps++;
+                            // First-iteration spotlight on the swap that
+                            // fixed something (helps verify in debug).
+                            if (sweeps === 1 && swaps <= 4) {
+                                dbg(`  SWAP PNG#${i}↔LaTeX#${l} & PNG#${k}↔LaTeX#${j} (was: ${j},${l}) crossX=${crossX} crossY=${crossY}`);
                             }
                         }
                     }
@@ -874,13 +913,18 @@
                 return;
             }
             const { pngContours, latexContours, pClass, lClass,
-                    pngId, latId, idToPair, plausibility } = lastRenderData;
+                    pngId, latId, idToPair, plausibility,
+                    pngDisplayScale, latDisplayScale } = lastRenderData;
 
             // Build a flat list of items {polys, matchId, label, score, orphan}.
             const items = [];
             const orphanLookup = new Set();
-            for (const [id, pair] of idToPair) {
-                if (pair.png < 0 || pair.lat < 0) orphanLookup.add(id);
+            // Skip orphan tagging when matching is off — every outer would
+            // otherwise be flagged as "no partner" and render bright red.
+            if (MATCHING_ENABLED) {
+                for (const [id, pair] of idToPair) {
+                    if (pair.png < 0 || pair.lat < 0) orphanLookup.add(id);
+                }
             }
             const scoreById = new Map();
             if (plausibility) {
@@ -927,76 +971,443 @@
                 return;
             }
 
-            // Layout: items distributed around a circle.
-            const W = 1400, H = 1000;
+            // Layout: PNG on LEFT half, LaTeX on RIGHT half of the ring.
+            // Each polygon is drawn at the EXACT on-screen size it has in the
+            // live panes (natural-pixel coords × display-scale captured when
+            // renderBBoxes last ran). No re-scaling — the polygons appear as
+            // big as they are on the page.
+            const W = 1800, H = 1300;
             const cx = W / 2, cy = H / 2;
-            const N = items.length;
-            const R = Math.min(W, H) * 0.40;
-            // Each polygon fits in a square cell — size based on arc length so
-            // cells don't overlap. Clamped so very-few-items don't get huge.
-            const cellHalf = Math.min(80, Math.max(30, (2 * Math.PI * R) / (N * 2.4)));
+            const R = 580;
+            const pngItems = items.filter(it => it.label[0] === 'P');
+            const latItems = items.filter(it => it.label[0] === 'L');
+            const pngScale = pngDisplayScale || 1;
+            const latScale = latDisplayScale || 1;
 
-            const svgPieces = [];
-
-            items.forEach((it, i) => {
-                const angle = -Math.PI / 2 + i * 2 * Math.PI / N;
+            const placeAt = (it, angle, scale) => {
                 const px = cx + R * Math.cos(angle);
                 const py = cy + R * Math.sin(angle);
-                const colour = it.matchId >= 0 ? paletteColor(it.matchId) : '#888';
+                return { it, px, py, scale };
+            };
+            const placed = [];
+            pngItems.forEach((it, i) => {
+                const angle = -Math.PI / 2 - (i + 0.5) * Math.PI / pngItems.length;
+                placed.push(placeAt(it, angle, pngScale));
+            });
+            latItems.forEach((it, i) => {
+                const angle = -Math.PI / 2 + (i + 0.5) * Math.PI / latItems.length;
+                placed.push(placeAt(it, angle, latScale));
+            });
 
-                // Compute outer bbox for normalization.
+            // Per-pane equation bboxes (for normalised descriptors used in
+            // the cross-polygon similarity ranking).
+            const pBB = pngItems.length
+                ? PlausibilCheck.equationBBox(pngItems.map(it => it.outer))
+                : { cx: 0, cy: 0, w: 1, h: 1 };
+            const lBB = latItems.length
+                ? PlausibilCheck.equationBBox(latItems.map(it => it.outer))
+                : { cx: 0, cy: 0, w: 1, h: 1 };
+
+            const svgPieces = [];
+            const polyData = []; // { idx, px, py, top3: [{idx, score}, ...] }
+
+            placed.forEach(({ it, px, py, scale }, idx) => {
+                const isOrphan = !!it.orphan;
+                const colour = isOrphan
+                    ? ORPHAN_COLOR
+                    : (it.matchId >= 0 ? paletteColor(it.matchId) : '#888');
+                const pathStyle = isOrphan ? ` style="filter:${ORPHAN_GLOW}"` : '';
+
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 for (const [x, y] of it.outer) {
                     if (x < minX) minX = x; if (x > maxX) maxX = x;
                     if (y < minY) minY = y; if (y > maxY) maxY = y;
                 }
-                const w = maxX - minX, h = maxY - minY;
-                const scale = Math.min((cellHalf * 1.8) / Math.max(1, w),
-                                       (cellHalf * 1.8) / Math.max(1, h));
                 const ox = (minX + maxX) / 2;
                 const oy = (minY + maxY) / 2;
+                // Scaled-screen bbox for the hover hit-test rect.
+                const sw = (maxX - minX) * scale;
+                const sh = (maxY - minY) * scale;
+                const pad = 14; // generous so even thin glyphs are easy to hit
+                const boxX = px - sw / 2 - pad;
+                const boxY = py - sh / 2 - pad;
+                const boxW = sw + pad * 2;
+                const boxH = sh + pad * 2;
+
                 const place = (poly) => poly.map(([x, y]) =>
                     `${px + (x - ox) * scale},${py + (y - oy) * scale}`).join(' ');
 
-                // Path: outer + holes with evenodd → holes punch through.
                 let d = `M ${place(it.outer).split(' ').join(' L ')} Z`;
                 for (const hp of it.holes) {
                     d += ` M ${place(hp).split(' ').join(' L ')} Z`;
                 }
+                // Visible polygon (no hover hook).
                 svgPieces.push(
-                    `<path d="${d}" fill="${colour}" fill-rule="evenodd" stroke="none"/>`
+                    `<path d="${d}" fill="${colour}" fill-rule="evenodd" stroke="none"${pathStyle}/>`
                 );
-
-                // Cell border — red dashed for orphans, none for paired
-                // (transparent / invisible).
-                if (it.orphan) {
-                    svgPieces.push(
-                        `<rect x="${px - cellHalf}" y="${py - cellHalf}" width="${cellHalf * 2}" height="${cellHalf * 2}" fill="none" stroke="#ff3030" stroke-width="2" stroke-dasharray="4,3" rx="6"/>`
-                    );
-                }
-
-                // No labels — only the polygon + cell border. Identity comes
-                // from the palette colour (paired = shared hue) and the cell
-                // border style (red dashed = orphan).
+                // Transparent hit-test rect ON TOP — captures mouseenter for
+                // its whole bounding box (much easier to hit than a thin
+                // glyph). Visually invisible but cursor stays pointer.
+                svgPieces.push(
+                    `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" data-idx="${idx}" fill="transparent" pointer-events="all" style="cursor:pointer"/>`
+                );
+                polyData.push({ idx, px, py, colour, src: it.label[0] });
             });
 
-            const win = window.open('', 'draw20-polygon-ring', `width=${W},height=${H + 60}`);
+            // Per-polygon shape descriptor — serialised into the popup so the
+            // top-3 can be RE-COMPUTED on the fly when the user drags the
+            // weight sliders.
+            const descriptors = placed.map(({ it }) => {
+                const bb = it.label[0] === 'P' ? pBB : lBB;
+                return PlausibilCheck.shapeDescriptor(it.outer, it.holes, bb);
+            });
+            // Attach a slim descriptor (only what shapeOnlyPlausibility needs)
+            // to each polyData entry so the popup can score pairs locally.
+            descriptors.forEach((d, i) => {
+                polyData[i].desc = d ? {
+                    size: d.size, elong: d.elong, fuzz: d.fuzz,
+                    massX: d.massX, massY: d.massY,
+                    holes: d.holes, holeFrac: d.holeFrac,
+                } : null;
+            });
+
+            // Restore the user's last window size/position (persisted in
+            // localStorage by the popup itself via beforeunload).
+            let geom = null;
+            try { geom = JSON.parse(localStorage.getItem('draw20-ring-geom') || 'null'); } catch (_) {}
+            const defW = Math.min(W, Math.round(window.screen.availWidth * 0.9));
+            const defH = Math.min(H + 60, Math.round(window.screen.availHeight * 0.9));
+            const wsz = geom && geom.w > 200 ? geom.w : defW;
+            const hsz = geom && geom.h > 200 ? geom.h : defH;
+            const features = [`width=${wsz}`, `height=${hsz}`];
+            if (geom && Number.isFinite(geom.x) && Number.isFinite(geom.y)) {
+                features.push(`left=${geom.x}`, `top=${geom.y}`);
+            }
+            const win = window.open('', 'draw20-polygon-ring', features.join(','));
             if (!win) { alert('Popup wurde blockiert.'); return; }
             win.document.open();
             win.document.write(`<!DOCTYPE html><html lang="de"><head>
-<meta charset="utf-8"><title>Polygon Ring (${N} outers)</title>
+<meta charset="utf-8"><title>Polygon Ring (${items.length} outers)</title>
 <style>
-  body { margin: 0; padding: 0; background: #000010; color: #aaa; font-family: 'Orbitron', sans-serif; }
-  .hdr { padding: 8px 16px; font-size: 12px; color: #00d2ff; border-bottom: 1px solid #222; }
-  svg { display: block; background: #000010; }
+  html, body { height: 100%; }
+  body { margin: 0; padding: 0; background: #000010; color: #aaa; font-family: 'Orbitron', sans-serif; display: flex; flex-direction: column; }
+  .hdr { padding: 6px 16px; font-size: 11px; color: #00d2ff; border-bottom: 1px solid #222; flex: 0 0 auto; }
+  .sliders { display: flex; gap: 14px; padding: 10px 16px; border-bottom: 1px solid #222; flex: 0 0 auto; flex-wrap: wrap; align-items: center; background: rgba(0,0,40,0.4); }
+  .sl { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+  .sl .row { display: flex; align-items: center; gap: 8px; }
+  .sl label { font-size: 10px; letter-spacing: 0.08em; color: #aaa; text-transform: uppercase; }
+  .sl input[type=range] { flex: 1; accent-color: #00d2ff; }
+  .sl .val { font-size: 11px; color: #00d2ff; font-weight: 700; min-width: 28px; text-align: right; font-family: Arial, sans-serif; }
+  .reset { padding: 6px 12px; background: rgba(0,0,0,0.6); color: #00d2ff; border: 1px solid rgba(0,210,255,0.5); border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; cursor: pointer; letter-spacing: 0.08em; }
+  .stage { flex: 1 1 auto; min-height: 0; }
+  svg { display: block; background: #000010; width: 100%; height: 100%; }
+  rect[data-idx] { transition: stroke 0.1s; }
 </style></head><body>
-<div class="hdr">Polygon Ring — ${N} outer polygons (PNG: ${pClass ? pClass.outers.length : 0}, LaTeX: ${lClass ? lClass.outers.length : 0})</div>
-<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${svgPieces.join('')}</svg>
+<div class="hdr">Polygon Ring — ${items.length} outer polygons (PNG: ${pngItems.length}, LaTeX: ${latItems.length}) · <b>klick</b> ein Polygon (lock) — slider gewichten in Echtzeit · <span style="color:#F4C430;font-weight:700">[A]</span> Top-1 für alle</div>
+<div class="sliders" id="sliders">
+  <div class="sl"><label>Mass</label><div class="row"><input type="range" id="w-mass" min="0" max="100" value="38"><span class="val" id="v-mass">38</span></div></div>
+  <div class="sl"><label>Size</label><div class="row"><input type="range" id="w-size" min="0" max="100" value="20"><span class="val" id="v-size">20</span></div></div>
+  <div class="sl"><label>Holes</label><div class="row"><input type="range" id="w-holes" min="0" max="100" value="18"><span class="val" id="v-holes">18</span></div></div>
+  <div class="sl"><label>Elong</label><div class="row"><input type="range" id="w-elong" min="0" max="100" value="14"><span class="val" id="v-elong">14</span></div></div>
+  <div class="sl"><label>Fuzz</label><div class="row"><input type="range" id="w-fuzz" min="0" max="100" value="10"><span class="val" id="v-fuzz">10</span></div></div>
+  <button class="reset" id="greedy-match">GREEDY [G]</button>
+  <button class="reset" id="reset-weights">RESET</button>
+</div>
+<div class="stage"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+  <g id="similarity-lines"></g>
+  ${svgPieces.join('')}
+</svg></div>
+<script>
+  const POLYS = ${JSON.stringify(polyData)};
+  const layer = document.getElementById('similarity-lines');
+  function clearLines() { while (layer.firstChild) layer.removeChild(layer.firstChild); }
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // Weight state — driven by the 5 sliders. Defaults match shapeOnlyPlausibility.
+  const W = { mass: 38, size: 20, holes: 18, elong: 14, fuzz: 10 };
+  function readSliders() {
+    W.mass  = +document.getElementById('w-mass').value;
+    W.size  = +document.getElementById('w-size').value;
+    W.holes = +document.getElementById('w-holes').value;
+    W.elong = +document.getElementById('w-elong').value;
+    W.fuzz  = +document.getElementById('w-fuzz').value;
+    document.getElementById('v-mass').textContent  = W.mass;
+    document.getElementById('v-size').textContent  = W.size;
+    document.getElementById('v-holes').textContent = W.holes;
+    document.getElementById('v-elong').textContent = W.elong;
+    document.getElementById('v-fuzz').textContent  = W.fuzz;
+  }
+  // Score function: identical to PlausibilCheck.shapeOnlyPlausibility but
+  // with weights from the sliders (renormalised so they sum to 1).
+  function score(a, b) {
+    if (!a || !b) return 0;
+    const sizeR = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
+    const sSize = Math.max(0, 1 - sizeR / 1.5);
+    const elongR = Math.abs(Math.log(a.elong / b.elong));
+    const sElong = Math.max(0, 1 - elongR / 1.0);
+    const fuzzR = Math.abs(Math.log(a.fuzz / b.fuzz));
+    const sFuzz = Math.max(0, 1 - fuzzR / 1.0);
+    const dmX = Math.abs(a.massX - b.massX);
+    const dmY = Math.abs(a.massY - b.massY);
+    const sMass = Math.max(0, 1 - (dmX + dmY) / 1.5);
+    const dh = Math.abs(a.holes - b.holes);
+    const dhf = Math.abs(a.holeFrac - b.holeFrac);
+    const sHoles = Math.max(0, 1 - dh / 2 - dhf * 0.5);
+    const sum = W.mass + W.size + W.holes + W.elong + W.fuzz;
+    if (sum <= 0) return 0;
+    return (W.mass * sMass + W.size * sSize + W.holes * sHoles
+          + W.elong * sElong + W.fuzz * sFuzz) / sum;
+  }
+  function topN(idx, n) {
+    const me = POLYS[idx];
+    if (!me || !me.desc) return [];
+    const out = [];
+    for (let j = 0; j < POLYS.length; j++) {
+      if (j === idx) continue;
+      const o = POLYS[j];
+      if (!o.desc || o.src === me.src) continue;
+      out.push({ idx: j, score: score(me.desc, o.desc) });
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out.slice(0, n);
+  }
+
+  let lockedIdx = null;
+  function showFor(idx) {
+    clearLines();
+    const me = POLYS[idx];
+    if (!me) return;
+    // Recompute top-3 on the fly using current slider weights.
+    const top3 = topN(idx, 3);
+    if (!top3.length) return;
+    // Rank 0 (most similar) gets thickest, brightest line; rank 2 thinnest.
+    top3.forEach((t, r) => {
+      const other = POLYS[t.idx];
+      if (!other) return;
+      const line = document.createElementNS(NS, 'line');
+      line.setAttribute('x1', me.px); line.setAttribute('y1', me.py);
+      line.setAttribute('x2', other.px); line.setAttribute('y2', other.py);
+      line.setAttribute('stroke', '#cccccc');
+      line.setAttribute('stroke-width', String(4 - r));
+      line.setAttribute('opacity', String(0.85 - r * 0.20));
+      layer.appendChild(line);
+      // Score badge: a rounded box with the percentage, positioned along the
+      // line biased toward the target end. Big text + dark backdrop for
+      // readability against any underlying polygon colour.
+      const tx = me.px + (other.px - me.px) * 0.62;
+      const ty = me.py + (other.py - me.py) * 0.62;
+      const label = Math.round(t.score * 100) + '%';
+      const fontSize = 32;
+      const padX = 16, padY = 10;
+      const charW = fontSize * 0.55;
+      const boxW = label.length * charW + padX * 2;
+      const boxH = fontSize + padY * 2;
+      // Rank → colour: best=green, 2nd=yellow, 3rd=red.
+      const RANK_COL = ['#3cb44b', '#F4C430', '#FF1744'];
+      const rankCol = RANK_COL[r] || '#888';
+      const g = document.createElementNS(NS, 'g');
+      const rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', tx - boxW / 2);
+      rect.setAttribute('y', ty - boxH / 2);
+      rect.setAttribute('width', boxW);
+      rect.setAttribute('height', boxH);
+      rect.setAttribute('rx', 8);
+      rect.setAttribute('fill', '#000');
+      rect.setAttribute('stroke', rankCol);
+      rect.setAttribute('stroke-width', '2');
+      g.appendChild(rect);
+      const txt = document.createElementNS(NS, 'text');
+      txt.setAttribute('x', tx);
+      txt.setAttribute('y', ty);
+      txt.setAttribute('fill', rankCol);
+      txt.setAttribute('font-size', String(fontSize));
+      txt.setAttribute('font-weight', '700');
+      txt.setAttribute('font-family', 'Arial, sans-serif');
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'central');
+      txt.textContent = label;
+      g.appendChild(txt);
+      layer.appendChild(g);
+    });
+  }
+  // Draw one line from each polygon's centroid to its top-1 most similar
+  // partner — used by [A] overview mode. Each line is coloured by the PNG
+  // endpoint's polygon colour.
+  function drawTop1ForAll() {
+    clearLines();
+    POLYS.forEach(me => {
+      if (!me.desc) return;
+      const top = topN(me.idx, 1);
+      if (!top.length) return;
+      const other = POLYS[top[0].idx];
+      if (!other) return;
+      const pngEnd = me.src === 'P' ? me : (other.src === 'P' ? other : me);
+      const line = document.createElementNS(NS, 'line');
+      line.setAttribute('x1', me.px); line.setAttribute('y1', me.py);
+      line.setAttribute('x2', other.px); line.setAttribute('y2', other.py);
+      line.setAttribute('stroke', pngEnd.colour);
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('opacity', '0.75');
+      layer.appendChild(line);
+    });
+  }
+  let allMode = false;
+  let greedyMode = false;
+
+  // Greedy bipartite assignment: sort every cross-pane pair by score
+  // descending, fix the top pair, mark both endpoints "used" so they can't
+  // appear in another pair, repeat. Not globally optimal like Hungarian,
+  // but simple and intuitive — and respects the current slider weights.
+  function drawGreedy() {
+    clearLines();
+    const pairs = [];
+    for (let i = 0; i < POLYS.length; i++) {
+      const a = POLYS[i];
+      if (!a.desc) continue;
+      for (let j = i + 1; j < POLYS.length; j++) {
+        const b = POLYS[j];
+        if (!b.desc || a.src === b.src) continue;
+        pairs.push({ i, j, s: score(a.desc, b.desc) });
+      }
+    }
+    pairs.sort((x, y) => y.s - x.s);
+    const used = new Set();
+    const picked = [];
+    for (const p of pairs) {
+      if (used.has(p.i) || used.has(p.j)) continue;
+      used.add(p.i); used.add(p.j);
+      picked.push(p);
+    }
+    // Draw — top of the list = highest score = thickest, brightest line.
+    picked.forEach((p, rank) => {
+      const a = POLYS[p.i], b = POLYS[p.j];
+      const pngEnd = a.src === 'P' ? a : (b.src === 'P' ? b : a);
+      const line = document.createElementNS(NS, 'line');
+      line.setAttribute('x1', a.px); line.setAttribute('y1', a.py);
+      line.setAttribute('x2', b.px); line.setAttribute('y2', b.py);
+      line.setAttribute('stroke', pngEnd.colour);
+      line.setAttribute('stroke-width', '2.5');
+      line.setAttribute('opacity', '0.85');
+      layer.appendChild(line);
+      // Score badge in the middle of each line.
+      const tx = (a.px + b.px) / 2;
+      const ty = (a.py + b.py) / 2;
+      const label = Math.round(p.s * 100) + '%';
+      const fontSize = 24;
+      const padX = 10, padY = 6;
+      const boxW = label.length * fontSize * 0.55 + padX * 2;
+      const boxH = fontSize + padY * 2;
+      const rankCol = p.s >= 0.70 ? '#3cb44b' : p.s >= 0.55 ? '#F4C430' : '#FF1744';
+      const g = document.createElementNS(NS, 'g');
+      const rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', tx - boxW / 2);
+      rect.setAttribute('y', ty - boxH / 2);
+      rect.setAttribute('width', boxW);
+      rect.setAttribute('height', boxH);
+      rect.setAttribute('rx', 6);
+      rect.setAttribute('fill', '#000');
+      rect.setAttribute('stroke', rankCol);
+      rect.setAttribute('stroke-width', '2');
+      g.appendChild(rect);
+      const txt = document.createElementNS(NS, 'text');
+      txt.setAttribute('x', tx);
+      txt.setAttribute('y', ty);
+      txt.setAttribute('fill', rankCol);
+      txt.setAttribute('font-size', String(fontSize));
+      txt.setAttribute('font-weight', '700');
+      txt.setAttribute('font-family', 'Arial, sans-serif');
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'central');
+      txt.textContent = label;
+      g.appendChild(txt);
+      layer.appendChild(g);
+    });
+  }
+
+  // Click to LOCK a polygon's top-3 display. Click again or on another →
+  // switches. The lines stay until cleared.
+  document.querySelectorAll('[data-idx]').forEach(p => {
+    p.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = +p.dataset.idx;
+      if (lockedIdx === idx) { lockedIdx = null; clearLines(); }
+      else { lockedIdx = idx; allMode = false; showFor(idx); }
+    });
+  });
+  // Click on empty space (the SVG, not on a polygon) → unlock.
+  document.querySelector('svg').addEventListener('click', () => {
+    lockedIdx = null;
+    if (allMode) drawTop1ForAll(); else clearLines();
+  });
+
+  function redraw() {
+    if (greedyMode) drawGreedy();
+    else if (allMode) drawTop1ForAll();
+    else if (lockedIdx !== null) showFor(lockedIdx);
+    else clearLines();
+  }
+
+  // Keys: [A] = top-1 for all, [G] = greedy assignment.
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'a' || e.key === 'A') {
+      allMode = !allMode;
+      if (allMode) { greedyMode = false; lockedIdx = null; }
+      redraw();
+    } else if (e.key === 'g' || e.key === 'G') {
+      greedyMode = !greedyMode;
+      if (greedyMode) { allMode = false; lockedIdx = null; }
+      redraw();
+    }
+  });
+
+  // Slider listeners — recompute live.
+  ['mass','size','holes','elong','fuzz'].forEach(k => {
+    document.getElementById('w-' + k).addEventListener('input', () => {
+      readSliders();
+      redraw();
+    });
+  });
+  document.getElementById('reset-weights').addEventListener('click', () => {
+    document.getElementById('w-mass').value = 38;
+    document.getElementById('w-size').value = 20;
+    document.getElementById('w-holes').value = 18;
+    document.getElementById('w-elong').value = 14;
+    document.getElementById('w-fuzz').value = 10;
+    readSliders();
+    redraw();
+  });
+  document.getElementById('greedy-match').addEventListener('click', () => {
+    greedyMode = !greedyMode;
+    if (greedyMode) { allMode = false; lockedIdx = null; }
+    redraw();
+  });
+  readSliders();
+  // Persist window geometry (size + position). Shared localStorage with the
+  // opener since the popup is same-origin.
+  function saveGeom() {
+    try {
+      localStorage.setItem('draw20-ring-geom', JSON.stringify({
+        w: window.outerWidth,
+        h: window.outerHeight,
+        x: window.screenX,
+        y: window.screenY,
+      }));
+    } catch (_) {}
+  }
+  window.addEventListener('resize', saveGeom);
+  window.addEventListener('beforeunload', saveGeom);
+  // Position has no event — poll every 1.5s while the popup is open.
+  setInterval(saveGeom, 1500);
+</script>
 </body></html>`);
             win.document.close();
         }
 
         function renderBBoxes() {
+            // Detach morph-layer first, wipe everything, drawing happens in
+            // between, morph-layer gets re-attached as the LAST child below
+            // so its polygons render on TOP of bboxes/outlines/dots.
+            if (morphLayer.parentNode === overlay) overlay.removeChild(morphLayer);
             while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
             let pngContours = null;
             let latexContoursList = null;
@@ -1019,24 +1430,43 @@
             const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
             dbg(`Hungarian: png=${pngContours?.length || 0} latex=${latexContoursList?.length || 0}`);
 
+            // Display scales — natural pixel → displayed CSS pixel, exactly
+            // as used by drawContours for the main panes. The polygon-ring
+            // uses these so each polygon is rendered at the SAME on-screen
+            // size as in the live panes.
+            const pixR = pix.getBoundingClientRect();
+            const texR = tex.getBoundingClientRect();
+            const pngDisplayScale = (pix.naturalWidth && pix.naturalHeight)
+                ? Math.min(pixR.width / pix.naturalWidth, pixR.height / pix.naturalHeight) : 1;
+            const latDisplayScale = (tex.naturalWidth && tex.naturalHeight)
+                ? Math.min(texR.width / tex.naturalWidth, texR.height / tex.naturalHeight) : 1;
+
             // Stash the most-recent render data so the polygon-ring view can
             // grab it without re-running the matcher.
             lastRenderData = {
                 pngContours, latexContours: latexContoursList,
                 pClass, lClass, pngId, latId, idToPair, plausibility,
+                pngDisplayScale, latDisplayScale,
             };
 
             // Refresh the orphan-id set so setMatchHighlight knows which mids
-            // are orphans (and must skip the yellow glow on hover).
+            // are orphans (and must skip the yellow glow on hover). When
+            // MATCHING_ENABLED is false, every outer is "unpaired" by design
+            // — skip the orphan flagging so they keep their palette colours
+            // instead of all rendering bright red.
             orphanMatchIds.clear();
-            for (const [id, pair] of idToPair) {
-                if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+            if (MATCHING_ENABLED) {
+                for (const [id, pair] of idToPair) {
+                    if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+                }
             }
 
             // Centroid maps populated by drawContours — used afterwards to
             // draw cross-pane match lines (centroid PNG ↔ centroid LaTeX).
             const pngCentroids = new Map();
             const latCentroids = new Map();
+            const pngPoints = new Map();
+            const latPoints = new Map();
 
             // ── PNG render
             if (pix.complete && pix.naturalWidth) {
@@ -1056,7 +1486,7 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(pngContours, mapFn, 'png', pngId, pngCentroids);
+                    drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints);
                 }
             }
 
@@ -1078,7 +1508,7 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids);
+                    drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints);
                 }
             }
 
@@ -1120,36 +1550,142 @@
                 line.dataset.score = score.toFixed(2);
                 overlay.appendChild(line);
             }
-            // Orphan markers: an outer that has no partner in the other pane
-            // gets a red dashed ring at its centroid. "pur nerd" indeed.
-            const markOrphan = (centroidMap, mid) => {
-                const c = centroidMap.get(mid);
-                if (!c) return;
-                const r = document.createElementNS(svgNS, 'circle');
-                r.setAttribute('cx', c[0]);
-                r.setAttribute('cy', c[1]);
-                r.setAttribute('r', String(14 / z));
-                r.setAttribute('fill', 'none');
-                r.setAttribute('stroke', '#ff3030');
-                r.setAttribute('stroke-width', String(2 / z));
-                r.setAttribute('stroke-dasharray', `${3 / z},${3 / z}`);
-                r.setAttribute('opacity', '0.85');
-                r.dataset.kind = 'orphan';
-                r.dataset.matchId = String(mid);
-                overlay.appendChild(r);
-            };
+            // Orphan dashed-circle markers removed — the bright-red polygon
+            // (rendered with ORPHAN_COLOR and red glow) is enough.
             let pngOrphCount = 0, latOrphCount = 0;
             for (const [id, pair] of idToPair) {
-                if (pair.png >= 0 && pair.lat < 0) {
-                    if (pngCentroids.has(id)) { markOrphan(pngCentroids, id); pngOrphCount++; }
-                } else if (pair.lat >= 0 && pair.png < 0) {
-                    if (latCentroids.has(id)) { markOrphan(latCentroids, id); latOrphCount++; }
-                }
+                if (pair.png >= 0 && pair.lat < 0) pngOrphCount++;
+                else if (pair.lat >= 0 && pair.png < 0) latOrphCount++;
             }
             dbg(`Orphans: png=${pngOrphCount} lat=${latOrphCount}`);
 
+            // Build the morph-pair list (matched outer pairs in wrap-local
+            // coords) so renderMorph(t) can interpolate without re-running
+            // anything. Re-apply the current morph value so the slider state
+            // stays consistent across re-renders.
+            morphPairs.length = 0;
+            for (const [mid, pp] of pngPoints) {
+                const lp = latPoints.get(mid);
+                if (!lp) continue;
+                morphPairs.push({ mid, pngPts: pp, latPts: lp });
+            }
+            dbg(`morphPairs: ${morphPairs.length} (png points: ${pngPoints.size}, lat points: ${latPoints.size})`);
+            // Morph-layer on top of everything for visibility.
+            overlay.appendChild(morphLayer);
+            const sl = document.getElementById('morph-slider');
+            if (sl) renderMorph(+sl.value / 100);
+
             updateInfoBoxes(pngContours, latexContoursList);
         }
+
+        // ── Morph: interpolate matched outer pairs between PNG and LaTeX.
+        // morphPairs is populated by renderBBoxes; the slider (0..100, value
+        // / 100 = t) drives the interpolation. pix/tex opacity crossfades so
+        // the source/target panes fade during the morph.
+        const morphPairs = [];
+        function resampleClosed(pts, n) {
+            if (!pts || pts.length === 0) return [];
+            if (typeof resamplePolygon === 'function') {
+                const arr = pts.map(p => [p.x, p.y]);
+                return resamplePolygon(arr, n).map(p => ({ x: p[0], y: p[1] }));
+            }
+            // Stride fallback if geometry.js helper is missing.
+            const step = pts.length / n;
+            const out = [];
+            for (let i = 0; i < n; i++) out.push(pts[Math.floor(i * step) % pts.length]);
+            return out;
+        }
+        // Rotate `pts` so the point closest to `anchor` is first — keeps the
+        // interpolation from "twisting" when the two polygons start at
+        // different positions on their boundary.
+        function alignStart(pts, anchor) {
+            let best = 0, bestD = Infinity;
+            for (let i = 0; i < pts.length; i++) {
+                const d = (pts[i].x - anchor.x) ** 2 + (pts[i].y - anchor.y) ** 2;
+                if (d < bestD) { bestD = d; best = i; }
+            }
+            return best === 0 ? pts : [...pts.slice(best), ...pts.slice(0, best)];
+        }
+        // Render morph polygons between PNG and LaTeX matched pairs.
+        // t=0 → pure PNG (no morph polys, pix full, tex hidden).
+        // t=1 → pure LaTeX (no morph polys, pix hidden, tex full).
+        // 0<t<1 → cross-fade panes + interpolated polygons over the top.
+        const MORPH_EPS = 0.02;
+        function renderMorph(t) {
+            while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
+            t = Math.max(0, Math.min(1, t));
+            dbg(`renderMorph t=${t.toFixed(2)} pairs=${morphPairs.length}`);
+            if (!morphPairs.length) {
+                pix.style.opacity = '';
+                tex.style.opacity = '';
+                return;
+            }
+            if (t < MORPH_EPS) {
+                pix.style.opacity = '1';
+                tex.style.opacity = '0';
+                return;
+            }
+            if (t > 1 - MORPH_EPS) {
+                pix.style.opacity = '0';
+                tex.style.opacity = '1';
+                return;
+            }
+            pix.style.opacity = String(1 - t);
+            tex.style.opacity = String(t);
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const N = 60;
+            const z = zoom || 1;
+            let drawn = 0;
+            for (const pair of morphPairs) {
+                const p = resampleClosed(pair.pngPts, N);
+                let l = resampleClosed(pair.latPts, N);
+                if (p.length < 3 || l.length < 3) continue;
+                l = alignStart(l, p[0]);
+                const pts = p.map((pp, i) => ({
+                    x: (1 - t) * pp.x + t * l[i].x,
+                    y: (1 - t) * pp.y + t * l[i].y,
+                }));
+                const polyStr = pts.map(pp => `${pp.x},${pp.y}`).join(' ');
+                const poly = document.createElementNS(svgNS, 'polygon');
+                poly.setAttribute('points', polyStr);
+                poly.setAttribute('fill', paletteColor(pair.mid));
+                poly.setAttribute('fill-opacity', '0.85');
+                poly.setAttribute('stroke', '#ffffff');
+                poly.setAttribute('stroke-width', String(1.5 / z));
+                poly.setAttribute('stroke-opacity', '0.6');
+                morphLayer.appendChild(poly);
+                drawn++;
+            }
+            dbg(`renderMorph drawn=${drawn} polygons`);
+        }
+        // Hook into the existing morph-slider (lives in the side panel).
+        // Updates draw20's overlay morph; the legacy engine listener still
+        // fires too but only updates the (hidden) legacy canvases.
+        function attachMorphSlider() {
+            const sl = document.getElementById('morph-slider');
+            if (!sl) { setTimeout(attachMorphSlider, 100); return; }
+            sl.min = '0';
+            if (sl.value === '1') sl.value = '0';
+            // OVERRIDE the legacy global onMorphSlider — its body uses the
+            // hidden legacy canvases (digit-canvas / morph-canvas) and won't
+            // produce visible morphs in our draw20 setup. Replacing the
+            // function on `window` redirects the HTML `oninput="onMorphSlider(this.value)"`
+            // attribute to our renderMorph.
+            window.onMorphSlider = function (val) {
+                const span = document.getElementById('morph-val');
+                if (span) span.textContent = val;
+                dbg(`onMorphSlider → ${val}`);
+                renderMorph(+val / 100);
+            };
+            // Also keep addEventListener as a belt-and-braces fallback.
+            sl.addEventListener('input', () => {
+                dbg(`slider input → ${sl.value}`);
+                renderMorph(+sl.value / 100);
+            });
+            dbg(`morph-slider listener attached (min=${sl.min}, max=${sl.max}, value=${sl.value})`);
+            renderMorph(+sl.value / 100);
+        }
+        attachMorphSlider();
 
         // Coordinated setter: switch both panes to a new formula and re-render
         // the bounding boxes once BOTH images have loaded (pix from preset PNG,
@@ -1157,6 +1693,8 @@
         function setFormula(latex, presetIndex) {
             dbg(`setFormula latex="${latex}" preset=${presetIndex}`);
             tex.dataset.latex = latex;
+            // Re-show pix in case a previous symbol-click hid it.
+            pix.style.visibility = '';
             const latexReady = renderLatex(latex);
             const url = `presets/formula-${presetIndex}.png`;
             const pixReady = new Promise(resolve => {
@@ -1170,6 +1708,48 @@
                 requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
             });
         }
+
+        // SYMBOLE / DIGIT clicks — single LaTeX glyph, no PNG preset.
+        // Renders the symbol into the tex pane and hides pix (no handwritten
+        // counterpart exists). Hooks the legacy `setTextInput` (used by every
+        // symbol radio) and `onDigitChange` (used by the digit buttons) so we
+        // get notified for both.
+        function setSymbolLatex(latex) {
+            if (!latex || !String(latex).trim()) return;
+            dbg(`setSymbolLatex "${latex}"`);
+            tex.dataset.latex = String(latex);
+            // No PNG counterpart: hide pix entirely and clear its src so
+            // renderBBoxes skips the PNG side (pix.naturalWidth becomes 0).
+            pix.style.visibility = 'hidden';
+            pix.removeAttribute('src');
+            // Clear the legacy draw-canvas so any prior handwriting / formula
+            // pixels are gone — symbol view shows ONLY the chosen glyph.
+            if (typeof clearDraw === 'function') {
+                try { clearDraw(); } catch (_) {}
+            } else {
+                const dc = document.getElementById('draw-canvas');
+                if (dc) dc.getContext('2d').clearRect(0, 0, dc.width, dc.height);
+            }
+            renderLatex(String(latex)).then(() => {
+                requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
+            });
+        }
+        function attachSymbolHooks() {
+            const origSet = (typeof window.setTextInput === 'function')
+                ? window.setTextInput : null;
+            window.setTextInput = function (latex) {
+                if (origSet) { try { origSet(latex); } catch (_) {} }
+                setSymbolLatex(latex);
+            };
+            const origDigit = (typeof window.onDigitChange === 'function')
+                ? window.onDigitChange : null;
+            window.onDigitChange = function (d) {
+                if (origDigit) { try { origDigit(d); } catch (_) {} }
+                setSymbolLatex(String(d));
+            };
+            dbg('symbol/digit hooks installed');
+        }
+        attachSymbolHooks();
 
         // Wire up the existing formula radio grid: any change selects a new
         // formula. We read the data-latex / data-preset attributes the inline
@@ -1326,8 +1906,106 @@
         // actively dragging the pane.
         let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
         host.style.cursor = 'crosshair';
+
+        // Drawing mode (Stift) is on when the legacy draw-canvas has
+        // pointer-events: auto. When ON, the user is drawing — we must NOT
+        // grab the mousedown for pan-drag (would steal events from the
+        // drawing canvas).
+        function isDrawingActive() {
+            const dc = document.getElementById('draw-canvas');
+            return !!(dc && dc.style.pointerEvents === 'auto');
+        }
+        // Sync the legacy draw-wrap visibility & z-order so the draw-canvas
+        // sits ABOVE draw20-wrap during drawing. Called whenever the Stift
+        // toggle changes (via the hooked onDrawToggle).
+        function applyDrawMode() {
+            const drawing = isDrawingActive();
+            const drawWrap = document.getElementById('draw-wrap');
+            if (drawWrap) {
+                drawWrap.style.setProperty('display', drawing ? 'block' : '', 'important');
+                if (drawing) {
+                    drawWrap.style.position = 'absolute';
+                    drawWrap.style.inset = '0';
+                    drawWrap.style.zIndex = '20';
+                    drawWrap.style.pointerEvents = 'auto';
+                }
+            }
+            const cs = document.getElementById('canvas-stack');
+            if (cs && drawing) cs.style.zIndex = '21';
+        }
+        function hookDrawToggle() {
+            const orig = window.onDrawToggle;
+            if (typeof orig !== 'function') { setTimeout(hookDrawToggle, 100); return; }
+            window.onDrawToggle = function () {
+                if (orig) { try { orig(); } catch (_) {} }
+                applyDrawMode();
+            };
+            applyDrawMode();
+            dbg('draw-toggle hook installed');
+        }
+        hookDrawToggle();
+
+        // ── Right-click context menu (custom).
+        // Currently a single action: "Delete Local" — wipes all localStorage
+        // (zoom/pan, drawn pixels, switch states, formula choice, …) so the
+        // next reload starts from a clean slate.
+        let ctxMenu = null;
+        function closeCtxMenu() {
+            if (ctxMenu && ctxMenu.parentNode) ctxMenu.parentNode.removeChild(ctxMenu);
+            ctxMenu = null;
+        }
+        function openCtxMenu(x, y) {
+            closeCtxMenu();
+            ctxMenu = document.createElement('div');
+            ctxMenu.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                z-index: 10000;
+                background: rgba(0, 0, 0, 0.95);
+                border: 1px solid rgba(0, 210, 255, 0.5);
+                border-radius: 6px;
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+                padding: 4px 0;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 12px;
+                color: #00d2ff;
+                min-width: 180px;
+                user-select: none;
+            `;
+            const item = document.createElement('div');
+            item.textContent = 'Delete Local';
+            item.style.cssText = `
+                padding: 8px 14px;
+                cursor: pointer;
+                letter-spacing: 0.06em;
+            `;
+            item.addEventListener('mouseenter', () => { item.style.background = 'rgba(0,210,255,0.15)'; });
+            item.addEventListener('mouseleave', () => { item.style.background = ''; });
+            item.addEventListener('click', () => {
+                try { localStorage.clear(); } catch (_) {}
+                dbg('localStorage cleared');
+                closeCtxMenu();
+                location.reload();
+            });
+            ctxMenu.appendChild(item);
+            document.body.appendChild(ctxMenu);
+        }
+        host.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openCtxMenu(e.clientX, e.clientY);
+        });
+        // Any click elsewhere (or Escape) closes the menu.
+        document.addEventListener('mousedown', (e) => {
+            if (ctxMenu && !ctxMenu.contains(e.target)) closeCtxMenu();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCtxMenu();
+        });
+
         host.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
+            if (isDrawingActive()) return; // Stift on → drawing has priority
             dragging = true;
             dragStartX = e.clientX;
             dragStartY = e.clientY;
@@ -1356,32 +2034,50 @@
         // Expose the diagnostic ring-view (also bound to a floating button).
         window.openPolygonRing = openPolygonRing;
 
-        // Floating button — top-right of the viewport, opens the polygon-ring
-        // diagnostic window. Appended to <body> with position: fixed so the
-        // `#canvas-container > * { display: none !important }` rule cannot
-        // hide it.
+        // RING button — placed directly below the similarity-box info card
+        // (same width, same left edge, similar styling) so it visually belongs
+        // to the diagnostic-info stack. Sits inside canvas-container with an
+        // inline display override against the global `> * { display: none
+        // !important }` rule.
         const ringBtn = document.createElement('button');
+        ringBtn.id = 'draw20-ring-btn';
         ringBtn.textContent = 'RING';
         ringBtn.title = 'Alle Outer-Polygone im Ring anzeigen (neues Fenster)';
-        ringBtn.style.cssText = `
-            position: fixed;
-            top: 14px;
-            right: 14px;
-            z-index: 9999;
-            padding: 8px 16px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #00d2ff;
-            border: 1px solid #00d2ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            cursor: pointer;
-            border-radius: 4px;
-            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
-        `;
         ringBtn.addEventListener('click', openPolygonRing);
-        document.body.appendChild(ringBtn);
+        host.appendChild(ringBtn);
+
+        // Position the button below the similarity-box. Re-position on
+        // every render (in case the sim-box size changed) and on resize.
+        function positionRingBtn() {
+            const sim = document.getElementById('similarity-box');
+            if (!sim) { setTimeout(positionRingBtn, 100); return; }
+            const simRect = sim.getBoundingClientRect();
+            const hostRect = host.getBoundingClientRect();
+            const top = simRect.bottom - hostRect.top + 8;
+            const left = simRect.left - hostRect.left;
+            const width = simRect.width;
+            ringBtn.style.cssText = `
+                position: absolute !important;
+                display: block !important;
+                top: ${top}px;
+                left: ${left}px;
+                width: ${width}px;
+                z-index: 50;
+                padding: 10px 12px;
+                background: rgba(0, 0, 0, 0.85);
+                color: #00d2ff;
+                border: 1px solid rgba(0, 210, 255, 0.5);
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+                font-family: 'Orbitron', sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                cursor: pointer;
+            `;
+        }
+        positionRingBtn();
+        window.addEventListener('resize', positionRingBtn);
 
         dbg('✓ wrap appended');
     }
