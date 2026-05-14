@@ -25,7 +25,20 @@ function createDraw20UI({
     const log = (typeof dbg === 'function') ? dbg : () => {};
 
     // ── Formula / Symbol / Radio dispatch ───────────────────────────────────
+    // Wipes the morph polygon layer immediately. Used by setFormula and
+    // setSymbolLatex to clear stale correspondence/morph lines BEFORE the
+    // async LaTeX/PNG render kicks off — otherwise the user sees stale
+    // lines blink from the previous selection.
+    function clearMorphLayer() {
+        const ml = document.getElementById('morph-layer');
+        if (!ml) return;
+        while (ml.firstChild) ml.removeChild(ml.firstChild);
+    }
     function setFormula(latex, presetIndex) {
+        // Wipe lingering correspondence/morph artifacts immediately so the
+        // user doesn't see stale lines from the previous formula while the
+        // new LaTeX renders async.
+        clearMorphLayer();
         tex.dataset.latex = latex;
         // Re-show pix in case a previous symbol-click hid it.
         pix.style.visibility = '';
@@ -52,6 +65,8 @@ function createDraw20UI({
     // on legacy globals needed.
     function setSymbolLatex(latex) {
         if (!latex || !String(latex).trim()) return;
+        // Wipe lingering correspondence/morph artifacts (see setFormula).
+        clearMorphLayer();
         tex.dataset.latex = String(latex);
         // No PNG counterpart: hide pix entirely and clear its src so
         // renderBBoxes skips the PNG side (pix.naturalWidth becomes 0).

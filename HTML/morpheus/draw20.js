@@ -294,6 +294,14 @@
 
         morph.attachMorphSlider();
 
+        // KORRESPONDENZ toggle — re-render the pre-morph view when toggled
+        // so the change is immediately visible (no slider movement needed).
+        const corrToggle = document.getElementById('correspondence-toggle');
+        if (corrToggle) corrToggle.addEventListener('change', () => {
+            const sl = document.getElementById('morph-slider');
+            if (sl) renderMorph(+sl.value / 100);
+        });
+
         // ── Render: drawContours, hover, similarity, renderBBoxes orchestrator.
         // Lives in draw20-render.js. Owns its own pngVertCount/latVertCount/
         // lastRenderData; writes baseSimilarity back via setter.

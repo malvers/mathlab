@@ -181,6 +181,12 @@ function createDraw20Morph({
             stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
         }
         if (t < MORPH_EPS) {
+            // KORRESPONDENZ toggle gates the per-vertex source→target lines.
+            // When off, pre-morph stays empty (source pane still visible as
+            // reference, no correspondence overlay).
+            const corrToggle = document.getElementById('correspondence-toggle');
+            const showCorr = corrToggle ? corrToggle.checked : true;
+            if (!showCorr) return;
             // Pre-morph preview: same correspondence the morph uses.
             // alignTargetTo (engine) finds the rotation+reverse; the line
             // shows source → ACTUAL target (not BB-aligned).
