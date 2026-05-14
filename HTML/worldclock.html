@@ -93,6 +93,14 @@
             position: absolute;
             background: #000616;
         }
+        /* Clock-only mode (toggled by 'D'): collapse the mini-rail/side-panel grid
+           columns so main-content (radial gradient) fills the viewport edge to edge. */
+        html body.clock-only-mode,
+        html body.clock-only-mode:has(#side-panel),
+        html body.clock-only-mode:has(#side-panel.collapsed),
+        html body.clock-only-mode:not(:has(#side-panel)) {
+            grid-template-columns: 0 0 minmax(0, 1fr) !important;
+        }
     </style>
     <script>
         (function () {
@@ -2022,6 +2030,18 @@
 
             function applyMode(active) {
                 window.__clockOnlyMode = active;
+                document.body.classList.toggle('clock-only-mode', active);
+                // Inline grid override (beats CSS specificity)
+                if (active) {
+                    if (document.body.dataset.prevGridCols === undefined) {
+                        document.body.dataset.prevGridCols = document.body.style.gridTemplateColumns || '';
+                    }
+                    document.body.style.setProperty('grid-template-columns', '0 0 minmax(0, 1fr)', 'important');
+                } else {
+                    document.body.style.gridTemplateColumns = document.body.dataset.prevGridCols || '';
+                    delete document.body.dataset.prevGridCols;
+                }
+                safeLog('[clockOnly] body.style.gridTemplateColumns=' + document.body.style.gridTemplateColumns);
                 HIDE_SELECTORS.forEach(sel => {
                     const el = document.querySelector(sel);
                     if (!el) { safeLog('[clockOnly] not found: ' + sel); return; }
@@ -2035,6 +2055,8 @@
                         delete el.dataset.prevDisplay;
                     }
                 });
+                // Trigger resize so the canvas recalculates dimensions for the new width
+                window.dispatchEvent(new Event('resize'));
                 safeLog('[clockOnly] active=' + active);
             }
 
