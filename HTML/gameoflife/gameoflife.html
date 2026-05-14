@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Game of Life</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="../js/cyber-layout.css">
+    <link rel="stylesheet" href="../js/buttons-ultra.css">
+    <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="../js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="../js/lab-shell-minimal.css">
+    <style>
+        /* GoL fills the canvas — hide the template's coach overlay */
+        #math-coach-box { display: none; }
+        #canvas { cursor: crosshair; }
+
+        /* --- Tabs (gravitation-style) --- */
+        #main-content { display: flex; flex-direction: column; }
+        #tab-bar {
+            display: flex; gap: 0; padding: 0 8px; align-items: stretch;
+            background: #07111f; border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        #tab-bar button {
+            font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1px;
+            padding: 11px 20px; border: none; border-radius: 0; cursor: pointer;
+            background: transparent; color: #555; border-top: 2px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }
+        #tab-bar button.active { color: #eee; border-top-color: #00d2ff; }
+        #tab-bar button:hover { color: #aaa; }
+
+        #tab-spiel { flex: 1; position: relative; min-height: 0; }
+        #tab-spiel #canvas-container { width: 100%; height: 100%; }
+        #tab-muster {
+            flex: 1; display: none; overflow-y: auto;
+            background: rgb(8, 20, 42);
+            padding: 24px;
+        }
+
+        /* --- Cards --- */
+        #cards-grid {
+            display: grid; gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            max-width: 1400px; margin: 0 auto;
+        }
+        .gol-card {
+            background: rgba(14, 36, 78, 0.55);
+            border: 1px solid rgba(0, 210, 255, 0.28);
+            border-radius: 6px;
+            padding: 14px;
+            display: flex; flex-direction: column; gap: 8px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .gol-card:hover {
+            border-color: rgba(0, 210, 255, 0.6);
+            box-shadow: 0 0 18px rgba(0, 210, 255, 0.18);
+        }
+        .gol-mini {
+            display: block; width: 100%; height: 130px;
+            background: rgb(8, 20, 42);
+            border: 1px solid rgba(0, 210, 255, 0.15);
+            border-radius: 3px;
+        }
+        .gol-card-name {
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            font-size: 0.95rem; letter-spacing: 1.5px;
+            color: #00d2ff;
+        }
+        .gol-card-meta {
+            font-family: 'Orbitron', sans-serif; font-size: 0.62rem;
+            letter-spacing: 1.2px; color: rgba(244, 196, 48, 0.85);
+            text-transform: uppercase;
+        }
+        .gol-card-desc {
+            font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+            line-height: 1.45; color: rgba(220, 234, 255, 0.82);
+            flex: 1;
+        }
+        .gol-card-spawn {
+            font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 1.4px;
+            padding: 8px 12px; cursor: pointer;
+            background: rgba(0, 210, 255, 0.12);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            border-radius: 3px;
+            transition: background 0.15s ease;
+        }
+        .gol-card-spawn:hover {
+            background: rgba(0, 210, 255, 0.28);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="tab-bar">
+            <button id="tab-btn-spiel" class="active" onclick="switchTab('spiel')">SPIEL</button>
+            <button id="tab-btn-muster" onclick="switchTab('muster')">MUSTER</button>
+        </div>
+        <div id="tab-spiel">
+            <div id="canvas-container">
+                <div id="math-coach-box">
+                    <div class="coach-title" id="coach-title-slot"></div>
+                    <div id="coach-content" class="coach-message"></div>
+                </div>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+        <div id="tab-muster">
+            <div id="cards-grid"></div>
+        </div>
+    </main>
+
+    <script src="../js/cyber-left-chrome.js"></script>
+    <script src="../js/branding/briefings.js"></script>
+    <script src="../js/branding/overlays.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/i18n-de.js"></script>
+    <script src="../js/i18n-en.js"></script>
+    <script src="../js/i18n-es.js"></script>
+    <script src="../js/i18n-fr.js"></script>
+    <script src="../js/i18n-it.js"></script>
+    <script src="../js/i18n-pt.js"></script>
+    <script src="../js/i18n-sw.js"></script>
+    <script src="../js/i18n-tr.js"></script>
+    <script src="../js/i18n-nl.js"></script>
+    <script src="../js/branding/nav.js"></script>
+    <script src="../js/branding.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Game of Life',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        // -----------------------------------------------------------------------------
+        // Conway's Game of Life — Cyber edition
+        // Cells age and shift hue: cyan (young) → yellow → orange → red (elders).
+        // Dying cells leave a fading red trail. Toroidal world. Mouse paints.
+        // -----------------------------------------------------------------------------
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        const TARGET_CELL_PX = 12;
+        const TRAIL_DECAY = 0.86;
+        const MIN_TICK_MS = 25;
+        const MAX_TICK_MS = 400;
+
+        let cols = 0, rows = 0, cellSize = TARGET_CELL_PX;
+        let cells, ages, next, nextAges, trails;
+        let running = true;
+        let wrap = true;
+        let tickMs = 90;
+        let lastTick = 0;
+        let generation = 0;
+        let aliveCount = 0;
+        let paintMode = 0; // 0 = idle, 1 = drawing alive, -1 = erasing
+        let lastPaintCell = null;
+        let cursorCell = null;
+
+        function allocGrids() {
+            const n = cols * rows;
+            cells = new Uint8Array(n);
+            ages = new Uint16Array(n);
+            next = new Uint8Array(n);
+            nextAges = new Uint16Array(n);
+            trails = new Float32Array(n);
+        }
+
+        function idx(x, y) { return y * cols + x; }
+
+        function seedRandom(density = 0.22) {
+            for (let i = 0; i < cells.length; i++) {
+                cells[i] = Math.random() < density ? 1 : 0;
+                ages[i] = cells[i];
+                trails[i] = 0;
+            }
+            generation = 0;
+        }
+
+        function clearGrid() {
+            cells.fill(0); ages.fill(0); trails.fill(0);
+            generation = 0;
+        }
+
+        // Toroidal or bounded neighbor count
+        function countNeighbors(x, y) {
+            let c = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (!dx && !dy) continue;
+                    let nx = x + dx, ny = y + dy;
+                    if (wrap) {
+                        if (nx < 0) nx += cols; else if (nx >= cols) nx -= cols;
+                        if (ny < 0) ny += rows; else if (ny >= rows) ny -= rows;
+                    } else if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) {
+                        continue;
+                    }
+                    c += cells[idx(nx, ny)];
+                }
+            }
+            return c;
+        }
+
+        function step() {
+            aliveCount = 0;
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const i = idx(x, y);
+                    const n = countNeighbors(x, y);
+                    const alive = cells[i] === 1;
+                    let nv = 0;
+                    if (alive && (n === 2 || n === 3)) nv = 1;
+                    else if (!alive && n === 3) nv = 1;
+                    next[i] = nv;
+                    if (nv) {
+                        nextAges[i] = alive ? ages[i] + 1 : 1;
+                        aliveCount++;
+                    } else {
+                        nextAges[i] = 0;
+                        if (alive) trails[i] = 1; // death glow
+                    }
+                }
+            }
+            // Decay existing trails
+            for (let i = 0; i < trails.length; i++) {
+                if (trails[i] > 0 && next[i] === 0) trails[i] *= TRAIL_DECAY;
+                if (trails[i] < 0.02) trails[i] = 0;
+            }
+            [cells, next] = [next, cells];
+            [ages, nextAges] = [nextAges, ages];
+            generation++;
+        }
+
+        // Age → HSL hue (cyan → yellow → orange → red). Lightness fades slightly with age.
+        function ageColor(age) {
+            const a = Math.min(age, 40);
+            const t = a / 40;
+            const hue = 195 - t * 195; // 195 (cyan) → 0 (red)
+            const sat = 90;
+            const light = 62 - t * 12;
+            return `hsl(${hue},${sat}%,${light}%)`;
+        }
+
+        function render() {
+            const rect = container.getBoundingClientRect();
+            const w = rect.width, h = rect.height;
+
+            // Dark blue background (no pure black per project rules)
+            ctx.fillStyle = 'rgb(8, 20, 42)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Faint grid lines
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.06)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = 0; x <= cols; x++) {
+                const px = Math.round(x * cellSize) + 0.5;
+                ctx.moveTo(px, 0); ctx.lineTo(px, rows * cellSize);
+            }
+            for (let y = 0; y <= rows; y++) {
+                const py = Math.round(y * cellSize) + 0.5;
+                ctx.moveTo(0, py); ctx.lineTo(cols * cellSize, py);
+            }
+            ctx.stroke();
+
+            // Death trails (red glow fading out)
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const i = idx(x, y);
+                    if (trails[i] > 0 && cells[i] === 0) {
+                        const alpha = trails[i] * 0.55;
+                        ctx.fillStyle = `rgba(196, 30, 58, ${alpha})`;
+                        ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+                    }
+                }
+            }
+
+            // Living cells with glow
+            ctx.save();
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const i = idx(x, y);
+                    if (cells[i] === 1) {
+                        const color = ageColor(ages[i]);
+                        ctx.shadowBlur = ages[i] < 3 ? 12 : 6;
+                        ctx.shadowColor = color;
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+                    }
+                }
+            }
+            ctx.restore();
+
+            // Cursor highlight
+            if (cursorCell) {
+                ctx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
+                ctx.lineWidth = 1.4;
+                ctx.strokeRect(cursorCell.x * cellSize + 0.5, cursorCell.y * cellSize + 0.5, cellSize - 1, cellSize - 1);
+            }
+
+            // HUD
+            drawHud(w, h);
+        }
+
+        function drawHud(w, h) {
+            const pad = 14;
+            const lh = 18;
+            ctx.font = "400 13px Orbitron, sans-serif";
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            const lines = [
+                `GENERATION ${generation}`,
+                `ALIVE ${aliveCount}`,
+                `${cols}×${rows}  ${wrap ? 'TORUS' : 'WALLS'}  ${running ? 'RUN' : 'PAUSE'}`,
+                `${Math.round(1000 / tickMs)} fps`,
+            ];
+            // Subtle box
+            const boxW = 200, boxH = lines.length * lh + 18;
+            ctx.fillStyle = 'rgba(8, 20, 42, 0.72)';
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.35)';
+            ctx.lineWidth = 1;
+            ctx.fillRect(pad, pad, boxW, boxH);
+            ctx.strokeRect(pad + 0.5, pad + 0.5, boxW - 1, boxH - 1);
+            ctx.fillStyle = 'rgba(0, 210, 255, 0.95)';
+            lines.forEach((line, k) => {
+                ctx.fillText(line, pad + 10, pad + 9 + k * lh);
+            });
+
+            // Help line bottom-left
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(180, 220, 255, 0.55)';
+            ctx.font = "300 12px Orbitron, sans-serif";
+            const help = 'SPACE pause · N step · R random · C clear · W wrap · G glider · P pulsar · S gun · +/- speed · click to paint';
+            ctx.fillText(help, pad, h - pad - 8);
+        }
+
+        // Loop ---------------------------------------------------------------------
+
+        function frame(t) {
+            if (running && t - lastTick >= tickMs) {
+                step();
+                lastTick = t;
+            }
+            render();
+            requestAnimationFrame(frame);
+        }
+
+        // Patterns -----------------------------------------------------------------
+
+        const PATTERNS = {
+            glider:    [[0,0],[1,1],[2,1],[0,2],[1,2]],
+            blinker:   [[0,0],[1,0],[2,0]],
+            pulsar:    (() => {
+                // 13x13 oscillator (period 3)
+                const arms = [[2,0],[3,0],[4,0],[0,2],[5,2],[0,3],[5,3],[0,4],[5,4],[2,5],[3,5],[4,5]];
+                const cells = [];
+                for (const [x, y] of arms) {
+                    cells.push([x + 1, y + 1]);
+                    cells.push([12 - x - 1, y + 1]);
+                    cells.push([x + 1, 12 - y - 1]);
+                    cells.push([12 - x - 1, 12 - y - 1]);
+                }
+                return cells;
+            })(),
+            gosper: [ // Gosper glider gun
+                [0,4],[0,5],[1,4],[1,5],
+                [10,4],[10,5],[10,6],[11,3],[11,7],[12,2],[12,8],[13,2],[13,8],
+                [14,5],[15,3],[15,7],[16,4],[16,5],[16,6],[17,5],
+                [20,2],[20,3],[20,4],[21,2],[21,3],[21,4],[22,1],[22,5],
+                [24,0],[24,1],[24,5],[24,6],
+                [34,2],[34,3],[35,2],[35,3]
+            ],
+        };
+
+        function stampPattern(pattern, cx, cy) {
+            // Center the pattern on (cx,cy)
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const [x, y] of pattern) {
+                if (x < minX) minX = x; if (y < minY) minY = y;
+                if (x > maxX) maxX = x; if (y > maxY) maxY = y;
+            }
+            const ox = cx - Math.floor((maxX + minX) / 2);
+            const oy = cy - Math.floor((maxY + minY) / 2);
+            for (const [x, y] of pattern) {
+                let px = ox + x, py = oy + y;
+                if (wrap) {
+                    px = ((px % cols) + cols) % cols;
+                    py = ((py % rows) + rows) % rows;
+                } else if (px < 0 || py < 0 || px >= cols || py >= rows) continue;
+                const i = idx(px, py);
+                cells[i] = 1;
+                ages[i] = 1;
+            }
+        }
+
+        // Input --------------------------------------------------------------------
+
+        function pixelToCell(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((clientX - rect.left) / cellSize);
+            const y = Math.floor((clientY - rect.top) / cellSize);
+            if (x < 0 || y < 0 || x >= cols || y >= rows) return null;
+            return { x, y };
+        }
+
+        function paintAt(cell, mode) {
+            const i = idx(cell.x, cell.y);
+            const want = mode === 1 ? 1 : 0;
+            cells[i] = want;
+            ages[i] = want;
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const c = pixelToCell(e.clientX, e.clientY);
+            if (!c) return;
+            paintMode = (cells[idx(c.x, c.y)] === 1) ? -1 : 1;
+            paintAt(c, paintMode);
+            lastPaintCell = c;
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            const c = pixelToCell(e.clientX, e.clientY);
+            cursorCell = c;
+            if (!c || !paintMode) return;
+            if (lastPaintCell && (lastPaintCell.x !== c.x || lastPaintCell.y !== c.y)) {
+                paintAt(c, paintMode);
+                lastPaintCell = c;
+            }
+        });
+        canvas.addEventListener('mouseleave', () => { cursorCell = null; });
+        window.addEventListener('mouseup', () => { paintMode = 0; lastPaintCell = null; });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target && e.target.tagName === 'INPUT') return;
+            const k = e.key.toLowerCase();
+            const cur = cursorCell || { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
+            switch (k) {
+                case ' ': running = !running; e.preventDefault(); break;
+                case 'n': step(); break;
+                case 'r': seedRandom(); break;
+                case 'c': clearGrid(); break;
+                case 'w': wrap = !wrap; break;
+                case 'g': stampPattern(PATTERNS.glider, cur.x, cur.y); break;
+                case 'b': stampPattern(PATTERNS.blinker, cur.x, cur.y); break;
+                case 'p': stampPattern(PATTERNS.pulsar, cur.x, cur.y); break;
+                case 's': stampPattern(PATTERNS.gosper, cur.x, cur.y); break;
+                case '+': case '=': tickMs = Math.max(MIN_TICK_MS, tickMs - 15); break;
+                case '-': case '_': tickMs = Math.min(MAX_TICK_MS, tickMs + 15); break;
+            }
+        });
+
+        // Sizing -------------------------------------------------------------------
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            cols = Math.max(8, Math.floor(w / TARGET_CELL_PX));
+            rows = Math.max(8, Math.floor(h / TARGET_CELL_PX));
+            cellSize = Math.min(w / cols, h / rows);
+        }
+
+        function init() {
+            const hadCells = !!cells && cells.length > 0;
+            const prevCols = cols, prevRows = rows;
+            const prev = hadCells ? { cells: cells.slice(), ages: ages.slice(), c: prevCols, r: prevRows } : null;
+            resizeCanvasToContainer();
+            allocGrids();
+            if (prev) {
+                // Re-project existing pattern onto the new grid (center-aligned)
+                const ox = Math.floor((cols - prev.c) / 2);
+                const oy = Math.floor((rows - prev.r) / 2);
+                for (let y = 0; y < prev.r; y++) {
+                    for (let x = 0; x < prev.c; x++) {
+                        const tx = x + ox, ty = y + oy;
+                        if (tx < 0 || ty < 0 || tx >= cols || ty >= rows) continue;
+                        const j = y * prev.c + x;
+                        if (prev.cells[j]) {
+                            const i = idx(tx, ty);
+                            cells[i] = 1;
+                            ages[i] = prev.ages[j];
+                        }
+                    }
+                }
+            } else {
+                seedRandom();
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            // Debounce so dragging the window doesn't reseed
+            clearTimeout(window.__golResize);
+            window.__golResize = setTimeout(init, 120);
+        });
+
+        document.fonts.ready.then(() => {
+            init();
+            requestAnimationFrame(frame);
+        });
+
+        // ============================================================
+        // Tabs + pattern catalog (mini-sims)
+        // ============================================================
+
+        let currentTab = 'spiel';
+        window.switchTab = function (name) {
+            currentTab = name;
+            document.getElementById('tab-spiel').style.display = (name === 'spiel') ? 'block' : 'none';
+            document.getElementById('tab-muster').style.display = (name === 'muster') ? 'block' : 'none';
+            document.getElementById('tab-btn-spiel').classList.toggle('active', name === 'spiel');
+            document.getElementById('tab-btn-muster').classList.toggle('active', name === 'muster');
+            if (name === 'spiel') {
+                setTimeout(init, 60); // re-fit canvas after layout settles
+            }
+        };
+
+        // Catalog of 12 classic patterns. Cells are arrays of [x,y].
+        const PATTERN_CATALOG = [
+            // --- Still lifes ---
+            { id: 'block', name: 'Block', family: 'Still Life', period: 'stabil',
+              desc: 'Das einfachste stabile Muster. 2×2 Quadrat, jede Zelle hat 3 Nachbarn — bleibt ewig.',
+              cells: [[0,0],[1,0],[0,1],[1,1]], gridW: 6, gridH: 5 },
+            { id: 'beehive', name: 'Beehive', family: 'Still Life', period: 'stabil',
+              desc: 'Bienenwabe. Sechs Zellen in stabiler Hexagonal-Form.',
+              cells: [[1,0],[2,0],[0,1],[3,1],[1,2],[2,2]], gridW: 6, gridH: 5 },
+            { id: 'loaf', name: 'Loaf', family: 'Still Life', period: 'stabil',
+              desc: 'Brotlaib. Sieben Zellen, asymmetrisch aber stabil.',
+              cells: [[1,0],[2,0],[0,1],[3,1],[1,2],[3,2],[2,3]], gridW: 6, gridH: 6 },
+
+            // --- Oscillators ---
+            { id: 'blinker', name: 'Blinker', family: 'Oszillator', period: 'P2',
+              desc: 'Drei Zellen in einer Reihe — kippen jedes Tick zwischen waagerecht und senkrecht.',
+              cells: [[0,1],[1,1],[2,1]], gridW: 5, gridH: 5 },
+            { id: 'toad', name: 'Toad', family: 'Oszillator', period: 'P2',
+              desc: 'Sechs Zellen in zwei versetzten Dreierreihen. Pulsiert mit Periode 2.',
+              cells: [[1,1],[2,1],[3,1],[0,2],[1,2],[2,2]], gridW: 6, gridH: 5 },
+            { id: 'pulsar', name: 'Pulsar', family: 'Oszillator', period: 'P3',
+              desc: 'Größter klassischer P3-Oszillator. 13×13 Feld, vierfach symmetrisch.',
+              cells: (() => {
+                const arms = [[2,0],[3,0],[4,0],[0,2],[5,2],[0,3],[5,3],[0,4],[5,4],[2,5],[3,5],[4,5]];
+                const out = [];
+                for (const [x, y] of arms) {
+                    out.push([x + 1, y + 1]);
+                    out.push([12 - x - 1, y + 1]);
+                    out.push([x + 1, 12 - y - 1]);
+                    out.push([12 - x - 1, 12 - y - 1]);
+                }
+                return out;
+              })(),
+              gridW: 14, gridH: 14 },
+
+            // --- Spaceships ---
+            { id: 'glider', name: 'Glider', family: 'Raumschiff', period: 'P4',
+              desc: 'Der berühmteste Wanderer. Bewegt sich diagonal, 1 Feld pro 4 Ticks.',
+              cells: [[0,0],[1,1],[2,1],[0,2],[1,2]], gridW: 12, gridH: 10 },
+            { id: 'lwss', name: 'LWSS', family: 'Raumschiff', period: 'P4',
+              desc: 'Light-Weight Space Ship. Fliegt waagerecht, 2× schneller als Glider seitlich.',
+              cells: [[1,0],[4,0],[0,1],[0,2],[4,2],[0,3],[1,3],[2,3],[3,3]], gridW: 14, gridH: 8 },
+
+            // --- Gun ---
+            { id: 'gosper', name: 'Gosper Gun', family: 'Gun', period: 'P30',
+              desc: 'Erste bekannte Glider-Gun (Bill Gosper, 1970). Schießt alle 30 Ticks einen Glider.',
+              cells: [
+                  [0,4],[0,5],[1,4],[1,5],
+                  [10,4],[10,5],[10,6],[11,3],[11,7],[12,2],[12,8],[13,2],[13,8],
+                  [14,5],[15,3],[15,7],[16,4],[16,5],[16,6],[17,5],
+                  [20,2],[20,3],[20,4],[21,2],[21,3],[21,4],[22,1],[22,5],
+                  [24,0],[24,1],[24,5],[24,6],
+                  [34,2],[34,3],[35,2],[35,3]
+              ],
+              gridW: 38, gridH: 11 },
+
+            // --- Methusalems ---
+            { id: 'rpent', name: 'R-Pentomino', family: 'Methusalem', period: '∼1103 Gen.',
+              desc: 'Fünf Zellen, die 1103 Generationen lang chaotisch leben, bevor sie sich stabilisieren.',
+              cells: [[1,0],[2,0],[0,1],[1,1],[1,2]], gridW: 30, gridH: 24 },
+            { id: 'acorn', name: 'Acorn', family: 'Methusalem', period: '∼5206 Gen.',
+              desc: 'Sieben Zellen, 5206 Generationen Evolution — bekanntester Methusalem.',
+              cells: [[1,0],[3,1],[0,2],[1,2],[4,2],[5,2],[6,2]], gridW: 40, gridH: 30 },
+            { id: 'diehard', name: 'Diehard', family: 'Methusalem', period: '130 Gen.',
+              desc: 'Sieben Zellen, die nach exakt 130 Generationen vollständig sterben.',
+              cells: [[6,0],[0,1],[1,1],[1,2],[5,2],[6,2],[7,2]], gridW: 20, gridH: 12 },
+        ];
+
+        const miniSims = [];
+
+        function buildPatternCards() {
+            const grid = document.getElementById('cards-grid');
+            for (const p of PATTERN_CATALOG) {
+                const card = document.createElement('div');
+                card.className = 'gol-card';
+                const c = document.createElement('canvas');
+                c.className = 'gol-mini';
+                c.width = 320; c.height = 260;
+                card.appendChild(c);
+
+                const nameEl = document.createElement('div');
+                nameEl.className = 'gol-card-name';
+                nameEl.textContent = p.name;
+                card.appendChild(nameEl);
+
+                const metaEl = document.createElement('div');
+                metaEl.className = 'gol-card-meta';
+                metaEl.textContent = `${p.family} · ${p.period}`;
+                card.appendChild(metaEl);
+
+                const descEl = document.createElement('div');
+                descEl.className = 'gol-card-desc';
+                descEl.textContent = p.desc;
+                card.appendChild(descEl);
+
+                const btn = document.createElement('button');
+                btn.className = 'gol-card-spawn';
+                btn.textContent = 'IN SIMULATION';
+                btn.addEventListener('click', () => {
+                    switchTab('spiel');
+                    setTimeout(() => {
+                        clearGrid();
+                        stampPattern(p.cells, Math.floor(cols / 2), Math.floor(rows / 2));
+                        running = true;
+                    }, 80);
+                });
+                card.appendChild(btn);
+
+                grid.appendChild(card);
+                miniSims.push(createMiniSim(c, p));
+            }
+        }
+
+        function createMiniSim(canvas, pattern) {
+            const ctx = canvas.getContext('2d');
+            // Mini grid sized to make the pattern occupy a comfortable interior.
+            const padding = 4;
+            const gridW = pattern.gridW + padding * 2;
+            const gridH = pattern.gridH + padding * 2;
+            const sim = {
+                canvas, ctx, gridW, gridH,
+                cells: new Uint8Array(gridW * gridH),
+                ages: new Uint16Array(gridW * gridH),
+                next: new Uint8Array(gridW * gridH),
+                nextAges: new Uint16Array(gridW * gridH),
+                pattern,
+                generation: 0,
+                maxGen: pattern.family === 'Methusalem' ? 1500 : 80,
+                lastTick: 0,
+                tickMs: pattern.family === 'Gun' ? 90 : 180,
+            };
+            seedMini(sim);
+            return sim;
+        }
+
+        function seedMini(sim) {
+            sim.cells.fill(0); sim.ages.fill(0);
+            const padding = 4;
+            for (const [x, y] of sim.pattern.cells) {
+                const px = x + padding;
+                const py = y + padding;
+                if (px < 0 || py < 0 || px >= sim.gridW || py >= sim.gridH) continue;
+                sim.cells[py * sim.gridW + px] = 1;
+                sim.ages[py * sim.gridW + px] = 1;
+            }
+            sim.generation = 0;
+        }
+
+        function stepMini(sim) {
+            const { cells, ages, next, nextAges, gridW, gridH } = sim;
+            let alive = 0;
+            for (let y = 0; y < gridH; y++) {
+                for (let x = 0; x < gridW; x++) {
+                    let n = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (!dx && !dy) continue;
+                            // Bounded (no wrap) so spaceships fly off
+                            const nx = x + dx, ny = y + dy;
+                            if (nx < 0 || ny < 0 || nx >= gridW || ny >= gridH) continue;
+                            n += cells[ny * gridW + nx];
+                        }
+                    }
+                    const i = y * gridW + x;
+                    const a = cells[i] === 1;
+                    let nv = 0;
+                    if (a && (n === 2 || n === 3)) nv = 1;
+                    else if (!a && n === 3) nv = 1;
+                    next[i] = nv;
+                    nextAges[i] = nv ? (a ? ages[i] + 1 : 1) : 0;
+                    if (nv) alive++;
+                }
+            }
+            for (let i = 0; i < sim.cells.length; i++) {
+                sim.cells[i] = next[i];
+                sim.ages[i] = nextAges[i];
+            }
+            sim.generation++;
+            // Auto-restart conditions
+            if (alive === 0 || sim.generation >= sim.maxGen) seedMini(sim);
+        }
+
+        function renderMini(sim) {
+            const { ctx, canvas, cells, ages, gridW, gridH } = sim;
+            const cs = Math.min(canvas.width / gridW, canvas.height / gridH);
+            const offsetX = (canvas.width - cs * gridW) / 2;
+            const offsetY = (canvas.height - cs * gridH) / 2;
+            ctx.fillStyle = 'rgb(8, 20, 42)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < gridH; y++) {
+                for (let x = 0; x < gridW; x++) {
+                    const i = y * gridW + x;
+                    if (cells[i] === 1) {
+                        const a = Math.min(ages[i], 40);
+                        const hue = 195 - (a / 40) * 195;
+                        ctx.fillStyle = `hsl(${hue}, 90%, ${62 - (a/40)*12}%)`;
+                        ctx.fillRect(offsetX + x * cs + 0.5, offsetY + y * cs + 0.5, cs - 1, cs - 1);
+                    }
+                }
+            }
+        }
+
+        function miniFrame(t) {
+            // Only animate when MUSTER tab is visible (perf)
+            if (currentTab === 'muster') {
+                for (const sim of miniSims) {
+                    if (t - sim.lastTick >= sim.tickMs) {
+                        stepMini(sim);
+                        sim.lastTick = t;
+                    }
+                    renderMini(sim);
+                }
+            }
+            requestAnimationFrame(miniFrame);
+        }
+
+        // Kick off mini-sim catalog (independent of font loading)
+        buildPatternCards();
+        requestAnimationFrame(miniFrame);
+    </script>
+</body>
+
+</html>

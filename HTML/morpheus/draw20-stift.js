@@ -1,0 +1,381 @@
+// Stift (freehand drawing) + Undo/Redo + Stift-outline extraction.
+// Plain global factory — loaded before draw20.js.
+//
+// The factory takes pre-built DOM refs (stiftCanvas, stiftCtx, stiftOutlineSvg)
+// + a context object with getters/callbacks supplied by the caller. It owns:
+//   - draw state: strokes, curStroke, drawingNow, stiftEnabled
+//   - undo/redo: strokeHistory + historyIdx
+//   - stift contours: stiftContours (extracted from the stiftCanvas)
+//
+// Caller plumbing (all optional unless noted):
+//   ctx.wrap                       (required) — element whose bounding rect
+//                                     drives the canvas pixel size on resize
+//   ctx.dbg(msg)                   logger
+//   ctx.getZoom()                  current zoom factor (1 = no zoom). Used for
+//                                     stroke-/dot-scaling in renderStiftOutlines.
+//   ctx.extractContours(canvas)    contour extractor (e.g. draw20ExtractPNGContours
+//                                     wrapper). Falls back to global if omitted.
+//   ctx.onAfterOutlinesChanged()   fires after extract/clear — caller re-runs
+//                                     toggles, rebuilds stift-morph-pairs,
+//                                     re-renders the morph slider value.
+
+function createDraw20Stift({
+    stiftCanvas,
+    stiftCtx,
+    stiftOutlineSvg,
+    wrap,
+    dbg,
+    getZoom,
+    extractContours,
+    onAfterOutlinesChanged,
+}) {
+    const log = (typeof dbg === 'function') ? dbg : () => {};
+    const getZ = (typeof getZoom === 'function') ? getZoom : () => 1;
+    const extract = (typeof extractContours === 'function')
+        ? extractContours
+        : (cvs) => (typeof draw20ExtractPNGContours === 'function')
+            ? draw20ExtractPNGContours(cvs, log) : [];
+    const onOutlinesChanged = (typeof onAfterOutlinesChanged === 'function')
+        ? onAfterOutlinesChanged : () => {};
+
+    // ── Draw state ──────────────────────────────────────────────────────────
+    let strokes = [];
+    let curStroke = null;
+    let drawingNow = false;
+    let stiftEnabled = false;
+    let stiftContours = null;
+
+    try {
+        const j = localStorage.getItem('draw20-strokes');
+        if (j) strokes = JSON.parse(j) || [];
+    } catch (_) {}
+    try {
+        stiftEnabled = localStorage.getItem('draw20-stift-enabled') === '1';
+    } catch (_) {}
+
+    // ── Undo/Redo: snapshot stack of stroke-arrays. Linear history; a new
+    //    action truncates the future. ────────────────────────────────────────
+    function snapshotStrokesNow() {
+        return strokes.map(s => ({
+            points: s.points.map(p => ({ nx: p.nx, ny: p.ny })),
+            width: s.width,
+            mode: s.mode,
+        }));
+    }
+    const strokeHistory = [snapshotStrokesNow()];
+    let historyIdx = 0;
+    const MAX_HISTORY = 50;
+
+    function pushHistory() {
+        if (historyIdx < strokeHistory.length - 1) {
+            strokeHistory.length = historyIdx + 1;
+        }
+        strokeHistory.push(snapshotStrokesNow());
+        if (strokeHistory.length > MAX_HISTORY) {
+            strokeHistory.shift();
+        } else {
+            historyIdx++;
+        }
+    }
+    function applyHistorySnapshot() {
+        const snap = strokeHistory[historyIdx];
+        strokes = snap.map(s => ({
+            points: s.points.map(p => ({ nx: p.nx, ny: p.ny })),
+            width: s.width,
+            mode: s.mode,
+        }));
+        curStroke = null;
+        drawingNow = false;
+        redrawStift();
+        persistStrokes();
+        // Outlines: if outlines were active AND strokes exist → re-extract;
+        // if no strokes left but stale outlines linger → wipe them.
+        const active = (() => { try { return localStorage.getItem('draw20-outlines-active') === '1'; } catch (_) { return false; } })();
+        if (active && strokes.length > 0) {
+            extractStiftOutlines();
+        } else if (stiftContours) {
+            clearStiftOutlines();
+        }
+    }
+    function undo() {
+        if (historyIdx <= 0) return;
+        historyIdx--;
+        applyHistorySnapshot();
+        log(`↶ undo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+    }
+    function redo() {
+        if (historyIdx >= strokeHistory.length - 1) return;
+        historyIdx++;
+        applyHistorySnapshot();
+        log(`↷ redo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+    }
+
+    // ── Drawing pipeline ────────────────────────────────────────────────────
+    function persistStrokes() {
+        try { localStorage.setItem('draw20-strokes', JSON.stringify(strokes)); } catch (_) {}
+    }
+    function redrawStift() {
+        const w = stiftCanvas.width, h = stiftCanvas.height;
+        const dpr = window.devicePixelRatio || 1;
+        stiftCtx.clearRect(0, 0, w, h);
+        for (const s of strokes) {
+            if (!s.points || s.points.length < 1) continue;
+            stiftCtx.globalCompositeOperation = (s.mode === 'eraser') ? 'destination-out' : 'source-over';
+            stiftCtx.strokeStyle = DRAW20_INK_COLOR;
+            stiftCtx.fillStyle = DRAW20_INK_COLOR;
+            stiftCtx.lineCap = 'round';
+            stiftCtx.lineJoin = 'round';
+            stiftCtx.lineWidth = (s.width || 6) * dpr;
+            if (s.points.length === 1) {
+                const p = s.points[0];
+                stiftCtx.beginPath();
+                stiftCtx.arc(p.nx * w, p.ny * h, ((s.width || 6) * dpr) / 2, 0, Math.PI * 2);
+                stiftCtx.fill();
+            } else {
+                stiftCtx.beginPath();
+                stiftCtx.moveTo(s.points[0].nx * w, s.points[0].ny * h);
+                for (let i = 1; i < s.points.length; i++) {
+                    stiftCtx.lineTo(s.points[i].nx * w, s.points[i].ny * h);
+                }
+                stiftCtx.stroke();
+            }
+        }
+        stiftCtx.globalCompositeOperation = 'source-over';
+    }
+    function resizeStift() {
+        const r = wrap.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        stiftCanvas.width = Math.max(1, Math.round(r.width * dpr));
+        stiftCanvas.height = Math.max(1, Math.round(r.height * dpr));
+        redrawStift();
+        // Outline polygons live in canvas-pixel coords — after resize the
+        // pixel scale changes. Re-extract from the freshly-drawn strokes so
+        // outlines stay aligned with the canvas.
+        if (stiftContours) extractStiftOutlines();
+    }
+    function clearStrokes() {
+        strokes = [];
+        curStroke = null;
+        drawingNow = false;
+        redrawStift();
+        persistStrokes();
+        // Push empty state into history → Cmd+Z restores pre-clear state.
+        pushHistory();
+        // Sweep stale outlines (they belonged to the now-erased strokes).
+        if (stiftContours) clearStiftOutlines();
+        log('strokes cleared');
+    }
+    function ptFromEvent(e) {
+        const r = stiftCanvas.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        return { nx: (cx - r.left) / r.width, ny: (cy - r.top) / r.height };
+    }
+    function onStiftDown(e) {
+        if (!stiftEnabled) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        e.preventDefault();
+        drawingNow = true;
+        const sw = document.getElementById('stroke-slider');
+        curStroke = {
+            points: [ptFromEvent(e)],
+            width: sw ? +sw.value : 6,
+            mode: 'pen',
+        };
+        strokes.push(curStroke);
+        redrawStift();
+    }
+    function onStiftMove(e) {
+        if (!drawingNow || !curStroke) return;
+        e.preventDefault();
+        curStroke.points.push(ptFromEvent(e));
+        redrawStift();
+    }
+    function onStiftUp() {
+        if (!drawingNow) return;
+        drawingNow = false;
+        curStroke = null;
+        persistStrokes();
+        // Stroke finished → snapshot into history.
+        pushHistory();
+    }
+    stiftCanvas.addEventListener('mousedown', onStiftDown);
+    window.addEventListener('mousemove', onStiftMove);
+    window.addEventListener('mouseup', onStiftUp);
+    stiftCanvas.addEventListener('touchstart', onStiftDown, { passive: false });
+    stiftCanvas.addEventListener('touchmove', onStiftMove, { passive: false });
+    stiftCanvas.addEventListener('touchend', onStiftUp);
+
+    // Cmd/Ctrl+Z = Undo, Cmd/Ctrl+Shift+Z = Redo (classic).
+    // capture:true so it fires before other handlers; ignore when focus is
+    // in an input/textarea (e.g. the LaTeX text input).
+    document.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        if (!(e.metaKey || e.ctrlKey)) return;
+        if (e.key === 'z' || e.key === 'Z') {
+            e.preventDefault();
+            if (e.shiftKey) redo();
+            else undo();
+        }
+    }, true);
+
+    // ── Stift-toggle state ──────────────────────────────────────────────────
+    function applyStiftState() {
+        stiftCanvas.style.pointerEvents = stiftEnabled ? 'auto' : 'none';
+        stiftCanvas.style.cursor = stiftEnabled ? 'crosshair' : 'default';
+        const icon = document.getElementById('draw-toggle');
+        if (icon) icon.style.opacity = stiftEnabled ? '1' : '0.35';
+    }
+    function toggleStiftEnabled() {
+        stiftEnabled = !stiftEnabled;
+        try { localStorage.setItem('draw20-stift-enabled', stiftEnabled ? '1' : '0'); } catch (_) {}
+        applyStiftState();
+    }
+
+    // ── Stift outlines: same pipeline as PNG extraction ─────────────────────
+    // After OUTLINES GENERIEREN we read the stiftCanvas pixels, run them
+    // through the standard extraction (red-threshold + morphClose +
+    // getContoursWithHoles + area-filter + rdp(eps)) and render the outer
+    // polygons (paletteColor) + holes (light-blue) into stiftOutlineSvg
+    // above the strokes. Stroke-width and dot-radius scale with 1/zoom so
+    // they stay crisp at any zoom.
+    function renderStiftOutlines() {
+        while (stiftOutlineSvg.firstChild) stiftOutlineSvg.removeChild(stiftOutlineSvg.firstChild);
+        if (!stiftContours || stiftContours.length === 0) return;
+        const z = getZ() || 1;
+        // stift natural pixel → wrap pre-transform CSS. Scale comes directly
+        // from offsetWidth (= pre-transform) / canvas.width (= natural).
+        // Independent of zoom — canvas.width changes only on resize, but
+        // zoom varies continuously.
+        const sx = wrap.offsetWidth / Math.max(1, stiftCanvas.width);
+        const sy = wrap.offsetHeight / Math.max(1, stiftCanvas.height);
+        const mapXY = (x, y) => [x * sx, y * sy];
+        const cls = (typeof classifyContours === 'function')
+            ? classifyContours(stiftContours)
+            : { outers: stiftContours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const sw = String(1.5 / z);
+        const dotR = (2 / z).toFixed(2);
+        const dash = `${(3 / z).toFixed(2)} ${(3 / z).toFixed(2)}`;
+
+        const ptsOf = (poly) => poly.map(p => {
+            const [x, y] = mapXY(p[0], p[1]);
+            return `${x.toFixed(2)},${y.toFixed(2)}`;
+        }).join(' ');
+        const subpathOf = (poly) => {
+            let s = '';
+            const m = mapXY(poly[0][0], poly[0][1]);
+            s += `M ${m[0].toFixed(2)} ${m[1].toFixed(2)}`;
+            for (let i = 1; i < poly.length; i++) {
+                const q = mapXY(poly[i][0], poly[i][1]);
+                s += ` L ${q[0].toFixed(2)} ${q[1].toFixed(2)}`;
+            }
+            return s + ' Z';
+        };
+
+        cls.outers.forEach((o, i) => {
+            const color = draw20PaletteColor(i);
+            const outerPoly = stiftContours[o.idx];
+            if (!outerPoly || outerPoly.length < 2) return;
+
+            // ── FILL: outer + holes as an evenodd subpath. fill-opacity 0.35
+            // so the yellow strokes below stay visible through the colour.
+            const fillParts = [outerPoly, ...o.holes.map(hi => stiftContours[hi]).filter(Boolean)];
+            const d = fillParts.map(subpathOf).join(' ');
+            const fillPath = document.createElementNS(svgNS, 'path');
+            fillPath.setAttribute('d', d);
+            fillPath.setAttribute('fill-rule', 'evenodd');
+            fillPath.setAttribute('fill', color);
+            fillPath.setAttribute('fill-opacity', '0.35');
+            fillPath.setAttribute('stroke', 'none');
+            fillPath.dataset.kind = 'fill';
+            fillPath.dataset.source = 'stift';
+            stiftOutlineSvg.appendChild(fillPath);
+
+            // ── LINE: outer polygon (solid) in palette colour.
+            const poly = document.createElementNS(svgNS, 'polygon');
+            poly.setAttribute('points', ptsOf(outerPoly));
+            poly.setAttribute('fill', 'none');
+            poly.setAttribute('stroke', color);
+            poly.setAttribute('stroke-width', sw);
+            poly.setAttribute('stroke-linejoin', 'round');
+            poly.dataset.source = 'stift';
+            stiftOutlineSvg.appendChild(poly);
+
+            // ── POINTS: vertex dots.
+            for (const p of outerPoly) {
+                const [x, y] = mapXY(p[0], p[1]);
+                const c = document.createElementNS(svgNS, 'circle');
+                c.setAttribute('cx', x.toFixed(2));
+                c.setAttribute('cy', y.toFixed(2));
+                c.setAttribute('r', dotR);
+                c.setAttribute('fill', color);
+                c.dataset.kind = 'point';
+                c.dataset.source = 'stift';
+                stiftOutlineSvg.appendChild(c);
+            }
+
+            // Holes: light-blue dashed + their vertex dots.
+            for (const hi of o.holes) {
+                const holePoly = stiftContours[hi];
+                if (!holePoly || holePoly.length < 2) continue;
+                const hp = document.createElementNS(svgNS, 'polygon');
+                hp.setAttribute('points', ptsOf(holePoly));
+                hp.setAttribute('fill', 'none');
+                hp.setAttribute('stroke', '#9ad6ff');
+                hp.setAttribute('stroke-width', sw);
+                hp.setAttribute('stroke-linejoin', 'round');
+                hp.setAttribute('stroke-dasharray', dash);
+                hp.dataset.source = 'stift';
+                stiftOutlineSvg.appendChild(hp);
+                for (const p of holePoly) {
+                    const [x, y] = mapXY(p[0], p[1]);
+                    const c = document.createElementNS(svgNS, 'circle');
+                    c.setAttribute('cx', x.toFixed(2));
+                    c.setAttribute('cy', y.toFixed(2));
+                    c.setAttribute('r', dotR);
+                    c.setAttribute('fill', '#9ad6ff');
+                    c.dataset.kind = 'point';
+                    c.dataset.source = 'stift';
+                    stiftOutlineSvg.appendChild(c);
+                }
+            }
+        });
+
+        log(`stift outlines rendered: ${cls.outers.length} outer + ${cls.holes.length} hole(s)`);
+    }
+
+    function extractStiftOutlines() {
+        stiftContours = extract(stiftCanvas) || [];
+        log(`▶ stift extract: ${stiftContours.length} contour(s)`);
+        renderStiftOutlines();
+        // Persist outlines-active flag so reload auto-extracts.
+        try { localStorage.setItem('draw20-outlines-active', '1'); } catch (_) {}
+        onOutlinesChanged();
+    }
+
+    function clearStiftOutlines() {
+        stiftContours = null;
+        while (stiftOutlineSvg.firstChild) stiftOutlineSvg.removeChild(stiftOutlineSvg.firstChild);
+        try { localStorage.removeItem('draw20-outlines-active'); } catch (_) {}
+        // Crossfade leftovers on stiftCanvas — without this it sticks at 0.5
+        // from the previous stift-morph.
+        stiftCanvas.style.opacity = '';
+        onOutlinesChanged();
+        log('stift outlines cleared');
+    }
+
+    return {
+        // History
+        undo, redo,
+        // Drawing
+        redrawStift, resizeStift, clearStrokes,
+        // Outlines
+        extractStiftOutlines, clearStiftOutlines, renderStiftOutlines,
+        // State / UI
+        applyStiftState, toggleStiftEnabled,
+        getStiftContours: () => stiftContours,
+        getStrokes: () => strokes,
+        getStiftEnabled: () => stiftEnabled,
+    };
+}

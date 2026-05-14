@@ -480,7 +480,7 @@
 
         if (isTextEntryTarget(e.target)) return;
 
-        if (e.key === 'p' || e.key === 'P') {
+        if ((e.metaKey || e.ctrlKey) && (e.key === 'p' || e.key === 'P')) {
             e.preventDefault();
             toggleWindowSizeMenu();
         }
