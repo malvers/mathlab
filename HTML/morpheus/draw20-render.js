@@ -73,32 +73,31 @@ function createDraw20Render({
         }
         return p;
     }
-    // Grow both polygons to `max(multiplier × max(srcLen, dstLen), MIN)`.
-    // MIN = 200 guarantees a dense morph even when raw outlines are short.
-    // multiplier=2 doubles the natural max — both safeguards combine.
-    const DRAW20_POINT_MULTIPLIER = 2;
-    const DRAW20_MIN_POINTS = 200;
-    function equalizePair(arrA, idxA, arrB, idxB, multiplier) {
+    // Grow both polygons to `max(a.length, b.length, MIN)`.
+    // IDEMPOTENT: once both polygons reach the same length (and ≥ MIN),
+    // further calls are no-ops. This is critical because equalize can
+    // run multiple times (formula switch, window resize, stift stroke,
+    // …). A multiplier would compound (300 → 600 → 1200 → ...).
+    const DRAW20_MIN_POINTS = 300;
+    function equalizePair(arrA, idxA, arrB, idxB) {
         const a = arrA[idxA], b = arrB[idxB];
         if (!a || !b) return;
-        const m = multiplier || 1;
-        const target = Math.max(Math.max(a.length, b.length) * m, DRAW20_MIN_POINTS);
+        const target = Math.max(a.length, b.length, DRAW20_MIN_POINTS);
         if (a.length < target) arrA[idxA] = growPoly(a, target);
         if (b.length < target) arrB[idxB] = growPoly(b, target);
     }
-    function equalizeMatchedContours(srcContours, dstContours, matchInfo, multiplier) {
+    function equalizeMatchedContours(srcContours, dstContours, matchInfo) {
         if (!matchInfo || !matchInfo.idToPair || !matchInfo.pClass || !matchInfo.lClass) return;
-        const m = multiplier || DRAW20_POINT_MULTIPLIER;
         const { idToPair, pClass, lClass } = matchInfo;
         for (const [, pair] of idToPair) {
             if (pair.png < 0 || pair.lat < 0) continue; // orphans untouched
             const pOuter = pClass.outers[pair.png];
             const lOuter = lClass.outers[pair.lat];
             if (!pOuter || !lOuter) continue;
-            equalizePair(srcContours, pOuter.idx, dstContours, lOuter.idx, m);
+            equalizePair(srcContours, pOuter.idx, dstContours, lOuter.idx);
             const nH = Math.min(pOuter.holes.length, lOuter.holes.length);
             for (let h = 0; h < nH; h++) {
-                equalizePair(srcContours, pOuter.holes[h], dstContours, lOuter.holes[h], m);
+                equalizePair(srcContours, pOuter.holes[h], dstContours, lOuter.holes[h]);
             }
         }
     }
@@ -261,10 +260,11 @@ function createDraw20Render({
         }
 
         // ── STROKE + POINTS: one polygon + N circles per contour.
-        // For now: outline strokes = dark red, vertex dots = blue.
+        // PNG/Stift side: strokes dark red, dots blue.
+        // LaTeX side:    strokes blue,    dots dark red. (swapped)
         // Orphans still get their red+glow override.
-        const LINE_COLOR = '#8B0000';
-        const POINT_COLOR = '#4363d8';
+        const LINE_COLOR = (label === 'latex') ? '#4363d8' : '#8B0000';
+        const POINT_COLOR = (label === 'latex') ? '#8B0000' : '#4363d8';
         let totalVerts = 0;
         for (let i = 0; i < contours.length; i++) {
             const mapped = mappedAll[i];

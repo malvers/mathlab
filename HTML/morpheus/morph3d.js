@@ -70,15 +70,26 @@
     #empty { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 1.1rem; letter-spacing: 0.1em; opacity: 0.7; }
     .row { display: flex; gap: 14px; align-items: center; }
     .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: middle; }
+    #reload-btn {
+        position: fixed; top: 12px; right: 12px;
+        font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 1.5px;
+        padding: 8px 14px; cursor: pointer;
+        background: rgba(0, 210, 255, 0.12); color: #00d2ff;
+        border: 1px solid rgba(0, 210, 255, 0.45); border-radius: 4px;
+        transition: background 0.15s ease, color 0.15s ease;
+        z-index: 100;
+    }
+    #reload-btn:hover { background: rgba(0, 210, 255, 0.28); color: #fff; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head><body>
 <div id="hud">
-    <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING</div>
-    <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET</div>
-    <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · close</div>
+    <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING · <span id="hud-png-pts">–</span> Pts</div>
+    <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
+    <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
 </div>
+<button id="reload-btn" onclick="(function(){ try { var b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn'); if (b) b.click(); else location.reload(); } catch (e) { location.reload(); } })()">↻ RELOAD</button>
 <div id="empty" style="display:none">Keine Polygon-Daten — bitte erst Formel + Zeichnung in morph.html laden.</div>
 <script>
 (function () {
@@ -153,6 +164,17 @@
         const pngN = normalize(pngOuters, pngBB, pngScale);
         const latN = normalize(latOuters, latBB, latScale);
 
+        // Total vertex counts → HUD top-left, mirrors morph.html's "Pts:" cards.
+        function totalPts(outers) {
+            let n = 0;
+            for (const o of outers) n += o.pts.length;
+            return n;
+        }
+        const pngPtsEl = document.getElementById('hud-png-pts');
+        const latPtsEl = document.getElementById('hud-lat-pts');
+        if (pngPtsEl) pngPtsEl.textContent = totalPts(pngN);
+        if (latPtsEl) latPtsEl.textContent = totalPts(latN);
+
         function resample(pts, N) {
             if (!pts || pts.length < 2) {
                 const fallback = []; for (let i = 0; i < N; i++) fallback.push({ x: 0, y: 0 }); return fallback;
@@ -193,7 +215,10 @@
         scene.background = new THREE.Color(0x081428);
 
         const cam = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 5000);
-        cam.position.set(450, 250, 700);
+        cam.position.set(700, 400, 1100);
+        // Remember initial camera + orbit-target so ESC restores the default view.
+        const CAM_HOME = cam.position.clone();
+        const TARGET_HOME = new THREE.Vector3(0, 0, 175);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(innerWidth, innerHeight);
@@ -258,15 +283,16 @@
             return pts[pts.length - 1];
         }
 
-        // Red picking spheres — actual 3D meshes (not THREE.Points dots) so
-        // they pick reliably and look solid. Shared geometry per call to keep
-        // GPU buffers cheap.
+        // Picking spheres — colored per plane to match the outline colors
+        // (PNG/Stift = green, LaTeX = orange). Shared geometry + per-plane
+        // material keeps GPU cheap.
         const PICK_SPHERE_R = 3.2;
         const pickSphereGeom = new THREE.SphereGeometry(PICK_SPHERE_R, 10, 10);
-        const pickSphereMat = new THREE.MeshBasicMaterial({ color: 0xff3344 });
+        const pickMatPng = new THREE.MeshBasicMaterial({ color: PNG_COLOR });
+        const pickMatLat = new THREE.MeshBasicMaterial({ color: LAT_COLOR });
         function addOuterPoints(pts, z, plane, partnerPts, partnerZ, alignment) {
             if (!pts || !pts.length) return;
-            // One mesh per vertex — small, but few enough that it doesn't matter.
+            const mat = (plane === 'lat') ? pickMatLat : pickMatPng;
             const ownCum = cumulativeLengths(pts);
             const partnerCum = partnerPts ? cumulativeLengths(partnerPts) : null;
             const baseData = {
@@ -277,11 +303,10 @@
                 partnerPts: partnerPts || null,
                 partnerCum: partnerCum,
                 partnerZ: partnerPts ? partnerZ : null,
-                // 'forward' (PNG→LaTeX) | 'reverse' (LaTeX→PNG)
                 alignment: alignment || null,
             };
             for (let i = 0; i < pts.length; i++) {
-                const m = new THREE.Mesh(pickSphereGeom, pickSphereMat);
+                const m = new THREE.Mesh(pickSphereGeom, mat);
                 m.position.set(pts[i].x, pts[i].y, z);
                 m.userData = Object.assign({ vertIdx: i }, baseData);
                 scene.add(m);
@@ -374,7 +399,7 @@
         }
         const HL_SPHERE_R = 2.4;   // small pick-marker spheres
         const HL_LINE_R = 0.9;     // matching slimmer cylinder
-        const HL_COLOR = 0xff9020; // orange
+        const HL_COLOR = 0xff3344; // red — only the picked/matched line
 
         function addHighlightSphere(p, color) {
             const geom = new THREE.SphereGeometry(HL_SPHERE_R, 16, 16);
@@ -489,7 +514,12 @@
         });
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') window.close();
+            if (e.key === 'Escape') {
+                // Reset camera + orbit target to the saved home pose.
+                cam.position.copy(CAM_HOME);
+                controls.target.copy(TARGET_HOME);
+                controls.update();
+            }
         });
     }
 
