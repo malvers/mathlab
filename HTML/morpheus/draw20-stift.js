@@ -221,20 +221,30 @@ function createDraw20Stift({
     // S = toggle stift on/off (P is already taken by legacy points-toggle).
     // capture:true so it fires before other handlers; ignore when focus is
     // in an input/textarea (e.g. the LaTeX text input).
+    // S handler — try BOTH window-capture AND document-bubble + log every
+    // hit so we can see which path the event takes in this environment.
+    const sHandler = (e, where) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return false;
+        if (e.key !== 's' && e.key !== 'S') return false;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+        log(`⌨ S caught (${where}) target=${e.target && e.target.tagName}`);
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toggleStiftEnabled();
+        return true;
+    };
+    window.addEventListener('keydown', (e) => sHandler(e, 'window-capture'), true);
+    document.addEventListener('keydown', (e) => sHandler(e, 'document-capture'), true);
+    document.addEventListener('keydown', (e) => sHandler(e, 'document-bubble'), false);
+
     document.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
-        if (e.key === 's' || e.key === 'S') log(`⌨ keydown: key=${e.key} meta=${e.metaKey} ctrl=${e.ctrlKey} shift=${e.shiftKey} target=${e.target && e.target.tagName}`);
         if (e.metaKey || e.ctrlKey) {
             if (e.key === 'z' || e.key === 'Z') {
                 e.preventDefault();
                 if (e.shiftKey) redo();
                 else undo();
             }
-            return;
-        }
-        if (e.key === 's' || e.key === 'S') {
-            e.preventDefault();
-            toggleStiftEnabled();
         }
     }, true);
 

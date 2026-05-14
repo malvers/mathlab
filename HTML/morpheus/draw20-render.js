@@ -31,6 +31,8 @@ function createDraw20Render({
     getUI,
     matchingEnabled,
     setBaseSimilarity,
+    rerenderStift,
+    morphHelpers,
     dbg,
 }) {
     const log = (typeof dbg === 'function') ? dbg : () => {};
@@ -47,6 +49,57 @@ function createDraw20Render({
     let activeMatchId = null;
     const orphanMatchIds = new Set();
     const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
+
+    // ── Point-count equalization ────────────────────────────────────────────
+    // For each matched (PNG/stift)↔LaTeX outer pair (and their paired
+    // holes), grow the shorter polygon to match the longer one by
+    // inserting midpoints on the LONGEST edge — preserves original
+    // vertices, adds new ones where it matters most (long straight
+    // segments get refined, short curvy parts stay untouched).
+    function growPoly(poly, target) {
+        if (!poly || poly.length >= target) return poly;
+        const p = poly.slice();
+        while (p.length < target) {
+            let maxLen = -1, maxIdx = 0;
+            for (let i = 0; i < p.length; i++) {
+                const a = p[i], b = p[(i + 1) % p.length];
+                const dx = b[0] - a[0], dy = b[1] - a[1];
+                const len = dx * dx + dy * dy;
+                if (len > maxLen) { maxLen = len; maxIdx = i; }
+            }
+            const a = p[maxIdx], b = p[(maxIdx + 1) % p.length];
+            const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            p.splice(maxIdx + 1, 0, mid);
+        }
+        return p;
+    }
+    // Grow both polygons to `multiplier × max(srcLen, dstLen)`. With
+    // multiplier=1 this is plain equalization. multiplier=2 also doubles
+    // the count on both sides — denser morph + denser correspondence.
+    const DRAW20_POINT_MULTIPLIER = 2;
+    function equalizePair(arrA, idxA, arrB, idxB, multiplier) {
+        const a = arrA[idxA], b = arrB[idxB];
+        if (!a || !b) return;
+        const target = Math.max(a.length, b.length) * (multiplier || 1);
+        if (a.length < target) arrA[idxA] = growPoly(a, target);
+        if (b.length < target) arrB[idxB] = growPoly(b, target);
+    }
+    function equalizeMatchedContours(srcContours, dstContours, matchInfo, multiplier) {
+        if (!matchInfo || !matchInfo.idToPair || !matchInfo.pClass || !matchInfo.lClass) return;
+        const m = multiplier || DRAW20_POINT_MULTIPLIER;
+        const { idToPair, pClass, lClass } = matchInfo;
+        for (const [, pair] of idToPair) {
+            if (pair.png < 0 || pair.lat < 0) continue; // orphans untouched
+            const pOuter = pClass.outers[pair.png];
+            const lOuter = lClass.outers[pair.lat];
+            if (!pOuter || !lOuter) continue;
+            equalizePair(srcContours, pOuter.idx, dstContours, lOuter.idx, m);
+            const nH = Math.min(pOuter.holes.length, lOuter.holes.length);
+            for (let h = 0; h < nH; h++) {
+                equalizePair(srcContours, pOuter.holes[h], dstContours, lOuter.holes[h], m);
+            }
+        }
+    }
 
     // ── BBox helpers ────────────────────────────────────────────────────────
     // Threshold-driven: any pixel above the threshold counts as "ink".
@@ -322,13 +375,24 @@ function createDraw20Render({
         const simVal = document.getElementById('sim-value');
         const objVerts = document.getElementById('obj-verts');
         const latVerts = document.getElementById('lat-verts');
-        const pOuters = (pngContours && typeof classifyContours === 'function')
+        // Left-side source: PNG if present, else fall back to stift (the
+        // user's own drawing). pngVertCount is already 0 when no PNG was
+        // rendered — compute stift counts on-demand from getStiftContours.
+        let leftOuters = (pngContours && typeof classifyContours === 'function')
             ? classifyContours(pngContours).outers.length : 0;
+        let leftVerts = pngVertCount;
+        if (leftOuters === 0 && leftVerts === 0) {
+            const sc = (typeof getStiftContours === 'function') ? getStiftContours() : null;
+            if (sc && sc.length && typeof classifyContours === 'function') {
+                leftOuters = classifyContours(sc).outers.length;
+                leftVerts = sc.reduce((s, p) => s + (p ? p.length : 0), 0);
+            }
+        }
         const lOuters = (latexContours && typeof classifyContours === 'function')
             ? classifyContours(latexContours).outers.length : 0;
-        if (objVal) objVal.textContent = pOuters;
+        if (objVal) objVal.textContent = leftOuters;
         if (latVal) latVal.textContent = lOuters;
-        if (objVerts) objVerts.textContent = pngVertCount;
+        if (objVerts) objVerts.textContent = leftVerts;
         if (latVerts) latVerts.textContent = latVertCount;
         const sim = computeSimilarity(pngContours, latexContours);
         setBS(sim);
@@ -353,10 +417,84 @@ function createDraw20Render({
     }
 
     // ── 3D Morph view (delegates to morph3d.js) ─────────────────────────────
+    // The user usually draws with stift — that path produces `stiftContours`,
+    // NOT the PNG-image-based pngContours that lastRenderData carries. When
+    // stift exists, substitute it into the data so the popup can show the
+    // drawn shape vs. the LaTeX target (computing the match on the fly).
     function openMorph3D() {
-        if (typeof Morph3D !== 'undefined' && typeof Morph3D.openMorph3D === 'function') {
-            Morph3D.openMorph3D(lastRenderData);
+        if (typeof Morph3D === 'undefined' || typeof Morph3D.openMorph3D !== 'function') return;
+        if (!lastRenderData) { Morph3D.openMorph3D(null); return; }
+
+        const stiftContours = (typeof getStiftContours === 'function') ? getStiftContours() : null;
+        let data = lastRenderData;
+        if (stiftContours && stiftContours.length
+            && lastRenderData.latexContours && lastRenderData.latexContours.length
+            && typeof computeMatchIds === 'function') {
+            const sm = computeMatchIds(stiftContours, lastRenderData.latexContours);
+            // Overwrite png-side fields with the stift counterpart so the
+            // popup uses a uniform "left = source / right = target" shape.
+            data = Object.assign({}, lastRenderData, {
+                pngContours: stiftContours,
+                pClass: sm.pClass,
+                pngId: sm.pngId,
+                latId: sm.latId,
+                idToPair: sm.idToPair,
+                plausibility: sm.plausibility,
+                pngDisplayScale: 1,
+            });
         }
+
+        // Per-pair vertex correspondence: resample both outlines to N points,
+        // then run the SAME alignment engine the 2D morph uses to get the
+        // rotation-correct idxMap. The popup uses this for picking — clicking
+        // an original vertex finds its partner via arc-length-fraction → mapped
+        // resampled index → fraction → interpolated point on the partner outline.
+        if (data && data.idToPair && data.pngContours && data.latexContours
+            && morphHelpers && typeof morphHelpers.resampleClosed === 'function'
+            && typeof morphHelpers.alignDstToSrcBBox === 'function'
+            && typeof morphHelpers.alignTargetWithEngine === 'function'
+            && typeof classifyContours === 'function') {
+            const N = 60;
+            const pClass = data.pClass;
+            const lClass = data.lClass;
+            // outerId → outerIdx for both sides (mirrors morph3d.js).
+            const pngIdxById = new Map();
+            for (let oi = 0; oi < pClass.outers.length; oi++) {
+                pngIdxById.set(data.pngId[pClass.outers[oi].idx], oi);
+            }
+            const latIdxById = new Map();
+            for (let oi = 0; oi < lClass.outers.length; oi++) {
+                latIdxById.set(data.latId[lClass.outers[oi].idx], oi);
+            }
+            const alignments = [];
+            for (const [id, pair] of data.idToPair) {
+                if (pair.png < 0 || pair.lat < 0) continue;
+                const pi = pngIdxById.get(id);
+                const li = latIdxById.get(id);
+                if (pi == null || li == null) continue;
+                const srcRaw = data.pngContours[pClass.outers[pi].idx];
+                const dstRaw = data.latexContours[lClass.outers[li].idx];
+                if (!srcRaw || !dstRaw) continue;
+                // morphHelpers expects {x,y} objects.
+                const srcPts = srcRaw.map(p => ({ x: p[0], y: p[1] }));
+                const dstPts = dstRaw.map(p => ({ x: p[0], y: p[1] }));
+                const srcR = morphHelpers.resampleClosed(srcPts, N);
+                const dstR = morphHelpers.resampleClosed(dstPts, N);
+                if (srcR.length < 3 || dstR.length < 3) continue;
+                const dstAligned = morphHelpers.alignDstToSrcBBox(srcR, dstR);
+                const eng = morphHelpers.alignTargetWithEngine(srcR, dstAligned);
+                if (!eng) continue;
+                alignments.push({
+                    outerId: id,
+                    pngOuterIdx: pi,
+                    latOuterIdx: li,
+                    N: N,
+                    idxMap: eng.idxMap, // src-resampled-i → dst-resampled-j (in dstR)
+                });
+            }
+            data = Object.assign({}, data, { pairAlignments: alignments });
+        }
+        Morph3D.openMorph3D(data);
     }
 
     // ── renderBBoxes: orchestrator ──────────────────────────────────────────
@@ -386,6 +524,21 @@ function createDraw20Render({
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
         const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
+
+        // Equalize point counts between matched PNG↔LaTeX pairs.
+        if (pngContours && pngContours.length && latexContoursList && latexContoursList.length) {
+            equalizeMatchedContours(pngContours, latexContoursList, matchInfo);
+        }
+
+        // Same for stift↔LaTeX (when user has drawn). After equalizing,
+        // re-render the stift outlines so the display reflects the new
+        // point counts.
+        const stiftC = (typeof getStiftContours === 'function') ? getStiftContours() : null;
+        if (stiftC && stiftC.length && latexContoursList && latexContoursList.length) {
+            const stiftMatch = computeMatchIds(stiftC, latexContoursList);
+            equalizeMatchedContours(stiftC, latexContoursList, stiftMatch);
+            if (typeof rerenderStift === 'function') rerenderStift();
+        }
 
         // Display scales — natural pixel → displayed CSS pixel, exactly as
         // used by drawContours for the main panes. The polygon-ring uses
@@ -523,10 +676,35 @@ function createDraw20Render({
         updateInfoBoxes(pngContours, latexContoursList);
     }
 
+    // Re-run updateInfoBoxes from the most recent renderBBoxes state.
+    // Cheap — no contour extraction. Used after stift outlines change so
+    // the left info-box reflects fresh stift counts.
+    function refreshInfoBoxes() {
+        if (!lastRenderData) {
+            updateInfoBoxes(null, null);
+            return;
+        }
+        updateInfoBoxes(lastRenderData.pngContours, lastRenderData.latexContours);
+    }
+
+    // Equalize stift contours against the most recently rendered LaTeX
+    // contours. Used after a stroke completes — keeps point counts aligned
+    // without re-running the full renderBBoxes. Returns true if any
+    // equalization actually happened.
+    function equalizeStiftWithLatex(stiftContours) {
+        if (!stiftContours || !stiftContours.length) return false;
+        if (!lastRenderData || !lastRenderData.latexContours || !lastRenderData.latexContours.length) return false;
+        const stiftMatch = computeMatchIds(stiftContours, lastRenderData.latexContours);
+        equalizeMatchedContours(stiftContours, lastRenderData.latexContours, stiftMatch);
+        return true;
+    }
+
     return {
         renderBBoxes,
         openPolygonRing,
         openMorph3D,
         getLastRenderData: () => lastRenderData,
+        refreshInfoBoxes,
+        equalizeStiftWithLatex,
     };
 }
