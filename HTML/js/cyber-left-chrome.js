@@ -23,14 +23,29 @@
 (function () {
     'use strict';
 
-    var NATURAL_EXPANDED = 66 + 356;
-    /** Rail-only width when SB collapsed — same 66px track as expanded chrome (single --cyber-left-scale applies to both). */
-    var NATURAL_COLLAPSED = 66;
+    /**
+     * Natural widths come from CSS custom properties defined in
+     * cyber-lab-overrides.css (:root): --cyber-rail-w, --cyber-sidebar-w.
+     * We read them live so resizing the sidebar centrally propagates here
+     * without touching this file.
+     */
+    function _cssPx(name, fallback) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        var n = parseFloat(v);
+        return Number.isFinite(n) && n > 0 ? n : fallback;
+    }
+    function getNaturalExpanded() {
+        return _cssPx('--cyber-rail-w', 66) + _cssPx('--cyber-sidebar-w', 356);
+    }
+    /** Rail-only width when SB collapsed — same rail track as expanded chrome (single --cyber-left-scale applies to both). */
+    function getNaturalCollapsed() {
+        return _cssPx('--cyber-rail-w', 66);
+    }
 
     var DEFAULT_MIN = 0.48;
-    var DEFAULT_MAX = 1.12; // Caps left chrome at ~472px (66 mini-rail + 406 sidebar buffer)
+    var DEFAULT_MAX = 1.12; // Caps left chrome at --cyber-left-cap on big windows
     var SAFETY_MIN = 0.05;
-    var SAFETY_MAX = 1.12; // Hard cap — prevents any code path (manual zoom, etc.) from growing beyond 472px
+    var SAFETY_MAX = 1.12; // Hard cap — prevents any code path (manual zoom, etc.) from growing beyond --cyber-left-cap
 
     /**
      * proportionalChrome: left width ≈ vw × leftViewportFraction × autoRelativeToFit.
@@ -64,7 +79,7 @@
         var collapsed = panel.classList.contains('collapsed');
         document.documentElement.style.setProperty(
             '--cyber-left-natural-w',
-            (collapsed ? NATURAL_COLLAPSED : NATURAL_EXPANDED) + 'px'
+            (collapsed ? getNaturalCollapsed() : getNaturalExpanded()) + 'px'
         );
     }
 
@@ -83,11 +98,11 @@
             var rel = CONFIG.autoRelativeToFit;
             if (!Number.isFinite(rel) || rel <= 0) rel = 1;
             rel = Math.min(1, Math.max(0.35, rel));
-            raw = (vw * frac * rel) / NATURAL_EXPANDED;
+            raw = (vw * frac * rel) / getNaturalExpanded();
         } else {
             var avail = vw - CONFIG.minMainWidth;
             if (avail < 80) avail = 80;
-            raw = avail / NATURAL_EXPANDED;
+            raw = avail / getNaturalExpanded();
         }
         // Hard cap at 1.0 — left chrome never grows beyond natural width (no zoom on big windows)
         return Math.min(1.0, Math.max(SAFETY_MIN, raw));

@@ -25,18 +25,18 @@ body {
     /* TEST: Flex auf body aus — Shell per Grid (Rail-Spalte fest 66px, keine Quetschung) */
     /* Zurück zum Vorher: nächste ~15 Zeilen bis Ende der body:has()-Blöcke durch eine Zeile ersetzen: display: flex; */
     display: grid;
-    grid-template-columns: 66px minmax(356px, auto) minmax(0, 1fr);
+    grid-template-columns: var(--cyber-rail-w, 66px) minmax(var(--cyber-sidebar-w, 356px), auto) minmax(0, 1fr);
     grid-template-rows: minmax(0, 100vh);
     align-items: stretch;
     overflow-x: hidden;
 }
 
 body:not(:has(#side-panel)) {
-    grid-template-columns: 66px minmax(0, 1fr);
+    grid-template-columns: var(--cyber-rail-w, 66px) minmax(0, 1fr);
 }
 
 body:has(#side-panel.collapsed) {
-    grid-template-columns: 66px 0 minmax(0, 1fr);
+    grid-template-columns: var(--cyber-rail-w, 66px) 0 minmax(0, 1fr);
 }
 
 /* --- SIDE PANEL (SIDEBAR) --- */
@@ -44,8 +44,8 @@ body:has(#side-panel.collapsed) {
     grid-column: 2;
     grid-row: 1;
     justify-self: start;
-    width: 380px;
-    min-width: 380px;
+    width: var(--cyber-sidebar-w, 356px);
+    min-width: var(--cyber-sidebar-w, 356px);
     background: var(--glass);
     backdrop-filter: blur(25px);
     border: none;
