@@ -13,8 +13,8 @@
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
-    width: 66px;
-    min-width: 66px;
+    width: var(--cyber-rail-w, 66px);
+    min-width: var(--cyber-rail-w, 66px);
     flex-shrink: 0;
     height: 100vh;
     background: rgba(5, 10, 20, 0.95);
@@ -45,7 +45,7 @@
     margin-left: -1px; /* Overlap the mini-rail border for a single line */
 }
 
-/* --- NAVIGATION COMPRESSION FOR 350px --- */
+/* --- NAVIGATION COMPRESSION FOR --cyber-sidebar-w --- */
 #side-panel .cyber-nav,
 #sidebar-header .cyber-nav {
     display: flex !important;
@@ -91,8 +91,8 @@
 }
 
 #side-panel {
-    width: 356px !important;
-    min-width: 356px !important; /* Overriding the base layout's min-width */
+    width: var(--cyber-sidebar-w) !important;
+    min-width: var(--cyber-sidebar-w) !important; /* Overriding the base layout's min-width */
     height: 100vh;
     background: rgba(10, 15, 26, 0.98);
     display: flex;
@@ -495,17 +495,31 @@ body {
     }
 }
 
-/* --- LEFT CHROME: Mini-Rail + Sidebar gemeinsam zoombar (cyber-left-chrome.js) --- */
+/* --- LEFT CHROME: Mini-Rail + Sidebar gemeinsam zoombar (cyber-left-chrome.js) ---
+ *
+ * SINGLE SOURCE OF TRUTH for left-chrome geometry. Change one of the two
+ * primitive widths and every dependent rule (body grid, side-panel width,
+ * chrome grid, cap, JS fit-scale math) follows automatically.
+ *
+ *   --cyber-rail-w        : mini-rail column (fixed icon column)
+ *   --cyber-sidebar-w     : expanded side panel
+ *   --cyber-left-natural-w: rail + sidebar (also overwritten by JS at runtime
+ *                           when sidebar collapses → rail-only width)
+ *   --cyber-left-cap      : hard pixel cap for total left chrome width
+ *                           (natural + 50px buffer)
+ */
 :root {
+    --cyber-rail-w: 66px;
+    --cyber-sidebar-w: 356px;
     --cyber-left-scale: 1;
-    /* 66px mini-rail + 356px sidebar = 422px natural width */
-    --cyber-left-natural-w: 422px;
+    --cyber-left-natural-w: calc(var(--cyber-rail-w) + var(--cyber-sidebar-w));
+    --cyber-left-cap: calc(var(--cyber-left-natural-w) + 50px);
 }
 
 body.cyber-shell-grid {
     display: grid !important;
-    /* Hard cap at 472px (66 mini-rail + 406 sidebar buffer) so left chrome never grows beyond on big windows */
-    grid-template-columns: min(calc(var(--cyber-left-natural-w, 422px) * var(--cyber-left-scale, 1)), 472px) minmax(0, 1fr) !important;
+    /* Hard cap (--cyber-left-cap) so left chrome never grows beyond on big windows. */
+    grid-template-columns: min(calc(var(--cyber-left-natural-w) * var(--cyber-left-scale, 1)), var(--cyber-left-cap)) minmax(0, 1fr) !important;
     grid-template-rows: minmax(0, 100vh) !important;
     align-items: stretch !important;
     align-content: stretch !important;
@@ -522,8 +536,8 @@ body.cyber-shell-grid > #cyber-left-chrome {
     grid-row: 1 !important;
     justify-self: start !important;
     align-self: start !important;
-    width: min(calc(var(--cyber-left-natural-w, 422px) * var(--cyber-left-scale, 1)), 472px);
-    max-width: 472px;
+    width: min(calc(var(--cyber-left-natural-w) * var(--cyber-left-scale, 1)), var(--cyber-left-cap));
+    max-width: var(--cyber-left-cap);
     height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
@@ -539,11 +553,11 @@ body.cyber-shell-grid > #cyber-left-chrome {
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner {
-    width: var(--cyber-left-natural-w, 422px);
-    /* Cap scale at 1.12 so content never grows beyond ~472px equivalent on big windows */
+    width: var(--cyber-left-natural-w);
+    /* Cap scale at 1.12 so content never grows beyond --cyber-left-cap equivalent on big windows */
     height: calc(100vh / min(var(--cyber-left-scale, 1), 1.12));
     display: grid;
-    grid-template-columns: 66px 356px;
+    grid-template-columns: var(--cyber-rail-w) var(--cyber-sidebar-w);
     grid-template-rows: minmax(0, 1fr);
     transform: scale(min(var(--cyber-left-scale, 1), 1.12));
     transform-origin: top left;
@@ -551,8 +565,8 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner:has(#side-panel.collapsed) {
-    /* Same rail column as expanded (66px); only sidebar column drops to 0 — identical mini-rail ZF/size. */
-    grid-template-columns: 66px 0 !important;
+    /* Same rail column as expanded; only sidebar column drops to 0 — identical mini-rail ZF/size. */
+    grid-template-columns: var(--cyber-rail-w) 0 !important;
 }
 
 body.cyber-shell-grid #cyber-left-chrome-inner > #mini-rail {
