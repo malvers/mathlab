@@ -38,11 +38,29 @@ function createDraw20UI({
         if (!ml) return;
         while (ml.firstChild) ml.removeChild(ml.firstChild);
     }
+    // Strip the bulk of the previous render (paths/polygons/dots) from the
+    // overlay SVG BEFORE the KaTeX wrapper is appended. Otherwise the
+    // browser has to do style/layout/paint over the entire heavy overlay
+    // while it processes the new KaTeX HTML — which blocks the main
+    // thread for 1–4 s (see setTimeout(50) actual = 1500–3800 ms).
+    // morph-layer is preserved so renderBBoxes' assumption holds.
+    function clearOverlayBulk() {
+        const overlay = document.getElementById('draw20-overlay');
+        if (!overlay) return;
+        const morphLayer = document.getElementById('morph-layer');
+        for (let i = overlay.childNodes.length - 1; i >= 0; i--) {
+            const c = overlay.childNodes[i];
+            if (c !== morphLayer) overlay.removeChild(c);
+        }
+    }
     function setFormula(latex, presetIndex) {
+        // Total click→done timer (read by renderBBoxes at the very end).
+        window.__draw20ClickT0 = performance.now();
         // Wipe lingering correspondence/morph artifacts immediately so the
         // user doesn't see stale lines from the previous formula while the
         // new LaTeX renders async.
         clearMorphLayer();
+        clearOverlayBulk();
         // Formel-Klick: stift strokes + outlines weg, nur PNG + LaTeX
         // bleiben (User wollte: "wenn ich eine Formel wähle alles gemalte
         // löschen, nur Latex und die Hand-Formel stehen lassen").
@@ -73,8 +91,11 @@ function createDraw20UI({
     // on legacy globals needed.
     function setSymbolLatex(latex) {
         if (!latex || !String(latex).trim()) return;
+        // Total click→done timer (read by renderBBoxes at the very end).
+        window.__draw20ClickT0 = performance.now();
         // Wipe lingering correspondence/morph artifacts (see setFormula).
         clearMorphLayer();
+        clearOverlayBulk();
         tex.dataset.latex = String(latex);
         // No PNG counterpart: hide pix entirely and clear its src so
         // renderBBoxes skips the PNG side (pix.naturalWidth becomes 0).

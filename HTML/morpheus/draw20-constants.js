@@ -31,8 +31,8 @@ const DRAW20_REGION_PALETTE = [
     '#85C1E9', // sky blue (replaces pumpkin)
     '#3D9970', // forest green (replaces pink)
 ];
-const DRAW20_ORPHAN_COLOR = '#FF1744';
-const DRAW20_ORPHAN_GLOW = 'drop-shadow(0 0 3px #FF1744)';
+const DRAW20_ORPHAN_COLOR = '#FF0000';
+const DRAW20_ORPHAN_GLOW = 'drop-shadow(0 0 3px #FF0000)';
 
 function draw20PaletteColor(i) {
     const n = DRAW20_REGION_PALETTE.length;
