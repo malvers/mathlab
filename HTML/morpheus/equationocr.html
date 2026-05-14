@@ -1407,6 +1407,33 @@
             };
             img.src = dataUrl;
         })();
+
+        // Diagnostic: report left-chrome geometry (rail + sidebar) for the central
+        // single-source-of-truth refactor. Logs natural sum vs. rendered width.
+        function logChromeGeometry(tag) {
+            const cs = getComputedStyle(document.documentElement);
+            const railVar    = cs.getPropertyValue('--cyber-rail-w').trim();
+            const sbVar      = cs.getPropertyValue('--cyber-sidebar-w').trim();
+            const naturalVar = cs.getPropertyValue('--cyber-left-natural-w').trim();
+            const scaleVar   = cs.getPropertyValue('--cyber-left-scale').trim();
+            const rail       = document.getElementById('mini-rail');
+            const panel      = document.getElementById('side-panel');
+            const chrome     = document.getElementById('cyber-left-chrome');
+            const railW      = rail   ? rail.getBoundingClientRect().width   : null;
+            const panelW     = panel  ? panel.getBoundingClientRect().width  : null;
+            const chromeW    = chrome ? chrome.getBoundingClientRect().width : null;
+            const sumRailPanel = (railW != null && panelW != null) ? (railW + panelW) : null;
+
+            DebugWindow.log(`▼ chrome (${tag}): vars rail=${railVar} sb=${sbVar} natural=${naturalVar} scale=${scaleVar}`);
+            DebugWindow.log(`  measured: rail=${railW?.toFixed(2)} sb=${panelW?.toFixed(2)} sum=${sumRailPanel?.toFixed(2)} chrome=${chromeW?.toFixed(2)}`);
+        }
+        // Fire after layout settles (post auto-fit-scale calc).
+        setTimeout(() => logChromeGeometry('init'), 50);
+        setTimeout(() => logChromeGeometry('settled'), 400);
+        window.addEventListener('resize', () => {
+            clearTimeout(window.__chromeLogTimer);
+            window.__chromeLogTimer = setTimeout(() => logChromeGeometry('resize'), 250);
+        });
     </script>
 </body>
 

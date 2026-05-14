@@ -41,6 +41,17 @@
     function getNaturalCollapsed() {
         return _cssPx('--cyber-rail-w', 66);
     }
+    /**
+     * Upper bound for the auto-fit scale: ensures the inner transform-scaled
+     * chrome never renders wider than --cyber-left-cap (otherwise it would
+     * be clipped by the outer overflow:hidden when cap < natural).
+     */
+    function getMaxAutoScale() {
+        var cap = _cssPx('--cyber-left-cap', 472);
+        var natural = getNaturalExpanded();
+        if (!(natural > 0)) return 1.0;
+        return Math.min(1.0, cap / natural);
+    }
 
     var DEFAULT_MIN = 0.48;
     var DEFAULT_MAX = 1.12; // Caps left chrome at --cyber-left-cap on big windows
@@ -104,8 +115,8 @@
             if (avail < 80) avail = 80;
             raw = avail / getNaturalExpanded();
         }
-        // Hard cap at 1.0 — left chrome never grows beyond natural width (no zoom on big windows)
-        return Math.min(1.0, Math.max(SAFETY_MIN, raw));
+        // Upper cap = cap / natural (≤ 1.0) — keeps rendered chrome ≤ --cyber-left-cap on big windows.
+        return Math.min(getMaxAutoScale(), Math.max(SAFETY_MIN, raw));
     }
 
     function publishResolvedScale() {
