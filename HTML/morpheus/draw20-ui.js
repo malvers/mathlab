@@ -171,6 +171,12 @@ function createDraw20UI({
         const fill = t ? t.checked : false;
         overlay.querySelectorAll('path[data-kind="fill"]').forEach(p => { p.style.display = fill ? '' : 'none'; });
         stiftOutlineSvg.querySelectorAll('path[data-kind="fill"]').forEach(p => { p.style.display = fill ? '' : 'none'; });
+        // Morph polygons live in morphLayer (inside overlay). Same green
+        // as the pixel/stift ink when fill is on, no fill (stroke only)
+        // when fill is off — same UX as POLYGONE FÜLLEN for the outlines.
+        overlay.querySelectorAll('polygon[data-source="morph"]').forEach(p => {
+            p.setAttribute('fill', fill ? '#adff2f' : 'none');
+        });
     }
     function attachToggles() {
         const lt = document.getElementById('lines-toggle');

@@ -150,6 +150,13 @@ function createDraw20Morph({
         tex.style.opacity = '';
         if (!pairs.length) {
             srcEl.style.opacity = '';
+            // CRITICAL: drop the morph-src-* classes — without this the
+            // stiftCanvas can stay visibility:hidden after LÖSCHEN, which
+            // blocks all mouse events and breaks drawing until reload.
+            pix.classList.remove('morph-src-pixel-hidden');
+            stiftCanvas.classList.remove('morph-src-pixel-hidden');
+            overlay.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
+            stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
             // Pre-morph not active: show all outlines/points again.
             overlay.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
             overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
@@ -248,24 +255,33 @@ function createDraw20Morph({
             const p = resampleClosed(pair[srcKey], N);
             const l = resampleClosed(pair[dstKey], N);
             if (p.length < 3 || l.length < 3) continue;
-            // In-place: dst polygon BB-aligned onto src. Then alignTargetTo
-            // (engine) chooses the rotation+reverse. Together: low-cross
-            // correspondence + in-place morph.
+            // alignDstToSrcBBox just centers the target onto the source so
+            // alignTargetTo (engine) can pick the right rotation/reverse —
+            // the aligned positions are NOT used for the actual morph end-
+            // point. We interpolate from src → ORIGINAL l[idxMap[i]] so the
+            // morph lands on the LaTeX's natural baseline at t=1.
             const lInPlace = alignDstToSrcBBox(p, l);
             const eng = alignTargetWithEngine(p, lInPlace);
             if (!eng) continue;
-            const pts = p.map((pp, i) => ({
-                x: (1 - t) * pp.x + t * eng.alignedXY[i].x,
-                y: (1 - t) * pp.y + t * eng.alignedXY[i].y,
-            }));
+            const pts = p.map((pp, i) => {
+                const j = eng.idxMap[i];
+                return {
+                    x: (1 - t) * pp.x + t * l[j].x,
+                    y: (1 - t) * pp.y + t * l[j].y,
+                };
+            });
             const polyStr = pts.map(pp => `${pp.x},${pp.y}`).join(' ');
             const poly = document.createElementNS(svgNS, 'polygon');
             poly.setAttribute('points', polyStr);
-            poly.setAttribute('fill', draw20PaletteColor(pair.mid));
-            poly.setAttribute('fill-opacity', '1');
+            // Same green as the stift/pixel ink. Fill respects the
+            // POLYGON FÜLLEN toggle: when off, no fill (only stroke).
+            const fillToggle = document.getElementById('fill-toggle');
+            const fillOn = fillToggle ? fillToggle.checked : false;
+            poly.setAttribute('fill', fillOn ? '#adff2f' : 'none');
             poly.setAttribute('stroke', '#ffffff');
             poly.setAttribute('stroke-width', String(1.5 / z));
             poly.setAttribute('stroke-opacity', '0.6');
+            poly.dataset.source = 'morph';
             morphLayer.appendChild(poly);
             // Vertex dots on the morphed polygon — blue, same look as the
             // outline dots, so PUNKTE toggle catches them automatically
@@ -367,8 +383,15 @@ function createDraw20Morph({
             sl.value = String(pct);
             if (span) span.textContent = String(pct);
             renderMorph(t);
-            if (t < 1) morphAnimRaf = requestAnimationFrame(tick);
-            else morphAnimRaf = null;
+            if (t < 1) {
+                morphAnimRaf = requestAnimationFrame(tick);
+            } else {
+                morphAnimRaf = null;
+                // Log point count of the finished morph polygon — once,
+                // only at end-of-animation (not during each frame).
+                const morphPts = morphLayer.querySelectorAll('circle[data-source="morph"]').length;
+                log(`🎯 morph done: ${morphPts} pts`);
+            }
         }
         tick();
     }
