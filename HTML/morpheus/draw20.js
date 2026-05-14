@@ -151,6 +151,144 @@
         overlay.addEventListener('mouseover', onOverlayHover);
         overlay.addEventListener('mouseout', onOverlayHover);
 
+        // ── Stift: eigene Zeichenfläche (entkoppelt vom Legacy-draw-canvas) ─
+        // Strokes werden in normalisierten [0,1]-Koordinaten gespeichert, damit
+        // sie mit Wrap-Resizing skalieren. localStorage-Persistenz für Reload.
+        const stiftCanvas = document.createElement('canvas');
+        stiftCanvas.id = 'draw20-stift';
+        stiftCanvas.style.cssText = `
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 12;
+            pointer-events: none;
+            touch-action: none;
+        `;
+        wrap.appendChild(stiftCanvas);
+        const stiftCtx = stiftCanvas.getContext('2d');
+
+        let strokes = [];
+        let curStroke = null;
+        let drawingNow = false;
+        let stiftEnabled = false;
+        try {
+            const j = localStorage.getItem('draw20-strokes');
+            if (j) strokes = JSON.parse(j) || [];
+        } catch (_) {}
+        try {
+            stiftEnabled = localStorage.getItem('draw20-stift-enabled') === '1';
+        } catch (_) {}
+
+        function persistStrokes() {
+            try { localStorage.setItem('draw20-strokes', JSON.stringify(strokes)); } catch (_) {}
+        }
+        function redrawStift() {
+            const w = stiftCanvas.width, h = stiftCanvas.height;
+            const dpr = window.devicePixelRatio || 1;
+            stiftCtx.clearRect(0, 0, w, h);
+            for (const s of strokes) {
+                if (!s.points || s.points.length < 1) continue;
+                stiftCtx.globalCompositeOperation = (s.mode === 'eraser') ? 'destination-out' : 'source-over';
+                stiftCtx.strokeStyle = '#F4C430';
+                stiftCtx.fillStyle = '#F4C430';
+                stiftCtx.lineCap = 'round';
+                stiftCtx.lineJoin = 'round';
+                stiftCtx.lineWidth = (s.width || 6) * dpr;
+                if (s.points.length === 1) {
+                    const p = s.points[0];
+                    stiftCtx.beginPath();
+                    stiftCtx.arc(p.nx * w, p.ny * h, ((s.width || 6) * dpr) / 2, 0, Math.PI * 2);
+                    stiftCtx.fill();
+                } else {
+                    stiftCtx.beginPath();
+                    stiftCtx.moveTo(s.points[0].nx * w, s.points[0].ny * h);
+                    for (let i = 1; i < s.points.length; i++) {
+                        stiftCtx.lineTo(s.points[i].nx * w, s.points[i].ny * h);
+                    }
+                    stiftCtx.stroke();
+                }
+            }
+            stiftCtx.globalCompositeOperation = 'source-over';
+        }
+        function resizeStift() {
+            const r = wrap.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            stiftCanvas.width = Math.max(1, Math.round(r.width * dpr));
+            stiftCanvas.height = Math.max(1, Math.round(r.height * dpr));
+            redrawStift();
+        }
+        function clearStrokes() {
+            strokes = [];
+            curStroke = null;
+            drawingNow = false;
+            redrawStift();
+            persistStrokes();
+            dbg('strokes cleared');
+        }
+        function ptFromEvent(e) {
+            const r = stiftCanvas.getBoundingClientRect();
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            return { nx: (cx - r.left) / r.width, ny: (cy - r.top) / r.height };
+        }
+        function onStiftDown(e) {
+            if (!stiftEnabled) return;
+            if (e.button !== undefined && e.button !== 0) return;
+            e.preventDefault();
+            drawingNow = true;
+            const sw = document.getElementById('stroke-slider');
+            curStroke = {
+                points: [ptFromEvent(e)],
+                width: sw ? +sw.value : 6,
+                mode: 'pen',
+            };
+            strokes.push(curStroke);
+            redrawStift();
+        }
+        function onStiftMove(e) {
+            if (!drawingNow || !curStroke) return;
+            e.preventDefault();
+            curStroke.points.push(ptFromEvent(e));
+            redrawStift();
+        }
+        function onStiftUp() {
+            if (!drawingNow) return;
+            drawingNow = false;
+            curStroke = null;
+            persistStrokes();
+        }
+        stiftCanvas.addEventListener('mousedown', onStiftDown);
+        window.addEventListener('mousemove', onStiftMove);
+        window.addEventListener('mouseup', onStiftUp);
+        stiftCanvas.addEventListener('touchstart', onStiftDown, { passive: false });
+        stiftCanvas.addEventListener('touchmove', onStiftMove, { passive: false });
+        stiftCanvas.addEventListener('touchend', onStiftUp);
+
+        function applyStiftState() {
+            stiftCanvas.style.pointerEvents = stiftEnabled ? 'auto' : 'none';
+            stiftCanvas.style.cursor = stiftEnabled ? 'crosshair' : 'default';
+            const icon = document.getElementById('draw-toggle');
+            if (icon) icon.style.opacity = stiftEnabled ? '1' : '0.35';
+        }
+        // Eigene Click-Listener für Stift-Toggle + LÖSCHEN — kein Hook auf
+        // window.onDrawToggle / window.clearDraw. Legacy-Handler (falls geladen)
+        // laufen parallel an versteckten Canvases — schaden nicht.
+        const stiftTglBtn = document.getElementById('draw-toggle');
+        if (stiftTglBtn) {
+            stiftTglBtn.addEventListener('click', () => {
+                stiftEnabled = !stiftEnabled;
+                try { localStorage.setItem('draw20-stift-enabled', stiftEnabled ? '1' : '0'); } catch (_) {}
+                applyStiftState();
+            });
+        }
+        const stiftClearBtn = document.querySelector('button.cyber-btn[onclick*="clearDraw"]');
+        if (stiftClearBtn) stiftClearBtn.addEventListener('click', clearStrokes);
+
+        applyStiftState();
+        requestAnimationFrame(resizeStift);
+        window.addEventListener('resize', resizeStift);
+
         // Render LaTeX offscreen (KaTeX → html2canvas) and use the resulting
         // canvas as BOTH the displayed image (tex.src = dataURL) and the
         // source for contour extraction (latexCanvas). Returns a Promise that
@@ -1695,6 +1833,9 @@
             tex.dataset.latex = latex;
             // Re-show pix in case a previous symbol-click hid it.
             pix.style.visibility = '';
+            // Spiegele die Auswahl ins Text-Input (UI-Sync, nicht-rekursiv).
+            const ti = document.getElementById('text-input');
+            if (ti && ti.value !== String(latex)) ti.value = String(latex);
             const latexReady = renderLatex(latex);
             const url = `presets/formula-${presetIndex}.png`;
             const pixReady = new Promise(resolve => {
@@ -1711,9 +1852,8 @@
 
         // SYMBOLE / DIGIT clicks — single LaTeX glyph, no PNG preset.
         // Renders the symbol into the tex pane and hides pix (no handwritten
-        // counterpart exists). Hooks the legacy `setTextInput` (used by every
-        // symbol radio) and `onDigitChange` (used by the digit buttons) so we
-        // get notified for both.
+        // counterpart exists). draw20 listens directly to the radios (siehe
+        // attachSymbolRadios), kein Hook mehr auf Legacy-Globals.
         function setSymbolLatex(latex) {
             if (!latex || !String(latex).trim()) return;
             dbg(`setSymbolLatex "${latex}"`);
@@ -1722,69 +1862,64 @@
             // renderBBoxes skips the PNG side (pix.naturalWidth becomes 0).
             pix.style.visibility = 'hidden';
             pix.removeAttribute('src');
-            // Clear the legacy draw-canvas so any prior handwriting / formula
-            // pixels are gone — symbol view shows ONLY the chosen glyph.
-            if (typeof clearDraw === 'function') {
-                try { clearDraw(); } catch (_) {}
-            } else {
-                const dc = document.getElementById('draw-canvas');
-                if (dc) dc.getContext('2d').clearRect(0, 0, dc.width, dc.height);
-            }
+            // Spiegele die Auswahl ins Text-Input (rein UI-Sync; nicht-rekursiv,
+            // weil .value = … kein 'input'-Event auslöst).
+            const ti = document.getElementById('text-input');
+            if (ti && ti.value !== String(latex)) ti.value = String(latex);
             renderLatex(String(latex)).then(() => {
                 requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
             });
         }
-        function attachSymbolHooks() {
-            const origSet = (typeof window.setTextInput === 'function')
-                ? window.setTextInput : null;
-            window.setTextInput = function (latex) {
-                if (origSet) { try { origSet(latex); } catch (_) {} }
-                setSymbolLatex(latex);
-            };
-            const origDigit = (typeof window.onDigitChange === 'function')
-                ? window.onDigitChange : null;
-            window.onDigitChange = function (d) {
-                if (origDigit) { try { origDigit(d); } catch (_) {} }
-                setSymbolLatex(String(d));
-            };
-            dbg('symbol/digit hooks installed');
-        }
-        attachSymbolHooks();
-
-        // Wire up the existing formula radio grid: any change selects a new
-        // formula. We read the data-latex / data-preset attributes the inline
-        // markup already provides.
-        function attachFormulaRadios() {
-            const radios = document.querySelectorAll(
-                'input[name="digit"][value^="formula-"]'
-            );
-            dbg(`formula radios: ${radios.length}`);
+        // Direkte 'change'-Listener auf alle Radios mit name="digit" — egal ob
+        // Ziffer (value="1".."9","0"), LaTeX-Symbol (value="latex-N"), Komplex
+        // (value="complex-N") oder Formel (value="formula-N"). Kein Hook auf
+        // Legacy-Globals — die Inline-onclick="…"-Handler im Markup laufen
+        // parallel ins Leere (in einer reinen draw20-Konfiguration) bzw.
+        // bedienen den Legacy-Stack (wenn beide geladen sind). Beides okay.
+        function attachAllRadios() {
+            const radios = document.querySelectorAll('input[name="digit"]');
+            dbg(`radios attached: ${radios.length}`);
             radios.forEach(r => {
                 r.addEventListener('change', () => {
                     if (!r.checked) return;
-                    const latex = r.dataset.latex;
-                    const preset = parseInt(r.dataset.preset, 10);
-                    if (!latex || isNaN(preset)) return;
-                    setFormula(latex, preset);
+                    dispatchRadio(r);
                 });
             });
-            // Pick up the currently-checked one, if any; else default.
-            const checked = document.querySelector(
-                'input[name="digit"][value^="formula-"]:checked'
-            );
-            if (checked) {
-                setFormula(checked.dataset.latex, parseInt(checked.dataset.preset, 10));
-            } else {
-                setFormula(DEFAULT_LATEX, DEFAULT_PRESET);
+            const ti = document.getElementById('text-input');
+            if (ti) {
+                ti.addEventListener('input', () => {
+                    const v = (ti.value || '').trim();
+                    if (v) setSymbolLatex(v);
+                });
             }
         }
+        function dispatchRadio(r) {
+            const v = r.value || '';
+            if (v.startsWith('formula-')) {
+                const latex = r.dataset.latex;
+                const preset = parseInt(r.dataset.preset, 10);
+                if (latex && !isNaN(preset)) setFormula(latex, preset);
+            } else {
+                // Ziffern (kein data-latex) verwenden den value direkt;
+                // LaTeX-Symbole & Komplex haben data-latex.
+                const latex = r.dataset.latex || v;
+                if (latex) setSymbolLatex(latex);
+            }
+        }
+        // Initiale Anzeige: aktuell gechecktes Radio (falls Legacy-Boot
+        // localStorage→radio.checked schon angewandt hat), sonst Default.
+        function applyInitialSelection() {
+            const checked = document.querySelector('input[name="digit"]:checked');
+            if (checked) dispatchRadio(checked);
+            else setFormula(DEFAULT_LATEX, DEFAULT_PRESET);
+        }
 
-        // The formula grid is built by the inline script in morph.html which
-        // runs at parse time; by the time DOMContentLoaded fires the radios
-        // exist. If we get called too early, retry.
+        // Das Radio-Grid wird vom Inline-Script in morph.html beim Parsen
+        // gebaut; bei DOMContentLoaded existiert es. Trotzdem defensiv retryen.
         function tryAttach() {
-            if (document.querySelector('input[name="digit"][value^="formula-"]')) {
-                attachFormulaRadios();
+            if (document.querySelector('input[name="digit"]')) {
+                attachAllRadios();
+                applyInitialSelection();
             } else {
                 setTimeout(tryAttach, 50);
             }
@@ -1907,43 +2042,10 @@
         let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
         host.style.cursor = 'crosshair';
 
-        // Drawing mode (Stift) is on when the legacy draw-canvas has
-        // pointer-events: auto. When ON, the user is drawing — we must NOT
-        // grab the mousedown for pan-drag (would steal events from the
-        // drawing canvas).
-        function isDrawingActive() {
-            const dc = document.getElementById('draw-canvas');
-            return !!(dc && dc.style.pointerEvents === 'auto');
-        }
-        // Sync the legacy draw-wrap visibility & z-order so the draw-canvas
-        // sits ABOVE draw20-wrap during drawing. Called whenever the Stift
-        // toggle changes (via the hooked onDrawToggle).
-        function applyDrawMode() {
-            const drawing = isDrawingActive();
-            const drawWrap = document.getElementById('draw-wrap');
-            if (drawWrap) {
-                drawWrap.style.setProperty('display', drawing ? 'block' : '', 'important');
-                if (drawing) {
-                    drawWrap.style.position = 'absolute';
-                    drawWrap.style.inset = '0';
-                    drawWrap.style.zIndex = '20';
-                    drawWrap.style.pointerEvents = 'auto';
-                }
-            }
-            const cs = document.getElementById('canvas-stack');
-            if (cs && drawing) cs.style.zIndex = '21';
-        }
-        function hookDrawToggle() {
-            const orig = window.onDrawToggle;
-            if (typeof orig !== 'function') { setTimeout(hookDrawToggle, 100); return; }
-            window.onDrawToggle = function () {
-                if (orig) { try { orig(); } catch (_) {} }
-                applyDrawMode();
-            };
-            applyDrawMode();
-            dbg('draw-toggle hook installed');
-        }
-        hookDrawToggle();
+        // Stift-Integration: draw20 hat eine eigene Zeichenfläche (siehe oben
+        // im Init); die Closure-Variable `stiftEnabled` gated pan-on-mousedown
+        // — bei aktivem Stift fängt das eigene Canvas den mousedown, kein
+        // Pan-Drag startet. Kein Hook auf Legacy-Globals nötig.
 
         // ── Right-click context menu (custom).
         // Currently a single action: "Delete Local" — wipes all localStorage
@@ -2005,7 +2107,7 @@
 
         host.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
-            if (isDrawingActive()) return; // Stift on → drawing has priority
+            if (stiftEnabled) return; // Stift on → eigenes Canvas hat Priorität
             dragging = true;
             dragStartX = e.clientX;
             dragStartY = e.clientY;
