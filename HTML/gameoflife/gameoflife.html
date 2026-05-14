@@ -63,15 +63,17 @@
             background: rgba(14, 36, 78, 0.55);
             border: 1px solid rgba(0, 210, 255, 0.28);
             border-radius: 6px;
+            display: flex; flex-wrap: wrap; align-items: center;
+            gap: 18px 24px;
         }
         #color-legend .legend-title {
             font-family: 'Orbitron', sans-serif; font-weight: 700;
             font-size: 0.9rem; letter-spacing: 1.5px;
-            color: #00d2ff; margin-bottom: 12px;
+            color: #00d2ff;
+            flex-shrink: 0;
         }
         #color-legend .legend-row {
             display: flex; flex-wrap: wrap; gap: 14px 22px;
-            margin-bottom: 12px;
         }
         #color-legend .legend-item {
             display: inline-flex; align-items: center; gap: 8px;
@@ -209,6 +211,12 @@
             display: flex; align-items: center; gap: 6px;
         }
         .gol-speed-row .gol-radio { flex: 0 0 36px; }
+        .gol-speed-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 1px;
+            color: rgba(180, 220, 255, 0.65);
+        }
         .gol-speed-val {
             flex: 1; text-align: center;
             font-family: 'Orbitron', sans-serif; font-size: 0.84rem;
@@ -292,7 +300,7 @@
         </div>
         <div id="tab-muster">
             <div id="color-legend">
-                <div class="legend-title">FARBEN — Alter der Zellen</div>
+                <div class="legend-title">Alter der Zellen</div>
                 <div class="legend-row">
                     <div class="legend-item"><span class="legend-swatch" style="background:hsl(195,90%,62%)"></span><span class="legend-label">Baby</span></div>
                     <div class="legend-item"><span class="legend-swatch" style="background:hsl(140,90%,58%)"></span><span class="legend-label">Kid</span></div>
@@ -650,6 +658,32 @@
         canvas.addEventListener('mouseleave', () => { cursorCell = null; });
         window.addEventListener('mouseup', () => { paintMode = 0; lastPaintCell = null; });
 
+        // Touch — mirror mouse paint, single-finger only. preventDefault stops page scroll.
+        canvas.addEventListener('touchstart', (e) => {
+            const t = e.touches[0]; if (!t) return;
+            const c = pixelToCell(t.clientX, t.clientY);
+            if (!c) return;
+            e.preventDefault();
+            paintMode = (cells[idx(c.x, c.y)] === 1) ? -1 : 1;
+            paintAt(c, paintMode);
+            lastPaintCell = c;
+            cursorCell = c;
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            const t = e.touches[0]; if (!t) return;
+            const c = pixelToCell(t.clientX, t.clientY);
+            cursorCell = c;
+            if (!c || !paintMode) return;
+            e.preventDefault();
+            if (lastPaintCell && (lastPaintCell.x !== c.x || lastPaintCell.y !== c.y)) {
+                paintAt(c, paintMode);
+                lastPaintCell = c;
+            }
+        }, { passive: false });
+        const endTouch = () => { paintMode = 0; lastPaintCell = null; cursorCell = null; };
+        canvas.addEventListener('touchend', endTouch);
+        canvas.addEventListener('touchcancel', endTouch);
+
         document.addEventListener('keydown', (e) => {
             if (e.target && e.target.tagName === 'INPUT') return;
             const k = e.key.toLowerCase();
@@ -730,6 +764,7 @@
         let currentTab = (_stored.tab === 'muster' || _stored.tab === 'spiel') ? _stored.tab : 'spiel';
         window.switchTab = function (name) {
             currentTab = name;
+            document.documentElement.dataset.tab = name;
             document.getElementById('tab-spiel').style.display = (name === 'spiel') ? 'block' : 'none';
             document.getElementById('tab-muster').style.display = (name === 'muster') ? 'block' : 'none';
             document.getElementById('tab-btn-spiel').classList.toggle('active', name === 'spiel');
@@ -907,8 +942,8 @@
             const slot = document.getElementById('ui-container');
             if (!slot) return;
 
-            // --- ANIMATION (Play/Stop toggle) ---
-            const animGroup = makeGroup('Animation');
+            // --- SIMULATION (Play/Stop toggle) ---
+            const animGroup = makeGroup('Simulation');
             const playBtn = document.createElement('button');
             playBtn.id = 'gol-play-btn';
             playBtn.className = 'gol-action gol-play';
