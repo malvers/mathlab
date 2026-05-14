@@ -70,10 +70,12 @@
         injectHTML(topLine, bottomLine) {
             if (document.querySelector(".canvas-branding")) return;
 
-            // Extremely subtle fullscreen icon: corner-arrows pointing outward
-            // (enter FS) or inward (exit FS). Styled in branding.styles.extracted.css.
-            const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>`;
-            const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>`;
+            // Subtle fullscreen icon: two diagonal corner brackets.
+            // ENTER FS: brackets at outer TR + BL corners, opening toward center.
+            // EXIT FS:  same diagonal but inverted — brackets sit closer to center
+            //           with their apex pointing inward (legs open outward).
+            const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
+            const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
             const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
             const container = document.createElement("div");
