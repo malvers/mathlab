@@ -205,7 +205,7 @@ function createDraw20Morph({
             const corrToggle = document.getElementById('correspondence-toggle');
             const showCorr = corrToggle ? corrToggle.checked : true;
             // log(`📍 corrToggle: el=${!!corrToggle} checked=${showCorr}`);
-            if (!showCorr) { log('📍 ⊘ KORRESPONDENZ off — skip'); return; }
+            if (!showCorr) return;
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = getZ() || 1;
             const sw = String(0.8 / z);
@@ -219,17 +219,24 @@ function createDraw20Morph({
                 const N = Math.max(srcLen, dstLen);
                 const p = resampleClosed(pair[srcKey], N);
                 const l = resampleClosed(pair[dstKey], N);
-                if (p.length < 3 || l.length < 3) { log(`📍     ⊘ short (${p.length}/${l.length})`); continue; }
+                if (p.length < 3 || l.length < 3) continue;
+                // Same shift as the polygon-morph branch: lines point to
+                // the SHIFTED LaTeX position (40 px left of natural).
+                let shiftX = 0;
+                if (pair[dstKey] && pair[dstKey].length >= 3) {
+                    const bb = bboxOfPts(pair[dstKey]);
+                    shiftX = -((bb.maxX - bb.minX) + 40);
+                }
                 const lInPlace = alignDstToSrcBBox(p, l);
                 const eng = alignTargetWithEngine(p, lInPlace);
-                if (!eng) { log('📍     ⊘ alignTargetWithEngine returned null'); continue; }
+                if (!eng) continue;
                 const color = draw20PaletteColor(pair.mid);
                 for (let i = 0; i < N; i++) {
                     const j = eng.idxMap[i];
                     const ln = document.createElementNS(svgNS, 'line');
                     ln.setAttribute('x1', p[i].x.toFixed(2));
                     ln.setAttribute('y1', p[i].y.toFixed(2));
-                    ln.setAttribute('x2', l[j].x.toFixed(2));
+                    ln.setAttribute('x2', (l[j].x + shiftX).toFixed(2));
                     ln.setAttribute('y2', l[j].y.toFixed(2));
                     ln.setAttribute('stroke', color);
                     ln.setAttribute('stroke-width', sw);
@@ -263,26 +270,49 @@ function createDraw20Morph({
             const srcRings = [srcOuter, ...srcHolesArr];
             const dstRings = [dstOuter, ...dstHolesArr];
             const numRings = Math.max(srcRings.length, dstRings.length);
+            // Shift the morph end-position so it lands `40 px` LEFT of the
+            // LaTeX bbox instead of on top of it. Computed once per pair
+            // from the outer's bbox (holes live inside, so outer is enough).
+            let shiftX = 0;
+            if (dstOuter && dstOuter.length >= 3) {
+                const bb = bboxOfPts(dstOuter);
+                shiftX = -((bb.maxX - bb.minX) + 40);
+            }
             let pathD = '';
             const allPts = [];
             for (let r = 0; r < numRings; r++) {
                 let sr = srcRings[r], dr = dstRings[r];
-                // Ghost-collapse for extra rings: when ONE side has more
-                // holes than the other, the missing ring collapses to the
-                // OTHER side's centroid → morph emerges from / vanishes
-                // into the centroid (old morph-engine "emerge from dark").
+                // Ghost for extra rings: when ONE side has more holes than
+                // the other, the missing ring is a SCALED-DOWN copy of the
+                // existing ring placed at the morph-final position. As the
+                // morph runs (t=0→1) the ghost grows from "super small" to
+                // its full target size — emerging in place, not flying in
+                // from a distant centroid.
                 const srOk = sr && sr.length >= 3;
                 const drOk = dr && dr.length >= 3;
+                const GHOST_SCALE = 0.05;
                 if (!srOk && drOk) {
+                    // Latex has the ring, stift doesn't → ghost src grows
+                    // from 5% of target size, positioned at target's
+                    // centroid + shiftX (the same point the morph ends at).
                     let cx = 0, cy = 0;
                     for (const q of dr) { cx += q.x; cy += q.y; }
                     cx /= dr.length; cy /= dr.length;
-                    sr = dr.map(() => ({ x: cx, y: cy }));
+                    sr = dr.map(q => ({
+                        x: (cx + shiftX) + (q.x - cx) * GHOST_SCALE,
+                        y: cy + (q.y - cy) * GHOST_SCALE,
+                    }));
                 } else if (!drOk && srOk) {
+                    // Stift has the ring, latex doesn't → ghost dst is
+                    // 5% of source size at source centroid → src shrinks
+                    // to a tiny version in place during the morph.
                     let cx = 0, cy = 0;
                     for (const q of sr) { cx += q.x; cy += q.y; }
                     cx /= sr.length; cy /= sr.length;
-                    dr = sr.map(() => ({ x: cx, y: cy }));
+                    dr = sr.map(q => ({
+                        x: cx + (q.x - cx) * GHOST_SCALE,
+                        y: cy + (q.y - cy) * GHOST_SCALE,
+                    }));
                 } else if (!srOk && !drOk) {
                     continue;
                 }
@@ -293,15 +323,15 @@ function createDraw20Morph({
                 // alignDstToSrcBBox centers the target onto the source so
                 // alignTargetTo picks the right rotation/reverse — aligned
                 // positions NOT used as morph endpoint; we morph to the
-                // ORIGINAL l[idxMap[i]] so the result lands on LaTeX's
-                // natural baseline at t=1.
+                // ORIGINAL l[idxMap[i]] (+shift) so the result lands 40 px
+                // left of the LaTeX at t=1.
                 const lInPlace = alignDstToSrcBBox(p, l);
                 const eng = alignTargetWithEngine(p, lInPlace);
                 if (!eng) continue;
                 const pts = p.map((pp, i) => {
                     const j = eng.idxMap[i];
                     return {
-                        x: (1 - t) * pp.x + t * l[j].x,
+                        x: (1 - t) * pp.x + t * (l[j].x + shiftX),
                         y: (1 - t) * pp.y + t * l[j].y,
                     };
                 });
@@ -351,17 +381,17 @@ function createDraw20Morph({
         stiftMorphPairs.length = 0;
         const stiftContours = getSC();
         // log(`🔧 buildStiftMorphPairs: stift=${stiftContours ? stiftContours.length : 'null'} latArg=${latexContoursList ? latexContoursList.length : 'null'}`);
-        if (!stiftContours || !stiftContours.length) { log('🔧 ⊘ no stift contours'); return; }
+        if (!stiftContours || !stiftContours.length) return;
         // If the caller didn't pass LaTeX contours, fetch them now.
         let lat = latexContoursList;
         if (!lat) {
             const res = (typeof extractLatexContours === 'function') ? extractLatexContours() : null;
             lat = res ? res.contours : null;
         }
-        if (!lat || !lat.length) { log('🔧 ⊘ no LaTeX contours'); return; }
+        if (!lat || !lat.length) return;
         const latexCanvas = getLC();
-        if (!tex.complete || !tex.naturalWidth || !latexCanvas) { log(`🔧 ⊘ tex/latexCanvas not ready (complete=${tex.complete} natW=${tex.naturalWidth} canv=${!!latexCanvas})`); return; }
-        if (typeof computeMatchIds !== 'function' || typeof classifyContours !== 'function') { log('🔧 ⊘ missing helpers'); return; }
+        if (!tex.complete || !tex.naturalWidth || !latexCanvas) return;
+        if (typeof computeMatchIds !== 'function' || typeof classifyContours !== 'function') return;
 
         const m = computeMatchIds(stiftContours, lat);
         const stiftId = m.pngId, latId = m.latId;

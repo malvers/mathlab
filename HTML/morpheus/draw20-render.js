@@ -100,6 +100,20 @@ function createDraw20Render({
                 equalizePair(srcContours, pOuter.holes[h], dstContours, lOuter.holes[h]);
             }
         }
+        // Density floor for EVERY contour (matched or not, outer or hole)
+        // — unmatched holes (e.g. when one side has fewer holes than the
+        // other) would otherwise stay sparse and look chunky on render.
+        ensureMinDensity(srcContours);
+        ensureMinDensity(dstContours);
+    }
+    function ensureMinDensity(contours) {
+        if (!contours) return;
+        for (let i = 0; i < contours.length; i++) {
+            const c = contours[i];
+            if (c && c.length >= 3 && c.length < DRAW20_MIN_POINTS) {
+                contours[i] = growPoly(c, DRAW20_MIN_POINTS);
+            }
+        }
     }
 
     // ── BBox helpers ────────────────────────────────────────────────────────
@@ -546,6 +560,12 @@ function createDraw20Render({
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
         const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
+
+        // Density floor for EVERY contour — even before matching. This
+        // way unmatched contours (e.g. LaTeX-only when no PNG/stift is
+        // present, or extra holes that don't pair) still hit MIN_POINTS.
+        ensureMinDensity(pngContours);
+        ensureMinDensity(latexContoursList);
 
         // Equalize point counts between matched PNG↔LaTeX pairs.
         if (pngContours && pngContours.length && latexContoursList && latexContoursList.length) {
