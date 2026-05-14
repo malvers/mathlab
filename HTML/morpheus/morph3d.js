@@ -100,8 +100,8 @@
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
 </div>
-<label id="scale-toggle" title="Natürliche Größen (kein Auto-Fit pro Seite)">
-    <input type="checkbox" id="scale-natural-cb">NATURAL
+<label id="scale-toggle" title="Originalgrößen (kein Auto-Fit pro Seite)">
+    <input type="checkbox" id="scale-natural-cb">ORIGINAL
 </label>
 <button id="reload-btn" onclick="(function(){ try { var b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn'); if (b) b.click(); else location.reload(); } catch (e) { location.reload(); } })()">↻ RELOAD</button>
 <div id="empty" style="display:none">Keine Polygon-Daten — bitte erst Formel + Zeichnung in morph.html laden.</div>
