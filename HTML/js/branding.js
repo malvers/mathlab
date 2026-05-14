@@ -174,7 +174,9 @@ function resolveCyberHtmlAsset(relativePath) {
 }
 
 const CyberBranding = {
-    MASTER_TITLE: "DOC ALVERS MATHE-LABORE",
+    // Single source of truth for the brand wording. All masthead/title rendering derives from this.
+    BRAND_NAME: "Doc Alvers Mathe-Labore",
+    get MASTER_TITLE() { return this.BRAND_NAME.toUpperCase(); },
     /// MRA ///
     DEV_MODE: true, // Master Switch for Auto-Reload
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only

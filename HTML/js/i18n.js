@@ -101,7 +101,9 @@ const CyberI18n = {
     /** Floating canvas masthead (coach line): always German, independent of UI language */
     /** Brand masthead line — fixed German wording; not localized. */
     getBrandMastheadTitle: function () {
-        return "Doc Alvers Mathe-Labor";
+        return (typeof CyberBranding !== "undefined" && CyberBranding.BRAND_NAME)
+            ? CyberBranding.BRAND_NAME
+            : "Doc Alvers Mathe-Labore";
     },
 
     /** Internal lab/tool links: ensure ?lang= matches CyberI18n.current (same tab / new tab / BFCache-safe). */
