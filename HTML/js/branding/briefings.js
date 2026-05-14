@@ -309,5 +309,20 @@ Optimierung komplexer Probleme mittels Kovarianzmatrix-Adaption. Dieses Labor de
 
 FEATURES
 - Multidimensionale Suche: Beobachtung der Konvergenz im Parameterraum.
-- Echtzeit-Optimierung: Sofortiges Feedback der Fitness-Funktion bei Formänderungen.`
+- Echtzeit-Optimierung: Sofortiges Feedback der Fitness-Funktion bei Formänderungen.`,
+
+        "gameoflife": `GAME OF LIFE (Conway, 1970):
+Zelluläres Automaten-Universum auf einem 2D-Gitter. Aus drei einfachen Regeln entstehen komplexe Strukturen — stabile Stillleben, periodische Oszillatoren, wandernde Raumschiffe, sogar Gleiter-Kanonen.
+
+REGELN
+- Eine lebende Zelle mit weniger als 2 Nachbarn stirbt (Einsamkeit).
+- Eine lebende Zelle mit 2 oder 3 Nachbarn überlebt.
+- Eine lebende Zelle mit mehr als 3 Nachbarn stirbt (Überbevölkerung).
+- Eine tote Zelle mit genau 3 Nachbarn wird geboren.
+
+FEATURES
+- SPIEL-Tab: Großes Spielfeld, Maus zum Malen, Tastatur-Shortcuts (Space, N, R, C, W, G/B/P/S, +/-).
+- MUSTER-Tab: 12 klassische Pattern aus 5 Familien (Stillleben, Oszillatoren, Raumschiffe, Guns, Methusalems) mit Live-Mini-Simulation pro Karte. Karte anklicken → Sidebar-Button "IN SIMULATION" startet sie zentriert im großen Feld.
+- Farbverlauf nach Alter: junge Zellen cyan → gelb → orange → rot (alt). Sterbende Zellen hinterlassen ein rotes Glühen.
+- Torus-Welt (W toggelt zu Wänden): das Spielfeld wickelt sich an den Rändern um.`
 };

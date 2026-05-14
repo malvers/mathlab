@@ -14,6 +14,13 @@
     <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="../js/branding.styles.extracted.css">
     <link rel="stylesheet" href="../js/lab-shell-minimal.css">
+    <script>
+        // Apply persisted tab choice BEFORE body renders to avoid flicker
+        try {
+            const s = JSON.parse(localStorage.getItem('gol.settings') || '{}');
+            if (s.tab === 'muster') document.documentElement.dataset.tab = 'muster';
+        } catch (e) { /* no storage */ }
+    </script>
     <style>
         /* GoL fills the canvas — hide the template's coach overlay */
         #math-coach-box { display: none; }
@@ -28,12 +35,12 @@
         }
         #tab-bar button {
             font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1px;
-            padding: 11px 20px; border: none; border-radius: 0; cursor: pointer;
-            background: transparent; color: #555; border-top: 2px solid transparent;
+            padding: 12px 20px; border: none; border-radius: 0; cursor: pointer;
+            background: transparent; color: #eee; border-top: 2px solid transparent;
             transition: color 0.15s ease, border-color 0.15s ease;
         }
-        #tab-bar button.active { color: #eee; border-top-color: #00d2ff; }
-        #tab-bar button:hover { color: #aaa; }
+        #tab-bar button.active { color: #fff; border-top-color: #00d2ff; }
+        #tab-bar button:hover { color: #fff; }
 
         #tab-spiel { flex: 1; position: relative; min-height: 0; }
         #tab-spiel #canvas-container { width: 100%; height: 100%; }
@@ -41,6 +48,48 @@
             flex: 1; display: none; overflow-y: auto;
             background: rgb(8, 20, 42);
             padding: 24px;
+        }
+        /* Persisted tab choice — applied pre-paint via <script> in head */
+        html[data-tab="muster"] #tab-spiel { display: none; }
+        html[data-tab="muster"] #tab-muster { display: block; }
+        html[data-tab="muster"] #tab-btn-spiel { border-top-color: transparent; color: #eee; }
+        html[data-tab="muster"] #tab-btn-muster { border-top-color: #00d2ff; color: #fff; }
+
+        /* --- Color legend --- */
+        #color-legend {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            padding: 16px 18px;
+            background: rgba(14, 36, 78, 0.55);
+            border: 1px solid rgba(0, 210, 255, 0.28);
+            border-radius: 6px;
+        }
+        #color-legend .legend-title {
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            font-size: 0.9rem; letter-spacing: 1.5px;
+            color: #00d2ff; margin-bottom: 12px;
+        }
+        #color-legend .legend-row {
+            display: flex; flex-wrap: wrap; gap: 14px 22px;
+            margin-bottom: 12px;
+        }
+        #color-legend .legend-item {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+            color: rgba(220, 234, 255, 0.85);
+        }
+        #color-legend .legend-swatch {
+            display: inline-block; width: 18px; height: 18px;
+            border-radius: 3px;
+            box-shadow: 0 0 8px currentColor;
+        }
+        #color-legend .legend-swatch.legend-trail {
+            box-shadow: none;
+        }
+        #color-legend .legend-note {
+            font-family: 'Outfit', sans-serif; font-size: 0.82rem;
+            line-height: 1.5;
+            color: rgba(200, 220, 245, 0.7);
         }
 
         /* --- Cards --- */
@@ -55,11 +104,17 @@
             border-radius: 6px;
             padding: 14px;
             display: flex; flex-direction: column; gap: 8px;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
         }
         .gol-card:hover {
             border-color: rgba(0, 210, 255, 0.6);
             box-shadow: 0 0 18px rgba(0, 210, 255, 0.18);
+        }
+        .gol-card.selected {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.14);
+            box-shadow: 0 0 26px rgba(0, 210, 255, 0.35);
         }
         .gol-mini {
             display: block; width: 100%; height: 130px;
@@ -82,18 +137,125 @@
             line-height: 1.45; color: rgba(220, 234, 255, 0.82);
             flex: 1;
         }
-        .gol-card-spawn {
-            font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 1.4px;
-            padding: 8px 12px; cursor: pointer;
+        /* Sidebar spawn button */
+        #gol-spawn-btn {
+            font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 1.4px;
+            padding: 10px 14px; cursor: pointer; margin: 12px;
             background: rgba(0, 210, 255, 0.12);
             color: #00d2ff;
             border: 1px solid rgba(0, 210, 255, 0.45);
             border-radius: 3px;
-            transition: background 0.15s ease;
+            transition: background 0.15s ease, opacity 0.15s ease;
+            display: block; width: calc(100% - 24px);
         }
-        .gol-card-spawn:hover {
+        #gol-spawn-btn:hover:not(:disabled) {
             background: rgba(0, 210, 255, 0.28);
             color: #fff;
+        }
+        #gol-spawn-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        #gol-spawn-label {
+            font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 1.2px;
+            color: rgba(180, 220, 255, 0.6); padding: 0 12px; margin-top: 4px;
+        }
+        #gol-spawn-label b { color: #00d2ff; font-weight: 400; }
+
+        /* Sidebar control groups */
+        .gol-group {
+            margin: 16px 12px 0;
+            padding: 10px;
+            border: 1px solid rgba(0, 210, 255, 0.18);
+            border-radius: 4px;
+            background: rgba(14, 36, 78, 0.35);
+        }
+        .gol-group-title {
+            font-family: 'Orbitron', sans-serif; font-size: 0.624rem; letter-spacing: 1.4px;
+            color: rgba(244, 196, 48, 0.85); margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .gol-radio-row {
+            display: flex; gap: 6px;
+        }
+        .gol-radio {
+            flex: 1; padding: 7px 4px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; font-size: 0.696rem; letter-spacing: 1px;
+            background: transparent; color: rgba(180, 220, 255, 0.55);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 3px;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+        .gol-radio:hover { color: rgba(220, 234, 255, 0.85); }
+        .gol-radio.active {
+            background: rgba(0, 210, 255, 0.22);
+            color: #fff;
+            border-color: rgba(0, 210, 255, 0.7);
+        }
+        .gol-action {
+            display: block; width: 100%; margin-top: 6px; padding: 7px 4px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1px;
+            background: rgba(0, 210, 255, 0.08);
+            color: rgba(180, 220, 255, 0.85);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 3px; cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .gol-action:hover {
+            background: rgba(0, 210, 255, 0.2);
+            color: #fff;
+        }
+        .gol-speed-row {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .gol-speed-row .gol-radio { flex: 0 0 36px; }
+        .gol-speed-val {
+            flex: 1; text-align: center;
+            font-family: 'Orbitron', sans-serif; font-size: 0.84rem;
+            color: #00d2ff;
+        }
+
+        /* Vertical pattern radio list (in AUSWAHL group) */
+        .gol-pattern-radio {
+            display: block; width: 100%; margin-top: 4px;
+            text-align: left; padding: 8px 10px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.95rem; letter-spacing: 0.8px;
+            background: rgba(0, 210, 255, 0.08);
+            color: rgba(180, 220, 255, 0.85);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 3px; cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+        .gol-pattern-radio:hover { color: #ddd; border-color: rgba(0, 210, 255, 0.4); }
+        .gol-pattern-radio.active {
+            background: rgba(0, 210, 255, 0.22);
+            color: #fff;
+            border-color: rgba(0, 210, 255, 0.7);
+        }
+
+        /* Play/Stop button */
+        #gol-play-btn {
+            font-size: 2.4rem;
+            padding: 0;
+            line-height: 1;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #gol-play-btn .gol-icon-play,
+        #gol-play-btn .gol-icon-stop {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            line-height: 1;
+        }
+        #gol-play-btn .gol-icon-play { color: #6BA043; text-shadow: 0 0 14px rgba(107, 160, 67, 0.7); }
+        #gol-play-btn .gol-icon-stop {
+            color: #C41E3A; text-shadow: 0 0 14px rgba(196, 30, 58, 0.7);
+            font-size: 1.6em; /* ■ glyph renders smaller than ▶ — compensate */
+            transform: translateY(-0.08em); /* tiny optical lift to match triangle's center */
         }
     </style>
 </head>
@@ -117,7 +279,7 @@
     <main id="main-content">
         <div id="tab-bar">
             <button id="tab-btn-spiel" class="active" onclick="switchTab('spiel')">SPIEL</button>
-            <button id="tab-btn-muster" onclick="switchTab('muster')">MUSTER</button>
+            <button id="tab-btn-muster" onclick="switchTab('muster')">ERKLÄRUNG</button>
         </div>
         <div id="tab-spiel">
             <div id="canvas-container">
@@ -129,6 +291,17 @@
             </div>
         </div>
         <div id="tab-muster">
+            <div id="color-legend">
+                <div class="legend-title">FARBEN — Alter der Zellen</div>
+                <div class="legend-row">
+                    <div class="legend-item"><span class="legend-swatch" style="background:hsl(195,90%,62%)"></span><span class="legend-label">Baby</span></div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:hsl(140,90%,58%)"></span><span class="legend-label">Kid</span></div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:hsl(50,90%,55%)"></span><span class="legend-label">Youngster</span></div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:hsl(25,90%,52%)"></span><span class="legend-label">Crisis</span></div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:hsl(0,90%,50%)"></span><span class="legend-label">Weiser</span></div>
+                    <div class="legend-item"><span class="legend-swatch legend-trail" style="background:rgba(196,30,58,0.55)"></span><span class="legend-label">Vita somnium breve</span></div>
+                </div>
+            </div>
             <div id="cards-grid"></div>
         </div>
     </main>
@@ -193,9 +366,19 @@
 
         let cols = 0, rows = 0, cellSize = TARGET_CELL_PX;
         let cells, ages, next, nextAges, trails;
-        let running = true;
+        const GOL_STORE = 'gol.settings';
+        const _stored = (() => {
+            try { return JSON.parse(localStorage.getItem(GOL_STORE) || '{}'); } catch (e) { return {}; }
+        })();
+        let running = typeof _stored.running === 'boolean' ? _stored.running : true;
         let wrap = true;
-        let tickMs = 90;
+        let tickMs = (typeof _stored.tickMs === 'number') ? _stored.tickMs : 90;
+
+        function persistGolSettings() {
+            try {
+                localStorage.setItem(GOL_STORE, JSON.stringify({ running, tickMs, tab: currentTab }));
+            } catch (e) { /* quota / private */ }
+        }
         let lastTick = 0;
         let generation = 0;
         let aliveCount = 0;
@@ -344,8 +527,6 @@
                 ctx.strokeRect(cursorCell.x * cellSize + 0.5, cursorCell.y * cellSize + 0.5, cellSize - 1, cellSize - 1);
             }
 
-            // HUD
-            drawHud(w, h);
         }
 
         function drawHud(w, h) {
@@ -372,12 +553,6 @@
                 ctx.fillText(line, pad + 10, pad + 9 + k * lh);
             });
 
-            // Help line bottom-left
-            ctx.textAlign = 'left';
-            ctx.fillStyle = 'rgba(180, 220, 255, 0.55)';
-            ctx.font = "300 12px Orbitron, sans-serif";
-            const help = 'SPACE pause · N step · R random · C clear · W wrap · G glider · P pulsar · S gun · +/- speed · click to paint';
-            ctx.fillText(help, pad, h - pad - 8);
         }
 
         // Loop ---------------------------------------------------------------------
@@ -492,6 +667,7 @@
                 case '+': case '=': tickMs = Math.max(MIN_TICK_MS, tickMs - 15); break;
                 case '-': case '_': tickMs = Math.min(MAX_TICK_MS, tickMs + 15); break;
             }
+            if (typeof syncSidebarUi === 'function') syncSidebarUi();
         });
 
         // Sizing -------------------------------------------------------------------
@@ -532,9 +708,8 @@
                         }
                     }
                 }
-            } else {
-                seedRandom();
             }
+            // No initial random seed on reload — start with an empty grid.
         }
 
         window.addEventListener('resize', () => {
@@ -552,7 +727,7 @@
         // Tabs + pattern catalog (mini-sims)
         // ============================================================
 
-        let currentTab = 'spiel';
+        let currentTab = (_stored.tab === 'muster' || _stored.tab === 'spiel') ? _stored.tab : 'spiel';
         window.switchTab = function (name) {
             currentTab = name;
             document.getElementById('tab-spiel').style.display = (name === 'spiel') ? 'block' : 'none';
@@ -562,6 +737,7 @@
             if (name === 'spiel') {
                 setTimeout(init, 60); // re-fit canvas after layout settles
             }
+            persistGolSettings();
         };
 
         // Catalog of 12 classic patterns. Cells are arrays of [x,y].
@@ -630,15 +806,76 @@
             { id: 'diehard', name: 'Diehard', family: 'Methusalem', period: '130 Gen.',
               desc: 'Sieben Zellen, die nach exakt 130 Generationen vollständig sterben.',
               cells: [[6,0],[0,1],[1,1],[1,2],[5,2],[6,2],[7,2]], gridW: 20, gridH: 12 },
+
+            // --- More still lifes ---
+            { id: 'pond', name: 'Pond', family: 'Still Life', period: 'stabil',
+              desc: 'Acht Zellen in stabiler Ring-Form — ein größerer Verwandter des Beehive.',
+              cells: [[1,0],[2,0],[0,1],[3,1],[0,2],[3,2],[1,3],[2,3]], gridW: 4, gridH: 4 },
+            { id: 'eater', name: 'Eater 1', family: 'Still Life', period: 'stabil',
+              desc: 'Fishhook. Stabiles Muster, das Gleiter „frisst" — eines der wichtigsten Bauteile in komplexen Konstruktionen.',
+              cells: [[0,0],[1,0],[1,1],[1,2],[2,2],[2,3],[3,3]], gridW: 4, gridH: 4 },
+
+            // --- More oscillators ---
+            { id: 'beacon', name: 'Beacon', family: 'Oszillator', period: 'P2',
+              desc: 'Zwei diagonal versetzte 2×2-Blöcke — die Lücke pulsiert im Takt 2.',
+              cells: [[0,0],[1,0],[0,1],[1,1],[2,2],[3,2],[2,3],[3,3]], gridW: 4, gridH: 4 },
+            { id: 'pentadeca', name: 'Pentadecathlon', family: 'Oszillator', period: 'P15',
+              desc: 'Eine Reihe von 10 Zellen mit Periode 15 — einer der höchstperiodischen einfachen Oszillatoren.',
+              cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0],[9,0]], gridW: 12, gridH: 9 },
+
+            // --- More spaceships ---
+            { id: 'mwss', name: 'MWSS', family: 'Raumschiff', period: 'P4',
+              desc: 'Middle-Weight Space Ship — ein Glied breiter als LWSS, gleicher 4-Tick-Zyklus.',
+              cells: [[1,0],[5,0],[0,1],[0,2],[5,2],[0,3],[1,3],[2,3],[3,3],[4,3]], gridW: 16, gridH: 8 },
+            { id: 'hwss', name: 'HWSS', family: 'Raumschiff', period: 'P4',
+              desc: 'Heavy-Weight Space Ship — zwei Glieder breiter als LWSS. Das größte „klassische" Raumschiff.',
+              cells: [[1,0],[6,0],[0,1],[0,2],[6,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]], gridW: 17, gridH: 8 },
+
+            // --- More methusalems ---
+            { id: 'bunnies', name: 'Bunnies', family: 'Methusalem', period: '~17331 Gen.',
+              desc: 'Acht Zellen, die ~17331 Generationen lang evolvieren — einer der langlebigsten bekannten Methusalems.',
+              cells: [[7,0],[0,1],[6,1],[8,1],[1,2],[5,2],[2,3],[4,3]], gridW: 45, gridH: 35 },
+            { id: 'pihept', name: 'Pi-Heptomino', family: 'Methusalem', period: '~173 Gen.',
+              desc: 'Sieben Zellen in Π-Form, ~173 Generationen Evolution mit komplexem Endzustand.',
+              cells: [[0,0],[1,0],[2,0],[0,1],[2,1],[0,2],[2,2]], gridW: 20, gridH: 16 },
         ];
 
         const miniSims = [];
+        let selectedPattern = null;
+
+        function selectPattern(pattern) {
+            selectedPattern = pattern;
+            // Highlight matching card
+            document.querySelectorAll('.gol-card').forEach(el => {
+                el.classList.toggle('selected', !!pattern && el.dataset.pid === pattern.id);
+            });
+            // Highlight matching sidebar radio
+            document.querySelectorAll('.gol-pattern-radio').forEach(el => {
+                el.classList.toggle('active', !!pattern && el.dataset.pid === pattern.id);
+            });
+            const btn = document.getElementById('gol-spawn-btn');
+            const label = document.getElementById('gol-spawn-label');
+            if (btn) btn.disabled = !pattern;
+            if (label) label.innerHTML = pattern ? `Auswahl: <b>${pattern.name}</b>` : 'Keine Auswahl';
+        }
+
+        function spawnSelected() {
+            if (!selectedPattern) return;
+            switchTab('spiel');
+            setTimeout(() => {
+                clearGrid();
+                stampPattern(selectedPattern.cells, Math.floor(cols / 2), Math.floor(rows / 2));
+                running = true;
+                syncSidebarUi();
+            }, 80);
+        }
 
         function buildPatternCards() {
             const grid = document.getElementById('cards-grid');
             for (const p of PATTERN_CATALOG) {
                 const card = document.createElement('div');
                 card.className = 'gol-card';
+                card.dataset.pid = p.id;
                 const c = document.createElement('canvas');
                 c.className = 'gol-mini';
                 c.width = 320; c.height = 260;
@@ -659,22 +896,134 @@
                 descEl.textContent = p.desc;
                 card.appendChild(descEl);
 
-                const btn = document.createElement('button');
-                btn.className = 'gol-card-spawn';
-                btn.textContent = 'IN SIMULATION';
-                btn.addEventListener('click', () => {
-                    switchTab('spiel');
-                    setTimeout(() => {
-                        clearGrid();
-                        stampPattern(p.cells, Math.floor(cols / 2), Math.floor(rows / 2));
-                        running = true;
-                    }, 80);
-                });
-                card.appendChild(btn);
+                card.addEventListener('click', () => { selectPattern(p); spawnSelected(); });
 
                 grid.appendChild(card);
                 miniSims.push(createMiniSim(c, p));
             }
+        }
+
+        function buildSidebarSpawn() {
+            const slot = document.getElementById('ui-container');
+            if (!slot) return;
+
+            // --- ANIMATION (Play/Stop toggle) ---
+            const animGroup = makeGroup('Animation');
+            const playBtn = document.createElement('button');
+            playBtn.id = 'gol-play-btn';
+            playBtn.className = 'gol-action gol-play';
+            playBtn.style.marginTop = '0';
+            playBtn.addEventListener('click', () => { running = !running; syncSidebarUi(); });
+            animGroup.appendChild(playBtn);
+            slot.appendChild(animGroup);
+
+            // --- ZUFALL (Torus/Walls) ---
+            const wrapGroup = makeGroup('Zufall');
+            const wrapRow = makeRadioRow([
+                { label: 'TORUS', value: true,  active: wrap },
+                { label: 'WÄNDE', value: false, active: !wrap },
+            ], (v) => { wrap = v; syncSidebarUi(); });
+            wrapRow.dataset.kind = 'wrap';
+            wrapGroup.appendChild(wrapRow);
+            slot.appendChild(wrapGroup);
+
+            // --- TEMPO (Slider: SLOW ↔ FAST) ---
+            const speedGroup = makeGroup('Tempo');
+            const speedRow = document.createElement('div');
+            speedRow.className = 'gol-speed-row';
+            const lblSlow = document.createElement('span');
+            lblSlow.className = 'gol-speed-label';
+            lblSlow.textContent = 'SLOW';
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.id = 'gol-speed-slider';
+            slider.min = '0'; slider.max = '100'; slider.step = '1';
+            slider.value = String(Math.round(100 * (MAX_TICK_MS - tickMs) / (MAX_TICK_MS - MIN_TICK_MS)));
+            slider.addEventListener('input', () => {
+                const s = Number(slider.value);
+                tickMs = Math.round(MAX_TICK_MS - (s / 100) * (MAX_TICK_MS - MIN_TICK_MS));
+                syncSidebarUi();
+            });
+            const lblFast = document.createElement('span');
+            lblFast.className = 'gol-speed-label';
+            lblFast.textContent = 'FAST';
+            speedRow.appendChild(lblSlow);
+            speedRow.appendChild(slider);
+            speedRow.appendChild(lblFast);
+            speedGroup.appendChild(speedRow);
+            slot.appendChild(speedGroup);
+
+            // --- AKTIONEN ---
+            const actGroup = makeGroup('Aktionen');
+            const actStep = makeAction('SCHRITT', () => step());
+            const actRand = makeAction('ZUFALL', () => { seedRandom(); });
+            const actClear = makeAction('CLEAR', () => { clearGrid(); });
+            actGroup.appendChild(actStep);
+            actGroup.appendChild(actRand);
+            actGroup.appendChild(actClear);
+            slot.appendChild(actGroup);
+
+            // --- AUSWAHL (Patterns as vertical radios; click = spawn) ---
+            const sel = makeGroup('Auswahl');
+            for (const p of PATTERN_CATALOG) {
+                const r = document.createElement('button');
+                r.className = 'gol-pattern-radio';
+                r.dataset.pid = p.id;
+                r.textContent = p.name;
+                r.addEventListener('click', () => { selectPattern(p); spawnSelected(); });
+                sel.appendChild(r);
+            }
+            slot.appendChild(sel);
+
+            syncSidebarUi();
+        }
+
+        function makeGroup(title) {
+            const g = document.createElement('div');
+            g.className = 'gol-group';
+            const t = document.createElement('div');
+            t.className = 'gol-group-title';
+            t.textContent = title;
+            g.appendChild(t);
+            return g;
+        }
+
+        function makeRadioRow(options, onChange) {
+            const row = document.createElement('div');
+            row.className = 'gol-radio-row';
+            options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'gol-radio' + (opt.active ? ' active' : '');
+                b.textContent = opt.label;
+                b.dataset.value = String(opt.value);
+                b.addEventListener('click', () => onChange(opt.value));
+                row.appendChild(b);
+            });
+            return row;
+        }
+
+        function makeAction(label, onClick) {
+            const b = document.createElement('button');
+            b.className = 'gol-action';
+            b.textContent = label;
+            b.addEventListener('click', onClick);
+            return b;
+        }
+
+        function syncSidebarUi() {
+            const slot = document.getElementById('ui-container');
+            if (!slot) return;
+            // Play/Stop icon
+            const playBtn = document.getElementById('gol-play-btn');
+            if (playBtn) playBtn.innerHTML = running ? '<span class="gol-icon-stop">■</span>' : '<span class="gol-icon-play">▶</span>';
+            // Wrap
+            slot.querySelectorAll('.gol-radio-row[data-kind="wrap"] .gol-radio').forEach(b => {
+                b.classList.toggle('active', String(wrap) === b.dataset.value);
+            });
+            // Speed
+            const sv = document.getElementById('gol-speed-val');
+            if (sv) sv.textContent = `${tickMs} ms`;
+            persistGolSettings();
         }
 
         function createMiniSim(canvas, pattern) {
@@ -782,7 +1131,10 @@
 
         // Kick off mini-sim catalog (independent of font loading)
         buildPatternCards();
+        buildSidebarSpawn();
         requestAnimationFrame(miniFrame);
+        // Apply persisted tab choice
+        switchTab(currentTab);
     </script>
 </body>
 

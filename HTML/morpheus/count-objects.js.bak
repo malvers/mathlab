@@ -126,19 +126,19 @@ function logDrawnObjects() {
     if (count === 0) {
         const msg = '⊘ No objects drawn';
         console.log(msg);
-        // if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg);
+        if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg);
         return;
     }
     const details = getDrawnObjectDetails();
     const header = `📍 ${count} separate object${count > 1 ? 's' : ''} drawn`;
     console.log(header);
-    // if (typeof DebugWindow !== 'undefined') DebugWindow.log(header);
+    if (typeof DebugWindow !== 'undefined') DebugWindow.log(header);
     details.forEach((d, i) => {
         const hStr = d.holes.length > 0
             ? ` with ${d.holes.length} hole${d.holes.length > 1 ? 's' : ''}`
             : '';
         const msg = `  Object ${i + 1}: ${d.vertexCount} verts, area ≈ ${d.area}px²${hStr}`;
         console.log(msg);
-        // if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg);
+        if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg);
     });
 }
