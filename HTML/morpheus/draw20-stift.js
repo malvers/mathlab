@@ -180,6 +180,19 @@ function createDraw20Stift({
         if (!stiftEnabled) return;
         if (e.button !== undefined && e.button !== 0) return;
         e.preventDefault();
+        // If the user starts drawing while the morph slider is mid-morph
+        // (or finished), snap it back to 0. Otherwise stiftCanvas would
+        // stay opacity:0 (new strokes invisible) and the stift outlines
+        // would keep their `morph-src-hidden` class. Resetting fires
+        // renderMorph(0) which clears all the hide classes and restores
+        // normal drawing mode.
+        const sl = document.getElementById('morph-slider');
+        if (sl && +sl.value > 0) {
+            sl.value = '0';
+            const span = document.getElementById('morph-val');
+            if (span) span.textContent = '0';
+            if (typeof window.onMorphSlider === 'function') window.onMorphSlider('0');
+        }
         drawingNow = true;
         const sw = document.getElementById('stroke-slider');
         curStroke = {
