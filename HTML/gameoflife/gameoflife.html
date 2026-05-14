@@ -25,6 +25,9 @@
         /* GoL fills the canvas — hide the template's coach overlay */
         #math-coach-box { display: none; }
         #canvas { cursor: crosshair; }
+        /* Nudge sidebar content 3px right (left padding 7px → 10px). The base rule in
+           cyber-lab-overrides.css uses !important on #side-panel padding, so we need it too. */
+        #side-panel { padding-left: 10px !important; }
 
         /* --- Tabs (gravitation-style) --- */
         #main-content { display: flex; flex-direction: column; }
@@ -1014,12 +1017,24 @@
         }
 
         function makeGroup(title) {
+            // Use the central .instrument-card / .instrument-title classes from js/ui.js
+            // so the sidebar matches every other lab (morph, gravitation, …).
             const g = document.createElement('div');
-            g.className = 'gol-group';
+            g.className = 'instrument-card';
             const t = document.createElement('div');
-            t.className = 'gol-group-title';
+            t.className = 'instrument-title';
+            t.style.color = '#00d2ff';
+            t.style.textShadow = '0 0 10px rgba(0, 210, 255, 0.4)';
             t.textContent = title;
             g.appendChild(t);
+            const body = document.createElement('div');
+            body.className = 'card-content';
+            g.appendChild(body);
+            // Children get appended to .card-content so the inner layout matches morph et al.
+            g.appendChild = function (node) {
+                body.appendChild(node);
+                return node;
+            };
             return g;
         }
 

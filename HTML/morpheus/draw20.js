@@ -33,9 +33,6 @@
         let panX = +(localStorage.getItem('draw20-panX') ?? 0);
         let panY = +(localStorage.getItem('draw20-panY') ?? 0);
 
-        // Most-recent render data — populated by renderBBoxes, consumed by
-        // openPolygonRing (the extra-window diagnostic view).
-        let lastRenderData = null;
 
         function saveZoomPan() {
             try {
@@ -117,12 +114,6 @@
         const morphLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         morphLayer.id = 'morph-layer';
         overlay.appendChild(morphLayer);
-        // Single delegated hover listener for the whole overlay — handles
-        // both <polygon> outlines and <path> fills via e.target.dataset.
-        // mouseover / mouseout bubble (unlike mouseenter / mouseleave) so a
-        // single listener at the parent catches every child transition.
-        overlay.addEventListener('mouseover', onOverlayHover);
-        overlay.addEventListener('mouseout', onOverlayHover);
 
         // ── Stift: eigene Zeichenfläche (entkoppelt vom Legacy-draw-canvas) ─
         // Strokes werden in normalisierten [0,1]-Koordinaten gespeichert, damit
@@ -257,530 +248,17 @@
             });
         }
 
-        // Compute the content bbox of an image (or canvas) by scanning a
-        // chosen channel. PNG presets use 'red' (black background, coloured
-        // ink, alpha is uniformly 255). LaTeX canvas uses 'alpha' (transparent
-        // background, ink alpha varies). Pass canvas directly to avoid an
-        // extra drawImage round-trip.
-        function computeContentBBox(source, channel) {
-            let cw, ch, ctx;
-            if (source instanceof HTMLCanvasElement) {
-                cw = source.width; ch = source.height;
-                ctx = source.getContext('2d');
-            } else {
-                cw = source.naturalWidth; ch = source.naturalHeight;
-                if (!cw || !ch) return null;
-                const c = document.createElement('canvas');
-                c.width = cw; c.height = ch;
-                ctx = c.getContext('2d');
-                ctx.drawImage(source, 0, 0);
-            }
-            let data;
-            try { data = ctx.getImageData(0, 0, cw, ch).data; }
-            catch (e) { return null; }
-            const off = channel === 'alpha' ? 3 : 0;
-            const t = getThreshold();
-            let minX = cw, minY = ch, maxX = -1, maxY = -1;
-            for (let y = 0; y < ch; y++) {
-                for (let x = 0; x < cw; x++) {
-                    const i = (y * cw + x) * 4;
-                    if (data[i + off] > t) {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-                    }
-                }
-            }
-            if (maxX < 0) return null;
-            return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1, cw, ch };
-        }
-        // PNG path keeps the red-channel test.
-        function computeImageBBox(img) { return computeContentBBox(img, 'red'); }
 
-        function mapImageBBoxToViewport(img, bbox) {
-            const r = img.getBoundingClientRect();
-            const scale = Math.min(r.width / bbox.cw, r.height / bbox.ch);
-            const renderW = bbox.cw * scale;
-            const renderH = bbox.ch * scale;
-            const offX = r.left + (r.width - renderW) / 2;
-            const offY = r.top + (r.height - renderH) / 2;
-            return {
-                left: offX + bbox.x * scale,
-                top: offY + bbox.y * scale,
-                width: bbox.w * scale,
-                height: bbox.h * scale,
-            };
-        }
-
-        function drawBBox(rect, label) {
-            // The input rect is in viewport (post-transform) coords. The overlay
-            // SVG lives inside `wrap`, which gets translate+scale applied, so we
-            // must convert into wrap's pre-transform local space by dividing by
-            // the current zoom.
-            const wrapRect = wrap.getBoundingClientRect();
-            const z = zoom || 1;
-            const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            r.setAttribute('x', (rect.left - wrapRect.left) / z);
-            r.setAttribute('y', (rect.top - wrapRect.top) / z);
-            r.setAttribute('width', rect.width / z);
-            r.setAttribute('height', rect.height / z);
-            r.setAttribute('fill', 'none');
-            r.setAttribute('stroke', '#888');
-            r.setAttribute('stroke-width', String(1 / (zoom || 1)));
-            overlay.appendChild(r);
-        }
-
-        // Grid + geometry helpers live in draw20-grid.js.
-        // Local wrappers pass the live threshold so existing callers stay unchanged.
-        const canvasToGridRed = (c) => draw20CanvasToGridRed(c, getThreshold());
-        const canvasToGridAlpha = (c) => draw20CanvasToGridAlpha(c, getThreshold());
-        const polyArea = draw20PolyArea;
-        const strideResample = draw20StrideResample;
 
         // Contour extraction lives in draw20-extract.js.
         // Wrappers run without `dbg` so non-Stift noise stays out of DEBUG.
         const extractPNGContours = (canvas) => draw20ExtractPNGContours(canvas);
         const extractLatexContours = () => draw20ExtractLatexContours(latexCanvas);
-        const TARGET_MAX_PTS = DRAW20_TARGET_MAX_PTS;
 
-        // Draw contours (array of polylines, each an array of [x,y] points in
-        // source-canvas pixels) onto the overlay, transforming source-canvas
-        // coords through mapFn(x, y) → wrap-local {x, y}.
-        //
-        // Holes are handled correctly: classifyContours() identifies outer vs
-        // hole regions. For each outer, we emit ONE <path> with the outer +
-        // its holes as subpaths and fill-rule="evenodd", so the holes XOR-out
-        // of the fill (same idea as morph-engine.js fill('evenodd')). The
-        // per-contour stroke/points stay individual so each region keeps its
-        // own color.
-        //
-        // `label` ('png' or 'latex') tags polygons + fill paths via
-        // data-source. Each element also carries data-match-id = the outer's
-        // index in the classified outers list (holes inherit their parent's
-        // id), so cross-pane hover highlighting can pair regions: PNG outer
-        // #N ↔ LaTeX outer #N (both sets are canonical-sorted left-to-right).
-        // drawContours accepts an optional `matchIdByContour` array
-        // (length = contours.length) that maps each contour index to the
-        // shared cross-pane matchId. When omitted, falls back to numbering
-        // outers in canonical order (legacy single-pane behaviour). The
-        // shared map is built by renderBBoxes via Hungarian assignment so
-        // PNG outer #N ↔ LaTeX outer #M get the same matchId.
-        //
-        // `centroidsOut` (optional Map<matchId,[x,y]>) is populated with the
-        // wrap-local centroid of each outer's mapped polygon so the caller
-        // can draw cross-pane match lines.
-        // `pointsOut` (optional Map<matchId, mapped-point-array>) stores the
-        // wrap-local point array per outer — used by renderMorph() for the
-        // pair-wise interpolation between PNG and LaTeX matched outers.
-        function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut) {
-            if (!contours || contours.length === 0) {
-                return 0;
-            }
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const z = zoom || 1;
-            const sw = String(1 / z);
-            const pr = 2 / z;
 
-            const mappedAll = contours.map(c =>
-                (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
-            );
-
-            const classified = (typeof classifyContours === 'function')
-                ? classifyContours(contours)
-                : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
-
-            // matchId per contour: from override if provided (Hungarian),
-            // else legacy "outer position" numbering. Holes always inherit
-            // their parent outer's id.
-            let matchId;
-            if (matchIdByContour && matchIdByContour.length === contours.length) {
-                matchId = matchIdByContour;
-            } else {
-                matchId = new Array(contours.length).fill(-1);
-                for (let oi = 0; oi < classified.outers.length; oi++) {
-                    const outer = classified.outers[oi];
-                    matchId[outer.idx] = oi;
-                    for (const hi of outer.holes) matchId[hi] = oi;
-                }
-            }
-            const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
-            const colourOf = (i) => {
-                const mid = matchId[i];
-                if (mid < 0) return INK_COLOR;
-                return isOrphanMid(mid) ? ORPHAN_COLOR : paletteColor(mid);
-            };
-
-            // ── FILL: one <path> per outer group (outer + its holes).
-            for (let oi = 0; oi < classified.outers.length; oi++) {
-                const outer = classified.outers[oi];
-                const oc = mappedAll[outer.idx];
-                if (!oc) continue;
-                const parts = [oc, ...outer.holes.map(hi => mappedAll[hi]).filter(Boolean)];
-                const d = parts.map(pts => {
-                    let s = `M ${pts[0].x} ${pts[0].y}`;
-                    for (let k = 1; k < pts.length; k++) s += ` L ${pts[k].x} ${pts[k].y}`;
-                    return s + ' Z';
-                }).join(' ');
-                const mid = matchId[outer.idx];
-                const orphan = isOrphanMid(mid);
-                const path = document.createElementNS(svgNS, 'path');
-                path.setAttribute('d', d);
-                path.setAttribute('fill-rule', 'evenodd');
-                path.setAttribute('fill', orphan ? ORPHAN_COLOR : paletteColor(mid));
-                path.setAttribute('stroke', 'none');
-                if (orphan) path.style.filter = ORPHAN_GLOW;
-                path.dataset.kind = 'fill';
-                path.dataset.source = label;
-                path.dataset.matchId = String(mid);
-                overlay.appendChild(path);
-
-                if (centroidsOut) {
-                    let sx = 0, sy = 0;
-                    for (const m of oc) { sx += m.x; sy += m.y; }
-                    centroidsOut.set(mid, [sx / oc.length, sy / oc.length]);
-                }
-                if (pointsOut) pointsOut.set(mid, oc);
-            }
-
-            // ── STROKE + POINTS: one polygon + N circles per contour.
-            let totalVerts = 0;
-            let polyCount = 0;
-            for (let i = 0; i < contours.length; i++) {
-                const mapped = mappedAll[i];
-                if (!mapped) continue;
-                polyCount++;
-                const mid = matchId[i];
-                const orphan = isOrphanMid(mid);
-                const colour = colourOf(i);
-                const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
-                const poly = document.createElementNS(svgNS, 'polygon');
-                poly.setAttribute('points', pts);
-                poly.setAttribute('fill', 'none');
-                poly.setAttribute('stroke', colour);
-                poly.setAttribute('stroke-width', sw);
-                poly.setAttribute('stroke-linejoin', 'round');
-                if (orphan) poly.style.filter = ORPHAN_GLOW;
-                poly.dataset.source = label;
-                poly.dataset.matchId = String(mid);
-                poly.style.pointerEvents = 'all';
-                overlay.appendChild(poly);
-
-                for (const m of mapped) {
-                    const dot = document.createElementNS(svgNS, 'circle');
-                    dot.setAttribute('cx', m.x);
-                    dot.setAttribute('cy', m.y);
-                    dot.setAttribute('r', pr);
-                    dot.setAttribute('fill', colour);
-                    if (orphan) dot.style.filter = ORPHAN_GLOW;
-                    dot.dataset.kind = 'point';
-                    dot.dataset.source = label;
-                    dot.dataset.matchId = String(mid);
-                    overlay.appendChild(dot);
-                    totalVerts++;
-                }
-            }
-            if (ui) {
-                ui.applyLinesToggle();
-                ui.applyPointsToggle();
-                ui.applyFillToggle();
-            }
-            return totalVerts;
-        }
-
-        // Cross-pane region highlighting. Yellow glow = "you and your partner".
-        // ORPHANS are explicitly excluded — hovering an orphan gives NO glow
-        // (the red dashed circle is its permanent marker; glow would falsely
-        // imply a partnership). The set of orphan matchIds is updated by
-        // renderBBoxes after computing idToPair.
-        const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
-        const orphanMatchIds = new Set();
-        function setMatchHighlight(matchId, on) {
-            if (matchId === undefined || matchId === '' || matchId === '-1') return;
-            if (orphanMatchIds.has(String(matchId))) return; // orphan: no glow
-            overlay.querySelectorAll(
-                `[data-match-id="${matchId}"]`
-            ).forEach(el => {
-                if (el.dataset.kind === 'match-line') {
-                    el.style.display = on ? '' : 'none';
-                } else {
-                    el.style.filter = on ? GLOW_FILTER : '';
-                }
-            });
-        }
-        // Currently-highlighted matchId. Single delegated mouseover/mouseout
-        // listener on overlay catches every child transition (path or polygon)
-        // via e.target. We track the active id so moves between sibling
-        // elements (e.g. polygon → its own fill path) don't flicker.
-        let activeMatchId = null;
-        function onOverlayHover(e) {
-            const t = e.target;
-            const mid = (t && t.dataset) ? t.dataset.matchId : '';
-            const valid = mid && mid !== '-1';
-            const next = (e.type === 'mouseover' && valid) ? mid : null;
-            if (next === activeMatchId) return;
-            if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
-            if (next !== null) setMatchHighlight(next, true);
-            activeMatchId = next;
-        }
-
-        // Similarity metric: account for centroid distance, vertex count, and topology
-        // Returns 0–100%, with penalties for: contour count mismatch, vertex count
-        // difference, and centroid displacement.
-        function computeSimilarity(pngContours, latexContours) {
-            if (!pngContours || !latexContours
-                || pngContours.length === 0 || latexContours.length === 0
-                || typeof classifyContours !== 'function'
-                || typeof normalizeForMatching !== 'function'
-                || typeof centroid !== 'function') return 0;
-            const pOuters = classifyContours(pngContours).outers
-                .map(o => pngContours[o.idx]).filter(Boolean);
-            const lOuters = classifyContours(latexContours).outers
-                .map(o => latexContours[o.idx]).filter(Boolean);
-            if (!pOuters.length || !lOuters.length) return 0;
-            const pNorm = normalizeForMatching(pOuters);
-            const lNorm = normalizeForMatching(lOuters);
-            const n = Math.min(pNorm.length, lNorm.length);
-            let sum = 0;
-            for (let i = 0; i < n; i++) {
-                const a = centroid(pNorm[i]);
-                const b = centroid(lNorm[i]);
-                sum += Math.hypot(a[0] - b[0], a[1] - b[1]);
-            }
-            const avg = sum / n;
-            // Count mismatch penalty: missing/extra outers count as max dist.
-            const missing = Math.abs(pNorm.length - lNorm.length);
-            const countPenalty = missing * 0.5;
-            // Vertex count penalty: 20% weight on point count difference
-            const vertDiff = Math.abs(pngVertCount - latVertCount);
-            const maxVerts = Math.max(pngVertCount, latVertCount, 1);
-            const vertPenalty = (vertDiff / maxVerts) * 0.2;
-            // Combined distance
-            const effDist = (avg * n + countPenalty) / Math.max(n + missing, 1) + vertPenalty;
-            const maxDist = 0.7; // increased range for more discrimination
-            return Math.max(0, Math.min(100, Math.round(100 * (1 - effDist / maxDist))));
-        }
-
-        function updateInfoBoxes(pngContours, latexContours) {
-            const objVal = document.getElementById('obj-value');
-            const latVal = document.getElementById('lat-value');
-            const simVal = document.getElementById('sim-value');
-            const objVerts = document.getElementById('obj-verts');
-            const latVerts = document.getElementById('lat-verts');
-            const pOuters = (pngContours && typeof classifyContours === 'function')
-                ? classifyContours(pngContours).outers.length : 0;
-            const lOuters = (latexContours && typeof classifyContours === 'function')
-                ? classifyContours(latexContours).outers.length : 0;
-            if (objVal) objVal.textContent = pOuters;
-            if (latVal) latVal.textContent = lOuters;
-            if (objVerts) objVerts.textContent = pngVertCount;
-            if (latVerts) latVerts.textContent = latVertCount;
-            baseSimilarity = computeSimilarity(pngContours, latexContours);
-            if (simVal) simVal.textContent = baseSimilarity + '%';
-        }
-
-        // ── Cross-pane matching: thin wrapper around draw20ComputeMatchIds
-        // (draw20-match.js). Binds dbg + the master switch so callers can use
-        // the same compact signature as before.
-        function computeMatchIds(pngContours, latexContours) {
-            return draw20ComputeMatchIds(pngContours, latexContours, {
-                matchingEnabled: DRAW20_MATCHING_ENABLED,
-                // No dbg — Hungarian/uncrossing/rescue logs are noise outside
-                // active matching debugging. Re-add `dbg` here to restore.
-            });
-        }
-
-        // ── Polygon-Ring diagnostic view ───────────────────────────────────
-        // Implementation lives in draw20-ring.js — this wrapper just hands it
-        // the current closure-bound state (lastRenderData + matching switch).
-        function openPolygonRing() {
-            draw20OpenPolygonRing(lastRenderData, DRAW20_MATCHING_ENABLED);
-        }
-
-        function renderBBoxes() {
-            // Detach morph-layer first, wipe everything, drawing happens in
-            // between, morph-layer gets re-attached as the LAST child below
-            // so its polygons render on TOP of bboxes/outlines/dots.
-            if (morphLayer.parentNode === overlay) overlay.removeChild(morphLayer);
-            while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
-            let pngContours = null;
-            let latexContoursList = null;
-
-            // ── Extract contours from both panes FIRST so we can match
-            // before drawing (shared matchIds drive both colour + hover pair).
-            if (pix.complete && pix.naturalWidth) {
-                const pc = document.createElement('canvas');
-                pc.width = pix.naturalWidth;
-                pc.height = pix.naturalHeight;
-                pc.getContext('2d').drawImage(pix, 0, 0);
-                pngContours = extractPNGContours(pc);
-            }
-            if (tex.complete && tex.naturalWidth && latexCanvas) {
-                const res = extractLatexContours();
-                if (res && res.contours.length) latexContoursList = res.contours;
-            }
-
-            const matchInfo = computeMatchIds(pngContours, latexContoursList);
-            const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
-
-            // Display scales — natural pixel → displayed CSS pixel, exactly
-            // as used by drawContours for the main panes. The polygon-ring
-            // uses these so each polygon is rendered at the SAME on-screen
-            // size as in the live panes.
-            const pixR = pix.getBoundingClientRect();
-            const texR = tex.getBoundingClientRect();
-            const pngDisplayScale = (pix.naturalWidth && pix.naturalHeight)
-                ? Math.min(pixR.width / pix.naturalWidth, pixR.height / pix.naturalHeight) : 1;
-            const latDisplayScale = (tex.naturalWidth && tex.naturalHeight)
-                ? Math.min(texR.width / tex.naturalWidth, texR.height / tex.naturalHeight) : 1;
-
-            // Stash the most-recent render data so the polygon-ring view can
-            // grab it without re-running the matcher.
-            lastRenderData = {
-                pngContours, latexContours: latexContoursList,
-                pClass, lClass, pngId, latId, idToPair, plausibility,
-                pngDisplayScale, latDisplayScale,
-            };
-
-            // Refresh the orphan-id set so setMatchHighlight knows which mids
-            // are orphans (and must skip the yellow glow on hover). When
-            // DRAW20_MATCHING_ENABLED is false, every outer is "unpaired" by design
-            // — skip the orphan flagging so they keep their palette colours
-            // instead of all rendering bright red.
-            // Orphan-Flagging vorerst aus — kommt später wieder rein. Ohne
-            // diesen Check fallen unpaired Outers auf ihre Palette-Farbe
-            // zurück (statt knallrot mit Glow).
-            orphanMatchIds.clear();
-
-            // Centroid maps populated by drawContours — used afterwards to
-            // draw cross-pane match lines (centroid PNG ↔ centroid LaTeX).
-            const pngCentroids = new Map();
-            const latCentroids = new Map();
-            const pngPoints = new Map();
-            const latPoints = new Map();
-
-            // ── PNG render
-            if (pix.complete && pix.naturalWidth) {
-                const bbox = computeImageBBox(pix);
-                if (bbox) drawBBox(mapImageBBoxToViewport(pix, bbox), 'png');
-                if (pngContours && pngContours.length) {
-                    const r = pix.getBoundingClientRect();
-                    const wrapRect = wrap.getBoundingClientRect();
-                    const scale = Math.min(r.width / pix.naturalWidth, r.height / pix.naturalHeight);
-                    const renderW = pix.naturalWidth * scale;
-                    const renderH = pix.naturalHeight * scale;
-                    const offX = r.left + (r.width - renderW) / 2;
-                    const offY = r.top + (r.height - renderH) / 2;
-                    const z = zoom || 1;
-                    const mapFn = (x, y) => ({
-                        x: (offX + x * scale - wrapRect.left) / z,
-                        y: (offY + y * scale - wrapRect.top) / z,
-                    });
-                    pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints);
-                } else {
-                }
-            } else {
-            }
-
-            // ── LaTeX render
-            if (tex.complete && tex.naturalWidth && latexCanvas) {
-                const bbox = computeContentBBox(latexCanvas, 'alpha');
-                if (bbox) drawBBox(mapImageBBoxToViewport(tex, bbox), 'latex');
-                if (latexContoursList && latexContoursList.length) {
-                    const r = tex.getBoundingClientRect();
-                    const wrapRect = wrap.getBoundingClientRect();
-                    const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
-                    const renderW = tex.naturalWidth * scale;
-                    const renderH = tex.naturalHeight * scale;
-                    const offX = r.left + (r.width - renderW) / 2;
-                    const offY = r.top + (r.height - renderH) / 2;
-                    const z = zoom || 1;
-                    const mapFn = (x, y) => ({
-                        x: (offX + x * scale - wrapRect.left) / z,
-                        y: (offY + y * scale - wrapRect.top) / z,
-                    });
-                    latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints);
-                } else {
-                }
-            } else {
-            }
-
-            // ── Match lines: Centroid-zu-Centroid pro gematchtes Outer-Pair.
-            // Per default JETZT sichtbar (vorher nur on-hover). Solid stroke;
-            // Farbe = Palette für ok/meh, knallrot für suspect.
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const z = zoom || 1;
-            const verdictById = new Map();
-            if (plausibility) {
-                for (const m of plausibility.matches) {
-                    for (const [id, pair] of idToPair) {
-                        if (pair.png === m.pngIdx) {
-                            verdictById.set(id, { verdict: m.verdict, score: m.score });
-                            break;
-                        }
-                    }
-                }
-            }
-            for (const [mid, p] of pngCentroids) {
-                const l = latCentroids.get(mid);
-                if (!l) continue;
-                const v = verdictById.get(mid);
-                const verdict = v ? v.verdict : 'ok';
-                const score = v ? v.score : 1;
-                const line = document.createElementNS(svgNS, 'line');
-                line.setAttribute('x1', p[0]);
-                line.setAttribute('y1', p[1]);
-                line.setAttribute('x2', l[0]);
-                line.setAttribute('y2', l[1]);
-                line.setAttribute('stroke', verdict === 'suspect' ? '#ff3030' : paletteColor(mid));
-                line.setAttribute('stroke-width', String((verdict === 'suspect' ? 2 : 1.5) / z));
-                line.setAttribute('opacity', '0.9');
-                line.dataset.kind = 'match-line';
-                line.dataset.matchId = String(mid);
-                line.dataset.verdict = verdict;
-                line.dataset.score = score.toFixed(2);
-                overlay.appendChild(line);
-            }
-            // Orphan dashed-circle markers removed — the bright-red polygon
-            // (rendered with ORPHAN_COLOR and red glow) is enough.
-            let pngOrphCount = 0, latOrphCount = 0;
-            for (const [id, pair] of idToPair) {
-                if (pair.png >= 0 && pair.lat < 0) pngOrphCount++;
-                else if (pair.lat >= 0 && pair.png < 0) latOrphCount++;
-            }
-
-            // Build the morph-pair list (matched outer pairs in wrap-local
-            // coords) so renderMorph(t) can interpolate without re-running
-            // anything. Re-apply the current morph value so the slider state
-            // stays consistent across re-renders.
-            morphPairs.length = 0;
-            for (const [mid, pp] of pngPoints) {
-                const lp = latPoints.get(mid);
-                if (!lp) continue;
-                morphPairs.push({ mid, pngPts: pp, latPts: lp });
-            }
-            // Morph-layer on top of everything for visibility.
-            overlay.appendChild(morphLayer);
-            const sl = document.getElementById('morph-slider');
-
-            // Wenn Stift-Outlines da sind, jetzt auch stift→LaTeX-Pairs neu
-            // bauen — die LaTeX-Coords haben sich gerade aktualisiert. Muss
-            // VOR renderMorph passieren, sonst nutzt der erste Slider-Tick
-            // noch das alte stiftMorphPairs.
-            const _sc = stift.getStiftContours();
-            if (_sc && _sc.length && typeof buildStiftMorphPairs === 'function') {
-                buildStiftMorphPairs(latexContoursList);
-            }
-
-            if (sl) renderMorph(+sl.value / 100);
-
-            updateInfoBoxes(pngContours, latexContoursList);
-        }
 
         const morphPairs = [];
         let baseSimilarity = 0; // Ähnlichkeit bei t=0, wird in renderBBoxes gespeichert
-        let pngVertCount = 0;
-        let latVertCount = 0;
 
         // ── Morph: PNG↔LaTeX (or stift↔LaTeX) interpolation. Lives in
         // draw20-morph.js. morphPairs is a shared array — renderBBoxes
@@ -798,7 +276,11 @@
             getStiftContours: () => stift.getStiftContours(),
             getBaseSimilarity: () => baseSimilarity,
             extractLatexContours,
-            computeMatchIds,
+            // Inline matchIds wrapper — render factory has its own copy for
+            // its renderBBoxes; this one is for buildStiftMorphPairs.
+            computeMatchIds: (p, l) => draw20ComputeMatchIds(p, l, {
+                matchingEnabled: DRAW20_MATCHING_ENABLED,
+            }),
             dbg,
         });
         // Local aliases keep the existing call sites unchanged.
@@ -811,6 +293,28 @@
         if (morphStartBtn) morphStartBtn.addEventListener('click', startMorphAnim);
 
         morph.attachMorphSlider();
+
+        // ── Render: drawContours, hover, similarity, renderBBoxes orchestrator.
+        // Lives in draw20-render.js. Owns its own pngVertCount/latVertCount/
+        // lastRenderData; writes baseSimilarity back via setter.
+        const render = createDraw20Render({
+            overlay, morphLayer, wrap,
+            pix, tex,
+            getZoom: () => zoom,
+            getLatexCanvas: () => latexCanvas,
+            getThreshold,
+            extractPNGContours, extractLatexContours,
+            getStiftContours: () => stift.getStiftContours(),
+            buildStiftMorphPairs,
+            renderMorph,
+            morphPairs,
+            getUI: () => ui,
+            matchingEnabled: DRAW20_MATCHING_ENABLED,
+            setBaseSimilarity: (v) => { baseSimilarity = v; },
+            dbg,
+        });
+        const renderBBoxes = render.renderBBoxes;
+        const openPolygonRing = render.openPolygonRing;
 
         // ── UI: Toggles, Formula/Symbol radios, context menu, RING button.
         // Lives in draw20-ui.js. Assigning to the previously-declared `let
