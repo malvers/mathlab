@@ -174,7 +174,7 @@ function resolveCyberHtmlAsset(relativePath) {
 }
 
 const CyberBranding = {
-    MASTER_TITLE: "DOC ALVERS MATHE-LABOR",
+    MASTER_TITLE: "DOC ALVERS MATHE-LABORE",
     /// MRA ///
     DEV_MODE: true, // Master Switch for Auto-Reload
     FORCE_INTERNAL_STYLES: false, // Ultimate extraction test: keep false to rely on external CSS only
