@@ -269,6 +269,7 @@
         renderer.setSize(innerWidth, innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        cam.up.set(0, 1, 0); // Explicit up before constructing controls
         const controls = new THREE.OrbitControls(cam, renderer.domElement);
         controls.enableDamping = false; // No inertia/Nachlauf — camera stops instantly on release
         controls.target.set(0, 0, 175);
@@ -560,7 +561,8 @@
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                // Reset camera + orbit target to the saved home pose.
+                // Manual full-state reset — explicit up vector first.
+                cam.up.set(0, 1, 0);
                 cam.position.copy(CAM_HOME);
                 controls.target.copy(TARGET_HOME);
                 controls.update();
