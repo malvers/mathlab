@@ -180,6 +180,63 @@
             stiftEnabled = localStorage.getItem('draw20-stift-enabled') === '1';
         } catch (_) {}
 
+        // Undo/Redo: Snapshot-Stack der strokes-Arrays. Index zeigt auf
+        // aktuellen Zustand. Neue Aktion truncatet alle „Future"-Snapshots
+        // (klassische Linear-History).
+        const strokeHistory = [snapshotStrokesNow()];
+        let historyIdx = 0;
+        const MAX_HISTORY = 50;
+        function snapshotStrokesNow() {
+            return strokes.map(s => ({
+                points: s.points.map(p => ({ nx: p.nx, ny: p.ny })),
+                width: s.width,
+                mode: s.mode,
+            }));
+        }
+        function pushHistory() {
+            if (historyIdx < strokeHistory.length - 1) {
+                strokeHistory.length = historyIdx + 1;
+            }
+            strokeHistory.push(snapshotStrokesNow());
+            if (strokeHistory.length > MAX_HISTORY) {
+                strokeHistory.shift();
+            } else {
+                historyIdx++;
+            }
+        }
+        function applyHistorySnapshot() {
+            const snap = strokeHistory[historyIdx];
+            strokes = snap.map(s => ({
+                points: s.points.map(p => ({ nx: p.nx, ny: p.ny })),
+                width: s.width,
+                mode: s.mode,
+            }));
+            curStroke = null;
+            drawingNow = false;
+            redrawStift();
+            persistStrokes();
+            // Outlines: wenn aktiv und Striche da → re-extract; wenn keine
+            // Striche mehr aber noch alte Outlines → wegräumen.
+            const active = (() => { try { return localStorage.getItem('draw20-outlines-active') === '1'; } catch (_) { return false; } })();
+            if (active && strokes.length > 0 && typeof extractStiftOutlines === 'function') {
+                extractStiftOutlines();
+            } else if (typeof stiftContours !== 'undefined' && stiftContours && typeof clearStiftOutlines === 'function') {
+                clearStiftOutlines();
+            }
+        }
+        function undo() {
+            if (historyIdx <= 0) return;
+            historyIdx--;
+            applyHistorySnapshot();
+            dbg(`↶ undo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+        }
+        function redo() {
+            if (historyIdx >= strokeHistory.length - 1) return;
+            historyIdx++;
+            applyHistorySnapshot();
+            dbg(`↷ redo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+        }
+
         function persistStrokes() {
             try { localStorage.setItem('draw20-strokes', JSON.stringify(strokes)); } catch (_) {}
         }
@@ -230,6 +287,9 @@
             drawingNow = false;
             redrawStift();
             persistStrokes();
+            // Leeren Zustand in die History pushen → Cmd+Z stellt
+            // den vor-Lösch-Zustand wieder her.
+            pushHistory();
             // Stale-Outlines mit-ausräumen (gehörten zu den jetzt weg-radierten
             // Strichen). `clearStiftOutlines` ist später im Init definiert; bei
             // tatsächlichem Aufruf via Button längst vorhanden.
@@ -267,6 +327,8 @@
             drawingNow = false;
             curStroke = null;
             persistStrokes();
+            // Strich abgeschlossen → in die History pushen.
+            pushHistory();
         }
         stiftCanvas.addEventListener('mousedown', onStiftDown);
         window.addEventListener('mousemove', onStiftMove);
@@ -274,6 +336,19 @@
         stiftCanvas.addEventListener('touchstart', onStiftDown, { passive: false });
         stiftCanvas.addEventListener('touchmove', onStiftMove, { passive: false });
         stiftCanvas.addEventListener('touchend', onStiftUp);
+
+        // Cmd/Ctrl+Z = Undo, Cmd/Ctrl+Shift+Z = Redo (klassisch).
+        // capture:true damit's vor anderen Handlern feuert; ignoriere wenn
+        // Fokus in einem Input/Textarea ist (z.B. Text-Input für LaTeX).
+        document.addEventListener('keydown', (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            if (!(e.metaKey || e.ctrlKey)) return;
+            if (e.key === 'z' || e.key === 'Z') {
+                e.preventDefault();
+                if (e.shiftKey) redo();
+                else undo();
+            }
+        }, true);
 
         function applyStiftState() {
             stiftCanvas.style.pointerEvents = stiftEnabled ? 'auto' : 'none';
@@ -1951,10 +2026,100 @@
             }
             return best === 0 ? pts : [...pts.slice(best), ...pts.slice(0, best)];
         }
-        // Render morph polygons between source and LaTeX target.
+        // BB-Hilfen für Nearest-Mapping + In-Place-Morph.
+        function bboxOfPts(pts) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const q of pts) {
+                if (q.x < minX) minX = q.x;
+                if (q.y < minY) minY = q.y;
+                if (q.x > maxX) maxX = q.x;
+                if (q.y > maxY) maxY = q.y;
+            }
+            return { minX, minY, maxX, maxY };
+        }
+        // Verschiebe + skaliere `l` so, dass seine BB exakt auf der BB von `p`
+        // liegt — der Morph passiert dann in place an der Quell-Position und
+        // -Größe statt quer durchs Pane zu wandern.
+        function alignDstToSrcBBox(p, l) {
+            const pBB = bboxOfPts(p), lBB = bboxOfPts(l);
+            const pCx = (pBB.minX + pBB.maxX) / 2;
+            const pCy = (pBB.minY + pBB.maxY) / 2;
+            const lCx = (lBB.minX + lBB.maxX) / 2;
+            const lCy = (lBB.minY + lBB.maxY) / 2;
+            const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
+            const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
+            const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
+            const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
+            const sx = pW / lW, sy = pH / lH;
+            return l.map(q => ({
+                x: (q.x - lCx) * sx + pCx,
+                y: (q.y - lCy) * sy + pCy,
+            }));
+        }
+        // Wrapper um die Engine-Funktion `alignTargetTo` aus morph-engine.js.
+        // Findet die Rotation k (und ggf. reverse) des Ziel-Polygons, die die
+        // Summe der quadratischen Punkt-zu-Punkt-Abstände zur Quelle minimiert
+        // — bewährte Logik aus dem alten Morph.
+        // Erwartet beide Polygone bereits same-length (= N nach resample) und
+        // im SELBEN Koordinatensystem (BB-aligned via alignDstToSrcBBox),
+        // damit die Distanzen sinnvoll vergleichbar sind.
+        // Liefert { alignedXY, idxMap } — alignedXY ist das rotierte Ziel
+        // im selben Format wie die Quelle ({x,y}), idxMap[i] gibt den
+        // ursprünglichen Ziel-Index (in `l`) für Quell-Punkt i.
+        function alignTargetWithEngine(p, l) {
+            if (typeof alignTargetTo !== 'function') return null;
+            if (p.length !== l.length) return null;
+            // Engine erwartet [x,y]-Tupel; trail ein Index-Tag um die
+            // ursprüngliche Reihenfolge durch die Rotation/Reverse zu
+            // tracken (Engine slict 3-Tupel transparent durch).
+            const src = p.map(q => [q.x, q.y]);
+            const tgt = l.map((q, i) => [q.x, q.y, i]);
+            const res = alignTargetTo(src, tgt);
+            return {
+                alignedXY: res.map(t => ({ x: t[0], y: t[1] })),
+                idxMap: res.map(t => t[2]),
+            };
+        }
+        // BB-Nearest Pairing (vorerst nicht mehr im Morph genutzt, aber
+        // behalten — vielleicht später für andere Visualisierungen).
+        function mapByBBoxNearest(p, l) {
+            const bb = (pts) => {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const q of pts) {
+                    if (q.x < minX) minX = q.x;
+                    if (q.y < minY) minY = q.y;
+                    if (q.x > maxX) maxX = q.x;
+                    if (q.y > maxY) maxY = q.y;
+                }
+                return { minX, minY, maxX, maxY };
+            };
+            const pBB = bb(p), lBB = bb(l);
+            const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
+            const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
+            const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
+            const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
+            const pN = p.map(q => [(q.x - pBB.minX) / pW, (q.y - pBB.minY) / pH]);
+            const lN = l.map(q => [(q.x - lBB.minX) / lW, (q.y - lBB.minY) / lH]);
+            const map = new Array(p.length).fill(0);
+            for (let i = 0; i < p.length; i++) {
+                let bestJ = 0, bestD = Infinity;
+                const pxi = pN[i][0], pyi = pN[i][1];
+                for (let j = 0; j < l.length; j++) {
+                    const dx = lN[j][0] - pxi, dy = lN[j][1] - pyi;
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; bestJ = j; }
+                }
+                map[i] = bestJ;
+            }
+            return map;
+        }
+        // Render morph polygons in-place an der Quell-Position.
         // Quelle = Stift (eigenes Drawing) wenn stiftMorphPairs vorhanden,
-        // sonst PNG-Preset. t=0 → reine Quelle, t=1 → reine LaTeX, 0<t<1 →
-        // Cross-Fade Quell-Pane ↔ tex + interpolierte Polygone drüber.
+        // sonst PNG-Preset. Beide Panes bleiben sichtbar als Referenz —
+        // der Morph passiert im Polygon-Overlay an der Quell-Stelle in
+        // Quell-Größe, statt quer durchs Pane zu wandern.
+        // t < eps → Pre-Morph-Vorschau: Korrespondenz-Linien Quelle → Ziel.
+        // t ≥ eps → Polygon-Overlay: shape morpht src → dst (alignDstToSrcBBox).
         const MORPH_EPS = 0.02;
         function renderMorph(t) {
             while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
@@ -1964,38 +2129,45 @@
             const srcKey = useStift ? 'srcPts' : 'pngPts';
             const dstKey = useStift ? 'dstPts' : 'latPts';
             dbg(`renderMorph t=${t.toFixed(2)} src=${useStift ? 'stift' : 'png'} pairs=${pairs.length}`);
-            // Quell-Pane referenz: stiftCanvas im stift-Modus, pix sonst.
+            // Ausgangs-Pane: nur während des Morphs (t ≥ eps) ausgeblendet,
+            // im Pre-Morph-Modus (Korrespondenz-Linien) bleibt sie sichtbar
+            // damit die Linien an etwas Erkennbarem ansetzen. Tex-Pane immer
+            // sichtbar als Referenz.
             const srcEl = useStift ? stiftCanvas : pix;
-            // Bei Stift-Modus: pix in Ruhe lassen (User entscheidet via PIXEL-
-            // Schalter / Auswahl, ob die PNG-Pane überhaupt sichtbar ist).
-            // Bei PNG-Modus: stiftCanvas in Ruhe lassen.
+            tex.style.opacity = '';
             if (!pairs.length) {
                 srcEl.style.opacity = '';
-                tex.style.opacity = '';
                 return;
             }
+            srcEl.style.opacity = (t < MORPH_EPS) ? '' : '0';
             if (t < MORPH_EPS) {
-                srcEl.style.opacity = '1';
-                tex.style.opacity = '0';
-                // Pre-Morph-Vorschau: zeige die N Korrespondenz-Linien pro
-                // Outer-Pair, die der Morph später interpoliert. So sieht
-                // der User, was wohin gehen wird.
+                // Pre-Morph-Vorschau: gleiche Korrespondenz die der Morph
+                // nutzt. alignTargetTo (engine) findet Rotation+Reverse;
+                // Linie zeigt Quelle → ECHTES Ziel (ungescaled).
                 const svgNS = 'http://www.w3.org/2000/svg';
                 const N = 60;
                 const z = zoom || 1;
                 const sw = String(0.8 / z);
                 for (const pair of pairs) {
                     const p = resampleClosed(pair[srcKey], N);
-                    let l = resampleClosed(pair[dstKey], N);
+                    const l = resampleClosed(pair[dstKey], N);
                     if (p.length < 3 || l.length < 3) continue;
-                    l = alignStart(l, p[0]);
+                    // BB-align l zur src BEVOR alignTargetTo — sonst dominiert
+                    // der Centroid-Offset und die Rotation wird willkürlich.
+                    const lInPlace = alignDstToSrcBBox(p, l);
+                    const eng = alignTargetWithEngine(p, lInPlace);
+                    if (!eng) continue;
+                    // idxMap zeigt auf den BB-aligned Index — gleiche Indizes
+                    // gelten 1:1 auch fürs Original `l` (alignTargetTo
+                    // permutiert nur, ändert keine Stückzahl).
                     const color = paletteColor(pair.mid);
                     for (let i = 0; i < N; i++) {
+                        const j = eng.idxMap[i];
                         const ln = document.createElementNS(svgNS, 'line');
                         ln.setAttribute('x1', p[i].x.toFixed(2));
                         ln.setAttribute('y1', p[i].y.toFixed(2));
-                        ln.setAttribute('x2', l[i].x.toFixed(2));
-                        ln.setAttribute('y2', l[i].y.toFixed(2));
+                        ln.setAttribute('x2', l[j].x.toFixed(2));
+                        ln.setAttribute('y2', l[j].y.toFixed(2));
                         ln.setAttribute('stroke', color);
                         ln.setAttribute('stroke-width', sw);
                         ln.setAttribute('stroke-opacity', '0.45');
@@ -2004,25 +2176,23 @@
                 }
                 return;
             }
-            if (t > 1 - MORPH_EPS) {
-                srcEl.style.opacity = '0';
-                tex.style.opacity = '1';
-                return;
-            }
-            srcEl.style.opacity = String(1 - t);
-            tex.style.opacity = String(t);
             const svgNS = 'http://www.w3.org/2000/svg';
             const N = 60;
             const z = zoom || 1;
             let drawn = 0;
             for (const pair of pairs) {
                 const p = resampleClosed(pair[srcKey], N);
-                let l = resampleClosed(pair[dstKey], N);
+                const l = resampleClosed(pair[dstKey], N);
                 if (p.length < 3 || l.length < 3) continue;
-                l = alignStart(l, p[0]);
+                // In-Place: dst-Polygon BB-aligned auf src. Danach
+                // alignTargetTo (engine) für die Rotation+Reverse-Wahl.
+                // Beides zusammen: kreuzungsarme Korrespondenz + in-place.
+                const lInPlace = alignDstToSrcBBox(p, l);
+                const eng = alignTargetWithEngine(p, lInPlace);
+                if (!eng) continue;
                 const pts = p.map((pp, i) => ({
-                    x: (1 - t) * pp.x + t * l[i].x,
-                    y: (1 - t) * pp.y + t * l[i].y,
+                    x: (1 - t) * pp.x + t * eng.alignedXY[i].x,
+                    y: (1 - t) * pp.y + t * eng.alignedXY[i].y,
                 }));
                 const polyStr = pts.map(pp => `${pp.x},${pp.y}`).join(' ');
                 const poly = document.createElementNS(svgNS, 'polygon');
