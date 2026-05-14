@@ -73,14 +73,16 @@ function createDraw20Render({
         }
         return p;
     }
-    // Grow both polygons to `multiplier × max(srcLen, dstLen)`. With
-    // multiplier=1 this is plain equalization. multiplier=2 also doubles
-    // the count on both sides — denser morph + denser correspondence.
+    // Grow both polygons to `max(multiplier × max(srcLen, dstLen), MIN)`.
+    // MIN = 200 guarantees a dense morph even when raw outlines are short.
+    // multiplier=2 doubles the natural max — both safeguards combine.
     const DRAW20_POINT_MULTIPLIER = 2;
+    const DRAW20_MIN_POINTS = 200;
     function equalizePair(arrA, idxA, arrB, idxB, multiplier) {
         const a = arrA[idxA], b = arrB[idxB];
         if (!a || !b) return;
-        const target = Math.max(a.length, b.length) * (multiplier || 1);
+        const m = multiplier || 1;
+        const target = Math.max(Math.max(a.length, b.length) * m, DRAW20_MIN_POINTS);
         if (a.length < target) arrA[idxA] = growPoly(a, target);
         if (b.length < target) arrB[idxB] = growPoly(b, target);
     }
@@ -338,14 +340,14 @@ function createDraw20Render({
     // ── Similarity metric ───────────────────────────────────────────────────
     // Returns 0–100 with penalties for: contour count mismatch, vertex-count
     // difference, and centroid displacement.
-    function computeSimilarity(pngContours, latexContours) {
-        if (!pngContours || !latexContours
-            || pngContours.length === 0 || latexContours.length === 0
+    function computeSimilarity(srcContours, latexContours, srcVerts, latVerts) {
+        if (!srcContours || !latexContours
+            || srcContours.length === 0 || latexContours.length === 0
             || typeof classifyContours !== 'function'
             || typeof normalizeForMatching !== 'function'
             || typeof centroid !== 'function') return 0;
-        const pOuters = classifyContours(pngContours).outers
-            .map(o => pngContours[o.idx]).filter(Boolean);
+        const pOuters = classifyContours(srcContours).outers
+            .map(o => srcContours[o.idx]).filter(Boolean);
         const lOuters = classifyContours(latexContours).outers
             .map(o => latexContours[o.idx]).filter(Boolean);
         if (!pOuters.length || !lOuters.length) return 0;
@@ -361,8 +363,11 @@ function createDraw20Render({
         const avg = sum / n;
         const missing = Math.abs(pNorm.length - lNorm.length);
         const countPenalty = missing * 0.5;
-        const vertDiff = Math.abs(pngVertCount - latVertCount);
-        const maxVerts = Math.max(pngVertCount, latVertCount, 1);
+        // Explicit vertex counts so stift fallback works.
+        const sv = (typeof srcVerts === 'number') ? srcVerts : pngVertCount;
+        const lv = (typeof latVerts === 'number') ? latVerts : latVertCount;
+        const vertDiff = Math.abs(sv - lv);
+        const maxVerts = Math.max(sv, lv, 1);
         const vertPenalty = (vertDiff / maxVerts) * 0.2;
         const effDist = (avg * n + countPenalty) / Math.max(n + missing, 1) + vertPenalty;
         const maxDist = 0.7;
@@ -381,11 +386,16 @@ function createDraw20Render({
         let leftOuters = (pngContours && typeof classifyContours === 'function')
             ? classifyContours(pngContours).outers.length : 0;
         let leftVerts = pngVertCount;
+        // The effective LEFT contours — used for both info-boxes AND
+        // similarity. When the user is in symbol mode (no PNG) but has
+        // drawn stift strokes, stift IS the source.
+        let leftContours = (pngContours && pngContours.length) ? pngContours : null;
         if (leftOuters === 0 && leftVerts === 0) {
             const sc = (typeof getStiftContours === 'function') ? getStiftContours() : null;
             if (sc && sc.length && typeof classifyContours === 'function') {
                 leftOuters = classifyContours(sc).outers.length;
                 leftVerts = sc.reduce((s, p) => s + (p ? p.length : 0), 0);
+                leftContours = sc;
             }
         }
         const lOuters = (latexContours && typeof classifyContours === 'function')
@@ -394,7 +404,11 @@ function createDraw20Render({
         if (latVal) latVal.textContent = lOuters;
         if (objVerts) objVerts.textContent = leftVerts;
         if (latVerts) latVerts.textContent = latVertCount;
-        const sim = computeSimilarity(pngContours, latexContours);
+        // Compute similarity using the effective left source (stift fall-
+        // back makes the % non-zero even when PNG is empty). Pass explicit
+        // vert counts so the penalty term uses leftVerts (not stale
+        // pngVertCount).
+        const sim = computeSimilarity(leftContours, latexContours, leftVerts, latVertCount);
         setBS(sim);
         if (simVal) simVal.textContent = sim + '%';
         // log(`📐 outline-points: PNG=${pngVertCount} (${pOuters} obj) | LaTeX=${latVertCount} (${lOuters} obj)`);
@@ -504,6 +518,10 @@ function createDraw20Render({
         // its polygons render on TOP of bboxes/outlines/dots.
         if (morphLayer.parentNode === overlay) overlay.removeChild(morphLayer);
         while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+        // Reset vert counts so stale values from a previous render don't
+        // poison the similarity penalty when one side is empty this round.
+        pngVertCount = 0;
+        latVertCount = 0;
         let pngContours = null;
         let latexContoursList = null;
 
