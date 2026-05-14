@@ -143,6 +143,31 @@
         .lightbox.active { display: flex; opacity: 1; }
         .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 12px; border: 1px solid rgba(0, 210, 255, 0.4); box-shadow: 0 0 50px rgba(0, 210, 255, 0.3); }
 
+        /* Whole-card view inside the lightbox */
+        .lightbox-card-clone {
+            background: rgba(0, 6, 22, 0.95) !important;
+            border: 1px solid rgba(0, 210, 255, 0.6) !important;
+            border-radius: 24px !important;
+            padding: 36px 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 50px !important;
+            max-width: 92vw !important;
+            max-height: 88vh !important;
+            box-shadow: 0 0 60px rgba(0, 210, 255, 0.35) !important;
+            transform: none !important;
+            cursor: zoom-out !important;
+        }
+        .lightbox-card-clone .member-photo {
+            width: 360px !important;
+            height: 360px !important;
+            border-radius: 18px !important;
+            border-width: 3px !important;
+        }
+        .lightbox-card-clone .member-name { font-size: 2.4rem !important; letter-spacing: 3px !important; }
+        .lightbox-card-clone .member-role { font-size: 1.1rem !important; margin-bottom: 18px !important; }
+        .lightbox-card-clone .member-desc { font-size: 1.2rem !important; line-height: 1.7 !important; }
+
         .close-btn { position: absolute; top: 15px; right: 15px; color: rgba(255, 255, 255, 0.6); cursor: pointer; transition: all 0.2s; z-index: 2001; }
         .close-btn:hover { transform: scale(1.1); color: #00d2ff; }
     </style>
@@ -268,7 +293,7 @@
                         <div class="member-info">
                             <div class="member-name">Chief Aesthetic Officer</div>
                             <div class="member-role">CAO / Silent Supervision</div>
-                            <div class="member-desc"><strong>Lady Seraphina</strong><br>Hüterin der Ästhetik und Expertin
+                            <div class="member-desc"><strong>Seraphina Aristocat</strong><br>Hüterin der Ästhetik und Expertin
                                 für lautlose Überwachung. Sorgt dafür, dass im Labor alles mit aristokratischer Eleganz
                                 abläuft.</div>
                         </div>
@@ -289,6 +314,7 @@
                 <div class="personal-footer">
                     <img src="resources/team/alvers_final.png" alt="Dr. Michael R. Alvers" class="personal-photo" onclick="openLightbox('resources/team/alvers_final.png')">
                     <div style="text-align: center; width: 400px; font-family: 'Orbitron', sans-serif; font-size: 22px; letter-spacing: 2px; color: #00d2ff; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);">Dr. Michael R. Alvers</div>
+                    <div style="text-align: center; width: 400px; font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); margin-top: 8px;">Ideengeber</div>
                 </div>
             </div>
         </div>
@@ -402,14 +428,36 @@
         function openLightbox(src) {
             const lb = document.getElementById('lightbox');
             const img = document.getElementById('lightbox-img');
+            img.style.display = '';
             img.src = src;
+            lb.style.display = 'flex';
+            setTimeout(() => lb.classList.add('active'), 10);
+        }
+        function openCardLightbox(cardEl) {
+            const lb = document.getElementById('lightbox');
+            const content = lb.querySelector('.lightbox-content');
+            // Wipe any previous card clone
+            const old = content.querySelector('.lightbox-card-clone');
+            if (old) old.remove();
+            const img = document.getElementById('lightbox-img');
+            if (img) img.style.display = 'none';
+            const clone = cardEl.cloneNode(true);
+            clone.classList.add('lightbox-card-clone');
+            clone.style.cursor = '';
+            content.appendChild(clone);
             lb.style.display = 'flex';
             setTimeout(() => lb.classList.add('active'), 10);
         }
         function closeLightbox() {
             const lb = document.getElementById('lightbox');
+            const clone = lb.querySelector('.lightbox-card-clone');
+            const img = document.getElementById('lightbox-img');
             lb.classList.remove('active');
-            setTimeout(() => lb.style.display = 'none', 400);
+            setTimeout(() => {
+                lb.style.display = 'none';
+                if (clone) clone.remove();
+                if (img) img.style.display = '';
+            }, 400);
         }
 
         // Init
@@ -425,6 +473,21 @@
             setTimeout(autoScale, 200);
         });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        // Make the whole card clickable — opens the lightbox with the FULL card
+        // (image + name + role + description) enlarged, not just the photo.
+        document.querySelectorAll('.team-member').forEach(card => {
+            const photo = card.querySelector('.member-photo');
+            if (!photo) return;
+            // Strip the original photo onclick so it doesn't fire alongside the card click
+            photo.removeAttribute('onclick');
+            photo.style.cursor = 'inherit';
+            card.style.cursor = 'zoom-in';
+            card.addEventListener('click', (ev) => {
+                if (ev.target.closest('a, button')) return;
+                openCardLightbox(card);
+            });
+        });
     </script>
 </body>
 </html>
