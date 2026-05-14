@@ -202,6 +202,10 @@ function createDraw20Morph({
         }
         if (t < MORPH_EPS) {
             // log(`📍 preMorph: t=${t.toFixed(3)} pairs=${pairs.length} useStift=${useStift}`);
+            // MORPH LINIEN aktuell NUR für Stift-Modus. Bei Formula (PNG↔
+            // LaTeX) ist die Pre-Morph-Korrespondenz noch nicht stabil
+            // genug — kommt später wieder rein.
+            if (!useStift) return;
             const corrToggle = document.getElementById('correspondence-toggle');
             const showCorr = corrToggle ? corrToggle.checked : true;
             // log(`📍 corrToggle: el=${!!corrToggle} checked=${showCorr}`);

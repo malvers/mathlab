@@ -49,13 +49,15 @@
         // drag listeners live (bubbling is independent of pointer-events
         // targeting). pix/tex get pointer-events: none individually so the
         // images themselves never become event targets.
+        // justify-content: space-around → each child gets equal space on
+        // both sides. With 2 children this centers pix in the LEFT half of
+        // the canvas and tex in the RIGHT half.
         wrap.style.cssText = `
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: clamp(20px, 4vw, 80px);
+            justify-content: space-around;
             z-index: 10;
             background: rgb(0, 0, 20);
         `;
@@ -63,8 +65,8 @@
         const pix = document.createElement('img');
         pix.draggable = false;
         pix.style.cssText = `
-            max-height: 43vh;
-            max-width: 29vw;
+            max-height: 54vh;
+            max-width: 36vw;
             object-fit: contain;
             mix-blend-mode: screen;
             pointer-events: none;
@@ -77,17 +79,15 @@
         // (no two-render discrepancy from a separate html2canvas pass).
         const tex = document.createElement('img');
         tex.draggable = false;
-        // LaTeX pane 100 % larger than the PNG/stift pane (43→86vh, 29→58vw),
-        // shifted ~20 vw further to the right via margin-left (the flex
-        // gap adapts — translateX was being absorbed by the wrap's flex
-        // centering).
+        // LaTeX pane same size as the pix/stift pane (36 vw / 54 vh) so
+        // both occupy ~36 % of the viewport width — total fits with flex
+        // gap in between, no overflow.
         tex.style.cssText = `
-            max-height: 86vh;
-            max-width: 58vw;
+            max-height: 54vh;
+            max-width: 36vw;
             object-fit: contain;
             pointer-events: none;
             user-select: none;
-            margin-left: 40vw;
         `;
         // Stash the rendered offscreen canvas for re-use during contour
         // extraction (avoids re-rendering, and keeps coords identical).
@@ -296,6 +296,7 @@
             // its renderBBoxes; this one is for buildStiftMorphPairs.
             computeMatchIds: (p, l) => draw20ComputeMatchIds(p, l, {
                 matchingEnabled: DRAW20_MATCHING_ENABLED,
+                dbg,
             }),
             dbg,
         });
@@ -310,7 +311,7 @@
 
         morph.attachMorphSlider();
 
-        // KORRESPONDENZ toggle — re-render the pre-morph view when toggled
+        // MORPH LINIEN toggle — re-render the pre-morph view when toggled
         // so the change is immediately visible (no slider movement needed).
         const corrToggle = document.getElementById('correspondence-toggle');
         if (corrToggle) corrToggle.addEventListener('change', () => {
@@ -354,6 +355,9 @@
             renderBBoxes,
             openPolygonRing,
             openMorph3D,
+            // When user picks a FORMULA, clear the freehand stift drawing
+            // + its outlines so only PNG-Hand-Formel + LaTeX stay.
+            onFormulaSelected: () => stift.clearStrokes(),
             defaultLatex: DEFAULT_LATEX,
             defaultPreset: DEFAULT_PRESET,
             dbg,
@@ -379,7 +383,7 @@
             const mx = e.clientX - hr.left;
             const my = e.clientY - hr.top;
             const factor = Math.exp(-e.deltaY * 0.001);
-            const newZoom = Math.max(1, Math.min(10, zoom * factor));
+            const newZoom = Math.max(0.1, Math.min(10, zoom * factor));
             // world point currently under the mouse:
             const wx = (mx - panX) / zoom;
             const wy = (my - panY) / zoom;

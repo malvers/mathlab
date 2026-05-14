@@ -234,11 +234,13 @@ function createDraw20Render({
         const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
         // Side-coloured: PNG/Stift = green (matches #object-count-box),
         // LaTeX = orange (matches #latex-count-box). Orphans stay red.
-        const SIDE_COLOR = (label === 'latex') ? '#F4C430' : '#adff2f';
+        // FILL uses palette per matchId so matched partners share the same
+        // hue (used to be green/orange side colours — now consistent with
+        // the outline stroke).
         const colourOf = (i) => {
             const mid = matchId[i];
             if (mid < 0) return INK;
-            return isOrphanMid(mid) ? ORPHAN : SIDE_COLOR;
+            return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
         };
 
         // ── FILL: one <path> per outer group (outer + its holes).
@@ -257,9 +259,9 @@ function createDraw20Render({
             const path = document.createElementNS(svgNS, 'path');
             path.setAttribute('d', d);
             path.setAttribute('fill-rule', 'evenodd');
-            path.setAttribute('fill', orphan ? ORPHAN : SIDE_COLOR);
+            // Orphans: red fill, NO glow.
+            path.setAttribute('fill', orphan ? ORPHAN : draw20PaletteColor(mid));
             path.setAttribute('stroke', 'none');
-            if (orphan) path.style.filter = GLOW;
             path.dataset.kind = 'fill';
             path.dataset.source = label;
             path.dataset.matchId = String(mid);
@@ -275,11 +277,17 @@ function createDraw20Render({
         }
 
         // ── STROKE + POINTS: one polygon + N circles per contour.
-        // PNG/Stift side: strokes dark red, dots blue.
-        // LaTeX side:    strokes blue,    dots dark red. (swapped)
-        // Orphans still get their red+glow override.
-        const LINE_COLOR = (label === 'latex') ? '#4363d8' : '#8B0000';
+        // OUTLINE STROKE: palette-coloured per matchId so PNG outer #N and
+        // LaTeX outer #N (matched partners) share the same hue — instantly
+        // visible which contour pairs with which across the two panes.
+        // POINTS: keep their side colours (blue/red) for legibility.
+        // Orphans use the same palette colour (no red, no glow).
         const POINT_COLOR = (label === 'latex') ? '#8B0000' : '#4363d8';
+        const lineColorOf = (i) => {
+            const mid = matchId[i];
+            if (mid < 0) return INK;
+            return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
+        };
         let totalVerts = 0;
         for (let i = 0; i < contours.length; i++) {
             const mapped = mappedAll[i];
@@ -290,10 +298,9 @@ function createDraw20Render({
             const poly = document.createElementNS(svgNS, 'polygon');
             poly.setAttribute('points', pts);
             poly.setAttribute('fill', 'none');
-            poly.setAttribute('stroke', orphan ? ORPHAN : LINE_COLOR);
+            poly.setAttribute('stroke', lineColorOf(i));
             poly.setAttribute('stroke-width', sw);
             poly.setAttribute('stroke-linejoin', 'round');
-            if (orphan) poly.style.filter = GLOW;
             poly.dataset.source = label;
             poly.dataset.matchId = String(mid);
             poly.style.pointerEvents = 'all';
@@ -304,8 +311,8 @@ function createDraw20Render({
                 dot.setAttribute('cx', m.x);
                 dot.setAttribute('cy', m.y);
                 dot.setAttribute('r', pr);
+                // Orphan dots: red. Otherwise side colour (blue/dark-red).
                 dot.setAttribute('fill', orphan ? ORPHAN : POINT_COLOR);
-                if (orphan) dot.style.filter = GLOW;
                 dot.dataset.kind = 'point';
                 dot.dataset.source = label;
                 dot.dataset.matchId = String(mid);
@@ -433,8 +440,7 @@ function createDraw20Render({
     function computeMatchIds(pngContours, latexContours) {
         return draw20ComputeMatchIds(pngContours, latexContours, {
             matchingEnabled: matchingEnabled !== false,
-            // No dbg — Hungarian/uncrossing/rescue logs are noise outside
-            // active matching debugging.
+            dbg,  // enabled — shows VETO/SWAP/RESCUE/DROP-SUSPECT decisions
         });
     }
 
@@ -558,6 +564,46 @@ function createDraw20Render({
             if (res && res.contours.length) latexContoursList = res.contours;
         }
 
+        // ── Match pix content-height to tex content-height + align baselines
+        // Hand-formula PNG often has different proportions / margins than
+        // the KaTeX-rendered LaTeX. Compute both content-bboxes in display
+        // CSS coords and apply a `translateY(dy) scale(sf)` transform on
+        // pix so the CONTENT visually matches tex content height AND the
+        // vertical centers (≈ baselines) align.
+        if (pix.complete && pix.naturalWidth && tex.complete && tex.naturalWidth && latexCanvas) {
+            // RESET first so we read the natural (un-transformed) bounds.
+            pix.style.transform = '';
+            pix.style.transformOrigin = 'center';
+            const pBB = computeImageBBox(pix);
+            const tBB = computeContentBBox(latexCanvas, 'alpha');
+            if (pBB && tBB && pBB.h > 0 && tBB.h > 0) {
+                const pixR = pix.getBoundingClientRect();
+                const texR = tex.getBoundingClientRect();
+                const pScale = Math.min(pixR.width / pix.naturalWidth, pixR.height / pix.naturalHeight);
+                const tScale = Math.min(texR.width / tex.naturalWidth, texR.height / tex.naturalHeight);
+                const pixContentH = pBB.h * pScale;
+                const texContentH = tBB.h * tScale;
+                if (pixContentH > 0 && texContentH > 0) {
+                    const sf = texContentH / pixContentH;
+                    // Vertical centers (in viewport coords) before transform.
+                    const pixView = mapImageBBoxToViewport(pix, pBB);
+                    const texView = mapImageBBoxToViewport(tex, tBB);
+                    const cyImg = pixR.top + pixR.height / 2;
+                    const pixCY = pixView.top + pixView.height / 2;
+                    const texCY = texView.top + texView.height / 2;
+                    // After scale(sf) with transform-origin center the content
+                    // center moves from pixCY to (cyImg + (pixCY-cyImg)*sf).
+                    // translateY shifts that final position so it matches texCY.
+                    const dy = (texCY - cyImg) - (pixCY - cyImg) * sf;
+                    pix.style.transform = `translateY(${dy.toFixed(2)}px) scale(${sf.toFixed(4)})`;
+                }
+            }
+        } else if (!pix.naturalWidth) {
+            // No PNG (symbol mode) — drop any leftover scale from a
+            // previous formula so the empty/hidden img doesn't carry it.
+            pix.style.transform = '';
+        }
+
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
         const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
 
@@ -657,41 +703,14 @@ function createDraw20Render({
             }
         }
 
-        // ── Match lines: centroid-to-centroid per matched outer pair.
-        // Solid stroke; colour = palette for ok/meh, knallrot for suspect.
+        // Match lines (centroid-to-centroid) disabled — user requested
+        // they be hidden. Keep the loop infrastructure commented for easy
+        // restoration.
         const svgNS = 'http://www.w3.org/2000/svg';
         const z = getZ() || 1;
-        const verdictById = new Map();
-        if (plausibility) {
-            for (const m of plausibility.matches) {
-                for (const [id, pair] of idToPair) {
-                    if (pair.png === m.pngIdx) {
-                        verdictById.set(id, { verdict: m.verdict, score: m.score });
-                        break;
-                    }
-                }
-            }
-        }
-        for (const [mid, p] of pngCentroids) {
-            const l = latCentroids.get(mid);
-            if (!l) continue;
-            const v = verdictById.get(mid);
-            const verdict = v ? v.verdict : 'ok';
-            const score = v ? v.score : 1;
-            const line = document.createElementNS(svgNS, 'line');
-            line.setAttribute('x1', p[0]);
-            line.setAttribute('y1', p[1]);
-            line.setAttribute('x2', l[0]);
-            line.setAttribute('y2', l[1]);
-            line.setAttribute('stroke', verdict === 'suspect' ? '#ff3030' : draw20PaletteColor(mid));
-            line.setAttribute('stroke-width', String((verdict === 'suspect' ? 2 : 1.5) / z));
-            line.setAttribute('opacity', '0.9');
-            line.dataset.kind = 'match-line';
-            line.dataset.matchId = String(mid);
-            line.dataset.verdict = verdict;
-            line.dataset.score = score.toFixed(2);
-            overlay.appendChild(line);
-        }
+        // const verdictById = new Map();
+        // if (plausibility) { ... }
+        // for (const [mid, p] of pngCentroids) { ... overlay.appendChild(line); }
 
         // Build the morph-pair list (matched outer pairs in wrap-local
         // coords) so renderMorph(t) can interpolate without re-running
