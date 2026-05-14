@@ -79,6 +79,21 @@
         }
         body.use-globe #globe-stage { display: block; filter: brightness(0.55); }
         body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
+        /* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
+        #debug-clock-cover {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            display: none;
+        }
+        #debug-clock-cover.show { opacity: 1; }
+        #debug-clock-cover .cover-piece {
+            position: absolute;
+            background: #000616;
+        }
     </style>
     <script>
         (function () {
@@ -112,6 +127,14 @@
             <div id="city-info-loading" style="font-size: clamp(0.7rem, 1vmin, 0.9rem); color: rgba(0, 210, 255, 0.6); font-style: italic; display: none;">Lade Info…</div>
             <div id="city-info-extract" style="font-size: clamp(0.72rem, 1.05vmin, 0.95rem); line-height: 1.45; color: rgba(230, 237, 243, 0.85); max-height: 45vh; overflow-y: auto;"></div>
         </div>
+    </div>
+
+    <!-- DEBUG: Cover that hides everything except the clock (fades in 2s after load) -->
+    <div id="debug-clock-cover">
+        <div class="cover-piece" data-piece="top"></div>
+        <div class="cover-piece" data-piece="bottom"></div>
+        <div class="cover-piece" data-piece="left"></div>
+        <div class="cover-piece" data-piece="right"></div>
     </div>
 
     <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
@@ -1969,6 +1992,65 @@
 
         // UI Controls & Interaction
         CyberUI.on('reset', manualReset);
+
+        // --- DEBUG: Cover everything except the clock area, fade in 2s after load ---
+        (function setupDebugClockCover() {
+            const cover = document.getElementById('debug-clock-cover');
+            if (!cover) return;
+            const pieceTop    = cover.querySelector('[data-piece="top"]');
+            const pieceBottom = cover.querySelector('[data-piece="bottom"]');
+            const pieceLeft   = cover.querySelector('[data-piece="left"]');
+            const pieceRight  = cover.querySelector('[data-piece="right"]');
+
+            function updateHole() {
+                const rect = canvas.getBoundingClientRect();
+                const w = Math.max(80, rect.width);
+                const h = Math.max(80, rect.height);
+                const cx = rect.left + w / 2;
+                const cy = rect.top + h / 2;
+                const r = Math.min(w, h) * 0.8 / 2;
+                // Mirrors drawFrame(): popupX is canvas-center, or right of globe in globe mode
+                const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
+                const popupY = cy;
+                // Clock box (boxW=160, boxH=80, teamYOffset=-52) + city list (nW=160, nH=100, gap=5)
+                const boxW = 160, boxH = 80, teamYOffset = -52, nH = 100, gap = 5, pad = 12;
+                const holeLeft   = popupX - boxW / 2 - pad;
+                const holeRight  = popupX + boxW / 2 + pad;
+                const holeTop    = popupY + teamYOffset - boxH / 2 - pad;
+                const holeBottom = popupY + teamYOffset + boxH / 2 + gap + nH + pad;
+                const W = window.innerWidth, H = window.innerHeight;
+
+                pieceTop.style.left   = '0px';
+                pieceTop.style.top    = '0px';
+                pieceTop.style.width  = W + 'px';
+                pieceTop.style.height = Math.max(0, holeTop) + 'px';
+
+                pieceBottom.style.left   = '0px';
+                pieceBottom.style.top    = holeBottom + 'px';
+                pieceBottom.style.width  = W + 'px';
+                pieceBottom.style.height = Math.max(0, H - holeBottom) + 'px';
+
+                pieceLeft.style.left   = '0px';
+                pieceLeft.style.top    = holeTop + 'px';
+                pieceLeft.style.width  = Math.max(0, holeLeft) + 'px';
+                pieceLeft.style.height = Math.max(0, holeBottom - holeTop) + 'px';
+
+                pieceRight.style.left   = holeRight + 'px';
+                pieceRight.style.top    = holeTop + 'px';
+                pieceRight.style.width  = Math.max(0, W - holeRight) + 'px';
+                pieceRight.style.height = Math.max(0, holeBottom - holeTop) + 'px';
+            }
+
+            setTimeout(() => {
+                cover.style.display = 'block';
+                updateHole();
+                requestAnimationFrame(() => cover.classList.add('show'));
+            }, 2000);
+
+            window.addEventListener('resize', () => {
+                if (cover.style.display !== 'none') updateHole();
+            });
+        })();
     </script>
     <script src="js/cyber-recorder-key.js"></script>
 </body>

@@ -316,6 +316,25 @@
             </div>
         `, '#00d2ff', { collapsible: true });
 
+        CyberUI.createCard('ui-container', 'KOMPLEX', `
+            <div class="digit-grid formula-grid">
+                ${[
+                    { latex: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                  text: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                  title: 'Riemann ζ' },
+                    { latex: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                 text: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                 title: 'Dirac' },
+                    { latex: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                      text: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                      title: 'Cauchy-Integral' },
+                    { latex: 'R_{\\mu\\nu}-\\frac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                   text: 'R_{\\mu\\nu}-\\frac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                   title: 'Einstein-Feldgleichungen' },
+                    { latex: '\\rho\\left(\\frac{\\partial v}{\\partial t}+v\\cdot\\nabla v\\right)=-\\nabla p+\\mu\\nabla^2 v+f',               text: '\\rho\\left(\\frac{\\partial v}{\\partial t}+v\\cdot\\nabla v\\right)=-\\nabla p+\\mu\\nabla^2 v+f',               title: 'Navier–Stokes' }
+                ].map((sym, i) => `
+                    <label class="latex-label" title="${sym.title} ✍">
+                        <input type="radio" name="digit" value="complex-${i}"
+                            onclick="onComplexClick(${i}, this.dataset.latex, this.dataset.title)"
+                            data-latex="${sym.text}" data-title="${sym.title}">
+                        <span class="latex-render" data-latex="${sym.latex}"></span>
+                    </label>
+                `).join('')}
+            </div>
+        `, '#F4C430', { collapsible: true });
+
         // ── Drawing ─────────────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
         const drawCtx = drawCanvas.getContext('2d');
@@ -834,6 +853,43 @@
                 try { localStorage.removeItem('morph-current-preset'); } catch (_) {}
             };
             img.src = `presets/formula-${index}.png`;
+        }
+
+        // Same pipeline as loadPreset but for complex-N.png. Resets
+        // currentPresetIndex so savePreset() can't accidentally write back
+        // into the formula-N.png namespace.
+        function loadComplexPreset(index) {
+            clearDraw();
+            currentPresetIndex = null;
+            try { localStorage.removeItem('morph-current-preset'); } catch (_) {}
+            const img = new Image();
+            img.onload = () => {
+                const w = 500, h = 500;
+                const x = 16, y = (1000 - h) / 2;
+                drawCtx.drawImage(img, x, y, w, h);
+                DebugWindow.log(`✓ Preset complex-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
+                scheduleAutoSave();
+                DebugWindow.log(`▶ Auto-extrahiere Outlines für complex-${index}.png`);
+                extractOutline();
+            };
+            img.onerror = () => {
+                DebugWindow.log(`❌ FEHLT: presets/complex-${index}.png konnte nicht geladen werden!`);
+            };
+            img.src = `presets/complex-${index}.png`;
+        }
+
+        // Single entry point for KOMPLEX-card clicks. Logs each step so the
+        // DebugWindow shows exactly where the chain succeeds/fails.
+        function onComplexClick(index, latex, title) {
+            DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+            DebugWindow.log(`🎯 KOMPLEX click ${index}: ${title}`);
+            DebugWindow.log(`   LaTeX: ${latex}`);
+            if (typeof setTextInput !== 'function') {
+                DebugWindow.log(`   ✗ setTextInput nicht definiert!`);
+                return;
+            }
+            setTextInput(latex);
+            loadComplexPreset(index);
         }
 
         function savePreset() {

@@ -165,6 +165,34 @@
         return { score, breakdown: { pos, mass, size, holes, elong, fuzz } };
     }
 
+    // ── Shape-only plausibility ────────────────────────────────────────────
+    // Ignores POSITION — pure shape comparison: mass distribution, size,
+    // hole count, elongation, fuzziness. Used by the polygon-ring view where
+    // the question is "which polygons LOOK alike?" regardless of formula
+    // position. Re-normalised weights without the pos term.
+    function shapeOnlyPlausibility(a, b) {
+        const sizeRatio = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
+        const size = Math.max(0, 1 - sizeRatio / 1.5);
+
+        const elongRatio = Math.abs(Math.log(a.elong / b.elong));
+        const elong = Math.max(0, 1 - elongRatio / 1.0);
+
+        const fuzzRatio = Math.abs(Math.log(a.fuzz / b.fuzz));
+        const fuzz = Math.max(0, 1 - fuzzRatio / 1.0);
+
+        const dmX = Math.abs(a.massX - b.massX);
+        const dmY = Math.abs(a.massY - b.massY);
+        const mass = Math.max(0, 1 - (dmX + dmY) / 1.5);
+
+        const dh = Math.abs(a.holes - b.holes);
+        const dhf = Math.abs(a.holeFrac - b.holeFrac);
+        const holes = Math.max(0, 1 - dh / 2 - dhf * 0.5);
+
+        const score = 0.38 * mass + 0.20 * size + 0.18 * holes
+                    + 0.14 * elong + 0.10 * fuzz;
+        return { score, breakdown: { mass, size, holes, elong, fuzz } };
+    }
+
     // ── Pairwise cost ──────────────────────────────────────────────────────
     // 1 - plausibility + veto terms. Vetoes catch fundamentally-incompatible
     // pairs and push their cost to ~∞ so Hungarian will not produce them:
@@ -296,6 +324,7 @@
             shapeDescriptor,
             equationBBox,
             pairPlausibility,
+            shapeOnlyPlausibility,
             pairCost,
             checkMatching,
             summarize,

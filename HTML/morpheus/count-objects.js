@@ -49,15 +49,22 @@ function classifyContours(contours) {
 
     // For each contour, find its smallest enclosing parent (if any).
     // "Smallest enclosing" handles nested holes correctly (rare for letters).
+    // The parent must be STRICTLY LARGER in area than the child — otherwise
+    // a child's centroid that happens to fall inside its own hole could pick
+    // the hole as parent (italic b/a/p/q: outer centroid often lies inside
+    // the loop's hole). Without the area gate, both outer and hole get
+    // mis-classified as holes → no fill rendered for those letters.
+    const areas = contours.map(p => Math.abs(signedArea(p)));
     const parent = new Array(contours.length).fill(-1);
     for (let i = 0; i < contours.length; i++) {
         let bestParent = -1;
         let bestArea = Infinity;
+        const myArea = areas[i];
         for (let j = 0; j < contours.length; j++) {
             if (i === j) continue;
+            if (areas[j] <= myArea) continue; // parent must be strictly larger
             if (!pointInPoly(cs[i], contours[j])) continue;
-            const a = Math.abs(signedArea(contours[j]));
-            if (a < bestArea) { bestArea = a; bestParent = j; }
+            if (areas[j] < bestArea) { bestArea = areas[j]; bestParent = j; }
         }
         parent[i] = bestParent;
     }

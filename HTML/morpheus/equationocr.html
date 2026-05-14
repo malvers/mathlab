@@ -28,20 +28,119 @@
             width: 100%;
             height: 100%;
             background: #020410;
-            cursor: crosshair;
+            /* Default: pen OFF so accidental clicks during box-adjustment
+               don't paint. The pen-toggle icon in the ZEICHNEN card title
+               adds .pen-on to re-enable drawing. */
+            cursor: default;
+            pointer-events: none;
             border-radius: 10px;
             border: 2px solid rgba(0, 210, 255, 0.5);
             box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
             touch-action: none;
         }
+        #draw-canvas.pen-on {
+            cursor: crosshair;
+            pointer-events: auto;
+        }
+        /* Mouse-coord readout — sits just above the ERKENNEN button, shows
+           the current pointer position in canvas-space (0–1000 each axis). */
+        #mouse-coord {
+            position: absolute;
+            left: 50%;
+            bottom: 80px;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #adff2f;
+            background: rgba(2, 4, 16, 0.85);
+            padding: 8px 20px;
+            border-radius: 6px;
+            border: 1px solid rgba(173, 255, 47, 0.4);
+            pointer-events: none;
+            z-index: 31;
+            white-space: nowrap;
+            min-width: 220px;
+            text-align: center;
+        }
+        /* Small pen icon in the ZEICHNEN card title — toggles drawing. */
+        .pen-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            color: rgba(0, 210, 255, 0.45);
+            transition: color 0.15s, filter 0.15s;
+        }
+        .pen-toggle:hover { color: #00d2ff; }
+        .pen-toggle.active {
+            color: #adff2f;
+            filter: drop-shadow(0 0 4px rgba(173, 255, 47, 0.6));
+        }
         #canvas-stack {
             position: relative;
-            width: 80%;
-            max-width: 80vh;
-            flex: 1 1 auto;
-            min-height: 0;
-            aspect-ratio: 1 / 1;
+            /* Hard-locked 1000×1000 display — matches the canvas intrinsic
+               resolution exactly. No responsive sizing here so Gemini's
+               normalized 0–1000 box coords map 1:1 to display pixels without
+               any non-uniform stretching. Overflow viewport on small screens
+               is intentional. */
+            width: 1000px;
+            height: 1000px;
+            flex: 0 0 auto;
             line-height: 0;
+        }
+        /* Overlay canvas for Gemini bounding boxes — sits on top of #draw-canvas,
+           transparent, click-through so drawing on the canvas still works. */
+        #overlay-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            border-radius: 10px;
+        }
+        /* HTML label layer — KaTeX-rendered token labels positioned at each
+           bbox's upper-left corner. Above the overlay-canvas (z=5), below the
+           ERKENNEN button (z=30). Click-through. */
+        #label-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 6;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        #label-overlay .bbox-label {
+            position: absolute;
+            color: #cccccc;
+            font-size: 11px;
+            line-height: 1;
+            white-space: nowrap;
+            transform: translate(2px, 2px);
+        }
+        #label-overlay .bbox-label .katex {
+            font-size: 1em;
+            color: inherit;
+        }
+        /* Raw Gemini [ymin, xmin, ymax, xmax] tag — sits just above each BB,
+           monospace, so we can eyeball the original JSON numbers per glyph. */
+        #label-overlay .bbox-coord {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(2, 4, 16, 0.85);
+            padding: 1px 5px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translate(0, -100%);
         }
         /* Floating ERKENNEN button — bottom-center overlay on the canvas.
            Canvas is WHITE in this lab (for OCR contrast), so the button needs
@@ -84,8 +183,9 @@
         }
         #result-box {
             position: relative;
-            width: 80%;
-            max-width: 80vh;
+            /* Hard-locked 1000px wide — matches the canvas-stack below so the
+               LATEX + RENDER panes align with the drawing surface. */
+            width: 1000px;
             flex-shrink: 0;
             background: #020410;
             border: 1px solid rgba(0, 210, 255, 0.5);
@@ -290,6 +390,9 @@
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="overlay-canvas" width="1000" height="1000"></canvas>
+                    <div id="label-overlay"></div>
+                    <div id="mouse-coord">x: —  y: —</div>
                     <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">► ERKENNEN</button>
                 </div>
                 <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
@@ -340,6 +443,9 @@
         CyberUI.createCard('ui-container', 'ZEICHNEN', `
             <button class="cyber-btn" onclick="clearDraw()"
                 style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
+            <button class="cyber-btn" onclick="replayLast()"
+                style="width:100%;margin-top:6px;border-color:rgba(244,196,48,0.4);color:#F4C430;"
+                title="Letzte Gemini-Antwort aus localStorage neu zeichnen (kein API-Call)">REPLAY</button>
             <div class="eps-row">
                 <label>Stift</label>
                 <input type="range" id="stroke-slider" min="1" max="30" value="8" step="1"
@@ -376,6 +482,10 @@
             const sel = document.getElementById('g-model');
             if (!sel) return;
             const model = sel.value;
+            // Persist the selection now — otherwise it would only land in
+            // localStorage at the next ERKENNEN call (and get lost if the
+            // user reloads before pressing it).
+            try { localStorage.setItem('eocr-g-model', model); } catch (_) {}
             const suffix = model.replace(/^gemini-/, '').toUpperCase();
             const card = sel.closest('.instrument-card');
             const titleEl = card?.querySelector('.instrument-title');
@@ -462,6 +572,7 @@
         // to canvas with 60 px margin (same look as drawn / preset content).
         function loadKatexToCanvas(latex, title) {
             DebugWindow.log(`▶ Render Komplex: ${title}`);
+            clearOverlay();
             const tmp = document.createElement('div');
             tmp.style.cssText = 'position:fixed;left:-10000px;top:0;padding:40px;background:#020410;color:#adff2f;font-size:60px;line-height:1.4;white-space:nowrap;';
             document.body.appendChild(tmp);
@@ -480,6 +591,7 @@
                     drawCtx.imageSmoothingQuality = 'high';
                     drawCtx.drawImage(snap, ox, oy, nw, nh);
                     document.body.removeChild(tmp);
+                    saveCanvasState();
                     DebugWindow.log(`✓ ${title} aufs Canvas (${Math.round(nw)}×${Math.round(nh)})`);
                 }).catch(err => {
                     if (tmp.parentNode) document.body.removeChild(tmp);
@@ -512,7 +624,224 @@
         // ── Draw state ──────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
         const drawCtx = drawCanvas.getContext('2d');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const overlayCtx = overlayCanvas.getContext('2d');
         let isDrawing = false;
+
+        function clearOverlay() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            const lo = document.getElementById('label-overlay');
+            if (lo) lo.innerHTML = '';
+        }
+
+        // Detect what range Gemini used for box_2d coords. Docs say 0–1000
+        // normalized, but in practice the model sometimes returns 0–1 decimals,
+        // 0–100 percentages, or pixel-space coords of the sent image. We pick
+        // the scale factor so the max observed value maps to canvas-1000.
+        function detectCoordScale(tokens) {
+            let maxV = 0;
+            for (const t of tokens) {
+                const b = t?.box_2d;
+                if (!Array.isArray(b)) continue;
+                for (const v of b) {
+                    const a = Math.abs(Number(v));
+                    if (Number.isFinite(a) && a > maxV) maxV = a;
+                }
+            }
+            if (maxV === 0)        return { factor: 1,    range: 'unknown (max=0)' };
+            if (maxV <= 1.5)       return { factor: 1000, range: '0-1 decimals' };
+            if (maxV <= 110)       return { factor: 10,   range: '0-100' };
+            if (maxV <= 1100)      return { factor: 1,    range: '0-1000 (Gemini default)' };
+            // Pixel space of the sent image. Scale so max maps to canvas size.
+            return { factor: 1000 / maxV, range: `pixel-space (max=${Math.round(maxV)})` };
+        }
+
+        // Build a binary ink mask (1 = stroke pixel, 0 = bg) from the current
+        // draw-canvas. Same threshold as the b/w pipeline that gets sent to
+        // Gemini, so the snap operates on what Gemini actually saw.
+        function getInkMask(W, H) {
+            const id = drawCtx.getImageData(0, 0, W, H);
+            const px = id.data;
+            const m = new Uint8Array(W * H);
+            for (let i = 0; i < m.length; i++) {
+                const o = i * 4;
+                if ((px[o] + px[o+1] + px[o+2]) / 3 > 60) m[i] = 1;
+            }
+            return m;
+        }
+
+        // For a Gemini box [ymin, xmin, ymax, xmax] in canvas-pixel space,
+        // expand by `margin` and return the tight bbox of ink pixels inside.
+        // Falls back to the original box if not enough ink is found (avoids
+        // collapsing onto a stray pixel) or if the snapped box would explode
+        // beyond 3× the original area (avoids bleeding into neighbour glyphs).
+        function snapToInk(mask, W, H, box, margin) {
+            const [ymin, xmin, ymax, xmax] = box;
+            const x0 = Math.max(0, Math.floor(xmin - margin));
+            const x1 = Math.min(W - 1, Math.ceil(xmax + margin));
+            const y0 = Math.max(0, Math.floor(ymin - margin));
+            const y1 = Math.min(H - 1, Math.ceil(ymax + margin));
+            let txmin = W, txmax = -1, tymin = H, tymax = -1, count = 0;
+            for (let y = y0; y <= y1; y++) {
+                const row = y * W;
+                for (let x = x0; x <= x1; x++) {
+                    if (mask[row + x]) {
+                        if (x < txmin) txmin = x;
+                        if (x > txmax) txmax = x;
+                        if (y < tymin) tymin = y;
+                        if (y > tymax) tymax = y;
+                        count++;
+                    }
+                }
+            }
+            if (count < 20) return box;
+            const origArea = Math.max(1, (xmax - xmin) * (ymax - ymin));
+            const newArea  = Math.max(1, (txmax - txmin) * (tymax - tymin));
+            if (newArea > origArea * 3) return box;
+            return [tymin, txmin, tymax, txmax];
+        }
+
+        // Paint Gemini-returned bounding boxes onto the overlay, after snapping
+        // each box to the actual ink within a small expansion margin. Tag shows
+        // the ORIGINAL Gemini ints; the drawn rectangle is the snapped version.
+        function drawBoxes(tokens) {
+            clearOverlay();
+            if (!Array.isArray(tokens) || tokens.length === 0) return;
+            const { factor, range } = detectCoordScale(tokens);
+            DebugWindow.log(`  📐 coord-range: ${range} → factor ${factor.toFixed(4)}`);
+            overlayCtx.lineWidth = 1;
+            overlayCtx.strokeStyle = '#cccccc';
+            const W = drawCanvas.width, H = drawCanvas.height;
+            const mask = getInkMask(W, H);
+            const SNAP_MARGIN = 60;
+            const placed = [];
+            let snapped = 0, totalDelta = 0;
+            for (const t of tokens) {
+                const b = t?.box_2d;
+                if (!Array.isArray(b) || b.length !== 4) continue;
+                const [ymin, xmin, ymax, xmax] = b.map(Number);
+                if (![ymin, xmin, ymax, xmax].every(Number.isFinite)) continue;
+                const cx = xmin * factor, cy = ymin * factor;
+                const cw = (xmax - xmin) * factor, ch = (ymax - ymin) * factor;
+                if (cw <= 0 || ch <= 0) continue;
+                const orig = [cy, cx, cy + ch, cx + cw];
+                const snap = snapToInk(mask, W, H, orig, SNAP_MARGIN);
+                if (snap[0] !== orig[0] || snap[1] !== orig[1] ||
+                    snap[2] !== orig[2] || snap[3] !== orig[3]) {
+                    snapped++;
+                    totalDelta += Math.abs(snap[0] - orig[0]) + Math.abs(snap[1] - orig[1])
+                                + Math.abs(snap[2] - orig[2]) + Math.abs(snap[3] - orig[3]);
+                }
+                placed.push({
+                    x: snap[1], y: snap[0],
+                    w: snap[3] - snap[1], h: snap[2] - snap[0],
+                    label: (t.label ?? '').toString(),
+                    raw: [ymin, xmin, ymax, xmax]
+                });
+            }
+            if (placed.length > 0) {
+                const avg = snapped > 0 ? Math.round(totalDelta / snapped / 4) : 0;
+                DebugWindow.log(`  ✂ ink-snap: ${snapped}/${placed.length} boxes angepasst, avg Δ ${avg}px/Kante`);
+            }
+            if (placed.length === 0) return;
+            for (const p of placed) overlayCtx.strokeRect(p.x, p.y, p.w, p.h);
+            const labelOverlay = document.getElementById('label-overlay');
+            if (labelOverlay) {
+                for (const p of placed) {
+                    // KaTeX label at upper-left.
+                    if (p.label && typeof katex !== 'undefined') {
+                        const el = document.createElement('div');
+                        el.className = 'bbox-label';
+                        el.style.left = p.x + 'px';
+                        el.style.top  = p.y + 'px';
+                        try { katex.render(p.label, el, { throwOnError: false }); }
+                        catch (_) { el.textContent = p.label; }
+                        labelOverlay.appendChild(el);
+                    }
+                }
+            }
+            DebugWindow.log(`  ▭ ${placed.length} Bounding-Box(es) gezeichnet`);
+        }
+
+        // Persist the last Gemini response + the exact canvas state at send-time
+        // so we can iterate on the drawing/scaling logic without burning new
+        // API calls. The image lets REPLAY restore the same picture the model
+        // analyzed; tokens/raw let us inspect coordinates after the fact.
+        function saveLastDebug(latex, tokens, rawJson) {
+            try {
+                const canvasImg = drawCanvas.toDataURL('image/png');
+                const payload = JSON.stringify({
+                    ts: Date.now(),
+                    latex,
+                    tokens,
+                    raw: rawJson,
+                    canvasImg,
+                    canvasW: drawCanvas.width,
+                    canvasH: drawCanvas.height
+                });
+                localStorage.setItem('eocr-last-debug', payload);
+                DebugWindow.log(`  💾 Antwort gespeichert (${(payload.length / 1024).toFixed(1)} KB) — REPLAY-Button verfügbar`);
+            } catch (e) {
+                DebugWindow.log(`  ⚠ save fehlgeschlagen: ${e.message}`);
+            }
+        }
+
+        // Replay the last saved response: restore the canvas image, re-set the
+        // result-latex/render, and re-draw boxes. Also dumps every token's raw
+        // coords to DebugWindow so we can debug the scaling math directly.
+        window.replayLast = function () {
+            let raw;
+            try { raw = localStorage.getItem('eocr-last-debug'); }
+            catch (e) {
+                DebugWindow.log(`✗ localStorage read failed: ${e.message}`);
+                document.getElementById('result-latex').textContent = `✗ localStorage: ${e.message}`;
+                return null;
+            }
+            if (!raw) {
+                const msg = '⚠ keine gespeicherte Antwort — erst einmal ERKENNEN drücken';
+                DebugWindow.log(msg);
+                document.getElementById('result-latex').textContent = msg;
+                return null;
+            }
+            let p;
+            try { p = JSON.parse(raw); }
+            catch (e) {
+                DebugWindow.log(`✗ replay parse failed: ${e.message}`);
+                document.getElementById('result-latex').textContent = `✗ replay parse: ${e.message}`;
+                return null;
+            }
+            const age = Math.round((Date.now() - (p.ts || 0)) / 1000);
+            const toks = Array.isArray(p.tokens) ? p.tokens : [];
+            DebugWindow.log(`▶ REPLAY (alter: ${age}s) — latex="${(p.latex || '').slice(0, 60)}", tokens=${toks.length}`);
+            // Dimensions: intrinsic (canvas attribute) vs. display (CSS).
+            // If these have different aspect ratios, boxes will look squished.
+            const rect = drawCanvas.getBoundingClientRect();
+            DebugWindow.log(`  📏 canvas: intrinsic ${drawCanvas.width}×${drawCanvas.height}, display ${Math.round(rect.width)}×${Math.round(rect.height)} (ratio ${(rect.width / rect.height).toFixed(2)})`);
+            // Dump each token's raw box for scale-debugging.
+            toks.forEach((t, i) => {
+                const b = Array.isArray(t.box_2d) ? t.box_2d : [];
+                DebugWindow.log(`  [${i}] "${t.label}" → [${b.join(', ')}]`);
+            });
+            const finishDraw = () => {
+                document.getElementById('result-latex').textContent = p.latex || '';
+                if (p.latex && p.latex !== '(empty)' && p.latex !== '(leer)') renderLatex(p.latex);
+                drawBoxes(toks);
+            };
+            if (p.canvasImg) {
+                const img = new Image();
+                img.onload = () => {
+                    drawCtx.fillStyle = '#020410';
+                    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+                    drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+                    finishDraw();
+                };
+                img.onerror = () => { DebugWindow.log('⚠ canvasImg konnte nicht geladen werden'); finishDraw(); };
+                img.src = p.canvasImg;
+            } else {
+                finishDraw();
+            }
+            return p;
+        };
 
         function initDraw() {
             drawCtx.fillStyle = '#020410'; // dark blue background — matches cyber theme
@@ -526,6 +855,8 @@
 
         function clearDraw() {
             initDraw();
+            clearOverlay();
+            try { localStorage.removeItem('eocr-canvas-png'); } catch (_) {}
             document.getElementById('result-latex').textContent = '';
             document.getElementById('result-render').innerHTML = '';
         }
@@ -535,6 +866,7 @@
         // FORMELN card (formula-N.png) and the KOMPLEX card (complex-N.png).
         function loadPNGPreset(path, title) {
             DebugWindow.log(`▶ Lade ${path} (${title})`);
+            clearOverlay();
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => {
@@ -555,6 +887,7 @@
                 drawCtx.fillStyle = '#020410';
                 drawCtx.fillRect(0, 0, 1000, 1000);
                 drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
+                saveCanvasState();
                 DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height})`);
             };
             img.onerror = () => DebugWindow.log(`✗ ${path} konnte nicht geladen werden`);
@@ -562,10 +895,37 @@
         }
 
         function loadPreset(idx) {
+            saveFormulaChoice('simple', idx);
             loadPNGPreset(`presets/formula-${idx}.png`, FORMULAS[idx]?.title ?? '?');
         }
         function loadComplexPreset(idx) {
+            saveFormulaChoice('complex', idx);
             loadPNGPreset(`presets/complex-${idx}.png`, COMPLEX_FORMULAS[idx]?.title ?? '?');
+        }
+
+        // Persist which formula radio was last picked — kind ('simple'/'complex')
+        // + index — so reload restores both the checked radio AND the canvas
+        // content (via the same load path the click would trigger).
+        function saveFormulaChoice(kind, idx) {
+            try { localStorage.setItem('eocr-formula', JSON.stringify({ kind, idx })); }
+            catch (_) {}
+        }
+        function restoreFormulaChoice() {
+            // Only restore the radio's checked state. The canvas content is
+            // handled separately by the canvas-state restore — calling
+            // loadPreset here would overwrite any saved strokes on reload.
+            let raw;
+            try { raw = localStorage.getItem('eocr-formula'); } catch (_) { return; }
+            if (!raw) return;
+            let saved;
+            try { saved = JSON.parse(raw); } catch (_) { return; }
+            const kind = saved?.kind, idx = +saved?.idx;
+            if (!Number.isFinite(idx)) return;
+            const radioName = kind === 'complex' ? 'complex-formula' : 'formula';
+            const value = `${kind === 'complex' ? 'complex' : 'formula'}-${idx}`;
+            const radio = document.querySelector(`input[name="${radioName}"][value="${value}"]`);
+            if (radio) radio.checked = true;
+            DebugWindow.log(`↻ Formel-Radio wiederhergestellt: ${kind}-${idx}`);
         }
 
         function onStrokeChange(v) {
@@ -606,8 +966,8 @@
             if (!isDrawing) return;
             const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         });
-        drawCanvas.addEventListener('mouseup',    () => { isDrawing = false; });
-        drawCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+        drawCanvas.addEventListener('mouseup',    () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
+        drawCanvas.addEventListener('mouseleave', () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
         drawCanvas.addEventListener('touchstart', e => {
             e.preventDefault(); isDrawing = true;
             drawCtx.beginPath();
@@ -618,7 +978,14 @@
             if (!isDrawing) return;
             const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
         }, { passive: false });
-        drawCanvas.addEventListener('touchend', () => { isDrawing = false; });
+        drawCanvas.addEventListener('touchend', () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
+
+        // Persist the current canvas pixels — called after every finished
+        // stroke and after preset loads. ~100–400 KB PNG; fits in localStorage.
+        function saveCanvasState() {
+            try { localStorage.setItem('eocr-canvas-png', drawCanvas.toDataURL('image/png')); }
+            catch (e) { DebugWindow.log(`⚠ Canvas-Save fehlgeschlagen: ${e.message}`); }
+        }
 
         // ── Cost control ────────────────────────────────────────────────────────
         // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
@@ -820,14 +1187,40 @@
             console.log('Gemini recognize() start', { model, keyTail: apiKey.slice(-4), b64Len: b64.length });
             document.getElementById('result-latex').textContent = '⏳ Lade…';
             document.getElementById('result-render').innerHTML = '';
+            clearOverlay();
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+            // Ask Gemini for structured JSON: full LaTeX + per-token bounding
+            // boxes. Prompt is intentionally strict — earlier looser wording
+            // produced centered/undersized boxes that uniform scaling could
+            // not fix. Explicit ink-extent + coordinate-system rules below.
             const prompt =
-                "This image contains a single handwritten or printed mathematical equation. " +
-                "Return ONLY the equation as LaTeX, with no surrounding text, no markdown code fences, " +
-                "no $ or \\( delimiters. Use standard LaTeX commands (e.g. \\frac, \\sqrt, \\sum, \\int). " +
-                "If the image is empty or unreadable, return exactly: (empty)";
+                "This image (1000x1000 px, white background) shows a single printed or handwritten mathematical equation.\n" +
+                "\n" +
+                "For EACH visible glyph (single character, digit, operator, bracket, accent, or punctuation), return a precise bounding box.\n" +
+                "\n" +
+                "COORDINATE SYSTEM:\n" +
+                "- Integers in [0, 1000], normalized to the image.\n" +
+                "- (0, 0) = top-left, (1000, 1000) = bottom-right.\n" +
+                "- Format: box_2d = [ymin, xmin, ymax, xmax].\n" +
+                "\n" +
+                "EACH BOX MUST:\n" +
+                "- Enclose ALL ink of that glyph — topmost pixel to bottommost, leftmost to rightmost.\n" +
+                "- Include ascenders, descenders, accents (e.g. dot of 'i'), and sub- or superscripts that are visually attached to the SAME glyph.\n" +
+                "- NOT merge multiple glyphs. One box per glyph.\n" +
+                "- NOT be a centered estimate — tight to the actual ink extrema.\n" +
+                "\n" +
+                "OUTPUT — strict JSON, no markdown, no commentary:\n" +
+                "{\n" +
+                "  \"latex\": \"<full equation as LaTeX, no $ or \\\\( delimiters>\",\n" +
+                "  \"tokens\": [\n" +
+                "    { \"label\": \"<LaTeX of single glyph>\", \"box_2d\": [ymin, xmin, ymax, xmax] }\n" +
+                "  ]\n" +
+                "}\n" +
+                "\n" +
+                "If empty/unreadable: { \"latex\": \"(empty)\", \"tokens\": [] }";
             // Gemini REST API expects camelCase: inlineData, mimeType, generationConfig.
+            // responseMimeType forces strict JSON output (no markdown wrappers).
             const body = {
                 contents: [{
                     parts: [
@@ -835,7 +1228,7 @@
                         { inlineData: { mimeType: 'image/png', data: b64 } }
                     ]
                 }],
-                generationConfig: { temperature: 0 }
+                generationConfig: { temperature: 0, responseMimeType: 'application/json' }
             };
             try {
                 const t0 = performance.now();
@@ -863,11 +1256,28 @@
                     return;
                 }
                 trackCost(model, data?.usageMetadata);
-                const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '(leer)';
+                const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
                 DebugWindow.log(`  raw: ${raw.slice(0, 200)}`);
-                const latex = unwrapLatex(raw);
+                // With responseMimeType=application/json Gemini returns a JSON
+                // string in the text field. Parse it for { latex, tokens }.
+                // If parsing fails (e.g. model ignored the schema), fall back
+                // to treating the whole text as raw LaTeX with no boxes.
+                let latex = '(leer)';
+                let tokens = [];
+                try {
+                    const parsed = JSON.parse(raw);
+                    latex = typeof parsed?.latex === 'string' && parsed.latex.trim()
+                        ? unwrapLatex(parsed.latex) : '(leer)';
+                    tokens = Array.isArray(parsed?.tokens) ? parsed.tokens : [];
+                    DebugWindow.log(`  parsed: latex="${latex.slice(0,80)}", tokens=${tokens.length}`);
+                } catch (e) {
+                    DebugWindow.log(`  ⚠ JSON-Schema-Parse fehlgeschlagen, fallback auf raw text`);
+                    latex = unwrapLatex(raw || '(leer)');
+                }
                 document.getElementById('result-latex').textContent = latex;
                 renderLatex(latex);
+                drawBoxes(tokens);
+                saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
@@ -927,7 +1337,76 @@
         }
         makeCardsCollapsible();
 
+        // Pen toggle — small SVG icon injected into the ZEICHNEN card title.
+        // Click flips drawing on/off (via .pen-on class on #draw-canvas).
+        // State is persisted in localStorage so the user's pick survives reload.
+        function togglePen() {
+            const on = drawCanvas.classList.toggle('pen-on');
+            try { localStorage.setItem('eocr-pen-on', on ? '1' : '0'); } catch (_) {}
+            const pen = document.querySelector('.pen-toggle');
+            if (pen) pen.classList.toggle('active', on);
+            DebugWindow.log(on ? '✏ Stift AN' : '✏ Stift AUS');
+        }
+        function setupPenToggle() {
+            const cards = document.querySelectorAll('.instrument-card');
+            let target = null;
+            for (const c of cards) {
+                const t = c.querySelector('.instrument-title');
+                if (t && t.textContent.trim().toUpperCase().includes('ZEICHNEN')) {
+                    target = t; break;
+                }
+            }
+            if (!target || target.querySelector('.pen-toggle')) return;
+            const pen = document.createElement('span');
+            pen.className = 'pen-toggle';
+            pen.title = 'Stift an/aus';
+            pen.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+            pen.addEventListener('click', (e) => { e.stopPropagation(); togglePen(); });
+            // Append at the right end of the title bar (after the text).
+            target.appendChild(pen);
+            // Reflect current state.
+            if (drawCanvas.classList.contains('pen-on')) pen.classList.add('active');
+        }
+        // Restore last pen state, then mount the icon.
+        try {
+            if (localStorage.getItem('eocr-pen-on') === '1') drawCanvas.classList.add('pen-on');
+        } catch (_) {}
+        setupPenToggle();
+
+        // Live mouse-coord readout above the ERKENNEN button.
+        (function wireMouseCoord() {
+            const coordEl = document.getElementById('mouse-coord');
+            const stackEl = document.getElementById('canvas-stack');
+            if (!coordEl || !stackEl) return;
+            stackEl.addEventListener('mousemove', (e) => {
+                const r = stackEl.getBoundingClientRect();
+                const x = Math.round((e.clientX - r.left) * 1000 / r.width);
+                const y = Math.round((e.clientY - r.top)  * 1000 / r.height);
+                coordEl.textContent = `x: ${x}  y: ${y}`;
+            });
+            stackEl.addEventListener('mouseleave', () => {
+                coordEl.textContent = 'x: —  y: —';
+            });
+        })();
+
         initDraw();
+        restoreFormulaChoice();
+        // If user has drawn / loaded a preset previously, restore the actual
+        // canvas pixels — overlays whatever restoreFormulaChoice just drew so
+        // strokes survive reload. Async, but it's the last thing to land.
+        (function restoreCanvasState() {
+            let dataUrl;
+            try { dataUrl = localStorage.getItem('eocr-canvas-png'); } catch (_) { return; }
+            if (!dataUrl) return;
+            const img = new Image();
+            img.onload = () => {
+                drawCtx.fillStyle = '#020410';
+                drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+                drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+                DebugWindow.log(`↻ Canvas-Pixel wiederhergestellt`);
+            };
+            img.src = dataUrl;
+        })();
     </script>
 </body>
 
