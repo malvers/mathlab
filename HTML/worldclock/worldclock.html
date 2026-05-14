@@ -8,14 +8,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@200;300;400;700;900&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="resources/favicon.png">
-    <link rel="stylesheet" href="js/cyber-layout.css">
-    <link rel="stylesheet" href="js/buttons-ultra.css">
-    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
-    <link rel="stylesheet" href="js/branding.styles.extracted.css">
-    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+    <link rel="stylesheet" href="../js/cyber-layout.css">
+    <link rel="stylesheet" href="../js/buttons-ultra.css">
+    <link rel="stylesheet" href="../js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="../js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="../js/lab-shell-minimal.css">
     <!-- Debug window: auto-disabled on docalvers.de; use ?debug=force to enable on production -->
-    <script src="js/debug-window.js"></script>
+    <script src="../js/debug-window.js"></script>
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
     <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
@@ -223,23 +223,23 @@
         </div>
     </main>
 
-    <script src="js/cyber-left-chrome.js"></script>
-    <script src="js/branding/briefings.js"></script>
-    <script src="js/branding/overlays.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/i18n-de.js"></script>
-    <script src="js/i18n-en.js"></script>
-    <script src="js/i18n-es.js"></script>
-    <script src="js/i18n-fr.js"></script>
-    <script src="js/i18n-it.js"></script>
-    <script src="js/i18n-pt.js"></script>
-    <script src="js/i18n-sw.js"></script>
-    <script src="js/i18n-tr.js"></script>
-    <script src="js/i18n-nl.js"></script>
-    <script src="js/branding/nav.js"></script>
-    <script src="js/branding.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/world-cities.js"></script>
+    <script src="../js/cyber-left-chrome.js"></script>
+    <script src="../js/branding/briefings.js"></script>
+    <script src="../js/branding/overlays.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/i18n-de.js"></script>
+    <script src="../js/i18n-en.js"></script>
+    <script src="../js/i18n-es.js"></script>
+    <script src="../js/i18n-fr.js"></script>
+    <script src="../js/i18n-it.js"></script>
+    <script src="../js/i18n-pt.js"></script>
+    <script src="../js/i18n-sw.js"></script>
+    <script src="../js/i18n-tr.js"></script>
+    <script src="../js/i18n-nl.js"></script>
+    <script src="../js/branding/nav.js"></script>
+    <script src="../js/branding.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="world-cities.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -292,20 +292,9 @@
 
         // --- WORLD CLOCK LOGIC ---
         const mapImg = new Image();
-        mapImg.src = 'resources/worldmap_polar.png';
+        mapImg.src = '../resources/worldmap_polar.png';
         let mapLoaded = false;
         mapImg.onload = () => { mapLoaded = true; init(); };
-
-        // Schnelles Koordinaten-Lookup nach Name
-        const neighborCoords = {};
-        neighborCities.forEach(c => {
-            neighborCoords[c.name] = {
-                lat: c.lat,
-                lng: c.lng,
-                globeLat: c.lat,
-                globeLng: c.lng
-            };
-        });
 
         function getDSTLabel(tz) {
             if (!tz) return "";
@@ -691,33 +680,7 @@
         let isReturning = false;
         let cityFontGray = 200; // Dynamic gray for city labels
         let ringFontGray = 222; // Dynamic gray for standard ring hours
-        const RELATED_CITIES_DB = {
-            "Europe/Berlin":       [{name:"Paris",f:"🇫🇷",lat:48.9,lng:2.3},{name:"Rom",f:"🇮🇹",lat:41.9,lng:12.5},{name:"Madrid",f:"🇪🇸",lat:40.4,lng:-3.7},{name:"Wien",f:"🇦🇹",lat:48.2,lng:16.4},{name:"Warschau",f:"🇵🇱",lat:52.2,lng:21.0}],
-            "Europe/London":       [{name:"Lissabon",f:"🇵🇹",lat:38.7,lng:-9.1},{name:"Dublin",f:"🇮🇪",lat:53.3,lng:-6.3},{name:"Edinburgh",f:"🇬🇧",lat:55.9,lng:-3.2},{name:"Porto",f:"🇵🇹",lat:41.2,lng:-8.6},{name:"Belfast",f:"🇬🇧",lat:54.6,lng:-5.9}],
-            "America/New_York":    [{name:"Toronto",f:"🇨🇦",lat:43.7,lng:-79.4},{name:"Miami",f:"🇺🇸",lat:25.8,lng:-80.2},{name:"Washington",f:"🇺🇸",lat:38.9,lng:-77.0},{name:"Montreal",f:"🇨🇦",lat:45.5,lng:-73.6},{name:"Atlanta",f:"🇺🇸",lat:33.7,lng:-84.4}],
-            "America/Chicago":     [{name:"Dallas",f:"🇺🇸",lat:32.8,lng:-96.8},{name:"Houston",f:"🇺🇸",lat:29.8,lng:-95.4},{name:"Winnipeg",f:"🇨🇦",lat:49.9,lng:-97.1},{name:"Memphis",f:"🇺🇸",lat:35.1,lng:-90.0},{name:"Minneapolis",f:"🇺🇸",lat:44.9,lng:-93.2}],
-            "America/Denver":      [{name:"Phoenix",f:"🇺🇸",lat:33.4,lng:-112.1},{name:"Salt Lake",f:"🇺🇸",lat:40.8,lng:-111.9},{name:"Calgary",f:"🇨🇦",lat:51.0,lng:-114.1},{name:"Edmonton",f:"🇨🇦",lat:53.5,lng:-113.5},{name:"El Paso",f:"🇺🇸",lat:31.8,lng:-106.4}],
-            "America/Los_Angeles": [{name:"Vancouver",f:"🇨🇦",lat:49.2,lng:-123.1},{name:"Seattle",f:"🇺🇸",lat:47.6,lng:-122.3},{name:"Las Vegas",f:"🇺🇸",lat:36.2,lng:-115.1},{name:"San Diego",f:"🇺🇸",lat:32.7,lng:-117.2},{name:"Tijuana",f:"🇲🇽",lat:32.5,lng:-117.0}],
-            "America/Dawson":      [{name:"Whitehorse",f:"🇨🇦",lat:60.7,lng:-135.1},{name:"Inuvik",f:"🇨🇦",lat:68.4,lng:-133.7},{name:"Yellowknife",f:"🇨🇦",lat:62.5,lng:-114.4},{name:"Juneau",f:"🇺🇸",lat:58.3,lng:-134.4},{name:"Sitka",f:"🇺🇸",lat:57.1,lng:-135.3}],
-            "America/Sao_Paulo":   [{name:"Brasilia",f:"🇧🇷",lat:-15.8,lng:-47.9},{name:"B. Aires",f:"🇦🇷",lat:-34.6,lng:-58.4},{name:"Montevideo",f:"🇺🇾",lat:-34.9,lng:-56.2},{name:"Asunción",f:"🇵🇾",lat:-25.3,lng:-57.6},{name:"Santiago",f:"🇨🇱",lat:-33.5,lng:-70.7}],
-            "America/Caracas":     [{name:"S. Domingo",f:"🇩🇴",lat:18.5,lng:-69.9},{name:"San Juan",f:"🇵🇷",lat:18.5,lng:-66.1},{name:"Manaus",f:"🇧🇷",lat:-3.1,lng:-60.0},{name:"Georgetown",f:"🇬🇾",lat:6.8,lng:-58.2},{name:"Paramaribo",f:"🇸🇷",lat:5.8,lng:-55.2}],
-            "Asia/Shanghai":       [{name:"Peking",f:"🇨🇳",lat:39.9,lng:116.4},{name:"Singapur",f:"🇸🇬",lat:1.3,lng:103.8},{name:"Hongkong",f:"🇭🇰",lat:22.3,lng:114.2},{name:"Taipeh",f:"🇹🇼",lat:25.0,lng:121.5},{name:"Perth",f:"🇦🇺",lat:-31.9,lng:115.9}],
-            "Asia/Tokyo":          [{name:"Seoul",f:"🇰🇷",lat:37.6,lng:127.0},{name:"Osaka",f:"🇯🇵",lat:34.7,lng:135.5},{name:"Sapporo",f:"🇯🇵",lat:43.1,lng:141.4},{name:"Kyoto",f:"🇯🇵",lat:35.0,lng:135.8},{name:"Nagoya",f:"🇯🇵",lat:35.2,lng:136.9}],
-            "Asia/Dubai":          [{name:"Maskat",f:"🇴🇲",lat:23.6,lng:58.6},{name:"Abu Dhabi",f:"🇦🇪",lat:24.5,lng:54.4},{name:"Tiflis",f:"🇬🇪",lat:41.7,lng:44.8},{name:"Baku",f:"🇦🇿",lat:40.4,lng:49.9},{name:"Jerewan",f:"🇦🇲",lat:40.2,lng:44.5}],
-            "Asia/Kolkata":        [{name:"Mumbai",f:"🇮🇳",lat:19.1,lng:72.9},{name:"Neu-Delhi",f:"🇮🇳",lat:28.6,lng:77.2},{name:"Bangalore",f:"🇮🇳",lat:12.9,lng:77.6},{name:"Chennai",f:"🇮🇳",lat:13.1,lng:80.3},{name:"Hyderabad",f:"🇮🇳",lat:17.4,lng:78.5}],
-            "Asia/Baghdad":        [{name:"Kuwait",f:"🇰🇼",lat:29.4,lng:47.9},{name:"Riad",f:"🇸🇦",lat:24.7,lng:46.7},{name:"Aden",f:"🇾🇪",lat:12.8,lng:45.0},{name:"Addis Abeba",f:"🇪🇹",lat:9.0,lng:38.7},{name:"Nairobi",f:"🇰🇪",lat:-1.3,lng:36.8}],
-            "Asia/Karachi":        [{name:"Islamabad",f:"🇵🇰",lat:33.7,lng:73.1},{name:"Taschkent",f:"🇺🇿",lat:41.3,lng:69.3},{name:"Samarkand",f:"🇺🇿",lat:39.7,lng:66.9},{name:"Duschanbe",f:"🇹🇯",lat:38.6,lng:68.8},{name:"Kabul",f:"🇦🇫",lat:34.5,lng:69.2}],
-            "Asia/Bangkok":        [{name:"Jakarta",f:"🇮🇩",lat:-6.2,lng:106.8},{name:"Hanoi",f:"🇻🇳",lat:21.0,lng:105.8},{name:"Saigon",f:"🇻🇳",lat:10.8,lng:106.7},{name:"Phnom Penh",f:"🇰🇭",lat:11.6,lng:104.9},{name:"Vientiane",f:"🇱🇦",lat:18.0,lng:102.6}],
-            "Australia/Sydney":    [{name:"Melbourne",f:"🇦🇺",lat:-37.8,lng:145.0},{name:"Brisbane",f:"🇦🇺",lat:-27.5,lng:153.0},{name:"Canberra",f:"🇦🇺",lat:-35.3,lng:149.1},{name:"Hobart",f:"🇦🇺",lat:-42.9,lng:147.3},{name:"Gold Coast",f:"🇦🇺",lat:-28.0,lng:153.4}],
-            "Pacific/Auckland":    [{name:"Wellington",f:"🇳🇿",lat:-41.3,lng:174.8},{name:"Christchurch",f:"🇳🇿",lat:-43.5,lng:172.6},{name:"Suva",f:"🇫🇯",lat:-18.1,lng:178.4},{name:"Nuku'alofa",f:"🇹🇴",lat:-21.1,lng:-175.2},{name:"Apia",f:"🇼🇸",lat:-13.8,lng:-172.1}],
-            "Pacific/Guadalcanal": [{name:"Port Vila",f:"🇻🇺",lat:-17.7,lng:168.3},{name:"Nouméa",f:"🇳🇨",lat:-22.3,lng:166.5},{name:"Magadan",f:"🇷🇺",lat:59.6,lng:150.8},{name:"Sachalin",f:"🇷🇺",lat:50.7,lng:142.7},{name:"Kamtschatka",f:"🇷🇺",lat:53.0,lng:158.7}],
-            "Pacific/Honolulu":    [{name:"Anchorage",f:"🇺🇸",lat:61.2,lng:-149.9},{name:"Papeete",f:"🇵🇫",lat:-17.5,lng:-149.6},{name:"Rarotonga",f:"🇨🇰",lat:-21.2,lng:-159.8},{name:"Adak",f:"🇺🇸",lat:51.9,lng:-176.6},{name:"Midway",f:"🇺🇸",lat:28.2,lng:-177.4}],
-            "Pacific/Samoa":       [{name:"Apia",f:"🇼🇸",lat:-13.8,lng:-172.1},{name:"Pago Pago",f:"🇦🇸",lat:-14.3,lng:-170.7},{name:"Niue",f:"🇳🇺",lat:-19.1,lng:-169.9},{name:"Alofi",f:"🇳🇺",lat:-19.1,lng:-169.9},{name:"Tokelau",f:"🇹🇰",lat:-9.2,lng:-171.8}],
-            "Atlantic/Azores":     [{name:"Ponta Delgada",f:"🇵🇹",lat:37.7,lng:-25.7},{name:"Angra",f:"🇵🇹",lat:38.7,lng:-27.2},{name:"Horta",f:"🇵🇹",lat:38.5,lng:-28.6},{name:"Funchal",f:"🇵🇹",lat:32.6,lng:-16.9},{name:"Santa Cruz",f:"🇵🇹",lat:28.5,lng:-16.3}],
-            "Atlantic/Cape_Verde": [{name:"Praia",f:"🇨🇻",lat:14.9,lng:-23.5},{name:"Mindelo",f:"🇨🇻",lat:16.9,lng:-25.0},{name:"Santa Maria",f:"🇨🇻",lat:16.6,lng:-22.9},{name:"Sal",f:"🇨🇻",lat:16.7,lng:-22.9},{name:"Boa Vista",f:"🇨🇻",lat:16.1,lng:-22.8}],
-            "Africa/Cairo":        [{name:"Athen",f:"🇬🇷",lat:37.9,lng:23.7},{name:"Jerusalem",f:"🇮🇱",lat:31.8,lng:35.2},{name:"Beirut",f:"🇱🇧",lat:33.9,lng:35.5},{name:"Amman",f:"🇯🇴",lat:31.9,lng:35.9},{name:"Johannesburg",f:"🇿🇦",lat:-26.2,lng:28.0}],
-            "Africa/Dakar":        [{name:"Abidjan",f:"🇨🇮",lat:5.3,lng:-4.0},{name:"Bamako",f:"🇲🇱",lat:12.6,lng:-8.0},{name:"Conakry",f:"🇬🇳",lat:9.5,lng:-13.7},{name:"Freetown",f:"🇸🇱",lat:8.5,lng:-13.2},{name:"Monrovia",f:"🇱🇷",lat:6.3,lng:-10.8}]
-        };
+        // RELATED_CITIES_DB defined in world-cities.js (loaded above).
 
         // Pre-fetch Nachbarstädte via Photon falls TZ nicht in RELATED_CITIES_DB
         async function ensureNeighborsForTZ(tz, lat, lon, excludeName) {
@@ -1689,113 +1652,7 @@
                 ctx.fillText(":", 20, y + 81);
                 
                 // --- Neighborhood Cities (Full Map Database with Flags) ---
-                const getRelatedCities = (tz) => {
-                    const db = {
-                        "Europe/Berlin": [
-                            {name: "Paris", f: "🇫🇷", lat: 48.9, lng: 2.3}, {name: "Rom", f: "🇮🇹", lat: 41.9, lng: 12.5},
-                            {name: "Madrid", f: "🇪🇸", lat: 40.4, lng: -3.7}, {name: "Wien", f: "🇦🇹", lat: 48.2, lng: 16.4}, {name: "Warschau", f: "🇵🇱", lat: 52.2, lng: 21.0}
-                        ],
-                        "Europe/London": [
-                            {name: "Lissabon", f: "🇵🇹", lat: 38.7, lng: -9.1}, {name: "Dublin", f: "🇮🇪", lat: 53.3, lng: -6.3},
-                            {name: "Edinburgh", f: "🇬🇧", lat: 55.9, lng: -3.2}, {name: "Porto", f: "🇵🇹", lat: 41.2, lng: -8.6}, {name: "Belfast", f: "🇬🇧", lat: 54.6, lng: -5.9}
-                        ],
-                        "America/New_York": [
-                            {name: "Toronto", f: "🇨🇦", lat: 43.7, lng: -79.4}, {name: "Miami", f: "🇺🇸", lat: 25.8, lng: -80.2},
-                            {name: "Washington", f: "🇺🇸", lat: 38.9, lng: -77.0}, {name: "Montreal", f: "🇨🇦", lat: 45.5, lng: -73.6}, {name: "Atlanta", f: "🇺🇸", lat: 33.7, lng: -84.4}
-                        ],
-                        "America/Chicago": [
-                            {name: "Dallas", f: "🇺🇸", lat: 32.8, lng: -96.8}, {name: "Houston", f: "🇺🇸", lat: 29.8, lng: -95.4},
-                            {name: "Winnipeg", f: "🇨🇦", lat: 49.9, lng: -97.1}, {name: "Memphis", f: "🇺🇸", lat: 35.1, lng: -90.0}, {name: "Minneapolis", f: "🇺🇸", lat: 44.9, lng: -93.2}
-                        ],
-                        "America/Denver": [
-                            {name: "Phoenix", f: "🇺🇸", lat: 33.4, lng: -112.1}, {name: "Salt Lake", f: "🇺🇸", lat: 40.8, lng: -111.9},
-                            {name: "Calgary", f: "🇨🇦", lat: 51.0, lng: -114.1}, {name: "Edmonton", f: "🇨🇦", lat: 53.5, lng: -113.5}, {name: "El Paso", f: "🇺🇸", lat: 31.8, lng: -106.4}
-                        ],
-                        "America/Los_Angeles": [
-                            {name: "Vancouver", f: "🇨🇦", lat: 49.2, lng: -123.1}, {name: "Seattle", f: "🇺🇸", lat: 47.6, lng: -122.3},
-                            {name: "Las Vegas", f: "🇺🇸", lat: 36.2, lng: -115.1}, {name: "San Diego", f: "🇺🇸", lat: 32.7, lng: -117.2}, {name: "Tijuana", f: "🇲🇽", lat: 32.5, lng: -117.0}
-                        ],
-                        "America/Dawson": [
-                            {name: "Whitehorse", f: "🇨🇦", lat: 60.7, lng: -135.1}, {name: "Inuvik", f: "🇨🇦", lat: 68.4, lng: -133.7},
-                            {name: "Yellowknife", f: "🇨🇦", lat: 62.5, lng: -114.4}, {name: "Juneau", f: "🇺🇸", lat: 58.3, lng: -134.4}, {name: "Sitka", f: "🇺🇸", lat: 57.1, lng: -135.3}
-                        ],
-                        "America/Sao_Paulo": [
-                            {name: "Brasilia", f: "🇧🇷", lat: -15.8, lng: -47.9}, {name: "B. Aires", f: "🇦🇷", lat: -34.6, lng: -58.4},
-                            {name: "Montevideo", f: "🇺🇾", lat: -34.9, lng: -56.2}, {name: "Asunción", f: "🇵🇾", lat: -25.3, lng: -57.6}, {name: "Santiago", f: "🇨🇱", lat: -33.5, lng: -70.7}
-                        ],
-                        "America/Caracas": [
-                            {name: "S. Domingo", f: "🇩🇴", lat: 18.5, lng: -69.9}, {name: "San Juan", f: "🇵🇷", lat: 18.5, lng: -66.1},
-                            {name: "Manaus", f: "🇧🇷", lat: -3.1, lng: -60.0}, {name: "Georgetown", f: "🇬🇾", lat: 6.8, lng: -58.2}, {name: "Paramaribo", f: "🇸🇷", lat: 5.8, lng: -55.2}
-                        ],
-                        "Asia/Shanghai": [
-                            {name: "Peking", f: "🇨🇳", lat: 39.9, lng: 116.4}, {name: "Singapur", f: "🇸🇬", lat: 1.3, lng: 103.8},
-                            {name: "Hongkong", f: "🇭🇰", lat: 22.3, lng: 114.2}, {name: "Taipeh", f: "🇹🇼", lat: 25.0, lng: 121.5}, {name: "Perth", f: "🇦🇺", lat: -31.9, lng: 115.9}
-                        ],
-                        "Asia/Tokyo": [
-                            {name: "Seoul", f: "🇰🇷", lat: 37.6, lng: 127.0}, {name: "Osaka", f: "🇯🇵", lat: 34.7, lng: 135.5},
-                            {name: "Sapporo", f: "🇯🇵", lat: 43.1, lng: 141.4}, {name: "Kyoto", f: "🇯🇵", lat: 35.0, lng: 135.8}, {name: "Nagoya", f: "🇯🇵", lat: 35.2, lng: 136.9}
-                        ],
-                        "Asia/Dubai": [
-                            {name: "Maskat", f: "🇴🇲", lat: 23.6, lng: 58.6}, {name: "Abu Dhabi", f: "🇦🇪", lat: 24.5, lng: 54.4},
-                            {name: "Tiflis", f: "🇬🇪", lat: 41.7, lng: 44.8}, {name: "Baku", f: "🇦🇿", lat: 40.4, lng: 49.9}, {name: "Jerewan", f: "🇦🇲", lat: 40.2, lng: 44.5}
-                        ],
-                        "Asia/Kolkata": [
-                            {name: "Mumbai", f: "🇮🇳", lat: 19.1, lng: 72.9}, {name: "Neu-Delhi", f: "🇮🇳", lat: 28.6, lng: 77.2},
-                            {name: "Bangalore", f: "🇮🇳", lat: 12.9, lng: 77.6}, {name: "Chennai", f: "🇮🇳", lat: 13.1, lng: 80.3}, {name: "Hyderabad", f: "🇮🇳", lat: 17.4, lng: 78.5}
-                        ],
-                        "Asia/Baghdad": [
-                            {name: "Kuwait", f: "🇰🇼", lat: 29.4, lng: 47.9}, {name: "Riad", f: "🇸🇦", lat: 24.7, lng: 46.7},
-                            {name: "Aden", f: "🇾🇪", lat: 12.8, lng: 45.0}, {name: "Addis Abeba", f: "🇪🇹", lat: 9.0, lng: 38.7}, {name: "Nairobi", f: "🇰🇪", lat: -1.3, lng: 36.8}
-                        ],
-                        "Asia/Karachi": [
-                            {name: "Islamabad", f: "🇵🇰", lat: 33.7, lng: 73.1}, {name: "Taschkent", f: "🇺🇿", lat: 41.3, lng: 69.3},
-                            {name: "Samarkand", f: "🇺🇿", lat: 39.7, lng: 66.9}, {name: "Duschanbe", f: "🇹🇯", lat: 38.6, lng: 68.8}, {name: "Kabul", f: "🇦🇫", lat: 34.5, lng: 69.2}
-                        ],
-                        "Asia/Bangkok": [
-                            {name: "Jakarta", f: "🇮🇩", lat: -6.2, lng: 106.8}, {name: "Hanoi", f: "🇻🇳", lat: 21.0, lng: 105.8},
-                            {name: "Saigon", f: "🇻🇳", lat: 10.8, lng: 106.7}, {name: "Phnom Penh", f: "🇰🇭", lat: 11.6, lng: 104.9}, {name: "Vientiane", f: "🇱🇦", lat: 18.0, lng: 102.6}
-                        ],
-                        "Australia/Sydney": [
-                            {name: "Melbourne", f: "🇦🇺", lat: -37.8, lng: 145.0}, {name: "Brisbane", f: "🇦🇺", lat: -27.5, lng: 153.0},
-                            {name: "Canberra", f: "🇦🇺", lat: -35.3, lng: 149.1}, {name: "Hobart", f: "🇦🇺", lat: -42.9, lng: 147.3}, {name: "Gold Coast", f: "🇦🇺", lat: -28.0, lng: 153.4}
-                        ],
-                        "Pacific/Auckland": [
-                            {name: "Wellington", f: "🇳🇿", lat: -41.3, lng: 174.8}, {name: "Christchurch", f: "🇳🇿", lat: -43.5, lng: 172.6},
-                            {name: "Suva", f: "🇫🇯", lat: -18.1, lng: 178.4}, {name: "Nuku'alofa", f: "🇹🇴", lat: -21.1, lng: -175.2}, {name: "Apia", f: "🇼🇸", lat: -13.8, lng: -172.1}
-                        ],
-                        "Pacific/Guadalcanal": [
-                            {name: "Port Vila", f: "🇻🇺", lat: -17.7, lng: 168.3}, {name: "Nouméa", f: "🇳🇨", lat: -22.3, lng: 166.5},
-                            {name: "Magadan", f: "🇷🇺", lat: 59.6, lng: 150.8}, {name: "Sachalin", f: "🇷🇺", lat: 50.7, lng: 142.7}, {name: "Kamtschatka", f: "🇷🇺", lat: 53.0, lng: 158.7}
-                        ],
-                        "Pacific/Honolulu": [
-                            {name: "Anchorage", f: "🇺🇸", lat: 61.2, lng: -149.9}, {name: "Papeete", f: "🇵🇫", lat: -17.5, lng: -149.6},
-                            {name: "Rarotonga", f: "🇨🇰", lat: -21.2, lng: -159.8}, {name: "Adak", f: "🇺🇸", lat: 51.9, lng: -176.6}, {name: "Midway", f: "🇺🇸", lat: 28.2, lng: -177.4}
-                        ],
-                        "Pacific/Samoa": [
-                            {name: "Apia", f: "🇼🇸", lat: -13.8, lng: -172.1}, {name: "Pago Pago", f: "🇦🇸", lat: -14.3, lng: -170.7},
-                            {name: "Niue", f: "🇳🇺", lat: -19.1, lng: -169.9}, {name: "Alofi", f: "🇳🇺", lat: -19.1, lng: -169.9}, {name: "Tokelau", f: "🇹🇰", lat: -9.2, lng: -171.8}
-                        ],
-                        "Atlantic/Azores": [
-                            {name: "Ponta Delgada", f: "🇵🇹", lat: 37.7, lng: -25.7}, {name: "Angra", f: "🇵🇹", lat: 38.7, lng: -27.2},
-                            {name: "Horta", f: "🇵🇹", lat: 38.5, lng: -28.6}, {name: "Funchal", f: "🇵🇹", lat: 32.6, lng: -16.9}, {name: "Santa Cruz", f: "🇵🇹", lat: 28.5, lng: -16.3}
-                        ],
-                        "Atlantic/Cape_Verde": [
-                            {name: "Praia", f: "🇨🇻", lat: 14.9, lng: -23.5}, {name: "Mindelo", f: "🇨🇻", lat: 16.9, lng: -25.0},
-                            {name: "Santa Maria", f: "🇨🇻", lat: 16.6, lng: -22.9}, {name: "Sal", f: "🇨🇻", lat: 16.7, lng: -22.9}, {name: "Boa Vista", f: "🇨🇻", lat: 16.1, lng: -22.8}
-                        ],
-                        "Africa/Cairo": [
-                            {name: "Athen", f: "🇬🇷", lat: 37.9, lng: 23.7}, {name: "Jerusalem", f: "🇮🇱", lat: 31.8, lng: 35.2},
-                            {name: "Beirut", f: "🇱🇧", lat: 33.9, lng: 35.5}, {name: "Amman", f: "🇯🇴", lat: 31.9, lng: 35.9}, {name: "Johannesburg", f: "🇿🇦", lat: -26.2, lng: 28.0}
-                        ],
-                        "Africa/Dakar": [
-                            {name: "Abidjan", f: "🇨🇮", lat: 5.3, lng: -4.0}, {name: "Bamako", f: "🇲🇱", lat: 12.6, lng: -8.0},
-                            {name: "Conakry", f: "🇬🇳", lat: 9.5, lng: -13.7}, {name: "Freetown", f: "🇸🇱", lat: 8.5, lng: -13.2}, {name: "Monrovia", f: "🇱🇷", lat: 6.3, lng: -10.8}
-                        ]
-                    };
-                    return db[tz] || (window._neighborCache?.[tz]) || [];
-                };
-
-                const neighbors = getRelatedCities(targetCity.tz);
+                const neighbors = RELATED_CITIES_DB[targetCity.tz] || (window._neighborCache?.[targetCity.tz]) || [];
                 const nW = 160, nH = 100; // Increased height for larger font
                 const nx = -nW/2, ny = y + boxH + 5; 
                 
@@ -1831,7 +1688,6 @@
                     // Save hitbox perfectly centered on the row
                     // x/y: popup-translate-relative (for legacy hover check)
                     // absX/absY: canvas-absolute (for click hit-test, account for popupX/popupY translate)
-                    const coords = neighborCoords[item.name];
                     const hbX = nx + 10;       // covers entire row (city name + flag area)
                     const hbY = centerY - 13;
                     const hbW = nW - 20;
@@ -1846,10 +1702,10 @@
                         countryCode: item.f,
                         index: i,
                         centerY: centerY,
-                        lat: coords ? coords.lat : null,
-                        lng: coords ? coords.lng : null,
-                        globeLat: coords ? coords.globeLat : null,
-                        globeLng: coords ? coords.globeLng : null,
+                        lat: item.lat ?? null,
+                        lng: item.lng ?? null,
+                        globeLat: item.lat ?? null,
+                        globeLng: item.lng ?? null,
                         name: item.name
                     });
                 });
@@ -2358,7 +2214,7 @@
             safeLog('[clockOnly] toggle setup ready — press D');
         })();
     </script>
-    <script src="js/cyber-recorder-key.js"></script>
+    <script src="../js/cyber-recorder-key.js"></script>
 </body>
 </html>
 

@@ -338,21 +338,53 @@
             const svgNS = 'http://www.w3.org/2000/svg';
             const sw = String(1.5 / z);
             const dotR = (2 / z).toFixed(2);
+            const dash = `${(3 / z).toFixed(2)} ${(3 / z).toFixed(2)}`;
+
+            const ptsOf = (poly) => poly.map(p => {
+                const [x, y] = mapXY(p[0], p[1]);
+                return `${x.toFixed(2)},${y.toFixed(2)}`;
+            }).join(' ');
+            const subpathOf = (poly) => {
+                let s = '';
+                const m = mapXY(poly[0][0], poly[0][1]);
+                s += `M ${m[0].toFixed(2)} ${m[1].toFixed(2)}`;
+                for (let i = 1; i < poly.length; i++) {
+                    const q = mapXY(poly[i][0], poly[i][1]);
+                    s += ` L ${q[0].toFixed(2)} ${q[1].toFixed(2)}`;
+                }
+                return s + ' Z';
+            };
+
             cls.outers.forEach((o, i) => {
                 const color = paletteColor(i);
                 const outerPoly = stiftContours[o.idx];
                 if (!outerPoly || outerPoly.length < 2) return;
-                const ptsStr = outerPoly.map(p => {
-                    const [x, y] = mapXY(p[0], p[1]);
-                    return `${x.toFixed(2)},${y.toFixed(2)}`;
-                }).join(' ');
+
+                // ── FÜLLEN: outer + holes als evenodd-Subpfad. fill-opacity
+                // 0.35 damit die gelben Striche darunter noch durchscheinen.
+                const fillParts = [outerPoly, ...o.holes.map(hi => stiftContours[hi]).filter(Boolean)];
+                const d = fillParts.map(subpathOf).join(' ');
+                const fillPath = document.createElementNS(svgNS, 'path');
+                fillPath.setAttribute('d', d);
+                fillPath.setAttribute('fill-rule', 'evenodd');
+                fillPath.setAttribute('fill', color);
+                fillPath.setAttribute('fill-opacity', '0.35');
+                fillPath.setAttribute('stroke', 'none');
+                fillPath.dataset.kind = 'fill';
+                fillPath.dataset.source = 'stift';
+                stiftOutlineSvg.appendChild(fillPath);
+
+                // ── LINIE: Outer-Polygon (durchgezogen) in Palette-Farbe.
                 const poly = document.createElementNS(svgNS, 'polygon');
-                poly.setAttribute('points', ptsStr);
+                poly.setAttribute('points', ptsOf(outerPoly));
                 poly.setAttribute('fill', 'none');
                 poly.setAttribute('stroke', color);
                 poly.setAttribute('stroke-width', sw);
                 poly.setAttribute('stroke-linejoin', 'round');
+                poly.dataset.source = 'stift';
                 stiftOutlineSvg.appendChild(poly);
+
+                // ── PUNKTE: Vertex-Dots.
                 for (const p of outerPoly) {
                     const [x, y] = mapXY(p[0], p[1]);
                     const c = document.createElementNS(svgNS, 'circle');
@@ -360,26 +392,44 @@
                     c.setAttribute('cy', y.toFixed(2));
                     c.setAttribute('r', dotR);
                     c.setAttribute('fill', color);
+                    c.dataset.kind = 'point';
+                    c.dataset.source = 'stift';
                     stiftOutlineSvg.appendChild(c);
                 }
-                // Holes: gestrichelt hellblau, damit sie sich vom Outer abheben
+
+                // Holes: hellblau gestrichelt + ihre Vertex-Dots
                 for (const hi of o.holes) {
                     const holePoly = stiftContours[hi];
                     if (!holePoly || holePoly.length < 2) continue;
-                    const hPtsStr = holePoly.map(p => {
-                        const [x, y] = mapXY(p[0], p[1]);
-                        return `${x.toFixed(2)},${y.toFixed(2)}`;
-                    }).join(' ');
                     const hp = document.createElementNS(svgNS, 'polygon');
-                    hp.setAttribute('points', hPtsStr);
+                    hp.setAttribute('points', ptsOf(holePoly));
                     hp.setAttribute('fill', 'none');
                     hp.setAttribute('stroke', '#9ad6ff');
                     hp.setAttribute('stroke-width', sw);
                     hp.setAttribute('stroke-linejoin', 'round');
-                    hp.setAttribute('stroke-dasharray', `${(3 / z).toFixed(2)} ${(3 / z).toFixed(2)}`);
+                    hp.setAttribute('stroke-dasharray', dash);
+                    hp.dataset.source = 'stift';
                     stiftOutlineSvg.appendChild(hp);
+                    for (const p of holePoly) {
+                        const [x, y] = mapXY(p[0], p[1]);
+                        const c = document.createElementNS(svgNS, 'circle');
+                        c.setAttribute('cx', x.toFixed(2));
+                        c.setAttribute('cy', y.toFixed(2));
+                        c.setAttribute('r', dotR);
+                        c.setAttribute('fill', '#9ad6ff');
+                        c.dataset.kind = 'point';
+                        c.dataset.source = 'stift';
+                        stiftOutlineSvg.appendChild(c);
+                    }
                 }
             });
+
+            // Aktuellen Schalterstand sofort anwenden, sonst sind frisch
+            // gerenderte Elemente immer sichtbar — egal was die Toggles sagen.
+            if (typeof applyLinesToggle === 'function') applyLinesToggle();
+            if (typeof applyPointsToggle === 'function') applyPointsToggle();
+            if (typeof applyFillToggle === 'function') applyFillToggle();
+            if (typeof applyArtToggle === 'function') applyArtToggle();
             dbg(`stift outlines rendered: ${cls.outers.length} outer + ${cls.holes.length} hole(s)`);
         }
 
@@ -391,11 +441,28 @@
             stiftContours = extractPNGContours(stiftCanvas) || [];
             dbg(`▶ stift extract: ${stiftContours.length} contour(s)`);
             renderStiftOutlines();
+            // Outlines-Status persistieren, damit beim Reload automatisch
+            // wieder extrahiert wird.
+            try { localStorage.setItem('draw20-outlines-active', '1'); } catch (_) {}
+            // Morph-Pairs für stift↔LaTeX bauen (falls eine LaTeX-Pane
+            // bereits gerendert ist). Danach renderMorph mit aktuellem Slider,
+            // damit eine bereits gesetzte t-Position sofort die neue Quelle nutzt.
+            if (typeof buildStiftMorphPairs === 'function') buildStiftMorphPairs();
+            const sl = document.getElementById('morph-slider');
+            if (sl && typeof renderMorph === 'function') renderMorph(+sl.value / 100);
         }
 
         function clearStiftOutlines() {
             stiftContours = null;
             while (stiftOutlineSvg.firstChild) stiftOutlineSvg.removeChild(stiftOutlineSvg.firstChild);
+            try { localStorage.removeItem('draw20-outlines-active'); } catch (_) {}
+            // Stift-Morph aus — Fallback auf PNG↔LaTeX.
+            if (typeof stiftMorphPairs !== 'undefined') stiftMorphPairs.length = 0;
+            // Crossfade-Reste am stiftCanvas zurücksetzen, sonst bleibt es bei
+            // 0.5 stehen vom letzten Stift-Morph.
+            stiftCanvas.style.opacity = '';
+            const sl = document.getElementById('morph-slider');
+            if (sl && typeof renderMorph === 'function') renderMorph(+sl.value / 100);
             dbg('stift outlines cleared');
         }
 
@@ -1709,12 +1776,10 @@
             // MATCHING_ENABLED is false, every outer is "unpaired" by design
             // — skip the orphan flagging so they keep their palette colours
             // instead of all rendering bright red.
+            // Orphan-Flagging vorerst aus — kommt später wieder rein. Ohne
+            // diesen Check fallen unpaired Outers auf ihre Palette-Farbe
+            // zurück (statt knallrot mit Glow).
             orphanMatchIds.clear();
-            if (MATCHING_ENABLED) {
-                for (const [id, pair] of idToPair) {
-                    if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
-                }
-            }
 
             // Centroid maps populated by drawContours — used afterwards to
             // draw cross-pane match lines (centroid PNG ↔ centroid LaTeX).
@@ -1767,10 +1832,9 @@
                 }
             }
 
-            // ── Match lines: hidden by default, only the hovered pair's line
-            // is revealed (via setMatchHighlight). Solid stroke; colour =
-            // palette for ok/meh, bright red for suspect (the plausibility
-            // verdict still affects colour, just not visibility).
+            // ── Match lines: Centroid-zu-Centroid pro gematchtes Outer-Pair.
+            // Per default JETZT sichtbar (vorher nur on-hover). Solid stroke;
+            // Farbe = Palette für ok/meh, knallrot für suspect.
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = zoom || 1;
             const verdictById = new Map();
@@ -1798,7 +1862,6 @@
                 line.setAttribute('stroke', verdict === 'suspect' ? '#ff3030' : paletteColor(mid));
                 line.setAttribute('stroke-width', String((verdict === 'suspect' ? 2 : 1.5) / z));
                 line.setAttribute('opacity', '0.9');
-                line.style.display = 'none';
                 line.dataset.kind = 'match-line';
                 line.dataset.matchId = String(mid);
                 line.dataset.verdict = verdict;
@@ -1828,16 +1891,29 @@
             // Morph-layer on top of everything for visibility.
             overlay.appendChild(morphLayer);
             const sl = document.getElementById('morph-slider');
+
+            // Wenn Stift-Outlines da sind, jetzt auch stift→LaTeX-Pairs neu
+            // bauen — die LaTeX-Coords haben sich gerade aktualisiert. Muss
+            // VOR renderMorph passieren, sonst nutzt der erste Slider-Tick
+            // noch das alte stiftMorphPairs.
+            if (stiftContours && stiftContours.length && typeof buildStiftMorphPairs === 'function') {
+                buildStiftMorphPairs(latexContoursList);
+            }
+
             if (sl) renderMorph(+sl.value / 100);
 
             updateInfoBoxes(pngContours, latexContoursList);
         }
 
-        // ── Morph: interpolate matched outer pairs between PNG and LaTeX.
-        // morphPairs is populated by renderBBoxes; the slider (0..100, value
-        // / 100 = t) drives the interpolation. pix/tex opacity crossfades so
-        // the source/target panes fade during the morph.
+        // ── Morph: interpolate matched outer pairs between PNG and LaTeX —
+        // ODER stift↔LaTeX, sobald der User selbst Outlines extrahiert hat.
+        // morphPairs wird von renderBBoxes befüllt; stiftMorphPairs von
+        // buildStiftMorphPairs (nach extractStiftOutlines bzw. nach jedem
+        // renderBBoxes, damit die LaTeX-Coords frisch bleiben).
+        // Slider (0..100, /100 = t) treibt die Interpolation; passende Quelle
+        // (pix vs. stiftCanvas) crossfadet zur tex-Pane.
         const morphPairs = [];
+        const stiftMorphPairs = [];
         function resampleClosed(pts, n) {
             if (!pts || pts.length === 0) return [];
             if (typeof resamplePolygon === 'function') {
@@ -1861,39 +1937,48 @@
             }
             return best === 0 ? pts : [...pts.slice(best), ...pts.slice(0, best)];
         }
-        // Render morph polygons between PNG and LaTeX matched pairs.
-        // t=0 → pure PNG (no morph polys, pix full, tex hidden).
-        // t=1 → pure LaTeX (no morph polys, pix hidden, tex full).
-        // 0<t<1 → cross-fade panes + interpolated polygons over the top.
+        // Render morph polygons between source and LaTeX target.
+        // Quelle = Stift (eigenes Drawing) wenn stiftMorphPairs vorhanden,
+        // sonst PNG-Preset. t=0 → reine Quelle, t=1 → reine LaTeX, 0<t<1 →
+        // Cross-Fade Quell-Pane ↔ tex + interpolierte Polygone drüber.
         const MORPH_EPS = 0.02;
         function renderMorph(t) {
             while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
             t = Math.max(0, Math.min(1, t));
-            dbg(`renderMorph t=${t.toFixed(2)} pairs=${morphPairs.length}`);
-            if (!morphPairs.length) {
-                pix.style.opacity = '';
+            const useStift = stiftMorphPairs.length > 0;
+            const pairs = useStift ? stiftMorphPairs : morphPairs;
+            const srcKey = useStift ? 'srcPts' : 'pngPts';
+            const dstKey = useStift ? 'dstPts' : 'latPts';
+            dbg(`renderMorph t=${t.toFixed(2)} src=${useStift ? 'stift' : 'png'} pairs=${pairs.length}`);
+            // Quell-Pane referenz: stiftCanvas im stift-Modus, pix sonst.
+            const srcEl = useStift ? stiftCanvas : pix;
+            // Bei Stift-Modus: pix in Ruhe lassen (User entscheidet via PIXEL-
+            // Schalter / Auswahl, ob die PNG-Pane überhaupt sichtbar ist).
+            // Bei PNG-Modus: stiftCanvas in Ruhe lassen.
+            if (!pairs.length) {
+                srcEl.style.opacity = '';
                 tex.style.opacity = '';
                 return;
             }
             if (t < MORPH_EPS) {
-                pix.style.opacity = '1';
+                srcEl.style.opacity = '1';
                 tex.style.opacity = '0';
                 return;
             }
             if (t > 1 - MORPH_EPS) {
-                pix.style.opacity = '0';
+                srcEl.style.opacity = '0';
                 tex.style.opacity = '1';
                 return;
             }
-            pix.style.opacity = String(1 - t);
+            srcEl.style.opacity = String(1 - t);
             tex.style.opacity = String(t);
             const svgNS = 'http://www.w3.org/2000/svg';
             const N = 60;
             const z = zoom || 1;
             let drawn = 0;
-            for (const pair of morphPairs) {
-                const p = resampleClosed(pair.pngPts, N);
-                let l = resampleClosed(pair.latPts, N);
+            for (const pair of pairs) {
+                const p = resampleClosed(pair[srcKey], N);
+                let l = resampleClosed(pair[dstKey], N);
                 if (p.length < 3 || l.length < 3) continue;
                 l = alignStart(l, p[0]);
                 const pts = p.map((pp, i) => ({
@@ -1913,6 +1998,109 @@
             }
             dbg(`renderMorph drawn=${drawn} polygons`);
         }
+
+        // Stift→LaTeX-Paare bauen — gleiche Match-Pipeline wie PNG↔LaTeX
+        // (computeMatchIds → Hungarian etc.), nur dass die Quelle stiftContours
+        // ist statt PNG. Punkte landen in wrap-pre-transform-CSS, damit
+        // renderMorph direkt interpolieren kann ohne erneutes Mapping.
+        function buildStiftMorphPairs(latexContoursList) {
+            stiftMorphPairs.length = 0;
+            if (!stiftContours || !stiftContours.length) return;
+            // Falls Caller keine LaTeX-Contours mitliefert, frisch holen.
+            let lat = latexContoursList;
+            if (!lat) {
+                const res = (typeof extractLatexContours === 'function') ? extractLatexContours() : null;
+                lat = res ? res.contours : null;
+            }
+            if (!lat || !lat.length) return;
+            if (!tex.complete || !tex.naturalWidth || !latexCanvas) return;
+            if (typeof computeMatchIds !== 'function' || typeof classifyContours !== 'function') return;
+
+            const m = computeMatchIds(stiftContours, lat);
+            const stiftId = m.pngId, latId = m.latId;
+
+            // stift natural → wrap pre-transform CSS
+            const ssx = wrap.offsetWidth / Math.max(1, stiftCanvas.width);
+            const ssy = wrap.offsetHeight / Math.max(1, stiftCanvas.height);
+            const stiftMap = (x, y) => ({ x: x * ssx, y: y * ssy });
+
+            // latex natural → wrap pre-transform CSS (Mirror der renderBBoxes-mapFn)
+            const r = tex.getBoundingClientRect();
+            const wrapRect = wrap.getBoundingClientRect();
+            const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
+            const renderW = tex.naturalWidth * scale;
+            const renderH = tex.naturalHeight * scale;
+            const offX = r.left + (r.width - renderW) / 2;
+            const offY = r.top + (r.height - renderH) / 2;
+            const z = zoom || 1;
+            const latMap = (x, y) => ({
+                x: (offX + x * scale - wrapRect.left) / z,
+                y: (offY + y * scale - wrapRect.top) / z,
+            });
+
+            const sCls = classifyContours(stiftContours);
+            const lCls = classifyContours(lat);
+            const srcPts = new Map();
+            for (const o of sCls.outers) {
+                const mid = stiftId[o.idx];
+                if (mid < 0) continue;
+                srcPts.set(mid, stiftContours[o.idx].map(p => stiftMap(p[0], p[1])));
+            }
+            const dstPts = new Map();
+            for (const o of lCls.outers) {
+                const mid = latId[o.idx];
+                if (mid < 0) continue;
+                dstPts.set(mid, lat[o.idx].map(p => latMap(p[0], p[1])));
+            }
+            for (const [mid, sp] of srcPts) {
+                const lp = dstPts.get(mid);
+                if (!lp) continue;
+                stiftMorphPairs.push({ mid, srcPts: sp, dstPts: lp });
+            }
+            dbg(`stiftMorphPairs: ${stiftMorphPairs.length}`);
+        }
+
+        // Animations-Loop für den ► MORPH-Knopf. Treibt den Slider 0→100 über
+        // MORPH_DURATION ms, danach Loop-Ende. Bricht alte Animation ab.
+        const STIFT_MORPH_DURATION = 2500;
+        let morphAnimRaf = null;
+        let morphAnimStart = 0;
+        function startMorphAnim() {
+            cancelAnimationFrame(morphAnimRaf);
+            const sl = document.getElementById('morph-slider');
+            const span = document.getElementById('morph-val');
+            if (!sl) return;
+            morphAnimStart = performance.now();
+            function tick() {
+                const elapsed = performance.now() - morphAnimStart;
+                const t = Math.min(1, elapsed / STIFT_MORPH_DURATION);
+                const pct = Math.round(t * 100);
+                sl.value = String(pct);
+                if (span) span.textContent = String(pct);
+                renderMorph(t);
+                if (t < 1) morphAnimRaf = requestAnimationFrame(tick);
+                else morphAnimRaf = null;
+            }
+            dbg('▶ morph anim start');
+            tick();
+        }
+        function stopMorphAnim() {
+            if (morphAnimRaf !== null) {
+                cancelAnimationFrame(morphAnimRaf);
+                morphAnimRaf = null;
+                dbg('⏸ morph anim stop');
+            }
+        }
+        // ► MORPH-Knopf hängen
+        const morphStartBtn = document.querySelector('button.cyber-btn[onclick*="startMorph"]');
+        if (morphStartBtn) morphStartBtn.addEventListener('click', startMorphAnim);
+        // Space-Taste zum Start/Pause (mirror des Legacy-Verhaltens)
+        document.addEventListener('keydown', (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            if (e.code !== 'Space') return;
+            if (morphAnimRaf !== null) { e.preventDefault(); stopMorphAnim(); }
+            else { e.preventDefault(); startMorphAnim(); }
+        });
         // Hook into the existing morph-slider (lives in the side panel).
         // Updates draw20's overlay morph; the legacy engine listener still
         // fires too but only updates the (hidden) legacy canvases.
@@ -1927,6 +2115,7 @@
             // function on `window` redirects the HTML `oninput="onMorphSlider(this.value)"`
             // attribute to our renderMorph.
             window.onMorphSlider = function (val) {
+                stopMorphAnim();
                 const span = document.getElementById('morph-val');
                 if (span) span.textContent = val;
                 dbg(`onMorphSlider → ${val}`);
@@ -1934,6 +2123,7 @@
             };
             // Also keep addEventListener as a belt-and-braces fallback.
             sl.addEventListener('input', () => {
+                stopMorphAnim();
                 dbg(`slider input → ${sl.value}`);
                 renderMorph(+sl.value / 100);
             });
@@ -2051,6 +2241,9 @@
             overlay.querySelectorAll('polygon').forEach(p => {
                 p.style.display = show ? '' : 'none';
             });
+            stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                p.style.display = show ? '' : 'none';
+            });
         }
         function applyPointsToggle() {
             const t = document.getElementById('points-toggle');
@@ -2058,22 +2251,33 @@
             overlay.querySelectorAll('circle[data-kind="point"]').forEach(p => {
                 p.style.display = show ? '' : 'none';
             });
+            stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(p => {
+                p.style.display = show ? '' : 'none';
+            });
         }
-        // PIXEL toggle: show/hide the raw PNG (handwriting) and LaTeX glyphs.
-        // Vector outlines + bbox stay so the user can see contours alone.
+        // PIXEL toggle: show/hide the raw PNG (handwriting), LaTeX glyphs UND
+        // die Stift-Striche. Vector outlines + bbox stay so the user can see
+        // contours alone. opacity statt visibility am stiftCanvas, damit der
+        // Stift-Modus weiter Maus-Events empfängt (visibility:hidden würde
+        // pointer-events killen).
         function applyArtToggle() {
             const t = document.getElementById('art-toggle');
             const show = t ? t.checked : true;
             pix.style.visibility = show ? '' : 'hidden';
             tex.style.visibility = show ? '' : 'hidden';
+            stiftCanvas.style.opacity = show ? '1' : '0';
         }
         // POLYGONE FÜLLEN: show/hide the grouped fill paths emitted by
-        // drawContours (one path per outer, with its holes as evenodd
-        // subpaths). Per-contour stroke polygons stay unchanged.
+        // drawContours + renderStiftOutlines (one path per outer, with its
+        // holes as evenodd subpaths). Per-contour stroke polygons stay
+        // unchanged.
         function applyFillToggle() {
             const t = document.getElementById('fill-toggle');
             const fill = t ? t.checked : false;
             overlay.querySelectorAll('path[data-kind="fill"]').forEach(p => {
+                p.style.display = fill ? '' : 'none';
+            });
+            stiftOutlineSvg.querySelectorAll('path[data-kind="fill"]').forEach(p => {
                 p.style.display = fill ? '' : 'none';
             });
         }
