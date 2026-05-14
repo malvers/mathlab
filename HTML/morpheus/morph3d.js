@@ -91,6 +91,17 @@
         z-index: 100; user-select: none;
     }
     #scale-toggle input { cursor: pointer; accent-color: #00d2ff; }
+    #pick-toggle {
+        position: fixed; top: 12px; right: 260px;
+        display: flex; align-items: center; gap: 8px;
+        font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
+        color: rgba(0, 210, 255, 0.85); cursor: pointer;
+        padding: 6px 10px;
+        background: rgba(0, 210, 255, 0.08);
+        border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
+        z-index: 100; user-select: none;
+    }
+    #pick-toggle input { cursor: pointer; accent-color: #00d2ff; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -100,6 +111,9 @@
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
 </div>
+<label id="pick-toggle" title="Picking-Modus: große Punkte zum Auswählen (off = 30%, dezent)">
+    <input type="checkbox" id="pick-mode-cb" checked>PICKING
+</label>
 <label id="scale-toggle" title="Originalgrößen (kein Auto-Fit pro Seite)">
     <input type="checkbox" id="scale-natural-cb">ORIGINAL
 </label>
@@ -332,7 +346,24 @@
         // Picking spheres — colored per plane to match the outline colors
         // (PNG/Stift = green, LaTeX = orange). Shared geometry + per-plane
         // material keeps GPU cheap.
-        const PICK_SPHERE_R = 3.2;
+        // PICKING toggle: large dots = easy to click; off = 30% size, more
+        // discrete look. State persisted alongside the other toggles.
+        const PICK_KEY = 'draw20-morph3d-picking';
+        const pickingMode = (function () {
+            try { return localStorage.getItem(PICK_KEY) !== '0'; } catch (_) { return true; }
+        })();
+        const pickCb = document.getElementById('pick-mode-cb');
+        if (pickCb) {
+            pickCb.checked = pickingMode;
+            pickCb.addEventListener('change', function () {
+                try { localStorage.setItem(PICK_KEY, pickCb.checked ? '1' : '0'); } catch (_) {}
+                try {
+                    const b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn');
+                    if (b) b.click();
+                } catch (_) {}
+            });
+        }
+        const PICK_SPHERE_R = pickingMode ? 3.2 : 1.0; // ~30% when picking off
         const pickSphereGeom = new THREE.SphereGeometry(PICK_SPHERE_R, 10, 10);
         const pickMatPng = new THREE.MeshBasicMaterial({ color: PNG_COLOR });
         const pickMatLat = new THREE.MeshBasicMaterial({ color: LAT_COLOR });
@@ -360,14 +391,16 @@
             }
         }
 
-        // Draw outlines for every outer (matched + orphan).
+        // Polygon outlines cyan on both planes — side identity is conveyed
+        // by the pick-sphere colors (green/orange).
+        const OUTLINE_COLOR = 0x00d2ff;
         for (const o of pngN) {
-            addOutlineLoop(o.pts, Z_PNG, PNG_COLOR);
-            for (const h of o.holes) addOutlineLoop(h, Z_PNG, PNG_COLOR);
+            addOutlineLoop(o.pts, Z_PNG, OUTLINE_COLOR);
+            for (const h of o.holes) addOutlineLoop(h, Z_PNG, OUTLINE_COLOR);
         }
         for (const o of latN) {
-            addOutlineLoop(o.pts, Z_LAT, LAT_COLOR);
-            for (const h of o.holes) addOutlineLoop(h, Z_LAT, LAT_COLOR);
+            addOutlineLoop(o.pts, Z_LAT, OUTLINE_COLOR);
+            for (const h of o.holes) addOutlineLoop(h, Z_LAT, OUTLINE_COLOR);
         }
 
         const matchedPngOuters = new Set();
@@ -404,6 +437,16 @@
                 // LaTeX vertex picking: reverse — dst → src by inverting idxMap.
                 addOuterPoints(latN[li].pts, Z_LAT, 'lat', pngN[pi].pts, Z_PNG,
                     align ? { dir: 'reverse', N: align.N, idxMap: align.idxMap } : null);
+                // Holes: paired by index (equalizeMatchedContours keeps hole
+                // counts in sync per outer pair). No engine alignment for holes
+                // → arc-length identity in addOuterPoints picking.
+                const pngHoles = pngN[pi].holes || [];
+                const latHoles = latN[li].holes || [];
+                const nHoles = Math.min(pngHoles.length, latHoles.length);
+                for (let h = 0; h < nHoles; h++) {
+                    addOuterPoints(pngHoles[h], Z_PNG, 'png', latHoles[h], Z_LAT, null);
+                    addOuterPoints(latHoles[h], Z_LAT, 'lat', pngHoles[h], Z_PNG, null);
+                }
                 matchedPngOuters.add(pi);
                 matchedLatOuters.add(li);
                 // Visual correspondence net: same 80-sample line bundle as before.
@@ -423,12 +466,18 @@
             }
         }
 
-        // Orphan outers — still pickable but no partner.
+        // Orphan outers (and their holes) — still pickable but no partner.
         for (let i = 0; i < pngN.length; i++) {
-            if (!matchedPngOuters.has(i)) addOuterPoints(pngN[i].pts, Z_PNG, 'png', null, null);
+            if (!matchedPngOuters.has(i)) {
+                addOuterPoints(pngN[i].pts, Z_PNG, 'png', null, null);
+                for (const h of pngN[i].holes || []) addOuterPoints(h, Z_PNG, 'png', null, null);
+            }
         }
         for (let i = 0; i < latN.length; i++) {
-            if (!matchedLatOuters.has(i)) addOuterPoints(latN[i].pts, Z_LAT, 'lat', null, null);
+            if (!matchedLatOuters.has(i)) {
+                addOuterPoints(latN[i].pts, Z_LAT, 'lat', null, null);
+                for (const h of latN[i].holes || []) addOuterPoints(h, Z_LAT, 'lat', null, null);
+            }
         }
 
         // ── Picking: click → highlight clicked vertex + its partner ─────────
