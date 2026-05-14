@@ -7,8 +7,17 @@ const DebugWindow = (() => {
     let prevTop = '';
     const MAX_LOGS = 50;
 
+    function isProduction() {
+        const host = window.location.hostname;
+        return host === 'docalvers.de' || host === 'www.docalvers.de';
+    }
+
     function init() {
         if (debugEl) return;
+        // Skip debug window on production unless ?debug=force is set
+        if (isProduction() && !new URLSearchParams(window.location.search).has('debug')) {
+            return;
+        }
 
         // Restore state from localStorage
         let savedState = {};

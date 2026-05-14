@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <!-- Debug window: auto-disabled on docalvers.de; use ?debug=force to enable on production -->
     <script src="js/debug-window.js"></script>
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
@@ -80,13 +81,14 @@
         body.use-globe #globe-stage { display: block; filter: brightness(0.55); }
         body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
         /* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
+        :root { --fade-out-ms: 3000ms; --fade-in-ms: 250ms; }
         #debug-clock-cover {
             position: fixed;
             inset: 0;
             pointer-events: none;
             z-index: 9000;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            transition: opacity var(--fade-out-ms) ease;
         }
         #debug-clock-cover.show { opacity: 1; }
         #debug-clock-cover .cover-piece {
@@ -769,14 +771,6 @@
             const dist = Math.sqrt(mx*mx + my*my);
             const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
 
-            // ROT-Checkbox hit test (in popup, takes precedence)
-            if (redCheckHitbox && targetCity &&
-                mxCanvas >= redCheckHitbox.x && mxCanvas <= redCheckHitbox.x + redCheckHitbox.w &&
-                myCanvas >= redCheckHitbox.y && myCanvas <= redCheckHitbox.y + redCheckHitbox.h) {
-                targetCity.red = !targetCity.red;
-                persistRedCities();
-                return;
-            }
 
             // Flag/neighbor city click → rotate globe
             if (flagHitboxes.length > 0) {
@@ -983,6 +977,100 @@
             isMouseDown = false;
             isReturning = true; // Start smooth return
         });
+
+        // Touch support for iPad/mobile rotation
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 0) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const mxCanvas = touch.clientX - rect.left;
+            const myCanvas = touch.clientY - rect.top;
+            const mx = touch.clientX - (rect.left + rect.width / 2);
+            const my = touch.clientY - (rect.top + rect.height / 2);
+
+            // For two-finger touch, let TrackballControls handle it (pinch/rotate)
+            if (e.touches.length >= 2) return;
+
+            // Single touch: use same hit-test logic as mousedown
+            const dist = Math.sqrt(mx*mx + my*my);
+            const touchAngle = Math.atan2(my, mx) * 180 / Math.PI;
+
+
+            // Flag/neighbor city hit test
+            if (flagHitboxes.length > 0) {
+                const clickedBox = flagHitboxes.find(b =>
+                    b.absX != null &&
+                    mxCanvas >= b.absX && mxCanvas <= b.absX + b.w &&
+                    myCanvas >= b.absY && myCanvas <= b.absY + b.h
+                );
+                if (clickedBox) {
+                    showCityInfo(clickedBox.name);
+                    if (globeInstance && clickedBox.lat != null) {
+                        let lat = clickedBox.lat, lng = clickedBox.lng;
+                        if (clickedBox.globeLat != null) lat = clickedBox.globeLat;
+                        if (clickedBox.globeLon != null) lng = clickedBox.globeLon;
+                        lockedCity = { lat, lng };
+                        requestAnimationFrame(() => {
+                            if (globeInstance) globeInstance.pointOfView({ lat, lng, altitude: 2.65 }, 1000);
+                        });
+                    }
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Impressum hit test
+            if (imprintHitbox &&
+                mxCanvas >= imprintHitbox.x && mxCanvas <= imprintHitbox.x + imprintHitbox.w &&
+                myCanvas >= imprintHitbox.y && myCanvas <= imprintHitbox.y + imprintHitbox.h) {
+                window.location.href = 'impressum.html';
+                e.preventDefault();
+                return;
+            }
+
+            // Globe toggle hit test
+            if (globeIconHitbox) {
+                const dx = mxCanvas - globeIconHitbox.cx;
+                const dy = myCanvas - globeIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= globeIconHitbox.r) {
+                    toggleGlobe();
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            isMouseDown = true;
+            isReturning = false;
+            lastMouseAngle = Math.atan2(my, mx);
+            autoRotationEnabled = false;
+        }, false);
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 0) return;
+            // Two-finger touch: let TrackballControls handle it
+            if (e.touches.length >= 2) return;
+
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const mx = touch.clientX - (rect.left + rect.width / 2);
+            const my = touch.clientY - (rect.top + rect.height / 2);
+
+            if (isMouseDown) {
+                if (!window.useGlobe) {
+                    const currentAngle = Math.atan2(my, mx);
+                    let delta = currentAngle - lastMouseAngle;
+                    if (delta > Math.PI) delta -= Math.PI * 2;
+                    if (delta < -Math.PI) delta += Math.PI * 2;
+                    autoRotation += delta * 180 / Math.PI;
+                    lastMouseAngle = currentAngle;
+                }
+            }
+        }, false);
+
+        canvas.addEventListener('touchend', (e) => {
+            isMouseDown = false;
+            isReturning = true;
+        }, false);
 
         function draw() {
             // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
@@ -1244,13 +1332,16 @@
             const legendY2 = legendY1 + legendFontSize * 1.5;
             ctx.font = `800 ${legendFontSize}px Orbitron`;
 
-            // Debug: hide canvas legend in clock-only mode (toggled by 'D')
-            if (!window.__clockOnlyMode) {
+            // Debug: fade canvas legend in clock-only mode (toggled by 'D')
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
+                ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
                 ctx.fillStyle = "#ffaa00";
                 ctx.fillText("SOMMERZEIT", legendX, legendY1);
 
                 ctx.fillStyle = "rgba(220, 220, 220, 0.9)";
                 ctx.fillText("NORMALZEIT", legendX, legendY2);
+                ctx.restore();
             }
 
             // Globe Toggle Icon (right of legend)
@@ -1282,6 +1373,7 @@
             _si.style.fontSize = (legendFontSize * 1.1 * _sy) + 'px';
             _si.style.height   = _siH + 'px';
 
+
             /* debug output disabled
             _dbg.textContent =
                 `vw:${window.innerWidth}×${window.innerHeight}  dpr:${window.devicePixelRatio}\n` +
@@ -1297,9 +1389,10 @@
             const iconCx = legendX + legendW + iconR * 2.2;
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
-            // Debug: hide globe-toggle icon in clock-only mode (toggled by 'D')
-            if (!window.__clockOnlyMode) {
+            // Debug: fade globe-toggle icon in clock-only mode (toggled by 'D')
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
                 ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
                 ctx.strokeStyle = window.useGlobe ? "#00d2ff" : "#888888";
                 ctx.fillStyle = "transparent";
                 ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
@@ -1354,10 +1447,13 @@
             const imprintX = r * 0.06;
             const imprintY = h - r * 0.05;
             const imprintMetrics = ctx.measureText(imprintText);
-            // Debug: hide imprint when clock-only mode is active (toggled by 'D')
-            if (!window.__clockOnlyMode) {
+            // Debug: fade imprint when clock-only mode is active (toggled by 'D')
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
+                ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
                 ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
                 ctx.fillText(imprintText, imprintX, imprintY);
+                ctx.restore();
             }
             imprintHitbox = {
                 x: imprintX,
@@ -1432,37 +1528,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // ROT-Checkbox (top-left of box)
-                const cbSize = 14;
-                const cbX = x + 8;
-                const cbY = y + 6;
-                ctx.save();
-                ctx.strokeStyle = targetCity.red ? "#550000" : "rgba(0, 210, 255, 0.7)";
-                ctx.lineWidth = 1;
-                ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-                ctx.beginPath();
-                ctx.rect(cbX, cbY, cbSize, cbSize);
-                ctx.fill();
-                ctx.stroke();
-                if (targetCity.red) {
-                    const cbGrad = ctx.createRadialGradient(
-                        cbX + cbSize/2, cbY + cbSize/2, 0,
-                        cbX + cbSize/2, cbY + cbSize/2, cbSize/2
-                    );
-                    cbGrad.addColorStop(0, '#ff2a2a');
-                    cbGrad.addColorStop(1, '#880000');
-                    ctx.fillStyle = cbGrad;
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = '#ff0000';
-                    ctx.fillRect(cbX + 1, cbY + 1, cbSize - 2, cbSize - 2);
-                }
-                ctx.restore();
-                redCheckHitbox = {
-                    x: popupX + cbX,
-                    y: popupY + cbY,
-                    w: cbSize,
-                    h: cbSize
-                };
 
                 ctx.textAlign = "center";
 
@@ -1708,12 +1773,12 @@
             const BRAND_BLUE = "#00d2ff";
             CyberUI.createCard('ui-container', 'Steuerung', `
                 <div style="display: flex; flex-direction: column; gap: 10px; align-items: stretch; padding: 0;">
-                    <button id="rotation-btn" class="cyber-btn" onclick="toggleRotation()" 
+                    <button id="rotation-btn" class="cyber-btn" onclick="toggleRotation()"
                             style="width: 100%; border-color: var(--neon-blue); color: var(--neon-blue); padding: 8px;">
                         ROTATION START
                     </button>
-                    
-                    <button class="cyber-btn" onclick="manualReset()" 
+
+                    <button class="cyber-btn" onclick="manualReset()"
                             style="width: 100%; border-color: #ff3366; color: #ff3366; padding: 8px;">
                         RESET
                     </button>
@@ -2025,43 +2090,138 @@
                 '#mini-rail',
                 '#math-coach-box',
                 '#wc-search',
-                '.canvas-branding'         // SOMMERZEIT / NORMALZEIT title block
+                '.canvas-branding',        // SOMMERZEIT / NORMALZEIT title block
+                '#central-debug-window'    // floating DEBUG window
             ];
+
+            // Cover strip that paints over the grey ex-mini-rail column
+            const cover  = document.getElementById('debug-clock-cover');
+            const pieces = {
+                top:    cover && cover.querySelector('[data-piece="top"]'),
+                bottom: cover && cover.querySelector('[data-piece="bottom"]'),
+                left:   cover && cover.querySelector('[data-piece="left"]'),
+                right:  cover && cover.querySelector('[data-piece="right"]')
+            };
+
+            function updateStrip() {
+                if (!cover || !pieces.left) return;
+                const chrome = document.getElementById('cyber-left-chrome');
+                const rect = chrome ? chrome.getBoundingClientRect() : { left: 0, top: 0, width: 66, height: window.innerHeight };
+                pieces.left.style.cssText =
+                    `position:absolute;background:#000616;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;`;
+                pieces.top.style.cssText    = 'display:none;';
+                pieces.bottom.style.cssText = 'display:none;';
+                pieces.right.style.cssText  = 'display:none;';
+                safeLog('[strip] left=' + rect.left + ' w=' + rect.width + ' h=' + rect.height);
+            }
+
+            let nextInteractionHandler = null;
+            function detachNextInteraction() {
+                if (!nextInteractionHandler) return;
+                document.removeEventListener('mousedown', nextInteractionHandler, true);
+                document.removeEventListener('keydown',   nextInteractionHandler, true);
+                document.removeEventListener('wheel',     nextInteractionHandler, true);
+                document.removeEventListener('touchstart',nextInteractionHandler, true);
+                nextInteractionHandler = null;
+            }
+
+            // Auto-hide: 5 s after load / after each restore → switch into clock-only mode
+            let autoHideTimer = null;
+            const AUTO_HIDE_MS = 5000;
+            function scheduleAutoHide() {
+                if (autoHideTimer) clearTimeout(autoHideTimer);
+                autoHideTimer = setTimeout(() => {
+                    autoHideTimer = null;
+                    applyMode(true);
+                }, AUTO_HIDE_MS);
+                safeLog('[autoHide] scheduled in ' + AUTO_HIDE_MS + 'ms');
+            }
+            function clearAutoHide() {
+                if (!autoHideTimer) return;
+                clearTimeout(autoHideTimer);
+                autoHideTimer = null;
+            }
+
+            const FADE_OUT_MS = 2000;
+            const FADE_IN_MS  = 250;
+
+            // Canvas elements (SOMMERZEIT/NORMALZEIT/Globe/Impressum) read this each frame.
+            window.__clockOnlyAlpha = 1;
+            let alphaAnimRaf = null;
+            function animateAlpha(toAlpha, durationMs) {
+                if (alphaAnimRaf) cancelAnimationFrame(alphaAnimRaf);
+                const from = window.__clockOnlyAlpha;
+                const start = performance.now();
+                function tick(t) {
+                    const p = Math.min(1, (t - start) / durationMs);
+                    window.__clockOnlyAlpha = from + (toAlpha - from) * p;
+                    if (p < 1) alphaAnimRaf = requestAnimationFrame(tick);
+                    else alphaAnimRaf = null;
+                }
+                alphaAnimRaf = requestAnimationFrame(tick);
+            }
 
             function applyMode(active) {
                 window.__clockOnlyMode = active;
-                document.body.classList.toggle('clock-only-mode', active);
-                // Inline grid override (beats CSS specificity)
-                if (active) {
-                    if (document.body.dataset.prevGridCols === undefined) {
-                        document.body.dataset.prevGridCols = document.body.style.gridTemplateColumns || '';
-                    }
-                    document.body.style.setProperty('grid-template-columns', '0 0 minmax(0, 1fr)', 'important');
-                } else {
-                    document.body.style.gridTemplateColumns = document.body.dataset.prevGridCols || '';
-                    delete document.body.dataset.prevGridCols;
-                }
-                safeLog('[clockOnly] body.style.gridTemplateColumns=' + document.body.style.gridTemplateColumns);
+                animateAlpha(active ? 0 : 1, active ? FADE_OUT_MS : FADE_IN_MS);
                 HIDE_SELECTORS.forEach(sel => {
                     const el = document.querySelector(sel);
                     if (!el) { safeLog('[clockOnly] not found: ' + sel); return; }
+                    el.style.transition = `opacity ${active ? FADE_OUT_MS : FADE_IN_MS}ms ease`;
+                    // Cancel CSS animations (e.g. .canvas-branding's branding-fade-in
+                    // with fill-mode forwards) — otherwise the animation's end-state
+                    // (opacity:1) overrides our inline opacity:0.
+                    el.style.animation = 'none';
+                    // Force reflow so the transition is observed
+                    void el.offsetWidth;
                     if (active) {
-                        if (el.dataset.prevDisplay === undefined) {
-                            el.dataset.prevDisplay = el.style.display || '';
+                        if (el.dataset.prevOpacity === undefined) {
+                            el.dataset.prevOpacity = el.style.opacity || '';
+                            el.dataset.prevPointer = el.style.pointerEvents || '';
                         }
-                        el.style.display = 'none';
+                        el.style.opacity = '0';
+                        el.style.pointerEvents = 'none';
                     } else {
-                        el.style.display = el.dataset.prevDisplay || '';
-                        delete el.dataset.prevDisplay;
+                        el.style.opacity = el.dataset.prevOpacity || '';
+                        el.style.pointerEvents = el.dataset.prevPointer || '';
+                        delete el.dataset.prevOpacity;
+                        delete el.dataset.prevPointer;
                     }
                 });
-                // Trigger resize so the canvas recalculates dimensions for the new width
-                window.dispatchEvent(new Event('resize'));
+                if (active) {
+                    clearAutoHide();
+                    updateStrip();
+                    cover && cover.classList.add('show');
+                    // Restore on the next user interaction. Defer one frame so the
+                    // current D-keydown isn't picked up as the "next" interaction.
+                    detachNextInteraction();
+                    requestAnimationFrame(() => {
+                        nextInteractionHandler = () => {
+                            detachNextInteraction();
+                            applyMode(false);
+                            scheduleAutoHide();  // 5 s after this interaction → hide again
+                        };
+                        document.addEventListener('mousedown', nextInteractionHandler, true);
+                        document.addEventListener('keydown',   nextInteractionHandler, true);
+                        document.addEventListener('wheel',     nextInteractionHandler, true);
+                        document.addEventListener('touchstart',nextInteractionHandler, true);
+                    });
+                } else {
+                    cover && cover.classList.remove('show');
+                    detachNextInteraction();
+                }
                 safeLog('[clockOnly] active=' + active);
             }
 
+            window.addEventListener('resize', () => {
+                if (cover && cover.classList.contains('show')) updateStrip();
+            });
+
             function toggle() {
-                applyMode(!window.__clockOnlyMode);
+                const wasActive = !!window.__clockOnlyMode;
+                applyMode(!wasActive);
+                // Manual D-toggle from active→inactive: also schedule the 5 s auto-hide
+                if (wasActive) scheduleAutoHide();
             }
 
             document.addEventListener('keydown', (e) => {
@@ -2071,6 +2231,8 @@
                 toggle();
             }, true);
 
+            // Initial: 5 s after load, hide
+            scheduleAutoHide();
             safeLog('[clockOnly] toggle setup ready — press D');
         })();
     </script>
