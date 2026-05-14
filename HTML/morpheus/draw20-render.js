@@ -185,7 +185,7 @@ function createDraw20Render({
     // match lines.
     // `pointsOut` (optional Map<matchId, mapped-point-array>) — used by
     // renderMorph for the pair-wise interpolation.
-    function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut) {
+    function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut, holesOut) {
         if (!contours || contours.length === 0) return 0;
         const svgNS = 'http://www.w3.org/2000/svg';
         const z = getZ() || 1;
@@ -257,6 +257,7 @@ function createDraw20Render({
                 centroidsOut.set(mid, [sx / oc.length, sy / oc.length]);
             }
             if (pointsOut) pointsOut.set(mid, oc);
+            if (holesOut) holesOut.set(mid, outer.holes.map(hi => mappedAll[hi]).filter(Boolean));
         }
 
         // ── STROKE + POINTS: one polygon + N circles per contour.
@@ -591,6 +592,8 @@ function createDraw20Render({
         const latCentroids = new Map();
         const pngPoints = new Map();
         const latPoints = new Map();
+        const pngHoles = new Map();
+        const latHoles = new Map();
 
         // ── PNG render
         if (pix.complete && pix.naturalWidth) {
@@ -609,7 +612,7 @@ function createDraw20Render({
                     x: (offX + x * scale - wrapRect.left) / z,
                     y: (offY + y * scale - wrapRect.top) / z,
                 });
-                pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints);
+                pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints, pngHoles);
             }
         }
 
@@ -630,7 +633,7 @@ function createDraw20Render({
                     x: (offX + x * scale - wrapRect.left) / z,
                     y: (offY + y * scale - wrapRect.top) / z,
                 });
-                latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints);
+                latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints, latHoles);
             }
         }
 
@@ -678,7 +681,12 @@ function createDraw20Render({
         for (const [mid, pp] of pngPoints) {
             const lp = latPoints.get(mid);
             if (!lp) continue;
-            morphPairs.push({ mid, pngPts: pp, latPts: lp });
+            morphPairs.push({
+                mid,
+                pngPts: pp, latPts: lp,
+                pngHoles: pngHoles.get(mid) || [],
+                latHoles: latHoles.get(mid) || [],
+            });
         }
         // Morph-layer on top of everything for visibility.
         overlay.appendChild(morphLayer);

@@ -77,12 +77,17 @@
         // (no two-render discrepancy from a separate html2canvas pass).
         const tex = document.createElement('img');
         tex.draggable = false;
+        // LaTeX pane 100 % larger than the PNG/stift pane (43→86vh, 29→58vw),
+        // shifted ~20 vw further to the right via margin-left (the flex
+        // gap adapts — translateX was being absorbed by the wrap's flex
+        // centering).
         tex.style.cssText = `
-            max-height: 43vh;
-            max-width: 29vw;
+            max-height: 86vh;
+            max-width: 58vw;
             object-fit: contain;
             pointer-events: none;
             user-select: none;
+            margin-left: 40vw;
         `;
         // Stash the rendered offscreen canvas for re-use during contour
         // extraction (avoids re-rendering, and keeps coords identical).
