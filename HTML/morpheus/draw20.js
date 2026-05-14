@@ -323,6 +323,7 @@
         });
         const renderBBoxes = render.renderBBoxes;
         const openPolygonRing = render.openPolygonRing;
+        const openMorph3D = render.openMorph3D;
 
         // ── UI: Toggles, Formula/Symbol radios, context menu, RING button.
         // Lives in draw20-ui.js. Assigning to the previously-declared `let
@@ -334,6 +335,7 @@
             renderLatex,
             renderBBoxes,
             openPolygonRing,
+            openMorph3D,
             defaultLatex: DEFAULT_LATEX,
             defaultPreset: DEFAULT_PRESET,
             dbg,
