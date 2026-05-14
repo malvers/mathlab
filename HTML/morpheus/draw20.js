@@ -848,7 +848,11 @@
         // wrap-local point array per outer — used by renderMorph() for the
         // pair-wise interpolation between PNG and LaTeX matched outers.
         function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut) {
-            if (!contours || contours.length === 0) return;
+            dbg(`→ drawContours(${label}): input contours.length=${contours ? contours.length : 'null'}`);
+            if (!contours || contours.length === 0) {
+                dbg(`  SKIP: no contours`);
+                return 0;
+            }
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = zoom || 1;
             const sw = String(1 / z);
@@ -917,9 +921,14 @@
 
             // ── STROKE + POINTS: one polygon + N circles per contour.
             let totalVerts = 0;
+            let polyCount = 0;
+            const mappedCount = mappedAll.filter(m => m).length;
+            dbg(`[${label}] mappedAll: ${mappedAll.length} total, ${mappedCount} non-null`);
             for (let i = 0; i < contours.length; i++) {
                 const mapped = mappedAll[i];
-                if (!mapped) continue;
+                if (!mapped) { dbg(`[${label}] contour ${i}: mapped=null`); continue; }
+                dbg(`[${label}] contour ${i}: mapped.length=${mapped.length}`);
+                polyCount++;
                 const mid = matchId[i];
                 const orphan = isOrphanMid(mid);
                 const colour = colourOf(i);
@@ -950,10 +959,11 @@
                     totalVerts++;
                 }
             }
-            dbg(`outlines ${label}: ${contours.length} contour(s), ${totalVerts} verts, ${classified.outers.length} outer(s), ${classified.holes.length} hole(s)`);
+            dbg(`outlines ${label}: ${contours.length} contour(s), ${polyCount} polygon(s) drawn, ${totalVerts} verts, ${classified.outers.length} outer(s), ${classified.holes.length} hole(s)`);
             applyLinesToggle();
             applyPointsToggle();
             applyFillToggle();
+            return totalVerts;
         }
 
         // Cross-pane region highlighting. Yellow glow = "you and your partner".
@@ -992,10 +1002,9 @@
             activeMatchId = next;
         }
 
-        // Similarity metric: normalize both contour sets to the same
-        // [-1, 1] box (preserving aspect via normalizeForMatching), then
-        // average the centroid distance between paired outers (smallest-area
-        // index match). Result mapped to 0–100% with maxDist = 0.5.
+        // Similarity metric: account for centroid distance, vertex count, and topology
+        // Returns 0–100%, with penalties for: contour count mismatch, vertex count
+        // difference, and centroid displacement.
         function computeSimilarity(pngContours, latexContours) {
             if (!pngContours || !latexContours
                 || pngContours.length === 0 || latexContours.length === 0
@@ -1019,9 +1028,14 @@
             const avg = sum / n;
             // Count mismatch penalty: missing/extra outers count as max dist.
             const missing = Math.abs(pNorm.length - lNorm.length);
-            const penalty = missing * 0.5;
-            const effDist = (avg * n + penalty) / Math.max(n + missing, 1);
-            const maxDist = 0.5;
+            const countPenalty = missing * 0.5;
+            // Vertex count penalty: 20% weight on point count difference
+            const vertDiff = Math.abs(pngVertCount - latVertCount);
+            const maxVerts = Math.max(pngVertCount, latVertCount, 1);
+            const vertPenalty = (vertDiff / maxVerts) * 0.2;
+            // Combined distance
+            const effDist = (avg * n + countPenalty) / Math.max(n + missing, 1) + vertPenalty;
+            const maxDist = 0.7; // increased range for more discrimination
             return Math.max(0, Math.min(100, Math.round(100 * (1 - effDist / maxDist))));
         }
 
@@ -1029,13 +1043,19 @@
             const objVal = document.getElementById('obj-value');
             const latVal = document.getElementById('lat-value');
             const simVal = document.getElementById('sim-value');
+            const objVerts = document.getElementById('obj-verts');
+            const latVerts = document.getElementById('lat-verts');
             const pOuters = (pngContours && typeof classifyContours === 'function')
                 ? classifyContours(pngContours).outers.length : 0;
             const lOuters = (latexContours && typeof classifyContours === 'function')
                 ? classifyContours(latexContours).outers.length : 0;
             if (objVal) objVal.textContent = pOuters;
             if (latVal) latVal.textContent = lOuters;
-            if (simVal) simVal.textContent = computeSimilarity(pngContours, latexContours) + '%';
+            if (objVerts) objVerts.textContent = pngVertCount;
+            if (latVerts) latVerts.textContent = latVertCount;
+            baseSimilarity = computeSimilarity(pngContours, latexContours);
+            if (simVal) simVal.textContent = baseSimilarity + '%';
+            dbg(`📊 PNG: ${pOuters} obj, ${pngVertCount} pts | LaTeX: ${lOuters} obj, ${latVertCount} pts | Ähnlichkeit: ${baseSimilarity}%`);
         }
 
         // Master switch — when false, Hungarian / vetoes / uncrossing /
@@ -1815,6 +1835,7 @@
         }
 
         function renderBBoxes() {
+            dbg(`=== renderBBoxes START ===`);
             // Detach morph-layer first, wipe everything, drawing happens in
             // between, morph-layer gets re-attached as the LAST child below
             // so its polygons render on TOP of bboxes/outlines/dots.
@@ -1831,10 +1852,12 @@
                 pc.height = pix.naturalHeight;
                 pc.getContext('2d').drawImage(pix, 0, 0);
                 pngContours = extractPNGContours(pc);
+                dbg(`extractPNGContours: ${pngContours ? pngContours.length : 0} contours`);
             }
             if (tex.complete && tex.naturalWidth && latexCanvas) {
                 const res = extractLatexContours();
                 if (res && res.contours.length) latexContoursList = res.contours;
+                dbg(`extractLatexContours: ${latexContoursList ? latexContoursList.length : 0} contours`);
             }
 
             const matchInfo = computeMatchIds(pngContours, latexContoursList);
@@ -1881,7 +1904,7 @@
             if (pix.complete && pix.naturalWidth) {
                 const bbox = computeImageBBox(pix);
                 if (bbox) drawBBox(mapImageBBoxToViewport(pix, bbox), 'png');
-
+                dbg(`PNG render: pngContours=${pngContours ? pngContours.length : 'null'}`);
                 if (pngContours && pngContours.length) {
                     const r = pix.getBoundingClientRect();
                     const wrapRect = wrap.getBoundingClientRect();
@@ -1895,15 +1918,21 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints);
+                    dbg(`BEFORE PNG drawContours: pngVertCount=${pngVertCount}, pngContours=${pngContours.length}`);
+                    pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints);
+                    dbg(`AFTER PNG drawContours: pngVertCount=${pngVertCount}`);
+                } else {
+                    dbg(`SKIP PNG drawContours: pngContours=${pngContours ? pngContours.length : 'null'}`);
                 }
+            } else {
+                dbg(`SKIP PNG render: pix.complete=${pix.complete}, pix.naturalWidth=${pix.naturalWidth}`);
             }
 
             // ── LaTeX render
             if (tex.complete && tex.naturalWidth && latexCanvas) {
                 const bbox = computeContentBBox(latexCanvas, 'alpha');
                 if (bbox) drawBBox(mapImageBBoxToViewport(tex, bbox), 'latex');
-
+                dbg(`LaTeX render: latexContoursList=${latexContoursList ? latexContoursList.length : 'null'}`);
                 if (latexContoursList && latexContoursList.length) {
                     const r = tex.getBoundingClientRect();
                     const wrapRect = wrap.getBoundingClientRect();
@@ -1917,8 +1946,14 @@
                         x: (offX + x * scale - wrapRect.left) / z,
                         y: (offY + y * scale - wrapRect.top) / z,
                     });
-                    drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints);
+                    dbg(`BEFORE LaTeX drawContours: latVertCount=${latVertCount}, latexContoursList=${latexContoursList.length}`);
+                    latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints);
+                    dbg(`AFTER LaTeX drawContours: latVertCount=${latVertCount}`);
+                } else {
+                    dbg(`SKIP LaTeX drawContours: latexContoursList=${latexContoursList ? latexContoursList.length : 'null'}`);
                 }
+            } else {
+                dbg(`SKIP LaTeX render: tex.complete=${tex.complete}, tex.naturalWidth=${tex.naturalWidth}, latexCanvas=${!!latexCanvas}`);
             }
 
             // ── Match lines: Centroid-zu-Centroid pro gematchtes Outer-Pair.
@@ -1991,7 +2026,9 @@
 
             if (sl) renderMorph(+sl.value / 100);
 
+            dbg(`=== BEFORE updateInfoBoxes: pngVertCount=${pngVertCount}, latVertCount=${latVertCount} ===`);
             updateInfoBoxes(pngContours, latexContoursList);
+            dbg(`=== renderBBoxes END ===`);
         }
 
         // ── Morph: interpolate matched outer pairs between PNG and LaTeX —
@@ -2003,6 +2040,9 @@
         // (pix vs. stiftCanvas) crossfadet zur tex-Pane.
         const morphPairs = [];
         const stiftMorphPairs = [];
+        let baseSimilarity = 0; // Ähnlichkeit bei t=0, wird in renderBBoxes gespeichert
+        let pngVertCount = 0;
+        let latVertCount = 0;
         function resampleClosed(pts, n) {
             if (!pts || pts.length === 0) return [];
             if (typeof resamplePolygon === 'function') {
@@ -2137,9 +2177,62 @@
             tex.style.opacity = '';
             if (!pairs.length) {
                 srcEl.style.opacity = '';
+                // Pre-morph nicht aktiv: alle Outlines/Punkte wieder zeigen
+                overlay.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
                 return;
             }
             srcEl.style.opacity = (t < MORPH_EPS) ? '' : '0';
+            // Ähnlichkeit während Morph interpolieren: von baseSimilarity gegen 100
+            const morphedSim = Math.round(baseSimilarity + (100 - baseSimilarity) * t);
+            const simVal = document.getElementById('sim-value');
+            if (simVal) simVal.textContent = morphedSim + '%';
+            if (t % 0.1 < 0.01) dbg(`🔄 Morph t=${t.toFixed(2)}: Ähnlichkeit ${morphedSim}%`);
+            // Während Morph (t ≥ eps): Punkte+Linien NUR der Quell-Seite
+            // verstecken; Ziel-Outlines (LaTeX) bleiben sichtbar.
+            if (t >= MORPH_EPS) {
+                const srcLabel = useStift ? 'stift' : 'png';
+                // PNG/LaTeX source outlines
+                overlay.querySelectorAll(`polygon[data-source="${srcLabel}"]`).forEach(p => {
+                    p.style.display = 'none';
+                });
+                overlay.querySelectorAll(`circle[data-kind="point"][data-source="${srcLabel}"]`).forEach(c => {
+                    c.style.display = 'none';
+                });
+                // Stift source outlines
+                if (useStift) {
+                    stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                        p.style.display = 'none';
+                    });
+                    stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                        c.style.display = 'none';
+                    });
+                }
+            } else {
+                // Pre-morph: alle Outlines/Punkte zeigen
+                overlay.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+            }
             if (t < MORPH_EPS) {
                 // Pre-Morph-Vorschau: gleiche Korrespondenz die der Morph
                 // nutzt. alignTargetTo (engine) findet Rotation+Reverse;
