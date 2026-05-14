@@ -1552,6 +1552,13 @@
 
                 ctx.textAlign = "center";
 
+                // Status (Sommerzeit/Normalzeit) — compute first so HIGHLIGHT button can match its colors
+                const dstStatus = getDSTLabel(targetCity.tz);
+                const isSZ = (dstStatus === "SZ");
+                const dstColor = isSZ ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
+                const dstColorDim = isSZ ? "rgba(255, 170, 0, 0.6)" : "rgba(220, 220, 220, 0.5)";
+                const dstColorBg = isSZ ? "rgba(255, 170, 0, 0.18)" : "rgba(220, 220, 220, 0.10)";
+
                 // HIGHLIGHT Button (over SOMMERZEIT/NORMALZEIT line, full box width)
                 const isHighlightOn = !!(targetCity && targetCity.red);
                 const hbX = -boxW/2 + 6;
@@ -1559,8 +1566,21 @@
                 const hbW = boxW - 12;
                 const hbH = 22;
                 ctx.save();
-                ctx.fillStyle = isHighlightOn ? "rgba(255, 170, 0, 0.25)" : "rgba(0, 210, 255, 0.08)";
-                ctx.strokeStyle = isHighlightOn ? "#ffaa00" : "rgba(0, 210, 255, 0.6)";
+                // Background: red radial gradient when active (matches city marker sphere), else transparent
+                if (isHighlightOn) {
+                    // Gradient spans full button width with softer falloff (no harsh black edges)
+                    const hbGrad = ctx.createRadialGradient(
+                        0, hbY + hbH/2, 0,
+                        0, hbY + hbH/2, hbW/2
+                    );
+                    hbGrad.addColorStop(0, '#dd1144');
+                    hbGrad.addColorStop(0.5, '#88001f');
+                    hbGrad.addColorStop(1, '#440011');
+                    ctx.fillStyle = hbGrad;
+                } else {
+                    ctx.fillStyle = "transparent";
+                }
+                ctx.strokeStyle = isHighlightOn ? dstColor : dstColorDim;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 const hbR = 4;
@@ -1576,7 +1596,7 @@
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                ctx.fillStyle = isHighlightOn ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                ctx.fillStyle = isHighlightOn ? "#fff" : dstColorDim;
                 ctx.font = "900 11px Orbitron";
                 ctx.textBaseline = "middle";
                 ctx.fillText("HIGHLIGHT", 0, hbY + hbH/2);
@@ -1589,8 +1609,6 @@
                     h: hbH
                 };
 
-                // Status (Sommerzeit/Normalzeit)
-                const dstStatus = getDSTLabel(targetCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
                 ctx.font = "900 10px Orbitron";
                 ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 38);
@@ -1618,11 +1636,11 @@
                 drawDigitBox(parts[1], 0);   // MM
                 drawDigitBox(parts[2], 40);  // SS
                 
-                // Colons (Restored)
+                // Colons (Restored) — kept 4px above the digit baseline (digits use y+85)
                 ctx.fillStyle = "#00d2ff";
                 ctx.font = "bold 14px Orbitron";
-                ctx.fillText(":", -20, y + 61);
-                ctx.fillText(":", 20, y + 61);
+                ctx.fillText(":", -20, y + 81);
+                ctx.fillText(":", 20, y + 81);
                 
                 // --- Neighborhood Cities (Full Map Database with Flags) ---
                 const getRelatedCities = (tz) => {

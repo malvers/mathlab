@@ -349,16 +349,27 @@ const CyberBranding = {
         }
         if (document.querySelector('.canvas-branding')) return;
 
+        // Subtle fullscreen toggle icon — kept in sync with branding/core.js
+        const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>`;
+        const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>`;
+        const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
+
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.title = "Vollbild umschalten";
         container.innerHTML = `
-            <h1 id="branding-master-title">${topLine}</h1>
+            <h1 id="branding-master-title">${currentIcon()}${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
         container.addEventListener('click', (e) => {
             this.toggleFullscreen();
+        });
+        document.addEventListener('fullscreenchange', () => {
+            const h1 = container.querySelector('#branding-master-title');
+            if (!h1) return;
+            const oldIcon = h1.querySelector('.canvas-branding-fs-icon');
+            if (oldIcon) oldIcon.outerHTML = currentIcon();
         });
         const anchor =
             document.getElementById('main-content') ||
