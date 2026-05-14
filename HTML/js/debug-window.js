@@ -42,8 +42,8 @@ const DebugWindow = (() => {
             width: ${collapsed ? '50px' : w};
             height: ${h};
             background: rgba(0, 0, 0, 0.95);
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid ${collapsed ? '#444444' : '#6BA043'};
+            color: ${collapsed ? '#444444' : '#6BA043'};
             font-family: Arial, sans-serif;
             font-size: 11px;
             padding: ${collapsed ? '0' : '8px'};
@@ -134,8 +134,8 @@ const DebugWindow = (() => {
         btnCollapse.title = 'Collapse/Expand';
         btnCollapse.style.cssText = `
             background: transparent;
-            border: 1px solid #6BA043;
-            color: #6BA043;
+            border: 1px solid ${collapsed ? '#444444' : '#6BA043'};
+            color: ${collapsed ? '#444444' : '#6BA043'};
             width: 28px;
             height: 24px;
             cursor: pointer;
@@ -333,6 +333,8 @@ const DebugWindow = (() => {
             debugEl.style.display = 'flex';
             debugEl.style.justifyContent = 'center';
             debugEl.style.alignItems = 'center';
+            debugEl.style.borderColor = '#444444';
+            debugEl.style.color = '#444444';
             // Snap collapsed pill to bottom-right of viewport
             debugEl.style.left = 'auto';
             debugEl.style.top = 'auto';
@@ -348,7 +350,11 @@ const DebugWindow = (() => {
                 header.style.paddingBottom = '0';
                 header.style.borderBottom = 'none';
             }
-            if (btn) btn.textContent = '▲';
+            if (btn) {
+                btn.textContent = '▲';
+                btn.style.borderColor = '#444444';
+                btn.style.color = '#444444';
+            }
         } else {
             // Expanding: restore previous height + position (or bottom-right default)
             collapsed = false;
@@ -357,6 +363,8 @@ const DebugWindow = (() => {
             debugEl.style.padding = '8px';
             debugEl.style.justifyContent = 'flex-start';
             debugEl.style.alignItems = 'stretch';
+            debugEl.style.borderColor = '#6BA043';
+            debugEl.style.color = '#6BA043';
             if (prevLeft || prevTop) {
                 debugEl.style.left = prevLeft;
                 debugEl.style.top = prevTop;
@@ -378,7 +386,11 @@ const DebugWindow = (() => {
                 header.style.paddingBottom = '6px';
                 header.style.borderBottom = '1px solid rgba(107, 160, 67, 0.3)';
             }
-            if (btn) btn.textContent = '▼';
+            if (btn) {
+                btn.textContent = '▼';
+                btn.style.borderColor = '#6BA043';
+                btn.style.color = '#6BA043';
+            }
         }
 
         try { localStorage.setItem('debug-window-collapsed', collapsed ? '1' : '0'); } catch (_) {}
