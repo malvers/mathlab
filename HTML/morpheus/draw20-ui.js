@@ -14,8 +14,9 @@ function createDraw20UI({
     // Renderers (closure into draw20.js)
     renderLatex,
     renderBBoxes,
-    // Diagnostic callback
+    // Diagnostic callbacks
     openPolygonRing,
+    openMorph3D,
     // Defaults
     defaultLatex = (typeof DRAW20_DEFAULT_LATEX !== 'undefined' ? DRAW20_DEFAULT_LATEX : 'E=mc^2'),
     defaultPreset = (typeof DRAW20_DEFAULT_PRESET !== 'undefined' ? DRAW20_DEFAULT_PRESET : 0),
@@ -259,35 +260,48 @@ function createDraw20UI({
     }
     host.appendChild(ringBtn);
 
-    // Position the button below the similarity-box. Re-position on every
+    // ── 3D MORPH button ─────────────────────────────────────────────────────
+    // Button creation + window-spawn logic live in morph3d.js. Layout
+    // (position-below-RING) is handled here so the whole stack stays in sync.
+    const morph3dBtn = (typeof Morph3D !== 'undefined' && Morph3D.createMorph3DButton)
+        ? Morph3D.createMorph3DButton(host, openMorph3D)
+        : null;
+
+    // Shared styling for both buttons (RING + 3D MORPH).
+    const stackBtnCss = `
+        position: absolute !important;
+        display: block !important;
+        z-index: 50;
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.85);
+        color: #00d2ff;
+        border: 1px solid rgba(0, 210, 255, 0.5);
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+    `;
+
+    // Position both buttons below the similarity-box. Re-position on every
     // render (in case the sim-box size changed) and on resize.
     function positionRingBtn() {
         const sim = document.getElementById('similarity-box');
         if (!sim) { setTimeout(positionRingBtn, 100); return; }
         const simRect = sim.getBoundingClientRect();
         const hostRect = host.getBoundingClientRect();
-        const top = simRect.bottom - hostRect.top + 8;
         const left = simRect.left - hostRect.left;
         const width = simRect.width;
-        ringBtn.style.cssText = `
-            position: absolute !important;
-            display: block !important;
-            top: ${top}px;
-            left: ${left}px;
-            width: ${width}px;
-            z-index: 50;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #00d2ff;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            cursor: pointer;
-        `;
+        const ringTop = simRect.bottom - hostRect.top + 8;
+        ringBtn.style.cssText = stackBtnCss + `top:${ringTop}px;left:${left}px;width:${width}px;`;
+        // 3D MORPH directly under RING with the same gap.
+        if (morph3dBtn) {
+            const ringRect = ringBtn.getBoundingClientRect();
+            const morphTop = ringRect.bottom - hostRect.top + 8;
+            morph3dBtn.style.cssText = stackBtnCss + `top:${morphTop}px;left:${left}px;width:${width}px;`;
+        }
     }
     positionRingBtn();
     window.addEventListener('resize', positionRingBtn);

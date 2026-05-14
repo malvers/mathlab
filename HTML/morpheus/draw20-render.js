@@ -164,10 +164,13 @@ function createDraw20Render({
             }
         }
         const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
+        // Side-coloured: PNG/Stift = green (matches #object-count-box),
+        // LaTeX = orange (matches #latex-count-box). Orphans stay red.
+        const SIDE_COLOR = (label === 'latex') ? '#F4C430' : '#adff2f';
         const colourOf = (i) => {
             const mid = matchId[i];
             if (mid < 0) return INK;
-            return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
+            return isOrphanMid(mid) ? ORPHAN : SIDE_COLOR;
         };
 
         // ── FILL: one <path> per outer group (outer + its holes).
@@ -186,7 +189,7 @@ function createDraw20Render({
             const path = document.createElementNS(svgNS, 'path');
             path.setAttribute('d', d);
             path.setAttribute('fill-rule', 'evenodd');
-            path.setAttribute('fill', orphan ? ORPHAN : draw20PaletteColor(mid));
+            path.setAttribute('fill', orphan ? ORPHAN : SIDE_COLOR);
             path.setAttribute('stroke', 'none');
             if (orphan) path.style.filter = GLOW;
             path.dataset.kind = 'fill';
@@ -203,18 +206,21 @@ function createDraw20Render({
         }
 
         // ── STROKE + POINTS: one polygon + N circles per contour.
+        // For now: outline strokes = dark red, vertex dots = blue.
+        // Orphans still get their red+glow override.
+        const LINE_COLOR = '#8B0000';
+        const POINT_COLOR = '#4363d8';
         let totalVerts = 0;
         for (let i = 0; i < contours.length; i++) {
             const mapped = mappedAll[i];
             if (!mapped) continue;
             const mid = matchId[i];
             const orphan = isOrphanMid(mid);
-            const colour = colourOf(i);
             const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
             const poly = document.createElementNS(svgNS, 'polygon');
             poly.setAttribute('points', pts);
             poly.setAttribute('fill', 'none');
-            poly.setAttribute('stroke', colour);
+            poly.setAttribute('stroke', orphan ? ORPHAN : LINE_COLOR);
             poly.setAttribute('stroke-width', sw);
             poly.setAttribute('stroke-linejoin', 'round');
             if (orphan) poly.style.filter = GLOW;
@@ -228,7 +234,7 @@ function createDraw20Render({
                 dot.setAttribute('cx', m.x);
                 dot.setAttribute('cy', m.y);
                 dot.setAttribute('r', pr);
-                dot.setAttribute('fill', colour);
+                dot.setAttribute('fill', orphan ? ORPHAN : POINT_COLOR);
                 if (orphan) dot.style.filter = GLOW;
                 dot.dataset.kind = 'point';
                 dot.dataset.source = label;
@@ -327,6 +333,7 @@ function createDraw20Render({
         const sim = computeSimilarity(pngContours, latexContours);
         setBS(sim);
         if (simVal) simVal.textContent = sim + '%';
+        // log(`📐 outline-points: PNG=${pngVertCount} (${pOuters} obj) | LaTeX=${latVertCount} (${lOuters} obj)`);
     }
 
     // ── Cross-pane matching wrapper ─────────────────────────────────────────
@@ -342,6 +349,13 @@ function createDraw20Render({
     function openPolygonRing() {
         if (typeof draw20OpenPolygonRing === 'function') {
             draw20OpenPolygonRing(lastRenderData, matchingEnabled !== false);
+        }
+    }
+
+    // ── 3D Morph view (delegates to morph3d.js) ─────────────────────────────
+    function openMorph3D() {
+        if (typeof Morph3D !== 'undefined' && typeof Morph3D.openMorph3D === 'function') {
+            Morph3D.openMorph3D(lastRenderData);
         }
     }
 
@@ -512,6 +526,7 @@ function createDraw20Render({
     return {
         renderBBoxes,
         openPolygonRing,
+        openMorph3D,
         getLastRenderData: () => lastRenderData,
     };
 }

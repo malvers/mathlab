@@ -244,7 +244,7 @@ function createDraw20Morph({
             const poly = document.createElementNS(svgNS, 'polygon');
             poly.setAttribute('points', polyStr);
             poly.setAttribute('fill', draw20PaletteColor(pair.mid));
-            poly.setAttribute('fill-opacity', '0.85');
+            poly.setAttribute('fill-opacity', '1');
             poly.setAttribute('stroke', '#ffffff');
             poly.setAttribute('stroke-width', String(1.5 / z));
             poly.setAttribute('stroke-opacity', '0.6');

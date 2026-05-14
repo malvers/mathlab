@@ -38,7 +38,7 @@ function createDraw20Stift({
     const onOutlinesChanged = (typeof onAfterOutlinesChanged === 'function')
         ? onAfterOutlinesChanged : () => {};
 
-    // log('⚙ createDraw20Stift called');
+    log('⚙ createDraw20Stift called');
 
     // ── Draw state ──────────────────────────────────────────────────────────
     let strokes = [];
@@ -54,7 +54,7 @@ function createDraw20Stift({
     try {
         stiftEnabled = localStorage.getItem('draw20-stift-enabled') === '1';
     } catch (_) {}
-    // log(`  restored: ${strokes.length} stroke(s), stiftEnabled=${stiftEnabled}`);
+    log(`  restored: ${strokes.length} stroke(s), stiftEnabled=${stiftEnabled}`);
 
     // ── Undo/Redo: snapshot stack of stroke-arrays. Linear history; a new
     //    action truncates the future. ────────────────────────────────────────
@@ -104,13 +104,13 @@ function createDraw20Stift({
         if (historyIdx <= 0) return;
         historyIdx--;
         applyHistorySnapshot();
-        // log(`↶ undo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+        log(`↶ undo (idx=${historyIdx}/${strokeHistory.length - 1})`);
     }
     function redo() {
         if (historyIdx >= strokeHistory.length - 1) return;
         historyIdx++;
         applyHistorySnapshot();
-        // log(`↷ redo (idx=${historyIdx}/${strokeHistory.length - 1})`);
+        log(`↷ redo (idx=${historyIdx}/${strokeHistory.length - 1})`);
     }
 
     // ── Drawing pipeline ────────────────────────────────────────────────────
@@ -150,7 +150,7 @@ function createDraw20Stift({
         const dpr = window.devicePixelRatio || 1;
         stiftCanvas.width = Math.max(1, Math.round(r.width * dpr));
         stiftCanvas.height = Math.max(1, Math.round(r.height * dpr));
-        // log(`📐 resizeStift: wrap=${Math.round(r.width)}×${Math.round(r.height)} dpr=${dpr} → canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
+        log(`📐 resizeStift: wrap=${Math.round(r.width)}×${Math.round(r.height)} dpr=${dpr} → canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
         redrawStift();
         // Outline polygons live in canvas-pixel coords — after resize the
         // pixel scale changes. Re-extract from the freshly-drawn strokes so
@@ -167,7 +167,7 @@ function createDraw20Stift({
         pushHistory();
         // Sweep stale outlines (they belonged to the now-erased strokes).
         if (stiftContours) clearStiftOutlines();
-        // log('strokes cleared');
+        log('strokes cleared');
     }
     function ptFromEvent(e) {
         const r = stiftCanvas.getBoundingClientRect();
@@ -176,9 +176,9 @@ function createDraw20Stift({
         return { nx: (cx - r.left) / r.width, ny: (cy - r.top) / r.height };
     }
     function onStiftDown(e) {
-        // log(`🖍 onStiftDown: enabled=${stiftEnabled} button=${e.button} type=${e.type}`);
-        if (!stiftEnabled) return;
-        if (e.button !== undefined && e.button !== 0) return;
+        log(`🖍 onStiftDown: enabled=${stiftEnabled} button=${e.button} type=${e.type}`);
+        if (!stiftEnabled) { log('  ⊘ skipped (stift disabled)'); return; }
+        if (e.button !== undefined && e.button !== 0) { log(`  ⊘ skipped (button ${e.button} ≠ 0)`); return; }
         e.preventDefault();
         drawingNow = true;
         const sw = document.getElementById('stroke-slider');
@@ -188,7 +188,7 @@ function createDraw20Stift({
             mode: 'pen',
         };
         strokes.push(curStroke);
-        // log(`  ▶ new stroke, width=${curStroke.width}, total strokes=${strokes.length}`);
+        log(`  ▶ new stroke, width=${curStroke.width}, total strokes=${strokes.length}`);
         redrawStift();
     }
     function onStiftMove(e) {
@@ -200,7 +200,7 @@ function createDraw20Stift({
     function onStiftUp() {
         if (!drawingNow) return;
         drawingNow = false;
-        // log(`✓ onStiftUp: stroke finished with ${curStroke ? curStroke.points.length : 0} points`);
+        log(`✓ onStiftUp: stroke finished with ${curStroke ? curStroke.points.length : 0} points`);
         curStroke = null;
         persistStrokes();
         // Stroke finished → snapshot into history.
@@ -244,7 +244,7 @@ function createDraw20Stift({
         stiftCanvas.style.cursor = stiftEnabled ? 'crosshair' : 'default';
         const icon = document.getElementById('draw-toggle');
         if (icon) icon.style.opacity = stiftEnabled ? '1' : '0.35';
-        // log(`✏️ applyStiftState: enabled=${stiftEnabled} pointer-events=${stiftCanvas.style.pointerEvents} canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
+        log(`✏️ applyStiftState: enabled=${stiftEnabled} pointer-events=${stiftCanvas.style.pointerEvents} canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
     }
     function toggleStiftEnabled() {
         stiftEnabled = !stiftEnabled;
@@ -365,12 +365,12 @@ function createDraw20Stift({
             }
         });
 
-        // log(`stift outlines rendered: ${cls.outers.length} outer + ${cls.holes.length} hole(s)`);
+        log(`stift outlines rendered: ${cls.outers.length} outer + ${cls.holes.length} hole(s)`);
     }
 
     function extractStiftOutlines() {
         stiftContours = extract(stiftCanvas) || [];
-        // log(`▶ stift extract: ${stiftContours.length} contour(s)`);
+        log(`▶ stift extract: ${stiftContours.length} contour(s)`);
         renderStiftOutlines();
         // Persist outlines-active flag so reload auto-extracts.
         try { localStorage.setItem('draw20-outlines-active', '1'); } catch (_) {}
@@ -385,7 +385,7 @@ function createDraw20Stift({
         // from the previous stift-morph.
         stiftCanvas.style.opacity = '';
         onOutlinesChanged();
-        // log('stift outlines cleared');
+        log('stift outlines cleared');
     }
 
     return {
