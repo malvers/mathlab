@@ -171,39 +171,40 @@ const DebugWindow = (() => {
             display: ${collapsed ? 'none' : 'block'};
         `;
 
-        // Custom resize handle (bottom-right corner)
-        const resizeHandle = document.createElement('div');
-        resizeHandle.id = 'debug-resize-handle';
-        resizeHandle.style.cssText = `
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 24px;
-            height: 24px;
-            cursor: nwse-resize;
-            display: ${collapsed ? 'none' : 'flex'};
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding: 2px;
-            box-sizing: border-box;
-            user-select: none;
-        `;
-        resizeHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6BA043" stroke-width="1.5">
-            <line x1="2" y1="14" x2="14" y2="2"/>
-            <line x1="6" y1="14" x2="14" y2="6"/>
-            <line x1="10" y1="14" x2="14" y2="10"/>
-        </svg>`;
         debugEl.style.position = 'fixed';
         debugEl.appendChild(header);
         debugEl.appendChild(content);
-        debugEl.appendChild(resizeHandle);
         document.body.appendChild(debugEl);
+
+        // Create 8 resize handles (4 edges + 4 corners). Hidden when collapsed.
+        const EDGE_THICKNESS = 6;
+        const CORNER_SIZE = 14;
+        const handleDefs = [
+            { dir: 'n',  cursor: 'ns-resize',   style: `top:0; left:${CORNER_SIZE}px; right:${CORNER_SIZE}px; height:${EDGE_THICKNESS}px;` },
+            { dir: 's',  cursor: 'ns-resize',   style: `bottom:0; left:${CORNER_SIZE}px; right:${CORNER_SIZE}px; height:${EDGE_THICKNESS}px;` },
+            { dir: 'e',  cursor: 'ew-resize',   style: `right:0; top:${CORNER_SIZE}px; bottom:${CORNER_SIZE}px; width:${EDGE_THICKNESS}px;` },
+            { dir: 'w',  cursor: 'ew-resize',   style: `left:0; top:${CORNER_SIZE}px; bottom:${CORNER_SIZE}px; width:${EDGE_THICKNESS}px;` },
+            { dir: 'ne', cursor: 'nesw-resize', style: `top:0; right:0; width:${CORNER_SIZE}px; height:${CORNER_SIZE}px;` },
+            { dir: 'nw', cursor: 'nwse-resize', style: `top:0; left:0; width:${CORNER_SIZE}px; height:${CORNER_SIZE}px;` },
+            { dir: 'se', cursor: 'nwse-resize', style: `bottom:0; right:0; width:${CORNER_SIZE}px; height:${CORNER_SIZE}px;` },
+            { dir: 'sw', cursor: 'nesw-resize', style: `bottom:0; left:0; width:${CORNER_SIZE}px; height:${CORNER_SIZE}px;` }
+        ];
+        const resizeHandles = [];
+        handleDefs.forEach(def => {
+            const h = document.createElement('div');
+            h.className = 'debug-resize-handle';
+            h.dataset.dir = def.dir;
+            h.style.cssText = `position:absolute; ${def.style} cursor:${def.cursor}; display:${collapsed ? 'none' : 'block'}; user-select:none; z-index:5;`;
+            debugEl.appendChild(h);
+            resizeHandles.push(h);
+            makeResizable(h, debugEl, def.dir);
+        });
 
         // Make draggable
         makeHeaderDraggable(header, debugEl);
 
-        // Make resizable via custom handle
-        makeResizable(resizeHandle, debugEl);
+        // Expose handles for toggle()
+        debugEl._resizeHandles = resizeHandles;
     }
 
     function makeResizable(handle, element) {
