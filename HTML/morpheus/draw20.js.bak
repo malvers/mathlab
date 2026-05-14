@@ -769,40 +769,389 @@
             updateInfoBoxes(pngContours, latexContoursList);
         }
 
+        // ── Morph: interpolate matched outer pairs between PNG and LaTeX —
+        // ODER stift↔LaTeX, sobald der User selbst Outlines extrahiert hat.
+        // morphPairs wird von renderBBoxes befüllt; stiftMorphPairs von
+        // buildStiftMorphPairs (nach extractStiftOutlines bzw. nach jedem
+        // renderBBoxes, damit die LaTeX-Coords frisch bleiben).
+        // Slider (0..100, /100 = t) treibt die Interpolation; passende Quelle
+        // (pix vs. stiftCanvas) crossfadet zur tex-Pane.
         const morphPairs = [];
+        const stiftMorphPairs = [];
         let baseSimilarity = 0; // Ähnlichkeit bei t=0, wird in renderBBoxes gespeichert
         let pngVertCount = 0;
         let latVertCount = 0;
+        function resampleClosed(pts, n) {
+            if (!pts || pts.length === 0) return [];
+            if (typeof resamplePolygon === 'function') {
+                const arr = pts.map(p => [p.x, p.y]);
+                return resamplePolygon(arr, n).map(p => ({ x: p[0], y: p[1] }));
+            }
+            // Stride fallback if geometry.js helper is missing.
+            const step = pts.length / n;
+            const out = [];
+            for (let i = 0; i < n; i++) out.push(pts[Math.floor(i * step) % pts.length]);
+            return out;
+        }
+        // BB-Hilfen für Nearest-Mapping + In-Place-Morph.
+        function bboxOfPts(pts) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const q of pts) {
+                if (q.x < minX) minX = q.x;
+                if (q.y < minY) minY = q.y;
+                if (q.x > maxX) maxX = q.x;
+                if (q.y > maxY) maxY = q.y;
+            }
+            return { minX, minY, maxX, maxY };
+        }
+        // Verschiebe + skaliere `l` so, dass seine BB exakt auf der BB von `p`
+        // liegt — der Morph passiert dann in place an der Quell-Position und
+        // -Größe statt quer durchs Pane zu wandern.
+        function alignDstToSrcBBox(p, l) {
+            const pBB = bboxOfPts(p), lBB = bboxOfPts(l);
+            const pCx = (pBB.minX + pBB.maxX) / 2;
+            const pCy = (pBB.minY + pBB.maxY) / 2;
+            const lCx = (lBB.minX + lBB.maxX) / 2;
+            const lCy = (lBB.minY + lBB.maxY) / 2;
+            const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
+            const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
+            const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
+            const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
+            const sx = pW / lW, sy = pH / lH;
+            return l.map(q => ({
+                x: (q.x - lCx) * sx + pCx,
+                y: (q.y - lCy) * sy + pCy,
+            }));
+        }
+        // Wrapper um die Engine-Funktion `alignTargetTo` aus morph-engine.js.
+        // Findet die Rotation k (und ggf. reverse) des Ziel-Polygons, die die
+        // Summe der quadratischen Punkt-zu-Punkt-Abstände zur Quelle minimiert
+        // — bewährte Logik aus dem alten Morph.
+        // Erwartet beide Polygone bereits same-length (= N nach resample) und
+        // im SELBEN Koordinatensystem (BB-aligned via alignDstToSrcBBox),
+        // damit die Distanzen sinnvoll vergleichbar sind.
+        // Liefert { alignedXY, idxMap } — alignedXY ist das rotierte Ziel
+        // im selben Format wie die Quelle ({x,y}), idxMap[i] gibt den
+        // ursprünglichen Ziel-Index (in `l`) für Quell-Punkt i.
+        function alignTargetWithEngine(p, l) {
+            if (typeof alignTargetTo !== 'function') return null;
+            if (p.length !== l.length) return null;
+            // Engine erwartet [x,y]-Tupel; trail ein Index-Tag um die
+            // ursprüngliche Reihenfolge durch die Rotation/Reverse zu
+            // tracken (Engine slict 3-Tupel transparent durch).
+            const src = p.map(q => [q.x, q.y]);
+            const tgt = l.map((q, i) => [q.x, q.y, i]);
+            const res = alignTargetTo(src, tgt);
+            return {
+                alignedXY: res.map(t => ({ x: t[0], y: t[1] })),
+                idxMap: res.map(t => t[2]),
+            };
+        }
+        // BB-Nearest Pairing (vorerst nicht mehr im Morph genutzt, aber
+        // behalten — vielleicht später für andere Visualisierungen).
+        function mapByBBoxNearest(p, l) {
+            const bb = (pts) => {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const q of pts) {
+                    if (q.x < minX) minX = q.x;
+                    if (q.y < minY) minY = q.y;
+                    if (q.x > maxX) maxX = q.x;
+                    if (q.y > maxY) maxY = q.y;
+                }
+                return { minX, minY, maxX, maxY };
+            };
+            const pBB = bb(p), lBB = bb(l);
+            const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
+            const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
+            const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
+            const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
+            const pN = p.map(q => [(q.x - pBB.minX) / pW, (q.y - pBB.minY) / pH]);
+            const lN = l.map(q => [(q.x - lBB.minX) / lW, (q.y - lBB.minY) / lH]);
+            const map = new Array(p.length).fill(0);
+            for (let i = 0; i < p.length; i++) {
+                let bestJ = 0, bestD = Infinity;
+                const pxi = pN[i][0], pyi = pN[i][1];
+                for (let j = 0; j < l.length; j++) {
+                    const dx = lN[j][0] - pxi, dy = lN[j][1] - pyi;
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; bestJ = j; }
+                }
+                map[i] = bestJ;
+            }
+            return map;
+        }
+        // Render morph polygons in-place an der Quell-Position.
+        // Quelle = Stift (eigenes Drawing) wenn stiftMorphPairs vorhanden,
+        // sonst PNG-Preset. Beide Panes bleiben sichtbar als Referenz —
+        // der Morph passiert im Polygon-Overlay an der Quell-Stelle in
+        // Quell-Größe, statt quer durchs Pane zu wandern.
+        // t < eps → Pre-Morph-Vorschau: Korrespondenz-Linien Quelle → Ziel.
+        // t ≥ eps → Polygon-Overlay: shape morpht src → dst (alignDstToSrcBBox).
+        const MORPH_EPS = 0.02;
+        function renderMorph(t) {
+            while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
+            t = Math.max(0, Math.min(1, t));
+            const useStift = stiftMorphPairs.length > 0;
+            const pairs = useStift ? stiftMorphPairs : morphPairs;
+            const srcKey = useStift ? 'srcPts' : 'pngPts';
+            const dstKey = useStift ? 'dstPts' : 'latPts';
+            // Ausgangs-Pane: nur während des Morphs (t ≥ eps) ausgeblendet,
+            // im Pre-Morph-Modus (Korrespondenz-Linien) bleibt sie sichtbar
+            // damit die Linien an etwas Erkennbarem ansetzen. Tex-Pane immer
+            // sichtbar als Referenz.
+            const srcEl = useStift ? stiftCanvas : pix;
+            tex.style.opacity = '';
+            if (!pairs.length) {
+                srcEl.style.opacity = '';
+                // Pre-morph nicht aktiv: alle Outlines/Punkte wieder zeigen
+                overlay.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+                return;
+            }
+            srcEl.style.opacity = (t < MORPH_EPS) ? '' : '0';
+            // Ähnlichkeit während Morph interpolieren: von baseSimilarity gegen 100
+            const morphedSim = Math.round(baseSimilarity + (100 - baseSimilarity) * t);
+            const simVal = document.getElementById('sim-value');
+            if (simVal) simVal.textContent = morphedSim + '%';
+            // Während Morph (t ≥ eps): Punkte+Linien NUR der Quell-Seite
+            // verstecken; Ziel-Outlines (LaTeX) bleiben sichtbar.
+            if (t >= MORPH_EPS) {
+                const srcLabel = useStift ? 'stift' : 'png';
+                // PNG/LaTeX source outlines
+                overlay.querySelectorAll(`polygon[data-source="${srcLabel}"]`).forEach(p => {
+                    p.style.display = 'none';
+                });
+                overlay.querySelectorAll(`circle[data-kind="point"][data-source="${srcLabel}"]`).forEach(c => {
+                    c.style.display = 'none';
+                });
+                // Stift source outlines
+                if (useStift) {
+                    stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                        p.style.display = 'none';
+                    });
+                    stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                        c.style.display = 'none';
+                    });
+                }
+            } else {
+                // Pre-morph: alle Outlines/Punkte zeigen
+                overlay.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                    p.style.display = '';
+                });
+                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => {
+                    c.style.display = '';
+                });
+            }
+            if (t < MORPH_EPS) {
+                // Pre-Morph-Vorschau: gleiche Korrespondenz die der Morph
+                // nutzt. alignTargetTo (engine) findet Rotation+Reverse;
+                // Linie zeigt Quelle → ECHTES Ziel (ungescaled).
+                const svgNS = 'http://www.w3.org/2000/svg';
+                const N = 60;
+                const z = zoom || 1;
+                const sw = String(0.8 / z);
+                for (const pair of pairs) {
+                    const p = resampleClosed(pair[srcKey], N);
+                    const l = resampleClosed(pair[dstKey], N);
+                    if (p.length < 3 || l.length < 3) continue;
+                    // BB-align l zur src BEVOR alignTargetTo — sonst dominiert
+                    // der Centroid-Offset und die Rotation wird willkürlich.
+                    const lInPlace = alignDstToSrcBBox(p, l);
+                    const eng = alignTargetWithEngine(p, lInPlace);
+                    if (!eng) continue;
+                    // idxMap zeigt auf den BB-aligned Index — gleiche Indizes
+                    // gelten 1:1 auch fürs Original `l` (alignTargetTo
+                    // permutiert nur, ändert keine Stückzahl).
+                    const color = paletteColor(pair.mid);
+                    for (let i = 0; i < N; i++) {
+                        const j = eng.idxMap[i];
+                        const ln = document.createElementNS(svgNS, 'line');
+                        ln.setAttribute('x1', p[i].x.toFixed(2));
+                        ln.setAttribute('y1', p[i].y.toFixed(2));
+                        ln.setAttribute('x2', l[j].x.toFixed(2));
+                        ln.setAttribute('y2', l[j].y.toFixed(2));
+                        ln.setAttribute('stroke', color);
+                        ln.setAttribute('stroke-width', sw);
+                        ln.setAttribute('stroke-opacity', '0.45');
+                        morphLayer.appendChild(ln);
+                    }
+                }
+                return;
+            }
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const N = 60;
+            const z = zoom || 1;
+            let drawn = 0;
+            for (const pair of pairs) {
+                const p = resampleClosed(pair[srcKey], N);
+                const l = resampleClosed(pair[dstKey], N);
+                if (p.length < 3 || l.length < 3) continue;
+                // In-Place: dst-Polygon BB-aligned auf src. Danach
+                // alignTargetTo (engine) für die Rotation+Reverse-Wahl.
+                // Beides zusammen: kreuzungsarme Korrespondenz + in-place.
+                const lInPlace = alignDstToSrcBBox(p, l);
+                const eng = alignTargetWithEngine(p, lInPlace);
+                if (!eng) continue;
+                const pts = p.map((pp, i) => ({
+                    x: (1 - t) * pp.x + t * eng.alignedXY[i].x,
+                    y: (1 - t) * pp.y + t * eng.alignedXY[i].y,
+                }));
+                const polyStr = pts.map(pp => `${pp.x},${pp.y}`).join(' ');
+                const poly = document.createElementNS(svgNS, 'polygon');
+                poly.setAttribute('points', polyStr);
+                poly.setAttribute('fill', paletteColor(pair.mid));
+                poly.setAttribute('fill-opacity', '0.85');
+                poly.setAttribute('stroke', '#ffffff');
+                poly.setAttribute('stroke-width', String(1.5 / z));
+                poly.setAttribute('stroke-opacity', '0.6');
+                morphLayer.appendChild(poly);
+                drawn++;
+            }
+        }
 
-        // ── Morph: PNG↔LaTeX (or stift↔LaTeX) interpolation. Lives in
-        // draw20-morph.js. morphPairs is a shared array — renderBBoxes
-        // (in draw20.js) keeps refilling it; the factory just reads.
-        const morph = createDraw20Morph({
-            morphLayer,
-            overlay,
-            pix, tex,
-            stiftCanvas,
-            stiftOutlineSvg,
-            wrap,
-            morphPairs,
-            getZoom: () => zoom,
-            getLatexCanvas: () => latexCanvas,
-            getStiftContours: () => stift.getStiftContours(),
-            getBaseSimilarity: () => baseSimilarity,
-            extractLatexContours,
-            computeMatchIds,
-            dbg,
-        });
-        // Local aliases keep the existing call sites unchanged.
-        const renderMorph = morph.renderMorph;
-        const buildStiftMorphPairs = morph.buildStiftMorphPairs;
-        const startMorphAnim = morph.startMorphAnim;
+        // Stift→LaTeX-Paare bauen — gleiche Match-Pipeline wie PNG↔LaTeX
+        // (computeMatchIds → Hungarian etc.), nur dass die Quelle stiftContours
+        // ist statt PNG. Punkte landen in wrap-pre-transform-CSS, damit
+        // renderMorph direkt interpolieren kann ohne erneutes Mapping.
+        function buildStiftMorphPairs(latexContoursList) {
+            stiftMorphPairs.length = 0;
+            const stiftContours = stift.getStiftContours();
+            if (!stiftContours || !stiftContours.length) return;
+            // Falls Caller keine LaTeX-Contours mitliefert, frisch holen.
+            let lat = latexContoursList;
+            if (!lat) {
+                const res = (typeof extractLatexContours === 'function') ? extractLatexContours() : null;
+                lat = res ? res.contours : null;
+            }
+            if (!lat || !lat.length) return;
+            if (!tex.complete || !tex.naturalWidth || !latexCanvas) return;
+            if (typeof computeMatchIds !== 'function' || typeof classifyContours !== 'function') return;
 
+            const m = computeMatchIds(stiftContours, lat);
+            const stiftId = m.pngId, latId = m.latId;
+
+            // stift natural → wrap pre-transform CSS
+            const ssx = wrap.offsetWidth / Math.max(1, stiftCanvas.width);
+            const ssy = wrap.offsetHeight / Math.max(1, stiftCanvas.height);
+            const stiftMap = (x, y) => ({ x: x * ssx, y: y * ssy });
+
+            // latex natural → wrap pre-transform CSS (Mirror der renderBBoxes-mapFn)
+            const r = tex.getBoundingClientRect();
+            const wrapRect = wrap.getBoundingClientRect();
+            const scale = Math.min(r.width / tex.naturalWidth, r.height / tex.naturalHeight);
+            const renderW = tex.naturalWidth * scale;
+            const renderH = tex.naturalHeight * scale;
+            const offX = r.left + (r.width - renderW) / 2;
+            const offY = r.top + (r.height - renderH) / 2;
+            const z = zoom || 1;
+            const latMap = (x, y) => ({
+                x: (offX + x * scale - wrapRect.left) / z,
+                y: (offY + y * scale - wrapRect.top) / z,
+            });
+
+            const sCls = classifyContours(stiftContours);
+            const lCls = classifyContours(lat);
+            const srcPts = new Map();
+            for (const o of sCls.outers) {
+                const mid = stiftId[o.idx];
+                if (mid < 0) continue;
+                srcPts.set(mid, stiftContours[o.idx].map(p => stiftMap(p[0], p[1])));
+            }
+            const dstPts = new Map();
+            for (const o of lCls.outers) {
+                const mid = latId[o.idx];
+                if (mid < 0) continue;
+                dstPts.set(mid, lat[o.idx].map(p => latMap(p[0], p[1])));
+            }
+            for (const [mid, sp] of srcPts) {
+                const lp = dstPts.get(mid);
+                if (!lp) continue;
+                stiftMorphPairs.push({ mid, srcPts: sp, dstPts: lp });
+            }
+        }
+
+        // Animations-Loop für den ► MORPH-Knopf. Treibt den Slider 0→100 über
+        // MORPH_DURATION ms, danach Loop-Ende. Bricht alte Animation ab.
+        const STIFT_MORPH_DURATION = 2500;
+        let morphAnimRaf = null;
+        let morphAnimStart = 0;
+        function startMorphAnim() {
+            cancelAnimationFrame(morphAnimRaf);
+            const sl = document.getElementById('morph-slider');
+            const span = document.getElementById('morph-val');
+            if (!sl) return;
+            morphAnimStart = performance.now();
+            function tick() {
+                const elapsed = performance.now() - morphAnimStart;
+                const t = Math.min(1, elapsed / STIFT_MORPH_DURATION);
+                const pct = Math.round(t * 100);
+                sl.value = String(pct);
+                if (span) span.textContent = String(pct);
+                renderMorph(t);
+                if (t < 1) morphAnimRaf = requestAnimationFrame(tick);
+                else morphAnimRaf = null;
+            }
+            tick();
+        }
+        function stopMorphAnim() {
+            if (morphAnimRaf !== null) {
+                cancelAnimationFrame(morphAnimRaf);
+                morphAnimRaf = null;
+            }
+        }
         // ► MORPH-Knopf hängen
         const morphStartBtn = document.querySelector('button.cyber-btn[onclick*="startMorph"]');
         if (morphStartBtn) morphStartBtn.addEventListener('click', startMorphAnim);
-
-        morph.attachMorphSlider();
+        // Space-Taste zum Start/Pause (mirror des Legacy-Verhaltens)
+        document.addEventListener('keydown', (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            if (e.code !== 'Space') return;
+            if (morphAnimRaf !== null) { e.preventDefault(); stopMorphAnim(); }
+            else { e.preventDefault(); startMorphAnim(); }
+        });
+        // Hook into the existing morph-slider (lives in the side panel).
+        // Updates draw20's overlay morph; the legacy engine listener still
+        // fires too but only updates the (hidden) legacy canvases.
+        function attachMorphSlider() {
+            const sl = document.getElementById('morph-slider');
+            if (!sl) { setTimeout(attachMorphSlider, 100); return; }
+            sl.min = '0';
+            if (sl.value === '1') sl.value = '0';
+            // OVERRIDE the legacy global onMorphSlider — its body uses the
+            // hidden legacy canvases (digit-canvas / morph-canvas) and won't
+            // produce visible morphs in our draw20 setup. Replacing the
+            // function on `window` redirects the HTML `oninput="onMorphSlider(this.value)"`
+            // attribute to our renderMorph.
+            window.onMorphSlider = function (val) {
+                stopMorphAnim();
+                const span = document.getElementById('morph-val');
+                if (span) span.textContent = val;
+                renderMorph(+val / 100);
+            };
+            // Also keep addEventListener as a belt-and-braces fallback.
+            sl.addEventListener('input', () => {
+                stopMorphAnim();
+                renderMorph(+sl.value / 100);
+            });
+            renderMorph(+sl.value / 100);
+        }
+        attachMorphSlider();
 
         // Coordinated setter: switch both panes to a new formula and re-render
         // the bounding boxes once BOTH images have loaded (pix from preset PNG,

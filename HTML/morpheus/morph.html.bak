@@ -38,7 +38,6 @@
     <script src="draw20-extract.js"></script>
     <script src="draw20-stift.js"></script>
     <script src="draw20-match.js"></script>
-    <script src="draw20-morph.js"></script>
     <script src="draw20-ring.js"></script>
     <script src="draw20.js"></script>
 </head>
@@ -383,9 +382,9 @@
                 if (morphRaf !== null) {
                     cancelAnimationFrame(morphRaf);
                     morphRaf = null;
-                    // DebugWindow.log('⏸ Morph paused (Space)');
+                    DebugWindow.log('⏸ Morph paused (Space)');
                 } else {
-                    // DebugWindow.log('▶ Morph started (Space)');
+                    DebugWindow.log('▶ Morph started (Space)');
                     startMorph();
                 }
             }
@@ -404,7 +403,7 @@
                 e.preventDefault();
                 coloradoMode = !coloradoMode;
                 drawColorado();
-                // DebugWindow.log(coloradoMode ? '🌈 Colorado ON' : '🌈 Colorado OFF');
+                DebugWindow.log(coloradoMode ? '🌈 Colorado ON' : '🌈 Colorado OFF');
             }
             if ((e.key === 'r' || e.key === 'R') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
                 e.stopImmediatePropagation();
@@ -425,7 +424,7 @@
                     if (dc) dc.style.cursor = cursorPencil;
                     document.getElementById('draw-hint').textContent = 'Zeichne — Maus oder Finger';
                 }
-                // DebugWindow.log(eraserMode ? '🧹 Eraser ON (20px)' : '✏️ Draw ON');
+                DebugWindow.log(eraserMode ? '🧹 Eraser ON (20px)' : '✏️ Draw ON');
             }
             if (e.key === 'Escape') {
                 resetView();
@@ -455,7 +454,7 @@
                 const delta = e.key === 'ArrowRight' ? 0.15 : -0.15;
                 outlineWidth = Math.max(0.25, Math.min(4, outlineWidth + delta));
                 try { localStorage.setItem('morph-outline-width', String(outlineWidth)); } catch (_) {}
-                // DebugWindow.log(`📏 Outline width: ${outlineWidth.toFixed(2)}px`);
+                DebugWindow.log(`📏 Outline width: ${outlineWidth.toFixed(2)}px`);
                 renderAll();
             }
             if ((e.key === 'k' || e.key === 'K') && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
@@ -506,7 +505,7 @@
             if (window.CyberLeftChrome?.publishResolvedScale) {
                 window.CyberLeftChrome.publishResolvedScale();
             }
-            // DebugWindow.log('↺ View reset');
+            DebugWindow.log('↺ View reset');
         }
 
         function onStrokeChange(val) {
@@ -598,7 +597,7 @@
         function ensureUserOutlines() {
             if (rawContours && rawContours.length > 0) return;
             if (!drawCanvasHasContent()) return;
-            // DebugWindow.log('▶ Auto-extract: LINIE/PUNKTE → ON, no outlines yet');
+            DebugWindow.log('▶ Auto-extract: LINIE/PUNKTE → ON, no outlines yet');
             extractOutline();
         }
 
@@ -614,21 +613,21 @@
         }
 
         function onLinesToggle(checked) {
-            // DebugWindow.log(`🎚 onLinesToggle: ${checked ? 'ON' : 'OFF'}`);
+            DebugWindow.log(`🎚 onLinesToggle: ${checked ? 'ON' : 'OFF'}`);
             try { localStorage.setItem('morph-lines-visible', checked ? '1' : '0'); } catch (_) {}
             if (checked) ensureUserOutlines();
             renderAll();
         }
 
         function onPointsToggle(checked) {
-            // DebugWindow.log(`🎚 onPointsToggle: ${checked ? 'ON' : 'OFF'}`);
+            DebugWindow.log(`🎚 onPointsToggle: ${checked ? 'ON' : 'OFF'}`);
             try { localStorage.setItem('morph-points-visible', checked ? '1' : '0'); } catch (_) {}
             if (checked) ensureUserOutlines();
             renderAll();
         }
 
         function onFillToggle(checked) {
-            // DebugWindow.log(`🎚 onFillToggle: ${checked ? 'ON' : 'OFF'}`);
+            DebugWindow.log(`🎚 onFillToggle: ${checked ? 'ON' : 'OFF'}`);
             try { localStorage.setItem('morph-fill-visible', checked ? '1' : '0'); } catch (_) {}
             renderAll();
         }
@@ -649,7 +648,7 @@
             const showArt = document.getElementById('art-toggle')?.checked ?? true;
             const showLines = document.getElementById('points-toggle')?.checked ?? true;
             const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
-            // DebugWindow.log(`🔄 renderAll: LINIE=${showLines}, PUNKTE=${showPoints}, PIXEL=${showArt}`);
+            DebugWindow.log(`🔄 renderAll: LINIE=${showLines}, PUNKTE=${showPoints}, PIXEL=${showArt}`);
 
             // Apply PIXEL toggle to both draw-canvas and digit-canvas
             const dc = document.getElementById('digit-canvas');
@@ -728,13 +727,13 @@
         //  calculateSimilarity moved to morpheus/morph-engine.js)
 
         function startMorph() {
-            // DebugWindow.log('▶ START MORPH');
+            DebugWindow.log('▶ START MORPH');
             if (!rawContour) extractOutline();
             if (!prepareMorph()) {
-                // DebugWindow.log('❌ Morph failed: missing outline or digit');
+                DebugWindow.log('❌ Morph failed: missing outline or digit');
                 return;
             }
-            // DebugWindow.log(`✓ Morph setup ready (${MORPH_DURATION}ms)`);
+            DebugWindow.log(`✓ Morph setup ready (${MORPH_DURATION}ms)`);
             cancelAnimationFrame(morphRaf);
             // Redraw digit without outline
             if (selectedDigit !== null && timesFont) {
@@ -774,7 +773,7 @@
         }
 
         function stopMorph() {
-            // DebugWindow.log('⏹ STOP MORPH');
+            DebugWindow.log('⏹ STOP MORPH');
             cancelAnimationFrame(morphRaf);
             morphRaf = null;
             morphCtx.clearRect(0, 0, 1000, 1000);
@@ -783,7 +782,7 @@
             // Redraw digit with outline
             if (selectedDigit !== null) drawTargetPolygon();
             showUserOutline();
-            // DebugWindow.log('✓ Morph stopped, user outline restored');
+            DebugWindow.log('✓ Morph stopped, user outline restored');
         }
 
         function clearMorphFigure() {
@@ -852,13 +851,13 @@
                 const w = 500, h = 500;
                 const x = 16, y = (1000 - h) / 2;
                 drawCtx.drawImage(img, x, y, w, h);
-                // DebugWindow.log(`✓ Preset formula-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
+                DebugWindow.log(`✓ Preset formula-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
                 scheduleAutoSave();
-                // DebugWindow.log(`▶ Auto-extrahiere Outlines für formula-${index}.png`);
+                DebugWindow.log(`▶ Auto-extrahiere Outlines für formula-${index}.png`);
                 extractOutline();
             };
             img.onerror = () => {
-                // DebugWindow.log(`❌ FEHLT: presets/formula-${index}.png konnte nicht geladen werden!`);
+                DebugWindow.log(`❌ FEHLT: presets/formula-${index}.png konnte nicht geladen werden!`);
                 currentPresetIndex = null;
                 try { localStorage.removeItem('morph-current-preset'); } catch (_) {}
             };
@@ -877,13 +876,13 @@
                 const w = 500, h = 500;
                 const x = 16, y = (1000 - h) / 2;
                 drawCtx.drawImage(img, x, y, w, h);
-                // DebugWindow.log(`✓ Preset complex-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
+                DebugWindow.log(`✓ Preset complex-${index}.png geladen (${img.naturalWidth}×${img.naturalHeight})`);
                 scheduleAutoSave();
-                // DebugWindow.log(`▶ Auto-extrahiere Outlines für complex-${index}.png`);
+                DebugWindow.log(`▶ Auto-extrahiere Outlines für complex-${index}.png`);
                 extractOutline();
             };
             img.onerror = () => {
-                // DebugWindow.log(`❌ FEHLT: presets/complex-${index}.png konnte nicht geladen werden!`);
+                DebugWindow.log(`❌ FEHLT: presets/complex-${index}.png konnte nicht geladen werden!`);
             };
             img.src = `presets/complex-${index}.png`;
         }
@@ -891,11 +890,11 @@
         // Single entry point for KOMPLEX-card clicks. Logs each step so the
         // DebugWindow shows exactly where the chain succeeds/fails.
         function onComplexClick(index, latex, title) {
-            // DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-            // DebugWindow.log(`🎯 KOMPLEX click ${index}: ${title}`);
-            // DebugWindow.log(`   LaTeX: ${latex}`);
+            DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+            DebugWindow.log(`🎯 KOMPLEX click ${index}: ${title}`);
+            DebugWindow.log(`   LaTeX: ${latex}`);
             if (typeof setTextInput !== 'function') {
-                // DebugWindow.log(`   ✗ setTextInput nicht definiert!`);
+                DebugWindow.log(`   ✗ setTextInput nicht definiert!`);
                 return;
             }
             setTextInput(latex);
@@ -903,9 +902,9 @@
         }
 
         function savePreset() {
-            // DebugWindow.log(`💾 savePreset() called, currentPresetIndex=${currentPresetIndex}`);
+            DebugWindow.log(`💾 savePreset() called, currentPresetIndex=${currentPresetIndex}`);
             if (currentPresetIndex === null) {
-                // DebugWindow.log('⚠️ Kein Preset geladen — Formel-Button klicken um Preset-Index zu setzen');
+                DebugWindow.log('⚠️ Kein Preset geladen — Formel-Button klicken um Preset-Index zu setzen');
                 return;
             }
             // 1. Read 1000×1000 canvas, find bounding box of non-black content
@@ -924,12 +923,12 @@
                 }
             }
             if (maxX < 0) {
-                // DebugWindow.log('⚠️ Canvas ist leer — nichts zu speichern');
+                DebugWindow.log('⚠️ Canvas ist leer — nichts zu speichern');
                 return;
             }
             const cw = maxX - minX + 1;
             const ch = maxY - minY + 1;
-            // DebugWindow.log(`  content bbox: ${minX},${minY} → ${maxX},${maxY}  (${cw}×${ch})`);
+            DebugWindow.log(`  content bbox: ${minX},${minY} → ${maxX},${maxY}  (${cw}×${ch})`);
             // 2. Build output canvas 1000×1000 black, paste content scaled with 60px margin
             const out = document.createElement('canvas');
             out.width = 1000; out.height = 1000;
@@ -948,7 +947,7 @@
             link.href = out.toDataURL('image/png');
             link.download = `formula-${currentPresetIndex}.png`;
             link.click();
-            // DebugWindow.log(`💾 Download: formula-${currentPresetIndex}.png  (cropped+rescaled ${cw}×${ch} → ${Math.round(nw)}×${Math.round(nh)} @ ${Math.round(ox)},${Math.round(oy)})`);
+            DebugWindow.log(`💾 Download: formula-${currentPresetIndex}.png  (cropped+rescaled ${cw}×${ch} → ${Math.round(nw)}×${Math.round(nh)} @ ${Math.round(ox)},${Math.round(oy)})`);
         }
 
         let eraserMode = false;
@@ -1086,7 +1085,7 @@
                 drawWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
                 drawWrap.style.transformOrigin = 'center center';
             }
-            // DebugWindow.log(`🔍 Canvas restore: scale=${canvasScale}, pan=(${panX}, ${panY})`);
+            DebugWindow.log(`🔍 Canvas restore: scale=${canvasScale}, pan=(${panX}, ${panY})`);
         } catch (_) {}
 
         function saveZoomPan() {

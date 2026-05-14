@@ -108,9 +108,9 @@ function setTextInput(latex) {
 function onTextInput(text) {
     selectedDigit = null;
     clearMorphFigure();
-    // DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    DebugWindow.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     if (!text || text.trim() === '') {
-        // DebugWindow.log('⊘ Empty input');
+        DebugWindow.log('⊘ Empty input');
         digitCtx.clearRect(0, 0, 1000, 1000);
         targetPolygon = null;
         formulaBbox = null;
@@ -122,7 +122,7 @@ function onTextInput(text) {
 
 // ── Extract polygons from rendered pixels on the digit-canvas ───────────────
 function extractAndUpdatePolygon() {
-    // DebugWindow.log('📊 Extracting polygons (topology-aware)...');
+    DebugWindow.log('📊 Extracting polygons (topology-aware)...');
     const imgData = digitCtx.getImageData(0, 0, 1000, 1000);
     const grid = new Uint8Array(1000 * 1000);
     for (let i = 0; i < 1000 * 1000; i++)
@@ -131,13 +131,13 @@ function extractAndUpdatePolygon() {
     targetPolygon = contours.length ? contours : null;
 
     if (!targetPolygon) {
-        // DebugWindow.log('⚠️ No polygons detected');
+        DebugWindow.log('⚠️ No polygons detected');
         return;
     }
 
-    // DebugWindow.log(`✓ Found ${contours.length} contour(s) (outer + holes)`);
+    DebugWindow.log(`✓ Found ${contours.length} contour(s) (outer + holes)`);
     const totalVerts = contours.reduce((s, c) => s + c.length, 0);
-    // DebugWindow.log(`  Total vertices: ${totalVerts}`);
+    DebugWindow.log(`  Total vertices: ${totalVerts}`);
 
     if (targetPolygon) {
         targetPolygon = targetPolygon.map(poly => {
@@ -158,7 +158,7 @@ function extractAndUpdatePolygon() {
         && katexAtomBboxes && katexAtomBboxes.length > 0) {
         targetReadingOrder = assignContoursToAtoms(targetPolygon, katexAtomBboxes);
         const haveOrder = targetReadingOrder.some(v => v >= 0);
-        // DebugWindow.log(`📖 target reading-order: ${haveOrder ? '[' + targetReadingOrder.join(',') + ']' : '(none)'} | ${katexAtomBboxes.length} atom(s)`);
+        DebugWindow.log(`📖 target reading-order: ${haveOrder ? '[' + targetReadingOrder.join(',') + ']' : '(none)'} | ${katexAtomBboxes.length} atom(s)`);
     } else {
         targetReadingOrder = targetPolygon ? new Array(targetPolygon.length).fill(-1) : [];
     }
@@ -166,7 +166,7 @@ function extractAndUpdatePolygon() {
     if (typeof updateMatching === 'function') updateMatching();
 
     const total = targetPolygon ? targetPolygon.reduce((s, p) => s + p.length, 0) : 0;
-    // DebugWindow.log(`✓ Resampled to ${total} vertices (max: ${TARGET_MAX_PTS})`);
+    DebugWindow.log(`✓ Resampled to ${total} vertices (max: ${TARGET_MAX_PTS})`);
 
     const el = document.getElementById('target-count');
     if (el) el.textContent = `${total} Vertices`;
@@ -181,16 +181,16 @@ function extractAndUpdatePolygon() {
 // ── LaTeX → pixels (via KaTeX HTML → html2canvas) ───────────────────────────
 function renderLatexToCanvas(text) {
     digitCtx.clearRect(0, 0, 1000, 1000);
-    // DebugWindow.log(`📝 Input: "${text}"`);
-    // DebugWindow.log(`KaTeX: ${typeof katex !== 'undefined' ? '✓' : '✗'} | html2canvas: ${typeof html2canvas !== 'undefined' ? '✓' : '✗'}`);
+    DebugWindow.log(`📝 Input: "${text}"`);
+    DebugWindow.log(`KaTeX: ${typeof katex !== 'undefined' ? '✓' : '✗'} | html2canvas: ${typeof html2canvas !== 'undefined' ? '✓' : '✗'}`);
 
     if (typeof katex === 'undefined') {
-        // DebugWindow.log('⚠️ KaTeX not loaded');
+        DebugWindow.log('⚠️ KaTeX not loaded');
         renderPlainText(text);
         return;
     }
     if (typeof html2canvas === 'undefined') {
-        // DebugWindow.log('⚠️ html2canvas not loaded');
+        DebugWindow.log('⚠️ html2canvas not loaded');
         renderPlainText(text);
         return;
     }
@@ -199,13 +199,13 @@ function renderLatexToCanvas(text) {
     let processedText = text.trim();
     if (processedText === '\\sqrt') {
         processedText = '\\surd';
-        // DebugWindow.log('🔄 Converting \\sqrt → \\surd (root symbol only)');
+        DebugWindow.log('🔄 Converting \\sqrt → \\surd (root symbol only)');
     }
 
     try {
-        // DebugWindow.log('🔄 Rendering KaTeX...');
+        DebugWindow.log('🔄 Rendering KaTeX...');
         const html = katex.renderToString(processedText, { throwOnError: true, displayMode: true });
-        // DebugWindow.log('✓ KaTeX HTML generated');
+        DebugWindow.log('✓ KaTeX HTML generated');
 
         // Offscreen wrapper with KaTeX HTML
         const wrapper = document.createElement('div');
@@ -226,14 +226,14 @@ function renderLatexToCanvas(text) {
         // Let the browser lay it out before snapshotting
         setTimeout(() => {
             const rect = wrapper.getBoundingClientRect();
-            // DebugWindow.log(`DOM size: ${Math.round(rect.width)}×${Math.round(rect.height)}px`);
+            DebugWindow.log(`DOM size: ${Math.round(rect.width)}×${Math.round(rect.height)}px`);
 
             // Capture reading-order atoms from the live DOM BEFORE html2canvas
             // (after which the wrapper is destroyed). Bboxes are wrapper-relative
             // and get transformed to digit-canvas coords below.
             const rawAtoms = (typeof extractKatexAtomBboxes === 'function')
                 ? extractKatexAtomBboxes(wrapper) : [];
-            // DebugWindow.log(`🔤 KaTeX atoms in reading order: ${rawAtoms.map(a => a.text).join(' ')}`);
+            DebugWindow.log(`🔤 KaTeX atoms in reading order: ${rawAtoms.map(a => a.text).join(' ')}`);
 
             html2canvas(wrapper, {
                 backgroundColor: null,
@@ -242,7 +242,7 @@ function renderLatexToCanvas(text) {
                 width: rect.width,
                 height: rect.height
             }).then(canvas => {
-                // DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
+                DebugWindow.log(`✓ html2canvas: ${canvas.width}×${canvas.height}px`);
 
                 // Find actual content bounding box (trim padding)
                 const canvasCtx = canvas.getContext('2d');
@@ -285,22 +285,22 @@ function renderLatexToCanvas(text) {
                 digitCtx.drawImage(canvas, contentX, contentY, contentW, contentH, x, y, w, h);
                 formulaBbox = { x, y, w, h };
                 document.body.removeChild(wrapper);
-                // DebugWindow.log(`✓ Drawn at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}×${Math.round(h)}px`);
+                DebugWindow.log(`✓ Drawn at (${Math.round(x)},${Math.round(y)}) ${Math.round(w)}×${Math.round(h)}px`);
                 extractAndUpdatePolygon();
             }).catch(err => {
-                // DebugWindow.log(`❌ html2canvas error: ${err.message}`);
+                DebugWindow.log(`❌ html2canvas error: ${err.message}`);
                 document.body.removeChild(wrapper);
                 renderPlainText(text);
             });
         }, 50);
     } catch (e) {
-        // DebugWindow.log(`❌ KaTeX error: ${e.message}`);
+        DebugWindow.log(`❌ KaTeX error: ${e.message}`);
         renderPlainText(text);
     }
 }
 
 function renderPlainText(text) {
-    // DebugWindow.log(`📄 Fallback to plain text: "${text}"`);
+    DebugWindow.log(`📄 Fallback to plain text: "${text}"`);
     digitCtx.clearRect(0, 0, 1000, 1000);
     digitCtx.save();
     digitCtx.fillStyle = '#F4C430';
@@ -313,7 +313,7 @@ function renderPlainText(text) {
     digitCtx.restore();
     // Plain-text fallback has no KaTeX structure → no atom bboxes.
     katexAtomBboxes = null;
-    // DebugWindow.log('✓ Text rendered');
+    DebugWindow.log('✓ Text rendered');
     extractAndUpdatePolygon();
 }
 
@@ -323,7 +323,7 @@ function drawTargetPolygon() {
 
     const showLines = document.getElementById('points-toggle')?.checked ?? true;
     const showPoints = document.getElementById('lines-toggle')?.checked ?? true;
-    // DebugWindow.log(`  drawTargetPolygon: LINIE=${showLines}, PUNKTE=${showPoints}`);
+    DebugWindow.log(`  drawTargetPolygon: LINIE=${showLines}, PUNKTE=${showPoints}`);
 
     // Bounding boxes (count as "lines" — follow LINIE switch).
     // Source of truth for the user bbox is savedPixels when available
@@ -377,7 +377,7 @@ function drawTargetPolygon() {
     // POLYGONE FÜLLEN: paint all target sub-polygons into a single evenodd
     // path so inner holes XOR-cancel from outer fills.
     const showFill = document.getElementById('fill-toggle')?.checked ?? false;
-    // DebugWindow.log(`    → drawTargetPolygon fill check: showFill=${showFill}, polys=${targetPolygon.length}`);
+    DebugWindow.log(`    → drawTargetPolygon fill check: showFill=${showFill}, polys=${targetPolygon.length}`);
     if (showFill) {
         outlineCtx.save();
         outlineCtx.fillStyle = '#F4C430';
@@ -392,7 +392,7 @@ function drawTargetPolygon() {
         }
         outlineCtx.fill('evenodd');
         outlineCtx.restore();
-        // DebugWindow.log(`    → drawTargetPolygon FILL drawn for ${drawn} polys`);
+        DebugWindow.log(`    → drawTargetPolygon FILL drawn for ${drawn} polys`);
     }
 
     if (!showLines && !showPoints) return;
@@ -427,7 +427,7 @@ function drawTargetPolygon() {
         }
     }
     if (linesDrawn > 0 || pointsDrawn > 0) {
-        // DebugWindow.log(`    → target: ${linesDrawn} polygons with lines, ${pointsDrawn} with points`);
+        DebugWindow.log(`    → target: ${linesDrawn} polygons with lines, ${pointsDrawn} with points`);
     }
     outlineCtx.restore();
 }

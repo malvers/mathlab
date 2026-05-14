@@ -165,7 +165,7 @@ function prepareMorph() {
     userMorphPoly = userMorphPolys[0] || null;
     targetMorphPoly = targetMorphPolys[0] || null;
 
-    // DebugWindow.log(`✓ prepareMorph: ${userMorphPolys.length} region(s), ${targetUsed.size} paired by Hungarian`);
+    DebugWindow.log(`✓ prepareMorph: ${userMorphPolys.length} region(s), ${targetUsed.size} paired by Hungarian`);
     return true;
 }
 
@@ -209,7 +209,7 @@ function drawMorph(t, forceLines, forcePoints) {
     let pruned = 0;
     if (t >= 1) {
         const targetAreas = targetMorphPolys.map(polyArea);
-        // DebugWindow.log(`  pruning check — targetAreas: [${targetAreas.map(Math.round).join(', ')}]`);
+        DebugWindow.log(`  pruning check — targetAreas: [${targetAreas.map(Math.round).join(', ')}]`);
         const keep = targetAreas.map(a => a >= 1);
         pruned = targetAreas.length - keep.filter(Boolean).length;
         if (pruned > 0) {
@@ -225,7 +225,7 @@ function drawMorph(t, forceLines, forcePoints) {
                 rawContours.length === origLen) {
                 rawContours = rawContours.filter((_, i) => keep[i]);
                 rawContour = rawContours[0] || null;
-                // DebugWindow.log(`  rawContours pruned: ${origLen} → ${rawContours.length}`);
+                DebugWindow.log(`  rawContours pruned: ${origLen} → ${rawContours.length}`);
             }
         }
     }
@@ -330,12 +330,12 @@ function drawMorph(t, forceLines, forcePoints) {
 
     // Final debug log
     if (t >= 1) {
-        // DebugWindow.log(`🎬 t=100% | sim: ${sim}% (avg dist ${Math.round(avgDist)}px) | ${allInterp.length} region(s)`);
+        DebugWindow.log(`🎬 t=100% | sim: ${sim}% (avg dist ${Math.round(avgDist)}px) | ${allInterp.length} region(s)`);
         allInterp.forEach((poly, i) => {
             const a = Math.round(polyArea(poly));
             const role = i === 0 ? 'outer' : `hole ${i}`;
-            // DebugWindow.log(`  region ${i} (${role}): ${a} px²`);
+            DebugWindow.log(`  region ${i} (${role}): ${a} px²`);
         });
-        // if (pruned > 0) DebugWindow.log(`  🗑 deleted ${pruned} zero-area region(s)`);
+        if (pruned > 0) DebugWindow.log(`  🗑 deleted ${pruned} zero-area region(s)`);
     }
 }

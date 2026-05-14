@@ -38,3 +38,10 @@ function draw20PaletteColor(i) {
     const n = DRAW20_REGION_PALETTE.length;
     return DRAW20_REGION_PALETTE[((i % n) + n) % n];
 }
+
+// Master switch — when false, Hungarian / vetoes / uncrossing / rescue /
+// suspect-drop are all bypassed. Each PNG and LaTeX outer gets its own
+// unique id (no cross-pane pairing) and renders with a unique palette
+// colour. Used to verify that every character is detected and contour-
+// extracted, without matching artefacts.
+const DRAW20_MATCHING_ENABLED = true;

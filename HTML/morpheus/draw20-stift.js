@@ -38,6 +38,8 @@ function createDraw20Stift({
     const onOutlinesChanged = (typeof onAfterOutlinesChanged === 'function')
         ? onAfterOutlinesChanged : () => {};
 
+    log('⚙ createDraw20Stift called');
+
     // ── Draw state ──────────────────────────────────────────────────────────
     let strokes = [];
     let curStroke = null;
@@ -52,6 +54,7 @@ function createDraw20Stift({
     try {
         stiftEnabled = localStorage.getItem('draw20-stift-enabled') === '1';
     } catch (_) {}
+    log(`  restored: ${strokes.length} stroke(s), stiftEnabled=${stiftEnabled}`);
 
     // ── Undo/Redo: snapshot stack of stroke-arrays. Linear history; a new
     //    action truncates the future. ────────────────────────────────────────
@@ -147,6 +150,7 @@ function createDraw20Stift({
         const dpr = window.devicePixelRatio || 1;
         stiftCanvas.width = Math.max(1, Math.round(r.width * dpr));
         stiftCanvas.height = Math.max(1, Math.round(r.height * dpr));
+        log(`📐 resizeStift: wrap=${Math.round(r.width)}×${Math.round(r.height)} dpr=${dpr} → canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
         redrawStift();
         // Outline polygons live in canvas-pixel coords — after resize the
         // pixel scale changes. Re-extract from the freshly-drawn strokes so
@@ -172,8 +176,9 @@ function createDraw20Stift({
         return { nx: (cx - r.left) / r.width, ny: (cy - r.top) / r.height };
     }
     function onStiftDown(e) {
-        if (!stiftEnabled) return;
-        if (e.button !== undefined && e.button !== 0) return;
+        log(`🖍 onStiftDown: enabled=${stiftEnabled} button=${e.button} type=${e.type}`);
+        if (!stiftEnabled) { log('  ⊘ skipped (stift disabled)'); return; }
+        if (e.button !== undefined && e.button !== 0) { log(`  ⊘ skipped (button ${e.button} ≠ 0)`); return; }
         e.preventDefault();
         drawingNow = true;
         const sw = document.getElementById('stroke-slider');
@@ -183,6 +188,7 @@ function createDraw20Stift({
             mode: 'pen',
         };
         strokes.push(curStroke);
+        log(`  ▶ new stroke, width=${curStroke.width}, total strokes=${strokes.length}`);
         redrawStift();
     }
     function onStiftMove(e) {
@@ -194,6 +200,7 @@ function createDraw20Stift({
     function onStiftUp() {
         if (!drawingNow) return;
         drawingNow = false;
+        log(`✓ onStiftUp: stroke finished with ${curStroke ? curStroke.points.length : 0} points`);
         curStroke = null;
         persistStrokes();
         // Stroke finished → snapshot into history.
@@ -225,10 +232,12 @@ function createDraw20Stift({
         stiftCanvas.style.cursor = stiftEnabled ? 'crosshair' : 'default';
         const icon = document.getElementById('draw-toggle');
         if (icon) icon.style.opacity = stiftEnabled ? '1' : '0.35';
+        log(`✏️ applyStiftState: enabled=${stiftEnabled} pointer-events=${stiftCanvas.style.pointerEvents} canvas=${stiftCanvas.width}×${stiftCanvas.height}`);
     }
     function toggleStiftEnabled() {
         stiftEnabled = !stiftEnabled;
         try { localStorage.setItem('draw20-stift-enabled', stiftEnabled ? '1' : '0'); } catch (_) {}
+        log(`🖱 toggle stift → ${stiftEnabled ? 'ON' : 'OFF'}`);
         applyStiftState();
     }
 
