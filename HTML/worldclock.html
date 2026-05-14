@@ -48,6 +48,39 @@
         body.has-school .canvas-branding {
             display: none !important;
         }
+        #canvas-container { position: relative; }
+        /* Centered greeting for ?name=… in normal mode — anchored to clock area, not viewport */
+        #visitor-greeting {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            padding: clamp(10px, 2vmin, 18px) clamp(18px, 3.6vmin, 32px);
+            background: rgba(0, 6, 22, 0.78);
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            border-radius: 1.2vmin;
+            box-shadow: 0 0 28px rgba(0, 210, 255, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 300;
+            letter-spacing: 0.18em;
+            font-size: clamp(18px, 3.6vmin, 34px);
+            color: #00d2ff;
+            text-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2400;
+            display: none;
+        }
+        body.has-school #visitor-greeting {
+            display: none !important;
+        }
+        #visitor-greeting .vg-comma {
+            margin-left: -0.18em;
+            letter-spacing: 0;
+        }
         .school-logo {
             display: none;
         }
@@ -107,13 +140,25 @@
     <script>
         (function () {
             try {
-                const raw = new URLSearchParams(window.location.search).get('school');
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('school');
                 const school = raw ? raw.toLowerCase() : null;
                 if (school) document.documentElement.dataset.school = school;
                 if (school === 'rahn' || school === 'ibb') {
                     document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.add('has-school');
                         document.body.classList.add('school-' + school);
+                    });
+                }
+                const visitorName = (params.get('name') || '').trim();
+                if (visitorName) {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const el = document.getElementById('visitor-greeting');
+                        if (!el) return;
+                        el.innerHTML = 'HAB EINE GUTE ZEIT<span class="vg-comma">,</span> ' + visitorName.toUpperCase().replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+                        if (!document.body.classList.contains('has-school')) {
+                            el.style.display = 'block';
+                        }
                     });
                 }
             } catch (e) { /* ignore */ }
@@ -174,6 +219,7 @@
             </div>
             <div id="globe-stage"></div>
             <canvas id="canvas"></canvas>
+            <div id="visitor-greeting"></div>
         </div>
     </main>
 
@@ -607,20 +653,20 @@
             });
         }
 
-        // URL-Parameter: ?name=Leipzig benennt Dresden um.
+        // URL-Parameter: ?city=Leipzig benennt Dresden um.
         // Zusätzlich beliebig viele weitere Overrides per Stadtname als Schlüssel:
         //   ?Tokio=Osaka&NewYork=Boston&Bombay=Mumbai
         // (Schlüssel case-insensitive, Leerzeichen/Zeilenumbrüche werden ignoriert.)
         try {
             const params = new URLSearchParams(window.location.search);
             const norm = s => (s || '').toLowerCase().replace(/[\s\n]+/g, '');
-            const customName = params.get('name');
+            const customName = params.get('city');
             if (customName) {
                 const dresden = cities.find(c => c.tz === 'Europe/Berlin');
                 if (dresden) dresden.name = customName;
             }
             params.forEach((value, key) => {
-                if (key === 'name' || !value) return;
+                if (key === 'city' || key === 'name' || !value) return;
                 const target = cities.find(c => norm(c.name) === norm(key));
                 if (target) target.name = value;
             });

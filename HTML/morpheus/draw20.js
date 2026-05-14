@@ -217,6 +217,12 @@
             stiftCanvas.width = Math.max(1, Math.round(r.width * dpr));
             stiftCanvas.height = Math.max(1, Math.round(r.height * dpr));
             redrawStift();
+            // Outline-Polygone leben in canvas-Pixel-Koordinaten — nach Resize
+            // ist die Pixel-Skala anders. Re-extract aus den frisch gezeichneten
+            // Strichen, sonst landen die Outlines an falscher Stelle.
+            if (stiftContours && typeof extractStiftOutlines === 'function') {
+                extractStiftOutlines();
+            }
         }
         function clearStrokes() {
             strokes = [];
@@ -224,6 +230,10 @@
             drawingNow = false;
             redrawStift();
             persistStrokes();
+            // Stale-Outlines mit-ausräumen (gehörten zu den jetzt weg-radierten
+            // Strichen). `clearStiftOutlines` ist später im Init definiert; bei
+            // tatsächlichem Aufruf via Button längst vorhanden.
+            if (typeof clearStiftOutlines === 'function') clearStiftOutlines();
             dbg('strokes cleared');
         }
         function ptFromEvent(e) {
@@ -288,6 +298,113 @@
         applyStiftState();
         requestAnimationFrame(resizeStift);
         window.addEventListener('resize', resizeStift);
+
+        // ── Stift-Outlines: gleiche Pipeline wie extractPNGContours ─────────
+        // Klickt der User OUTLINES GENERIEREN, lese ich die stiftCanvas-Pixel,
+        // jage sie durch dieselbe Extraktion (red-Threshold + morphClose +
+        // getContoursWithHoles + Area-Filter + rdp(eps)) und rendere die
+        // Outer-Polygone (paletteColor) + Holes (hellblau) in ein eigenes
+        // SVG-Layer oberhalb der Striche. Stroke-Width/Dot-Radius werden mit
+        // /zoom skaliert, damit sie im Zoom konstant dünn bleiben.
+        const stiftOutlineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        stiftOutlineSvg.id = 'draw20-stift-outlines';
+        stiftOutlineSvg.style.cssText = `
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 13;
+            pointer-events: none;
+        `;
+        wrap.appendChild(stiftOutlineSvg);
+
+        let stiftContours = null;
+
+        function renderStiftOutlines() {
+            while (stiftOutlineSvg.firstChild) stiftOutlineSvg.removeChild(stiftOutlineSvg.firstChild);
+            if (!stiftContours || stiftContours.length === 0) return;
+            const z = zoom || 1;
+            // stift natural pixel → wrap pre-transform CSS. Verhältnis kommt
+            // direkt aus offsetWidth (= pre-transform) / canvas.width
+            // (= natural). Damit ist die Skala unabhängig vom aktuellen Zoom
+            // — wichtig, weil sich canvas.width nur bei resize ändert, der
+            // Zoom aber kontinuierlich variieren kann.
+            const sx = wrap.offsetWidth / Math.max(1, stiftCanvas.width);
+            const sy = wrap.offsetHeight / Math.max(1, stiftCanvas.height);
+            const mapXY = (x, y) => [x * sx, y * sy];
+            const cls = (typeof classifyContours === 'function')
+                ? classifyContours(stiftContours)
+                : { outers: stiftContours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const sw = String(1.5 / z);
+            const dotR = (2 / z).toFixed(2);
+            cls.outers.forEach((o, i) => {
+                const color = paletteColor(i);
+                const outerPoly = stiftContours[o.idx];
+                if (!outerPoly || outerPoly.length < 2) return;
+                const ptsStr = outerPoly.map(p => {
+                    const [x, y] = mapXY(p[0], p[1]);
+                    return `${x.toFixed(2)},${y.toFixed(2)}`;
+                }).join(' ');
+                const poly = document.createElementNS(svgNS, 'polygon');
+                poly.setAttribute('points', ptsStr);
+                poly.setAttribute('fill', 'none');
+                poly.setAttribute('stroke', color);
+                poly.setAttribute('stroke-width', sw);
+                poly.setAttribute('stroke-linejoin', 'round');
+                stiftOutlineSvg.appendChild(poly);
+                for (const p of outerPoly) {
+                    const [x, y] = mapXY(p[0], p[1]);
+                    const c = document.createElementNS(svgNS, 'circle');
+                    c.setAttribute('cx', x.toFixed(2));
+                    c.setAttribute('cy', y.toFixed(2));
+                    c.setAttribute('r', dotR);
+                    c.setAttribute('fill', color);
+                    stiftOutlineSvg.appendChild(c);
+                }
+                // Holes: gestrichelt hellblau, damit sie sich vom Outer abheben
+                for (const hi of o.holes) {
+                    const holePoly = stiftContours[hi];
+                    if (!holePoly || holePoly.length < 2) continue;
+                    const hPtsStr = holePoly.map(p => {
+                        const [x, y] = mapXY(p[0], p[1]);
+                        return `${x.toFixed(2)},${y.toFixed(2)}`;
+                    }).join(' ');
+                    const hp = document.createElementNS(svgNS, 'polygon');
+                    hp.setAttribute('points', hPtsStr);
+                    hp.setAttribute('fill', 'none');
+                    hp.setAttribute('stroke', '#9ad6ff');
+                    hp.setAttribute('stroke-width', sw);
+                    hp.setAttribute('stroke-linejoin', 'round');
+                    hp.setAttribute('stroke-dasharray', `${(3 / z).toFixed(2)} ${(3 / z).toFixed(2)}`);
+                    stiftOutlineSvg.appendChild(hp);
+                }
+            });
+            dbg(`stift outlines rendered: ${cls.outers.length} outer + ${cls.holes.length} hole(s)`);
+        }
+
+        function extractStiftOutlines() {
+            if (typeof extractPNGContours !== 'function') {
+                dbg('✗ extractPNGContours unavailable (modul fehlt)');
+                return;
+            }
+            stiftContours = extractPNGContours(stiftCanvas) || [];
+            dbg(`▶ stift extract: ${stiftContours.length} contour(s)`);
+            renderStiftOutlines();
+        }
+
+        function clearStiftOutlines() {
+            stiftContours = null;
+            while (stiftOutlineSvg.firstChild) stiftOutlineSvg.removeChild(stiftOutlineSvg.firstChild);
+            dbg('stift outlines cleared');
+        }
+
+        // Buttons hängen (legacy onclick im Markup läuft parallel ins Leere/
+        // an versteckte Canvases, schadet nicht):
+        const stiftExtractBtn = document.querySelector('button.cyber-btn[onclick*="extractOutline"]');
+        if (stiftExtractBtn) stiftExtractBtn.addEventListener('click', extractStiftOutlines);
+        const stiftClearOutBtn = document.querySelector('button.cyber-btn[onclick*="clearOutline"]');
+        if (stiftClearOutBtn) stiftClearOutBtn.addEventListener('click', clearStiftOutlines);
 
         // Render LaTeX offscreen (KaTeX → html2canvas) and use the resulting
         // canvas as BOTH the displayed image (tex.src = dataURL) and the
@@ -2018,6 +2135,15 @@
             overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
                 c.setAttribute('r', pr);
             });
+            // Gleiches Spiel für Stift-Outlines: Strich = 1.5/zoom, Dot = 2/zoom.
+            const ssw = String(1.5 / zoom);
+            stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                p.setAttribute('stroke-width', ssw);
+                if (p.hasAttribute('stroke-dasharray')) {
+                    p.setAttribute('stroke-dasharray', `${(3 / zoom).toFixed(2)} ${(3 / zoom).toFixed(2)}`);
+                }
+            });
+            stiftOutlineSvg.querySelectorAll('circle').forEach(c => c.setAttribute('r', pr));
         }, { passive: false });
         // Double-click and ESC both reset the view.
         function resetZoom() {
@@ -2030,6 +2156,11 @@
             overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => {
                 c.setAttribute('r', '2');
             });
+            stiftOutlineSvg.querySelectorAll('polygon').forEach(p => {
+                p.setAttribute('stroke-width', '1.5');
+                if (p.hasAttribute('stroke-dasharray')) p.setAttribute('stroke-dasharray', '3 3');
+            });
+            stiftOutlineSvg.querySelectorAll('circle').forEach(c => c.setAttribute('r', '2'));
         }
         host.addEventListener('dblclick', resetZoom);
         document.addEventListener('keydown', (e) => {
