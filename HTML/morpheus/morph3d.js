@@ -110,6 +110,7 @@
     <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING · <span id="hud-png-pts">–</span> Pts</div>
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
+    <div style="margin-top:2px;opacity:0.6">Ansicht: O oben · U unten · V vorn · H hinten · L links · R rechts</div>
 </div>
 <label id="pick-toggle" title="Picking-Modus: große Punkte zum Auswählen (off = 30%, dezent)">
     <input type="checkbox" id="pick-mode-cb" checked>PICKING
@@ -608,13 +609,45 @@
             renderer.setSize(innerWidth, innerHeight);
         });
 
+        // Canonical-view shortcuts. Camera is placed `d` units away from the
+        // scene target on the chosen axis, looking back toward target. For
+        // Top/Bottom the world-up is degenerate (collinear with view dir) →
+        // re-set up to a Z-axis so the view is well-defined.
+        function setView(name) {
+            const t = TARGET_HOME;
+            const d = 1100;
+            cam.up.set(0, 1, 0);
+            switch (name) {
+                case 'top':    cam.position.set(t.x, t.y + d, t.z); cam.up.set(0, 0, -1); break;
+                case 'bottom': cam.position.set(t.x, t.y - d, t.z); cam.up.set(0, 0,  1); break;
+                case 'front':  cam.position.set(t.x, t.y, t.z + d); break;
+                case 'back':   cam.position.set(t.x, t.y, t.z - d); break;
+                case 'left':   cam.position.set(t.x - d, t.y, t.z); break;
+                case 'right':  cam.position.set(t.x + d, t.y, t.z); break;
+            }
+            controls.target.copy(t);
+            controls.update();
+        }
+
         document.addEventListener('keydown', function (e) {
+            // Ignore if focus is in a text input (no inputs in this popup, but defensive).
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            const k = e.key.toLowerCase();
             if (e.key === 'Escape') {
-                // Manual full-state reset — explicit up vector first.
                 cam.up.set(0, 1, 0);
                 cam.position.copy(CAM_HOME);
                 controls.target.copy(TARGET_HOME);
                 controls.update();
+                return;
+            }
+            // Canonical-view shortcuts (German keys).
+            switch (k) {
+                case 'o': setView('top');    break; // Oben
+                case 'u': setView('bottom'); break; // Unten
+                case 'v': setView('front');  break; // Vorn
+                case 'h': setView('back');   break; // Hinten
+                case 'l': setView('left');   break; // Links
+                case 'r': setView('right');  break; // Rechts
             }
         });
     }

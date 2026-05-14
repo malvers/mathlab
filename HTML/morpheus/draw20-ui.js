@@ -17,6 +17,9 @@ function createDraw20UI({
     // Diagnostic callbacks
     openPolygonRing,
     openMorph3D,
+    // Stift bridge — called when user picks a FORMULA (Formel) so we can
+    // wipe the freehand drawing + outlines. PNG preset + LaTeX remain.
+    onFormulaSelected,
     // Defaults
     defaultLatex = (typeof DRAW20_DEFAULT_LATEX !== 'undefined' ? DRAW20_DEFAULT_LATEX : 'E=mc^2'),
     defaultPreset = (typeof DRAW20_DEFAULT_PRESET !== 'undefined' ? DRAW20_DEFAULT_PRESET : 0),
@@ -40,6 +43,10 @@ function createDraw20UI({
         // user doesn't see stale lines from the previous formula while the
         // new LaTeX renders async.
         clearMorphLayer();
+        // Formel-Klick: stift strokes + outlines weg, nur PNG + LaTeX
+        // bleiben (User wollte: "wenn ich eine Formel wähle alles gemalte
+        // löschen, nur Latex und die Hand-Formel stehen lassen").
+        if (typeof onFormulaSelected === 'function') onFormulaSelected();
         tex.dataset.latex = latex;
         // Re-show pix in case a previous symbol-click hid it.
         pix.style.visibility = '';
