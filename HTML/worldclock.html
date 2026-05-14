@@ -87,7 +87,6 @@
             z-index: 9000;
             opacity: 0;
             transition: opacity 0.8s ease;
-            display: none;
         }
         #debug-clock-cover.show { opacity: 1; }
         #debug-clock-cover .cover-piece {
@@ -1995,8 +1994,10 @@
 
         // --- DEBUG: Cover everything except the clock area, fade in 2s after load ---
         (function setupDebugClockCover() {
+            console.log('[debug-cover] IIFE running');
             const cover = document.getElementById('debug-clock-cover');
-            if (!cover) return;
+            if (!cover) { console.warn('[debug-cover] cover element NOT FOUND'); return; }
+            console.log('[debug-cover] cover element found');
             const pieceTop    = cover.querySelector('[data-piece="top"]');
             const pieceBottom = cover.querySelector('[data-piece="bottom"]');
             const pieceLeft   = cover.querySelector('[data-piece="left"]');
@@ -2004,14 +2005,16 @@
 
             function updateHole() {
                 const rect = canvas.getBoundingClientRect();
-                const w = Math.max(80, rect.width);
-                const h = Math.max(80, rect.height);
-                const cx = rect.left + w / 2;
-                const cy = rect.top + h / 2;
-                const r = Math.min(w, h) * 0.8 / 2;
-                // Mirrors drawFrame(): popupX is canvas-center, or right of globe in globe mode
-                const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
-                const popupY = cy;
+                const w = rect.width, h = rect.height;
+                const size = Math.min(w, h) * 0.8;
+                const r = size / 2;
+                // Canvas-relative coordinates (mirrors drawFrame())
+                const canvasCx = w / 2, canvasCy = h / 2;
+                const canvasPopupX = window.useGlobe ? canvasCx + r * 1.2 + 90 : canvasCx;
+                const canvasPopupY = canvasCy;
+                // Convert to viewport coordinates
+                const popupX = rect.left + canvasPopupX;
+                const popupY = rect.top + canvasPopupY;
                 // Clock box (boxW=160, boxH=80, teamYOffset=-52) + city list (nW=160, nH=100, gap=5)
                 const boxW = 160, boxH = 80, teamYOffset = -52, nH = 100, gap = 5, pad = 12;
                 const holeLeft   = popupX - boxW / 2 - pad;
@@ -2020,35 +2023,89 @@
                 const holeBottom = popupY + teamYOffset + boxH / 2 + gap + nH + pad;
                 const W = window.innerWidth, H = window.innerHeight;
 
+                console.log('[updateHole] canvas rect:', {left: rect.left, top: rect.top, w, h});
+                console.log('[updateHole] size:', size, 'r:', r);
+                console.log('[updateHole] popupX:', popupX, 'popupY:', popupY);
+                console.log('[updateHole] hole:', {left: holeLeft, right: holeRight, top: holeTop, bottom: holeBottom});
+                console.log('[updateHole] window:', {W, H});
+
                 pieceTop.style.left   = '0px';
                 pieceTop.style.top    = '0px';
                 pieceTop.style.width  = W + 'px';
                 pieceTop.style.height = Math.max(0, holeTop) + 'px';
+                console.log('[pieceTop]', {top: '0px', height: Math.max(0, holeTop) + 'px'});
 
                 pieceBottom.style.left   = '0px';
                 pieceBottom.style.top    = holeBottom + 'px';
                 pieceBottom.style.width  = W + 'px';
                 pieceBottom.style.height = Math.max(0, H - holeBottom) + 'px';
+                console.log('[pieceBottom]', {top: holeBottom + 'px', height: Math.max(0, H - holeBottom) + 'px'});
 
                 pieceLeft.style.left   = '0px';
                 pieceLeft.style.top    = holeTop + 'px';
                 pieceLeft.style.width  = Math.max(0, holeLeft) + 'px';
                 pieceLeft.style.height = Math.max(0, holeBottom - holeTop) + 'px';
+                console.log('[pieceLeft]', {left: '0px', top: holeTop + 'px', width: Math.max(0, holeLeft) + 'px', height: Math.max(0, holeBottom - holeTop) + 'px'});
 
                 pieceRight.style.left   = holeRight + 'px';
                 pieceRight.style.top    = holeTop + 'px';
                 pieceRight.style.width  = Math.max(0, W - holeRight) + 'px';
                 pieceRight.style.height = Math.max(0, holeBottom - holeTop) + 'px';
+                console.log('[pieceRight]', {left: holeRight + 'px', top: holeTop + 'px', width: Math.max(0, W - holeRight) + 'px', height: Math.max(0, holeBottom - holeTop) + 'px'});
             }
 
-            setTimeout(() => {
-                cover.style.display = 'block';
+            function showCover() {
+                console.log('[showCover] called');
                 updateHole();
-                requestAnimationFrame(() => cover.classList.add('show'));
+                console.log('[showCover] updateHole done, adding class...');
+                requestAnimationFrame(() => {
+                    console.log('[showCover] rAF: adding show class');
+                    cover.classList.add('show');
+                    console.log('[showCover] class added, current opacity:', window.getComputedStyle(cover).opacity);
+                });
+            }
+            function hideCover() {
+                console.log('[hideCover] called');
+                cover.classList.remove('show');
+                console.log('[hideCover] class removed, current opacity:', window.getComputedStyle(cover).opacity);
+            }
+            function toggleCover() {
+                const hasShow = cover.classList.contains('show');
+                console.log('[toggleCover] hasShow:', hasShow, '-> will call', hasShow ? 'hideCover' : 'showCover');
+                if (hasShow) hideCover(); else showCover();
+            }
+
+            // Auto fade-in 2s after load
+            console.log('[setupDebugClockCover] setTimeout 2s scheduled');
+            setTimeout(() => {
+                console.log('[setupDebugClockCover] 2s timeout fired!');
+                showCover();
             }, 2000);
 
+            // 'D' key toggles cover (ignore when typing in inputs). Capture phase so
+            // nothing downstream can swallow it.
+            document.addEventListener('keydown', (e) => {
+                console.log('[keydown] key:', e.key, 'code:', e.code, 'target:', e.target?.tagName, 'id:', e.target?.id);
+                if (e.key !== 'd' && e.key !== 'D') {
+                    console.log('[keydown] not d/D, ignoring');
+                    return;
+                }
+                console.log('[keydown] D/d key detected!');
+                const t = e.target;
+                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+                    console.log('[keydown] on input/textarea/contenteditable, ignoring');
+                    return;
+                }
+                console.log('[keydown] calling toggleCover()');
+                toggleCover();
+            }, true);
+
             window.addEventListener('resize', () => {
-                if (cover.style.display !== 'none') updateHole();
+                console.log('[resize] fired, cover.show:', cover.classList.contains('show'));
+                if (cover.classList.contains('show')) {
+                    console.log('[resize] cover is shown, updating hole');
+                    updateHole();
+                }
             });
         })();
     </script>
