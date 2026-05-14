@@ -450,10 +450,13 @@
                 }
                 matchedPngOuters.add(pi);
                 matchedLatOuters.add(li);
-                // Visual correspondence net: same 80-sample line bundle as before.
-                const a = resample(pngN[pi].pts, SAMPLES);
-                const b = resample(latN[li].pts, SAMPLES);
-                for (let k = 0; k < SAMPLES; k++) {
+                // Visual correspondence net: original vertices only — no
+                // resampling. Counts are equalized upstream so index k on the
+                // PNG side maps to index k on the LaTeX side.
+                const a = pngN[pi].pts;
+                const b = latN[li].pts;
+                const nLink = Math.min(a.length, b.length);
+                for (let k = 0; k < nLink; k++) {
                     linkVerts.push(a[k].x, a[k].y, Z_PNG);
                     linkVerts.push(b[k].x, b[k].y, Z_LAT);
                 }
@@ -609,7 +612,7 @@
             renderer.setSize(innerWidth, innerHeight);
         });
 
-        // Canonical-view shortcuts. Camera is placed `d` units away from the
+        // Canonical-view shortcuts. Camera is placed 'd' units away from the
         // scene target on the chosen axis, looking back toward target. For
         // Top/Bottom the world-up is degenerate (collinear with view dir) →
         // re-set up to a Z-axis so the view is well-defined.

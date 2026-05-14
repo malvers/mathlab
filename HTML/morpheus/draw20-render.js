@@ -78,7 +78,7 @@ function createDraw20Render({
     // further calls are no-ops. This is critical because equalize can
     // run multiple times (formula switch, window resize, stift stroke,
     // …). A multiplier would compound (300 → 600 → 1200 → ...).
-    const DRAW20_MIN_POINTS = 300;
+    const DRAW20_MIN_POINTS = 200;
     function equalizePair(arrA, idxA, arrB, idxB) {
         const a = arrA[idxA], b = arrB[idxB];
         if (!a || !b) return;
@@ -440,7 +440,8 @@ function createDraw20Render({
     function computeMatchIds(pngContours, latexContours) {
         return draw20ComputeMatchIds(pngContours, latexContours, {
             matchingEnabled: matchingEnabled !== false,
-            dbg,  // enabled — shows VETO/SWAP/RESCUE/DROP-SUSPECT decisions
+            // dbg disabled — Hungarian/iteration logs flood DEBUG and slow
+            // renderBBoxes by 5–10× due to many DOM writes per formula.
         });
     }
 
@@ -537,6 +538,13 @@ function createDraw20Render({
 
     // ── renderBBoxes: orchestrator ──────────────────────────────────────────
     function renderBBoxes() {
+        const _t0 = performance.now();
+        let _tPrev = _t0;
+        const _mark = (name) => {
+            const now = performance.now();
+            log(`⏱ ${name}: ${(now - _tPrev).toFixed(1)}ms`);
+            _tPrev = now;
+        };
         // Detach morph-layer first, wipe everything, drawing happens in
         // between, morph-layer gets re-attached as the LAST child below so
         // its polygons render on TOP of bboxes/outlines/dots.
@@ -563,6 +571,7 @@ function createDraw20Render({
             const res = extractLatexContours();
             if (res && res.contours.length) latexContoursList = res.contours;
         }
+        _mark(`extract (png=${pngContours?.length || 0} lat=${latexContoursList?.length || 0})`);
 
         // ── Match pix content-height to tex content-height + align baselines
         // Hand-formula PNG often has different proportions / margins than
@@ -603,20 +612,24 @@ function createDraw20Render({
             // previous formula so the empty/hidden img doesn't carry it.
             pix.style.transform = '';
         }
+        _mark('height-match');
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
         const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
+        _mark('computeMatchIds');
 
         // Density floor for EVERY contour — even before matching. This
         // way unmatched contours (e.g. LaTeX-only when no PNG/stift is
         // present, or extra holes that don't pair) still hit MIN_POINTS.
         ensureMinDensity(pngContours);
         ensureMinDensity(latexContoursList);
+        _mark('ensureMinDensity');
 
         // Equalize point counts between matched PNG↔LaTeX pairs.
         if (pngContours && pngContours.length && latexContoursList && latexContoursList.length) {
             equalizeMatchedContours(pngContours, latexContoursList, matchInfo);
         }
+        _mark('equalize PNG↔LaTeX');
 
         // Same for stift↔LaTeX (when user has drawn). After equalizing,
         // re-render the stift outlines so the display reflects the new
@@ -627,6 +640,7 @@ function createDraw20Render({
             equalizeMatchedContours(stiftC, latexContoursList, stiftMatch);
             if (typeof rerenderStift === 'function') rerenderStift();
         }
+        _mark('stift↔LaTeX equalize + rerender');
 
         // Display scales — natural pixel → displayed CSS pixel, exactly as
         // used by drawContours for the main panes. The polygon-ring uses
@@ -647,10 +661,13 @@ function createDraw20Render({
             pngDisplayScale, latDisplayScale,
         };
 
-        // Refresh the orphan-id set so setMatchHighlight knows which mids
-        // are orphans (must skip the yellow glow on hover).
-        // Orphan-Flagging vorerst aus — kommt später wieder rein.
+        // Refresh the orphan-id set: any match-id whose pair has png<0 or
+        // lat<0 (no partner on the other side) is flagged so drawContours
+        // can paint it red.
         orphanMatchIds.clear();
+        for (const [id, pair] of idToPair) {
+            if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+        }
 
         // Centroid maps populated by drawContours — used afterwards to draw
         // cross-pane match lines (centroid PNG ↔ centroid LaTeX).
@@ -681,6 +698,7 @@ function createDraw20Render({
                 pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints, pngHoles);
             }
         }
+        _mark(`drawContours PNG (${pngVertCount} verts)`);
 
         // ── LaTeX render
         if (tex.complete && tex.naturalWidth && latexCanvas) {
@@ -702,6 +720,7 @@ function createDraw20Render({
                 latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints, latHoles);
             }
         }
+        _mark(`drawContours LaTeX (${latVertCount} verts)`);
 
         // Match lines (centroid-to-centroid) disabled — user requested
         // they be hidden. Keep the loop infrastructure commented for easy
@@ -740,8 +759,15 @@ function createDraw20Render({
         }
 
         if (sl && typeof renderMorph === 'function') renderMorph(+sl.value / 100);
+        _mark('renderMorph');
 
         updateInfoBoxes(pngContours, latexContoursList);
+        _mark('updateInfoBoxes');
+        log(`⏱ TOTAL renderBBoxes: ${(performance.now() - _t0).toFixed(1)}ms`);
+        if (typeof window !== 'undefined' && window.__draw20ClickT0) {
+            log(`⏱⏱ CLICK → DONE: ${(performance.now() - window.__draw20ClickT0).toFixed(1)}ms`);
+            window.__draw20ClickT0 = 0;
+        }
     }
 
     // Re-run updateInfoBoxes from the most recent renderBBoxes state.
