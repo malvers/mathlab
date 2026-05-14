@@ -194,13 +194,40 @@
     display: flex;
     flex-direction: column;
     width: 100% !important;
-    /* Right padding 6px: keeps the inner cards from butting against the
-       scrollbar (cards are width:100% and would otherwise extend right up to
-       the scrollbar thumb). Top/bottom/left padding still handled by #side-panel. */
-    padding: 0 6px 0 0 !important;
+    padding: 0 !important; /* Panel padding is handled by #side-panel */
     box-sizing: border-box;
     position: relative;
     z-index: 5;
+}
+
+/* Scrollbar with built-in visual breathing room.
+   Track is 14px wide, thumb is rendered inside a 3px transparent border on
+   each side → visible thumb stays 8px (same as global) but appears centered
+   with ~3px gap from the cards. Crucially this width is only "stolen" from
+   content when the scrollbar is actually present — no wasted space when the
+   panel content fits without scrolling. */
+#ui-container::-webkit-scrollbar,
+#parameters-container::-webkit-scrollbar,
+#parameter-container::-webkit-scrollbar {
+    width: 14px;
+}
+#ui-container::-webkit-scrollbar-track,
+#parameters-container::-webkit-scrollbar-track,
+#parameter-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+#ui-container::-webkit-scrollbar-thumb,
+#parameters-container::-webkit-scrollbar-thumb,
+#parameter-container::-webkit-scrollbar-thumb {
+    background-color: #334155;
+    border-radius: 7px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+#ui-container::-webkit-scrollbar-thumb:hover,
+#parameters-container::-webkit-scrollbar-thumb:hover,
+#parameter-container::-webkit-scrollbar-thumb:hover {
+    background-color: #475569;
 }
 
 /* Zwischen Stats/HUD-Zeile und Karten — gleicher Rhythmus wie cyber-nav gap (4px); kein Inline margin mehr nötig */
