@@ -220,13 +220,10 @@ function createDraw20Morph({
                 const p = resampleClosed(pair[srcKey], N);
                 const l = resampleClosed(pair[dstKey], N);
                 if (p.length < 3 || l.length < 3) continue;
-                // Same shift as the polygon-morph branch: lines point to
-                // the SHIFTED LaTeX position (40 px left of natural).
-                let shiftX = 0;
-                if (pair[dstKey] && pair[dstKey].length >= 3) {
-                    const bb = bboxOfPts(pair[dstKey]);
-                    shiftX = -((bb.maxX - bb.minX) + 40);
-                }
+                // Pre-morph "MORPH LINIEN": lines end ON the LaTeX (no
+                // shift). The polygon-morph branch below uses the shift
+                // so the final morph lands NEXT TO the LaTeX — but at
+                // t=0 we show the natural correspondence.
                 const lInPlace = alignDstToSrcBBox(p, l);
                 const eng = alignTargetWithEngine(p, lInPlace);
                 if (!eng) continue;
@@ -236,7 +233,7 @@ function createDraw20Morph({
                     const ln = document.createElementNS(svgNS, 'line');
                     ln.setAttribute('x1', p[i].x.toFixed(2));
                     ln.setAttribute('y1', p[i].y.toFixed(2));
-                    ln.setAttribute('x2', (l[j].x + shiftX).toFixed(2));
+                    ln.setAttribute('x2', l[j].x.toFixed(2));
                     ln.setAttribute('y2', l[j].y.toFixed(2));
                     ln.setAttribute('stroke', color);
                     ln.setAttribute('stroke-width', sw);
@@ -278,23 +275,16 @@ function createDraw20Morph({
                 const bb = bboxOfPts(dstOuter);
                 shiftX = -((bb.maxX - bb.minX) + 40);
             }
-            let pathD = '';
+            let pathD = '';        // matched rings → main green path
+            let ghostPathD = '';   // ghost (unpaired) rings → BLACK from start
             const allPts = [];
             for (let r = 0; r < numRings; r++) {
                 let sr = srcRings[r], dr = dstRings[r];
-                // Ghost for extra rings: when ONE side has more holes than
-                // the other, the missing ring is a SCALED-DOWN copy of the
-                // existing ring placed at the morph-final position. As the
-                // morph runs (t=0→1) the ghost grows from "super small" to
-                // its full target size — emerging in place, not flying in
-                // from a distant centroid.
                 const srOk = sr && sr.length >= 3;
                 const drOk = dr && dr.length >= 3;
+                const isGhost = (!srOk && drOk) || (!drOk && srOk);
                 const GHOST_SCALE = 0.05;
                 if (!srOk && drOk) {
-                    // Latex has the ring, stift doesn't → ghost src grows
-                    // from 5% of target size, positioned at target's
-                    // centroid + shiftX (the same point the morph ends at).
                     let cx = 0, cy = 0;
                     for (const q of dr) { cx += q.x; cy += q.y; }
                     cx /= dr.length; cy /= dr.length;
@@ -303,9 +293,6 @@ function createDraw20Morph({
                         y: cy + (q.y - cy) * GHOST_SCALE,
                     }));
                 } else if (!drOk && srOk) {
-                    // Stift has the ring, latex doesn't → ghost dst is
-                    // 5% of source size at source centroid → src shrinks
-                    // to a tiny version in place during the morph.
                     let cx = 0, cy = 0;
                     for (const q of sr) { cx += q.x; cy += q.y; }
                     cx /= sr.length; cy /= sr.length;
@@ -340,19 +327,39 @@ function createDraw20Morph({
                     s += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
                 }
                 s += ' Z';
-                pathD += (pathD ? ' ' : '') + s;
+                if (isGhost) {
+                    ghostPathD += (ghostPathD ? ' ' : '') + s;
+                } else {
+                    pathD += (pathD ? ' ' : '') + s;
+                }
                 for (const pp of pts) allPts.push(pp);
             }
-            if (!pathD) continue;
-            const path = document.createElementNS(svgNS, 'path');
-            path.setAttribute('d', pathD);
-            path.setAttribute('fill-rule', 'evenodd');
-            path.setAttribute('fill', fillOn ? '#adff2f' : 'none');
-            path.setAttribute('stroke', '#ffffff');
-            path.setAttribute('stroke-width', String(1.5 / z));
-            path.setAttribute('stroke-opacity', '0.6');
-            path.dataset.source = 'morph';
-            morphLayer.appendChild(path);
+            // Main green path FIRST, then BLACK ghost path on top — at t=1
+            // the ghost covers the green at the hole-position so the morph
+            // looks like the LaTeX with real holes. At t=0 the ghost is
+            // tiny at the morph-final position; barely visible on black bg.
+            if (pathD) {
+                const path = document.createElementNS(svgNS, 'path');
+                path.setAttribute('d', pathD);
+                path.setAttribute('fill-rule', 'evenodd');
+                path.setAttribute('fill', fillOn ? '#adff2f' : 'none');
+                path.setAttribute('stroke', '#ffffff');
+                path.setAttribute('stroke-width', String(1.5 / z));
+                path.setAttribute('stroke-opacity', '0.6');
+                path.dataset.source = 'morph';
+                morphLayer.appendChild(path);
+            }
+            if (ghostPathD) {
+                const gpath = document.createElementNS(svgNS, 'path');
+                gpath.setAttribute('d', ghostPathD);
+                gpath.setAttribute('fill-rule', 'evenodd');
+                gpath.setAttribute('fill', '#000');
+                gpath.setAttribute('stroke', 'none');
+                gpath.dataset.source = 'morph';
+                gpath.dataset.kind = 'ghost';
+                morphLayer.appendChild(gpath);
+            }
+            if (!pathD && !ghostPathD) continue;
             // Vertex dots across all rings — blue, controlled by PUNKTE.
             // Always create them but set display:none upfront if PUNKTE is
             // off, so a later toggle-on can reveal them via the standard
