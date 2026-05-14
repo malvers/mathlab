@@ -128,9 +128,6 @@
         </div>
     </div>
 
-    <!-- DEBUG: Status marker — updated directly from the IIFE -->
-    <div id="debug-version-marker" style="position:fixed; top:0; left:0; z-index:99999; background:#C41E3A; color:#fff; font:14px/1.4 monospace; padding:6px 10px; pointer-events:none; white-space:pre;">BUILD v4: waiting for IIFE…</div>
-
     <!-- DEBUG: Cover that hides everything except the clock (fades in 2s after load) -->
     <div id="debug-clock-cover">
         <div class="cover-piece" data-piece="top"></div>
@@ -1239,11 +1236,14 @@
             const legendY2 = legendY1 + legendFontSize * 1.5;
             ctx.font = `800 ${legendFontSize}px Orbitron`;
 
-            ctx.fillStyle = "#ffaa00";
-            ctx.fillText("SOMMERZEIT", legendX, legendY1);
+            // Debug: hide canvas legend in clock-only mode (toggled by 'D')
+            if (!window.__clockOnlyMode) {
+                ctx.fillStyle = "#ffaa00";
+                ctx.fillText("SOMMERZEIT", legendX, legendY1);
 
-            ctx.fillStyle = "rgba(220, 220, 220, 0.9)";
-            ctx.fillText("NORMALZEIT", legendX, legendY2);
+                ctx.fillStyle = "rgba(220, 220, 220, 0.9)";
+                ctx.fillText("NORMALZEIT", legendX, legendY2);
+            }
 
             // Globe Toggle Icon (right of legend)
             const sommerW = ctx.measureText("SOMMERZEIT").width;
@@ -1289,42 +1289,45 @@
             const iconCx = legendX + legendW + iconR * 2.2;
             const iconCy = (legendY1 + legendY2 + legendFontSize) / 2;
 
-            ctx.save();
-            ctx.strokeStyle = window.useGlobe ? "#00d2ff" : "#888888";
-            ctx.fillStyle = "transparent";
-            ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
+            // Debug: hide globe-toggle icon in clock-only mode (toggled by 'D')
+            if (!window.__clockOnlyMode) {
+                ctx.save();
+                ctx.strokeStyle = window.useGlobe ? "#00d2ff" : "#888888";
+                ctx.fillStyle = "transparent";
+                ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
 
-            // Outer circle (globe sphere)
-            ctx.beginPath();
-            ctx.arc(iconCx, iconCy, iconR, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // 5 horizontal latitude lines (thinner)
-            ctx.lineWidth = Math.max(0.5, legendFontSize * 0.04);
-            const latLines = [0.65, 0.30, 0, -0.30, -0.65];
-            for (let lat of latLines) {
-                const offsetY = lat * iconR;
-                const lineWidth = iconR * Math.sqrt(1 - lat * lat) * 0.95;
+                // Outer circle (globe sphere)
                 ctx.beginPath();
-                ctx.moveTo(iconCx - lineWidth, iconCy + offsetY);
-                ctx.lineTo(iconCx + lineWidth, iconCy + offsetY);
+                ctx.arc(iconCx, iconCy, iconR, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
+
+                // 5 horizontal latitude lines (thinner)
+                ctx.lineWidth = Math.max(0.5, legendFontSize * 0.04);
+                const latLines = [0.65, 0.30, 0, -0.30, -0.65];
+                for (let lat of latLines) {
+                    const offsetY = lat * iconR;
+                    const lineWidth = iconR * Math.sqrt(1 - lat * lat) * 0.95;
+                    ctx.beginPath();
+                    ctx.moveTo(iconCx - lineWidth, iconCy + offsetY);
+                    ctx.lineTo(iconCx + lineWidth, iconCy + offsetY);
+                    ctx.stroke();
+                }
+                ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
+
+                // Central vertical meridian
+                ctx.beginPath();
+                ctx.moveTo(iconCx, iconCy - iconR);
+                ctx.lineTo(iconCx, iconCy + iconR);
+                ctx.stroke();
+
+                // Vertical ellipse (3D depth)
+                ctx.beginPath();
+                ctx.ellipse(iconCx, iconCy, iconR * 0.48, iconR, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.restore();
             }
-            ctx.lineWidth = Math.max(1, legendFontSize * 0.08);
-
-            // Central vertical meridian
-            ctx.beginPath();
-            ctx.moveTo(iconCx, iconCy - iconR);
-            ctx.lineTo(iconCx, iconCy + iconR);
-            ctx.stroke();
-
-            // Vertical ellipse (3D depth)
-            ctx.beginPath();
-            ctx.ellipse(iconCx, iconCy, iconR * 0.48, iconR, 0, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.restore();
 
             // Store hitbox in canvas coords (legend was translated by (-r, -r) earlier? check)
             globeIconHitbox = {
@@ -2014,8 +2017,7 @@
                 '#mini-rail',
                 '#math-coach-box',
                 '#wc-search',
-                '.canvas-branding',        // SOMMERZEIT / NORMALZEIT title block
-                '#debug-version-marker'    // red BUILD debug marker
+                '.canvas-branding'         // SOMMERZEIT / NORMALZEIT title block
             ];
 
             function applyMode(active) {
@@ -2045,8 +2047,6 @@
                 const t = e.target;
                 if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
                 toggle();
-                document.getElementById('debug-version-marker').textContent =
-                    'BUILD v5: clockOnly=' + window.__clockOnlyMode;
             }, true);
 
             safeLog('[clockOnly] toggle setup ready — press D');
