@@ -127,7 +127,7 @@
     <!-- CITY INFO BOX (globe mode, left side) -->
     <div id="city-info-box" style="position: fixed; left: 0; top: 50%; transform: translateY(-50%); width: clamp(240px, 30vmin, 440px); max-height: 80vh; background: rgba(0, 6, 22, 0.92); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 1vmin; z-index: 9999; display: none; flex-direction: column; font-family: 'Outfit', sans-serif; color: #e6edf3; overflow: hidden; box-shadow: 0 1vmin 4vmin rgba(0,0,0,0.6);">
         <div id="city-info-img-wrap" style="width: 100%; background: #000; overflow: hidden; display: none;">
-            <img id="city-info-img" style="width: 100%; height: auto; display: block;">
+            <img id="city-info-img" src="" alt="" style="width: 100%; height: auto; display: block;">
         </div>
         <a id="city-info-source" target="_blank" rel="noopener" style="display: none; padding: 0.3vmin 1.2vmin; font-size: clamp(0.6rem, 0.85vmin, 0.8rem); color: rgba(0, 210, 255, 0.7); text-decoration: none; font-family: 'Outfit', sans-serif; border-bottom: 1px solid rgba(0, 210, 255, 0.15);">Quelle: Wikipedia →</a>
         <div style="padding: 1vmin 1.2vmin;">
@@ -709,6 +709,7 @@
         let hoveredFlagIndex = null; // Use index to distinguish same flags
 
         let redCheckHitbox = null; // Hitbox of the in-popup ROT checkbox in canvas coords
+        let highlightBtnHitbox = null; // Hitbox of the HIGHLIGHT button in canvas coords
         let imprintHitbox = null;  // Hitbox of the "Impressum · ..." footer in canvas coords
 
         const RED_STORAGE_KEY = 'worldclock.redCities';
@@ -771,6 +772,14 @@
             const dist = Math.sqrt(mx*mx + my*my);
             const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
 
+            // HIGHLIGHT button hit test (in popup, takes precedence)
+            if (highlightBtnHitbox && targetCity &&
+                mxCanvas >= highlightBtnHitbox.x && mxCanvas <= highlightBtnHitbox.x + highlightBtnHitbox.w &&
+                myCanvas >= highlightBtnHitbox.y && myCanvas <= highlightBtnHitbox.y + highlightBtnHitbox.h) {
+                targetCity.red = !targetCity.red;
+                persistRedCities();
+                return;
+            }
 
             // Flag/neighbor city click → rotate globe
             if (flagHitboxes.length > 0) {
@@ -995,6 +1004,15 @@
             const dist = Math.sqrt(mx*mx + my*my);
             const touchAngle = Math.atan2(my, mx) * 180 / Math.PI;
 
+            // HIGHLIGHT button hit test
+            if (highlightBtnHitbox && targetCity &&
+                mxCanvas >= highlightBtnHitbox.x && mxCanvas <= highlightBtnHitbox.x + highlightBtnHitbox.w &&
+                myCanvas >= highlightBtnHitbox.y && myCanvas <= highlightBtnHitbox.y + highlightBtnHitbox.h) {
+                targetCity.red = !targetCity.red;
+                persistRedCities();
+                e.preventDefault();
+                return;
+            }
 
             // Flag/neighbor city hit test
             if (flagHitboxes.length > 0) {
@@ -1061,7 +1079,9 @@
                     let delta = currentAngle - lastMouseAngle;
                     if (delta > Math.PI) delta -= Math.PI * 2;
                     if (delta < -Math.PI) delta += Math.PI * 2;
-                    autoRotation += delta * 180 / Math.PI;
+                    // Mirror mousemove: drive manualOffset so touchend triggers
+                    // the same smooth return-to-real-time animation.
+                    manualOffset -= delta * (1440 / (Math.PI * 2));
                     lastMouseAngle = currentAngle;
                 }
             }
@@ -1472,6 +1492,7 @@
             }
 
             redCheckHitbox = null; // Reset; will be set when popup is drawn
+            highlightBtnHitbox = null; // Reset; will be set when popup is drawn
 
             // 7. Draw Central Selection Time Box
             if (displayAlpha > 0 && targetCity) {
@@ -1505,9 +1526,9 @@
                 const parts = localStr.split(':'); // [HH, MM, SS]
                 
                 const boxW = 160;
-                const boxH = 80; // More height for "air"
+                const boxH = 100; // More height: top reserved for HIGHLIGHT button
                 const rBox = 5;
-                const teamYOffset = -52; // Recalculated to center the larger team
+                const teamYOffset = -62; // Recalculated to center the larger team
                 
                 // Background Box (Harmonized Style)
                 ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
@@ -1531,29 +1552,66 @@
 
                 ctx.textAlign = "center";
 
+                // HIGHLIGHT Button (over SOMMERZEIT/NORMALZEIT line, full box width)
+                const isHighlightOn = !!(targetCity && targetCity.red);
+                const hbX = -boxW/2 + 6;
+                const hbY = y + 4;
+                const hbW = boxW - 12;
+                const hbH = 22;
+                ctx.save();
+                ctx.fillStyle = isHighlightOn ? "rgba(255, 170, 0, 0.25)" : "rgba(0, 210, 255, 0.08)";
+                ctx.strokeStyle = isHighlightOn ? "#ffaa00" : "rgba(0, 210, 255, 0.6)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                const hbR = 4;
+                ctx.moveTo(hbX + hbR, hbY);
+                ctx.lineTo(hbX + hbW - hbR, hbY);
+                ctx.quadraticCurveTo(hbX + hbW, hbY, hbX + hbW, hbY + hbR);
+                ctx.lineTo(hbX + hbW, hbY + hbH - hbR);
+                ctx.quadraticCurveTo(hbX + hbW, hbY + hbH, hbX + hbW - hbR, hbY + hbH);
+                ctx.lineTo(hbX + hbR, hbY + hbH);
+                ctx.quadraticCurveTo(hbX, hbY + hbH, hbX, hbY + hbH - hbR);
+                ctx.lineTo(hbX, hbY + hbR);
+                ctx.quadraticCurveTo(hbX, hbY, hbX + hbR, hbY);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = isHighlightOn ? "#ffaa00" : "rgba(0, 210, 255, 0.9)";
+                ctx.font = "900 11px Orbitron";
+                ctx.textBaseline = "middle";
+                ctx.fillText("HIGHLIGHT", 0, hbY + hbH/2);
+                ctx.textBaseline = "alphabetic";
+                ctx.restore();
+                highlightBtnHitbox = {
+                    x: popupX + hbX,
+                    y: popupY + hbY,
+                    w: hbW,
+                    h: hbH
+                };
+
                 // Status (Sommerzeit/Normalzeit)
                 const dstStatus = getDSTLabel(targetCity.tz);
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
                 ctx.font = "900 10px Orbitron";
-                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 18);
+                ctx.fillText((dstStatus === "SZ") ? "SOMMERZEIT" : "NORMALZEIT", 0, y + 38);
 
                 // Querstrich (Separator)
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
                 ctx.beginPath();
-                ctx.moveTo(-boxW/2 + 20, y + 26);
-                ctx.lineTo(boxW/2 - 20, y + 26);
+                ctx.moveTo(-boxW/2 + 20, y + 46);
+                ctx.lineTo(boxW/2 - 20, y + 46);
                 ctx.stroke();
 
                 // City Name (Top)
                 ctx.fillStyle = (dstStatus === "SZ") ? "#ffaa00" : "#00d2ff";
                 ctx.font = "bold 12px Orbitron"; // Larger city name
-                ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 40);
-                
+                ctx.fillText(targetCity.name.replace(/\n/g, ' ').toUpperCase(), 0, y + 60);
+
                 // --- Digit Widgets ---
                 const drawDigitBox = (val, xPos) => {
                     ctx.fillStyle = "#fff";
                     ctx.font = "900 20px Orbitron";
-                    ctx.fillText(val, xPos, y + 65);
+                    ctx.fillText(val, xPos, y + 85);
                 };
 
                 drawDigitBox(parts[0], -40); // HH
