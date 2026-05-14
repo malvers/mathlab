@@ -194,7 +194,10 @@
     display: flex;
     flex-direction: column;
     width: 100% !important;
-    padding: 0 !important; /* Panel padding is handled by #side-panel */
+    /* Right padding 6px: keeps the inner cards from butting against the
+       scrollbar (cards are width:100% and would otherwise extend right up to
+       the scrollbar thumb). Top/bottom/left padding still handled by #side-panel. */
+    padding: 0 6px 0 0 !important;
     box-sizing: border-box;
     position: relative;
     z-index: 5;
@@ -513,10 +516,11 @@ body {
     --cyber-sidebar-w: 356px;
     --cyber-left-scale: 1;
     --cyber-left-natural-w: calc(var(--cyber-rail-w) + var(--cyber-sidebar-w));
-    /* Hard rendered-width cap for the left chrome.
+    /* Hard rendered-width cap for the left chrome (6px buffer above 384 so
+       the inner scrollbar has breathing room from the panel edge).
        The JS auto-fit scale (cyber-left-chrome.js) is additionally capped
        at cap / natural so the inner transform never exceeds this. */
-    --cyber-left-cap: 384px;
+    --cyber-left-cap: 390px;
 }
 
 body.cyber-shell-grid {

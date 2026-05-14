@@ -5,6 +5,9 @@ const DebugWindow = (() => {
     let prevHeight = '300px';
     let prevLeft = '';
     let prevTop = '';
+    let fontSize = 11; // px — persisted; user-adjustable via +/- buttons
+    const MIN_FONT = 8;
+    const MAX_FONT = 28;
     const MAX_LOGS = 50;
 
     function isProduction() {
@@ -28,6 +31,10 @@ const DebugWindow = (() => {
             if (savedState.prevHeight) prevHeight = savedState.prevHeight;
             if (savedState.prevLeft) prevLeft = savedState.prevLeft;
             if (savedState.prevTop) prevTop = savedState.prevTop;
+            const savedFont = parseFloat(localStorage.getItem('debug-window-fontsize'));
+            if (Number.isFinite(savedFont) && savedFont >= MIN_FONT && savedFont <= MAX_FONT) {
+                fontSize = savedFont;
+            }
         } catch (_) {}
 
         debugEl = document.createElement('div');
@@ -89,6 +96,52 @@ const DebugWindow = (() => {
 
         const btnGroup = document.createElement('div');
         btnGroup.style.cssText = `display: flex; gap: 4px;`;
+
+        // Font-size minus button
+        const btnFontMinus = document.createElement('button');
+        btnFontMinus.textContent = 'A−';
+        btnFontMinus.title = 'Schrift kleiner';
+        btnFontMinus.style.cssText = `
+            background: transparent;
+            border: 1px solid #6BA043;
+            color: #6BA043;
+            width: 28px;
+            height: 24px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 0;
+            border-radius: 3px;
+            display: ${collapsed ? 'none' : 'block'};
+        `;
+        btnFontMinus.onclick = (e) => {
+            e.stopPropagation();
+            setFontSize(fontSize - 1);
+        };
+        btnGroup.appendChild(btnFontMinus);
+
+        // Font-size plus button
+        const btnFontPlus = document.createElement('button');
+        btnFontPlus.textContent = 'A+';
+        btnFontPlus.title = 'Schrift größer';
+        btnFontPlus.style.cssText = `
+            background: transparent;
+            border: 1px solid #6BA043;
+            color: #6BA043;
+            width: 28px;
+            height: 24px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 0;
+            border-radius: 3px;
+            display: ${collapsed ? 'none' : 'block'};
+        `;
+        btnFontPlus.onclick = (e) => {
+            e.stopPropagation();
+            setFontSize(fontSize + 1);
+        };
+        btnGroup.appendChild(btnFontPlus);
 
         const btnCopy = document.createElement('button');
         btnCopy.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="9" height="10" rx="1"/><rect x="5" y="2" width="9" height="10" rx="1"/></svg>`;
@@ -168,6 +221,7 @@ const DebugWindow = (() => {
             white-space: pre-wrap;
             word-break: break-all;
             line-height: 1.4;
+            font-size: ${fontSize}px;
             display: ${collapsed ? 'none' : 'block'};
         `;
 
@@ -195,6 +249,19 @@ const DebugWindow = (() => {
             h.className = 'debug-resize-handle';
             h.dataset.dir = def.dir;
             h.style.cssText = `position:absolute; ${def.style} cursor:${def.cursor}; display:${collapsed ? 'none' : 'block'}; user-select:none; z-index:5;`;
+            // Visual indicator on the SE corner (bottom-right) so users see the resize grip
+            if (def.dir === 'se') {
+                h.style.display = collapsed ? 'none' : 'flex';
+                h.style.alignItems = 'flex-end';
+                h.style.justifyContent = 'flex-end';
+                h.style.padding = '2px';
+                h.style.boxSizing = 'border-box';
+                h.innerHTML = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="color:inherit; pointer-events:none;">
+                    <line x1="2" y1="14" x2="14" y2="2"/>
+                    <line x1="6" y1="14" x2="14" y2="6"/>
+                    <line x1="10" y1="14" x2="14" y2="10"/>
+                </svg>`;
+            }
             debugEl.appendChild(h);
             resizeHandles.push(h);
             makeResizable(h, debugEl, def.dir);
@@ -207,28 +274,54 @@ const DebugWindow = (() => {
         debugEl._resizeHandles = resizeHandles;
     }
 
-    function makeResizable(handle, element) {
+    function makeResizable(handle, element, dir) {
         let isResizing = false;
         let startX = 0, startY = 0;
         let startWidth = 0, startHeight = 0;
+        let startLeft = 0, startTop = 0;
+        const MIN_W = 150, MIN_H = 80;
 
         handle.addEventListener('mousedown', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             isResizing = true;
             startX = e.clientX;
             startY = e.clientY;
             startWidth = element.offsetWidth;
             startHeight = element.offsetHeight;
+            startLeft = element.offsetLeft;
+            startTop = element.offsetTop;
+            // Switch from bottom/right anchoring to absolute coords for stable resize
+            element.style.left = startLeft + 'px';
+            element.style.top = startTop + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
-            const newWidth = Math.max(150, startWidth + deltaX);
-            const newHeight = Math.max(80, startHeight + deltaY);
-            element.style.width = newWidth + 'px';
-            element.style.height = newHeight + 'px';
+
+            // East/West (width)
+            if (dir.indexOf('e') !== -1) {
+                const newWidth = Math.max(MIN_W, startWidth + deltaX);
+                element.style.width = newWidth + 'px';
+            } else if (dir.indexOf('w') !== -1) {
+                const newWidth = Math.max(MIN_W, startWidth - deltaX);
+                element.style.width = newWidth + 'px';
+                element.style.left = (startLeft + (startWidth - newWidth)) + 'px';
+            }
+
+            // North/South (height)
+            if (dir.indexOf('s') !== -1) {
+                const newHeight = Math.max(MIN_H, startHeight + deltaY);
+                element.style.height = newHeight + 'px';
+            } else if (dir.indexOf('n') !== -1) {
+                const newHeight = Math.max(MIN_H, startHeight - deltaY);
+                element.style.height = newHeight + 'px';
+                element.style.top = (startTop + (startHeight - newHeight)) + 'px';
+            }
         });
 
         document.addEventListener('mouseup', () => {
@@ -321,14 +414,23 @@ const DebugWindow = (() => {
         updateContent();
     }
 
+    function setFontSize(px) {
+        const clamped = Math.max(MIN_FONT, Math.min(MAX_FONT, px));
+        if (clamped === fontSize) return;
+        fontSize = clamped;
+        const content = document.getElementById('debug-content');
+        if (content) content.style.fontSize = fontSize + 'px';
+        try { localStorage.setItem('debug-window-fontsize', String(fontSize)); } catch (_) {}
+    }
+
     function toggle() {
         if (!debugEl) init();
         const content = document.getElementById('debug-content');
         const btn = document.getElementById('debug-collapse-btn');
-        const resizeHandle = document.getElementById('debug-resize-handle');
+        const resizeHandles = debugEl._resizeHandles || [];
         const title = debugEl.querySelector('span');
-        const btnCopy = debugEl.querySelectorAll('button')[0];
-        const btnClear = debugEl.querySelectorAll('button')[1];
+        // All buttons in header except the collapse button (which stays visible)
+        const allBtns = Array.from(debugEl.querySelectorAll('button')).filter(b => b.id !== 'debug-collapse-btn');
         const header = debugEl.querySelector('div');
 
         if (!collapsed) {
@@ -351,10 +453,9 @@ const DebugWindow = (() => {
             debugEl.style.right = '20px';
             debugEl.style.bottom = '20px';
             content.style.display = 'none';
-            if (resizeHandle) resizeHandle.style.display = 'none';
+            resizeHandles.forEach(h => h.style.display = 'none');
             if (title) title.style.display = 'none';
-            if (btnCopy) btnCopy.style.display = 'none';
-            if (btnClear) btnClear.style.display = 'none';
+            allBtns.forEach(b => b.style.display = 'none');
             if (header) {
                 header.style.marginBottom = '0';
                 header.style.paddingBottom = '0';
@@ -387,10 +488,12 @@ const DebugWindow = (() => {
                 debugEl.style.bottom = '20px';
             }
             content.style.display = 'block';
-            if (resizeHandle) resizeHandle.style.display = 'flex';
+            resizeHandles.forEach(h => h.style.display = (h.dataset.dir === 'se') ? 'flex' : 'block');
             if (title) title.style.display = 'block';
-            if (btnCopy) btnCopy.style.display = 'flex';
-            if (btnClear) btnClear.style.display = 'block';
+            allBtns.forEach(b => {
+                // Copy button uses 'flex' (centers SVG); others use 'block'
+                b.style.display = b.querySelector('svg') ? 'flex' : 'block';
+            });
             if (header) {
                 header.style.marginBottom = '8px';
                 header.style.paddingBottom = '6px';
