@@ -240,7 +240,7 @@ function createDraw20Stift({
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return false;
         if (e.key !== 's' && e.key !== 'S') return false;
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
-        log(`⌨ S caught (${where}) target=${e.target && e.target.tagName}`);
+        // log(`⌨ S caught (${where}) target=${e.target && e.target.tagName}`);
         e.preventDefault();
         e.stopImmediatePropagation();
         toggleStiftEnabled();
@@ -272,7 +272,7 @@ function createDraw20Stift({
     function toggleStiftEnabled() {
         stiftEnabled = !stiftEnabled;
         try { localStorage.setItem('draw20-stift-enabled', stiftEnabled ? '1' : '0'); } catch (_) {}
-        log(`🖱 toggle stift → ${stiftEnabled ? 'ON' : 'OFF'}`);
+        // log(`🖱 toggle stift → ${stiftEnabled ? 'ON' : 'OFF'}`);
         applyStiftState();
     }
 
