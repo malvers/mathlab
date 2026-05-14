@@ -12,9 +12,9 @@ Three coupled angle sources, all relative to `-π/2` (12 o'clock at top):
 
 | What | File:Line | Current (CCW) | Flipped (CW) |
 |---|---|---|---|
-| Hour ring (1–24 labels) | [worldclock.html:1303](worldclock.html#L1303) | `(12 - i) * 2π/24 - π/2` | `(i - 12) * 2π/24 - π/2` |
-| City markers (arrows) | [worldclock.html:1210](worldclock.html#L1210) | `(-city.lon) * π/180 - π/2` | `(city.lon) * π/180 - π/2` |
-| City label / hover angle | [worldclock.html:856](worldclock.html#L856), [:950](worldclock.html#L950), [:1518](worldclock.html#L1518) | `-city.lon + mapRotation - 90` | `city.lon + mapRotation - 90` |
+| Hour ring (1–24 labels) | [worldclock.html:1303](worldclock.html) | `(12 - i) * 2π/24 - π/2` | `(i - 12) * 2π/24 - π/2` |
+| City markers (arrows) | [worldclock.html:1210](worldclock.html) | `(-city.lon) * π/180 - π/2` | `(city.lon) * π/180 - π/2` |
+| City label / hover angle | [worldclock.html:856](worldclock.html), [:950](worldclock.html), [:1518](worldclock.html) | `-city.lon + mapRotation - 90` | `city.lon + mapRotation - 90` |
 
 All three must flip together — if hour-ring flips but city markers don't, cities no longer stand over the correct hour.
 

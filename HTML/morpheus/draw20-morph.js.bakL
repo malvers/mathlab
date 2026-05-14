@@ -143,11 +143,11 @@ function createDraw20Morph({
         const pairs = useStift ? stiftMorphPairs : morphPairs;
         const srcKey = useStift ? 'srcPts' : 'pngPts';
         const dstKey = useStift ? 'dstPts' : 'latPts';
-        // log(`🎬 renderMorph(t=${t.toFixed(3)}) useStift=${useStift} stiftMP=${stiftMorphPairs.length} pngMP=${morphPairs.length}`);
+        log(`🎬 renderMorph(t=${t.toFixed(3)}) useStift=${useStift} stiftMP=${stiftMorphPairs.length} pngMP=${morphPairs.length}`);
         const srcEl = useStift ? stiftCanvas : pix;
         tex.style.opacity = '';
         if (!pairs.length) {
-            // log('🎬 ⊘ EARLY RETURN — pairs.length === 0');
+            log('🎬 ⊘ EARLY RETURN — pairs.length === 0');
             srcEl.style.opacity = '';
             // CRITICAL: drop the morph-src-* classes — without this the
             // stiftCanvas can stay visibility:hidden after LÖSCHEN, which
@@ -201,10 +201,10 @@ function createDraw20Morph({
             stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
         }
         if (t < MORPH_EPS) {
-            // log(`📍 preMorph: t=${t.toFixed(3)} pairs=${pairs.length} useStift=${useStift}`);
+            log(`📍 preMorph: t=${t.toFixed(3)} pairs=${pairs.length} useStift=${useStift}`);
             const corrToggle = document.getElementById('correspondence-toggle');
             const showCorr = corrToggle ? corrToggle.checked : true;
-            // log(`📍 corrToggle: el=${!!corrToggle} checked=${showCorr}`);
+            log(`📍 corrToggle: el=${!!corrToggle} checked=${showCorr}`);
             if (!showCorr) { log('📍 ⊘ KORRESPONDENZ off — skip'); return; }
             const svgNS = 'http://www.w3.org/2000/svg';
             const z = getZ() || 1;
@@ -214,7 +214,7 @@ function createDraw20Morph({
             for (const pair of pairs) {
                 const srcLen = pair[srcKey] ? pair[srcKey].length : 0;
                 const dstLen = pair[dstKey] ? pair[dstKey].length : 0;
-                // log(`📍   pair[${pairIdx}] mid=${pair.mid} srcLen=${srcLen} dstLen=${dstLen}`);
+                log(`📍   pair[${pairIdx}] mid=${pair.mid} srcLen=${srcLen} dstLen=${dstLen}`);
                 pairIdx++;
                 const N = Math.max(srcLen, dstLen);
                 const p = resampleClosed(pair[srcKey], N);
@@ -238,7 +238,7 @@ function createDraw20Morph({
                     drawnLines++;
                 }
             }
-            // log(`📍 preMorph done: ${drawnLines} lines appended to morphLayer`);
+            log(`📍 preMorph done: ${drawnLines} lines appended to morphLayer`);
             return;
         }
         const svgNS = 'http://www.w3.org/2000/svg';
@@ -350,7 +350,7 @@ function createDraw20Morph({
     function buildStiftMorphPairs(latexContoursList) {
         stiftMorphPairs.length = 0;
         const stiftContours = getSC();
-        // log(`🔧 buildStiftMorphPairs: stift=${stiftContours ? stiftContours.length : 'null'} latArg=${latexContoursList ? latexContoursList.length : 'null'}`);
+        log(`🔧 buildStiftMorphPairs: stift=${stiftContours ? stiftContours.length : 'null'} latArg=${latexContoursList ? latexContoursList.length : 'null'}`);
         if (!stiftContours || !stiftContours.length) { log('🔧 ⊘ no stift contours'); return; }
         // If the caller didn't pass LaTeX contours, fetch them now.
         let lat = latexContoursList;
@@ -365,15 +365,15 @@ function createDraw20Morph({
 
         const m = computeMatchIds(stiftContours, lat);
         const stiftId = m.pngId, latId = m.latId;
-        // log(`🔧 match: stiftIds=[${stiftId.join(',')}] latIds=[${latId.join(',')}]`);
+        log(`🔧 match: stiftIds=[${stiftId.join(',')}] latIds=[${latId.join(',')}]`);
         if (m.idToPair) {
             const pairsList = [];
             for (const [id, p] of m.idToPair) pairsList.push(`${id}:png=${p.png}/lat=${p.lat}`);
-            // log(`🔧 idToPair: ${pairsList.join(' | ')}`);
+            log(`🔧 idToPair: ${pairsList.join(' | ')}`);
         }
         if (m.plausibility && m.plausibility.matches) {
             const ms = m.plausibility.matches.map(mm => `pIdx=${mm.pngIdx}→lIdx=${mm.latIdx} score=${mm.score?.toFixed(2)} verdict=${mm.verdict}`);
-            // log(`🔧 plausibility: ${ms.join(' | ')}`);
+            log(`🔧 plausibility: ${ms.join(' | ')}`);
         }
 
         // stift natural → wrap pre-transform CSS
@@ -428,7 +428,7 @@ function createDraw20Morph({
         // Pair them 1:1 by canonical outer order so the user still gets a
         // morph. Holes are paired by index within each outer pair.
         if (stiftMorphPairs.length === 0 && sCls.outers.length && lCls.outers.length) {
-            // log('🔧 fallback: forcing 1:1 outer pairing (matching rejected all)');
+            log('🔧 fallback: forcing 1:1 outer pairing (matching rejected all)');
             const nP = Math.min(sCls.outers.length, lCls.outers.length);
             for (let k = 0; k < nP; k++) {
                 const so = sCls.outers[k];
@@ -440,7 +440,7 @@ function createDraw20Morph({
                 stiftMorphPairs.push({ mid: k, srcPts: sp, dstPts: lp, srcHoles: sh, dstHoles: lh });
             }
         }
-        // log(`🔧 stiftMorphPairs built: ${stiftMorphPairs.length} pair(s)`);
+        log(`🔧 stiftMorphPairs built: ${stiftMorphPairs.length} pair(s)`);
     }
 
     // ── ► MORPH animation loop ──────────────────────────────────────────────
