@@ -72,14 +72,13 @@ function createDraw20Morph({
         const pCy = (pBB.minY + pBB.maxY) / 2;
         const lCx = (lBB.minX + lBB.maxX) / 2;
         const lCy = (lBB.minY + lBB.maxY) / 2;
-        const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
-        const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
-        const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
-        const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
-        const sx = pW / lW, sy = pH / lH;
+        // Translate-only: keep the LaTeX target at its NATURAL size,
+        // just shift its centroid onto the source centroid. The morph
+        // result at t=1 is then exactly the LaTeX size at the source
+        // location. (anisotropic scaling distorted; min(sx,sy) shrank.)
         return l.map(q => ({
-            x: (q.x - lCx) * sx + pCx,
-            y: (q.y - lCy) * sy + pCy,
+            x: q.x - lCx + pCx,
+            y: q.y - lCy + pCy,
         }));
     }
     // Wrapper around the engine function `alignTargetTo` (morph-engine.js).
@@ -242,12 +241,10 @@ function createDraw20Morph({
         const svgNS = 'http://www.w3.org/2000/svg';
         const z = getZ() || 1;
         let drawn = 0;
-        let lastN = 0;
         for (const pair of pairs) {
             // N adaptive: use the max(src, dst) length so the equalized
             // outline points are all preserved (no down-sample to 60).
             const N = Math.max(pair[srcKey].length, pair[dstKey].length);
-            lastN = N;
             const p = resampleClosed(pair[srcKey], N);
             const l = resampleClosed(pair[dstKey], N);
             if (p.length < 3 || l.length < 3) continue;
@@ -286,11 +283,6 @@ function createDraw20Morph({
             }
             drawn++;
         }
-        // Count what we actually rendered (each pair contributes N points
-        // to the morph polygon). Quick sanity check that the displayed
-        // dot count matches the equalized info-box numbers.
-        const morphPts = morphLayer.querySelectorAll('circle[data-source="morph"]').length;
-        log(`🎯 morph t=${t.toFixed(2)}: ${drawn} polygon(s), N=${lastN} verts/poly, ${morphPts} pts total in DOM`);
     }
 
     // ── buildStiftMorphPairs: stift→LaTeX matching pipeline ─────────────────

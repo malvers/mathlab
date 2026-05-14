@@ -258,32 +258,35 @@
             return pts[pts.length - 1];
         }
 
+        // Red picking spheres — actual 3D meshes (not THREE.Points dots) so
+        // they pick reliably and look solid. Shared geometry per call to keep
+        // GPU buffers cheap.
+        const PICK_SPHERE_R = 3.2;
+        const pickSphereGeom = new THREE.SphereGeometry(PICK_SPHERE_R, 10, 10);
+        const pickSphereMat = new THREE.MeshBasicMaterial({ color: 0xff3344 });
         function addOuterPoints(pts, z, plane, partnerPts, partnerZ, alignment) {
             if (!pts || !pts.length) return;
-            const verts = new Float32Array(pts.length * 3);
-            for (let i = 0; i < pts.length; i++) {
-                verts[i * 3] = pts[i].x; verts[i * 3 + 1] = pts[i].y; verts[i * 3 + 2] = z;
-            }
-            const geom = new THREE.BufferGeometry();
-            geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
-            const obj = new THREE.Points(geom, new THREE.PointsMaterial({
-                color: 0xff3344, size: 7, sizeAttenuation: false,
-            }));
-            obj.userData = {
+            // One mesh per vertex — small, but few enough that it doesn't matter.
+            const ownCum = cumulativeLengths(pts);
+            const partnerCum = partnerPts ? cumulativeLengths(partnerPts) : null;
+            const baseData = {
                 plane: plane,
                 ownPts: pts,
-                ownCum: cumulativeLengths(pts),
+                ownCum: ownCum,
                 ownZ: z,
                 partnerPts: partnerPts || null,
-                partnerCum: partnerPts ? cumulativeLengths(partnerPts) : null,
+                partnerCum: partnerCum,
                 partnerZ: partnerPts ? partnerZ : null,
-                // Engine alignment (computed by draw20-render.js openMorph3D).
-                // 'forward' = use idxMap as-is (PNG → LaTeX direction).
-                // 'reverse' = invert it (LaTeX → PNG direction).
+                // 'forward' (PNG→LaTeX) | 'reverse' (LaTeX→PNG)
                 alignment: alignment || null,
             };
-            scene.add(obj);
-            pickablePoints.push(obj);
+            for (let i = 0; i < pts.length; i++) {
+                const m = new THREE.Mesh(pickSphereGeom, pickSphereMat);
+                m.position.set(pts[i].x, pts[i].y, z);
+                m.userData = Object.assign({ vertIdx: i }, baseData);
+                scene.add(m);
+                pickablePoints.push(m);
+            }
         }
 
         // Draw outlines for every outer (matched + orphan).
@@ -369,8 +372,8 @@
                 if (c.material) c.material.dispose();
             }
         }
-        const HL_SPHERE_R = 4;     // smaller pick-marker spheres
-        const HL_LINE_R = 1.6;     // cylinder radius — fakes a thick "in-focus" line
+        const HL_SPHERE_R = 2.4;   // small pick-marker spheres
+        const HL_LINE_R = 0.9;     // matching slimmer cylinder
         const HL_COLOR = 0xff9020; // orange
 
         function addHighlightSphere(p, color) {
@@ -460,7 +463,13 @@
             raycaster.setFromCamera(pointer, cam);
             const hits = raycaster.intersectObjects(pickablePoints, false);
             if (hits.length) {
-                highlightFromHit(hits[0].object, hits[0].index);
+                const obj = hits[0].object;
+                // Mesh path: vertex index is on userData (one mesh per vertex).
+                // Points fallback: hits[0].index from the BufferGeometry index.
+                const idx = (obj.userData && obj.userData.vertIdx != null)
+                    ? obj.userData.vertIdx
+                    : hits[0].index;
+                highlightFromHit(obj, idx);
             } else {
                 clearHighlights();
             }
