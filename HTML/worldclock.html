@@ -128,6 +128,9 @@
         </div>
     </div>
 
+    <!-- DEBUG: Status marker — updated directly from the IIFE -->
+    <div id="debug-version-marker" style="position:fixed; top:0; left:0; z-index:99999; background:#C41E3A; color:#fff; font:14px/1.4 monospace; padding:6px 10px; pointer-events:none; white-space:pre;">BUILD v4: waiting for IIFE…</div>
+
     <!-- DEBUG: Cover that hides everything except the clock (fades in 2s after load) -->
     <div id="debug-clock-cover">
         <div class="cover-piece" data-piece="top"></div>
@@ -1340,8 +1343,11 @@
             const imprintX = r * 0.06;
             const imprintY = h - r * 0.05;
             const imprintMetrics = ctx.measureText(imprintText);
-            ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
-            ctx.fillText(imprintText, imprintX, imprintY);
+            // Debug: hide imprint when clock-only mode is active (toggled by 'D')
+            if (!window.__clockOnlyMode) {
+                ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
+                ctx.fillText(imprintText, imprintX, imprintY);
+            }
             imprintHitbox = {
                 x: imprintX,
                 y: imprintY - imprintFontSize * 1.4,
@@ -1989,124 +1995,61 @@
 
         document.fonts.ready.then(init);
 
-        // UI Controls & Interaction
-        CyberUI.on('reset', manualReset);
+        // UI Controls & Interaction (wrapped in try/catch — CyberUI.on does not exist
+        // on the current CyberUI, throws TypeError and blocks everything below).
+        try { CyberUI.on('reset', manualReset); } catch (e) {
+            try { DebugWindow.log('[CyberUI.on] failed: ' + e.message); } catch(_) {}
+        }
 
-        // --- DEBUG: Cover everything except the clock area, fade in 2s after load ---
-        (function setupDebugClockCover() {
-            console.log('[debug-cover] IIFE running');
-            const cover = document.getElementById('debug-clock-cover');
-            if (!cover) { console.warn('[debug-cover] cover element NOT FOUND'); return; }
-            console.log('[debug-cover] cover element found');
-            const pieceTop    = cover.querySelector('[data-piece="top"]');
-            const pieceBottom = cover.querySelector('[data-piece="bottom"]');
-            const pieceLeft   = cover.querySelector('[data-piece="left"]');
-            const pieceRight  = cover.querySelector('[data-piece="right"]');
-
-            function updateHole() {
-                const rect = canvas.getBoundingClientRect();
-                const w = rect.width, h = rect.height;
-                const size = Math.min(w, h) * 0.8;
-                const r = size / 2;
-                // Canvas-relative coordinates (mirrors drawFrame())
-                const canvasCx = w / 2, canvasCy = h / 2;
-                const canvasPopupX = window.useGlobe ? canvasCx + r * 1.2 + 90 : canvasCx;
-                const canvasPopupY = canvasCy;
-                // Convert to viewport coordinates
-                const popupX = rect.left + canvasPopupX;
-                const popupY = rect.top + canvasPopupY;
-                // Clock box (boxW=160, boxH=80, teamYOffset=-52) + city list (nW=160, nH=100, gap=5)
-                const boxW = 160, boxH = 80, teamYOffset = -52, nH = 100, gap = 5, pad = 12;
-                const holeLeft   = popupX - boxW / 2 - pad;
-                const holeRight  = popupX + boxW / 2 + pad;
-                const holeTop    = popupY + teamYOffset - boxH / 2 - pad;
-                const holeBottom = popupY + teamYOffset + boxH / 2 + gap + nH + pad;
-                const W = window.innerWidth, H = window.innerHeight;
-
-                console.log('[updateHole] canvas rect:', {left: rect.left, top: rect.top, w, h});
-                console.log('[updateHole] size:', size, 'r:', r);
-                console.log('[updateHole] popupX:', popupX, 'popupY:', popupY);
-                console.log('[updateHole] hole:', {left: holeLeft, right: holeRight, top: holeTop, bottom: holeBottom});
-                console.log('[updateHole] window:', {W, H});
-
-                pieceTop.style.left   = '0px';
-                pieceTop.style.top    = '0px';
-                pieceTop.style.width  = W + 'px';
-                pieceTop.style.height = Math.max(0, holeTop) + 'px';
-                console.log('[pieceTop]', {top: '0px', height: Math.max(0, holeTop) + 'px'});
-
-                pieceBottom.style.left   = '0px';
-                pieceBottom.style.top    = holeBottom + 'px';
-                pieceBottom.style.width  = W + 'px';
-                pieceBottom.style.height = Math.max(0, H - holeBottom) + 'px';
-                console.log('[pieceBottom]', {top: holeBottom + 'px', height: Math.max(0, H - holeBottom) + 'px'});
-
-                pieceLeft.style.left   = '0px';
-                pieceLeft.style.top    = holeTop + 'px';
-                pieceLeft.style.width  = Math.max(0, holeLeft) + 'px';
-                pieceLeft.style.height = Math.max(0, holeBottom - holeTop) + 'px';
-                console.log('[pieceLeft]', {left: '0px', top: holeTop + 'px', width: Math.max(0, holeLeft) + 'px', height: Math.max(0, holeBottom - holeTop) + 'px'});
-
-                pieceRight.style.left   = holeRight + 'px';
-                pieceRight.style.top    = holeTop + 'px';
-                pieceRight.style.width  = Math.max(0, W - holeRight) + 'px';
-                pieceRight.style.height = Math.max(0, holeBottom - holeTop) + 'px';
-                console.log('[pieceRight]', {left: holeRight + 'px', top: holeTop + 'px', width: Math.max(0, W - holeRight) + 'px', height: Math.max(0, holeBottom - holeTop) + 'px'});
+        // --- DEBUG: Global keydown test ---
+        // --- DEBUG: Clock-only mode — toggled by 'D'. Hides mini-rail, coach-box
+        //     (SOMMERZEIT header), search input, and the canvas-drawn imprint.
+        (function setupClockOnlyToggle() {
+            function safeLog(msg) {
+                try { DebugWindow.log(msg); } catch(_) {}
             }
 
-            function showCover() {
-                console.log('[showCover] called');
-                updateHole();
-                console.log('[showCover] updateHole done, adding class...');
-                requestAnimationFrame(() => {
-                    console.log('[showCover] rAF: adding show class');
-                    cover.classList.add('show');
-                    console.log('[showCover] class added, current opacity:', window.getComputedStyle(cover).opacity);
+            // Selectors of elements to hide in clock-only mode
+            const HIDE_SELECTORS = [
+                '#mini-rail',
+                '#math-coach-box',
+                '#wc-search',
+                '.canvas-branding',        // SOMMERZEIT / NORMALZEIT title block
+                '#debug-version-marker'    // red BUILD debug marker
+            ];
+
+            function applyMode(active) {
+                window.__clockOnlyMode = active;
+                HIDE_SELECTORS.forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (!el) { safeLog('[clockOnly] not found: ' + sel); return; }
+                    if (active) {
+                        if (el.dataset.prevDisplay === undefined) {
+                            el.dataset.prevDisplay = el.style.display || '';
+                        }
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = el.dataset.prevDisplay || '';
+                        delete el.dataset.prevDisplay;
+                    }
                 });
-            }
-            function hideCover() {
-                console.log('[hideCover] called');
-                cover.classList.remove('show');
-                console.log('[hideCover] class removed, current opacity:', window.getComputedStyle(cover).opacity);
-            }
-            function toggleCover() {
-                const hasShow = cover.classList.contains('show');
-                console.log('[toggleCover] hasShow:', hasShow, '-> will call', hasShow ? 'hideCover' : 'showCover');
-                if (hasShow) hideCover(); else showCover();
+                safeLog('[clockOnly] active=' + active);
             }
 
-            // Auto fade-in 2s after load
-            console.log('[setupDebugClockCover] setTimeout 2s scheduled');
-            setTimeout(() => {
-                console.log('[setupDebugClockCover] 2s timeout fired!');
-                showCover();
-            }, 2000);
+            function toggle() {
+                applyMode(!window.__clockOnlyMode);
+            }
 
-            // 'D' key toggles cover (ignore when typing in inputs). Capture phase so
-            // nothing downstream can swallow it.
             document.addEventListener('keydown', (e) => {
-                console.log('[keydown] key:', e.key, 'code:', e.code, 'target:', e.target?.tagName, 'id:', e.target?.id);
-                if (e.key !== 'd' && e.key !== 'D') {
-                    console.log('[keydown] not d/D, ignoring');
-                    return;
-                }
-                console.log('[keydown] D/d key detected!');
+                if (e.key !== 'd' && e.key !== 'D') return;
                 const t = e.target;
-                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-                    console.log('[keydown] on input/textarea/contenteditable, ignoring');
-                    return;
-                }
-                console.log('[keydown] calling toggleCover()');
-                toggleCover();
+                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+                toggle();
+                document.getElementById('debug-version-marker').textContent =
+                    'BUILD v5: clockOnly=' + window.__clockOnlyMode;
             }, true);
 
-            window.addEventListener('resize', () => {
-                console.log('[resize] fired, cover.show:', cover.classList.contains('show'));
-                if (cover.classList.contains('show')) {
-                    console.log('[resize] cover is shown, updating hole');
-                    updateHole();
-                }
-            });
+            safeLog('[clockOnly] toggle setup ready — press D');
         })();
     </script>
     <script src="js/cyber-recorder-key.js"></script>

@@ -52,12 +52,13 @@ const DebugWindow = (() => {
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 20px rgba(107, 160, 67, 0.3);
-            resize: ${collapsed ? 'none' : 'both'};
+            resize: none;
             overflow: hidden;
             transition: height 0.25s ease, width 0.25s ease;
         `;
 
         const header = document.createElement('div');
+        header.id = 'debug-header';
         header.style.cssText = `
             display: flex;
             justify-content: ${collapsed ? 'center' : 'space-between'};
@@ -70,7 +71,7 @@ const DebugWindow = (() => {
         `;
 
         const title = document.createElement('span');
-        title.textContent = '🐛 DEBUG';
+        title.textContent = '🐛 DEBUGING';
         title.style.flex = '1';
         title.style.display = collapsed ? 'none' : 'block';
         header.appendChild(title);
@@ -159,12 +160,69 @@ const DebugWindow = (() => {
             display: ${collapsed ? 'none' : 'block'};
         `;
 
+        // Custom resize handle (bottom-right corner)
+        const resizeHandle = document.createElement('div');
+        resizeHandle.id = 'debug-resize-handle';
+        resizeHandle.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            cursor: nwse-resize;
+            display: ${collapsed ? 'none' : 'flex'};
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 2px;
+            box-sizing: border-box;
+            user-select: none;
+        `;
+        resizeHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6BA043" stroke-width="1.5">
+            <line x1="2" y1="14" x2="14" y2="2"/>
+            <line x1="6" y1="14" x2="14" y2="6"/>
+            <line x1="10" y1="14" x2="14" y2="10"/>
+        </svg>`;
+        debugEl.style.position = 'fixed';
         debugEl.appendChild(header);
         debugEl.appendChild(content);
+        debugEl.appendChild(resizeHandle);
         document.body.appendChild(debugEl);
 
         // Make draggable
         makeHeaderDraggable(header, debugEl);
+
+        // Make resizable via custom handle
+        makeResizable(resizeHandle, debugEl);
+    }
+
+    function makeResizable(handle, element) {
+        let isResizing = false;
+        let startX = 0, startY = 0;
+        let startWidth = 0, startHeight = 0;
+
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isResizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = element.offsetWidth;
+            startHeight = element.offsetHeight;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            const newWidth = Math.max(150, startWidth + deltaX);
+            const newHeight = Math.max(80, startHeight + deltaY);
+            element.style.width = newWidth + 'px';
+            element.style.height = newHeight + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) saveState();
+            isResizing = false;
+        });
     }
 
     function makeHeaderDraggable(header, element) {
@@ -205,12 +263,6 @@ const DebugWindow = (() => {
             if (isMouseDown) saveState();
             isMouseDown = false;
         });
-
-        // Save on resize (resize: both creates a resize handle)
-        const ro = new ResizeObserver(() => {
-            if (!collapsed) saveState();
-        });
-        ro.observe(element);
     }
 
     function saveState() {
@@ -261,6 +313,7 @@ const DebugWindow = (() => {
         if (!debugEl) init();
         const content = document.getElementById('debug-content');
         const btn = document.getElementById('debug-collapse-btn');
+        const resizeHandle = document.getElementById('debug-resize-handle');
         const title = debugEl.querySelector('span');
         const btnCopy = debugEl.querySelectorAll('button')[0];
         const btnClear = debugEl.querySelectorAll('button')[1];
@@ -272,21 +325,23 @@ const DebugWindow = (() => {
             prevLeft = debugEl.style.left || '';
             prevTop = debugEl.style.top || '';
             collapsed = true;
-            debugEl.style.height = '40px';
+            debugEl.style.height = '50px';
             debugEl.style.width = '50px';
-            debugEl.style.padding = '4px';
-            debugEl.style.resize = 'none';
+            debugEl.style.padding = '0';
+            debugEl.style.display = 'flex';
+            debugEl.style.justifyContent = 'center';
+            debugEl.style.alignItems = 'center';
             // Snap collapsed pill to bottom-right of viewport
             debugEl.style.left = 'auto';
             debugEl.style.top = 'auto';
             debugEl.style.right = '20px';
             debugEl.style.bottom = '20px';
             content.style.display = 'none';
+            if (resizeHandle) resizeHandle.style.display = 'none';
             if (title) title.style.display = 'none';
             if (btnCopy) btnCopy.style.display = 'none';
             if (btnClear) btnClear.style.display = 'none';
             if (header) {
-                header.style.justifyContent = 'center';
                 header.style.marginBottom = '0';
                 header.style.paddingBottom = '0';
                 header.style.borderBottom = 'none';
@@ -297,8 +352,9 @@ const DebugWindow = (() => {
             collapsed = false;
             debugEl.style.height = prevHeight;
             debugEl.style.width = '400px';
-            debugEl.style.padding = '10px';
-            debugEl.style.resize = 'both';
+            debugEl.style.padding = '8px';
+            debugEl.style.justifyContent = 'flex-start';
+            debugEl.style.alignItems = 'stretch';
             if (prevLeft || prevTop) {
                 debugEl.style.left = prevLeft;
                 debugEl.style.top = prevTop;
@@ -311,11 +367,11 @@ const DebugWindow = (() => {
                 debugEl.style.bottom = '20px';
             }
             content.style.display = 'block';
+            if (resizeHandle) resizeHandle.style.display = 'flex';
             if (title) title.style.display = 'block';
             if (btnCopy) btnCopy.style.display = 'flex';
             if (btnClear) btnClear.style.display = 'block';
             if (header) {
-                header.style.justifyContent = 'space-between';
                 header.style.marginBottom = '8px';
                 header.style.paddingBottom = '6px';
                 header.style.borderBottom = '1px solid rgba(107, 160, 67, 0.3)';
