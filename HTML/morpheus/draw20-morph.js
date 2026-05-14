@@ -247,47 +247,73 @@ function createDraw20Morph({
         }
         const svgNS = 'http://www.w3.org/2000/svg';
         const z = getZ() || 1;
+        const pr = (2 / z).toFixed(2);
+        const fillToggle = document.getElementById('fill-toggle');
+        const fillOn = fillToggle ? fillToggle.checked : false;
+        // Respect PUNKTE toggle for the morph dots — when off, don't even
+        // add them (newly-created elements default to visible, so without
+        // this they'd appear even with the toggle off).
+        const pointsToggle = document.getElementById('points-toggle');
+        const pointsOn = pointsToggle ? pointsToggle.checked : true;
         let drawn = 0;
+        // Morph each pair as ONE <path> with M-L-Z subpaths for outer
+        // + every paired hole; fill-rule=evenodd cuts the holes out.
+        // Each ring is morphed independently (alignTargetTo per ring).
         for (const pair of pairs) {
-            // N adaptive: use the max(src, dst) length so the equalized
-            // outline points are all preserved (no down-sample to 60).
-            const N = Math.max(pair[srcKey].length, pair[dstKey].length);
-            const p = resampleClosed(pair[srcKey], N);
-            const l = resampleClosed(pair[dstKey], N);
-            if (p.length < 3 || l.length < 3) continue;
-            // alignDstToSrcBBox just centers the target onto the source so
-            // alignTargetTo (engine) can pick the right rotation/reverse —
-            // the aligned positions are NOT used for the actual morph end-
-            // point. We interpolate from src → ORIGINAL l[idxMap[i]] so the
-            // morph lands on the LaTeX's natural baseline at t=1.
-            const lInPlace = alignDstToSrcBBox(p, l);
-            const eng = alignTargetWithEngine(p, lInPlace);
-            if (!eng) continue;
-            const pts = p.map((pp, i) => {
-                const j = eng.idxMap[i];
-                return {
-                    x: (1 - t) * pp.x + t * l[j].x,
-                    y: (1 - t) * pp.y + t * l[j].y,
-                };
-            });
-            const polyStr = pts.map(pp => `${pp.x},${pp.y}`).join(' ');
-            const poly = document.createElementNS(svgNS, 'polygon');
-            poly.setAttribute('points', polyStr);
-            // Same green as the stift/pixel ink. Fill respects the
-            // POLYGON FÜLLEN toggle: when off, no fill (only stroke).
-            const fillToggle = document.getElementById('fill-toggle');
-            const fillOn = fillToggle ? fillToggle.checked : false;
-            poly.setAttribute('fill', fillOn ? '#adff2f' : 'none');
-            poly.setAttribute('stroke', '#ffffff');
-            poly.setAttribute('stroke-width', String(1.5 / z));
-            poly.setAttribute('stroke-opacity', '0.6');
-            poly.dataset.source = 'morph';
-            morphLayer.appendChild(poly);
-            // Vertex dots on the morphed polygon — blue, same look as the
-            // outline dots, so PUNKTE toggle catches them automatically
-            // (query is `circle[data-kind="point"]`).
-            const pr = (2 / z).toFixed(2);
-            for (const pp of pts) {
+            const srcOuter = pair[srcKey];
+            const dstOuter = pair[dstKey];
+            const srcHolesArr = pair[useStift ? 'srcHoles' : 'pngHoles'] || [];
+            const dstHolesArr = pair[useStift ? 'dstHoles' : 'latHoles'] || [];
+            const srcRings = [srcOuter, ...srcHolesArr];
+            const dstRings = [dstOuter, ...dstHolesArr];
+            const numRings = Math.min(srcRings.length, dstRings.length);
+            let pathD = '';
+            const allPts = [];
+            for (let r = 0; r < numRings; r++) {
+                const sr = srcRings[r], dr = dstRings[r];
+                if (!sr || !dr || sr.length < 3 || dr.length < 3) continue;
+                const N = Math.max(sr.length, dr.length);
+                const p = resampleClosed(sr, N);
+                const l = resampleClosed(dr, N);
+                if (p.length < 3 || l.length < 3) continue;
+                // alignDstToSrcBBox centers the target onto the source so
+                // alignTargetTo picks the right rotation/reverse — aligned
+                // positions NOT used as morph endpoint; we morph to the
+                // ORIGINAL l[idxMap[i]] so the result lands on LaTeX's
+                // natural baseline at t=1.
+                const lInPlace = alignDstToSrcBBox(p, l);
+                const eng = alignTargetWithEngine(p, lInPlace);
+                if (!eng) continue;
+                const pts = p.map((pp, i) => {
+                    const j = eng.idxMap[i];
+                    return {
+                        x: (1 - t) * pp.x + t * l[j].x,
+                        y: (1 - t) * pp.y + t * l[j].y,
+                    };
+                });
+                let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+                for (let i = 1; i < pts.length; i++) {
+                    s += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
+                }
+                s += ' Z';
+                pathD += (pathD ? ' ' : '') + s;
+                for (const pp of pts) allPts.push(pp);
+            }
+            if (!pathD) continue;
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', pathD);
+            path.setAttribute('fill-rule', 'evenodd');
+            path.setAttribute('fill', fillOn ? '#adff2f' : 'none');
+            path.setAttribute('stroke', '#ffffff');
+            path.setAttribute('stroke-width', String(1.5 / z));
+            path.setAttribute('stroke-opacity', '0.6');
+            path.dataset.source = 'morph';
+            morphLayer.appendChild(path);
+            // Vertex dots across all rings — blue, controlled by PUNKTE.
+            // Always create them but set display:none upfront if PUNKTE is
+            // off, so a later toggle-on can reveal them via the standard
+            // applyPointsToggle path.
+            for (const pp of allPts) {
                 const dot = document.createElementNS(svgNS, 'circle');
                 dot.setAttribute('cx', pp.x.toFixed(2));
                 dot.setAttribute('cy', pp.y.toFixed(2));
@@ -295,6 +321,7 @@ function createDraw20Morph({
                 dot.setAttribute('fill', '#4363d8');
                 dot.dataset.kind = 'point';
                 dot.dataset.source = 'morph';
+                if (!pointsOn) dot.style.display = 'none';
                 morphLayer.appendChild(dot);
             }
             drawn++;
@@ -346,21 +373,30 @@ function createDraw20Morph({
         const sCls = classifyContours(stiftContours);
         const lCls = classifyContours(lat);
         const srcPts = new Map();
+        const srcHoles = new Map();
         for (const o of sCls.outers) {
             const mid = stiftId[o.idx];
             if (mid < 0) continue;
             srcPts.set(mid, stiftContours[o.idx].map(p => stiftMap(p[0], p[1])));
+            srcHoles.set(mid, o.holes.map(hi => stiftContours[hi].map(p => stiftMap(p[0], p[1]))));
         }
         const dstPts = new Map();
+        const dstHoles = new Map();
         for (const o of lCls.outers) {
             const mid = latId[o.idx];
             if (mid < 0) continue;
             dstPts.set(mid, lat[o.idx].map(p => latMap(p[0], p[1])));
+            dstHoles.set(mid, o.holes.map(hi => lat[hi].map(p => latMap(p[0], p[1]))));
         }
         for (const [mid, sp] of srcPts) {
             const lp = dstPts.get(mid);
             if (!lp) continue;
-            stiftMorphPairs.push({ mid, srcPts: sp, dstPts: lp });
+            stiftMorphPairs.push({
+                mid,
+                srcPts: sp, dstPts: lp,
+                srcHoles: srcHoles.get(mid) || [],
+                dstHoles: dstHoles.get(mid) || [],
+            });
         }
     }
 

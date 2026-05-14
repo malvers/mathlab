@@ -80,6 +80,17 @@
         z-index: 100;
     }
     #reload-btn:hover { background: rgba(0, 210, 255, 0.28); color: #fff; }
+    #scale-toggle {
+        position: fixed; top: 12px; right: 130px;
+        display: flex; align-items: center; gap: 8px;
+        font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
+        color: rgba(0, 210, 255, 0.85); cursor: pointer;
+        padding: 6px 10px;
+        background: rgba(0, 210, 255, 0.08);
+        border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
+        z-index: 100; user-select: none;
+    }
+    #scale-toggle input { cursor: pointer; accent-color: #00d2ff; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -89,6 +100,9 @@
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
 </div>
+<label id="scale-toggle" title="Natürliche Größen (kein Auto-Fit pro Seite)">
+    <input type="checkbox" id="scale-natural-cb">NATURAL
+</label>
 <button id="reload-btn" onclick="(function(){ try { var b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn'); if (b) b.click(); else location.reload(); } catch (e) { location.reload(); } })()">↻ RELOAD</button>
 <div id="empty" style="display:none">Keine Polygon-Daten — bitte erst Formel + Zeichnung in morph.html laden.</div>
 <script>
@@ -150,9 +164,40 @@
         }
         const pngBB = bboxOf(pngOuters);
         const latBB = bboxOf(latOuters);
+        // Auto-fit (default): each side scaled so longest axis = targetSize.
+        // Natural: no scaling — both sides keep their real relative sizes.
+        const SCALE_KEY = 'draw20-morph3d-natural';
+        const naturalMode = (function () {
+            try { return localStorage.getItem(SCALE_KEY) === '1'; } catch (_) { return false; }
+        })();
+        const cb = document.getElementById('scale-natural-cb');
+        if (cb) {
+            cb.checked = naturalMode;
+            cb.addEventListener('change', function () {
+                try { localStorage.setItem(SCALE_KEY, cb.checked ? '1' : '0'); } catch (_) {}
+                // Popup URL is about:blank (window.open with empty url + doc.write),
+                // so location.reload() would render an empty page. Instead poke the
+                // opener's 3D MORPH button — it re-writes fresh content into the
+                // same named window, which picks up the new SCALE_KEY value.
+                try {
+                    const b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn');
+                    if (b) b.click();
+                } catch (_) {}
+            });
+        }
         const targetSize = 400;
-        const pngScale = Math.max(pngBB.w, pngBB.h) > 0 ? targetSize / Math.max(pngBB.w, pngBB.h) : 1;
-        const latScale = Math.max(latBB.w, latBB.h) > 0 ? targetSize / Math.max(latBB.w, latBB.h) : 1;
+        let pngScale, latScale;
+        if (naturalMode) {
+            // Shared scale: relative sizes preserved, total fits the camera.
+            const longest = Math.max(pngBB.w, pngBB.h, latBB.w, latBB.h);
+            const uniform = longest > 0 ? targetSize / longest : 1;
+            pngScale = uniform;
+            latScale = uniform;
+        } else {
+            // Auto-fit per side: each shape uses the same on-screen footprint.
+            pngScale = Math.max(pngBB.w, pngBB.h) > 0 ? targetSize / Math.max(pngBB.w, pngBB.h) : 1;
+            latScale = Math.max(latBB.w, latBB.h) > 0 ? targetSize / Math.max(latBB.w, latBB.h) : 1;
+        }
         function normalize(outers, bb, scale) {
             return outers.map(function (o) {
                 return {
