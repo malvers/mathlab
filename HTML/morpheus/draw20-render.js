@@ -423,40 +423,43 @@ function createDraw20Render({
         });
     }
 
+    // When the user draws with stift instead of loading a PNG preset,
+    // lastRenderData.pngContours is empty and the matcher returns LaTeX as
+    // an orphan. Substitute stiftContours into the data and re-run the
+    // match against LaTeX so the diagnostic views (RING, 3D MORPH) see a
+    // real source side. Returns lastRenderData unchanged when no stift.
+    function dataWithStiftSubstitution() {
+        if (!lastRenderData) return null;
+        const hasPng = lastRenderData.pngContours && lastRenderData.pngContours.length;
+        if (hasPng) return lastRenderData;
+        const stiftContours = (typeof getStiftContours === 'function') ? getStiftContours() : null;
+        if (!stiftContours || !stiftContours.length) return lastRenderData;
+        if (!lastRenderData.latexContours || !lastRenderData.latexContours.length) return lastRenderData;
+        const sm = computeMatchIds(stiftContours, lastRenderData.latexContours);
+        return Object.assign({}, lastRenderData, {
+            pngContours: stiftContours,
+            pClass: sm.pClass,
+            pngId: sm.pngId,
+            latId: sm.latId,
+            idToPair: sm.idToPair,
+            plausibility: sm.plausibility,
+            pngDisplayScale: 1,
+        });
+    }
+
     // ── Polygon-Ring diagnostic (delegates to draw20-ring.js) ───────────────
     function openPolygonRing() {
         if (typeof draw20OpenPolygonRing === 'function') {
-            draw20OpenPolygonRing(lastRenderData, matchingEnabled !== false);
+            draw20OpenPolygonRing(dataWithStiftSubstitution(), matchingEnabled !== false);
         }
     }
 
     // ── 3D Morph view (delegates to morph3d.js) ─────────────────────────────
-    // The user usually draws with stift — that path produces `stiftContours`,
-    // NOT the PNG-image-based pngContours that lastRenderData carries. When
-    // stift exists, substitute it into the data so the popup can show the
-    // drawn shape vs. the LaTeX target (computing the match on the fly).
     function openMorph3D() {
         if (typeof Morph3D === 'undefined' || typeof Morph3D.openMorph3D !== 'function') return;
         if (!lastRenderData) { Morph3D.openMorph3D(null); return; }
 
-        const stiftContours = (typeof getStiftContours === 'function') ? getStiftContours() : null;
-        let data = lastRenderData;
-        if (stiftContours && stiftContours.length
-            && lastRenderData.latexContours && lastRenderData.latexContours.length
-            && typeof computeMatchIds === 'function') {
-            const sm = computeMatchIds(stiftContours, lastRenderData.latexContours);
-            // Overwrite png-side fields with the stift counterpart so the
-            // popup uses a uniform "left = source / right = target" shape.
-            data = Object.assign({}, lastRenderData, {
-                pngContours: stiftContours,
-                pClass: sm.pClass,
-                pngId: sm.pngId,
-                latId: sm.latId,
-                idToPair: sm.idToPair,
-                plausibility: sm.plausibility,
-                pngDisplayScale: 1,
-            });
-        }
+        let data = dataWithStiftSubstitution();
 
         // Per-pair vertex correspondence: resample both outlines to N points,
         // then run the SAME alignment engine the 2D morph uses to get the

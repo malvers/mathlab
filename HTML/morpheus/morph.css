@@ -32,12 +32,13 @@
     display: none !important;
 }
 
-/* Source PIX/Stift canvas: opacity+visibility hide so layout doesn't
-   shift (display:none would let the LaTeX pane slide). Beats the PIXEL
-   toggle's inline opacity/visibility resets. */
+/* Source PIX/Stift canvas: opacity-only hide so pointer-events still
+   flow through and the user can keep drawing on the stiftCanvas even
+   while it's invisible (visibility:hidden would block events and break
+   drawing after morph). display:none would also let the LaTeX pane slide
+   in the flex layout — opacity:0 keeps everything in place. */
 .morph-src-pixel-hidden {
     opacity: 0 !important;
-    visibility: hidden !important;
 }
 /* ========================================================================= */
 
