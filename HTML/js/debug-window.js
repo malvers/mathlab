@@ -3,6 +3,8 @@ const DebugWindow = (() => {
     let logs = [];
     let collapsed = false;
     let prevHeight = '300px';
+    let prevLeft = '';
+    let prevTop = '';
     const MAX_LOGS = 50;
 
     function init() {
@@ -15,17 +17,24 @@ const DebugWindow = (() => {
             const s = localStorage.getItem('debug-window-state');
             if (s) savedState = JSON.parse(s);
             if (savedState.prevHeight) prevHeight = savedState.prevHeight;
+            if (savedState.prevLeft) prevLeft = savedState.prevLeft;
+            if (savedState.prevTop) prevTop = savedState.prevTop;
         } catch (_) {}
 
         debugEl = document.createElement('div');
         debugEl.id = 'central-debug-window';
 
-        // Position/size: use saved or defaults
+        // Position/size: collapsed → bottom-right; expanded → saved position or default bottom-right
         const w = savedState.width || '400px';
         const h = collapsed ? '40px' : (savedState.height || '300px');
-        const positionStyle = savedState.left
-            ? `left: ${savedState.left}; top: ${savedState.top}; right: auto; bottom: auto;`
-            : `right: 20px; bottom: 20px;`;
+        let positionStyle;
+        if (collapsed) {
+            positionStyle = `left: auto; top: auto; right: 20px; bottom: 20px;`;
+        } else if (savedState.left && savedState.left !== 'auto') {
+            positionStyle = `left: ${savedState.left}; top: ${savedState.top}; right: auto; bottom: auto;`;
+        } else {
+            positionStyle = `right: 20px; bottom: 20px;`;
+        }
 
         debugEl.style.cssText = `
             position: fixed;
@@ -207,12 +216,22 @@ const DebugWindow = (() => {
     function saveState() {
         if (!debugEl) return;
         try {
+            // When collapsed, the live left/top are "auto" — persist the pre-collapse
+            // position via prevLeft/prevTop so reload + expand restores it.
+            const liveLeft = debugEl.style.left;
+            const liveTop = debugEl.style.top;
+            if (!collapsed && liveLeft && liveLeft !== 'auto') {
+                prevLeft = liveLeft;
+                prevTop = liveTop;
+            }
             const state = {
-                left: debugEl.style.left,
-                top: debugEl.style.top,
+                left: collapsed ? prevLeft : liveLeft,
+                top: collapsed ? prevTop : liveTop,
                 width: debugEl.style.width,
                 height: collapsed ? prevHeight : debugEl.style.height,
-                prevHeight: prevHeight
+                prevHeight: prevHeight,
+                prevLeft: prevLeft,
+                prevTop: prevTop
             };
             localStorage.setItem('debug-window-state', JSON.stringify(state));
         } catch (_) {}
@@ -248,13 +267,20 @@ const DebugWindow = (() => {
         const header = debugEl.querySelector('div');
 
         if (!collapsed) {
-            // Collapsing: save current height, shrink to header
+            // Collapsing: save current size + position, snap to bottom-right
             prevHeight = debugEl.style.height || debugEl.offsetHeight + 'px';
+            prevLeft = debugEl.style.left || '';
+            prevTop = debugEl.style.top || '';
             collapsed = true;
             debugEl.style.height = '40px';
             debugEl.style.width = '50px';
             debugEl.style.padding = '4px';
             debugEl.style.resize = 'none';
+            // Snap collapsed pill to bottom-right of viewport
+            debugEl.style.left = 'auto';
+            debugEl.style.top = 'auto';
+            debugEl.style.right = '20px';
+            debugEl.style.bottom = '20px';
             content.style.display = 'none';
             if (title) title.style.display = 'none';
             if (btnCopy) btnCopy.style.display = 'none';
@@ -267,12 +293,23 @@ const DebugWindow = (() => {
             }
             if (btn) btn.textContent = '▲';
         } else {
-            // Expanding: restore previous height
+            // Expanding: restore previous height + position (or bottom-right default)
             collapsed = false;
             debugEl.style.height = prevHeight;
             debugEl.style.width = '400px';
             debugEl.style.padding = '10px';
             debugEl.style.resize = 'both';
+            if (prevLeft || prevTop) {
+                debugEl.style.left = prevLeft;
+                debugEl.style.top = prevTop;
+                debugEl.style.right = 'auto';
+                debugEl.style.bottom = 'auto';
+            } else {
+                debugEl.style.left = 'auto';
+                debugEl.style.top = 'auto';
+                debugEl.style.right = '20px';
+                debugEl.style.bottom = '20px';
+            }
             content.style.display = 'block';
             if (title) title.style.display = 'block';
             if (btnCopy) btnCopy.style.display = 'flex';
