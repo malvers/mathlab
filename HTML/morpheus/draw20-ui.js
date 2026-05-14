@@ -189,6 +189,31 @@ function createDraw20UI({
     }
     attachToggles();
 
+    // L / P keys mirror the legacy points/lines toggles — but legacy just
+    // flips `.checked` without dispatching a change event, so the draw20
+    // apply* listeners never fire. AND legacy ran AFTER us (bubble phase)
+    // would flip the checkbox a SECOND time → net-zero visual toggle but
+    // applyToggle ran with the intermediate state → desync.
+    // Solution: capture-phase + stopImmediatePropagation so legacy never
+    // sees the L/P keydown.
+    document.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (e.key === 'l' || e.key === 'L') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const t = document.getElementById('lines-toggle');
+            if (t) t.checked = !t.checked;
+            applyLinesToggle();
+        } else if (e.key === 'p' || e.key === 'P') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const t = document.getElementById('points-toggle');
+            if (t) t.checked = !t.checked;
+            applyPointsToggle();
+        }
+    }, true);
+
     // ── Right-click context menu (custom). ──────────────────────────────────
     // Currently a single action: "Delete Local" — wipes all localStorage
     // (zoom/pan, drawn pixels, switch states, formula choice, …) so the

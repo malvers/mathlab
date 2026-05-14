@@ -166,6 +166,15 @@
             // init() (no hoisting). Wrap it so the lookup happens at call time.
             extractContours: (cvs) => extractPNGContours(cvs),
             onAfterOutlinesChanged: () => {
+                // Equalize stift point counts against latex BEFORE everything
+                // else so buildStiftMorphPairs and the info-boxes see the
+                // updated counts. Re-render stift outlines to show the new
+                // points on canvas.
+                if (render && typeof render.equalizeStiftWithLatex === 'function') {
+                    if (render.equalizeStiftWithLatex(stift.getStiftContours())) {
+                        stift.renderStiftOutlines();
+                    }
+                }
                 if (ui) {
                     ui.applyLinesToggle();
                     ui.applyPointsToggle();
@@ -175,6 +184,8 @@
                 if (typeof buildStiftMorphPairs === 'function') buildStiftMorphPairs();
                 const sl = document.getElementById('morph-slider');
                 if (sl && typeof renderMorph === 'function') renderMorph(+sl.value / 100);
+                // Refresh left info-box so it picks up new stift counts.
+                if (render && typeof render.refreshInfoBoxes === 'function') render.refreshInfoBoxes();
             },
         });
 
@@ -319,6 +330,8 @@
             getUI: () => ui,
             matchingEnabled: DRAW20_MATCHING_ENABLED,
             setBaseSimilarity: (v) => { baseSimilarity = v; },
+            rerenderStift: () => stift.renderStiftOutlines(),
+            morphHelpers: morph.morphHelpers,
             dbg,
         });
         const renderBBoxes = render.renderBBoxes;

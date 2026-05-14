@@ -158,27 +158,42 @@ function createDraw20Morph({
             stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
             return;
         }
-        srcEl.style.opacity = (t < MORPH_EPS) ? '' : '0';
+        // Source pane: visible ONLY at t==0; hidden as soon as the morph
+        // starts. Use a CSS class with !important so the PIXEL toggle
+        // (applyArtToggle sets inline opacity/visibility) cannot bring
+        // the source back during morph.
+        if (t > 0) {
+            srcEl.classList.add('morph-src-pixel-hidden');
+        } else {
+            // Drop class from both panes so toggles work normally again.
+            pix.classList.remove('morph-src-pixel-hidden');
+            stiftCanvas.classList.remove('morph-src-pixel-hidden');
+        }
         // Interpolate the displayed similarity from baseSimilarity → 100%.
         const morphedSim = Math.round(getBS() + (100 - getBS()) * t);
         const simVal = document.getElementById('sim-value');
         if (simVal) simVal.textContent = morphedSim + '%';
-        // During morph (t ≥ eps): hide ONLY source-side outlines/points;
-        // target outlines (LaTeX) stay visible.
-        if (t >= MORPH_EPS) {
+        // Source figure (PNG or stift) is completely hidden the moment
+        // morph starts — pts, lines, fills AND pixels — and stays hidden
+        // through to t=1. Only at t==0 the source is fully visible.
+        // We tag elements with class `morph-src-hidden` (CSS rule with
+        // `!important` lives in morph.css). This SURVIVES later toggle
+        // clicks (PUNKTE/LINIE/etc.) because the class wins over their
+        // inline `display=''` resets — the source stays gone for good.
+        if (t > 0) {
             const srcLabel = useStift ? 'stift' : 'png';
-            overlay.querySelectorAll(`polygon[data-source="${srcLabel}"]`).forEach(p => { p.style.display = 'none'; });
-            overlay.querySelectorAll(`circle[data-kind="point"][data-source="${srcLabel}"]`).forEach(c => { c.style.display = 'none'; });
+            overlay.querySelectorAll(`polygon[data-source="${srcLabel}"]`).forEach(p => p.classList.add('morph-src-hidden'));
+            overlay.querySelectorAll(`circle[data-kind="point"][data-source="${srcLabel}"]`).forEach(c => c.classList.add('morph-src-hidden'));
+            overlay.querySelectorAll(`path[data-source="${srcLabel}"]`).forEach(p => p.classList.add('morph-src-hidden'));
             if (useStift) {
-                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => { p.style.display = 'none'; });
-                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = 'none'; });
+                stiftOutlineSvg.querySelectorAll('polygon').forEach(p => p.classList.add('morph-src-hidden'));
+                stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => c.classList.add('morph-src-hidden'));
+                stiftOutlineSvg.querySelectorAll('path[data-kind="fill"]').forEach(p => p.classList.add('morph-src-hidden'));
             }
         } else {
-            // Pre-morph: show all outlines/points.
-            overlay.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
-            overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
-            stiftOutlineSvg.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
-            stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
+            // t==0: drop the class so source becomes visible again.
+            overlay.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
+            stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
         }
         if (t < MORPH_EPS) {
             // KORRESPONDENZ toggle gates the per-vertex source→target lines.
@@ -190,11 +205,13 @@ function createDraw20Morph({
             // Pre-morph preview: same correspondence the morph uses.
             // alignTargetTo (engine) finds the rotation+reverse; the line
             // shows source → ACTUAL target (not BB-aligned).
+            // N is adaptive — equalized outlines keep their full point
+            // count (e.g. 83 in / 83 out, not down-sampled to 60).
             const svgNS = 'http://www.w3.org/2000/svg';
-            const N = 60;
             const z = getZ() || 1;
             const sw = String(0.8 / z);
             for (const pair of pairs) {
+                const N = Math.max(pair[srcKey].length, pair[dstKey].length);
                 const p = resampleClosed(pair[srcKey], N);
                 const l = resampleClosed(pair[dstKey], N);
                 if (p.length < 3 || l.length < 3) continue;
@@ -223,10 +240,14 @@ function createDraw20Morph({
             return;
         }
         const svgNS = 'http://www.w3.org/2000/svg';
-        const N = 60;
         const z = getZ() || 1;
         let drawn = 0;
+        let lastN = 0;
         for (const pair of pairs) {
+            // N adaptive: use the max(src, dst) length so the equalized
+            // outline points are all preserved (no down-sample to 60).
+            const N = Math.max(pair[srcKey].length, pair[dstKey].length);
+            lastN = N;
             const p = resampleClosed(pair[srcKey], N);
             const l = resampleClosed(pair[dstKey], N);
             if (p.length < 3 || l.length < 3) continue;
@@ -249,8 +270,27 @@ function createDraw20Morph({
             poly.setAttribute('stroke-width', String(1.5 / z));
             poly.setAttribute('stroke-opacity', '0.6');
             morphLayer.appendChild(poly);
+            // Vertex dots on the morphed polygon — blue, same look as the
+            // outline dots, so PUNKTE toggle catches them automatically
+            // (query is `circle[data-kind="point"]`).
+            const pr = (2 / z).toFixed(2);
+            for (const pp of pts) {
+                const dot = document.createElementNS(svgNS, 'circle');
+                dot.setAttribute('cx', pp.x.toFixed(2));
+                dot.setAttribute('cy', pp.y.toFixed(2));
+                dot.setAttribute('r', pr);
+                dot.setAttribute('fill', '#4363d8');
+                dot.dataset.kind = 'point';
+                dot.dataset.source = 'morph';
+                morphLayer.appendChild(dot);
+            }
             drawn++;
         }
+        // Count what we actually rendered (each pair contributes N points
+        // to the morph polygon). Quick sanity check that the displayed
+        // dot count matches the equalized info-box numbers.
+        const morphPts = morphLayer.querySelectorAll('circle[data-source="morph"]').length;
+        log(`🎯 morph t=${t.toFixed(2)}: ${drawn} polygon(s), N=${lastN} verts/poly, ${morphPts} pts total in DOM`);
     }
 
     // ── buildStiftMorphPairs: stift→LaTeX matching pipeline ─────────────────
@@ -386,5 +426,12 @@ function createDraw20Morph({
         attachMorphSlider,
         getStiftMorphPairs: () => stiftMorphPairs,
         MORPH_EPS,
+        // Expose the rotation/alignment helpers so the 3D view can compute
+        // the SAME vertex correspondence the 2D morph uses.
+        morphHelpers: {
+            resampleClosed,
+            alignDstToSrcBBox,
+            alignTargetWithEngine,
+        },
     };
 }

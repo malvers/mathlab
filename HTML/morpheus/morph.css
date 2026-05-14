@@ -23,6 +23,22 @@
 #canvas-container > #key-legend {
     display: flex !important;
 }
+
+/* Source-side SVG elements (outline polygons / dots / fill paths) get
+   this class during morph (t>0). Wins over inline display style set by
+   the LINIE/PUNKTE/POLYGONE FÜLLEN toggles — source stays gone until
+   t==0 brings it back. */
+.morph-src-hidden {
+    display: none !important;
+}
+
+/* Source PIX/Stift canvas: opacity+visibility hide so layout doesn't
+   shift (display:none would let the LaTeX pane slide). Beats the PIXEL
+   toggle's inline opacity/visibility resets. */
+.morph-src-pixel-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
 /* ========================================================================= */
 
 #draw-canvas {
