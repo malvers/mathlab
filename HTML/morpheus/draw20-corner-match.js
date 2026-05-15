@@ -12,6 +12,13 @@
 //   4. Build idxMap respecting offset and the reverse mapping.
 //
 // Assumes srcN == dstN (true after resampleClosed equalises both sides).
+//
+// Wrapped in an IIFE so internal helpers (signedArea, normalizeToUnitBBox)
+// do NOT pollute the global namespace — count-objects.js defines its own
+// top-level `signedArea` (for [x,y]-array polygons) that classifyContours()
+// depends on, and a global collision broke hole detection.
+
+(function () {
 
 function draw20CornerMatch(srcPolygon, dstPolygon) {
     if (!srcPolygon || !dstPolygon) return null;
@@ -25,13 +32,10 @@ function draw20CornerMatch(srcPolygon, dstPolygon) {
     // 2. Reverse-orientation check (CW vs CCW). signedArea < 0 = CW in image
     //    coords (y-down). If src and dst wind in opposite directions, reverse
     //    dst before offset search so the cyclic sequences are comparable.
-    const reversed = (signedArea(srcS) < 0) !== (signedArea(dstS) < 0);
+    const reversed = (signedAreaXY(srcS) < 0) !== (signedAreaXY(dstS) < 0);
     const dstWork = reversed ? dstS.slice().reverse() : dstS;
 
-    // 3. Cyclic offset search. For each k, sum squared distance between
-    //    src[i] and dstWork[(i+k) % N]. Sample sparsely for speed — N can
-    //    be up to 300+, full N² is 90k ops per call which is still cheap,
-    //    but every-Sth sampling is fine to find the minimum.
+    // 3. Cyclic offset search.
     const STEP = Math.max(1, Math.floor(N / 80));
     let bestK = 0, bestCost = Infinity;
     for (let k = 0; k < N; k++) {
@@ -55,7 +59,9 @@ function draw20CornerMatch(srcPolygon, dstPolygon) {
     return { idxMap, offset: bestK, reversed, anchors: null };
 }
 
-function signedArea(poly) {
+// Local signedArea for {x, y}-object polygons (do NOT name it `signedArea`
+// — that name is taken by count-objects.js for [x, y]-array polygons).
+function signedAreaXY(poly) {
     let s = 0;
     const n = poly.length;
     for (let i = 0; i < n; i++) {
@@ -82,3 +88,5 @@ function normalizeToUnitBBox(poly) {
 if (typeof window !== 'undefined') {
     window.draw20CornerMatch = draw20CornerMatch;
 }
+
+})();
