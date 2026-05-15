@@ -12,6 +12,10 @@
 
     const GEOM_KEY = 'draw20-morph3d-geom';
 
+    // Tracks the most recently opened popup window so we can detect "still open"
+    // for auto-refresh on formula changes.
+    let popupWin = null;
+
     function openMorph3D(ringData) {
         // Pass data through the opener so the popup can read it.
         global.__morph3dData = ringData || null;
@@ -40,7 +44,17 @@
         win.document.open();
         win.document.write(POPUP_HTML);
         win.document.close();
+        popupWin = win;
         return win;
+    }
+
+    // Called by render after a formula change. Triggers a refresh ONLY if the
+    // popup is currently open — silent no-op otherwise.
+    function refreshIfOpen() {
+        if (popupWin && !popupWin.closed) {
+            const btn = document.getElementById('draw20-morph3d-btn');
+            if (btn) btn.click();
+        }
     }
 
     function createMorph3DButton(host, onClick) {
@@ -744,5 +758,5 @@
 </script>
 </body></html>`;
 
-    global.Morph3D = { createMorph3DButton, openMorph3D };
+    global.Morph3D = { createMorph3DButton, openMorph3D, refreshIfOpen };
 })(window);

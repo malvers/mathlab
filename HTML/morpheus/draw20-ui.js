@@ -83,7 +83,10 @@ function createDraw20UI({
             pix.alt = latex;
         });
         Promise.all([latexReady, pixReady]).then(() => {
-            requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                renderBBoxes();
+                if (typeof Morph3D !== 'undefined' && Morph3D.refreshIfOpen) Morph3D.refreshIfOpen();
+            }));
         });
     }
 
@@ -108,7 +111,10 @@ function createDraw20UI({
         const ti = document.getElementById('text-input');
         if (ti && ti.value !== String(latex)) ti.value = String(latex);
         renderLatex(String(latex)).then(() => {
-            requestAnimationFrame(() => requestAnimationFrame(renderBBoxes));
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                renderBBoxes();
+                if (typeof Morph3D !== 'undefined' && Morph3D.refreshIfOpen) Morph3D.refreshIfOpen();
+            }));
         });
     }
 

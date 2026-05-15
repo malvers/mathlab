@@ -587,7 +587,7 @@ function createDraw20Render({
         // smaller of the two scales wins (Math.min) so tall formulas
         // don't overflow the pane vertically and wide ones don't overflow
         // horizontally. paneW = wrap.width/2 (flex split), paneH = wrap.height.
-        const TARGET_CONTENT_FRAC = 0.6;
+        const TARGET_CONTENT_FRAC = 0.66;
         const wrapRect = wrap.getBoundingClientRect();
         const paneW = (wrapRect.width || 2) / 2;
         const paneH = wrapRect.height || 1;
