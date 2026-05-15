@@ -68,22 +68,41 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
         };
         const pRank = rankOf(pDesc);
         const lRank = rankOf(lDesc);
-        const ORDER_WEIGHT = 0.15;
+        // Reading-order is THE strongest signal for math formulas: glyphs
+        // at the same position are almost always the same character. Bump
+        // from 0.15 → 1.5 so a 0.5 rank-diff (distant pair) costs 0.75 —
+        // virtually impossible for any shape similarity to beat. Eliminates
+        // the long-distance crossings visible in the 3D MORPH view.
+        const ORDER_WEIGHT = 1.5;
+        // No-pair slot cost. Each PNG outer gets its own dummy column at
+        // this cost; Hungarian routes outers there when no LaTeX partner
+        // beats it. Frees noise specks / unintended strokes from being
+        // force-paired with random LaTeX glyphs.
+        const NO_PAIR_COST = 0.5;
+        const NO_PAIR_FORBIDDEN = 1e9;
 
-        // Cost = shape-plausibility cost + reading-order penalty.
-        // The order term is BUILT INTO the cost matrix so Hungarian
-        // already prefers in-order pairings, dramatically reducing
-        // crossings in the initial solution.
+        // Cost matrix is N × (M + N): first M columns are real LaTeX
+        // outers, last N columns are per-row "no-pair" dummies.
+        const Mext = M + N;
         const cost = new Array(N);
         for (let i = 0; i < N; i++) {
-            cost[i] = new Array(M);
+            cost[i] = new Array(Mext);
             for (let j = 0; j < M; j++) {
                 const base = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
                 const ord = Math.abs(pRank[i] / Math.max(1, N - 1) - lRank[j] / Math.max(1, M - 1));
                 cost[i][j] = base + ORDER_WEIGHT * ord;
             }
+            // Per-row dummy at column M+i (own no-pair slot); other
+            // dummies forbidden so each PNG can only self-orphan.
+            for (let j = M; j < Mext; j++) {
+                cost[i][j] = (j - M === i) ? NO_PAIR_COST : NO_PAIR_FORBIDDEN;
+            }
         }
         assign = hungarian(cost);
+        // Decode dummy-column assignments as orphans (-1).
+        for (let i = 0; i < N; i++) {
+            if (assign[i] !== undefined && assign[i] >= M) assign[i] = -1;
+        }
 
         // Post-filter: veto-bust to orphan.
         const VETO_COST = 1e5;

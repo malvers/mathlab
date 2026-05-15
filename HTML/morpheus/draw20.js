@@ -59,7 +59,7 @@
             align-items: center;
             justify-content: space-around;
             z-index: 10;
-            background: rgb(0, 0, 20);
+            background: rgb(8, 20, 42);
         `;
 
         const pix = document.createElement('img');

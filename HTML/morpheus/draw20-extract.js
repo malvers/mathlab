@@ -19,10 +19,9 @@ function draw20GetEps() {
 function draw20ExtractPNGContours(canvas, dbg) {
     const g = draw20CanvasToGridRed(canvas, draw20GetThreshold());
     if (!g) return [];
-    const mergeEl = document.getElementById('merge-slider');
-    const closeR = mergeEl ? +mergeEl.value : 4;
-    const grid = (closeR > 0 && typeof morphClose === 'function')
-        ? morphClose(g.grid, g.W, g.H, closeR) : g.grid;
+    // morphClose entfällt — Verschmelzung benachbarter Glyphen war
+    // unerwünscht; User wollte den Slider weg, Radius auf 0.
+    const grid = g.grid;
     if (typeof getContoursWithHoles !== 'function') return [];
     const raw = getContoursWithHoles(grid, g.W, g.H);
     const areaScale = (g.W * g.H) / (1000 * 1000);
