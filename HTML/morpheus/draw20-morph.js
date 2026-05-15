@@ -271,11 +271,9 @@ function createDraw20Morph({
             const srcRings = [srcOuter, ...srcHolesArr];
             const dstRings = [dstOuter, ...dstHolesArr];
             const numRings = Math.max(srcRings.length, dstRings.length);
-            // Shift the morph end-position so it lands `40 px` LEFT of the
-            // LaTeX bbox instead of on top of it. Computed once per pair
-            // from the outer's bbox (holes live inside, so outer is enough).
+            // Shift only in stift mode — formula morph stays in place.
             let shiftX = 0;
-            if (dstOuter && dstOuter.length >= 3) {
+            if (useStift && dstOuter && dstOuter.length >= 3) {
                 const bb = bboxOfPts(dstOuter);
                 shiftX = -((bb.maxX - bb.minX) + 40);
             }
@@ -311,19 +309,18 @@ function createDraw20Morph({
                 const p = resampleClosed(sr, N);
                 const l = resampleClosed(dr, N);
                 if (p.length < 3 || l.length < 3) continue;
-                // alignDstToSrcBBox centers the target onto the source so
-                // alignTargetTo picks the right rotation/reverse — aligned
-                // positions NOT used as morph endpoint; we morph to the
-                // ORIGINAL l[idxMap[i]] (+shift) so the result lands 40 px
-                // left of the LaTeX at t=1.
+                // alignDstToSrcBBox centers the target onto the source bbox.
+                // Formula mode: morph endpoint = lInPlace (stays in source bbox → in place).
+                // Stift mode: morph endpoint = ORIGINAL l + shiftX (lands 40 px left of LaTeX).
                 const lInPlace = alignDstToSrcBBox(p, l);
                 const eng = alignTargetWithEngine(p, lInPlace);
                 if (!eng) continue;
+                const lEnd = useStift ? l : lInPlace;
                 const pts = p.map((pp, i) => {
                     const j = eng.idxMap[i];
                     return {
-                        x: (1 - t) * pp.x + t * (l[j].x + shiftX),
-                        y: (1 - t) * pp.y + t * l[j].y,
+                        x: (1 - t) * pp.x + t * (lEnd[j].x + shiftX),
+                        y: (1 - t) * pp.y + t * lEnd[j].y,
                     };
                 });
                 let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
