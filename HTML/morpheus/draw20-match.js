@@ -7,19 +7,16 @@
 // pngId/latId: per-contour matchId arrays (holes inherit their outer's id;
 // unpaired outers get a unique id that doesn't appear on the other side).
 //
-// Pipeline (when matchingEnabled, default true):
-//   Stage 1 — Hungarian on the full cost matrix (shape descriptors
-//             from PlausibilCheck + reading-order ranks).
-//   Stage 2 — uncrossing swaps (X- or Y-order inversions).
-//   Stages 3+4 — alternating RESCUE (relaxed vetoes on remaining orphans)
-//             and SUSPECT-DROP (kill pairs with plausibility < 0.55).
+// NEW STRATEGY (replaces Hungarian):
+// Greedy sequential matching with symbol-type classification.
+// Symbols are classified as 'stroke', 'loop', or 'glyph' based on geometry,
+// then matched tier-by-tier. This respects formula structure far better than
+// Hungarian's global optimization.
 //
 // Requires globals: classifyContours (count-objects.js),
-//                   PlausibilCheck    (plausibilcheck.js),
-//                   hungarian         (matching.js).
+//                   PlausibilCheck    (plausibilcheck.js).
 
 function draw20ComputeMatchIds(pngContours, latexContours, options) {
-    // Default matchingEnabled = true; only false when explicitly disabled.
     const matchingEnabled = !options || options.matchingEnabled !== false;
     const dbg = (options && typeof options.dbg === 'function') ? options.dbg : () => {};
 
@@ -36,232 +33,109 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
     const pOuters = pClass.outers.map(o => png[o.idx]);
     const lOuters = lClass.outers.map(o => lat[o.idx]);
 
-    let assign = [];
-    let pDesc = [], lDesc = [];
-    if (matchingEnabled
-        && pOuters.length && lOuters.length
-        && typeof PlausibilCheck !== 'undefined'
-        && typeof hungarian === 'function') {
+    const N = pClass.outers.length, M = lClass.outers.length;
+    const assign = new Array(N).fill(-1);
+    let plausibility = null;
+
+    if (matchingEnabled && N > 0 && M > 0 && typeof PlausibilCheck !== 'undefined') {
         const pBB = PlausibilCheck.equationBBox(pOuters);
         const lBB = PlausibilCheck.equationBBox(lOuters);
-        // Pass each outer's HOLE polygons too — the descriptor needs
-        // them for hole-count / hole-area-fraction features.
-        pDesc = pClass.outers.map(o => PlausibilCheck.shapeDescriptor(
+        const pDesc = pClass.outers.map(o => PlausibilCheck.shapeDescriptor(
             png[o.idx],
             (o.holes || []).map(hi => png[hi]).filter(Boolean),
             pBB));
-        lDesc = lClass.outers.map(o => PlausibilCheck.shapeDescriptor(
+        const lDesc = lClass.outers.map(o => PlausibilCheck.shapeDescriptor(
             lat[o.idx],
             (o.holes || []).map(hi => lat[hi]).filter(Boolean),
             lBB));
-        const N = pDesc.length, M = lDesc.length;
 
-        // ── Stage 0: reading-order ranks. Sorting by (cx + 0.3·cy)
-        // gives a useful left-to-right + slight-vertical-bias linear
-        // order that matches how formulas are read.
-        const rankOf = (desc) => {
-            const keyed = desc.map((d, i) => ({ i, k: d.nx + 0.3 * d.ny }));
-            keyed.sort((a, b) => a.k - b.k);
-            const r = new Array(desc.length);
-            for (let k = 0; k < keyed.length; k++) r[keyed[k].i] = k;
-            return r;
+        // Symbol type classification: group shapes by topological properties
+        const symbolType = (desc) => {
+            if (!desc) return 'glyph';
+            if (desc.holes > 0) return 'loop';
+            if (desc.elong > 3) return 'stroke';
+            return 'glyph';
         };
-        const pRank = rankOf(pDesc);
-        const lRank = rankOf(lDesc);
-        // Reading-order is THE strongest signal for math formulas: glyphs
-        // at the same position are almost always the same character. Bump
-        // from 0.15 → 1.5 so a 0.5 rank-diff (distant pair) costs 0.75 —
-        // virtually impossible for any shape similarity to beat. Eliminates
-        // the long-distance crossings visible in the 3D MORPH view.
-        const ORDER_WEIGHT = 1.5;
-        // No-pair slot cost. Each PNG outer gets its own dummy column at
-        // this cost; Hungarian routes outers there when no LaTeX partner
-        // beats it. Frees noise specks / unintended strokes from being
-        // force-paired with random LaTeX glyphs.
-        const NO_PAIR_COST = 0.5;
-        const NO_PAIR_FORBIDDEN = 1e9;
 
-        // Cost matrix is N × (M + N): first M columns are real LaTeX
-        // outers, last N columns are per-row "no-pair" dummies.
-        const Mext = M + N;
-        const cost = new Array(N);
+        const pTypes = pDesc.map(d => symbolType(d));
+        const lTypes = lDesc.map(d => symbolType(d));
+
+        dbg(`PNG types: ${pTypes.join(',')}`);
+        dbg(`LaTeX types: ${lTypes.join(',')}`);
+
+        const VETO = 1e9;
+        const usedPng = new Set(), usedLat = new Set();
+
+        // Tier-based greedy matching: process symbol types in priority order
+        const TIERS = ['stroke', 'loop', 'glyph'];
+
+        for (const tier of TIERS) {
+            const tierCosts = [];
+            for (let i = 0; i < N; i++) {
+                if (usedPng.has(i) || pTypes[i] !== tier || !pDesc[i]) continue;
+                for (let j = 0; j < M; j++) {
+                    if (usedLat.has(j) || lTypes[j] !== tier || !lDesc[j]) continue;
+                    const cost = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
+                    if (cost >= VETO) continue;
+                    tierCosts.push({ i, j, cost });
+                }
+            }
+            tierCosts.sort((a, b) => a.cost - b.cost);
+
+            for (const { i, j } of tierCosts) {
+                if (usedPng.has(i) || usedLat.has(j)) continue;
+                assign[i] = j;
+                usedPng.add(i);
+                usedLat.add(j);
+                dbg(`  [${tier}] PNG#${i} ↔ LaTeX#${j}`);
+            }
+        }
+
+        // Fallback: match remaining unmatched pairs without type constraint
+        const fallbackCosts = [];
         for (let i = 0; i < N; i++) {
-            cost[i] = new Array(Mext);
+            if (usedPng.has(i) || !pDesc[i]) continue;
             for (let j = 0; j < M; j++) {
-                const base = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
-                const ord = Math.abs(pRank[i] / Math.max(1, N - 1) - lRank[j] / Math.max(1, M - 1));
-                cost[i][j] = base + ORDER_WEIGHT * ord;
-            }
-            // Per-row dummy at column M+i (own no-pair slot); other
-            // dummies forbidden so each PNG can only self-orphan.
-            for (let j = M; j < Mext; j++) {
-                cost[i][j] = (j - M === i) ? NO_PAIR_COST : NO_PAIR_FORBIDDEN;
+                if (usedLat.has(j) || !lDesc[j]) continue;
+                const cost = PlausibilCheck.pairCost(pDesc[i], lDesc[j]);
+                if (cost >= VETO) continue;
+                fallbackCosts.push({ i, j, cost });
             }
         }
-        assign = hungarian(cost);
-        // Decode dummy-column assignments as orphans (-1).
-        for (let i = 0; i < N; i++) {
-            if (assign[i] !== undefined && assign[i] >= M) assign[i] = -1;
+        fallbackCosts.sort((a, b) => a.cost - b.cost);
+
+        for (const { i, j } of fallbackCosts) {
+            if (usedPng.has(i) || usedLat.has(j)) continue;
+            assign[i] = j;
+            usedPng.add(i);
+            usedLat.add(j);
+            dbg(`  [fallback] PNG#${i} ↔ LaTeX#${j}`);
         }
 
-        // Post-filter: veto-bust to orphan.
-        const VETO_COST = 1e5;
-        for (let i = 0; i < N; i++) {
-            const j = assign[i];
-            if (j >= 0 && j < M && cost[i][j] >= VETO_COST) {
-                assign[i] = -1;
-                dbg(`  VETO PNG#${i} ↮ LaTeX#${j} (cost=${cost[i][j].toExponential(1)} — shape incompatible)`);
+        // Plausibility check on the resulting pairing
+        if (typeof PlausibilCheck !== 'undefined' && pDesc.length) {
+            const pairing = assign.slice();
+            plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing, pDesc, lDesc);
+            dbg(PlausibilCheck.summarize(plausibility));
+            for (const m of plausibility.matches) {
+                if (m.verdict !== 'ok') dbg(PlausibilCheck.describeMatch(m));
             }
+            for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
+            for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
         }
-
-        // ── Stage 2: uncrossing-swap pass.
-        let swaps = 0, sweeps = 0;
-        let changed = true;
-        while (changed && sweeps < 8) {
-            changed = false;
-            sweeps++;
-            for (let i = 0; i < N; i++) {
-                const j = assign[i];
-                if (j < 0) continue;
-                for (let k = i + 1; k < N; k++) {
-                    const l = assign[k];
-                    if (l < 0) continue;
-                    // Detect crossings on EITHER axis: X-order
-                    // inversion (formula left-to-right reading flow)
-                    // OR Y-order inversion (vertical structures like
-                    // fractions). Either is a strong indicator that
-                    // the two pairs are swapped.
-                    const crossX = (pDesc[i].nx < pDesc[k].nx) !== (lDesc[j].nx < lDesc[l].nx);
-                    const crossY = (pDesc[i].ny < pDesc[k].ny) !== (lDesc[j].ny < lDesc[l].ny);
-                    if (!crossX && !crossY) continue;
-                    // Only refuse the swap when it would create a
-                    // veto-level pair (cost ≥ 1e5 — fundamentally
-                    // incompatible shapes). For ALL other cases
-                    // accept it — Hungarian is globally optimal so a
-                    // local swap inevitably raises total cost, but
-                    // crossings are a stronger reading-order signal
-                    // than tiny cost deltas. No cost cap.
-                    if (cost[i][l] >= VETO_COST || cost[k][j] >= VETO_COST) continue;
-                    assign[i] = l;
-                    assign[k] = j;
-                    changed = true;
-                    swaps++;
-                    // First-iteration spotlight on the swap that
-                    // fixed something (helps verify in debug).
-                    if (sweeps === 1 && swaps <= 4) {
-                        dbg(`  SWAP PNG#${i}↔LaTeX#${l} & PNG#${k}↔LaTeX#${j} (was: ${j},${l}) crossX=${crossX} crossY=${crossY}`);
-                    }
-                }
-            }
-        }
-        dbg(`Uncrossing: ${swaps} swap(s) over ${sweeps} sweep(s)`);
-
-        // ── Stages 3 + 4 iterated until stable.
-        //
-        // Stage 3: RESCUE — re-run Hungarian on remaining orphans
-        //   with RELAXED vetoes (5× elong, 20× size, no order term).
-        //   Catches good pairs Hungarian sacrificed for global cost.
-        //
-        // Stage 4: SUSPECT-DROP — break any pair whose plausibility
-        //   score falls below 0.55. Both glyphs become orphans →
-        //   visible as red dashed circles, no misleading match-line.
-        //
-        // Iterate (rescue → drop → rescue → drop ...) until no
-        // assignment changes. Each suspect-drop frees up a LaTeX
-        // outer that the next rescue might pair with a previously
-        // orphaned PNG (the b-orphan / b-claimed-by-junk inversion).
-        const SUSPECT_THRESHOLD = 0.55;
-        const REL_ELONG = Math.log(5);
-        const REL_SIZE  = Math.log(20);
-
-        function runRescue() {
-            const pngOrphIdx = [], latClaimed = new Set();
-            for (let i = 0; i < N; i++) {
-                if (assign[i] < 0) pngOrphIdx.push(i);
-                else latClaimed.add(assign[i]);
-            }
-            const latOrphIdx = [];
-            for (let j = 0; j < M; j++) if (!latClaimed.has(j)) latOrphIdx.push(j);
-            if (!pngOrphIdx.length || !latOrphIdx.length) return 0;
-
-            const RN = pngOrphIdx.length, RM = latOrphIdx.length;
-            const cost2 = new Array(RN);
-            for (let pi = 0; pi < RN; pi++) {
-                cost2[pi] = new Array(RM);
-                const a = pDesc[pngOrphIdx[pi]];
-                for (let li = 0; li < RM; li++) {
-                    const b = lDesc[latOrphIdx[li]];
-                    const elongR = Math.abs(Math.log(a.elong / b.elong));
-                    const sizeR  = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
-                    const dh = Math.abs(a.holes - b.holes);
-                    const dmY = Math.abs(a.massY - b.massY);
-                    const dmX = Math.abs(a.massX - b.massX);
-                    let veto = 0;
-                    if (elongR > REL_ELONG) veto += 1e6 * (elongR - REL_ELONG);
-                    if (sizeR  > REL_SIZE)  veto += 1e6 * (sizeR  - REL_SIZE);
-                    if (dh >= 2)            veto += 1e6 * (dh - 1);
-                    if (dmY > 0.9)          veto += 1e6 * (dmY - 0.9);
-                    if (dmX > 1.3)          veto += 1e6 * (dmX - 1.3);
-                    const pl = PlausibilCheck.pairPlausibility(a, b);
-                    cost2[pi][li] = (1 - pl.score) + veto;
-                }
-            }
-            const assign2 = hungarian(cost2);
-            let rescued = 0;
-            for (let pi = 0; pi < RN; pi++) {
-                const li = assign2[pi];
-                if (li !== undefined && li >= 0 && li < RM
-                    && cost2[pi][li] < VETO_COST) {
-                    const a = pDesc[pngOrphIdx[pi]];
-                    const b = lDesc[latOrphIdx[li]];
-                    const pl = PlausibilCheck.pairPlausibility(a, b);
-                    if (pl.score >= SUSPECT_THRESHOLD) {
-                        assign[pngOrphIdx[pi]] = latOrphIdx[li];
-                        rescued++;
-                        dbg(`  RESCUE PNG#${pngOrphIdx[pi]} → LaTeX#${latOrphIdx[li]} score=${(pl.score*100).toFixed(0)}%`);
-                    }
-                }
-            }
-            return rescued;
-        }
-
-        function runSuspectDrop() {
-            let dropped = 0;
-            for (let i = 0; i < N; i++) {
-                const j = assign[i];
-                if (j < 0) continue;
-                const pl = PlausibilCheck.pairPlausibility(pDesc[i], lDesc[j]);
-                if (pl.score < SUSPECT_THRESHOLD) {
-                    assign[i] = -1;
-                    dropped++;
-                    dbg(`  DROP-SUSPECT PNG#${i} ↮ LaTeX#${j} score=${(pl.score*100).toFixed(0)}%`);
-                }
-            }
-            return dropped;
-        }
-
-        let iter = 0, totalRescued = 0, totalDropped = 0;
-        while (iter < 5) {
-            iter++;
-            const dropped = runSuspectDrop();
-            const rescued = runRescue();
-            totalDropped += dropped;
-            totalRescued += rescued;
-            if (dropped === 0 && rescued === 0) break;
-        }
-        dbg(`Refine-loop: ${iter} iter(s), ${totalRescued} rescued, ${totalDropped} dropped`);
     }
 
+    // Build result structure (same as before)
     const usedLatex = new Set();
     let nextId = 0;
-    // Track id ↔ (pngOuterIdx, latexOuterIdx) so the plausibility
-    // report can be indexed by matchId in renderBBoxes.
     const idToPair = new Map();
+
     for (let oi = 0; oi < pClass.outers.length; oi++) {
         const id = nextId++;
         const po = pClass.outers[oi];
         pngId[po.idx] = id;
         for (const hi of po.holes) pngId[hi] = id;
+
         const j = assign[oi];
         if (j !== undefined && j >= 0 && j < lClass.outers.length && !usedLatex.has(j)) {
             const lo = lClass.outers[j];
@@ -273,6 +147,7 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
             idToPair.set(id, { png: oi, lat: -1 });
         }
     }
+
     for (let j = 0; j < lClass.outers.length; j++) {
         if (usedLatex.has(j)) continue;
         const id = nextId++;
@@ -280,25 +155,6 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
         latId[lo.idx] = id;
         for (const hi of lo.holes) latId[hi] = id;
         idToPair.set(id, { png: -1, lat: j });
-    }
-
-    // Run plausibility check on the resulting pairing — using the
-    // SAME descriptors the cost matrix used. Verdicts are reported
-    // for diagnostics and used for line styling.
-    let plausibility = null;
-    if (typeof PlausibilCheck !== 'undefined' && pDesc.length) {
-        const pairing = new Array(pOuters.length).fill(-1);
-        for (let oi = 0; oi < pClass.outers.length; oi++) {
-            pairing[oi] = assign[oi] === undefined ? -1 : assign[oi];
-        }
-        plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing, pDesc, lDesc);
-        dbg(PlausibilCheck.summarize(plausibility));
-        // Only dump suspect matches + orphans (the actionable ones).
-        for (const m of plausibility.matches) {
-            if (m.verdict !== 'ok') dbg(PlausibilCheck.describeMatch(m));
-        }
-        for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
-        for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
     }
 
     return { pngId, latId, idToPair, plausibility, pClass, lClass };

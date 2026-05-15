@@ -211,11 +211,11 @@
         const dh = Math.abs(a.holes - b.holes);
         const dmY = Math.abs(a.massY - b.massY);
         const dmX = Math.abs(a.massX - b.massX);
-        if (elongRatio > Math.log(3))  return PAIR_VETO;
-        if (sizeRatio  > Math.log(10)) return PAIR_VETO;
+        if (elongRatio > Math.log(5))  return PAIR_VETO;
+        if (sizeRatio  > Math.log(15)) return PAIR_VETO;
         if (dh >= 2)                   return PAIR_VETO;
-        if (dmY > 0.5)                 return PAIR_VETO;
-        if (dmX > 0.7)                 return PAIR_VETO;
+        if (dmY > 0.7)                 return PAIR_VETO;
+        if (dmX > 0.9)                 return PAIR_VETO;
         const { score } = pairPlausibility(a, b);
         return 1 - score;
     }

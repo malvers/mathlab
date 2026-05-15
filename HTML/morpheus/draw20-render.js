@@ -597,15 +597,24 @@ function createDraw20Render({
             img.style.transform = '';
             img.style.transformOrigin = 'center';
             if (!img.complete || !img.naturalWidth) return;
-            if (!bb || bb.w <= 0 || bb.h <= 0) return;
+            if (!bb || bb.w <= 0 || bb.h <= 0 || !bb.ch) return;
             const r = img.getBoundingClientRect();
             if (r.width <= 0 || r.height <= 0) return;
             const renderScale = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
             const contentW = bb.w * renderScale;
             const contentH = bb.h * renderScale;
             if (contentW <= 0 || contentH <= 0) return;
-            const sf = Math.min(targetW / contentW, targetH / contentH);
-            img.style.transform = `scale(${sf.toFixed(4)})`;
+            // Y-LIMIT: never let scaled content exceed the image's CSS box
+            // height (max-height: 54vh). Without this clamp, tall formulas
+            // (e.g. a/b fraction with small width) get scaled UP by sfW to
+            // hit targetW and overflow the pane vertically.
+            const sf = Math.min(targetW / contentW, targetH / contentH, r.height / contentH);
+            // Y-CENTER: shift the CONTENT-bbox center to the image center
+            // (img is already pane-centered via flex align-items:center).
+            // Offset in natural coords, scaled to displayed CSS px.
+            const offsetYNat = (bb.y + bb.h / 2) - (bb.ch / 2);
+            const dy = -offsetYNat * renderScale * sf;
+            img.style.transform = `translateY(${dy.toFixed(2)}px) scale(${sf.toFixed(4)})`;
         };
         fitContentToTarget(pix, pix.naturalWidth ? computeImageBBox(pix) : null);
         fitContentToTarget(tex, latexCanvas ? computeContentBBox(latexCanvas, 'alpha') : null);

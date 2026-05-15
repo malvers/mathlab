@@ -543,12 +543,12 @@
         function onStrokeChange(val) {
             document.getElementById('stroke-val').textContent = val;
             drawCtx.lineWidth = +val;
-            try { localStorage.setItem('morph-stroke', val); } catch (_) {}
+            // try { localStorage.setItem('morph-stroke', val); } catch (_) {}
         }
 
         function onThresholdChange(val) {
             document.getElementById('threshold-val').textContent = val;
-            try { localStorage.setItem('morph-threshold', val); } catch (_) {}
+            // try { localStorage.setItem('morph-threshold', val); } catch (_) {}
             // Re-render draw20 overlays with the new threshold.
             if (window.redrawDraw20) window.redrawDraw20();
         }
@@ -575,7 +575,7 @@
         function onTargetScaleChange(val) {
             document.getElementById('target-scale-val').textContent = val;
             targetScale = +val / 100;
-            try { localStorage.setItem('morph-target-scale', val); } catch (_) {}
+            // try { localStorage.setItem('morph-target-scale', val); } catch (_) {}
             // Re-render the target with new scale
             if (selectedDigit !== null) {
                 onDigitChange(selectedDigit);
@@ -587,7 +587,7 @@
 
         function onEpsChange(val) {
             document.getElementById('eps-val').textContent = val;
-            try { localStorage.setItem('morph-eps', val); } catch (_) {}
+            // try { localStorage.setItem('morph-eps', val); } catch (_) {}
             drawPolygon();
         }
 
@@ -1099,26 +1099,26 @@
         const drawWrap = document.getElementById('draw-wrap');
 
         // Restore zoom/pan from localStorage
-        try {
-            const savedScale = localStorage.getItem('morph-canvas-scale');
-            const savedPanX = localStorage.getItem('morph-canvas-panX');
-            const savedPanY = localStorage.getItem('morph-canvas-panY');
-            if (savedScale !== null) canvasScale = +savedScale;
-            if (savedPanX !== null) panX = +savedPanX;
-            if (savedPanY !== null) panY = +savedPanY;
-            if (drawWrap) {
-                drawWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
-                drawWrap.style.transformOrigin = 'center center';
-            }
-            // DebugWindow.log(`🔍 Canvas restore: scale=${canvasScale}, pan=(${panX}, ${panY})`);
-        } catch (_) {}
+        // try {
+        //     const savedScale = localStorage.getItem('morph-canvas-scale');
+        //     const savedPanX = localStorage.getItem('morph-canvas-panX');
+        //     const savedPanY = localStorage.getItem('morph-canvas-panY');
+        //     if (savedScale !== null) canvasScale = +savedScale;
+        //     if (savedPanX !== null) panX = +savedPanX;
+        //     if (savedPanY !== null) panY = +savedPanY;
+        //     if (drawWrap) {
+        //         drawWrap.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
+        //         drawWrap.style.transformOrigin = 'center center';
+        //     }
+        //     // DebugWindow.log(`🔍 Canvas restore: scale=${canvasScale}, pan=(${panX}, ${panY})`);
+        // } catch (_) {}
 
         function saveZoomPan() {
-            try {
-                localStorage.setItem('morph-canvas-scale', canvasScale);
-                localStorage.setItem('morph-canvas-panX', panX);
-                localStorage.setItem('morph-canvas-panY', panY);
-            } catch (_) {}
+            // try {
+            //     localStorage.setItem('morph-canvas-scale', canvasScale);
+            //     localStorage.setItem('morph-canvas-panX', panX);
+            //     localStorage.setItem('morph-canvas-panY', panY);
+            // } catch (_) {}
         }
 
         function updateTransform() {
@@ -1180,57 +1180,57 @@
         { const dc = document.getElementById('draw-canvas');
           if (dc) dc.style.cursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' fill='white'/%3E%3C/svg%3E\") 0 24, crosshair"; }
         loadFromStorage();
-        try {
-            const savedEps = localStorage.getItem('morph-eps');
-            if (savedEps !== null) {
-                document.getElementById('eps-slider').value = savedEps;
-                document.getElementById('eps-val').textContent = savedEps;
-            }
-        } catch (_) {}
-        try {
-            const savedStroke = localStorage.getItem('morph-stroke');
-            if (savedStroke !== null) {
-                document.getElementById('stroke-slider').value = savedStroke;
-                document.getElementById('stroke-val').textContent = savedStroke;
-                drawCtx.lineWidth = +savedStroke;
-            }
-        } catch (_) {}
-        try {
-            const savedTargetScale = localStorage.getItem('morph-target-scale');
-            if (savedTargetScale !== null) {
-                document.getElementById('target-scale-slider').value = savedTargetScale;
-                document.getElementById('target-scale-val').textContent = savedTargetScale;
-                targetScale = +savedTargetScale / 100;
-            }
-        } catch (_) {}
-        try {
-            const savedThreshold = localStorage.getItem('morph-threshold');
-            if (savedThreshold !== null) {
-                document.getElementById('threshold-slider').value = savedThreshold;
-                document.getElementById('threshold-val').textContent = savedThreshold;
-            }
-        } catch (_) {}
-        try {
-            const savedDraw = localStorage.getItem('morph-draw-enabled');
-            drawingEnabled = savedDraw === '1';
-        } catch (_) {}
+        // try {
+        //     const savedEps = localStorage.getItem('morph-eps');
+        //     if (savedEps !== null) {
+        //         document.getElementById('eps-slider').value = savedEps;
+        //         document.getElementById('eps-val').textContent = savedEps;
+        //     }
+        // } catch (_) {}
+        // try {
+        //     const savedStroke = localStorage.getItem('morph-stroke');
+        //     if (savedStroke !== null) {
+        //         document.getElementById('stroke-slider').value = savedStroke;
+        //         document.getElementById('stroke-val').textContent = savedStroke;
+        //         drawCtx.lineWidth = +savedStroke;
+        //     }
+        // } catch (_) {}
+        // try {
+        //     const savedTargetScale = localStorage.getItem('morph-target-scale');
+        //     if (savedTargetScale !== null) {
+        //         document.getElementById('target-scale-slider').value = savedTargetScale;
+        //         document.getElementById('target-scale-val').textContent = savedTargetScale;
+        //         targetScale = +savedTargetScale / 100;
+        //     }
+        // } catch (_) {}
+        // try {
+        //     const savedThreshold = localStorage.getItem('morph-threshold');
+        //     if (savedThreshold !== null) {
+        //         document.getElementById('threshold-slider').value = savedThreshold;
+        //         document.getElementById('threshold-val').textContent = savedThreshold;
+        //     }
+        // } catch (_) {}
+        // try {
+        //     const savedDraw = localStorage.getItem('morph-draw-enabled');
+        //     drawingEnabled = savedDraw === '1';
+        // } catch (_) {}
         applyDrawingEnabled();
-        try {
-            const savedText = localStorage.getItem('morph-text');
-            const savedDigit = localStorage.getItem('morph-digit');
-            if (savedText !== null) {
-                document.getElementById('text-input').value = savedText;
-                // Check matching radio button (querySelector fails with LaTeX special chars)
-                for (const r of document.querySelectorAll('input[name="digit"][data-latex]')) {
-                    if (r.dataset.latex === savedText) { r.checked = true; break; }
-                }
-                onTextInput(savedText);
-            } else if (savedDigit !== null) {
-                const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
-                if (radio) radio.checked = true;
-                onDigitChange(+savedDigit);
-            }
-        } catch (_) {}
+        // try {
+        //     const savedText = localStorage.getItem('morph-text');
+        //     const savedDigit = localStorage.getItem('morph-digit');
+        //     if (savedText !== null) {
+        //         document.getElementById('text-input').value = savedText;
+        //         // Check matching radio button (querySelector fails with LaTeX special chars)
+        //         for (const r of document.querySelectorAll('input[name="digit"][data-latex]')) {
+        //             if (r.dataset.latex === savedText) { r.checked = true; break; }
+        //         }
+        //         onTextInput(savedText);
+        //     } else if (savedDigit !== null) {
+        //         const radio = document.querySelector(`input[name="digit"][value="${savedDigit}"]`);
+        //         if (radio) radio.checked = true;
+        //         onDigitChange(+savedDigit);
+        //     }
+        // } catch (_) {}
         try {
             const savedPoly = localStorage.getItem('morph-poly-visible');
             if (savedPoly !== null) {
