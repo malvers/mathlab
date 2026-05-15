@@ -20,15 +20,13 @@
         // Pass data through the opener so the popup can read it.
         global.__morph3dData = ringData || null;
 
-        // Restore the user's last window size/position (persisted via
-        // beforeunload + poll in the popup itself).
+        // Restore the user's last window position (persisted via beforeunload).
+        // Size is fixed to avoid width/height feature creep.
         let geom = null;
         try { geom = JSON.parse(localStorage.getItem(GEOM_KEY) || 'null'); } catch (_) {}
-        const defW = Math.min(1200, Math.round(window.screen.availWidth * 0.9));
+        const defW = 800;
         const defH = Math.min(900, Math.round(window.screen.availHeight * 0.9));
-        const wsz = geom && geom.w > 200 ? geom.w : defW;
-        const hsz = geom && geom.h > 200 ? geom.h : defH;
-        const features = [`width=${wsz}`, `height=${hsz}`];
+        const features = [`width=${defW}`, `height=${defH}`];
         if (geom && Number.isFinite(geom.x) && Number.isFinite(geom.y)) {
             features.push(`left=${geom.x}`, `top=${geom.y}`);
         }
@@ -96,6 +94,8 @@
         border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
         transition: background 0.15s ease, color 0.15s ease;
         white-space: nowrap;
+        display: flex; align-items: center; justify-content: center; width: 100px; height: 32px;
+        box-sizing: border-box;
     }
     #reload-btn:hover, .top-toggle:hover, .view-btn:hover {
         background: rgba(0, 210, 255, 0.22); color: #fff;
@@ -105,7 +105,7 @@
     #reload-btn {
         background: rgba(0, 210, 255, 0.12); color: #00d2ff;
         border-color: rgba(0, 210, 255, 0.45);
-        font-size: 12px; padding: 8px 14px; letter-spacing: 1.5px;
+        letter-spacing: 1.5px;
     }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -195,14 +195,14 @@
         // Auto-fit (default): each side scaled so longest axis = targetSize.
         // Natural: no scaling — both sides keep their real relative sizes.
         const SCALE_KEY = 'draw20-morph3d-natural';
-        const naturalMode = (function () {
-            try { return localStorage.getItem(SCALE_KEY) === '1'; } catch (_) { return false; }
-        })();
+        const naturalMode = false; // (function () {
+            // try { return localStorage.getItem(SCALE_KEY) === '1'; } catch (_) { return false; }
+        // })();
         const cb = document.getElementById('scale-natural-cb');
         if (cb) {
             cb.checked = naturalMode;
             cb.addEventListener('change', function () {
-                try { localStorage.setItem(SCALE_KEY, cb.checked ? '1' : '0'); } catch (_) {}
+                // try { localStorage.setItem(SCALE_KEY, cb.checked ? '1' : '0'); } catch (_) {}
                 // Popup URL is about:blank (window.open with empty url + doc.write),
                 // so location.reload() would render an empty page. Instead poke the
                 // opener's 3D MORPH button — it re-writes fresh content into the
@@ -359,14 +359,14 @@
 
         // PICKING toggle: large dots = easy to click; off = 30% size.
         const PICK_KEY = 'draw20-morph3d-picking';
-        const pickingMode = (function () {
-            try { return localStorage.getItem(PICK_KEY) === '1'; } catch (_) { return false; }
-        })();
+        const pickingMode = false; // (function () {
+            // try { return localStorage.getItem(PICK_KEY) === '1'; } catch (_) { return false; }
+        // })();
         const pickCb = document.getElementById('pick-mode-cb');
         if (pickCb) {
             pickCb.checked = pickingMode;
             pickCb.addEventListener('change', function () {
-                try { localStorage.setItem(PICK_KEY, pickCb.checked ? '1' : '0'); } catch (_) {}
+                // try { localStorage.setItem(PICK_KEY, pickCb.checked ? '1' : '0'); } catch (_) {}
                 try {
                     const b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn');
                     if (b) b.click();
@@ -399,15 +399,15 @@
         // Correspondence-line visibility toggle (default OFF). Stored in
         // localStorage, applies to all per-pair link bundles built below.
         const LINES_KEY = 'draw20-morph3d-lines';
-        const linesVisible = (function () {
-            try { return localStorage.getItem(LINES_KEY) === '1'; } catch (_) { return false; }
-        })();
+        const linesVisible = false; // (function () {
+            // try { return localStorage.getItem(LINES_KEY) === '1'; } catch (_) { return false; }
+        // })();
         const linkLineMeshes = [];
         const linesCb = document.getElementById('lines-mode-cb');
         if (linesCb) {
             linesCb.checked = linesVisible;
             linesCb.addEventListener('change', function () {
-                try { localStorage.setItem(LINES_KEY, linesCb.checked ? '1' : '0'); } catch (_) {}
+                // try { localStorage.setItem(LINES_KEY, linesCb.checked ? '1' : '0'); } catch (_) {}
                 for (const m of linkLineMeshes) m.visible = linesCb.checked;
             });
         }

@@ -29,17 +29,17 @@
 
         // Mouse-zoom state — declared up top so drawBBox closures see it
         // initialized regardless of which async path fires first.
-        let zoom = +(localStorage.getItem('draw20-zoom') ?? 1);
-        let panX = +(localStorage.getItem('draw20-panX') ?? 0);
-        let panY = +(localStorage.getItem('draw20-panY') ?? 0);
+        let zoom = 1; // +(localStorage.getItem('draw20-zoom') ?? 1);
+        let panX = 0; // +(localStorage.getItem('draw20-panX') ?? 0);
+        let panY = 0; // +(localStorage.getItem('draw20-panY') ?? 0);
 
 
         function saveZoomPan() {
-            try {
-                localStorage.setItem('draw20-zoom', zoom);
-                localStorage.setItem('draw20-panX', panX);
-                localStorage.setItem('draw20-panY', panY);
-            } catch (_) {}
+            // try {
+            //     localStorage.setItem('draw20-zoom', zoom);
+            //     localStorage.setItem('draw20-panX', panX);
+            //     localStorage.setItem('draw20-panY', panY);
+            // } catch (_) {}
         }
 
         const wrap = document.createElement('div');

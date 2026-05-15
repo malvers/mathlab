@@ -27,11 +27,11 @@ let formulaBbox = null;
 function onDigitChange(d) {
     selectedDigit = d;
     clearMorphFigure();
-    try {
-        localStorage.setItem('morph-digit', String(d));
-        localStorage.removeItem('morph-text');
-        document.getElementById('text-input').value = '';
-    } catch (_) {}
+    // try {
+    //     localStorage.setItem('morph-digit', String(d));
+    //     localStorage.removeItem('morph-text');
+    //     document.getElementById('text-input').value = '';
+    // } catch (_) {}
     digitCtx.clearRect(0, 0, 1000, 1000);
     formulaBbox = null;
 
@@ -98,10 +98,10 @@ function onDigitChange(d) {
 function setTextInput(latex) {
     const input = document.getElementById('text-input');
     input.value = latex;
-    try {
-        localStorage.setItem('morph-text', latex);
-        localStorage.removeItem('morph-digit');
-    } catch (_) {}
+    // try {
+    //     localStorage.setItem('morph-text', latex);
+    //     localStorage.removeItem('morph-digit');
+    // } catch (_) {}
     onTextInput(latex);
 }
 

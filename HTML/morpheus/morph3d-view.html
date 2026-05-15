@@ -273,8 +273,8 @@
     function saveGeom() {
         try {
             localStorage.setItem('draw20-morph3d-geom', JSON.stringify({
-                w: window.outerWidth,
-                h: window.outerHeight,
+                w: window.innerWidth,
+                h: window.innerHeight,
                 x: window.screenX,
                 y: window.screenY,
             }));
@@ -282,7 +282,9 @@
     }
     window.addEventListener('resize', saveGeom);
     window.addEventListener('beforeunload', saveGeom);
-    setInterval(saveGeom, 1500); // position has no event — poll while popup is open
+    // No setInterval poll — it creates a feedback loop with window.open's
+    // height feature: each reload would add Chrome's chrome height (~100px),
+    // saveGeom captures the inflated value, next open uses it as the new base.
 })();
 </script>
 </body>
