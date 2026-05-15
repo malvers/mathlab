@@ -177,12 +177,6 @@
                 <span id="target-scale-val">100</span>
             </div>
             <div class="eps-row">
-                <label>Merge</label>
-                <input type="range" id="merge-slider" min="0" max="15" value="4" step="1"
-                    oninput="onMergeChange(this.value)">
-                <span id="merge-val">4</span>
-            </div>
-            <div class="eps-row">
                 <label>Schwelle</label>
                 <input type="range" id="threshold-slider" min="5" max="50" value="20" step="1"
                     oninput="onThresholdChange(this.value)">
@@ -550,13 +544,6 @@
             document.getElementById('stroke-val').textContent = val;
             drawCtx.lineWidth = +val;
             try { localStorage.setItem('morph-stroke', val); } catch (_) {}
-        }
-
-        function onMergeChange(val) {
-            document.getElementById('merge-val').textContent = val;
-            try { localStorage.setItem('morph-merge', val); } catch (_) {}
-            // Re-run outline extraction so the new radius takes effect immediately.
-            if (savedPixels) extractOutline();
         }
 
         function onThresholdChange(val) {
@@ -1214,13 +1201,6 @@
                 document.getElementById('target-scale-slider').value = savedTargetScale;
                 document.getElementById('target-scale-val').textContent = savedTargetScale;
                 targetScale = +savedTargetScale / 100;
-            }
-        } catch (_) {}
-        try {
-            const savedMerge = localStorage.getItem('morph-merge');
-            if (savedMerge !== null) {
-                document.getElementById('merge-slider').value = savedMerge;
-                document.getElementById('merge-val').textContent = savedMerge;
             }
         } catch (_) {}
         try {

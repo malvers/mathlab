@@ -533,6 +533,14 @@ function createDraw20Render({
             }
             data = Object.assign({}, data, { pairAlignments: alignments });
         }
+
+        // Per-match palette colour — same convention as the 2D main view:
+        // both sides of a match share the colour from draw20PaletteColor.
+        if (data && data.idToPair && typeof draw20PaletteColor === 'function') {
+            const colorByMatchId = {};
+            for (const [id] of data.idToPair) colorByMatchId[id] = draw20PaletteColor(id);
+            data = Object.assign({}, data, { colorByMatchId });
+        }
         Morph3D.openMorph3D(data);
     }
 
@@ -574,44 +582,33 @@ function createDraw20Render({
         _mark(`extract (png=${pngContours?.length || 0} lat=${latexContoursList?.length || 0})`);
 
         // ── Match pix content-height to tex content-height + align baselines
-        // Hand-formula PNG often has different proportions / margins than
-        // the KaTeX-rendered LaTeX. Compute both content-bboxes in display
-        // CSS coords and apply a `translateY(dy) scale(sf)` transform on
-        // pix so the CONTENT visually matches tex content height AND the
-        // vertical centers (≈ baselines) align.
-        if (pix.complete && pix.naturalWidth && tex.complete && tex.naturalWidth && latexCanvas) {
-            // RESET first so we read the natural (un-transformed) bounds.
-            pix.style.transform = '';
-            pix.style.transformOrigin = 'center';
-            const pBB = computeImageBBox(pix);
-            const tBB = computeContentBBox(latexCanvas, 'alpha');
-            if (pBB && tBB && pBB.h > 0 && tBB.h > 0) {
-                const pixR = pix.getBoundingClientRect();
-                const texR = tex.getBoundingClientRect();
-                const pScale = Math.min(pixR.width / pix.naturalWidth, pixR.height / pix.naturalHeight);
-                const tScale = Math.min(texR.width / tex.naturalWidth, texR.height / tex.naturalHeight);
-                const pixContentH = pBB.h * pScale;
-                const texContentH = tBB.h * tScale;
-                if (pixContentH > 0 && texContentH > 0) {
-                    const sf = texContentH / pixContentH;
-                    // Vertical centers (in viewport coords) before transform.
-                    const pixView = mapImageBBoxToViewport(pix, pBB);
-                    const texView = mapImageBBoxToViewport(tex, tBB);
-                    const cyImg = pixR.top + pixR.height / 2;
-                    const pixCY = pixView.top + pixView.height / 2;
-                    const texCY = texView.top + texView.height / 2;
-                    // After scale(sf) with transform-origin center the content
-                    // center moves from pixCY to (cyImg + (pixCY-cyImg)*sf).
-                    // translateY shifts that final position so it matches texCY.
-                    const dy = (texCY - cyImg) - (pixCY - cyImg) * sf;
-                    pix.style.transform = `translateY(${dy.toFixed(2)}px) scale(${sf.toFixed(4)})`;
-                }
-            }
-        } else if (!pix.naturalWidth) {
-            // No PNG (symbol mode) — drop any leftover scale from a
-            // previous formula so the empty/hidden img doesn't carry it.
-            pix.style.transform = '';
-        }
+        // PLAN B: Both pix and tex content are scaled to fit within
+        // TARGET_CONTENT_FRAC of BOTH pane width AND pane height — the
+        // smaller of the two scales wins (Math.min) so tall formulas
+        // don't overflow the pane vertically and wide ones don't overflow
+        // horizontally. paneW = wrap.width/2 (flex split), paneH = wrap.height.
+        const TARGET_CONTENT_FRAC = 0.6;
+        const wrapRect = wrap.getBoundingClientRect();
+        const paneW = (wrapRect.width || 2) / 2;
+        const paneH = wrapRect.height || 1;
+        const targetW = TARGET_CONTENT_FRAC * paneW;
+        const targetH = TARGET_CONTENT_FRAC * paneH;
+        const fitContentToTarget = (img, bb) => {
+            img.style.transform = '';
+            img.style.transformOrigin = 'center';
+            if (!img.complete || !img.naturalWidth) return;
+            if (!bb || bb.w <= 0 || bb.h <= 0) return;
+            const r = img.getBoundingClientRect();
+            if (r.width <= 0 || r.height <= 0) return;
+            const renderScale = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+            const contentW = bb.w * renderScale;
+            const contentH = bb.h * renderScale;
+            if (contentW <= 0 || contentH <= 0) return;
+            const sf = Math.min(targetW / contentW, targetH / contentH);
+            img.style.transform = `scale(${sf.toFixed(4)})`;
+        };
+        fitContentToTarget(pix, pix.naturalWidth ? computeImageBBox(pix) : null);
+        fitContentToTarget(tex, latexCanvas ? computeContentBBox(latexCanvas, 'alpha') : null);
         _mark('height-match');
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);

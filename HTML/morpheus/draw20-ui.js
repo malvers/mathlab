@@ -53,7 +53,7 @@ function createDraw20UI({
             if (c !== morphLayer) overlay.removeChild(c);
         }
     }
-    function setFormula(latex, presetIndex) {
+    function setFormula(latex, presetIndex, prefix = 'formula') {
         // Total click→done timer (read by renderBBoxes at the very end).
         window.__draw20ClickT0 = performance.now();
         // Wipe lingering correspondence/morph artifacts immediately so the
@@ -72,7 +72,9 @@ function createDraw20UI({
         const ti = document.getElementById('text-input');
         if (ti && ti.value !== String(latex)) ti.value = String(latex);
         const latexReady = renderLatex(latex);
-        const url = `presets/formula-${presetIndex}.png`;
+        // prefix = 'formula' or 'complex' — both share the same pipeline,
+        // only the PNG namespace differs.
+        const url = `presets/${prefix}-${presetIndex}.png`;
         const pixReady = new Promise(resolve => {
             if (pix.src.endsWith(url)) { resolve(); return; }
             pix.onload = () => resolve();
@@ -138,9 +140,15 @@ function createDraw20UI({
             const latex = r.dataset.latex;
             const preset = parseInt(r.dataset.preset, 10);
             if (latex && !isNaN(preset)) setFormula(latex, preset);
+        } else if (v.startsWith('complex-')) {
+            // Komplex-Formel: hat Bild presets/complex-N.png. Index aus
+            // dem value (kein data-preset auf den complex-Radios).
+            const latex = r.dataset.latex;
+            const preset = parseInt(v.slice('complex-'.length), 10);
+            if (latex && !isNaN(preset)) setFormula(latex, preset, 'complex');
         } else {
             // Digits (no data-latex) use the value directly; LaTeX symbols
-            // & Komplex have data-latex.
+            // have data-latex.
             const latex = r.dataset.latex || v;
             if (latex) setSymbolLatex(latex);
         }

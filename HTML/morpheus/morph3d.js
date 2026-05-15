@@ -66,42 +66,33 @@
 <style>
     html, body { margin: 0; padding: 0; height: 100%; background: rgb(8, 20, 42); overflow: hidden; font-family: 'Orbitron', sans-serif; color: #00d2ff; }
     canvas { display: block; }
-    #hud { position: fixed; top: 12px; left: 12px; font-size: 11px; letter-spacing: 1.5px; opacity: 0.85; pointer-events: none; line-height: 1.5; }
+    #hud { position: fixed; bottom: 12px; left: 12px; font-size: 11px; letter-spacing: 1.5px; opacity: 0.85; pointer-events: none; line-height: 1.5; }
+    #top-bar {
+        position: fixed; top: 12px; left: 12px; right: 12px;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; z-index: 100;
+    }
     #empty { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 1.1rem; letter-spacing: 0.1em; opacity: 0.7; }
     .row { display: flex; gap: 14px; align-items: center; }
     .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: middle; }
-    #reload-btn {
-        position: fixed; top: 12px; right: 12px;
-        font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 1.5px;
-        padding: 8px 14px; cursor: pointer;
-        background: rgba(0, 210, 255, 0.12); color: #00d2ff;
-        border: 1px solid rgba(0, 210, 255, 0.45); border-radius: 4px;
+    #reload-btn, .top-toggle, .view-btn {
+        font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
+        padding: 6px 12px; cursor: pointer;
+        background: rgba(0, 210, 255, 0.08); color: rgba(0, 210, 255, 0.85);
+        border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
         transition: background 0.15s ease, color 0.15s ease;
-        z-index: 100;
+        white-space: nowrap;
     }
-    #reload-btn:hover { background: rgba(0, 210, 255, 0.28); color: #fff; }
-    #scale-toggle {
-        position: fixed; top: 12px; right: 130px;
-        display: flex; align-items: center; gap: 8px;
-        font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
-        color: rgba(0, 210, 255, 0.85); cursor: pointer;
-        padding: 6px 10px;
-        background: rgba(0, 210, 255, 0.08);
-        border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
-        z-index: 100; user-select: none;
+    #reload-btn:hover, .top-toggle:hover, .view-btn:hover {
+        background: rgba(0, 210, 255, 0.22); color: #fff;
     }
-    #scale-toggle input { cursor: pointer; accent-color: #00d2ff; }
-    #pick-toggle {
-        position: fixed; top: 12px; right: 260px;
-        display: flex; align-items: center; gap: 8px;
-        font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
-        color: rgba(0, 210, 255, 0.85); cursor: pointer;
-        padding: 6px 10px;
-        background: rgba(0, 210, 255, 0.08);
-        border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
-        z-index: 100; user-select: none;
+    .top-toggle { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+    .top-toggle input { cursor: pointer; accent-color: #00d2ff; }
+    #reload-btn {
+        background: rgba(0, 210, 255, 0.12); color: #00d2ff;
+        border-color: rgba(0, 210, 255, 0.45);
+        font-size: 12px; padding: 8px 14px; letter-spacing: 1.5px;
     }
-    #pick-toggle input { cursor: pointer; accent-color: #00d2ff; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -110,15 +101,23 @@
     <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING · <span id="hud-png-pts">–</span> Pts</div>
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
-    <div style="margin-top:2px;opacity:0.6">Ansicht: O oben · U unten · V vorn · H hinten · L links · R rechts</div>
+    <div style="margin-top:2px;opacity:0.6">Ansicht: O/U oben/unten · V/H vorn/hinten · R rechts · L LINIEN toggle</div>
 </div>
-<label id="pick-toggle" title="Picking-Modus: große Punkte zum Auswählen (off = 30%, dezent)">
-    <input type="checkbox" id="pick-mode-cb" checked>PICKING
-</label>
-<label id="scale-toggle" title="Originalgrößen (kein Auto-Fit pro Seite)">
-    <input type="checkbox" id="scale-natural-cb">ORIGINAL
-</label>
-<button id="reload-btn" onclick="(function(){ try { var b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn'); if (b) b.click(); else location.reload(); } catch (e) { location.reload(); } })()">↻ RELOAD</button>
+<div id="top-bar">
+    <label class="top-toggle" title="Korrespondenz-Linien zwischen den Ebenen ein/aus">
+        <input type="checkbox" id="lines-mode-cb">LINIEN
+    </label>
+    <label class="top-toggle" title="Picking-Modus: große Punkte zum Auswählen (off = 30%, dezent)">
+        <input type="checkbox" id="pick-mode-cb">PICKING
+    </label>
+    <label class="top-toggle" title="Originalgrößen (kein Auto-Fit pro Seite)">
+        <input type="checkbox" id="scale-natural-cb">ORIGINAL
+    </label>
+    <button class="view-btn" id="view-btn-vorn-hinten"  data-toggle="front-back">V ⇄ H</button>
+    <button class="view-btn" id="view-btn-links-rechts" data-toggle="left-right">L ⇄ R</button>
+    <button class="view-btn" id="view-btn-oben-unten"   data-toggle="top-bottom">O ⇄ U</button>
+    <button id="reload-btn" onclick="(function(){ try { var b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn'); if (b) b.click(); else location.reload(); } catch (e) { location.reload(); } })()">↻ RELOAD</button>
+</div>
 <div id="empty" style="display:none">Keine Polygon-Daten — bitte erst Formel + Zeichnung in morph.html laden.</div>
 <script>
 (function () {
@@ -344,14 +343,10 @@
             return pts[pts.length - 1];
         }
 
-        // Picking spheres — colored per plane to match the outline colors
-        // (PNG/Stift = green, LaTeX = orange). Shared geometry + per-plane
-        // material keeps GPU cheap.
-        // PICKING toggle: large dots = easy to click; off = 30% size, more
-        // discrete look. State persisted alongside the other toggles.
+        // PICKING toggle: large dots = easy to click; off = 30% size.
         const PICK_KEY = 'draw20-morph3d-picking';
         const pickingMode = (function () {
-            try { return localStorage.getItem(PICK_KEY) !== '0'; } catch (_) { return true; }
+            try { return localStorage.getItem(PICK_KEY) === '1'; } catch (_) { return false; }
         })();
         const pickCb = document.getElementById('pick-mode-cb');
         if (pickCb) {
@@ -364,13 +359,47 @@
                 } catch (_) {}
             });
         }
-        const PICK_SPHERE_R = pickingMode ? 3.2 : 1.0; // ~30% when picking off
+        const PICK_SPHERE_R = pickingMode ? 3.2 : 1.0;
         const pickSphereGeom = new THREE.SphereGeometry(PICK_SPHERE_R, 10, 10);
-        const pickMatPng = new THREE.MeshBasicMaterial({ color: PNG_COLOR });
-        const pickMatLat = new THREE.MeshBasicMaterial({ color: LAT_COLOR });
-        function addOuterPoints(pts, z, plane, partnerPts, partnerZ, alignment) {
+
+        // Per-match palette colors come from data.colorByMatchId (built upstream
+        // via draw20PaletteColor). Same convention as 2D: both sides of a pair
+        // share the colour. Orphans use red. Cache materials per colour.
+        const ORPHAN_COLOR = 0xFF0000;
+        const colorMap = data.colorByMatchId || {};
+        const pickMatCache = {};
+        function pickMatFor(matchId, isOrphan) {
+            const key = isOrphan ? 'orph' : String(matchId);
+            if (!pickMatCache[key]) {
+                const col = isOrphan ? ORPHAN_COLOR
+                    : (colorMap[matchId] || '#ff3344');
+                pickMatCache[key] = new THREE.MeshBasicMaterial({ color: col });
+            }
+            return pickMatCache[key];
+        }
+        function colorForMatch(matchId, isOrphan) {
+            if (isOrphan) return ORPHAN_COLOR;
+            return colorMap[matchId] || 0x00d2ff;
+        }
+
+        // Correspondence-line visibility toggle (default OFF). Stored in
+        // localStorage, applies to all per-pair link bundles built below.
+        const LINES_KEY = 'draw20-morph3d-lines';
+        const linesVisible = (function () {
+            try { return localStorage.getItem(LINES_KEY) === '1'; } catch (_) { return false; }
+        })();
+        const linkLineMeshes = [];
+        const linesCb = document.getElementById('lines-mode-cb');
+        if (linesCb) {
+            linesCb.checked = linesVisible;
+            linesCb.addEventListener('change', function () {
+                try { localStorage.setItem(LINES_KEY, linesCb.checked ? '1' : '0'); } catch (_) {}
+                for (const m of linkLineMeshes) m.visible = linesCb.checked;
+            });
+        }
+        function addOuterPoints(pts, z, plane, partnerPts, partnerZ, alignment, matchId, isOrphan) {
             if (!pts || !pts.length) return;
-            const mat = (plane === 'lat') ? pickMatLat : pickMatPng;
+            const mat = pickMatFor(matchId, isOrphan);
             const ownCum = cumulativeLengths(pts);
             const partnerCum = partnerPts ? cumulativeLengths(partnerPts) : null;
             const baseData = {
@@ -390,18 +419,6 @@
                 scene.add(m);
                 pickablePoints.push(m);
             }
-        }
-
-        // Polygon outlines cyan on both planes — side identity is conveyed
-        // by the pick-sphere colors (green/orange).
-        const OUTLINE_COLOR = 0x00d2ff;
-        for (const o of pngN) {
-            addOutlineLoop(o.pts, Z_PNG, OUTLINE_COLOR);
-            for (const h of o.holes) addOutlineLoop(h, Z_PNG, OUTLINE_COLOR);
-        }
-        for (const o of latN) {
-            addOutlineLoop(o.pts, Z_LAT, OUTLINE_COLOR);
-            for (const h of o.holes) addOutlineLoop(h, Z_LAT, OUTLINE_COLOR);
         }
 
         const matchedPngOuters = new Set();
@@ -425,62 +442,73 @@
                 for (const a of data.pairAlignments) alignByOuterId.set(a.outerId, a);
             }
 
-            const linkVerts = [];
             for (const entry of data.idToPair) {
                 const id = entry[0], pair = entry[1];
                 if (pair.png < 0 || pair.lat < 0) continue;
                 const pi = pngIdx.get(id), li = latIdx.get(id);
                 if (pi == null || li == null || !pngN[pi] || !latN[li]) continue;
                 const align = alignByOuterId.get(id) || null;
-                // PNG vertex picking: forward — src → dst via idxMap.
+                const matchCol = colorForMatch(id, false);
+                // Outlines (outer + holes) in the per-match palette colour.
+                addOutlineLoop(pngN[pi].pts, Z_PNG, matchCol);
+                for (const h of (pngN[pi].holes || [])) addOutlineLoop(h, Z_PNG, matchCol);
+                addOutlineLoop(latN[li].pts, Z_LAT, matchCol);
+                for (const h of (latN[li].holes || [])) addOutlineLoop(h, Z_LAT, matchCol);
+                // Pick spheres carry the match colour via pickMatFor.
                 addOuterPoints(pngN[pi].pts, Z_PNG, 'png', latN[li].pts, Z_LAT,
-                    align ? { dir: 'forward', N: align.N, idxMap: align.idxMap } : null);
-                // LaTeX vertex picking: reverse — dst → src by inverting idxMap.
+                    align ? { dir: 'forward', N: align.N, idxMap: align.idxMap } : null,
+                    id, false);
                 addOuterPoints(latN[li].pts, Z_LAT, 'lat', pngN[pi].pts, Z_PNG,
-                    align ? { dir: 'reverse', N: align.N, idxMap: align.idxMap } : null);
-                // Holes: paired by index (equalizeMatchedContours keeps hole
-                // counts in sync per outer pair). No engine alignment for holes
-                // → arc-length identity in addOuterPoints picking.
+                    align ? { dir: 'reverse', N: align.N, idxMap: align.idxMap } : null,
+                    id, false);
+                // Holes (paired by index).
                 const pngHoles = pngN[pi].holes || [];
                 const latHoles = latN[li].holes || [];
                 const nHoles = Math.min(pngHoles.length, latHoles.length);
                 for (let h = 0; h < nHoles; h++) {
-                    addOuterPoints(pngHoles[h], Z_PNG, 'png', latHoles[h], Z_LAT, null);
-                    addOuterPoints(latHoles[h], Z_LAT, 'lat', pngHoles[h], Z_PNG, null);
+                    addOuterPoints(pngHoles[h], Z_PNG, 'png', latHoles[h], Z_LAT, null, id, false);
+                    addOuterPoints(latHoles[h], Z_LAT, 'lat', pngHoles[h], Z_PNG, null, id, false);
                 }
                 matchedPngOuters.add(pi);
                 matchedLatOuters.add(li);
-                // Visual correspondence net: original vertices only — no
-                // resampling. Counts are equalized upstream so index k on the
-                // PNG side maps to index k on the LaTeX side.
+                // Correspondence net for this pair — original vertices, no
+                // resampling. Per-pair LineSegments so each takes the match colour.
                 const a = pngN[pi].pts;
                 const b = latN[li].pts;
                 const nLink = Math.min(a.length, b.length);
-                for (let k = 0; k < nLink; k++) {
-                    linkVerts.push(a[k].x, a[k].y, Z_PNG);
-                    linkVerts.push(b[k].x, b[k].y, Z_LAT);
+                if (nLink) {
+                    const linkVerts = new Float32Array(nLink * 6);
+                    for (let k = 0; k < nLink; k++) {
+                        linkVerts[k * 6]     = a[k].x; linkVerts[k * 6 + 1] = a[k].y; linkVerts[k * 6 + 2] = Z_PNG;
+                        linkVerts[k * 6 + 3] = b[k].x; linkVerts[k * 6 + 4] = b[k].y; linkVerts[k * 6 + 5] = Z_LAT;
+                    }
+                    const lg = new THREE.BufferGeometry();
+                    lg.setAttribute('position', new THREE.BufferAttribute(linkVerts, 3));
+                    const ls = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({
+                        color: matchCol, transparent: true, opacity: 0.45,
+                    }));
+                    ls.visible = linesVisible;
+                    linkLineMeshes.push(ls);
+                    scene.add(ls);
                 }
-            }
-            if (linkVerts.length) {
-                const lg = new THREE.BufferGeometry();
-                lg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linkVerts), 3));
-                scene.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({
-                    color: LINK_COLOR, transparent: true, opacity: 0.45,
-                })));
             }
         }
 
-        // Orphan outers (and their holes) — still pickable but no partner.
+        // Orphans — outline + pick spheres in orphan red, no partner.
         for (let i = 0; i < pngN.length; i++) {
             if (!matchedPngOuters.has(i)) {
-                addOuterPoints(pngN[i].pts, Z_PNG, 'png', null, null);
-                for (const h of pngN[i].holes || []) addOuterPoints(h, Z_PNG, 'png', null, null);
+                addOutlineLoop(pngN[i].pts, Z_PNG, ORPHAN_COLOR);
+                for (const h of (pngN[i].holes || [])) addOutlineLoop(h, Z_PNG, ORPHAN_COLOR);
+                addOuterPoints(pngN[i].pts, Z_PNG, 'png', null, null, null, -1, true);
+                for (const h of pngN[i].holes || []) addOuterPoints(h, Z_PNG, 'png', null, null, null, -1, true);
             }
         }
         for (let i = 0; i < latN.length; i++) {
             if (!matchedLatOuters.has(i)) {
-                addOuterPoints(latN[i].pts, Z_LAT, 'lat', null, null);
-                for (const h of latN[i].holes || []) addOuterPoints(h, Z_LAT, 'lat', null, null);
+                addOutlineLoop(latN[i].pts, Z_LAT, ORPHAN_COLOR);
+                for (const h of (latN[i].holes || [])) addOutlineLoop(h, Z_LAT, ORPHAN_COLOR);
+                addOuterPoints(latN[i].pts, Z_LAT, 'lat', null, null, null, -1, true);
+                for (const h of latN[i].holes || []) addOuterPoints(h, Z_LAT, 'lat', null, null, null, -1, true);
             }
         }
 
@@ -612,17 +640,37 @@
             renderer.setSize(innerWidth, innerHeight);
         });
 
+        // Toggle state for the 3 paired view buttons. Each click alternates
+        // between the two members of its pair.
+        const viewToggle = { 'top-bottom': 'top', 'left-right': 'left', 'front-back': 'front' };
+        const viewPair = {
+            'top-bottom':  ['top', 'bottom'],
+            'left-right':  ['left', 'right'],
+            'front-back':  ['front', 'back'],
+        };
+        document.querySelectorAll('.view-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const key = btn.dataset.toggle;
+                const pair = viewPair[key];
+                const next = (viewToggle[key] === pair[0]) ? pair[1] : pair[0];
+                viewToggle[key] = next;
+                setView(next);
+            });
+        });
+
         // Canonical-view shortcuts. Camera is placed 'd' units away from the
-        // scene target on the chosen axis, looking back toward target. For
-        // Top/Bottom the world-up is degenerate (collinear with view dir) →
-        // re-set up to a Z-axis so the view is well-defined.
+        // scene target on the chosen axis, looking back toward target.
+        // Top/Bottom would be degenerate with world-up=(0,1,0) → add a tiny
+        // tilt along Z so cam.up stays (0,1,0) consistently and OrbitControls
+        // doesn't flip its internal "up" reference between views.
         function setView(name) {
             const t = TARGET_HOME;
             const d = 1100;
-            cam.up.set(0, 1, 0);
+            const eps = 0.5; // small tilt to avoid up/view colinearity
+            cam.up.set(0, 1, 0); // always world Y up — keeps orbit consistent
             switch (name) {
-                case 'top':    cam.position.set(t.x, t.y + d, t.z); cam.up.set(0, 0, -1); break;
-                case 'bottom': cam.position.set(t.x, t.y - d, t.z); cam.up.set(0, 0,  1); break;
+                case 'top':    cam.position.set(t.x, t.y + d, t.z + eps); break;
+                case 'bottom': cam.position.set(t.x, t.y - d, t.z + eps); break;
                 case 'front':  cam.position.set(t.x, t.y, t.z + d); break;
                 case 'back':   cam.position.set(t.x, t.y, t.z - d); break;
                 case 'left':   cam.position.set(t.x - d, t.y, t.z); break;
@@ -636,6 +684,16 @@
             // Ignore if focus is in a text input (no inputs in this popup, but defensive).
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
             const k = e.key.toLowerCase();
+            // Cmd+R / Ctrl+R → trigger our reload (browser reload would render
+            // about:blank empty since this window was opened with empty URL).
+            if ((e.metaKey || e.ctrlKey) && k === 'r') {
+                e.preventDefault();
+                try {
+                    const b = window.opener && window.opener.document.getElementById('draw20-morph3d-btn');
+                    if (b) b.click();
+                } catch (_) {}
+                return;
+            }
             if (e.key === 'Escape') {
                 cam.up.set(0, 1, 0);
                 cam.position.copy(CAM_HOME);
@@ -643,14 +701,24 @@
                 controls.update();
                 return;
             }
-            // Canonical-view shortcuts (German keys).
+            // Canonical-view shortcuts — each key toggles its pair (same
+            // behavior as the V⇄H / L⇄R / O⇄U buttons).
+            function togglePair(pairKey) {
+                const pair = viewPair[pairKey];
+                const next = (viewToggle[pairKey] === pair[0]) ? pair[1] : pair[0];
+                viewToggle[pairKey] = next;
+                setView(next);
+            }
             switch (k) {
-                case 'o': setView('top');    break; // Oben
-                case 'u': setView('bottom'); break; // Unten
-                case 'v': setView('front');  break; // Vorn
-                case 'h': setView('back');   break; // Hinten
-                case 'l': setView('left');   break; // Links
-                case 'r': setView('right');  break; // Rechts
+                case 'o': case 'u': togglePair('top-bottom');  break;
+                case 'v': case 'h': togglePair('front-back');  break;
+                case 'r':           togglePair('left-right');  break;
+                case 'l': {
+                    // L toggles the correspondence-lines checkbox.
+                    const cb = document.getElementById('lines-mode-cb');
+                    if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); }
+                    break;
+                }
             }
         });
     }
@@ -669,7 +737,9 @@
     }
     window.addEventListener('resize', saveGeom);
     window.addEventListener('beforeunload', saveGeom);
-    setInterval(saveGeom, 1500);
+    // No setInterval poll — it creates a feedback loop with window.open's
+    // height feature: each reload would add Chrome's chrome height (~100px),
+    // saveGeom captures the inflated value, next open uses it as the new base.
 })();
 </script>
 </body></html>`;

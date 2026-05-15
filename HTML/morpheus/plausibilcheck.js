@@ -194,29 +194,30 @@
     }
 
     // ── Pairwise cost ──────────────────────────────────────────────────────
-    // 1 - plausibility + veto terms. Vetoes catch fundamentally-incompatible
-    // pairs and push their cost to ~∞ so Hungarian will not produce them:
+    // 1 - plausibility, with BINARY vetoes for fundamentally-incompatible
+    // pairs (returns +∞-ish so Hungarian never produces them):
     //   • elongation mismatch  > 3×       (e.g. "2" onto √-overbar)
     //   • size mismatch        > 10×      (e.g. "−" onto a digit's body)
     //   • hole-count mismatch  ≥ 2        (e.g. "8" onto "0")
     //   • mass-Y mismatch      > 0.5      (e.g. "b" onto "p" — opposite Y)
     //   • mass-X mismatch      > 0.7      (e.g. "b" onto "d" — mirrored)
-    //   • hole-count differs by 1 AND
-    //     one has none, other has one    (e.g. "c" onto "o", "n" onto "a")
+    // Binary (was graduated 1e6·excess) — graduated lets the smallest-veto
+    // pair win when all candidates are vetoed; binary forces "no pair" via
+    // the dummy-column slot in draw20-match.js.
+    const PAIR_VETO = 1e9;
     function pairCost(a, b) {
         const elongRatio = Math.abs(Math.log(a.elong / b.elong));
         const sizeRatio = Math.abs(Math.log((a.size + 1e-4) / (b.size + 1e-4)));
         const dh = Math.abs(a.holes - b.holes);
         const dmY = Math.abs(a.massY - b.massY);
         const dmX = Math.abs(a.massX - b.massX);
-        let veto = 0;
-        if (elongRatio > Math.log(3))  veto += 1e6 * (elongRatio - Math.log(3));
-        if (sizeRatio  > Math.log(10)) veto += 1e6 * (sizeRatio  - Math.log(10));
-        if (dh >= 2)                   veto += 1e6 * (dh - 1);
-        if (dmY > 0.5)                 veto += 5e5 * (dmY - 0.5);
-        if (dmX > 0.7)                 veto += 5e5 * (dmX - 0.7);
+        if (elongRatio > Math.log(3))  return PAIR_VETO;
+        if (sizeRatio  > Math.log(10)) return PAIR_VETO;
+        if (dh >= 2)                   return PAIR_VETO;
+        if (dmY > 0.5)                 return PAIR_VETO;
+        if (dmX > 0.7)                 return PAIR_VETO;
         const { score } = pairPlausibility(a, b);
-        return (1 - score) + veto;
+        return 1 - score;
     }
 
     // ── Run plausibility check ─────────────────────────────────────────────
