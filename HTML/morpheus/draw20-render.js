@@ -47,8 +47,12 @@ function createDraw20Render({
     let latVertCount = 0;
     let lastRenderData = null;
     let activeMatchId = null;
+    let inSymbolMode = false; // one side empty: use side-colours, not palette
     const orphanMatchIds = new Set();
     const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
+    // Side-colours used in symbol mode (matches the count-box labels).
+    const SIDE_COLOR_PNG = '#adff2f';
+    const SIDE_COLOR_LATEX = '#F4C430';
 
     // ── Point-count equalization ────────────────────────────────────────────
     // For each matched (PNG/stift)↔LaTeX outer pair (and their paired
@@ -78,7 +82,7 @@ function createDraw20Render({
     // further calls are no-ops. This is critical because equalize can
     // run multiple times (formula switch, window resize, stift stroke,
     // …). A multiplier would compound (300 → 600 → 1200 → ...).
-    const DRAW20_MIN_POINTS = 200;
+    const DRAW20_MIN_POINTS = 300;
     function equalizePair(arrA, idxA, arrB, idxB) {
         const a = arrA[idxA], b = arrB[idxB];
         if (!a || !b) return;
@@ -237,9 +241,11 @@ function createDraw20Render({
         // FILL uses palette per matchId so matched partners share the same
         // hue (used to be green/orange side colours — now consistent with
         // the outline stroke).
+        const sideColor = (label === 'latex') ? SIDE_COLOR_LATEX : SIDE_COLOR_PNG;
         const colourOf = (i) => {
             const mid = matchId[i];
             if (mid < 0) return INK;
+            if (inSymbolMode) return sideColor;
             return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
         };
 
@@ -259,8 +265,8 @@ function createDraw20Render({
             const path = document.createElementNS(svgNS, 'path');
             path.setAttribute('d', d);
             path.setAttribute('fill-rule', 'evenodd');
-            // Orphans: red fill, NO glow.
-            path.setAttribute('fill', orphan ? ORPHAN : draw20PaletteColor(mid));
+            // Orphans: red fill, NO glow. Symbol mode: side-colour.
+            path.setAttribute('fill', orphan ? ORPHAN : (inSymbolMode ? sideColor : draw20PaletteColor(mid)));
             path.setAttribute('stroke', 'none');
             path.dataset.kind = 'fill';
             path.dataset.source = label;
@@ -286,6 +292,7 @@ function createDraw20Render({
         const lineColorOf = (i) => {
             const mid = matchId[i];
             if (mid < 0) return INK;
+            if (inSymbolMode) return sideColor;
             return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
         };
         let totalVerts = 0;
@@ -351,10 +358,19 @@ function createDraw20Render({
         const mid = (t && t.dataset) ? t.dataset.matchId : '';
         const valid = mid && mid !== '-1';
         const next = (e.type === 'mouseover' && valid) ? mid : null;
+        // Don't trigger morph-line render for orphans — they have no partner.
+        const nextEffective = (next !== null && !orphanMatchIds.has(String(next))) ? next : null;
         if (next === activeMatchId) return;
         if (activeMatchId !== null) setMatchHighlight(activeMatchId, false);
         if (next !== null) setMatchHighlight(next, true);
         activeMatchId = next;
+        // Persist active id so the morph layer can render pre-morph lines
+        // only for the hovered pair (formula mode). Then re-render.
+        overlay.dataset.activeMatchId = nextEffective || '';
+        if (typeof renderMorph === 'function') {
+            const sl = document.getElementById('morph-slider');
+            if (sl) renderMorph(+sl.value / 100);
+        }
     }
     overlay.addEventListener('mouseover', onOverlayHover);
     overlay.addEventListener('mouseout', onOverlayHover);
@@ -549,9 +565,9 @@ function createDraw20Render({
         const _t0 = performance.now();
         let _tPrev = _t0;
         const _mark = (name) => {
-            const now = performance.now();
-            log(`⏱ ${name}: ${(now - _tPrev).toFixed(1)}ms`);
-            _tPrev = now;
+            // const now = performance.now();
+            // log(`⏱ ${name}: ${(now - _tPrev).toFixed(1)}ms`);
+            // _tPrev = now;
         };
         // Detach morph-layer first, wipe everything, drawing happens in
         // between, morph-layer gets re-attached as the LAST child below so
@@ -670,9 +686,14 @@ function createDraw20Render({
         // Refresh the orphan-id set: any match-id whose pair has png<0 or
         // lat<0 (no partner on the other side) is flagged so drawContours
         // can paint it red.
+        // Symbol mode (one side completely empty) is not "orphaned" — it's
+        // just the only source, so skip orphan-marking and use side-colours.
         orphanMatchIds.clear();
-        for (const [id, pair] of idToPair) {
-            if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+        inSymbolMode = pClass.outers.length === 0 || lClass.outers.length === 0;
+        if (!inSymbolMode) {
+            for (const [id, pair] of idToPair) {
+                if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));
+            }
         }
 
         // Centroid maps populated by drawContours — used afterwards to draw
@@ -769,9 +790,9 @@ function createDraw20Render({
 
         updateInfoBoxes(pngContours, latexContoursList);
         _mark('updateInfoBoxes');
-        log(`⏱ TOTAL renderBBoxes: ${(performance.now() - _t0).toFixed(1)}ms`);
+        // log(`⏱ TOTAL renderBBoxes: ${(performance.now() - _t0).toFixed(1)}ms`);
         if (typeof window !== 'undefined' && window.__draw20ClickT0) {
-            log(`⏱⏱ CLICK → DONE: ${(performance.now() - window.__draw20ClickT0).toFixed(1)}ms`);
+            // log(`⏱⏱ CLICK → DONE: ${(performance.now() - window.__draw20ClickT0).toFixed(1)}ms`);
             window.__draw20ClickT0 = 0;
         }
     }

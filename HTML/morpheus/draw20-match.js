@@ -60,8 +60,8 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
         const pTypes = pDesc.map(d => symbolType(d));
         const lTypes = lDesc.map(d => symbolType(d));
 
-        dbg(`PNG types: ${pTypes.join(',')}`);
-        dbg(`LaTeX types: ${lTypes.join(',')}`);
+        // dbg(`PNG types: ${pTypes.join(',')}`);
+        // dbg(`LaTeX types: ${lTypes.join(',')}`);
 
         const VETO = 1e9;
         const usedPng = new Set(), usedLat = new Set();
@@ -87,7 +87,7 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
                 assign[i] = j;
                 usedPng.add(i);
                 usedLat.add(j);
-                dbg(`  [${tier}] PNG#${i} ↔ LaTeX#${j}`);
+                // dbg(`  [${tier}] PNG#${i} ↔ LaTeX#${j}`);
             }
         }
 
@@ -109,19 +109,19 @@ function draw20ComputeMatchIds(pngContours, latexContours, options) {
             assign[i] = j;
             usedPng.add(i);
             usedLat.add(j);
-            dbg(`  [fallback] PNG#${i} ↔ LaTeX#${j}`);
+            // dbg(`  [fallback] PNG#${i} ↔ LaTeX#${j}`);
         }
 
         // Plausibility check on the resulting pairing
         if (typeof PlausibilCheck !== 'undefined' && pDesc.length) {
             const pairing = assign.slice();
             plausibility = PlausibilCheck.checkMatching(pOuters, lOuters, pairing, pDesc, lDesc);
-            dbg(PlausibilCheck.summarize(plausibility));
-            for (const m of plausibility.matches) {
-                if (m.verdict !== 'ok') dbg(PlausibilCheck.describeMatch(m));
-            }
-            for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
-            for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
+            // dbg(PlausibilCheck.summarize(plausibility));
+            // for (const m of plausibility.matches) {
+            //     if (m.verdict !== 'ok') dbg(PlausibilCheck.describeMatch(m));
+            // }
+            // for (const o of plausibility.pngOrphans) dbg(PlausibilCheck.describeOrphan(o, 'png'));
+            // for (const o of plausibility.latexOrphans) dbg(PlausibilCheck.describeOrphan(o, 'latex'));
         }
     }
 

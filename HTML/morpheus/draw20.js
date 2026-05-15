@@ -240,7 +240,7 @@
                 if (processed === '\\sqrt') processed = '\\surd';
                 const cached = latexCanvasCache.get(processed);
                 if (cached) {
-                    dbg(`⏱ renderLatex cache HIT (${cached.width}x${cached.height})`);
+                    // dbg(`⏱ renderLatex cache HIT (${cached.width}x${cached.height})`);
                     latexCanvas = cached;
                     tex.onload = () => resolve(cached);
                     tex.src = cached.toDataURL();
@@ -250,7 +250,7 @@
                 let html;
                 try { html = katex.renderToString(processed, { throwOnError: false, displayMode: true }); }
                 catch (e) { resolve(null); return; }
-                dbg(`⏱ renderLatex katex: ${(performance.now() - _tLatex0).toFixed(1)}ms`);
+                // dbg(`⏱ renderLatex katex: ${(performance.now() - _tLatex0).toFixed(1)}ms`);
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = html;
                 wrapper.style.cssText = `
@@ -262,22 +262,22 @@
                 document.body.appendChild(wrapper);
                 const _tSched = performance.now();
                 setTimeout(() => {
-                    dbg(`⏱ renderLatex setTimeout(50) actual: ${(performance.now() - _tSched).toFixed(1)}ms`);
+                    // dbg(`⏱ renderLatex setTimeout(50) actual: ${(performance.now() - _tSched).toFixed(1)}ms`);
                     const _tBB = performance.now();
                     const rect = wrapper.getBoundingClientRect();
-                    dbg(`⏱ renderLatex getBoundingClientRect: ${(performance.now() - _tBB).toFixed(1)}ms`);
+                    // dbg(`⏱ renderLatex getBoundingClientRect: ${(performance.now() - _tBB).toFixed(1)}ms`);
                     const _tH2C0 = performance.now();
                     html2canvas(wrapper, {
                         backgroundColor: null, scale: 1, logging: false,
                         width: rect.width, height: rect.height
                     }).then(canvas => {
-                        dbg(`⏱ renderLatex html2canvas (${canvas.width}x${canvas.height}): ${(performance.now() - _tH2C0).toFixed(1)}ms`);
+                        // dbg(`⏱ renderLatex html2canvas (${canvas.width}x${canvas.height}): ${(performance.now() - _tH2C0).toFixed(1)}ms`);
                         document.body.removeChild(wrapper);
                         latexCanvasCache.set(processed, canvas);
                         latexCanvas = canvas;
                         const _tDU = performance.now();
                         tex.onload = () => {
-                            dbg(`⏱ renderLatex toDataURL+decode+onload: ${(performance.now() - _tDU).toFixed(1)}ms`);
+                            // dbg(`⏱ renderLatex toDataURL+decode+onload: ${(performance.now() - _tDU).toFixed(1)}ms`);
                             resolve(canvas);
                         };
                         tex.src = canvas.toDataURL();
