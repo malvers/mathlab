@@ -121,6 +121,9 @@
     <label class="top-toggle" title="Korrespondenz-Linien zwischen den Ebenen ein/aus">
         <input type="checkbox" id="lines-mode-cb">LINIEN
     </label>
+    <label class="top-toggle" title="Mantelfläche zwischen benachbarten Korrespondenz-Linien ein/aus">
+        <input type="checkbox" id="fill-mode-cb">FILL
+    </label>
     <label class="top-toggle" title="Picking-Modus: große Punkte zum Auswählen (off = 30%, dezent)">
         <input type="checkbox" id="pick-mode-cb">PICKING
     </label>
@@ -316,6 +319,30 @@
             const geom = new THREE.BufferGeometry().setFromPoints(verts);
             scene.add(new THREE.Line(geom, new THREE.LineBasicMaterial({ color: color })));
         }
+        // Cap (Deckel) — gefüllte Fläche aus Outer + Holes auf konstantem z.
+        function makeCapMesh(pts, holes, z, color) {
+            if (!pts || pts.length < 3) return null;
+            const shape = new THREE.Shape();
+            shape.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].y);
+            shape.closePath();
+            for (const h of holes || []) {
+                if (!h || h.length < 3) continue;
+                const hp = new THREE.Path();
+                hp.moveTo(h[0].x, h[0].y);
+                for (let i = 1; i < h.length; i++) hp.lineTo(h[i].x, h[i].y);
+                hp.closePath();
+                shape.holes.push(hp);
+            }
+            const geom = new THREE.ShapeGeometry(shape);
+            geom.computeVertexNormals();
+            const mesh = new THREE.Mesh(geom, new THREE.MeshStandardMaterial({
+                color: color, side: THREE.DoubleSide,
+                metalness: 0.4, roughness: 0.5,
+            }));
+            mesh.position.z = z;
+            return mesh;
+        }
         const PNG_COLOR = 0xadff2f;
         const LAT_COLOR = 0xF4C430;
         const LINK_COLOR = 0x4dbfa0;
@@ -396,19 +423,59 @@
             return colorMap[matchId] || 0x00d2ff;
         }
 
-        // Correspondence-line visibility toggle (default OFF). Stored in
-        // localStorage, applies to all per-pair link bundles built below.
-        const LINES_KEY = 'draw20-morph3d-lines';
-        const linesVisible = false; // (function () {
-            // try { return localStorage.getItem(LINES_KEY) === '1'; } catch (_) { return false; }
-        // })();
+        // Correspondence-line visibility — live-synced with the main window's
+        // MORPH LINIEN switch (correspondence-toggle). When the main toggle
+        // changes, the 3D view follows immediately.
+        function readMainLinesState() {
+            try {
+                const cb = window.opener && window.opener.document
+                    && window.opener.document.getElementById('correspondence-toggle');
+                return !!(cb && cb.checked);
+            } catch (_) { return false; }
+        }
+        let linesVisible = readMainLinesState();
         const linkLineMeshes = [];
         const linesCb = document.getElementById('lines-mode-cb');
+        function applyLinesVisibility(v) {
+            linesVisible = v;
+            if (linesCb) linesCb.checked = v;
+            for (const m of linkLineMeshes) m.visible = v;
+        }
         if (linesCb) {
             linesCb.checked = linesVisible;
             linesCb.addEventListener('change', function () {
-                // try { localStorage.setItem(LINES_KEY, linesCb.checked ? '1' : '0'); } catch (_) {}
-                for (const m of linkLineMeshes) m.visible = linesCb.checked;
+                // Local toggle also pushes back to the main window so the
+                // two stay in sync regardless of which side flips it.
+                try {
+                    const cb = window.opener && window.opener.document
+                        && window.opener.document.getElementById('correspondence-toggle');
+                    if (cb && cb.checked !== linesCb.checked) {
+                        cb.checked = linesCb.checked;
+                        cb.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } catch (_) {}
+                applyLinesVisibility(linesCb.checked);
+            });
+        }
+        // Listen for the main window's toggle changes so the 3D updates
+        // without needing a refresh.
+        try {
+            const cb = window.opener && window.opener.document
+                && window.opener.document.getElementById('correspondence-toggle');
+            if (cb) cb.addEventListener('change', () => applyLinesVisibility(cb.checked));
+        } catch (_) {}
+        // FILL toggle — Mantelfläche zwischen den beiden Ebenen. Persisted.
+        const FILL_KEY = 'draw20-morph3d-fill';
+        let fillVisible = false;
+        try { fillVisible = localStorage.getItem(FILL_KEY) === '1'; } catch (_) {}
+        const loftMeshes = [];
+        const fillCb = document.getElementById('fill-mode-cb');
+        if (fillCb) {
+            fillCb.checked = fillVisible;
+            fillCb.addEventListener('change', function () {
+                fillVisible = fillCb.checked;
+                try { localStorage.setItem(FILL_KEY, fillVisible ? '1' : '0'); } catch (_) {}
+                for (const m of loftMeshes) m.visible = fillVisible;
             });
         }
         function addOuterPoints(pts, z, plane, partnerPts, partnerZ, alignment, matchId, isOrphan) {
@@ -505,6 +572,41 @@
                     linkLineMeshes.push(ls);
                     scene.add(ls);
                 }
+                // Loft surface — Quads zwischen benachbarten Korrespondenz-Linien
+                // (a[k], a[k+1], b[k+1], b[k]) → zwei Dreiecke pro Segment.
+                if (nLink >= 2) {
+                    const loftVerts = new Float32Array(nLink * 2 * 3);
+                    for (let k = 0; k < nLink; k++) {
+                        loftVerts[k * 3]               = a[k].x;
+                        loftVerts[k * 3 + 1]           = a[k].y;
+                        loftVerts[k * 3 + 2]           = Z_PNG;
+                        loftVerts[(nLink + k) * 3]     = b[k].x;
+                        loftVerts[(nLink + k) * 3 + 1] = b[k].y;
+                        loftVerts[(nLink + k) * 3 + 2] = Z_LAT;
+                    }
+                    const loftIdx = [];
+                    for (let k = 0; k < nLink; k++) {
+                        const k1 = (k + 1) % nLink;
+                        const ai = k, aj = k1, bi = nLink + k, bj = nLink + k1;
+                        loftIdx.push(ai, aj, bj, ai, bj, bi);
+                    }
+                    const lf = new THREE.BufferGeometry();
+                    lf.setAttribute('position', new THREE.BufferAttribute(loftVerts, 3));
+                    lf.setIndex(loftIdx);
+                    lf.computeVertexNormals();
+                    const loftMesh = new THREE.Mesh(lf, new THREE.MeshStandardMaterial({
+                        color: matchCol, side: THREE.DoubleSide,
+                        metalness: 0.4, roughness: 0.5,
+                    }));
+                    loftMesh.visible = fillVisible;
+                    loftMeshes.push(loftMesh);
+                    scene.add(loftMesh);
+                }
+                // Cap-Flächen — Deckel auf PNG-Seite (grün) und LaTeX-Seite (orange).
+                const capPng = makeCapMesh(pngN[pi].pts, pngN[pi].holes, Z_PNG, PNG_COLOR);
+                if (capPng) { capPng.visible = fillVisible; loftMeshes.push(capPng); scene.add(capPng); }
+                const capLat = makeCapMesh(latN[li].pts, latN[li].holes, Z_LAT, LAT_COLOR);
+                if (capLat) { capLat.visible = fillVisible; loftMeshes.push(capLat); scene.add(capLat); }
             }
         }
 

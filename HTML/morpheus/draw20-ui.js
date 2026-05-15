@@ -142,6 +142,8 @@ function createDraw20UI({
     }
     function dispatchRadio(r) {
         const v = r.value || '';
+        // Persist last-selected radio (mode + element) for reload restore.
+        try { localStorage.setItem('draw20-radio-value', v); } catch (_) {}
         if (v.startsWith('formula-')) {
             const latex = r.dataset.latex;
             const preset = parseInt(r.dataset.preset, 10);
@@ -159,9 +161,20 @@ function createDraw20UI({
             if (latex) setSymbolLatex(latex);
         }
     }
-    // Initial display: currently-checked radio (if legacy boot already
-    // applied localStorage→radio.checked), else default.
+    // Initial display: restore last-selected radio from localStorage
+    // (covers SYMBOLE / FORMELN / KOMPLEX since they share name="digit"),
+    // else any currently-checked radio, else default.
     function applyInitialSelection() {
+        let stored = null;
+        try { stored = localStorage.getItem('draw20-radio-value'); } catch (_) {}
+        if (stored) {
+            const r = document.querySelector(`input[name="digit"][value="${stored}"]`);
+            if (r) {
+                r.checked = true;
+                dispatchRadio(r);
+                return;
+            }
+        }
         const checked = document.querySelector('input[name="digit"]:checked');
         if (checked) dispatchRadio(checked);
         else setFormula(defaultLatex, defaultPreset);

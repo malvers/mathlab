@@ -38,6 +38,7 @@
     <script src="draw20-extract.js"></script>
     <script src="draw20-stift.js"></script>
     <script src="draw20-match.js"></script>
+    <script src="draw20-corner-match.js"></script>
     <script src="draw20-morph.js"></script>
     <script src="draw20-render.js"></script>
     <script src="draw20-ring.js"></script>
@@ -255,6 +256,7 @@
                     </label>
                 `).join('')}
                 ${[
+                    { latex: 'E', text: 'E', title: 'E' },
                     // Big operators
                     { latex: '\\surd', text: '\\sqrt', title: 'surd' },
                     { latex: '\\sqrt{\\phantom{x}}', text: '\\sqrt{\\phantom{x}}', title: 'sqrt + bar' },
@@ -543,7 +545,7 @@
         function onStrokeChange(val) {
             document.getElementById('stroke-val').textContent = val;
             drawCtx.lineWidth = +val;
-            // try { localStorage.setItem('morph-stroke', val); } catch (_) {}
+            try { localStorage.setItem('morph-stroke', val); } catch (_) {}
         }
 
         function onThresholdChange(val) {
@@ -1187,14 +1189,14 @@
         //         document.getElementById('eps-val').textContent = savedEps;
         //     }
         // } catch (_) {}
-        // try {
-        //     const savedStroke = localStorage.getItem('morph-stroke');
-        //     if (savedStroke !== null) {
-        //         document.getElementById('stroke-slider').value = savedStroke;
-        //         document.getElementById('stroke-val').textContent = savedStroke;
-        //         drawCtx.lineWidth = +savedStroke;
-        //     }
-        // } catch (_) {}
+        try {
+            const savedStroke = localStorage.getItem('morph-stroke');
+            if (savedStroke !== null) {
+                document.getElementById('stroke-slider').value = savedStroke;
+                document.getElementById('stroke-val').textContent = savedStroke;
+                drawCtx.lineWidth = +savedStroke;
+            }
+        } catch (_) {}
         // try {
         //     const savedTargetScale = localStorage.getItem('morph-target-scale');
         //     if (savedTargetScale !== null) {
