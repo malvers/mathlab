@@ -470,7 +470,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:06';
+        const BUILD_TIME = '2026-05-16 13:12';
         const buildInfoEl = document.getElementById('build-info');
         buildInfoEl.textContent = 'BT: ' + BUILD_TIME;
         buildInfoEl.title = 'Klick: hart neu laden';
@@ -566,10 +566,10 @@
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
 
-                    // TEST FLAG — set true to skip MediaRecorder and only test SpeechRecognition.
-                    // If recognition works alone but not with MR, we have proof of the conflict.
-                    const SKIP_MEDIARECORDER = true;
-                    logRec(`SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER}`);
+                    // Pixel-Geräte können MediaRecorder + SpeechRecognition nicht gleichzeitig nutzen
+                    // (MediaRecorder belegt das Mic exklusiv). Andere Geräte (Lenovo, Desktop) gehen.
+                    const SKIP_MEDIARECORDER = /Pixel/i.test(navigator.userAgent);
+                    logRec(`SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER} (UA-detected)`);
 
                     let recognitionStarted = false;
                     try {
