@@ -130,28 +130,92 @@
             height: auto;
             width: 100%;
         }
-        body.mini > #btn-download {
+        body.mini > .bottom-row {
+            flex: 2 1 0;
+            flex-direction: column;
+        }
+        body.mini > .bottom-row .btn-saveload {
             flex: 1 1 0;
             height: auto;
         }
 
+        /* mini-mode body view (vertical stack) */
         #mini-stack {
             display: none;
             flex-direction: column;
             gap: 10px;
             width: 220px;
             padding: 14px;
-            background: rgba(8, 18, 38, 0.96);
-            border: 1px solid rgba(0, 210, 255, 0.6);
-            border-radius: 10px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 210, 255, 0.25);
-            backdrop-filter: blur(6px);
         }
+        /* popup mode: RADIAL — buttons arranged in a circle around touch point */
         #mini-stack.popup {
-            display: flex;
+            display: block;
             position: fixed;
             z-index: 20;
+            width: 320px;
+            height: 230px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            pointer-events: none;     /* center is click-through */
         }
+        /* subtle radial glow underneath the popup buttons */
+        #mini-stack.popup::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 520px;
+            height: 380px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center,
+                rgba(0, 210, 255, 0.18) 0%,
+                rgba(0, 210, 255, 0.09) 28%,
+                rgba(0, 210, 255, 0.035) 55%,
+                rgba(0, 210, 255, 0) 75%);
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(6px);
+        }
+        #mini-stack.popup .mini-sep { display: none; }
+        #mini-stack.popup .mini-btn {
+            position: absolute;
+            pointer-events: auto;
+            width: 115px;
+            height: 32px;
+            font-size: 0.62rem;
+            letter-spacing: 0.15em;
+            transform: translate(-50%, -50%);
+            background: rgba(8, 18, 38, 0.96);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 210, 255, 0.25);
+            color: rgba(0, 210, 255, 0.95);
+            border-color: rgba(0, 210, 255, 0.8);
+        }
+        #mini-stack.popup .mini-btn:hover { background: rgba(0, 210, 255, 0.1); }
+        /* destructive deletes → rot (right side) */
+        #mini-stack.popup #mb-del-all,
+        #mini-stack.popup #mb-del-text,
+        #mini-stack.popup #mb-del-voice {
+            color: rgb(196, 30, 58);
+            border-color: rgb(196, 30, 58);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(196, 30, 58, 0.3);
+        }
+        #mini-stack.popup #mb-del-all:hover,
+        #mini-stack.popup #mb-del-text:hover,
+        #mini-stack.popup #mb-del-voice:hover { background: rgba(196, 30, 58, 0.12); }
+        /* opposite/warning buttons → orange (left side) */
+        #mini-stack.popup #mb-load-file,
+        #mini-stack.popup #mb-engine,
+        #mini-stack.popup #mb-reload-ai {
+            color: rgb(245, 194, 66);
+            border-color: rgb(245, 194, 66);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.3);
+        }
+        #mini-stack.popup #mb-load-file:hover,
+        #mini-stack.popup #mb-engine:hover,
+        #mini-stack.popup #mb-reload-ai:hover { background: rgba(245, 194, 66, 0.12); }
         .mini-btn {
             height: clamp(48px, 12vw, 60px);
             border-radius: 12px;
@@ -215,15 +279,20 @@
             box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
         }
 
-        #btn-download {
+        .bottom-row {
             width: min(560px, 92vw);
-            height: clamp(44px, 10vh, 60px);
+            display: flex;
+            gap: 16px;
             flex-shrink: 0;
+        }
+        .btn-saveload {
+            flex: 1;
+            height: clamp(44px, 10vh, 60px);
             border-radius: 12px;
             cursor: pointer;
             outline: none;
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+            font-size: clamp(0.85rem, 3vw, 1.05rem);
             letter-spacing: 0.3em;
             color: rgba(0, 210, 255, 0.95);
             background: rgba(8, 18, 38, 0.9);
@@ -233,11 +302,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             container-type: size;
         }
-        #btn-download .dl-icon { display: none; }
-        body.mini > #btn-download .dl-label { display: none; }
-        body.mini > #btn-download .dl-icon {
+        .btn-saveload .sl-icon { display: none; }
+        body.mini .btn-saveload .sl-label { display: none; }
+        body.mini .btn-saveload .sl-icon {
             display: block;
             width: 50cqmin;
             height: 50cqmin;
@@ -249,22 +319,21 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-        #btn-download:hover:not(:disabled) {
+        .btn-saveload:hover:not(:disabled) {
             background: rgba(0, 210, 255, 0.08);
         }
-        #btn-download:active:not(:disabled) { transform: scale(0.97); }
-        #btn-download:disabled {
+        .btn-saveload:active:not(:disabled) { transform: scale(0.97); }
+        .btn-saveload:disabled {
             cursor: not-allowed;
             color: rgba(0, 210, 255, 0.25);
             border-color: rgba(0, 210, 255, 0.25);
             box-shadow: none;
         }
-        /* button stays cyan; only the label/icon pulses to signal unsaved */
-        #btn-download.unsaved .dl-label,
-        #btn-download.unsaved .dl-icon {
+        #btn-save.unsaved .sl-label,
+        #btn-save.unsaved .sl-icon {
             animation: pulse-label 1.2s ease-in-out infinite;
         }
-        body.mini > #btn-download:disabled .dl-icon { stroke: rgba(0, 210, 255, 0.25); }
+        body.mini .btn-saveload:disabled .sl-icon { stroke: rgba(0, 210, 255, 0.25); }
         @keyframes pulse-label {
             0%, 100% { opacity: 1; }
             50%       { opacity: 0.35; }
@@ -305,6 +374,153 @@
         }
         #whisper-status.visible { display: block; }
         #whisper-status.busy { animation: pulse-label 1.3s ease-in-out infinite; }
+
+        /* ── Library dialog ─────────────────────────────── */
+        #library-dialog {
+            position: fixed; inset: 0;
+            display: none;
+            align-items: center; justify-content: center;
+            background: rgba(0, 0, 20, 0.7);
+            backdrop-filter: blur(3px);
+            z-index: 55;
+        }
+        #library-dialog.visible { display: flex; }
+        #library-dialog .lib-card {
+            background: rgba(8, 18, 38, 0.98);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            border-radius: 14px;
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.3);
+            padding: 22px 24px;
+            width: min(520px, 92vw);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Raleway', sans-serif;
+            color: rgba(220, 230, 245, 0.95);
+        }
+        #library-dialog .lib-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.3em;
+            color: rgba(0, 210, 255, 0.95);
+            margin-bottom: 14px;
+        }
+        #library-dialog .lib-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+            min-height: 80px;
+            max-height: 50vh;
+        }
+        #library-dialog .lib-empty {
+            display: none;
+            color: rgba(180, 200, 220, 0.5);
+            text-align: center;
+            padding: 24px 0;
+            font-size: 0.9rem;
+        }
+        #library-dialog.empty .lib-empty { display: block; }
+        #library-dialog.empty .lib-list  { display: none; }
+        #library-dialog .lib-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        #library-dialog .lib-item:hover {
+            background: rgba(0, 210, 255, 0.12);
+            border-color: rgba(0, 210, 255, 0.6);
+        }
+        #library-dialog .lib-name {
+            flex: 1;
+            font-size: 0.85rem;
+            color: rgba(220, 230, 245, 0.95);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #library-dialog .lib-meta {
+            font-size: 0.72rem;
+            color: rgba(160, 190, 215, 0.6);
+            margin-right: 8px;
+        }
+        #library-dialog .lib-del {
+            background: transparent;
+            border: 1px solid rgb(196, 30, 58);
+            color: rgb(196, 30, 58);
+            width: 28px; height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        #library-dialog .lib-del:hover { background: rgba(196, 30, 58, 0.12); }
+        #library-dialog .lib-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ── Confirm dialog ────────────────────────────── */
+        #confirm-dialog {
+            position: fixed; inset: 0;
+            display: none;
+            align-items: center; justify-content: center;
+            background: rgba(0, 0, 20, 0.7);
+            backdrop-filter: blur(3px);
+            z-index: 60;
+        }
+        #confirm-dialog.visible { display: flex; }
+        #confirm-dialog .cdlg-card {
+            background: rgba(8, 18, 38, 0.98);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            border-radius: 14px;
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.3);
+            padding: 24px 28px;
+            width: min(420px, 90vw);
+            font-family: 'Raleway', sans-serif;
+            color: rgba(220, 230, 245, 0.95);
+        }
+        #confirm-dialog .cdlg-msg {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+        #confirm-dialog .cdlg-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        #confirm-dialog .cdlg-btn {
+            min-width: 110px;
+            height: 44px;
+            border-radius: 8px;
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.6);
+            color: rgba(0, 210, 255, 0.95);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+            transition: background 0.12s, transform 0.12s;
+        }
+        #confirm-dialog .cdlg-btn:hover { background: rgba(0, 210, 255, 0.1); }
+        #confirm-dialog .cdlg-btn:active { transform: scale(0.96); }
+        #confirm-dialog .cdlg-btn.ok {
+            border-color: rgb(176, 36, 24);
+            color: rgb(245, 194, 66);
+            box-shadow: 0 0 8px rgba(176, 36, 24, 0.4);
+        }
+        #confirm-dialog .cdlg-btn.ok:hover { background: rgba(176, 36, 24, 0.12); }
 
         /* ── Centered AI loader ───────────────────────── */
         #ai-loading {
@@ -356,6 +572,20 @@
             color: rgba(0, 210, 255, 0.95);
             text-shadow: 0 0 8px rgba(0, 210, 255, 0.5);
             margin-bottom: 8px;
+        }
+        #ai-loading .ai-hint {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.78rem;
+            color: rgba(180, 210, 230, 0.65);
+            letter-spacing: 0.05em;
+        }
+        #ai-loading .ai-timer {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+            color: rgba(180, 210, 230, 0.65);
+            letter-spacing: 0.05em;
+            margin-top: 4px;
         }
         #ai-loading .ai-progress {
             font-family: 'Raleway', sans-serif;
@@ -439,12 +669,20 @@
     <div id="transcript-box">
         <div id="transcript-inner"></div></div>
 
-    <button id="btn-download" disabled>
-        <span class="dl-label">DOWNLOAD</span>
-        <svg class="dl-icon" viewBox="0 0 24 24">
-            <path d="M12 3 v12 m-5 -5 l5 5 l5 -5 M5 20 h14"/>
-        </svg>
-    </button>
+    <div class="bottom-row">
+        <button class="btn-saveload" id="btn-save" disabled>
+            <span class="sl-label">SAVE</span>
+            <svg class="sl-icon" viewBox="0 0 24 24">
+                <path d="M12 3 v12 m-5 -5 l5 5 l5 -5 M5 20 h14"/>
+            </svg>
+        </button>
+        <button class="btn-saveload" id="btn-load">
+            <span class="sl-label">LOAD</span>
+            <svg class="sl-icon" viewBox="0 0 24 24">
+                <path d="M12 21 v-12 m-5 5 l5 -5 l5 5 M5 4 h14"/>
+            </svg>
+        </button>
+    </div>
 
     <div id="build-info"></div>
 
@@ -456,8 +694,9 @@
         <button class="mini-btn danger" id="mb-del-voice">DELETE VOICE</button>
         <div class="mini-sep"></div>
         <button class="mini-btn" id="mb-copy-text">COPY TEXT</button>
-        <button class="mini-btn" id="mb-load-file">LOAD FILE</button>
+        <button class="mini-btn" id="mb-load-file">LOAD</button>
         <div class="mini-sep"></div>
+        <button class="mini-btn" id="mb-engine">WEBSPEECH</button>
         <button class="mini-btn danger" id="mb-reload-ai">RELOAD AI</button>
     </div>
 
@@ -465,6 +704,30 @@
 
     <!-- Whisper status — small banner for transcription/short messages -->
     <div id="whisper-status"></div>
+
+    <!-- Library dialog (saved recordings) -->
+    <div id="library-dialog">
+        <div class="lib-card">
+            <div class="lib-title">AUFNAHMEN</div>
+            <div class="lib-list"></div>
+            <div class="lib-empty">— keine Aufnahmen —</div>
+            <div class="lib-actions">
+                <button class="cdlg-btn cancel" id="lib-cancel">CANCEL</button>
+                <button class="cdlg-btn" id="lib-from-file">FROM FILE…</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom confirm dialog -->
+    <div id="confirm-dialog">
+        <div class="cdlg-card">
+            <div class="cdlg-msg"></div>
+            <div class="cdlg-buttons">
+                <button class="cdlg-btn cancel">CANCEL</button>
+                <button class="cdlg-btn ok">OK</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Centered AI loader — shown while model downloads -->
     <div id="ai-loading">
@@ -477,6 +740,8 @@
                 <span class="ai-dot"></span>
             </div>
             <div class="ai-text">LOADING AI</div>
+            <div class="ai-hint">can take up to one minute — once only</div>
+            <div class="ai-timer">00:00</div>
         </div>
     </div>
 
@@ -491,6 +756,7 @@
 
         const statusEl   = document.getElementById('whisper-status');
         const aiLoadEl   = document.getElementById('ai-loading');
+        const aiTimerEl  = aiLoadEl.querySelector('.ai-timer');
 
         function setStatus(msg, busy) {
             if (!msg) { statusEl.classList.remove('visible','busy'); return; }
@@ -498,8 +764,25 @@
             statusEl.classList.add('visible');
             statusEl.classList.toggle('busy', !!busy);
         }
-        function showLoader() { aiLoadEl.classList.add('visible'); }
-        function hideLoader() { aiLoadEl.classList.remove('visible'); }
+        let loaderStartT = 0;
+        let loaderTimerId = null;
+        function tickTimer() {
+            const s = Math.floor((Date.now() - loaderStartT) / 1000);
+            const mm = String(Math.floor(s / 60)).padStart(2, '0');
+            const ss = String(s % 60).padStart(2, '0');
+            aiTimerEl.textContent = `${mm}:${ss}`;
+        }
+        function showLoader() {
+            aiLoadEl.classList.add('visible');
+            if (loaderTimerId) return;
+            loaderStartT = Date.now();
+            tickTimer();
+            loaderTimerId = setInterval(tickTimer, 1000);
+        }
+        function hideLoader() {
+            aiLoadEl.classList.remove('visible');
+            clearInterval(loaderTimerId); loaderTimerId = null;
+        }
 
         let transcriber = null;
         let loading = null;
@@ -563,14 +846,17 @@
             }
         };
 
-        // start downloading the model in the background as soon as page loads
-        loadModel().catch(() => {});
+        // start downloading the model in the background ONLY if whisper engine is selected
+        if ((localStorage.getItem('transcriber.engine') || 'webspeech') === 'whisper') {
+            loadModel().catch(() => {});
+        }
     </script>
 
     <script>
         const btnRecord    = document.getElementById('btn-record');
         const btnPlay      = document.getElementById('btn-play');
-        const btnDownload  = document.getElementById('btn-download');
+        const btnSave  = document.getElementById('btn-save');
+        const btnLoad  = document.getElementById('btn-load');
         const transcriptEl = document.getElementById('transcript-inner');
 
         let mediaRecorder = null;
@@ -584,11 +870,17 @@
         let isDirty       = false; // recording exists but not downloaded
 
         // ── IndexedDB ────────────────────────────────────────────
-        const DB_NAME = 'voicerec', STORE = 'recordings', KEY = 'current';
+        const DB_NAME = 'voicerec', DB_VERSION = 2;
+        const STORE = 'recordings', KEY = 'current';
+        const STORE_LIB = 'library';
         function openDB() {
             return new Promise((res, rej) => {
-                const req = indexedDB.open(DB_NAME, 1);
-                req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(STORE))     db.createObjectStore(STORE);
+                    if (!db.objectStoreNames.contains(STORE_LIB)) db.createObjectStore(STORE_LIB);
+                };
                 req.onsuccess = () => res(req.result);
                 req.onerror   = () => rej(req.error);
             });
@@ -615,9 +907,72 @@
             return new Promise(res => tx.oncomplete = () => res());
         }
 
+        // ── Library (Liste aller gespeicherten Aufnahmen) ─────
+        async function saveToLibrary(blob, transcript, name) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_LIB, 'readwrite');
+            const id = Date.now();
+            tx.objectStore(STORE_LIB).put({ id, blob, transcript, name, savedAt: id }, id);
+            return new Promise(res => tx.oncomplete = () => res(id));
+        }
+        async function listLibrary() {
+            const db = await openDB();
+            const tx = db.transaction(STORE_LIB, 'readonly');
+            return new Promise(res => {
+                const r = tx.objectStore(STORE_LIB).getAll();
+                r.onsuccess = () => res(r.result || []);
+                r.onerror   = () => res([]);
+            });
+        }
+        async function deleteFromLibrary(id) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_LIB, 'readwrite');
+            tx.objectStore(STORE_LIB).delete(id);
+            return new Promise(res => tx.oncomplete = () => res());
+        }
+
         function setDirty(v) {
             isDirty = v;
-            btnDownload.classList.toggle('unsaved', v);
+            btnSave.classList.toggle('unsaved', v);
+        }
+
+        // Voice commands → formatting
+        //   "absatz"     → \n (line break)
+        //   "neue idee"  → blank line + "Idee #N" + newline (N counts sequentially)
+        function formatCommands(text) {
+            if (!text) return text;
+            let n = 0;
+            return text
+                .replace(/\bneue\s+idee\s*[.,;:]?/gi, () => { n++; return `\n\nIdee ${n}\n`; })
+                .replace(/\babsatz\s*[.,;:]?/gi, '\n');
+        }
+
+        // ── Custom confirm dialog (replaces window.confirm) ───────
+        function uiConfirm(message) {
+            return new Promise(resolve => {
+                const dlg  = document.getElementById('confirm-dialog');
+                const msg  = dlg.querySelector('.cdlg-msg');
+                const okEl = dlg.querySelector('.cdlg-btn.ok');
+                const cancelEl = dlg.querySelector('.cdlg-btn.cancel');
+                msg.textContent = message;
+                dlg.classList.add('visible');
+                const cleanup = (result) => {
+                    dlg.classList.remove('visible');
+                    okEl.removeEventListener('click', onOk);
+                    cancelEl.removeEventListener('click', onCancel);
+                    document.removeEventListener('keydown', onKey);
+                    resolve(result);
+                };
+                const onOk     = () => cleanup(true);
+                const onCancel = () => cleanup(false);
+                const onKey    = e => {
+                    if (e.key === 'Enter')  onOk();
+                    if (e.key === 'Escape') onCancel();
+                };
+                okEl.addEventListener('click', onOk);
+                cancelEl.addEventListener('click', onCancel);
+                document.addEventListener('keydown', onKey);
+            });
         }
 
         // ── Recognition event log ────────────────────────────────
@@ -632,12 +987,14 @@
         const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
         // const logRec = () => {};
 
-        // ── Speech recognition ───────────────────────────────────
-        // DISABLED — Whisper (transformers.js) replaces Web Speech API.
-        // Whisper post-processes the recorded blob, works on all browsers/devices.
-        const SpeechRecognition = null;
-        let finalText = '';      // displayed final text
-        let savedFinal = '';     // accumulated across recordings
+        // ── Transcription engine switch ──────────────────────────
+        // 'webspeech' = live transcription via browser API (default, better quality reported)
+        // 'whisper'   = post-record transcription via local Whisper model (more universal)
+        let engine = localStorage.getItem('transcriber.engine') || 'webspeech';
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let finalText = '';
+        let savedFinal = '';
 
         logRec(`UA: ${navigator.userAgent.substring(0, 80)}`);
 
@@ -657,32 +1014,39 @@
             recognition.onstart        = () => logRec('start');
 
             recognition.onresult = e => {
-                let sessionFinal = '';
+                // Collect all final transcripts in order, then dedupe:
+                // - cumulative (Lenovo etc.): later final starts with previous → replace
+                // - discrete (Mac etc.):      later final is independent → append
+                const finals = [];
                 let interim = '';
                 const dump = [];
-                // Chrome's quirk: multiple overlapping final results.
-                // Strategy: take only the LAST final result + the LAST interim result.
-                let lastFinalIdx = -1, lastInterimIdx = -1;
                 for (let i = 0; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
                     const f = e.results[i].isFinal;
                     dump.push(`[${i}]${f?'F':'I'}="${t}"`);
-                    if (f) lastFinalIdx = i;
-                    else   lastInterimIdx = i;
+                    if (f) finals.push(t);
+                    else   interim = t;
                 }
-                if (lastFinalIdx   >= 0) sessionFinal = e.results[lastFinalIdx  ][0].transcript;
-                if (lastInterimIdx >= 0) interim       = e.results[lastInterimIdx][0].transcript;
-
+                const deduped = [];
+                for (const f of finals) {
+                    const prev = deduped[deduped.length - 1];
+                    if (prev && f.trim().startsWith(prev.trim())) {
+                        deduped[deduped.length - 1] = f;     // cumulative → replace
+                    } else {
+                        deduped.push(f);                      // discrete    → append
+                    }
+                }
+                const sessionFinal = deduped.join(' ').replace(/\s+/g, ' ').trim();
                 logRec(`result idx=${e.resultIndex} ${dump.join(' ')}`);
                 finalText = savedFinal + sessionFinal;
-                transcriptEl.textContent = finalText + interim;
+                transcriptEl.textContent = formatCommands(finalText) + (interim ? ' ' + interim : '');
             };
             recognition.onend = () => {
                 // promote session's final text into savedFinal with a trailing space
                 savedFinal = finalText.replace(/\s+$/, '') + (finalText ? ' ' : '');
                 finalText = savedFinal;
                 // only paint if we have text — don't wipe interim that's visible on screen
-                if (finalText) transcriptEl.textContent = finalText;
+                if (finalText) transcriptEl.textContent = formatCommands(finalText);
                 logRec(`end (finalText.len=${finalText.length})`);
 
                 if (isRecording) {
@@ -712,12 +1076,12 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 14:36 (whisper-base + webgpu)';
+        const BUILD_TIME = '2026-05-16 16:10';
 
         // Pixel-Detection und Dialog entfernt — Whisper transkribiert den Blob unabhängig vom Mic-Konflikt
 
         const buildInfoEl = document.getElementById('build-info');
-        buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
+        buildInfoEl.textContent = `BT: ${BUILD_TIME} | engine=${localStorage.getItem('transcriber.engine') || 'webspeech'}`;
         buildInfoEl.title = 'Klick: hart neu laden';
         buildInfoEl.addEventListener('click', () => {
             const url = location.pathname + '?cb=' + Date.now() + location.hash;
@@ -743,7 +1107,7 @@
                         audioUrl = URL.createObjectURL(currentBlob);
                         audioEl  = new Audio(audioUrl);
                         btnPlay.disabled = false;
-                        btnDownload.disabled = false;
+                        btnSave.disabled = false;
                         setDirty(true);
                     }
                     if (stored.transcript) {
@@ -756,7 +1120,7 @@
             }
             // show restored transcript (debug-dump auskommentiert)
             // transcriptEl.textContent = '[DEBUG]\n' + dbg.join('\n') + '\n\n' + (finalText || '');
-            transcriptEl.textContent = finalText || '';
+            transcriptEl.textContent = formatCommands(finalText || '');
         })();
 
         // ── Record ───────────────────────────────────────────────
@@ -795,36 +1159,52 @@
                         audioUrl = URL.createObjectURL(currentBlob);
                         audioEl  = new Audio(audioUrl);
                         btnPlay.disabled = false;
-                        btnDownload.disabled = false;
+                        btnSave.disabled = false;
                         stream.getTracks().forEach(t => t.stop());
                         setDirty(true);
 
-                        // hand the blob to Whisper for transcription (post-process)
-                        if (window.transcribeAudioBlob) {
+                        // Whisper post-process — only when engine='whisper'
+                        if (engine === 'whisper' && window.transcribeAudioBlob) {
                             try {
                                 const text = await window.transcribeAudioBlob(currentBlob, 'german');
                                 const sep = savedFinal && !savedFinal.endsWith(' ') ? ' ' : '';
                                 savedFinal = (savedFinal || '') + sep + text;
                                 finalText  = savedFinal;
-                                transcriptEl.textContent = finalText;
+                                transcriptEl.textContent = formatCommands(finalText);
                             } catch (e) { /* error already shown via setStatus */ }
                         }
                         await saveToDB(currentBlob, finalText);
+
+                        // Diagnostic dump if nothing was transcribed
+                        if (!finalText) {
+                            transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n');
+                        }
                     };
 
                     isRecording = true;
                     btnRecord.classList.add('active');
                     btnPlay.disabled = true;
-                    recLog = []; // fresh log per recording
+                    recLog = [];
 
-                    // Whisper transcribes the blob AFTER stop — no Web Speech needed.
-                    // MediaRecorder runs alone, no mic conflicts on any platform.
-                    try {
-                        mediaRecorder.start();
-                        logRec('mediaRecorder.start');
-                    } catch (e) {
-                        logRec(`mediaRecorder.start THREW: ${e.message || e}`);
+                    // engine='webspeech': start live recognition; MediaRecorder follows after delay
+                    // engine='whisper':   only MediaRecorder; Whisper transcribes blob after stop
+                    if (engine === 'webspeech' && recognition) {
+                        try {
+                            recognition.start();
+                            logRec('recognition.start() called');
+                        } catch (e) {
+                            logRec(`recognition.start THREW: ${e.message || e}`);
+                        }
                     }
+
+                    setTimeout(() => {
+                        try {
+                            mediaRecorder.start();
+                            logRec('mediaRecorder.start');
+                        } catch (e) {
+                            logRec(`mediaRecorder.start THREW: ${e.message || e}`);
+                        }
+                    }, engine === 'webspeech' && recognition ? 600 : 0);
 
                 } catch (err) {
                     // surface error in the transcript area so user can see what failed
@@ -862,7 +1242,7 @@
             };
         });
 
-        // ── Download (audio + transcript sidecar) ────────────────
+        // ── Save (audio + transcript sidecar + library) ──────────
         function audioExt(blob) {
             const t = (blob.type || '').toLowerCase();
             if (t.includes('mp4'))  return '.m4a';
@@ -871,7 +1251,7 @@
             if (t.includes('mpeg')) return '.mp3';
             return '.webm';
         }
-        btnDownload.addEventListener('click', () => {
+        btnSave.addEventListener('click', async () => {
             if (!currentBlob) return;
             const d = new Date();
             const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -895,6 +1275,9 @@
                 URL.revokeObjectURL(a2.href);
             }
 
+            // also keep in library
+            await saveToLibrary(currentBlob, text, baseName);
+
             setDirty(false);
         });
 
@@ -908,15 +1291,42 @@
         }
         document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
 
-        // Right-click anywhere → popup with action buttons
+        // Right-click anywhere → popup with action buttons (radial layout)
         const miniStack = document.getElementById('mini-stack');
+        // per-button manual y-offsets (ellipse is just a starting point)
+        const Y_OFFSETS = {
+            'mb-mini-toggle':  -4,   // war -20, jetzt 16 runter
+            'mb-del-all':      16,   // 16 runter
+            'mb-reload-ai':    16,   // 16 runter
+            'mb-del-voice':   -16,   // 16 hoch
+            'mb-copy-text':     4,   // war +20, jetzt 16 hoch
+            'mb-load-file':   -16,   // 16 hoch
+        };
         function openPopup(clientX, clientY) {
-            const w = 220, h = 260;
-            const x = Math.min(Math.max(clientX, 8), window.innerWidth  - w - 8);
-            const y = Math.min(Math.max(clientY, 8), window.innerHeight - h - 8);
+            const W = 320, H = 260;
+            const rx = 105, ry = 95;
+            const x = Math.max(8, Math.min(clientX - W / 2, window.innerWidth  - W - 8));
+            const y = Math.max(8, Math.min(clientY - H / 2, window.innerHeight - H - 8));
             miniStack.style.left = x + 'px';
             miniStack.style.top  = y + 'px';
             miniStack.classList.add('popup');
+
+            const btns = Array.from(miniStack.querySelectorAll('.mini-btn'));
+            const n = btns.length;
+            btns.forEach((b, i) => {
+                const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+                const px = W / 2 + Math.cos(angle) * rx;
+                const py = H / 2 + Math.sin(angle) * ry + (Y_OFFSETS[b.id] || 0);
+                b.style.left = px + 'px';
+                b.style.top  = py + 'px';
+            });
+        }
+        // clear inline positions when popup closes (so body.mini view stays stacked)
+        function clearPopupPositions() {
+            miniStack.querySelectorAll('.mini-btn').forEach(b => {
+                b.style.left = '';
+                b.style.top  = '';
+            });
         }
         window.addEventListener('contextmenu', e => {
             e.preventDefault();
@@ -948,12 +1358,16 @@
 
         // close popup after a button click inside it (click fires AFTER mousedown)
         miniStack.addEventListener('click', e => {
-            if (e.target.tagName === 'BUTTON') miniStack.classList.remove('popup');
+            if (e.target.tagName === 'BUTTON') {
+                miniStack.classList.remove('popup');
+                clearPopupPositions();
+            }
         });
         // close popup on click outside
         document.addEventListener('mousedown', e => {
             if (miniStack.classList.contains('popup') && !miniStack.contains(e.target)) {
                 miniStack.classList.remove('popup');
+                clearPopupPositions();
             }
         });
 
@@ -966,7 +1380,7 @@
 
         // ── Mini-mode actions ────────────────────────────────────
         document.getElementById('mb-del-all').addEventListener('click', async () => {
-            if (!confirm('Alles löschen — Aufnahme und Text?')) return;
+            if (!await uiConfirm('Alles löschen — Aufnahme und Text?')) return;
             audioChunks = [];
             currentBlob = null;
             if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
@@ -975,13 +1389,13 @@
             savedFinal = '';
             transcriptEl.textContent = '';
             btnPlay.disabled = true;
-            btnDownload.disabled = true;
+            btnSave.disabled = true;
             await clearDB();
             setDirty(false);
         });
 
-        document.getElementById('mb-del-text').addEventListener('click', () => {
-            if (!confirm('Transkript löschen?')) return;
+        document.getElementById('mb-del-text').addEventListener('click', async () => {
+            if (!await uiConfirm('Transkript löschen?')) return;
             finalText = '';
             savedFinal = '';
             transcriptEl.textContent = '';
@@ -989,13 +1403,13 @@
         });
 
         document.getElementById('mb-del-voice').addEventListener('click', async () => {
-            if (!confirm('Aufnahme löschen?')) return;
+            if (!await uiConfirm('Aufnahme löschen?')) return;
             audioChunks = [];
             currentBlob = null;
             if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
             audioEl = null;
             btnPlay.disabled = true;
-            btnDownload.disabled = true;
+            btnSave.disabled = true;
             await clearDB();
             setDirty(false);
         });
@@ -1004,6 +1418,18 @@
             const text = transcriptEl.textContent.trim();
             if (!text) return;
             try { await navigator.clipboard.writeText(text); } catch (e) {}
+        });
+
+        // ── Engine toggle ────────────────────────────────────────
+        const btnEngine = document.getElementById('mb-engine');
+        function refreshEngineLabel() {
+            btnEngine.textContent = engine.toUpperCase();
+        }
+        refreshEngineLabel();
+        btnEngine.addEventListener('click', () => {
+            engine = (engine === 'webspeech') ? 'whisper' : 'webspeech';
+            localStorage.setItem('transcriber.engine', engine);
+            refreshEngineLabel();
         });
 
         // ── Reload AI (debug): clear cached Whisper model + hard reload ─
@@ -1019,6 +1445,67 @@
         // ── Load file(s): audio + optional transcript sidecar ─────
         const fileInput = document.getElementById('file-input');
         document.getElementById('mb-load-file').addEventListener('click', () => fileInput.click());
+
+        // ── Library list dialog (shown on bottom LOAD click) ─────
+        const libDlg     = document.getElementById('library-dialog');
+        const libListEl  = libDlg.querySelector('.lib-list');
+        const libCancel  = document.getElementById('lib-cancel');
+        const libFromFile= document.getElementById('lib-from-file');
+
+        async function loadAudioBlob(blob, transcript, name) {
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
+            currentBlob = blob;
+            audioUrl = URL.createObjectURL(currentBlob);
+            audioEl  = new Audio(audioUrl);
+            btnPlay.disabled = false;
+            btnSave.disabled = false;
+            if (typeof transcript === 'string') {
+                finalText  = transcript;
+                savedFinal = transcript;
+                transcriptEl.textContent = formatCommands(transcript);
+            }
+            await saveToDB(currentBlob, finalText);
+            setDirty(false);
+        }
+
+        async function openLibrary() {
+            libListEl.innerHTML = '';
+            const items = await listLibrary();
+            // newest first
+            items.sort((a, b) => b.savedAt - a.savedAt);
+            libDlg.classList.toggle('empty', items.length === 0);
+            items.forEach(it => {
+                const row = document.createElement('div');
+                row.className = 'lib-item';
+                row.innerHTML = `
+                    <div class="lib-name"></div>
+                    <div class="lib-meta"></div>
+                    <button class="lib-del" title="Löschen">×</button>
+                `;
+                row.querySelector('.lib-name').textContent = it.name || ('recording ' + new Date(it.savedAt).toLocaleString());
+                const sizeKB = Math.round((it.blob?.size || 0) / 1024);
+                row.querySelector('.lib-meta').textContent = `${sizeKB} KB`;
+                row.addEventListener('click', e => {
+                    if (e.target.classList.contains('lib-del')) return;
+                    loadAudioBlob(it.blob, it.transcript, it.name);
+                    libDlg.classList.remove('visible');
+                });
+                row.querySelector('.lib-del').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!await uiConfirm(`Aufnahme "${it.name}" löschen?`)) return;
+                    await deleteFromLibrary(it.id);
+                    openLibrary();
+                });
+                libListEl.appendChild(row);
+            });
+            libDlg.classList.add('visible');
+        }
+        btnLoad.addEventListener('click', openLibrary);
+        libCancel.addEventListener('click',  () => libDlg.classList.remove('visible'));
+        libFromFile.addEventListener('click',() => {
+            libDlg.classList.remove('visible');
+            fileInput.click();
+        });
         fileInput.addEventListener('change', async () => {
             const files = Array.from(fileInput.files || []);
             if (!files.length) return;
@@ -1032,14 +1519,14 @@
                 audioUrl = URL.createObjectURL(currentBlob);
                 audioEl  = new Audio(audioUrl);
                 btnPlay.disabled = false;
-                btnDownload.disabled = false;
+                btnSave.disabled = false;
             }
 
             if (textFile) {
                 const text = await textFile.text();
                 finalText  = text;
                 savedFinal = text;
-                transcriptEl.textContent = text;
+                transcriptEl.textContent = formatCommands(text);
             }
 
             if (currentBlob) await saveToDB(currentBlob, finalText);
