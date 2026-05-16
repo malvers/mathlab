@@ -94,13 +94,21 @@
         border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 4px;
         transition: background 0.15s ease, color 0.15s ease;
         white-space: nowrap;
-        display: flex; align-items: center; justify-content: center; width: 100px; height: 32px;
-        box-sizing: border-box;
+        height: 32px; box-sizing: border-box;
     }
     #reload-btn:hover, .top-toggle:hover, .view-btn:hover {
         background: rgba(0, 210, 255, 0.22); color: #fff;
     }
-    .top-toggle { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+    /* Buttons (view + reload): fixed width, centered content. */
+    .view-btn, #reload-btn {
+        width: 100px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    /* Toggles: natural width — checkbox left, label right. */
+    .top-toggle {
+        display: inline-flex; align-items: center; gap: 8px;
+        user-select: none; min-width: 100px;
+    }
     .top-toggle input { cursor: pointer; accent-color: #00d2ff; }
     #reload-btn {
         background: rgba(0, 210, 255, 0.12); color: #00d2ff;
@@ -115,7 +123,7 @@
     <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING · <span id="hud-png-pts">–</span> Pts</div>
     <div class="row"><span class="swatch" style="background:#F4C430"></span>LaTeX · TARGET · <span id="hud-lat-pts">–</span> Pts</div>
     <div style="margin-top:8px;opacity:0.6">drag · orbit · wheel · zoom · ESC · reset</div>
-    <div style="margin-top:2px;opacity:0.6">Ansicht: O/U oben/unten · V/H vorn/hinten · R rechts · L LINIEN toggle</div>
+    <div style="margin-top:2px;opacity:0.6">Ansicht: O/U oben/unten · V/H vorn/hinten · R rechts · L LINIEN · F FILL</div>
 </div>
 <div id="top-bar">
     <label class="top-toggle" title="Korrespondenz-Linien zwischen den Ebenen ein/aus">
@@ -198,14 +206,13 @@
         // Auto-fit (default): each side scaled so longest axis = targetSize.
         // Natural: no scaling — both sides keep their real relative sizes.
         const SCALE_KEY = 'draw20-morph3d-natural';
-        const naturalMode = false; // (function () {
-            // try { return localStorage.getItem(SCALE_KEY) === '1'; } catch (_) { return false; }
-        // })();
+        let naturalMode = false;
+        try { naturalMode = localStorage.getItem(SCALE_KEY) === '1'; } catch (_) {}
         const cb = document.getElementById('scale-natural-cb');
         if (cb) {
             cb.checked = naturalMode;
             cb.addEventListener('change', function () {
-                // try { localStorage.setItem(SCALE_KEY, cb.checked ? '1' : '0'); } catch (_) {}
+                try { localStorage.setItem(SCALE_KEY, cb.checked ? '1' : '0'); } catch (_) {}
                 // Popup URL is about:blank (window.open with empty url + doc.write),
                 // so location.reload() would render an empty page. Instead poke the
                 // opener's 3D MORPH button — it re-writes fresh content into the
@@ -318,6 +325,38 @@
             verts.push(verts[0].clone());
             const geom = new THREE.BufferGeometry().setFromPoints(verts);
             scene.add(new THREE.Line(geom, new THREE.LineBasicMaterial({ color: color })));
+        }
+        // Loft-Mantelfläche zwischen zwei Loop-Paaren (PNG-Loop a auf z=Z_PNG,
+        // LaTeX-Loop b auf z=Z_LAT). Wird für Outer UND alle Holes aufgerufen.
+        function addLoftBetween(a, b, color) {
+            const n = Math.min(a.length, b.length);
+            if (n < 2) return;
+            const verts = new Float32Array(n * 2 * 3);
+            for (let k = 0; k < n; k++) {
+                verts[k * 3]           = a[k].x;
+                verts[k * 3 + 1]       = a[k].y;
+                verts[k * 3 + 2]       = Z_PNG;
+                verts[(n + k) * 3]     = b[k].x;
+                verts[(n + k) * 3 + 1] = b[k].y;
+                verts[(n + k) * 3 + 2] = Z_LAT;
+            }
+            const idx = [];
+            for (let k = 0; k < n; k++) {
+                const k1 = (k + 1) % n;
+                const ai = k, aj = k1, bi = n + k, bj = n + k1;
+                idx.push(ai, aj, bj, ai, bj, bi);
+            }
+            const g = new THREE.BufferGeometry();
+            g.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+            g.setIndex(idx);
+            g.computeVertexNormals();
+            const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
+                color: color, side: THREE.DoubleSide,
+                metalness: 0.4, roughness: 0.5,
+            }));
+            m.visible = fillVisible;
+            loftMeshes.push(m);
+            scene.add(m);
         }
         // Cap (Deckel) — gefüllte Fläche aus Outer + Holes auf konstantem z.
         function makeCapMesh(pts, holes, z, color) {
@@ -572,40 +611,21 @@
                     linkLineMeshes.push(ls);
                     scene.add(ls);
                 }
-                // Loft surface — Quads zwischen benachbarten Korrespondenz-Linien
-                // (a[k], a[k+1], b[k+1], b[k]) → zwei Dreiecke pro Segment.
-                if (nLink >= 2) {
-                    const loftVerts = new Float32Array(nLink * 2 * 3);
-                    for (let k = 0; k < nLink; k++) {
-                        loftVerts[k * 3]               = a[k].x;
-                        loftVerts[k * 3 + 1]           = a[k].y;
-                        loftVerts[k * 3 + 2]           = Z_PNG;
-                        loftVerts[(nLink + k) * 3]     = b[k].x;
-                        loftVerts[(nLink + k) * 3 + 1] = b[k].y;
-                        loftVerts[(nLink + k) * 3 + 2] = Z_LAT;
-                    }
-                    const loftIdx = [];
-                    for (let k = 0; k < nLink; k++) {
-                        const k1 = (k + 1) % nLink;
-                        const ai = k, aj = k1, bi = nLink + k, bj = nLink + k1;
-                        loftIdx.push(ai, aj, bj, ai, bj, bi);
-                    }
-                    const lf = new THREE.BufferGeometry();
-                    lf.setAttribute('position', new THREE.BufferAttribute(loftVerts, 3));
-                    lf.setIndex(loftIdx);
-                    lf.computeVertexNormals();
-                    const loftMesh = new THREE.Mesh(lf, new THREE.MeshStandardMaterial({
-                        color: matchCol, side: THREE.DoubleSide,
-                        metalness: 0.4, roughness: 0.5,
-                    }));
-                    loftMesh.visible = fillVisible;
-                    loftMeshes.push(loftMesh);
-                    scene.add(loftMesh);
+                // Loft surface — Quads zwischen benachbarten Korrespondenz-Linien.
+                // Outer + alle Holes (z. B. das innere Loch einer "0").
+                addLoftBetween(a, b, matchCol);
+                const pngHolesL = pngN[pi].holes || [];
+                const latHolesL = latN[li].holes || [];
+                const nHolesL = Math.min(pngHolesL.length, latHolesL.length);
+                for (let h = 0; h < nHolesL; h++) {
+                    addLoftBetween(pngHolesL[h], latHolesL[h], matchCol);
                 }
                 // Cap-Flächen — Deckel auf PNG-Seite (grün) und LaTeX-Seite (orange).
-                const capPng = makeCapMesh(pngN[pi].pts, pngN[pi].holes, Z_PNG, PNG_COLOR);
+                // Leicht nach außen versetzt (z ± 2), damit die Pick-Spheres auf
+                // z=0 / z=350 nicht in den Caps verschwinden.
+                const capPng = makeCapMesh(pngN[pi].pts, pngN[pi].holes, Z_PNG - 2, PNG_COLOR);
                 if (capPng) { capPng.visible = fillVisible; loftMeshes.push(capPng); scene.add(capPng); }
-                const capLat = makeCapMesh(latN[li].pts, latN[li].holes, Z_LAT, LAT_COLOR);
+                const capLat = makeCapMesh(latN[li].pts, latN[li].holes, Z_LAT + 2, LAT_COLOR);
                 if (capLat) { capLat.visible = fillVisible; loftMeshes.push(capLat); scene.add(capLat); }
             }
         }
@@ -832,6 +852,12 @@
                 case 'l': {
                     // L toggles the correspondence-lines checkbox.
                     const cb = document.getElementById('lines-mode-cb');
+                    if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); }
+                    break;
+                }
+                case 'f': {
+                    // F toggles the fill (Mantelfläche + Caps) checkbox.
+                    const cb = document.getElementById('fill-mode-cb');
                     if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); }
                     break;
                 }
