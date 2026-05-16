@@ -414,12 +414,21 @@
             recognition.onresult = e => {
                 let sessionFinal = '';
                 let interim = '';
+                const dump = [];
+                // Chrome's quirk: multiple overlapping final results.
+                // Strategy: take only the LAST final result + the LAST interim result.
+                let lastFinalIdx = -1, lastInterimIdx = -1;
                 for (let i = 0; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
-                    if (e.results[i].isFinal) sessionFinal += t + ' ';
-                    else                       interim       += t;
+                    const f = e.results[i].isFinal;
+                    dump.push(`[${i}]${f?'F':'I'}="${t}"`);
+                    if (f) lastFinalIdx = i;
+                    else   lastInterimIdx = i;
                 }
-                logRec(`result(len=${e.results.length} idx=${e.resultIndex} final="${sessionFinal.trim().slice(0,30)}" interim="${interim.trim().slice(0,30)}")`);
+                if (lastFinalIdx   >= 0) sessionFinal = e.results[lastFinalIdx  ][0].transcript;
+                if (lastInterimIdx >= 0) interim       = e.results[lastInterimIdx][0].transcript;
+
+                logRec(`result idx=${e.resultIndex} ${dump.join(' ')}`);
                 finalText = savedFinal + sessionFinal;
                 transcriptEl.textContent = finalText + interim;
             };
@@ -439,7 +448,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 11:10';
+        const BUILD_TIME = '2026-05-16 10:58';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
