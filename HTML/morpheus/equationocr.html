@@ -146,7 +146,7 @@
             align-items: center;
             justify-content: flex-start;
             gap: 14px;
-            padding: 80px 20px 20px;
+            padding: 50px 20px 20px;
             box-sizing: border-box;
         }
         #result-box {
@@ -183,7 +183,7 @@
             word-break: break-all;
             line-height: 1.4;
             /* Responsive: tablet shrinks LATEX line, desktop keeps 30px. */
-            height: clamp(28px, 4vh, 40px);
+            height: clamp(20px, 3vh, 32px);
             overflow: auto;
             display: flex;
             align-items: center;
@@ -351,7 +351,6 @@
             <div id="draw-wrap">
                 <div id="result-box">
                     <div class="pane">
-                        <div class="label">LATEX</div>
                         <div id="result-latex"></div>
                     </div>
                     <div class="pane">
@@ -982,6 +981,29 @@
                 target.textContent = latex;
                 DebugWindow.log(`⚠ katex.render threw: ${e.message}`);
             }
+            fitLatexToContainer(target);
+        }
+
+        // Autoscale the KaTeX render to fit the container. If the natural
+        // size overflows on either axis, shrink via CSS transform so the
+        // glyph stays sharp (KaTeX is vector). Idempotent — resets any
+        // previous transform on the inner .katex element first.
+        function fitLatexToContainer(target) {
+            const inner = target.querySelector('.katex, .katex-display');
+            if (!inner) return;
+            inner.style.transformOrigin = 'center center';
+            inner.style.transform = '';
+            // Force layout flush before measuring (otherwise we read stale
+            // dimensions from the cleared transform above).
+            const cw = target.clientWidth, ch = target.clientHeight;
+            const nw = inner.scrollWidth || inner.offsetWidth;
+            const nh = inner.scrollHeight || inner.offsetHeight;
+            if (!cw || !ch || !nw || !nh) return;
+            // 0.95 padding so the glyph doesn't touch the box edges.
+            const sx = (cw * 0.95) / nw;
+            const sy = (ch * 0.95) / nh;
+            const s = Math.min(sx, sy, 1);
+            if (s < 1) inner.style.transform = `scale(${s.toFixed(4)})`;
         }
 
         // ── Gemini OCR ──────────────────────────────────────────────────────────
