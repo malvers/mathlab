@@ -97,55 +97,6 @@
             width: 100%;
             height: 100%;
         }
-        /* Overlay canvas for Gemini bounding boxes — sits on top of #draw-canvas,
-           transparent, click-through so drawing on the canvas still works. */
-        #overlay-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 5;
-            border-radius: 10px;
-        }
-        /* HTML label layer — KaTeX-rendered token labels positioned at each
-           bbox's upper-left corner. Above the overlay-canvas (z=5), below the
-           ERKENNEN button (z=30). Click-through. */
-        #label-overlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 6;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-        #label-overlay .bbox-label {
-            position: absolute;
-            color: #cccccc;
-            font-size: 11px;
-            line-height: 1;
-            white-space: nowrap;
-            transform: translate(2px, 2px);
-        }
-        #label-overlay .bbox-label .katex {
-            font-size: 1em;
-            color: inherit;
-        }
-        /* Raw Gemini [ymin, xmin, ymax, xmax] tag — sits just above each BB,
-           monospace, so we can eyeball the original JSON numbers per glyph. */
-        #label-overlay .bbox-coord {
-            position: absolute;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(2, 4, 16, 0.85);
-            padding: 1px 5px;
-            border-radius: 2px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            white-space: nowrap;
-            pointer-events: none;
-            transform: translate(0, -100%);
-        }
         /* Floating ERKENNEN button — bottom-center overlay on the canvas.
            Canvas is WHITE in this lab (for OCR contrast), so the button needs
            a solid dark background to stay readable — unlike morph where the
@@ -396,8 +347,6 @@
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
-                    <canvas id="overlay-canvas" width="1000" height="1000"></canvas>
-                    <div id="label-overlay"></div>
                     <div id="mouse-coord">x: —  y: —</div>
                     <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">► ERKENNEN</button>
                 </div>
@@ -633,148 +582,11 @@
         // ── Draw state ──────────────────────────────────────────────────────────
         const drawCanvas = document.getElementById('draw-canvas');
         const drawCtx = drawCanvas.getContext('2d');
-        const overlayCanvas = document.getElementById('overlay-canvas');
-        const overlayCtx = overlayCanvas.getContext('2d');
         let isDrawing = false;
 
-        function clearOverlay() {
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            const lo = document.getElementById('label-overlay');
-            if (lo) lo.innerHTML = '';
-        }
-
-        // Detect what range Gemini used for box_2d coords. Docs say 0–1000
-        // normalized, but in practice the model sometimes returns 0–1 decimals,
-        // 0–100 percentages, or pixel-space coords of the sent image. We pick
-        // the scale factor so the max observed value maps to canvas-1000.
-        function detectCoordScale(tokens) {
-            let maxV = 0;
-            for (const t of tokens) {
-                const b = t?.box_2d;
-                if (!Array.isArray(b)) continue;
-                for (const v of b) {
-                    const a = Math.abs(Number(v));
-                    if (Number.isFinite(a) && a > maxV) maxV = a;
-                }
-            }
-            if (maxV === 0)        return { factor: 1,    range: 'unknown (max=0)' };
-            if (maxV <= 1.5)       return { factor: 1000, range: '0-1 decimals' };
-            if (maxV <= 110)       return { factor: 10,   range: '0-100' };
-            if (maxV <= 1100)      return { factor: 1,    range: '0-1000 (Gemini default)' };
-            // Pixel space of the sent image. Scale so max maps to canvas size.
-            return { factor: 1000 / maxV, range: `pixel-space (max=${Math.round(maxV)})` };
-        }
-
-        // Build a binary ink mask (1 = stroke pixel, 0 = bg) from the current
-        // draw-canvas. Same threshold as the b/w pipeline that gets sent to
-        // Gemini, so the snap operates on what Gemini actually saw.
-        function getInkMask(W, H) {
-            const id = drawCtx.getImageData(0, 0, W, H);
-            const px = id.data;
-            const m = new Uint8Array(W * H);
-            for (let i = 0; i < m.length; i++) {
-                const o = i * 4;
-                if ((px[o] + px[o+1] + px[o+2]) / 3 > 60) m[i] = 1;
-            }
-            return m;
-        }
-
-        // For a Gemini box [ymin, xmin, ymax, xmax] in canvas-pixel space,
-        // expand by `margin` and return the tight bbox of ink pixels inside.
-        // Falls back to the original box if not enough ink is found (avoids
-        // collapsing onto a stray pixel) or if the snapped box would explode
-        // beyond 3× the original area (avoids bleeding into neighbour glyphs).
-        function snapToInk(mask, W, H, box, margin) {
-            const [ymin, xmin, ymax, xmax] = box;
-            const x0 = Math.max(0, Math.floor(xmin - margin));
-            const x1 = Math.min(W - 1, Math.ceil(xmax + margin));
-            const y0 = Math.max(0, Math.floor(ymin - margin));
-            const y1 = Math.min(H - 1, Math.ceil(ymax + margin));
-            let txmin = W, txmax = -1, tymin = H, tymax = -1, count = 0;
-            for (let y = y0; y <= y1; y++) {
-                const row = y * W;
-                for (let x = x0; x <= x1; x++) {
-                    if (mask[row + x]) {
-                        if (x < txmin) txmin = x;
-                        if (x > txmax) txmax = x;
-                        if (y < tymin) tymin = y;
-                        if (y > tymax) tymax = y;
-                        count++;
-                    }
-                }
-            }
-            if (count < 20) return box;
-            const origArea = Math.max(1, (xmax - xmin) * (ymax - ymin));
-            const newArea  = Math.max(1, (txmax - txmin) * (tymax - tymin));
-            if (newArea > origArea * 3) return box;
-            return [tymin, txmin, tymax, txmax];
-        }
-
-        // Paint Gemini-returned bounding boxes onto the overlay, after snapping
-        // each box to the actual ink within a small expansion margin. Tag shows
-        // the ORIGINAL Gemini ints; the drawn rectangle is the snapped version.
-        function drawBoxes(tokens) {
-            // BBs from Gemini were unreliable — disabled. Function kept as a
-            // no-op so callsites (recognize, loadLastDebug) stay valid.
-            clearOverlay();
-            return;
-            // eslint-disable-next-line no-unreachable
-            if (!Array.isArray(tokens) || tokens.length === 0) return;
-            const { factor, range } = detectCoordScale(tokens);
-            DebugWindow.log(`  📐 coord-range: ${range} → factor ${factor.toFixed(4)}`);
-            overlayCtx.lineWidth = 1;
-            overlayCtx.strokeStyle = '#cccccc';
-            const W = drawCanvas.width, H = drawCanvas.height;
-            const mask = getInkMask(W, H);
-            const SNAP_MARGIN = 60;
-            const placed = [];
-            let snapped = 0, totalDelta = 0;
-            for (const t of tokens) {
-                const b = t?.box_2d;
-                if (!Array.isArray(b) || b.length !== 4) continue;
-                const [ymin, xmin, ymax, xmax] = b.map(Number);
-                if (![ymin, xmin, ymax, xmax].every(Number.isFinite)) continue;
-                const cx = xmin * factor, cy = ymin * factor;
-                const cw = (xmax - xmin) * factor, ch = (ymax - ymin) * factor;
-                if (cw <= 0 || ch <= 0) continue;
-                const orig = [cy, cx, cy + ch, cx + cw];
-                const snap = snapToInk(mask, W, H, orig, SNAP_MARGIN);
-                if (snap[0] !== orig[0] || snap[1] !== orig[1] ||
-                    snap[2] !== orig[2] || snap[3] !== orig[3]) {
-                    snapped++;
-                    totalDelta += Math.abs(snap[0] - orig[0]) + Math.abs(snap[1] - orig[1])
-                                + Math.abs(snap[2] - orig[2]) + Math.abs(snap[3] - orig[3]);
-                }
-                placed.push({
-                    x: snap[1], y: snap[0],
-                    w: snap[3] - snap[1], h: snap[2] - snap[0],
-                    label: (t.label ?? '').toString(),
-                    raw: [ymin, xmin, ymax, xmax]
-                });
-            }
-            if (placed.length > 0) {
-                const avg = snapped > 0 ? Math.round(totalDelta / snapped / 4) : 0;
-                DebugWindow.log(`  ✂ ink-snap: ${snapped}/${placed.length} boxes angepasst, avg Δ ${avg}px/Kante`);
-            }
-            if (placed.length === 0) return;
-            for (const p of placed) overlayCtx.strokeRect(p.x, p.y, p.w, p.h);
-            const labelOverlay = document.getElementById('label-overlay');
-            if (labelOverlay) {
-                for (const p of placed) {
-                    // KaTeX label at upper-left.
-                    if (p.label && typeof katex !== 'undefined') {
-                        const el = document.createElement('div');
-                        el.className = 'bbox-label';
-                        el.style.left = p.x + 'px';
-                        el.style.top  = p.y + 'px';
-                        try { katex.render(p.label, el, { throwOnError: false }); }
-                        catch (_) { el.textContent = p.label; }
-                        labelOverlay.appendChild(el);
-                    }
-                }
-            }
-            DebugWindow.log(`  ▭ ${placed.length} Bounding-Box(es) gezeichnet`);
-        }
+        // Bounding-box overlay was removed (Gemini boxes were unreliable).
+        // Kept as a no-op so older callsites (replayLast etc.) stay valid.
+        function clearOverlay() { /* no-op */ }
 
         // Persist the last Gemini response + the exact canvas state at send-time
         // so we can iterate on the drawing/scaling logic without burning new
@@ -830,15 +642,14 @@
             // If these have different aspect ratios, boxes will look squished.
             const rect = drawCanvas.getBoundingClientRect();
             DebugWindow.log(`  📏 canvas: intrinsic ${drawCanvas.width}×${drawCanvas.height}, display ${Math.round(rect.width)}×${Math.round(rect.height)} (ratio ${(rect.width / rect.height).toFixed(2)})`);
-            // Dump each token's raw box for scale-debugging.
+            // Token list (labels only, no boxes).
             toks.forEach((t, i) => {
-                const b = Array.isArray(t.box_2d) ? t.box_2d : [];
-                DebugWindow.log(`  [${i}] "${t.label}" → [${b.join(', ')}]`);
+                const lbl = typeof t === 'string' ? t : (t?.label ?? '');
+                DebugWindow.log(`  [${i}] "${lbl}"`);
             });
             const finishDraw = () => {
                 document.getElementById('result-latex').textContent = p.latex || '';
                 if (p.latex && p.latex !== '(empty)' && p.latex !== '(leer)') renderLatex(p.latex);
-                drawBoxes(toks);
             };
             if (p.canvasImg) {
                 const img = new Image();
@@ -1276,7 +1087,6 @@
                 }
                 document.getElementById('result-latex').textContent = latex;
                 renderLatex(latex);
-                drawBoxes(tokens);
                 saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
             } catch (err) {
