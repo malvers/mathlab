@@ -450,7 +450,8 @@
                    String(d.getSeconds()).padStart(2,'0') + '.' +
                    String(d.getMilliseconds()).padStart(3,'0');
         };
-        const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
+        // const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
+        const logRec = () => {};   // debug disabled — uncomment line above to re-enable
 
         // ── Speech recognition ───────────────────────────────────
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -520,9 +521,9 @@
                     logRec(`saveToDB called, transcript=${finalText.length} chars`);
                 }
                 // If MediaRecorder was skipped (test mode), no onstop will fire — dump log here
-                if (!currentBlob) {
-                    transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
-                }
+                // if (!currentBlob) {
+                //     transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
+                // }
             };
             recognition.onerror = e => {
                 logRec(`ERROR: error="${e.error||''}" message="${e.message||''}"`);
@@ -532,7 +533,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:29';
+        const BUILD_TIME = '2026-05-16 13:35';
 
         // detect Pixel device via User-Agent Client Hints
         // Pixel-mode: 'text' = transcribe only, 'audio' = record only
@@ -598,8 +599,9 @@
             } catch (e) {
                 dbg.push('IDB ERROR: ' + (e.message || e));
             }
-            // show debug + restored transcript
-            transcriptEl.textContent = '[DEBUG]\n' + dbg.join('\n') + '\n\n' + (finalText || '');
+            // show restored transcript (debug-dump auskommentiert)
+            // transcriptEl.textContent = '[DEBUG]\n' + dbg.join('\n') + '\n\n' + (finalText || '');
+            transcriptEl.textContent = finalText || '';
         })();
 
         // ── Record ───────────────────────────────────────────────
@@ -646,7 +648,7 @@
                         setDirty(true);
 
                         // dump full debug log after stop
-                        transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
+                        // transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
                     };
 
                     isRecording = true;
