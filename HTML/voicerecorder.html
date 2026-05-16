@@ -94,42 +94,6 @@
             position: relative;
         }
 
-        #btn-copy {
-            position: absolute;
-            top: 6px;
-            right: 13px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(8, 18, 38, 0.85);
-            border: 1px solid rgba(0, 210, 255, 0.35);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-            z-index: 5;
-            backdrop-filter: blur(4px);
-            transition: background 0.18s, border-color 0.18s, transform 0.12s;
-        }
-        #btn-copy:hover {
-            background: rgba(0, 210, 255, 0.1);
-            border-color: rgba(0, 210, 255, 0.7);
-        }
-        #btn-copy:active { transform: scale(0.92); }
-        #btn-copy svg {
-            width: 16px;
-            height: 16px;
-            stroke: rgba(0, 210, 255, 0.7);
-            transition: stroke 0.18s;
-        }
-        #btn-copy:hover svg { stroke: rgba(0, 210, 255, 1); }
-        #btn-copy.copied {
-            border-color: rgb(121, 158, 49);
-            background: rgba(121, 158, 49, 0.18);
-        }
-        #btn-copy.copied svg { stroke: rgb(121, 158, 49); }
-
         #btn-fullscreen {
             position: fixed;
             top: 0;
@@ -317,12 +281,6 @@
     </div>
 
     <div id="transcript-box">
-        <button id="btn-copy" title="Copy">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="13" height="13" rx="2"/>
-                <rect x="8" y="8" width="13" height="13" rx="2"/>
-            </svg>
-        </button>
         <div id="transcript-inner"></div></div>
 
     <button id="btn-download" disabled>
@@ -340,7 +298,10 @@
         <button class="mini-btn danger" id="mb-del-voice">DELETE VOICE</button>
         <div class="mini-sep"></div>
         <button class="mini-btn" id="mb-copy-text">COPY TEXT</button>
+        <button class="mini-btn" id="mb-load-file">LOAD FILE</button>
     </div>
+
+    <input type="file" id="file-input" accept="audio/*,text/plain,.txt,.webm" multiple style="display:none">
 
     <button id="btn-fullscreen" title="Fullscreen"></button>
 
@@ -399,7 +360,8 @@
 
         // ── Speech recognition ───────────────────────────────────
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let finalText = '';
+        let finalText = '';      // total displayed final text
+        let savedFinal = '';     // committed from previous sessions (across recognition.start cycles)
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.continuous    = true;
@@ -407,14 +369,22 @@
             recognition.lang          = 'de-DE';
 
             recognition.onresult = e => {
+                let sessionFinal = '';
                 let interim = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
+                // iterate ALL results in this session so the full text is always rebuilt
+                for (let i = 0; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
-                    e.results[i].isFinal ? (finalText += t + ' ') : (interim = t);
+                    if (e.results[i].isFinal) sessionFinal += t + ' ';
+                    else                       interim       += t;
                 }
+                finalText = savedFinal + sessionFinal;
                 transcriptEl.textContent = finalText + interim;
             };
-            recognition.onend = () => { if (isRecording) recognition.start(); };
+            recognition.onend = () => {
+                // promote anything finalized in this session, then restart if still recording
+                savedFinal = finalText;
+                if (isRecording) recognition.start();
+            };
         }
 
         // ── Restore from IndexedDB on load ───────────────────────
@@ -429,6 +399,7 @@
                 btnDownload.disabled = false;
                 if (stored.transcript) {
                     finalText = stored.transcript;
+                    savedFinal = stored.transcript;
                     transcriptEl.textContent = finalText;
                 }
                 setDirty(true);
@@ -496,32 +467,35 @@
             };
         });
 
-        // ── Download ─────────────────────────────────────────────
+        // ── Download (audio + transcript sidecar) ────────────────
         btnDownload.addEventListener('click', () => {
             if (!currentBlob) return;
             const d = new Date();
             const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(currentBlob);
-            a.download = `recording ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}.webm`;
-            a.click();
-            URL.revokeObjectURL(a.href);
+            const baseName = `recording ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+            // audio file
+            const a1 = document.createElement('a');
+            a1.href = URL.createObjectURL(currentBlob);
+            a1.download = baseName + '.webm';
+            a1.click();
+            URL.revokeObjectURL(a1.href);
+
+            // transcript sidecar (only if there is text)
+            const text = transcriptEl.textContent.trim();
+            if (text) {
+                const a2 = document.createElement('a');
+                const tBlob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                a2.href = URL.createObjectURL(tBlob);
+                a2.download = baseName + '.txt';
+                a2.click();
+                URL.revokeObjectURL(a2.href);
+            }
+
             setDirty(false);
         });
 
-        // ── Copy transcript to clipboard ─────────────────────────
-        const btnCopy = document.getElementById('btn-copy');
-        btnCopy.addEventListener('click', async () => {
-            const text = transcriptEl.textContent.trim();
-            if (!text) return;
-            try {
-                await navigator.clipboard.writeText(text);
-                btnCopy.classList.add('copied');
-                setTimeout(() => btnCopy.classList.remove('copied'), 900);
-            } catch (e) { /* ignore */ }
-        });
-
-        // ── Fullscreen toggle ────────────────────────────────────
+// ── Fullscreen toggle ────────────────────────────────────
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen?.();
@@ -569,6 +543,7 @@
             if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
             audioEl = null;
             finalText = '';
+            savedFinal = '';
             transcriptEl.textContent = '';
             btnPlay.disabled = true;
             btnDownload.disabled = true;
@@ -579,6 +554,7 @@
         document.getElementById('mb-del-text').addEventListener('click', () => {
             if (!confirm('Transkript löschen?')) return;
             finalText = '';
+            savedFinal = '';
             transcriptEl.textContent = '';
             if (currentBlob) saveToDB(currentBlob, '');
         });
@@ -599,6 +575,37 @@
             const text = transcriptEl.textContent.trim();
             if (!text) return;
             try { await navigator.clipboard.writeText(text); } catch (e) {}
+        });
+
+        // ── Load file(s): audio + optional transcript sidecar ─────
+        const fileInput = document.getElementById('file-input');
+        document.getElementById('mb-load-file').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async () => {
+            const files = Array.from(fileInput.files || []);
+            if (!files.length) return;
+
+            let audioFile = files.find(f => f.type.startsWith('audio/') || /\.(webm|mp3|wav|m4a|ogg)$/i.test(f.name));
+            let textFile  = files.find(f => f.type === 'text/plain' || /\.txt$/i.test(f.name));
+
+            if (audioFile) {
+                if (audioUrl) URL.revokeObjectURL(audioUrl);
+                currentBlob = audioFile;
+                audioUrl = URL.createObjectURL(currentBlob);
+                audioEl  = new Audio(audioUrl);
+                btnPlay.disabled = false;
+                btnDownload.disabled = false;
+            }
+
+            if (textFile) {
+                const text = await textFile.text();
+                finalText  = text;
+                savedFinal = text;
+                transcriptEl.textContent = text;
+            }
+
+            if (currentBlob) await saveToDB(currentBlob, finalText);
+            setDirty(false);
+            fileInput.value = '';
         });
 
         // Fullscreen only via the top-right corner button (no long-press elsewhere).
