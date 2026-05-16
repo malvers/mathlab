@@ -560,14 +560,13 @@
             maybeShowPixelDialog();
         }
 
-        // build-info line auskommentiert (war "unter Wasser") — wieder einkommentieren falls debug nötig
-        // const buildInfoEl = document.getElementById('build-info');
-        // buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
-        // buildInfoEl.title = 'Klick: hart neu laden';
-        // buildInfoEl.addEventListener('click', () => {
-        //     const url = location.pathname + '?cb=' + Date.now() + location.hash;
-        //     location.replace(url);
-        // });
+        const buildInfoEl = document.getElementById('build-info');
+        buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
+        buildInfoEl.title = 'Klick: hart neu laden';
+        buildInfoEl.addEventListener('click', () => {
+            const url = location.pathname + '?cb=' + Date.now() + location.hash;
+            location.replace(url);
+        });
 
         // ── Restore from IndexedDB on load ───────────────────────
         (async () => {
