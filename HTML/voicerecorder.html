@@ -502,17 +502,21 @@
                 // promote session's final text into savedFinal with a trailing space
                 savedFinal = finalText.replace(/\s+$/, '') + (finalText ? ' ' : '');
                 finalText = savedFinal;
-                transcriptEl.textContent = finalText;
+                // only paint if we have text — don't wipe interim that's visible on screen
+                if (finalText) transcriptEl.textContent = finalText;
                 logRec(`end (finalText.len=${finalText.length})`);
 
                 if (isRecording) {
-                    // auto-restart so the silence-timeout doesn't permanently kill recognition
-                    try {
-                        recognition.start();
-                        logRec('recognition auto-restarted');
-                    } catch (e) {
-                        logRec(`recognition restart THREW: ${e.message || e}`);
-                    }
+                    // restart in next tick — same-tick restart throws InvalidStateError on iOS Safari
+                    setTimeout(() => {
+                        if (!isRecording) return;
+                        try {
+                            recognition.start();
+                            logRec('recognition auto-restarted');
+                        } catch (e) {
+                            logRec(`recognition restart THREW: ${e.message || e}`);
+                        }
+                    }, 100);
                     return;
                 }
 
@@ -520,10 +524,6 @@
                     saveToDB(currentBlob, finalText);
                     logRec(`saveToDB called, transcript=${finalText.length} chars`);
                 }
-                // If MediaRecorder was skipped (test mode), no onstop will fire — dump log here
-                // if (!currentBlob) {
-                //     transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
-                // }
             };
             recognition.onerror = e => {
                 logRec(`ERROR: error="${e.error||''}" message="${e.message||''}"`);
@@ -533,7 +533,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:35';
+        const BUILD_TIME = '2026-05-16 13:40';
 
         // detect Pixel device via User-Agent Client Hints
         // Pixel-mode: 'text' = transcribe only, 'audio' = record only
