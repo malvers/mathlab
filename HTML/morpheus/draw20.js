@@ -181,10 +181,11 @@
                     }
                 }
                 if (ui) {
-                    ui.applyLinesToggle();
-                    ui.applyPointsToggle();
-                    ui.applyFillToggle();
-                    ui.applyArtToggle();
+                    if (ui.applyAllToggles) ui.applyAllToggles();
+                    else {
+                        ui.applyLinesToggle(); ui.applyPointsToggle();
+                        ui.applyFillToggle(); ui.applyArtToggle();
+                    }
                 }
                 if (typeof buildStiftMorphPairs === 'function') buildStiftMorphPairs();
                 const sl = document.getElementById('morph-slider');

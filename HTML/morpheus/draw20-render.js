@@ -47,8 +47,21 @@ function createDraw20Render({
     let latVertCount = 0;
     let lastRenderData = null;
     let activeMatchId = null;
-    let inSymbolMode = false; // one side empty: use side-colours, not palette
+    let currentMode = 'empty'; // 'empty' | 'symbol' | 'formel' | 'stift'
+    let inSymbolMode = false;  // derived: currentMode === 'symbol'
     const orphanMatchIds = new Set();
+    // Single source of truth for "which render mode are we in?". Called at
+    // the top of renderBBoxes; updates currentMode / inSymbolMode together.
+    function detectRenderMode() {
+        const hasPng = !!(pix && pix.complete && pix.naturalWidth);
+        const sc = (typeof getStiftContours === 'function') ? getStiftContours() : null;
+        const hasStift = !!(sc && sc.length);
+        const hasLatex = !!(getLC() && tex.complete && tex.naturalWidth);
+        if (hasStift) return 'stift';
+        if (hasPng) return 'formel';
+        if (hasLatex) return 'symbol';
+        return 'empty';
+    }
     const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
     // Side-colours used in symbol mode (matches the count-box labels).
     const SIDE_COLOR_PNG = '#adff2f';
@@ -222,6 +235,8 @@ function createDraw20Render({
         r.setAttribute('fill', 'none');
         r.setAttribute('stroke', '#888');
         r.setAttribute('stroke-width', String(1 / z));
+        r.dataset.kind = 'bbox';
+        r.dataset.source = label || '';
         overlay.appendChild(r);
     }
 
@@ -343,6 +358,7 @@ function createDraw20Render({
             poly.setAttribute('stroke', lineColorOf(i));
             poly.setAttribute('stroke-width', sw);
             poly.setAttribute('stroke-linejoin', 'round');
+            poly.dataset.kind = 'stroke';
             poly.dataset.source = label;
             poly.dataset.matchId = String(mid);
             poly.style.pointerEvents = 'all';
@@ -364,9 +380,8 @@ function createDraw20Render({
         }
         const u = getU();
         if (u) {
-            u.applyLinesToggle();
-            u.applyPointsToggle();
-            u.applyFillToggle();
+            // Single centralized pass replaces three separate apply calls.
+            u.applyAllToggles ? u.applyAllToggles() : (u.applyLinesToggle(), u.applyPointsToggle(), u.applyFillToggle());
         }
         return totalVerts;
     }
@@ -604,6 +619,10 @@ function createDraw20Render({
             // log(`⏱ ${name}: ${(now - _tPrev).toFixed(1)}ms`);
             // _tPrev = now;
         };
+        // Mode detection at the very top — every subsequent decision reads
+        // currentMode / inSymbolMode rather than re-checking pix/stift state.
+        currentMode = detectRenderMode();
+        inSymbolMode = (currentMode === 'symbol');
         // Detach morph-layer first, wipe everything, drawing happens in
         // between, morph-layer gets re-attached as the LAST child below so
         // its polygons render on TOP of bboxes/outlines/dots.
@@ -733,11 +752,10 @@ function createDraw20Render({
 
         // Refresh the orphan-id set: any match-id whose pair has png<0 or
         // lat<0 (no partner on the other side) is flagged so drawContours
-        // can paint it red.
-        // Symbol mode (one side completely empty) is not "orphaned" — it's
-        // just the only source, so skip orphan-marking and use side-colours.
+        // can paint it red. Symbol mode is not "orphaned" — it's just the
+        // only source, so skip orphan-marking and use side-colours.
+        // inSymbolMode was already set at the top via detectRenderMode().
         orphanMatchIds.clear();
-        inSymbolMode = pClass.outers.length === 0 || lClass.outers.length === 0;
         if (!inSymbolMode) {
             for (const [id, pair] of idToPair) {
                 if (pair.png < 0 || pair.lat < 0) orphanMatchIds.add(String(id));

@@ -345,6 +345,7 @@ function createDraw20Stift({
             poly.setAttribute('stroke', '#8B0000');
             poly.setAttribute('stroke-width', sw);
             poly.setAttribute('stroke-linejoin', 'round');
+            poly.dataset.kind = 'stroke';
             poly.dataset.source = 'stift';
             stiftOutlineSvg.appendChild(poly);
 
@@ -372,6 +373,7 @@ function createDraw20Stift({
                 hp.setAttribute('stroke-width', sw);
                 hp.setAttribute('stroke-linejoin', 'round');
                 hp.setAttribute('stroke-dasharray', dash);
+                hp.dataset.kind = 'stroke';
                 hp.dataset.source = 'stift';
                 stiftOutlineSvg.appendChild(hp);
                 for (const p of holePoly) {

@@ -250,9 +250,16 @@ function createDraw20Morph({
                     ln.setAttribute('stroke', color);
                     ln.setAttribute('stroke-width', sw);
                     ln.setAttribute('stroke-opacity', '0.45');
+                    ln.dataset.kind = 'corr-line';
+                    ln.dataset.source = 'morph';
+                    ln.dataset.matchId = String(pair.mid);
                     morphLayer.appendChild(ln);
                     drawnLines++;
                 }
+            }
+            // Newly-created corr-lines must respect MORPH LINIEN toggle etc.
+            if (typeof window !== 'undefined' && window.__draw20ApplyAllToggles) {
+                window.__draw20ApplyAllToggles();
             }
             return;
         }
@@ -362,7 +369,9 @@ function createDraw20Morph({
                 path.setAttribute('stroke', '#ffffff');
                 path.setAttribute('stroke-width', String(1.5 / z));
                 path.setAttribute('stroke-opacity', '0.6');
+                path.dataset.kind = 'stroke';
                 path.dataset.source = 'morph';
+                path.dataset.matchId = String(pair.mid);
                 morphLayer.appendChild(path);
             }
             if (ghostPathD) {
@@ -371,8 +380,9 @@ function createDraw20Morph({
                 gpath.setAttribute('fill-rule', 'evenodd');
                 gpath.setAttribute('fill', '#000');
                 gpath.setAttribute('stroke', 'none');
-                gpath.dataset.source = 'morph';
                 gpath.dataset.kind = 'ghost';
+                gpath.dataset.source = 'morph';
+                gpath.dataset.matchId = String(pair.mid);
                 morphLayer.appendChild(gpath);
             }
             if (!pathD && !ghostPathD) continue;
@@ -389,10 +399,18 @@ function createDraw20Morph({
                 dot.setAttribute('fill', '#4363d8');
                 dot.dataset.kind = 'point';
                 dot.dataset.source = 'morph';
+                dot.dataset.matchId = String(pair.mid);
                 if (!pointsOn) dot.style.display = 'none';
                 morphLayer.appendChild(dot);
             }
             drawn++;
+        }
+        // After morph render: reapply all toggles so newly-created morph
+        // elements respect the user's current toggle state (without this,
+        // turning LINIEN off then moving the slider would re-show morph
+        // strokes). Phase B will move this into a proper factory dependency.
+        if (typeof window !== 'undefined' && window.__draw20ApplyAllToggles) {
+            window.__draw20ApplyAllToggles();
         }
     }
 
