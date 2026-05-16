@@ -415,26 +415,41 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 10:35';
+        const BUILD_TIME = '2026-05-16 10:40';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
         (async () => {
-            const stored = await loadFromDB();
-            if (stored && stored.blob) {
-                currentBlob = stored.blob;
-                if (audioUrl) URL.revokeObjectURL(audioUrl);
-                audioUrl = URL.createObjectURL(currentBlob);
-                audioEl  = new Audio(audioUrl);
-                btnPlay.disabled = false;
-                btnDownload.disabled = false;
-                if (stored.transcript) {
-                    finalText = stored.transcript;
-                    savedFinal = stored.transcript;
-                    transcriptEl.textContent = finalText;
+            const dbg = [];
+            try {
+                const stored = await loadFromDB();
+                if (!stored) {
+                    dbg.push('IDB: nichts gespeichert');
+                } else {
+                    dbg.push('IDB stored keys: ' + Object.keys(stored).join(','));
+                    dbg.push('IDB blob: ' + (stored.blob ? `${stored.blob.size}B type=${stored.blob.type||'?'}` : 'null'));
+                    dbg.push('IDB transcript: ' + (stored.transcript ? `${stored.transcript.length} chars` : 'null/empty'));
+                    dbg.push('IDB savedAt: ' + (stored.savedAt ? new Date(stored.savedAt).toLocaleString() : 'unknown'));
+
+                    if (stored.blob) {
+                        currentBlob = stored.blob;
+                        if (audioUrl) URL.revokeObjectURL(audioUrl);
+                        audioUrl = URL.createObjectURL(currentBlob);
+                        audioEl  = new Audio(audioUrl);
+                        btnPlay.disabled = false;
+                        btnDownload.disabled = false;
+                        setDirty(true);
+                    }
+                    if (stored.transcript) {
+                        finalText = stored.transcript;
+                        savedFinal = stored.transcript;
+                    }
                 }
-                setDirty(true);
+            } catch (e) {
+                dbg.push('IDB ERROR: ' + (e.message || e));
             }
+            // show debug + restored transcript
+            transcriptEl.textContent = '[DEBUG]\n' + dbg.join('\n') + '\n\n' + (finalText || '');
         })();
 
         // ── Record ───────────────────────────────────────────────
