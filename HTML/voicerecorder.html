@@ -43,10 +43,14 @@
             color: rgba(255,255,255,0.7);
             background: rgba(0, 0, 20, 0.95);
             transition: transform 0.12s;
+            container-type: size;
         }
+        /* icon size scales with button height (50% of the smaller side) */
         .btn svg {
-            width: clamp(26px, 7vw, 36px);
-            height: clamp(26px, 7vw, 36px);
+            width: 50cqmin;
+            height: 50cqmin;
+            max-width: 60%;
+            max-height: 60%;
         }
         .btn:active { transform: scale(0.93); }
 
@@ -55,7 +59,8 @@
             border: 1px solid rgb(245, 194, 66);
             box-shadow: 0 0 8px rgba(245,194,66,0.35);
         }
-        #btn-record.active { animation: pulse-rec 1s infinite; }
+        #btn-record.active svg circle { animation: pulse-icon 1s infinite; }
+        #btn-play.playing svg .icon-stop { animation: pulse-icon 1s infinite; }
 
         #btn-play {
             background: rgba(8, 18, 38, 0.9);
@@ -65,13 +70,16 @@
         #btn-play:disabled {
             cursor: not-allowed;
         }
-        #btn-play:disabled svg polygon {
+        #btn-play:disabled svg .icon-play {
             fill: #444 !important;
         }
+        #btn-play .icon-stop { display: none; }
+        #btn-play.playing .icon-play { display: none; }
+        #btn-play.playing .icon-stop { display: block; }
 
-        @keyframes pulse-rec {
-            0%, 100% { box-shadow: 0 0 8px rgba(245,194,66,0.35); }
-            50%       { box-shadow: 0 0 20px rgba(245,194,66,0.7); }
+        @keyframes pulse-icon {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
         }
 
         #transcript-box {
@@ -135,7 +143,72 @@
             z-index: 10;
             opacity: 0;
         }
-        #btn-fullscreen:hover { opacity: 0.15; background: rgba(0, 210, 255, 0.4); }
+        #btn-fullscreen:hover {
+            opacity: 0.15;
+            background: rgba(0, 210, 255, 0.4);
+        }
+
+        /* ── MINI MODE ─────────────────────────────────────── */
+        body.mini > #transcript-box { display: none; }
+        body.mini > .btn-row {
+            flex: 2 1 0;
+            flex-direction: column;
+            width: min(560px, 90vw);
+        }
+        body.mini > .btn-row .btn {
+            flex: 1 1 0;
+            height: auto;
+            width: 100%;
+        }
+        body.mini > #btn-download {
+            flex: 1 1 0;
+            height: auto;
+        }
+
+        #mini-stack {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 220px;
+            padding: 14px;
+            background: rgba(8, 18, 38, 0.96);
+            border: 1px solid rgba(0, 210, 255, 0.6);
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 210, 255, 0.25);
+            backdrop-filter: blur(6px);
+        }
+        #mini-stack.popup {
+            display: flex;
+            position: fixed;
+            z-index: 20;
+        }
+        .mini-btn {
+            height: clamp(48px, 12vw, 60px);
+            border-radius: 12px;
+            cursor: pointer;
+            outline: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.8rem, 2.6vw, 0.95rem);
+            letter-spacing: 0.22em;
+            color: rgba(0, 210, 255, 0.95);
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
+            transition: background 0.12s, transform 0.12s;
+        }
+        .mini-btn:hover { background: rgba(0, 210, 255, 0.08); }
+        .mini-btn:active { transform: scale(0.97); }
+        .mini-btn.danger {
+            color: rgb(245, 194, 66);
+            border-color: rgb(245, 194, 66);
+            box-shadow: 0 0 8px rgba(245, 194, 66, 0.35);
+        }
+        .mini-btn.danger:hover { background: rgba(245, 194, 66, 0.08); }
+        .mini-sep {
+            height: 1px;
+            background: rgba(0, 210, 255, 0.3);
+            margin: 6px 0;
+        }
         #transcript-inner {
             flex: 1;
             padding: clamp(12px, 3vw, 16px) clamp(14px, 4vw, 20px);
@@ -186,6 +259,24 @@
             border: 1px solid rgba(0, 210, 255, 0.8);
             box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
             transition: transform 0.12s, background 0.12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            container-type: size;
+        }
+        #btn-download .dl-icon { display: none; }
+        body.mini > #btn-download .dl-label { display: none; }
+        body.mini > #btn-download .dl-icon {
+            display: block;
+            width: 50cqmin;
+            height: 50cqmin;
+            max-width: 60%;
+            max-height: 60%;
+            stroke: rgba(0, 210, 255, 0.95);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
         #btn-download:hover:not(:disabled) {
             background: rgba(0, 210, 255, 0.08);
@@ -197,15 +288,15 @@
             border-color: rgba(0, 210, 255, 0.25);
             box-shadow: none;
         }
-        #btn-download.unsaved {
-            color: rgb(245, 194, 66);
-            border-color: rgb(245, 194, 66);
-            box-shadow: 0 0 8px rgba(245, 194, 66, 0.4);
-            animation: pulse-warn 1.6s infinite;
+        /* button stays cyan; only the label/icon pulses to signal unsaved */
+        #btn-download.unsaved .dl-label,
+        #btn-download.unsaved .dl-icon {
+            animation: pulse-label 1.2s ease-in-out infinite;
         }
-        @keyframes pulse-warn {
-            0%, 100% { box-shadow: 0 0 8px rgba(245, 194, 66, 0.4); }
-            50%       { box-shadow: 0 0 18px rgba(245, 194, 66, 0.8); }
+        body.mini > #btn-download:disabled .dl-icon { stroke: rgba(0, 210, 255, 0.25); }
+        @keyframes pulse-label {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.35; }
         }
     </style>
 </head>
@@ -219,21 +310,37 @@
 
         <button class="btn" id="btn-play" title="Play" disabled>
             <svg viewBox="0 0 52 52">
-                <polygon points="14,6 46,26 14,46" fill="rgb(121, 158, 49)"/>
+                <polygon class="icon-play" points="14,6 46,26 14,46" fill="rgb(121, 158, 49)"/>
+                <rect class="icon-stop" x="12" y="12" width="28" height="28" rx="3" fill="rgb(121, 158, 49)"/>
             </svg>
         </button>
     </div>
 
     <div id="transcript-box">
         <button id="btn-copy" title="Copy">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="11" height="11" rx="2.5"/>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="13" height="13" rx="2"/>
+                <rect x="8" y="8" width="13" height="13" rx="2"/>
             </svg>
         </button>
-        <div id="transcript-inner">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div></div>
+        <div id="transcript-inner"></div></div>
 
-    <button id="btn-download" disabled>DOWNLOAD</button>
+    <button id="btn-download" disabled>
+        <span class="dl-label">DOWNLOAD</span>
+        <svg class="dl-icon" viewBox="0 0 24 24">
+            <path d="M12 3 v12 m-5 -5 l5 5 l5 -5 M5 20 h14"/>
+        </svg>
+    </button>
+
+    <div id="mini-stack">
+        <button class="mini-btn" id="mb-mini-toggle">MINI MODE</button>
+        <div class="mini-sep"></div>
+        <button class="mini-btn danger" id="mb-del-all">DELETE ALL</button>
+        <button class="mini-btn danger" id="mb-del-text">DELETE TEXT</button>
+        <button class="mini-btn danger" id="mb-del-voice">DELETE VOICE</button>
+        <div class="mini-sep"></div>
+        <button class="mini-btn" id="mb-copy-text">COPY TEXT</button>
+    </div>
 
     <button id="btn-fullscreen" title="Fullscreen"></button>
 
@@ -311,23 +418,22 @@
         }
 
         // ── Restore from IndexedDB on load ───────────────────────
-        // TEMP DISABLED for debug
-        // (async () => {
-        //     const stored = await loadFromDB();
-        //     if (stored && stored.blob) {
-        //         currentBlob = stored.blob;
-        //         if (audioUrl) URL.revokeObjectURL(audioUrl);
-        //         audioUrl = URL.createObjectURL(currentBlob);
-        //         audioEl  = new Audio(audioUrl);
-        //         btnPlay.disabled = false;
-        //         btnDownload.disabled = false;
-        //         if (stored.transcript) {
-        //             finalText = stored.transcript;
-        //             transcriptEl.textContent = finalText;
-        //         }
-        //         setDirty(true);
-        //     }
-        // })();
+        (async () => {
+            const stored = await loadFromDB();
+            if (stored && stored.blob) {
+                currentBlob = stored.blob;
+                if (audioUrl) URL.revokeObjectURL(audioUrl);
+                audioUrl = URL.createObjectURL(currentBlob);
+                audioEl  = new Audio(audioUrl);
+                btnPlay.disabled = false;
+                btnDownload.disabled = false;
+                if (stored.transcript) {
+                    finalText = stored.transcript;
+                    transcriptEl.textContent = finalText;
+                }
+                setDirty(true);
+            }
+        })();
 
         // ── Record ───────────────────────────────────────────────
         btnRecord.addEventListener('click', async () => {
@@ -369,14 +475,23 @@
             }
         });
 
-        // ── Play ─────────────────────────────────────────────────
+        // ── Play / Stop ──────────────────────────────────────────
         btnPlay.addEventListener('click', () => {
-            if (isRecording || !audioEl || isPlaying) return;
+            if (isRecording || !audioEl) return;
+            if (isPlaying) {
+                audioEl.pause();
+                audioEl.currentTime = 0;
+                isPlaying = false;
+                btnPlay.classList.remove('playing');
+                return;
+            }
             isPlaying = true;
+            btnPlay.classList.add('playing');
             audioEl.currentTime = 0;
             audioEl.play();
             audioEl.onended = () => {
                 isPlaying = false;
+                btnPlay.classList.remove('playing');
                 audioEl = new Audio(audioUrl);
             };
         });
@@ -416,22 +531,77 @@
         }
         document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
 
-        // Long-press anywhere on body to toggle fullscreen (mobile-friendly)
-        let lpTimer = null;
-        const LP_MS = 600;
-        function lpStart(e) {
-            // ignore touches on interactive buttons
-            if (e.target.closest('button')) return;
-            clearTimeout(lpTimer);
-            lpTimer = setTimeout(() => { toggleFullscreen(); lpTimer = null; }, LP_MS);
-        }
-        function lpCancel() { clearTimeout(lpTimer); lpTimer = null; }
-        document.body.addEventListener('touchstart', lpStart, { passive: true });
-        document.body.addEventListener('touchend',   lpCancel);
-        document.body.addEventListener('touchmove',  lpCancel);
-        document.body.addEventListener('mousedown',  lpStart);
-        document.body.addEventListener('mouseup',    lpCancel);
-        document.body.addEventListener('mouseleave', lpCancel);
+        // Right-click anywhere → popup with action buttons
+        const miniStack = document.getElementById('mini-stack');
+        window.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const w = 220, h = 240;
+            const x = Math.min(e.clientX, window.innerWidth  - w - 8);
+            const y = Math.min(e.clientY, window.innerHeight - h - 8);
+            miniStack.style.left = x + 'px';
+            miniStack.style.top  = y + 'px';
+            miniStack.classList.add('popup');
+        });
+
+        // close popup after a button click inside it (click fires AFTER mousedown)
+        miniStack.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') miniStack.classList.remove('popup');
+        });
+        // close popup on click outside
+        document.addEventListener('mousedown', e => {
+            if (miniStack.classList.contains('popup') && !miniStack.contains(e.target)) {
+                miniStack.classList.remove('popup');
+            }
+        });
+
+        // ── Mini-mode toggle (from popup) ────────────────────────
+        const btnMiniToggle = document.getElementById('mb-mini-toggle');
+        btnMiniToggle.addEventListener('click', () => {
+            document.body.classList.toggle('mini');
+            btnMiniToggle.textContent = document.body.classList.contains('mini') ? 'FULL MODE' : 'MINI MODE';
+        });
+
+        // ── Mini-mode actions ────────────────────────────────────
+        document.getElementById('mb-del-all').addEventListener('click', async () => {
+            if (!confirm('Alles löschen — Aufnahme und Text?')) return;
+            audioChunks = [];
+            currentBlob = null;
+            if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
+            audioEl = null;
+            finalText = '';
+            transcriptEl.textContent = '';
+            btnPlay.disabled = true;
+            btnDownload.disabled = true;
+            await clearDB();
+            setDirty(false);
+        });
+
+        document.getElementById('mb-del-text').addEventListener('click', () => {
+            if (!confirm('Transkript löschen?')) return;
+            finalText = '';
+            transcriptEl.textContent = '';
+            if (currentBlob) saveToDB(currentBlob, '');
+        });
+
+        document.getElementById('mb-del-voice').addEventListener('click', async () => {
+            if (!confirm('Aufnahme löschen?')) return;
+            audioChunks = [];
+            currentBlob = null;
+            if (audioUrl) { URL.revokeObjectURL(audioUrl); audioUrl = null; }
+            audioEl = null;
+            btnPlay.disabled = true;
+            btnDownload.disabled = true;
+            await clearDB();
+            setDirty(false);
+        });
+
+        document.getElementById('mb-copy-text').addEventListener('click', async () => {
+            const text = transcriptEl.textContent.trim();
+            if (!text) return;
+            try { await navigator.clipboard.writeText(text); } catch (e) {}
+        });
+
+        // Fullscreen only via the top-right corner button (no long-press elsewhere).
 
         // ── Warn on close if unsaved ─────────────────────────────
         window.addEventListener('beforeunload', e => {
