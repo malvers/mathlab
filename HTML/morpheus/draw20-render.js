@@ -50,17 +50,16 @@ function createDraw20Render({
     let currentMode = 'empty'; // 'empty' | 'symbol' | 'formel' | 'stift'
     let inSymbolMode = false;  // derived: currentMode === 'symbol'
     const orphanMatchIds = new Set();
-    // Single source of truth for "which render mode are we in?". Called at
-    // the top of renderBBoxes; updates currentMode / inSymbolMode together.
+    // Single source of truth for "which render mode are we in?". The pure
+    // helper lives in draw20-mode.js; this closure wires up the factory
+    // dependencies. Called at the top of renderBBoxes.
     function detectRenderMode() {
-        const hasPng = !!(pix && pix.complete && pix.naturalWidth);
-        const sc = (typeof getStiftContours === 'function') ? getStiftContours() : null;
-        const hasStift = !!(sc && sc.length);
-        const hasLatex = !!(getLC() && tex.complete && tex.naturalWidth);
-        if (hasStift) return 'stift';
-        if (hasPng) return 'formel';
-        if (hasLatex) return 'symbol';
-        return 'empty';
+        if (typeof draw20DetectRenderMode !== 'function') return 'empty';
+        return draw20DetectRenderMode({
+            pix, tex,
+            getLatexCanvas: getLC,
+            getStiftContours,
+        });
     }
     const GLOW_FILTER = 'drop-shadow(0 0 6px #F4C430) drop-shadow(0 0 12px #F4C430)';
     // Side-colours used in symbol mode (matches the count-box labels).
@@ -517,7 +516,6 @@ function createDraw20Render({
         const sim = computeSimilarity(leftContours, latexContours, leftVerts, latVertCount);
         setBS(sim);
         if (simVal) simVal.textContent = sim + '%';
-        // log(`📐 outline-points: PNG=${pngVertCount} (${pOuters} obj) | LaTeX=${latVertCount} (${lOuters} obj)`);
     }
 
     // ── Cross-pane matching wrapper ─────────────────────────────────────────
@@ -630,13 +628,6 @@ function createDraw20Render({
 
     // ── renderBBoxes: orchestrator ──────────────────────────────────────────
     function renderBBoxes() {
-        const _t0 = performance.now();
-        let _tPrev = _t0;
-        const _mark = (name) => {
-            // const now = performance.now();
-            // log(`⏱ ${name}: ${(now - _tPrev).toFixed(1)}ms`);
-            // _tPrev = now;
-        };
         // Mode detection at the very top — every subsequent decision reads
         // currentMode / inSymbolMode rather than re-checking pix/stift state.
         currentMode = detectRenderMode();
@@ -667,7 +658,6 @@ function createDraw20Render({
             const res = extractLatexContours();
             if (res && res.contours.length) latexContoursList = res.contours;
         }
-        _mark(`extract (png=${pngContours?.length || 0} lat=${latexContoursList?.length || 0})`);
 
         // ── Match pix content-height to tex content-height + align baselines
         // PLAN B: Both pix and tex content are scaled to fit within
@@ -719,24 +709,20 @@ function createDraw20Render({
         } else {
             pix.style.display = '';
         }
-        _mark('height-match');
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
         const { pngId, latId, idToPair, plausibility, pClass, lClass } = matchInfo;
-        _mark('computeMatchIds');
 
         // Density floor for EVERY contour — even before matching. This
         // way unmatched contours (e.g. LaTeX-only when no PNG/stift is
         // present, or extra holes that don't pair) still hit MIN_POINTS.
         ensureMinDensity(pngContours);
         ensureMinDensity(latexContoursList);
-        _mark('ensureMinDensity');
 
         // Equalize point counts between matched PNG↔LaTeX pairs.
         if (pngContours && pngContours.length && latexContoursList && latexContoursList.length) {
             equalizeMatchedContours(pngContours, latexContoursList, matchInfo);
         }
-        _mark('equalize PNG↔LaTeX');
 
         // Same for stift↔LaTeX (when user has drawn). After equalizing,
         // re-render the stift outlines so the display reflects the new
@@ -747,7 +733,6 @@ function createDraw20Render({
             equalizeMatchedContours(stiftC, latexContoursList, stiftMatch);
             if (typeof rerenderStift === 'function') rerenderStift();
         }
-        _mark('stift↔LaTeX equalize + rerender');
 
         // Display scales — natural pixel → displayed CSS pixel, exactly as
         // used by drawContours for the main panes. The polygon-ring uses
@@ -809,7 +794,6 @@ function createDraw20Render({
                 pngVertCount = drawContours(pngContours, mapFn, 'png', pngId, pngCentroids, pngPoints, pngHoles);
             }
         }
-        _mark(`drawContours PNG (${pngVertCount} verts)`);
 
         // ── LaTeX render
         if (tex.complete && tex.naturalWidth && latexCanvas) {
@@ -831,7 +815,6 @@ function createDraw20Render({
                 latVertCount = drawContours(latexContoursList, mapFn, 'latex', latId, latCentroids, latPoints, latHoles);
             }
         }
-        _mark(`drawContours LaTeX (${latVertCount} verts)`);
 
         // Match lines (centroid-to-centroid) disabled — user requested
         // they be hidden. Keep the loop infrastructure commented for easy
@@ -870,13 +853,9 @@ function createDraw20Render({
         }
 
         if (sl && typeof renderMorph === 'function') renderMorph(+sl.value / 100);
-        _mark('renderMorph');
 
         updateInfoBoxes(pngContours, latexContoursList);
-        _mark('updateInfoBoxes');
-        // log(`⏱ TOTAL renderBBoxes: ${(performance.now() - _t0).toFixed(1)}ms`);
         if (typeof window !== 'undefined' && window.__draw20ClickT0) {
-            // log(`⏱⏱ CLICK → DONE: ${(performance.now() - window.__draw20ClickT0).toFixed(1)}ms`);
             window.__draw20ClickT0 = 0;
         }
     }
