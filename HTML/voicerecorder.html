@@ -470,9 +470,20 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:12';
+        const BUILD_TIME = '2026-05-16 13:25';
         const buildInfoEl = document.getElementById('build-info');
-        buildInfoEl.textContent = 'BT: ' + BUILD_TIME;
+        buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
+
+        // detect Pixel device via User-Agent Client Hints (Chrome reduces UA, but UA-CH gives model)
+        let isPixel = /Pixel/i.test(navigator.userAgent);   // fallback if UA still has it
+        if (navigator.userAgentData?.getHighEntropyValues) {
+            navigator.userAgentData.getHighEntropyValues(['model']).then(d => {
+                if (d.model && /Pixel/i.test(d.model)) isPixel = true;
+                buildInfoEl.textContent = `BT: ${BUILD_TIME} | model=${d.model || '?'} | pixel=${isPixel}`;
+            }).catch(() => {});
+        } else {
+            buildInfoEl.textContent = `BT: ${BUILD_TIME} | UA-CH n/a | pixel=${isPixel}`;
+        }
         buildInfoEl.title = 'Klick: hart neu laden';
         buildInfoEl.addEventListener('click', () => {
             // cache-bust by appending a fresh timestamp param
@@ -566,10 +577,11 @@
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
 
-                    // Pixel-Geräte können MediaRecorder + SpeechRecognition nicht gleichzeitig nutzen
-                    // (MediaRecorder belegt das Mic exklusiv). Andere Geräte (Lenovo, Desktop) gehen.
-                    const SKIP_MEDIARECORDER = /Pixel/i.test(navigator.userAgent);
-                    logRec(`SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER} (UA-detected)`);
+                    // Pixel-spezifischer Mic-Conflict — andere Android (Lenovo) und iOS gehen.
+                    // isPixel wird oben via UA-CH früh ermittelt.
+                    const SKIP_MEDIARECORDER = isPixel;
+                    logRec(`UA-full: ${navigator.userAgent}`);
+                    logRec(`isPixel=${isPixel} → SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER}`);
 
                     let recognitionStarted = false;
                     try {
