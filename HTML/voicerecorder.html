@@ -793,15 +793,12 @@
             loading = (async () => {
                 showLoader();
                 try {
-                    // whisper-base: gute Genauigkeit. WebGPU wenn verfügbar (5-10x schneller).
-                    const hasWebGPU = !!navigator.gpu;
+                    // whisper-base + quantized — WASM (default), zuverlässig auf allen Geräten.
+                    // WebGPU war auf Pixel kaputt ("unsup type: whisper"), Fallback nicht stabil.
                     transcriber = await pipeline(
                         'automatic-speech-recognition',
                         'Xenova/whisper-base',
-                        {
-                            quantized: true,
-                            device: hasWebGPU ? 'webgpu' : 'wasm'
-                        }
+                        { quantized: true }
                     );
                     hideLoader();
                 } catch (e) {
@@ -814,7 +811,8 @@
             return transcriber;
         }
 
-        // Expose a global so the main script can call it
+        // Expose globals so the main script can pre-load the model
+        window.loadWhisperModel = loadModel;
         window.transcribeAudioBlob = async (blob, lang) => {
             await loadModel();
             setStatus('Transkribiere…', true);
@@ -1076,7 +1074,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 16:10';
+        const BUILD_TIME = '2026-05-16 16:18';
 
         // Pixel-Detection und Dialog entfernt — Whisper transkribiert den Blob unabhängig vom Mic-Konflikt
 
@@ -1430,6 +1428,10 @@
             engine = (engine === 'webspeech') ? 'whisper' : 'webspeech';
             localStorage.setItem('transcriber.engine', engine);
             refreshEngineLabel();
+            // pre-load whisper model immediately so the loading dialog appears
+            if (engine === 'whisper' && window.loadWhisperModel) {
+                window.loadWhisperModel().catch(() => {});
+            }
         });
 
         // ── Reload AI (debug): clear cached Whisper model + hard reload ─
