@@ -645,6 +645,10 @@ function createDraw20Render({
         const targetW = TARGET_CONTENT_FRAC * paneW;
         const targetH = TARGET_CONTENT_FRAC * paneH;
         const fitContentToTarget = (img, bb) => {
+            // Always reset transform first — covers the "no image" case (e.g.
+            // switching from a formula preset to a symbol-only render where
+            // pix has no src; without this the previous formula's transform
+            // would persist and push pix outside the viewport).
             img.style.transform = '';
             img.style.transformOrigin = 'center';
             if (!img.complete || !img.naturalWidth) return;
@@ -659,7 +663,9 @@ function createDraw20Render({
             // height (max-height: 54vh). Without this clamp, tall formulas
             // (e.g. a/b fraction with small width) get scaled UP by sfW to
             // hit targetW and overflow the pane vertically.
-            const sf = Math.min(targetW / contentW, targetH / contentH, r.height / contentH);
+            // Clamp to max 1 — NEVER upscale (single symbols would otherwise
+            // render at huge size with visible pixelation/fuzziness).
+            const sf = Math.min(targetW / contentW, targetH / contentH, r.height / contentH, 1);
             // Y-CENTER: shift the CONTENT-bbox center to the image center
             // (img is already pane-centered via flex align-items:center).
             // Offset in natural coords, scaled to displayed CSS px.
@@ -669,6 +675,13 @@ function createDraw20Render({
         };
         fitContentToTarget(pix, pix.naturalWidth ? computeImageBBox(pix) : null);
         fitContentToTarget(tex, latexCanvas ? computeContentBBox(latexCanvas, 'alpha') : null);
+        // Hide pix entirely when it has no src (symbol mode) so the broken-
+        // image icon never leaks through after a Formel→Symbol switch.
+        if (!pix.getAttribute('src') || !pix.naturalWidth) {
+            pix.style.display = 'none';
+        } else {
+            pix.style.display = '';
+        }
         _mark('height-match');
 
         const matchInfo = computeMatchIds(pngContours, latexContoursList);
