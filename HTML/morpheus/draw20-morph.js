@@ -277,9 +277,26 @@ function createDraw20Morph({
         const pr = (2 / z).toFixed(2);
         const fillOn = document.getElementById('fill-toggle')?.checked ?? false;
         const pointsOn = document.getElementById('points-toggle')?.checked ?? true;
-        // In-place morph for formula/symbol mode (target = lInPlace).
-        // Stift mode keeps the legacy "travel to LaTeX pane" behavior.
-        const inPlace = !useStift;
+        // Formula-level (global) shift: subtract the centroid distance
+        // PNG → LaTeX so the entire LaTeX shape ends up at the PNG
+        // formula's location. CONSTANT (not t-dependent) — interpolation
+        // is linear between src and (l - dist), so the morph stays in
+        // place instead of bowing right-then-left.
+        // Stift mode bypasses this and keeps the legacy per-pair shift.
+        let globalShiftX = 0;
+        let globalShiftY = 0;
+        if (!useStift) {
+            let pCx = 0, pCy = 0, pCt = 0;
+            let lCx = 0, lCy = 0, lCt = 0;
+            for (const pair of pairs) {
+                if (pair[srcKey]) for (const q of pair[srcKey]) { pCx += q.x; pCy += q.y; pCt++; }
+                if (pair[dstKey]) for (const q of pair[dstKey]) { lCx += q.x; lCy += q.y; lCt++; }
+            }
+            if (pCt && lCt) {
+                globalShiftX = -((lCx / lCt) - (pCx / pCt));
+                globalShiftY = -((lCy / lCt) - (pCy / pCt));
+            }
+        }
         for (const pair of pairs) {
             const srcOuter = pair[srcKey];
             const dstOuter = pair[dstKey];
@@ -288,19 +305,21 @@ function createDraw20Morph({
             const srcRings = [srcOuter, ...srcHolesArr];
             const dstRings = [dstOuter, ...dstHolesArr];
             const numRings = Math.max(srcRings.length, dstRings.length);
-            // Shift morph end-position 40px LEFT of LaTeX bbox so the morph
-            // lands NEXT TO the target — STIFT MODE ONLY. Formula mode
-            // morphs in place (no translation across the pane).
-            let shiftX = 0;
+            // Per-pair shift: stift mode pushes the morph 40px LEFT of the
+            // LaTeX target pane. Formula mode uses the globalShift computed
+            // above instead — applied uniformly to every pair.
+            let shiftX = globalShiftX;
+            let shiftY = globalShiftY;
             if (useStift && dstOuter && dstOuter.length >= 3) {
                 const bb = bboxOfPts(dstOuter);
                 shiftX = -((bb.maxX - bb.minX) + 40);
+                shiftY = 0;
             }
             let pathD = '';
             let ghostPathD = '';
             const allPts = [];
             for (let r = 0; r < numRings; r++) {
-                const result = morphRingPair(srcRings[r], dstRings[r], t, shiftX, inPlace);
+                const result = morphRingPair(srcRings[r], dstRings[r], t, shiftX, shiftY);
                 if (!result) continue;
                 if (result.isGhost) {
                     ghostPathD += (ghostPathD ? ' ' : '') + result.subpath;
