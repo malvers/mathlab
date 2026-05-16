@@ -448,7 +448,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 12:54';
+        const BUILD_TIME = '2026-05-16 12:59';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
@@ -537,8 +537,11 @@
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
 
-                    // start SpeechRecognition FIRST so it gets the mic before MediaRecorder.
-                    // On Pixel/Android MediaRecorder seems to lock the mic exclusively otherwise.
+                    // TEST FLAG — set true to skip MediaRecorder and only test SpeechRecognition.
+                    // If recognition works alone but not with MR, we have proof of the conflict.
+                    const SKIP_MEDIARECORDER = true;
+                    logRec(`SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER}`);
+
                     let recognitionStarted = false;
                     try {
                         if (recognition) {
@@ -552,16 +555,20 @@
                         logRec(`recognition.start THREW: ${e.message || e}`);
                     }
 
-                    // delay MediaRecorder so SpeechRecognition can finish opening audio.
-                    // ~600ms gives Pixel time to fire audiostart/speechstart.
-                    setTimeout(() => {
-                        try {
-                            mediaRecorder.start();
-                            logRec('mediaRecorder.start (delayed)');
-                        } catch (e) {
-                            logRec(`mediaRecorder.start THREW: ${e.message || e}`);
-                        }
-                    }, recognitionStarted ? 600 : 0);
+                    if (!SKIP_MEDIARECORDER) {
+                        setTimeout(() => {
+                            try {
+                                mediaRecorder.start();
+                                logRec('mediaRecorder.start (delayed)');
+                            } catch (e) {
+                                logRec(`mediaRecorder.start THREW: ${e.message || e}`);
+                            }
+                        }, recognitionStarted ? 600 : 0);
+                    } else {
+                        // release the mic stream we acquired since we won't use MR
+                        stream.getTracks().forEach(t => t.stop());
+                        logRec('MediaRecorder SKIPPED, mic stream released');
+                    }
 
                 } catch (err) {
                     // surface error in the transcript area so user can see what failed
@@ -570,7 +577,9 @@
 
             } else {
                 if (recognition) recognition.stop();
-                mediaRecorder.stop();
+                try {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                } catch (e) { logRec('mediaRecorder.stop error: ' + (e.message||e)); }
                 isRecording = false;
                 btnRecord.classList.remove('active');
             }
