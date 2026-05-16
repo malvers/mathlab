@@ -1,14 +1,19 @@
 // Voice commands → text formatting.
-//   "absatz"                     → line break
-//   "hashtag/hash/# neue Idee"   → "Idee N" (blank line only if text exists before)
+//   "absatz"  → line break
+//   New-idea trigger (any variant) → "Idee N" (blank line only if text exists before)
+//     accepted starts: "#", "hashtag", "hash tag", "hash", "raute"
+//     accepted middle: optional "neue" (so "hashtag idee" also works)
+//   Case-insensitive, tolerant of trailing punctuation.
 export function formatCommands(text) {
     if (!text) return text;
 
     const matches = text.match(/Idee (\d+)/g);
     let maxN = matches ? Math.max(...matches.map(m => parseInt(m.split(' ')[1]))) : 0;
 
+    const ideaCmd = /(?:#|hashtag|hash\s*tag|hash|raute)\s*(?:neue\s+)?idee\s*[.,;:!?]?/gi;
+
     return text
-        .replace(/(?:#|hashtag|hash)\s*neue\s+idee\s*[.,;:!?]?/gi, (match, offset) => {
+        .replace(ideaCmd, (match, offset) => {
             maxN++;
             const beforeMatch = text.substring(0, offset).trim();
             const prefix = beforeMatch.length > 0 ? '\n\n' : '';

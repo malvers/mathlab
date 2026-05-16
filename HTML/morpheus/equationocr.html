@@ -83,15 +83,19 @@
         }
         #canvas-stack {
             position: relative;
-            /* Hard-locked 1000×1000 display — matches the canvas intrinsic
-               resolution exactly. No responsive sizing here so Gemini's
-               normalized 0–1000 box coords map 1:1 to display pixels without
-               any non-uniform stretching. Overflow viewport on small screens
-               is intentional. */
-            width: 1000px;
-            height: 1000px;
+            /* Responsive: shrinks to fit small viewports (tablet) while
+               keeping the 1:1 aspect ratio. The intrinsic canvas resolution
+               stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
+               scales the displayed size uniformly. Mouse-coord mapping in
+               JS already accounts for display vs intrinsic ratio. */
+            width: min(1000px, calc(100vw - 40px), calc(100vh - 280px));
+            aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             line-height: 0;
+        }
+        #canvas-stack > canvas {
+            width: 100%;
+            height: 100%;
         }
         /* Overlay canvas for Gemini bounding boxes — sits on top of #draw-canvas,
            transparent, click-through so drawing on the canvas still works. */
@@ -183,9 +187,9 @@
         }
         #result-box {
             position: relative;
-            /* Hard-locked 1000px wide — matches the canvas-stack below so the
-               LATEX + RENDER panes align with the drawing surface. */
-            width: 1000px;
+            /* Matches canvas-stack width so the LATEX + RENDER panes align
+               with the drawing surface. Responsive: same min() formula. */
+            width: min(1000px, calc(100vw - 40px), calc(100vh - 280px));
             flex-shrink: 0;
             background: #020410;
             border: 1px solid rgba(0, 210, 255, 0.5);
