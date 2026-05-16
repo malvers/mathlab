@@ -479,16 +479,16 @@
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
             <div style="font-family:Arial,sans-serif;font-size:17px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
                 <div style="display:flex;justify-content:space-between;gap:10px;">
-                    <span>Letzter Call:</span>
-                    <span id="cost-last" style="color:#adff2f;font-weight:700;">0</span>
+                    <span>Last Call:</span>
+                    <span id="cost-last" style="color:#adff2f;font-weight:700;white-space:nowrap;">0</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:10px;">
                     <span>Session:</span>
-                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;">0</span>
+                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">0</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;gap:10px;">
                     <span>Counter:</span>
-                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;">0</span>
+                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;white-space:nowrap;">0</span>
                 </div>
             </div>
             <!--
@@ -864,10 +864,9 @@
         } catch (_) {}
 
         function fmtUSD(v) {
-            // Always 2 decimal places. Sub-cent values (< $0.01) would
-            // round to "$0.00" — show those as cents instead so something
-            // readable lands on screen.
-            if (v < 0.01) return (v * 100).toFixed(2) + ' ct';
+            // Always dollars. 2 NKS normally; 4 NKS below $0.01 so sub-cent
+            // amounts stay readable instead of rounding to "$0.00".
+            if (v < 0.01) return '$' + v.toFixed(4);
             return '$' + v.toFixed(2);
         }
         function fmtTok(n) {
@@ -876,11 +875,17 @@
             const k = n / 1000;
             return (k >= 10 ? Math.round(k) : (Math.round(k * 10) / 10)) + 'K tok';
         }
-        function fmtCount(c) { return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd) + ' ' + fmtTok(c.inTok + c.outTok); }
+        // Separator: em-space (U+2003) ×3 between price and token-count
+        // so the eye gets a clear gap that CSS won't collapse.
+        function fmtCount(c) {
+            const SEP = '   ';
+            return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd) + SEP + fmtTok(c.inTok + c.outTok);
+        }
 
         function updateCostUI() {
+            const SEP = '   ';
             document.getElementById('cost-last').textContent =
-                costLastUSD > 0 ? `${fmtUSD(costLastUSD)} ${fmtTok(costLastTok)}` : '0';
+                costLastUSD > 0 ? `${fmtUSD(costLastUSD)}${SEP}${fmtTok(costLastTok)}` : '0';
             document.getElementById('cost-session').textContent =
                 costSession.calls > 0 ? fmtCount(costSession) : '0';
             document.getElementById('cost-alltime').textContent =
