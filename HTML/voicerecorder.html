@@ -272,15 +272,100 @@
 
         #build-info {
             font-family: 'Raleway', sans-serif;
-            font-size: 0.65rem;
-            color: rgba(60, 90, 130, 0.35);
+            font-size: 0.9rem;
+            color: rgba(180, 210, 235, 0.85);
             letter-spacing: 0.05em;
-            margin-top: -4px;
+            margin-top: -2px;
             flex-shrink: 0;
             cursor: pointer;
             user-select: none;
         }
-        #build-info:hover { color: rgba(0, 210, 255, 0.95); }
+        #build-info:hover { color: rgba(0, 210, 255, 1); }
+
+        /* ── Whisper status banner ─────────────────────── */
+        #whisper-status {
+            position: fixed;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 14px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.78rem;
+            color: rgba(0, 210, 255, 0.95);
+            background: rgba(8, 18, 38, 0.92);
+            border: 1px solid rgba(0, 210, 255, 0.6);
+            border-radius: 999px;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
+            z-index: 25;
+            display: none;
+            max-width: 92vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #whisper-status.visible { display: block; }
+        #whisper-status.busy { animation: pulse-label 1.3s ease-in-out infinite; }
+
+        /* ── Centered AI loader ───────────────────────── */
+        #ai-loading {
+            position: fixed; inset: 0;
+            display: none;
+            align-items: center; justify-content: center;
+            background: rgba(0, 0, 20, 0.55);
+            backdrop-filter: blur(2px);
+            z-index: 50;
+        }
+        #ai-loading.visible { display: flex; }
+        #ai-loading .ai-box {
+            padding: 40px 56px;
+            border-radius: 16px;
+            background: rgba(8, 18, 38, 0.95);
+            text-align: center;
+            min-width: 260px;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.25);
+        }
+
+        /* orbiting chase dots */
+        #ai-loading .ai-orbit {
+            position: relative;
+            width: 80px; height: 80px;
+            margin: 0 auto 24px;
+            animation: ai-spin 1.6s linear infinite;
+        }
+        #ai-loading .ai-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 12px; height: 12px;
+            margin: -6px 0 0 -6px;
+            border-radius: 50%;
+            background: rgb(0, 210, 255);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.9);
+            opacity: 1;
+        }
+        #ai-loading .ai-dot:nth-child(1) { transform: rotate(  0deg) translateX(34px); }
+        #ai-loading .ai-dot:nth-child(2) { transform: rotate( 72deg) translateX(34px); }
+        #ai-loading .ai-dot:nth-child(3) { transform: rotate(144deg) translateX(34px); }
+        #ai-loading .ai-dot:nth-child(4) { transform: rotate(216deg) translateX(34px); }
+        #ai-loading .ai-dot:nth-child(5) { transform: rotate(288deg) translateX(34px); }
+
+        #ai-loading .ai-text {
+            font-family: 'Raleway', sans-serif;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 0.35em;
+            color: rgba(0, 210, 255, 0.95);
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.5);
+            margin-bottom: 8px;
+        }
+        #ai-loading .ai-progress {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            color: rgba(180, 220, 240, 0.8);
+        }
+        @keyframes ai-spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* ── Pixel dialog ─────────────────────────────────── */
         #pixel-dialog {
@@ -372,21 +457,115 @@
         <div class="mini-sep"></div>
         <button class="mini-btn" id="mb-copy-text">COPY TEXT</button>
         <button class="mini-btn" id="mb-load-file">LOAD FILE</button>
+        <div class="mini-sep"></div>
+        <button class="mini-btn danger" id="mb-reload-ai">RELOAD AI</button>
     </div>
 
     <input type="file" id="file-input" accept="audio/*,text/plain,.txt,.webm" multiple style="display:none">
 
-    <div id="pixel-dialog" style="display:none">
-        <div class="dlg-card">
-            <h2>Pixel-Hinweis</h2>
-            <p>Auf Pixel-Geräten kann der Browser nur entweder Audio aufzeichnen <em>oder</em> live transkribieren — nicht beides gleichzeitig.</p>
-            <label class="radio"><input type="radio" name="pixmode" value="text" checked> Text (Transkript)</label>
-            <label class="radio"><input type="radio" name="pixmode" value="audio"> Audio (.webm-Aufnahme)</label>
-            <button id="pixel-dialog-ok">OK</button>
+    <!-- Whisper status — small banner for transcription/short messages -->
+    <div id="whisper-status"></div>
+
+    <!-- Centered AI loader — shown while model downloads -->
+    <div id="ai-loading">
+        <div class="ai-box">
+            <div class="ai-orbit">
+                <span class="ai-dot"></span>
+                <span class="ai-dot"></span>
+                <span class="ai-dot"></span>
+                <span class="ai-dot"></span>
+                <span class="ai-dot"></span>
+            </div>
+            <div class="ai-text">LOADING AI</div>
         </div>
     </div>
 
+    <!-- Pixel dialog entfernt — Whisper macht das obsolet -->
+
     <button id="btn-fullscreen" title="Fullscreen"></button>
+
+    <!-- ── Whisper (transformers.js) — single transcription path for ALL browsers ── -->
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+        env.allowLocalModels = false; // load from HF Hub / CDN
+
+        const statusEl   = document.getElementById('whisper-status');
+        const aiLoadEl   = document.getElementById('ai-loading');
+
+        function setStatus(msg, busy) {
+            if (!msg) { statusEl.classList.remove('visible','busy'); return; }
+            statusEl.textContent = msg;
+            statusEl.classList.add('visible');
+            statusEl.classList.toggle('busy', !!busy);
+        }
+        function showLoader() { aiLoadEl.classList.add('visible'); }
+        function hideLoader() { aiLoadEl.classList.remove('visible'); }
+
+        let transcriber = null;
+        let loading = null;
+
+        async function loadModel() {
+            if (transcriber) return transcriber;
+            if (loading) return loading;
+            loading = (async () => {
+                showLoader();
+                try {
+                    // whisper-base: gute Genauigkeit. WebGPU wenn verfügbar (5-10x schneller).
+                    const hasWebGPU = !!navigator.gpu;
+                    transcriber = await pipeline(
+                        'automatic-speech-recognition',
+                        'Xenova/whisper-base',
+                        {
+                            quantized: true,
+                            device: hasWebGPU ? 'webgpu' : 'wasm'
+                        }
+                    );
+                    hideLoader();
+                } catch (e) {
+                    hideLoader();
+                    setStatus('Whisper-Fehler: ' + (e.message || e), false);
+                    throw e;
+                }
+            })();
+            await loading;
+            return transcriber;
+        }
+
+        // Expose a global so the main script can call it
+        window.transcribeAudioBlob = async (blob, lang) => {
+            await loadModel();
+            setStatus('Transkribiere…', true);
+            try {
+                const arrayBuffer = await blob.arrayBuffer();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                let pcm;
+                if (audioBuffer.numberOfChannels > 1) {
+                    pcm = new Float32Array(audioBuffer.length);
+                    for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+                        const ch = audioBuffer.getChannelData(c);
+                        for (let i = 0; i < pcm.length; i++) pcm[i] += ch[i] / audioBuffer.numberOfChannels;
+                    }
+                } else {
+                    pcm = audioBuffer.getChannelData(0);
+                }
+                await audioCtx.close();
+                const out = await transcriber(pcm, {
+                    language: lang || 'german',
+                    task: 'transcribe',
+                    return_timestamps: false
+                });
+                setStatus(null);
+                return (out && out.text) ? out.text.trim() : '';
+            } catch (e) {
+                setStatus('Transkriptions-Fehler: ' + (e.message || e), false);
+                throw e;
+            }
+        };
+
+        // start downloading the model in the background as soon as page loads
+        loadModel().catch(() => {});
+    </script>
 
     <script>
         const btnRecord    = document.getElementById('btn-record');
@@ -454,13 +633,13 @@
         // const logRec = () => {};
 
         // ── Speech recognition ───────────────────────────────────
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let finalText = '';      // total displayed final text
-        let savedFinal = '';     // committed from previous sessions (across recognition.start cycles)
+        // DISABLED — Whisper (transformers.js) replaces Web Speech API.
+        // Whisper post-processes the recorded blob, works on all browsers/devices.
+        const SpeechRecognition = null;
+        let finalText = '';      // displayed final text
+        let savedFinal = '';     // accumulated across recordings
 
         logRec(`UA: ${navigator.userAgent.substring(0, 80)}`);
-        logRec(`SpeechRecognition: ${!!window.SpeechRecognition}, webkitSpeechRecognition: ${!!window.webkitSpeechRecognition}`);
-        logRec(`online: ${navigator.onLine}, language: ${navigator.language}`);
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
@@ -533,32 +712,9 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:48';
+        const BUILD_TIME = '2026-05-16 14:36 (whisper-base + webgpu)';
 
-        // detect Pixel device via User-Agent Client Hints
-        // Pixel-mode: 'text' = transcribe only, 'audio' = record only
-        let isPixel = /Pixel/i.test(navigator.userAgent);
-        let pixelMode = 'text';   // default
-
-        function maybeShowPixelDialog() {
-            if (!isPixel) return;
-            const dlg = document.getElementById('pixel-dialog');
-            dlg.style.display = 'flex';
-            document.getElementById('pixel-dialog-ok').addEventListener('click', () => {
-                const sel = dlg.querySelector('input[name="pixmode"]:checked');
-                pixelMode = sel ? sel.value : 'text';
-                dlg.style.display = 'none';
-            }, { once: true });
-        }
-
-        if (navigator.userAgentData?.getHighEntropyValues) {
-            navigator.userAgentData.getHighEntropyValues(['model']).then(d => {
-                if (d.model && /Pixel/i.test(d.model)) isPixel = true;
-                maybeShowPixelDialog();
-            }).catch(() => { maybeShowPixelDialog(); });
-        } else {
-            maybeShowPixelDialog();
-        }
+        // Pixel-Detection und Dialog entfernt — Whisper transkribiert den Blob unabhängig vom Mic-Konflikt
 
         const buildInfoEl = document.getElementById('build-info');
         buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
@@ -641,13 +797,19 @@
                         btnPlay.disabled = false;
                         btnDownload.disabled = false;
                         stream.getTracks().forEach(t => t.stop());
-
-                        await saveToDB(currentBlob, finalText);
-                        logRec(`mediaRecorder.onstop saved blob=${currentBlob.size}B transcript=${finalText.length}chars`);
                         setDirty(true);
 
-                        // dump full debug log after stop
-                        transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
+                        // hand the blob to Whisper for transcription (post-process)
+                        if (window.transcribeAudioBlob) {
+                            try {
+                                const text = await window.transcribeAudioBlob(currentBlob, 'german');
+                                const sep = savedFinal && !savedFinal.endsWith(' ') ? ' ' : '';
+                                savedFinal = (savedFinal || '') + sep + text;
+                                finalText  = savedFinal;
+                                transcriptEl.textContent = finalText;
+                            } catch (e) { /* error already shown via setStatus */ }
+                        }
+                        await saveToDB(currentBlob, finalText);
                     };
 
                     isRecording = true;
@@ -655,42 +817,13 @@
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
 
-                    // Pixel-Mic-Conflict: User wählt im Dialog Audio ODER Text.
-                    // Andere Geräte (Lenovo, Desktop, iOS) machen beides.
-                    const SKIP_MEDIARECORDER = isPixel && pixelMode === 'text';
-                    const SKIP_RECOGNITION   = isPixel && pixelMode === 'audio';
-                    logRec(`isPixel=${isPixel} mode=${pixelMode} → skipMR=${SKIP_MEDIARECORDER} skipRec=${SKIP_RECOGNITION}`);
-
-                    let recognitionStarted = false;
-                    if (!SKIP_RECOGNITION) {
-                        try {
-                            if (recognition) {
-                                recognition.start();
-                                recognitionStarted = true;
-                                logRec('recognition.start() called');
-                            } else {
-                                logRec('recognition is null');
-                            }
-                        } catch (e) {
-                            logRec(`recognition.start THREW: ${e.message || e}`);
-                        }
-                    } else {
-                        logRec('recognition SKIPPED (audio-only mode)');
-                    }
-
-                    if (!SKIP_MEDIARECORDER) {
-                        setTimeout(() => {
-                            try {
-                                mediaRecorder.start();
-                                logRec('mediaRecorder.start (delayed)');
-                            } catch (e) {
-                                logRec(`mediaRecorder.start THREW: ${e.message || e}`);
-                            }
-                        }, recognitionStarted ? 600 : 0);
-                    } else {
-                        // release the mic stream we acquired since we won't use MR
-                        stream.getTracks().forEach(t => t.stop());
-                        logRec('MediaRecorder SKIPPED, mic stream released');
+                    // Whisper transcribes the blob AFTER stop — no Web Speech needed.
+                    // MediaRecorder runs alone, no mic conflicts on any platform.
+                    try {
+                        mediaRecorder.start();
+                        logRec('mediaRecorder.start');
+                    } catch (e) {
+                        logRec(`mediaRecorder.start THREW: ${e.message || e}`);
                     }
 
                 } catch (err) {
@@ -871,6 +1004,16 @@
             const text = transcriptEl.textContent.trim();
             if (!text) return;
             try { await navigator.clipboard.writeText(text); } catch (e) {}
+        });
+
+        // ── Reload AI (debug): clear cached Whisper model + hard reload ─
+        document.getElementById('mb-reload-ai').addEventListener('click', async () => {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch (e) { /* ignore */ }
+            const url = location.pathname + '?cb=' + Date.now() + location.hash;
+            location.replace(url);
         });
 
         // ── Load file(s): audio + optional transcript sidecar ─────
