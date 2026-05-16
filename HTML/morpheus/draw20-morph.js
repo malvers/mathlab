@@ -209,16 +209,18 @@ function createDraw20Morph({
     // missing, a tiny ghost ring is synthesised at the partner's centroid
     // (so the morph "spawns" a vanishing hole rather than jumping).
     //
-    //   inPlace = true  → endpoint is lInPlace (target translated to src bbox).
-    //                     Used in FORMEL/SYMBOL mode: morph stays at the
-    //                     source location, only the shape changes.
-    //   inPlace = false → endpoint is l + shiftX (raw target position with
-    //                     optional offset). Used in STIFT mode where the
-    //                     morph travels next to the LaTeX target pane.
+    // Endpoint per vertex: raw l[j] + (shiftX, shiftY). The caller decides
+    // what those shifts are:
+    //   FORMEL/SYMBOL mode → shifts = -t * (latCentroid - pngCentroid),
+    //                       i.e. dist/100 to the left per slider step.
+    //                       At t=1 the whole morph sits on the source
+    //                       formula's position (LaTeX shape, PNG location).
+    //   STIFT mode        → shiftX = -((latBboxW) + 40), shiftY = 0.
+    //                       Morph travels next to the LaTeX target pane.
     //
     // Returns { subpath, pts, isGhost } or null if both sides degenerate.
     const GHOST_SCALE = 0.05;
-    function morphRingPair(sr, dr, t, shiftX, inPlace) {
+    function morphRingPair(sr, dr, t, shiftX, shiftY) {
         const srOk = sr && sr.length >= 3;
         const drOk = dr && dr.length >= 3;
         if (!srOk && !drOk) return null;
@@ -228,8 +230,8 @@ function createDraw20Morph({
             for (const q of dr) { cx += q.x; cy += q.y; }
             cx /= dr.length; cy /= dr.length;
             sr = dr.map(q => ({
-                x: (cx + shiftX) + (q.x - cx) * GHOST_SCALE,
-                y: cy + (q.y - cy) * GHOST_SCALE,
+                x: (cx + (shiftX || 0)) + (q.x - cx) * GHOST_SCALE,
+                y: (cy + (shiftY || 0)) + (q.y - cy) * GHOST_SCALE,
             }));
         } else if (!drOk && srOk) {
             let cx = 0, cy = 0;
@@ -244,15 +246,18 @@ function createDraw20Morph({
         const p = resampleClosed(sr, N);
         const l = resampleClosed(dr, N);
         if (p.length < 3 || l.length < 3) return null;
+        // lInPlace only feeds the rotation/reverse search for idxMap —
+        // the endpoint itself uses raw l + caller-supplied shifts.
         const lInPlace = alignDstToSrcBBox(p, l);
         const idxMap = resolveCorrespondence(p, lInPlace);
         if (!idxMap) return null;
-        const target = inPlace ? lInPlace : l;
+        const sx = shiftX || 0;
+        const sy = shiftY || 0;
         const pts = p.map((pp, i) => {
             const j = idxMap[i];
             return {
-                x: (1 - t) * pp.x + t * (target[j].x + shiftX),
-                y: (1 - t) * pp.y + t * target[j].y,
+                x: (1 - t) * pp.x + t * (l[j].x + sx),
+                y: (1 - t) * pp.y + t * (l[j].y + sy),
             };
         });
         let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;

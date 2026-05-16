@@ -9,7 +9,7 @@ import { attachPopup }     from './popup.js';
 import { attachSaveLoad }  from './save-load.js';
 import { loadWhisperModel } from './whisper.js';
 
-const BUILD_TIME = '2026-05-16 16:40';
+const BUILD_TIME = '2026-05-16 16:57';
 
 bindDom();
 state.recognition = initRecognition();
