@@ -230,10 +230,9 @@ function createDraw20Morph({
                 // t=0 we show the natural correspondence.
                 const lInPlace = alignDstToSrcBBox(p, l);
                 let idxMap = null;
-                let anchors = null;
                 if (typeof draw20CornerMatch === 'function') {
                     const cm = draw20CornerMatch(p, lInPlace);
-                    if (cm && cm.idxMap) { idxMap = cm.idxMap; anchors = cm.anchors; }
+                    if (cm && cm.idxMap) idxMap = cm.idxMap;
                 }
                 if (!idxMap) {
                     const eng = alignTargetWithEngine(p, lInPlace);
@@ -253,67 +252,6 @@ function createDraw20Morph({
                     ln.setAttribute('stroke-opacity', '0.45');
                     morphLayer.appendChild(ln);
                     drawnLines++;
-                }
-                // Anchor visualization: per-pair colour (so you can see which
-                // src-anchor matches which dst-anchor) + a label index next
-                // to each anchor.
-                if (anchors && anchors.src && anchors.dst) {
-                    const M = Math.min(anchors.src.length, anchors.dst.length);
-                    const anchorR = (7 / (getZ() || 1)).toFixed(2);
-                    const anchorSW = String(3 / (getZ() || 1));
-                    const ANCHOR_PALETTE = ['#FF1744','#F4C430','#42d4f4','#bfef45','#f032e6','#E040FB','#aaffc3','#9A6324'];
-                    for (let m = 0; m < M; m++) {
-                        const srcIdx = anchors.src[m];
-                        const dstIdx = anchors.dst[(m + anchors.offset) % M];
-                        const sp = p[srcIdx];
-                        const lp = l[dstIdx];
-                        if (!sp || !lp) continue;
-                        const ac = ANCHOR_PALETTE[m % ANCHOR_PALETTE.length];
-                        // Pair link line in pair colour
-                        const ln = document.createElementNS(svgNS, 'line');
-                        ln.setAttribute('x1', sp.x.toFixed(2));
-                        ln.setAttribute('y1', sp.y.toFixed(2));
-                        ln.setAttribute('x2', lp.x.toFixed(2));
-                        ln.setAttribute('y2', lp.y.toFixed(2));
-                        ln.setAttribute('stroke', ac);
-                        ln.setAttribute('stroke-width', anchorSW);
-                        ln.setAttribute('stroke-opacity', '0.95');
-                        morphLayer.appendChild(ln);
-                        // Source anchor dot + index label
-                        const sc = document.createElementNS(svgNS, 'circle');
-                        sc.setAttribute('cx', sp.x.toFixed(2));
-                        sc.setAttribute('cy', sp.y.toFixed(2));
-                        sc.setAttribute('r', anchorR);
-                        sc.setAttribute('fill', ac);
-                        sc.setAttribute('stroke', '#08142A');
-                        sc.setAttribute('stroke-width', '1.5');
-                        morphLayer.appendChild(sc);
-                        const sl = document.createElementNS(svgNS, 'text');
-                        sl.setAttribute('x', (sp.x + 10 / (getZ() || 1)).toFixed(2));
-                        sl.setAttribute('y', (sp.y - 6 / (getZ() || 1)).toFixed(2));
-                        sl.setAttribute('fill', ac);
-                        sl.setAttribute('font-size', String(14 / (getZ() || 1)));
-                        sl.setAttribute('font-weight', 'bold');
-                        sl.textContent = String(m);
-                        morphLayer.appendChild(sl);
-                        // Dst anchor dot + index label
-                        const dc = document.createElementNS(svgNS, 'circle');
-                        dc.setAttribute('cx', lp.x.toFixed(2));
-                        dc.setAttribute('cy', lp.y.toFixed(2));
-                        dc.setAttribute('r', anchorR);
-                        dc.setAttribute('fill', ac);
-                        dc.setAttribute('stroke', '#08142A');
-                        dc.setAttribute('stroke-width', '1.5');
-                        morphLayer.appendChild(dc);
-                        const dl = document.createElementNS(svgNS, 'text');
-                        dl.setAttribute('x', (lp.x + 10 / (getZ() || 1)).toFixed(2));
-                        dl.setAttribute('y', (lp.y - 6 / (getZ() || 1)).toFixed(2));
-                        dl.setAttribute('fill', ac);
-                        dl.setAttribute('font-size', String(14 / (getZ() || 1)));
-                        dl.setAttribute('font-weight', 'bold');
-                        dl.textContent = String(m);
-                        morphLayer.appendChild(dl);
-                    }
                 }
             }
             return;
@@ -380,30 +318,18 @@ function createDraw20Morph({
                 const p = resampleClosed(sr, N);
                 const l = resampleClosed(dr, N);
                 if (p.length < 3 || l.length < 3) continue;
-                // Corner-anchored matching for vertex correspondence
-                // (fallback to engine if corner-match unavailable / degenerate).
+                // Vertex correspondence via scale + cyclic offset (corner-match
+                // module). Fallback to legacy engine if it returns null.
                 const lInPlace = alignDstToSrcBBox(p, l);
                 let idxMap = null;
                 if (typeof draw20CornerMatch === 'function') {
                     const cm = draw20CornerMatch(p, lInPlace);
-                    if (cm && cm.idxMap) {
-                        idxMap = cm.idxMap;
-                        if (r === 0) {
-                            const a = cm.anchors;
-                            log(`🔶 MORPH pair#${pair.mid}/ring0: N=${N} corners=${a ? a.src.length : 0}`
-                                + ` offset=${a ? a.offset : '-'} reversed=${a ? a.reversed : '-'}`);
-                            if (a) {
-                                log(`    srcA=[${a.src.join(',')}]`);
-                                log(`    dstA=[${a.dst.join(',')}]`);
-                            }
-                        }
-                    }
+                    if (cm && cm.idxMap) idxMap = cm.idxMap;
                 }
                 if (!idxMap) {
                     const eng = alignTargetWithEngine(p, lInPlace);
                     if (!eng) continue;
                     idxMap = eng.idxMap;
-                    if (r === 0) log(`🔶 MORPH pair#${pair.mid}/ring0: FALLBACK engine`);
                 }
                 const pts = p.map((pp, i) => {
                     const j = idxMap[i];
@@ -450,7 +376,7 @@ function createDraw20Morph({
                 morphLayer.appendChild(gpath);
             }
             if (!pathD && !ghostPathD) continue;
-            log(`🟢 MORPH pair#${pair.mid}: drawing ${allPts.length} morph dots`);
+            // log(`🟢 MORPH pair#${pair.mid}: drawing ${allPts.length} morph dots`);
             // Vertex dots across all rings — blue, controlled by PUNKTE.
             // Always create them but set display:none upfront if PUNKTE is
             // off, so a later toggle-on can reveal them via the standard

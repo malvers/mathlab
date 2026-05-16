@@ -13,7 +13,10 @@ function draw20GetThreshold() {
 }
 
 function draw20GetEps() {
-    return +(document.getElementById('eps-slider')?.value ?? 1);
+    // Default 0 → RDP simplification OFF. With ensureMinDensity growing
+    // polygons up to MIN_POINTS, RDP-reduced contours look edgy because
+    // midpoint-insertion preserves the original sharp corners.
+    return +(document.getElementById('eps-slider')?.value ?? 0);
 }
 
 function draw20ExtractPNGContours(canvas, dbg) {
@@ -26,7 +29,12 @@ function draw20ExtractPNGContours(canvas, dbg) {
     const raw = getContoursWithHoles(grid, g.W, g.H);
     const areaScale = (g.W * g.H) / (1000 * 1000);
     const MIN_AREA = 10 * areaScale;
-    const filtered = raw.filter(p => draw20PolyArea(p) >= MIN_AREA);
+    let filtered = raw.filter(p => draw20PolyArea(p) >= MIN_AREA);
+    // Cap each contour at DRAW20_TARGET_MAX_PTS via stride-resample so PNG
+    // and LaTeX polygons share the same upper bound (matching pipeline).
+    if (typeof draw20StrideResample === 'function') {
+        filtered = filtered.map(p => draw20StrideResample(p, DRAW20_TARGET_MAX_PTS));
+    }
     let sorted = (typeof sortContoursCanonical === 'function')
         ? sortContoursCanonical(filtered) : filtered;
     const eps = draw20GetEps();

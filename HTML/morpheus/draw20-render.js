@@ -110,6 +110,40 @@ function createDraw20Render({
         ensureMinDensity(srcContours);
         ensureMinDensity(dstContours);
     }
+    // Laplacian smoothing pass for closed polygons. Weighted: each vertex is
+    // pulled toward the midpoint of its neighbours by `alpha`. Iterations
+    // and alpha kept mild so corners are preserved but marching-squares
+    // staircase noise gets averaged out.
+    const SMOOTH_PASSES = 3;
+    const SMOOTH_ALPHA = 0.5;
+    function smoothPoly(poly) {
+        if (!poly || poly.length < 4) return poly;
+        let p = poly;
+        for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
+            const n = p.length;
+            const out = new Array(n);
+            for (let i = 0; i < n; i++) {
+                const a = p[(i - 1 + n) % n];
+                const b = p[i];
+                const c = p[(i + 1) % n];
+                const mx = (a[0] + c[0]) / 2;
+                const my = (a[1] + c[1]) / 2;
+                out[i] = [
+                    b[0] + SMOOTH_ALPHA * (mx - b[0]),
+                    b[1] + SMOOTH_ALPHA * (my - b[1]),
+                ];
+            }
+            p = out;
+        }
+        return p;
+    }
+    function smoothContours(contours) {
+        if (!contours) return;
+        for (let i = 0; i < contours.length; i++) {
+            const c = contours[i];
+            if (c && c.length >= 4) contours[i] = smoothPoly(c);
+        }
+    }
     function ensureMinDensity(contours) {
         if (!contours) return;
         for (let i = 0; i < contours.length; i++) {
@@ -118,6 +152,7 @@ function createDraw20Render({
                 contours[i] = growPoly(c, DRAW20_MIN_POINTS);
             }
         }
+        smoothContours(contours);
     }
 
     // ── BBox helpers ────────────────────────────────────────────────────────
