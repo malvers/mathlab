@@ -69,6 +69,7 @@ async function onRecordClick() {
 
             state.isRecording = true;
             el.btnRecord.classList.add('active');
+            el.btnRecord.querySelector('.rec-label').textContent = 'STOP RECORDING';
             el.btnPlay.disabled = true;
             recLog.length = 0;
 
@@ -100,6 +101,7 @@ async function onRecordClick() {
         } catch (e) { logRec('mediaRecorder.stop error: ' + (e.message||e)); }
         state.isRecording = false;
         el.btnRecord.classList.remove('active');
+        el.btnRecord.querySelector('.rec-label').textContent = 'RECORD';
     }
 }
 
@@ -110,15 +112,18 @@ function onPlayClick() {
         state.audioEl.currentTime = 0;
         state.isPlaying = false;
         el.btnPlay.classList.remove('playing');
+        el.btnPlay.querySelector('.play-label').textContent = 'PLAY';
         return;
     }
     state.isPlaying = true;
     el.btnPlay.classList.add('playing');
+    el.btnPlay.querySelector('.play-label').textContent = 'STOP PLAYING';
     state.audioEl.currentTime = 0;
     state.audioEl.play();
     state.audioEl.onended = () => {
         state.isPlaying = false;
         el.btnPlay.classList.remove('playing');
+        el.btnPlay.querySelector('.play-label').textContent = 'PLAY';
         state.audioEl = new Audio(state.audioUrl);
     };
 }

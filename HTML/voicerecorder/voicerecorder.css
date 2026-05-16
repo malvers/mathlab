@@ -43,21 +43,31 @@ body {
     container-type: size;
 }
 /* icon size scales with button height (50% of the smaller side) */
-.btn svg {
-    width: 50cqmin;
-    height: 50cqmin;
-    max-width: 60%;
-    max-height: 60%;
+.btn span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(0.85rem, 3vw, 1.05rem);
+    letter-spacing: 0.3em;
+}
+#btn-record .rec-label {
+    color: rgb(176, 36, 24);
+}
+#btn-play .play-label {
+    color: rgb(121, 158, 49);
 }
 .btn:active { transform: scale(0.93); }
 
 #btn-record {
     background: rgba(8, 18, 38, 0.9);
-    border: 1px solid rgb(245, 194, 66);
-    box-shadow: 0 0 8px rgba(245,194,66,0.35);
+    border: 1px solid rgb(176, 36, 24);
+    box-shadow: 0 0 8px rgba(176,36,24,0.35);
+    overflow: visible;
 }
-#btn-record.active svg circle { animation: pulse-icon 1s infinite; }
-#btn-play.playing svg .icon-stop { animation: pulse-icon 1s infinite; }
+#btn-record.active .rec-label {
+    animation: pulse-label 1.2s ease-in-out infinite;
+}
+#btn-play.playing .play-label {
+    animation: pulse-label 1.2s ease-in-out infinite;
+}
 
 #btn-play {
     background: rgba(8, 18, 38, 0.9);
@@ -115,6 +125,9 @@ body.mini > .btn-row .btn {
     flex: 1 1 0;
     height: auto;
     width: 100%;
+}
+body.mini > .btn-row .btn span {
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
 }
 body.mini > .bottom-row {
     flex: 2 1 0;
@@ -206,10 +219,10 @@ body.mini > .bottom-row .btn-saveload {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(0.8rem, 2.6vw, 0.95rem);
     letter-spacing: 0.22em;
-    color: rgba(0, 210, 255, 0.95);
+    color: rgba(245, 194, 66, 0.95);
     background: rgba(8, 18, 38, 0.9);
-    border: 1px solid rgba(0, 210, 255, 0.8);
-    box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
+    border: 1px solid rgba(245, 194, 66, 0.8);
+    box-shadow: 0 0 8px rgba(245, 194, 66, 0.28);
     transition: background 0.12s, transform 0.12s;
 }
 .mini-btn:hover { background: rgba(0, 210, 255, 0.08); }
@@ -275,10 +288,10 @@ body.mini > .bottom-row .btn-saveload {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(0.85rem, 3vw, 1.05rem);
     letter-spacing: 0.3em;
-    color: rgba(0, 210, 255, 0.95);
+    color: rgba(245, 194, 66, 0.95);
     background: rgba(8, 18, 38, 0.9);
-    border: 1px solid rgba(0, 210, 255, 0.8);
-    box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
+    border: 1px solid rgba(245, 194, 66, 0.8);
+    box-shadow: 0 0 8px rgba(245, 194, 66, 0.28);
     transition: transform 0.12s, background 0.12s;
     display: flex;
     align-items: center;
@@ -294,25 +307,25 @@ body.mini .btn-saveload .sl-icon {
     height: 50cqmin;
     max-width: 60%;
     max-height: 60%;
-    stroke: rgba(0, 210, 255, 0.95);
+    stroke: rgba(245, 194, 66, 0.95);
     fill: none;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.btn-saveload:hover:not(:disabled) { background: rgba(0, 210, 255, 0.08); }
+.btn-saveload:hover:not(:disabled) { background: rgba(245, 194, 66, 0.08); }
 .btn-saveload:active:not(:disabled) { transform: scale(0.97); }
 .btn-saveload:disabled {
     cursor: not-allowed;
-    color: rgba(0, 210, 255, 0.25);
-    border-color: rgba(0, 210, 255, 0.25);
+    color: rgba(245, 194, 66, 0.25);
+    border-color: rgba(245, 194, 66, 0.25);
     box-shadow: none;
 }
 #btn-save.unsaved .sl-label,
 #btn-save.unsaved .sl-icon {
-    animation: pulse-label 1.2s ease-in-out infinite;
+    /* static */
 }
-body.mini .btn-saveload:disabled .sl-icon { stroke: rgba(0, 210, 255, 0.25); }
+body.mini .btn-saveload:disabled .sl-icon { stroke: rgba(245, 194, 66, 0.25); }
 @keyframes pulse-label {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.35; }
@@ -484,22 +497,22 @@ body.mini .btn-saveload:disabled .sl-icon { stroke: rgba(0, 210, 255, 0.25); }
     height: 44px;
     border-radius: 8px;
     background: rgba(8, 18, 38, 0.9);
-    border: 1px solid rgba(0, 210, 255, 0.6);
-    color: rgba(0, 210, 255, 0.95);
+    border: 1px solid rgba(100, 100, 100, 0.6);
+    color: rgba(150, 150, 150, 0.95);
     font-family: 'Orbitron', sans-serif;
     font-size: 0.8rem;
     letter-spacing: 0.25em;
     cursor: pointer;
     transition: background 0.12s, transform 0.12s;
 }
-#confirm-dialog .cdlg-btn:hover { background: rgba(0, 210, 255, 0.1); }
+#confirm-dialog .cdlg-btn:hover { background: rgba(100, 100, 100, 0.08); }
 #confirm-dialog .cdlg-btn:active { transform: scale(0.96); }
 #confirm-dialog .cdlg-btn.ok {
-    border-color: rgb(176, 36, 24);
-    color: rgb(245, 194, 66);
-    box-shadow: 0 0 8px rgba(176, 36, 24, 0.4);
+    border-color: rgba(0, 210, 255, 0.95);
+    color: rgba(0, 210, 255, 1);
+    box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
 }
-#confirm-dialog .cdlg-btn.ok:hover { background: rgba(176, 36, 24, 0.12); }
+#confirm-dialog .cdlg-btn.ok:hover { background: rgba(0, 210, 255, 0.1); }
 
 /* ── Centered AI loader ───────────────────────── */
 #ai-loading {

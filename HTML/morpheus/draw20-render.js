@@ -221,22 +221,9 @@ function createDraw20Render({
     }
 
     function drawBBox(rect, label) {
-        // Input rect is viewport (post-transform) coords. The overlay SVG
-        // lives inside `wrap`, which gets translate+scale applied — convert
-        // to wrap's pre-transform local space by dividing by current zoom.
-        const wrapRect = wrap.getBoundingClientRect();
-        const z = getZ() || 1;
-        const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        r.setAttribute('x', (rect.left - wrapRect.left) / z);
-        r.setAttribute('y', (rect.top - wrapRect.top) / z);
-        r.setAttribute('width', rect.width / z);
-        r.setAttribute('height', rect.height / z);
-        r.setAttribute('fill', 'none');
-        r.setAttribute('stroke', '#888');
-        r.setAttribute('stroke-width', String(1 / z));
-        r.dataset.kind = 'bbox';
-        r.dataset.source = label || '';
-        overlay.appendChild(r);
+        // BB rendering disabled by user preference. Function kept as a
+        // no-op so existing call sites in renderBBoxes don't need editing.
+        return;
     }
 
     // ── Render helpers (Phase B extraction) ─────────────────────────────────
