@@ -470,8 +470,11 @@
         `, '#00d2ff', { collapsible: true });
 
         CyberUI.createCard('ui-container', 'GOOGLE GEMINI API', `
-            <input type="password" id="g-api-key" class="api-input" placeholder="API key (aistudio.google.com/apikey)" autocomplete="off">
-            <select id="g-model" class="api-input" style="margin-top:6px;" onchange="updateGeminiTitle()">
+            <!-- API key input kept hidden — key is loaded from apikey.local.js
+                 (obfuscated, gitignored). Restore-logic in initApi() still
+                 reads/writes this field so localStorage round-trips work. -->
+            <input type="password" id="g-api-key" class="api-input" placeholder="API key" autocomplete="off" style="display:none;">
+            <select id="g-model" class="api-input" onchange="updateGeminiTitle()">
                 <option value="gemini-2.5-flash">2.5-flash</option>
                 <option value="gemini-2.5-flash-lite">2.5-flash-lite</option>
                 <option value="gemini-2.5-pro">2.5-pro</option>
@@ -711,7 +714,11 @@
         // each box to the actual ink within a small expansion margin. Tag shows
         // the ORIGINAL Gemini ints; the drawn rectangle is the snapped version.
         function drawBoxes(tokens) {
+            // BBs from Gemini were unreliable — disabled. Function kept as a
+            // no-op so callsites (recognize, loadLastDebug) stay valid.
             clearOverlay();
+            return;
+            // eslint-disable-next-line no-unreachable
             if (!Array.isArray(tokens) || tokens.length === 0) return;
             const { factor, range } = detectCoordScale(tokens);
             DebugWindow.log(`  📐 coord-range: ${range} → factor ${factor.toFixed(4)}`);
@@ -1196,35 +1203,22 @@
             clearOverlay();
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-            // Ask Gemini for structured JSON: full LaTeX + per-token bounding
-            // boxes. Prompt is intentionally strict — earlier looser wording
-            // produced centered/undersized boxes that uniform scaling could
-            // not fix. Explicit ink-extent + coordinate-system rules below.
+            // Gemini bounding boxes were unreliable — drop them entirely.
+            // We still ask for a per-glyph token list (labels only, no boxes)
+            // for downstream character-level matching against a LaTeX target.
             const prompt =
-                "This image (1000x1000 px, white background) shows a single printed or handwritten mathematical equation.\n" +
+                "This image shows a single printed or handwritten mathematical equation.\n" +
                 "\n" +
-                "For EACH visible glyph (single character, digit, operator, bracket, accent, or punctuation), return a precise bounding box.\n" +
-                "\n" +
-                "COORDINATE SYSTEM:\n" +
-                "- Integers in [0, 1000], normalized to the image.\n" +
-                "- (0, 0) = top-left, (1000, 1000) = bottom-right.\n" +
-                "- Format: box_2d = [ymin, xmin, ymax, xmax].\n" +
-                "\n" +
-                "EACH BOX MUST:\n" +
-                "- Enclose ALL ink of that glyph — topmost pixel to bottommost, leftmost to rightmost.\n" +
-                "- Include ascenders, descenders, accents (e.g. dot of 'i'), and sub- or superscripts that are visually attached to the SAME glyph.\n" +
-                "- NOT merge multiple glyphs. One box per glyph.\n" +
-                "- NOT be a centered estimate — tight to the actual ink extrema.\n" +
-                "\n" +
-                "OUTPUT — strict JSON, no markdown, no commentary:\n" +
+                "Return strict JSON, no markdown, no commentary:\n" +
                 "{\n" +
                 "  \"latex\": \"<full equation as LaTeX, no $ or \\\\( delimiters>\",\n" +
-                "  \"tokens\": [\n" +
-                "    { \"label\": \"<LaTeX of single glyph>\", \"box_2d\": [ymin, xmin, ymax, xmax] }\n" +
-                "  ]\n" +
+                "  \"tokens\": [ \"<LaTeX of single glyph>\", ... ]\n" +
                 "}\n" +
                 "\n" +
-                "If empty/unreadable: { \"latex\": \"(empty)\", \"tokens\": [] }";
+                "RULES:\n" +
+                "- tokens lists every visible glyph (character, digit, operator, bracket, accent), in reading order.\n" +
+                "- No bounding boxes. Just the labels.\n" +
+                "- If empty/unreadable: { \"latex\": \"(empty)\", \"tokens\": [] }";
             // Gemini REST API expects camelCase: inlineData, mimeType, generationConfig.
             // responseMimeType forces strict JSON output (no markdown wrappers).
             const body = {
