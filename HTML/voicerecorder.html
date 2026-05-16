@@ -272,8 +272,8 @@
 
         #build-info {
             font-family: 'Raleway', sans-serif;
-            font-size: 0.85rem;
-            color: rgba(160, 200, 230, 0.75);
+            font-size: 0.65rem;
+            color: rgba(60, 90, 130, 0.35);
             letter-spacing: 0.05em;
             margin-top: -4px;
             flex-shrink: 0;
@@ -281,6 +281,58 @@
             user-select: none;
         }
         #build-info:hover { color: rgba(0, 210, 255, 0.95); }
+
+        /* ── Pixel dialog ─────────────────────────────────── */
+        #pixel-dialog {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 20, 0.85);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 30;
+            backdrop-filter: blur(4px);
+        }
+        #pixel-dialog .dlg-card {
+            background: rgba(8, 18, 38, 0.98);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            border-radius: 14px;
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.3);
+            padding: 24px 28px;
+            width: min(420px, 90vw);
+            font-family: 'Raleway', sans-serif;
+            color: rgba(220, 230, 245, 0.95);
+        }
+        #pixel-dialog h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.2em;
+            color: rgba(0, 210, 255, 0.95);
+            margin-bottom: 14px;
+        }
+        #pixel-dialog p { font-size: 0.85rem; line-height: 1.5; margin-bottom: 18px; }
+        #pixel-dialog em { color: rgb(245, 194, 66); font-style: normal; }
+        #pixel-dialog .radio {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; margin-bottom: 8px;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        #pixel-dialog .radio input { accent-color: rgb(0, 210, 255); transform: scale(1.2); }
+        #pixel-dialog button {
+            margin-top: 14px;
+            width: 100%;
+            height: 44px;
+            border-radius: 8px;
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            color: rgba(0, 210, 255, 0.95);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+        }
+        #pixel-dialog button:hover { background: rgba(0, 210, 255, 0.1); }
     </style>
 </head>
 <body>
@@ -323,6 +375,16 @@
     </div>
 
     <input type="file" id="file-input" accept="audio/*,text/plain,.txt,.webm" multiple style="display:none">
+
+    <div id="pixel-dialog" style="display:none">
+        <div class="dlg-card">
+            <h2>Pixel-Hinweis</h2>
+            <p>Auf Pixel-Geräten kann der Browser nur entweder Audio aufzeichnen <em>oder</em> live transkribieren — nicht beides gleichzeitig.</p>
+            <label class="radio"><input type="radio" name="pixmode" value="text" checked> Text (Transkript)</label>
+            <label class="radio"><input type="radio" name="pixmode" value="audio"> Audio (.webm-Aufnahme)</label>
+            <button id="pixel-dialog-ok">OK</button>
+        </div>
+    </div>
 
     <button id="btn-fullscreen" title="Fullscreen"></button>
 
@@ -470,26 +532,41 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:25';
-        const buildInfoEl = document.getElementById('build-info');
-        buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
+        const BUILD_TIME = '2026-05-16 13:29';
 
-        // detect Pixel device via User-Agent Client Hints (Chrome reduces UA, but UA-CH gives model)
-        let isPixel = /Pixel/i.test(navigator.userAgent);   // fallback if UA still has it
+        // detect Pixel device via User-Agent Client Hints
+        // Pixel-mode: 'text' = transcribe only, 'audio' = record only
+        let isPixel = /Pixel/i.test(navigator.userAgent);
+        let pixelMode = 'text';   // default
+
+        function maybeShowPixelDialog() {
+            if (!isPixel) return;
+            const dlg = document.getElementById('pixel-dialog');
+            dlg.style.display = 'flex';
+            document.getElementById('pixel-dialog-ok').addEventListener('click', () => {
+                const sel = dlg.querySelector('input[name="pixmode"]:checked');
+                pixelMode = sel ? sel.value : 'text';
+                dlg.style.display = 'none';
+            }, { once: true });
+        }
+
         if (navigator.userAgentData?.getHighEntropyValues) {
             navigator.userAgentData.getHighEntropyValues(['model']).then(d => {
                 if (d.model && /Pixel/i.test(d.model)) isPixel = true;
-                buildInfoEl.textContent = `BT: ${BUILD_TIME} | model=${d.model || '?'} | pixel=${isPixel}`;
-            }).catch(() => {});
+                maybeShowPixelDialog();
+            }).catch(() => { maybeShowPixelDialog(); });
         } else {
-            buildInfoEl.textContent = `BT: ${BUILD_TIME} | UA-CH n/a | pixel=${isPixel}`;
+            maybeShowPixelDialog();
         }
-        buildInfoEl.title = 'Klick: hart neu laden';
-        buildInfoEl.addEventListener('click', () => {
-            // cache-bust by appending a fresh timestamp param
-            const url = location.pathname + '?cb=' + Date.now() + location.hash;
-            location.replace(url);
-        });
+
+        // build-info line auskommentiert (war "unter Wasser") — wieder einkommentieren falls debug nötig
+        // const buildInfoEl = document.getElementById('build-info');
+        // buildInfoEl.textContent = `BT: ${BUILD_TIME}`;
+        // buildInfoEl.title = 'Klick: hart neu laden';
+        // buildInfoEl.addEventListener('click', () => {
+        //     const url = location.pathname + '?cb=' + Date.now() + location.hash;
+        //     location.replace(url);
+        // });
 
         // ── Restore from IndexedDB on load ───────────────────────
         (async () => {
@@ -577,23 +654,27 @@
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
 
-                    // Pixel-spezifischer Mic-Conflict — andere Android (Lenovo) und iOS gehen.
-                    // isPixel wird oben via UA-CH früh ermittelt.
-                    const SKIP_MEDIARECORDER = isPixel;
-                    logRec(`UA-full: ${navigator.userAgent}`);
-                    logRec(`isPixel=${isPixel} → SKIP_MEDIARECORDER=${SKIP_MEDIARECORDER}`);
+                    // Pixel-Mic-Conflict: User wählt im Dialog Audio ODER Text.
+                    // Andere Geräte (Lenovo, Desktop, iOS) machen beides.
+                    const SKIP_MEDIARECORDER = isPixel && pixelMode === 'text';
+                    const SKIP_RECOGNITION   = isPixel && pixelMode === 'audio';
+                    logRec(`isPixel=${isPixel} mode=${pixelMode} → skipMR=${SKIP_MEDIARECORDER} skipRec=${SKIP_RECOGNITION}`);
 
                     let recognitionStarted = false;
-                    try {
-                        if (recognition) {
-                            recognition.start();
-                            recognitionStarted = true;
-                            logRec('recognition.start() called');
-                        } else {
-                            logRec('recognition is null');
+                    if (!SKIP_RECOGNITION) {
+                        try {
+                            if (recognition) {
+                                recognition.start();
+                                recognitionStarted = true;
+                                logRec('recognition.start() called');
+                            } else {
+                                logRec('recognition is null');
+                            }
+                        } catch (e) {
+                            logRec(`recognition.start THREW: ${e.message || e}`);
                         }
-                    } catch (e) {
-                        logRec(`recognition.start THREW: ${e.message || e}`);
+                    } else {
+                        logRec('recognition SKIPPED (audio-only mode)');
                     }
 
                     if (!SKIP_MEDIARECORDER) {
