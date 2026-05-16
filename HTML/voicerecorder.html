@@ -404,6 +404,9 @@
                 if (isRecording) {
                     try { recognition.start(); }
                     catch (e) { transcriptEl.textContent += `\n[Recognition-Restart-Fehler] ${e.message || e}`; }
+                } else if (currentBlob) {
+                    // recording is stopped — re-save with the freshly finalized transcript
+                    saveToDB(currentBlob, finalText);
                 }
             };
             recognition.onerror = e => {
@@ -415,7 +418,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 10:40';
+        const BUILD_TIME = '2026-05-16 10:48';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
