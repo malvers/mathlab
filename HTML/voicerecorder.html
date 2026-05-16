@@ -450,8 +450,8 @@
                    String(d.getSeconds()).padStart(2,'0') + '.' +
                    String(d.getMilliseconds()).padStart(3,'0');
         };
-        // const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
-        const logRec = () => {};   // debug disabled — uncomment line above to re-enable
+        const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
+        // const logRec = () => {};
 
         // ── Speech recognition ───────────────────────────────────
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -533,7 +533,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 13:40';
+        const BUILD_TIME = '2026-05-16 13:48';
 
         // detect Pixel device via User-Agent Client Hints
         // Pixel-mode: 'text' = transcribe only, 'audio' = record only
@@ -647,7 +647,7 @@
                         setDirty(true);
 
                         // dump full debug log after stop
-                        // transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
+                        transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
                     };
 
                     isRecording = true;
@@ -777,15 +777,41 @@
 
         // Right-click anywhere → popup with action buttons
         const miniStack = document.getElementById('mini-stack');
-        window.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            const w = 220, h = 240;
-            const x = Math.min(e.clientX, window.innerWidth  - w - 8);
-            const y = Math.min(e.clientY, window.innerHeight - h - 8);
+        function openPopup(clientX, clientY) {
+            const w = 220, h = 260;
+            const x = Math.min(Math.max(clientX, 8), window.innerWidth  - w - 8);
+            const y = Math.min(Math.max(clientY, 8), window.innerHeight - h - 8);
             miniStack.style.left = x + 'px';
             miniStack.style.top  = y + 'px';
             miniStack.classList.add('popup');
+        }
+        window.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            openPopup(e.clientX, e.clientY);
         });
+
+        // Long-press on touch devices → also opens popup (iOS Safari hat kein Rechtsklick)
+        let lpTimer = null, lpStartX = 0, lpStartY = 0;
+        document.addEventListener('touchstart', e => {
+            if (e.target.closest('button, input, label')) return;
+            if (miniStack.classList.contains('popup')) return;
+            const t = e.touches[0];
+            lpStartX = t.clientX;
+            lpStartY = t.clientY;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(() => {
+                openPopup(lpStartX, lpStartY);
+                lpTimer = null;
+            }, 550);
+        }, { passive: true });
+        document.addEventListener('touchmove', e => {
+            const t = e.touches[0];
+            if (Math.abs(t.clientX - lpStartX) > 8 || Math.abs(t.clientY - lpStartY) > 8) {
+                clearTimeout(lpTimer); lpTimer = null;
+            }
+        }, { passive: true });
+        document.addEventListener('touchend',   () => { clearTimeout(lpTimer); lpTimer = null; });
+        document.addEventListener('touchcancel',() => { clearTimeout(lpTimer); lpTimer = null; });
 
         // close popup after a button click inside it (click fires AFTER mousedown)
         miniStack.addEventListener('click', e => {
