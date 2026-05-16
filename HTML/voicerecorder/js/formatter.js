@@ -10,7 +10,8 @@ export function formatCommands(text) {
     const matches = text.match(/Idee (\d+)/g);
     let maxN = matches ? Math.max(...matches.map(m => parseInt(m.split(' ')[1]))) : 0;
 
-    const ideaCmd = /(?:#|hashtag|hash\s*tag|hash|raute)\s*(?:neue\s+)?idee\s*[.,;:!?]?/gi;
+    // Whisper mishears "Hashtag" as "HedgeTex", "Hedge Tex", "Hash Tech", etc.
+    const ideaCmd = /(?:#|hashtag|hash\s*tag|hash\s*tech|hedge\s*tex|hedge\s*tech|hedge\s*tag|hash|hedge|raute)\s*(?:neue\s+)?idee\s*[.,;:!?]?/gi;
 
     return text
         .replace(ideaCmd, (match, offset) => {

@@ -200,7 +200,7 @@
             overflow: hidden;
         }
         #result-box .pane {
-            padding: 18px 22px;
+            padding: clamp(8px, 1.5vh, 18px) 22px;
         }
         #result-box .pane + .pane {
             border-top: 1px solid rgba(0, 210, 255, 0.3);
@@ -218,7 +218,8 @@
             color: #adff2f;
             word-break: break-all;
             line-height: 1.4;
-            height: 30px;
+            /* Responsive: tablet shrinks LATEX line, desktop keeps 30px. */
+            height: clamp(28px, 4vh, 40px);
             overflow: auto;
             display: flex;
             align-items: center;
@@ -226,7 +227,8 @@
         #result-render {
             font-size: 24px;
             color: #F4C430;
-            height: 96px;
+            /* Responsive: shrinks to ~9vh on small viewports, max 96px desktop. */
+            height: clamp(56px, 9vh, 96px);
             text-align: center;
             display: flex;
             align-items: center;
@@ -1021,8 +1023,8 @@
         } catch (_) {}
 
         function fmtUSD(v) {
-            // Below $1, show cents (1 USD = 100 ct) — easier to read for small amounts.
-            if (v < 1) return (v * 100).toFixed(2) + ' ct';
+            // Always dollars — 4 decimals below $1 so small amounts stay readable.
+            if (v < 1) return '$' + v.toFixed(4);
             return '$' + v.toFixed(2);
         }
         function fmtTok(n) {
