@@ -24,6 +24,9 @@
          for local development. Missing local.js is fine — onerror swallows. -->
     <script src="apikey.embedded.js"></script>
     <script src="apikey.local.js" onerror="this.remove()"></script>
+    <!-- Gemini OCR module: exposes geminiRecognize, geminiCropCanvas,
+         geminiUnwrapLatex, SINGLE_GLYPH_PROMPT, DEFAULT_PROMPT. -->
+    <script src="gemini-ocr.js"></script>
 
     <style>
         #draw-canvas {
@@ -37,7 +40,7 @@
             cursor: default;
             pointer-events: none;
             border-radius: 10px;
-            border: 2px solid rgba(0, 210, 255, 0.5);
+            border: 1px solid rgba(0, 210, 255, 0.5);
             box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
             touch-action: none;
         }
@@ -91,7 +94,7 @@
                stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
                scales the displayed size uniformly. Mouse-coord mapping in
                JS already accounts for display vs intrinsic ratio. */
-            width: min(1000px, calc(100vw - 40px), calc(100vh - 280px));
+            width: min(1600px, calc(100vw - 40px), calc(100vh - 160px));
             aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             line-height: 0;
@@ -100,6 +103,33 @@
             width: 100%;
             height: 100%;
         }
+        /* Per-object recognition chip overlay. Sits above the canvas,
+           below the button row. Each chip is positioned absolutely in
+           canvas-display coordinates by JS after each Gemini call. */
+        #obj-chip-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .obj-chip {
+            position: absolute;
+            background: rgba(8, 20, 42, 0.92);
+            border: 0.5px solid #adff2f;
+            color: #adff2f;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 13px;
+            line-height: 1.2;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            box-shadow: 0 0 4px rgba(173, 255, 47, 0.25);
+        }
+        .obj-chip.pending  { color: rgba(173,255,47,0.55); border-color: rgba(173,255,47,0.45); }
+        .obj-chip.error    { color: #ff7088; border-color: #ff7088; box-shadow: 0 0 4px rgba(255,112,136,0.25); }
+        .obj-chip .katex { font-size: 1em; color: inherit; }
         /* Bottom-center button row overlaying the canvas (ERKENNEN + CLEAR).
            Canvas is WHITE in this lab (for OCR contrast), so the buttons need
            a solid dark background to stay readable. */
@@ -145,15 +175,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 14px;
-            padding: 50px 20px 20px;
+            gap: 8px;
+            padding: 20px 20px 20px;
             box-sizing: border-box;
         }
         #result-box {
             position: relative;
             /* Matches canvas-stack width so the LATEX + RENDER panes align
                with the drawing surface. Responsive: same min() formula. */
-            width: min(1000px, calc(100vw - 40px), calc(100vh - 280px));
+            width: min(1600px, calc(100vw - 40px), calc(100vh - 160px));
             flex-shrink: 0;
             background: #020410;
             border: 1px solid rgba(0, 210, 255, 0.5);
@@ -350,15 +380,19 @@
             </div>
             <div id="draw-wrap">
                 <div id="result-box">
+                    <!--
                     <div class="pane">
                         <div id="result-latex"></div>
                     </div>
+                    -->
                     <div class="pane">
                         <div id="result-render"></div>
                     </div>
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <!-- Per-object recognition chips overlay. Click-through. -->
+                    <div id="obj-chip-layer"></div>
                     <!-- <div id="mouse-coord">x: —  y: —</div> -->
                     <div id="canvas-btn-row">
                         <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">ERKENNEN</button>
@@ -398,6 +432,15 @@
     <script src="../js/branding.js"></script>
     <script src="../js/ui.js"></script>
     <script>
+        // Boot probe — should appear BEFORE any user interaction. If absent,
+        // the inline script crashed during parse (look in DevTools console).
+        try {
+            const k = (typeof window.GEMINI_API_KEY === 'string') ? window.GEMINI_API_KEY : '';
+            console.log('[eocr] boot — GEMINI_API_KEY:', k ? '…' + k.slice(-4) : '(missing)');
+            if (typeof DebugWindow !== 'undefined') {
+                DebugWindow.log('🛫 eocr boot — GEMINI_API_KEY: ' + (k ? '…' + k.slice(-4) : '(MISSING)'));
+            }
+        } catch (e) { console.error('boot probe failed', e); }
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
@@ -476,19 +519,21 @@
         }
 
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
-            <div style="font-family:Arial,sans-serif;font-size:17px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;">
-                <div style="display:flex;justify-content:space-between;gap:10px;">
-                    <span>Last Call:</span>
-                    <span id="cost-last" style="color:#adff2f;font-weight:700;white-space:nowrap;">0</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;gap:10px;">
-                    <span>Session:</span>
-                    <span id="cost-session" style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">0</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;gap:10px;">
-                    <span>Counter:</span>
-                    <span id="cost-alltime" style="color:#F4C430;font-weight:700;text-align:right;white-space:nowrap;">0</span>
-                </div>
+            <div style="font-family:Arial,sans-serif;font-size:17px;line-height:1.9;color:#00d2ff;letter-spacing:0.02em;display:grid;grid-template-columns:auto 1fr auto auto;column-gap:14px;align-items:baseline;">
+                <span>Last:</span>
+                <span id="cost-last-calls" style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;"></span>
+                <span id="cost-last-usd"   style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+                <span id="cost-last-tok"   style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+
+                <span>Session:</span>
+                <span id="cost-session-calls" style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+                <span id="cost-session-usd"   style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+                <span id="cost-session-tok"   style="color:#adff2f;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+
+                <span>Counter:</span>
+                <span id="cost-alltime-calls" style="color:#F4C430;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+                <span id="cost-alltime-usd"   style="color:#F4C430;font-weight:700;text-align:right;white-space:nowrap;">—</span>
+                <span id="cost-alltime-tok"   style="color:#F4C430;font-weight:700;text-align:right;white-space:nowrap;">—</span>
             </div>
             <!--
             <div class="eps-row" style="margin-top:14px;">
@@ -603,6 +648,15 @@
         // Kept as a no-op so older callsites (replayLast etc.) stay valid.
         function clearOverlay() { /* no-op */ }
 
+        // The #result-latex DOM node is currently commented out. This helper
+        // logs every status/error message to the DEBUG window instead and
+        // safely no-ops the textContent write if the node is missing.
+        function setLatexResult(text) {
+            try { DebugWindow.log(`[latex] ${text}`); } catch (_) {}
+            const el = document.getElementById('result-latex');
+            if (el) el.textContent = text;
+        }
+
         // Persist the last Gemini response + the exact canvas state at send-time
         // so we can iterate on the drawing/scaling logic without burning new
         // API calls. The image lets REPLAY restore the same picture the model
@@ -634,20 +688,20 @@
             try { raw = localStorage.getItem('eocr-last-debug'); }
             catch (e) {
                 DebugWindow.log(`✗ localStorage read failed: ${e.message}`);
-                document.getElementById('result-latex').textContent = `✗ localStorage: ${e.message}`;
+                setLatexResult(`✗ localStorage: ${e.message}`);
                 return null;
             }
             if (!raw) {
                 const msg = '⚠ keine gespeicherte Antwort — erst einmal ERKENNEN drücken';
                 DebugWindow.log(msg);
-                document.getElementById('result-latex').textContent = msg;
+                setLatexResult(msg);
                 return null;
             }
             let p;
             try { p = JSON.parse(raw); }
             catch (e) {
                 DebugWindow.log(`✗ replay parse failed: ${e.message}`);
-                document.getElementById('result-latex').textContent = `✗ replay parse: ${e.message}`;
+                setLatexResult(`✗ replay parse: ${e.message}`);
                 return null;
             }
             const age = Math.round((Date.now() - (p.ts || 0)) / 1000);
@@ -663,7 +717,7 @@
                 DebugWindow.log(`  [${i}] "${lbl}"`);
             });
             const finishDraw = () => {
-                document.getElementById('result-latex').textContent = p.latex || '';
+                setLatexResult(p.latex || '');
                 if (p.latex && p.latex !== '(empty)' && p.latex !== '(leer)') renderLatex(p.latex);
             };
             if (p.canvasImg) {
@@ -696,8 +750,15 @@
             initDraw();
             clearOverlay();
             try { localStorage.removeItem('eocr-canvas-png'); } catch (_) {}
-            document.getElementById('result-latex').textContent = '';
+            setLatexResult('');
             document.getElementById('result-render').innerHTML = '';
+            // Reset stroke + object state.
+            strokes.length = 0;
+            objects.length = 0;
+            curStroke = null;
+            activeObjIdx = -1;
+            if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
+            clearChips();
             // Reset stuck drawing state + ensure the canvas is interactive so
             // the user can keep drawing right after CLEAR.
             isDrawing = false;
@@ -803,35 +864,262 @@
             return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
         }
 
-        drawCanvas.addEventListener('mousedown', e => {
-            isDrawing = true;
-            drawCtx.beginPath();
-            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
-        });
-        drawCanvas.addEventListener('mousemove', e => {
-            if (!isDrawing) return;
-            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
-        });
-        drawCanvas.addEventListener('mouseup',    () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
-        drawCanvas.addEventListener('mouseleave', () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
-        drawCanvas.addEventListener('touchstart', e => {
-            e.preventDefault(); isDrawing = true;
-            drawCtx.beginPath();
-            const p = getPos(e); drawCtx.moveTo(p.x, p.y);
-        }, { passive: false });
-        drawCanvas.addEventListener('touchmove', e => {
-            e.preventDefault();
-            if (!isDrawing) return;
-            const p = getPos(e); drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
-        }, { passive: false });
-        drawCanvas.addEventListener('touchend', () => { if (isDrawing) { isDrawing = false; saveCanvasState(); } });
+        DebugWindow.log('📍 probe-A: before stroke buffer');
+        // ── Stroke + object buffer ─────────────────────────────────────────
+        // Strokes are captured AS objects (point lists), not just rasterized,
+        // so we can group them into glyphs and send each crop to Gemini.
+        const strokes = [];          // [{ points: [{x,y}], width }]
+        const objects = [];          // [{ strokeIdxs, bbox, status, label, matchedTokenIdx }]
+        let curStroke = null;
+        let activeObjIdx = -1;
+        let objectIdleTimer = null;
+        const OBJ_MARGIN_PX = 30;    // bbox expansion for "same object" test
+        const OBJ_IDLE_MS = 1200;    // pause after which active obj finalizes
 
+        function bboxOfStroke(s) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const p of s.points) {
+                if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+            }
+            return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+        }
+        function bboxUnion(a, b) {
+            const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+            return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
+        }
+        function bboxOverlapsExpanded(a, b, margin) {
+            return !(a.x + a.w + margin < b.x
+                  || b.x + b.w + margin < a.x
+                  || a.y + a.h + margin < b.y
+                  || b.y + b.h + margin < a.y);
+        }
+        function pushNewObject(strokeIdx, bb) {
+            objects.push({
+                strokeIdxs: [strokeIdx],
+                bbox: bb,
+                status: 'pending',
+                label: '',
+                matchedTokenIdx: -1,
+            });
+            activeObjIdx = objects.length - 1;
+        }
+        function onStrokeFinished(strokeIdx) {
+            const stroke = strokes[strokeIdx];
+            if (!stroke || stroke.points.length < 1) return;
+            const sBB = bboxOfStroke(stroke);
+            if (activeObjIdx >= 0 && objects[activeObjIdx].status === 'pending') {
+                const obj = objects[activeObjIdx];
+                if (bboxOverlapsExpanded(obj.bbox, sBB, OBJ_MARGIN_PX)) {
+                    obj.strokeIdxs.push(strokeIdx);
+                    obj.bbox = bboxUnion(obj.bbox, sBB);
+                } else {
+                    finalizeObject(activeObjIdx);
+                    pushNewObject(strokeIdx, sBB);
+                }
+            } else {
+                pushNewObject(strokeIdx, sBB);
+            }
+            if (objectIdleTimer) clearTimeout(objectIdleTimer);
+            const idleIdx = activeObjIdx;
+            objectIdleTimer = setTimeout(() => {
+                if (idleIdx === activeObjIdx) finalizeObject(idleIdx);
+            }, OBJ_IDLE_MS);
+        }
+
+        // ── Per-object Gemini recognition ──────────────────────────────────
+        async function finalizeObject(idx) {
+            const obj = objects[idx];
+            if (!obj || obj.status !== 'pending') return;
+            obj.status = 'recognizing';
+            if (idx === activeObjIdx) activeObjIdx = -1;
+            renderChips();
+            const apiKey = (document.getElementById('g-api-key')?.value || window.GEMINI_API_KEY || '').trim();
+            if (!apiKey) {
+                obj.status = 'error'; obj.label = '?';
+                renderChips();
+                DebugWindow.log(`⚠ obj#${idx} OCR skipped — kein API-Key`);
+                return;
+            }
+            if (typeof geminiCropCanvas !== 'function' || typeof geminiRecognize !== 'function') {
+                obj.status = 'error'; obj.label = '?';
+                renderChips();
+                DebugWindow.log(`⚠ obj#${idx} OCR skipped — gemini-ocr.js fehlt`);
+                return;
+            }
+            const cropPad = Math.max(20, Math.round(Math.min(obj.bbox.w, obj.bbox.h) * 0.15));
+            const cropCanvas = geminiCropCanvas(drawCanvas, obj.bbox, cropPad);
+            const t0 = performance.now();
+            const result = await geminiRecognize({
+                canvas: cropCanvas,
+                apiKey,
+                model: 'gemini-2.5-flash-lite',
+                prompt: (typeof SINGLE_GLYPH_PROMPT === 'string') ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''),
+                dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
+            });
+            const ms = Math.round(performance.now() - t0);
+            if (!result.ok) {
+                obj.status = 'error'; obj.label = '?';
+                DebugWindow.log(`✗ obj#${idx} OCR failed (${ms}ms): ${result.error}`);
+            } else {
+                let label = '?';
+                try {
+                    const parsed = JSON.parse(result.rawText || '{}');
+                    label = typeof parsed.label === 'string' ? parsed.label.trim() : '?';
+                } catch (_) {
+                    label = (result.latex || '').trim() || '?';
+                }
+                obj.label = (typeof geminiUnwrapLatex === 'function') ? geminiUnwrapLatex(label) : label;
+                obj.status = 'recognized';
+                if (result.usage) trackCost('gemini-2.5-flash-lite', result.usage);
+                DebugWindow.log(`✓ obj#${idx} "${obj.label}" (${ms}ms)`);
+            }
+            renderChips();
+        }
+
+        // ── Chip overlay ───────────────────────────────────────────────────
+        function renderChips() {
+            const layer = document.getElementById('obj-chip-layer');
+            if (!layer) return;
+            layer.innerHTML = '';
+            const rect = drawCanvas.getBoundingClientRect();
+            const layerRect = layer.getBoundingClientRect();
+            const sx = rect.width / drawCanvas.width;
+            const sy = rect.height / drawCanvas.height;
+            const dx = rect.left - layerRect.left;
+            const dy = rect.top - layerRect.top;
+            for (let i = 0; i < objects.length; i++) {
+                const obj = objects[i];
+                if (obj.status === 'pending') continue;
+                const cx = dx + obj.bbox.x * sx;
+                const cy = dy + obj.bbox.y * sy;
+                const chip = document.createElement('div');
+                chip.className = 'obj-chip ' + (obj.status === 'error' ? 'error'
+                    : obj.status === 'recognizing' ? 'pending' : '');
+                chip.style.left = (cx + obj.bbox.w * sx + 4) + 'px';
+                chip.style.top  = (cy - 4) + 'px';
+                let text;
+                if (obj.status === 'recognizing') text = '⏳';
+                else if (obj.status === 'error')   text = '? ✗';
+                else                                text = (obj.label || '?') + ' ✓';
+                if (obj.status === 'recognized' && typeof katex !== 'undefined'
+                    && obj.label && obj.label.includes('\\')) {
+                    try {
+                        const span = document.createElement('span');
+                        katex.render(obj.label, span, { throwOnError: false });
+                        chip.appendChild(span);
+                        chip.appendChild(document.createTextNode(' ✓'));
+                    } catch (_) { chip.textContent = text; }
+                } else {
+                    chip.textContent = text;
+                }
+                chip.title = `obj#${i} status=${obj.status} label="${obj.label}"`;
+                layer.appendChild(chip);
+            }
+        }
+        function clearChips() {
+            const layer = document.getElementById('obj-chip-layer');
+            if (layer) layer.innerHTML = '';
+        }
+        window.addEventListener('resize', renderChips);
+
+        // After the final-pass returns its token list (strings, reading-order),
+        // assign each pixel-object the index of its matching token. Walks both
+        // arrays in order and picks the first un-consumed token whose label
+        // equals the object's label. Unmatched objects get matchedTokenIdx=-1.
+        function applyObjectTokenMapping(tokens) {
+            if (!Array.isArray(tokens)) tokens = [];
+            const used = new Array(tokens.length).fill(false);
+            const norm = (s) => (s || '').toString().trim().replace(/^\\\\/, '\\\\').toLowerCase();
+            for (const obj of objects) {
+                obj.matchedTokenIdx = -1;
+                if (obj.status !== 'recognized') continue;
+                const wanted = norm(obj.label);
+                for (let k = 0; k < tokens.length; k++) {
+                    if (used[k]) continue;
+                    if (norm(tokens[k]) === wanted) {
+                        obj.matchedTokenIdx = k;
+                        used[k] = true;
+                        break;
+                    }
+                }
+            }
+            const mapped  = objects.filter(o => o.matchedTokenIdx >= 0).length;
+            const unmapped = objects.length - mapped;
+            DebugWindow.log(`📎 obj↔token: ${mapped}/${objects.length} matched (${unmapped} unmapped, ${tokens.length} tokens total)`);
+            objects.forEach((o, i) => {
+                const t = o.matchedTokenIdx;
+                const tokStr = (t >= 0 && tokens[t] != null) ? `"${tokens[t]}"` : '—';
+                DebugWindow.log(`  obj#${i} "${o.label}" ↔ token#${t} ${tokStr}`);
+            });
+        }
+
+        // Pointer events with palm rejection.
+        // Accept: pen, mouse, finger (small touch contact).
+        // Reject: palm (large touch contact — width or height > PALM_MAX_PX).
+        const PALM_MAX_PX = 40;
+        let activePointerId = null;
+
+        function isAllowedPointer(e) {
+            if (e.pointerType === 'pen' || e.pointerType === 'mouse') return true;
+            if (e.pointerType === 'touch') {
+                if ((e.width || 0) > PALM_MAX_PX || (e.height || 0) > PALM_MAX_PX) return false;
+                return true;
+            }
+            return true;
+        }
+
+        drawCanvas.style.touchAction = 'none';
+
+        drawCanvas.addEventListener('pointerdown', e => {
+            if (!isAllowedPointer(e)) return;
+            if (activePointerId !== null) return;
+            activePointerId = e.pointerId;
+            isDrawing = true;
+            const p = getPos(e);
+            curStroke = { points: [p], width: drawCtx.lineWidth };
+            drawCtx.beginPath();
+            drawCtx.moveTo(p.x, p.y);
+            try { drawCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+            e.preventDefault();
+        }, { passive: false });
+
+        drawCanvas.addEventListener('pointermove', e => {
+            if (!isDrawing || e.pointerId !== activePointerId) return;
+            if (!isAllowedPointer(e)) return;
+            const p = getPos(e);
+            if (curStroke) curStroke.points.push(p);
+            drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            e.preventDefault();
+        }, { passive: false });
+
+        function endStroke(e) {
+            if (e && e.pointerId !== activePointerId) return;
+            if (isDrawing) {
+                isDrawing = false;
+                if (curStroke && curStroke.points.length >= 1) {
+                    const idx = strokes.length;
+                    strokes.push(curStroke);
+                    saveCanvasState();
+                    onStrokeFinished(idx);
+                }
+                curStroke = null;
+            }
+            activePointerId = null;
+        }
+        drawCanvas.addEventListener('pointerup',     endStroke);
+        drawCanvas.addEventListener('pointercancel', endStroke);
+        drawCanvas.addEventListener('pointerleave',  endStroke);
+
+        DebugWindow.log('📍 probe-B: after stroke buffer + pointer handlers');
         // Persist the current canvas pixels — called after every finished
         // stroke and after preset loads. ~100–400 KB PNG; fits in localStorage.
         function saveCanvasState() {
             try { localStorage.setItem('eocr-canvas-png', drawCanvas.toDataURL('image/png')); }
             catch (e) { DebugWindow.log(`⚠ Canvas-Save fehlgeschlagen: ${e.message}`); }
         }
+
+        DebugWindow.log('📍 probe-C: before cost control');
 
         // ── Cost control ────────────────────────────────────────────────────────
         // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
@@ -862,6 +1150,7 @@
             if (lim && limEl) limEl.value = lim;
         } catch (_) {}
 
+        DebugWindow.log("📍 probe-C1: after GEMINI_PRICING");
         function fmtUSD(v) {
             // Always dollars. 2 NKS normally; 4 NKS below $0.01 so sub-cent
             // amounts stay readable instead of rounding to "$0.00".
@@ -880,29 +1169,40 @@
             const SEP = '   ';
             return c.calls + ' call' + (c.calls === 1 ? '' : 's') + ', ' + fmtUSD(c.usd) + SEP + fmtTok(c.inTok + c.outTok);
         }
+        // Fill one cost row across THREE spans: cost-{idBase}-calls / -usd / -tok.
+        // calls null → calls cell stays "—". Empty (0/0) row → all three "—".
+        function setRow(idBase, calls, usd, tok) {
+            const callsEl = document.getElementById(idBase + '-calls');
+            const usdEl   = document.getElementById(idBase + '-usd');
+            const tokEl   = document.getElementById(idBase + '-tok');
+            const empty   = !usd && !tok;
+            if (callsEl) callsEl.textContent = (typeof calls === 'number')
+                ? (calls + ' call' + (calls === 1 ? '' : 's'))
+                : (empty ? '—' : '');
+            if (usdEl)   usdEl.textContent = empty ? '—' : fmtUSD(usd);
+            if (tokEl)   tokEl.textContent = empty ? '—' : fmtTok(tok);
+        }
 
         function updateCostUI() {
-            const SEP = '   ';
-            document.getElementById('cost-last').textContent =
-                costLastUSD > 0 ? `${fmtUSD(costLastUSD)}${SEP}${fmtTok(costLastTok)}` : '0';
-            document.getElementById('cost-session').textContent =
-                costSession.calls > 0 ? fmtCount(costSession) : '0';
-            document.getElementById('cost-alltime').textContent =
-                costAllTime.calls > 0 ? fmtCount(costAllTime) : '0';
-            // Limit warning — red text when exceeded (input is commented out, defaults to no limit)
+            setRow('cost-last',    null,              costLastUSD,    costLastTok);
+            setRow('cost-session', costSession.calls, costSession.usd, costSession.inTok + costSession.outTok);
+            setRow('cost-alltime', costAllTime.calls, costAllTime.usd, costAllTime.inTok + costAllTime.outTok);
+            // Limit warning — red text on the all-time USD cell when exceeded.
             const limitEl = document.getElementById('cost-limit');
             const limit = limitEl ? parseFloat(limitEl.value) : NaN;
-            const el = document.getElementById('cost-alltime');
+            const allTimeUsdEl = document.getElementById('cost-alltime-usd');
+            if (!allTimeUsdEl) return;
             if (isFinite(limit) && limit > 0 && costAllTime.usd >= limit) {
-                el.style.color = '#C41E3A';
-                el.style.fontWeight = 'bold';
+                allTimeUsdEl.style.color = '#C41E3A';
+                allTimeUsdEl.style.fontWeight = 'bold';
             } else {
-                el.style.color = '#F4C430';
-                el.style.fontWeight = '';
+                allTimeUsdEl.style.color = '#F4C430';
+                allTimeUsdEl.style.fontWeight = '';
             }
         }
 
         // Called after a successful Gemini response. usage = data.usageMetadata.
+        DebugWindow.log("📍 probe-C2: after fmt/updateCostUI");
         function trackCost(model, usage) {
             if (!usage) {
                 DebugWindow.log('  ⚠ keine usageMetadata in der Antwort');
@@ -968,8 +1268,10 @@
 
         // Show initial values + re-check warning state (in case we crossed
         // the threshold in a previous session and never acknowledged it).
-        updateCostUI();
-        maybeShowCostWarning();
+        try { DebugWindow.log('📍 probe-C2.1: before updateCostUI()'); updateCostUI(); DebugWindow.log('📍 probe-C2.2: after updateCostUI()'); }
+        catch (e) { DebugWindow.log('✗ updateCostUI crash: ' + e.message); console.error('updateCostUI crash', e); }
+        try { DebugWindow.log('📍 probe-C2.3: before maybeShowCostWarning()'); maybeShowCostWarning(); DebugWindow.log('📍 probe-C2.4: after maybeShowCostWarning()'); }
+        catch (e) { DebugWindow.log('✗ maybeShowCostWarning crash: ' + e.message); console.error('maybeShowCostWarning crash', e); }
 
         // ── Render helper (shared by recognize + debugRender) ───────────────────
         function renderLatex(latex) {
@@ -1006,8 +1308,9 @@
             if (s < 1) inner.style.transform = `scale(${s.toFixed(4)})`;
         }
 
-        // ── Gemini OCR ──────────────────────────────────────────────────────────
-        // Strip a single $...$, $$...$$, \(...\) or \[...\] wrapper if Gemini added one.
+//         // ── Gemini OCR ──────────────────────────────────────────────────────────
+//         // Strip a single $...$, $$...$$, \(...\) or \[...\] wrapper if Gemini added one.
+        DebugWindow.log("📍 probe-C3: after trackCost/maybeWarn");
         function unwrapLatex(s) {
             s = s.trim();
             // Remove markdown code fences ```latex ... ``` if present
@@ -1020,12 +1323,13 @@
             return s;
         }
 
+        DebugWindow.log("📍 probe-C4: after unwrap + renderLatex etc");
         async function recognize() {
             const apiKey = document.getElementById('g-api-key').value.trim();
             const model  = document.getElementById('g-model').value;
             if (!apiKey) {
-                DebugWindow.log('⚠ API key fehlt');
-                document.getElementById('result-latex').textContent = '⚠ API-Key fehlt';
+                DebugWindow.log('⚠ API-Key fehlt');
+                setLatexResult('⚠ API-Key fehlt');
                 return;
             }
             try { localStorage.setItem('eocr-g-key', apiKey); } catch (_) {}
@@ -1061,7 +1365,7 @@
 
             DebugWindow.log(`▶ Gemini ${model} (key: …${apiKey.slice(-4)}, b64: ${b64.length} chars)`);
             console.log('Gemini recognize() start', { model, keyTail: apiKey.slice(-4), b64Len: b64.length });
-            document.getElementById('result-latex').textContent = '⏳ Lade…';
+            setLatexResult('⏳ Lade…');
             document.getElementById('result-render').innerHTML = '';
             clearOverlay();
 
@@ -1109,13 +1413,13 @@
                 try { data = JSON.parse(text); }
                 catch (e) {
                     DebugWindow.log(`✗ JSON parse failed: ${e.message}`);
-                    document.getElementById('result-latex').textContent = `Fehler: invalid JSON (${res.status})`;
+                    setLatexResult(`Fehler: invalid JSON (${res.status})`);
                     return;
                 }
                 if (!res.ok) {
                     const msg = data?.error?.message || `HTTP ${res.status}`;
                     DebugWindow.log(`✗ Gemini-Fehler: ${msg}`);
-                    document.getElementById('result-latex').textContent = `Fehler: ${msg}`;
+                    setLatexResult(`Fehler: ${msg}`);
                     return;
                 }
                 trackCost(model, data?.usageMetadata);
@@ -1137,23 +1441,31 @@
                     DebugWindow.log(`  ⚠ JSON-Schema-Parse fehlgeschlagen, fallback auf raw text`);
                     latex = unwrapLatex(raw || '(leer)');
                 }
-                document.getElementById('result-latex').textContent = latex;
+                setLatexResult(latex);
                 renderLatex(latex);
                 saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
+                // Build match-mapping: pixel-object ↔ LaTeX-token (per label).
+                // Strings-only tokens (we asked for that), match per label in
+                // reading-order. Objects must already be left-to-right (they
+                // are added in stroke order, which == left-to-right writing).
+                applyObjectTokenMapping(tokens);
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
                 console.error('Gemini fetch error', err);
-                document.getElementById('result-latex').textContent = `Fehler: ${err.message}`;
+                setLatexResult(`Fehler: ${err.message}`);
             }
         }
 
+        DebugWindow.log('📍 probe-D: before init/restore');
         // Restore credentials: localStorage wins; fall back to window.GEMINI_API_KEY
         // from apikey.local.js (gitignored) so the key survives a localStorage wipe.
+        DebugWindow.log('🔑 initApi enter');
         try {
             const keyLS  = localStorage.getItem('eocr-g-key');
             const keyFile = (typeof window.GEMINI_API_KEY === 'string' && window.GEMINI_API_KEY.trim())
                 ? window.GEMINI_API_KEY.trim() : '';
+            DebugWindow.log(`🔑 init: localStorage=${keyLS ? '…' + keyLS.slice(-4) : '∅'}, window.GEMINI_API_KEY=${keyFile ? '…' + keyFile.slice(-4) : '∅'}`);
             const key   = keyLS || keyFile;
             // Validate restored model — if it points at a deprecated/removed
             // option (e.g. gemini-2.0-flash after the 2.0 sunset), discard it
@@ -1176,7 +1488,7 @@
             const scInit = sc !== null ? sc : '50';
             const slSc = document.getElementById('canvas-scale-slider');
             if (slSc) { slSc.value = scInit; onCanvasScaleChange(scInit); }
-        } catch (_) {}
+        } catch (e) { DebugWindow.log('✗ initApi crash: ' + e.message); console.error(e); }
 
         // Persist card collapse state — same pattern as morph.html
         function makeCardsCollapsible() {
