@@ -376,49 +376,70 @@
             btnDownload.classList.toggle('unsaved', v);
         }
 
+        // ── Recognition event log ────────────────────────────────
+        let recLog = [];
+        const tStamp = () => {
+            const d = new Date();
+            return String(d.getHours()).padStart(2,'0') + ':' +
+                   String(d.getMinutes()).padStart(2,'0') + ':' +
+                   String(d.getSeconds()).padStart(2,'0') + '.' +
+                   String(d.getMilliseconds()).padStart(3,'0');
+        };
+        const logRec = (msg) => recLog.push(`${tStamp()} ${msg}`);
+
         // ── Speech recognition ───────────────────────────────────
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let finalText = '';      // total displayed final text
         let savedFinal = '';     // committed from previous sessions (across recognition.start cycles)
+
+        logRec(`UA: ${navigator.userAgent.substring(0, 80)}`);
+        logRec(`SpeechRecognition: ${!!window.SpeechRecognition}, webkitSpeechRecognition: ${!!window.webkitSpeechRecognition}`);
+        logRec(`online: ${navigator.onLine}, language: ${navigator.language}`);
+
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.continuous    = true;
             recognition.interimResults = true;
             recognition.lang          = 'de-DE';
 
+            recognition.onaudiostart   = () => logRec('audiostart');
+            recognition.onsoundstart   = () => logRec('soundstart');
+            recognition.onspeechstart  = () => logRec('speechstart');
+            recognition.onspeechend    = () => logRec('speechend');
+            recognition.onsoundend     = () => logRec('soundend');
+            recognition.onaudioend     = () => logRec('audioend');
+            recognition.onnomatch      = () => logRec('nomatch');
+            recognition.onstart        = () => logRec('start');
+
             recognition.onresult = e => {
                 let sessionFinal = '';
                 let interim = '';
-                // iterate ALL results in this session so the full text is always rebuilt
                 for (let i = 0; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
                     if (e.results[i].isFinal) sessionFinal += t + ' ';
                     else                       interim       += t;
                 }
+                logRec(`result(len=${e.results.length} idx=${e.resultIndex} final="${sessionFinal.trim().slice(0,30)}" interim="${interim.trim().slice(0,30)}")`);
                 finalText = savedFinal + sessionFinal;
                 transcriptEl.textContent = finalText + interim;
             };
             recognition.onend = () => {
-                // promote anything finalized in this session, then restart if still recording
                 savedFinal = finalText;
-                if (isRecording) {
-                    try { recognition.start(); }
-                    catch (e) { transcriptEl.textContent += `\n[Recognition-Restart-Fehler] ${e.message || e}`; }
-                } else if (currentBlob) {
-                    // recording is stopped — re-save with the freshly finalized transcript
+                logRec(`end (finalText.len=${finalText.length})`);
+                if (!isRecording && currentBlob) {
                     saveToDB(currentBlob, finalText);
+                    logRec(`saveToDB called, transcript=${finalText.length} chars`);
                 }
             };
             recognition.onerror = e => {
-                transcriptEl.textContent += `\n[Recognition-Fehler] ${e.error || ''} ${e.message || ''}`;
+                logRec(`ERROR: error="${e.error||''}" message="${e.message||''}"`);
             };
         } else {
-            // surface the fact that speech recognition isn't available
-            transcriptEl.textContent = '[SpeechRecognition nicht verfügbar in diesem Browser]';
+            logRec('NO SpeechRecognition object — API not available');
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 10:48';
+        const BUILD_TIME = '2026-05-16 11:10';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
@@ -482,6 +503,7 @@
 
                     mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
                     const usedType = mediaRecorder.mimeType || mimeType || 'audio/webm';
+                    logRec(`MediaRecorder mimeType=${usedType}`);
 
                     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
                     mediaRecorder.onstop = async () => {
@@ -494,15 +516,30 @@
                         stream.getTracks().forEach(t => t.stop());
 
                         await saveToDB(currentBlob, finalText);
+                        logRec(`mediaRecorder.onstop saved blob=${currentBlob.size}B transcript=${finalText.length}chars`);
                         setDirty(true);
+
+                        // dump full debug log after stop
+                        transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
                     };
 
                     mediaRecorder.start();
                     isRecording = true;
                     btnRecord.classList.add('active');
                     btnPlay.disabled = true;
+                    recLog = []; // fresh log per recording
+                    logRec('mediaRecorder.start');
 
-                    try { if (recognition) recognition.start(); } catch (e) { /* recognition may not be available */ }
+                    try {
+                        if (recognition) {
+                            recognition.start();
+                            logRec('recognition.start() called');
+                        } else {
+                            logRec('recognition is null');
+                        }
+                    } catch (e) {
+                        logRec(`recognition.start THREW: ${e.message || e}`);
+                    }
 
                 } catch (err) {
                     // surface error in the transcript area so user can see what failed
