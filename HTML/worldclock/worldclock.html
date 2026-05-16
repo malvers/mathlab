@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../js/lab-shell-minimal.css">
     <!-- Debug window: auto-disabled on docalvers.de; use ?debug=force to enable on production -->
     <script src="../js/debug-window.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
     <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
@@ -69,7 +70,9 @@
             color: #00d2ff;
             text-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
             text-align: center;
-            white-space: nowrap;
+            white-space: normal;
+            max-width: clamp(200px, 40vmin, 480px);
+            overflow-wrap: break-word;
             pointer-events: none;
             z-index: 2400;
             display: none;
@@ -150,12 +153,20 @@
                         document.body.classList.add('school-' + school);
                     });
                 }
-                const visitorName = (params.get('name') || '').trim();
-                if (visitorName) {
+                let visitorMsg = '';
+                const mComp = params.get('m');
+                if (mComp) {
+                    try {
+                        const bytes = Uint8Array.from(atob(mComp.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
+                        visitorMsg = pako.inflate(bytes, { to: 'string' });
+                    } catch (_) {}
+                }
+                if (!visitorMsg) visitorMsg = (params.get('message') || '').trim();
+                if (visitorMsg) {
                     document.addEventListener('DOMContentLoaded', () => {
                         const el = document.getElementById('visitor-greeting');
                         if (!el) return;
-                        el.innerHTML = 'HAB EINE GUTE ZEIT<span class="vg-comma">,</span> ' + visitorName.toUpperCase().replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+                        el.textContent = visitorMsg;
                         if (!document.body.classList.contains('has-school')) {
                             el.style.display = 'block';
                         }
@@ -1242,7 +1253,8 @@
                         ctx.shadowColor = '#E30613';
                     } else {
                         grad.addColorStop(0, '#ffaa00');
-                        grad.addColorStop(1, '#e68a00');
+                        grad.addColorStop(0.2, '#ffaa00');
+                        grad.addColorStop(1, '#a05000');
 
                         ctx.save();
                         ctx.shadowBlur = cityShadowBlur;
@@ -1265,14 +1277,10 @@
                 ctx.rotate(-mapRotation * Math.PI / 180);
                 
                 let lines = city.name.split('\n');
-                if (city.highlight) {
-                    const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-                    lines.push(timeStr);
-                }
                 
                 const dst = getDSTLabel(city.tz);
                 if (city.highlight) {
-                    ctx.fillStyle = isRahnSchool ? "#ffffff" : "#333333";
+                    ctx.fillStyle = isRahnSchool ? "#ffffff" : "rgb(0,0,40)";
                 } else if (dst === "SZ") {
                     ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
                 } else {
@@ -1401,6 +1409,101 @@
             _si.style.width    = _siW + 'px';
             _si.style.fontSize = (legendFontSize * 1.1 * _sy) + 'px';
             _si.style.height   = _siH + 'px';
+
+            // Link icon below search input (left-aligned)
+            const _lnk = document.getElementById('wc-link-icon') || (() => {
+                const el = document.createElement('div');
+                el.id = 'wc-link-icon';
+                el.title = 'Personalisierten Link erstellen';
+                el.style.cssText = 'position:fixed;cursor:pointer;z-index:1000;opacity:0.65;pointer-events:auto;color:#00d2ff;line-height:1;';
+                el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+                el.addEventListener('mouseenter', () => el.style.opacity = '1');
+                el.addEventListener('mouseleave', () => el.style.opacity = '0.65');
+                el.addEventListener('click', () => {
+                    let pop = document.getElementById('wc-personalize-popup');
+                    if (pop) { pop.style.display = pop.style.display === 'none' ? 'flex' : 'none'; return; }
+                    pop = document.createElement('div');
+                    pop.id = 'wc-personalize-popup';
+                    pop.style.cssText = [
+                        'position:fixed;z-index:2000;display:flex;flex-direction:column;gap:10px;',
+                        'background:rgba(8,20,42,0.97);border:1px solid rgba(0,210,255,0.45);border-radius:6px;',
+                        'padding:16px 18px;min-width:320px;max-width:420px;',
+                        'font-family:Orbitron,sans-serif;color:#00d2ff;',
+                        'top:50%;left:50%;transform:translate(-50%,-50%);',
+                        'box-shadow:0 0 32px rgba(0,210,255,0.15);',
+                    ].join('');
+                    pop.innerHTML = [
+                        '<div style="display:flex;justify-content:space-between;align-items:center;">',
+                        '  <span style="font-size:11px;letter-spacing:1.5px;opacity:0.9;">PERSONALISIERTE NACHRICHT</span>',
+                        '  <span id="wc-pop-close" style="cursor:pointer;opacity:0.55;line-height:1;display:flex;align-items:center;" title="Schließen">',
+                        '    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">',
+                        '      <line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/>',
+                        '    </svg>',
+                        '  </span>',
+                        '</div>',
+                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4"',
+                        '  style="background:rgba(0,10,30,0.9);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);',
+                        '         border-radius:4px;padding:6px 8px;font-family:Orbitron,sans-serif;font-size:11px;',
+                        '         letter-spacing:0.05em;outline:none;width:100%;box-sizing:border-box;resize:vertical;',
+                        '         line-height:1.6;"></textarea>',
+                        '<div style="display:flex;gap:8px;">',
+                        '  <button id="wc-pop-copy" style="font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;',
+                        '    flex:1;padding:6px 12px;cursor:pointer;background:rgba(0,210,255,0.08);color:rgba(0,210,255,0.85);',
+                        '    border:1px solid rgba(0,210,255,0.3);border-radius:4px;transition:background 0.15s;">COPY LINK</button>',
+                        '  <button id="wc-pop-copy-plain" title="Lesbare URL — Nachricht im Klartext sichtbar"',
+                        '    style="font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;',
+                        '    flex:1;padding:6px 12px;cursor:pointer;background:rgba(0,210,255,0.04);color:rgba(0,210,255,0.55);',
+                        '    border:1px solid rgba(0,210,255,0.18);border-radius:4px;transition:background 0.15s;">COPY PLAIN</button>',
+                        '</div>',
+                    ].join('');
+                    document.body.appendChild(pop);
+
+                    const inp = document.getElementById('wc-pop-input');
+                    const copyBtn = document.getElementById('wc-pop-copy');
+
+                    copyBtn.addEventListener('click', () => {
+                        const msg = inp.value.trim();
+                        let param;
+                        try {
+                            const compressed = pako.deflate(msg);
+                            const b64 = btoa(String.fromCharCode(...compressed))
+                                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+                            param = '?m=' + b64;
+                        } catch (_) {
+                            param = '?message=' + encodeURIComponent(msg);
+                        }
+                        const link = window.location.origin + '/worldclock/worldclock.html' + param;
+                        navigator.clipboard.writeText(link).then(() => {
+                            copyBtn.textContent = 'KOPIERT!';
+                            setTimeout(() => { copyBtn.textContent = 'COPY LINK'; }, 1800);
+                        }).catch(() => {
+                            copyBtn.textContent = 'FEHLER';
+                            setTimeout(() => { copyBtn.textContent = 'COPY LINK'; }, 1800);
+                        });
+                    });
+
+                    const plainBtn = document.getElementById('wc-pop-copy-plain');
+                    plainBtn.addEventListener('click', () => {
+                        const msg = inp.value.trim();
+                        const link = window.location.origin + '/worldclock/worldclock.html?message=' + msg;
+                        navigator.clipboard.writeText(link).then(() => {
+                            plainBtn.textContent = 'KOPIERT!';
+                            setTimeout(() => { plainBtn.textContent = 'COPY PLAIN'; }, 1800);
+                        }).catch(() => {
+                            plainBtn.textContent = 'FEHLER';
+                            setTimeout(() => { plainBtn.textContent = 'COPY PLAIN'; }, 1800);
+                        });
+                    });
+
+                    document.getElementById('wc-pop-close').addEventListener('click', () => {
+                        pop.style.display = 'none';
+                    });
+                });
+                document.body.appendChild(el);
+                return el;
+            })();
+            _lnk.style.left = _siLeft + 'px';
+            _lnk.style.top  = (_siTop + _siH + 12) + 'px';
 
 
             /* debug output disabled
@@ -2068,6 +2171,7 @@
                 '#mini-rail',
                 '#math-coach-box',
                 '#wc-search',
+                '#wc-link-icon',
                 '.canvas-branding',        // SOMMERZEIT / NORMALZEIT title block
                 '#central-debug-window'    // floating DEBUG window
             ];

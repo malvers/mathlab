@@ -106,8 +106,8 @@
     }
     /* Toggles: natural width — checkbox left, label right. */
     .top-toggle {
-        display: inline-flex; align-items: center; gap: 8px;
-        user-select: none; min-width: 100px;
+        display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px;
+        user-select: none; min-width: 100px; padding-left: 6px;
     }
     .top-toggle input { cursor: pointer; accent-color: #00d2ff; }
     #reload-btn {

@@ -53,6 +53,30 @@ function createDraw20UI({
             if (c !== morphLayer) overlay.removeChild(c);
         }
     }
+    // ── pix-Lifecycle (single source of truth for the handwriting <img>) ────
+    // Symbol-mode click → resetPix. Formula click → loadPix(url). Both reset
+    // every style property pix could carry from a previous mode (visibility,
+    // display, transform, src) so no leakage between Formel → Symbol → Formel.
+    function resetPix() {
+        pix.removeAttribute('src');
+        pix.style.visibility = '';
+        pix.style.display = '';
+        pix.style.transform = '';
+        pix.style.opacity = '';
+    }
+    function loadPix(url, alt) {
+        pix.style.visibility = '';
+        pix.style.display = '';
+        pix.style.transform = '';
+        pix.style.opacity = '';
+        return new Promise(resolve => {
+            if (pix.src && pix.src.endsWith(url)) { resolve(); return; }
+            pix.onload = () => resolve();
+            pix.onerror = () => resolve();
+            pix.src = url;
+            if (alt) pix.alt = alt;
+        });
+    }
     function setFormula(latex, presetIndex, prefix = 'formula') {
         // Total click→done timer (read by renderBBoxes at the very end).
         window.__draw20ClickT0 = performance.now();
@@ -66,8 +90,6 @@ function createDraw20UI({
         // löschen, nur Latex und die Hand-Formel stehen lassen").
         if (typeof onFormulaSelected === 'function') onFormulaSelected();
         tex.dataset.latex = latex;
-        // Re-show pix in case a previous symbol-click hid it.
-        pix.style.visibility = '';
         // Mirror the choice into the text-input (UI sync, non-recursive).
         const ti = document.getElementById('text-input');
         if (ti && ti.value !== String(latex)) ti.value = String(latex);
@@ -75,13 +97,7 @@ function createDraw20UI({
         // prefix = 'formula' or 'complex' — both share the same pipeline,
         // only the PNG namespace differs.
         const url = `presets/${prefix}-${presetIndex}.png`;
-        const pixReady = new Promise(resolve => {
-            if (pix.src.endsWith(url)) { resolve(); return; }
-            pix.onload = () => resolve();
-            pix.onerror = () => { resolve(); };
-            pix.src = url;
-            pix.alt = latex;
-        });
+        const pixReady = loadPix(url, latex);
         Promise.all([latexReady, pixReady]).then(() => {
             requestAnimationFrame(() => requestAnimationFrame(() => {
                 renderBBoxes();
@@ -102,10 +118,10 @@ function createDraw20UI({
         clearMorphLayer();
         clearOverlayBulk();
         tex.dataset.latex = String(latex);
-        // No PNG counterpart: hide pix entirely and clear its src so
-        // renderBBoxes skips the PNG side (pix.naturalWidth becomes 0).
-        pix.style.visibility = 'hidden';
-        pix.removeAttribute('src');
+        // No PNG counterpart: clear pix fully so renderBBoxes skips the PNG
+        // side (pix.naturalWidth becomes 0) and nothing from a previous
+        // formula mode leaks through (transform, visibility, src).
+        resetPix();
         // Mirror the choice into the text-input (UI sync; non-recursive
         // because .value = … doesn't fire an 'input' event).
         const ti = document.getElementById('text-input');
@@ -192,63 +208,58 @@ function createDraw20UI({
     }
     tryAttachRadios();
 
-    // ── LINIE / PUNKTE / PIXEL / POLYGONE FÜLLEN toggles ────────────────────
-    // The grey bboxes (rects) stay visible regardless.
-    function applyLinesToggle() {
-        const t = document.getElementById('lines-toggle');
-        const show = t ? t.checked : true;
-        overlay.querySelectorAll('polygon').forEach(p => { p.style.display = show ? '' : 'none'; });
-        stiftOutlineSvg.querySelectorAll('polygon').forEach(p => { p.style.display = show ? '' : 'none'; });
-    }
-    function applyPointsToggle() {
-        const t = document.getElementById('points-toggle');
-        const show = t ? t.checked : true;
-        overlay.querySelectorAll('circle[data-kind="point"]').forEach(p => { p.style.display = show ? '' : 'none'; });
-        stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(p => { p.style.display = show ? '' : 'none'; });
-    }
-    // PIXEL toggle: show/hide raw PNG (handwriting) + LaTeX glyphs +
-    // stift strokes. Vector outlines + bbox stay so the user can see
-    // contours alone. opacity (not visibility) on stiftCanvas so stift
-    // mode keeps receiving mouse events (visibility:hidden would kill
-    // pointer-events).
-    function applyArtToggle() {
-        const t = document.getElementById('art-toggle');
-        const show = t ? t.checked : true;
-        pix.style.visibility = show ? '' : 'hidden';
-        tex.style.visibility = show ? '' : 'hidden';
-        stiftCanvas.style.opacity = show ? '1' : '0';
-    }
-    // POLYGONE FÜLLEN: show/hide the grouped fill paths from drawContours
-    // + renderStiftOutlines (one path per outer, holes as evenodd subpaths).
-    // Per-contour stroke polygons stay unchanged.
-    function applyFillToggle() {
-        const t = document.getElementById('fill-toggle');
-        const fill = t ? t.checked : false;
-        overlay.querySelectorAll('path[data-kind="fill"]').forEach(p => { p.style.display = fill ? '' : 'none'; });
-        stiftOutlineSvg.querySelectorAll('path[data-kind="fill"]').forEach(p => { p.style.display = fill ? '' : 'none'; });
-        // Morph paths live in morphLayer (inside overlay). Same green as
-        // the pixel/stift ink when fill is on, no fill (stroke only) when
-        // off — same UX as POLYGONE FÜLLEN for the outlines.
-        overlay.querySelectorAll('path[data-source="morph"]').forEach(p => {
-            p.setAttribute('fill', fill ? '#adff2f' : 'none');
+    // ── Centralized toggle application ──────────────────────────────────────
+    // Single source of truth: walks ALL render layers (overlay + morphLayer
+    // is inside overlay so it's covered by the overlay query; stiftOutlineSvg
+    // separately) and applies five toggles uniformly via data-kind selectors.
+    // The grey bboxes (rect[data-kind="bbox"]) stay visible regardless.
+    function applyAllToggles() {
+        const flags = {
+            lines:      document.getElementById('lines-toggle')?.checked ?? true,
+            points:     document.getElementById('points-toggle')?.checked ?? true,
+            pixel:      document.getElementById('art-toggle')?.checked ?? true,
+            fill:       document.getElementById('fill-toggle')?.checked ?? false,
+            morphLines: document.getElementById('correspondence-toggle')?.checked ?? false,
+        };
+        const setDisp = (el, on) => { el.style.display = on ? '' : 'none'; };
+        const apply = (layer) => {
+            layer.querySelectorAll('[data-kind="stroke"]').forEach(e => setDisp(e, flags.lines));
+            layer.querySelectorAll('[data-kind="point"]').forEach(e => setDisp(e, flags.points));
+            layer.querySelectorAll('[data-kind="fill"]').forEach(e => setDisp(e, flags.fill));
+            layer.querySelectorAll('[data-kind="ghost"]').forEach(e => setDisp(e, flags.fill));
+            layer.querySelectorAll('[data-kind="corr-line"]').forEach(e => setDisp(e, flags.morphLines));
+        };
+        apply(overlay);
+        apply(stiftOutlineSvg);
+        // Morph paths share fill with the pixel ink: fill OR stroke-only.
+        overlay.querySelectorAll('path[data-kind="stroke"][data-source="morph"]').forEach(p => {
+            p.setAttribute('fill', flags.fill ? '#adff2f' : 'none');
         });
+        // PIXEL: opacity, not visibility — keeps mouse events working on
+        // stiftCanvas and avoids clash with display='none' set by renderBBoxes.
+        pix.style.opacity = flags.pixel ? '' : '0';
+        tex.style.opacity = flags.pixel ? '' : '0';
+        stiftCanvas.style.opacity = flags.pixel ? '' : '0';
     }
+    // Back-compat aliases — other modules still call these individually
+    // (e.g. draw20-stift onAfterOutlinesChanged callback, draw20-render
+    // applyToggles after drawContours). All route to applyAllToggles now.
+    const applyLinesToggle = applyAllToggles;
+    const applyPointsToggle = applyAllToggles;
+    const applyArtToggle = applyAllToggles;
+    const applyFillToggle = applyAllToggles;
     function attachToggles() {
-        const lt = document.getElementById('lines-toggle');
-        const pt = document.getElementById('points-toggle');
-        const at = document.getElementById('art-toggle');
-        const ft = document.getElementById('fill-toggle');
-        if (!lt || !pt || !at || !ft) { setTimeout(attachToggles, 50); return; }
-        lt.addEventListener('change', applyLinesToggle);
-        pt.addEventListener('change', applyPointsToggle);
-        at.addEventListener('change', applyArtToggle);
-        ft.addEventListener('change', applyFillToggle);
-        applyLinesToggle();
-        applyPointsToggle();
-        applyArtToggle();
-        applyFillToggle();
+        const ids = ['lines-toggle', 'points-toggle', 'art-toggle', 'fill-toggle', 'correspondence-toggle'];
+        const els = ids.map(id => document.getElementById(id));
+        if (els.some(e => !e)) { setTimeout(attachToggles, 50); return; }
+        els.forEach(e => e.addEventListener('change', applyAllToggles));
+        applyAllToggles();
     }
     attachToggles();
+    // Cross-module hook: renderMorph (in draw20-morph.js) must reapply
+    // toggles after creating new SVG elements. Phase B will wire this via
+    // the factory API; for now expose globally.
+    if (typeof window !== 'undefined') window.__draw20ApplyAllToggles = applyAllToggles;
 
     // L / P keys mirror the legacy points/lines toggles — but legacy just
     // flips `.checked` without dispatching a change event, so the draw20
@@ -393,8 +404,11 @@ function createDraw20UI({
     window.addEventListener('resize', positionRingBtn);
 
     return {
-        // Expose toggles so other code (e.g. stift's onAfterOutlinesChanged)
-        // can call them after re-rendering outlines.
+        // Centralized toggle pass — single entry point. Other code (stift's
+        // onAfterOutlinesChanged, drawContours epilogue, etc.) should call
+        // this after re-rendering layers.
+        applyAllToggles,
+        // Back-compat aliases (route to applyAllToggles internally).
         applyLinesToggle, applyPointsToggle, applyArtToggle, applyFillToggle,
         // Expose setters so init() can also kick the initial selection
         // path manually if needed.
