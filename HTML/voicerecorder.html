@@ -412,13 +412,32 @@
 
             if (!isRecording) {
                 try {
+                    if (!navigator.mediaDevices?.getUserMedia) {
+                        throw new Error('getUserMedia nicht verfügbar (HTTPS nötig)');
+                    }
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
+
+                    // pick a supported MIME type — Android often lacks audio/webm
+                    const candidates = [
+                        'audio/webm;codecs=opus',
+                        'audio/webm',
+                        'audio/ogg;codecs=opus',
+                        'audio/mp4;codecs=mp4a.40.2',
+                        'audio/mp4',
+                        ''   // fallback: let browser decide
+                    ];
+                    let mimeType = '';
+                    for (const c of candidates) {
+                        if (c === '' || MediaRecorder.isTypeSupported(c)) { mimeType = c; break; }
+                    }
+
+                    mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+                    const usedType = mediaRecorder.mimeType || mimeType || 'audio/webm';
 
                     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
                     mediaRecorder.onstop = async () => {
                         if (audioUrl) URL.revokeObjectURL(audioUrl);
-                        currentBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        currentBlob = new Blob(audioChunks, { type: usedType });
                         audioUrl = URL.createObjectURL(currentBlob);
                         audioEl  = new Audio(audioUrl);
                         btnPlay.disabled = false;
@@ -434,9 +453,12 @@
                     btnRecord.classList.add('active');
                     btnPlay.disabled = true;
 
-                    if (recognition) recognition.start();
+                    try { if (recognition) recognition.start(); } catch (e) { /* recognition may not be available */ }
 
-                } catch (err) { /* no mic */ }
+                } catch (err) {
+                    // surface error in the transcript area so user can see what failed
+                    transcriptEl.textContent = '[Mikrofon-Fehler] ' + (err && err.message ? err.message : err);
+                }
 
             } else {
                 if (recognition) recognition.stop();
@@ -468,6 +490,14 @@
         });
 
         // ── Download (audio + transcript sidecar) ────────────────
+        function audioExt(blob) {
+            const t = (blob.type || '').toLowerCase();
+            if (t.includes('mp4'))  return '.m4a';
+            if (t.includes('ogg'))  return '.ogg';
+            if (t.includes('wav'))  return '.wav';
+            if (t.includes('mpeg')) return '.mp3';
+            return '.webm';
+        }
         btnDownload.addEventListener('click', () => {
             if (!currentBlob) return;
             const d = new Date();
@@ -477,7 +507,7 @@
             // audio file
             const a1 = document.createElement('a');
             a1.href = URL.createObjectURL(currentBlob);
-            a1.download = baseName + '.webm';
+            a1.download = baseName + audioExt(currentBlob);
             a1.click();
             URL.revokeObjectURL(a1.href);
 
