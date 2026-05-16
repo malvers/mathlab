@@ -105,30 +105,6 @@ function createDraw20Morph({
             idxMap: res.map(t => t[2]),
         };
     }
-    // BB-Nearest pairing — currently unused by the morph but kept for
-    // potential future visualisations. Pure helper, no closure deps.
-    function mapByBBoxNearest(p, l) {
-        const pBB = bboxOfPts(p), lBB = bboxOfPts(l);
-        const pW = Math.max(1e-6, pBB.maxX - pBB.minX);
-        const pH = Math.max(1e-6, pBB.maxY - pBB.minY);
-        const lW = Math.max(1e-6, lBB.maxX - lBB.minX);
-        const lH = Math.max(1e-6, lBB.maxY - lBB.minY);
-        const pN = p.map(q => [(q.x - pBB.minX) / pW, (q.y - pBB.minY) / pH]);
-        const lN = l.map(q => [(q.x - lBB.minX) / lW, (q.y - lBB.minY) / lH]);
-        const map = new Array(p.length).fill(0);
-        for (let i = 0; i < p.length; i++) {
-            let bestJ = 0, bestD = Infinity;
-            const pxi = pN[i][0], pyi = pN[i][1];
-            for (let j = 0; j < l.length; j++) {
-                const dx = lN[j][0] - pxi, dy = lN[j][1] - pyi;
-                const d = dx * dx + dy * dy;
-                if (d < bestD) { bestD = d; bestJ = j; }
-            }
-            map[i] = bestJ;
-        }
-        return map;
-    }
-
     // ── Morph render helpers (Phase B extraction) ───────────────────────────
     const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -398,7 +374,6 @@ function createDraw20Morph({
     function buildStiftMorphPairs(latexContoursList) {
         stiftMorphPairs.length = 0;
         const stiftContours = getSC();
-        // log(`🔧 buildStiftMorphPairs: stift=${stiftContours ? stiftContours.length : 'null'} latArg=${latexContoursList ? latexContoursList.length : 'null'}`);
         if (!stiftContours || !stiftContours.length) return;
         // If the caller didn't pass LaTeX contours, fetch them now.
         let lat = latexContoursList;
@@ -413,15 +388,12 @@ function createDraw20Morph({
 
         const m = computeMatchIds(stiftContours, lat);
         const stiftId = m.pngId, latId = m.latId;
-        // log(`🔧 match: stiftIds=[${stiftId.join(',')}] latIds=[${latId.join(',')}]`);
         if (m.idToPair) {
             const pairsList = [];
             for (const [id, p] of m.idToPair) pairsList.push(`${id}:png=${p.png}/lat=${p.lat}`);
-            // log(`🔧 idToPair: ${pairsList.join(' | ')}`);
         }
         if (m.plausibility && m.plausibility.matches) {
             const ms = m.plausibility.matches.map(mm => `pIdx=${mm.pngIdx}→lIdx=${mm.latIdx} score=${mm.score?.toFixed(2)} verdict=${mm.verdict}`);
-            // log(`🔧 plausibility: ${ms.join(' | ')}`);
         }
 
         // stift natural → wrap pre-transform CSS
@@ -476,7 +448,6 @@ function createDraw20Morph({
         // Pair them 1:1 by canonical outer order so the user still gets a
         // morph. Holes are paired by index within each outer pair.
         if (stiftMorphPairs.length === 0 && sCls.outers.length && lCls.outers.length) {
-            // log('🔧 fallback: forcing 1:1 outer pairing (matching rejected all)');
             const nP = Math.min(sCls.outers.length, lCls.outers.length);
             for (let k = 0; k < nP; k++) {
                 const so = sCls.outers[k];
@@ -488,7 +459,6 @@ function createDraw20Morph({
                 stiftMorphPairs.push({ mid: k, srcPts: sp, dstPts: lp, srcHoles: sh, dstHoles: lh });
             }
         }
-        // log(`🔧 stiftMorphPairs built: ${stiftMorphPairs.length} pair(s)`);
     }
 
     // ── ► MORPH animation loop ──────────────────────────────────────────────
@@ -517,7 +487,6 @@ function createDraw20Morph({
                 // Log point count of the finished morph polygon — once,
                 // only at end-of-animation (not during each frame).
                 const morphPts = morphLayer.querySelectorAll('circle[data-source="morph"]').length;
-                // log(`🎯 morph done: ${morphPts} pts`);
             }
         }
         tick();

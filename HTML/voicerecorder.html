@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Voice Recorder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Raleway:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
-            min-height: 100vh;
+            background: rgb(0, 0, 20);
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .btn-row {
             display: flex;
-            gap: 48px;
+            gap: 16px;
             align-items: center;
+            width: min(560px, 90vw);
         }
 
         .btn {
-            width: 120px;
-            height: 120px;
+            flex: 1;
+            height: clamp(48px, 12vw, 60px);
             border-radius: 16px;
             cursor: pointer;
             display: flex;
@@ -33,61 +38,210 @@
             justify-content: center;
             gap: 12px;
             outline: none;
-            font-family: 'Orbitron', sans-serif;
             font-size: 0.6rem;
             letter-spacing: 0.25em;
             color: rgba(255,255,255,0.7);
-            background: rgba(8, 18, 38, 0.95);
+            background: rgba(0, 0, 20, 0.95);
             transition: transform 0.12s;
+        }
+        .btn svg {
+            width: clamp(26px, 7vw, 36px);
+            height: clamp(26px, 7vw, 36px);
         }
         .btn:active { transform: scale(0.93); }
 
-        /* Υ (Rot) #C41E3A */
         #btn-record {
-            border: 2px solid #C41E3A;
-            box-shadow: 0 0 18px rgba(196,30,58,0.6), inset 0 0 30px rgba(196,30,58,0.08);
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgb(245, 194, 66);
+            box-shadow: 0 0 8px rgba(245,194,66,0.35);
         }
-        #btn-record.active {
-            animation: pulse-rec 1s infinite;
-        }
+        #btn-record.active { animation: pulse-rec 1s infinite; }
 
-        /* φ (Grün) #6BA043 */
         #btn-play {
-            border: 2px solid #6BA043;
-            box-shadow: 0 0 18px rgba(107,160,67,0.6), inset 0 0 30px rgba(107,160,67,0.08);
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgb(121, 158, 49);
+            box-shadow: 0 0 8px rgba(121,158,49,0.35);
         }
         #btn-play:disabled {
-            opacity: 0.22;
             cursor: not-allowed;
-            box-shadow: none;
+        }
+        #btn-play:disabled svg polygon {
+            fill: #444 !important;
         }
 
         @keyframes pulse-rec {
-            0%, 100% { box-shadow: 0 0 18px rgba(196,30,58,0.6), inset 0 0 30px rgba(196,30,58,0.08); }
-            50%       { box-shadow: 0 0 44px rgba(196,30,58,1),   inset 0 0 50px rgba(196,30,58,0.18); }
+            0%, 100% { box-shadow: 0 0 8px rgba(245,194,66,0.35); }
+            50%       { box-shadow: 0 0 20px rgba(245,194,66,0.7); }
+        }
+
+        #transcript-box {
+            width: min(560px, 90vw);
+            flex: 1;
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
+            overflow: hidden;
+            display: flex;
+            position: relative;
+        }
+
+        #btn-copy {
+            position: absolute;
+            top: 6px;
+            right: 13px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(8, 18, 38, 0.85);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            z-index: 5;
+            backdrop-filter: blur(4px);
+            transition: background 0.18s, border-color 0.18s, transform 0.12s;
+        }
+        #btn-copy:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: rgba(0, 210, 255, 0.7);
+        }
+        #btn-copy:active { transform: scale(0.92); }
+        #btn-copy svg {
+            width: 16px;
+            height: 16px;
+            stroke: rgba(0, 210, 255, 0.7);
+            transition: stroke 0.18s;
+        }
+        #btn-copy:hover svg { stroke: rgba(0, 210, 255, 1); }
+        #btn-copy.copied {
+            border-color: rgb(121, 158, 49);
+            background: rgba(121, 158, 49, 0.18);
+        }
+        #btn-copy.copied svg { stroke: rgb(121, 158, 49); }
+
+        #btn-fullscreen {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            z-index: 10;
+            opacity: 0;
+        }
+        #btn-fullscreen:hover { opacity: 0.15; background: rgba(0, 210, 255, 0.4); }
+        #transcript-inner {
+            flex: 1;
+            padding: clamp(12px, 3vw, 16px) clamp(14px, 4vw, 20px);
+            color: rgba(200, 200, 200, 0.85);
+            font-family: 'Raleway', sans-serif;
+            font-size: clamp(0.85rem, 2.8vw, 0.95rem);
+            letter-spacing: 0.06em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(72, 88, 112, 0.95) rgba(8, 18, 38, 0.9);
+        }
+        #transcript-inner::-webkit-scrollbar {
+            width: 11px;
+        }
+        #transcript-inner::-webkit-scrollbar-track {
+            background: rgba(8, 18, 38, 0.9);
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+        #transcript-inner::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg,
+                rgba(78, 92, 118, 0.95) 0%,
+                rgba(52, 64, 86, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid rgba(34, 42, 58, 0.85);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+        }
+        #transcript-inner::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg,
+                rgba(92, 108, 134, 0.98) 0%,
+                rgba(68, 82, 108, 0.95) 100%);
+            box-shadow: 0 0 10px rgba(100, 118, 145, 0.22);
+        }
+
+        #btn-download {
+            width: min(560px, 90vw);
+            height: clamp(48px, 12vw, 60px);
+            border-radius: 12px;
+            cursor: pointer;
+            outline: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+            letter-spacing: 0.3em;
+            color: rgba(0, 210, 255, 0.95);
+            background: rgba(8, 18, 38, 0.9);
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.28);
+            transition: transform 0.12s, background 0.12s;
+        }
+        #btn-download:hover:not(:disabled) {
+            background: rgba(0, 210, 255, 0.08);
+        }
+        #btn-download:active:not(:disabled) { transform: scale(0.97); }
+        #btn-download:disabled {
+            cursor: not-allowed;
+            color: rgba(0, 210, 255, 0.25);
+            border-color: rgba(0, 210, 255, 0.25);
+            box-shadow: none;
+        }
+        #btn-download.unsaved {
+            color: rgb(245, 194, 66);
+            border-color: rgb(245, 194, 66);
+            box-shadow: 0 0 8px rgba(245, 194, 66, 0.4);
+            animation: pulse-warn 1.6s infinite;
+        }
+        @keyframes pulse-warn {
+            0%, 100% { box-shadow: 0 0 8px rgba(245, 194, 66, 0.4); }
+            50%       { box-shadow: 0 0 18px rgba(245, 194, 66, 0.8); }
         }
     </style>
 </head>
 <body>
     <div class="btn-row">
         <button class="btn" id="btn-record" title="Record">
-            <svg width="38" height="38" viewBox="0 0 40 40">
-                <circle cx="20" cy="20" r="14" fill="white"/>
+            <svg viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="14" fill="rgb(245, 194, 66)"/>
             </svg>
-            REC
         </button>
 
         <button class="btn" id="btn-play" title="Play" disabled>
-            <svg width="38" height="38" viewBox="0 0 52 52">
-                <polygon points="12,4 48,26 12,48" fill="white"/>
+            <svg viewBox="0 0 52 52">
+                <polygon points="14,6 46,26 14,46" fill="rgb(121, 158, 49)"/>
             </svg>
-            PLAY
         </button>
     </div>
 
+    <div id="transcript-box">
+        <button id="btn-copy" title="Copy">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="11" height="11" rx="2.5"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+        </button>
+        <div id="transcript-inner">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div></div>
+
+    <button id="btn-download" disabled>DOWNLOAD</button>
+
+    <button id="btn-fullscreen" title="Fullscreen"></button>
+
     <script>
-        const btnRecord = document.getElementById('btn-record');
-        const btnPlay   = document.getElementById('btn-play');
+        const btnRecord    = document.getElementById('btn-record');
+        const btnPlay      = document.getElementById('btn-play');
+        const btnDownload  = document.getElementById('btn-download');
+        const transcriptEl = document.getElementById('transcript-inner');
 
         let mediaRecorder = null;
         let audioChunks   = [];
@@ -95,7 +249,87 @@
         let audioEl       = null;
         let isRecording   = false;
         let isPlaying     = false;
+        let recognition   = null;
+        let currentBlob   = null;
+        let isDirty       = false; // recording exists but not downloaded
 
+        // ── IndexedDB ────────────────────────────────────────────
+        const DB_NAME = 'voicerec', STORE = 'recordings', KEY = 'current';
+        function openDB() {
+            return new Promise((res, rej) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+                req.onsuccess = () => res(req.result);
+                req.onerror   = () => rej(req.error);
+            });
+        }
+        async function saveToDB(blob, transcript) {
+            const db = await openDB();
+            const tx = db.transaction(STORE, 'readwrite');
+            tx.objectStore(STORE).put({ blob, transcript, savedAt: Date.now() }, KEY);
+            return new Promise(res => tx.oncomplete = () => res());
+        }
+        async function loadFromDB() {
+            const db = await openDB();
+            const tx = db.transaction(STORE, 'readonly');
+            return new Promise(res => {
+                const r = tx.objectStore(STORE).get(KEY);
+                r.onsuccess = () => res(r.result || null);
+                r.onerror   = () => res(null);
+            });
+        }
+        async function clearDB() {
+            const db = await openDB();
+            const tx = db.transaction(STORE, 'readwrite');
+            tx.objectStore(STORE).delete(KEY);
+            return new Promise(res => tx.oncomplete = () => res());
+        }
+
+        function setDirty(v) {
+            isDirty = v;
+            btnDownload.classList.toggle('unsaved', v);
+        }
+
+        // ── Speech recognition ───────────────────────────────────
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let finalText = '';
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous    = true;
+            recognition.interimResults = true;
+            recognition.lang          = 'de-DE';
+
+            recognition.onresult = e => {
+                let interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const t = e.results[i][0].transcript;
+                    e.results[i].isFinal ? (finalText += t + ' ') : (interim = t);
+                }
+                transcriptEl.textContent = finalText + interim;
+            };
+            recognition.onend = () => { if (isRecording) recognition.start(); };
+        }
+
+        // ── Restore from IndexedDB on load ───────────────────────
+        // TEMP DISABLED for debug
+        // (async () => {
+        //     const stored = await loadFromDB();
+        //     if (stored && stored.blob) {
+        //         currentBlob = stored.blob;
+        //         if (audioUrl) URL.revokeObjectURL(audioUrl);
+        //         audioUrl = URL.createObjectURL(currentBlob);
+        //         audioEl  = new Audio(audioUrl);
+        //         btnPlay.disabled = false;
+        //         btnDownload.disabled = false;
+        //         if (stored.transcript) {
+        //             finalText = stored.transcript;
+        //             transcriptEl.textContent = finalText;
+        //         }
+        //         setDirty(true);
+        //     }
+        // })();
+
+        // ── Record ───────────────────────────────────────────────
         btnRecord.addEventListener('click', async () => {
             if (isPlaying) return;
 
@@ -103,15 +337,19 @@
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
-                    audioChunks   = [];
 
                     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-                    mediaRecorder.onstop = () => {
+                    mediaRecorder.onstop = async () => {
                         if (audioUrl) URL.revokeObjectURL(audioUrl);
-                        audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/webm' }));
+                        currentBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        audioUrl = URL.createObjectURL(currentBlob);
                         audioEl  = new Audio(audioUrl);
                         btnPlay.disabled = false;
+                        btnDownload.disabled = false;
                         stream.getTracks().forEach(t => t.stop());
+
+                        await saveToDB(currentBlob, finalText);
+                        setDirty(true);
                     };
 
                     mediaRecorder.start();
@@ -119,15 +357,19 @@
                     btnRecord.classList.add('active');
                     btnPlay.disabled = true;
 
+                    if (recognition) recognition.start();
+
                 } catch (err) { /* no mic */ }
 
             } else {
+                if (recognition) recognition.stop();
                 mediaRecorder.stop();
                 isRecording = false;
                 btnRecord.classList.remove('active');
             }
         });
 
+        // ── Play ─────────────────────────────────────────────────
         btnPlay.addEventListener('click', () => {
             if (isRecording || !audioEl || isPlaying) return;
             isPlaying = true;
@@ -137,6 +379,67 @@
                 isPlaying = false;
                 audioEl = new Audio(audioUrl);
             };
+        });
+
+        // ── Download ─────────────────────────────────────────────
+        btnDownload.addEventListener('click', () => {
+            if (!currentBlob) return;
+            const d = new Date();
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(currentBlob);
+            a.download = `recording ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}.webm`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            setDirty(false);
+        });
+
+        // ── Copy transcript to clipboard ─────────────────────────
+        const btnCopy = document.getElementById('btn-copy');
+        btnCopy.addEventListener('click', async () => {
+            const text = transcriptEl.textContent.trim();
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                btnCopy.classList.add('copied');
+                setTimeout(() => btnCopy.classList.remove('copied'), 900);
+            } catch (e) { /* ignore */ }
+        });
+
+        // ── Fullscreen toggle ────────────────────────────────────
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.();
+            } else {
+                document.exitFullscreen?.();
+            }
+        }
+        document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+
+        // Long-press anywhere on body to toggle fullscreen (mobile-friendly)
+        let lpTimer = null;
+        const LP_MS = 600;
+        function lpStart(e) {
+            // ignore touches on interactive buttons
+            if (e.target.closest('button')) return;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(() => { toggleFullscreen(); lpTimer = null; }, LP_MS);
+        }
+        function lpCancel() { clearTimeout(lpTimer); lpTimer = null; }
+        document.body.addEventListener('touchstart', lpStart, { passive: true });
+        document.body.addEventListener('touchend',   lpCancel);
+        document.body.addEventListener('touchmove',  lpCancel);
+        document.body.addEventListener('mousedown',  lpStart);
+        document.body.addEventListener('mouseup',    lpCancel);
+        document.body.addEventListener('mouseleave', lpCancel);
+
+        // ── Warn on close if unsaved ─────────────────────────────
+        window.addEventListener('beforeunload', e => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
         });
     </script>
 </body>
