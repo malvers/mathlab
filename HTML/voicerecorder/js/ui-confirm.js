@@ -17,9 +17,10 @@ export function uiConfirm(message) {
         const onOk     = () => cleanup(true);
         const onCancel = () => cleanup(false);
         const onKey    = e => {
-            if (e.key === 'Enter')  onOk();
+            if (e.key === 'Enter')  onCancel();
             if (e.key === 'Escape') onCancel();
         };
+        cancelEl.focus();
         okEl.addEventListener('click', onOk);
         cancelEl.addEventListener('click', onCancel);
         document.addEventListener('keydown', onKey);
