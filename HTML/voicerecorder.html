@@ -277,7 +277,10 @@
             letter-spacing: 0.05em;
             margin-top: -4px;
             flex-shrink: 0;
+            cursor: pointer;
+            user-select: none;
         }
+        #build-info:hover { color: rgba(0, 210, 255, 0.95); }
     </style>
 </head>
 <body>
@@ -433,11 +436,30 @@
                 transcriptEl.textContent = finalText + interim;
             };
             recognition.onend = () => {
-                savedFinal = finalText;
+                // promote session's final text into savedFinal with a trailing space
+                savedFinal = finalText.replace(/\s+$/, '') + (finalText ? ' ' : '');
+                finalText = savedFinal;
+                transcriptEl.textContent = finalText;
                 logRec(`end (finalText.len=${finalText.length})`);
-                if (!isRecording && currentBlob) {
+
+                if (isRecording) {
+                    // auto-restart so the silence-timeout doesn't permanently kill recognition
+                    try {
+                        recognition.start();
+                        logRec('recognition auto-restarted');
+                    } catch (e) {
+                        logRec(`recognition restart THREW: ${e.message || e}`);
+                    }
+                    return;
+                }
+
+                if (currentBlob) {
                     saveToDB(currentBlob, finalText);
                     logRec(`saveToDB called, transcript=${finalText.length} chars`);
+                }
+                // If MediaRecorder was skipped (test mode), no onstop will fire — dump log here
+                if (!currentBlob) {
+                    transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
                 }
             };
             recognition.onerror = e => {
@@ -448,8 +470,15 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 12:59';
-        document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
+        const BUILD_TIME = '2026-05-16 13:06';
+        const buildInfoEl = document.getElementById('build-info');
+        buildInfoEl.textContent = 'BT: ' + BUILD_TIME;
+        buildInfoEl.title = 'Klick: hart neu laden';
+        buildInfoEl.addEventListener('click', () => {
+            // cache-bust by appending a fresh timestamp param
+            const url = location.pathname + '?cb=' + Date.now() + location.hash;
+            location.replace(url);
+        });
 
         // ── Restore from IndexedDB on load ───────────────────────
         (async () => {
