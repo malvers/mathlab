@@ -231,9 +231,13 @@ function createDraw20UI({
         };
         apply(overlay);
         apply(stiftOutlineSvg);
-        // Morph paths share fill with the pixel ink: fill OR stroke-only.
+        // Morph paths fill: palette-coloured per matchId when on, transparent
+        // when off. Keeps the morph polygon visually tied to its pair color.
         overlay.querySelectorAll('path[data-kind="stroke"][data-source="morph"]').forEach(p => {
-            p.setAttribute('fill', flags.fill ? '#adff2f' : 'none');
+            const mid = parseInt(p.dataset.matchId || '-1', 10);
+            const color = (mid >= 0 && typeof draw20PaletteColor === 'function')
+                ? draw20PaletteColor(mid) : '#adff2f';
+            p.setAttribute('fill', flags.fill ? color : 'none');
         });
         // PIXEL: opacity, not visibility — keeps mouse events working on
         // stiftCanvas and avoids clash with display='none' set by renderBBoxes.

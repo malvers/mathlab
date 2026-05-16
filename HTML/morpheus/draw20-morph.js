@@ -331,13 +331,14 @@ function createDraw20Morph({
             // Main path first, ghost path on top (covers green at hole locations
             // when fully morphed at t=1 so the result looks like cut-out holes).
             if (pathD) {
+                const pairColor = draw20PaletteColor(pair.mid);
                 const path = document.createElementNS(SVG_NS, 'path');
                 path.setAttribute('d', pathD);
                 path.setAttribute('fill-rule', 'evenodd');
-                path.setAttribute('fill', fillOn ? '#adff2f' : 'none');
-                path.setAttribute('stroke', '#ffffff');
+                path.setAttribute('fill', fillOn ? pairColor : 'none');
+                path.setAttribute('stroke', pairColor);
                 path.setAttribute('stroke-width', String(1.5 / z));
-                path.setAttribute('stroke-opacity', '0.6');
+                path.setAttribute('stroke-opacity', '0.9');
                 path.dataset.kind = 'stroke';
                 path.dataset.source = 'morph';
                 path.dataset.matchId = String(pair.mid);

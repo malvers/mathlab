@@ -255,6 +255,9 @@ function createDraw20Stift({
         if (e.metaKey || e.ctrlKey) {
             if (e.key === 'z' || e.key === 'Z') {
                 e.preventDefault();
+                if (typeof DebugWindow !== 'undefined') {
+                    DebugWindow.log(`[stift] ⌘Z hit: shift=${e.shiftKey} idx=${historyIdx}/${strokeHistory.length - 1} strokes=${strokes.length}`);
+                }
                 if (e.shiftKey) redo();
                 else undo();
             }
