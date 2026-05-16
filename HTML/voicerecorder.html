@@ -448,7 +448,7 @@
         }
 
         // build timestamp — updated on every save
-        const BUILD_TIME = '2026-05-16 10:58';
+        const BUILD_TIME = '2026-05-16 11:11';
         document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
@@ -532,16 +532,18 @@
                         transcriptEl.textContent = '[DEBUG-LOG]\n' + recLog.join('\n') + '\n\n[TRANSCRIPT]\n' + (finalText || '(empty)');
                     };
 
-                    mediaRecorder.start();
                     isRecording = true;
                     btnRecord.classList.add('active');
                     btnPlay.disabled = true;
                     recLog = []; // fresh log per recording
-                    logRec('mediaRecorder.start');
 
+                    // start SpeechRecognition FIRST so it gets the mic before MediaRecorder.
+                    // On Pixel/Android MediaRecorder seems to lock the mic exclusively otherwise.
+                    let recognitionStarted = false;
                     try {
                         if (recognition) {
                             recognition.start();
+                            recognitionStarted = true;
                             logRec('recognition.start() called');
                         } else {
                             logRec('recognition is null');
@@ -549,6 +551,17 @@
                     } catch (e) {
                         logRec(`recognition.start THREW: ${e.message || e}`);
                     }
+
+                    // delay MediaRecorder so SpeechRecognition can finish opening audio.
+                    // ~600ms gives Pixel time to fire audiostart/speechstart.
+                    setTimeout(() => {
+                        try {
+                            mediaRecorder.start();
+                            logRec('mediaRecorder.start (delayed)');
+                        } catch (e) {
+                            logRec(`mediaRecorder.start THREW: ${e.message || e}`);
+                        }
+                    }, recognitionStarted ? 600 : 0);
 
                 } catch (err) {
                     // surface error in the transcript area so user can see what failed
