@@ -162,6 +162,9 @@
                         const el = document.getElementById('visitor-greeting');
                         if (!el) return;
                         const safe = visitorMsg.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+                        const align = visitorMsg.length > 60 ? 'left' : 'center';
+                        el.style.justifyContent = visitorMsg.length > 60 ? 'flex-start' : 'center';
+                        el.style.textAlign = align;
                         el.innerHTML = '<span style="overflow-wrap:break-word;">' + safe + '</span>';
                         if (!document.body.classList.contains('has-school')) {
                             el.style.display = 'flex';
@@ -1428,12 +1431,12 @@
                         '    </svg>',
                         '  </span>',
                         '</div>',
-                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4" maxlength="300"',
+                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4" maxlength="260"',
                         '  style="background:rgba(0,10,30,0.9);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);',
                         '         border-radius:4px;padding:6px 8px;font-family:Orbitron,sans-serif;font-size:11px;',
                         '         letter-spacing:0.05em;outline:none;width:100%;box-sizing:border-box;resize:vertical;',
                         '         line-height:1.6;"></textarea>',
-                        '<div id="wc-pop-counter" style="font-size:9px;opacity:0.4;text-align:right;letter-spacing:0.05em;">0 / 300</div>',
+                        '<div id="wc-pop-counter" style="font-size:9px;opacity:0.4;text-align:right;letter-spacing:0.05em;">0 / 260</div>',
                         '<div style="display:flex;gap:8px;">',
                         '  <button id="wc-pop-copy" style="font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;',
                         '    flex:1;padding:6px 12px;cursor:pointer;background:rgba(0,210,255,0.08);color:rgba(0,210,255,0.85);',
@@ -1449,8 +1452,8 @@
                     const inp = document.getElementById('wc-pop-input');
                     const counter = document.getElementById('wc-pop-counter');
                     inp.addEventListener('input', () => {
-                        counter.textContent = inp.value.length + ' / 300';
-                        counter.style.opacity = inp.value.length > 270 ? '0.85' : '0.4';
+                        counter.textContent = inp.value.length + ' / 260';
+                        counter.style.opacity = inp.value.length > 230 ? '0.85' : '0.4';
                     });
                     const copyBtn = document.getElementById('wc-pop-copy');
 
