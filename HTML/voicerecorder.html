@@ -8,28 +8,33 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body { height: 100%; }
         body {
             background: rgb(0, 0, 20);
-            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh;   /* dynamic viewport height — survives mobile URL bar */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 16px;
-            padding: 16px 0;
+            gap: clamp(8px, 2vh, 16px);
+            padding: clamp(8px, 2vh, 16px) 0;
             font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
         }
 
         .btn-row {
             display: flex;
             gap: 16px;
             align-items: center;
-            width: min(560px, 90vw);
+            width: min(560px, 92vw);
+            flex-shrink: 0;
         }
 
         .btn {
             flex: 1;
-            height: clamp(48px, 12vw, 60px);
+            height: clamp(44px, 10vh, 60px);
+            flex-shrink: 0;
             border-radius: 16px;
             cursor: pointer;
             display: flex;
@@ -83,8 +88,9 @@
         }
 
         #transcript-box {
-            width: min(560px, 90vw);
-            flex: 1;
+            width: min(560px, 92vw);
+            flex: 1 1 0;
+            min-height: 0;   /* allow it to shrink inside flex column */
             background: rgba(8, 18, 38, 0.9);
             border: 1px solid rgba(0, 210, 255, 0.8);
             border-radius: 12px;
@@ -210,8 +216,9 @@
         }
 
         #btn-download {
-            width: min(560px, 90vw);
-            height: clamp(48px, 12vw, 60px);
+            width: min(560px, 92vw);
+            height: clamp(44px, 10vh, 60px);
+            flex-shrink: 0;
             border-radius: 12px;
             cursor: pointer;
             outline: none;
@@ -262,6 +269,15 @@
             0%, 100% { opacity: 1; }
             50%       { opacity: 0.35; }
         }
+
+        #build-info {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.6rem;
+            color: rgba(120, 160, 200, 0.45);
+            letter-spacing: 0.05em;
+            margin-top: -6px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -289,6 +305,8 @@
             <path d="M12 3 v12 m-5 -5 l5 5 l5 -5 M5 20 h14"/>
         </svg>
     </button>
+
+    <div id="build-info"></div>
 
     <div id="mini-stack">
         <button class="mini-btn" id="mb-mini-toggle">MINI MODE</button>
@@ -383,9 +401,22 @@
             recognition.onend = () => {
                 // promote anything finalized in this session, then restart if still recording
                 savedFinal = finalText;
-                if (isRecording) recognition.start();
+                if (isRecording) {
+                    try { recognition.start(); }
+                    catch (e) { transcriptEl.textContent += `\n[Recognition-Restart-Fehler] ${e.message || e}`; }
+                }
             };
+            recognition.onerror = e => {
+                transcriptEl.textContent += `\n[Recognition-Fehler] ${e.error || ''} ${e.message || ''}`;
+            };
+        } else {
+            // surface the fact that speech recognition isn't available
+            transcriptEl.textContent = '[SpeechRecognition nicht verfügbar in diesem Browser]';
         }
+
+        // build timestamp — updated on every save
+        const BUILD_TIME = '2026-05-16 10:35';
+        document.getElementById('build-info').textContent = 'BT: ' + BUILD_TIME;
 
         // ── Restore from IndexedDB on load ───────────────────────
         (async () => {

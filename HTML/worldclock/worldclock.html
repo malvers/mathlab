@@ -318,6 +318,8 @@
         }
 
         window.useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
+        const CW = new URLSearchParams(window.location.search).get('dir') === 'cw';
+        const dirSign = CW ? -1 : 1;
         let globeInstance = null;
         let globeIconHitbox = null;
 
@@ -858,10 +860,10 @@
             const r = size / 2;
             const time = getDisplayTime();
             const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-            const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
+            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
 
             cities.forEach(city => {
-                const cityAngle = (-city.lon + mapRotation - 90);
+                const cityAngle = (dirSign * (-city.lon) + mapRotation - 90);
                 let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
 
                 // If distance is near the plaques and angle is close
@@ -939,7 +941,7 @@
                     if (delta > Math.PI) delta -= Math.PI * 2;
                     if (delta < -Math.PI) delta += Math.PI * 2;
 
-                    manualOffset -= delta * (1440 / (Math.PI * 2));
+                    manualOffset -= dirSign * delta * (1440 / (Math.PI * 2));
                     lastMouseAngle = currentAngle;
                 }
                 hoveredCity = null;
@@ -1098,7 +1100,7 @@
                     if (delta < -Math.PI) delta += Math.PI * 2;
                     // Mirror mousemove: drive manualOffset so touchend triggers
                     // the same smooth return-to-real-time animation.
-                    manualOffset -= delta * (1440 / (Math.PI * 2));
+                    manualOffset -= dirSign * delta * (1440 / (Math.PI * 2));
                     lastMouseAngle = currentAngle;
                 }
             }
@@ -1174,9 +1176,9 @@
             // (Glow removed)
 
             // 1. Draw Map (Rotating)
-            if (autoRotationEnabled) autoRotation -= 0.02; 
+            if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
             // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
-            const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
+            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
             
             ctx.save();
             ctx.rotate(mapRotation * Math.PI / 180);
@@ -1192,6 +1194,7 @@
             ctx.clip();
             
             if (!window.useGlobe) {
+                if (CW) ctx.scale(-1, 1);
                 ctx.drawImage(mapImg, -r, -r, size, size);
             }
             ctx.restore();
@@ -1214,8 +1217,7 @@
             const cityLineHeight = r * 0.038;
             const cityShadowBlur = r * 0.031;
             cities.forEach(city => {
-                // FLIPPED: Use -city.lon because the hour ring is reversed (CCW)
-                const cityAngle = (-city.lon) * Math.PI / 180 - Math.PI / 2;
+                const cityAngle = dirSign * (-city.lon) * Math.PI / 180 - Math.PI / 2;
                 const markerR = (r * 0.9) - markerInset;
                 const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
@@ -1298,7 +1300,7 @@
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             for (let i = 1; i <= 24; i++) {
-                const angle = (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
+                const angle = dirSign * (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
                 const tx = Math.cos(angle) * (r * 1.15 - hourLabelInset);
                 const ty = Math.sin(angle) * (r * 1.15 - hourLabelInset);
 
@@ -1614,7 +1616,7 @@
 
                 // Connecting Line (only in normal mode)
                 if (!window.useGlobe) {
-                    const cityAngle = (-targetCity.lon + mapRotation - 90) * Math.PI / 180;
+                    const cityAngle = (dirSign * (-targetCity.lon) + mapRotation - 90) * Math.PI / 180;
                     const startX = Math.cos(cityAngle) * (r * 0.78);
                     const startY = Math.sin(cityAngle) * (r * 0.78);
 
