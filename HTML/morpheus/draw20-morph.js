@@ -208,9 +208,17 @@ function createDraw20Morph({
     // Morph one ring pair (outer-outer, hole-hole). When one side is
     // missing, a tiny ghost ring is synthesised at the partner's centroid
     // (so the morph "spawns" a vanishing hole rather than jumping).
+    //
+    //   inPlace = true  → endpoint is lInPlace (target translated to src bbox).
+    //                     Used in FORMEL/SYMBOL mode: morph stays at the
+    //                     source location, only the shape changes.
+    //   inPlace = false → endpoint is l + shiftX (raw target position with
+    //                     optional offset). Used in STIFT mode where the
+    //                     morph travels next to the LaTeX target pane.
+    //
     // Returns { subpath, pts, isGhost } or null if both sides degenerate.
     const GHOST_SCALE = 0.05;
-    function morphRingPair(sr, dr, t, shiftX) {
+    function morphRingPair(sr, dr, t, shiftX, inPlace) {
         const srOk = sr && sr.length >= 3;
         const drOk = dr && dr.length >= 3;
         if (!srOk && !drOk) return null;
@@ -239,11 +247,12 @@ function createDraw20Morph({
         const lInPlace = alignDstToSrcBBox(p, l);
         const idxMap = resolveCorrespondence(p, lInPlace);
         if (!idxMap) return null;
+        const target = inPlace ? lInPlace : l;
         const pts = p.map((pp, i) => {
             const j = idxMap[i];
             return {
-                x: (1 - t) * pp.x + t * (l[j].x + shiftX),
-                y: (1 - t) * pp.y + t * l[j].y,
+                x: (1 - t) * pp.x + t * (target[j].x + shiftX),
+                y: (1 - t) * pp.y + t * target[j].y,
             };
         });
         let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
@@ -263,6 +272,9 @@ function createDraw20Morph({
         const pr = (2 / z).toFixed(2);
         const fillOn = document.getElementById('fill-toggle')?.checked ?? false;
         const pointsOn = document.getElementById('points-toggle')?.checked ?? true;
+        // In-place morph for formula/symbol mode (target = lInPlace).
+        // Stift mode keeps the legacy "travel to LaTeX pane" behavior.
+        const inPlace = !useStift;
         for (const pair of pairs) {
             const srcOuter = pair[srcKey];
             const dstOuter = pair[dstKey];
@@ -272,10 +284,10 @@ function createDraw20Morph({
             const dstRings = [dstOuter, ...dstHolesArr];
             const numRings = Math.max(srcRings.length, dstRings.length);
             // Shift morph end-position 40px LEFT of LaTeX bbox so the morph
-            // lands NEXT TO the target rather than on top of it (stift mode);
-            // formula mode currently uses the same shift via legacy path.
+            // lands NEXT TO the target — STIFT MODE ONLY. Formula mode
+            // morphs in place (no translation across the pane).
             let shiftX = 0;
-            if (dstOuter && dstOuter.length >= 3) {
+            if (useStift && dstOuter && dstOuter.length >= 3) {
                 const bb = bboxOfPts(dstOuter);
                 shiftX = -((bb.maxX - bb.minX) + 40);
             }
@@ -283,7 +295,7 @@ function createDraw20Morph({
             let ghostPathD = '';
             const allPts = [];
             for (let r = 0; r < numRings; r++) {
-                const result = morphRingPair(srcRings[r], dstRings[r], t, shiftX);
+                const result = morphRingPair(srcRings[r], dstRings[r], t, shiftX, inPlace);
                 if (!result) continue;
                 if (result.isGhost) {
                     ghostPathD += (ghostPathD ? ' ' : '') + result.subpath;
