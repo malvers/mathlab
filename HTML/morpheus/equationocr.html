@@ -19,7 +19,10 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="../js/debug-window.js"></script>
-    <!-- Local API keys (gitignored). Missing file is fine — onerror swallows the 404. -->
+    <!-- API key: embedded.js (committed, deployed) sets window.GEMINI_API_KEY
+         for production; local.js (gitignored) loads after and can override
+         for local development. Missing local.js is fine — onerror swallows. -->
+    <script src="apikey.embedded.js"></script>
     <script src="apikey.local.js" onerror="this.remove()"></script>
 
     <style>
@@ -347,7 +350,7 @@
                 </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
-                    <div id="mouse-coord">x: —  y: —</div>
+                    <!-- <div id="mouse-coord">x: —  y: —</div> -->
                     <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">► ERKENNEN</button>
                 </div>
                 <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
