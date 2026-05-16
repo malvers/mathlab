@@ -47,6 +47,36 @@ const DEFAULT_PROMPT =
     "- No bounding boxes. Just the labels.\n" +
     "- If empty/unreadable: { \"latex\": \"(empty)\", \"tokens\": [] }";
 
+// Single-glyph prompt — used by per-object recognition where we send a
+// CROP of one drawn glyph and just need its LaTeX label.
+const SINGLE_GLYPH_PROMPT =
+    "This image shows a single mathematical glyph (one character, digit,\n" +
+    "operator, bracket, or accent — possibly multi-stroke like + = E).\n" +
+    "\n" +
+    "Return strict JSON, no markdown, no commentary:\n" +
+    "{ \"label\": \"<LaTeX of the glyph, no $ delimiters>\" }\n" +
+    "\n" +
+    "If unreadable / empty: { \"label\": \"?\" }";
+
+// Crop a rectangle of a source canvas onto a fresh canvas with optional
+// padding (px) added on every side. Background filled white so the OCR
+// preprocessing in geminiPrepareCanvas() sees a clean binary image.
+function geminiCropCanvas(srcCanvas, bbox, padding) {
+    const pad = (typeof padding === 'number') ? padding : 0;
+    const sx = Math.max(0, Math.floor(bbox.x - pad));
+    const sy = Math.max(0, Math.floor(bbox.y - pad));
+    const sw = Math.min(srcCanvas.width  - sx, Math.ceil(bbox.w + pad * 2));
+    const sh = Math.min(srcCanvas.height - sy, Math.ceil(bbox.h + pad * 2));
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, sw);
+    out.height = Math.max(1, sh);
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+    return out;
+}
+
 // Strip LaTeX math delimiters that Gemini sometimes wraps around the output.
 function geminiUnwrapLatex(latex) {
     if (!latex) return latex;
@@ -176,10 +206,12 @@ async function geminiRecognize(opts) {
 
 // Expose globally (no-module pattern used by the rest of the morpheus stack).
 if (typeof window !== 'undefined') {
-    window.geminiUnwrapLatex   = geminiUnwrapLatex;
-    window.geminiPrepareCanvas = geminiPrepareCanvas;
-    window.geminiRecognize     = geminiRecognize;
+    window.geminiUnwrapLatex     = geminiUnwrapLatex;
+    window.geminiPrepareCanvas   = geminiPrepareCanvas;
+    window.geminiCropCanvas      = geminiCropCanvas;
+    window.geminiRecognize       = geminiRecognize;
     window.GEMINI_DEFAULT_PROMPT = DEFAULT_PROMPT;
+    window.SINGLE_GLYPH_PROMPT   = SINGLE_GLYPH_PROMPT;
 }
 
 })();
