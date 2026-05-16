@@ -38,7 +38,7 @@
             border-color: rgba(0, 255, 255, 0.2);
             pointer-events: none; /* Don't block clicks */
         }
-        /* --- School Scheme: ?school=rahn | ?school=ibb --- */
+        /* --- School Scheme: ?school=ibb --- */
         body.has-school,
         body.has-school #side-panel {
             background: #e30613 !important;
@@ -55,24 +55,28 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, calc(-50% - 15vmin)) scale(0.5);
-            padding: clamp(10px, 2vmin, 18px) clamp(18px, 3.6vmin, 32px);
+            transform: translate(-50%, calc(-50% - 15vmin));
+            padding: clamp(8px, 1.6vmin, 16px) clamp(14px, 2.8vmin, 28px);
             background: rgba(0, 6, 22, 0.78);
             border: 1px solid rgba(0, 210, 255, 0.45);
             border-radius: 1.2vmin;
             box-shadow: 0 0 28px rgba(0, 210, 255, 0.25);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Raleway', sans-serif;
             font-weight: 300;
-            letter-spacing: 0.18em;
-            font-size: clamp(18px, 3.6vmin, 34px);
+            letter-spacing: 0.08em;
+            font-size: clamp(10px, 1.5vmin, 17px);
             color: #00d2ff;
             text-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
             text-align: center;
             white-space: normal;
-            max-width: clamp(200px, 40vmin, 480px);
-            overflow-wrap: break-word;
+            width: clamp(200px, 37vmin, 460px);
+            height: clamp(76px, 17.6vmin, 176px);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
             z-index: 2400;
             display: none;
@@ -87,24 +91,15 @@
         .school-logo {
             display: none;
         }
-        body.school-rahn #school-logo-rahn,
         body.school-ibb #school-logo-ibb {
             display: block;
             position: fixed;
-            top: 1.5vmin;
+            top: 4vmin;
             right: 2vmin;
             height: 9.6vmin;
             width: auto;
             z-index: 2500;
             pointer-events: none;
-        }
-        body.school-rahn #school-logo-rahn {
-            height: 10.6vmin;
-            /* Recolor entire SVG (alle Pfade) auf #E30613 */
-            filter: brightness(0) saturate(100%) invert(13%) sepia(99%) saturate(7470%) hue-rotate(354deg) brightness(95%) contrast(89%);
-        }
-        body.school-ibb #school-logo-ibb {
-            top: 4vmin;
         }
         /* --- Globe Mode: ?globe=1 --- */
         #globe-stage {
@@ -147,7 +142,7 @@
                 const raw = params.get('school');
                 const school = raw ? raw.toLowerCase() : null;
                 if (school) document.documentElement.dataset.school = school;
-                if (school === 'rahn' || school === 'ibb') {
+                if (school === 'ibb') {
                     document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.add('has-school');
                         document.body.classList.add('school-' + school);
@@ -166,9 +161,10 @@
                     document.addEventListener('DOMContentLoaded', () => {
                         const el = document.getElementById('visitor-greeting');
                         if (!el) return;
-                        el.textContent = visitorMsg;
+                        const safe = visitorMsg.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+                        el.innerHTML = '<span style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word;">' + safe + '</span>';
                         if (!document.body.classList.contains('has-school')) {
-                            el.style.display = 'block';
+                            el.style.display = 'flex';
                         }
                     });
                 }
@@ -202,7 +198,6 @@
         <div class="cover-piece" data-piece="right"></div>
     </div>
 
-    <img id="school-logo-rahn" class="school-logo" src="https://rahn.education/_assets/faebf5c3e8e16adc76561186ce16a8a4/Images/logo.svg" alt="Rahn">
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
 
     <nav id="mini-rail">
@@ -319,7 +314,6 @@
             } catch (e) { return ""; }
         }
 
-        const isRahnSchool = (new URLSearchParams(window.location.search).get('school') || '').toLowerCase() === 'rahn';
         window.useGlobe = new URLSearchParams(window.location.search).get('globe') === '1';
         let globeInstance = null;
         let globeIconHitbox = null;
@@ -653,10 +647,10 @@
             });
         }
 
+
         // URL-Parameter: ?city=Leipzig benennt Dresden um.
         // Zusätzlich beliebig viele weitere Overrides per Stadtname als Schlüssel:
         //   ?Tokio=Osaka&NewYork=Boston&Bombay=Mumbai
-        // (Schlüssel case-insensitive, Leerzeichen/Zeilenumbrüche werden ignoriert.)
         try {
             const params = new URLSearchParams(window.location.search);
             const norm = s => (s || '').toLowerCase().replace(/[\s\n]+/g, '');
@@ -1244,14 +1238,7 @@
                     grad.addColorStop(0, '#dd1144');
                     grad.addColorStop(1, '#1c0008');
                 } else if (city.highlight) {
-                    if (isRahnSchool) {
-                        grad.addColorStop(0, '#E30613');
-                        grad.addColorStop(1, '#7a0309');
-
-                        ctx.save();
-                        ctx.shadowBlur = cityShadowBlur;
-                        ctx.shadowColor = '#E30613';
-                    } else {
+                    {
                         grad.addColorStop(0, '#ffaa00');
                         grad.addColorStop(0.2, '#ffaa00');
                         grad.addColorStop(1, '#a05000');
@@ -1280,7 +1267,7 @@
                 
                 const dst = getDSTLabel(city.tz);
                 if (city.highlight) {
-                    ctx.fillStyle = isRahnSchool ? "#ffffff" : "rgb(0,0,40)";
+                    ctx.fillStyle = "rgb(0,0,40)";
                 } else if (dst === "SZ") {
                     ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
                 } else {
@@ -1441,11 +1428,12 @@
                         '    </svg>',
                         '  </span>',
                         '</div>',
-                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4"',
+                        '<textarea id="wc-pop-input" placeholder="Deine Nachricht…" rows="4" maxlength="300"',
                         '  style="background:rgba(0,10,30,0.9);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);',
                         '         border-radius:4px;padding:6px 8px;font-family:Orbitron,sans-serif;font-size:11px;',
                         '         letter-spacing:0.05em;outline:none;width:100%;box-sizing:border-box;resize:vertical;',
                         '         line-height:1.6;"></textarea>',
+                        '<div id="wc-pop-counter" style="font-size:9px;opacity:0.4;text-align:right;letter-spacing:0.05em;">0 / 300</div>',
                         '<div style="display:flex;gap:8px;">',
                         '  <button id="wc-pop-copy" style="font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1.2px;',
                         '    flex:1;padding:6px 12px;cursor:pointer;background:rgba(0,210,255,0.08);color:rgba(0,210,255,0.85);',
@@ -1459,6 +1447,11 @@
                     document.body.appendChild(pop);
 
                     const inp = document.getElementById('wc-pop-input');
+                    const counter = document.getElementById('wc-pop-counter');
+                    inp.addEventListener('input', () => {
+                        counter.textContent = inp.value.length + ' / 300';
+                        counter.style.opacity = inp.value.length > 270 ? '0.85' : '0.4';
+                    });
                     const copyBtn = document.getElementById('wc-pop-copy');
 
                     copyBtn.addEventListener('click', () => {

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voice Recorder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(2, 10, 25, 1) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            outline: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.25em;
+            color: rgba(255,255,255,0.7);
+            background: rgba(8, 18, 38, 0.95);
+            transition: transform 0.12s;
+        }
+        .btn:active { transform: scale(0.93); }
+
+        /* Υ (Rot) #C41E3A */
+        #btn-record {
+            border: 2px solid #C41E3A;
+            box-shadow: 0 0 18px rgba(196,30,58,0.6), inset 0 0 30px rgba(196,30,58,0.08);
+        }
+        #btn-record.active {
+            animation: pulse-rec 1s infinite;
+        }
+
+        /* φ (Grün) #6BA043 */
+        #btn-play {
+            border: 2px solid #6BA043;
+            box-shadow: 0 0 18px rgba(107,160,67,0.6), inset 0 0 30px rgba(107,160,67,0.08);
+        }
+        #btn-play:disabled {
+            opacity: 0.22;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @keyframes pulse-rec {
+            0%, 100% { box-shadow: 0 0 18px rgba(196,30,58,0.6), inset 0 0 30px rgba(196,30,58,0.08); }
+            50%       { box-shadow: 0 0 44px rgba(196,30,58,1),   inset 0 0 50px rgba(196,30,58,0.18); }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-row">
+        <button class="btn" id="btn-record" title="Record">
+            <svg width="38" height="38" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="14" fill="white"/>
+            </svg>
+            REC
+        </button>
+
+        <button class="btn" id="btn-play" title="Play" disabled>
+            <svg width="38" height="38" viewBox="0 0 52 52">
+                <polygon points="12,4 48,26 12,48" fill="white"/>
+            </svg>
+            PLAY
+        </button>
+    </div>
+
+    <script>
+        const btnRecord = document.getElementById('btn-record');
+        const btnPlay   = document.getElementById('btn-play');
+
+        let mediaRecorder = null;
+        let audioChunks   = [];
+        let audioUrl      = null;
+        let audioEl       = null;
+        let isRecording   = false;
+        let isPlaying     = false;
+
+        btnRecord.addEventListener('click', async () => {
+            if (isPlaying) return;
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks   = [];
+
+                    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        if (audioUrl) URL.revokeObjectURL(audioUrl);
+                        audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/webm' }));
+                        audioEl  = new Audio(audioUrl);
+                        btnPlay.disabled = false;
+                        stream.getTracks().forEach(t => t.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btnRecord.classList.add('active');
+                    btnPlay.disabled = true;
+
+                } catch (err) { /* no mic */ }
+
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btnRecord.classList.remove('active');
+            }
+        });
+
+        btnPlay.addEventListener('click', () => {
+            if (isRecording || !audioEl || isPlaying) return;
+            isPlaying = true;
+            audioEl.currentTime = 0;
+            audioEl.play();
+            audioEl.onended = () => {
+                isPlaying = false;
+                audioEl = new Audio(audioUrl);
+            };
+        });
+    </script>
+</body>
+</html>

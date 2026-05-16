@@ -129,62 +129,35 @@ function createDraw20Morph({
         return map;
     }
 
-    // ── renderMorph: in-place at the source position ────────────────────────
-    // Source = stift (own drawing) when stiftMorphPairs is populated, else
-    // the PNG preset. Both panes stay visible as reference — the morph
-    // happens in the polygon overlay at source location/size, instead of
-    // travelling across the pane.
-    // t < eps → pre-morph preview: correspondence lines source → target.
-    // t ≥ eps → polygon overlay: shape morphs src → dst (alignDstToSrcBBox).
-    function renderMorph(t) {
-        while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
-        t = Math.max(0, Math.min(1, t));
-        const useStift = stiftMorphPairs.length > 0;
-        const pairs = useStift ? stiftMorphPairs : morphPairs;
-        const srcKey = useStift ? 'srcPts' : 'pngPts';
-        const dstKey = useStift ? 'dstPts' : 'latPts';
-        // log(`🎬 renderMorph(t=${t.toFixed(3)}) useStift=${useStift} stiftMP=${stiftMorphPairs.length} pngMP=${morphPairs.length}`);
-        const srcEl = useStift ? stiftCanvas : pix;
-        tex.style.opacity = '';
-        if (!pairs.length) {
-            // log('🎬 ⊘ EARLY RETURN — pairs.length === 0');
-            srcEl.style.opacity = '';
-            // CRITICAL: drop the morph-src-* classes — without this the
-            // stiftCanvas can stay visibility:hidden after LÖSCHEN, which
-            // blocks all mouse events and breaks drawing until reload.
-            pix.classList.remove('morph-src-pixel-hidden');
-            stiftCanvas.classList.remove('morph-src-pixel-hidden');
-            overlay.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
-            stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
-            // Pre-morph not active: show all outlines/points again.
-            overlay.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
-            overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
-            stiftOutlineSvg.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
-            stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
-            return;
-        }
-        // Source pane: visible ONLY at t==0; hidden as soon as the morph
-        // starts. Use a CSS class with !important so the PIXEL toggle
-        // (applyArtToggle sets inline opacity/visibility) cannot bring
-        // the source back during morph.
+    // ── Morph render helpers (Phase B extraction) ───────────────────────────
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    // Drop every morph-src-* class + restore element display. Called when
+    // there are no pairs (pre-morph idle state) so the stiftCanvas is
+    // interactive again and any source outlines hidden by a previous morph
+    // come back. Idempotent.
+    function clearMorphSourceVisibility() {
+        pix.classList.remove('morph-src-pixel-hidden');
+        stiftCanvas.classList.remove('morph-src-pixel-hidden');
+        overlay.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
+        stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
+        overlay.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
+        overlay.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
+        stiftOutlineSvg.querySelectorAll('polygon').forEach(p => { p.style.display = ''; });
+        stiftOutlineSvg.querySelectorAll('circle[data-kind="point"]').forEach(c => { c.style.display = ''; });
+    }
+
+    // Manage which source-pane elements are visible based on the morph t.
+    // At t === 0 the source (PNG / stift) is fully visible. As soon as
+    // t > 0 the source pixels, outlines, points, fills get hidden via the
+    // `.morph-src-*` CSS classes (which use !important to survive toggles).
+    function manageSourceVisibility(t, useStift, srcEl) {
         if (t > 0) {
             srcEl.classList.add('morph-src-pixel-hidden');
         } else {
-            // Drop class from both panes so toggles work normally again.
             pix.classList.remove('morph-src-pixel-hidden');
             stiftCanvas.classList.remove('morph-src-pixel-hidden');
         }
-        // Interpolate the displayed similarity from baseSimilarity → 100%.
-        const morphedSim = Math.round(getBS() + (100 - getBS()) * t);
-        const simVal = document.getElementById('sim-value');
-        if (simVal) simVal.textContent = morphedSim + '%';
-        // Source figure (PNG or stift) is completely hidden the moment
-        // morph starts — pts, lines, fills AND pixels — and stays hidden
-        // through to t=1. Only at t==0 the source is fully visible.
-        // We tag elements with class `morph-src-hidden` (CSS rule with
-        // `!important` lives in morph.css). This SURVIVES later toggle
-        // clicks (PUNKTE/LINIE/etc.) because the class wins over their
-        // inline `display=''` resets — the source stays gone for good.
         if (t > 0) {
             const srcLabel = useStift ? 'stift' : 'png';
             overlay.querySelectorAll(`polygon[data-source="${srcLabel}"]`).forEach(p => p.classList.add('morph-src-hidden'));
@@ -196,87 +169,124 @@ function createDraw20Morph({
                 stiftOutlineSvg.querySelectorAll('path[data-kind="fill"]').forEach(p => p.classList.add('morph-src-hidden'));
             }
         } else {
-            // t==0: drop the class so source becomes visible again.
             overlay.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
             stiftOutlineSvg.querySelectorAll('.morph-src-hidden').forEach(el => el.classList.remove('morph-src-hidden'));
         }
-        if (t === 0) {
-            const corrToggle = document.getElementById('correspondence-toggle');
-            const showCorr = corrToggle ? corrToggle.checked : true;
-            if (!showCorr) return;
-            // Formula mode: only show lines for the currently hovered match.
-            // If nothing is hovered, no lines at all. Stift mode keeps the
-            // existing behaviour (all pairs shown).
-            const activeId = (overlay.dataset && overlay.dataset.activeMatchId) || '';
-            if (!useStift && !activeId) return;
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const z = getZ() || 1;
-            const sw = String(0.8 / z);
-            let drawnLines = 0;
-            let pairIdx = 0;
-            for (const pair of pairs) {
-                // Formula mode: skip non-hovered pairs.
-                if (!useStift && String(pair.mid) !== activeId) continue;
-                const srcLen = pair[srcKey] ? pair[srcKey].length : 0;
-                const dstLen = pair[dstKey] ? pair[dstKey].length : 0;
-                pairIdx++;
-                const N = Math.max(srcLen, dstLen);
-                const p = resampleClosed(pair[srcKey], N);
-                const l = resampleClosed(pair[dstKey], N);
-                if (p.length < 3 || l.length < 3) continue;
-                // Pre-morph "MORPH LINIEN": lines end ON the LaTeX (no
-                // shift). The polygon-morph branch below uses the shift
-                // so the final morph lands NEXT TO the LaTeX — but at
-                // t=0 we show the natural correspondence.
-                const lInPlace = alignDstToSrcBBox(p, l);
-                let idxMap = null;
-                if (typeof draw20CornerMatch === 'function') {
-                    const cm = draw20CornerMatch(p, lInPlace);
-                    if (cm && cm.idxMap) idxMap = cm.idxMap;
-                }
-                if (!idxMap) {
-                    const eng = alignTargetWithEngine(p, lInPlace);
-                    if (!eng) continue;
-                    idxMap = eng.idxMap;
-                }
-                const color = draw20PaletteColor(pair.mid);
-                for (let i = 0; i < N; i++) {
-                    const j = idxMap[i];
-                    const ln = document.createElementNS(svgNS, 'line');
-                    ln.setAttribute('x1', p[i].x.toFixed(2));
-                    ln.setAttribute('y1', p[i].y.toFixed(2));
-                    ln.setAttribute('x2', l[j].x.toFixed(2));
-                    ln.setAttribute('y2', l[j].y.toFixed(2));
-                    ln.setAttribute('stroke', color);
-                    ln.setAttribute('stroke-width', sw);
-                    ln.setAttribute('stroke-opacity', '0.45');
-                    ln.dataset.kind = 'corr-line';
-                    ln.dataset.source = 'morph';
-                    ln.dataset.matchId = String(pair.mid);
-                    morphLayer.appendChild(ln);
-                    drawnLines++;
-                }
-            }
-            // Newly-created corr-lines must respect MORPH LINIEN toggle etc.
-            if (typeof window !== 'undefined' && window.__draw20ApplyAllToggles) {
-                window.__draw20ApplyAllToggles();
-            }
-            return;
+    }
+
+    // Compute vertex correspondence between two equal-length closed polygons.
+    // Prefers the corner-match module (scale + cyclic offset → monotonic
+    // idxMap); falls back to the legacy alignTargetTo engine if corner-match
+    // is unavailable or returns null. Returns idxMap[] or null on failure.
+    function resolveCorrespondence(p, lInPlace) {
+        if (typeof draw20CornerMatch === 'function') {
+            const cm = draw20CornerMatch(p, lInPlace);
+            if (cm && cm.idxMap) return cm.idxMap;
         }
-        const svgNS = 'http://www.w3.org/2000/svg';
+        const eng = alignTargetWithEngine(p, lInPlace);
+        return eng ? eng.idxMap : null;
+    }
+
+    // Pre-morph correspondence lines at t === 0. In formula mode only shows
+    // the hovered match (gated by overlay.dataset.activeMatchId); in stift
+    // mode shows all pairs simultaneously. Skipped when MORPH-LINIEN toggle
+    // is off.
+    function renderCorrespondenceLines(pairs, srcKey, dstKey, useStift) {
+        const corrToggle = document.getElementById('correspondence-toggle');
+        const showCorr = corrToggle ? corrToggle.checked : true;
+        if (!showCorr) return;
+        const activeId = (overlay.dataset && overlay.dataset.activeMatchId) || '';
+        if (!useStift && !activeId) return;
+        const z = getZ() || 1;
+        const sw = String(0.8 / z);
+        for (const pair of pairs) {
+            if (!useStift && String(pair.mid) !== activeId) continue;
+            const srcLen = pair[srcKey] ? pair[srcKey].length : 0;
+            const dstLen = pair[dstKey] ? pair[dstKey].length : 0;
+            const N = Math.max(srcLen, dstLen);
+            const p = resampleClosed(pair[srcKey], N);
+            const l = resampleClosed(pair[dstKey], N);
+            if (p.length < 3 || l.length < 3) continue;
+            const lInPlace = alignDstToSrcBBox(p, l);
+            const idxMap = resolveCorrespondence(p, lInPlace);
+            if (!idxMap) continue;
+            const color = draw20PaletteColor(pair.mid);
+            for (let i = 0; i < N; i++) {
+                const j = idxMap[i];
+                const ln = document.createElementNS(SVG_NS, 'line');
+                ln.setAttribute('x1', p[i].x.toFixed(2));
+                ln.setAttribute('y1', p[i].y.toFixed(2));
+                ln.setAttribute('x2', l[j].x.toFixed(2));
+                ln.setAttribute('y2', l[j].y.toFixed(2));
+                ln.setAttribute('stroke', color);
+                ln.setAttribute('stroke-width', sw);
+                ln.setAttribute('stroke-opacity', '0.45');
+                ln.dataset.kind = 'corr-line';
+                ln.dataset.source = 'morph';
+                ln.dataset.matchId = String(pair.mid);
+                morphLayer.appendChild(ln);
+            }
+        }
+    }
+
+    // Morph one ring pair (outer-outer, hole-hole). When one side is
+    // missing, a tiny ghost ring is synthesised at the partner's centroid
+    // (so the morph "spawns" a vanishing hole rather than jumping).
+    // Returns { subpath, pts, isGhost } or null if both sides degenerate.
+    const GHOST_SCALE = 0.05;
+    function morphRingPair(sr, dr, t, shiftX) {
+        const srOk = sr && sr.length >= 3;
+        const drOk = dr && dr.length >= 3;
+        if (!srOk && !drOk) return null;
+        const isGhost = (!srOk && drOk) || (!drOk && srOk);
+        if (!srOk && drOk) {
+            let cx = 0, cy = 0;
+            for (const q of dr) { cx += q.x; cy += q.y; }
+            cx /= dr.length; cy /= dr.length;
+            sr = dr.map(q => ({
+                x: (cx + shiftX) + (q.x - cx) * GHOST_SCALE,
+                y: cy + (q.y - cy) * GHOST_SCALE,
+            }));
+        } else if (!drOk && srOk) {
+            let cx = 0, cy = 0;
+            for (const q of sr) { cx += q.x; cy += q.y; }
+            cx /= sr.length; cy /= sr.length;
+            dr = sr.map(q => ({
+                x: cx + (q.x - cx) * GHOST_SCALE,
+                y: cy + (q.y - cy) * GHOST_SCALE,
+            }));
+        }
+        const N = Math.max(sr.length, dr.length);
+        const p = resampleClosed(sr, N);
+        const l = resampleClosed(dr, N);
+        if (p.length < 3 || l.length < 3) return null;
+        const lInPlace = alignDstToSrcBBox(p, l);
+        const idxMap = resolveCorrespondence(p, lInPlace);
+        if (!idxMap) return null;
+        const pts = p.map((pp, i) => {
+            const j = idxMap[i];
+            return {
+                x: (1 - t) * pp.x + t * (l[j].x + shiftX),
+                y: (1 - t) * pp.y + t * l[j].y,
+            };
+        });
+        let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+        for (let i = 1; i < pts.length; i++) {
+            s += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
+        }
+        s += ' Z';
+        return { subpath: s, pts, isGhost };
+    }
+
+    // Render the polygon-morph for every pair (t > 0). Each pair becomes
+    // one main green <path> (outer + paired holes via evenodd) plus an
+    // optional black "ghost" <path> covering unpaired holes. Vertex dots
+    // are appended below.
+    function renderMorphPolygons(pairs, t, useStift, srcKey, dstKey) {
         const z = getZ() || 1;
         const pr = (2 / z).toFixed(2);
-        const fillToggle = document.getElementById('fill-toggle');
-        const fillOn = fillToggle ? fillToggle.checked : false;
-        // Respect PUNKTE toggle for the morph dots — when off, don't even
-        // add them (newly-created elements default to visible, so without
-        // this they'd appear even with the toggle off).
-        const pointsToggle = document.getElementById('points-toggle');
-        const pointsOn = pointsToggle ? pointsToggle.checked : true;
-        let drawn = 0;
-        // Morph each pair as ONE <path> with M-L-Z subpaths for outer
-        // + every paired hole; fill-rule=evenodd cuts the holes out.
-        // Each ring is morphed independently (alignTargetTo per ring).
+        const fillOn = document.getElementById('fill-toggle')?.checked ?? false;
+        const pointsOn = document.getElementById('points-toggle')?.checked ?? true;
         for (const pair of pairs) {
             const srcOuter = pair[srcKey];
             const dstOuter = pair[dstKey];
@@ -285,84 +295,31 @@ function createDraw20Morph({
             const srcRings = [srcOuter, ...srcHolesArr];
             const dstRings = [dstOuter, ...dstHolesArr];
             const numRings = Math.max(srcRings.length, dstRings.length);
-            // Shift the morph end-position so it lands `40 px` LEFT of the
-            // LaTeX bbox instead of on top of it. Computed once per pair
-            // from the outer's bbox (holes live inside, so outer is enough).
+            // Shift morph end-position 40px LEFT of LaTeX bbox so the morph
+            // lands NEXT TO the target rather than on top of it (stift mode);
+            // formula mode currently uses the same shift via legacy path.
             let shiftX = 0;
             if (dstOuter && dstOuter.length >= 3) {
                 const bb = bboxOfPts(dstOuter);
                 shiftX = -((bb.maxX - bb.minX) + 40);
             }
-            let pathD = '';        // matched rings → main green path
-            let ghostPathD = '';   // ghost (unpaired) rings → BLACK from start
+            let pathD = '';
+            let ghostPathD = '';
             const allPts = [];
             for (let r = 0; r < numRings; r++) {
-                let sr = srcRings[r], dr = dstRings[r];
-                const srOk = sr && sr.length >= 3;
-                const drOk = dr && dr.length >= 3;
-                const isGhost = (!srOk && drOk) || (!drOk && srOk);
-                const GHOST_SCALE = 0.05;
-                if (!srOk && drOk) {
-                    let cx = 0, cy = 0;
-                    for (const q of dr) { cx += q.x; cy += q.y; }
-                    cx /= dr.length; cy /= dr.length;
-                    sr = dr.map(q => ({
-                        x: (cx + shiftX) + (q.x - cx) * GHOST_SCALE,
-                        y: cy + (q.y - cy) * GHOST_SCALE,
-                    }));
-                } else if (!drOk && srOk) {
-                    let cx = 0, cy = 0;
-                    for (const q of sr) { cx += q.x; cy += q.y; }
-                    cx /= sr.length; cy /= sr.length;
-                    dr = sr.map(q => ({
-                        x: cx + (q.x - cx) * GHOST_SCALE,
-                        y: cy + (q.y - cy) * GHOST_SCALE,
-                    }));
-                } else if (!srOk && !drOk) {
-                    continue;
-                }
-                const N = Math.max(sr.length, dr.length);
-                const p = resampleClosed(sr, N);
-                const l = resampleClosed(dr, N);
-                if (p.length < 3 || l.length < 3) continue;
-                // Vertex correspondence via scale + cyclic offset (corner-match
-                // module). Fallback to legacy engine if it returns null.
-                const lInPlace = alignDstToSrcBBox(p, l);
-                let idxMap = null;
-                if (typeof draw20CornerMatch === 'function') {
-                    const cm = draw20CornerMatch(p, lInPlace);
-                    if (cm && cm.idxMap) idxMap = cm.idxMap;
-                }
-                if (!idxMap) {
-                    const eng = alignTargetWithEngine(p, lInPlace);
-                    if (!eng) continue;
-                    idxMap = eng.idxMap;
-                }
-                const pts = p.map((pp, i) => {
-                    const j = idxMap[i];
-                    return {
-                        x: (1 - t) * pp.x + t * (l[j].x + shiftX),
-                        y: (1 - t) * pp.y + t * l[j].y,
-                    };
-                });
-                let s = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-                for (let i = 1; i < pts.length; i++) {
-                    s += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
-                }
-                s += ' Z';
-                if (isGhost) {
-                    ghostPathD += (ghostPathD ? ' ' : '') + s;
+                const result = morphRingPair(srcRings[r], dstRings[r], t, shiftX);
+                if (!result) continue;
+                if (result.isGhost) {
+                    ghostPathD += (ghostPathD ? ' ' : '') + result.subpath;
                 } else {
-                    pathD += (pathD ? ' ' : '') + s;
+                    pathD += (pathD ? ' ' : '') + result.subpath;
                 }
-                for (const pp of pts) allPts.push(pp);
+                for (const pp of result.pts) allPts.push(pp);
             }
-            // Main green path FIRST, then BLACK ghost path on top — at t=1
-            // the ghost covers the green at the hole-position so the morph
-            // looks like the LaTeX with real holes. At t=0 the ghost is
-            // tiny at the morph-final position; barely visible on black bg.
+            // Main path first, ghost path on top (covers green at hole locations
+            // when fully morphed at t=1 so the result looks like cut-out holes).
             if (pathD) {
-                const path = document.createElementNS(svgNS, 'path');
+                const path = document.createElementNS(SVG_NS, 'path');
                 path.setAttribute('d', pathD);
                 path.setAttribute('fill-rule', 'evenodd');
                 path.setAttribute('fill', fillOn ? '#adff2f' : 'none');
@@ -375,7 +332,7 @@ function createDraw20Morph({
                 morphLayer.appendChild(path);
             }
             if (ghostPathD) {
-                const gpath = document.createElementNS(svgNS, 'path');
+                const gpath = document.createElementNS(SVG_NS, 'path');
                 gpath.setAttribute('d', ghostPathD);
                 gpath.setAttribute('fill-rule', 'evenodd');
                 gpath.setAttribute('fill', '#000');
@@ -386,13 +343,8 @@ function createDraw20Morph({
                 morphLayer.appendChild(gpath);
             }
             if (!pathD && !ghostPathD) continue;
-            // log(`🟢 MORPH pair#${pair.mid}: drawing ${allPts.length} morph dots`);
-            // Vertex dots across all rings — blue, controlled by PUNKTE.
-            // Always create them but set display:none upfront if PUNKTE is
-            // off, so a later toggle-on can reveal them via the standard
-            // applyPointsToggle path.
             for (const pp of allPts) {
-                const dot = document.createElementNS(svgNS, 'circle');
+                const dot = document.createElementNS(SVG_NS, 'circle');
                 dot.setAttribute('cx', pp.x.toFixed(2));
                 dot.setAttribute('cy', pp.y.toFixed(2));
                 dot.setAttribute('r', pr);
@@ -403,15 +355,39 @@ function createDraw20Morph({
                 if (!pointsOn) dot.style.display = 'none';
                 morphLayer.appendChild(dot);
             }
-            drawn++;
         }
-        // After morph render: reapply all toggles so newly-created morph
-        // elements respect the user's current toggle state (without this,
-        // turning LINIEN off then moving the slider would re-show morph
-        // strokes). Phase B will move this into a proper factory dependency.
-        if (typeof window !== 'undefined' && window.__draw20ApplyAllToggles) {
-            window.__draw20ApplyAllToggles();
+    }
+
+    // ── renderMorph: thin orchestrator ──────────────────────────────────────
+    // Source = stift (when stiftMorphPairs is populated), else PNG preset.
+    // Both panes stay visible as reference — the morph happens inside the
+    // polygon overlay at source location/size (no travelling across panes).
+    //   t === 0 → pre-morph: correspondence lines source → target.
+    //   t > 0   → polygon overlay: shape interpolates src → dst.
+    function renderMorph(t) {
+        while (morphLayer.firstChild) morphLayer.removeChild(morphLayer.firstChild);
+        t = Math.max(0, Math.min(1, t));
+        const useStift = stiftMorphPairs.length > 0;
+        const pairs = useStift ? stiftMorphPairs : morphPairs;
+        const srcKey = useStift ? 'srcPts' : 'pngPts';
+        const dstKey = useStift ? 'dstPts' : 'latPts';
+        const srcEl = useStift ? stiftCanvas : pix;
+        tex.style.opacity = '';
+        if (!pairs.length) {
+            srcEl.style.opacity = '';
+            clearMorphSourceVisibility();
+            return;
         }
+        manageSourceVisibility(t, useStift, srcEl);
+        // Display similarity 'morphedSim' interpolated from baseSim → 100%.
+        const morphedSim = Math.round(getBS() + (100 - getBS()) * t);
+        const simVal = document.getElementById('sim-value');
+        if (simVal) simVal.textContent = morphedSim + '%';
+        if (t === 0) {
+            renderCorrespondenceLines(pairs, srcKey, dstKey, useStift);
+            return;
+        }
+        renderMorphPolygons(pairs, t, useStift, srcKey, dstKey);
     }
 
     // ── buildStiftMorphPairs: stift→LaTeX matching pipeline ─────────────────

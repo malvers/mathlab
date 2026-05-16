@@ -240,83 +240,54 @@ function createDraw20Render({
         overlay.appendChild(r);
     }
 
-    // ── drawContours ────────────────────────────────────────────────────────
-    // `label` ('png' or 'latex') tags polygons + fill paths via data-source.
-    // Each element also carries data-match-id = the outer's index in the
-    // classified outers list (holes inherit their parent's id), so cross-pane
-    // hover highlighting can pair regions: PNG outer #N ↔ LaTeX outer #N
-    // (both sets are canonical-sorted left-to-right). The shared map is
-    // built by renderBBoxes via Hungarian assignment.
-    //
-    // `centroidsOut` (optional Map<matchId,[x,y]>) — wrap-local centroid of
-    // each outer's mapped polygon, used by renderBBoxes to draw cross-pane
-    // match lines.
-    // `pointsOut` (optional Map<matchId, mapped-point-array>) — used by
-    // renderMorph for the pair-wise interpolation.
-    function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut, holesOut) {
-        if (!contours || contours.length === 0) return 0;
-        const svgNS = 'http://www.w3.org/2000/svg';
-        const z = getZ() || 1;
-        const sw = String(1 / z);
-        const pr = 2 / z;
-        const INK = (typeof DRAW20_INK_COLOR !== 'undefined') ? DRAW20_INK_COLOR : '#F4C430';
-        const ORPHAN = (typeof DRAW20_ORPHAN_COLOR !== 'undefined') ? DRAW20_ORPHAN_COLOR : '#FF1744';
-        const GLOW = (typeof DRAW20_ORPHAN_GLOW !== 'undefined') ? DRAW20_ORPHAN_GLOW : 'drop-shadow(0 0 3px #FF1744)';
+    // ── Render helpers (Phase B extraction) ─────────────────────────────────
+    // Module-level constants shared by the three render sub-functions and
+    // by the colour helper. (Were previously local to drawContours.)
+    const INK = (typeof DRAW20_INK_COLOR !== 'undefined') ? DRAW20_INK_COLOR : '#F4C430';
+    const ORPHAN = (typeof DRAW20_ORPHAN_COLOR !== 'undefined') ? DRAW20_ORPHAN_COLOR : '#FF1744';
+    const SVG_NS = 'http://www.w3.org/2000/svg';
 
-        const mappedAll = contours.map(c =>
-            (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
-        );
+    // Single source of truth for "what colour does this element have?".
+    //   matchId  : the canonical match id (< 0 = unmatched)
+    //   kind     : 'fill' | 'stroke' | 'point'
+    //   isOrphan : true if matchId is in orphanMatchIds
+    //   sideColor: SIDE_COLOR_LATEX or SIDE_COLOR_PNG (precomputed for the label)
+    //   pointColor: POINT_COLOR specific to PNG/Stift vs LaTeX
+    function computeElementColor(matchId, kind, isOrphan, sideColor, pointColor) {
+        if (matchId < 0) return INK;
+        if (kind === 'point') return isOrphan ? ORPHAN : pointColor;
+        if (inSymbolMode) return sideColor;
+        return isOrphan ? ORPHAN : draw20PaletteColor(matchId);
+    }
 
-        const classified = (typeof classifyContours === 'function')
-            ? classifyContours(contours)
-            : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
+    // Build "M..L..Z M..L..Z" subpath string for one outer + its holes.
+    // The evenodd fill-rule turns hole subpaths into cutouts at render time.
+    function buildFillPathData(outer, mappedAll) {
+        const oc = mappedAll[outer.idx];
+        if (!oc) return null;
+        const rings = [oc, ...outer.holes.map(hi => mappedAll[hi]).filter(Boolean)];
+        return rings.map(pts => {
+            let s = `M ${pts[0].x} ${pts[0].y}`;
+            for (let k = 1; k < pts.length; k++) s += ` L ${pts[k].x} ${pts[k].y}`;
+            return s + ' Z';
+        }).join(' ');
+    }
 
-        // matchId per contour: from override if provided (Hungarian),
-        // else legacy "outer position" numbering. Holes always inherit
-        // their parent outer's id.
-        let matchId;
-        if (matchIdByContour && matchIdByContour.length === contours.length) {
-            matchId = matchIdByContour;
-        } else {
-            matchId = new Array(contours.length).fill(-1);
-            for (let oi = 0; oi < classified.outers.length; oi++) {
-                const outer = classified.outers[oi];
-                matchId[outer.idx] = oi;
-                for (const hi of outer.holes) matchId[hi] = oi;
-            }
-        }
-        const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
-        // Side-coloured: PNG/Stift = green (matches #object-count-box),
-        // LaTeX = orange (matches #latex-count-box). Orphans stay red.
-        // FILL uses palette per matchId so matched partners share the same
-        // hue (used to be green/orange side colours — now consistent with
-        // the outline stroke).
-        const sideColor = (label === 'latex') ? SIDE_COLOR_LATEX : SIDE_COLOR_PNG;
-        const colourOf = (i) => {
-            const mid = matchId[i];
-            if (mid < 0) return INK;
-            if (inSymbolMode) return sideColor;
-            return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
-        };
-
-        // ── FILL: one <path> per outer group (outer + its holes).
+    // Render one <path> per outer (with holes as evenodd subpaths). Populates
+    // centroidsOut/pointsOut/holesOut for downstream cross-pane consumers.
+    function renderFill(label, classified, mappedAll, matchId, isOrphanMid, sideColor, centroidsOut, pointsOut, holesOut) {
         for (let oi = 0; oi < classified.outers.length; oi++) {
             const outer = classified.outers[oi];
             const oc = mappedAll[outer.idx];
             if (!oc) continue;
-            const parts = [oc, ...outer.holes.map(hi => mappedAll[hi]).filter(Boolean)];
-            const d = parts.map(pts => {
-                let s = `M ${pts[0].x} ${pts[0].y}`;
-                for (let k = 1; k < pts.length; k++) s += ` L ${pts[k].x} ${pts[k].y}`;
-                return s + ' Z';
-            }).join(' ');
+            const d = buildFillPathData(outer, mappedAll);
+            if (!d) continue;
             const mid = matchId[outer.idx];
             const orphan = isOrphanMid(mid);
-            const path = document.createElementNS(svgNS, 'path');
+            const path = document.createElementNS(SVG_NS, 'path');
             path.setAttribute('d', d);
             path.setAttribute('fill-rule', 'evenodd');
-            // Orphans: red fill, NO glow. Symbol mode: side-colour.
-            path.setAttribute('fill', orphan ? ORPHAN : (inSymbolMode ? sideColor : draw20PaletteColor(mid)));
+            path.setAttribute('fill', computeElementColor(mid, 'fill', orphan, sideColor, null));
             path.setAttribute('stroke', 'none');
             path.dataset.kind = 'fill';
             path.dataset.source = label;
@@ -331,31 +302,19 @@ function createDraw20Render({
             if (pointsOut) pointsOut.set(mid, oc);
             if (holesOut) holesOut.set(mid, outer.holes.map(hi => mappedAll[hi]).filter(Boolean));
         }
+    }
 
-        // ── STROKE + POINTS: one polygon + N circles per contour.
-        // OUTLINE STROKE: palette-coloured per matchId so PNG outer #N and
-        // LaTeX outer #N (matched partners) share the same hue — instantly
-        // visible which contour pairs with which across the two panes.
-        // POINTS: keep their side colours (blue/red) for legibility.
-        // Orphans use the same palette colour (no red, no glow).
-        const POINT_COLOR = (label === 'latex') ? '#8B0000' : '#4363d8';
-        const lineColorOf = (i) => {
-            const mid = matchId[i];
-            if (mid < 0) return INK;
-            if (inSymbolMode) return sideColor;
-            return isOrphanMid(mid) ? ORPHAN : draw20PaletteColor(mid);
-        };
-        let totalVerts = 0;
+    // Render one <polygon> per contour (palette-coloured stroke, no fill).
+    function renderStroke(label, contours, mappedAll, matchId, isOrphanMid, sideColor, sw) {
         for (let i = 0; i < contours.length; i++) {
             const mapped = mappedAll[i];
             if (!mapped) continue;
             const mid = matchId[i];
             const orphan = isOrphanMid(mid);
-            const pts = mapped.map(m => `${m.x},${m.y}`).join(' ');
-            const poly = document.createElementNS(svgNS, 'polygon');
-            poly.setAttribute('points', pts);
+            const poly = document.createElementNS(SVG_NS, 'polygon');
+            poly.setAttribute('points', mapped.map(m => `${m.x},${m.y}`).join(' '));
             poly.setAttribute('fill', 'none');
-            poly.setAttribute('stroke', lineColorOf(i));
+            poly.setAttribute('stroke', computeElementColor(mid, 'stroke', orphan, sideColor, null));
             poly.setAttribute('stroke-width', sw);
             poly.setAttribute('stroke-linejoin', 'round');
             poly.dataset.kind = 'stroke';
@@ -363,14 +322,25 @@ function createDraw20Render({
             poly.dataset.matchId = String(mid);
             poly.style.pointerEvents = 'all';
             overlay.appendChild(poly);
+        }
+    }
 
+    // Render vertex dots for every contour. Returns the total vertex count
+    // (used by similarity/info-box computations).
+    function renderPoints(label, contours, mappedAll, matchId, isOrphanMid, pointColor, pr) {
+        let totalVerts = 0;
+        for (let i = 0; i < contours.length; i++) {
+            const mapped = mappedAll[i];
+            if (!mapped) continue;
+            const mid = matchId[i];
+            const orphan = isOrphanMid(mid);
+            const fill = computeElementColor(mid, 'point', orphan, null, pointColor);
             for (const m of mapped) {
-                const dot = document.createElementNS(svgNS, 'circle');
+                const dot = document.createElementNS(SVG_NS, 'circle');
                 dot.setAttribute('cx', m.x);
                 dot.setAttribute('cy', m.y);
                 dot.setAttribute('r', pr);
-                // Orphan dots: red. Otherwise side colour (blue/dark-red).
-                dot.setAttribute('fill', orphan ? ORPHAN : POINT_COLOR);
+                dot.setAttribute('fill', fill);
                 dot.dataset.kind = 'point';
                 dot.dataset.source = label;
                 dot.dataset.matchId = String(mid);
@@ -378,9 +348,57 @@ function createDraw20Render({
                 totalVerts++;
             }
         }
+        return totalVerts;
+    }
+
+    // ── drawContours ────────────────────────────────────────────────────────
+    // Thin orchestrator: classify → build matchId map → renderFill → renderStroke
+    // → renderPoints → apply visibility toggles. Delegated heavy lifting to the
+    // four helpers above.
+    //
+    // `label` ('png'|'latex'|'stift') tags every element via data-source.
+    // `matchIdByContour` (optional) overrides the default "outer position" id
+    //   mapping with the Hungarian/Greedy assignment from computeMatchIds.
+    // `centroidsOut` / `pointsOut` / `holesOut` (optional Maps) capture
+    //   per-matchId data for downstream cross-pane consumers (match lines,
+    //   morph interpolation).
+    function drawContours(contours, mapFn, label, matchIdByContour, centroidsOut, pointsOut, holesOut) {
+        if (!contours || contours.length === 0) return 0;
+        const z = getZ() || 1;
+        const sw = String(1 / z);
+        const pr = 2 / z;
+
+        const mappedAll = contours.map(c =>
+            (c && c.length >= 2) ? c.map(p => mapFn(p[0], p[1])) : null
+        );
+
+        const classified = (typeof classifyContours === 'function')
+            ? classifyContours(contours)
+            : { outers: contours.map((_, i) => ({ idx: i, holes: [] })), holes: [] };
+
+        // matchId per contour: from caller (Hungarian/Greedy override),
+        // else legacy "outer position" numbering. Holes inherit their parent's id.
+        let matchId;
+        if (matchIdByContour && matchIdByContour.length === contours.length) {
+            matchId = matchIdByContour;
+        } else {
+            matchId = new Array(contours.length).fill(-1);
+            for (let oi = 0; oi < classified.outers.length; oi++) {
+                const outer = classified.outers[oi];
+                matchId[outer.idx] = oi;
+                for (const hi of outer.holes) matchId[hi] = oi;
+            }
+        }
+        const isOrphanMid = (mid) => mid >= 0 && orphanMatchIds.has(String(mid));
+        const sideColor = (label === 'latex') ? SIDE_COLOR_LATEX : SIDE_COLOR_PNG;
+        const pointColor = (label === 'latex') ? '#8B0000' : '#4363d8';
+
+        renderFill(label, classified, mappedAll, matchId, isOrphanMid, sideColor, centroidsOut, pointsOut, holesOut);
+        renderStroke(label, contours, mappedAll, matchId, isOrphanMid, sideColor, sw);
+        const totalVerts = renderPoints(label, contours, mappedAll, matchId, isOrphanMid, pointColor, pr);
+
         const u = getU();
         if (u) {
-            // Single centralized pass replaces three separate apply calls.
             u.applyAllToggles ? u.applyAllToggles() : (u.applyLinesToggle(), u.applyPointsToggle(), u.applyFillToggle());
         }
         return totalVerts;
