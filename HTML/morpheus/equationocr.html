@@ -102,10 +102,21 @@
                stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
                scales the displayed size uniformly. Mouse-coord mapping in
                JS already accounts for display vs intrinsic ratio. */
-            width: min(1760px, calc(110vw - 44px), calc(110dvh - 216px));
+            /* Three constraints:
+               1. Never bigger than 1760px (caps on huge monitors)
+               2. Fit horizontally inside #draw-wrap (which is sized by
+                  #main-content — so the sidebar width is automatically
+                  subtracted; no hardcoded sidebar guess)
+               3. Fit vertically inside viewport minus top/bottom chrome
+               aspect-ratio: 1/1 → height follows width. */
+            width: min(1760px, calc(100% - 24px), calc(100dvh - 100px));
             aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             line-height: 0;
+            /* Container query anchor — button row inside scales fonts/padding
+               via `cqi` units (relative to canvas-stack's inline size). */
+            container-type: inline-size;
+            container-name: canvas;
         }
         #canvas-stack > canvas {
             width: 100%;
@@ -145,11 +156,13 @@
             position: absolute;
             left: 0;
             right: 0;
-            bottom: clamp(8px, 1.5vh, 16px);
+            /* Y in cqi units — relative to canvas-stack inline size. % bottom
+               on a container-type parent can be flaky; cqi is reliable. */
+            bottom: clamp(4px, 2cqi, 28px);
             display: flex;
-            gap: clamp(6px, 1vw, 10px);
+            gap: clamp(4px, 1cqi, 12px);
             z-index: 30;
-            padding: 0 clamp(8px, 1.5vw, 16px);
+            padding: 0 clamp(4px, 1.5cqi, 20px);
             box-sizing: border-box;
         }
         #canvas-recognize-btn,
@@ -160,9 +173,9 @@
             flex: 1 1 0 !important;
             width: auto !important;
             min-width: 0 !important;
-            padding: clamp(2px, 0.6vh, 8px) clamp(2px, 1vw, 12px) !important;
-            font-size: clamp(8px, 1.3vw, 14px) !important;
-            letter-spacing: 0.04em !important;
+            padding: clamp(2px, 0.6cqi, 8px) clamp(1px, 0.8cqi, 12px) !important;
+            font-size: clamp(7px, 2.2cqi, 16px) !important;
+            letter-spacing: 0 !important;
             border: 0.5px solid #adff2f !important;
             color: #adff2f !important;
             background: rgba(8, 20, 42, 0.92) !important;
@@ -170,6 +183,7 @@
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: clip !important;
+            text-align: center !important;
         }
         #canvas-recognize-btn:hover,
         #canvas-reload-btn:hover,
@@ -247,7 +261,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: clamp(45px, 7.7vw, 90px);
+            font-size: clamp(18px, 7cqi, 90px);
             color: #FF0000;
             text-shadow: 0 0 6px rgba(2, 4, 16, 0.9), 0 0 10px rgba(2, 4, 16, 0.6);
             pointer-events: none;
@@ -265,11 +279,9 @@
             pointer-events: none;
             z-index: 25;
         }
-        /* KaTeX inherits page font-family otherwise — force its own glyphs */
-        #result-render .katex,
-        #result-render .katex-display {
-            color: #FF0000;
-        }
+        /* Don't force color on .katex — inline `\textcolor{#X}{ch}` from
+           colorizeLatex() needs to win. The default red is inherited from
+           #result-render for any glyph that didn't get an inline color. */
         .api-input {
             width: 100%;
             margin-top: 6px;
@@ -1249,7 +1261,8 @@ function toggleSidebar() {
             // Order by writing order (left-to-right) so the row matches reading.
             visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
             // Y position: just above the midline (canvas mid = canvasH/2).
-            const chipY = canvasTop + canvasH * 0.5 - 36;
+            // Use % of canvas height so the chip-row scales with the canvas.
+            const chipY = canvasTop + canvasH * 0.45;
             // X positions: evenly distribute centers across full canvas width.
             const N = visible.length;
             visible.forEach(({ obj, i }, rank) => {
@@ -1348,6 +1361,11 @@ function toggleSidebar() {
         drawCanvas.style.touchAction = 'none';
 
         drawCanvas.addEventListener('pointerdown', e => {
+            // TEMP DIAG: log every pointerdown so we can see what iPad reports
+            // for finger touches (width/height vs PALM_MAX_PX threshold).
+            try {
+                DebugWindow.log(`🖐 down type=${e.pointerType} w=${e.width||0} h=${e.height||0} primary=${e.isPrimary} allow=${isAllowedPointer(e)}`);
+            } catch (_) {}
             if (!isAllowedPointer(e)) return;
             if (activePointerId !== null) return;
             activePointerId = e.pointerId;
