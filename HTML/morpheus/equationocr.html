@@ -301,7 +301,7 @@
             position: absolute;
             left: 4%;
             right: 4%;
-            top: 50%;
+            top: 45%;
             height: 1px;
             background: rgba(0, 210, 255, 0.35);
             pointer-events: none;
@@ -516,11 +516,6 @@ function toggleSidebar() {
         if (window.CyberLeftChrome?.configure) CyberLeftChrome.configure({ viewportOnlyZoom: true });
 
         CyberUI.createCard('ui-container', 'ZEICHNEN', `
-            <button class="cyber-btn" onclick="clearDraw()"
-                style="width:100%;border-color:rgba(0,210,255,0.35);">LÖSCHEN</button>
-            <button class="cyber-btn" onclick="replayLast()"
-                style="width:100%;margin-top:6px;border-color:rgba(244,196,48,0.4);color:#F4C430;"
-                title="Letzte Gemini-Antwort aus localStorage neu zeichnen (kein API-Call)">REPLAY</button>
             <div class="eps-row">
                 <label>Stift</label>
                 <input type="range" id="stroke-slider" min="1" max="30" value="8" step="1"
@@ -1414,7 +1409,9 @@ function toggleSidebar() {
         // Pointer events with palm rejection.
         // Accept: pen, mouse, finger (small touch contact).
         // Reject: palm (large touch contact — width or height > PALM_MAX_PX).
-        const PALM_MAX_PX = 40;
+        // iPad Safari reports finger touches with width/height in the 50-80
+        // range (much larger than Android), so threshold needs to be generous.
+        const PALM_MAX_PX = 100;
         let activePointerId = null;
 
         function isAllowedPointer(e) {
@@ -1717,7 +1714,10 @@ function toggleSidebar() {
             DebugWindow.log(`▶ Gemini ${model} (key: …${apiKey.slice(-4)}, b64: ${b64.length} chars)`);
             console.log('Gemini recognize() start', { model, keyTail: apiKey.slice(-4), b64Len: b64.length });
             setLatexResult('⏳ Lade…');
-            document.getElementById('result-render').innerHTML = '';
+            // Show the squiri spinner in the upper half while we await Gemini.
+            // renderLatex(latex) overwrites innerHTML when the result arrives.
+            document.getElementById('result-render').innerHTML =
+                '<div class="squiri"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>';
             clearOverlay();
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
