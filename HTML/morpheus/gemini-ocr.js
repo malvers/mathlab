@@ -58,6 +58,39 @@ const SINGLE_GLYPH_PROMPT =
     "\n" +
     "If unreadable / empty: { \"label\": \"?\" }";
 
+// Context-aware single-glyph prompt. We already know the full LaTeX of the
+// equation (from a prior whole-canvas call) AND the deduplicated token
+// list. Forcing the model to pick from that exact list closes the door
+// on hallucinations like "a"→"g".
+function singleGlyphContextualPrompt(fullLatex, tokens) {
+    const safeEq = String(fullLatex || '').replace(/"/g, '\\"').slice(0, 200);
+    // Build the allowed-label list (deduped, in reading order, as JSON-safe
+    // strings so the model sees brackets/backslashes clearly).
+    const list = Array.isArray(tokens) ? tokens : [];
+    const seen = new Set();
+    const uniq = [];
+    for (const t of list) {
+        const s = String(t || '').trim();
+        if (!s || seen.has(s)) continue;
+        seen.add(s); uniq.push(s);
+    }
+    const allowedJson = '[' + uniq.map(s => JSON.stringify(s)).join(', ') + ']';
+    return (
+        "This image shows ONE single glyph from a known LaTeX equation.\n" +
+        "\n" +
+        `Full equation: ${safeEq}\n` +
+        `Allowed labels (you MUST return exactly one of these): ${allowedJson}\n` +
+        "\n" +
+        "Return strict JSON, no markdown, no commentary:\n" +
+        "{ \"label\": \"<one entry from the allowed list>\" }\n" +
+        "\n" +
+        "Rules:\n" +
+        "- The label MUST be a verbatim entry from the allowed list above — no other strings.\n" +
+        "- Do NOT invent characters. If unclear, pick the closest match from the list.\n" +
+        "- Only if nothing in the list is even remotely plausible: { \"label\": \"?\" }"
+    );
+}
+
 // Crop a rectangle of a source canvas onto a fresh canvas with optional
 // padding (px) added on every side. Background filled white so the OCR
 // preprocessing in geminiPrepareCanvas() sees a clean binary image.
@@ -212,6 +245,7 @@ if (typeof window !== 'undefined') {
     window.geminiRecognize       = geminiRecognize;
     window.GEMINI_DEFAULT_PROMPT = DEFAULT_PROMPT;
     window.SINGLE_GLYPH_PROMPT   = SINGLE_GLYPH_PROMPT;
+    window.singleGlyphContextualPrompt = singleGlyphContextualPrompt;
 }
 
 })();

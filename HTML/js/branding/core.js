@@ -86,9 +86,18 @@
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
-            container.addEventListener("click", (e) => {
-                this.toggleFullscreen();
-            });
+            // Transparent overlay that absorbs all touch/long-press on the brand text.
+            // Chrome Android's Touch-to-Search reads DOM text under the finger — if the
+            // topmost hit-target has no text content (this overlay), no word is found,
+            // so the Wikipedia/Knowledge-Graph strip can't appear.
+            // Clicks on the overlay still reach the fullscreen toggle below.
+            container.style.position = container.style.position || "fixed";
+            const _touchShield = document.createElement("div");
+            _touchShield.setAttribute("aria-hidden", "true");
+            _touchShield.style.cssText = "position:absolute;inset:0;z-index:2;background:transparent;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;";
+            _touchShield.addEventListener("click", () => this.toggleFullscreen());
+            _touchShield.addEventListener("contextmenu", (e) => e.preventDefault());
+            container.appendChild(_touchShield);
 
             // Swap icon when fullscreen state changes
             document.addEventListener("fullscreenchange", () => {

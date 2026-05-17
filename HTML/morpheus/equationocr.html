@@ -26,6 +26,7 @@
     <script src="apikey.local.js" onerror="this.remove()"></script>
     <!-- Gemini OCR module: exposes geminiRecognize, geminiCropCanvas,
          geminiUnwrapLatex, SINGLE_GLYPH_PROMPT, DEFAULT_PROMPT. -->
+    <script src="draw20-constants.js"></script>
     <script src="gemini-ocr.js"></script>
 
     <style>
@@ -94,7 +95,7 @@
                stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
                scales the displayed size uniformly. Mouse-coord mapping in
                JS already accounts for display vs intrinsic ratio. */
-            width: min(1600px, calc(100vw - 40px), calc(100vh - 160px));
+            width: min(1760px, calc(110vw - 44px), calc(110vh - 176px));
             aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             line-height: 0;
@@ -145,6 +146,7 @@
             max-width: calc(100% - 24px);
         }
         #canvas-recognize-btn,
+        #canvas-reload-btn,
         #canvas-clear-btn {
             width: auto !important;
             /* Responsive: shrinks on tablet, fills sensibly on desktop. */
@@ -158,6 +160,7 @@
         }
         #canvas-recognize-btn { min-width: clamp(110px, 24vw, 200px) !important; }
         #canvas-recognize-btn:hover,
+        #canvas-reload-btn:hover,
         #canvas-clear-btn:hover {
             background: rgba(8, 20, 42, 0.92) !important;
             border: 0.5px solid #adff2f !important;
@@ -165,6 +168,7 @@
             box-shadow: 0 0 14px rgba(173, 255, 47, 0.4) !important;
         }
         #canvas-recognize-btn:active,
+        #canvas-reload-btn:active,
         #canvas-clear-btn:active {
             transform: scale(0.98) !important;
         }
@@ -176,7 +180,7 @@
             align-items: center;
             justify-content: flex-start;
             gap: 8px;
-            padding: 20px 20px 20px;
+            padding: 60px 20px 20px;
             box-sizing: border-box;
         }
         #result-box {
@@ -218,16 +222,21 @@
             display: flex;
             align-items: center;
         }
+        /* KaTeX result overlay — floats at top of canvas, no own background
+           so the drawing shows through. Click-through; doesn't block drawing. */
         #result-render {
-            font-size: 24px;
-            color: #F4C430;
-            /* Responsive: shrinks to ~9vh on small viewports, max 96px desktop. */
-            height: clamp(56px, 9vh, 96px);
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 100%;
             text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: clamp(45px, 7.7vw, 90px);
+            color: #F4C430;
+            text-shadow: 0 0 6px rgba(2, 4, 16, 0.9), 0 0 10px rgba(2, 4, 16, 0.6);
+            pointer-events: none;
+            z-index: 26;
             overflow: hidden;
+            min-height: clamp(64px, 9.6vh, 128px);
         }
         /* KaTeX inherits page font-family otherwise — force its own glyphs */
         #result-render .katex,
@@ -379,23 +388,16 @@
                 <div id="coach-content" class="coach-message"></div>
             </div>
             <div id="draw-wrap">
-                <div id="result-box">
-                    <!--
-                    <div class="pane">
-                        <div id="result-latex"></div>
-                    </div>
-                    -->
-                    <div class="pane">
-                        <div id="result-render"></div>
-                    </div>
-                </div>
                 <div id="canvas-stack">
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
+                    <div id="result-render"></div>
                     <!-- Per-object recognition chips overlay. Click-through. -->
                     <div id="obj-chip-layer"></div>
                     <!-- <div id="mouse-coord">x: —  y: —</div> -->
                     <div id="canvas-btn-row">
                         <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">ERKENNEN</button>
+                        <button class="cyber-btn" id="canvas-reload-btn" onclick="location.reload(true)">RELOAD</button>
                         <button class="cyber-btn" id="canvas-clear-btn" onclick="clearDraw()">CLEAR</button>
                     </div>
                 </div>
@@ -863,7 +865,7 @@ function toggleSidebar() {
         let activeObjIdx = -1;
         let objectIdleTimer = null;
         const OBJ_MARGIN_PX = 30;    // bbox expansion for "same object" test
-        const OBJ_IDLE_MS = 1200;    // pause after which active obj finalizes
+        const OBJ_IDLE_MS = 500;     // pause after which active obj is closed
 
         function bboxOfStroke(s) {
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -893,6 +895,120 @@ function toggleSidebar() {
             });
             activeObjIdx = objects.length - 1;
         }
+
+        // Per-object color: shared palette from draw20-constants.js (the same
+        // 20-color RED-FREE palette used by morph). Same matchId → same color
+        // across labs, which lets us pair pixel-objects to morph regions later.
+        function objColor(i) { return draw20PaletteColor(i); }
+        function objColorHex(i) { return draw20PaletteColor(i).replace(/^#/, '').toUpperCase(); }
+        // Wrap each glyph in the LaTeX source with \textcolor[HTML]{HEX}{glyph},
+        // using the color of the object that's been matched to that token. Walks
+        // latex + tokens in parallel — works for simple inline math (E=mc^2,
+        // single-letter operators); multi-char \cmd tokens are left uncolored
+        // (they're structural anyway). Returns latex unchanged if no tokens.
+        function colorizeLatex(latex, tokens) {
+            if (!Array.isArray(tokens) || tokens.length === 0) return latex;
+            // tokenIdx → objIdx via matchedTokenIdx.
+            const tokToObj = new Array(tokens.length).fill(-1);
+            for (let oi = 0; oi < objects.length; oi++) {
+                const t = objects[oi].matchedTokenIdx;
+                if (t >= 0 && t < tokens.length) tokToObj[t] = oi;
+            }
+            let out = '';
+            let ti = 0;
+            let i = 0;
+            // If the previous char was ^ or _ (and no explicit { followed),
+            // the next wrapped glyph must be surrounded with {…} so KaTeX
+            // takes the whole \textcolor expression as the sup/sub argument.
+            let needsBraces = false;
+            while (i < latex.length) {
+                const ch = latex[i];
+                if (ch === '\\') {
+                    let j = i + 1;
+                    while (j < latex.length && /[a-zA-Z]/.test(latex[j])) j++;
+                    out += latex.substring(i, j);
+                    i = j;
+                    needsBraces = false;
+                    continue;
+                }
+                if (ch === '^' || ch === '_') {
+                    out += ch;
+                    if (ti < tokens.length && tokens[ti] === ch) ti++;
+                    needsBraces = true;
+                    i++;
+                    continue;
+                }
+                if (ch === '{' || ch === '}' || ch === ' ') {
+                    out += ch;
+                    if (ti < tokens.length && tokens[ti] === ch) ti++;
+                    // User provided explicit braces — sup/sub already grouped.
+                    if (ch === '{') needsBraces = false;
+                    i++;
+                    continue;
+                }
+                if (ti < tokens.length && typeof tokens[ti] === 'string'
+                    && tokens[ti].length === 1 && tokens[ti] === ch) {
+                    const oi = tokToObj[ti];
+                    let wrap;
+                    if (oi >= 0) {
+                        wrap = `\\textcolor{#${objColorHex(oi)}}{${ch}}`;
+                    } else {
+                        wrap = ch;
+                    }
+                    if (needsBraces && wrap.length > 1) {
+                        out += '{' + wrap + '}';
+                    } else {
+                        out += wrap;
+                    }
+                    needsBraces = false;
+                    ti++;
+                } else {
+                    out += ch;
+                    needsBraces = false;
+                }
+                i++;
+            }
+            return out;
+        }
+        function objectOfStroke(strokeIdx) {
+            for (let i = 0; i < objects.length; i++) {
+                if (objects[i].strokeIdxs.indexOf(strokeIdx) >= 0) return i;
+            }
+            return -1;
+        }
+        // Wipe canvas + repaint every stroke in its object's color. Called
+        // after each stroke-end (color "snaps" once you lift the pen).
+        function renderStrokes() {
+            drawCtx.fillStyle = '#020410';
+            drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+            for (let s = 0; s < strokes.length; s++) {
+                const st = strokes[s];
+                if (!st || !st.points || st.points.length < 1) continue;
+                const objIdx = objectOfStroke(s);
+                drawCtx.strokeStyle = objIdx >= 0 ? objColor(objIdx) : '#adff2f';
+                drawCtx.lineWidth = st.width || drawCtx.lineWidth;
+                drawCtx.beginPath();
+                drawCtx.moveTo(st.points[0].x, st.points[0].y);
+                for (let p = 1; p < st.points.length; p++) {
+                    drawCtx.lineTo(st.points[p].x, st.points[p].y);
+                }
+                if (st.points.length === 1) {
+                    drawCtx.lineTo(st.points[0].x + 0.01, st.points[0].y + 0.01);
+                }
+                drawCtx.stroke();
+            }
+        }
+        // Just closes the boundary of the currently-active object — does NOT
+        // run OCR. Per-object recognition is now deferred until ERKENNEN, so
+        // we can pass the full-formula LaTeX as context to flash-lite.
+        function closeActiveObject() {
+            if (activeObjIdx < 0) return;
+            const obj = objects[activeObjIdx];
+            if (obj && obj.status === 'pending') obj.status = 'closed';
+            activeObjIdx = -1;
+        }
         function onStrokeFinished(strokeIdx) {
             const stroke = strokes[strokeIdx];
             if (!stroke || stroke.points.length < 1) return;
@@ -903,7 +1019,7 @@ function toggleSidebar() {
                     obj.strokeIdxs.push(strokeIdx);
                     obj.bbox = bboxUnion(obj.bbox, sBB);
                 } else {
-                    finalizeObject(activeObjIdx);
+                    closeActiveObject();
                     pushNewObject(strokeIdx, sBB);
                 }
             } else {
@@ -912,16 +1028,18 @@ function toggleSidebar() {
             if (objectIdleTimer) clearTimeout(objectIdleTimer);
             const idleIdx = activeObjIdx;
             objectIdleTimer = setTimeout(() => {
-                if (idleIdx === activeObjIdx) finalizeObject(idleIdx);
+                if (idleIdx === activeObjIdx) closeActiveObject();
             }, OBJ_IDLE_MS);
         }
 
         // ── Per-object Gemini recognition ──────────────────────────────────
-        async function finalizeObject(idx) {
+        // Called AFTER the full-pass returns the equation's LaTeX. We send
+        // each object's crop with the full-equation LaTeX as context so the
+        // model just picks the matching glyph instead of guessing blind.
+        async function recognizeObjectWithContext(idx, fullLatex, tokens) {
             const obj = objects[idx];
-            if (!obj || obj.status !== 'pending') return;
+            if (!obj || (obj.status !== 'closed' && obj.status !== 'pending')) return;
             obj.status = 'recognizing';
-            if (idx === activeObjIdx) activeObjIdx = -1;
             renderChips();
             const apiKey = (document.getElementById('g-api-key')?.value || window.GEMINI_API_KEY || '').trim();
             if (!apiKey) {
@@ -938,12 +1056,17 @@ function toggleSidebar() {
             }
             const cropPad = Math.max(20, Math.round(Math.min(obj.bbox.w, obj.bbox.h) * 0.15));
             const cropCanvas = geminiCropCanvas(drawCanvas, obj.bbox, cropPad);
+            // Build context-aware prompt with full equation + explicit
+            // allowed-label list (forces flash-lite to pick from real tokens).
+            const prompt = (typeof window.singleGlyphContextualPrompt === 'function')
+                ? window.singleGlyphContextualPrompt(fullLatex, tokens)
+                : (typeof SINGLE_GLYPH_PROMPT === 'string' ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''));
             const t0 = performance.now();
             const result = await geminiRecognize({
                 canvas: cropCanvas,
                 apiKey,
                 model: 'gemini-2.5-flash-lite',
-                prompt: (typeof SINGLE_GLYPH_PROMPT === 'string') ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''),
+                prompt,
                 dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
             });
             const ms = Math.round(performance.now() - t0);
@@ -979,7 +1102,9 @@ function toggleSidebar() {
             const dy = rect.top - layerRect.top;
             for (let i = 0; i < objects.length; i++) {
                 const obj = objects[i];
-                if (obj.status === 'pending') continue;
+                // Only show chips once OCR has actually run. 'pending' = still
+                // being drawn; 'closed' = drawn but waiting for ERKENNEN.
+                if (obj.status === 'pending' || obj.status === 'closed') continue;
                 const cx = dx + obj.bbox.x * sx;
                 const cy = dy + obj.bbox.y * sy;
                 const chip = document.createElement('div');
@@ -987,6 +1112,14 @@ function toggleSidebar() {
                     : obj.status === 'recognizing' ? 'pending' : '');
                 chip.style.left = (cx + obj.bbox.w * sx + 4) + 'px';
                 chip.style.top  = (cy - 4) + 'px';
+                // Per-object color — overrides CSS for recognized chips so
+                // each chip matches its strokes on the canvas.
+                if (obj.status !== 'error') {
+                    const col = objColor(i);
+                    chip.style.color = col;
+                    chip.style.borderColor = col;
+                    chip.style.boxShadow = `0 0 4px ${col}55`;
+                }
                 let text;
                 if (obj.status === 'recognizing') text = '⏳';
                 else if (obj.status === 'error')   text = '? ✗';
@@ -1020,7 +1153,13 @@ function toggleSidebar() {
             if (!Array.isArray(tokens)) tokens = [];
             const used = new Array(tokens.length).fill(false);
             const norm = (s) => (s || '').toString().trim().replace(/^\\\\/, '\\\\').toLowerCase();
-            for (const obj of objects) {
+            // Walk objects in WRITING order (left-to-right by bbox.x, ties by
+            // bbox.y top-to-bottom), not stroke-order — user may add glyphs
+            // out-of-sequence (e.g. superscript ² over c after writing E=mc).
+            const ordered = objects
+                .map((o, i) => ({ o, i }))
+                .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
+            for (const { o: obj } of ordered) {
                 obj.matchedTokenIdx = -1;
                 if (obj.status !== 'recognized') continue;
                 const wanted = norm(obj.label);
@@ -1036,10 +1175,10 @@ function toggleSidebar() {
             const mapped  = objects.filter(o => o.matchedTokenIdx >= 0).length;
             const unmapped = objects.length - mapped;
             DebugWindow.log(`📎 obj↔token: ${mapped}/${objects.length} matched (${unmapped} unmapped, ${tokens.length} tokens total)`);
-            objects.forEach((o, i) => {
+            ordered.forEach(({ o, i }, rank) => {
                 const t = o.matchedTokenIdx;
                 const tokStr = (t >= 0 && tokens[t] != null) ? `"${tokens[t]}"` : '—';
-                DebugWindow.log(`  obj#${i} "${o.label}" ↔ token#${t} ${tokStr}`);
+                DebugWindow.log(`  rank#${rank} obj#${i} (x=${Math.round(o.bbox.x)}) "${o.label}" ↔ token#${t} ${tokStr}`);
             });
         }
 
@@ -1089,8 +1228,10 @@ function toggleSidebar() {
                 if (curStroke && curStroke.points.length >= 1) {
                     const idx = strokes.length;
                     strokes.push(curStroke);
-                    saveCanvasState();
                     onStrokeFinished(idx);
+                    // Re-paint everything in object colors (color snaps on release).
+                    renderStrokes();
+                    saveCanvasState();
                 }
                 curStroke = null;
             }
@@ -1421,11 +1562,29 @@ function toggleSidebar() {
                 renderLatex(latex);
                 saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
-                // Build match-mapping: pixel-object ↔ LaTeX-token (per label).
-                // Strings-only tokens (we asked for that), match per label in
-                // reading-order. Objects must already be left-to-right (they
-                // are added in stroke order, which == left-to-right writing).
+                // 1) Close any still-open active object before per-object pass.
+                if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
+                closeActiveObject();
+                // 2) Per-object pass: sorted left-to-right, context-aware
+                //    flash-lite OCR. Each call gets the full LaTeX as hint
+                //    so the model just picks one of the known glyphs.
+                const orderedObjs = objects
+                    .map((o, i) => ({ o, i }))
+                    .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
+                DebugWindow.log(`▸ per-object OCR pass: ${orderedObjs.length} objects, context="${latex}", tokens=${JSON.stringify(tokens)}`);
+                for (const { i } of orderedObjs) {
+                    await recognizeObjectWithContext(i, latex, tokens);
+                }
+                // 3) Match-mapping: pixel-object ↔ LaTeX-token by label.
                 applyObjectTokenMapping(tokens);
+                // 4) Re-render LaTeX colorized per token using each object's hue.
+                try {
+                    const colored = colorizeLatex(latex, tokens);
+                    renderLatex(colored);
+                    DebugWindow.log(`🎨 colorized re-render: ${colored.slice(0, 120)}`);
+                } catch (e) {
+                    DebugWindow.log(`⚠ colorize failed: ${e.message}`);
+                }
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
                 console.error('Gemini fetch error', err);
