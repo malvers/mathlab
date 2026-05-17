@@ -73,6 +73,7 @@ const DebugWindow = (() => {
             resize: none;
             overflow: hidden;
             transition: height 0.25s ease, width 0.25s ease;
+            touch-action: none;
         `;
 
         const header = document.createElement('div');
@@ -347,67 +348,83 @@ const DebugWindow = (() => {
         let offsetX = 0, offsetY = 0;
         let isDragging = false;
         let activePointerId = null;
-        let captureEl = null;
 
-        const startDrag = (e, target) => {
-            isDragging = true;
-            activePointerId = e.pointerId;
-            captureEl = target;
-            offsetX = e.clientX - element.offsetLeft;
-            offsetY = e.clientY - element.offsetTop;
-            try { target.setPointerCapture(e.pointerId); } catch (_) {}
+        // Read clientX/clientY from either a Pointer or a Touch event.
+        const xyFrom = (e) => {
+            if (typeof e.clientX === 'number') return { x: e.clientX, y: e.clientY };
+            const t = e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0];
+            return t ? { x: t.clientX, y: t.clientY } : { x: 0, y: 0 };
         };
 
-        header.addEventListener('pointerdown', (e) => {
-            // Ignore taps on buttons inside the header
-            if (e.target.closest && e.target.closest('button')) return;
-            e.preventDefault();
-            startDrag(e, header);
-        });
-
-        // Auch am Rand greifen zum Verschieben
-        element.addEventListener('pointerdown', (e) => {
-            if (e.target !== element) return;
-            const rect = element.getBoundingClientRect();
-            const DRAG_MARGIN = 8;
-            const inLeft = e.clientX - rect.left < DRAG_MARGIN;
-            const inRight = e.clientX - rect.right > -DRAG_MARGIN;
-            const inTop = e.clientY - rect.top < DRAG_MARGIN;
-            const inBottom = e.clientY - rect.bottom > -DRAG_MARGIN;
-
-            if (inLeft || inRight || inTop || inBottom) {
-                e.preventDefault();
-                startDrag(e, element);
-            }
-        });
+        const startDrag = (e) => {
+            const { x, y } = xyFrom(e);
+            isDragging = true;
+            activePointerId = (typeof e.pointerId === 'number') ? e.pointerId : null;
+            offsetX = x - element.offsetLeft;
+            offsetY = y - element.offsetTop;
+            // Bind move/up to WINDOW so the events keep firing no matter where
+            // the finger goes (no need for setPointerCapture, which is flaky
+            // on touch). Pointer events first; touch events as fallback.
+            window.addEventListener('pointermove', onMove, { passive: false });
+            window.addEventListener('pointerup', endDrag);
+            window.addEventListener('pointercancel', endDrag);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', endDrag);
+            window.addEventListener('touchcancel', endDrag);
+        };
 
         const onMove = (e) => {
             if (!isDragging) return;
-            if (activePointerId != null && e.pointerId !== activePointerId) return;
-            e.preventDefault();
-            element.style.left = (e.clientX - offsetX) + 'px';
-            element.style.top = (e.clientY - offsetY) + 'px';
+            if (activePointerId != null && typeof e.pointerId === 'number'
+                && e.pointerId !== activePointerId) return;
+            if (e.cancelable) e.preventDefault();
+            const { x, y } = xyFrom(e);
+            element.style.left = (x - offsetX) + 'px';
+            element.style.top = (y - offsetY) + 'px';
             element.style.right = 'auto';
             element.style.bottom = 'auto';
         };
 
         const endDrag = (e) => {
-            if (activePointerId != null && e.pointerId !== activePointerId) return;
+            if (activePointerId != null && typeof e.pointerId === 'number'
+                && e.pointerId !== activePointerId) return;
             if (isDragging) saveState();
             isDragging = false;
-            if (captureEl) {
-                try { captureEl.releasePointerCapture(e.pointerId); } catch (_) {}
-            }
-            captureEl = null;
             activePointerId = null;
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', endDrag);
+            window.removeEventListener('pointercancel', endDrag);
+            window.removeEventListener('touchmove', onMove);
+            window.removeEventListener('touchend', endDrag);
+            window.removeEventListener('touchcancel', endDrag);
         };
 
-        header.addEventListener('pointermove', onMove);
-        element.addEventListener('pointermove', onMove);
-        header.addEventListener('pointerup', endDrag);
-        element.addEventListener('pointerup', endDrag);
-        header.addEventListener('pointercancel', endDrag);
-        element.addEventListener('pointercancel', endDrag);
+        // Header: drag from anywhere except buttons.
+        const onHeaderStart = (e) => {
+            if (e.target.closest && e.target.closest('button')) return;
+            if (e.cancelable) e.preventDefault();
+            startDrag(e);
+        };
+        header.addEventListener('pointerdown', onHeaderStart);
+        header.addEventListener('touchstart', onHeaderStart, { passive: false });
+
+        // Edge-drag: tap within 8px of any edge of the body itself.
+        const onEdgeStart = (e) => {
+            if (e.target !== element) return;
+            const rect = element.getBoundingClientRect();
+            const { x, y } = xyFrom(e);
+            const DRAG_MARGIN = 8;
+            const inLeft = x - rect.left < DRAG_MARGIN;
+            const inRight = x - rect.right > -DRAG_MARGIN;
+            const inTop = y - rect.top < DRAG_MARGIN;
+            const inBottom = y - rect.bottom > -DRAG_MARGIN;
+            if (inLeft || inRight || inTop || inBottom) {
+                if (e.cancelable) e.preventDefault();
+                startDrag(e);
+            }
+        };
+        element.addEventListener('pointerdown', onEdgeStart);
+        element.addEventListener('touchstart', onEdgeStart, { passive: false });
     }
 
     function saveState() {
@@ -440,6 +457,9 @@ const DebugWindow = (() => {
         logs.push(`[${timestamp}] ${msg}`);
         if (logs.length > MAX_LOGS) logs.shift();
         updateContent();
+        // Mirror to console so remote DevTools (chrome://inspect over USB)
+        // see every log without having to scroll the in-page debug panel.
+        try { console.log(`[DBG] ${msg}`); } catch (_) {}
     }
 
     function updateContent() {

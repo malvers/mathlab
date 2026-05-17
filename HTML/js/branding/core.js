@@ -78,18 +78,12 @@
             const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
             const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
-            // Defeat Chrome Android "Touch to Search": insert a zero-width space
-            // (U+200B) between every character so Chrome's word segmenter sees only
-            // single-letter "words" — no Wikipedia/Knowledge-Graph hit.
-            const _zwsp = "​";
-            const _split = s => Array.from(String(s)).join(_zwsp);
-
             const container = document.createElement("div");
             container.className = "canvas-branding";
             container.title = "Vollbild umschalten";
             container.innerHTML = `
-            <h1 id="branding-master-title">${currentIcon()}${_split(topLine)}</h1>
-            <div class="canvas-subtitle" id="branding-module-title">${_split(bottomLine)}</div>
+            <h1 id="branding-master-title">${currentIcon()}${topLine}</h1>
+            <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
             container.addEventListener("click", (e) => {
