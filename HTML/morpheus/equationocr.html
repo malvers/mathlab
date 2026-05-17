@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  VISION: see /TRAUM.md — handwriting captured here should morph almost
+  imperceptibly into LaTeX. This file is one half of that pipeline;
+  morph.html is the other.
+-->
 <html lang="de">
 
 <head>
@@ -27,6 +32,8 @@
     <!-- Gemini OCR module: exposes geminiRecognize, geminiCropCanvas,
          geminiUnwrapLatex, SINGLE_GLYPH_PROMPT, DEFAULT_PROMPT. -->
     <script src="draw20-constants.js"></script>
+    <script src="contours.js"></script>
+    <script src="count-objects.js"></script>
     <script src="gemini-ocr.js"></script>
 
     <style>
@@ -95,7 +102,7 @@
                stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
                scales the displayed size uniformly. Mouse-coord mapping in
                JS already accounts for display vs intrinsic ratio. */
-            width: min(1760px, calc(110vw - 44px), calc(110vh - 176px));
+            width: min(1760px, calc(110vw - 44px), calc(110dvh - 216px));
             aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             line-height: 0;
@@ -222,13 +229,18 @@
             display: flex;
             align-items: center;
         }
-        /* KaTeX result overlay — floats at top of canvas, no own background
-           so the drawing shows through. Click-through; doesn't block drawing. */
+        /* KaTeX result overlay — fills the UPPER HALF of the canvas and centers
+           the formula vertically inside it. No own background so the drawing
+           shows through. Click-through; doesn't block drawing. */
         #result-render {
             position: absolute;
             left: 0;
-            top: 8px;
+            top: 0;
             width: 100%;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
             font-size: clamp(45px, 7.7vw, 90px);
             color: #F4C430;
@@ -236,7 +248,17 @@
             pointer-events: none;
             z-index: 26;
             overflow: hidden;
-            min-height: clamp(64px, 9.6vh, 128px);
+        }
+        /* Thin midline splitting the canvas into LaTeX (top) / handwriting (bottom). */
+        #canvas-midline {
+            position: absolute;
+            left: 4%;
+            right: 4%;
+            top: 50%;
+            height: 1px;
+            background: rgba(0, 210, 255, 0.35);
+            pointer-events: none;
+            z-index: 25;
         }
         /* KaTeX inherits page font-family otherwise — force its own glyphs */
         #result-render .katex,
@@ -392,6 +414,8 @@
                     <canvas id="draw-canvas" width="1000" height="1000"></canvas>
                     <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
                     <div id="result-render"></div>
+                    <!-- Thin midline divider between LaTeX (top) and handwriting (bottom). -->
+                    <div id="canvas-midline"></div>
                     <!-- Per-object recognition chips overlay. Click-through. -->
                     <div id="obj-chip-layer"></div>
                     <!-- <div id="mouse-coord">x: —  y: —</div> -->
@@ -975,6 +999,111 @@ function toggleSidebar() {
                 if (objects[i].strokeIdxs.indexOf(strokeIdx) >= 0) return i;
             }
             return -1;
+        }
+        // ── Contour-based regrouping (morph-style) ─────────────────────────
+        // Brightness-thresholded grid: any pixel that's brighter than the
+        // dark-blue background counts as ink, regardless of stroke color.
+        // The morph stack's draw20CanvasToGridRed only checks the red
+        // channel — won't catch blue/cyan/green strokes.
+        function eocrBuildGridFromCanvas() {
+            const W = drawCanvas.width, H = drawCanvas.height;
+            let data;
+            try { data = drawCtx.getImageData(0, 0, W, H).data; }
+            catch (e) { return null; }
+            // Background is ~#020410 → r+g+b ≈ 22. Any palette colour scores
+            // hundreds. Threshold 80 = generous "is ink" detection.
+            const THRESHOLD = 80;
+            const grid = new Uint8Array(W * H);
+            for (let i = 0; i < W * H; i++) {
+                const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+                grid[i] = (r + g + b) > THRESHOLD ? 1 : 0;
+            }
+            return { grid, W, H };
+        }
+        function bboxOfPolygon(poly) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const [x, y] of poly) {
+                if (x < minX) minX = x; if (x > maxX) maxX = x;
+                if (y < minY) minY = y; if (y > maxY) maxY = y;
+            }
+            return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+        }
+        // Replace `objects[]` with groupings derived from the rasterised canvas.
+        // Connected-component contours from marching-squares = "one outer per
+        // glyph". Each stroke is assigned to the outer whose polygon contains
+        // the majority of its points. Strokes that don't fall inside any outer
+        // (very thin lines, possibly missed) get their own singleton object.
+        function regroupObjectsFromContours() {
+            if (typeof getContoursWithHoles !== 'function'
+                || typeof classifyContours !== 'function') {
+                DebugWindow.log('⚠ contour deps missing — keeping bbox-grouping');
+                return false;
+            }
+            const g = eocrBuildGridFromCanvas();
+            if (!g) { DebugWindow.log('⚠ grid build failed'); return false; }
+            const raw = getContoursWithHoles(g.grid, g.W, g.H);
+            const { outers } = classifyContours(raw);
+            if (outers.length === 0) {
+                DebugWindow.log('⊘ no outers found in canvas');
+                return false;
+            }
+            // Build polygon array + bbox per outer.
+            const outerPolys = outers.map(o => raw[o.idx]);
+            const outerBBs = outerPolys.map(bboxOfPolygon);
+            // For each stroke, count how many of its points fall inside each
+            // outer polygon. Assign stroke to the outer with the most points.
+            // (Bbox pre-test for speed; full pointInPoly only when needed.)
+            const strokeToOuter = new Array(strokes.length).fill(-1);
+            for (let si = 0; si < strokes.length; si++) {
+                const st = strokes[si];
+                if (!st || !st.points || st.points.length === 0) continue;
+                const counts = new Array(outerPolys.length).fill(0);
+                for (const p of st.points) {
+                    for (let oi = 0; oi < outerPolys.length; oi++) {
+                        const bb = outerBBs[oi];
+                        if (p.x < bb.x || p.x > bb.x + bb.w
+                            || p.y < bb.y || p.y > bb.y + bb.h) continue;
+                        if (pointInPoly([p.x, p.y], outerPolys[oi])) counts[oi]++;
+                    }
+                }
+                let best = -1, bestCnt = 0;
+                for (let oi = 0; oi < outerPolys.length; oi++) {
+                    if (counts[oi] > bestCnt) { bestCnt = counts[oi]; best = oi; }
+                }
+                strokeToOuter[si] = best;
+            }
+            // Rebuild objects[] from the new groupings. Status='closed' since
+            // the per-object OCR runs next. Preserve any existing label/match.
+            const newObjects = outerPolys.map((poly, oi) => ({
+                strokeIdxs: [],
+                bbox: outerBBs[oi],
+                status: 'closed',
+                label: '',
+                matchedTokenIdx: -1,
+            }));
+            // Orphan strokes (no outer matched) → singleton objects each.
+            const orphans = [];
+            for (let si = 0; si < strokes.length; si++) {
+                const oi = strokeToOuter[si];
+                if (oi >= 0) newObjects[oi].strokeIdxs.push(si);
+                else orphans.push(si);
+            }
+            for (const si of orphans) {
+                newObjects.push({
+                    strokeIdxs: [si],
+                    bbox: bboxOfStroke(strokes[si]),
+                    status: 'closed',
+                    label: '',
+                    matchedTokenIdx: -1,
+                });
+            }
+            // Drop outers that ended up empty (very small noise contours).
+            const final = newObjects.filter(o => o.strokeIdxs.length > 0);
+            objects.length = 0;
+            for (const o of final) objects.push(o);
+            activeObjIdx = -1;
+            DebugWindow.log(`▷ contour-regroup: ${outers.length} outers, ${orphans.length} orphans → ${objects.length} objects`);
+            return true;
         }
         // Wipe canvas + repaint every stroke in its object's color. Called
         // after each stroke-end (color "snaps" once you lift the pen).
@@ -1565,6 +1694,14 @@ function toggleSidebar() {
                 // 1) Close any still-open active object before per-object pass.
                 if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
                 closeActiveObject();
+                // 1b) Rebuild objects[] from connected-component contours of
+                //     the rasterised canvas (morph-style). Replaces the live
+                //     bbox-based grouping which often splits strokes of one
+                //     glyph (e.g. the four parts of E) into separate objects.
+                regroupObjectsFromContours();
+                // Re-paint canvas so stroke colors match the new object IDs.
+                renderStrokes();
+                renderChips();
                 // 2) Per-object pass: sorted left-to-right, context-aware
                 //    flash-lite OCR. Each call gets the full LaTeX as hint
                 //    so the model just picks one of the known glyphs.

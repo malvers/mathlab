@@ -357,23 +357,36 @@ const CyberBranding = {
         const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
         const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
+        // Defeat Chrome Android "Touch to Search": split words by inserting
+        // a zero-width space between each character so the word segmenter
+        // sees only single-letter "words".
+        const _zwsp = '​';
+        const _split = s => Array.from(String(s)).join(_zwsp);
+
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         container.title = "Vollbild umschalten";
         container.innerHTML = `
-            <h1 id="branding-master-title">${currentIcon()}${topLine}</h1>
-            <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
+            <h1 id="branding-master-title">${currentIcon()}${_split(topLine)}</h1>
+            <div class="canvas-subtitle" id="branding-module-title">${_split(bottomLine)}</div>
         `;
 
-        // Transparent overlay shield against Chrome Android Touch-to-Search.
-        // See branding/core.js for the rationale; same approach mirrored here.
-        container.style.position = container.style.position || 'fixed';
-        const _touchShield = document.createElement('div');
-        _touchShield.setAttribute('aria-hidden', 'true');
-        _touchShield.style.cssText = 'position:absolute;inset:0;z-index:2;background:transparent;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;';
-        _touchShield.addEventListener('click', () => this.toggleFullscreen());
-        _touchShield.addEventListener('contextmenu', (e) => e.preventDefault());
-        container.appendChild(_touchShield);
+        container.addEventListener('click', (e) => {
+            this.toggleFullscreen();
+        });
+
+        // TEMP DEBUG: solid orange shield covering the brand text — to test whether
+        // Chrome Android Touch-to-Search reads through the DOM overlay or not.
+        // Use position:fixed with explicit coordinates so the shield is visible even
+        // if the container has zero height for some reason on the device.
+        const _debugShield = document.createElement('div');
+        _debugShield.setAttribute('aria-hidden', 'true');
+        _debugShield.style.cssText = 'position:fixed;top:8px;right:8px;width:320px;height:80px;z-index:2147483647;background:rgb(245,194,66);cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;pointer-events:auto;border:3px solid rgb(176,36,24);';
+        _debugShield.title = 'DEBUG TOUCH SHIELD';
+        _debugShield.addEventListener('click', () => this.toggleFullscreen());
+        _debugShield.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.body.appendChild(_debugShield);
+
         document.addEventListener('fullscreenchange', () => {
             const h1 = container.querySelector('#branding-master-title');
             if (!h1) return;

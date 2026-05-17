@@ -78,26 +78,23 @@
             const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
             const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
 
+            // Defeat Chrome Android "Touch to Search": insert a zero-width space
+            // (U+200B) between every character so Chrome's word segmenter sees only
+            // single-letter "words" — no Wikipedia/Knowledge-Graph hit.
+            const _zwsp = "​";
+            const _split = s => Array.from(String(s)).join(_zwsp);
+
             const container = document.createElement("div");
             container.className = "canvas-branding";
             container.title = "Vollbild umschalten";
             container.innerHTML = `
-            <h1 id="branding-master-title">${currentIcon()}${topLine}</h1>
-            <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
+            <h1 id="branding-master-title">${currentIcon()}${_split(topLine)}</h1>
+            <div class="canvas-subtitle" id="branding-module-title">${_split(bottomLine)}</div>
         `;
 
-            // Transparent overlay that absorbs all touch/long-press on the brand text.
-            // Chrome Android's Touch-to-Search reads DOM text under the finger — if the
-            // topmost hit-target has no text content (this overlay), no word is found,
-            // so the Wikipedia/Knowledge-Graph strip can't appear.
-            // Clicks on the overlay still reach the fullscreen toggle below.
-            container.style.position = container.style.position || "fixed";
-            const _touchShield = document.createElement("div");
-            _touchShield.setAttribute("aria-hidden", "true");
-            _touchShield.style.cssText = "position:absolute;inset:0;z-index:2;background:transparent;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;";
-            _touchShield.addEventListener("click", () => this.toggleFullscreen());
-            _touchShield.addEventListener("contextmenu", (e) => e.preventDefault());
-            container.appendChild(_touchShield);
+            container.addEventListener("click", (e) => {
+                this.toggleFullscreen();
+            });
 
             // Swap icon when fullscreen state changes
             document.addEventListener("fullscreenchange", () => {

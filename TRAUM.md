@@ -2,6 +2,11 @@
 
 Cross-Lab Visionen — Dinge die wir noch nicht angegangen sind, aber die das große Ganze zusammenführen würden.
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+WAS ICH WILL:
+Nutzer schreibt handschriftlich (auch) formeln, die sich kaum merkbar in LaTeX morphen.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 (Unterschied zu IDEAS.md: dort sind neue eigenständige Labs gelistet. Hier sind Verbindungen zwischen bestehenden Labs.)
 
 ## Morph ↔ OCR-Bridge
