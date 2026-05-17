@@ -635,16 +635,21 @@ function toggleSidebar() {
                 html2canvas(tmp, { backgroundColor: '#020410', scale: 2, logging: false }).then(snap => {
                     drawCtx.fillStyle = '#020410';
                     drawCtx.fillRect(0, 0, 1000, 1000);
-                    const MARGIN = 60;
-                    const sc = Math.min((1000 - 2*MARGIN) / snap.width, (1000 - 2*MARGIN) / snap.height);
+                    // Aspect-fit into the LOWER half (y 500..1000), centered.
+                    // Shift up 5% (50 px) so the formula clears the button row.
+                    const MARGIN = 20;
+                    const targetW = 1000 - 2*MARGIN;
+                    const targetH = 500  - 2*MARGIN;
+                    const sc = Math.min(targetW / snap.width, targetH / snap.height);
                     const nw = snap.width * sc, nh = snap.height * sc;
-                    const ox = (1000 - nw) / 2, oy = (1000 - nh) / 2;
+                    const ox = (1000 - nw) / 2;
+                    const oy = 500 + (500 - nh) / 2 - 50;
                     drawCtx.imageSmoothingEnabled = true;
                     drawCtx.imageSmoothingQuality = 'high';
                     drawCtx.drawImage(snap, ox, oy, nw, nh);
                     document.body.removeChild(tmp);
                     saveCanvasState();
-                    DebugWindow.log(`✓ ${title} aufs Canvas (${Math.round(nw)}×${Math.round(nh)})`);
+                    DebugWindow.log(`✓ ${title} aufs Canvas (${Math.round(nw)}×${Math.round(nh)} @lower)`);
                 }).catch(err => {
                     if (tmp.parentNode) document.body.removeChild(tmp);
                     DebugWindow.log(`✗ html2canvas-Fehler: ${err.message}`);
@@ -827,9 +832,20 @@ function toggleSidebar() {
                 tctx.putImageData(id, 0, 0);
                 drawCtx.fillStyle = '#020410';
                 drawCtx.fillRect(0, 0, 1000, 1000);
-                drawCtx.drawImage(tmp, 0, 0, 1000, 1000);
+                // Aspect-fit into the LOWER half (y 500..1000), centered.
+                // Shift up 5% (50 px) so the formula clears the button row.
+                const MARGIN = 20;
+                const targetW = 1000 - 2 * MARGIN;
+                const targetH = 500  - 2 * MARGIN;
+                const sc = Math.min(targetW / img.width, targetH / img.height);
+                const nw = img.width * sc, nh = img.height * sc;
+                const ox = (1000 - nw) / 2;
+                const oy = 500 + (500 - nh) / 2 - 50;
+                drawCtx.imageSmoothingEnabled = true;
+                drawCtx.imageSmoothingQuality = 'high';
+                drawCtx.drawImage(tmp, ox, oy, nw, nh);
                 saveCanvasState();
-                DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height})`);
+                DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height} → ${Math.round(nw)}×${Math.round(nh)} @lower)`);
             };
             img.onerror = () => DebugWindow.log(`✗ ${path} konnte nicht geladen werden`);
             img.src = path;
