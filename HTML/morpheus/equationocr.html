@@ -143,29 +143,34 @@
            a solid dark background to stay readable. */
         #canvas-btn-row {
             position: absolute;
-            left: 50%;
+            left: 0;
+            right: 0;
             bottom: clamp(8px, 1.5vh, 16px);
-            transform: translateX(-50%);
             display: flex;
             gap: clamp(6px, 1vw, 10px);
             z-index: 30;
-            width: max-content;
-            max-width: calc(100% - 24px);
+            padding: 0 clamp(8px, 1.5vw, 16px);
+            box-sizing: border-box;
         }
         #canvas-recognize-btn,
         #canvas-reload-btn,
         #canvas-clear-btn {
+            /* Three equal-width buttons spanning canvas width — flex 1 each,
+               no min-width override so they really go equal. */
+            flex: 1 1 0 !important;
             width: auto !important;
-            /* Responsive: shrinks on tablet, fills sensibly on desktop. */
-            min-width: clamp(70px, 18vw, 140px) !important;
-            padding: clamp(4px, 0.8vh, 10px) clamp(8px, 2vw, 18px) !important;
-            font-size: clamp(11px, 1.6vw, 14px) !important;
+            min-width: 0 !important;
+            padding: clamp(2px, 0.6vh, 8px) clamp(2px, 1vw, 12px) !important;
+            font-size: clamp(8px, 1.3vw, 14px) !important;
+            letter-spacing: 0.04em !important;
             border: 0.5px solid #adff2f !important;
             color: #adff2f !important;
             background: rgba(8, 20, 42, 0.92) !important;
             box-shadow: 0 0 6px rgba(173, 255, 47, 0.18) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: clip !important;
         }
-        #canvas-recognize-btn { min-width: clamp(110px, 24vw, 200px) !important; }
         #canvas-recognize-btn:hover,
         #canvas-reload-btn:hover,
         #canvas-clear-btn:hover {
@@ -243,7 +248,7 @@
             justify-content: center;
             text-align: center;
             font-size: clamp(45px, 7.7vw, 90px);
-            color: #F4C430;
+            color: #FF0000;
             text-shadow: 0 0 6px rgba(2, 4, 16, 0.9), 0 0 10px rgba(2, 4, 16, 0.6);
             pointer-events: none;
             z-index: 26;
@@ -263,7 +268,7 @@
         /* KaTeX inherits page font-family otherwise — force its own glyphs */
         #result-render .katex,
         #result-render .katex-display {
-            color: #F4C430;
+            color: #FF0000;
         }
         .api-input {
             width: 100%;
@@ -1219,30 +1224,40 @@ function toggleSidebar() {
         }
 
         // ── Chip overlay ───────────────────────────────────────────────────
+        // Chips are arranged in a SINGLE HORIZONTAL ROW, evenly distributed
+        // across the canvas width, ordered left-to-right by each object's
+        // bbox.x (writing order). Sits just above the midline.
         function renderChips() {
             const layer = document.getElementById('obj-chip-layer');
             if (!layer) return;
             layer.innerHTML = '';
-            const rect = drawCanvas.getBoundingClientRect();
             const layerRect = layer.getBoundingClientRect();
-            const sx = rect.width / drawCanvas.width;
-            const sy = rect.height / drawCanvas.height;
-            const dx = rect.left - layerRect.left;
-            const dy = rect.top - layerRect.top;
+            const rect = drawCanvas.getBoundingClientRect();
+            const canvasLeft = rect.left - layerRect.left;
+            const canvasTop  = rect.top  - layerRect.top;
+            const canvasW    = rect.width;
+            const canvasH    = rect.height;
+            // Visible chips = objects that have actual labels (recognized,
+            // recognizing, error). Skip 'pending'/'closed' (no label yet).
+            const visible = [];
             for (let i = 0; i < objects.length; i++) {
                 const obj = objects[i];
-                // Only show chips once OCR has actually run. 'pending' = still
-                // being drawn; 'closed' = drawn but waiting for ERKENNEN.
                 if (obj.status === 'pending' || obj.status === 'closed') continue;
-                const cx = dx + obj.bbox.x * sx;
-                const cy = dy + obj.bbox.y * sy;
+                visible.push({ obj, i });
+            }
+            if (visible.length === 0) return;
+            // Order by writing order (left-to-right) so the row matches reading.
+            visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
+            // Y position: just above the midline (canvas mid = canvasH/2).
+            const chipY = canvasTop + canvasH * 0.5 - 36;
+            // X positions: evenly distribute centers across full canvas width.
+            const N = visible.length;
+            visible.forEach(({ obj, i }, rank) => {
+                const xCenter = canvasLeft + canvasW * (rank + 0.5) / N;
                 const chip = document.createElement('div');
                 chip.className = 'obj-chip ' + (obj.status === 'error' ? 'error'
                     : obj.status === 'recognizing' ? 'pending' : '');
-                chip.style.left = (cx + obj.bbox.w * sx + 4) + 'px';
-                chip.style.top  = (cy - 4) + 'px';
-                // Per-object color — overrides CSS for recognized chips so
-                // each chip matches its strokes on the canvas.
+                chip.style.top  = chipY + 'px';
                 if (obj.status !== 'error') {
                     const col = objColor(i);
                     chip.style.color = col;
@@ -1264,9 +1279,13 @@ function toggleSidebar() {
                 } else {
                     chip.textContent = text;
                 }
-                chip.title = `obj#${i} status=${obj.status} label="${obj.label}"`;
+                chip.title = `obj#${i} rank#${rank} status=${obj.status} label="${obj.label}"`;
+                // Center the chip horizontally on xCenter — set transform after
+                // appending so the chip's own width is known.
                 layer.appendChild(chip);
-            }
+                const w = chip.offsetWidth || 40;
+                chip.style.left = (xCenter - w / 2) + 'px';
+            });
         }
         function clearChips() {
             const layer = document.getElementById('obj-chip-layer');
