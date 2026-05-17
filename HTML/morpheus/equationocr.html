@@ -268,6 +268,34 @@
             z-index: 26;
             overflow: hidden;
         }
+        /* Loading spinner — 8 chase-fade dots. Reused from numberrecognition.html.
+           Shown inside #result-render while the full-pass is awaiting Gemini. */
+        .squiri {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .squiri span {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00d2ff;
+            box-shadow: 0 0 8px rgba(0,210,255,0.8);
+            animation: chase-fade 1.2s ease-in-out infinite;
+        }
+        .squiri span:nth-child(1) { top: 0;    left: 35px; animation-delay: 0s; }
+        .squiri span:nth-child(2) { top: 11px; left: 62px; animation-delay: -1.05s; }
+        .squiri span:nth-child(3) { top: 35px; left: 70px; animation-delay: -0.9s; }
+        .squiri span:nth-child(4) { top: 59px; left: 62px; animation-delay: -0.75s; }
+        .squiri span:nth-child(5) { top: 70px; left: 35px; animation-delay: -0.6s; }
+        .squiri span:nth-child(6) { top: 59px; left: 8px;  animation-delay: -0.45s; }
+        .squiri span:nth-child(7) { top: 35px; left: 0;    animation-delay: -0.3s; }
+        .squiri span:nth-child(8) { top: 11px; left: 8px;  animation-delay: -0.15s; }
+        @keyframes chase-fade {
+            0%, 100% { opacity: 0.15; transform: scale(0.7); }
+            50%      { opacity: 1;    transform: scale(1.2); }
+        }
         /* Thin midline splitting the canvas into LaTeX (top) / handwriting (bottom). */
         #canvas-midline {
             position: absolute;
@@ -625,6 +653,10 @@ function toggleSidebar() {
         function loadKatexToCanvas(latex, title) {
             DebugWindow.log(`▶ Render Komplex: ${title}`);
             clearOverlay();
+            // Picking a new formula → the previous LaTeX result is stale; wipe it.
+            setLatexResult('');
+            const rr = document.getElementById('result-render');
+            if (rr) rr.innerHTML = '';
             const tmp = document.createElement('div');
             tmp.style.cssText = 'position:fixed;left:-10000px;top:0;padding:40px;background:#020410;color:#adff2f;font-size:60px;line-height:1.4;white-space:nowrap;';
             document.body.appendChild(tmp);
@@ -635,12 +667,12 @@ function toggleSidebar() {
                 html2canvas(tmp, { backgroundColor: '#020410', scale: 2, logging: false }).then(snap => {
                     drawCtx.fillStyle = '#020410';
                     drawCtx.fillRect(0, 0, 1000, 1000);
-                    // Aspect-fit into the LOWER half (y 500..1000), centered.
-                    // Shift up 5% (50 px) so the formula clears the button row.
+                    // Aspect-fit into the LOWER half (y 500..1000), centered, then
+                    // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
                     const MARGIN = 20;
                     const targetW = 1000 - 2*MARGIN;
                     const targetH = 500  - 2*MARGIN;
-                    const sc = Math.min(targetW / snap.width, targetH / snap.height);
+                    const sc = Math.min(targetW / snap.width, targetH / snap.height) * 2.1;
                     const nw = snap.width * sc, nh = snap.height * sc;
                     const ox = (1000 - nw) / 2;
                     const oy = 500 + (500 - nh) / 2 - 50;
@@ -813,6 +845,10 @@ function toggleSidebar() {
         function loadPNGPreset(path, title) {
             DebugWindow.log(`▶ Lade ${path} (${title})`);
             clearOverlay();
+            // Picking a new formula → the previous LaTeX result is stale; wipe it.
+            setLatexResult('');
+            const rr = document.getElementById('result-render');
+            if (rr) rr.innerHTML = '';
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => {
@@ -832,12 +868,12 @@ function toggleSidebar() {
                 tctx.putImageData(id, 0, 0);
                 drawCtx.fillStyle = '#020410';
                 drawCtx.fillRect(0, 0, 1000, 1000);
-                // Aspect-fit into the LOWER half (y 500..1000), centered.
-                // Shift up 5% (50 px) so the formula clears the button row.
+                // Aspect-fit into the LOWER half (y 500..1000), centered, then
+                // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
                 const MARGIN = 20;
                 const targetW = 1000 - 2 * MARGIN;
                 const targetH = 500  - 2 * MARGIN;
-                const sc = Math.min(targetW / img.width, targetH / img.height);
+                const sc = Math.min(targetW / img.width, targetH / img.height) * 2.1;
                 const nw = img.width * sc, nh = img.height * sc;
                 const ox = (1000 - nw) / 2;
                 const oy = 500 + (500 - nh) / 2 - 50;
@@ -1130,8 +1166,13 @@ function toggleSidebar() {
                     matchedTokenIdx: -1,
                 });
             }
-            // Drop outers that ended up empty (very small noise contours).
-            const final = newObjects.filter(o => o.strokeIdxs.length > 0);
+            // Keep all outers — when a preset PNG is loaded (no strokes drawn),
+            // objects legitimately have strokeIdxs=[], but their bbox/pixels
+            // are still valid OCR targets. Only drop if strokes existed AND
+            // this outer caught none of them (= true noise).
+            const final = (strokes.length === 0)
+                ? newObjects
+                : newObjects.filter(o => o.strokeIdxs.length > 0);
             objects.length = 0;
             for (const o of final) objects.push(o);
             activeObjIdx = -1;
@@ -1140,7 +1181,10 @@ function toggleSidebar() {
         }
         // Wipe canvas + repaint every stroke in its object's color. Called
         // after each stroke-end (color "snaps" once you lift the pen).
+        // Skip entirely when no strokes exist — would otherwise erase any
+        // preset PNG that was loaded into the canvas pixels.
         function renderStrokes() {
+            if (strokes.length === 0) return;
             drawCtx.fillStyle = '#020410';
             drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
             drawCtx.lineCap = 'round';
@@ -1276,13 +1320,21 @@ function toggleSidebar() {
             if (visible.length === 0) return;
             // Order by writing order (left-to-right) so the row matches reading.
             visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
-            // Y position: just above the midline (canvas mid = canvasH/2).
-            // Use % of canvas height so the chip-row scales with the canvas.
-            const chipY = canvasTop + canvasH * 0.45;
-            // X positions: evenly distribute centers across full canvas width.
+            // Two-row layout — both in the LOWER half of the canvas.
+            //   Top row: just below the midline (start of lower half).
+            //   Bottom row: just above the button row (end of lower half).
+            // Chips are split by reading order: first ceil(N/2) → top row,
+            // remainder → bottom row. Doubles the per-chip width.
+            const chipYTop    = canvasTop + canvasH * 0.52;
+            const chipYBottom = canvasTop + canvasH * 0.84;
             const N = visible.length;
+            const splitAt = Math.ceil(N / 2);
             visible.forEach(({ obj, i }, rank) => {
-                const xCenter = canvasLeft + canvasW * (rank + 0.5) / N;
+                const isTop = rank < splitAt;
+                const rowN  = isTop ? splitAt : (N - splitAt);
+                const rowR  = isTop ? rank : (rank - splitAt);
+                const xCenter = canvasLeft + canvasW * (rowR + 0.5) / Math.max(1, rowN);
+                const chipY   = isTop ? chipYTop : chipYBottom;
                 const chip = document.createElement('div');
                 chip.className = 'obj-chip ' + (obj.status === 'error' ? 'error'
                     : obj.status === 'recognizing' ? 'pending' : '');
@@ -1744,37 +1796,43 @@ function toggleSidebar() {
                 renderLatex(latex);
                 saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
-                // 1) Close any still-open active object before per-object pass.
-                if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
-                closeActiveObject();
-                // 1b) Rebuild objects[] from connected-component contours of
-                //     the rasterised canvas (morph-style). Replaces the live
-                //     bbox-based grouping which often splits strokes of one
-                //     glyph (e.g. the four parts of E) into separate objects.
-                regroupObjectsFromContours();
-                // Re-paint canvas so stroke colors match the new object IDs.
-                renderStrokes();
-                renderChips();
-                // 2) Per-object pass: sorted left-to-right, context-aware
-                //    flash-lite OCR. Each call gets the full LaTeX as hint
-                //    so the model just picks one of the known glyphs.
-                const orderedObjs = objects
-                    .map((o, i) => ({ o, i }))
-                    .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
-                DebugWindow.log(`▸ per-object OCR pass: ${orderedObjs.length} objects, context="${latex}", tokens=${JSON.stringify(tokens)}`);
-                for (const { i } of orderedObjs) {
-                    await recognizeObjectWithContext(i, latex, tokens);
-                }
-                // 3) Match-mapping: pixel-object ↔ LaTeX-token by label.
-                applyObjectTokenMapping(tokens);
-                // 4) Re-render LaTeX colorized per token using each object's hue.
-                try {
-                    const colored = colorizeLatex(latex, tokens);
-                    renderLatex(colored);
-                    DebugWindow.log(`🎨 colorized re-render: ${colored.slice(0, 120)}`);
-                } catch (e) {
-                    DebugWindow.log(`⚠ colorize failed: ${e.message}`);
-                }
+                // ┌─── TEMP: per-object pass deactivated ──────────────────────┐
+                // │ Only the full-pass runs (no object regroup, no flash-lite, │
+                // │ no chip-row, no per-token colorize). To restore: uncomment │
+                // │ the block below.                                           │
+                // │ Marker for grep: PER_OBJECT_OFF                            │
+                // └────────────────────────────────────────────────────────────┘
+                // // 1) Close any still-open active object before per-object pass.
+                // if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
+                // closeActiveObject();
+                // // 1b) Rebuild objects[] from connected-component contours of
+                // //     the rasterised canvas (morph-style). Replaces the live
+                // //     bbox-based grouping which often splits strokes of one
+                // //     glyph (e.g. the four parts of E) into separate objects.
+                // regroupObjectsFromContours();
+                // // Re-paint canvas so stroke colors match the new object IDs.
+                // renderStrokes();
+                // renderChips();
+                // // 2) Per-object pass: sorted left-to-right, context-aware
+                // //    flash-lite OCR. Each call gets the full LaTeX as hint
+                // //    so the model just picks one of the known glyphs.
+                // const orderedObjs = objects
+                //     .map((o, i) => ({ o, i }))
+                //     .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
+                // DebugWindow.log(`▸ per-object OCR pass: ${orderedObjs.length} objects, context="${latex}", tokens=${JSON.stringify(tokens)}`);
+                // for (const { i } of orderedObjs) {
+                //     await recognizeObjectWithContext(i, latex, tokens);
+                // }
+                // // 3) Match-mapping: pixel-object ↔ LaTeX-token by label.
+                // applyObjectTokenMapping(tokens);
+                // // 4) Re-render LaTeX colorized per token using each object's hue.
+                // try {
+                //     const colored = colorizeLatex(latex, tokens);
+                //     renderLatex(colored);
+                //     DebugWindow.log(`🎨 colorized re-render: ${colored.slice(0, 120)}`);
+                // } catch (e) {
+                //     DebugWindow.log(`⚠ colorize failed: ${e.message}`);
+                // }
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
                 console.error('Gemini fetch error', err);
