@@ -41,8 +41,8 @@ const DebugWindow = (() => {
         debugEl.id = 'central-debug-window';
 
         // Position/size: collapsed → bottom-right; expanded → saved position or default bottom-right
-        const w = savedState.width || '400px';
-        const h = collapsed ? '40px' : (savedState.height || '300px');
+        const w = savedState.width || '520px';
+        const h = collapsed ? '40px' : (savedState.height || '500px');
         let positionStyle;
         if (collapsed) {
             positionStyle = `left: auto; top: auto; right: 20px; bottom: 20px;`;
@@ -403,6 +403,7 @@ const DebugWindow = (() => {
         const onHeaderStart = (e) => {
             if (e.target.closest && e.target.closest('button')) return;
             if (e.cancelable) e.preventDefault();
+            log(`🐾 dragStart type=${e.type} ptId=${e.pointerId} target=${e.target?.tagName||'?'}`);
             startDrag(e);
         };
         header.addEventListener('pointerdown', onHeaderStart);
