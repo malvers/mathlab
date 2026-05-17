@@ -86,6 +86,7 @@ const DebugWindow = (() => {
             border-bottom: ${collapsed ? 'none' : '1px solid rgba(107, 160, 67, 0.3)'};
             cursor: move;
             user-select: none;
+            touch-action: none;
         `;
 
         const title = document.createElement('span');
@@ -248,7 +249,7 @@ const DebugWindow = (() => {
             const h = document.createElement('div');
             h.className = 'debug-resize-handle';
             h.dataset.dir = def.dir;
-            h.style.cssText = `position:absolute; ${def.style} cursor:${def.cursor}; display:${collapsed ? 'none' : 'block'}; user-select:none; z-index:5;`;
+            h.style.cssText = `position:absolute; ${def.style} cursor:${def.cursor}; display:${collapsed ? 'none' : 'block'}; user-select:none; touch-action:none; z-index:5;`;
             // Visual indicator on the SE corner (bottom-right) so users see the resize grip
             if (def.dir === 'se') {
                 h.style.display = collapsed ? 'none' : 'flex';
@@ -281,10 +282,13 @@ const DebugWindow = (() => {
         let startLeft = 0, startTop = 0;
         const MIN_W = 150, MIN_H = 80;
 
-        handle.addEventListener('mousedown', (e) => {
+        let activePointerId = null;
+
+        handle.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             e.stopPropagation();
             isResizing = true;
+            activePointerId = e.pointerId;
             startX = e.clientX;
             startY = e.clientY;
             startWidth = element.offsetWidth;
@@ -296,10 +300,14 @@ const DebugWindow = (() => {
             element.style.top = startTop + 'px';
             element.style.right = 'auto';
             element.style.bottom = 'auto';
+            // Capture pointer so we keep getting move events even when finger/cursor leaves the handle.
+            try { handle.setPointerCapture(e.pointerId); } catch (_) {}
         });
 
-        document.addEventListener('mousemove', (e) => {
+        handle.addEventListener('pointermove', (e) => {
             if (!isResizing) return;
+            if (activePointerId != null && e.pointerId !== activePointerId) return;
+            e.preventDefault();
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
 
@@ -324,26 +332,42 @@ const DebugWindow = (() => {
             }
         });
 
-        document.addEventListener('mouseup', () => {
+        const endResize = (e) => {
+            if (activePointerId != null && e.pointerId !== activePointerId) return;
             if (isResizing) saveState();
             isResizing = false;
-        });
+            try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+            activePointerId = null;
+        };
+        handle.addEventListener('pointerup', endResize);
+        handle.addEventListener('pointercancel', endResize);
     }
 
     function makeHeaderDraggable(header, element) {
         let offsetX = 0, offsetY = 0;
-        let isMouseDown = false;
+        let isDragging = false;
+        let activePointerId = null;
+        let captureEl = null;
 
-        const startDrag = (e) => {
-            isMouseDown = true;
+        const startDrag = (e, target) => {
+            isDragging = true;
+            activePointerId = e.pointerId;
+            captureEl = target;
             offsetX = e.clientX - element.offsetLeft;
             offsetY = e.clientY - element.offsetTop;
+            try { target.setPointerCapture(e.pointerId); } catch (_) {}
         };
 
-        header.addEventListener('mousedown', startDrag);
+        header.addEventListener('pointerdown', (e) => {
+            // Ignore taps on buttons inside the header
+            if (e.target.closest && e.target.closest('button')) return;
+            e.preventDefault();
+            startDrag(e, header);
+        });
 
         // Auch am Rand greifen zum Verschieben
-        element.addEventListener('mousedown', (e) => {
+        element.addEventListener('pointerdown', (e) => {
+            if (e.target !== element) return;
             const rect = element.getBoundingClientRect();
             const DRAG_MARGIN = 8;
             const inLeft = e.clientX - rect.left < DRAG_MARGIN;
@@ -351,23 +375,39 @@ const DebugWindow = (() => {
             const inTop = e.clientY - rect.top < DRAG_MARGIN;
             const inBottom = e.clientY - rect.bottom > -DRAG_MARGIN;
 
-            if ((inLeft || inRight || inTop || inBottom) && e.target === element) {
-                startDrag(e);
+            if (inLeft || inRight || inTop || inBottom) {
+                e.preventDefault();
+                startDrag(e, element);
             }
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isMouseDown) return;
+        const onMove = (e) => {
+            if (!isDragging) return;
+            if (activePointerId != null && e.pointerId !== activePointerId) return;
+            e.preventDefault();
             element.style.left = (e.clientX - offsetX) + 'px';
             element.style.top = (e.clientY - offsetY) + 'px';
             element.style.right = 'auto';
             element.style.bottom = 'auto';
-        });
+        };
 
-        document.addEventListener('mouseup', () => {
-            if (isMouseDown) saveState();
-            isMouseDown = false;
-        });
+        const endDrag = (e) => {
+            if (activePointerId != null && e.pointerId !== activePointerId) return;
+            if (isDragging) saveState();
+            isDragging = false;
+            if (captureEl) {
+                try { captureEl.releasePointerCapture(e.pointerId); } catch (_) {}
+            }
+            captureEl = null;
+            activePointerId = null;
+        };
+
+        header.addEventListener('pointermove', onMove);
+        element.addEventListener('pointermove', onMove);
+        header.addEventListener('pointerup', endDrag);
+        element.addEventListener('pointerup', endDrag);
+        header.addEventListener('pointercancel', endDrag);
+        element.addEventListener('pointercancel', endDrag);
     }
 
     function saveState() {

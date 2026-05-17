@@ -365,9 +365,15 @@ const CyberBranding = {
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
         `;
 
-        container.addEventListener('click', (e) => {
-            this.toggleFullscreen();
-        });
+        // Transparent overlay shield against Chrome Android Touch-to-Search.
+        // See branding/core.js for the rationale; same approach mirrored here.
+        container.style.position = container.style.position || 'fixed';
+        const _touchShield = document.createElement('div');
+        _touchShield.setAttribute('aria-hidden', 'true');
+        _touchShield.style.cssText = 'position:absolute;inset:0;z-index:2;background:transparent;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;';
+        _touchShield.addEventListener('click', () => this.toggleFullscreen());
+        _touchShield.addEventListener('contextmenu', (e) => e.preventDefault());
+        container.appendChild(_touchShield);
         document.addEventListener('fullscreenchange', () => {
             const h1 = container.querySelector('#branding-master-title');
             if (!h1) return;
