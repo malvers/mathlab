@@ -432,16 +432,7 @@
     <script src="../js/branding.js"></script>
     <script src="../js/ui.js"></script>
     <script>
-        // Boot probe — should appear BEFORE any user interaction. If absent,
-        // the inline script crashed during parse (look in DevTools console).
-        try {
-            const k = (typeof window.GEMINI_API_KEY === 'string') ? window.GEMINI_API_KEY : '';
-            console.log('[eocr] boot — GEMINI_API_KEY:', k ? '…' + k.slice(-4) : '(missing)');
-            if (typeof DebugWindow !== 'undefined') {
-                DebugWindow.log('🛫 eocr boot — GEMINI_API_KEY: ' + (k ? '…' + k.slice(-4) : '(MISSING)'));
-            }
-        } catch (e) { console.error('boot probe failed', e); }
-        function toggleSidebar() {
+function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
             if (window.CyberLeftChrome?.publishResolvedScale) CyberLeftChrome.publishResolvedScale();
@@ -863,8 +854,6 @@
             const s = e.touches ? e.touches[0] : e;
             return { x: (s.clientX - r.left) * sx, y: (s.clientY - r.top) * sy };
         }
-
-        DebugWindow.log('📍 probe-A: before stroke buffer');
         // ── Stroke + object buffer ─────────────────────────────────────────
         // Strokes are captured AS objects (point lists), not just rasterized,
         // so we can group them into glyphs and send each crop to Gemini.
@@ -1110,17 +1099,12 @@
         drawCanvas.addEventListener('pointerup',     endStroke);
         drawCanvas.addEventListener('pointercancel', endStroke);
         drawCanvas.addEventListener('pointerleave',  endStroke);
-
-        DebugWindow.log('📍 probe-B: after stroke buffer + pointer handlers');
         // Persist the current canvas pixels — called after every finished
         // stroke and after preset loads. ~100–400 KB PNG; fits in localStorage.
         function saveCanvasState() {
             try { localStorage.setItem('eocr-canvas-png', drawCanvas.toDataURL('image/png')); }
             catch (e) { DebugWindow.log(`⚠ Canvas-Save fehlgeschlagen: ${e.message}`); }
         }
-
-        DebugWindow.log('📍 probe-C: before cost control');
-
         // ── Cost control ────────────────────────────────────────────────────────
         // USD per 1M tokens. Verify against ai.google.dev/pricing if rates change.
         const GEMINI_PRICING = {
@@ -1149,8 +1133,6 @@
             const limEl = document.getElementById('cost-limit');
             if (lim && limEl) limEl.value = lim;
         } catch (_) {}
-
-        DebugWindow.log("📍 probe-C1: after GEMINI_PRICING");
         function fmtUSD(v) {
             // Always dollars. 2 NKS normally; 4 NKS below $0.01 so sub-cent
             // amounts stay readable instead of rounding to "$0.00".
@@ -1202,7 +1184,6 @@
         }
 
         // Called after a successful Gemini response. usage = data.usageMetadata.
-        DebugWindow.log("📍 probe-C2: after fmt/updateCostUI");
         function trackCost(model, usage) {
             if (!usage) {
                 DebugWindow.log('  ⚠ keine usageMetadata in der Antwort');
@@ -1268,10 +1249,8 @@
 
         // Show initial values + re-check warning state (in case we crossed
         // the threshold in a previous session and never acknowledged it).
-        try { DebugWindow.log('📍 probe-C2.1: before updateCostUI()'); updateCostUI(); DebugWindow.log('📍 probe-C2.2: after updateCostUI()'); }
-        catch (e) { DebugWindow.log('✗ updateCostUI crash: ' + e.message); console.error('updateCostUI crash', e); }
-        try { DebugWindow.log('📍 probe-C2.3: before maybeShowCostWarning()'); maybeShowCostWarning(); DebugWindow.log('📍 probe-C2.4: after maybeShowCostWarning()'); }
-        catch (e) { DebugWindow.log('✗ maybeShowCostWarning crash: ' + e.message); console.error('maybeShowCostWarning crash', e); }
+        updateCostUI();
+        maybeShowCostWarning();
 
         // ── Render helper (shared by recognize + debugRender) ───────────────────
         function renderLatex(latex) {
@@ -1310,7 +1289,6 @@
 
 //         // ── Gemini OCR ──────────────────────────────────────────────────────────
 //         // Strip a single $...$, $$...$$, \(...\) or \[...\] wrapper if Gemini added one.
-        DebugWindow.log("📍 probe-C3: after trackCost/maybeWarn");
         function unwrapLatex(s) {
             s = s.trim();
             // Remove markdown code fences ```latex ... ``` if present
@@ -1322,8 +1300,6 @@
             if (s.startsWith('\\[') && s.endsWith('\\]')) return s.slice(2, -2).trim();
             return s;
         }
-
-        DebugWindow.log("📍 probe-C4: after unwrap + renderLatex etc");
         async function recognize() {
             const apiKey = document.getElementById('g-api-key').value.trim();
             const model  = document.getElementById('g-model').value;
@@ -1456,11 +1432,8 @@
                 setLatexResult(`Fehler: ${err.message}`);
             }
         }
-
-        DebugWindow.log('📍 probe-D: before init/restore');
         // Restore credentials: localStorage wins; fall back to window.GEMINI_API_KEY
         // from apikey.local.js (gitignored) so the key survives a localStorage wipe.
-        DebugWindow.log('🔑 initApi enter');
         try {
             const keyLS  = localStorage.getItem('eocr-g-key');
             const keyFile = (typeof window.GEMINI_API_KEY === 'string' && window.GEMINI_API_KEY.trim())
@@ -1488,7 +1461,7 @@
             const scInit = sc !== null ? sc : '50';
             const slSc = document.getElementById('canvas-scale-slider');
             if (slSc) { slSc.value = scInit; onCanvasScaleChange(scInit); }
-        } catch (e) { DebugWindow.log('✗ initApi crash: ' + e.message); console.error(e); }
+        } catch (_) {}
 
         // Persist card collapse state — same pattern as morph.html
         function makeCardsCollapsible() {
