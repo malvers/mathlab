@@ -44,7 +44,7 @@
                2. Fit horizontally inside #draw-wrap (sidebar already excluded)
                3. Fit vertically inside viewport minus top/bottom chrome
                aspect-ratio: 1/1 → height follows width. */
-            width: min(1760px, calc(100% - 24px), calc(100dvh - 100px));
+            width: min(1760px, calc(100% - 24px), calc(100dvh - 160px));
             aspect-ratio: 1 / 1;
             flex: 0 0 auto;
             /* Transparent — strokes/chips/LaTeX-render float on top of the
@@ -242,6 +242,18 @@
         }
         .cyber-grid {
             display: none !important;
+        }
+        /* Force the whole shell to track DYNAMIC viewport height — so on
+           mobile / non-fullscreen Chrome (where the address bar reduces the
+           visible area), the bottom-anchored button row stays inside the
+           visible window instead of being pushed below it. */
+        body.cyber-shell-grid {
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            grid-template-rows: minmax(0, 100dvh) !important;
+        }
+        body.cyber-shell-grid > #main-content {
+            height: 100dvh !important;
         }
         /* KaTeX result overlay — fills the UPPER HALF of the canvas and centers
            the formula vertically inside it. No own background so the drawing
