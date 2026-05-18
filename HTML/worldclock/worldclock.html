@@ -180,7 +180,7 @@
                     document.addEventListener('DOMContentLoaded', () => {
                         const el = document.getElementById('visitor-greeting');
                         if (!el) return;
-                        const safe = visitorMsg.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+                        const safe = visitorMsg.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(/\r\n|\r|\n/g, '<br>');
                         const align = visitorMsg.length > 60 ? 'left' : 'center';
                         el.style.justifyContent = visitorMsg.length > 60 ? 'flex-start' : 'center';
                         el.style.textAlign = align;
