@@ -34,6 +34,11 @@
     <script src="draw20-constants.js"></script>
     <script src="contours.js"></script>
     <script src="count-objects.js"></script>
+    <!-- Morph cross-pane matcher: plausibility check + Greedy Sequential
+         Symbol-Type-Tier matching. Used to pair handwriting outers with
+         KaTeX-rendered outers by SHAPE, not labels. -->
+    <script src="plausibilcheck.js"></script>
+    <script src="draw20-match.js"></script>
     <script src="gemini-ocr.js"></script>
 
     <style>
@@ -806,12 +811,18 @@ function toggleSidebar() {
             clearOverlay();
             try { localStorage.removeItem('eocr-canvas-png'); } catch (_) {}
             setLatexResult('');
-            document.getElementById('result-render').innerHTML = '';
-            // Reset stroke + object state.
+            const rr = document.getElementById('result-render');
+            if (rr) { rr.innerHTML = ''; rr.style.display = ''; }
+            // Reset stroke + object state + match cache.
             strokes.length = 0;
             objects.length = 0;
             curStroke = null;
             activeObjIdx = -1;
+            handwritingContours = [];
+            handwritingOuters = [];
+            latexContours = [];
+            latexOuters = [];
+            lastMatchResult = null;
             if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
             clearChips();
             // Reset stuck drawing state + ensure the canvas is interactive so
@@ -936,7 +947,13 @@ function toggleSidebar() {
         // Strokes are captured AS objects (point lists), not just rasterized,
         // so we can group them into glyphs and send each crop to Gemini.
         const strokes = [];          // [{ points: [{x,y}], width }]
-        const objects = [];          // [{ strokeIdxs, bbox, status, label, matchedTokenIdx }]
+        const objects = [];          // [{ strokeIdxs, bbox, outerIdx, matchId, status, label, matchedTokenIdx }]
+        // Raw contours + outers from the latest regroup — passed to the
+        // morph-style cross-pane matcher (draw20ComputeMatchIds).
+        let handwritingContours = [];
+        let handwritingOuters = [];
+        let latexContours = [];
+        let latexOuters = [];
         let curStroke = null;
         let activeObjIdx = -1;
         let objectIdleTimer = null;
@@ -1102,6 +1119,10 @@ function toggleSidebar() {
             // Build polygon array + bbox per outer.
             const outerPolys = outers.map(o => raw[o.idx]);
             const outerBBs = outerPolys.map(bboxOfPolygon);
+            // Cache raw contours + outers list for the morph-style cross-pane
+            // matcher (`draw20ComputeMatchIds` runs after the full-pass).
+            handwritingContours = raw;
+            handwritingOuters = outers;
             // Assign each stroke to an outer polygon via robust bbox-test:
             //  (1) is stroke's bbox-center inside an outer's bbox?
             //  (2) else: which outer is closest by bbox-center distance?
@@ -1137,9 +1158,16 @@ function toggleSidebar() {
             }
             // Rebuild objects[] from the new groupings. Status='closed' since
             // the per-object OCR runs next. Preserve any existing label/match.
+            //
+            // Each object carries `outerIdx` (index in outers[]) so the
+            // morph-style cross-pane matcher can map an object back to its
+            // contour in `handwritingContours`. matchId is filled later by
+            // draw20ComputeMatchIds. -1 means orphan / not matched.
             const newObjects = outerPolys.map((poly, oi) => ({
                 strokeIdxs: [],
                 bbox: outerBBs[oi],
+                outerIdx: oi,
+                matchId: -1,
                 status: 'closed',
                 label: '',
                 matchedTokenIdx: -1,
@@ -1155,6 +1183,8 @@ function toggleSidebar() {
                 newObjects.push({
                     strokeIdxs: [si],
                     bbox: bboxOfStroke(strokes[si]),
+                    outerIdx: -1,    // not in the contour list — pure stroke
+                    matchId: -1,
                     status: 'closed',
                     label: '',
                     matchedTokenIdx: -1,
@@ -1172,6 +1202,238 @@ function toggleSidebar() {
             activeObjIdx = -1;
             DebugWindow.log(`▷ contour-regroup: ${outers.length} outers, ${orphans.length} orphans → ${objects.length} objects`);
             return true;
+        }
+        // ── Morph-style cross-pane matching ────────────────────────────────
+        // Rasterise the LaTeX string via KaTeX + html2canvas, extract its
+        // contours, then run draw20ComputeMatchIds() to pair handwriting
+        // outers ↔ LaTeX outers by SHAPE (size, elongation, position, fuzz).
+        // Result is stored on each object as `matchId`.
+        async function renderLatexToOffscreenAndExtractContours(latex) {
+            return new Promise((resolve) => {
+                const tmp = document.createElement('div');
+                tmp.style.cssText = 'position:fixed;left:-10000px;top:0;padding:40px;background:#000;color:#fff;font-size:60px;line-height:1.4;white-space:nowrap;';
+                document.body.appendChild(tmp);
+                try { katex.render(latex, tmp, { throwOnError: false, displayMode: true }); }
+                catch (e) { tmp.textContent = latex; }
+                setTimeout(() => {
+                    html2canvas(tmp, { backgroundColor: '#000', scale: 2, logging: false }).then(snap => {
+                        try { document.body.removeChild(tmp); } catch (_) {}
+                        // Render into a 1000×500 canvas — same x-range as the
+                        // drawing canvas, but only the UPPER HALF height. The
+                        // contour coords match where we'll draw them on the
+                        // visible canvas later (upper half overlay).
+                        const RW = 1000, RH = 500;
+                        const off = document.createElement('canvas');
+                        off.width = RW; off.height = RH;
+                        const octx = off.getContext('2d');
+                        octx.fillStyle = '#000';
+                        octx.fillRect(0, 0, RW, RH);
+                        const MARGIN = 30;
+                        const targetW = RW - 2 * MARGIN;
+                        const targetH = RH - 2 * MARGIN;
+                        const sc = Math.min(targetW / snap.width, targetH / snap.height);
+                        const nw = snap.width * sc, nh = snap.height * sc;
+                        const ox = (RW - nw) / 2, oy = (RH - nh) / 2;
+                        octx.imageSmoothingEnabled = true;
+                        octx.imageSmoothingQuality = 'high';
+                        octx.drawImage(snap, ox, oy, nw, nh);
+                        // Brightness-threshold grid → contours.
+                        const data = octx.getImageData(0, 0, RW, RH).data;
+                        const grid = new Uint8Array(RW * RH);
+                        for (let i = 0; i < RW * RH; i++) {
+                            const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+                            grid[i] = (r + g + b) > 80 ? 1 : 0;
+                        }
+                        const contours = (typeof getContoursWithHoles === 'function')
+                            ? getContoursWithHoles(grid, RW, RH) : [];
+                        const cls = (typeof classifyContours === 'function')
+                            ? classifyContours(contours) : { outers: [], holes: [] };
+                        DebugWindow.log(`▷ latex-contours: ${contours.length} contours, ${cls.outers.length} outers, ${cls.holes.length} holes`);
+                        resolve({ contours, outers: cls.outers });
+                    }).catch(err => {
+                        try { document.body.removeChild(tmp); } catch (_) {}
+                        DebugWindow.log(`✗ html2canvas (LaTeX-render) failed: ${err.message}`);
+                        resolve({ contours: [], outers: [] });
+                    });
+                }, 50);
+            });
+        }
+        // Render LaTeX contours onto the drawCanvas upper half, colored by
+        // matchId (paired) or orphan-red (no PNG counterpart).
+        function renderLatexContoursOnCanvas() {
+            if (!lastMatchResult || latexContours.length === 0) return;
+            const H = drawCanvas.height;
+            // Clear upper half — we don't want any leftover overlay/strokes.
+            drawCtx.clearRect(0, 0, drawCanvas.width, H * 0.5);
+            drawCtx.lineWidth = 4;
+            drawCtx.lineJoin = 'round';
+            drawCtx.lineCap = 'round';
+            // Outers first (filled + outlined), then holes (cut out via
+            // destination-out so the background shows through).
+            for (let oi = 0; oi < latexOuters.length; oi++) {
+                const outer = latexOuters[oi];
+                const poly = latexContours[outer.idx];
+                if (!poly || poly.length < 3) continue;
+                const id = lastMatchResult.latId[outer.idx];
+                const pair = lastMatchResult.idToPair.get(id);
+                const isOrphan = !pair || pair.png < 0;
+                const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
+                drawCtx.strokeStyle = color;
+                // Fill semi-transparently so glyph shape reads as a block of
+                // colour but doesn't drown out finer features.
+                drawCtx.fillStyle = color + '55'; // ~33% alpha
+                drawCtx.beginPath();
+                drawCtx.moveTo(poly[0][0], poly[0][1]);
+                for (let p = 1; p < poly.length; p++) drawCtx.lineTo(poly[p][0], poly[p][1]);
+                drawCtx.closePath();
+                drawCtx.fill();
+                drawCtx.stroke();
+            }
+            // Cut holes (e.g. inside 'a', 'b', 'd', 'o') by erasing the
+            // hole-polygons through globalCompositeOperation.
+            const prev = drawCtx.globalCompositeOperation;
+            drawCtx.globalCompositeOperation = 'destination-out';
+            for (let oi = 0; oi < latexOuters.length; oi++) {
+                const outer = latexOuters[oi];
+                for (const hi of (outer.holes || [])) {
+                    const hole = latexContours[hi];
+                    if (!hole || hole.length < 3) continue;
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(hole[0][0], hole[0][1]);
+                    for (let p = 1; p < hole.length; p++) drawCtx.lineTo(hole[p][0], hole[p][1]);
+                    drawCtx.closePath();
+                    drawCtx.fill();
+                }
+            }
+            drawCtx.globalCompositeOperation = prev;
+        }
+        // Latest match result — referenced by renderStrokes / renderChips /
+        // colorizeLatex to look up "is this object an orphan?" via idToPair.
+        let lastMatchResult = null;
+        // Apply the morph-style cross-pane match. Writes matchId + isOrphan
+        // on every object. Returns the match-result object.
+        function applyShapeMatching() {
+            lastMatchResult = null;
+            if (typeof draw20ComputeMatchIds !== 'function'
+                || typeof PlausibilCheck === 'undefined') {
+                DebugWindow.log('⚠ shape-matching deps missing (draw20-match / plausibilcheck)');
+                return null;
+            }
+            if (handwritingContours.length === 0 || latexContours.length === 0) {
+                DebugWindow.log('⚠ shape-matching skipped — no contours on one side');
+                return null;
+            }
+            const result = draw20ComputeMatchIds(handwritingContours, latexContours,
+                { matchingEnabled: true, dbg: (m) => DebugWindow.log(`  match: ${m}`) });
+            lastMatchResult = result;
+            // Map outer-idx-in-outers-list → raw-contour-idx → matchId.
+            for (const obj of objects) {
+                obj.matchId = -1;
+                obj.isOrphan = false;
+                if (obj.outerIdx < 0) continue;
+                const o = handwritingOuters[obj.outerIdx];
+                if (!o) continue;
+                const id = result.pngId[o.idx];
+                if (typeof id === 'number' && id >= 0) {
+                    obj.matchId = id;
+                    const pair = result.idToPair.get(id);
+                    obj.isOrphan = !pair || pair.lat < 0;
+                }
+            }
+            // Log assignments.
+            let paired = 0, orphan = 0;
+            for (const obj of objects) {
+                if (obj.matchId < 0 || obj.isOrphan) orphan++;
+                else paired++;
+            }
+            DebugWindow.log(`📎 shape-match: ${paired}/${objects.length} paired, ${orphan} orphan(s)`);
+            return result;
+        }
+        // Color for an object — palette by matchId when paired, orphan red
+        // when matched-but-no-LaTeX-counterpart, fallback green when match
+        // hasn't run yet (e.g. live drawing before ERKENNEN).
+        function colorForObject(obj) {
+            if (obj && obj.isOrphan) return '#FF0000';
+            if (obj && typeof obj.matchId === 'number' && obj.matchId >= 0) {
+                return draw20PaletteColor(obj.matchId);
+            }
+            return null; // caller falls back to objColor(index) for unmatched
+        }
+        // After shape-matching, attach a label to each object by walking
+        // the matched LaTeX outers in reading-order and pairing them with
+        // the full-pass `tokens[]`. For each object → its matched LaTeX
+        // outer → the token at that outer's reading rank.
+        function assignLabelsFromTokens(tokens) {
+            for (const obj of objects) obj.label = '';
+            if (!Array.isArray(tokens) || tokens.length === 0) return;
+            if (!lastMatchResult || latexOuters.length === 0) return;
+            // Sort LaTeX outers by reading order (x with y tiebreak).
+            const sorted = latexOuters
+                .map((o, j) => {
+                    const poly = latexContours[o.idx];
+                    const bb = bboxOfPolygon(poly);
+                    return { j, cx: bb.x + bb.w / 2, cy: bb.y + bb.h / 2 };
+                })
+                .sort((a, b) => (a.cx - b.cx) || (a.cy - b.cy));
+            // Map LaTeX-outer-index (j in latexOuters) → token from tokens[rank].
+            const tokenForLatOuter = new Map();
+            sorted.forEach((x, rank) => {
+                if (rank < tokens.length) tokenForLatOuter.set(x.j, tokens[rank]);
+            });
+            // For each handwriting object: its matchId → pair.lat → token.
+            for (const obj of objects) {
+                if (typeof obj.matchId !== 'number' || obj.matchId < 0) continue;
+                const pair = lastMatchResult.idToPair.get(obj.matchId);
+                if (!pair || pair.lat < 0) continue;
+                const tok = tokenForLatOuter.get(pair.lat);
+                if (tok != null) {
+                    obj.label = String(tok);
+                    obj.status = 'recognized';
+                }
+            }
+            DebugWindow.log(`📝 labels assigned via shape-match + token reading-order`);
+        }
+        // Detect "stacked horizontal bars" signature — two outers that are
+        // each MUCH wider than tall, vertically stacked with overlapping
+        // x-range. Matches '=', '±' bars, '÷' dashes. ALWAYS merged before
+        // the generic count-based merge runs, because count-merge sometimes
+        // picks the wrong pair when multiple have gap≈0.
+        function isStackedBars(a, b) {
+            // Both are horizontal bars (w / h > 1.5).
+            if (!(a.w > a.h * 1.5)) return false;
+            if (!(b.w > b.h * 1.5)) return false;
+            // Their x-ranges overlap by at least 50% of the smaller width.
+            const xOverlap = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+            const minW = Math.min(a.w, b.w);
+            if (xOverlap < minW * 0.5) return false;
+            // They DON'T overlap in y (one above the other), and the y-gap
+            // is small relative to the bar's height (within ~4x the height).
+            const yGap = Math.max(0, Math.max(a.y - (b.y + b.h), b.y - (a.y + a.h)));
+            if (yGap <= 0) return false;
+            const minH = Math.min(a.h, b.h);
+            if (yGap > minH * 4) return false;
+            return true;
+        }
+        function mergeStackedBars() {
+            let changed = true;
+            let merges = 0;
+            while (changed) {
+                changed = false;
+                for (let i = 0; i < objects.length && !changed; i++) {
+                    for (let j = i + 1; j < objects.length; j++) {
+                        if (!isStackedBars(objects[i].bbox, objects[j].bbox)) continue;
+                        const a = objects[i], b = objects[j];
+                        a.strokeIdxs = Array.from(new Set([...a.strokeIdxs, ...b.strokeIdxs]));
+                        a.bbox = bboxUnion(a.bbox, b.bbox);
+                        DebugWindow.log(`  ↣ stacked-bar merge obj#${j} → obj#${i} (gap-y small, x-overlap high)`);
+                        objects.splice(j, 1);
+                        merges++;
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+            if (merges > 0) DebugWindow.log(`▷ stacked-bar pass: ${merges} merge(s)`);
         }
         // Minimum edge-distance between two bboxes: 0 if they overlap or
         // touch, else the euclidean gap to the closest edge. Better than
@@ -1231,7 +1493,14 @@ function toggleSidebar() {
                 const st = strokes[s];
                 if (!st || !st.points || st.points.length < 1) continue;
                 const objIdx = objectOfStroke(s);
-                drawCtx.strokeStyle = objIdx >= 0 ? objColor(objIdx) : '#adff2f';
+                // Color priority: matchId (after shape-matching) > objColor
+                // (live-drawing index) > fallback green for orphan strokes.
+                let col = '#adff2f';
+                if (objIdx >= 0) {
+                    const matched = colorForObject(objects[objIdx]);
+                    col = matched != null ? matched : objColor(objIdx);
+                }
+                drawCtx.strokeStyle = col;
                 drawCtx.lineWidth = st.width || drawCtx.lineWidth;
                 drawCtx.beginPath();
                 drawCtx.moveTo(st.points[0].x, st.points[0].y);
@@ -1386,7 +1655,9 @@ function toggleSidebar() {
                     : obj.status === 'recognizing' ? 'pending' : '');
                 chip.style.top  = chipY + 'px';
                 if (obj.status !== 'error') {
-                    const col = objColor(i);
+                    // Color priority: matchId (after shape-matching) > objColor.
+                    const matched = colorForObject(obj);
+                    const col = matched != null ? matched : objColor(i);
                     chip.style.color = col;
                     chip.style.borderColor = col;
                     chip.style.boxShadow = `0 0 4px ${col}55`;
@@ -1793,7 +2064,13 @@ function toggleSidebar() {
                 "}\n" +
                 "\n" +
                 "RULES:\n" +
-                "- tokens lists every visible glyph (character, digit, operator, bracket, accent), in reading order.\n" +
+                "- tokens lists every VISIBLE INK glyph (letter, digit, operator like +/-/=/*, bracket, dot, accent, radical, integral, sum, Greek letter), in reading order.\n" +
+                "- INCLUDE visible LaTeX commands that produce ink: \\\\sqrt, \\\\sum, \\\\int, \\\\frac (counts as one token — the fraction bar), \\\\pi, \\\\alpha, \\\\beta, etc.\n" +
+                "- EXCLUDE LaTeX *structural* characters that produce NO ink: '^', '_', '{', '}', whitespace.\n" +
+                "- Example: \"E=mc^2\" → tokens = [\"E\", \"=\", \"m\", \"c\", \"2\"] (no '^').\n" +
+                "- Example: \"a^2+b^2\" → tokens = [\"a\", \"2\", \"+\", \"b\", \"2\"].\n" +
+                "- Example: \"\\\\sqrt{x}+1\" → tokens = [\"\\\\sqrt\", \"x\", \"+\", \"1\"] (the radical IS visible ink).\n" +
+                "- Example: \"\\\\sum_{i=1}^n i\" → tokens = [\"\\\\sum\", \"i\", \"=\", \"1\", \"n\", \"i\"] (sum sign visible, _ and ^ skipped).\n" +
                 "- No bounding boxes. Just the labels.\n" +
                 "- If empty/unreadable: { \"latex\": \"(empty)\", \"tokens\": [] }";
             // Gemini REST API expects camelCase: inlineData, mimeType, generationConfig.
@@ -1862,37 +2139,51 @@ function toggleSidebar() {
                 //    the rasterised canvas (morph-style). Connected ink =
                 //    one glyph; the live bbox-grouping was unreliable.
                 regroupObjectsFromContours();
-                // 2b) Multi-stroke glyphs like '+', '=', '÷' come out of
-                //     contour extraction as MULTIPLE disjoint outers. If the
-                //     count exceeds the full-pass token count, greedily merge
-                //     the geometrically closest pair until counts match.
-                if (Array.isArray(tokens) && tokens.length > 0 && objects.length > tokens.length) {
-                    mergeObjectsToMatchTokens(tokens.length);
+                // 2a) Specifically merge "stacked horizontal bars" (= ± ÷)
+                //     ALWAYS, regardless of count. Two parallel horizontal
+                //     bars with overlapping x-range and small vertical gap
+                //     are pretty much always one glyph.
+                // NB: mergeStackedBars() is intentionally NOT called here.
+                // Shape-matching pairs each PNG outer to its LaTeX outer
+                // individually — '=' as 2 outers on both sides pairs 1:1
+                // (top↔top, bot↔bot) with matching colours. Pre-merging
+                // would orphan one of the LaTeX bars.
+                //
+                // 3) MORPH-STYLE SHAPE MATCHING (replaces position-based
+                //    mapping). Render the LaTeX off-screen, extract its
+                //    contours, then pair each handwriting outer with a LaTeX
+                //    outer by SHAPE (size, elongation, position, fuzz) via
+                //    the same Greedy-Sequential-Symbol-Type-Tier matcher
+                //    that morph uses. Result is stored on every object as
+                //    `matchId`.
+                let shapeMatched = false;
+                try {
+                    const lat = await renderLatexToOffscreenAndExtractContours(latex);
+                    latexContours = lat.contours;
+                    latexOuters   = lat.outers;
+                    applyShapeMatching();
+                    assignLabelsFromTokens(tokens);
+                    shapeMatched = lastMatchResult != null;
+                } catch (e) {
+                    DebugWindow.log(`⚠ shape-match failed: ${e.message}`);
                 }
+                // 4) Repaint strokes with MATCHED colours, then overlay the
+                //    LaTeX contours on the upper half in matching palette.
                 renderStrokes();
-                // 3) POSITION-BASED CORRESPONDENCE (no flash-lite needed).
-                //    If the per-glyph object count matches the full-pass
-                //    token count, assign tokens to objects in writing order
-                //    (sorted by bbox.x). The full-pass is reliable for
-                //    counts, so this works for most well-spaced equations.
-                //    Per-object flash-lite OCR stays OFF for now (marker:
-                //    PER_OBJECT_OFF) — we may revive it as a mismatch
-                //    fallback later.
-                if (Array.isArray(tokens) && tokens.length === objects.length && objects.length > 0) {
-                    const ordered = objects
-                        .map((o, i) => ({ o, i }))
-                        .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
-                    ordered.forEach(({ o, i }, rank) => {
-                        o.label = String(tokens[rank] ?? '');
-                        o.matchedTokenIdx = rank;
-                        o.status = 'recognized';
-                    });
-                    DebugWindow.log(`📍 position-mapped: ${objects.length} objects ↔ ${tokens.length} tokens (1:1, by bbox.x)`);
+                if (shapeMatched) {
+                    renderLatexContoursOnCanvas();
+                    // Hide KaTeX HTML — the contour render IS the LaTeX view.
+                    const rr = document.getElementById('result-render');
+                    if (rr) rr.style.display = 'none';
                 } else {
-                    DebugWindow.log(`⚠ count mismatch: objects=${objects.length} vs tokens=${tokens.length} — no mapping (per-object OCR fallback could go here)`);
+                    // Fallback: shape-match failed; show the KaTeX HTML render.
+                    const rr = document.getElementById('result-render');
+                    if (rr) rr.style.display = '';
                 }
                 renderChips();
-                // 4) Re-render LaTeX colorized per token using each object's hue.
+                // 5) (legacy fallback — KaTeX colorize-via-textcolor — kept
+                //    in case shape-matching fails entirely. Currently hidden
+                //    via display:none above when shape-matching succeeds.)
                 try {
                     const colored = colorizeLatex(latex, tokens);
                     renderLatex(colored);

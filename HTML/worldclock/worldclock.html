@@ -81,9 +81,6 @@
             z-index: 2400;
             display: none;
         }
-        body.has-school #visitor-greeting {
-            display: none !important;
-        }
         #visitor-greeting .vg-comma {
             margin-left: -0.18em;
             letter-spacing: 0;
@@ -91,15 +88,20 @@
         .school-logo {
             display: none;
         }
-        body.school-ibb #school-logo-ibb {
+        body.school-ibb #school-logo-ibb,
+        body.school-wkoe #school-logo-wkoe {
             display: block;
             position: fixed;
             top: 4vmin;
             right: 2vmin;
-            height: 9.6vmin;
+            height: 14.4vmin;
             width: auto;
             z-index: 2500;
-            pointer-events: none;
+            cursor: pointer;
+            filter: drop-shadow(0.5vmin 0.5vmin 0.8vmin rgba(0, 0, 0, 0.85));
+        }
+        body.school-ibb #school-logo-ibb {
+            height: 11.52vmin;
         }
         /* --- Globe Mode: ?globe=1 --- */
         #globe-stage {
@@ -139,15 +141,32 @@
         (function () {
             try {
                 const params = new URLSearchParams(window.location.search);
-                const raw = params.get('school');
+                const raw = params.get('orga');
                 const school = raw ? raw.toLowerCase() : null;
                 if (school) document.documentElement.dataset.school = school;
-                if (school === 'ibb') {
+                const KNOWN_ORGAS = ['ibb', 'wkoe'];
+                if (school && KNOWN_ORGAS.includes(school)) {
                     document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.add('has-school');
                         document.body.classList.add('school-' + school);
                     });
                 }
+                // Any school logo: click → toggle fullscreen
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.school-logo').forEach(logo => {
+                        logo.addEventListener('click', () => {
+                            const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+                            if (!fsEl) {
+                                const req = document.documentElement.requestFullscreen
+                                    || document.documentElement.webkitRequestFullscreen;
+                                if (req) req.call(document.documentElement);
+                            } else {
+                                const exit = document.exitFullscreen || document.webkitExitFullscreen;
+                                if (exit) exit.call(document);
+                            }
+                        });
+                    });
+                });
                 let visitorMsg = '';
                 const mComp = params.get('m');
                 if (mComp) {
@@ -166,9 +185,7 @@
                         el.style.justifyContent = visitorMsg.length > 60 ? 'flex-start' : 'center';
                         el.style.textAlign = align;
                         el.innerHTML = '<span style="overflow-wrap:break-word;">' + safe + '</span>';
-                        if (!document.body.classList.contains('has-school')) {
-                            el.style.display = 'flex';
-                        }
+                        el.style.display = 'flex';
                     });
                 }
             } catch (e) { /* ignore */ }
@@ -202,6 +219,7 @@
     </div>
 
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
+    <img id="school-logo-wkoe" class="school-logo" src="WKOE%20frei.png" alt="Wirtschaftskanzlei Oliver Emslander">
 
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
@@ -1456,16 +1474,19 @@
 
                     copyBtn.addEventListener('click', () => {
                         const msg = inp.value.trim();
-                        let param;
+                        const params = new URLSearchParams(window.location.search);
+                        params.delete('m');
+                        params.delete('message');
                         try {
                             const compressed = pako.deflate(msg);
                             const b64 = btoa(String.fromCharCode(...compressed))
                                 .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-                            param = '?m=' + b64;
+                            params.set('m', b64);
                         } catch (_) {
-                            param = '?message=' + encodeURIComponent(msg);
+                            params.set('message', msg);
                         }
-                        const link = window.location.origin + '/worldclock/worldclock.html' + param;
+                        const qs = params.toString();
+                        const link = window.location.origin + '/worldclock/worldclock.html' + (qs ? '?' + qs : '');
                         navigator.clipboard.writeText(link).then(() => {
                             copyBtn.textContent = 'KOPIERT!';
                             setTimeout(() => { copyBtn.textContent = 'LINK MIT NACHRICHT KOPIEREN'; }, 1800);
