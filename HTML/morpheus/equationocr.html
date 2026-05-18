@@ -39,17 +39,21 @@
     <style>
         #draw-canvas {
             display: block;
-            width: 100%;
-            height: 100%;
-            background: #020410;
-            /* Default: pen OFF so accidental clicks during box-adjustment
+            /* Canvas is its OWN sizing element — no wrapper. Constraints:
+               1. Never bigger than 1760px (caps on huge monitors)
+               2. Fit horizontally inside #draw-wrap (sidebar already excluded)
+               3. Fit vertically inside viewport minus top/bottom chrome
+               aspect-ratio: 1/1 → height follows width. */
+            width: min(1760px, calc(100% - 24px), calc(100dvh - 100px));
+            aspect-ratio: 1 / 1;
+            flex: 0 0 auto;
+            /* Transparent — strokes/chips/LaTeX-render float on top of the
+               main-content background. Default: pen OFF so accidental clicks
                don't paint. The pen-toggle icon in the ZEICHNEN card title
                adds .pen-on to re-enable drawing. */
+            background: transparent;
             cursor: default;
             pointer-events: none;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            box-shadow: 0 0 24px rgba(0, 210, 255, 0.12);
             touch-action: none;
         }
         #draw-canvas.pen-on {
@@ -95,32 +99,12 @@
             color: #adff2f;
             filter: drop-shadow(0 0 4px rgba(173, 255, 47, 0.6));
         }
-        #canvas-stack {
-            position: relative;
-            /* Responsive: shrinks to fit small viewports (tablet) while
-               keeping the 1:1 aspect ratio. The intrinsic canvas resolution
-               stays 1000×1000 (Gemini box coords map 1:1 to it); CSS just
-               scales the displayed size uniformly. Mouse-coord mapping in
-               JS already accounts for display vs intrinsic ratio. */
-            /* Three constraints:
-               1. Never bigger than 1760px (caps on huge monitors)
-               2. Fit horizontally inside #draw-wrap (which is sized by
-                  #main-content — so the sidebar width is automatically
-                  subtracted; no hardcoded sidebar guess)
-               3. Fit vertically inside viewport minus top/bottom chrome
-               aspect-ratio: 1/1 → height follows width. */
-            width: min(1760px, calc(100% - 24px), calc(100dvh - 100px));
-            aspect-ratio: 1 / 1;
-            flex: 0 0 auto;
-            line-height: 0;
-            /* Container query anchor — button row inside scales fonts/padding
-               via `cqi` units (relative to canvas-stack's inline size). */
+        /* container-type on draw-wrap so descendants can use `cqi` units
+           (relative to draw-wrap inline-size — which is essentially the
+           main-content width). */
+        #draw-wrap {
             container-type: inline-size;
             container-name: canvas;
-        }
-        #canvas-stack > canvas {
-            width: 100%;
-            height: 100%;
         }
         /* Per-object recognition chip overlay. Sits above the canvas,
            below the button row. Each chip is positioned absolutely in
@@ -248,6 +232,17 @@
             display: flex;
             align-items: center;
         }
+        /* Lab-specific overrides — flat dark-navy background, no cyber-grid,
+           no radial glow. Several layers had their own background gradient:
+           #main-content (cyan radial glow) and #canvas-container (dark radial
+           gradient). We flatten ALL of them. */
+        #main-content,
+        #canvas-container {
+            background: rgb(0, 0, 20) !important;
+        }
+        .cyber-grid {
+            display: none !important;
+        }
         /* KaTeX result overlay — fills the UPPER HALF of the canvas and centers
            the formula vertically inside it. No own background so the drawing
            shows through. Click-through; doesn't block drawing. */
@@ -295,17 +290,6 @@
         @keyframes chase-fade {
             0%, 100% { opacity: 0.15; transform: scale(0.7); }
             50%      { opacity: 1;    transform: scale(1.2); }
-        }
-        /* Thin midline splitting the canvas into LaTeX (top) / handwriting (bottom). */
-        #canvas-midline {
-            position: absolute;
-            left: 4%;
-            right: 4%;
-            top: 45%;
-            height: 1px;
-            background: rgba(0, 210, 255, 0.35);
-            pointer-events: none;
-            z-index: 25;
         }
         /* Don't force color on .katex — inline `\textcolor{#X}{ch}` from
            colorizeLatex() needs to win. The default red is inherited from
@@ -455,20 +439,15 @@
                 <div id="coach-content" class="coach-message"></div>
             </div>
             <div id="draw-wrap">
-                <div id="canvas-stack">
-                    <canvas id="draw-canvas" width="1000" height="1000"></canvas>
-                    <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
-                    <div id="result-render"></div>
-                    <!-- Thin midline divider between LaTeX (top) and handwriting (bottom). -->
-                    <div id="canvas-midline"></div>
-                    <!-- Per-object recognition chips overlay. Click-through. -->
-                    <div id="obj-chip-layer"></div>
-                    <!-- <div id="mouse-coord">x: —  y: —</div> -->
-                    <div id="canvas-btn-row">
-                        <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">ERKENNEN</button>
-                        <button class="cyber-btn" id="canvas-reload-btn" onclick="location.reload(true)">RELOAD</button>
-                        <button class="cyber-btn" id="canvas-clear-btn" onclick="clearDraw()">CLEAR</button>
-                    </div>
+                <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
+                <div id="result-render"></div>
+                <!-- Per-object recognition chips overlay. Click-through. -->
+                <div id="obj-chip-layer"></div>
+                <div id="canvas-btn-row">
+                    <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">ERKENNEN</button>
+                    <button class="cyber-btn" id="canvas-reload-btn" onclick="location.reload(true)">RELOAD</button>
+                    <button class="cyber-btn" id="canvas-clear-btn" onclick="clearDraw()">CLEAR</button>
                 </div>
                 <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
             </div>
@@ -659,9 +638,8 @@ function toggleSidebar() {
             catch (e) { tmp.textContent = latex; }
             // Give KaTeX a tick to lay out before html2canvas captures it.
             setTimeout(() => {
-                html2canvas(tmp, { backgroundColor: '#020410', scale: 2, logging: false }).then(snap => {
-                    drawCtx.fillStyle = '#020410';
-                    drawCtx.fillRect(0, 0, 1000, 1000);
+                html2canvas(tmp, { backgroundColor: null, scale: 2, logging: false }).then(snap => {
+                    drawCtx.clearRect(0, 0, 1000, 1000);
                     // Aspect-fit into the LOWER half (y 500..1000), centered, then
                     // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
                     const MARGIN = 20;
@@ -789,8 +767,7 @@ function toggleSidebar() {
             if (p.canvasImg) {
                 const img = new Image();
                 img.onload = () => {
-                    drawCtx.fillStyle = '#020410';
-                    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
                     finishDraw();
                 };
@@ -803,8 +780,8 @@ function toggleSidebar() {
         };
 
         function initDraw() {
-            drawCtx.fillStyle = '#020410'; // dark blue background — matches cyber theme
-            drawCtx.fillRect(0, 0, 1000, 1000);
+            // Transparent canvas — main-content background shows through.
+            drawCtx.clearRect(0, 0, 1000, 1000);
             drawCtx.strokeStyle = '#adff2f'; // neon green strokes
             const strokeEl = document.getElementById('stroke-slider');
             drawCtx.lineWidth = strokeEl ? +strokeEl.value : 8;
@@ -861,8 +838,7 @@ function toggleSidebar() {
                     d[i+3] = 255;
                 }
                 tctx.putImageData(id, 0, 0);
-                drawCtx.fillStyle = '#020410';
-                drawCtx.fillRect(0, 0, 1000, 1000);
+                drawCtx.clearRect(0, 0, 1000, 1000);
                 // Aspect-fit into the LOWER half (y 500..1000), centered, then
                 // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
                 const MARGIN = 20;
@@ -1236,8 +1212,7 @@ function toggleSidebar() {
         // preset PNG that was loaded into the canvas pixels.
         function renderStrokes() {
             if (strokes.length === 0) return;
-            drawCtx.fillStyle = '#020410';
-            drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
             drawCtx.lineCap = 'round';
             drawCtx.lineJoin = 'round';
             for (let s = 0; s < strokes.length; s++) {
@@ -1382,20 +1357,17 @@ function toggleSidebar() {
             byDrawingOrder.forEach((v, k) => drawingRank.set(v.i, k + 1));
             // Order by writing order (left-to-right) so the row matches reading.
             visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
-            // Two-row layout — both in the LOWER half of the canvas.
-            //   Top row: just below the midline (start of lower half).
-            //   Bottom row: just above the button row (end of lower half).
-            // Chips are split by reading order: first ceil(N/2) → top row,
-            // remainder → bottom row. Doubles the per-chip width.
+            // Chip x-position follows the GLYPH's bbox-center x (canvas
+            // internal coords scaled to display). Alternating rows (top/
+            // bottom of lower half) avoid horizontal collisions when glyphs
+            // are tightly spaced.
             const chipYTop    = canvasTop + canvasH * 0.52;
             const chipYBottom = canvasTop + canvasH * 0.84;
-            const N = visible.length;
-            const splitAt = Math.ceil(N / 2);
+            const sx = canvasW / drawCanvas.width;
             visible.forEach(({ obj, i }, rank) => {
-                const isTop = rank < splitAt;
-                const rowN  = isTop ? splitAt : (N - splitAt);
-                const rowR  = isTop ? rank : (rank - splitAt);
-                const xCenter = canvasLeft + canvasW * (rowR + 0.5) / Math.max(1, rowN);
+                const isTop = (rank % 2) === 0;
+                const glyphCx = obj.bbox.x + obj.bbox.w / 2;
+                const xCenter = canvasLeft + glyphCx * sx;
                 const chipY   = isTop ? chipYTop : chipYBottom;
                 const chip = document.createElement('div');
                 chip.className = 'obj-chip ' + (obj.status === 'error' ? 'error'
@@ -2037,8 +2009,7 @@ function toggleSidebar() {
             if (!dataUrl) return;
             const img = new Image();
             img.onload = () => {
-                drawCtx.fillStyle = '#020410';
-                drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
                 DebugWindow.log(`↻ Canvas-Pixel wiederhergestellt`);
             };
