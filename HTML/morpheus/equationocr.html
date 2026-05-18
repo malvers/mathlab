@@ -542,6 +542,10 @@ function toggleSidebar() {
             <div id="g-price-info" style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.65);text-align:right;margin-top:4px;letter-spacing:0.04em;">
                 — per Mio. Token
             </div>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-family:'Orbitron',sans-serif;font-size:11px;color:#00d2ff;cursor:pointer;letter-spacing:0.05em;">
+                <input type="checkbox" id="g-thinking" onchange="onThinkingChange()">
+                <span>Thinking (default on)</span>
+            </label>
         `, '#00d2ff', { collapsible: true });
 
         // Reflect the selected model in the card title (replaces "API" with e.g. "2.5-FLASH").
@@ -569,6 +573,16 @@ function toggleSidebar() {
             if (priceEl && price) {
                 priceEl.textContent = `$${price.in} in / $${price.out} out — per Mio. Token`;
             }
+        }
+
+        // Thinking toggle — persisted across sessions. Default ON (Gemini 2.5
+        // default behaviour). When unchecked, we set thinkingBudget=0 in
+        // generationConfig to skip the reasoning step and save output tokens.
+        function onThinkingChange() {
+            const el = document.getElementById('g-thinking');
+            if (!el) return;
+            try { localStorage.setItem('eocr-thinking', el.checked ? '1' : '0'); } catch (_) {}
+            DebugWindow.log(`🧠 thinking: ${el.checked ? 'ON (default)' : 'OFF (budget=0)'}`);
         }
 
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
@@ -1216,23 +1230,53 @@ function toggleSidebar() {
                 try { katex.render(latex, tmp, { throwOnError: false, displayMode: true }); }
                 catch (e) { tmp.textContent = latex; }
                 setTimeout(() => {
-                    html2canvas(tmp, { backgroundColor: '#000', scale: 2, logging: false }).then(snap => {
+                    html2canvas(tmp, { backgroundColor: '#000', scale: 2, logging: false }).then(snapRaw => {
                         try { document.body.removeChild(tmp); } catch (_) {}
-                        // Render into a 1000×1000 canvas — same coord space as
-                        // the drawing canvas. Contours coords are in [0..1000]
-                        // square space; renderLatexContoursOnCanvas() will
-                        // remap them to the handwriting's bbox so the two
-                        // visualisations overlap at the same screen position
-                        // (the morph base state — ready for cross-fade later).
-                        const RW = 1000, RH = 1000;
+                        // Tight-crop the snapshot to the actual ink bbox. Without
+                        // this, html2canvas captures the element's full padding
+                        // box → snap.width includes whitespace → aspect-fit
+                        // shrinks vertically more than it should, making the
+                        // formula look flat in y. Crop to the real ink.
+                        const snap = (function tightCrop(s) {
+                            try {
+                                const c = s.getContext('2d');
+                                const data = c.getImageData(0, 0, s.width, s.height).data;
+                                let minX = s.width, minY = s.height, maxX = 0, maxY = 0, has = false;
+                                for (let y = 0; y < s.height; y++) {
+                                    for (let x = 0; x < s.width; x++) {
+                                        const i = (y * s.width + x) * 4;
+                                        if (data[i] + data[i+1] + data[i+2] > 80) {
+                                            has = true;
+                                            if (x < minX) minX = x;
+                                            if (x > maxX) maxX = x;
+                                            if (y < minY) minY = y;
+                                            if (y > maxY) maxY = y;
+                                        }
+                                    }
+                                }
+                                if (!has) return s;
+                                const cw = maxX - minX + 1, ch = maxY - minY + 1;
+                                const out = document.createElement('canvas');
+                                out.width = cw; out.height = ch;
+                                out.getContext('2d').drawImage(s, minX, minY, cw, ch, 0, 0, cw, ch);
+                                return out;
+                            } catch (_) { return s; }
+                        })(snapRaw);
+                        // Render into a 1000×500 canvas — same x-range as the
+                        // drawing canvas, mapping to its upper half. We keep
+                        // margins tight so wide equations (like \sqrt{...})
+                        // don't get visually squashed against the y-axis.
+                        const RW = 1000, RH = 500;
                         const off = document.createElement('canvas');
                         off.width = RW; off.height = RH;
                         const octx = off.getContext('2d');
                         octx.fillStyle = '#000';
                         octx.fillRect(0, 0, RW, RH);
-                        const MARGIN = 30;
-                        const targetW = RW - 2 * MARGIN;
-                        const targetH = RH - 2 * MARGIN;
+                        // Tight horizontal margin so wide equations don't get
+                        // squashed; smaller vertical margin so the available
+                        // upper-half height is actually used.
+                        const targetW = RW - 60;
+                        const targetH = RH - 20;
                         const sc = Math.min(targetW / snap.width, targetH / snap.height);
                         const nw = snap.width * sc, nh = snap.height * sc;
                         const ox = (RW - nw) / 2, oy = (RH - nh) / 2;
@@ -1250,7 +1294,8 @@ function toggleSidebar() {
                             ? getContoursWithHoles(grid, RW, RH) : [];
                         const cls = (typeof classifyContours === 'function')
                             ? classifyContours(contours) : { outers: [], holes: [] };
-                        DebugWindow.log(`▷ latex-contours: ${contours.length} contours, ${cls.outers.length} outers, ${cls.holes.length} holes`);
+                        const holesInOuters = cls.outers.reduce((s, o) => s + (o.holes || []).length, 0);
+                        DebugWindow.log(`▷ latex-contours: ${contours.length} contours, ${cls.outers.length} outers, ${cls.holes.length} holes (${holesInOuters} attached to outers)`);
                         resolve({ contours, outers: cls.outers });
                     }).catch(err => {
                         try { document.body.removeChild(tmp); } catch (_) {}
@@ -1260,20 +1305,21 @@ function toggleSidebar() {
                 }, 50);
             });
         }
-        // Render the HANDWRITING outers as filled-with-holes polygons in the
-        // matched palette colors — same morph-style look as the LaTeX overlay.
-        // Used AFTER ERKENNEN to replace the live stroke rendering with the
-        // contour-based one (consistent visual with the LaTeX render).
+        // Render the HANDWRITING outers as filled-with-holes polygons using
+        // the EVEN-ODD fill rule (no compositing tricks). Each outer + its
+        // hole sub-paths get joined into one Path2D; canvas's evenodd rule
+        // fills the outer minus the holes. Stroke draws both the outer AND
+        // the hole edges in the matched palette color.
         function renderHandwritingContoursOnCanvas() {
             if (handwritingOuters.length === 0) return;
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
-            // Map handwriting-outer-index → object (for color lookup).
             const objByOuter = new Map();
             for (let i = 0; i < objects.length; i++) {
                 if (objects[i].outerIdx >= 0) objByOuter.set(objects[i].outerIdx, objects[i]);
             }
+            let holesDrawn = 0;
             for (let oi = 0; oi < handwritingOuters.length; oi++) {
                 const outer = handwritingOuters[oi];
                 const poly = handwritingContours[outer.idx];
@@ -1286,31 +1332,22 @@ function toggleSidebar() {
                     else color = objColor(objects.indexOf(obj));
                 }
                 drawCtx.strokeStyle = color;
-                drawCtx.fillStyle = color + '55'; // ~33% alpha
                 drawCtx.beginPath();
                 drawCtx.moveTo(poly[0][0], poly[0][1]);
                 for (let p = 1; p < poly.length; p++) drawCtx.lineTo(poly[p][0], poly[p][1]);
                 drawCtx.closePath();
-                drawCtx.fill();
-                drawCtx.stroke();
-            }
-            // Cut handwriting holes (insides of a, b, o, d) so the background
-            // shows through — same as LaTeX render.
-            const prev = drawCtx.globalCompositeOperation;
-            drawCtx.globalCompositeOperation = 'destination-out';
-            for (let oi = 0; oi < handwritingOuters.length; oi++) {
-                const outer = handwritingOuters[oi];
+                // Stroke hole edges too — so they're visible as inner outlines.
                 for (const hi of (outer.holes || [])) {
                     const hole = handwritingContours[hi];
                     if (!hole || hole.length < 3) continue;
-                    drawCtx.beginPath();
+                    holesDrawn++;
                     drawCtx.moveTo(hole[0][0], hole[0][1]);
                     for (let p = 1; p < hole.length; p++) drawCtx.lineTo(hole[p][0], hole[p][1]);
                     drawCtx.closePath();
-                    drawCtx.fill();
                 }
+                drawCtx.stroke();
             }
-            drawCtx.globalCompositeOperation = prev;
+            DebugWindow.log(`✂ hand: ${handwritingOuters.length} outers, ${holesDrawn} hole(s) outlined`);
         }
         // Compute the bounding box covering an array of objects' bboxes, or
         // an array of contour-outers. Returns null if input empty.
@@ -1328,31 +1365,15 @@ function toggleSidebar() {
             }
             return bb;
         }
-        // Render LaTeX contours on the canvas, REMAPPED to overlay the
-        // handwriting's bbox (so the two visualisations sit at the same
-        // screen position — morph base state). Colored by matchId (palette
-        // when paired, orphan-red otherwise). The fill is semi-transparent
-        // so the handwriting strokes underneath remain visible.
+        // Render LaTeX contours onto the canvas UPPER HALF using the EVEN-ODD
+        // fill rule (outer + holes as one combined path → fill skips holes).
+        // Colored by matchId (palette when paired, orphan-red otherwise).
         function renderLatexContoursOnCanvas() {
             if (!lastMatchResult || latexContours.length === 0) return;
-            // LaTeX bbox (covers all outers in latex-coord space).
-            const lbb = bboxOfBoxes(latexOuters.map(o =>
-                bboxOfPolygon(latexContours[o.idx])));
-            if (!lbb || lbb.w <= 0 || lbb.h <= 0) return;
-            // Handwriting bbox — covers all objects. Falls back to a
-            // centered-in-canvas square if no handwriting.
-            const hbb = bboxOfBoxes(objects.map(o => o.bbox)) ||
-                { x: 100, y: 100, w: drawCanvas.width - 200, h: drawCanvas.height - 200 };
-            // Aspect-fit LaTeX into the handwriting bbox.
-            const sc = Math.min(hbb.w / lbb.w, hbb.h / lbb.h);
-            const nw = lbb.w * sc, nh = lbb.h * sc;
-            const tx = hbb.x + (hbb.w - nw) / 2 - lbb.x * sc;
-            const ty = hbb.y + (hbb.h - nh) / 2 - lbb.y * sc;
-            const tPt = (p) => [p[0] * sc + tx, p[1] * sc + ty];
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
-            // Outers: fill semi-transparently + outline. Done before holes.
+            let holesDrawn = 0;
             for (let oi = 0; oi < latexOuters.length; oi++) {
                 const outer = latexOuters[oi];
                 const poly = latexContours[outer.idx];
@@ -1362,38 +1383,21 @@ function toggleSidebar() {
                 const isOrphan = !pair || pair.png < 0;
                 const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
                 drawCtx.strokeStyle = color;
-                drawCtx.fillStyle = color + '55'; // ~33% alpha
                 drawCtx.beginPath();
-                const p0 = tPt(poly[0]);
-                drawCtx.moveTo(p0[0], p0[1]);
-                for (let p = 1; p < poly.length; p++) {
-                    const pt = tPt(poly[p]);
-                    drawCtx.lineTo(pt[0], pt[1]);
-                }
+                drawCtx.moveTo(poly[0][0], poly[0][1]);
+                for (let p = 1; p < poly.length; p++) drawCtx.lineTo(poly[p][0], poly[p][1]);
                 drawCtx.closePath();
-                drawCtx.fill();
-                drawCtx.stroke();
-            }
-            // Cut holes (e.g. inside a, b, d, o) via destination-out.
-            const prev = drawCtx.globalCompositeOperation;
-            drawCtx.globalCompositeOperation = 'destination-out';
-            for (let oi = 0; oi < latexOuters.length; oi++) {
-                const outer = latexOuters[oi];
                 for (const hi of (outer.holes || [])) {
                     const hole = latexContours[hi];
                     if (!hole || hole.length < 3) continue;
-                    drawCtx.beginPath();
-                    const p0 = tPt(hole[0]);
-                    drawCtx.moveTo(p0[0], p0[1]);
-                    for (let p = 1; p < hole.length; p++) {
-                        const pt = tPt(hole[p]);
-                        drawCtx.lineTo(pt[0], pt[1]);
-                    }
+                    holesDrawn++;
+                    drawCtx.moveTo(hole[0][0], hole[0][1]);
+                    for (let p = 1; p < hole.length; p++) drawCtx.lineTo(hole[p][0], hole[p][1]);
                     drawCtx.closePath();
-                    drawCtx.fill();
                 }
+                drawCtx.stroke();
             }
-            drawCtx.globalCompositeOperation = prev;
+            DebugWindow.log(`✂ latex: ${latexOuters.length} outers, ${holesDrawn} hole(s) outlined`);
         }
         // Latest match result — referenced by renderStrokes / renderChips /
         // colorizeLatex to look up "is this object an orphan?" via idToPair.
@@ -2036,8 +2040,15 @@ function toggleSidebar() {
                 DebugWindow.log('  ⚠ keine usageMetadata in der Antwort');
                 return;
             }
-            const inTok  = +usage.promptTokenCount    || 0;
-            const outTok = +usage.candidatesTokenCount || 0;
+            // Gemini 2.5 (Flash, Flash-Lite) have *thinking enabled by
+            // default*. Per Google: "response pricing is the sum of output
+            // tokens AND thinking tokens." So thoughtsTokenCount must be
+            // charged at the OUTPUT rate, on top of candidatesTokenCount.
+            // (We were undercounting before.)
+            const inTok       = +usage.promptTokenCount     || 0;
+            const candidates  = +usage.candidatesTokenCount || 0;
+            const thoughts    = +usage.thoughtsTokenCount   || 0;
+            const outTok      = candidates + thoughts;
             const p = GEMINI_PRICING[model] || GEMINI_PRICING['gemini-2.5-flash'];
             const usd = (inTok * p.in + outTok * p.out) / 1_000_000;
             costLastUSD = usd;
@@ -2045,7 +2056,7 @@ function toggleSidebar() {
             costSession.calls++;  costSession.inTok += inTok;  costSession.outTok += outTok;  costSession.usd += usd;
             costAllTime.calls++;  costAllTime.inTok += inTok;  costAllTime.outTok += outTok;  costAllTime.usd += usd;
             try { localStorage.setItem('eocr-cost-alltime', JSON.stringify(costAllTime)); } catch (_) {}
-            DebugWindow.log(`  💰 ${inTok} in + ${outTok} out = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
+            DebugWindow.log(`  💰 ${inTok} in + ${candidates} out${thoughts > 0 ? ' + ' + thoughts + ' think' : ''} = ${fmtUSD(usd)} (all-time: ${fmtUSD(costAllTime.usd)})`);
             updateCostUI();
             maybeShowCostWarning();
             // Warn if all-time crosses the limit on THIS call
@@ -2227,7 +2238,15 @@ function toggleSidebar() {
                         { inlineData: { mimeType: 'image/png', data: b64 } }
                     ]
                 }],
-                generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+                generationConfig: (() => {
+                    const cfg = { temperature: 0, responseMimeType: 'application/json' };
+                    const thEl = document.getElementById('g-thinking');
+                    if (thEl && !thEl.checked) {
+                        // Disable thinking → save thoughts-tokens at output rate.
+                        cfg.thinkingConfig = { thinkingBudget: 0 };
+                    }
+                    return cfg;
+                })()
             };
             try {
                 const t0 = performance.now();
@@ -2370,6 +2389,10 @@ function toggleSidebar() {
                 try { localStorage.removeItem('eocr-g-model'); } catch (_) {}
                 DebugWindow.log(`⚠ Gespeichertes Modell "${modelSaved}" nicht mehr verfügbar — Default geladen`);
             }
+            // Restore thinking toggle (default ON).
+            const thinkingSaved = localStorage.getItem('eocr-thinking');
+            const thinkingEl = document.getElementById('g-thinking');
+            if (thinkingEl) thinkingEl.checked = (thinkingSaved !== '0');
             updateGeminiTitle();
             if (keyFile && !keyLS) DebugWindow.log('🔑 Key aus apikey.local.js geladen');
             const s = localStorage.getItem('eocr-stroke');
