@@ -1114,25 +1114,36 @@ function toggleSidebar() {
             // Build polygon array + bbox per outer.
             const outerPolys = outers.map(o => raw[o.idx]);
             const outerBBs = outerPolys.map(bboxOfPolygon);
-            // For each stroke, count how many of its points fall inside each
-            // outer polygon. Assign stroke to the outer with the most points.
-            // (Bbox pre-test for speed; full pointInPoly only when needed.)
+            // Assign each stroke to an outer polygon via robust bbox-test:
+            //  (1) is stroke's bbox-center inside an outer's bbox?
+            //  (2) else: which outer is closest by bbox-center distance?
+            // Marching-squares polygons live at half-pixel edges; the strict
+            // pointInPoly check from earlier produced false-negatives on
+            // narrow ink, leaving strokes orphaned. Bbox is tolerant enough.
             const strokeToOuter = new Array(strokes.length).fill(-1);
             for (let si = 0; si < strokes.length; si++) {
                 const st = strokes[si];
                 if (!st || !st.points || st.points.length === 0) continue;
-                const counts = new Array(outerPolys.length).fill(0);
-                for (const p of st.points) {
+                const sBB = bboxOfStroke(st);
+                const scx = sBB.x + sBB.w / 2;
+                const scy = sBB.y + sBB.h / 2;
+                // (1) bbox-containment of stroke-center.
+                let best = -1;
+                for (let oi = 0; oi < outerPolys.length; oi++) {
+                    const bb = outerBBs[oi];
+                    if (scx >= bb.x && scx <= bb.x + bb.w
+                        && scy >= bb.y && scy <= bb.y + bb.h) { best = oi; break; }
+                }
+                // (2) nearest by center-distance.
+                if (best < 0) {
+                    let bestD = Infinity;
                     for (let oi = 0; oi < outerPolys.length; oi++) {
                         const bb = outerBBs[oi];
-                        if (p.x < bb.x || p.x > bb.x + bb.w
-                            || p.y < bb.y || p.y > bb.y + bb.h) continue;
-                        if (pointInPoly([p.x, p.y], outerPolys[oi])) counts[oi]++;
+                        const dx = (bb.x + bb.w / 2) - scx;
+                        const dy = (bb.y + bb.h / 2) - scy;
+                        const d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < bestD) { bestD = d; best = oi; }
                     }
-                }
-                let best = -1, bestCnt = 0;
-                for (let oi = 0; oi < outerPolys.length; oi++) {
-                    if (counts[oi] > bestCnt) { bestCnt = counts[oi]; best = oi; }
                 }
                 strokeToOuter[si] = best;
             }
@@ -1173,6 +1184,51 @@ function toggleSidebar() {
             activeObjIdx = -1;
             DebugWindow.log(`▷ contour-regroup: ${outers.length} outers, ${orphans.length} orphans → ${objects.length} objects`);
             return true;
+        }
+        // Minimum edge-distance between two bboxes: 0 if they overlap or
+        // touch, else the euclidean gap to the closest edge. Better than
+        // center-distance for merging fragmented glyphs because the dot of
+        // an 'i' or the bar of a '+' has its bbox right next to the rest.
+        function bboxGap(a, b) {
+            const dx = Math.max(0, Math.max(a.x - (b.x + b.w), b.x - (a.x + a.w)));
+            const dy = Math.max(0, Math.max(a.y - (b.y + b.h), b.y - (a.y + a.h)));
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        // Greedy merge of the closest (by edge-gap) bbox-pair, repeated
+        // until objects.length === target. Reconciles contour-count
+        // (which fragments multi-stroke glyphs like '+', '=', '5' with
+        // disconnected dash) with the full-pass token-count. Ties on gap=0
+        // are broken by the smaller center-distance.
+        function mergeObjectsToMatchTokens(target) {
+            if (!target || objects.length <= target) return;
+            const startCount = objects.length;
+            while (objects.length > target) {
+                let bestI = -1, bestJ = -1, bestGap = Infinity, bestCD = Infinity;
+                for (let i = 0; i < objects.length; i++) {
+                    const a = objects[i];
+                    const ax = a.bbox.x + a.bbox.w / 2;
+                    const ay = a.bbox.y + a.bbox.h / 2;
+                    for (let j = i + 1; j < objects.length; j++) {
+                        const b = objects[j];
+                        const gap = bboxGap(a.bbox, b.bbox);
+                        if (gap > bestGap) continue;
+                        const bx = b.bbox.x + b.bbox.w / 2;
+                        const by = b.bbox.y + b.bbox.h / 2;
+                        const dx = ax - bx, dy = ay - by;
+                        const cd = Math.sqrt(dx * dx + dy * dy);
+                        if (gap < bestGap || (gap === bestGap && cd < bestCD)) {
+                            bestGap = gap; bestCD = cd; bestI = i; bestJ = j;
+                        }
+                    }
+                }
+                if (bestI < 0) break;
+                const a = objects[bestI], b = objects[bestJ];
+                a.strokeIdxs = Array.from(new Set([...a.strokeIdxs, ...b.strokeIdxs]));
+                a.bbox = bboxUnion(a.bbox, b.bbox);
+                DebugWindow.log(`  ↣ merge obj#${bestJ} → obj#${bestI} (gap=${bestGap.toFixed(1)}, cd=${bestCD.toFixed(1)})`);
+                objects.splice(bestJ, 1);
+            }
+            DebugWindow.log(`▷ merge done: ${startCount} → ${objects.length} objects (target ${target})`);
         }
         // Wipe canvas + repaint every stroke in its object's color. Called
         // after each stroke-end (color "snaps" once you lift the pen).
@@ -1313,6 +1369,17 @@ function toggleSidebar() {
                 visible.push({ obj, i });
             }
             if (visible.length === 0) return;
+            // Compute DRAWING ORDER per visible object: rank by the earliest
+            // stroke index that belongs to it (lowest = drawn first). Objects
+            // with no strokes (e.g. preset-only) sort to the end.
+            const firstStroke = (obj) => {
+                if (!obj.strokeIdxs || obj.strokeIdxs.length === 0) return Infinity;
+                return Math.min.apply(null, obj.strokeIdxs);
+            };
+            const byDrawingOrder = visible.slice().sort(
+                (a, b) => firstStroke(a.obj) - firstStroke(b.obj));
+            const drawingRank = new Map();
+            byDrawingOrder.forEach((v, k) => drawingRank.set(v.i, k + 1));
             // Order by writing order (left-to-right) so the row matches reading.
             visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
             // Two-row layout — both in the LOWER half of the canvas.
@@ -1340,22 +1407,30 @@ function toggleSidebar() {
                     chip.style.borderColor = col;
                     chip.style.boxShadow = `0 0 4px ${col}55`;
                 }
-                let text;
-                if (obj.status === 'recognizing') text = '⏳';
-                else if (obj.status === 'error')   text = '? ✗';
-                else                                text = (obj.label || '?') + ' ✓';
+                const dRank = drawingRank.get(i);
+                const dRankStr = (typeof dRank === 'number' && isFinite(dRank))
+                    ? String(dRank) : '–';
+                let baseText;
+                if (obj.status === 'recognizing') baseText = '⏳';
+                else if (obj.status === 'error')   baseText = '?';
+                else                                baseText = (obj.label || '?');
                 if (obj.status === 'recognized' && typeof katex !== 'undefined'
                     && obj.label && obj.label.includes('\\')) {
                     try {
                         const span = document.createElement('span');
                         katex.render(obj.label, span, { throwOnError: false });
                         chip.appendChild(span);
-                        chip.appendChild(document.createTextNode(' ✓'));
-                    } catch (_) { chip.textContent = text; }
+                    } catch (_) { chip.textContent = baseText; }
                 } else {
-                    chip.textContent = text;
+                    chip.textContent = baseText;
                 }
-                chip.title = `obj#${i} rank#${rank} status=${obj.status} label="${obj.label}"`;
+                // Drawing-order rank — small superscript-style suffix.
+                const rankNode = document.createElement('sup');
+                rankNode.textContent = ' ' + dRankStr;
+                rankNode.style.opacity = '0.7';
+                rankNode.style.marginLeft = '4px';
+                chip.appendChild(rankNode);
+                chip.title = `obj#${i} reading#${rank} drawn#${dRankStr} status=${obj.status} label="${obj.label}"`;
                 // Center the chip horizontally on xCenter — set transform after
                 // appending so the chip's own width is known.
                 layer.appendChild(chip);
@@ -1796,43 +1871,51 @@ function toggleSidebar() {
                 renderLatex(latex);
                 saveLastDebug(latex, tokens, raw);
                 DebugWindow.log(`✓ LaTeX: ${latex}`);
-                // ┌─── TEMP: per-object pass deactivated ──────────────────────┐
-                // │ Only the full-pass runs (no object regroup, no flash-lite, │
-                // │ no chip-row, no per-token colorize). To restore: uncomment │
-                // │ the block below.                                           │
-                // │ Marker for grep: PER_OBJECT_OFF                            │
-                // └────────────────────────────────────────────────────────────┘
-                // // 1) Close any still-open active object before per-object pass.
-                // if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
-                // closeActiveObject();
-                // // 1b) Rebuild objects[] from connected-component contours of
-                // //     the rasterised canvas (morph-style). Replaces the live
-                // //     bbox-based grouping which often splits strokes of one
-                // //     glyph (e.g. the four parts of E) into separate objects.
-                // regroupObjectsFromContours();
-                // // Re-paint canvas so stroke colors match the new object IDs.
-                // renderStrokes();
-                // renderChips();
-                // // 2) Per-object pass: sorted left-to-right, context-aware
-                // //    flash-lite OCR. Each call gets the full LaTeX as hint
-                // //    so the model just picks one of the known glyphs.
-                // const orderedObjs = objects
-                //     .map((o, i) => ({ o, i }))
-                //     .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
-                // DebugWindow.log(`▸ per-object OCR pass: ${orderedObjs.length} objects, context="${latex}", tokens=${JSON.stringify(tokens)}`);
-                // for (const { i } of orderedObjs) {
-                //     await recognizeObjectWithContext(i, latex, tokens);
-                // }
-                // // 3) Match-mapping: pixel-object ↔ LaTeX-token by label.
-                // applyObjectTokenMapping(tokens);
-                // // 4) Re-render LaTeX colorized per token using each object's hue.
-                // try {
-                //     const colored = colorizeLatex(latex, tokens);
-                //     renderLatex(colored);
-                //     DebugWindow.log(`🎨 colorized re-render: ${colored.slice(0, 120)}`);
-                // } catch (e) {
-                //     DebugWindow.log(`⚠ colorize failed: ${e.message}`);
-                // }
+                // 1) Close any still-open active object.
+                if (objectIdleTimer) { clearTimeout(objectIdleTimer); objectIdleTimer = null; }
+                closeActiveObject();
+                // 2) Rebuild objects[] from connected-component contours of
+                //    the rasterised canvas (morph-style). Connected ink =
+                //    one glyph; the live bbox-grouping was unreliable.
+                regroupObjectsFromContours();
+                // 2b) Multi-stroke glyphs like '+', '=', '÷' come out of
+                //     contour extraction as MULTIPLE disjoint outers. If the
+                //     count exceeds the full-pass token count, greedily merge
+                //     the geometrically closest pair until counts match.
+                if (Array.isArray(tokens) && tokens.length > 0 && objects.length > tokens.length) {
+                    mergeObjectsToMatchTokens(tokens.length);
+                }
+                renderStrokes();
+                // 3) POSITION-BASED CORRESPONDENCE (no flash-lite needed).
+                //    If the per-glyph object count matches the full-pass
+                //    token count, assign tokens to objects in writing order
+                //    (sorted by bbox.x). The full-pass is reliable for
+                //    counts, so this works for most well-spaced equations.
+                //    Per-object flash-lite OCR stays OFF for now (marker:
+                //    PER_OBJECT_OFF) — we may revive it as a mismatch
+                //    fallback later.
+                if (Array.isArray(tokens) && tokens.length === objects.length && objects.length > 0) {
+                    const ordered = objects
+                        .map((o, i) => ({ o, i }))
+                        .sort((a, b) => (a.o.bbox.x - b.o.bbox.x) || (a.o.bbox.y - b.o.bbox.y));
+                    ordered.forEach(({ o, i }, rank) => {
+                        o.label = String(tokens[rank] ?? '');
+                        o.matchedTokenIdx = rank;
+                        o.status = 'recognized';
+                    });
+                    DebugWindow.log(`📍 position-mapped: ${objects.length} objects ↔ ${tokens.length} tokens (1:1, by bbox.x)`);
+                } else {
+                    DebugWindow.log(`⚠ count mismatch: objects=${objects.length} vs tokens=${tokens.length} — no mapping (per-object OCR fallback could go here)`);
+                }
+                renderChips();
+                // 4) Re-render LaTeX colorized per token using each object's hue.
+                try {
+                    const colored = colorizeLatex(latex, tokens);
+                    renderLatex(colored);
+                    DebugWindow.log(`🎨 colorized re-render: ${colored.slice(0, 120)}`);
+                } catch (e) {
+                    DebugWindow.log(`⚠ colorize failed: ${e.message}`);
+                }
             } catch (err) {
                 DebugWindow.log(`✗ Gemini-Fehler: ${err.message}`);
                 console.error('Gemini fetch error', err);
