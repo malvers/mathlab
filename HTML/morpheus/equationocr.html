@@ -1218,11 +1218,13 @@ function toggleSidebar() {
                 setTimeout(() => {
                     html2canvas(tmp, { backgroundColor: '#000', scale: 2, logging: false }).then(snap => {
                         try { document.body.removeChild(tmp); } catch (_) {}
-                        // Render into a 1000×500 canvas — same x-range as the
-                        // drawing canvas, but only the UPPER HALF height. The
-                        // contour coords match where we'll draw them on the
-                        // visible canvas later (upper half overlay).
-                        const RW = 1000, RH = 500;
+                        // Render into a 1000×1000 canvas — same coord space as
+                        // the drawing canvas. Contours coords are in [0..1000]
+                        // square space; renderLatexContoursOnCanvas() will
+                        // remap them to the handwriting's bbox so the two
+                        // visualisations overlap at the same screen position
+                        // (the morph base state — ready for cross-fade later).
+                        const RW = 1000, RH = 1000;
                         const off = document.createElement('canvas');
                         off.width = RW; off.height = RH;
                         const octx = off.getContext('2d');
@@ -1258,29 +1260,32 @@ function toggleSidebar() {
                 }, 50);
             });
         }
-        // Render LaTeX contours onto the drawCanvas upper half, colored by
-        // matchId (paired) or orphan-red (no PNG counterpart).
-        function renderLatexContoursOnCanvas() {
-            if (!lastMatchResult || latexContours.length === 0) return;
-            const H = drawCanvas.height;
-            // Clear upper half — we don't want any leftover overlay/strokes.
-            drawCtx.clearRect(0, 0, drawCanvas.width, H * 0.5);
-            drawCtx.lineWidth = 4;
+        // Render the HANDWRITING outers as filled-with-holes polygons in the
+        // matched palette colors — same morph-style look as the LaTeX overlay.
+        // Used AFTER ERKENNEN to replace the live stroke rendering with the
+        // contour-based one (consistent visual with the LaTeX render).
+        function renderHandwritingContoursOnCanvas() {
+            if (handwritingOuters.length === 0) return;
+            drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
-            // Outers first (filled + outlined), then holes (cut out via
-            // destination-out so the background shows through).
-            for (let oi = 0; oi < latexOuters.length; oi++) {
-                const outer = latexOuters[oi];
-                const poly = latexContours[outer.idx];
+            // Map handwriting-outer-index → object (for color lookup).
+            const objByOuter = new Map();
+            for (let i = 0; i < objects.length; i++) {
+                if (objects[i].outerIdx >= 0) objByOuter.set(objects[i].outerIdx, objects[i]);
+            }
+            for (let oi = 0; oi < handwritingOuters.length; oi++) {
+                const outer = handwritingOuters[oi];
+                const poly = handwritingContours[outer.idx];
                 if (!poly || poly.length < 3) continue;
-                const id = lastMatchResult.latId[outer.idx];
-                const pair = lastMatchResult.idToPair.get(id);
-                const isOrphan = !pair || pair.png < 0;
-                const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
+                const obj = objByOuter.get(oi);
+                let color = '#adff2f';
+                if (obj) {
+                    const matched = colorForObject(obj);
+                    if (matched != null) color = matched;
+                    else color = objColor(objects.indexOf(obj));
+                }
                 drawCtx.strokeStyle = color;
-                // Fill semi-transparently so glyph shape reads as a block of
-                // colour but doesn't drown out finer features.
                 drawCtx.fillStyle = color + '55'; // ~33% alpha
                 drawCtx.beginPath();
                 drawCtx.moveTo(poly[0][0], poly[0][1]);
@@ -1289,14 +1294,14 @@ function toggleSidebar() {
                 drawCtx.fill();
                 drawCtx.stroke();
             }
-            // Cut holes (e.g. inside 'a', 'b', 'd', 'o') by erasing the
-            // hole-polygons through globalCompositeOperation.
+            // Cut handwriting holes (insides of a, b, o, d) so the background
+            // shows through — same as LaTeX render.
             const prev = drawCtx.globalCompositeOperation;
             drawCtx.globalCompositeOperation = 'destination-out';
-            for (let oi = 0; oi < latexOuters.length; oi++) {
-                const outer = latexOuters[oi];
+            for (let oi = 0; oi < handwritingOuters.length; oi++) {
+                const outer = handwritingOuters[oi];
                 for (const hi of (outer.holes || [])) {
-                    const hole = latexContours[hi];
+                    const hole = handwritingContours[hi];
                     if (!hole || hole.length < 3) continue;
                     drawCtx.beginPath();
                     drawCtx.moveTo(hole[0][0], hole[0][1]);
@@ -1307,26 +1312,164 @@ function toggleSidebar() {
             }
             drawCtx.globalCompositeOperation = prev;
         }
+        // Compute the bounding box covering an array of objects' bboxes, or
+        // an array of contour-outers. Returns null if input empty.
+        function bboxOfBoxes(boxes) {
+            let bb = null;
+            for (const b of boxes) {
+                if (!b || b.w <= 0 || b.h <= 0) continue;
+                if (!bb) { bb = { x: b.x, y: b.y, w: b.w, h: b.h }; continue; }
+                const r = Math.max(bb.x + bb.w, b.x + b.w);
+                const bot = Math.max(bb.y + bb.h, b.y + b.h);
+                bb.x = Math.min(bb.x, b.x);
+                bb.y = Math.min(bb.y, b.y);
+                bb.w = r - bb.x;
+                bb.h = bot - bb.y;
+            }
+            return bb;
+        }
+        // Render LaTeX contours on the canvas, REMAPPED to overlay the
+        // handwriting's bbox (so the two visualisations sit at the same
+        // screen position — morph base state). Colored by matchId (palette
+        // when paired, orphan-red otherwise). The fill is semi-transparent
+        // so the handwriting strokes underneath remain visible.
+        function renderLatexContoursOnCanvas() {
+            if (!lastMatchResult || latexContours.length === 0) return;
+            // LaTeX bbox (covers all outers in latex-coord space).
+            const lbb = bboxOfBoxes(latexOuters.map(o =>
+                bboxOfPolygon(latexContours[o.idx])));
+            if (!lbb || lbb.w <= 0 || lbb.h <= 0) return;
+            // Handwriting bbox — covers all objects. Falls back to a
+            // centered-in-canvas square if no handwriting.
+            const hbb = bboxOfBoxes(objects.map(o => o.bbox)) ||
+                { x: 100, y: 100, w: drawCanvas.width - 200, h: drawCanvas.height - 200 };
+            // Aspect-fit LaTeX into the handwriting bbox.
+            const sc = Math.min(hbb.w / lbb.w, hbb.h / lbb.h);
+            const nw = lbb.w * sc, nh = lbb.h * sc;
+            const tx = hbb.x + (hbb.w - nw) / 2 - lbb.x * sc;
+            const ty = hbb.y + (hbb.h - nh) / 2 - lbb.y * sc;
+            const tPt = (p) => [p[0] * sc + tx, p[1] * sc + ty];
+            drawCtx.lineWidth = 3;
+            drawCtx.lineJoin = 'round';
+            drawCtx.lineCap = 'round';
+            // Outers: fill semi-transparently + outline. Done before holes.
+            for (let oi = 0; oi < latexOuters.length; oi++) {
+                const outer = latexOuters[oi];
+                const poly = latexContours[outer.idx];
+                if (!poly || poly.length < 3) continue;
+                const id = lastMatchResult.latId[outer.idx];
+                const pair = lastMatchResult.idToPair.get(id);
+                const isOrphan = !pair || pair.png < 0;
+                const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
+                drawCtx.strokeStyle = color;
+                drawCtx.fillStyle = color + '55'; // ~33% alpha
+                drawCtx.beginPath();
+                const p0 = tPt(poly[0]);
+                drawCtx.moveTo(p0[0], p0[1]);
+                for (let p = 1; p < poly.length; p++) {
+                    const pt = tPt(poly[p]);
+                    drawCtx.lineTo(pt[0], pt[1]);
+                }
+                drawCtx.closePath();
+                drawCtx.fill();
+                drawCtx.stroke();
+            }
+            // Cut holes (e.g. inside a, b, d, o) via destination-out.
+            const prev = drawCtx.globalCompositeOperation;
+            drawCtx.globalCompositeOperation = 'destination-out';
+            for (let oi = 0; oi < latexOuters.length; oi++) {
+                const outer = latexOuters[oi];
+                for (const hi of (outer.holes || [])) {
+                    const hole = latexContours[hi];
+                    if (!hole || hole.length < 3) continue;
+                    drawCtx.beginPath();
+                    const p0 = tPt(hole[0]);
+                    drawCtx.moveTo(p0[0], p0[1]);
+                    for (let p = 1; p < hole.length; p++) {
+                        const pt = tPt(hole[p]);
+                        drawCtx.lineTo(pt[0], pt[1]);
+                    }
+                    drawCtx.closePath();
+                    drawCtx.fill();
+                }
+            }
+            drawCtx.globalCompositeOperation = prev;
+        }
         // Latest match result — referenced by renderStrokes / renderChips /
         // colorizeLatex to look up "is this object an orphan?" via idToPair.
         let lastMatchResult = null;
-        // Apply the morph-style cross-pane match. Writes matchId + isOrphan
-        // on every object. Returns the match-result object.
+        // Build a synthetic match result from a positional 1:1 mapping —
+        // same shape as draw20ComputeMatchIds output (pngId, latId, idToPair)
+        // so the rest of the rendering code doesn't care about the source.
+        function positionalMatchResult() {
+            const sortFn = (a, b) => (a.cx - b.cx) || (a.cy - b.cy);
+            const pngSorted = handwritingOuters.map((o, i) => {
+                const bb = bboxOfPolygon(handwritingContours[o.idx]);
+                return { i, idx: o.idx, holes: o.holes, cx: bb.x + bb.w / 2, cy: bb.y + bb.h / 2 };
+            }).sort(sortFn);
+            const latSorted = latexOuters.map((o, j) => {
+                const bb = bboxOfPolygon(latexContours[o.idx]);
+                return { j, idx: o.idx, holes: o.holes, cx: bb.x + bb.w / 2, cy: bb.y + bb.h / 2 };
+            }).sort(sortFn);
+            const N = Math.min(pngSorted.length, latSorted.length);
+            const pngId = new Array(handwritingContours.length).fill(-1);
+            const latId = new Array(latexContours.length).fill(-1);
+            const idToPair = new Map();
+            let nextId = 0;
+            for (let k = 0; k < N; k++) {
+                const id = nextId++;
+                const p = pngSorted[k], l = latSorted[k];
+                pngId[p.idx] = id;
+                for (const hi of (p.holes || [])) pngId[hi] = id;
+                latId[l.idx] = id;
+                for (const hi of (l.holes || [])) latId[hi] = id;
+                idToPair.set(id, { png: p.i, lat: l.j });
+            }
+            // Unmatched outers (when counts differ) → orphans with own id.
+            for (let k = N; k < pngSorted.length; k++) {
+                const id = nextId++;
+                const p = pngSorted[k];
+                pngId[p.idx] = id;
+                for (const hi of (p.holes || [])) pngId[hi] = id;
+                idToPair.set(id, { png: p.i, lat: -1 });
+            }
+            for (let k = N; k < latSorted.length; k++) {
+                const id = nextId++;
+                const l = latSorted[k];
+                latId[l.idx] = id;
+                for (const hi of (l.holes || [])) latId[hi] = id;
+                idToPair.set(id, { png: -1, lat: l.j });
+            }
+            return { pngId, latId, idToPair };
+        }
+        // Apply matching. Strategy:
+        //   1. If outer counts on both sides agree → POSITIONAL 1:1 in
+        //      reading order. Almost always correct for simple inline math
+        //      because both renders share the same glyph count.
+        //   2. Else → SHAPE matching (draw20ComputeMatchIds) — pairs as many
+        //      as plausible by geometry, leaves the rest as orphans.
+        // Writes matchId + isOrphan on every object.
         function applyShapeMatching() {
             lastMatchResult = null;
-            if (typeof draw20ComputeMatchIds !== 'function'
-                || typeof PlausibilCheck === 'undefined') {
+            if (handwritingContours.length === 0 || latexContours.length === 0) {
+                DebugWindow.log('⚠ matching skipped — no contours on one side');
+                return null;
+            }
+            let result;
+            if (handwritingOuters.length === latexOuters.length
+                && handwritingOuters.length > 0) {
+                result = positionalMatchResult();
+                DebugWindow.log(`📎 positional 1:1 match (${handwritingOuters.length} outers each side)`);
+            } else if (typeof draw20ComputeMatchIds === 'function'
+                && typeof PlausibilCheck !== 'undefined') {
+                result = draw20ComputeMatchIds(handwritingContours, latexContours,
+                    { matchingEnabled: true, dbg: (m) => DebugWindow.log(`  shape: ${m}`) });
+                DebugWindow.log(`📎 shape-match (${handwritingOuters.length} png / ${latexOuters.length} lat)`);
+            } else {
                 DebugWindow.log('⚠ shape-matching deps missing (draw20-match / plausibilcheck)');
                 return null;
             }
-            if (handwritingContours.length === 0 || latexContours.length === 0) {
-                DebugWindow.log('⚠ shape-matching skipped — no contours on one side');
-                return null;
-            }
-            const result = draw20ComputeMatchIds(handwritingContours, latexContours,
-                { matchingEnabled: true, dbg: (m) => DebugWindow.log(`  match: ${m}`) });
             lastMatchResult = result;
-            // Map outer-idx-in-outers-list → raw-contour-idx → matchId.
             for (const obj of objects) {
                 obj.matchId = -1;
                 obj.isOrphan = false;
@@ -1340,13 +1483,11 @@ function toggleSidebar() {
                     obj.isOrphan = !pair || pair.lat < 0;
                 }
             }
-            // Log assignments.
             let paired = 0, orphan = 0;
             for (const obj of objects) {
-                if (obj.matchId < 0 || obj.isOrphan) orphan++;
-                else paired++;
+                if (obj.matchId < 0 || obj.isOrphan) orphan++; else paired++;
             }
-            DebugWindow.log(`📎 shape-match: ${paired}/${objects.length} paired, ${orphan} orphan(s)`);
+            DebugWindow.log(`  → ${paired}/${objects.length} paired, ${orphan} orphan(s)`);
             return result;
         }
         // Color for an object — palette by matchId when paired, orphan red
@@ -1638,13 +1779,17 @@ function toggleSidebar() {
             byDrawingOrder.forEach((v, k) => drawingRank.set(v.i, k + 1));
             // Order by writing order (left-to-right) so the row matches reading.
             visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
-            // Chip x-position follows the GLYPH's bbox-center x (canvas
-            // internal coords scaled to display). Alternating rows (top/
-            // bottom of lower half) avoid horizontal collisions when glyphs
-            // are tightly spaced.
-            const chipYTop    = canvasTop + canvasH * 0.52;
-            const chipYBottom = canvasTop + canvasH * 0.84;
+            // Chip x-position follows the GLYPH's bbox-center x. Two-row
+            // layout: top row sits just ABOVE the handwriting bbox, bottom
+            // row just BELOW — so chips frame the (now unified) ink area
+            // instead of overlapping with it.
             const sx = canvasW / drawCanvas.width;
+            const sy = canvasH / drawCanvas.height;
+            const hbb = bboxOfBoxes(objects.map(o => o.bbox)) ||
+                { x: 100, y: 100, w: drawCanvas.width - 200, h: drawCanvas.height - 200 };
+            const PAD_PX = 24; // distance between chip and ink-bbox edge
+            const chipYTop    = canvasTop + (hbb.y * sy) - PAD_PX;
+            const chipYBottom = canvasTop + ((hbb.y + hbb.h) * sy) + PAD_PX;
             visible.forEach(({ obj, i }, rank) => {
                 const isTop = (rank % 2) === 0;
                 const glyphCx = obj.bbox.x + obj.bbox.w / 2;
@@ -2167,16 +2312,23 @@ function toggleSidebar() {
                 } catch (e) {
                     DebugWindow.log(`⚠ shape-match failed: ${e.message}`);
                 }
-                // 4) Repaint strokes with MATCHED colours, then overlay the
-                //    LaTeX contours on the upper half in matching palette.
-                renderStrokes();
+                // 4) MORPH-STYLE UNIFIED RENDER. After ERKENNEN:
+                //    - clear canvas
+                //    - draw handwriting outers as filled+holes polygons
+                //      (matched palette colour)
+                //    - overlay LaTeX outers, REMAPPED to the handwriting's
+                //      bbox so the two share screen position (morph base
+                //      state — ready for cross-fade later).
                 if (shapeMatched) {
+                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                    renderHandwritingContoursOnCanvas();
                     renderLatexContoursOnCanvas();
                     // Hide KaTeX HTML — the contour render IS the LaTeX view.
                     const rr = document.getElementById('result-render');
                     if (rr) rr.style.display = 'none';
                 } else {
-                    // Fallback: shape-match failed; show the KaTeX HTML render.
+                    // Fallback: shape-match failed; show strokes + KaTeX HTML.
+                    renderStrokes();
                     const rr = document.getElementById('result-render');
                     if (rr) rr.style.display = '';
                 }

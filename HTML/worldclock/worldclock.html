@@ -89,7 +89,8 @@
             display: none;
         }
         body.school-ibb #school-logo-ibb,
-        body.school-wkoe #school-logo-wkoe {
+        body.school-wkoe #school-logo-wkoe,
+        body.school-alema #school-logo-alema {
             display: block;
             position: fixed;
             top: 4vmin;
@@ -102,6 +103,13 @@
         }
         body.school-ibb #school-logo-ibb {
             height: 11.52vmin;
+        }
+        body.school-alema #school-logo-alema {
+            filter: none;
+            background: #fff;
+            border-radius: 1.2vmin;
+            padding: 1vmin;
+            box-sizing: content-box;
         }
         /* --- Globe Mode: ?globe=1 --- */
         #globe-stage {
@@ -144,7 +152,7 @@
                 const raw = params.get('orga');
                 const school = raw ? raw.toLowerCase() : null;
                 if (school) document.documentElement.dataset.school = school;
-                const KNOWN_ORGAS = ['ibb', 'wkoe'];
+                const KNOWN_ORGAS = ['ibb', 'wkoe', 'alema'];
                 if (school && KNOWN_ORGAS.includes(school)) {
                     document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.add('has-school');
@@ -220,6 +228,7 @@
 
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
     <img id="school-logo-wkoe" class="school-logo" src="WKOE%20frei.png" alt="Wirtschaftskanzlei Oliver Emslander">
+    <img id="school-logo-alema" class="school-logo" src="ALEMA.PNG" alt="Alemannenschule">
 
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
