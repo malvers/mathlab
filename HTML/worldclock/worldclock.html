@@ -413,6 +413,10 @@
         let mapLoaded = false;
         mapImg.onload = () => { mapLoaded = true; init(); };
 
+        // WKOE mode: white disc with WKOE logo instead of world map
+        const wkoeLogoImg = new Image();
+        wkoeLogoImg.src = 'WKOE%20frei.png';
+
         function getDSTLabel(tz) {
             if (!tz) return "";
             try {
@@ -1324,12 +1328,14 @@
             const cityFontHighlight = Math.max(6, r * 0.034);
             const cityLineHeight = r * 0.038;
             const cityShadowBlur = r * 0.031;
+            const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
             cities.forEach(city => {
                 const cityAngle = dirSign * (-city.lon) * Math.PI / 180 - Math.PI / 2;
                 const markerR = (r * 0.9) - markerInset;
                 const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
+                const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
 
                 // Draw Precision Triangle (Pointer)
                 ctx.save();
@@ -1338,7 +1344,7 @@
                 const tipR = markerR + circleRadius + tipExtend;
                 const baseR = markerR + circleRadius - baseInset;
                 const spread = 0.06; // angular, no scaling needed
-                
+
                 ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
                 ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
                 ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
@@ -1346,55 +1352,82 @@
                 ctx.fill();
                 ctx.restore();
 
-                const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
-                if (city.red) {
-                    grad.addColorStop(0, '#dd1144');
-                    grad.addColorStop(1, '#1c0008');
-                } else if (city.highlight) {
-                    {
-                        grad.addColorStop(0, '#ffaa00');
-                        grad.addColorStop(0.2, '#ffaa00');
-                        grad.addColorStop(1, '#a05000');
-
-                        ctx.save();
-                        ctx.shadowBlur = cityShadowBlur;
-                        ctx.shadowColor = '#e68a00';
-                    }
+                if (isWkoeDresden) {
+                    // Light gray disc for Dresden in WKOE mode
+                    ctx.save();
+                    ctx.fillStyle = 'rgb(180, 180, 180)';
+                    ctx.beginPath();
+                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
                 } else {
-                    grad.addColorStop(0, '#0033aa');
-                    grad.addColorStop(1, '#000811');
+                    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
+                    if (city.red) {
+                        grad.addColorStop(0, '#dd1144');
+                        grad.addColorStop(1, '#1c0008');
+                    } else if (city.highlight) {
+                        {
+                            grad.addColorStop(0, '#ffaa00');
+                            grad.addColorStop(0.2, '#ffaa00');
+                            grad.addColorStop(1, '#a05000');
+
+                            ctx.save();
+                            ctx.shadowBlur = cityShadowBlur;
+                            ctx.shadowColor = '#e68a00';
+                        }
+                    } else {
+                        grad.addColorStop(0, '#0033aa');
+                        grad.addColorStop(1, '#000811');
+                    }
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (city.highlight && !city.red) ctx.restore();
                 }
 
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
-                ctx.fill();
-                if (city.highlight && !city.red) ctx.restore();
-                
                 ctx.save();
                 ctx.translate(mx, my);
-                // Inverse the map rotation to keep text level
+                // Inverse the map rotation to keep text/logo level
                 ctx.rotate(-mapRotation * Math.PI / 180);
-                
-                let lines = city.name.split('\n');
-                
-                const dst = getDSTLabel(city.tz);
-                if (city.highlight) {
-                    ctx.fillStyle = "rgb(0,0,40)";
-                } else if (dst === "SZ") {
-                    ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
-                } else {
-                    ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // Light gray for Winter Time
-                }
-                ctx.font = (city.highlight)
-                    ? `900 ${cityFontHighlight}px Orbitron`
-                    : `bold ${cityFontNormal}px Orbitron`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
 
-                lines.forEach((line, i) => {
-                    ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight);
-                });
+                if (isWkoeDresden) {
+                    if (wkoeLogoImg.complete && wkoeLogoImg.naturalWidth) {
+                        // Fit logo inside the disc (diameter = 2*circleRadius), with margin.
+                        // Logo PNG has a drop-shadow on the right/bottom, so visible shield is
+                        // off-center inside its bounding box → compensate with a small shift.
+                        const maxSide = circleRadius * 1.3;
+                        const iw = wkoeLogoImg.naturalWidth;
+                        const ih = wkoeLogoImg.naturalHeight;
+                        const scale = Math.min(maxSide / iw, maxSide / ih);
+                        const dw = iw * scale;
+                        const dh = ih * scale;
+                        const shadowShiftX = dw * 0.03; // shift right to counter shadow on left
+                        const shadowShiftY = dh * 0.04; // shift down to counter shadow on top
+                        ctx.drawImage(wkoeLogoImg, -dw / 2 + shadowShiftX, -dh / 2 + shadowShiftY, dw, dh);
+                    }
+                } else {
+                    let lines = city.name.split('\n');
+
+                    const dst = getDSTLabel(city.tz);
+                    if (city.highlight) {
+                        ctx.fillStyle = "rgb(0,0,40)";
+                    } else if (dst === "SZ") {
+                        ctx.fillStyle = "#ffaa00"; // Orange for Summer Time
+                    } else {
+                        ctx.fillStyle = "rgba(220, 220, 220, 0.9)"; // Light gray for Winter Time
+                    }
+                    ctx.font = (city.highlight)
+                        ? `900 ${cityFontHighlight}px Orbitron`
+                        : `bold ${cityFontNormal}px Orbitron`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight);
+                    });
+                }
                 ctx.restore();
             });
             ctx.restore(); // End map rotation (Earth + Glued Markers)
@@ -1444,13 +1477,38 @@
                 ctx.restore();
 
                 // Half-Hour Ticks (Only Tics)
-                const halfAngle = angle - (Math.PI / 24); 
+                const halfAngle = angle - (Math.PI / 24);
                 ctx.save();
                 ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                 ctx.beginPath();
                 ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - tickInset), Math.sin(halfAngle) * (r * 1.02 - tickInset));
                 ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - tickInset), Math.sin(halfAngle) * (r * 1.05 - tickInset));
                 ctx.stroke();
+                ctx.restore();
+            }
+
+            // Open/Closed arc ring (?open=1 mode) — green for open hours, red for closed
+            if (window.__openMode) {
+                const ranges = window.__openRanges || [];
+                const arcR = r * 1.00;
+                const lineW = Math.max(1, r * 0.010);
+                const hourToAngle = h => dirSign * (12 - h) * (Math.PI * 2 / 24) - Math.PI / 2;
+                const anticlockwise = (dirSign === 1);
+                ctx.save();
+                ctx.lineWidth = lineW;
+                ctx.lineCap = 'butt';
+                // Red full ring (closed)
+                ctx.strokeStyle = 'rgba(176, 36, 24, 0.85)';
+                ctx.beginPath();
+                ctx.arc(0, 0, arcR, 0, Math.PI * 2);
+                ctx.stroke();
+                // Green arcs (open)
+                ctx.strokeStyle = 'rgba(121, 158, 49, 0.95)';
+                ranges.forEach(([a, b]) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, arcR, hourToAngle(a), hourToAngle(b), anticlockwise);
+                    ctx.stroke();
+                });
                 ctx.restore();
             }
 
