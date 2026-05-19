@@ -98,13 +98,10 @@
             color: #adff2f;
             filter: drop-shadow(0 0 4px rgba(173, 255, 47, 0.6));
         }
-        /* container-type on draw-wrap so descendants can use `cqi` units
-           (relative to draw-wrap inline-size — which is essentially the
-           main-content width). */
-        #draw-wrap {
-            container-type: inline-size;
-            container-name: canvas;
-        }
+        /* container-type on canvas-stack so descendants can use `cqi` units
+           relative to the actual canvas square (not draw-wrap, which is wider
+           whenever the stack is height-constrained via calc(100dvh - 160px)). */
+        #draw-wrap { }
         /* Per-object recognition chip overlay. Sits above the canvas,
            below the button row. Each chip is positioned absolutely in
            canvas-display coordinates by JS after each Gemini call. */
@@ -198,6 +195,8 @@
             aspect-ratio: 1 / 1;
             flex-shrink: 0;
             align-self: center;
+            container-type: inline-size;
+            container-name: canvas;
         }
         #draw-canvas {
             display: block;
@@ -1307,34 +1306,19 @@ function toggleSidebar() {
         // contours, then run draw20ComputeMatchIds() to pair handwriting
         // outers ↔ LaTeX outers by SHAPE (size, elongation, position, fuzz).
         // Result is stored on each object as `matchId`.
-        async function renderLatexToOffscreenAndExtractContours(latex) {
+        async function renderLatexToOffscreenAndExtractContours(_latex) {
             return new Promise((resolve) => {
                 const target = document.getElementById('result-render');
                 if (!target) { resolve({ contours: [], outers: [], srcW: 0, srcH: 0 }); return; }
-                // Clone result-render DOM (already has fitLatexToContainer applied)
-                // so contour extraction uses the same visual scale as the overlay.
-                const clone = target.cloneNode(true);
-                const tr = target.getBoundingClientRect();
-                clone.style.cssText = `position:fixed;left:-10000px;top:0;background:#000;width:${tr.width}px;height:${tr.height}px;display:flex;align-items:center;justify-content:center;`;
-                document.body.appendChild(clone);
+                // Snapshot the ORIGINAL #result-render directly (already has
+                // fitLatexToContainer + correct container-query font-size).
+                // No clone needed — avoids all style-mismatch issues.
+                const dpr = window.devicePixelRatio || 1;
                 setTimeout(() => {
-                    html2canvas(clone, { backgroundColor: '#000', scale: 2, logging: false }).then(snap => {
-                        try { document.body.removeChild(clone); } catch (_) {}
-                        // Use the full snapshot (not tight-cropped) so contours
-                        // stay in #result-render display space.
-                        let work = snap;
-                        const MAX_W = 1200;
-                        if (work.width > MAX_W) {
-                            const dw = MAX_W;
-                            const dh = Math.round(work.height * (MAX_W / work.width));
-                            const ds = document.createElement('canvas');
-                            ds.width = dw; ds.height = dh;
-                            const dctx = ds.getContext('2d');
-                            dctx.imageSmoothingEnabled = true;
-                            dctx.imageSmoothingQuality = 'high';
-                            dctx.drawImage(work, 0, 0, dw, dh);
-                            work = ds;
-                        }
+                    html2canvas(target, { backgroundColor: '#000', scale: dpr, logging: false }).then(snap => {
+                        // Use the full snapshot — no downsampling, so contour
+                        // coordinates map 1:1 to the canvas via sx/sy.
+                        const work = snap;
                         const RW = work.width, RH = work.height;
                         const data = work.getContext('2d').getImageData(0, 0, RW, RH).data;
                         const grid = new Uint8Array(RW * RH);
@@ -1348,14 +1332,10 @@ function toggleSidebar() {
                             ? classifyContours(contours) : { outers: [], holes: [] };
                         const holesInOuters = cls.outers.reduce((s, o) => s + (o.holes || []).length, 0);
                         DebugWindow.log(`▷ latex-contours: ${contours.length} contours @${RW}×${RH}, ${cls.outers.length} outers, ${cls.holes.length} holes (${holesInOuters} attached)`);
-                        // Source dimensions = full snapshot size of #result-render.
-                        // renderLatexContoursOnCanvas maps these to the canvas
-                        // upper half of the canvas.
                         latexOriginalBBox = { x: 0, y: 0, w: RW, h: RH };
                         resolve({ contours, outers: cls.outers, srcW: RW, srcH: RH });
                     }).catch(err => {
-                        try { document.body.removeChild(clone); } catch (_) {}
-                        DebugWindow.log(`✗ html2canvas (LaTeX-render via clone) failed: ${err.message}`);
+                        DebugWindow.log(`✗ html2canvas (LaTeX-render via result-render) failed: ${err.message}`);
                         resolve({ contours: [], outers: [] });
                     });
                 }, 50);
