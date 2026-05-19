@@ -211,20 +211,18 @@ function toggleSidebar() {
             if (!el) return;
             try { localStorage.setItem('eocr-outline', el.checked ? '1' : '0'); } catch (_) {}
             DebugWindow.log(`✏ outline: ${el.checked ? 'ON (contour render)' : 'OFF (KaTeX HTML)'}`);
-            // Outline ON: contours on canvas, red KaTeX hidden.
-            // Outline OFF: no contours, red KaTeX visible.
+            // Outline ON: preset + contours, red KaTeX hidden.
+            // Outline OFF: preset only, red KaTeX visible.
             const rr = document.getElementById('result-render');
+            restoreInkSnapshot();
             if (el.checked) {
                 if (rr) rr.style.visibility = 'hidden';
                 if (lastMatchResult) {
-                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
                     renderLatexContoursOnCanvas();
                 }
             } else {
                 if (rr) rr.style.visibility = '';
-                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                renderHandwritingContoursOnCanvas();
             }
         }
 
@@ -331,7 +329,7 @@ function toggleSidebar() {
                     const BUTTON_GAP = MARGIN;
                     const baseSc = Math.min((W - 2*MARGIN) / srcW, (halfH - 2*MARGIN) / srcH);
                     const maxSc  = Math.min((W - 2*MARGIN) / srcW, (H - 2*MARGIN) / srcH);
-                    const sc = Math.min(baseSc * 1.6, maxSc);
+                    const sc = Math.min(baseSc * 1.6, maxSc) * 0.645;
                     const nw = srcW * sc, nh = srcH * sc;
                     const ox = (W - nw) / 2;
                     const oy = H - BUTTON_GAP - nh;
@@ -588,7 +586,7 @@ function toggleSidebar() {
                 const BUTTON_GAP = MARGIN;
                 const baseSc = Math.min((W - 2*MARGIN) / srcW, (halfH - 2*MARGIN) / srcH);
                 const maxSc  = Math.min((W - 2*MARGIN) / srcW, (H - 2*MARGIN) / srcH);
-                const sc = Math.min(baseSc * 1.6, maxSc);
+                const sc = Math.min(baseSc * 1.6, maxSc) * 0.645;
                 const nw = srcW * sc, nh = srcH * sc;
                 const ox = (W - nw) / 2;
                 const oy = H - BUTTON_GAP - nh;
@@ -675,6 +673,10 @@ function toggleSidebar() {
         let handwritingOuters = [];
         let latexContours = [];
         let latexOuters = [];
+        // Snapshot of the preset+strokes layer right before contour rendering.
+        // Used to restore the underlying ink when toggling the Outline checkbox
+        // so contours composite ON TOP of the preset rather than replacing it.
+        let inkSnapshot = null;
         // Source dimensions of the latex contour space (native snap size).
         // renderLatexContoursOnCanvas() maps from these to the drawCanvas
         // upper half via aspect-preserving transform.
@@ -1010,6 +1012,7 @@ function toggleSidebar() {
                     else color = objColor(objects.indexOf(obj));
                 }
                 drawCtx.strokeStyle = color;
+                drawCtx.fillStyle = color;
                 drawCtx.beginPath();
                 drawCtx.moveTo(poly[0][0], poly[0][1]);
                 for (let p = 1; p < poly.length; p++) drawCtx.lineTo(poly[p][0], poly[p][1]);
@@ -1023,6 +1026,7 @@ function toggleSidebar() {
                     for (let p = 1; p < hole.length; p++) drawCtx.lineTo(hole[p][0], hole[p][1]);
                     drawCtx.closePath();
                 }
+                drawCtx.fill('evenodd');
                 drawCtx.stroke();
             }
             DebugWindow.log(`✂ hand: ${handwritingOuters.length} outers, ${holesDrawn} hole(s) outlined`);
@@ -1075,6 +1079,7 @@ function toggleSidebar() {
                 const isOrphan = !pair || pair.png < 0;
                 const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
                 drawCtx.strokeStyle = color;
+                drawCtx.fillStyle = color;
                 drawCtx.beginPath();
                 drawCtx.moveTo(tx(poly[0]), ty(poly[0]));
                 for (let p = 1; p < poly.length; p++) drawCtx.lineTo(tx(poly[p]), ty(poly[p]));
@@ -1087,6 +1092,7 @@ function toggleSidebar() {
                     for (let p = 1; p < hole.length; p++) drawCtx.lineTo(tx(hole[p]), ty(hole[p]));
                     drawCtx.closePath();
                 }
+                drawCtx.fill('evenodd');
                 drawCtx.stroke();
             }
             DebugWindow.log(`✂ latex: ${latexOuters.length} outers, ${holesDrawn} hole(s) outlined`);
@@ -1590,6 +1596,23 @@ function toggleSidebar() {
         drawCanvas.addEventListener('pointerup',     endStroke);
         drawCanvas.addEventListener('pointercancel', endStroke);
         drawCanvas.addEventListener('pointerleave',  endStroke);
+        // Capture current canvas (preset + strokes, before any contour overlay)
+        // into an offscreen buffer so we can re-composite contours on top
+        // without losing the underlying preset/strokes.
+        function captureInkSnapshot() {
+            if (!inkSnapshot) inkSnapshot = document.createElement('canvas');
+            if (inkSnapshot.width !== drawCanvas.width || inkSnapshot.height !== drawCanvas.height) {
+                inkSnapshot.width = drawCanvas.width;
+                inkSnapshot.height = drawCanvas.height;
+            }
+            const ic = inkSnapshot.getContext('2d');
+            ic.clearRect(0, 0, inkSnapshot.width, inkSnapshot.height);
+            ic.drawImage(drawCanvas, 0, 0);
+        }
+        function restoreInkSnapshot() {
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            if (inkSnapshot) drawCtx.drawImage(inkSnapshot, 0, 0);
+        }
         // Persist the current canvas pixels — called after every finished
         // stroke and after preset loads. ~100–400 KB PNG; fits in localStorage.
         function saveCanvasState() {
@@ -1980,14 +2003,16 @@ function toggleSidebar() {
                 //    - overlay LaTeX outers, REMAPPED to the handwriting's
                 //      bbox so the two share screen position (morph base
                 //      state — ready for cross-fade later).
-                // Outline ON: contours on canvas, red KaTeX hidden.
-                // Outline OFF: no contours, red KaTeX visible.
+                // Outline ON: preset + contours, red KaTeX hidden.
+                // Outline OFF: preset only, red KaTeX visible.
                 if (shapeMatched) {
-                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                    renderHandwritingContoursOnCanvas();
+                    // Snapshot the preset+strokes layer so toggling outlines
+                    // can later composite contours on top without re-clearing.
+                    captureInkSnapshot();
                     const outlineEl = document.getElementById('g-outline');
                     const rr = document.getElementById('result-render');
                     if (!outlineEl || outlineEl.checked) {
+                        renderHandwritingContoursOnCanvas();
                         renderLatexContoursOnCanvas();
                         if (rr) rr.style.visibility = 'hidden';
                     } else {
