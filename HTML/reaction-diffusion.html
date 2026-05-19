@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Reaction-Diffusion</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        #canvas {
+            cursor: crosshair;
+            background: #000616;
+        }
+        body, #side-panel {
+            background: #000616 !important;
+        }
+        #canvas-container {
+            background: #000616;
+        }
+        .cyber-grid { display: none; }
+        #step-counter {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-family: 'Orbitron', monospace;
+            font-size: 10px;
+            color: rgba(0, 210, 255, 0.25);
+            letter-spacing: 0.05em;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div id="step-counter">0</div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/i18n-de.js"></script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-es.js"></script>
+    <script src="js/i18n-fr.js"></script>
+    <script src="js/i18n-it.js"></script>
+    <script src="js/i18n-pt.js"></script>
+    <script src="js/i18n-sw.js"></script>
+    <script src="js/i18n-tr.js"></script>
+    <script src="js/i18n-nl.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Reaction-Diffusion',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        let initialized = false;
+        let GRID_W = 160;
+        let GRID_H = 120;
+        let u, v, nextU, nextV;
+        let running = true;
+        let simSpeed = 1;
+        let stepCount = 0;
+        let Du = 0.16;
+        let Dv = 0.08;
+let feed = 0.026;
+let kill = 0.058;
+        let brushRadius = 8;
+        let brushAmount = 0.5;
+
+        const PRESETS = {
+            "Wirbel":                { feed: 0.026, kill: 0.058, Du: 0.16,  Dv: 0.08 },
+            "Pillen (klassisch)":    { feed: 0.035, kill: 0.065, Du: 0.16,  Dv: 0.08 },
+            "Streifen":              { feed: 0.030, kill: 0.062, Du: 0.16,  Dv: 0.08 },
+            "Wellen":                { feed: 0.014, kill: 0.045, Du: 0.16,  Dv: 0.08 },
+            "Flecken":               { feed: 0.035, kill: 0.060, Du: 0.16,  Dv: 0.08 },
+            "Tupfen":                { feed: 0.050, kill: 0.065, Du: 0.16,  Dv: 0.08 },
+            "Gitter":                { feed: 0.042, kill: 0.064, Du: 0.16,  Dv: 0.08 },
+            "Chaos":                 { feed: 0.018, kill: 0.051, Du: 0.16,  Dv: 0.08 },
+            "Nebel":                 { feed: 0.024, kill: 0.056, Du: 0.12,  Dv: 0.06 },
+            "Koralle":               { feed: 0.030, kill: 0.055, Du: 0.18,  Dv: 0.09 },
+            "Flocken":               { feed: 0.048, kill: 0.067, Du: 0.14,  Dv: 0.07 },
+            "Schlangen":             { feed: 0.020, kill: 0.048, Du: 0.16,  Dv: 0.08 },
+            "Pulsierend":            { feed: 0.032, kill: 0.059, Du: 0.18,  Dv: 0.09 },
+            "Adern":                 { feed: 0.038, kill: 0.063, Du: 0.14,  Dv: 0.07 },
+            "Labyrinth":             { feed: 0.045, kill: 0.066, Du: 0.12,  Dv: 0.06 },
+            "Bienenwabe":            { feed: 0.040, kill: 0.062, Du: 0.16,  Dv: 0.08 },
+        };
+
+        const COLOR_SCHEMES = [
+            { name: "Feuer", fn: (v) => {
+                const t = Math.pow(v, 0.6);
+                return `rgb(${Math.floor(255 * t)},${Math.floor(120 * t * (1 - t * 0.5))},${Math.floor(20 * t * (1 - t))})`;
+            }},
+            { name: "Eis", fn: (v) => {
+                const t = Math.pow(v, 0.6);
+                return `rgb(${Math.floor(20 * t)},${Math.floor(100 * t)},${Math.floor(255 * t)})`;
+            }},
+            { name: "Grün", fn: (v) => {
+                const t = Math.pow(v, 0.6);
+                return `rgb(${Math.floor(10 * t)},${Math.floor(180 * t)},${Math.floor(50 * t)})`;
+            }},
+            { name: "Violett", fn: (v) => {
+                const t = Math.pow(v, 0.6);
+                return `rgb(${Math.floor(180 * t)},${Math.floor(30 * t)},${Math.floor(220 * t)})`;
+            }},
+            { name: "Graustufen", fn: (v) => {
+                const t = Math.floor(255 * Math.pow(v, 0.6));
+                return `rgb(${t},${t},${t})`;
+            }},
+        ];
+        let colorScheme = COLOR_SCHEMES[0];
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, Math.floor(rect.width));
+            const h = Math.max(1, Math.floor(rect.height));
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function initGrid() {
+            const rect = container.getBoundingClientRect();
+            GRID_W = Math.max(40, Math.min(320, Math.floor(rect.width / 4)));
+            GRID_H = Math.max(40, Math.min(240, Math.floor(rect.height / 4)));
+            const len = GRID_W * GRID_H;
+            u = new Float32Array(len);
+            v = new Float32Array(len);
+            nextU = new Float32Array(len);
+            nextV = new Float32Array(len);
+            u.fill(1.0);
+            v.fill(0.0);
+            const cx = GRID_W >> 1;
+            const cy = GRID_H >> 1;
+            const r = Math.max(4, Math.min(GRID_W, GRID_H) * 0.10);
+            for (let y = 0; y < GRID_H; y++) {
+                for (let x = 0; x < GRID_W; x++) {
+                    const dx = x - cx, dy = y - cy;
+                    if (dx * dx + dy * dy < r * r) {
+                        const idx = y * GRID_W + x;
+                        v[idx] = 1.0;
+                        u[idx] = 0.0;
+                    }
+                }
+            }
+            stepCount = 0;
+            initialized = true;
+        }
+
+        function laplacian(g, x, y) {
+            const w = GRID_W, h = GRID_H;
+            const idx = y * w + x;
+            let sum = 0;
+            sum += g[idx] * -1.0;
+            sum += g[((y - 1 + h) % h) * w + x] * 0.2;
+            sum += g[((y + 1) % h) * w + x] * 0.2;
+            sum += g[y * w + ((x - 1 + w) % w)] * 0.2;
+            sum += g[y * w + ((x + 1) % w)] * 0.2;
+            sum += g[((y - 1 + h) % h) * w + ((x - 1 + w) % w)] * 0.05;
+            sum += g[((y - 1 + h) % h) * w + ((x + 1) % w)] * 0.05;
+            sum += g[((y + 1) % h) * w + ((x - 1 + w) % w)] * 0.05;
+            sum += g[((y + 1) % h) * w + ((x + 1) % w)] * 0.05;
+            return sum;
+        }
+
+        function stepSimulation() {
+            const w = GRID_W, h = GRID_H;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = y * w + x;
+                    const uVal = u[idx];
+                    const vVal = v[idx];
+                    const lapU = laplacian(u, x, y);
+                    const lapV = laplacian(v, x, y);
+                    const uvv = uVal * vVal * vVal;
+                    let du = Du * lapU - uvv + feed * (1 - uVal);
+                    let dv = Dv * lapV + uvv - (feed + kill) * vVal;
+                    nextU[idx] = uVal + du;
+                    nextV[idx] = vVal + dv;
+                    if (nextU[idx] < 0) nextU[idx] = 0;
+                    if (nextU[idx] > 1) nextU[idx] = 1;
+                    if (nextV[idx] < 0) nextV[idx] = 0;
+                    if (nextV[idx] > 1) nextV[idx] = 1;
+                }
+            }
+            [u, nextU] = [nextU, u];
+            [v, nextV] = [nextV, v];
+            stepCount++;
+        }
+
+        function seedAt(gridX, gridY) {
+            const r = brushRadius;
+            const w = GRID_W, h = GRID_H;
+            for (let dy = -r; dy <= r; dy++) {
+                for (let dx = -r; dx <= r; dx++) {
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d > r) continue;
+                    const sx = (gridX + dx + w) % w;
+                    const sy = (gridY + dy + h) % h;
+                    const idx = sy * w + sx;
+                    const strength = brushAmount * (1 - d / r);
+                    v[idx] = Math.min(1, v[idx] + strength);
+                    u[idx] = Math.max(0, u[idx] - strength * 0.5);
+                }
+            }
+        }
+
+        function draw() {
+            try {
+                if (!initialized) {
+                    requestAnimationFrame(draw);
+                    return;
+                }
+                if (running) {
+                    for (let s = 0; s < simSpeed; s++) {
+                        stepSimulation();
+                    }
+                }
+                drawFrame();
+            } catch (e) {
+                console.error('draw error:', e);
+            }
+            requestAnimationFrame(draw);
+        }
+
+        function drawFrame() {
+            const rect = container.getBoundingClientRect();
+            const w = Math.floor(rect.width);
+            const h = Math.floor(rect.height);
+            if (w < 1 || h < 1) return;
+
+            ctx.fillStyle = '#000616';
+            ctx.fillRect(0, 0, w, h);
+
+            const cw = w / GRID_W;
+            const ch = h / GRID_H;
+
+            for (let gy = 0; gy < GRID_H; gy++) {
+                for (let gx = 0; gx < GRID_W; gx++) {
+                    const val = v[gy * GRID_W + gx];
+                    if (val < 0.01) continue;
+                    ctx.fillStyle = colorScheme.fn(val);
+                    ctx.fillRect(Math.floor(gx * cw), Math.floor(gy * ch), Math.ceil(cw) + 0.5, Math.ceil(ch) + 0.5);
+                }
+            }
+
+            const counter = document.getElementById('step-counter');
+            if (counter) counter.textContent = stepCount.toLocaleString();
+        }
+
+        function setupUI() {
+            const containerEl = document.getElementById('ui-container');
+            if (containerEl) containerEl.innerHTML = '';
+
+            const BRAND_BLUE = "#00d2ff";
+            const presetKeys = Object.keys(PRESETS);
+            const defaultPresetIdx = presetKeys.indexOf('Wirbel');
+            const presetOptions = presetKeys.map((name, i) =>
+                `<option value="${i}"${i === defaultPresetIdx ? ' selected' : ''}>${name}</option>`
+            ).join('');
+            const colorOptions = COLOR_SCHEMES.map((s, i) =>
+                `<option value="${i}"${i === 0 ? ' selected' : ''}>${s.name}</option>`
+            ).join('');
+
+            CyberUI.createCard('ui-container', 'Parameter', `
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;padding:0;">
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        PRESET
+                        <select id="rd-preset" style="display:block;width:100%;margin-top:4px;background:rgba(0,10,30,0.92);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);border-radius:4px;padding:4px 6px;font-family:Orbitron;font-size:12px;outline:none;">
+                            ${presetOptions}
+                        </select>
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        FARBE
+                        <select id="rd-color" style="display:block;width:100%;margin-top:4px;background:rgba(0,10,30,0.92);color:#00d2ff;border:1px solid rgba(0,210,255,0.4);border-radius:4px;padding:4px 6px;font-family:Orbitron;font-size:12px;outline:none;">
+                            ${colorOptions}
+                        </select>
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        FEED (F): <span id="rd-feed-val">${feed.toFixed(3)}</span>
+                        <input type="range" min="0.005" max="0.090" step="0.001" value="${feed}"
+                               oninput="feed=parseFloat(this.value);document.getElementById('rd-feed-val').innerText=feed.toFixed(3);">
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        KILL (k): <span id="rd-kill-val">${kill.toFixed(3)}</span>
+                        <input type="range" min="0.025" max="0.080" step="0.001" value="${kill}"
+                               oninput="kill=parseFloat(this.value);document.getElementById('rd-kill-val').innerText=kill.toFixed(3);">
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        DIFFUSION U: <span id="rd-du-val">${Du.toFixed(3)}</span>
+                        <input type="range" min="0.01" max="1.0" step="0.005" value="${Du}"
+                               oninput="Du=parseFloat(this.value);document.getElementById('rd-du-val').innerText=Du.toFixed(3);">
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        DIFFUSION V: <span id="rd-dv-val">${Dv.toFixed(3)}</span>
+                        <input type="range" min="0.005" max="0.5" step="0.005" value="${Dv}"
+                               oninput="Dv=parseFloat(this.value);document.getElementById('rd-dv-val').innerText=Dv.toFixed(3);">
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        GESCHWINDIGKEIT: <span id="rd-speed-val">${simSpeed}</span>
+                        <input type="range" min="1" max="10" step="1" value="${simSpeed}"
+                               oninput="simSpeed=parseInt(this.value);document.getElementById('rd-speed-val').innerText=simSpeed;">
+                    </label>
+                    <label style="color:var(--neon-blue);font-size:12px;font-family:Orbitron;">
+                        PINSEL: <span id="rd-brush-val">${brushRadius}</span>
+                        <input type="range" min="2" max="30" step="1" value="${brushRadius}"
+                               oninput="brushRadius=parseInt(this.value);document.getElementById('rd-brush-val').innerText=brushRadius;">
+                    </label>
+                    <div style="display:flex;gap:6px;margin-top:8px;">
+                        <button class="cyber-btn" onclick="running=!running;this.innerText=running?'PAUSE':'PLAY'"
+                                style="flex:1;border-color:#ffaa00;color:#ffaa00;padding:8px;">PAUSE</button>
+                        <button class="cyber-btn" onclick="initGrid()"
+                                style="flex:1;border-color:#ff3366;color:#ff3366;padding:8px;">RESET</button>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cyber-btn" onclick="clearAll()"
+                                style="flex:1;border-color:#888;color:#888;padding:8px;">LEEREN</button>
+                        <button class="cyber-btn" onclick="seedCenter()"
+                                style="flex:1;border-color:#00d2ff;color:#00d2ff;padding:8px;">SÄEN</button>
+                    </div>
+                </div>
+            `, BRAND_BLUE);
+
+            document.getElementById('rd-preset').addEventListener('change', function() {
+                const keys = Object.keys(PRESETS);
+                const p = PRESETS[keys[parseInt(this.value)]];
+                if (!p) return;
+                feed = p.feed; kill = p.kill; Du = p.Du; Dv = p.Dv;
+                document.querySelectorAll('input[type="range"]')[0].value = feed;
+                document.querySelectorAll('input[type="range"]')[1].value = kill;
+                document.querySelectorAll('input[type="range"]')[2].value = Du;
+                document.querySelectorAll('input[type="range"]')[3].value = Dv;
+                document.getElementById('rd-feed-val').innerText = feed.toFixed(3);
+                document.getElementById('rd-kill-val').innerText = kill.toFixed(3);
+                document.getElementById('rd-du-val').innerText = Du.toFixed(3);
+                document.getElementById('rd-dv-val').innerText = Dv.toFixed(3);
+            });
+
+            document.getElementById('rd-color').addEventListener('change', function() {
+                colorScheme = COLOR_SCHEMES[parseInt(this.value)];
+            });
+        }
+
+        function clearAll() {
+            if (!initialized) return;
+            for (let i = 0; i < GRID_W * GRID_H; i++) {
+                u[i] = 1.0;
+                v[i] = 0.0;
+            }
+        }
+
+        function seedCenter() {
+            if (!initialized) return;
+            seedAt(GRID_W >> 1, GRID_H >> 1);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!initialized) return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            seedAt(Math.floor(mx / rect.width * GRID_W), Math.floor(my / rect.height * GRID_H));
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!initialized || e.buttons !== 1) return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            seedAt(Math.floor(mx / rect.width * GRID_W), Math.floor(my / rect.height * GRID_H));
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (!initialized) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            seedAt(
+                Math.floor((touch.clientX - rect.left) / rect.width * GRID_W),
+                Math.floor((touch.clientY - rect.top) / rect.height * GRID_H)
+            );
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!initialized) return;
+            e.preventDefault();
+            if (e.touches.length === 0) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            seedAt(
+                Math.floor((touch.clientX - rect.left) / rect.width * GRID_W),
+                Math.floor((touch.clientY - rect.top) / rect.height * GRID_H)
+            );
+        }, { passive: false });
+
+        let resizeRaf = null;
+        window.addEventListener('resize', () => {
+            if (resizeRaf != null) return;
+            resizeRaf = requestAnimationFrame(() => {
+                resizeRaf = null;
+                resizeCanvasToContainer();
+            });
+        });
+
+        function boot() {
+            try {
+                resizeCanvasToContainer();
+                initGrid();
+                setupUI();
+            } catch (e) {
+                console.error('boot error:', e);
+            }
+            draw();
+        }
+
+        document.fonts.ready.then(boot);
+        setTimeout(boot, 1500);
+    </script>
+</body>
+</html>

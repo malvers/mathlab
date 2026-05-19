@@ -34,6 +34,7 @@
     <script src="draw20-constants.js"></script>
     <script src="contours.js"></script>
     <script src="count-objects.js"></script>
+    <script src="geometry.js"></script>
     <!-- Morph cross-pane matcher: plausibility check + Greedy Sequential
          Symbol-Type-Tier matching. Used to pair handwriting outers with
          KaTeX-rendered outers by SHAPE, not labels. -->
@@ -546,6 +547,10 @@ function toggleSidebar() {
                 <input type="checkbox" id="g-thinking" onchange="onThinkingChange()">
                 <span>Thinking (default on)</span>
             </label>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'Orbitron',sans-serif;font-size:11px;color:#00d2ff;cursor:pointer;letter-spacing:0.05em;">
+                <input type="checkbox" id="g-outline" onchange="onOutlineChange()" checked>
+                <span>Outline (off → KaTeX HTML)</span>
+            </label>
         `, '#00d2ff', { collapsible: true });
 
         // Reflect the selected model in the card title (replaces "API" with e.g. "2.5-FLASH").
@@ -583,6 +588,33 @@ function toggleSidebar() {
             if (!el) return;
             try { localStorage.setItem('eocr-thinking', el.checked ? '1' : '0'); } catch (_) {}
             DebugWindow.log(`🧠 thinking: ${el.checked ? 'ON (default)' : 'OFF (budget=0)'}`);
+        }
+        // Outline toggle — when ON (default), the LaTeX is shown as colored
+        // contour outlines on the canvas upper half. When OFF, the original
+        // KaTeX HTML render is shown instead (the un-touched Gemini output).
+        function onOutlineChange() {
+            const el = document.getElementById('g-outline');
+            if (!el) return;
+            try { localStorage.setItem('eocr-outline', el.checked ? '1' : '0'); } catch (_) {}
+            DebugWindow.log(`✏ outline: ${el.checked ? 'ON (contour render)' : 'OFF (KaTeX HTML)'}`);
+            // Re-render whatever's on screen. If we have a last match result,
+            // toggling should swap the visualisation without re-calling Gemini.
+            const rr = document.getElementById('result-render');
+            if (el.checked) {
+                // Hide KaTeX HTML, show contour render (only if we have data).
+                if (rr) rr.style.display = 'none';
+                if (lastMatchResult) {
+                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                    renderHandwritingContoursOnCanvas();
+                    renderLatexContoursOnCanvas();
+                }
+            } else {
+                // Show KaTeX HTML, clear contour latex from upper half.
+                if (rr) rr.style.display = '';
+                // Keep handwriting visible — re-render hand only.
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                renderHandwritingContoursOnCanvas();
+            }
         }
 
         CyberUI.createCard('ui-container', 'KOSTENKONTROLLE', `
@@ -968,6 +1000,15 @@ function toggleSidebar() {
         let handwritingOuters = [];
         let latexContours = [];
         let latexOuters = [];
+        // Source dimensions of the latex contour space (native snap size).
+        // renderLatexContoursOnCanvas() maps from these to the drawCanvas
+        // upper half via aspect-preserving transform.
+        let latexSrcW = 0, latexSrcH = 0;
+        // BBox of the ORIGINAL KaTeX render — where the rasterised equation
+        // actually sits on the off-screen 1000×500 canvas (= same coord space
+        // as the drawCanvas upper half). Used to draw a debug-rectangle so we
+        // can sanity-check rendering against the original layout.
+        let latexOriginalBBox = null;
         let curStroke = null;
         let activeObjIdx = -1;
         let objectIdleTimer = null;
@@ -1262,29 +1303,27 @@ function toggleSidebar() {
                                 return out;
                             } catch (_) { return s; }
                         })(snapRaw);
-                        // Render into a 1000×500 canvas — same x-range as the
-                        // drawing canvas, mapping to its upper half. We keep
-                        // margins tight so wide equations (like \sqrt{...})
-                        // don't get visually squashed against the y-axis.
-                        const RW = 1000, RH = 500;
-                        const off = document.createElement('canvas');
-                        off.width = RW; off.height = RH;
-                        const octx = off.getContext('2d');
-                        octx.fillStyle = '#000';
-                        octx.fillRect(0, 0, RW, RH);
-                        // Tight horizontal margin so wide equations don't get
-                        // squashed; smaller vertical margin so the available
-                        // upper-half height is actually used.
-                        const targetW = RW - 60;
-                        const targetH = RH - 20;
-                        const sc = Math.min(targetW / snap.width, targetH / snap.height);
-                        const nw = snap.width * sc, nh = snap.height * sc;
-                        const ox = (RW - nw) / 2, oy = (RH - nh) / 2;
-                        octx.imageSmoothingEnabled = true;
-                        octx.imageSmoothingQuality = 'high';
-                        octx.drawImage(snap, ox, oy, nw, nh);
-                        // Brightness-threshold grid → contours.
-                        const data = octx.getImageData(0, 0, RW, RH).data;
+                        // Extract contours from the SNAP'S NATIVE pixels — no
+                        // off-screen aspect-fit step. Aspect-preserving mapping
+                        // to drawCanvas happens at render time (no source-side
+                        // squashing possible). If snap is too large for fast
+                        // marching-squares, downsample to 1200 wide while
+                        // preserving aspect.
+                        let work = snap;
+                        const MAX_W = 1200;
+                        if (work.width > MAX_W) {
+                            const dw = MAX_W;
+                            const dh = Math.round(work.height * (MAX_W / work.width));
+                            const ds = document.createElement('canvas');
+                            ds.width = dw; ds.height = dh;
+                            const dctx = ds.getContext('2d');
+                            dctx.imageSmoothingEnabled = true;
+                            dctx.imageSmoothingQuality = 'high';
+                            dctx.drawImage(work, 0, 0, dw, dh);
+                            work = ds;
+                        }
+                        const RW = work.width, RH = work.height;
+                        const data = work.getContext('2d').getImageData(0, 0, RW, RH).data;
                         const grid = new Uint8Array(RW * RH);
                         for (let i = 0; i < RW * RH; i++) {
                             const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
@@ -1295,8 +1334,11 @@ function toggleSidebar() {
                         const cls = (typeof classifyContours === 'function')
                             ? classifyContours(contours) : { outers: [], holes: [] };
                         const holesInOuters = cls.outers.reduce((s, o) => s + (o.holes || []).length, 0);
-                        DebugWindow.log(`▷ latex-contours: ${contours.length} contours, ${cls.outers.length} outers, ${cls.holes.length} holes (${holesInOuters} attached to outers)`);
-                        resolve({ contours, outers: cls.outers });
+                        DebugWindow.log(`▷ latex-contours: ${contours.length} contours @${RW}×${RH}, ${cls.outers.length} outers, ${cls.holes.length} holes (${holesInOuters} attached)`);
+                        // Track the SOURCE dimensions so renderLatexContoursOnCanvas
+                        // can aspect-fit them into the drawCanvas upper-half.
+                        latexOriginalBBox = { x: 0, y: 0, w: RW, h: RH };
+                        resolve({ contours, outers: cls.outers, srcW: RW, srcH: RH });
                     }).catch(err => {
                         try { document.body.removeChild(tmp); } catch (_) {}
                         DebugWindow.log(`✗ html2canvas (LaTeX-render) failed: ${err.message}`);
@@ -1365,11 +1407,32 @@ function toggleSidebar() {
             }
             return bb;
         }
-        // Render LaTeX contours onto the canvas UPPER HALF using the EVEN-ODD
-        // fill rule (outer + holes as one combined path → fill skips holes).
-        // Colored by matchId (palette when paired, orphan-red otherwise).
+        // Render LaTeX contours onto the canvas UPPER HALF. Contours come in
+        // SOURCE coords [0..latexSrcW] × [0..latexSrcH] (native snap size).
+        // We aspect-fit them into the upper half (drawCanvas.width ×
+        // drawCanvas.height/2) with a small margin → no source-side squashing.
         function renderLatexContoursOnCanvas() {
             if (!lastMatchResult || latexContours.length === 0) return;
+            if (!latexSrcW || !latexSrcH) return;
+            const dw = drawCanvas.width;
+            const dh = drawCanvas.height * 0.5;
+            const MARG = 30;
+            const sc = Math.min((dw - 2 * MARG) / latexSrcW, (dh - 2 * MARG) / latexSrcH);
+            const nw = latexSrcW * sc, nh = latexSrcH * sc;
+            const ox = (dw - nw) / 2;
+            const oy = (dh - nh) / 2;
+            const tx = (p) => p[0] * sc + ox;
+            const ty = (p) => p[1] * sc + oy;
+            // Debug-rect around the ORIGINAL LaTeX placement (after aspect-fit
+            // to the upper half — this is the ground-truth bbox).
+            drawCtx.save();
+            drawCtx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
+            drawCtx.setLineDash([8, 6]);
+            drawCtx.lineWidth = 1.5;
+            drawCtx.strokeRect(ox, oy, nw, nh);
+            drawCtx.setLineDash([]);
+            drawCtx.restore();
+            DebugWindow.log(`▢ latex-target-bbox: x=${Math.round(ox)} y=${Math.round(oy)} w=${Math.round(nw)} h=${Math.round(nh)} (sc=${sc.toFixed(3)}, src=${latexSrcW}×${latexSrcH})`);
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
@@ -1384,15 +1447,15 @@ function toggleSidebar() {
                 const color = isOrphan ? '#FF0000' : draw20PaletteColor(id);
                 drawCtx.strokeStyle = color;
                 drawCtx.beginPath();
-                drawCtx.moveTo(poly[0][0], poly[0][1]);
-                for (let p = 1; p < poly.length; p++) drawCtx.lineTo(poly[p][0], poly[p][1]);
+                drawCtx.moveTo(tx(poly[0]), ty(poly[0]));
+                for (let p = 1; p < poly.length; p++) drawCtx.lineTo(tx(poly[p]), ty(poly[p]));
                 drawCtx.closePath();
                 for (const hi of (outer.holes || [])) {
                     const hole = latexContours[hi];
                     if (!hole || hole.length < 3) continue;
                     holesDrawn++;
-                    drawCtx.moveTo(hole[0][0], hole[0][1]);
-                    for (let p = 1; p < hole.length; p++) drawCtx.lineTo(hole[p][0], hole[p][1]);
+                    drawCtx.moveTo(tx(hole[0]), ty(hole[0]));
+                    for (let p = 1; p < hole.length; p++) drawCtx.lineTo(tx(hole[p]), ty(hole[p]));
                     drawCtx.closePath();
                 }
                 drawCtx.stroke();
@@ -2325,6 +2388,8 @@ function toggleSidebar() {
                     const lat = await renderLatexToOffscreenAndExtractContours(latex);
                     latexContours = lat.contours;
                     latexOuters   = lat.outers;
+                    latexSrcW = lat.srcW || 0;
+                    latexSrcH = lat.srcH || 0;
                     applyShapeMatching();
                     assignLabelsFromTokens(tokens);
                     shapeMatched = lastMatchResult != null;
@@ -2341,10 +2406,17 @@ function toggleSidebar() {
                 if (shapeMatched) {
                     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
-                    renderLatexContoursOnCanvas();
-                    // Hide KaTeX HTML — the contour render IS the LaTeX view.
+                    // Outline toggle: ON → contour render. OFF → KaTeX HTML.
+                    const outlineEl = document.getElementById('g-outline');
+                    const showOutline = !outlineEl || outlineEl.checked;
                     const rr = document.getElementById('result-render');
-                    if (rr) rr.style.display = 'none';
+                    if (showOutline) {
+                        renderLatexContoursOnCanvas();
+                        if (rr) rr.style.display = 'none';
+                    } else {
+                        // Show the un-touched KaTeX HTML rendering.
+                        if (rr) rr.style.display = '';
+                    }
                 } else {
                     // Fallback: shape-match failed; show strokes + KaTeX HTML.
                     renderStrokes();
@@ -2393,6 +2465,10 @@ function toggleSidebar() {
             const thinkingSaved = localStorage.getItem('eocr-thinking');
             const thinkingEl = document.getElementById('g-thinking');
             if (thinkingEl) thinkingEl.checked = (thinkingSaved !== '0');
+            // Restore outline toggle (default ON).
+            const outlineSaved = localStorage.getItem('eocr-outline');
+            const outlineEl = document.getElementById('g-outline');
+            if (outlineEl) outlineEl.checked = (outlineSaved !== '0');
             updateGeminiTitle();
             if (keyFile && !keyLS) DebugWindow.log('🔑 Key aus apikey.local.js geladen');
             const s = localStorage.getItem('eocr-stroke');
