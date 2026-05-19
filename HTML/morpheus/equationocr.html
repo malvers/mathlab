@@ -284,7 +284,6 @@
             text-align: center;
             font-size: clamp(18px, 7cqi, 90px);
             color: #FF0000;
-            text-shadow: 0 0 6px rgba(2, 4, 16, 0.9), 0 0 10px rgba(2, 4, 16, 0.6);
             pointer-events: none;
             z-index: 26;
             overflow: hidden;
@@ -1314,17 +1313,26 @@ function toggleSidebar() {
                 // fitLatexToContainer + correct container-query font-size).
                 // No clone needed — avoids all style-mismatch issues.
                 const dpr = window.devicePixelRatio || 1;
+                // Kill text-shadow during snapshot — the 0 0 10px halo bleeds
+                // dark-blue pixels far past the glyph and inflates contours by
+                // ~10–15px on each side. Restore after html2canvas returns.
+                const prevShadow = target.style.textShadow;
+                target.style.textShadow = 'none';
                 setTimeout(() => {
                     html2canvas(target, { backgroundColor: '#000', scale: dpr, logging: false }).then(snap => {
+                        target.style.textShadow = prevShadow;
                         // Use the full snapshot — no downsampling, so contour
                         // coordinates map 1:1 to the canvas via sx/sy.
                         const work = snap;
                         const RW = work.width, RH = work.height;
                         const data = work.getContext('2d').getImageData(0, 0, RW, RH).data;
                         const grid = new Uint8Array(RW * RH);
+                        // Threshold: glyph is pure red (sum≈255). Antialiased
+                        // edge pixels fade to near-black; cut at mid-intensity
+                        // so the contour hugs the glyph instead of the AA halo.
                         for (let i = 0; i < RW * RH; i++) {
                             const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
-                            grid[i] = (r + g + b) > 0 ? 1 : 0;
+                            grid[i] = (r + g + b) > 128 ? 1 : 0;
                         }
                         const contours = (typeof getContoursWithHoles === 'function')
                             ? getContoursWithHoles(grid, RW, RH) : [];
@@ -1335,6 +1343,7 @@ function toggleSidebar() {
                         latexOriginalBBox = { x: 0, y: 0, w: RW, h: RH };
                         resolve({ contours, outers: cls.outers, srcW: RW, srcH: RH });
                     }).catch(err => {
+                        target.style.textShadow = prevShadow;
                         DebugWindow.log(`✗ html2canvas (LaTeX-render via result-render) failed: ${err.message}`);
                         resolve({ contours: [], outers: [] });
                     });
