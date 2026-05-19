@@ -82,7 +82,6 @@
                     <button class="cyber-btn" id="canvas-reload-btn" onclick="location.reload(true)">RELOAD</button>
                     <button class="cyber-btn" id="canvas-clear-btn" onclick="clearDraw()">CLEAR</button>
                 </div>
-                <div id="draw-hint">Zeichne eine Formel — Maus oder Finger</div>
             </div>
         </div>
     </main>
@@ -212,17 +211,18 @@ function toggleSidebar() {
             if (!el) return;
             try { localStorage.setItem('eocr-outline', el.checked ? '1' : '0'); } catch (_) {}
             DebugWindow.log(`✏ outline: ${el.checked ? 'ON (contour render)' : 'OFF (KaTeX HTML)'}`);
-            // Re-render whatever's on screen. The red KaTeX overlay
-            // (#result-render) stays visible in both modes — this toggle only
-            // controls whether the LaTeX *contours* are drawn on the canvas.
+            // Outline ON: contours on canvas, red KaTeX hidden.
+            // Outline OFF: no contours, red KaTeX visible.
+            const rr = document.getElementById('result-render');
             if (el.checked) {
+                if (rr) rr.style.visibility = 'hidden';
                 if (lastMatchResult) {
                     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
                     renderLatexContoursOnCanvas();
                 }
             } else {
-                // Clear contour latex; keep handwriting visible.
+                if (rr) rr.style.display = '';
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 renderHandwritingContoursOnCanvas();
             }
@@ -533,18 +533,19 @@ function toggleSidebar() {
                 }
                 tctx.putImageData(id, 0, 0);
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                // Aspect-fit base = lower half, then bump 60% larger.
-                // Cap at full-canvas fit so we never overflow the viewport.
+                // Base = aspect-fit into lower half, then 60% larger.
+                // Bottom-anchored in the lower half (minus a button gap).
                 const W = drawCanvas.width;
                 const H = drawCanvas.height;
                 const halfH = H / 2;
                 const MARGIN = 20;
+                const BUTTON_GAP = MARGIN;
                 const baseSc = Math.min((W - 2*MARGIN) / img.width, (halfH - 2*MARGIN) / img.height);
-                const maxSc  = Math.min((W - 2*MARGIN) / img.width, (H     - 2*MARGIN) / img.height);
+                const maxSc  = Math.min((W - 2*MARGIN) / img.width, (H - 2*MARGIN) / img.height);
                 const sc = Math.min(baseSc * 1.6, maxSc);
                 const nw = img.width * sc, nh = img.height * sc;
                 const ox = (W - nw) / 2;
-                const oy = (H - nh) / 2;
+                const oy = H - BUTTON_GAP - nh;
                 drawCtx.imageSmoothingEnabled = true;
                 drawCtx.imageSmoothingQuality = 'high';
                 drawCtx.drawImage(tmp, ox, oy, nw, nh);
@@ -1948,17 +1949,24 @@ function toggleSidebar() {
                 //    - overlay LaTeX outers, REMAPPED to the handwriting's
                 //      bbox so the two share screen position (morph base
                 //      state — ready for cross-fade later).
-                // The red KaTeX overlay (#result-render) is ALWAYS shown — the
-                // Outline toggle only adds/removes the *contour* render on the
-                // canvas, never the red HTML overlay.
+                // Outline ON: contours on canvas, red KaTeX hidden.
+                // Outline OFF: no contours, red KaTeX visible.
                 if (shapeMatched) {
                     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
                     const outlineEl = document.getElementById('g-outline');
-                    if (!outlineEl || outlineEl.checked) renderLatexContoursOnCanvas();
+                    const rr = document.getElementById('result-render');
+                    if (!outlineEl || outlineEl.checked) {
+                        renderLatexContoursOnCanvas();
+                        if (rr) rr.style.visibility = 'hidden';
+                    } else {
+                        if (rr) rr.style.display = '';
+                    }
                 } else {
-                    // Fallback: shape-match failed; just show user strokes.
+                    // Fallback: shape-match failed; just show user strokes + red KaTeX.
                     renderStrokes();
+                    const rr = document.getElementById('result-render');
+                    if (rr) rr.style.display = '';
                 }
                 // renderChips();
                 // 5) (legacy fallback — KaTeX colorize-via-textcolor — kept
