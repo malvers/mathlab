@@ -294,28 +294,53 @@ function toggleSidebar() {
             // Give KaTeX a tick to lay out before html2canvas captures it.
             setTimeout(() => {
                 html2canvas(tmp, { backgroundColor: null, scale: 2, logging: false }).then(snap => {
+                    // Crop the snap to a tight BB around the green ink — drops
+                    // the 40px padding and any KaTeX baseline whitespace.
+                    const snapCtx = snap.getContext('2d');
+                    const sid = snapCtx.getImageData(0, 0, snap.width, snap.height).data;
+                    let bbMinX = snap.width, bbMinY = snap.height, bbMaxX = -1, bbMaxY = -1;
+                    for (let y = 0; y < snap.height; y++) {
+                        for (let x = 0; x < snap.width; x++) {
+                            const i = (y * snap.width + x) * 4;
+                            // Bright = ink. (background is the body or transparent.)
+                            const brightness = (sid[i] + sid[i+1] + sid[i+2]) / 3;
+                            if (sid[i+3] > 30 && brightness > 40) {
+                                if (x < bbMinX) bbMinX = x;
+                                if (y < bbMinY) bbMinY = y;
+                                if (x > bbMaxX) bbMaxX = x;
+                                if (y > bbMaxY) bbMaxY = y;
+                            }
+                        }
+                    }
+                    if (bbMaxX < 0) { bbMinX = 0; bbMinY = 0; bbMaxX = snap.width - 1; bbMaxY = snap.height - 1; }
+                    const pad = Math.max(4, Math.round(Math.min(snap.width, snap.height) * 0.02));
+                    bbMinX = Math.max(0, bbMinX - pad);
+                    bbMinY = Math.max(0, bbMinY - pad);
+                    bbMaxX = Math.min(snap.width  - 1, bbMaxX + pad);
+                    bbMaxY = Math.min(snap.height - 1, bbMaxY + pad);
+                    const srcX = bbMinX, srcY = bbMinY;
+                    const srcW = bbMaxX - bbMinX + 1;
+                    const srcH = bbMaxY - bbMinY + 1;
                     const W = drawCanvas.width;
                     const H = drawCanvas.height;
                     const halfH = H / 2;
                     drawCtx.clearRect(0, 0, W, H);
-                    // Base = aspect-fit into lower half, then 60% larger.
-                    // Cap so it never overflows the viewport. Bottom-anchored in
-                    // the lower half (minus a button gap); tall formulas grow
-                    // upward into the upper half rather than below the buttons.
+                    // Base = aspect-fit (of the cropped BB) into lower half, then 60% larger.
+                    // Bottom-anchored in the lower half (minus a button gap).
                     const MARGIN = 20;
                     const BUTTON_GAP = MARGIN;
-                    const baseSc = Math.min((W - 2*MARGIN) / snap.width, (halfH - 2*MARGIN) / snap.height);
-                    const maxSc  = Math.min((W - 2*MARGIN) / snap.width, (H - 2*MARGIN) / snap.height);
+                    const baseSc = Math.min((W - 2*MARGIN) / srcW, (halfH - 2*MARGIN) / srcH);
+                    const maxSc  = Math.min((W - 2*MARGIN) / srcW, (H - 2*MARGIN) / srcH);
                     const sc = Math.min(baseSc * 1.6, maxSc);
-                    const nw = snap.width * sc, nh = snap.height * sc;
+                    const nw = srcW * sc, nh = srcH * sc;
                     const ox = (W - nw) / 2;
                     const oy = H - BUTTON_GAP - nh;
                     drawCtx.imageSmoothingEnabled = true;
                     drawCtx.imageSmoothingQuality = 'high';
-                    drawCtx.drawImage(snap, ox, oy, nw, nh);
+                    drawCtx.drawImage(snap, srcX, srcY, srcW, srcH, ox, oy, nw, nh);
                     document.body.removeChild(tmp);
                     saveCanvasState();
-                    DebugWindow.log(`✓ ${title} aufs Canvas (${Math.round(nw)}×${Math.round(nh)} @lower)`);
+                    DebugWindow.log(`✓ ${title} aufs Canvas (BB ${srcW}×${srcH} → ${Math.round(nw)}×${Math.round(nh)} @lower)`);
                 }).catch(err => {
                     if (tmp.parentNode) document.body.removeChild(tmp);
                     DebugWindow.log(`✗ html2canvas-Fehler: ${err.message}`);
@@ -524,33 +549,54 @@ function toggleSidebar() {
                 tctx.drawImage(img, 0, 0);
                 const id = tctx.getImageData(0, 0, tmp.width, tmp.height);
                 const d = id.data;
-                for (let i = 0; i < d.length; i += 4) {
-                    // Bright pixel (drawn stroke) → green, dark (bg) → dark blue.
-                    const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
-                    if (brightness > 40) { d[i] = 173; d[i+1] = 255; d[i+2] = 47; }
-                    else                 { d[i] = 2;   d[i+1] = 4;   d[i+2] = 16; }
-                    d[i+3] = 255;
+                // Recolor (bright → green, dark → dark blue) AND track BB of
+                // the bright (ink) pixels so we can crop away empty margins.
+                let bbMinX = tmp.width, bbMinY = tmp.height, bbMaxX = -1, bbMaxY = -1;
+                for (let y = 0; y < tmp.height; y++) {
+                    for (let x = 0; x < tmp.width; x++) {
+                        const i = (y * tmp.width + x) * 4;
+                        const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
+                        if (brightness > 40) {
+                            d[i] = 173; d[i+1] = 255; d[i+2] = 47;
+                            if (x < bbMinX) bbMinX = x;
+                            if (y < bbMinY) bbMinY = y;
+                            if (x > bbMaxX) bbMaxX = x;
+                            if (y > bbMaxY) bbMaxY = y;
+                        } else {
+                            d[i] = 2; d[i+1] = 4; d[i+2] = 16;
+                        }
+                        d[i+3] = 255;
+                    }
                 }
                 tctx.putImageData(id, 0, 0);
+                if (bbMaxX < 0) { bbMinX = 0; bbMinY = 0; bbMaxX = tmp.width - 1; bbMaxY = tmp.height - 1; }
+                const pad = Math.max(4, Math.round(Math.min(tmp.width, tmp.height) * 0.02));
+                bbMinX = Math.max(0, bbMinX - pad);
+                bbMinY = Math.max(0, bbMinY - pad);
+                bbMaxX = Math.min(tmp.width  - 1, bbMaxX + pad);
+                bbMaxY = Math.min(tmp.height - 1, bbMaxY + pad);
+                const srcX = bbMinX, srcY = bbMinY;
+                const srcW = bbMaxX - bbMinX + 1;
+                const srcH = bbMaxY - bbMinY + 1;
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                // Base = aspect-fit into lower half, then 60% larger.
+                // Base = aspect-fit (of the cropped BB) into lower half, then 60% larger.
                 // Bottom-anchored in the lower half (minus a button gap).
                 const W = drawCanvas.width;
                 const H = drawCanvas.height;
                 const halfH = H / 2;
                 const MARGIN = 20;
                 const BUTTON_GAP = MARGIN;
-                const baseSc = Math.min((W - 2*MARGIN) / img.width, (halfH - 2*MARGIN) / img.height);
-                const maxSc  = Math.min((W - 2*MARGIN) / img.width, (H - 2*MARGIN) / img.height);
+                const baseSc = Math.min((W - 2*MARGIN) / srcW, (halfH - 2*MARGIN) / srcH);
+                const maxSc  = Math.min((W - 2*MARGIN) / srcW, (H - 2*MARGIN) / srcH);
                 const sc = Math.min(baseSc * 1.6, maxSc);
-                const nw = img.width * sc, nh = img.height * sc;
+                const nw = srcW * sc, nh = srcH * sc;
                 const ox = (W - nw) / 2;
                 const oy = H - BUTTON_GAP - nh;
                 drawCtx.imageSmoothingEnabled = true;
                 drawCtx.imageSmoothingQuality = 'high';
-                drawCtx.drawImage(tmp, ox, oy, nw, nh);
+                drawCtx.drawImage(tmp, srcX, srcY, srcW, srcH, ox, oy, nw, nh);
                 saveCanvasState();
-                DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height} → ${Math.round(nw)}×${Math.round(nh)} @lower)`);
+                DebugWindow.log(`✓ ${title} geladen (${img.width}×${img.height}, BB ${srcW}×${srcH} → ${Math.round(nw)}×${Math.round(nh)} @lower)`);
             };
             img.onerror = () => DebugWindow.log(`✗ ${path} konnte nicht geladen werden`);
             img.src = path;
@@ -944,20 +990,6 @@ function toggleSidebar() {
         // the hole edges in the matched palette color.
         function renderHandwritingContoursOnCanvas() {
             if (handwritingOuters.length === 0) return;
-            // Scale handwriting outlines around their combined bbox center.
-            const HAND_SCALE = 1.632;
-            const handBoxes = handwritingOuters
-                .map(o => bboxOfPolygon(handwritingContours[o.idx]))
-                .filter(Boolean);
-            const handBB = bboxOfBoxes(handBoxes);
-            drawCtx.save();
-            if (handBB) {
-                const cx = handBB.x + handBB.w / 2;
-                const cy = handBB.y + handBB.h / 2;
-                drawCtx.translate(cx, cy);
-                drawCtx.scale(HAND_SCALE, HAND_SCALE);
-                drawCtx.translate(-cx, -cy);
-            }
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
@@ -993,7 +1025,6 @@ function toggleSidebar() {
                 }
                 drawCtx.stroke();
             }
-            drawCtx.restore();
             DebugWindow.log(`✂ hand: ${handwritingOuters.length} outers, ${holesDrawn} hole(s) outlined`);
         }
         // Compute the bounding box covering an array of objects' bboxes, or
