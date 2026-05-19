@@ -60,7 +60,7 @@
             pointer-events: auto;
         }
         /* Mouse-coord readout — sits just above the ERKENNEN button, shows
-           the current pointer position in canvas-space (0–1000 each axis). */
+           the current pointer position in canvas-space (0..W each axis). */
         #mouse-coord {
             position: absolute;
             left: 50%;
@@ -202,7 +202,7 @@
         #draw-canvas {
             display: block;
             width: 100%;
-            height: 100%;
+            aspect-ratio: 1 / 1;
             background: transparent;
             cursor: default;
             pointer-events: none;
@@ -467,7 +467,7 @@
             </div>
             <div id="draw-wrap">
                 <div id="canvas-stack">
-                    <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <canvas id="draw-canvas"></canvas>
                     <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
                     <div id="result-render"></div>
                     <!-- Per-object recognition chips overlay. Click-through. -->
@@ -537,7 +537,7 @@ function toggleSidebar() {
                 <span id="canvas-scale-val">50</span><span style="opacity:0.6;">%</span>
             </div>
             <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(0,210,255,0.6);text-align:right;margin-top:2px;">
-                <span id="canvas-scale-size">500×500</span> px an Gemini
+                <span id="canvas-scale-size">—×—</span> px an Gemini
             </div>
         `, '#00d2ff', { collapsible: true });
 
@@ -713,16 +713,19 @@ function toggleSidebar() {
             // Give KaTeX a tick to lay out before html2canvas captures it.
             setTimeout(() => {
                 html2canvas(tmp, { backgroundColor: null, scale: 2, logging: false }).then(snap => {
-                    drawCtx.clearRect(0, 0, 1000, 1000);
-                    // Aspect-fit into the LOWER half (y 500..1000), centered, then
-                    // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
+                    const W = drawCanvas.width;
+                    const H = drawCanvas.height;
+                    const halfH = H / 2;
+                    drawCtx.clearRect(0, 0, W, H);
+                    // Aspect-fit into the LOWER half (y halfH..H), centered, then
+                    // bumped 40% bigger. Shifted up 5% so it clears the buttons.
                     const MARGIN = 20;
-                    const targetW = 1000 - 2*MARGIN;
-                    const targetH = 500  - 2*MARGIN;
+                    const targetW = W - 2*MARGIN;
+                    const targetH = halfH - 2*MARGIN;
                     const sc = Math.min(targetW / snap.width, targetH / snap.height) * 2.1;
                     const nw = snap.width * sc, nh = snap.height * sc;
-                    const ox = (1000 - nw) / 2;
-                    const oy = 500 + (500 - nh) / 2 - 50;
+                    const ox = (W - nw) / 2;
+                    const oy = halfH + (halfH - nh) / 2 - (H * 0.05);
                     drawCtx.imageSmoothingEnabled = true;
                     drawCtx.imageSmoothingQuality = 'high';
                     drawCtx.drawImage(snap, ox, oy, nw, nh);
@@ -761,6 +764,21 @@ function toggleSidebar() {
         const drawCanvas = document.getElementById('draw-canvas');
         const drawCtx = drawCanvas.getContext('2d');
         let isDrawing = false;
+
+        // Set canvas internal resolution to match display size × DPR for crisp rendering.
+        function resizeCanvas() {
+            const w = drawCanvas.offsetWidth;
+            const h = drawCanvas.offsetHeight;
+            if (w < 1 || h < 1) return;
+            const dpr = window.devicePixelRatio || 1;
+            const iw = Math.round(w * dpr);
+            const ih = Math.round(h * dpr);
+            if (drawCanvas.width !== iw || drawCanvas.height !== ih) {
+                drawCanvas.width = iw;
+                drawCanvas.height = ih;
+                DebugWindow.log(`▸ canvas resized to ${iw}×${ih} (display ${w}×${h}, DPR ${dpr})`);
+            }
+        }
 
         // Bounding-box overlay was removed (Gemini boxes were unreliable).
         // Kept as a no-op so older callsites (replayLast etc.) stay valid.
@@ -855,7 +873,7 @@ function toggleSidebar() {
 
         function initDraw() {
             // Transparent canvas — main-content background shows through.
-            drawCtx.clearRect(0, 0, 1000, 1000);
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
             drawCtx.strokeStyle = '#adff2f'; // neon green strokes
             const strokeEl = document.getElementById('stroke-slider');
             drawCtx.lineWidth = strokeEl ? +strokeEl.value : 8;
@@ -864,7 +882,19 @@ function toggleSidebar() {
         }
 
         function clearDraw() {
+        // Defer resize until after layout is computed.
+        setTimeout(() => {
+            resizeCanvas();
             initDraw();
+            // Update scale display now that canvas has real dimensions.
+            const scInit = +(document.getElementById('canvas-scale-slider')?.value ?? 50);
+            onCanvasScaleChange(scInit);
+        }, 100);
+        // Observe container resize → keep canvas resolution in sync.
+        const stackEl = document.getElementById('canvas-stack');
+        if (stackEl && typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => resizeCanvas()).observe(stackEl);
+        }
             clearOverlay();
             try { localStorage.removeItem('eocr-canvas-png'); } catch (_) {}
             setLatexResult('');
@@ -918,16 +948,19 @@ function toggleSidebar() {
                     d[i+3] = 255;
                 }
                 tctx.putImageData(id, 0, 0);
-                drawCtx.clearRect(0, 0, 1000, 1000);
-                // Aspect-fit into the LOWER half (y 500..1000), centered, then
-                // bumped 40% bigger. Shifted up 5% (50 px) so it clears the buttons.
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                // Aspect-fit into the LOWER half (y halfH..H), centered, then
+                // bumped 40% bigger. Shifted up 5% so it clears the buttons.
+                const W = drawCanvas.width;
+                const H = drawCanvas.height;
+                const halfH = H / 2;
                 const MARGIN = 20;
-                const targetW = 1000 - 2 * MARGIN;
-                const targetH = 500  - 2 * MARGIN;
+                const targetW = W - 2 * MARGIN;
+                const targetH = halfH - 2 * MARGIN;
                 const sc = Math.min(targetW / img.width, targetH / img.height) * 2.1;
                 const nw = img.width * sc, nh = img.height * sc;
-                const ox = (1000 - nw) / 2;
-                const oy = 500 + (500 - nh) / 2 - 50;
+                const ox = (W - nw) / 2;
+                const oy = halfH + (halfH - nh) / 2 - (H * 0.05);
                 drawCtx.imageSmoothingEnabled = true;
                 drawCtx.imageSmoothingQuality = 'high';
                 drawCtx.drawImage(tmp, ox, oy, nw, nh);
@@ -983,7 +1016,7 @@ function toggleSidebar() {
         // displaying the formula at full size for the user.
         function onCanvasScaleChange(v) {
             document.getElementById('canvas-scale-val').textContent = v;
-            const px = Math.round(1000 * (+v / 100));
+            const px = Math.round(drawCanvas.width * (+v / 100));
             const sizeEl = document.getElementById('canvas-scale-size');
             if (sizeEl) sizeEl.textContent = `${px}×${px}`;
             // Clear any stale inline transform from older code paths — the
@@ -1016,7 +1049,7 @@ function toggleSidebar() {
         // upper half via aspect-preserving transform.
         let latexSrcW = 0, latexSrcH = 0;
         // BBox of the ORIGINAL KaTeX render — where the rasterised equation
-        // actually sits on the off-screen 1000×500 canvas (= same coord space
+        // actually sits on the off-screen canvas (= same coord space
         // as the drawCanvas upper half). Used to draw a debug-rectangle so we
         // can sanity-check rendering against the original layout.
         let latexOriginalBBox = null;
@@ -1276,50 +1309,19 @@ function toggleSidebar() {
         // Result is stored on each object as `matchId`.
         async function renderLatexToOffscreenAndExtractContours(latex) {
             return new Promise((resolve) => {
-                const tmp = document.createElement('div');
-                tmp.style.cssText = 'position:fixed;left:-10000px;top:0;padding:40px;background:#000;color:#fff;font-size:60px;line-height:1.4;white-space:nowrap;';
-                document.body.appendChild(tmp);
-                try { katex.render(latex, tmp, { throwOnError: false, displayMode: true }); }
-                catch (e) { tmp.textContent = latex; }
+                const target = document.getElementById('result-render');
+                if (!target) { resolve({ contours: [], outers: [], srcW: 0, srcH: 0 }); return; }
+                // Clone result-render DOM (already has fitLatexToContainer applied)
+                // so contour extraction uses the same visual scale as the overlay.
+                const clone = target.cloneNode(true);
+                const tr = target.getBoundingClientRect();
+                clone.style.cssText = `position:fixed;left:-10000px;top:0;background:#000;width:${tr.width}px;height:${tr.height}px;display:flex;align-items:center;justify-content:center;`;
+                document.body.appendChild(clone);
                 setTimeout(() => {
-                    html2canvas(tmp, { backgroundColor: '#000', scale: 2, logging: false }).then(snapRaw => {
-                        try { document.body.removeChild(tmp); } catch (_) {}
-                        // Tight-crop the snapshot to the actual ink bbox. Without
-                        // this, html2canvas captures the element's full padding
-                        // box → snap.width includes whitespace → aspect-fit
-                        // shrinks vertically more than it should, making the
-                        // formula look flat in y. Crop to the real ink.
-                        const snap = (function tightCrop(s) {
-                            try {
-                                const c = s.getContext('2d');
-                                const data = c.getImageData(0, 0, s.width, s.height).data;
-                                let minX = s.width, minY = s.height, maxX = 0, maxY = 0, has = false;
-                                for (let y = 0; y < s.height; y++) {
-                                    for (let x = 0; x < s.width; x++) {
-                                        const i = (y * s.width + x) * 4;
-                                        if (data[i] + data[i+1] + data[i+2] > 80) {
-                                            has = true;
-                                            if (x < minX) minX = x;
-                                            if (x > maxX) maxX = x;
-                                            if (y < minY) minY = y;
-                                            if (y > maxY) maxY = y;
-                                        }
-                                    }
-                                }
-                                if (!has) return s;
-                                const cw = maxX - minX + 1, ch = maxY - minY + 1;
-                                const out = document.createElement('canvas');
-                                out.width = cw; out.height = ch;
-                                out.getContext('2d').drawImage(s, minX, minY, cw, ch, 0, 0, cw, ch);
-                                return out;
-                            } catch (_) { return s; }
-                        })(snapRaw);
-                        // Extract contours from the SNAP'S NATIVE pixels — no
-                        // off-screen aspect-fit step. Aspect-preserving mapping
-                        // to drawCanvas happens at render time (no source-side
-                        // squashing possible). If snap is too large for fast
-                        // marching-squares, downsample to 1200 wide while
-                        // preserving aspect.
+                    html2canvas(clone, { backgroundColor: '#000', scale: 2, logging: false }).then(snap => {
+                        try { document.body.removeChild(clone); } catch (_) {}
+                        // Use the full snapshot (not tight-cropped) so contours
+                        // stay in #result-render display space.
                         let work = snap;
                         const MAX_W = 1200;
                         if (work.width > MAX_W) {
@@ -1338,7 +1340,7 @@ function toggleSidebar() {
                         const grid = new Uint8Array(RW * RH);
                         for (let i = 0; i < RW * RH; i++) {
                             const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
-                            grid[i] = (r + g + b) > 80 ? 1 : 0;
+                            grid[i] = (r + g + b) > 0 ? 1 : 0;
                         }
                         const contours = (typeof getContoursWithHoles === 'function')
                             ? getContoursWithHoles(grid, RW, RH) : [];
@@ -1346,13 +1348,14 @@ function toggleSidebar() {
                             ? classifyContours(contours) : { outers: [], holes: [] };
                         const holesInOuters = cls.outers.reduce((s, o) => s + (o.holes || []).length, 0);
                         DebugWindow.log(`▷ latex-contours: ${contours.length} contours @${RW}×${RH}, ${cls.outers.length} outers, ${cls.holes.length} holes (${holesInOuters} attached)`);
-                        // Track the SOURCE dimensions so renderLatexContoursOnCanvas
-                        // can aspect-fit them into the drawCanvas upper-half.
+                        // Source dimensions = full snapshot size of #result-render.
+                        // renderLatexContoursOnCanvas maps these to the canvas
+                        // upper half of the canvas.
                         latexOriginalBBox = { x: 0, y: 0, w: RW, h: RH };
                         resolve({ contours, outers: cls.outers, srcW: RW, srcH: RH });
                     }).catch(err => {
-                        try { document.body.removeChild(tmp); } catch (_) {}
-                        DebugWindow.log(`✗ html2canvas (LaTeX-render) failed: ${err.message}`);
+                        try { document.body.removeChild(clone); } catch (_) {}
+                        DebugWindow.log(`✗ html2canvas (LaTeX-render via clone) failed: ${err.message}`);
                         resolve({ contours: [], outers: [] });
                     });
                 }, 50);
@@ -1425,25 +1428,12 @@ function toggleSidebar() {
         function renderLatexContoursOnCanvas() {
             if (!lastMatchResult || latexContours.length === 0) return;
             if (!latexSrcW || !latexSrcH) return;
-            const dw = drawCanvas.width;
-            const dh = drawCanvas.height * 0.5;
-            const MARG = 30;
-            const sc = Math.min((dw - 2 * MARG) / latexSrcW, (dh - 2 * MARG) / latexSrcH);
-            const nw = latexSrcW * sc, nh = latexSrcH * sc;
-            const ox = (dw - nw) / 2;
-            const oy = (dh - nh) / 2;
-            const tx = (p) => p[0] * sc + ox;
-            const ty = (p) => p[1] * sc + oy;
-            // Debug-rect around the ORIGINAL LaTeX placement (after aspect-fit
-            // to the upper half — this is the ground-truth bbox).
-            drawCtx.save();
-            drawCtx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
-            drawCtx.setLineDash([8, 6]);
-            drawCtx.lineWidth = 1.5;
-            drawCtx.strokeRect(ox, oy, nw, nh);
-            drawCtx.setLineDash([]);
-            drawCtx.restore();
-            DebugWindow.log(`▢ latex-target-bbox: x=${Math.round(ox)} y=${Math.round(oy)} w=${Math.round(nw)} h=${Math.round(nh)} (sc=${sc.toFixed(3)}, src=${latexSrcW}×${latexSrcH})`);
+            // Contours are in #result-render display-pixel space.
+            // Map directly to canvas upper half.
+            const sx = drawCanvas.width  / latexSrcW;
+            const sy = (drawCanvas.height * 0.5) / latexSrcH;
+            const tx = (p) => p[0] * sx;
+            const ty = (p) => p[1] * sy;
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
@@ -2502,8 +2492,10 @@ function toggleSidebar() {
             if (!coordEl || !stackEl) return;
             stackEl.addEventListener('mousemove', (e) => {
                 const r = stackEl.getBoundingClientRect();
-                const x = Math.round((e.clientX - r.left) * 1000 / r.width);
-                const y = Math.round((e.clientY - r.top)  * 1000 / r.height);
+                const W = drawCanvas.width;
+                const H = drawCanvas.height;
+                const x = Math.round((e.clientX - r.left) * W / r.width);
+                const y = Math.round((e.clientY - r.top)  * H / r.height);
                 coordEl.textContent = `x: ${x}  y: ${y}`;
             });
             stackEl.addEventListener('mouseleave', () => {
@@ -2511,23 +2503,33 @@ function toggleSidebar() {
             });
         })();
 
-        initDraw();
         restoreFormulaChoice();
-        // If user has drawn / loaded a preset previously, restore the actual
-        // canvas pixels — overlays whatever restoreFormulaChoice just drew so
-        // strokes survive reload. Async, but it's the last thing to land.
-        (function restoreCanvasState() {
-            let dataUrl;
-            try { dataUrl = localStorage.getItem('eocr-canvas-png'); } catch (_) { return; }
-            if (!dataUrl) return;
-            const img = new Image();
-            img.onload = () => {
-                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
-                DebugWindow.log(`↻ Canvas-Pixel wiederhergestellt`);
-            };
-            img.src = dataUrl;
-        })();
+        // Defer resize until after layout is computed.
+        setTimeout(() => {
+            resizeCanvas();
+            initDraw();
+            // Update scale display now that canvas has real dimensions.
+            const scInit = +(document.getElementById('canvas-scale-slider')?.value ?? 50);
+            onCanvasScaleChange(scInit);
+            // Restore saved canvas pixels after resize so dimensions are correct.
+            (function restoreCanvasState() {
+                let dataUrl;
+                try { dataUrl = localStorage.getItem('eocr-canvas-png'); } catch (_) { return; }
+                if (!dataUrl) return;
+                const img = new Image();
+                img.onload = () => {
+                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                    drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+                    DebugWindow.log(`↻ Canvas-Pixel wiederhergestellt`);
+                };
+                img.src = dataUrl;
+            })();
+        }, 100);
+        // Observe container resize → keep canvas resolution in sync.
+        const stackEl = document.getElementById('canvas-stack');
+        if (stackEl && typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => resizeCanvas()).observe(stackEl);
+        }
 
         // Diagnostic: report left-chrome geometry (rail + sidebar) for the central
         // single-source-of-truth refactor. Logs natural sum vs. rendered width.
