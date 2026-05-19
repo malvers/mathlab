@@ -1928,25 +1928,17 @@ function toggleSidebar() {
                 //    - overlay LaTeX outers, REMAPPED to the handwriting's
                 //      bbox so the two share screen position (morph base
                 //      state — ready for cross-fade later).
+                // The red KaTeX overlay (#result-render) is ALWAYS shown — the
+                // Outline toggle only adds/removes the *contour* render on the
+                // canvas, never the red HTML overlay.
                 if (shapeMatched) {
                     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
-                    // Outline toggle: ON → contour render. OFF → KaTeX HTML.
                     const outlineEl = document.getElementById('g-outline');
-                    const showOutline = !outlineEl || outlineEl.checked;
-                    const rr = document.getElementById('result-render');
-                    if (showOutline) {
-                        renderLatexContoursOnCanvas();
-                        if (rr) rr.style.display = 'none';
-                    } else {
-                        // Show the un-touched KaTeX HTML rendering.
-                        if (rr) rr.style.display = '';
-                    }
+                    if (!outlineEl || outlineEl.checked) renderLatexContoursOnCanvas();
                 } else {
-                    // Fallback: shape-match failed; show strokes + KaTeX HTML.
+                    // Fallback: shape-match failed; just show user strokes.
                     renderStrokes();
-                    const rr = document.getElementById('result-render');
-                    if (rr) rr.style.display = '';
                 }
                 // renderChips();
                 // 5) (legacy fallback — KaTeX colorize-via-textcolor — kept

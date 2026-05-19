@@ -2,9 +2,7 @@
 
 ## Suggested
 
-- Cellular Automata (Elementary 1D + Conway's Game of Life)
-- Reaction-Diffusion (Turing patterns, Gray-Scott)
-- L-Systems / Fractal trees (configurable rules)
+- Sierpinski / Chaos game (n-gon variants)
 - Newton fractal (root basins of complex polynomials)
 - Logistic map & bifurcation diagram (period-doubling, Feigenbaum)
 - Double pendulum (chaos, phase space trail)
@@ -14,7 +12,6 @@
 - Penrose tiling (P2/P3, deflation)
 - Hilbert / Peano / dragon curve (space-filling animation)
 - Spirograph / roulette curves (hypocycloid, epicycloid)
-- Sierpinski / Chaos game (n-gon variants)
 - Abelian sandpile (avalanches on a grid)
 - Wave interference / ripple tank (double slit, Huygens)
 - Phase portrait / vector fields (ODE explorer)
