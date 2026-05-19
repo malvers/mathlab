@@ -324,5 +324,35 @@ FEATURES
 - SPIEL-Tab: Großes Spielfeld, Maus zum Malen, Tastatur-Shortcuts (Space, N, R, C, W, G/B/P/S, +/-).
 - MUSTER-Tab: 12 klassische Pattern aus 5 Familien (Stillleben, Oszillatoren, Raumschiffe, Guns, Methusalems) mit Live-Mini-Simulation pro Karte. Karte anklicken → Sidebar-Button "IN SIMULATION" startet sie zentriert im großen Feld.
 - Farbverlauf nach Alter: junge Zellen cyan → gelb → orange → rot (alt). Sterbende Zellen hinterlassen ein rotes Glühen.
-- Torus-Welt (W toggelt zu Wänden): das Spielfeld wickelt sich an den Rändern um.`
+- Torus-Welt (W toggelt zu Wänden): das Spielfeld wickelt sich an den Rändern um.`,
+
+        "reaction-diffusion": `Reaction-Diffusion-Systeme modellieren das Wechselspiel zweier chemischer Stoffe U und V, die gleichzeitig (a) ineinander reagieren und (b) im Raum diffundieren. Das Labor implementiert das klassische Gray-Scott-Modell auf einem toroidalen 2D-Gitter. Aus minimalen lokalen Regeln entstehen global Muster wie Streifen, Flecken, Labyrinthe, Wirbel und sich selbst replizierende „Pillen" — verwandt mit Turing-Mustern in Biologie (Fellzeichnung, Korallen, Embryogenese).
+
+Gleichungen pro Zelle:
+- ∂u/∂t = Du · ∇²u − u·v² + F·(1 − u)
+- ∂v/∂t = Dv · ∇²v + u·v² − (F + k)·v
+
+FEATURES
+- 16 Presets (Wirbel, Pillen, Streifen, Wellen, Flecken, Tupfen, Gitter, Chaos, Nebel, Koralle, Flocken, Schlangen, Pulsierend, Adern, Labyrinth, Bienenwabe).
+- 5 Farbschemata (Feuer, Eis, Grün, Violett, Graustufen).
+- Live-Interaktion: Maus/Touch „malt" Konzentration von V direkt ins Feld.
+- Periodische Randbedingungen (Torus) — Muster wachsen nahtlos über die Ränder.
+- Step-Counter zeigt Anzahl der Iterationen rechts unten.
+
+PARAMETER
+- PRESET — Vordefinierte (F, k, Du, Dv)-Kombinationen. Quick-Start in stabile Musterklassen, ohne die sehr empfindliche Parameterlandschaft selbst absuchen zu müssen.
+- FARBE — Reine Visualisierung; greift nicht in die Simulation ein. Mappt die Konzentration v ∈ [0,1] auf eine Farbe mit Gamma 0.6.
+- FEED (F) [0.005 – 0.090] — „Nachschub"-Rate für U. F·(1−u) füllt U permanent auf. Hohes F = aggressives Wachstum von V, kleine isolierte Flecken; niedriges F = ruhigere, größere Strukturen.
+- KILL (k) [0.025 – 0.080] — Zerfallsrate für V. (F+k)·v frisst V auf. Höheres k = V stirbt schneller, dünnere/sparsamere Muster; niedrigeres k = überlebt großflächig. Nur ein schmaler Streifen im (F,k)-Raum erzeugt überhaupt Muster — außerhalb wird alles uniform.
+- DIFFUSION U [0.01 – 1.0] — Wie schnell U sich räumlich ausbreitet (∇²u-Vorfaktor). Typisch ≈ 0.16. Größer = U glättet schneller, schärfere V-Strukturen verschwimmen.
+- DIFFUSION V [0.005 – 0.5] — Diffusion von V. Typisch ≈ 0.08 — also rund halb so schnell wie Du. Genau diese Asymmetrie Du > Dv ist die Ursache der Muster (Turing-Instabilität). Bei Du ≈ Dv verschwindet die Strukturbildung.
+- GESCHWINDIGKEIT [1 – 10] — Wie viele Simulationsschritte pro gezeichnetem Frame. Rein Performance/Zeitraffer — verändert die Physik nicht, nur wie schnell wir den Verlauf sehen.
+- PINSEL [2 – 30] — Radius (in Gitterzellen) der Maus-/Touch-Aussaat. Beim Klick wird V lokal erhöht, U reduziert — neue „Reaktions-Keime".
+
+STEUERUNG
+- PAUSE/PLAY — Simulation anhalten / fortsetzen.
+- RESET — Feld neu initialisieren (U=1, V=0, ein V-Tropfen in der Mitte).
+- LEEREN — Feld auf gleichmäßigen Grundzustand (U=1, V=0); danach manuell säen.
+- SÄEN — Setzt einen V-Tropfen in die Mitte.
+- Maus / Finger ziehen — kontinuierliches Einzeichnen von V.`
 };
