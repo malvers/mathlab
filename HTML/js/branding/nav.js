@@ -15,7 +15,13 @@
             // Home Button
             const homeBtn = document.createElement("a");
             homeBtn.className = "nav-btn";
-            homeBtn.href = "index.html";
+            // Compute relative path to dashboard from this script's src
+            // (handles labs in subfolders like /morpheus/, /worldclock/)
+            const navScript = document.querySelector('script[src$="js/branding/nav.js"]');
+            const navSrc = navScript ? navScript.getAttribute("src") : "";
+            homeBtn.href = navSrc
+                ? navSrc.replace(/js\/branding\/nav\.js$/, "index.html")
+                : "index.html";
             homeBtn.title = "Dashboard öffnen";
 
             // --- DEV-MODE INDICATOR: RED HOME BUTTON (INTENSE) ---
@@ -108,10 +114,12 @@
         `;
             window.cyberPlayBtn = playBtn;
 
+            // Dashboard-relative prefix (handles subfolder labs like /morpheus/, /worldclock/)
+            const dashPrefix = navSrc ? navSrc.replace(/js\/branding\/nav\.js$/, "") : "";
             // Async: check if a recording exists for this lab; show button if so.
             (() => {
                 const labName = window.location.pathname.split('/').pop().replace('.html', '');
-                const base = new URL('.', document.baseURI).href + 'recordings/';
+                const base = new URL(dashPrefix + 'recordings/', document.baseURI).href;
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', base + 'index.json', true);
                 xhr.responseType = 'json';
@@ -124,7 +132,7 @@
             })();
             playBtn.onclick = () => {
                 const labName = window.location.pathname.split('/').pop().replace('.html', '');
-                const base = new URL('.', document.baseURI).href + 'recordings/';
+                const base = new URL(dashPrefix + 'recordings/', document.baseURI).href;
                 const xhrGet = (url, type, cb) => {
                     const xhr = new XMLHttpRequest();
                     xhr.open('GET', url, true);
@@ -136,7 +144,7 @@
                 const loadRecorder = (cb) => {
                     if (window.CyberRecorder) { cb(); return; }
                     const s = document.createElement('script');
-                    s.src = 'js/cyber-recorder.js' + '?v=' + Date.now();
+                    s.src = dashPrefix + 'js/cyber-recorder.js' + '?v=' + Date.now();
                     s.onload = cb;
                     document.head.appendChild(s);
                 };
