@@ -45,18 +45,11 @@
     <style>
         #draw-canvas {
             display: block;
-            /* Canvas is its OWN sizing element — no wrapper. Constraints:
-               1. Never bigger than 1760px (caps on huge monitors)
-               2. Fit horizontally inside #draw-wrap (sidebar already excluded)
-               3. Fit vertically inside viewport minus top/bottom chrome
-               aspect-ratio: 1/1 → height follows width. */
             width: min(1760px, calc(100% - 24px), calc(100dvh - 160px));
             aspect-ratio: 1 / 1;
-            flex: 0 0 auto;
-            /* Transparent — strokes/chips/LaTeX-render float on top of the
-               main-content background. Default: pen OFF so accidental clicks
-               don't paint. The pen-toggle icon in the ZEICHNEN card title
-               adds .pen-on to re-enable drawing. */
+            height: auto !important;
+            flex-shrink: 0;
+            align-self: center;
             background: transparent;
             cursor: default;
             pointer-events: none;
@@ -198,6 +191,22 @@
             gap: 8px;
             padding: 60px 20px 20px;
             box-sizing: border-box;
+        }
+        #canvas-stack {
+            position: relative;
+            width: min(1760px, calc(100% - 24px), calc(100dvh - 160px));
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+            align-self: center;
+        }
+        #draw-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            cursor: default;
+            pointer-events: none;
+            touch-action: none;
         }
         #result-box {
             position: relative;
@@ -457,11 +466,13 @@
                 <div id="coach-content" class="coach-message"></div>
             </div>
             <div id="draw-wrap">
-                <canvas id="draw-canvas" width="1000" height="1000"></canvas>
-                <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
-                <div id="result-render"></div>
-                <!-- Per-object recognition chips overlay. Click-through. -->
-                <div id="obj-chip-layer"></div>
+                <div id="canvas-stack">
+                    <canvas id="draw-canvas" width="1000" height="1000"></canvas>
+                    <!-- KaTeX-rendered formula overlay — sits on top of canvas. -->
+                    <div id="result-render"></div>
+                    <!-- Per-object recognition chips overlay. Click-through. -->
+                    <div id="obj-chip-layer"></div>
+                </div>
                 <div id="canvas-btn-row">
                     <button class="cyber-btn" id="canvas-recognize-btn" onclick="recognize()">ERKENNEN</button>
                     <button class="cyber-btn" id="canvas-reload-btn" onclick="location.reload(true)">RELOAD</button>
@@ -1783,13 +1794,15 @@ function toggleSidebar() {
                 ? window.singleGlyphContextualPrompt(fullLatex, tokens)
                 : (typeof SINGLE_GLYPH_PROMPT === 'string' ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''));
             const t0 = performance.now();
-            const result = await geminiRecognize({
-                canvas: cropCanvas,
-                apiKey,
-                model: 'gemini-2.5-flash-lite',
-                prompt,
-                dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
-            });
+            // === GEMINI AUSKOMMENTIERT ===
+            // const result = await geminiRecognize({
+            //     canvas: cropCanvas,
+            //     apiKey,
+            //     model: 'gemini-2.5-flash-lite',
+            //     prompt,
+            //     dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
+            // });
+            const result = { ok: true, latex: obj.label || '?', rawText: '{"label":"' + (obj.label || '?') + '"}', usage: null };
             const ms = Math.round(performance.now() - t0);
             if (!result.ok) {
                 obj.status = 'error'; obj.label = '?';
