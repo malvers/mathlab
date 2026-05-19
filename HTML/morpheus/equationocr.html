@@ -1768,161 +1768,107 @@ function toggleSidebar() {
         // Called AFTER the full-pass returns the equation's LaTeX. We send
         // each object's crop with the full-equation LaTeX as context so the
         // model just picks the matching glyph instead of guessing blind.
-        async function recognizeObjectWithContext(idx, fullLatex, tokens) {
-            const obj = objects[idx];
-            if (!obj || (obj.status !== 'closed' && obj.status !== 'pending')) return;
-            obj.status = 'recognizing';
-            renderChips();
-            const apiKey = (document.getElementById('g-api-key')?.value || window.GEMINI_API_KEY || '').trim();
-            if (!apiKey) {
-                obj.status = 'error'; obj.label = '?';
-                renderChips();
-                DebugWindow.log(`⚠ obj#${idx} OCR skipped — kein API-Key`);
-                return;
-            }
-            if (typeof geminiCropCanvas !== 'function' || typeof geminiRecognize !== 'function') {
-                obj.status = 'error'; obj.label = '?';
-                renderChips();
-                DebugWindow.log(`⚠ obj#${idx} OCR skipped — gemini-ocr.js fehlt`);
-                return;
-            }
-            const cropPad = Math.max(20, Math.round(Math.min(obj.bbox.w, obj.bbox.h) * 0.15));
-            const cropCanvas = geminiCropCanvas(drawCanvas, obj.bbox, cropPad);
-            // Build context-aware prompt with full equation + explicit
-            // allowed-label list (forces flash-lite to pick from real tokens).
-            const prompt = (typeof window.singleGlyphContextualPrompt === 'function')
-                ? window.singleGlyphContextualPrompt(fullLatex, tokens)
-                : (typeof SINGLE_GLYPH_PROMPT === 'string' ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''));
-            const t0 = performance.now();
-            // === GEMINI AUSKOMMENTIERT ===
-            // const result = await geminiRecognize({
-            //     canvas: cropCanvas,
-            //     apiKey,
-            //     model: 'gemini-2.5-flash-lite',
-            //     prompt,
-            //     dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
-            // });
-            const result = { ok: true, latex: obj.label || '?', rawText: '{"label":"' + (obj.label || '?') + '"}', usage: null };
-            const ms = Math.round(performance.now() - t0);
-            if (!result.ok) {
-                obj.status = 'error'; obj.label = '?';
-                DebugWindow.log(`✗ obj#${idx} OCR failed (${ms}ms): ${result.error}`);
-            } else {
-                let label = '?';
-                try {
-                    const parsed = JSON.parse(result.rawText || '{}');
-                    label = typeof parsed.label === 'string' ? parsed.label.trim() : '?';
-                } catch (_) {
-                    label = (result.latex || '').trim() || '?';
-                }
-                obj.label = (typeof geminiUnwrapLatex === 'function') ? geminiUnwrapLatex(label) : label;
-                obj.status = 'recognized';
-                if (result.usage) trackCost('gemini-2.5-flash-lite', result.usage);
-                DebugWindow.log(`✓ obj#${idx} "${obj.label}" (${ms}ms)`);
-            }
-            renderChips();
-        }
+        // async function recognizeObjectWithContext(idx, fullLatex, tokens) {
+        //     const obj = objects[idx];
+        //     if (!obj || (obj.status !== 'closed' && obj.status !== 'pending')) return;
+        //     obj.status = 'recognizing';
+        //     renderChips();
+        //     const apiKey = (document.getElementById('g-api-key')?.value || window.GEMINI_API_KEY || '').trim();
+        //     if (!apiKey) {
+        //         obj.status = 'error'; obj.label = '?';
+        //         renderChips();
+        //         DebugWindow.log(`⚠ obj#${idx} OCR skipped — kein API-Key`);
+        //         return;
+        //     }
+        //     if (typeof geminiCropCanvas !== 'function' || typeof geminiRecognize !== 'function') {
+        //         obj.status = 'error'; obj.label = '?';
+        //         renderChips();
+        //         DebugWindow.log(`⚠ obj#${idx} OCR skipped — gemini-ocr.js fehlt`);
+        //         return;
+        //     }
+        //     const cropPad = Math.max(20, Math.round(Math.min(obj.bbox.w, obj.bbox.h) * 0.15));
+        //     const cropCanvas = geminiCropCanvas(drawCanvas, obj.bbox, cropPad);
+        //     const prompt = (typeof window.singleGlyphContextualPrompt === 'function')
+        //         ? window.singleGlyphContextualPrompt(fullLatex, tokens)
+        //         : (typeof SINGLE_GLYPH_PROMPT === 'string' ? SINGLE_GLYPH_PROMPT : (window.SINGLE_GLYPH_PROMPT || ''));
+        //     const t0 = performance.now();
+        //     const result = await geminiRecognize({
+        //         canvas: cropCanvas,
+        //         apiKey,
+        //         model: 'gemini-2.5-flash-lite',
+        //         prompt,
+        //         dbg: (m) => DebugWindow.log(`  obj#${idx} ${m}`),
+        //     });
+        //     const ms = Math.round(performance.now() - t0);
+        //     if (!result.ok) {
+        //         obj.status = 'error'; obj.label = '?';
+        //         DebugWindow.log(`✗ obj#${idx} OCR failed (${ms}ms): ${result.error}`);
+        //     } else {
+        //         let label = '?';
+        //         try {
+        //             const parsed = JSON.parse(result.rawText || '{}');
+        //             label = typeof parsed.label === 'string' ? parsed.label.trim() : '?';
+        //         } catch (_) {
+        //             label = (result.latex || '').trim() || '?';
+        //         }
+        //         obj.label = (typeof geminiUnwrapLatex === 'function') ? geminiUnwrapLatex(label) : label;
+        //         obj.status = 'recognized';
+        //         if (result.usage) trackCost('gemini-2.5-flash-lite', result.usage);
+        //         DebugWindow.log(`✓ obj#${idx} "${obj.label}" (${ms}ms)`);
+        //     }
+        //     renderChips();
+        // }
 
         // ── Chip overlay ───────────────────────────────────────────────────
         // Chips are arranged in a SINGLE HORIZONTAL ROW, evenly distributed
         // across the canvas width, ordered left-to-right by each object's
         // bbox.x (writing order). Sits just above the midline.
-        function renderChips() {
-            const layer = document.getElementById('obj-chip-layer');
-            if (!layer) return;
-            layer.innerHTML = '';
-            const layerRect = layer.getBoundingClientRect();
-            const rect = drawCanvas.getBoundingClientRect();
-            const canvasLeft = rect.left - layerRect.left;
-            const canvasTop  = rect.top  - layerRect.top;
-            const canvasW    = rect.width;
-            const canvasH    = rect.height;
-            // Visible chips = objects that have actual labels (recognized,
-            // recognizing, error). Skip 'pending'/'closed' (no label yet).
-            const visible = [];
-            for (let i = 0; i < objects.length; i++) {
-                const obj = objects[i];
-                if (obj.status === 'pending' || obj.status === 'closed') continue;
-                visible.push({ obj, i });
-            }
-            if (visible.length === 0) return;
-            // Compute DRAWING ORDER per visible object: rank by the earliest
-            // stroke index that belongs to it (lowest = drawn first). Objects
-            // with no strokes (e.g. preset-only) sort to the end.
-            const firstStroke = (obj) => {
-                if (!obj.strokeIdxs || obj.strokeIdxs.length === 0) return Infinity;
-                return Math.min.apply(null, obj.strokeIdxs);
-            };
-            const byDrawingOrder = visible.slice().sort(
-                (a, b) => firstStroke(a.obj) - firstStroke(b.obj));
-            const drawingRank = new Map();
-            byDrawingOrder.forEach((v, k) => drawingRank.set(v.i, k + 1));
-            // Order by writing order (left-to-right) so the row matches reading.
-            visible.sort((a, b) => (a.obj.bbox.x - b.obj.bbox.x) || (a.obj.bbox.y - b.obj.bbox.y));
-            // Chip x-position follows the GLYPH's bbox-center x. Two-row
-            // layout: top row sits just ABOVE the handwriting bbox, bottom
-            // row just BELOW — so chips frame the (now unified) ink area
-            // instead of overlapping with it.
-            const sx = canvasW / drawCanvas.width;
-            const sy = canvasH / drawCanvas.height;
-            const hbb = bboxOfBoxes(objects.map(o => o.bbox)) ||
-                { x: 100, y: 100, w: drawCanvas.width - 200, h: drawCanvas.height - 200 };
-            const PAD_PX = 24; // distance between chip and ink-bbox edge
-            const chipYTop    = canvasTop + (hbb.y * sy) - PAD_PX;
-            const chipYBottom = canvasTop + ((hbb.y + hbb.h) * sy) + PAD_PX;
-            visible.forEach(({ obj, i }, rank) => {
-                const isTop = (rank % 2) === 0;
-                const glyphCx = obj.bbox.x + obj.bbox.w / 2;
-                const xCenter = canvasLeft + glyphCx * sx;
-                const chipY   = isTop ? chipYTop : chipYBottom;
-                const chip = document.createElement('div');
-                chip.className = 'obj-chip ' + (obj.status === 'error' ? 'error'
-                    : obj.status === 'recognizing' ? 'pending' : '');
-                chip.style.top  = chipY + 'px';
-                if (obj.status !== 'error') {
-                    // Color priority: matchId (after shape-matching) > objColor.
-                    const matched = colorForObject(obj);
-                    const col = matched != null ? matched : objColor(i);
-                    chip.style.color = col;
-                    chip.style.borderColor = col;
-                    chip.style.boxShadow = `0 0 4px ${col}55`;
-                }
-                const dRank = drawingRank.get(i);
-                const dRankStr = (typeof dRank === 'number' && isFinite(dRank))
-                    ? String(dRank) : '–';
-                let baseText;
-                if (obj.status === 'recognizing') baseText = '⏳';
-                else if (obj.status === 'error')   baseText = '?';
-                else                                baseText = (obj.label || '?');
-                if (obj.status === 'recognized' && typeof katex !== 'undefined'
-                    && obj.label && obj.label.includes('\\')) {
-                    try {
-                        const span = document.createElement('span');
-                        katex.render(obj.label, span, { throwOnError: false });
-                        chip.appendChild(span);
-                    } catch (_) { chip.textContent = baseText; }
-                } else {
-                    chip.textContent = baseText;
-                }
-                // Drawing-order rank — small superscript-style suffix.
-                const rankNode = document.createElement('sup');
-                rankNode.textContent = ' ' + dRankStr;
-                rankNode.style.opacity = '0.7';
-                rankNode.style.marginLeft = '4px';
-                chip.appendChild(rankNode);
-                chip.title = `obj#${i} reading#${rank} drawn#${dRankStr} status=${obj.status} label="${obj.label}"`;
-                // Center the chip horizontally on xCenter — set transform after
-                // appending so the chip's own width is known.
-                layer.appendChild(chip);
-                const w = chip.offsetWidth || 40;
-                chip.style.left = (xCenter - w / 2) + 'px';
-            });
-        }
-        function clearChips() {
-            const layer = document.getElementById('obj-chip-layer');
-            if (layer) layer.innerHTML = '';
-        }
-        window.addEventListener('resize', renderChips);
+        // function renderChips() {
+        //     const layer = document.getElementById('obj-chip-layer');
+        //     if (!layer) return;
+        //     layer.innerHTML = '';
+        //     const layerRect = layer.getBoundingClientRect();
+        //     const rect = drawCanvas.getBoundingClientRect();
+        //     const canvasLeft = rect.left - layerRect.left;
+        //     const canvasTop  = rect.top  - layerRect.top;
+        //     const canvasW    = rect.width;
+        //     const canvasH    = rect.height;
+        //     const visible = [];
+        //     for (let i = 0; i < objects.length; i++) {
+        //         const obj = objects[i];
+        //         if (obj.status === 'pending' || obj.status === 'closed') continue;
+        //         visible.push({ obj, i });
+        //     }
+        //     if (visible.length === 0) return;
+        //     for (const v of visible) {
+        //         const o = v.obj;
+        //         v.drawOrder = (o.strokeIndices && o.strokeIndices.length > 0)
+        //             ? Math.min(...o.strokeIndices) : v.i;
+        //     }
+        //     visible.sort((a, b) => a.drawOrder - b.drawOrder);
+        //     const n = visible.length;
+        //     const chipW = Math.min(40, canvasW / n - 6);
+        //     const gapX  = n > 1 ? (canvasW - n * chipW) / (n - 1) : 0;
+        //     const y     = canvasH * 0.38 - chipW / 2;
+        //     let x = (canvasW - (n * chipW + (n - 1) * gapX)) / 2;
+        //     for (const v of visible) {
+        //         const chip = document.createElement('div');
+        //         chip.className = 'obj-chip';
+        //         chip.textContent = v.obj.label || '?';
+        //         chip.style.left   = (canvasLeft + x) + 'px';
+        //         chip.style.top    = (canvasTop  + y) + 'px';
+        //         chip.style.width  = chipW + 'px';
+        //         chip.style.height = chipW + 'px';
+        //         chip.style.borderRadius = Math.max(2, chipW * 0.18) + 'px';
+        //         chip.style.backgroundColor = PALETTE[(v.obj.matchId ?? v.i) % PALETTE.length];
+        //         chip.dataset.idx = v.i;
+        //         chip.addEventListener('click', () => focusObject(v.i));
+        //         layer.appendChild(chip);
+        //         x += chipW + gapX;
+        //     }
+        // }
+
+        // window.addEventListener('resize', renderChips);
 
         // After the final-pass returns its token list (strings, reading-order),
         // assign each pixel-object the index of its matching token. Walks both
@@ -2436,7 +2382,7 @@ function toggleSidebar() {
                     const rr = document.getElementById('result-render');
                     if (rr) rr.style.display = '';
                 }
-                renderChips();
+                // renderChips();
                 // 5) (legacy fallback — KaTeX colorize-via-textcolor — kept
                 //    in case shape-matching fails entirely. Currently hidden
                 //    via display:none above when shape-matching succeeds.)
