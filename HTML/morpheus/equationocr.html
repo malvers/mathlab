@@ -298,14 +298,18 @@ function toggleSidebar() {
                     const H = drawCanvas.height;
                     const halfH = H / 2;
                     drawCtx.clearRect(0, 0, W, H);
-                    // Aspect-fit into the LOWER half (y halfH..H), x+y centered.
+                    // Base = aspect-fit into lower half, then 60% larger.
+                    // Cap so it never overflows the viewport. Bottom-anchored in
+                    // the lower half (minus a button gap); tall formulas grow
+                    // upward into the upper half rather than below the buttons.
                     const MARGIN = 20;
-                    const targetW = W - 2*MARGIN;
-                    const targetH = halfH - 2*MARGIN;
-                    const sc = Math.min(targetW / snap.width, targetH / snap.height);
+                    const BUTTON_GAP = MARGIN;
+                    const baseSc = Math.min((W - 2*MARGIN) / snap.width, (halfH - 2*MARGIN) / snap.height);
+                    const maxSc  = Math.min((W - 2*MARGIN) / snap.width, (H - 2*MARGIN) / snap.height);
+                    const sc = Math.min(baseSc * 1.6, maxSc);
                     const nw = snap.width * sc, nh = snap.height * sc;
                     const ox = (W - nw) / 2;
-                    const oy = halfH + (halfH - nh) / 2;
+                    const oy = H - BUTTON_GAP - nh;
                     drawCtx.imageSmoothingEnabled = true;
                     drawCtx.imageSmoothingQuality = 'high';
                     drawCtx.drawImage(snap, ox, oy, nw, nh);
@@ -529,17 +533,18 @@ function toggleSidebar() {
                 }
                 tctx.putImageData(id, 0, 0);
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                // Aspect-fit into the LOWER half (y halfH..H), x+y centered.
+                // Aspect-fit base = lower half, then bump 60% larger.
+                // Cap at full-canvas fit so we never overflow the viewport.
                 const W = drawCanvas.width;
                 const H = drawCanvas.height;
                 const halfH = H / 2;
                 const MARGIN = 20;
-                const targetW = W - 2 * MARGIN;
-                const targetH = halfH - 2 * MARGIN;
-                const sc = Math.min(targetW / img.width, targetH / img.height);
+                const baseSc = Math.min((W - 2*MARGIN) / img.width, (halfH - 2*MARGIN) / img.height);
+                const maxSc  = Math.min((W - 2*MARGIN) / img.width, (H     - 2*MARGIN) / img.height);
+                const sc = Math.min(baseSc * 1.6, maxSc);
                 const nw = img.width * sc, nh = img.height * sc;
                 const ox = (W - nw) / 2;
-                const oy = halfH + (halfH - nh) / 2;
+                const oy = (H - nh) / 2;
                 drawCtx.imageSmoothingEnabled = true;
                 drawCtx.imageSmoothingQuality = 'high';
                 drawCtx.drawImage(tmp, ox, oy, nw, nh);
@@ -938,6 +943,20 @@ function toggleSidebar() {
         // the hole edges in the matched palette color.
         function renderHandwritingContoursOnCanvas() {
             if (handwritingOuters.length === 0) return;
+            // Scale handwriting outlines around their combined bbox center.
+            const HAND_SCALE = 1.632;
+            const handBoxes = handwritingOuters
+                .map(o => bboxOfPolygon(handwritingContours[o.idx]))
+                .filter(Boolean);
+            const handBB = bboxOfBoxes(handBoxes);
+            drawCtx.save();
+            if (handBB) {
+                const cx = handBB.x + handBB.w / 2;
+                const cy = handBB.y + handBB.h / 2;
+                drawCtx.translate(cx, cy);
+                drawCtx.scale(HAND_SCALE, HAND_SCALE);
+                drawCtx.translate(-cx, -cy);
+            }
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
@@ -973,6 +992,7 @@ function toggleSidebar() {
                 }
                 drawCtx.stroke();
             }
+            drawCtx.restore();
             DebugWindow.log(`✂ hand: ${handwritingOuters.length} outers, ${holesDrawn} hole(s) outlined`);
         }
         // Compute the bounding box covering an array of objects' bboxes, or
