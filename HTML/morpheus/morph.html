@@ -50,6 +50,7 @@
     <script src="draw20-ring.js"></script>
     <script src="morph3d.js"></script>
     <script src="draw20-ui.js"></script>
+    <script src="formulas.js"></script>
     <script src="draw20.js"></script>
 </head>
 
@@ -338,27 +339,12 @@
 
         CyberUI.createCard('ui-container', 'FORMELN', `
             <div class="digit-grid formula-grid">
-                ${[
-                    { latex: 'E=mc^2',                                 text: 'E=mc^2',                                title: 'Einstein',             preset: 0  },
-                    { latex: '\\frac{a}{b}',                           text: '\\frac{a}{b}',                          title: 'Bruch',                preset: 1  },
-                    { latex: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',   text: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',  title: 'Quadratische Formel',  preset: 2  },
-                    { latex: 'e^{i\\pi}+1=0',                          text: 'e^{i\\pi}+1=0',                         title: 'Eulersche Identität',  preset: 3  },
-                    { latex: 'a^2+b^2=c^2',                            text: 'a^2+b^2=c^2',                           title: 'Pythagoras',           preset: 4  },
-                    { latex: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}', text: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}', title: 'Taylor e^x',    preset: 5  },
-                    { latex: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}', text: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}', title: 'Gauss-Integral', preset: 6 },
-                    { latex: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',    text: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',    title: 'Binomialkoeffizient', preset: 7  },
-                    { latex: '\\frac{d}{dx}x^n=nx^{n-1}',             text: '\\frac{d}{dx}x^n=nx^{n-1}',             title: 'Potenzregel',          preset: 8  },
-                    { latex: '\\int_a^b f(x)\\,dx',                   text: '\\int_a^b f(x)\\,dx',                   title: 'Bestimmtes Integral',  preset: 9  },
-                    { latex: 'F=G\\frac{m_1 m_2}{r^2}',               text: 'F=G\\frac{m_1 m_2}{r^2}',               title: 'Newton Gravitation',   preset: 10 },
-                    { latex: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', text: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi', title: 'Schrödinger', preset: 11 },
-                    { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', text: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}', title: 'Maxwell (Gauß)', preset: 12 },
-                    { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', text: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}', title: 'Maxwell (Ampère)', preset: 13 },
-                ].map((sym, i) => `
-                    <label class="latex-label" title="${sym.title}${sym.preset !== null ? ' ✍' : ''}">
+                ${window.MORPHEUS_FORMULAS.map((sym, i) => `
+                    <label class="latex-label" title="${sym.title} ✍">
                         <input type="radio" name="digit" value="formula-${i}"
-                            onclick="setTextInput(this.dataset.latex);${sym.preset !== null ? `loadPreset(${sym.preset});` : ''}"
-                            data-latex="${sym.text}"
-                            ${sym.preset !== null ? `data-preset="${sym.preset}"` : ''}>
+                            onclick="setTextInput(this.dataset.latex);loadPreset(${i});"
+                            data-latex="${sym.latex}"
+                            data-preset="${i}">
                         <span class="latex-render" data-latex="${sym.latex}"></span>
                     </label>
                 `).join('')}
@@ -367,17 +353,11 @@
 
         CyberUI.createCard('ui-container', 'KOMPLEX', `
             <div class="digit-grid formula-grid">
-                ${[
-                    { latex: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                  text: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                  title: 'Riemann ζ' },
-                    { latex: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                 text: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                 title: 'Dirac' },
-                    { latex: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                      text: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                      title: 'Cauchy-Integral' },
-                    { latex: 'R_{\\mu\\nu}-\\frac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                   text: 'R_{\\mu\\nu}-\\frac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                   title: 'Einstein-Feldgleichungen' },
-                    { latex: '\\rho\\left(\\frac{\\partial v}{\\partial t}+v\\cdot\\nabla v\\right)=-\\nabla p+\\mu\\nabla^2 v+f',               text: '\\rho\\left(\\frac{\\partial v}{\\partial t}+v\\cdot\\nabla v\\right)=-\\nabla p+\\mu\\nabla^2 v+f',               title: 'Navier–Stokes' }
-                ].map((sym, i) => `
+                ${window.MORPHEUS_COMPLEX_FORMULAS.map((sym, i) => `
                     <label class="latex-label" title="${sym.title} ✍">
                         <input type="radio" name="digit" value="complex-${i}"
                             onclick="onComplexClick(${i}, this.dataset.latex, this.dataset.title)"
-                            data-latex="${sym.text}" data-title="${sym.title}">
+                            data-latex="${sym.latex}" data-title="${sym.title}">
                         <span class="latex-render" data-latex="${sym.latex}"></span>
                     </label>
                 `).join('')}

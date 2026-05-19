@@ -41,403 +41,9 @@
     <script src="plausibilcheck.js"></script>
     <script src="draw20-match.js"></script>
     <script src="gemini-ocr.js"></script>
+    <script src="formulas.js"></script>
 
-    <style>
-        #draw-canvas {
-            display: block;
-            width: min(1760px, calc(100% - 24px), calc(100dvh - 160px));
-            aspect-ratio: 1 / 1;
-            height: auto !important;
-            flex-shrink: 0;
-            align-self: center;
-            background: transparent;
-            cursor: default;
-            pointer-events: none;
-            touch-action: none;
-        }
-        #draw-canvas.pen-on {
-            cursor: crosshair;
-            pointer-events: auto;
-        }
-        /* Mouse-coord readout — sits just above the ERKENNEN button, shows
-           the current pointer position in canvas-space (0..W each axis). */
-        #mouse-coord {
-            position: absolute;
-            left: 50%;
-            bottom: 80px;
-            transform: translateX(-50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            color: #adff2f;
-            background: rgba(2, 4, 16, 0.85);
-            padding: 8px 20px;
-            border-radius: 6px;
-            border: 1px solid rgba(173, 255, 47, 0.4);
-            pointer-events: none;
-            z-index: 31;
-            white-space: nowrap;
-            min-width: 220px;
-            text-align: center;
-        }
-        /* Small pen icon in the ZEICHNEN card title — toggles drawing. */
-        .pen-toggle {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            color: rgba(0, 210, 255, 0.45);
-            transition: color 0.15s, filter 0.15s;
-        }
-        .pen-toggle:hover { color: #00d2ff; }
-        .pen-toggle.active {
-            color: #adff2f;
-            filter: drop-shadow(0 0 4px rgba(173, 255, 47, 0.6));
-        }
-        /* container-type on canvas-stack so descendants can use `cqi` units
-           relative to the actual canvas square (not draw-wrap, which is wider
-           whenever the stack is height-constrained via calc(100dvh - 160px)). */
-        #draw-wrap { }
-        /* Per-object recognition chip overlay. Sits above the canvas,
-           below the button row. Each chip is positioned absolutely in
-           canvas-display coordinates by JS after each Gemini call. */
-        #obj-chip-layer {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 25;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-        .obj-chip {
-            position: absolute;
-            background: rgba(8, 20, 42, 0.92);
-            border: 0.5px solid #adff2f;
-            color: #adff2f;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-size: 13px;
-            line-height: 1.2;
-            font-family: 'Courier New', monospace;
-            white-space: nowrap;
-            box-shadow: 0 0 4px rgba(173, 255, 47, 0.25);
-        }
-        .obj-chip.pending  { color: rgba(173,255,47,0.55); border-color: rgba(173,255,47,0.45); }
-        .obj-chip.error    { color: #ff7088; border-color: #ff7088; box-shadow: 0 0 4px rgba(255,112,136,0.25); }
-        .obj-chip .katex { font-size: 1em; color: inherit; }
-        /* Bottom-center button row overlaying the canvas (ERKENNEN + CLEAR).
-           Canvas is WHITE in this lab (for OCR contrast), so the buttons need
-           a solid dark background to stay readable. */
-        #canvas-btn-row {
-            position: absolute;
-            left: 0;
-            right: 0;
-            /* Y in cqi units — relative to canvas-stack inline size. % bottom
-               on a container-type parent can be flaky; cqi is reliable. */
-            bottom: clamp(4px, 2cqi, 28px);
-            display: flex;
-            gap: clamp(4px, 1cqi, 12px);
-            z-index: 30;
-            padding: 0 clamp(4px, 1.5cqi, 20px);
-            box-sizing: border-box;
-        }
-        #canvas-recognize-btn,
-        #canvas-reload-btn,
-        #canvas-clear-btn {
-            /* Three equal-width buttons spanning canvas width — flex 1 each,
-               no min-width override so they really go equal. */
-            flex: 1 1 0 !important;
-            width: auto !important;
-            min-width: 0 !important;
-            padding: clamp(2px, 0.6cqi, 8px) clamp(1px, 0.8cqi, 12px) !important;
-            font-size: clamp(7px, 2.2cqi, 16px) !important;
-            letter-spacing: 0 !important;
-            border: 0.5px solid #adff2f !important;
-            color: #adff2f !important;
-            background: rgba(8, 20, 42, 0.92) !important;
-            box-shadow: 0 0 6px rgba(173, 255, 47, 0.18) !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: clip !important;
-            text-align: center !important;
-        }
-        #canvas-recognize-btn:hover,
-        #canvas-reload-btn:hover,
-        #canvas-clear-btn:hover {
-            background: rgba(8, 20, 42, 0.92) !important;
-            border: 0.5px solid #adff2f !important;
-            color: #adff2f !important;
-            box-shadow: 0 0 14px rgba(173, 255, 47, 0.4) !important;
-        }
-        #canvas-recognize-btn:active,
-        #canvas-reload-btn:active,
-        #canvas-clear-btn:active {
-            transform: scale(0.98) !important;
-        }
-        #draw-wrap {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 8px;
-            padding: 60px 20px 20px;
-            box-sizing: border-box;
-        }
-        #canvas-stack {
-            position: relative;
-            width: min(1760px, calc(100% - 24px), calc(100dvh - 160px));
-            aspect-ratio: 1 / 1;
-            flex-shrink: 0;
-            align-self: center;
-            container-type: inline-size;
-            container-name: canvas;
-        }
-        #draw-canvas {
-            display: block;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: transparent;
-            cursor: default;
-            pointer-events: none;
-            touch-action: none;
-        }
-        #result-box {
-            position: relative;
-            /* Matches canvas-stack width so the LATEX + RENDER panes align
-               with the drawing surface. Responsive: same min() formula. */
-            width: min(1600px, calc(100vw - 40px), calc(100vh - 160px));
-            flex-shrink: 0;
-            background: #020410;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            border-radius: 8px;
-            color: #00d2ff;
-            font-family: 'Outfit', sans-serif;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-            overflow: hidden;
-        }
-        #result-box .pane {
-            padding: clamp(8px, 1.5vh, 18px) 22px;
-        }
-        #result-box .pane + .pane {
-            border-top: 1px solid rgba(0, 210, 255, 0.3);
-        }
-        #result-box .label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            letter-spacing: 0.1em;
-            color: rgba(0, 210, 255, 0.6);
-            margin-bottom: 8px;
-        }
-        #result-latex {
-            font-family: 'Courier New', monospace;
-            font-size: 20px;
-            color: #adff2f;
-            word-break: break-all;
-            line-height: 1.4;
-            /* Responsive: tablet shrinks LATEX line, desktop keeps 30px. */
-            height: clamp(20px, 3vh, 32px);
-            overflow: auto;
-            display: flex;
-            align-items: center;
-        }
-        /* Lab-specific overrides — flat dark-navy background, no cyber-grid,
-           no radial glow. Several layers had their own background gradient:
-           #main-content (cyan radial glow) and #canvas-container (dark radial
-           gradient). We flatten ALL of them. */
-        #main-content,
-        #canvas-container {
-            background: rgb(0, 0, 20) !important;
-        }
-        .cyber-grid {
-            display: none !important;
-        }
-        /* Force the whole shell to track DYNAMIC viewport height — so on
-           mobile / non-fullscreen Chrome (where the address bar reduces the
-           visible area), the bottom-anchored button row stays inside the
-           visible window instead of being pushed below it. */
-        body.cyber-shell-grid {
-            height: 100dvh !important;
-            max-height: 100dvh !important;
-            grid-template-rows: minmax(0, 100dvh) !important;
-        }
-        body.cyber-shell-grid > #main-content {
-            height: 100dvh !important;
-        }
-        /* KaTeX result overlay — fills the UPPER HALF of the canvas and centers
-           the formula vertically inside it. No own background so the drawing
-           shows through. Click-through; doesn't block drawing. */
-        #result-render {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: clamp(18px, 7cqi, 90px);
-            color: #FF0000;
-            pointer-events: none;
-            z-index: 26;
-            overflow: hidden;
-        }
-        /* Loading spinner — 8 chase-fade dots. Reused from numberrecognition.html.
-           Shown inside #result-render while the full-pass is awaiting Gemini. */
-        .squiri {
-            position: relative;
-            width: 80px;
-            height: 80px;
-        }
-        .squiri span {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #00d2ff;
-            box-shadow: 0 0 8px rgba(0,210,255,0.8);
-            animation: chase-fade 1.2s ease-in-out infinite;
-        }
-        .squiri span:nth-child(1) { top: 0;    left: 35px; animation-delay: 0s; }
-        .squiri span:nth-child(2) { top: 11px; left: 62px; animation-delay: -1.05s; }
-        .squiri span:nth-child(3) { top: 35px; left: 70px; animation-delay: -0.9s; }
-        .squiri span:nth-child(4) { top: 59px; left: 62px; animation-delay: -0.75s; }
-        .squiri span:nth-child(5) { top: 70px; left: 35px; animation-delay: -0.6s; }
-        .squiri span:nth-child(6) { top: 59px; left: 8px;  animation-delay: -0.45s; }
-        .squiri span:nth-child(7) { top: 35px; left: 0;    animation-delay: -0.3s; }
-        .squiri span:nth-child(8) { top: 11px; left: 8px;  animation-delay: -0.15s; }
-        @keyframes chase-fade {
-            0%, 100% { opacity: 0.15; transform: scale(0.7); }
-            50%      { opacity: 1;    transform: scale(1.2); }
-        }
-        /* Don't force color on .katex — inline `\textcolor{#X}{ch}` from
-           colorizeLatex() needs to win. The default red is inherited from
-           #result-render for any glyph that didn't get an inline color. */
-        .api-input {
-            width: 100%;
-            margin-top: 6px;
-            padding: 6px 10px;
-            background: rgba(0, 210, 255, 0.08);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            color: #00d2ff;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            border-radius: 4px;
-            outline: none;
-            box-sizing: border-box;
-        }
-        .api-input:focus {
-            border-color: #00d2ff;
-        }
-        #draw-hint {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.35);
-            letter-spacing: 0.04em;
-            text-align: center;
-        }
-        .eps-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .eps-row label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            color: rgba(0, 210, 255, 0.7);
-        }
-        .eps-row input[type=range] {
-            flex: 1;
-            accent-color: #00d2ff;
-        }
-        .eps-row span {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            color: #00d2ff;
-            width: 28px;
-            text-align: right;
-        }
-        /* Tiny RESET button — sits at the top-right of the KOSTENKONTROLLE card,
-           next to the title. Overrides cyber-btn defaults (which would fill width). */
-        #reset-cost-btn {
-            position: absolute !important;
-            top: 6px !important;
-            right: 12px !important;
-            width: auto !important;
-            min-width: 0 !important;
-            min-height: 22px !important;
-            padding: 3px 10px !important;
-            font-size: 10px !important;
-            letter-spacing: 1.5px !important;
-            background: rgba(8, 20, 42, 0.6) !important;
-            border: 1px solid rgba(244, 196, 48, 0.5) !important;
-            color: #F4C430 !important;
-            border-radius: 4px !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-            z-index: 5;
-        }
-        #reset-cost-btn:hover {
-            background: rgba(244, 196, 48, 0.12) !important;
-            border-color: #F4C430 !important;
-            color: #F4C430 !important;
-            box-shadow: 0 0 8px rgba(244, 196, 48, 0.35) !important;
-            transform: none !important;
-        }
-
-        /* Page-local cyber-btn override — only inside equationocr.html.
-           buttons-ultra.css enforces min-height 58px globally; we make them
-           flatter here without touching the central rule (morph etc. stay 58px). */
-        .cyber-btn {
-            min-height: 42px !important;
-            padding: 10px 18px !important;
-        }
-
-        /* Formula grid — copied from morph.css (digit-grid + formula-grid) */
-        .digit-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-        }
-        .digit-grid input[type=radio] { display: none; }
-        .digit-grid label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 16px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.55);
-            background: rgba(0, 210, 255, 0.04);
-            border: 1px solid rgba(0, 210, 255, 0.25);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            user-select: none;
-        }
-        .digit-grid label:hover {
-            color: #00d2ff;
-            border-color: rgba(0, 210, 255, 0.6);
-            background: rgba(0, 210, 255, 0.1);
-        }
-        .digit-grid label:has(input:checked) {
-            color: #adff2f;
-            border-color: #adff2f;
-            background: rgba(173, 255, 47, 0.12);
-            box-shadow: 0 0 12px rgba(173, 255, 47, 0.3);
-        }
-        .digit-grid .latex-render .katex {
-            color: inherit;
-            line-height: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="equationocr.css">
 </head>
 
 <body>
@@ -606,21 +212,17 @@ function toggleSidebar() {
             if (!el) return;
             try { localStorage.setItem('eocr-outline', el.checked ? '1' : '0'); } catch (_) {}
             DebugWindow.log(`✏ outline: ${el.checked ? 'ON (contour render)' : 'OFF (KaTeX HTML)'}`);
-            // Re-render whatever's on screen. If we have a last match result,
-            // toggling should swap the visualisation without re-calling Gemini.
-            const rr = document.getElementById('result-render');
+            // Re-render whatever's on screen. The red KaTeX overlay
+            // (#result-render) stays visible in both modes — this toggle only
+            // controls whether the LaTeX *contours* are drawn on the canvas.
             if (el.checked) {
-                // Hide KaTeX HTML, show contour render (only if we have data).
-                if (rr) rr.style.display = 'none';
                 if (lastMatchResult) {
                     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                     renderHandwritingContoursOnCanvas();
                     renderLatexContoursOnCanvas();
                 }
             } else {
-                // Show KaTeX HTML, clear contour latex from upper half.
-                if (rr) rr.style.display = '';
-                // Keep handwriting visible — re-render hand only.
+                // Clear contour latex; keep handwriting visible.
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 renderHandwritingContoursOnCanvas();
             }
@@ -655,32 +257,13 @@ function toggleSidebar() {
             <button class="cyber-btn" id="reset-cost-btn" onclick="resetCostCounter()" title="Counter zurücksetzen">RESET</button>
         `, '#F4C430', { collapsible: true });
 
-        // Formula list — same shape & order as morph.html FORMELN card.
-        const FORMULAS = [
-            { latex: 'E=mc^2',                                                                                                                title: 'Einstein' },
-            { latex: '\\frac{a}{b}',                                                                                                          title: 'Bruch' },
-            { latex: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',                                                                                   title: 'Quadratische Formel' },
-            { latex: 'e^{i\\pi}+1=0',                                                                                                         title: 'Eulersche Identität' },
-            { latex: 'a^2+b^2=c^2',                                                                                                           title: 'Pythagoras' },
-            { latex: 'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}',                                                                              title: 'Taylor e^x' },
-            { latex: '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}',                                                                     title: 'Gauss-Integral' },
-            { latex: '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}',                                                                                    title: 'Binomialkoeffizient' },
-            { latex: '\\frac{d}{dx}x^n=nx^{n-1}',                                                                                             title: 'Potenzregel' },
-            { latex: '\\int_a^b f(x)\\,dx',                                                                                                   title: 'Bestimmtes Integral' },
-            { latex: 'F=G\\frac{m_1 m_2}{r^2}',                                                                                               title: 'Newton Gravitation' },
-            { latex: 'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi',                                                               title: 'Schrödinger' },
-            { latex: '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}',                                                                         title: 'Maxwell (Gauß)' },
-            { latex: '\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}',                                        title: 'Maxwell (Ampère)' }
-        ];
-        // Complex formulas — rendered live via KaTeX + html2canvas onto the
-        // draw-canvas. No preset PNGs needed.
-        const COMPLEX_FORMULAS = [
-            { latex: '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}',                                                                          title: 'Riemann ζ' },
-            { latex: '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0',                                                                         title: 'Dirac' },
-            { latex: 'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz',                                                              title: 'Cauchy-Integral' },
-            { latex: 'R_{\\mu\\nu}-\\tfrac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}',                          title: 'Einstein-Feldgleichungen' },
-            { latex: '\\rho\\!\\left(\\frac{\\partial\\mathbf{v}}{\\partial t}+\\mathbf{v}\\!\\cdot\\!\\nabla\\mathbf{v}\\right)=-\\nabla p+\\mu\\nabla^2\\mathbf{v}+\\mathbf{f}', title: 'Navier–Stokes' }
-        ];
+        // Shared formula registry (formulas.js). Defensive fallback so the
+        // rest of the script keeps building cards even if formulas.js failed.
+        if (!window.MORPHEUS_FORMULAS) {
+            DebugWindow.log('⚠ formulas.js nicht geladen — FORMELN/KOMPLEX bleiben leer');
+        }
+        const FORMULAS = window.MORPHEUS_FORMULAS || [];
+        const COMPLEX_FORMULAS = window.MORPHEUS_COMPLEX_FORMULAS || [];
         CyberUI.createCard('ui-container', 'KOMPLEX', `
             <div class="digit-grid">
                 ${COMPLEX_FORMULAS.map((sym, i) => `
@@ -715,15 +298,14 @@ function toggleSidebar() {
                     const H = drawCanvas.height;
                     const halfH = H / 2;
                     drawCtx.clearRect(0, 0, W, H);
-                    // Aspect-fit into the LOWER half (y halfH..H), centered, then
-                    // bumped 40% bigger. Shifted up 5% so it clears the buttons.
+                    // Aspect-fit into the LOWER half (y halfH..H), x+y centered.
                     const MARGIN = 20;
                     const targetW = W - 2*MARGIN;
                     const targetH = halfH - 2*MARGIN;
-                    const sc = Math.min(targetW / snap.width, targetH / snap.height) * 2.1;
+                    const sc = Math.min(targetW / snap.width, targetH / snap.height);
                     const nw = snap.width * sc, nh = snap.height * sc;
                     const ox = (W - nw) / 2;
-                    const oy = halfH + (halfH - nh) / 2 - (H * 0.05);
+                    const oy = halfH + (halfH - nh) / 2;
                     drawCtx.imageSmoothingEnabled = true;
                     drawCtx.imageSmoothingQuality = 'high';
                     drawCtx.drawImage(snap, ox, oy, nw, nh);
@@ -947,18 +529,17 @@ function toggleSidebar() {
                 }
                 tctx.putImageData(id, 0, 0);
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-                // Aspect-fit into the LOWER half (y halfH..H), centered, then
-                // bumped 40% bigger. Shifted up 5% so it clears the buttons.
+                // Aspect-fit into the LOWER half (y halfH..H), x+y centered.
                 const W = drawCanvas.width;
                 const H = drawCanvas.height;
                 const halfH = H / 2;
                 const MARGIN = 20;
                 const targetW = W - 2 * MARGIN;
                 const targetH = halfH - 2 * MARGIN;
-                const sc = Math.min(targetW / img.width, targetH / img.height) * 2.1;
+                const sc = Math.min(targetW / img.width, targetH / img.height);
                 const nw = img.width * sc, nh = img.height * sc;
                 const ox = (W - nw) / 2;
-                const oy = halfH + (halfH - nh) / 2 - (H * 0.05);
+                const oy = halfH + (halfH - nh) / 2;
                 drawCtx.imageSmoothingEnabled = true;
                 drawCtx.imageSmoothingQuality = 'high';
                 drawCtx.drawImage(tmp, ox, oy, nw, nh);
@@ -1410,19 +991,25 @@ function toggleSidebar() {
             }
             return bb;
         }
-        // Render LaTeX contours onto the canvas UPPER HALF. Contours come in
-        // SOURCE coords [0..latexSrcW] × [0..latexSrcH] (native snap size).
-        // We aspect-fit them into the upper half (drawCanvas.width ×
-        // drawCanvas.height/2) with a small margin → no source-side squashing.
+        // Render LaTeX contours onto the canvas EXACTLY where #result-render
+        // is drawn — no upper-half assumption. We read result-render's rect
+        // relative to drawCanvas's rect and scale to canvas internal pixels.
         function renderLatexContoursOnCanvas() {
             if (!lastMatchResult || latexContours.length === 0) return;
             if (!latexSrcW || !latexSrcH) return;
-            // Contours are in #result-render display-pixel space.
-            // Map directly to canvas upper half.
-            const sx = drawCanvas.width  / latexSrcW;
-            const sy = (drawCanvas.height * 0.5) / latexSrcH;
-            const tx = (p) => p[0] * sx;
-            const ty = (p) => p[1] * sy;
+            const rr = document.getElementById('result-render');
+            if (!rr) return;
+            const rrR = rr.getBoundingClientRect();
+            const cR  = drawCanvas.getBoundingClientRect();
+            if (!cR.width || !cR.height) return;
+            const pxPerCssX = drawCanvas.width  / cR.width;
+            const pxPerCssY = drawCanvas.height / cR.height;
+            const offX = (rrR.left - cR.left) * pxPerCssX;
+            const offY = (rrR.top  - cR.top ) * pxPerCssY;
+            const sx = (rrR.width  * pxPerCssX) / latexSrcW;
+            const sy = (rrR.height * pxPerCssY) / latexSrcH;
+            const tx = (p) => offX + p[0] * sx;
+            const ty = (p) => offY + p[1] * sy;
             drawCtx.lineWidth = 3;
             drawCtx.lineJoin = 'round';
             drawCtx.lineCap = 'round';
@@ -2546,6 +2133,38 @@ function toggleSidebar() {
             clearTimeout(window.__chromeLogTimer);
             window.__chromeLogTimer = setTimeout(() => logChromeGeometry('resize'), 250);
         });
+        // ── Canvas wheel-zoom (mouse-pivot) ─────────────────────────────────
+        // Wheel over the canvas-stack scales it via CSS transform, with the
+        // mouse position as pivot — so the pixel under the cursor stays
+        // anchored while zooming in/out. Press '0' to reset.
+        (function setupCanvasZoom() {
+            const stack = document.getElementById('canvas-stack');
+            if (!stack) return;
+            let scale = 1, tx = 0, ty = 0;
+            stack.style.transformOrigin = '0 0';
+            function apply() {
+                stack.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+            }
+            stack.addEventListener('wheel', e => {
+                e.preventDefault();
+                const parentR = stack.parentElement.getBoundingClientRect();
+                const mx = e.clientX - parentR.left;
+                const my = e.clientY - parentR.top;
+                const step = (e.deltaY < 0) ? 1.15 : (1 / 1.15);
+                const newScale = Math.max(0.2, Math.min(40, scale * step));
+                const k = newScale / scale;
+                tx = mx - k * (mx - tx);
+                ty = my - k * (my - ty);
+                scale = newScale;
+                apply();
+            }, { passive: false });
+            document.addEventListener('keydown', e => {
+                if (e.key === '0' || e.key === 'Escape') {
+                    scale = 1; tx = 0; ty = 0; apply();
+                    DebugWindow.log('🔍 canvas-zoom reset');
+                }
+            });
+        })();
     </script>
 </body>
 

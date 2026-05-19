@@ -111,6 +111,44 @@
             padding: 1vmin;
             box-sizing: content-box;
         }
+        /* --- Opening hours: ?open=1 --- */
+        #opening-hours {
+            display: none;
+            position: fixed;
+            top: calc(4vmin + 14.4vmin + 0.6vmin);
+            right: calc(2vmin + 14px);
+            padding: 0;
+            background: none;
+            border: 0;
+            box-shadow: none;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 200;
+            color: rgba(230, 237, 243, 0.7);
+            font-size: clamp(0.94rem, 1.56vmin, 1.33rem);
+            letter-spacing: 0.06em;
+            line-height: 1.4;
+            text-align: right;
+            z-index: 2500;
+            pointer-events: none;
+        }
+        body.school-ibb #opening-hours {
+            top: calc(4vmin + 11.52vmin + 0.6vmin);
+        }
+        #opening-hours .oh-title { display: none; }
+        #opening-hours .oh-row {
+            display: grid;
+            grid-template-columns: 2.4em 1fr;
+            gap: 0.6em;
+            justify-content: end;
+        }
+        #opening-hours .oh-day { color: rgba(230, 237, 243, 0.55); }
+        #opening-hours .oh-hours { text-align: right; }
+        #opening-hours .oh-row.is-today .oh-day,
+        #opening-hours .oh-row.is-today .oh-hours {
+            color: rgb(121, 158, 49);
+            font-weight: 400;
+        }
+        #opening-hours.is-visible { display: block; }
         /* --- Globe Mode: ?globe=1 --- */
         #globe-stage {
             position: absolute;
@@ -175,6 +213,47 @@
                         });
                     });
                 });
+                // ?open=1 → load opening hours from openinghours.txt and show under the org logo
+                const wantOpen = params.get('open') === '1';
+                window.__openMode = !!(wantOpen && school && KNOWN_ORGAS.includes(school));
+                if (window.__openMode) {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        fetch('openinghours.txt', { cache: 'no-cache' })
+                            .then(r => r.ok ? r.text() : Promise.reject(r.status))
+                            .then(text => {
+                                const lines = text.split(/\r?\n/)
+                                    .map(l => l.trim())
+                                    .filter(l => l && !l.startsWith('#'));
+                                if (!lines.length) return;
+                                const host = document.getElementById('opening-hours');
+                                if (!host) return;
+                                const todayKey = ['SO','MO','DI','MI','DO','FR','SA'][new Date().getDay()];
+                                const parts = ['<div class="oh-title">Öffnungszeiten</div>'];
+                                const todayRanges = [];
+                                lines.forEach(line => {
+                                    const m = line.match(/^(\S+)\s+(.+)$/);
+                                    if (!m) return;
+                                    const day = m[1].replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+                                    const hrsRaw = m[2];
+                                    const hrs = hrsRaw
+                                        .replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
+                                        .replace(/\s*-\s*/g, ' - ');
+                                    const isToday = day.toUpperCase().startsWith(todayKey);
+                                    if (isToday) {
+                                        hrsRaw.split(/[,;]/).forEach(seg => {
+                                            const rm = seg.match(/(\d{1,2})\s*-\s*(\d{1,2})/);
+                                            if (rm) todayRanges.push([parseInt(rm[1],10), parseInt(rm[2],10)]);
+                                        });
+                                    }
+                                    parts.push('<div class="oh-row' + (isToday ? ' is-today' : '') + '"><span class="oh-day">' + day + '</span><span class="oh-hours">' + hrs + '</span></div>');
+                                });
+                                window.__openRanges = todayRanges;
+                                host.innerHTML = parts.join('');
+                                host.classList.add('is-visible');
+                            })
+                            .catch(() => { /* file missing or unreachable */ });
+                    });
+                }
                 let visitorMsg = '';
                 const mComp = params.get('m');
                 if (mComp) {
@@ -229,6 +308,8 @@
     <img id="school-logo-ibb" class="school-logo" src="https://www.ibb-dresden.de/assets/images/6/ibb-dresden-d0db51aa.svg" alt="IBB Dresden">
     <img id="school-logo-wkoe" class="school-logo" src="WKOE%20frei.png" alt="Wirtschaftskanzlei Oliver Emslander">
     <img id="school-logo-alema" class="school-logo" src="ALEMA.PNG" alt="Alemannenschule">
+
+    <div id="opening-hours" aria-label="Öffnungszeiten"></div>
 
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
@@ -1335,6 +1416,14 @@
                 let glow = false;
 
                 if (i === 12 || i === 6 || i === 18 || i === 24) { color = "#ffaa00"; glow = true; }
+                if (window.__openMode && i !== 12 && i !== 18) {
+                    const ranges = window.__openRanges || [];
+                    const isOpen = ranges.some(([a, b]) => i >= a && i <= b);
+                    if (isOpen) {
+                        color = "rgb(121, 158, 49)";
+                        glow = (i === 6 || i === 24);
+                    }
+                }
 
                 ctx.save();
                 ctx.fillStyle = color;
