@@ -13,12 +13,12 @@ CyberUI.init();
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:system-ui,sans-serif;background:#0a0e1a;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:12px;overflow:hidden;background:#020410}
-header{display:flex;gap:8px;padding:12px;background:rgba(0,210,255,.08);border-bottom:1px solid rgba(0,210,255,.2)}
-header input{flex:1;padding:8px 12px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
+#app{width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:16px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
+header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16)}
+header input{flex:1;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
 header input::placeholder{color:rgba(0,210,255,.3)}
 header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
-#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(14,18,20)}
 .msg{padding:6px 10px;border-radius:12px;max-width:80%;word-wrap:break-word;line-height:1.4;font-size:14px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.15);color:#111}
 .msg.self{align-self:flex-end;background:#dcf8c6;border-top-right-radius:4px}
 .msg.other{align-self:flex-start;background:#f5f0e8;border-top-left-radius:4px}
@@ -27,8 +27,8 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 .msg .text{word-wrap:break-word}
 .msg .time{font-size:11px;opacity:.5;margin-left:8px;white-space:nowrap}
 .msg.encrypted{border:1px solid rgba(255,100,100,.3)}
-#input-row{display:flex;gap:8px;padding:12px;background:rgba(0,210,255,.04)}
-#input-row input{flex:1;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
+#input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16)}
+#input-row input{flex:1;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
 #input-row input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #config-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
 #config-panel.hidden{display:none}
@@ -43,6 +43,14 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #key-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(255,100,100,.3);border-radius:8px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
 #key-panel input:focus{outline:none;border-color:#ff6b6b}
 #key-panel button{padding:12px 32px;border:none;border-radius:8px;background:#ff6b6b;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+#confirm-modal{position:fixed;inset:0;background:rgba(2,4,16,.9);display:flex;align-items:center;justify-content:center;z-index:200}
+#confirm-modal.hidden{display:none}
+#confirm-box{background:#020410;border:1px solid rgba(255,100,100,.3);border-radius:16px;padding:24px 32px;text-align:center;max-width:320px}
+#confirm-box p{color:#e0e8f0;font-size:15px;margin-bottom:20px}
+#confirm-box .btns{display:flex;gap:12px;justify-content:center}
+#confirm-box button{padding:10px 28px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
+#confirm-box .btn-yes{background:#ff6b6b;color:#020410}
+#confirm-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
 .enc-badge{font-size:10px;color:#ff6b6b;background:rgba(255,100,100,.1);padding:2px 6px;border-radius:4px;margin-left:4px}
 </style>
 </head>
@@ -54,6 +62,16 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
   <div id="messages"></div>
   <div id="input-row">
     <input id="msg-input" placeholder="Nachricht..." disabled>
+  </div>
+</div>
+
+<div id="confirm-modal" class="hidden">
+  <div id="confirm-box">
+    <p>Alle Nachrichten löschen?</p>
+    <div class="btns">
+      <button class="btn-yes" id="confirm-yes">LÖSCHEN</button>
+      <button class="btn-no" id="confirm-no">ABBRECHEN</button>
+    </div>
   </div>
 </div>
 
@@ -103,6 +121,8 @@ const msgInput = document.getElementById('msg-input');
 const myNameEl = document.getElementById('my-name');
 const configPanel = document.getElementById('config-panel');
 const keyPanel = document.getElementById('key-panel');
+const confirmModal = document.getElementById('confirm-modal');
+let pendingDelete = false;
 
 myNameEl.value = localStorage.getItem(NAME_KEY) || '';
 
@@ -125,6 +145,22 @@ document.getElementById('key-go').onclick = () => {
     dbg('Init mit Supabase-Keys');
     initChat(SUPABASE_URL, SUPABASE_KEY);
   });
+};
+
+document.getElementById('confirm-yes').onclick = async () => {
+  confirmModal.classList.add('hidden');
+  if (!pendingDelete) return;
+  const { error } = await client.from('messages').delete().gt('id', 0);
+  if (error) { dbg('Löschfehler: ' + error.message); return; }
+  knownSenders = new Set();
+  messagesEl.innerHTML = '';
+  msgInput.value = '';
+  dbg('Alle Nachrichten gelöscht');
+  pendingDelete = false;
+};
+document.getElementById('confirm-no').onclick = () => {
+  confirmModal.classList.add('hidden');
+  pendingDelete = false;
 };
 
 document.getElementById('cfg-go').onclick = () => {
@@ -158,19 +194,20 @@ async function encryptText(plain) {
   const combined = new Uint8Array(iv.length + encrypted.byteLength);
   combined.set(iv);
   combined.set(new Uint8Array(encrypted), iv.length);
-  return btoa(String.fromCharCode(...combined));
+  return 'ENC:' + btoa(String.fromCharCode(...combined));
 }
 
 async function decryptText(cipherB64) {
+  if (!cipherB64.startsWith('ENC:')) return cipherB64;
   try {
-    const combined = Uint8Array.from(atob(cipherB64), c => c.charCodeAt(0));
+    const combined = Uint8Array.from(atob(cipherB64.slice(4)), c => c.charCodeAt(0));
     const iv = combined.slice(0, 12);
     const data = combined.slice(12);
     const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
     return new TextDecoder().decode(decrypted);
   } catch(e) {
     dbg('Entschlüsselung fehlgeschlagen: ' + e.message);
-    return '[entschlüsseln fehlgeschlagen]';
+    return '[falscher Schlüssel]';
   }
 }
 
@@ -227,8 +264,10 @@ async function renderMsg(msg) {
   const multi = knownSenders.size > 2;
   div.className = 'msg ' + (multi ? 'multi' : (isSelf ? 'self' : 'other'));
   const senderColor = nameColor(msg.sender);
+  const isEnc = msg.content.startsWith('ENC:');
+  if (isEnc) div.classList.add('encrypted');
   const content = await decryptText(msg.content);
-  div.innerHTML = `<span class="sender" style="color:${senderColor}">${escapeHtml(msg.sender)}</span><span class="text">${escapeHtml(content)}</span><span class="enc-badge">E2E</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  div.innerHTML = `<span class="sender" style="color:${senderColor}">${escapeHtml(msg.sender)}</span><span class="text">${escapeHtml(content)}</span>${isEnc ? '<span class="enc-badge">E2E</span>' : ''}<span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
 }
 
@@ -239,6 +278,12 @@ async function sendMsg() {
   const sender = myNameEl.value.trim().toLowerCase();
   if (!content) return;
   if (!sender) return alert('Name eingeben!');
+  if (content === '/delete') {
+    pendingDelete = true;
+    confirmModal.classList.remove('hidden');
+    msgInput.value = '';
+    return;
+  }
   localStorage.setItem(NAME_KEY, sender);
   const encrypted = await encryptText(content);
   dbg(`Sende (verschlüsselt) als ${sender}`);
@@ -249,14 +294,6 @@ async function sendMsg() {
   setTimeout(loadMessages, 300);
 }
 
-setInterval(() => {
-  if (client) {
-    client.from('messages').select('sender').then(({ data }) => {
-      if (data) knownSenders = new Set(data.map(m => m.sender));
-    });
-    loadMessages();
-  }
-}, 2000);
 
 function escapeHtml(s) {
   const d = document.createElement('div');
