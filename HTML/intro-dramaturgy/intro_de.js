@@ -70,7 +70,7 @@ JAVA
 60pt
 Artificial Intelligence 
 40pt
-fully vibed coded
+fully vibe coded
 
 # 
 200pt
