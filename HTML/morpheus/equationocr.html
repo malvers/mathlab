@@ -1550,6 +1550,35 @@ function toggleSidebar() {
 
         drawCanvas.style.touchAction = 'none';
 
+        // TEMP DIAG: document-level capture listeners so we can see whether the
+        // stylus fires ANY input event and on which target — even if it never
+        // reaches #draw-canvas. Helps diagnose "finger works, pen does nothing".
+        document.addEventListener('pointerdown', e => {
+            const t = e.target;
+            const tid = t && t.id ? '#' + t.id : (t && t.tagName ? t.tagName.toLowerCase() : '?');
+            DebugWindow.log(`📡 doc pointerdown type=${e.pointerType} btn=${e.button} tgt=${tid} w=${e.width||0} h=${e.height||0}`);
+        }, true);
+        document.addEventListener('touchstart', e => {
+            DebugWindow.log(`📡 doc touchstart touches=${e.touches.length}`);
+        }, true);
+        document.addEventListener('mousedown', e => {
+            DebugWindow.log(`📡 doc mousedown btn=${e.button}`);
+        }, true);
+        // Hover/move: AES pens fire pointerover/move while floating above the
+        // glass. If we see these for the pen but no pointerdown, the tip-press
+        // isn't being registered (vs. the pen being intercepted entirely).
+        let _lastHoverLog = 0;
+        document.addEventListener('pointerover', e => {
+            if (e.pointerType === 'pen') DebugWindow.log(`📡 doc pointerover type=pen`);
+        }, true);
+        document.addEventListener('pointermove', e => {
+            const now = Date.now();
+            if (e.pointerType === 'pen' && now - _lastHoverLog > 400) {
+                _lastHoverLog = now;
+                DebugWindow.log(`📡 doc pointermove type=pen pressure=${e.pressure}`);
+            }
+        }, true);
+
         drawCanvas.addEventListener('pointerdown', e => {
             // TEMP DIAG: log every pointerdown so we can see what iPad reports
             // for finger touches (width/height vs PALM_MAX_PX threshold).
