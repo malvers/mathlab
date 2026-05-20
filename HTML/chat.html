@@ -17,10 +17,10 @@ CyberUI.init();
 *{margin:0;padding:0;box-sizing:border-box}
 input,button,textarea{font-family:inherit}
 body{font-family:'Raleway',system-ui,sans-serif;background:#0a0e1a;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:16px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
+#app{width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:8px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
 header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
 .name-wrap{flex:1;position:relative;display:flex}
-header input{flex:1;padding:10px 50px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
 .name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
 header input::placeholder{color:rgba(0,210,255,.3)}
 header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
@@ -44,11 +44,14 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #config-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
 #key-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
 #key-panel.hidden{display:none}
-#key-panel h2{color:#ff6b6b;font-size:20px;margin-bottom:4px}
+#key-panel h2{color:#00d2ff;font-size:20px;margin-bottom:4px;font-weight:400}
 #key-panel p{color:rgba(0,210,255,.5);font-size:13px;text-align:center;max-width:350px;line-height:1.5}
-#key-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(255,100,100,.3);border-radius:8px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
-#key-panel input:focus{outline:none;border-color:#ff6b6b}
-#key-panel button{padding:12px 32px;border:none;border-radius:8px;background:#ff6b6b;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+#key-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:rgb(14,32,64);color:#e0e8f0;font-size:14px}
+#key-panel input:focus{outline:none;border-color:#00d2ff}
+#key-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+#key-panel .key-btns{display:flex;gap:12px;width:100%;max-width:400px}
+#key-panel .key-btns button{flex:1}
+#key-panel #key-cancel{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
 #confirm-modal{position:fixed;inset:0;background:rgba(2,4,16,.9);display:flex;align-items:center;justify-content:center;z-index:200}
 #confirm-modal.hidden{display:none}
 #confirm-box{background:#020410;border:1px solid rgba(255,100,100,.3);border-radius:16px;padding:24px 32px;text-align:center;max-width:320px}
@@ -57,20 +60,55 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #confirm-box button{padding:10px 28px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
 #confirm-box .btn-yes{background:#ff6b6b;color:#020410}
 #confirm-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
-.enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help}
+.enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
+.e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:rgb(14,36,78);color:#cfe4f7;border:1px solid rgba(0,210,255,.3);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
+/* Emoji avatar sits INSIDE the name input, before the name text */
+#name-emoji{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
+#name-emoji:focus{outline:none}
+/* Emoji picker overlay */
+#emoji-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#emoji-panel.hidden{display:none}
+#emoji-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;max-width:420px;width:100%}
+#emoji-grid button{font-size:26px;line-height:1;padding:8px 0;border:1px solid rgba(0,210,255,.15);border-radius:10px;background:rgb(14,32,64);cursor:pointer}
+#emoji-grid button:hover,#emoji-grid button:focus{outline:none;border-color:#00d2ff;background:rgb(20,44,84)}
+#emoji-cancel{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+@media(max-width:480px){#emoji-grid{grid-template-columns:repeat(6,1fr)}}
+/* Slash-command help overlay */
+#help-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#help-panel.hidden{display:none}
+#help-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#help-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
+#help-list .cmd{display:flex;gap:12px;align-items:baseline;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px}
+#help-list code{color:#00d2ff;font-family:monospace;font-size:14px;font-weight:700;flex:0 0 80px}
+#help-list span{color:#cfe4f7;font-size:13px;line-height:1.4}
+#help-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Storage stats overlay */
+#stats-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#stats-panel.hidden{display:none}
+#stats-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#stats-body{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
+#stats-body .row{display:flex;justify-content:space-between;gap:12px;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px;color:#cfe4f7;font-size:14px}
+#stats-body .row b{color:#00d2ff;font-weight:700}
+#stats-bar{width:100%;max-width:420px;height:10px;border-radius:5px;background:rgb(14,32,64);overflow:hidden;border:1px solid rgba(0,210,255,.15)}
+#stats-bar div{height:100%;background:#00d2ff;width:0}
+#stats-note{color:rgba(0,210,255,.45);font-size:11px;text-align:center;max-width:420px;line-height:1.5}
+#stats-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="name-wrap">
-      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30">
-      <span class="enc-badge" id="e2e-badge" title="Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.">E2E</span>
+      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
+      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off">
+      <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
     </div>
   </header>
   <div id="messages"></div>
   <div id="input-row">
-    <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht..." disabled>
+    <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht..." disabled autocomplete="off">
   </div>
 </div>
 
@@ -85,10 +123,39 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 </div>
 
 <div id="key-panel" class="hidden">
-  <h2>Chat-Schlüssel</h2>
-  <p>Alle Teilnehmer müssen denselben Schlüssel eingeben. Nur damit können Nachrichten entschlüsselt werden.</p>
-  <input id="chat-key" type="password" aria-label="Gemeinsamer Schlüssel" placeholder="Gemeinsamer Schlüssel...">
-  <button id="key-go">VERSCHLÜSSELN</button>
+  <h2>Passwort</h2>
+  <input id="chat-key" type="password" aria-label="Passwort" placeholder="" autocomplete="new-password">
+  <div class="key-btns">
+    <button id="key-cancel" style="display:none">ABBRECHEN</button>
+    <button id="key-go">OK</button>
+  </div>
+</div>
+
+<div id="help-panel" class="hidden">
+  <h2>Befehle</h2>
+  <div id="help-list">
+    <div class="cmd"><code>/help</code><span>Diese Befehlsübersicht anzeigen</span></div>
+    <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
+    <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
+    <div class="cmd"><code>/key</code><span>Passwort (Verschlüsselung) ändern</span></div>
+    <div class="cmd"><code>/delete</code><span>Alle Nachrichten löschen</span></div>
+    <div class="cmd"><code>/clear</code><span>Lokalen Browser-Speicher löschen und neu laden</span></div>
+  </div>
+  <button id="help-close">SCHLIESSEN</button>
+</div>
+
+<div id="stats-panel" class="hidden">
+  <h2>Supabase-Speicher</h2>
+  <div id="stats-body"></div>
+  <div id="stats-bar"><div></div></div>
+  <p id="stats-note">Belegung aus den Nachrichten geschätzt. Exakte Kontingente (DB, Bandbreite) nur im Supabase-Dashboard — nicht über den öffentlichen Key abrufbar.</p>
+  <button id="stats-close">SCHLIESSEN</button>
+</div>
+
+<div id="emoji-panel" class="hidden">
+  <h2>Wähle dein Emoji</h2>
+  <div id="emoji-grid"></div>
+  <button id="emoji-cancel">ABBRECHEN</button>
 </div>
 
 <div id="config-panel" class="hidden">
@@ -111,6 +178,7 @@ const SUPABASE_URL_KEY = 'eocr-supabase-url';
 const SUPABASE_KEY_KEY = 'eocr-supabase-key';
 const NAME_KEY = 'eocr-chat-name';
 const CHAT_KEY = 'eocr-chat-key';
+const EMOJI_KEY = 'eocr-chat-emoji';
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -124,6 +192,7 @@ let client = null;
 let subscription = null;
 let knownSenders = new Set();
 let cryptoKey = null;
+let chatReady = false;
 
 const messagesEl = document.getElementById('messages');
 const msgInput = document.getElementById('msg-input');
@@ -135,6 +204,95 @@ let pendingDelete = false;
 
 myNameEl.value = localStorage.getItem(NAME_KEY) || '';
 
+// --- Emoji avatar: chosen per person, shown left of the name and prefixed to the sender ---
+const EMOJIS = ['😀','😎','🤓','🥳','😇','🤩','😜','🤖','👻','💀','🐱','🐶','🦊','🐼','🐸','🦁','🐯','🦄','🐝','🦋','🌵','🌻','🍀','🔥','💧','⚡','🌈','⭐','🍎','🍕','🍩','☕','⚽','🎲','🎸','🎨','🚀','🛸','💎','👑'];
+const nameEmojiBtn = document.getElementById('name-emoji');
+const emojiPanel = document.getElementById('emoji-panel');
+const emojiGrid = document.getElementById('emoji-grid');
+let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
+if (myEmoji) nameEmojiBtn.textContent = myEmoji;
+
+// Build the picker grid once
+for (const e of EMOJIS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = e;
+  b.onclick = () => pickEmoji(e);
+  emojiGrid.appendChild(b);
+}
+
+function openEmojiPanel() { emojiPanel.classList.remove('hidden'); }
+async function pickEmoji(e) {
+  myEmoji = e;
+  localStorage.setItem(EMOJI_KEY, e);
+  nameEmojiBtn.textContent = e;
+  emojiPanel.classList.add('hidden');
+  dbg('Emoji gewählt: ' + e);
+  if (!msgInput.disabled) msgInput.focus();
+  await applyEmojiToOldMessages(e);
+}
+
+// Rewrite the emoji prefix on all of my own past messages so the change is retroactive for everyone
+async function applyEmojiToOldMessages(emoji) {
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!client || !name) return;
+  const { data, error } = await client.from('messages').select('id,sender');
+  if (error) { dbg('Emoji-Update Fehler: ' + error.message); return; }
+  // A row is "mine" if its sender is my plain name or ends with " <name>" (any old emoji prefix)
+  const ids = data.filter(m => m.sender === name || m.sender.endsWith(' ' + name)).map(m => m.id);
+  if (!ids.length) return;
+  const { error: uErr } = await client.from('messages').update({ sender: `${emoji} ${name}` }).in('id', ids);
+  if (uErr) { dbg('Emoji-Update Fehler: ' + uErr.message); return; }
+  dbg(`Emoji in ${ids.length} eigenen Nachrichten aktualisiert`);
+  loadMessages();
+}
+nameEmojiBtn.onclick = openEmojiPanel;
+document.getElementById('help-close').onclick = () => document.getElementById('help-panel').classList.add('hidden');
+document.getElementById('stats-close').onclick = () => document.getElementById('stats-panel').classList.add('hidden');
+
+// Supabase free tier: 500 MB database. We can only estimate from message rows via the public key.
+const FREE_DB_BYTES = 500 * 1024 * 1024;
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(2) + ' MB';
+}
+async function showStats() {
+  const panel = document.getElementById('stats-panel');
+  const body = document.getElementById('stats-body');
+  const bar = document.querySelector('#stats-bar div');
+  panel.classList.remove('hidden');
+  body.innerHTML = `<div class="row"><span>Lade…</span></div>`;
+  if (!client) { body.innerHTML = `<div class="row"><span>Kein Client — erst Schlüssel eingeben.</span></div>`; return; }
+  const { data, count, error } = await client
+    .from('messages')
+    .select('sender,content,created_at', { count: 'exact' });
+  if (error) { body.innerHTML = `<div class="row"><span>Fehler: ${escapeHtml(error.message)}</span></div>`; return; }
+  // Estimate stored bytes from the row payloads (sender + content), UTF-8 length
+  const enc = new TextEncoder();
+  let bytes = 0;
+  for (const m of data) bytes += enc.encode((m.sender || '') + (m.content || '')).length;
+  const pct = Math.min(100, bytes / FREE_DB_BYTES * 100);
+  bar.style.width = pct.toFixed(2) + '%';
+  body.innerHTML = `
+    <div class="row"><span>Nachrichten</span><b>${count ?? data.length}</b></div>
+    <div class="row"><span>Belegt (geschätzt)</span><b>${fmtBytes(bytes)}</b></div>
+    <div class="row"><span>Free-Tier DB-Limit</span><b>500 MB</b></div>
+    <div class="row"><span>Anteil</span><b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)} %</b></div>`;
+  dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
+}
+document.getElementById('emoji-cancel').onclick = () => emojiPanel.classList.add('hidden');
+// Enter in the name field opens the emoji palette
+myNameEl.onkeydown = ev => {
+  if (ev.key === 'Enter') {
+    ev.preventDefault();
+    if (myNameEl.value.trim()) {
+      localStorage.setItem(NAME_KEY, myNameEl.value.trim().toLowerCase());
+      openEmojiPanel();
+    }
+  }
+};
+
 const savedKey = localStorage.getItem(CHAT_KEY);
 if (savedKey) {
   initCrypto(savedKey).then(() => {
@@ -145,15 +303,40 @@ if (savedKey) {
   keyPanel.classList.remove('hidden');
 }
 
-document.getElementById('key-go').onclick = () => {
-  const key = document.getElementById('chat-key').value.trim();
+async function submitKey() {
+  const keyInput = document.getElementById('chat-key');
+  const key = keyInput.value.trim();
   if (!key) return alert('Schlüssel eingeben!');
+  const goBtn = document.getElementById('key-go');
+  goBtn.disabled = true;
+  const testKey = await deriveKey(key);
+  const ok = await verifyKey(testKey);
+  goBtn.disabled = false;
+  if (!ok) {
+    dbg('Falscher Schlüssel — Dialog bleibt offen');
+    keyInput.value = '';
+    keyInput.focus();
+    keyInput.placeholder = 'Falscher Schlüssel';
+    return;
+  }
+  cryptoKey = testKey;
   localStorage.setItem(CHAT_KEY, key);
   keyPanel.classList.add('hidden');
-  initCrypto(key).then(() => {
+  if (chatReady) {
+    dbg('Schlüssel geändert — Nachrichten werden neu entschlüsselt');
+    loadMessages();
+  } else {
     dbg('Init mit Supabase-Keys');
     initChat(SUPABASE_URL, SUPABASE_KEY);
-  });
+  }
+}
+
+document.getElementById('key-go').onclick = submitKey;
+document.getElementById('chat-key').onkeydown = e => { if (e.key === 'Enter') submitKey(); };
+
+document.getElementById('key-cancel').onclick = () => {
+  keyPanel.classList.add('hidden');
+  if (client) msgInput.focus();
 };
 
 document.getElementById('confirm-yes').onclick = async () => {
@@ -183,17 +366,37 @@ document.getElementById('cfg-go').onclick = () => {
   initChat(url, key);
 };
 
-async function initCrypto(password) {
+async function deriveKey(password) {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-  cryptoKey = await crypto.subtle.deriveKey(
+  return crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt: enc.encode('forloop-chat-salt'), iterations: 100000, hash: 'SHA-256' },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
     ['encrypt', 'decrypt']
   );
+}
+
+async function initCrypto(password) {
+  cryptoKey = await deriveKey(password);
   dbg('AES-256-GCM Schlüssel abgeleitet');
+}
+
+// Prüft testKey gegen die zuletzt gespeicherte verschlüsselte Nachricht.
+// Kein Client/keine verschlüsselte Nachricht/Query-Fehler -> nicht prüfbar -> als gültig behandeln.
+async function verifyKey(testKey) {
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const { data, error } = await client
+    .from('messages')
+    .select('content')
+    .like('content', 'ENC:%')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) { dbg('Schlüssel-Check nicht möglich: ' + error.message); return true; }
+  if (!data || !data.length) { dbg('Keine verschlüsselte Nachricht zum Prüfen'); return true; }
+  const plain = await decryptText(data[0].content, testKey);
+  return plain !== '[falscher Schlüssel]';
 }
 
 async function encryptText(plain) {
@@ -206,13 +409,13 @@ async function encryptText(plain) {
   return 'ENC:' + btoa(String.fromCharCode(...combined));
 }
 
-async function decryptText(cipherB64) {
+async function decryptText(cipherB64, key = cryptoKey) {
   if (!cipherB64.startsWith('ENC:')) return cipherB64;
   try {
     const combined = Uint8Array.from(atob(cipherB64.slice(4)), c => c.charCodeAt(0));
     const iv = combined.slice(0, 12);
     const data = combined.slice(12);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
     return new TextDecoder().decode(decrypted);
   } catch(e) {
     dbg('Entschlüsselung fehlgeschlagen: ' + e.message);
@@ -221,7 +424,8 @@ async function decryptText(cipherB64) {
 }
 
 function initChat(url, key) {
-  client = window.supabase.createClient(url, key);
+  if (!client) client = window.supabase.createClient(url, key);
+  chatReady = true;
   dbg('Supabase-Client erstellt');
   loadMessages();
   subscribeMessages();
@@ -230,23 +434,29 @@ function initChat(url, key) {
   dbg('Chat bereit — E2E aktiv');
 }
 
-const NAME_COLORS = ['#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#009688','#4caf50','#ff9800','#ff5722','#795548','#00bcd4','#cddc39','#ffeb3b','#e040fb','#536dfe','#00e676','#f06292','#ffab40','#6d4c41','#80cbc4','#b39ddb','#f48fb1','#a5d6a7','#fff176','#90a4ae','#ff8a65','#a1887f','#4db6ac','#7986cb','#4dd0e1'];
+// Dark, saturated shades only — readable on the light message bubbles, no pale/bright tones
+const NAME_COLORS = ['#b71c1c','#880e4f','#a3105f','#4a148c','#311b92','#1a237e','#0d47a1','#01579b','#006064','#004d40','#1b5e20','#33691e','#bf360c','#e65100','#3e2723','#263238','#ad1457','#6a1b9a','#283593','#00695c','#2e7d32','#c62828','#283593','#5d4037','#37474f','#7b1fa2','#0277bd','#00838f','#558b2f','#d84315'];
 function nameColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length];
 }
 
-async function loadMessages() {
-  const { data, error } = await client
-    .from('messages')
-    .select('*')
-    .order('created_at', { ascending: true });
+const MSG_LIMIT = 500;
+async function loadMessages(all = false) {
+  // Default: only the most recent MSG_LIMIT messages (saves traffic). /loadall fetches everything.
+  let query = client.from('messages').select('*');
+  query = all
+    ? query.order('created_at', { ascending: true })
+    : query.order('created_at', { ascending: false }).limit(MSG_LIMIT);
+  const { data, error } = await query;
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
-  dbg(`${data.length} Nachrichten geladen`);
-  knownSenders = new Set(data.map(m => m.sender));
+  // Limited query comes back newest-first — flip to chronological for display
+  const rows = all ? data : data.slice().reverse();
+  dbg(`${rows.length} Nachrichten geladen${all ? ' (alle)' : ` (max ${MSG_LIMIT})`}`);
+  knownSenders = new Set(rows.map(m => m.sender));
   messagesEl.innerHTML = '';
-  for (const msg of data) await renderMsg(msg);
+  for (const msg of rows) await renderMsg(msg);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -261,15 +471,26 @@ function subscribeMessages() {
       await renderMsg(payload.new);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
+      dbg('Nachricht(en) gelöscht — lade neu');
+      loadMessages();
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
+      dbg('Nachricht(en) geändert (z.B. Emoji) — lade neu');
+      loadMessages();
+    })
     .subscribe(status => {
       dbg('Realtime-Status: ' + JSON.stringify(status));
     });
 }
 
 async function renderMsg(msg) {
+  // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
+  if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
   const myName = myNameEl.value.trim().toLowerCase();
   const div = document.createElement('div');
   div.className = 'msg other';
+  if (msg.id != null) div.dataset.id = msg.id;
   const senderColor = nameColor(msg.sender);
   const isEnc = msg.content.startsWith('ENC:');
   if (isEnc) div.classList.add('encrypted');
@@ -291,10 +512,44 @@ async function sendMsg() {
     msgInput.value = '';
     return;
   }
+  if (content === '/key') {
+    const keyInput = document.getElementById('chat-key');
+    keyInput.value = '';
+    document.getElementById('key-cancel').style.display = 'inline-block';
+    keyPanel.classList.remove('hidden');
+    keyInput.focus();
+    msgInput.value = '';
+    return;
+  }
+  if (content === '/help') {
+    document.getElementById('help-panel').classList.remove('hidden');
+    msgInput.value = '';
+    return;
+  }
+  if (content === '/stats') {
+    msgInput.value = '';
+    showStats();
+    return;
+  }
+  if (content === '/loadall') {
+    msgInput.value = '';
+    dbg('Lade alle Nachrichten...');
+    loadMessages(true);
+    return;
+  }
+  if (content === '/clear') {
+    // Clear this origin's localStorage (chat key, name, Supabase config) and reload
+    localStorage.clear();
+    dbg('localStorage geleert');
+    location.reload();
+    return;
+  }
   localStorage.setItem(NAME_KEY, sender);
+  // Prefix the chosen emoji to the sender so it shows up for everyone in the chat
+  const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
   const encrypted = await encryptText(content);
-  dbg(`Sende (verschlüsselt) als ${sender}`);
-  const { error } = await client.from('messages').insert({ sender, content: encrypted });
+  dbg(`Sende (verschlüsselt) als ${displaySender}`);
+  const { error } = await client.from('messages').insert({ sender: displaySender, content: encrypted });
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
   msgInput.value = '';
