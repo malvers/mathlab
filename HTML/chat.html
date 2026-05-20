@@ -29,7 +29,7 @@ header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,
 .name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
 header input::placeholder{color:rgba(0,210,255,.3)}
 header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
-#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16)}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .msg{padding:6px 10px;border-radius:12px;max-width:80%;word-wrap:break-word;line-height:1.4;font-size:14px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.15);color:rgb(0,0,40)}
 .msg.self{align-self:flex-end;background:#dcf8c6;border-top-right-radius:4px}
 .msg.other{align-self:flex-start;background:#b3d2f0;border-top-left-radius:4px}
@@ -38,9 +38,14 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 .msg .text{word-wrap:break-word}
 .msg .time{font-size:11px;opacity:.5;margin-left:8px;white-space:nowrap}
 .msg.encrypted{border:none}
-#input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16)}
+#input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
 #input-row input{flex:1;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
 #input-row input:focus{outline:none;border-color:rgba(0,210,255,.25)}
+/* Send button — always visible, only enabled when the message field has text */
+#send-btn{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
+#send-btn svg{fill:#020410!important}
+#send-btn:disabled{opacity:.35;cursor:default}
+#input-row{position:relative;z-index:10}
 #config-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
 #config-panel.hidden{display:none}
 #config-panel h2{color:#00d2ff;font-size:20px;margin-bottom:8px}
@@ -120,6 +125,11 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
   <div id="messages"></div>
   <div id="input-row">
     <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht..." disabled autocomplete="off">
+    <button id="send-btn" aria-label="Senden" title="Senden">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="6 4 20 12 6 20"></polygon>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -157,8 +167,9 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
     <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
     <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
     <div class="cmd"><code>/key</code><span>Passwort (Verschlüsselung) ändern</span></div>
+    <div class="cmd"><code>/release</code><span>Eigenen Namen freigeben (wieder vergebbar)</span></div>
     <div class="cmd"><code>/delete</code><span>Alle Nachrichten löschen</span></div>
-    <div class="cmd"><code>/clear</code><span>Lokalen Browser-Speicher löschen und neu laden</span></div>
+    <div class="cmd"><code>/clear</code><span>Passwort/Config löschen (Name bleibt), neu laden</span></div>
   </div>
   <button id="help-close">SCHLIESSEN</button>
 </div>
@@ -187,7 +198,10 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
     <code style="font-size:11px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;display:block;margin-top:6px;text-align:left;word-break:break-all">
       CREATE TABLE messages (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, created_at timestamptz DEFAULT now(), sender text NOT NULL, content text NOT NULL);<br>
       ALTER TABLE messages ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "allow all" ON messages FOR ALL USING (true) WITH CHECK (true);
+      CREATE POLICY "allow all" ON messages FOR ALL USING (true) WITH CHECK (true);<br><br>
+      CREATE TABLE participants (name_id text PRIMARY KEY, owner_hash text NOT NULL, updated_at timestamptz DEFAULT now());<br>
+      ALTER TABLE participants ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "allow all" ON participants FOR ALL USING (true) WITH CHECK (true);
     </code>
   </p>
 </div>
@@ -198,6 +212,7 @@ const SUPABASE_KEY_KEY = 'eocr-supabase-key';
 const NAME_KEY = 'eocr-chat-name';
 const CHAT_KEY = 'eocr-chat-key';
 const EMOJI_KEY = 'eocr-chat-emoji';
+const CLAIM_KEY = 'eocr-chat-claim'; // local random secret proving ownership of a claimed name
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -211,6 +226,8 @@ let client = null;
 let subscription = null;
 let knownSenders = new Set();
 let cryptoKey = null;
+let hmacKey = null; // derived from the password, used only to compute name_id (HMAC) for uniqueness
+let claimedName = null; // the name this device has confirmed ownership of this session
 let chatReady = false;
 
 const messagesEl = document.getElementById('messages');
@@ -251,21 +268,110 @@ async function pickEmoji(e) {
   await applyEmojiToOldMessages(e);
 }
 
-// Rewrite the emoji prefix on all of my own past messages so the change is retroactive for everyone
+// Rewrite the emoji prefix on all of my own past messages so the change is retroactive for everyone.
+// Senders are encrypted, so we decrypt each to find mine, then write a freshly encrypted sender back.
 async function applyEmojiToOldMessages(emoji) {
   const name = myNameEl.value.trim().toLowerCase();
   if (!client || !name) return;
   const { data, error } = await client.from('messages').select('id,sender');
   if (error) { dbg('Emoji-Update Fehler: ' + error.message); return; }
-  // A row is "mine" if its sender is my plain name or ends with " <name>" (any old emoji prefix)
-  const ids = data.filter(m => m.sender === name || m.sender.endsWith(' ' + name)).map(m => m.id);
+  const ids = [];
+  for (const m of data) {
+    const plain = await decryptText(m.sender); // old plaintext senders pass through unchanged
+    // A row is "mine" if the decrypted sender is my plain name or ends with " <name>" (any emoji prefix)
+    if (plain === name || plain.endsWith(' ' + name)) ids.push(m.id);
+  }
   if (!ids.length) return;
-  const { error: uErr } = await client.from('messages').update({ sender: `${emoji} ${name}` }).in('id', ids);
+  const newEncSender = await encryptText(`${emoji} ${name}`);
+  const { error: uErr } = await client.from('messages').update({ sender: newEncSender }).in('id', ids);
   if (uErr) { dbg('Emoji-Update Fehler: ' + uErr.message); return; }
   dbg(`Emoji in ${ids.length} eigenen Nachrichten aktualisiert`);
   loadMessages();
 }
-nameEmojiBtn.onclick = openEmojiPanel;
+// Opening the emoji palette must first reserve the entered name — no emoji for a taken name
+nameEmojiBtn.onclick = async () => {
+  const name = myNameEl.value.trim().toLowerCase();
+  if (name && name !== claimedName) {
+    const ok = await claimName(name);
+    if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
+    localStorage.setItem(NAME_KEY, name);
+  }
+  openEmojiPanel();
+};
+
+// --- Name ownership: name_id = HMAC(name), reserved once in the participants table ---
+function bufToHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// HMAC key uses a SEPARATE salt from the AES key — never reuse one key for two purposes
+async function deriveHmacKey(password) {
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('forloop-chat-hmac-salt'), iterations: 100000, hash: 'SHA-256' },
+    km, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+}
+async function nameId(name) {
+  const enc = new TextEncoder();
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(name.toLowerCase()));
+  return bufToHex(sig);
+}
+// Random per-device secret; only its hash goes to the server, never the secret itself
+function getClaimSecret() {
+  let s = localStorage.getItem(CLAIM_KEY);
+  if (!s) { s = bufToHex(crypto.getRandomValues(new Uint8Array(32)).buffer); localStorage.setItem(CLAIM_KEY, s); }
+  return s;
+}
+async function ownerHash() {
+  const enc = new TextEncoder();
+  return bufToHex(await crypto.subtle.digest('SHA-256', enc.encode(getClaimSecret())));
+}
+// Returns true if the name is now ours (freshly claimed or already owned by this device)
+async function claimName(name) {
+  if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const id = await nameId(name);
+  const mine = await ownerHash();
+  const { data, error } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
+  if (error) { dbg('Claim-Check nicht möglich (Tabelle da?): ' + error.message); return true; }
+  if (data && data.length) {
+    if (data[0].owner_hash === mine) { dbg('Name gehört dir: ' + name); claimedName = name; return true; }
+    dbg('Name vergeben: ' + name);
+    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    return false;
+  }
+  const { error: insErr } = await client.from('participants').insert({ name_id: id, owner_hash: mine });
+  if (insErr) {
+    // PK conflict = someone claimed it in the meantime
+    dbg('Claim fehlgeschlagen: ' + insErr.message);
+    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    return false;
+  }
+  dbg('Name beansprucht: ' + name);
+  claimedName = name;
+  return true;
+}
+async function releaseName() {
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!name) { alert('Kein Name gesetzt.'); return; }
+  if (!hmacKey) { alert('Erst Passwort eingeben!'); return; }
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const id = await nameId(name);
+  const mine = await ownerHash();
+  const { data } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
+  if (data && data.length && data[0].owner_hash !== mine) {
+    alert('Dieser Name gehört nicht dir.');
+    return;
+  }
+  await client.from('participants').delete().eq('name_id', id);
+  localStorage.removeItem(NAME_KEY);
+  myNameEl.value = '';
+  if (claimedName === name) claimedName = null;
+  dbg('Name freigegeben: ' + name);
+  alert('Name „' + name + '" freigegeben.');
+}
+
 document.getElementById('help-close').onclick = () => document.getElementById('help-panel').classList.add('hidden');
 document.getElementById('stats-close').onclick = () => document.getElementById('stats-panel').classList.add('hidden');
 
@@ -301,15 +407,16 @@ async function showStats() {
   dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
 }
 document.getElementById('emoji-cancel').onclick = () => emojiPanel.classList.add('hidden');
-// Enter in the name field opens the emoji palette
-myNameEl.onkeydown = ev => {
-  if (ev.key === 'Enter') {
-    ev.preventDefault();
-    if (myNameEl.value.trim()) {
-      localStorage.setItem(NAME_KEY, myNameEl.value.trim().toLowerCase());
-      openEmojiPanel();
-    }
-  }
+// Enter in the name field: claim the name (must be free), then open the emoji palette
+myNameEl.onkeydown = async ev => {
+  if (ev.key !== 'Enter') return;
+  ev.preventDefault();
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!name) return;
+  const ok = await claimName(name);
+  if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
+  localStorage.setItem(NAME_KEY, name);
+  openEmojiPanel();
 };
 
 const savedKey = localStorage.getItem(CHAT_KEY);
@@ -326,6 +433,7 @@ async function submitKey() {
   const keyInput = document.getElementById('chat-key');
   const key = keyInput.value.trim();
   if (!key) return alert('Schlüssel eingeben!');
+  dbg(`submitKey: eingegebene Länge=${key.length}`);
   const goBtn = document.getElementById('key-go');
   goBtn.disabled = true;
   const testKey = await deriveKey(key);
@@ -339,6 +447,7 @@ async function submitKey() {
     return;
   }
   cryptoKey = testKey;
+  hmacKey = await deriveHmacKey(key);
   localStorage.setItem(CHAT_KEY, key);
   keyPanel.classList.add('hidden');
   if (chatReady) {
@@ -379,7 +488,7 @@ document.getElementById('confirm-yes').onclick = async () => {
   if (error) { dbg('Löschfehler: ' + error.message); return; }
   knownSenders = new Set();
   messagesEl.innerHTML = '';
-  msgInput.value = '';
+  msgInput.value = ''; updateSendBtn();
   dbg('Alle Nachrichten gelöscht');
   pendingDelete = false;
 };
@@ -413,6 +522,7 @@ async function deriveKey(password) {
 
 async function initCrypto(password) {
   cryptoKey = await deriveKey(password);
+  hmacKey = await deriveHmacKey(password);
   dbg('AES-256-GCM Schlüssel abgeleitet');
 }
 
@@ -429,7 +539,9 @@ async function verifyKey(testKey) {
   if (error) { dbg('Schlüssel-Check nicht möglich: ' + error.message); return true; }
   if (!data || !data.length) { dbg('Keine verschlüsselte Nachricht zum Prüfen'); return true; }
   const plain = await decryptText(data[0].content, testKey);
-  return plain !== '[falscher Schlüssel]';
+  const ok = plain !== '[falscher Schlüssel]';
+  dbg(`verifyKey: geprüfte Nachricht len=${data[0].content.length}, Ergebnis=${ok ? 'OK' : 'FALSCH'}`);
+  return ok;
 }
 
 async function encryptText(plain) {
@@ -524,15 +636,23 @@ async function renderMsg(msg) {
   const div = document.createElement('div');
   div.className = 'msg other';
   if (msg.id != null) div.dataset.id = msg.id;
-  const senderColor = nameColor(msg.sender);
+  // Sender is encrypted too (old plaintext senders still pass through decryptText unchanged)
+  const senderPlain = await decryptText(msg.sender);
+  const senderColor = nameColor(senderPlain);
   const isEnc = msg.content.startsWith('ENC:');
   if (isEnc) div.classList.add('encrypted');
   const content = await decryptText(msg.content);
-  div.innerHTML = `<span class="sender" style="color:${senderColor}">${escapeHtml(msg.sender)}</span><span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  div.innerHTML = `<span class="sender" style="color:${senderColor}">${escapeHtml(senderPlain)}</span><span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
 }
 
 msgInput.onkeydown = e => { if (e.key === 'Enter') sendMsg(); };
+
+// Send button: visible only while the field has text
+const sendBtn = document.getElementById('send-btn');
+function updateSendBtn() { sendBtn.classList.toggle('visible', msgInput.value.trim().length > 0); }
+msgInput.addEventListener('input', updateSendBtn);
+sendBtn.onclick = () => sendMsg();
 
 async function sendMsg() {
   const content = msgInput.value.trim();
@@ -542,7 +662,7 @@ async function sendMsg() {
   if (content === '/delete') {
     pendingDelete = true;
     confirmModal.classList.remove('hidden');
-    msgInput.value = '';
+    msgInput.value = ''; updateSendBtn();
     return;
   }
   if (content === '/key') {
@@ -551,42 +671,55 @@ async function sendMsg() {
     document.getElementById('key-cancel').style.display = 'inline-block';
     keyPanel.classList.remove('hidden');
     keyInput.focus();
-    msgInput.value = '';
+    msgInput.value = ''; updateSendBtn();
     return;
   }
   if (content === '/help') {
     document.getElementById('help-panel').classList.remove('hidden');
-    msgInput.value = '';
+    msgInput.value = ''; updateSendBtn();
     return;
   }
   if (content === '/stats') {
-    msgInput.value = '';
+    msgInput.value = ''; updateSendBtn();
     showStats();
     return;
   }
   if (content === '/loadall') {
-    msgInput.value = '';
+    msgInput.value = ''; updateSendBtn();
     dbg('Lade alle Nachrichten...');
     loadMessages(true);
     return;
   }
+  if (content === '/release') {
+    msgInput.value = ''; updateSendBtn();
+    releaseName();
+    return;
+  }
   if (content === '/clear') {
-    // Clear this origin's localStorage (chat key, name, Supabase config) and reload
-    localStorage.clear();
-    dbg('localStorage geleert');
+    // Wipe only the password + Supabase config; KEEP identity (name + claim secret) so you keep your name
+    localStorage.removeItem(CHAT_KEY);
+    localStorage.removeItem(SUPABASE_URL_KEY);
+    localStorage.removeItem(SUPABASE_KEY_KEY);
+    dbg('Passwort/Config gelöscht (Name behalten)');
     location.reload();
     return;
   }
   if (!sender) return alert('Name eingeben!');
+  // Enforce name reservation here too — typing a name in the header and just chatting must not bypass it
+  if (sender !== claimedName) {
+    const ok = await claimName(sender);
+    if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
+  }
   localStorage.setItem(NAME_KEY, sender);
-  // Prefix the chosen emoji to the sender so it shows up for everyone in the chat
+  // Prefix the chosen emoji to the sender, then encrypt the whole sender (full metadata encryption)
   const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
+  const encryptedSender = await encryptText(displaySender);
   const encrypted = await encryptText(content);
   dbg(`Sende (verschlüsselt) als ${displaySender}`);
-  const { error } = await client.from('messages').insert({ sender: displaySender, content: encrypted });
+  const { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted });
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
-  msgInput.value = '';
+  msgInput.value = ''; updateSendBtn();
   setTimeout(loadMessages, 300);
 }
 
