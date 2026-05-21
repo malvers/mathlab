@@ -30,6 +30,10 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
 .ios b{color:#00d2ff}
 .note{font-size:11.5px;color:rgba(0,210,255,.45);line-height:1.5;margin-top:8px}
 .share{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin:0 2px}
+/* swirly spinner — shown while something is running (install / opening the app) */
+.spinner{display:none;width:34px;height:34px;margin:16px auto 0;border:3px solid rgba(0,210,255,.2);border-top-color:#00d2ff;border-radius:50%;animation:spin .8s linear infinite}
+.spinner.on{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -47,7 +51,8 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
     &nbsp;→&nbsp; <b>„Zum Home-Bildschirm"</b>.
   </div>
 
-  <a class="btn secondary" href="vgp.html">Im Browser öffnen</a>
+  <a class="btn secondary" href="vgp.html" id="open-btn">Im Browser öffnen</a>
+  <div class="spinner" id="spinner"></div>
   <div class="note" id="status"></div>
 </div>
 
@@ -55,6 +60,8 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
 const statusEl = document.getElementById('status');
 const installBtn = document.getElementById('install-btn');
 const iosHint = document.getElementById('ios-hint');
+const spinner = document.getElementById('spinner');
+const showSpinner = (on) => spinner.classList.toggle('on', on);
 
 // Register the service worker (scope covers vgp.html too) — needed for installability.
 if ('serviceWorker' in navigator) {
@@ -65,11 +72,15 @@ if ('serviceWorker' in navigator) {
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 if (standalone) {
-  // Already launched as an installed app → go straight to the chat.
+  // Already launched as an installed app → spinner, then straight to the chat.
+  showSpinner(true);
   location.replace('vgp.html');
 } else if (isIOS) {
   iosHint.style.display = 'block';
 }
+
+// Spinner while the chat loads when "Im Browser öffnen" is tapped
+document.getElementById('open-btn').addEventListener('click', () => showSpinner(true));
 
 // Android/Chromium: capture the install prompt and wire it to our button.
 let deferredPrompt = null;
@@ -80,13 +91,16 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 installBtn.onclick = async () => {
   if (!deferredPrompt) return;
+  showSpinner(true);
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
+  showSpinner(false);
   statusEl.textContent = outcome === 'accepted' ? 'Installiert! Öffne VGP vom Startbildschirm.' : 'Installation abgebrochen.';
   deferredPrompt = null;
   installBtn.style.display = 'none';
 };
 window.addEventListener('appinstalled', () => {
+  showSpinner(false);
   statusEl.textContent = 'Installiert! Öffne VGP vom Startbildschirm.';
   installBtn.style.display = 'none';
 });
