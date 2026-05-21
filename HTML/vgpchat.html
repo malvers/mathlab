@@ -268,10 +268,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
     <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
     <div class="cmd"><code>/key</code><span>Passwort (Verschlüsselung) ändern</span></div>
-    <div class="cmd"><code>/release</code><span>Eigenen Namen freigeben (wieder vergebbar)</span></div>
-    <div class="cmd"><code>/delete</code><span>Alle Nachrichten löschen</span></div>
     <div class="cmd"><code>/clear</code><span>Passwort/Config löschen (Name bleibt), neu laden</span></div>
-    <div class="cmd"><code>/reset</code><span>ALLES unwiderruflich zurücksetzen</span></div>
   </div>
   <button id="help-close">SCHLIESSEN</button>
 </div>
@@ -300,17 +297,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <input id="cfg-key" aria-label="anon public key" placeholder="anon public key">
   <button id="cfg-go">STARTEN</button>
   <p style="font-size:12px;color:rgba(0,210,255,.3);max-width:400px;text-align:center;line-height:1.5">
-    Nach dem Starten: in Supabase SQL-Editor folgendes ausführen:<br>
+    Setup: in Supabase „Anonymous Sign-ins" aktivieren, dann im SQL-Editor:<br>
     <code style="font-size:11px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;display:block;margin-top:6px;text-align:left;word-break:break-all">
-      CREATE TABLE messages (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, created_at timestamptz DEFAULT now(), sender text NOT NULL, content text NOT NULL);<br>
+      CREATE TABLE messages (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, created_at timestamptz DEFAULT now(), sender text NOT NULL, content text NOT NULL, author uuid DEFAULT auth.uid(), pubkey text, sig text);<br>
       ALTER TABLE messages ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "allow all" ON messages FOR ALL USING (true) WITH CHECK (true);<br><br>
-      CREATE TABLE participants (name_id text PRIMARY KEY, owner_hash text NOT NULL, updated_at timestamptz DEFAULT now());<br>
-      ALTER TABLE participants ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "allow all" ON participants FOR ALL USING (true) WITH CHECK (true);<br><br>
-      CREATE TABLE app_meta (key text PRIMARY KEY, value text, updated_at timestamptz DEFAULT now());<br>
-      ALTER TABLE app_meta ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "allow all" ON app_meta FOR ALL USING (true) WITH CHECK (true);
+      CREATE POLICY "msg read" ON messages FOR SELECT TO authenticated USING (true);<br>
+      CREATE POLICY "msg insert" ON messages FOR INSERT TO authenticated WITH CHECK (author = auth.uid());<br>
+      CREATE POLICY "msg update" ON messages FOR UPDATE TO authenticated USING (author = auth.uid()) WITH CHECK (author = auth.uid());<br>
+      CREATE POLICY "msg delete" ON messages FOR DELETE TO authenticated USING (author = auth.uid());<br><br>
+      CREATE TABLE identities (name_id text PRIMARY KEY, pubkey text NOT NULL, owner uuid DEFAULT auth.uid(), created_at timestamptz DEFAULT now());<br>
+      ALTER TABLE identities ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "id read" ON identities FOR SELECT TO authenticated USING (true);<br>
+      CREATE POLICY "id insert" ON identities FOR INSERT TO authenticated WITH CHECK (owner = auth.uid());<br>
+      CREATE POLICY "id delete" ON identities FOR DELETE TO authenticated USING (owner = auth.uid());
     </code>
   </p>
 </div>
@@ -321,7 +320,6 @@ const SUPABASE_KEY_KEY = 'eocr-supabase-key';
 const NAME_KEY = 'eocr-chat-name';
 const CHAT_KEY = 'eocr-chat-key';
 const EMOJI_KEY = 'eocr-chat-emoji';
-const CLAIM_KEY = 'eocr-chat-claim'; // local random secret proving ownership of a claimed name
 const LAST_RESET_KEY = 'eocr-last-reset-seen'; // the reset_at marker this device has already applied
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
@@ -475,7 +473,7 @@ msgEmojiBtn.onclick = () => {
   openEmojiPanel();
 };
 
-// --- Name ownership: name_id = HMAC(name), reserved once in the participants table ---
+// --- Name binding: name_id = HMAC(name), reserved once in the identities table (name ↔ pubkey) ---
 function bufToHex(buf) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -493,14 +491,7 @@ async function nameId(name) {
   const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(name.toLowerCase()));
   return bufToHex(sig);
 }
-// Owner proof derived from password + name — same result on every device with the same password.
-// Uses a distinct prefix ('owner:') so it can never collide with nameId().
-async function ownerHash(name) {
-  const enc = new TextEncoder();
-  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode('owner:' + name.toLowerCase()));
-  return bufToHex(sig);
-}
-// Returns true if the name is now ours (freshly claimed or already owned via same password)
+// Returns true if the name is now ours (freshly claimed or already owned via our signing key)
 async function claimName(name) {
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
   await ensureClient();
@@ -525,26 +516,6 @@ async function claimName(name) {
   dbg('Name beansprucht (Schlüssel gebunden): ' + name);
   claimedName = name;
   return true;
-}
-async function releaseName() {
-  const name = myNameEl.value.trim().toLowerCase();
-  if (!name) { alert('Kein Name gesetzt.'); return; }
-  if (!hmacKey) { alert('Erst Passwort eingeben!'); return; }
-  await ensureClient();
-  if (!myPubB64) await loadSigningKeys();
-  const id = await nameId(name);
-  const { data } = await client.from('identities').select('pubkey').eq('name_id', id).limit(1);
-  if (data && data.length && data[0].pubkey !== myPubB64) {
-    alert('Dieser Name gehört nicht dir.');
-    return;
-  }
-  await client.from('identities').delete().eq('name_id', id);
-  if (idCache) idCache.delete(id);
-  localStorage.removeItem(NAME_KEY);
-  myNameEl.value = '';
-  if (claimedName === name) claimedName = null;
-  dbg('Name freigegeben: ' + name);
-  alert('Name „' + name + '" freigegeben.');
 }
 
 document.getElementById('help-close').onclick = () => document.getElementById('help-panel').classList.add('hidden');
@@ -781,8 +752,8 @@ async function doReset() {
     // Wipe all messages and all reserved names on the server
     const { error: mErr } = await client.from('messages').delete().gt('id', 0);
     if (mErr) dbg('Reset Nachrichten-Fehler: ' + mErr.message);
-    const { error: pErr } = await client.from('participants').delete().neq('name_id', '');
-    if (pErr) dbg('Reset Teilnehmer-Fehler: ' + pErr.message);
+    const { error: pErr } = await client.from('identities').delete().neq('name_id', '');
+    if (pErr) dbg('Reset Identitäten-Fehler: ' + pErr.message);
     // Signal every other client to wipe itself (now if online, on next open if offline)
     const { error: rErr } = await client.from('app_meta').upsert({ key: 'reset_at', value: ts, updated_at: ts });
     if (rErr) dbg('Reset-Signal-Fehler (app_meta da?): ' + rErr.message);
@@ -1056,10 +1027,9 @@ const CMD_LIST = [
   { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
   { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
   { cmd: '/key',     desc: 'Passwort ändern',                   run: () => { const ki = document.getElementById('chat-key'); ki.value = ''; document.getElementById('key-cancel').style.display = 'inline-block'; keyPanel.classList.remove('hidden'); ki.focus(); } },
-  { cmd: '/release', desc: 'Eigenen Namen freigeben',           run: () => releaseName() },
-  { cmd: '/delete',  desc: 'Alle Nachrichten löschen',          run: () => { pendingDelete = true; confirmModal.classList.remove('hidden'); } },
-  { cmd: '/clear',   desc: 'Passwort/Config löschen',           run: () => { localStorage.removeItem(CHAT_KEY); localStorage.removeItem(SUPABASE_URL_KEY); localStorage.removeItem(SUPABASE_KEY_KEY); dbg('Passwort/Config gelöscht (Name behalten)'); location.reload(); } },
-  { cmd: '/reset',   desc: 'ALLES unwiderruflich zurücksetzen', run: () => openResetModal() }
+  { cmd: '/clear',   desc: 'Passwort/Config löschen',           run: () => { localStorage.removeItem(CHAT_KEY); localStorage.removeItem(SUPABASE_URL_KEY); localStorage.removeItem(SUPABASE_KEY_KEY); dbg('Passwort/Config gelöscht (Name behalten)'); location.reload(); } }
+  // /delete und /reset entfernt: löschen unter RLS nur eigene Nachrichten → irreführend.
+  // Echter Admin-Wipe bräuchte service_role/Edge Function (späteres Thema).
 ];
 const cmdBox = document.getElementById('cmd-box');
 let cmdMatches = [], cmdActive = -1;
