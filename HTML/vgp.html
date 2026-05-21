@@ -4,14 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>Doc Alvers Chat — E2E</title>
-<!-- PWA: installable app (manifest + icons + iOS home-screen support) -->
+<!-- PWA: manifest so the installed app (launched from vgpapp.html) opens the chat in standalone -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020410">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VGP">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
@@ -219,6 +214,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </button>
   </div>
   <div id="emoji-panel" class="hidden">
+    <!--suppress HtmlUnknownTag -->
     <emoji-picker class="dark"></emoji-picker>
   </div>
 </div>
@@ -236,7 +232,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="reset-modal" class="hidden">
   <div id="reset-box">
     <p><b>ALLES unwiderruflich zurücksetzen?</b><br>Alle Nachrichten, alle reservierten Namen und deine lokalen Daten werden gelöscht. Das kann <b>nicht</b> rückgängig gemacht werden.</p>
-    <input id="reset-pwd" type="password" placeholder="Bestätigungs-Passwort" autocomplete="off" readonly>
+    <input id="reset-pwd" type="password" aria-label="Bestätigungs-Passwort" placeholder="Bestätigungs-Passwort" autocomplete="off" readonly>
     <p id="reset-err" class="reset-err hidden">Falsches Passwort.</p>
     <div class="btns">
       <button class="btn-yes" id="reset-yes">RESET</button>
@@ -1074,16 +1070,6 @@ function escapeHtml(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
-}
-
-// PWA: register the service worker so the browser offers "Install app" (no offline caching — KISS)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(
-      () => dbg('Service Worker registriert — App installierbar'),
-      err => dbg('Service Worker Fehler: ' + err.message)
-    );
-  });
 }
 </script>
 </body>
