@@ -957,7 +957,7 @@ async function renderMsg(msg) {
   const rawContent = await decryptText(msg.content);
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
-  const showSender = senderNames.size > 2 && !decryptFailed;
+  const showSender = !decryptFailed;
   const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${escapeHtml(senderPlain)}</span>` : '';
   div.innerHTML = `${senderHtml}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
