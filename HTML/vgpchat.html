@@ -53,6 +53,9 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 .msg.self::before{content:'';position:absolute;top:0;right:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%230c4a6e' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat}
 .msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%23202c33' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
 .msg .sender{display:block;font-size:12.8px;font-weight:600;margin-bottom:2px;line-height:1.25}
+/* unverified / forged message: signature invalid or key doesn't match the claimed name */
+.msg.forged{outline:1px solid rgba(255,80,80,.6);background:rgba(120,20,20,.35)!important}
+.msg .sender .unverified{font-weight:700}
 .msg .text{word-wrap:break-word}
 .msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
 .msg.encrypted{border:none}
@@ -332,6 +335,21 @@ function dbg(msg) {
 let client = null;
 let subscription = null;
 let knownSenders = new Set();
+
+// Single Supabase client + anonymous sign-in → a device-bound identity (auth.uid()) without e-mail.
+// Failsafe: if Anonymous sign-ins aren't enabled in Supabase yet, the app keeps working (old RLS).
+async function ensureClient() {
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) {
+      const { error } = await client.auth.signInAnonymously();
+      if (error) dbg('Anon-Login nicht möglich (Anonymous Auth aktiviert?): ' + error.message);
+      else dbg('Anonym eingeloggt — Geräte-Identität aktiv');
+    }
+  } catch (e) { dbg('Auth-Fehler: ' + e.message); }
+  return client;
+}
 let cryptoKey = null;
 let hmacKey = null; // derived from the password, used only to compute name_id (HMAC) for uniqueness
 let claimedName = null; // the name this device has confirmed ownership of this session
@@ -485,24 +503,26 @@ async function ownerHash(name) {
 // Returns true if the name is now ours (freshly claimed or already owned via same password)
 async function claimName(name) {
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
-  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  await ensureClient();
+  if (!myPubB64) await loadSigningKeys();
   const id = await nameId(name);
-  const mine = await ownerHash(name);
-  const { data, error } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
+  // A name is bound to a public key. Ours if the stored pubkey matches this device's key.
+  const { data, error } = await client.from('identities').select('pubkey').eq('name_id', id).limit(1);
   if (error) { dbg('Claim-Check nicht möglich (Tabelle da?): ' + error.message); return true; }
   if (data && data.length) {
-    if (data[0].owner_hash === mine) { dbg('Name gehört dir: ' + name); claimedName = name; return true; }
+    if (data[0].pubkey === myPubB64) { dbg('Name gehört dir: ' + name); claimedName = name; return true; }
     dbg('Name vergeben: ' + name);
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
   }
-  const { error: insErr } = await client.from('participants').insert({ name_id: id, owner_hash: mine });
+  const { error: insErr } = await client.from('identities').insert({ name_id: id, pubkey: myPubB64 });
   if (insErr) {
     dbg('Claim fehlgeschlagen: ' + insErr.message);
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
   }
-  dbg('Name beansprucht: ' + name);
+  if (idCache) idCache.set(id, myPubB64);
+  dbg('Name beansprucht (Schlüssel gebunden): ' + name);
   claimedName = name;
   return true;
 }
@@ -510,15 +530,16 @@ async function releaseName() {
   const name = myNameEl.value.trim().toLowerCase();
   if (!name) { alert('Kein Name gesetzt.'); return; }
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return; }
-  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  await ensureClient();
+  if (!myPubB64) await loadSigningKeys();
   const id = await nameId(name);
-  const mine = await ownerHash(name);
-  const { data } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
-  if (data && data.length && data[0].owner_hash !== mine) {
+  const { data } = await client.from('identities').select('pubkey').eq('name_id', id).limit(1);
+  if (data && data.length && data[0].pubkey !== myPubB64) {
     alert('Dieser Name gehört nicht dir.');
     return;
   }
-  await client.from('participants').delete().eq('name_id', id);
+  await client.from('identities').delete().eq('name_id', id);
+  if (idCache) idCache.delete(id);
   localStorage.removeItem(NAME_KEY);
   myNameEl.value = '';
   if (claimedName === name) claimedName = null;
@@ -817,7 +838,7 @@ async function initCrypto(password) {
 // Prüft testKey gegen die zuletzt gespeicherte verschlüsselte Nachricht.
 // Kein Client/keine verschlüsselte Nachricht/Query-Fehler -> nicht prüfbar -> als gültig behandeln.
 async function verifyKey(testKey) {
-  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  await ensureClient();
   const { data, error } = await client
     .from('messages')
     .select('content')
@@ -856,8 +877,61 @@ async function decryptText(cipherB64, key = cryptoKey) {
   }
 }
 
+// --- Device signing identity (ECDSA P-256). Private key is non-extractable and lives only in
+// IndexedDB on this device (Signal-style). Each message is signed; receivers verify the signature
+// against the public key bound to the sender's name → cryptographic anti-impersonation. ---
+let myPrivKey = null;   // non-extractable CryptoKey (sign)
+let myPubB64 = null;    // our public key (spki, base64) — published with each message
+let idCache = null;     // Map name_id(hex) → pubkey(base64), loaded from the identities table
+
+function idbReq(mode, fn) {
+  return new Promise((res, rej) => {
+    const open = indexedDB.open('vgp-keys', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('keys');
+    open.onerror = () => rej(open.error);
+    open.onsuccess = () => {
+      const tx = open.result.transaction('keys', mode);
+      const r = fn(tx.objectStore('keys'));
+      tx.oncomplete = () => res(r && r.result);
+      tx.onerror = () => rej(tx.error);
+    };
+  });
+}
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function loadSigningKeys() {
+  const stored = await idbReq('readonly', st => st.get('signing'));
+  if (stored && stored.priv && stored.pub) { myPrivKey = stored.priv; myPubB64 = stored.pub; return; }
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  myPubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
+  // Re-import the private key as NON-extractable, then persist that (CryptoKey survives in IndexedDB)
+  const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+  myPrivKey = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  await idbReq('readwrite', st => st.put({ priv: myPrivKey, pub: myPubB64 }, 'signing'));
+  dbg('Signatur-Schlüssel erzeugt (Geräte-Identität)');
+}
+async function signText(text) {
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, myPrivKey, new TextEncoder().encode(text));
+  return b64(sig);
+}
+async function verifyText(text, sigB64, pubB64) {
+  try {
+    const pub = await crypto.subtle.importKey('spki', unb64(pubB64), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pub, unb64(sigB64), new TextEncoder().encode(text));
+  } catch (_) { return false; }
+}
+// Load the name→pubkey registry once (cached); refreshed on demand
+async function loadIdentities() {
+  idCache = new Map();
+  const { data, error } = await client.from('identities').select('name_id,pubkey');
+  if (error) { dbg('Identities nicht lesbar (Tabelle da?): ' + error.message); return; }
+  for (const r of (data || [])) idCache.set(r.name_id, r.pubkey);
+}
+
 async function initChat(url, key) {
-  if (!client) client = window.supabase.createClient(url, key);
+  await ensureClient();
+  await loadSigningKeys();
   chatReady = true;
   dbg('Supabase-Client erstellt');
   // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
@@ -883,6 +957,8 @@ function nameColor(name) {
 
 const MSG_LIMIT = 500;
 async function loadMessages(all = false) {
+  // Refresh the name→pubkey registry so renderMsg can verify signatures
+  await loadIdentities();
   // Default: only the most recent MSG_LIMIT messages (saves traffic). /loadall fetches everything.
   let query = client.from('messages').select('*');
   query = all
@@ -956,7 +1032,20 @@ async function renderMsg(msg) {
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
   const showSender = !decryptFailed;
-  const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${escapeHtml(senderPlain)}</span>` : '';
+  // Anti-impersonation: the signature must be valid AND the signing key must be the one bound to
+  // this sender's name. A mismatch → flag the message (possible forgery). Legacy messages without
+  // a signature are left unflagged.
+  let badge = '';
+  if (!decryptFailed && msg.pubkey && msg.sig && hmacKey) {
+    const sigOk = await verifyText(msg.content + '|' + msg.sender, msg.sig, msg.pubkey);
+    const boundPub = idCache ? idCache.get(await nameId(senderName(senderPlain))) : undefined;
+    const nameOk = !boundPub || boundPub === msg.pubkey;
+    if (!sigOk || !nameOk) {
+      badge = '<span class="unverified" title="Signatur ungültig — mögliche Fälschung">⚠️</span> ';
+      div.classList.add('forged');
+    }
+  }
+  const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${badge}${escapeHtml(senderPlain)}</span>` : '';
   div.innerHTML = `${senderHtml}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
 }
@@ -1057,8 +1146,17 @@ async function sendMsg() {
   const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
   const encryptedSender = await encryptText(displaySender);
   const encrypted = await encryptText(content);
-  dbg(`Sende (verschlüsselt) als ${displaySender}`);
-  const { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted });
+  // Sign the (encrypted) payload with our private key → receivers verify it against the
+  // public key bound to this name. Nobody without our key can forge a message as us.
+  if (!myPubB64) await loadSigningKeys();
+  const sig = await signText(encrypted + '|' + encryptedSender);
+  dbg(`Sende (verschlüsselt + signiert) als ${displaySender}`);
+  let { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted, pubkey: myPubB64, sig });
+  // Failsafe: if the pubkey/sig columns don't exist yet (Etappe-2-SQL not run), send without them
+  if (error && /pubkey|sig|column|schema|cache/i.test(error.message)) {
+    dbg('Signatur-Spalten fehlen — sende ohne Signatur (bitte Etappe-2-SQL ausführen): ' + error.message);
+    ({ error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted }));
+  }
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
   msgInput.value = ''; updateSendBtn();
