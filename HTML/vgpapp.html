@@ -6,7 +6,7 @@
 <title>VGP installieren</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- PWA install entry point: manifest + icons. The manifest's start_url points at vgp.html,
+<!-- PWA install entry point: manifest + icons. The manifest's start_url points at vgpchat.html,
      so the installed tile opens the chat directly. -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020410">
@@ -29,6 +29,7 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
 .ios{display:none;text-align:left;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.2);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;color:#cfe4f7;margin-bottom:12px}
 .ios b{color:#00d2ff}
 .note{font-size:11.5px;color:rgba(0,210,255,.45);line-height:1.5;margin-top:8px}
+.note.warn{font-size:14px;color:#ff4444}
 .share{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin:0 2px}
 /* swirly spinner — shown while something is running (install / opening the app) */
 .spinner{display:none;width:34px;height:34px;margin:16px auto 0;border:3px solid rgba(0,210,255,.2);border-top-color:#00d2ff;border-radius:50%;animation:spin .8s linear infinite}
@@ -51,7 +52,7 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
     &nbsp;→&nbsp; <b>„Zum Home-Bildschirm"</b>.
   </div>
 
-  <a class="btn secondary" href="vgp.html" id="open-btn">Im Browser öffnen</a>
+  <a class="btn secondary" href="vgpchat.html" id="open-btn">Im Browser öffnen</a>
   <div class="spinner" id="spinner"></div>
   <div class="note" id="status"></div>
 </div>
@@ -63,7 +64,7 @@ const iosHint = document.getElementById('ios-hint');
 const spinner = document.getElementById('spinner');
 const showSpinner = (on) => spinner.classList.toggle('on', on);
 
-// Register the service worker (scope covers vgp.html too) — needed for installability.
+// Register the service worker (scope covers vgpchat.html too) — needed for installability.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
@@ -74,7 +75,7 @@ const standalone = window.matchMedia('(display-mode: standalone)').matches || wi
 if (standalone) {
   // Already launched as an installed app → spinner, then straight to the chat.
   showSpinner(true);
-  location.replace('vgp.html');
+  location.replace('vgpchat.html');
 } else if (isIOS) {
   iosHint.style.display = 'block';
 }
@@ -93,6 +94,7 @@ installBtn.onclick = async () => {
   if (!deferredPrompt) {
     // No native install prompt available → direct install is Android/Chrome only.
     statusEl.textContent = 'Direkt-Installation nur unter Android (Chrome) möglich.';
+    statusEl.classList.add('warn');
     if (isIOS) iosHint.style.display = 'block';
     return;
   }
