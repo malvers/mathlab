@@ -31,7 +31,10 @@ header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,
 .name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
 header input::placeholder{color:rgba(0,210,255,.3)}
 header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
-#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.25) transparent}
+#messages::-webkit-scrollbar{width:5px}
+#messages::-webkit-scrollbar-thumb{background:rgba(0,210,255,.25);border-radius:3px}
+#messages::-webkit-scrollbar-track{background:transparent}
 /* WhatsApp-style bubbles (blue), dark theme — self right, other left */
 .msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:#e9edef;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
 .msg.self{align-self:flex-end;background:#0c4a6e;border-top-right-radius:0}
@@ -94,9 +97,9 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #name-emoji:focus{outline:none}
 /* Emoji picker overlay */
 /* WhatsApp-style emoji picker — appears just above the input row, dark theme */
-#emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;background:transparent}
+#emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
 #emoji-panel.hidden{display:none}
-#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 8px 70px;border-radius:8px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
+#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
   --background:rgb(3,10,16);
   --border-color:rgba(0,210,255,.12);
   --indicator-color:#00d2ff;
@@ -104,8 +107,8 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
   --input-border-color:rgba(0,210,255,.2);
   --input-font-color:#e9edef;
   --input-placeholder-color:rgba(160,170,180,.55);
-  --input-padding:0.2rem 0.5rem;
-  --input-line-height:1.4;
+  --input-padding:0.1rem 0.6rem;
+  --input-line-height:1.2;
   --button-active-background:rgba(0,210,255,.18);
   --button-hover-background:rgba(0,210,255,.1);
   --num-columns:9;
@@ -311,16 +314,17 @@ if (myEmoji) nameEmojiBtn.textContent = myEmoji;
 emojiPicker.addEventListener('emoji-click', ev => pickEmoji(ev.detail.unicode));
 // Tapping the dimmed area outside the sheet closes it
 emojiPanel.addEventListener('click', e => { if (e.target === emojiPanel) emojiPanel.classList.add('hidden'); });
-// The scrollable list lives in the picker's shadow DOM — inject a slim scrollbar there
+// Inner styling lives in the picker's shadow DOM — inject a <style> there (the documented way).
+// Selectors: #skintone-button is the skin-tone (hand) button, input.search is the search box.
 customElements.whenDefined('emoji-picker').then(() => {
-  const css = `::-webkit-scrollbar{width:5px;height:5px}
+  const style = document.createElement('style');
+  style.textContent = `* {scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+    ::-webkit-scrollbar{width:5px;height:5px}
     ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:3px}
     ::-webkit-scrollbar-track{background:transparent}
-    .skintone-button{display:none}
+    #skintone-button{display:none}
     input.search{font-size:13px}`;
-  const sheet = new CSSStyleSheet();
-  sheet.replaceSync(css);
-  emojiPicker.shadowRoot.adoptedStyleSheets = [...emojiPicker.shadowRoot.adoptedStyleSheets, sheet];
+  emojiPicker.shadowRoot.appendChild(style);
 });
 
 // Where a picked emoji goes: 'avatar' (header button) changes the personal emoji;
