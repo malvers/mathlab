@@ -892,16 +892,16 @@ async function renderMsg(msg) {
   messagesEl.appendChild(div);
 }
 
-// --- Slash-command autocomplete (opens above the input on "/") ---
+// --- Slash-command registry — single source of truth for autocomplete + execution ---
 const CMD_LIST = [
-  { cmd: '/help', desc: 'Befehlsübersicht anzeigen' },
-  { cmd: '/stats', desc: 'Belegten Speicher anzeigen' },
-  { cmd: '/loadall', desc: 'Alle Nachrichten laden' },
-  { cmd: '/key', desc: 'Passwort ändern' },
-  { cmd: '/release', desc: 'Eigenen Namen freigeben' },
-  { cmd: '/delete', desc: 'Alle Nachrichten löschen' },
-  { cmd: '/clear', desc: 'Passwort/Config löschen' },
-  { cmd: '/reset', desc: 'ALLES unwiderruflich zurücksetzen' }
+  { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
+  { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
+  { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
+  { cmd: '/key',     desc: 'Passwort ändern',                   run: () => { const ki = document.getElementById('chat-key'); ki.value = ''; document.getElementById('key-cancel').style.display = 'inline-block'; keyPanel.classList.remove('hidden'); ki.focus(); } },
+  { cmd: '/release', desc: 'Eigenen Namen freigeben',           run: () => releaseName() },
+  { cmd: '/delete',  desc: 'Alle Nachrichten löschen',          run: () => { pendingDelete = true; confirmModal.classList.remove('hidden'); } },
+  { cmd: '/clear',   desc: 'Passwort/Config löschen',           run: () => { localStorage.removeItem(CHAT_KEY); localStorage.removeItem(SUPABASE_URL_KEY); localStorage.removeItem(SUPABASE_KEY_KEY); dbg('Passwort/Config gelöscht (Name behalten)'); location.reload(); } },
+  { cmd: '/reset',   desc: 'ALLES unwiderruflich zurücksetzen', run: () => openResetModal() }
 ];
 const cmdBox = document.getElementById('cmd-box');
 let cmdMatches = [], cmdActive = -1;
@@ -969,67 +969,22 @@ sendBtn.onclick = () => sendMsg();
 async function sendMsg() {
   hideCmdBox();
   const content = msgInput.value.trim();
-  const sender = myNameEl.value.trim().toLowerCase();
   if (!content) return;
-  // Slash commands run without a name — only sending a real message requires one
-  if (content === '/delete') {
-    pendingDelete = true;
-    confirmModal.classList.remove('hidden');
+  // Dispatch slash commands — no name required
+  const cmd = CMD_LIST.find(c => c.cmd === content.toLowerCase());
+  if (cmd) {
     msgInput.value = ''; updateSendBtn();
+    cmd.run();
     return;
   }
-  if (content === '/key') {
-    const keyInput = document.getElementById('chat-key');
-    keyInput.value = '';
-    document.getElementById('key-cancel').style.display = 'inline-block';
-    keyPanel.classList.remove('hidden');
-    keyInput.focus();
-    msgInput.value = ''; updateSendBtn();
-    return;
-  }
-  if (content === '/help') {
-    document.getElementById('help-panel').classList.remove('hidden');
-    msgInput.value = ''; updateSendBtn();
-    return;
-  }
-  if (content === '/stats') {
-    msgInput.value = ''; updateSendBtn();
-    showStats();
-    return;
-  }
-  if (content === '/loadall') {
-    msgInput.value = ''; updateSendBtn();
-    dbg('Lade alle Nachrichten...');
-    loadMessages(true);
-    return;
-  }
-  if (content === '/release') {
-    msgInput.value = ''; updateSendBtn();
-    releaseName();
-    return;
-  }
-  if (content === '/clear') {
-    // Wipe only the password + Supabase config; KEEP identity (name + claim secret) so you keep your name
-    localStorage.removeItem(CHAT_KEY);
-    localStorage.removeItem(SUPABASE_URL_KEY);
-    localStorage.removeItem(SUPABASE_KEY_KEY);
-    dbg('Passwort/Config gelöscht (Name behalten)');
-    location.reload();
-    return;
-  }
-  if (content === '/reset') {
-    msgInput.value = ''; updateSendBtn();
-    openResetModal();
-    return;
-  }
+  // Send a real message — name required
+  const sender = myNameEl.value.trim().toLowerCase();
   if (!sender) return alert('Name eingeben!');
-  // Enforce name reservation here too — typing a name in the header and just chatting must not bypass it
   if (sender !== claimedName) {
     const ok = await claimName(sender);
     if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
   }
   localStorage.setItem(NAME_KEY, sender);
-  // Prefix the chosen emoji to the sender, then encrypt the whole sender (full metadata encryption)
   const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
   const encryptedSender = await encryptText(displaySender);
   const encrypted = await encryptText(content);
