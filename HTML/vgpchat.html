@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Doc Alvers Chat — E2E</title>
+<!-- PWA: manifest so the installed app (launched from vgpapp.html) opens the chat in standalone -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020410">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+// Load the debug window only when ?debug=1 is set — otherwise it never appears (also not after /clear)
+if (new URLSearchParams(location.search).get('debug') === '1') {
+  document.write('<scr' + 'ipt src="js/debug-window.js"></scr' + 'ipt>');
+}
+</script>
+<script src="js/ui.js"></script>
+<script>
+CyberUI.init();
+</script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- WhatsApp-style emoji picker (categories, recent, search, dark theme) -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#020410}
+input,button,textarea{font-family:inherit}
+/* Safari injects an AutoFill/contact button (👤⌄) into text fields — hide it */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:none!important;pointer-events:none;position:absolute;right:0}
+body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
+#app{position:relative;width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:8px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
+header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
+.name-wrap{flex:1;position:relative;display:flex}
+header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+.name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
+header input::placeholder{color:rgba(0,210,255,.3)}
+header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+/* Chrome + Safari: slim cyan scrollbar via ::-webkit-scrollbar (must NOT also set scrollbar-width, or Safari falls back to the native bar) */
+#messages::-webkit-scrollbar{width:6px}
+#messages::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
+#messages::-webkit-scrollbar-track{background:transparent}
+/* Firefox only: it ignores ::-webkit-scrollbar, so give it the standard properties here */
+@supports (-moz-appearance:none){#messages{scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.3) transparent}}
+/* WhatsApp-style bubbles (blue), dark theme — self right, other left */
+.msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:#e9edef;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
+.msg.self{align-self:flex-end;background:#0c4a6e;border-top-right-radius:0}
+.msg.other{align-self:flex-start;background:#202c33;border-top-left-radius:0}
+/* Original WhatsApp tail shapes (tail-out right, tail-in left) as inline SVG */
+.msg.self::before{content:'';position:absolute;top:0;right:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%230c4a6e' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat}
+.msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%23202c33' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
+.msg .sender{display:block;font-size:12.8px;font-weight:600;margin-bottom:2px;line-height:1.25}
+.msg .text{word-wrap:break-word}
+.msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
+.msg.encrypted{border:none}
+#input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
+/* Wrapper keeps the emoji button inside the message field, independent of the send button */
+.msg-field-wrap{flex:1;position:relative;display:flex}
+.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+.msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
+#msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
+#msg-emoji:focus{outline:none}
+/* Send button — visible only when message field has text */
+#send-btn{flex:0 0 auto;margin-left:auto;display:none;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
+#send-btn.visible{display:flex}
+#send-btn svg{fill:#020410!important}
+#send-btn:disabled{opacity:.35;cursor:default}
+#input-row{position:relative;z-index:10}
+/* Slash-command autocomplete — opens upward, above the input */
+#cmd-box{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);background:rgb(3,10,16);border:1px solid rgba(0,210,255,.25);border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 -6px 24px rgba(0,0,0,.45)}
+#cmd-box.hidden{display:none}
+#cmd-box .cmd-item{display:flex;gap:10px;align-items:baseline;padding:8px 14px;cursor:pointer}
+#cmd-box .cmd-item.active,#cmd-box .cmd-item:hover{background:rgba(0,210,255,.12)}
+#cmd-box .cmd-item code{color:#00d2ff;font-family:monospace;font-weight:700;font-size:13px;flex:0 0 76px}
+#cmd-box .cmd-item span{color:#cfe4f7;font-size:12px;line-height:1.4}
+#config-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
+#config-panel.hidden{display:none}
+#config-panel h2{color:#00d2ff;font-size:20px;margin-bottom:8px}
+#config-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
+#config-panel input:focus{outline:none;border-color:#00d2ff}
+#config-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+#key-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
+#key-panel.hidden{display:none}
+#key-panel h2{color:#00d2ff;font-size:20px;margin-bottom:4px;font-weight:400}
+#key-panel p{color:rgba(0,210,255,.5);font-size:13px;text-align:center;max-width:350px;line-height:1.5}
+#key-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:rgb(14,32,64);color:#e0e8f0;font-size:14px}
+.pwd-wrap{position:relative;width:100%;max-width:400px;display:flex}
+.pwd-wrap input{padding-right:44px!important}
+#key-panel #chat-key{color:#fff;font-size:18px;letter-spacing:3px;font-family:'SF Mono',Menlo,Consolas,monospace}
+#key-panel .pwd-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:auto;background:transparent;border:none;border-radius:0;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center;font-weight:400}
+#key-panel .pwd-eye:hover{color:#00d2ff}
+#key-panel .pwd-eye:focus{outline:none}
+#key-panel input:focus{outline:none;border-color:#00d2ff}
+#key-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+#key-panel .key-btns{display:flex;gap:12px;width:100%;max-width:400px}
+#key-panel .key-btns button{flex:1}
+#key-panel #key-cancel{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
+#confirm-modal{position:fixed;inset:0;background:rgb(2,4,16);display:flex;align-items:center;justify-content:center;z-index:200}
+#confirm-modal.hidden{display:none}
+#confirm-box{background:#020410;border:1px solid rgba(0,210,255,.3);border-radius:16px;padding:24px 32px;text-align:center;max-width:320px}
+#confirm-box p{color:#e0e8f0;font-size:15px;margin-bottom:20px}
+#confirm-box .btns{display:flex;gap:12px}
+#confirm-box button{flex:1;padding:10px 20px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
+#confirm-box .btn-yes{background:#00d2ff;color:#020410}
+#confirm-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
+/* Hard-reset confirmation (requires the confirmation password) */
+#reset-modal{position:fixed;inset:0;background:rgb(2,4,16);display:flex;align-items:center;justify-content:center;z-index:200}
+#reset-modal.hidden{display:none}
+#reset-box{background:#020410;border:1px solid rgba(0,210,255,.3);border-radius:16px;padding:24px 28px;text-align:center;max-width:340px}
+#reset-box p{color:#e0e8f0;font-size:14px;line-height:1.5;margin-bottom:16px}
+#reset-box input{width:100%;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px;margin-bottom:12px}
+#reset-box input:focus{outline:none;border-color:#00d2ff}
+#reset-box .reset-err{color:#ff6b6b;font-size:13px;margin:0 0 12px}
+#reset-box .reset-err.hidden{display:none}
+#reset-box .btns{display:flex;gap:12px}
+#reset-box button{flex:1;padding:10px 20px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
+#reset-box .btn-yes{background:#00d2ff;color:#020410}
+#reset-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
+.enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
+.e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:rgb(14,36,78);color:#cfe4f7;border:1px solid rgba(0,210,255,.3);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
+/* Emoji avatar sits INSIDE the name input, before the name text */
+#name-emoji{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
+#name-emoji:focus{outline:none}
+/* Emoji picker overlay */
+/* WhatsApp-style emoji picker — appears just above the input row, dark theme */
+#emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
+#emoji-panel.hidden{display:none}
+#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
+  --background:rgb(3,10,16);
+  --border-color:rgba(0,210,255,.12);
+  --indicator-color:#00d2ff;
+  --input-background:rgb(10,24,52);
+  --input-border-color:rgba(0,210,255,.2);
+  --input-font-color:#e9edef;
+  --input-placeholder-color:rgba(160,170,180,.55);
+  --input-padding:0.4rem 0.6rem;
+  --input-line-height:1.3;
+  --button-active-background:rgba(0,210,255,.18);
+  --button-hover-background:rgba(0,210,255,.1);
+  --num-columns:9;
+  --emoji-size:1.25rem;
+  --emoji-padding:0.25rem}
+/* Slash-command help overlay */
+#help-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#help-panel.hidden{display:none}
+#help-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#help-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
+#help-list .cmd{display:flex;gap:12px;align-items:baseline;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px}
+#help-list code{color:#00d2ff;font-family:monospace;font-size:14px;font-weight:700;flex:0 0 80px}
+#help-list span{color:#cfe4f7;font-size:13px;line-height:1.4}
+#help-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Storage stats overlay */
+#stats-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#stats-panel.hidden{display:none}
+#stats-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#stats-body{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
+#stats-body .row{display:flex;justify-content:space-between;gap:12px;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px;color:#cfe4f7;font-size:14px}
+#stats-body .row b{color:#00d2ff;font-weight:700}
+#stats-bar{width:100%;max-width:420px;height:10px;border-radius:5px;background:rgb(14,32,64);overflow:hidden;border:1px solid rgba(0,210,255,.15)}
+#stats-bar div{height:100%;background:#00d2ff;width:0}
+#stats-note{color:rgba(0,210,255,.45);font-size:11px;text-align:center;max-width:420px;line-height:1.5}
+#stats-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Fantasy name picker overlay */
+#names-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#names-panel.hidden{display:none}
+#names-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#names-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:420px;width:100%;max-height:50vh;overflow-y:auto;scrollbar-width:none}
+#names-grid::-webkit-scrollbar{display:none}
+#names-grid button{padding:10px 14px;border:1px solid rgba(0,210,255,.15);border-radius:10px;background:rgb(14,32,64);color:#e0e8f0;cursor:pointer;font-size:14px;text-align:left;font-family:inherit}
+#names-grid button:hover,#names-grid button:focus{outline:none;border-color:#00d2ff;background:rgb(20,44,84)}
+#names-custom{width:100%;max-width:420px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+#names-custom:focus{outline:none;border-color:#00d2ff}
+#names-custom::placeholder{color:rgba(0,210,255,.3)}
+#names-panel .name-btns{display:flex;gap:12px;width:100%;max-width:420px}
+#names-custom-btn{flex:0 0 auto;padding:10px 28px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:14px}
+#names-cancel{flex:0 0 auto;padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Touch devices (real phones/tablets) only: bump the text up — the fixed px look smaller on a
+   physically small screen. (hover:none)+(pointer:coarse) targets touch devices, NOT a narrow
+   desktop window, so the desktop browser stays exactly as before regardless of window width.
+   17px+ on inputs also stops iOS from zooming in when a field is focused. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (hover:none) and (pointer:coarse){
+  .msg{font-size:22px}
+  .msg .sender{font-size:18px}
+  .msg .time{font-size:15px}
+  header input,.msg-field-wrap input{font-size:19px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="name-wrap">
+      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
+      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off">
+      <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
+    </div>
+  </header>
+  <div id="messages"></div>
+  <div id="input-row">
+    <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
+    <div class="msg-field-wrap">
+      <input id="msg-input" aria-label="Nachricht" disabled autocomplete="new-password">
+      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
+    </div>
+    <button id="send-btn" aria-label="Senden" title="Senden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="3 3 22 12 3 21 8 12"></polygon>
+      </svg>
+    </button>
+  </div>
+  <div id="emoji-panel" class="hidden">
+    <!--suppress HtmlUnknownTag -->
+    <emoji-picker class="dark"></emoji-picker>
+  </div>
+</div>
+
+<div id="confirm-modal" class="hidden">
+  <div id="confirm-box">
+    <p>Alle Nachrichten löschen?</p>
+    <div class="btns">
+      <button class="btn-yes" id="confirm-yes">LÖSCHEN</button>
+      <button class="btn-no" id="confirm-no">ABBRECHEN</button>
+    </div>
+  </div>
+</div>
+
+<div id="reset-modal" class="hidden">
+  <div id="reset-box">
+    <p><b>ALLES unwiderruflich zurücksetzen?</b><br>Alle Nachrichten, alle reservierten Namen und deine lokalen Daten werden gelöscht. Das kann <b>nicht</b> rückgängig gemacht werden.</p>
+    <input id="reset-pwd" type="password" aria-label="Bestätigungs-Passwort" placeholder="Bestätigungs-Passwort" autocomplete="off" readonly>
+    <p id="reset-err" class="reset-err hidden">Falsches Passwort.</p>
+    <div class="btns">
+      <button class="btn-yes" id="reset-yes">RESET</button>
+      <button class="btn-no" id="reset-no">ABBRECHEN</button>
+    </div>
+  </div>
+</div>
+
+<div id="key-panel" class="hidden">
+  <h2>Passwort</h2>
+  <div class="pwd-wrap">
+    <input id="chat-key" type="password" aria-label="Passwort" placeholder="" autocomplete="off" readonly>
+    <button type="button" class="pwd-eye" id="chat-key-eye" aria-label="Passwort anzeigen">
+      <svg id="chat-key-eye-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </button>
+  </div>
+  <div class="key-btns">
+    <button id="key-cancel" style="display:none">ABBRECHEN</button>
+    <button id="key-go">OK</button>
+  </div>
+</div>
+
+<div id="help-panel" class="hidden">
+  <h2>Befehle</h2>
+  <div id="help-list">
+    <div class="cmd"><code>/help</code><span>Diese Befehlsübersicht anzeigen</span></div>
+    <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
+    <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
+    <div class="cmd"><code>/key</code><span>Passwort (Verschlüsselung) ändern</span></div>
+    <div class="cmd"><code>/release</code><span>Eigenen Namen freigeben (wieder vergebbar)</span></div>
+    <div class="cmd"><code>/delete</code><span>Alle Nachrichten löschen</span></div>
+    <div class="cmd"><code>/clear</code><span>Passwort/Config löschen (Name bleibt), neu laden</span></div>
+    <div class="cmd"><code>/reset</code><span>ALLES unwiderruflich zurücksetzen</span></div>
+  </div>
+  <button id="help-close">SCHLIESSEN</button>
+</div>
+
+<div id="stats-panel" class="hidden">
+  <h2>Supabase-Speicher</h2>
+  <div id="stats-body"></div>
+  <div id="stats-bar"><div></div></div>
+  <p id="stats-note">Belegung aus den Nachrichten geschätzt. Exakte Kontingente (DB, Bandbreite) nur im Supabase-Dashboard — nicht über den öffentlichen Key abrufbar.</p>
+  <button id="stats-close">SCHLIESSEN</button>
+</div>
+
+<div id="names-panel" class="hidden">
+  <h2>Wähle einen Namen</h2>
+  <div class="name-btns">
+    <input id="names-custom" aria-label="Eigener Name" placeholder="Eigener Name..." autocomplete="off" maxlength="30" style="flex:1">
+    <button id="names-custom-btn">OK</button>
+  </div>
+  <div id="names-grid"></div>
+  <button id="names-cancel">ABBRECHEN</button>
+</div>
+
+<div id="config-panel" class="hidden">
+  <h2>Supabase Keys</h2>
+  <input id="cfg-url" aria-label="Project URL" placeholder="Project URL (z.B. https://xxx.supabase.co)">
+  <input id="cfg-key" aria-label="anon public key" placeholder="anon public key">
+  <button id="cfg-go">STARTEN</button>
+  <p style="font-size:12px;color:rgba(0,210,255,.3);max-width:400px;text-align:center;line-height:1.5">
+    Nach dem Starten: in Supabase SQL-Editor folgendes ausführen:<br>
+    <code style="font-size:11px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;display:block;margin-top:6px;text-align:left;word-break:break-all">
+      CREATE TABLE messages (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, created_at timestamptz DEFAULT now(), sender text NOT NULL, content text NOT NULL);<br>
+      ALTER TABLE messages ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "allow all" ON messages FOR ALL USING (true) WITH CHECK (true);<br><br>
+      CREATE TABLE participants (name_id text PRIMARY KEY, owner_hash text NOT NULL, updated_at timestamptz DEFAULT now());<br>
+      ALTER TABLE participants ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "allow all" ON participants FOR ALL USING (true) WITH CHECK (true);<br><br>
+      CREATE TABLE app_meta (key text PRIMARY KEY, value text, updated_at timestamptz DEFAULT now());<br>
+      ALTER TABLE app_meta ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "allow all" ON app_meta FOR ALL USING (true) WITH CHECK (true);
+    </code>
+  </p>
+</div>
+
+<script>
+const SUPABASE_URL_KEY = 'eocr-supabase-url';
+const SUPABASE_KEY_KEY = 'eocr-supabase-key';
+const NAME_KEY = 'eocr-chat-name';
+const CHAT_KEY = 'eocr-chat-key';
+const EMOJI_KEY = 'eocr-chat-emoji';
+const CLAIM_KEY = 'eocr-chat-claim'; // local random secret proving ownership of a claimed name
+const LAST_RESET_KEY = 'eocr-last-reset-seen'; // the reset_at marker this device has already applied
+
+const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
+
+function dbg(msg) {
+  try { if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg); } catch(_) {}
+  console.log('[chat]', msg);
+}
+
+let client = null;
+let subscription = null;
+let knownSenders = new Set();
+let cryptoKey = null;
+let hmacKey = null; // derived from the password, used only to compute name_id (HMAC) for uniqueness
+let claimedName = null; // the name this device has confirmed ownership of this session
+let chatReady = false;
+let senderNames = new Set(); // distinct participant names seen in messages
+let alignRight = false; // false = all left, true = left/right; key 'l' toggles
+
+// Strip a leading emoji prefix and lowercase → the bare participant name
+function senderName(plain) {
+  return (plain || '').replace(/^\p{Extended_Pictographic}️?\s/u, '').trim().toLowerCase();
+}
+
+const messagesEl = document.getElementById('messages');
+const msgInput = document.getElementById('msg-input');
+const myNameEl = document.getElementById('my-name');
+const configPanel = document.getElementById('config-panel');
+const keyPanel = document.getElementById('key-panel');
+const confirmModal = document.getElementById('confirm-modal');
+let pendingDelete = false;
+
+// Keep browser password managers (Firefox "generate password", Safari/Chrome autofill) away from
+// our non-account password fields: they start readonly, so no manager pops up on load; the first
+// real interaction unlocks them for typing.
+document.querySelectorAll('input[type="password"]').forEach(inp => {
+  const unlock = () => { if (inp.hasAttribute('readonly')) inp.removeAttribute('readonly'); };
+  inp.addEventListener('pointerdown', unlock);
+  inp.addEventListener('focus', unlock);
+  inp.addEventListener('keydown', unlock);
+});
+
+// ?name= query param pre-fills the name (overrides localStorage)
+const urlParamName = new URLSearchParams(location.search).get('name');
+if (urlParamName) {
+  const n = urlParamName.trim().toLowerCase();
+  myNameEl.value = n;
+  localStorage.setItem(NAME_KEY, n);
+  dbg('Name aus URL-Parameter: ' + n);
+} else {
+  myNameEl.value = localStorage.getItem(NAME_KEY) || '';
+}
+
+// --- Emoji avatar: chosen per person, shown left of the name and prefixed to the sender ---
+const nameEmojiBtn = document.getElementById('name-emoji');
+const msgEmojiBtn = document.getElementById('msg-emoji');
+const emojiPanel = document.getElementById('emoji-panel');
+const emojiPicker = emojiPanel.querySelector('emoji-picker');
+let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
+if (myEmoji) nameEmojiBtn.textContent = myEmoji;
+
+// WhatsApp-style picker (emoji-picker-element): a click delivers the emoji to pickEmoji()
+emojiPicker.addEventListener('emoji-click', ev => pickEmoji(ev.detail.unicode));
+// Tapping the dimmed area outside the sheet closes it
+emojiPanel.addEventListener('click', e => { if (e.target === emojiPanel) emojiPanel.classList.add('hidden'); });
+// Inner styling lives in the picker's shadow DOM — inject a <style> there (the documented way).
+// Selectors: #skintone-button is the skin-tone (hand) button, input.search is the search box.
+customElements.whenDefined('emoji-picker').then(() => {
+  const style = document.createElement('style');
+  style.textContent = `::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    @supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.3) transparent}}
+    #skintone-button{display:none}
+    input.search{font-size:13px;width:calc(100% - 4px);margin:0 auto}
+    .picker{border-radius:12px}`;
+  emojiPicker.shadowRoot.appendChild(style);
+});
+
+// Where a picked emoji goes: 'avatar' (header button) changes the personal emoji;
+// 'text' (input button) inserts the emoji into the message text, like WhatsApp.
+let emojiTarget = 'avatar';
+function openEmojiPanel() { emojiPanel.classList.remove('hidden'); }
+async function pickEmoji(e) {
+  // Input button: insert into the message text at the caret, keep the sheet open (like WhatsApp)
+  if (emojiTarget === 'text') {
+    const start = msgInput.selectionStart ?? msgInput.value.length;
+    const end = msgInput.selectionEnd ?? msgInput.value.length;
+    msgInput.value = msgInput.value.slice(0, start) + e + msgInput.value.slice(end);
+    const caret = start + e.length;
+    msgInput.setSelectionRange(caret, caret);
+    updateSendBtn();
+    dbg('Emoji in Text eingefügt: ' + e);
+    return;
+  }
+  // Header button: change the personal avatar emoji (retroactive for own messages), then close
+  emojiPanel.classList.add('hidden');
+  myEmoji = e;
+  localStorage.setItem(EMOJI_KEY, e);
+  nameEmojiBtn.textContent = e;
+  dbg('Avatar-Emoji gewählt: ' + e);
+  if (!msgInput.disabled) msgInput.focus();
+  await applyEmojiToOldMessages(e);
+}
+
+// Rewrite the emoji prefix on all of my own past messages so the change is retroactive for everyone.
+// Senders are encrypted, so we decrypt each to find mine, then write a freshly encrypted sender back.
+async function applyEmojiToOldMessages(emoji) {
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!client || !name) return;
+  const { data, error } = await client.from('messages').select('id,sender');
+  if (error) { dbg('Emoji-Update Fehler: ' + error.message); return; }
+  const ids = [];
+  for (const m of data) {
+    const plain = await decryptText(m.sender); // old plaintext senders pass through unchanged
+    // A row is "mine" if the decrypted sender is my plain name or ends with " <name>" (any emoji prefix)
+    if (plain === name || plain.endsWith(' ' + name)) ids.push(m.id);
+  }
+  if (!ids.length) return;
+  const newEncSender = await encryptText(`${emoji} ${name}`);
+  const { error: uErr } = await client.from('messages').update({ sender: newEncSender }).in('id', ids);
+  if (uErr) { dbg('Emoji-Update Fehler: ' + uErr.message); return; }
+  dbg(`Emoji in ${ids.length} eigenen Nachrichten aktualisiert`);
+  loadMessages();
+}
+// Header avatar button: changes the personal emoji → must first reserve the entered name
+nameEmojiBtn.onclick = () => {
+  emojiTarget = 'avatar';
+  openEmojiPanel();
+};
+
+// Input emoji button: inserts an emoji into the message text (no name reservation needed)
+msgEmojiBtn.onclick = () => {
+  emojiTarget = 'text';
+  openEmojiPanel();
+};
+
+// --- Name ownership: name_id = HMAC(name), reserved once in the participants table ---
+function bufToHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// HMAC key uses a SEPARATE salt from the AES key — never reuse one key for two purposes
+async function deriveHmacKey(password) {
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('forloop-chat-hmac-salt'), iterations: 100000, hash: 'SHA-256' },
+    km, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+}
+async function nameId(name) {
+  const enc = new TextEncoder();
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(name.toLowerCase()));
+  return bufToHex(sig);
+}
+// Owner proof derived from password + name — same result on every device with the same password.
+// Uses a distinct prefix ('owner:') so it can never collide with nameId().
+async function ownerHash(name) {
+  const enc = new TextEncoder();
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode('owner:' + name.toLowerCase()));
+  return bufToHex(sig);
+}
+// Returns true if the name is now ours (freshly claimed or already owned via same password)
+async function claimName(name) {
+  if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const id = await nameId(name);
+  const mine = await ownerHash(name);
+  const { data, error } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
+  if (error) { dbg('Claim-Check nicht möglich (Tabelle da?): ' + error.message); return true; }
+  if (data && data.length) {
+    if (data[0].owner_hash === mine) { dbg('Name gehört dir: ' + name); claimedName = name; return true; }
+    dbg('Name vergeben: ' + name);
+    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    return false;
+  }
+  const { error: insErr } = await client.from('participants').insert({ name_id: id, owner_hash: mine });
+  if (insErr) {
+    dbg('Claim fehlgeschlagen: ' + insErr.message);
+    alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
+    return false;
+  }
+  dbg('Name beansprucht: ' + name);
+  claimedName = name;
+  return true;
+}
+async function releaseName() {
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!name) { alert('Kein Name gesetzt.'); return; }
+  if (!hmacKey) { alert('Erst Passwort eingeben!'); return; }
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const id = await nameId(name);
+  const mine = await ownerHash(name);
+  const { data } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
+  if (data && data.length && data[0].owner_hash !== mine) {
+    alert('Dieser Name gehört nicht dir.');
+    return;
+  }
+  await client.from('participants').delete().eq('name_id', id);
+  localStorage.removeItem(NAME_KEY);
+  myNameEl.value = '';
+  if (claimedName === name) claimedName = null;
+  dbg('Name freigegeben: ' + name);
+  alert('Name „' + name + '" freigegeben.');
+}
+
+document.getElementById('help-close').onclick = () => document.getElementById('help-panel').classList.add('hidden');
+document.getElementById('stats-close').onclick = () => document.getElementById('stats-panel').classList.add('hidden');
+
+// Supabase free tier: 500 MB database. We can only estimate from message rows via the public key.
+const FREE_DB_BYTES = 500 * 1024 * 1024;
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(2) + ' MB';
+}
+async function showStats() {
+  const panel = document.getElementById('stats-panel');
+  const body = document.getElementById('stats-body');
+  const bar = document.querySelector('#stats-bar div');
+  panel.classList.remove('hidden');
+  body.innerHTML = `<div class="row"><span>Lade…</span></div>`;
+  if (!client) { body.innerHTML = `<div class="row"><span>Kein Client — erst Schlüssel eingeben.</span></div>`; return; }
+  const { data, count, error } = await client
+    .from('messages')
+    .select('sender,content,created_at', { count: 'exact' });
+  if (error) { body.innerHTML = `<div class="row"><span>Fehler: ${escapeHtml(error.message)}</span></div>`; return; }
+  // Estimate stored bytes from the row payloads (sender + content), UTF-8 length
+  const enc = new TextEncoder();
+  let bytes = 0;
+  for (const m of data) bytes += enc.encode((m.sender || '') + (m.content || '')).length;
+  const pct = Math.min(100, bytes / FREE_DB_BYTES * 100);
+  bar.style.width = pct.toFixed(2) + '%';
+  body.innerHTML = `
+    <div class="row"><span>Nachrichten</span><b>${count ?? data.length}</b></div>
+    <div class="row"><span>Belegt (geschätzt)</span><b>${fmtBytes(bytes)}</b></div>
+    <div class="row"><span>Free-Tier DB-Limit</span><b>500 MB</b></div>
+    <div class="row"><span>Anteil</span><b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)} %</b></div>`;
+  dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
+}
+
+// --- Fantasy name picker ---
+const FANTASY_NAMES = [
+  {e:'⛏️', n:'Pickaxe Pete'},  {e:'🕯️', n:'Cavern Clara'},
+  {e:'💨', n:'Dusty Dale'},    {e:'🔦', n:'Torchbearer Tess'},
+  {e:'🪨', n:'Boulder Bob'},   {e:'🦇', n:'Spelunker Sam'},
+  {e:'😈', n:'Gloomy Greta'}, {e:'💎', n:'Treasure Tom'},
+  {e:'🔮', n:'Crystal Kate'}, {e:'🧱', n:'Rubble Rex'},
+  {e:'🌑', n:'Shadowmere Sue'},{e:'⛰️', n:'Deeprock Doug'},
+  {e:'✨', n:'Flickering Fay'},{e:'🪖', n:'Mineshaft Mike'},
+  {e:'🕷️', n:'Cobweb Clem'},  {e:'🪝', n:'Stalactite Steve'},
+  {e:'💍', n:'Gemstone Gwen'},{e:'🌪️', n:'Drifter Dan'},
+  {e:'🍀', n:'Lucky Lila'},   {e:'🐞', n:'Ladybug Lou'}
+];
+
+function openNamesPanel() {
+  const grid = document.getElementById('names-grid');
+  grid.innerHTML = '';
+  for (const {e, n} of FANTASY_NAMES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = `${e} ${n}`;
+    b.onclick = () => pickFantasyName(n.toLowerCase(), e);
+    grid.appendChild(b);
+  }
+  document.getElementById('names-panel').classList.remove('hidden');
+}
+
+function pickFantasyName(name, emoji) {
+  myNameEl.value = name;
+  localStorage.setItem(NAME_KEY, name);
+  if (emoji) {
+    myEmoji = emoji;
+    localStorage.setItem(EMOJI_KEY, emoji);
+    nameEmojiBtn.textContent = emoji;
+    if (typeof msgEmojiBtn !== 'undefined') msgEmojiBtn.textContent = emoji;
+  }
+  document.getElementById('names-panel').classList.add('hidden');
+  document.getElementById('names-custom').value = '';
+  msgInput.focus();
+  dbg('Fantasiename gewählt: ' + emoji + ' ' + name);
+}
+
+document.getElementById('names-custom-btn').onclick = () => {
+  const val = document.getElementById('names-custom').value.trim().toLowerCase();
+  if (val) pickFantasyName(val);
+};
+document.getElementById('names-custom').onkeydown = e => {
+  if (e.key === 'Enter') document.getElementById('names-custom-btn').click();
+};
+document.getElementById('names-cancel').onclick = () => {
+  document.getElementById('names-panel').classList.add('hidden');
+};
+
+// Enter in the name field: claim the name (must be free), then open the emoji palette
+myNameEl.onkeydown = async ev => {
+  if (ev.key !== 'Enter') return;
+  ev.preventDefault();
+  const name = myNameEl.value.trim().toLowerCase();
+  if (!name) return;
+  const ok = await claimName(name);
+  if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
+  localStorage.setItem(NAME_KEY, name);
+  openEmojiPanel();
+};
+
+const savedKey = localStorage.getItem(CHAT_KEY);
+if (savedKey) {
+  initCrypto(savedKey).then(() => {
+    dbg('Init mit Supabase-Keys');
+    initChat(SUPABASE_URL, SUPABASE_KEY);
+  });
+} else {
+  keyPanel.classList.remove('hidden');
+}
+
+async function submitKey() {
+  const keyInput = document.getElementById('chat-key');
+  const key = keyInput.value.trim();
+  if (!key) return alert('Schlüssel eingeben!');
+  dbg(`submitKey: eingegebene Länge=${key.length}`);
+  const goBtn = document.getElementById('key-go');
+  goBtn.disabled = true;
+  const testKey = await deriveKey(key);
+  const ok = await verifyKey(testKey);
+  goBtn.disabled = false;
+  if (!ok) {
+    dbg('Falscher Schlüssel — Dialog bleibt offen');
+    keyInput.value = '';
+    keyInput.focus();
+    keyInput.placeholder = 'Falscher Schlüssel';
+    return;
+  }
+  cryptoKey = testKey;
+  hmacKey = await deriveHmacKey(key);
+  localStorage.setItem(CHAT_KEY, key);
+  keyPanel.classList.add('hidden');
+  if (chatReady) {
+    dbg('Schlüssel geändert — Nachrichten werden neu entschlüsselt');
+    loadMessages();
+  } else {
+    dbg('Init mit Supabase-Keys');
+    initChat(SUPABASE_URL, SUPABASE_KEY);
+  }
+}
+
+document.getElementById('key-go').onclick = submitKey;
+document.getElementById('chat-key').onkeydown = e => { if (e.key === 'Enter') submitKey(); };
+
+// Eye toggle: show/hide the password text (SVG swaps between eye and eye-off, same as vault.html)
+document.getElementById('chat-key-eye').onclick = () => {
+  const inp = document.getElementById('chat-key');
+  const eye = document.getElementById('chat-key-eye');
+  const svg = document.getElementById('chat-key-eye-svg');
+  const reveal = inp.type === 'password';
+  inp.type = reveal ? 'text' : 'password';
+  svg.innerHTML = reveal
+    ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line>`
+    : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+  eye.setAttribute('aria-label', reveal ? 'Passwort verbergen' : 'Passwort anzeigen');
+  inp.focus();
+};
+
+document.getElementById('key-cancel').onclick = () => {
+  keyPanel.classList.add('hidden');
+  if (client) msgInput.focus();
+};
+
+document.getElementById('confirm-yes').onclick = async () => {
+  confirmModal.classList.add('hidden');
+  if (!pendingDelete) return;
+  const { error } = await client.from('messages').delete().gt('id', 0);
+  if (error) { dbg('Löschfehler: ' + error.message); return; }
+  knownSenders = new Set();
+  messagesEl.innerHTML = '';
+  msgInput.value = ''; updateSendBtn();
+  dbg('Alle Nachrichten gelöscht');
+  pendingDelete = false;
+};
+document.getElementById('confirm-no').onclick = () => {
+  confirmModal.classList.add('hidden');
+  pendingDelete = false;
+};
+
+// --- /reset: irreversible full wipe, gated behind a confirmation password ---
+// The plaintext password is NEVER stored anywhere in the project. We keep only its
+// PBKDF2-HMAC-SHA-256 hash (salt 'forloop-reset-salt-v1', 200000 iterations, 32 bytes —
+// same hardening as the E2E key) and hash the typed input at runtime to compare.
+// To change the password, regenerate the hash on the fly (password is read hidden, never saved):
+//   python3 tools/reset_hash.py
+// then paste the printed value below. Keep these params in sync with hashResetPwd().
+const RESET_PWD_HASH = 'e7cb48b3c2c65f0d173c10894505f8dcfc96f4ec4cacedc12027fc0ecf0a0c84';
+async function hashResetPwd(pwd) {
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(pwd), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode('forloop-reset-salt-v1'), iterations: 200000, hash: 'SHA-256' },
+    km, 256
+  );
+  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const resetModal = document.getElementById('reset-modal');
+const resetPwd = document.getElementById('reset-pwd');
+const resetErr = document.getElementById('reset-err');
+function openResetModal() {
+  resetPwd.value = '';
+  resetErr.classList.add('hidden');
+  resetModal.classList.remove('hidden');
+  resetPwd.focus();
+}
+// Wipe all local app data, remember which reset we applied (so we don't loop), then reload.
+function wipeLocalAndReload(resetAt) {
+  Object.keys(localStorage).filter(k => k.startsWith('eocr-')).forEach(k => localStorage.removeItem(k));
+  if (resetAt) localStorage.setItem(LAST_RESET_KEY, resetAt); // set AFTER the wipe, so it survives
+  location.reload();
+}
+// Read the server-wide reset marker (null if the table/row doesn't exist yet)
+async function getResetMarker() {
+  if (!client) return null;
+  const { data, error } = await client.from('app_meta').select('value').eq('key', 'reset_at').limit(1);
+  if (error) { dbg('Reset-Marker nicht lesbar (Tabelle da?): ' + error.message); return null; }
+  return (data && data.length) ? data[0].value : null;
+}
+// On load / on realtime signal: if the server reset is newer than what we've applied, wipe ourselves.
+function maybeApplyRemoteReset(remote) {
+  if (!remote) return false;
+  if (localStorage.getItem(LAST_RESET_KEY) === remote) return false; // already applied
+  const hasData = localStorage.getItem(NAME_KEY) || localStorage.getItem(CHAT_KEY);
+  if (hasData) { dbg('Remote-Reset erkannt — lösche lokale Daten & lade neu'); wipeLocalAndReload(remote); return true; }
+  localStorage.setItem(LAST_RESET_KEY, remote); // fresh visitor: nothing to wipe, just mark as current
+  return false;
+}
+
+async function doReset() {
+  dbg('RESET: lösche alles…');
+  let ts = new Date().toISOString();
+  if (client) {
+    // Wipe all messages and all reserved names on the server
+    const { error: mErr } = await client.from('messages').delete().gt('id', 0);
+    if (mErr) dbg('Reset Nachrichten-Fehler: ' + mErr.message);
+    const { error: pErr } = await client.from('participants').delete().neq('name_id', '');
+    if (pErr) dbg('Reset Teilnehmer-Fehler: ' + pErr.message);
+    // Signal every other client to wipe itself (now if online, on next open if offline)
+    const { error: rErr } = await client.from('app_meta').upsert({ key: 'reset_at', value: ts, updated_at: ts });
+    if (rErr) dbg('Reset-Signal-Fehler (app_meta da?): ' + rErr.message);
+  }
+  dbg('RESET: lokal & Server geleert — lade neu');
+  wipeLocalAndReload(ts);
+}
+document.getElementById('reset-yes').onclick = async () => {
+  const btn = document.getElementById('reset-yes');
+  btn.disabled = true;
+  const ok = (await hashResetPwd(resetPwd.value)) === RESET_PWD_HASH;
+  btn.disabled = false;
+  if (!ok) {
+    resetErr.classList.remove('hidden');
+    resetPwd.value = ''; resetPwd.focus();
+    return;
+  }
+  btn.disabled = true;
+  await doReset();
+};
+document.getElementById('reset-no').onclick = () => resetModal.classList.add('hidden');
+resetPwd.onkeydown = e => { if (e.key === 'Enter') document.getElementById('reset-yes').click(); };
+
+document.getElementById('cfg-go').onclick = () => {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) return alert('Beide Felder ausfüllen');
+  dbg('Manueller Init: ' + url);
+  localStorage.setItem(SUPABASE_URL_KEY, url);
+  localStorage.setItem(SUPABASE_KEY_KEY, key);
+  configPanel.classList.add('hidden');
+  initChat(url, key);
+};
+
+async function deriveKey(password) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('forloop-chat-salt'), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function initCrypto(password) {
+  cryptoKey = await deriveKey(password);
+  hmacKey = await deriveHmacKey(password);
+  dbg('AES-256-GCM Schlüssel abgeleitet');
+}
+
+// Prüft testKey gegen die zuletzt gespeicherte verschlüsselte Nachricht.
+// Kein Client/keine verschlüsselte Nachricht/Query-Fehler -> nicht prüfbar -> als gültig behandeln.
+async function verifyKey(testKey) {
+  if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const { data, error } = await client
+    .from('messages')
+    .select('content')
+    .like('content', 'ENC:%')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) { dbg('Schlüssel-Check nicht möglich: ' + error.message); return true; }
+  if (!data || !data.length) { dbg('Keine verschlüsselte Nachricht zum Prüfen'); return true; }
+  const plain = await decryptText(data[0].content, testKey);
+  const ok = plain !== '[falscher Schlüssel]';
+  dbg(`verifyKey: geprüfte Nachricht len=${data[0].content.length}, Ergebnis=${ok ? 'OK' : 'FALSCH'}`);
+  return ok;
+}
+
+async function encryptText(plain) {
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(plain));
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  return 'ENC:' + btoa(String.fromCharCode(...combined));
+}
+
+async function decryptText(cipherB64, key = cryptoKey) {
+  if (!cipherB64.startsWith('ENC:')) return cipherB64;
+  try {
+    const combined = Uint8Array.from(atob(cipherB64.slice(4)), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return new TextDecoder().decode(decrypted);
+  } catch(e) {
+    dbg('Entschlüsselung fehlgeschlagen: ' + e.message);
+    return '[falscher Schlüssel]';
+  }
+}
+
+async function initChat(url, key) {
+  if (!client) client = window.supabase.createClient(url, key);
+  chatReady = true;
+  dbg('Supabase-Client erstellt');
+  // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
+  if (await maybeApplyRemoteReset(await getResetMarker())) return;
+  loadMessages();
+  subscribeMessages();
+  msgInput.disabled = false;
+  dbg('Chat bereit — E2E aktiv');
+  if (!myNameEl.value.trim()) {
+    openNamesPanel();
+  } else {
+    msgInput.focus();
+  }
+}
+
+// Bright shades — readable on the dark WhatsApp-style bubbles (sender names in group mode)
+const NAME_COLORS = ['#53bdeb','#06cf9c','#ffab00','#ff7e6b','#c58fff','#7ad0ff','#ffd24d','#26d367','#ff8fab','#b5e853','#f4a261','#d4a5ff','#4fc3f7','#ff8a65','#9ccc65','#4dd0e1','#f06292','#fdd835','#80cbc4','#ba68c8'];
+function nameColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length];
+}
+
+const MSG_LIMIT = 500;
+async function loadMessages(all = false) {
+  // Default: only the most recent MSG_LIMIT messages (saves traffic). /loadall fetches everything.
+  let query = client.from('messages').select('*');
+  query = all
+    ? query.order('created_at', { ascending: true })
+    : query.order('created_at', { ascending: false }).limit(MSG_LIMIT);
+  const { data, error } = await query;
+  if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
+  // Limited query comes back newest-first — flip to chronological for display
+  const rows = all ? data : data.slice().reverse();
+  dbg(`${rows.length} Nachrichten geladen${all ? ' (alle)' : ` (max ${MSG_LIMIT})`}`);
+  // Count distinct participants (for debugging only)
+  senderNames = new Set();
+  for (const m of rows) {
+    const s = senderName(await decryptText(m.sender));
+    if (s && s !== '[falscher schlüssel]') senderNames.add(s);
+  }
+  alignRight = senderNames.size <= 2;
+  knownSenders = new Set(rows.map(m => m.sender));
+  messagesEl.innerHTML = '';
+  for (const msg of rows) await renderMsg(msg);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function subscribeMessages() {
+  if (subscription) subscription.unsubscribe();
+  dbg('Realtime-Subscription wird erstellt...');
+  subscription = client
+    .channel('messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
+      dbg('Neue Nachricht');
+      knownSenders.add(payload.new.sender);
+      senderNames.add(senderName(await decryptText(payload.new.sender)));
+      await renderMsg(payload.new);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
+      dbg('Nachricht(en) gelöscht — lade neu');
+      loadMessages();
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
+      dbg('Nachricht(en) geändert (z.B. Emoji) — lade neu');
+      loadMessages();
+    })
+    // Remote /reset signal: another client wiped everything → wipe ourselves and reload
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_meta' }, payload => {
+      const row = payload.new;
+      if (row && row.key === 'reset_at') {
+        dbg('Remote-Reset-Signal empfangen');
+        maybeApplyRemoteReset(row.value);
+      }
+    })
+    .subscribe(status => {
+      dbg('Realtime-Status: ' + JSON.stringify(status));
+    });
+}
+
+async function renderMsg(msg) {
+  // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
+  if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
+  const myName = myNameEl.value.trim().toLowerCase();
+  // Sender is encrypted too (old plaintext senders still pass through decryptText unchanged)
+  const senderPlain = await decryptText(msg.sender);
+  // alignRight: my messages right, others left
+  const isSelf = alignRight && senderName(senderPlain) === myName && myName !== '';
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isSelf ? 'self' : 'other');
+  if (msg.id != null) div.dataset.id = msg.id;
+  const isEnc = msg.content.startsWith('ENC:');
+  if (isEnc) div.classList.add('encrypted');
+  const rawContent = await decryptText(msg.content);
+  const decryptFailed = rawContent === '[falscher Schlüssel]';
+  const content = decryptFailed ? '🔒' : rawContent;
+  const showSender = !decryptFailed;
+  const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${escapeHtml(senderPlain)}</span>` : '';
+  div.innerHTML = `${senderHtml}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  messagesEl.appendChild(div);
+}
+
+// --- Slash-command registry — single source of truth for autocomplete + execution ---
+const CMD_LIST = [
+  { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
+  { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
+  { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
+  { cmd: '/key',     desc: 'Passwort ändern',                   run: () => { const ki = document.getElementById('chat-key'); ki.value = ''; document.getElementById('key-cancel').style.display = 'inline-block'; keyPanel.classList.remove('hidden'); ki.focus(); } },
+  { cmd: '/release', desc: 'Eigenen Namen freigeben',           run: () => releaseName() },
+  { cmd: '/delete',  desc: 'Alle Nachrichten löschen',          run: () => { pendingDelete = true; confirmModal.classList.remove('hidden'); } },
+  { cmd: '/clear',   desc: 'Passwort/Config löschen',           run: () => { localStorage.removeItem(CHAT_KEY); localStorage.removeItem(SUPABASE_URL_KEY); localStorage.removeItem(SUPABASE_KEY_KEY); dbg('Passwort/Config gelöscht (Name behalten)'); location.reload(); } },
+  { cmd: '/reset',   desc: 'ALLES unwiderruflich zurücksetzen', run: () => openResetModal() }
+];
+const cmdBox = document.getElementById('cmd-box');
+let cmdMatches = [], cmdActive = -1;
+
+function refreshCmdBox() {
+  const v = msgInput.value;
+  if (!v.startsWith('/')) return hideCmdBox();
+  cmdMatches = CMD_LIST.filter(c => c.cmd.startsWith(v.toLowerCase()));
+  if (!cmdMatches.length) return hideCmdBox();
+  cmdActive = 0;
+  cmdBox.innerHTML = cmdMatches.map((c, i) =>
+    `<div class="cmd-item${i === 0 ? ' active' : ''}" role="option" data-i="${i}"><code>${c.cmd}</code><span>${escapeHtml(c.desc)}</span></div>`
+  ).join('');
+  cmdBox.classList.remove('hidden');
+}
+function hideCmdBox() { cmdBox.classList.add('hidden'); cmdMatches = []; cmdActive = -1; }
+function markCmdActive() {
+  [...cmdBox.children].forEach((el, i) => el.classList.toggle('active', i === cmdActive));
+}
+function applyCmd(i) {
+  if (i < 0 || i >= cmdMatches.length) return;
+  msgInput.value = cmdMatches[i].cmd;
+  hideCmdBox();
+  msgInput.focus();
+  updateSendBtn();
+}
+cmdBox.addEventListener('mousedown', e => {
+  // mousedown (not click) so the input doesn't lose focus before we apply
+  const item = e.target.closest('.cmd-item');
+  if (item) { e.preventDefault(); applyCmd(+item.dataset.i); }
+});
+
+msgInput.onkeydown = e => {
+  if (!cmdBox.classList.contains('hidden') && cmdMatches.length) {
+    if (e.key === 'ArrowUp') { e.preventDefault(); cmdActive = (cmdActive - 1 + cmdMatches.length) % cmdMatches.length; markCmdActive(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdActive = (cmdActive + 1) % cmdMatches.length; markCmdActive(); return; }
+    if (e.key === 'Tab') { e.preventDefault(); applyCmd(cmdActive); return; }
+    if (e.key === 'Escape') { e.preventDefault(); hideCmdBox(); return; }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // If the field already equals the active command, run it; otherwise complete it first
+      if (msgInput.value.toLowerCase() === cmdMatches[cmdActive].cmd) { hideCmdBox(); sendMsg(); }
+      else applyCmd(cmdActive);
+      return;
+    }
+  }
+  if (e.key === 'Enter') sendMsg();
+};
+
+// Debug: key 'l' toggles bubble alignment (all left ↔ left/right)
+document.addEventListener('keydown', e => {
+  if (e.key !== 'l' && e.key !== 'L') return;
+  alignRight = !alignRight;
+  dbg('Debug: Blasen ' + (alignRight ? 'links/rechts' : 'alle links'));
+  loadMessages();
+});
+
+// Send button: visible only while the field has text
+const sendBtn = document.getElementById('send-btn');
+function updateSendBtn() { sendBtn.classList.toggle('visible', msgInput.value.trim().length > 0); }
+msgInput.addEventListener('input', () => { updateSendBtn(); refreshCmdBox(); });
+msgInput.addEventListener('blur', () => setTimeout(hideCmdBox, 120));
+sendBtn.onclick = () => sendMsg();
+
+async function sendMsg() {
+  hideCmdBox();
+  const content = msgInput.value.trim();
+  if (!content) return;
+  // Dispatch slash commands — no name required
+  const cmd = CMD_LIST.find(c => c.cmd === content.toLowerCase());
+  if (cmd) {
+    msgInput.value = ''; updateSendBtn();
+    cmd.run();
+    return;
+  }
+  // Send a real message — name required
+  const sender = myNameEl.value.trim().toLowerCase();
+  if (!sender) return alert('Name eingeben!');
+  if (sender !== claimedName) {
+    const ok = await claimName(sender);
+    if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
+  }
+  localStorage.setItem(NAME_KEY, sender);
+  const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
+  const encryptedSender = await encryptText(displaySender);
+  const encrypted = await encryptText(content);
+  dbg(`Sende (verschlüsselt) als ${displaySender}`);
+  const { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted });
+  if (error) { dbg('Sendefehler: ' + error.message); return; }
+  dbg('Nachricht gesendet');
+  msgInput.value = ''; updateSendBtn();
+  setTimeout(loadMessages, 300);
+}
+
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
