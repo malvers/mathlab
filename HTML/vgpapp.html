@@ -41,9 +41,9 @@ p{font-size:14.5px;line-height:1.55;color:#cfe4f7;margin-bottom:18px}
   <img class="icon" src="icons/icon-512.png" alt="VGP">
   <h1>VGP</h1>
   <div class="sub">very good privacy</div>
-  <p>100% Ende-zu-Ende-verschlüsselte Chat-App.</p>
+  <p>100% Ende-zu-Ende-verschlüsselte Kommunikation!</p>
 
-  <button class="btn" id="install-btn" style="display:none">App installieren</button>
+  <button class="btn" id="install-btn">App installieren</button>
 
   <div class="ios" id="ios-hint">
     Auf dem iPhone:&nbsp; <b>Teilen</b>
@@ -82,27 +82,30 @@ if (standalone) {
 // Spinner while the chat loads when "Im Browser öffnen" is tapped
 document.getElementById('open-btn').addEventListener('click', () => showSpinner(true));
 
-// Android/Chromium: capture the install prompt and wire it to our button.
+// Android/Chromium fires beforeinstallprompt → we can install directly. The button stays visible
+// always; on platforms without a native prompt (iOS, desktop, already installed) we explain that.
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  installBtn.style.display = 'block';
 });
 installBtn.onclick = async () => {
-  if (!deferredPrompt) return;
+  if (!deferredPrompt) {
+    // No native install prompt available → direct install is Android/Chrome only.
+    statusEl.textContent = 'Direkt-Installation nur unter Android (Chrome) möglich.';
+    if (isIOS) iosHint.style.display = 'block';
+    return;
+  }
   showSpinner(true);
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
   showSpinner(false);
   statusEl.textContent = outcome === 'accepted' ? 'Installiert! Öffne VGP vom Startbildschirm.' : 'Installation abgebrochen.';
   deferredPrompt = null;
-  installBtn.style.display = 'none';
 };
 window.addEventListener('appinstalled', () => {
   showSpinner(false);
   statusEl.textContent = 'Installiert! Öffne VGP vom Startbildschirm.';
-  installBtn.style.display = 'none';
 });
 </script>
 </body>
