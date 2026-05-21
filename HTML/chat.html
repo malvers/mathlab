@@ -18,11 +18,13 @@ if (new URLSearchParams(location.search).get('debug') === '1') {
 CyberUI.init();
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- WhatsApp-style emoji picker (categories, recent, search, dark theme) -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 input,button,textarea{font-family:inherit}
 body{font-family:'Raleway',system-ui,sans-serif;background:#0a0e1a;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:8px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
+#app{position:relative;width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:8px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
 header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
 .name-wrap{flex:1;position:relative;display:flex}
 header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
@@ -30,19 +32,27 @@ header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,
 header input::placeholder{color:rgba(0,210,255,.3)}
 header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-.msg{padding:6px 10px;border-radius:12px;max-width:80%;word-wrap:break-word;line-height:1.4;font-size:14px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.15);color:rgb(0,0,40)}
-.msg.self{align-self:flex-end;background:#dcf8c6;border-top-right-radius:4px}
-.msg.other{align-self:flex-start;background:#b3d2f0;border-top-left-radius:4px}
-.msg.multi{align-self:flex-start;background:#b3d2f0}
-.msg .sender{font-weight:500;margin-right:4px;text-transform:uppercase}
+/* WhatsApp-style bubbles (blue), dark theme — self right, other left */
+.msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:#e9edef;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
+.msg.self{align-self:flex-end;background:#0c4a6e;border-top-right-radius:0}
+.msg.other{align-self:flex-start;background:#202c33;border-top-left-radius:0}
+/* Original WhatsApp tail shapes (tail-out right, tail-in left) as inline SVG */
+.msg.self::before{content:'';position:absolute;top:0;right:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%230c4a6e' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat}
+.msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%23202c33' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
+.msg .sender{display:block;font-size:12.8px;font-weight:600;margin-bottom:2px;line-height:1.25}
 .msg .text{word-wrap:break-word}
-.msg .time{font-size:11px;opacity:.5;margin-left:8px;white-space:nowrap}
+.msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
 .msg.encrypted{border:none}
 #input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
-#input-row input{flex:1;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
-#input-row input:focus{outline:none;border-color:rgba(0,210,255,.25)}
-/* Send button — always visible, only enabled when the message field has text */
-#send-btn{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
+/* Wrapper keeps the emoji button inside the message field, independent of the send button */
+.msg-field-wrap{flex:1;position:relative;display:flex}
+.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+.msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
+#msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
+#msg-emoji:focus{outline:none}
+/* Send button — visible only when message field has text */
+#send-btn{flex:0 0 auto;margin-left:auto;display:none;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
+#send-btn.visible{display:flex}
 #send-btn svg{fill:#020410!important}
 #send-btn:disabled{opacity:.35;cursor:default}
 #input-row{position:relative;z-index:10}
@@ -83,14 +93,24 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #name-emoji{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
 #name-emoji:focus{outline:none}
 /* Emoji picker overlay */
-#emoji-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+/* WhatsApp-style emoji picker — appears just above the input row, dark theme */
+#emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;background:transparent}
 #emoji-panel.hidden{display:none}
-#emoji-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
-#emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;max-width:420px;width:100%}
-#emoji-grid button{font-size:26px;line-height:1;padding:8px 0;border:1px solid rgba(0,210,255,.15);border-radius:10px;background:rgb(14,32,64);cursor:pointer}
-#emoji-grid button:hover,#emoji-grid button:focus{outline:none;border-color:#00d2ff;background:rgb(20,44,84)}
-#emoji-cancel{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
-@media(max-width:480px){#emoji-grid{grid-template-columns:repeat(6,1fr)}}
+#emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 8px 70px;border-radius:8px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
+  --background:rgb(3,10,16);
+  --border-color:rgba(0,210,255,.12);
+  --indicator-color:#00d2ff;
+  --input-background:rgb(10,24,52);
+  --input-border-color:rgba(0,210,255,.2);
+  --input-font-color:#e9edef;
+  --input-placeholder-color:rgba(160,170,180,.55);
+  --input-padding:0.2rem 0.5rem;
+  --input-line-height:1.4;
+  --button-active-background:rgba(0,210,255,.18);
+  --button-hover-background:rgba(0,210,255,.1);
+  --num-columns:9;
+  --emoji-size:1.25rem;
+  --emoji-padding:0.25rem}
 /* Slash-command help overlay */
 #help-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
 #help-panel.hidden{display:none}
@@ -111,6 +131,19 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #stats-bar div{height:100%;background:#00d2ff;width:0}
 #stats-note{color:rgba(0,210,255,.45);font-size:11px;text-align:center;max-width:420px;line-height:1.5}
 #stats-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Fantasy name picker overlay */
+#names-panel{position:fixed;inset:0;background:rgba(2,4,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
+#names-panel.hidden{display:none}
+#names-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
+#names-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:420px;width:100%;max-height:50vh;overflow-y:auto}
+#names-grid button{padding:10px 14px;border:1px solid rgba(0,210,255,.15);border-radius:10px;background:rgb(14,32,64);color:#e0e8f0;cursor:pointer;font-size:14px;text-align:left;font-family:inherit}
+#names-grid button:hover,#names-grid button:focus{outline:none;border-color:#00d2ff;background:rgb(20,44,84)}
+#names-custom{width:100%;max-width:420px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+#names-custom:focus{outline:none;border-color:#00d2ff}
+#names-custom::placeholder{color:rgba(0,210,255,.3)}
+#names-panel .name-btns{display:flex;gap:12px;width:100%;max-width:420px}
+#names-custom-btn{flex:0 0 auto;padding:10px 28px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:14px}
+#names-cancel{flex:0 0 auto;padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
 </style>
 </head>
 <body>
@@ -124,12 +157,18 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
   </header>
   <div id="messages"></div>
   <div id="input-row">
-    <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht..." disabled autocomplete="off">
+    <div class="msg-field-wrap">
+      <input id="msg-input" aria-label="Nachricht" disabled autocomplete="new-password">
+      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
+    </div>
     <button id="send-btn" aria-label="Senden" title="Senden">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <polygon points="6 4 20 12 6 20"></polygon>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="3 3 22 12 3 21 8 12"></polygon>
       </svg>
     </button>
+  </div>
+  <div id="emoji-panel" class="hidden">
+    <emoji-picker class="dark"></emoji-picker>
   </div>
 </div>
 
@@ -182,10 +221,14 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<div id="emoji-panel" class="hidden">
-  <h2>Wähle dein Emoji</h2>
-  <div id="emoji-grid"></div>
-  <button id="emoji-cancel">ABBRECHEN</button>
+<div id="names-panel" class="hidden">
+  <h2>Wähle einen Namen</h2>
+  <div id="names-grid"></div>
+  <div class="name-btns">
+    <input id="names-custom" aria-label="Eigener Name" placeholder="Oder eigenen Namen..." autocomplete="off" maxlength="30" style="flex:1">
+    <button id="names-custom-btn">OK</button>
+  </div>
+  <button id="names-cancel">ABBRECHEN</button>
 </div>
 
 <div id="config-panel" class="hidden">
@@ -229,6 +272,13 @@ let cryptoKey = null;
 let hmacKey = null; // derived from the password, used only to compute name_id (HMAC) for uniqueness
 let claimedName = null; // the name this device has confirmed ownership of this session
 let chatReady = false;
+let senderNames = new Set(); // distinct participant names seen in messages
+let alignRight = false; // false = all left, true = left/right; key 'l' toggles
+
+// Strip a leading emoji prefix and lowercase → the bare participant name
+function senderName(plain) {
+  return (plain || '').replace(/^\p{Extended_Pictographic}️?\s/u, '').trim().toLowerCase();
+}
 
 const messagesEl = document.getElementById('messages');
 const msgInput = document.getElementById('msg-input');
@@ -238,32 +288,63 @@ const keyPanel = document.getElementById('key-panel');
 const confirmModal = document.getElementById('confirm-modal');
 let pendingDelete = false;
 
-myNameEl.value = localStorage.getItem(NAME_KEY) || '';
+// ?name= query param pre-fills the name (overrides localStorage)
+const urlParamName = new URLSearchParams(location.search).get('name');
+if (urlParamName) {
+  const n = urlParamName.trim().toLowerCase();
+  myNameEl.value = n;
+  localStorage.setItem(NAME_KEY, n);
+  dbg('Name aus URL-Parameter: ' + n);
+} else {
+  myNameEl.value = localStorage.getItem(NAME_KEY) || '';
+}
 
 // --- Emoji avatar: chosen per person, shown left of the name and prefixed to the sender ---
-const EMOJIS = ['😀','😎','🤓','🥳','😇','🤩','😜','🤖','👻','💀','🐱','🐶','🦊','🐼','🐸','🦁','🐯','🦄','🐝','🦋','🌵','🌻','🍀','🔥','💧','⚡','🌈','⭐','🍎','🍕','🍩','☕','⚽','🎲','🎸','🎨','🚀','🛸','💎','👑'];
 const nameEmojiBtn = document.getElementById('name-emoji');
+const msgEmojiBtn = document.getElementById('msg-emoji');
 const emojiPanel = document.getElementById('emoji-panel');
-const emojiGrid = document.getElementById('emoji-grid');
+const emojiPicker = emojiPanel.querySelector('emoji-picker');
 let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
 if (myEmoji) nameEmojiBtn.textContent = myEmoji;
 
-// Build the picker grid once
-for (const e of EMOJIS) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.textContent = e;
-  b.onclick = () => pickEmoji(e);
-  emojiGrid.appendChild(b);
-}
+// WhatsApp-style picker (emoji-picker-element): a click delivers the emoji to pickEmoji()
+emojiPicker.addEventListener('emoji-click', ev => pickEmoji(ev.detail.unicode));
+// Tapping the dimmed area outside the sheet closes it
+emojiPanel.addEventListener('click', e => { if (e.target === emojiPanel) emojiPanel.classList.add('hidden'); });
+// The scrollable list lives in the picker's shadow DOM — inject a slim scrollbar there
+customElements.whenDefined('emoji-picker').then(() => {
+  const css = `::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    .skintone-button{display:none}
+    input.search{font-size:13px}`;
+  const sheet = new CSSStyleSheet();
+  sheet.replaceSync(css);
+  emojiPicker.shadowRoot.adoptedStyleSheets = [...emojiPicker.shadowRoot.adoptedStyleSheets, sheet];
+});
 
+// Where a picked emoji goes: 'avatar' (header button) changes the personal emoji;
+// 'text' (input button) inserts the emoji into the message text, like WhatsApp.
+let emojiTarget = 'avatar';
 function openEmojiPanel() { emojiPanel.classList.remove('hidden'); }
 async function pickEmoji(e) {
+  // Input button: insert into the message text at the caret, keep the sheet open (like WhatsApp)
+  if (emojiTarget === 'text') {
+    const start = msgInput.selectionStart ?? msgInput.value.length;
+    const end = msgInput.selectionEnd ?? msgInput.value.length;
+    msgInput.value = msgInput.value.slice(0, start) + e + msgInput.value.slice(end);
+    const caret = start + e.length;
+    msgInput.setSelectionRange(caret, caret);
+    updateSendBtn();
+    dbg('Emoji in Text eingefügt: ' + e);
+    return;
+  }
+  // Header button: change the personal avatar emoji (retroactive for own messages), then close
+  emojiPanel.classList.add('hidden');
   myEmoji = e;
   localStorage.setItem(EMOJI_KEY, e);
   nameEmojiBtn.textContent = e;
-  emojiPanel.classList.add('hidden');
-  dbg('Emoji gewählt: ' + e);
+  dbg('Avatar-Emoji gewählt: ' + e);
   if (!msgInput.disabled) msgInput.focus();
   await applyEmojiToOldMessages(e);
 }
@@ -288,7 +369,7 @@ async function applyEmojiToOldMessages(emoji) {
   dbg(`Emoji in ${ids.length} eigenen Nachrichten aktualisiert`);
   loadMessages();
 }
-// Opening the emoji palette must first reserve the entered name — no emoji for a taken name
+// Header avatar button: changes the personal emoji → must first reserve the entered name
 nameEmojiBtn.onclick = async () => {
   const name = myNameEl.value.trim().toLowerCase();
   if (name && name !== claimedName) {
@@ -296,6 +377,13 @@ nameEmojiBtn.onclick = async () => {
     if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
     localStorage.setItem(NAME_KEY, name);
   }
+  emojiTarget = 'avatar';
+  openEmojiPanel();
+};
+
+// Input emoji button: inserts an emoji into the message text (no name reservation needed)
+msgEmojiBtn.onclick = () => {
+  emojiTarget = 'text';
   openEmojiPanel();
 };
 
@@ -406,7 +494,49 @@ async function showStats() {
     <div class="row"><span>Anteil</span><b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)} %</b></div>`;
   dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
 }
-document.getElementById('emoji-cancel').onclick = () => emojiPanel.classList.add('hidden');
+
+// --- Fantasy name picker ---
+const FANTASY_NAMES = [
+  'Pickaxe Pete','Cavern Clara','Dusty Dale','Torchbearer Tess',
+  'Boulder Bob','Spelunker Sam','Gloomy Greta','Treasure Tom',
+  'Crystal Kate','Rubble Rex','Shadowmere Sue','Deeprock Doug',
+  'Flickering Fay','Mineshaft Mike','Cobweb Clem','Stalactite Steve',
+  'Gemstone Gwen','Drifter Dan','Lucky Lila','Ladybug Lou'
+];
+
+function openNamesPanel() {
+  const grid = document.getElementById('names-grid');
+  grid.innerHTML = '';
+  for (const n of FANTASY_NAMES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = n;
+    b.onclick = () => pickFantasyName(n.toLowerCase());
+    grid.appendChild(b);
+  }
+  document.getElementById('names-panel').classList.remove('hidden');
+}
+
+function pickFantasyName(name) {
+  myNameEl.value = name;
+  localStorage.setItem(NAME_KEY, name);
+  document.getElementById('names-panel').classList.add('hidden');
+  document.getElementById('names-custom').value = '';
+  msgInput.focus();
+  dbg('Fantasiename gewählt: ' + name);
+}
+
+document.getElementById('names-custom-btn').onclick = () => {
+  const val = document.getElementById('names-custom').value.trim().toLowerCase();
+  if (val) pickFantasyName(val);
+};
+document.getElementById('names-custom').onkeydown = e => {
+  if (e.key === 'Enter') document.getElementById('names-custom-btn').click();
+};
+document.getElementById('names-cancel').onclick = () => {
+  document.getElementById('names-panel').classList.add('hidden');
+};
+
 // Enter in the name field: claim the name (must be free), then open the emoji palette
 myNameEl.onkeydown = async ev => {
   if (ev.key !== 'Enter') return;
@@ -575,12 +705,16 @@ function initChat(url, key) {
   loadMessages();
   subscribeMessages();
   msgInput.disabled = false;
-  msgInput.focus();
   dbg('Chat bereit — E2E aktiv');
+  if (!myNameEl.value.trim()) {
+    openNamesPanel();
+  } else {
+    msgInput.focus();
+  }
 }
 
-// Dark, saturated shades only — readable on the light message bubbles, no pale/bright tones
-const NAME_COLORS = ['#b71c1c','#880e4f','#a3105f','#4a148c','#311b92','#1a237e','#0d47a1','#01579b','#006064','#004d40','#1b5e20','#33691e','#bf360c','#e65100','#3e2723','#263238','#ad1457','#6a1b9a','#283593','#00695c','#2e7d32','#c62828','#283593','#5d4037','#37474f','#7b1fa2','#0277bd','#00838f','#558b2f','#d84315'];
+// Bright shades — readable on the dark WhatsApp-style bubbles (sender names in group mode)
+const NAME_COLORS = ['#53bdeb','#06cf9c','#ffab00','#ff7e6b','#c58fff','#7ad0ff','#ffd24d','#26d367','#ff8fab','#b5e853','#f4a261','#d4a5ff','#4fc3f7','#ff8a65','#9ccc65','#4dd0e1','#f06292','#fdd835','#80cbc4','#ba68c8'];
 function nameColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -599,6 +733,9 @@ async function loadMessages(all = false) {
   // Limited query comes back newest-first — flip to chronological for display
   const rows = all ? data : data.slice().reverse();
   dbg(`${rows.length} Nachrichten geladen${all ? ' (alle)' : ` (max ${MSG_LIMIT})`}`);
+  // Count distinct participants (for debugging only)
+  senderNames = new Set();
+  for (const m of rows) senderNames.add(senderName(await decryptText(m.sender)));
   knownSenders = new Set(rows.map(m => m.sender));
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
@@ -611,8 +748,9 @@ function subscribeMessages() {
   subscription = client
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
-      dbg('Neue Nachricht von ' + payload.new.sender);
+      dbg('Neue Nachricht');
       knownSenders.add(payload.new.sender);
+      senderNames.add(senderName(await decryptText(payload.new.sender)));
       await renderMsg(payload.new);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     })
@@ -633,20 +771,31 @@ async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
   const myName = myNameEl.value.trim().toLowerCase();
-  const div = document.createElement('div');
-  div.className = 'msg other';
-  if (msg.id != null) div.dataset.id = msg.id;
   // Sender is encrypted too (old plaintext senders still pass through decryptText unchanged)
   const senderPlain = await decryptText(msg.sender);
-  const senderColor = nameColor(senderPlain);
+  // alignRight: my messages right, others left
+  const isSelf = alignRight && senderName(senderPlain) === myName && myName !== '';
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isSelf ? 'self' : 'other');
+  if (msg.id != null) div.dataset.id = msg.id;
   const isEnc = msg.content.startsWith('ENC:');
   if (isEnc) div.classList.add('encrypted');
   const content = await decryptText(msg.content);
-  div.innerHTML = `<span class="sender" style="color:${senderColor}">${escapeHtml(senderPlain)}</span><span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  const showSender = senderNames.size > 2;
+  const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${escapeHtml(senderPlain)}</span>` : '';
+  div.innerHTML = `${senderHtml}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
 }
 
 msgInput.onkeydown = e => { if (e.key === 'Enter') sendMsg(); };
+
+// Debug: key 'l' toggles bubble alignment (all left ↔ left/right)
+document.addEventListener('keydown', e => {
+  if (e.key !== 'l' && e.key !== 'L') return;
+  alignRight = !alignRight;
+  dbg('Debug: Blasen ' + (alignRight ? 'links/rechts' : 'alle links'));
+  loadMessages();
+});
 
 // Send button: visible only while the field has text
 const sendBtn = document.getElementById('send-btn');
