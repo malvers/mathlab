@@ -98,15 +98,22 @@ installBtn.onclick = async () => {
     if (isIOS) iosHint.style.display = 'block';
     return;
   }
-  showSpinner(true);
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  showSpinner(false);
-  statusEl.textContent = outcome === 'accepted' ? 'Installiert! Öffne VGP vom Startbildschirm.' : 'Installation abgebrochen.';
+  if (outcome === 'accepted') {
+    // Chrome now installs in the background → keep the spinner running until 'appinstalled'
+    showSpinner(true);
+    statusEl.classList.remove('warn');
+    statusEl.textContent = 'Installiere…';
+  } else {
+    showSpinner(false);
+    statusEl.textContent = 'Installation abgebrochen.';
+  }
   deferredPrompt = null;
 };
 window.addEventListener('appinstalled', () => {
   showSpinner(false);
+  statusEl.classList.remove('warn');
   statusEl.textContent = 'Installiert! Öffne VGP vom Startbildschirm.';
 });
 </script>
