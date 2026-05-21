@@ -286,7 +286,10 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
       CREATE POLICY "allow all" ON messages FOR ALL USING (true) WITH CHECK (true);<br><br>
       CREATE TABLE participants (name_id text PRIMARY KEY, owner_hash text NOT NULL, updated_at timestamptz DEFAULT now());<br>
       ALTER TABLE participants ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "allow all" ON participants FOR ALL USING (true) WITH CHECK (true);
+      CREATE POLICY "allow all" ON participants FOR ALL USING (true) WITH CHECK (true);<br><br>
+      CREATE TABLE app_meta (key text PRIMARY KEY, value text, updated_at timestamptz DEFAULT now());<br>
+      ALTER TABLE app_meta ENABLE ROW LEVEL SECURITY;<br>
+      CREATE POLICY "allow all" ON app_meta FOR ALL USING (true) WITH CHECK (true);
     </code>
   </p>
 </div>
@@ -298,6 +301,7 @@ const NAME_KEY = 'eocr-chat-name';
 const CHAT_KEY = 'eocr-chat-key';
 const EMOJI_KEY = 'eocr-chat-emoji';
 const CLAIM_KEY = 'eocr-chat-claim'; // local random secret proving ownership of a claimed name
+const LAST_RESET_KEY = 'eocr-last-reset-seen'; // the reset_at marker this device has already applied
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -697,19 +701,44 @@ function openResetModal() {
   resetModal.classList.remove('hidden');
   resetPwd.focus();
 }
+// Wipe all local app data, remember which reset we applied (so we don't loop), then reload.
+function wipeLocalAndReload(resetAt) {
+  Object.keys(localStorage).filter(k => k.startsWith('eocr-')).forEach(k => localStorage.removeItem(k));
+  if (resetAt) localStorage.setItem(LAST_RESET_KEY, resetAt); // set AFTER the wipe, so it survives
+  location.reload();
+}
+// Read the server-wide reset marker (null if the table/row doesn't exist yet)
+async function getResetMarker() {
+  if (!client) return null;
+  const { data, error } = await client.from('app_meta').select('value').eq('key', 'reset_at').limit(1);
+  if (error) { dbg('Reset-Marker nicht lesbar (Tabelle da?): ' + error.message); return null; }
+  return (data && data.length) ? data[0].value : null;
+}
+// On load / on realtime signal: if the server reset is newer than what we've applied, wipe ourselves.
+function maybeApplyRemoteReset(remote) {
+  if (!remote) return false;
+  if (localStorage.getItem(LAST_RESET_KEY) === remote) return false; // already applied
+  const hasData = localStorage.getItem(NAME_KEY) || localStorage.getItem(CHAT_KEY);
+  if (hasData) { dbg('Remote-Reset erkannt — lösche lokale Daten & lade neu'); wipeLocalAndReload(remote); return true; }
+  localStorage.setItem(LAST_RESET_KEY, remote); // fresh visitor: nothing to wipe, just mark as current
+  return false;
+}
+
 async function doReset() {
   dbg('RESET: lösche alles…');
+  let ts = new Date().toISOString();
   if (client) {
     // Wipe all messages and all reserved names on the server
     const { error: mErr } = await client.from('messages').delete().gt('id', 0);
     if (mErr) dbg('Reset Nachrichten-Fehler: ' + mErr.message);
     const { error: pErr } = await client.from('participants').delete().neq('name_id', '');
     if (pErr) dbg('Reset Teilnehmer-Fehler: ' + pErr.message);
+    // Signal every other client to wipe itself (now if online, on next open if offline)
+    const { error: rErr } = await client.from('app_meta').upsert({ key: 'reset_at', value: ts, updated_at: ts });
+    if (rErr) dbg('Reset-Signal-Fehler (app_meta da?): ' + rErr.message);
   }
-  // Wipe every local app key (name, password, emoji, claim secret, Supabase config)
-  Object.keys(localStorage).filter(k => k.startsWith('eocr-')).forEach(k => localStorage.removeItem(k));
   dbg('RESET: lokal & Server geleert — lade neu');
-  location.reload();
+  wipeLocalAndReload(ts);
 }
 document.getElementById('reset-yes').onclick = async () => {
   const btn = document.getElementById('reset-yes');
@@ -798,10 +827,12 @@ async function decryptText(cipherB64, key = cryptoKey) {
   }
 }
 
-function initChat(url, key) {
+async function initChat(url, key) {
   if (!client) client = window.supabase.createClient(url, key);
   chatReady = true;
   dbg('Supabase-Client erstellt');
+  // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
+  if (await maybeApplyRemoteReset(await getResetMarker())) return;
   loadMessages();
   subscribeMessages();
   msgInput.disabled = false;
@@ -864,6 +895,14 @@ function subscribeMessages() {
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
       dbg('Nachricht(en) geändert (z.B. Emoji) — lade neu');
       loadMessages();
+    })
+    // Remote /reset signal: another client wiped everything → wipe ourselves and reload
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_meta' }, payload => {
+      const row = payload.new;
+      if (row && row.key === 'reset_at') {
+        dbg('Remote-Reset-Signal empfangen');
+        maybeApplyRemoteReset(row.value);
+      }
     })
     .subscribe(status => {
       dbg('Realtime-Status: ' + JSON.stringify(status));
