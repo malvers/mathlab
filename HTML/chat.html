@@ -215,7 +215,7 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 <div id="reset-modal" class="hidden">
   <div id="reset-box">
     <p><b>ALLES unwiderruflich zurücksetzen?</b><br>Alle Nachrichten, alle reservierten Namen und deine lokalen Daten werden gelöscht. Das kann <b>nicht</b> rückgängig gemacht werden.</p>
-    <input id="reset-pwd" type="password" placeholder="Bestätigungs-Passwort" autocomplete="new-password">
+    <input id="reset-pwd" type="password" placeholder="Bestätigungs-Passwort" autocomplete="off" readonly>
     <p id="reset-err" class="reset-err hidden">Falsches Passwort.</p>
     <div class="btns">
       <button class="btn-yes" id="reset-yes">RESET</button>
@@ -227,7 +227,7 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 <div id="key-panel" class="hidden">
   <h2>Passwort</h2>
   <div class="pwd-wrap">
-    <input id="chat-key" type="password" aria-label="Passwort" placeholder="" autocomplete="new-password">
+    <input id="chat-key" type="password" aria-label="Passwort" placeholder="" autocomplete="off" readonly>
     <button type="button" class="pwd-eye" id="chat-key-eye" aria-label="Passwort anzeigen">
       <svg id="chat-key-eye-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -251,6 +251,7 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
     <div class="cmd"><code>/release</code><span>Eigenen Namen freigeben (wieder vergebbar)</span></div>
     <div class="cmd"><code>/delete</code><span>Alle Nachrichten löschen</span></div>
     <div class="cmd"><code>/clear</code><span>Passwort/Config löschen (Name bleibt), neu laden</span></div>
+    <div class="cmd"><code>/reset</code><span>ALLES unwiderruflich zurücksetzen</span></div>
   </div>
   <button id="help-close">SCHLIESSEN</button>
 </div>
@@ -333,6 +334,16 @@ const configPanel = document.getElementById('config-panel');
 const keyPanel = document.getElementById('key-panel');
 const confirmModal = document.getElementById('confirm-modal');
 let pendingDelete = false;
+
+// Keep browser password managers (Firefox "generate password", Safari/Chrome autofill) away from
+// our non-account password fields: they start readonly, so no manager pops up on load; the first
+// real interaction unlocks them for typing.
+document.querySelectorAll('input[type="password"]').forEach(inp => {
+  const unlock = () => { if (inp.hasAttribute('readonly')) inp.removeAttribute('readonly'); };
+  inp.addEventListener('pointerdown', unlock);
+  inp.addEventListener('focus', unlock);
+  inp.addEventListener('keydown', unlock);
+});
 
 // ?name= query param pre-fills the name (overrides localStorage)
 const urlParamName = new URLSearchParams(location.search).get('name');
@@ -870,6 +881,7 @@ async function loadMessages(all = false) {
     const s = senderName(await decryptText(m.sender));
     if (s && s !== '[falscher schlüssel]') senderNames.add(s);
   }
+  alignRight = senderNames.size <= 2;
   knownSenders = new Set(rows.map(m => m.sender));
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
