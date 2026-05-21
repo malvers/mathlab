@@ -476,22 +476,19 @@ async function nameId(name) {
   const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode(name.toLowerCase()));
   return bufToHex(sig);
 }
-// Random per-device secret; only its hash goes to the server, never the secret itself
-function getClaimSecret() {
-  let s = localStorage.getItem(CLAIM_KEY);
-  if (!s) { s = bufToHex(crypto.getRandomValues(new Uint8Array(32)).buffer); localStorage.setItem(CLAIM_KEY, s); }
-  return s;
-}
-async function ownerHash() {
+// Owner proof derived from password + name — same result on every device with the same password.
+// Uses a distinct prefix ('owner:') so it can never collide with nameId().
+async function ownerHash(name) {
   const enc = new TextEncoder();
-  return bufToHex(await crypto.subtle.digest('SHA-256', enc.encode(getClaimSecret())));
+  const sig = await crypto.subtle.sign('HMAC', hmacKey, enc.encode('owner:' + name.toLowerCase()));
+  return bufToHex(sig);
 }
-// Returns true if the name is now ours (freshly claimed or already owned by this device)
+// Returns true if the name is now ours (freshly claimed or already owned via same password)
 async function claimName(name) {
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
   if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const id = await nameId(name);
-  const mine = await ownerHash();
+  const mine = await ownerHash(name);
   const { data, error } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
   if (error) { dbg('Claim-Check nicht möglich (Tabelle da?): ' + error.message); return true; }
   if (data && data.length) {
@@ -502,7 +499,6 @@ async function claimName(name) {
   }
   const { error: insErr } = await client.from('participants').insert({ name_id: id, owner_hash: mine });
   if (insErr) {
-    // PK conflict = someone claimed it in the meantime
     dbg('Claim fehlgeschlagen: ' + insErr.message);
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
@@ -517,7 +513,7 @@ async function releaseName() {
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return; }
   if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const id = await nameId(name);
-  const mine = await ownerHash();
+  const mine = await ownerHash(name);
   const { data } = await client.from('participants').select('owner_hash').eq('name_id', id).limit(1);
   if (data && data.length && data[0].owner_hash !== mine) {
     alert('Dieser Name gehört nicht dir.');
