@@ -22,11 +22,12 @@ CyberUI.init();
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+html{background:#020410}
 input,button,textarea{font-family:inherit}
 /* Safari injects an AutoFill/contact button (👤⌄) into text fields — hide it */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:none!important;pointer-events:none;position:absolute;right:0}
-body{font-family:'Raleway',system-ui,sans-serif;background:#0a0e1a;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
+body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
 #app{position:relative;width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border:1px solid rgba(0,210,255,.3);border-radius:8px;overflow:hidden;background:#020410;box-shadow:0 0 24px rgba(0,210,255,.12)}
 header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
 .name-wrap{flex:1;position:relative;display:flex}
@@ -174,6 +175,16 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #names-panel .name-btns{display:flex;gap:12px;width:100%;max-width:420px}
 #names-custom-btn{flex:0 0 auto;padding:10px 28px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:14px}
 #names-cancel{flex:0 0 auto;padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
+/* Smartphone: bump the text up so it reads as large as on desktop (the fixed px look smaller on a
+   physically small screen). Deliberately NOT fluid — just a one-step larger size on small screens.
+   16px on inputs also stops iOS from zooming in when a field is focused. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (max-width:600px){
+  .msg{font-size:17px}
+  .msg .sender{font-size:15px}
+  .msg .time{font-size:13px}
+  header input,.msg-field-wrap input{font-size:16px}
+}
 </style>
 </head>
 <body>
