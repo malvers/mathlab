@@ -175,11 +175,12 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #names-panel .name-btns{display:flex;gap:12px;width:100%;max-width:420px}
 #names-custom-btn{flex:0 0 auto;padding:10px 28px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:14px}
 #names-cancel{flex:0 0 auto;padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
-/* Smartphone: bump the text up so it reads as large as on desktop (the fixed px look smaller on a
-   physically small screen). Deliberately NOT fluid — just a one-step larger size on small screens.
-   16px on inputs also stops iOS from zooming in when a field is focused. */
+/* Touch devices (real phones/tablets) only: bump the text up — the fixed px look smaller on a
+   physically small screen. (hover:none)+(pointer:coarse) targets touch devices, NOT a narrow
+   desktop window, so the desktop browser stays exactly as before regardless of window width.
+   17px+ on inputs also stops iOS from zooming in when a field is focused. */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-@media (max-width:600px){
+@media (hover:none) and (pointer:coarse){
   .msg{font-size:22px}
   .msg .sender{font-size:18px}
   .msg .time{font-size:15px}
