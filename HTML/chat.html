@@ -2,8 +2,16 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>Doc Alvers Chat — E2E</title>
+<!-- PWA: installable app (manifest + icons + iOS home-screen support) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020410">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VGP">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
@@ -442,13 +450,7 @@ async function applyEmojiToOldMessages(emoji) {
   loadMessages();
 }
 // Header avatar button: changes the personal emoji → must first reserve the entered name
-nameEmojiBtn.onclick = async () => {
-  const name = myNameEl.value.trim().toLowerCase();
-  if (name && name !== claimedName) {
-    const ok = await claimName(name);
-    if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
-    localStorage.setItem(NAME_KEY, name);
-  }
+nameEmojiBtn.onclick = () => {
   emojiTarget = 'avatar';
   openEmojiPanel();
 };
@@ -1072,6 +1074,16 @@ function escapeHtml(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+// PWA: register the service worker so the browser offers "Install app" (no offline caching — KISS)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(
+      () => dbg('Service Worker registriert — App installierbar'),
+      err => dbg('Service Worker Fehler: ' + err.message)
+    );
+  });
 }
 </script>
 </body>
