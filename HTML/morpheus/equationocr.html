@@ -1538,6 +1538,8 @@ function toggleSidebar() {
         // range (much larger than Android), so threshold needs to be generous.
         const PALM_MAX_PX = 100;
         let activePointerId = null;
+        let lastRaw = null; // last raw stylus point (bezier control)
+        let lastMid = null; // last drawn midpoint (bezier start for next segment)
 
         function isAllowedPointer(e) {
             if (e.pointerType === 'pen' || e.pointerType === 'mouse') return true;
@@ -1590,6 +1592,7 @@ function toggleSidebar() {
             activePointerId = e.pointerId;
             isDrawing = true;
             const p = getPos(e);
+            lastRaw = p; lastMid = p;
             curStroke = { points: [p], width: drawCtx.lineWidth };
             drawCtx.beginPath();
             drawCtx.moveTo(p.x, p.y);
@@ -1600,15 +1603,36 @@ function toggleSidebar() {
         drawCanvas.addEventListener('pointermove', e => {
             if (!isDrawing || e.pointerId !== activePointerId) return;
             if (!isAllowedPointer(e)) return;
-            const p = getPos(e);
-            if (curStroke) curStroke.points.push(p);
-            drawCtx.lineTo(p.x, p.y); drawCtx.stroke();
+            // Use coalesced events to recover all high-frequency stylus samples the
+            // browser batched into this one pointermove (active pens report 240 Hz+).
+            const all = e.getCoalescedEvents ? [...e.getCoalescedEvents(), e] : [e];
+            for (const ev of all) {
+                const p = getPos(ev);
+                if (curStroke) curStroke.points.push(p);
+                // Midpoint bezier: draw from lastMid → lastRaw (control) → mid (end).
+                // Each segment starts exactly where the previous ended → G1-continuous.
+                const mid = { x: (lastRaw.x + p.x) / 2, y: (lastRaw.y + p.y) / 2 };
+                drawCtx.beginPath();
+                drawCtx.moveTo(lastMid.x, lastMid.y);
+                drawCtx.quadraticCurveTo(lastRaw.x, lastRaw.y, mid.x, mid.y);
+                drawCtx.stroke();
+                lastMid = mid;
+                lastRaw = p;
+            }
             e.preventDefault();
         }, { passive: false });
 
         function endStroke(e) {
             if (e && e.pointerId !== activePointerId) return;
             if (isDrawing) {
+                // Close the final bezier segment to the actual last stylus position.
+                if (lastMid && lastRaw) {
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(lastMid.x, lastMid.y);
+                    drawCtx.lineTo(lastRaw.x, lastRaw.y);
+                    drawCtx.stroke();
+                }
+                lastRaw = null; lastMid = null;
                 isDrawing = false;
                 if (curStroke && curStroke.points.length >= 1) {
                     const idx = strokes.length;
