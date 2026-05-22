@@ -1,5 +1,10 @@
 # Forloop Projekt — Farben
 
+> ⚠️ **TEMPORÄR / VOR DEPLOY ENTFERNEN — HTML/vgpchat.html:** Auto-Login aktiv (Konto-Passwort
+> wird im Klartext in localStorage `vgp-TEMP-pwd` gecacht, App-Lock wird übersprungen — nur fürs
+> lokale Testen!). Vor jedem echten Deploy: den `TEMPORÄR`-Block beim Start auf das ORIGINAL
+> zurücksetzen, beide `localStorage.setItem('vgp-TEMP-pwd', …)` in `authSubmit()` löschen.
+
 ## General rules
 A few ground rules:
 

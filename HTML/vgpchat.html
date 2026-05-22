@@ -31,16 +31,40 @@ input,button,textarea{font-family:inherit}
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:none!important;pointer-events:none;position:absolute;right:0}
 body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{position:relative;width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:#020410}
-header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
-#lock-btn{flex:0 0 auto;width:40px;height:40px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:rgb(10,24,52);color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#app{position:relative;width:100%;max-width:900px;height:100dvh;max-height:800px;display:flex;border-radius:8px;overflow:hidden;background:#020410}
+/* Sidebar: own identity + search + contact list */
+#sidebar{flex:0 0 300px;display:flex;flex-direction:column;min-width:0;background:rgb(2,6,14);border-right:1px solid rgba(0,210,255,.15)}
+/* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
+#sidebar-head{display:flex;gap:8px;padding:10px 12px;background:rgb(3,10,16);align-items:center;border-top:1px solid rgba(0,210,255,.12)}
+#sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:rgba(224,232,240,.7);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sidebar-head #my-name:focus{outline:none}
+#name-emoji{flex:0 0 auto;position:static;transform:none;width:32px;height:32px;border:none;border-radius:50%;background:rgb(10,24,52);font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+#contact-search{margin:12px 12px 8px;padding:9px 14px;border:1px solid rgba(0,210,255,.2);border-radius:18px;background:rgb(10,24,52);color:#e0e8f0;font-size:13px}
+#contact-search:focus{outline:none;border-color:#00d2ff}
+#contact-search::placeholder{color:rgba(0,210,255,.3)}
+#contact-list{flex:1;overflow-y:auto}
+.contact{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(0,210,255,.06)}
+.contact:hover{background:rgba(0,210,255,.06)}
+.contact.active{background:rgba(0,210,255,.12)}
+.contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgb(14,32,64);display:flex;align-items:center;justify-content:center;font-size:20px}
+.contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Chat panel */
+#chat-panel{flex:1;display:flex;flex-direction:column;min-width:0}
+#chat-head{display:flex;gap:8px;padding:12px 14px;background:rgb(3,10,16);align-items:center}
+#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
+#lock-btn{flex:0 0 auto;width:36px;height:36px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:rgb(10,24,52);color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 #lock-btn:hover{border-color:#00d2ff;background:rgb(14,32,64)}
-#lock-btn:focus{outline:none}
-.name-wrap{flex:1;position:relative;display:flex}
-header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
-.name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
-header input::placeholder{color:rgba(0,210,255,.3)}
-header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
+#lock-btn:focus,#name-emoji:focus,#back-btn:focus{outline:none}
+/* Mobile / narrow: one column — sidebar by default, chat slides in when a contact is picked */
+@media (max-width:700px){
+  #app{max-width:100%;border-radius:0}
+  #sidebar{flex:1 1 100%}
+  #chat-panel{position:absolute;inset:0;z-index:40;background:#020410;transform:translateX(100%);transition:transform .2s}
+  #app.chat-open #chat-panel{transform:translateX(0)}
+  #app.chat-open #sidebar{display:none}
+  #back-btn{display:flex}
+}
 #messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 /* Chrome + Safari: slim cyan scrollbar via ::-webkit-scrollbar (must NOT also set scrollbar-width, or Safari falls back to the native bar) */
 #messages::-webkit-scrollbar{width:6px}
@@ -147,8 +171,7 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 .enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
 .e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:rgb(14,36,78);color:#cfe4f7;border:1px solid rgba(0,210,255,.3);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
 .enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
-/* Emoji avatar sits INSIDE the name input, before the name text */
-#name-emoji{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
+/* (own emoji avatar styled in the sidebar-head rule above) */
 #name-emoji:focus{outline:none}
 /* Emoji picker overlay */
 /* WhatsApp-style emoji picker — appears just above the input row, dark theme */
@@ -218,31 +241,41 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </head>
 <body>
 <div id="app">
-  <header>
-    <div class="name-wrap">
+  <aside id="sidebar">
+    <input id="contact-search" placeholder="Suchen…" autocomplete="off">
+    <div id="contact-list"></div>
+    <div id="sidebar-head">
       <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
-      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off">
+      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
+      <button id="lock-btn" type="button" aria-label="App sperren" title="Sperren (Konto-Passwort nötig)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </button>
+    </div>
+  </aside>
+  <section id="chat-panel">
+    <header id="chat-head">
+      <button id="back-btn" type="button" aria-label="Zurück" title="Zurück">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <span id="chat-peer">Wähle einen Kontakt</span>
       <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
+    </header>
+    <div id="messages"></div>
+    <div id="input-row">
+      <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
+      <div class="msg-field-wrap">
+        <input id="msg-input" aria-label="Nachricht" disabled autocomplete="new-password">
+        <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
+      </div>
+      <button id="send-btn" aria-label="Senden" title="Senden">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="3 3 22 12 3 21 8 12"></polygon>
+        </svg>
+      </button>
     </div>
-    <button id="lock-btn" type="button" aria-label="App sperren" title="Sperren (Konto-Passwort nötig)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-    </button>
-  </header>
-  <div id="messages"></div>
-  <div id="input-row">
-    <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
-    <div class="msg-field-wrap">
-      <input id="msg-input" aria-label="Nachricht" disabled autocomplete="new-password">
-      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
-    </div>
-    <button id="send-btn" aria-label="Senden" title="Senden">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <polygon points="3 3 22 12 3 21 8 12"></polygon>
-      </svg>
-    </button>
-  </div>
+  </section>
   <div id="emoji-panel" class="hidden">
     <!--suppress HtmlUnknownTag -->
     <emoji-picker class="dark"></emoji-picker>
@@ -383,15 +416,17 @@ let knownSenders = new Set();
 
 // Single Supabase client + anonymous sign-in → a device-bound identity (auth.uid()) without e-mail.
 // Failsafe: if Anonymous sign-ins aren't enabled in Supabase yet, the app keeps working (old RLS).
+let myUid = null; // our auth.uid() — used as message author/recipient id
 async function ensureClient() {
   if (!client) client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   try {
-    const { data: { session } } = await client.auth.getSession();
+    let { data: { session } } = await client.auth.getSession();
     if (!session) {
-      const { error } = await client.auth.signInAnonymously();
+      const { data, error } = await client.auth.signInAnonymously();
       if (error) dbg('Anon-Login nicht möglich (Anonymous Auth aktiviert?): ' + error.message);
-      else dbg('Anonym eingeloggt — Geräte-Identität aktiv');
+      else { session = data.session; dbg('Anonym eingeloggt — Geräte-Identität aktiv'); }
     }
+    myUid = session && session.user ? session.user.id : null;
   } catch (e) { dbg('Auth-Fehler: ' + e.message); }
   return client;
 }
@@ -478,35 +513,13 @@ async function pickEmoji(e) {
     dbg('Emoji in Text eingefügt: ' + e);
     return;
   }
-  // Header button: change the personal avatar emoji (retroactive for own messages), then close
+  // Header button: change the personal avatar emoji (1:1 model: only local, no message rewrite)
   emojiPanel.classList.add('hidden');
   myEmoji = e;
   localStorage.setItem(EMOJI_KEY, e);
   nameEmojiBtn.textContent = e;
   dbg('Avatar-Emoji gewählt: ' + e);
   if (!msgInput.disabled) msgInput.focus();
-  await applyEmojiToOldMessages(e);
-}
-
-// Rewrite the emoji prefix on all of my own past messages so the change is retroactive for everyone.
-// Senders are encrypted, so we decrypt each to find mine, then write a freshly encrypted sender back.
-async function applyEmojiToOldMessages(emoji) {
-  const name = myNameEl.value.trim().toLowerCase();
-  if (!client || !name) return;
-  const { data, error } = await client.from('messages').select('id,sender');
-  if (error) { dbg('Emoji-Update Fehler: ' + error.message); return; }
-  const ids = [];
-  for (const m of data) {
-    const plain = await decryptText(m.sender); // old plaintext senders pass through unchanged
-    // A row is "mine" if the decrypted sender is my plain name or ends with " <name>" (any emoji prefix)
-    if (plain === name || plain.endsWith(' ' + name)) ids.push(m.id);
-  }
-  if (!ids.length) return;
-  const newEncSender = await encryptText(`${emoji} ${name}`);
-  const { error: uErr } = await client.from('messages').update({ sender: newEncSender }).in('id', ids);
-  if (uErr) { dbg('Emoji-Update Fehler: ' + uErr.message); return; }
-  dbg(`Emoji in ${ids.length} eigenen Nachrichten aktualisiert`);
-  loadMessages();
 }
 // Header avatar button: changes the personal emoji → must first reserve the entered name
 nameEmojiBtn.onclick = () => {
@@ -750,10 +763,32 @@ document.getElementById('auth-forgot').onclick = () => {
 };
 // Lock button: lock the app → reload shows the login screen (account password needed)
 document.getElementById('lock-btn').onclick = () => location.reload();
+// Back button (mobile): return from the open chat to the contact list
+document.getElementById('back-btn').onclick = () => document.getElementById('app').classList.remove('chat-open');
 
-// Start: vault present → unlock (login); otherwise create account (sign up)
-setAuthMode(vaultExists() ? 'login' : 'signup');
-authPanel.classList.remove('hidden');
+/* ============================================================================================
+   ███  TEMPORÄR — NUR FÜRS LOKALE TESTEN — VOR DEPLOY ENTFERNEN!  ███
+   Auto-Login: Das Konto-Passwort ist HART IN DIE QUELLE geschrieben (TEMP_PWD) und wird beim
+   Start automatisch zum Entsperren des Vaults benutzt → der App-Lock (Login-Screen) wird
+   übersprungen. DAS HEBELT DIE SICHERHEIT AUS. Vor jedem echten Deploy:
+     diesen ganzen Block durch die zwei Zeilen unten ersetzen (siehe ORIGINAL).
+   ORIGINAL (Produktion):
+     setAuthMode(vaultExists() ? 'login' : 'signup');
+     authPanel.classList.remove('hidden');
+   ============================================================================================ */
+{
+  const TEMP_PWD = '!aMe5007!!??';   // ⚠️ TEMP — hardcoded account password, remove before deploy
+  if (vaultExists()) {
+    dbg('⚠️ TEMP Auto-Login aktiv — App-Lock übersprungen (vor Deploy entfernen!)');
+    openVault(TEMP_PWD).then(async v => {
+      if (v && v !== 'WRONG') { await activateVault(v); authPanel.classList.add('hidden'); await initChat(SUPABASE_URL, SUPABASE_KEY); }
+      else { setAuthMode('login'); authPanel.classList.remove('hidden'); }
+    });
+  } else {
+    setAuthMode('signup');
+    authPanel.classList.remove('hidden');
+  }
+}
 
 async function submitKey() {
   const keyInput = document.getElementById('chat-key');
@@ -951,10 +986,10 @@ async function verifyKey(testKey) {
   return ok;
 }
 
-async function encryptText(plain) {
+async function encryptText(plain, key = cryptoKey) {
   const enc = new TextEncoder();
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(plain));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plain));
   const combined = new Uint8Array(iv.length + encrypted.byteLength);
   combined.set(iv);
   combined.set(new Uint8Array(encrypted), iv.length);
@@ -1004,6 +1039,53 @@ async function loadIdentities() {
   if (error) { dbg('Identities nicht lesbar (Tabelle da?): ' + error.message); return; }
   for (const r of (data || [])) idCache.set(r.name_id, r.pubkey);
 }
+
+// --- Contact list (everyone registered, except me) ---
+let activePeer = null;          // the contact we're currently chatting with
+let allContacts = [];           // cached list for search filtering
+function contactAvatar(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
+async function loadContacts() {
+  const { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner');
+  if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
+  const me = (myNameEl.value || '').toLowerCase();
+  // --- DIAGNOSE (TEMP): show exactly what the DB returned and why rows pass/fail the filter ---
+  dbg(`loadContacts: ${data ? data.length : 0} Zeile(n) aus identities, eigener Name="${me}"`);
+  (data || []).forEach(r => {
+    const keep = r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner;
+    dbg(`  • name=${JSON.stringify(r.name)} ecdh=${r.ecdh_pubkey ? 'ja' : 'NEIN'} owner=${r.owner ? 'ja' : 'NEIN'} → ${keep ? 'KONTAKT' : 'raus'}`);
+  });
+  allContacts = (data || []).filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
+                            .sort((a, b) => a.name.localeCompare(b.name));
+  renderContacts(document.getElementById('contact-search').value);
+}
+function renderContacts(filter) {
+  const list = document.getElementById('contact-list');
+  const f = (filter || '').toLowerCase();
+  const shown = allContacts.filter(c => c.name.toLowerCase().includes(f));
+  list.innerHTML = '';
+  if (!shown.length) {
+    list.innerHTML = `<div style="padding:14px;color:rgba(0,210,255,.4);font-size:13px">${allContacts.length ? 'Kein Treffer.' : 'Noch keine Kontakte.'}</div>`;
+    return;
+  }
+  for (const c of shown) {
+    const div = document.createElement('div');
+    div.className = 'contact' + (activePeer && activePeer.name === c.name ? ' active' : '');
+    div.innerHTML = `<span class="av">${escapeHtml(contactAvatar(c.name))}</span><span class="nm">${escapeHtml(c.name)}</span>`;
+    div.onclick = () => selectContact(c, div);
+    list.appendChild(div);
+  }
+}
+function selectContact(c, div) {
+  activePeer = c;
+  document.querySelectorAll('.contact').forEach(el => el.classList.remove('active'));
+  if (div) div.classList.add('active');
+  document.getElementById('chat-peer').textContent = c.name;
+  document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
+  msgInput.disabled = false;
+  loadMessages(); // E3 will filter to this 1:1 conversation
+  msgInput.focus();
+}
+document.getElementById('contact-search').addEventListener('input', e => renderContacts(e.target.value));
 
 // --- Account-password vault (WhatsApp/Signal-style app lock) ---
 // The account password derives a wrapping key (PBKDF2) that encrypts a local blob holding the
@@ -1093,11 +1175,10 @@ async function initChat(url, key) {
   dbg('Supabase-Client erstellt');
   // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
   if (await maybeApplyRemoteReset(await getResetMarker())) return;
-  loadMessages();
+  await loadContacts();      // fill the sidebar
   subscribeMessages();
-  msgInput.disabled = false;
-  dbg('Chat bereit — E2E aktiv');
-  msgInput.focus();
+  msgInput.disabled = true;  // stays disabled until a contact is selected
+  dbg('Chat bereit — wähle einen Kontakt');
 }
 
 // Bright shades — readable on the dark WhatsApp-style bubbles (sender names in group mode)
@@ -1109,27 +1190,17 @@ function nameColor(name) {
 }
 
 const MSG_LIMIT = 500;
-async function loadMessages(all = false) {
-  // Refresh the name→pubkey registry so renderMsg can verify signatures
-  await loadIdentities();
-  // Default: only the most recent MSG_LIMIT messages (saves traffic). /loadall fetches everything.
-  let query = client.from('messages').select('*');
-  query = all
-    ? query.order('created_at', { ascending: true })
-    : query.order('created_at', { ascending: false }).limit(MSG_LIMIT);
-  const { data, error } = await query;
+let activeChatKey = null; // ECDH-derived AES key for the currently open 1:1 conversation
+async function loadMessages() {
+  if (!activePeer) { messagesEl.innerHTML = ''; return; }
+  await loadIdentities();                                  // for signature verification
+  activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
+  const peer = activePeer.owner;
+  const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
-  // Limited query comes back newest-first — flip to chronological for display
-  const rows = all ? data : data.slice().reverse();
-  dbg(`${rows.length} Nachrichten geladen${all ? ' (alle)' : ` (max ${MSG_LIMIT})`}`);
-  // Count distinct participants (for debugging only)
-  senderNames = new Set();
-  for (const m of rows) {
-    const s = senderName(await decryptText(m.sender));
-    if (s && s !== '[falscher schlüssel]') senderNames.add(s);
-  }
-  alignRight = senderNames.size <= 2;
-  knownSenders = new Set(rows.map(m => m.sender));
+  // RLS already restricts to rows where I'm author or recipient → keep only those with this peer
+  const rows = (data || []).filter(m => m.author === peer || m.recipient === peer);
+  dbg(`${rows.length} 1:1-Nachrichten mit ${activePeer.name}`);
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1141,19 +1212,15 @@ function subscribeMessages() {
   subscription = client
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
-      dbg('Neue Nachricht');
-      knownSenders.add(payload.new.sender);
-      senderNames.add(senderName(await decryptText(payload.new.sender)));
-      await renderMsg(payload.new);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      const m = payload.new;
+      // Only render if it belongs to the currently open 1:1 conversation
+      if (activePeer && (m.author === activePeer.owner || m.recipient === activePeer.owner)) {
+        await renderMsg(m);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
-      dbg('Nachricht(en) gelöscht — lade neu');
-      loadMessages();
-    })
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
-      dbg('Nachricht(en) geändert (z.B. Emoji) — lade neu');
-      loadMessages();
+      if (activePeer) loadMessages();
     })
     // Remote /reset signal: another client wiped everything → wipe ourselves and reload
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_meta' }, payload => {
@@ -1163,43 +1230,41 @@ function subscribeMessages() {
         maybeApplyRemoteReset(row.value);
       }
     })
+    // A new account registered (or changed) → refresh the contact list live
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'identities' }, () => {
+      dbg('Kontakte geändert — Liste aktualisieren');
+      loadContacts();
+    })
     .subscribe(status => {
       dbg('Realtime-Status: ' + JSON.stringify(status));
     });
 }
+// Fallback if identities isn't in the realtime publication: refresh contacts when the tab regains focus
+window.addEventListener('focus', () => { if (chatReady) loadContacts(); });
 
 async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
-  const myName = myNameEl.value.trim().toLowerCase();
-  // Sender is encrypted too (old plaintext senders still pass through decryptText unchanged)
-  const senderPlain = await decryptText(msg.sender);
-  // alignRight: my messages right, others left
-  const isSelf = alignRight && senderName(senderPlain) === myName && myName !== '';
+  // 1:1: my own messages go right, the peer's go left (decided by author = our uid)
+  const isSelf = msg.author === myUid;
   const div = document.createElement('div');
   div.className = 'msg ' + (isSelf ? 'self' : 'other');
   if (msg.id != null) div.dataset.id = msg.id;
-  const isEnc = msg.content.startsWith('ENC:');
-  if (isEnc) div.classList.add('encrypted');
-  const rawContent = await decryptText(msg.content);
+  const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, activeChatKey) : (msg.content || '');
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
-  const showSender = !decryptFailed;
-  // Anti-impersonation: the signature must be valid AND the signing key must be the one bound to
-  // this sender's name. A mismatch → flag the message (possible forgery). Legacy messages without
-  // a signature are left unflagged.
+  // Anti-impersonation: signature valid AND the signing key belongs to the actual author
+  // (mine, or the peer's registered key). Mismatch → flag as possible forgery.
   let badge = '';
-  if (!decryptFailed && msg.pubkey && msg.sig && hmacKey) {
-    const sigOk = await verifyText(msg.content + '|' + msg.sender, msg.sig, msg.pubkey);
-    const boundPub = idCache ? idCache.get(await nameId(senderName(senderPlain))) : undefined;
-    const nameOk = !boundPub || boundPub === msg.pubkey;
-    if (!sigOk || !nameOk) {
+  if (!decryptFailed && msg.pubkey && msg.sig) {
+    const sigOk = await verifyText(msg.content + '|' + (msg.recipient || ''), msg.sig, msg.pubkey);
+    const expectedPub = isSelf ? myPubB64 : (activePeer && activePeer.pubkey);
+    if (!sigOk || (expectedPub && msg.pubkey !== expectedPub)) {
       badge = '<span class="unverified" title="Signatur ungültig — mögliche Fälschung">⚠️</span> ';
       div.classList.add('forged');
     }
   }
-  const senderHtml = showSender ? `<span class="sender" style="color:${nameColor(senderPlain)}">${badge}${escapeHtml(senderPlain)}</span>` : '';
-  div.innerHTML = `${senderHtml}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  div.innerHTML = `${badge}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   messagesEl.appendChild(div);
 }
 
@@ -1260,14 +1325,6 @@ msgInput.onkeydown = e => {
   if (e.key === 'Enter') sendMsg();
 };
 
-// Debug: key 'l' toggles bubble alignment (all left ↔ left/right)
-document.addEventListener('keydown', e => {
-  if (e.key !== 'l' && e.key !== 'L') return;
-  alignRight = !alignRight;
-  dbg('Debug: Blasen ' + (alignRight ? 'links/rechts' : 'alle links'));
-  loadMessages();
-});
-
 // Send button: visible only while the field has text
 const sendBtn = document.getElementById('send-btn');
 function updateSendBtn() { sendBtn.classList.toggle('visible', msgInput.value.trim().length > 0); }
@@ -1286,27 +1343,15 @@ async function sendMsg() {
     cmd.run();
     return;
   }
-  // Send a real message — name required
-  const sender = myNameEl.value.trim().toLowerCase();
-  if (!sender) return alert('Name eingeben!');
-  if (sender !== claimedName) {
-    const ok = await claimName(sender);
-    if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
-  }
-  localStorage.setItem(NAME_KEY, sender);
-  const displaySender = myEmoji ? `${myEmoji} ${sender}` : sender;
-  const encryptedSender = await encryptText(displaySender);
-  const encrypted = await encryptText(content);
-  // Sign the (encrypted) payload with our private key → receivers verify it against the
-  // public key bound to this name. Nobody without our key can forge a message as us.
-  const sig = await signText(encrypted + '|' + encryptedSender);
-  dbg(`Sende (verschlüsselt + signiert) als ${displaySender}`);
-  let { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted, pubkey: myPubB64, sig });
-  // Failsafe: if the pubkey/sig columns don't exist yet (Etappe-2-SQL not run), send without them
-  if (error && /pubkey|sig|column|schema|cache/i.test(error.message)) {
-    dbg('Signatur-Spalten fehlen — sende ohne Signatur (bitte Etappe-2-SQL ausführen): ' + error.message);
-    ({ error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted }));
-  }
+  // Real message → 1:1 to the selected contact, encrypted with the ECDH-derived shared key
+  if (!activePeer) return alert('Wähle zuerst einen Kontakt.');
+  const chatKey = await deriveChatKey(activePeer.ecdh_pubkey);
+  if (!chatKey) { dbg('Kein Chat-Schlüssel (ECDH) — Kontakt ohne ecdh_pubkey?'); return; }
+  const encrypted = await encryptText(content, chatKey);
+  // Sign the ciphertext bound to recipient → receiver verifies it's really from us, unaltered
+  const sig = await signText(encrypted + '|' + activePeer.owner);
+  dbg(`Sende (1:1, verschlüsselt + signiert) an ${activePeer.name}`);
+  const { error } = await client.from('messages').insert({ content: encrypted, recipient: activePeer.owner, pubkey: myPubB64, sig });
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
   msgInput.value = ''; updateSendBtn();
