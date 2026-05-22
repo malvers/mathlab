@@ -48,6 +48,12 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 .contact.active{background:rgba(0,210,255,.12)}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgb(14,32,64);display:flex;align-items:center;justify-content:center;font-size:20px}
 .contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
+.contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
+.contact .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
+.contact .c-time.unread{color:#25d366}
+/* Green unread indicator — shows the number of new messages from this contact */
+.contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#25d366;color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 /* Chat panel */
 #chat-panel{flex:1;display:flex;flex-direction:column;min-width:0}
 #chat-head{display:flex;gap:8px;padding:12px 14px;background:rgb(3,10,16);align-items:center}
@@ -85,6 +91,9 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 .msg .sender .unverified{font-weight:700}
 .msg .text{word-wrap:break-word}
 .msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
+/* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
+.msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55)}
+.msg .ticks.read{color:#34b7f1}
 .msg.encrypted{border:none}
 #input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
@@ -278,6 +287,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 const NAME_KEY = 'eocr-chat-name';
 const EMOJI_KEY = 'eocr-chat-emoji';
 const VAULT_KEY = 'vgp-vault'; // local account vault (encrypted private key + room password)
+const SESSION_PWD_KEY = 'vgp-session-pwd'; // account pwd cached for THIS tab only (sessionStorage) → no re-entry on reload
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -556,6 +566,7 @@ async function authSubmit() {
       if (!(await checkAccessCode(room))) return showAuthErr('Falsches Raum-Passwort.');
       const vault = await createVault(name, pwd, room);
       await activateVault(vault);
+      sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
       await initChat(SUPABASE_URL, SUPABASE_KEY);
       const ok = await claimName(name); // bind name ↔ key
@@ -572,6 +583,7 @@ async function authSubmit() {
       const vault = await openVault(pwd);
       if (vault === 'WRONG' || !vault) return showAuthErr('Falsches Konto-Passwort.');
       await activateVault(vault);
+      sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
       await initChat(SUPABASE_URL, SUPABASE_KEY);
     }
@@ -594,20 +606,40 @@ authPwdEl.addEventListener('input', updateStrengthMeter);
 document.getElementById('auth-pwd-eye').onclick = () => { authPwdEl.type = authPwdEl.type === 'password' ? 'text' : 'password'; authPwdEl.focus(); };
 document.getElementById('auth-forgot').onclick = () => {
   if (confirm('Konto auf diesem Gerät zurücksetzen? Deine Identität (Schlüssel) geht verloren — du musst dich neu anmelden und ggf. einen neuen Namen wählen.')) {
+    sessionStorage.removeItem(SESSION_PWD_KEY);
     localStorage.removeItem(VAULT_KEY);
     location.reload();
   }
 };
-// Lock button: lock the app → reload shows the login screen (account password needed).
-document.getElementById('lock-btn').onclick = () => location.reload();
+// Lock button: clear the session unlock and reload → login screen (account password needed).
+document.getElementById('lock-btn').onclick = () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); };
 // Back button (mobile): return from the open chat to the contact list
 document.getElementById('back-btn').onclick = () => document.getElementById('app').classList.remove('chat-open');
 
-// On start: existing vault → login screen (enter account password), otherwise sign-up.
-{
-  setAuthMode(vaultExists() ? 'login' : 'signup');
-  authPanel.classList.remove('hidden');
-}
+// On start: if this tab still holds the account password (sessionStorage, cleared on tab close /
+// lock), auto-unlock so a hard reload doesn't ask again. Otherwise show login / sign-up.
+// Deferred (setTimeout 0) so it runs AFTER the whole script is evaluated — openVault() uses const
+// helpers (unb64, …) declared further down, which are in the TDZ during top-level execution.
+setTimeout(() => {
+  const cached = sessionStorage.getItem(SESSION_PWD_KEY);
+  dbg(`Start: vaultExists=${vaultExists()} cachedPwd=${cached ? 'ja' : 'NEIN'}`);
+  if (vaultExists() && cached) {
+    openVault(cached).then(async v => {
+      dbg('Auto-Unlock: openVault → ' + (v === 'WRONG' ? 'WRONG' : (v ? 'OK' : 'null')));
+      if (v && v !== 'WRONG') {
+        await activateVault(v);
+        authPanel.classList.add('hidden');
+        await initChat(SUPABASE_URL, SUPABASE_KEY);
+      } else {
+        sessionStorage.removeItem(SESSION_PWD_KEY);
+        setAuthMode('login'); authPanel.classList.remove('hidden');
+      }
+    }).catch(e => { dbg('Auto-Unlock Fehler: ' + (e && e.message ? e.message : e)); setAuthMode(vaultExists() ? 'login' : 'signup'); authPanel.classList.remove('hidden'); });
+  } else {
+    setAuthMode(vaultExists() ? 'login' : 'signup');
+    authPanel.classList.remove('hidden');
+  }
+}, 0);
 
 // Derive the HMAC key (name uniqueness) from the room password. No AES key here anymore —
 // 1:1 message encryption uses per-pair ECDH keys (deriveChatKey), not the room password.
@@ -665,13 +697,56 @@ async function verifyText(text, sigB64, pubB64) {
 let activePeer = null;          // the contact we're currently chatting with
 let allContacts = [];           // cached list for search filtering
 function contactAvatar(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
+
+// --- Contact-row meta: green unread badge + time of the last message per contact ---
+const READ_KEY = 'vgp-read';    // { peerUid: ISO timestamp of when we last opened that chat }
+let unreadByPeer = {};          // peerUid -> count of unread (received-but-not-yet-opened) messages
+let lastTimeByPeer = {};        // peerUid -> ISO timestamp of the last message in that conversation
+let receivedFrom = new Set();   // peers I have received at least one message from (for delivery receipts)
+function readMap() { try { return JSON.parse(localStorage.getItem(READ_KEY)) || {}; } catch { return {}; } }
+function markRead(peerUid) { const m = readMap(); m[peerUid] = new Date().toISOString(); localStorage.setItem(READ_KEY, JSON.stringify(m)); }
+// WhatsApp-style time: today → relative ("vor x Min/Std"), yesterday and older → "dd.mm - hh:mm".
+function fmtContactTime(iso) {
+  const d = new Date(iso), now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    const min = Math.floor((now - d) / 60000);
+    if (min < 1) return 'gerade eben';
+    if (min < 60) return `vor ${min} Min`;
+    return `vor ${Math.floor(min / 60)} Std`;
+  }
+  const p = n => String(n).padStart(2, '0');
+  return `${p(d.getDate())}.${p(d.getMonth() + 1)} - ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+// Per contact: last-message time (both directions) + count of unread messages addressed to me.
+async function computeContactMeta() {
+  unreadByPeer = {}; lastTimeByPeer = {}; receivedFrom = new Set();
+  if (!allContacts.length) return;
+  const { data, error } = await client.from('messages').select('created_at,author,recipient');
+  if (error) { dbg('Kontakt-Meta nicht ladbar: ' + error.message); return; }
+  const reads = readMap();
+  for (const m of (data || [])) {
+    const peer = m.author === myUid ? m.recipient : (m.recipient === myUid ? m.author : null);
+    if (!peer) continue;
+    if (!lastTimeByPeer[peer] || m.created_at > lastTimeByPeer[peer]) lastTimeByPeer[peer] = m.created_at;
+    if (m.author === peer) {                                      // a message I received
+      receivedFrom.add(peer);
+      const base = reads[peer] ? new Date(reads[peer]).getTime() : 0;
+      if (new Date(m.created_at).getTime() > base) unreadByPeer[peer] = (unreadByPeer[peer] || 0) + 1;
+    }
+  }
+}
+const searchVal = () => document.getElementById('contact-search').value;
+// Relative times age → refresh the contact list every minute so "vor x Min" stays correct.
+setInterval(() => { if (chatReady) renderContacts(searchVal()); }, 60000);
+
 async function loadContacts() {
   const { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner');
   if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
   const me = (myNameEl.value || '').toLowerCase();
   allContacts = (data || []).filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
                             .sort((a, b) => a.name.localeCompare(b.name));
-  renderContacts(document.getElementById('contact-search').value);
+  await computeContactMeta();
+  renderContacts(searchVal());
 }
 function renderContacts(filter) {
   const list = document.getElementById('contact-list');
@@ -685,19 +760,27 @@ function renderContacts(filter) {
   for (const c of shown) {
     const div = document.createElement('div');
     div.className = 'contact' + (activePeer && activePeer.name === c.name ? ' active' : '');
-    div.innerHTML = `<span class="av">${escapeHtml(contactAvatar(c.name))}</span><span class="nm">${escapeHtml(c.name)}</span>`;
-    div.onclick = () => selectContact(c, div);
+    const n = unreadByPeer[c.owner] || 0;
+    const t = lastTimeByPeer[c.owner] ? fmtContactTime(lastTimeByPeer[c.owner]) : '';
+    div.innerHTML = `<span class="av">${escapeHtml(contactAvatar(c.name))}</span><span class="nm">${escapeHtml(c.name)}</span>` +
+                    `<div class="c-meta">` +
+                      (t ? `<span class="c-time${n ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
+                      (n ? `<span class="c-badge">${n > 99 ? '99+' : n}</span>` : '') +
+                    `</div>`;
+    div.onclick = () => selectContact(c);
     list.appendChild(div);
   }
 }
-function selectContact(c, div) {
+function selectContact(c) {
   activePeer = c;
-  document.querySelectorAll('.contact').forEach(el => el.classList.remove('active'));
-  if (div) div.classList.add('active');
+  markRead(c.owner);            // opening the chat clears its unread count (local)
+  publishRead(c.owner);         // tell the sender I read their messages → their ticks turn blue
+  unreadByPeer[c.owner] = 0;
   document.getElementById('chat-peer').textContent = c.name;
   document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
   msgInput.disabled = false;
-  loadMessages(); // E3 will filter to this 1:1 conversation
+  renderContacts(searchVal());  // refresh active highlight + remove the green badge
+  loadMessages(); // filter to this 1:1 conversation
   msgInput.focus();
 }
 document.getElementById('contact-search').addEventListener('input', e => renderContacts(e.target.value));
@@ -789,16 +872,64 @@ async function initChat(url, key) {
   chatReady = true;
   dbg('Supabase-Client erstellt');
   await loadContacts();      // fill the sidebar
+  await markAllDelivered();  // confirm delivery for everything received while we were away
   subscribeMessages();
   msgInput.disabled = true;  // stays disabled until a contact is selected
   dbg('Chat bereit — wähle einen Kontakt');
 }
 
 let activeChatKey = null; // ECDH-derived AES key for the currently open 1:1 conversation
+// --- Delivery/read receipts (✓ / ✓✓ gray / ✓✓ blue) ---
+// receipts(owner=recipient, peer=sender, delivered_at, read_at): per-conversation high-water marks.
+let activeReceipt = null;  // the open peer's receipt ABOUT my messages (owner=peer, peer=me)
+// I am the recipient: tell <peerUid> I received (delivered) / read their messages up to now.
+async function publishDelivered(peerUid) {
+  if (!myUid || !peerUid) return;
+  await client.from('receipts').upsert({ owner: myUid, peer: peerUid, delivered_at: new Date().toISOString() }, { onConflict: 'owner,peer' });
+}
+async function publishRead(peerUid) {
+  if (!myUid || !peerUid) return;
+  const now = new Date().toISOString();
+  await client.from('receipts').upsert({ owner: myUid, peer: peerUid, delivered_at: now, read_at: now }, { onConflict: 'owner,peer' });
+}
+// On (re)connect: tell every sender I've received from that their messages reached this device.
+async function markAllDelivered() {
+  if (!receivedFrom.size) return;
+  const now = new Date().toISOString();
+  const rows = [...receivedFrom].map(p => ({ owner: myUid, peer: p, delivered_at: now }));
+  await client.from('receipts').upsert(rows, { onConflict: 'owner,peer' });
+}
+// I am the sender: load the open peer's receipt about MY messages, so I can show ticks.
+async function loadActiveReceipt(peerUid) {
+  const { data } = await client.from('receipts').select('delivered_at,read_at').eq('owner', peerUid).eq('peer', myUid).limit(1);
+  activeReceipt = (data && data[0]) || null;
+}
+// Tick state for one of my messages given the peer's receipt high-water marks.
+function tickState(createdAt) {
+  const t = new Date(createdAt).getTime();
+  if (activeReceipt) {
+    if (activeReceipt.read_at && new Date(activeReceipt.read_at).getTime() >= t) return 'read';
+    if (activeReceipt.delivered_at && new Date(activeReceipt.delivered_at).getTime() >= t) return 'delivered';
+  }
+  return 'sent';
+}
+const tickGlyph = s => (s === 'sent' ? '✓' : '✓✓');
+// Re-color the ticks on already-rendered own messages (e.g. when a receipt arrives via realtime).
+function updateTicks() {
+  messagesEl.querySelectorAll('.msg.self[data-ts]').forEach(div => {
+    const span = div.querySelector('.ticks');
+    if (!span) return;
+    const s = tickState(div.dataset.ts);
+    span.className = 'ticks ' + s;
+    span.textContent = tickGlyph(s);
+  });
+}
+
 async function loadMessages() {
-  if (!activePeer) { messagesEl.innerHTML = ''; return; }
+  if (!activePeer) { messagesEl.innerHTML = ''; activeReceipt = null; return; }
   activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   const peer = activePeer.owner;
+  await loadActiveReceipt(peer); // the peer's delivered/read marks for my messages
   const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
   // Strict 1:1: keep ONLY messages exchanged between me and this peer (both directions).
@@ -819,16 +950,33 @@ function subscribeMessages() {
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
       const m = payload.new;
-      // Only render if it belongs to the currently open 1:1 conversation (both me AND this peer)
+      // Update the contact row's last-message time (both directions)
+      const msgPeer = m.author === myUid ? m.recipient : (m.recipient === myUid ? m.author : null);
+      if (msgPeer) lastTimeByPeer[msgPeer] = m.created_at;
+      // Only render in the thread if it belongs to the currently open 1:1 conversation
       const peer = activePeer && activePeer.owner;
       if (peer && ((m.author === myUid && m.recipient === peer) ||
                    (m.author === peer  && m.recipient === myUid))) {
         await renderMsg(m);
         messagesEl.scrollTop = messagesEl.scrollHeight;
+        if (m.author === peer) { markRead(peer); publishRead(peer); } // received in open chat → read
+      } else if (m.recipient === myUid) {
+        // Message for me in a chat I don't have open → bump badge + confirm delivery to the sender
+        unreadByPeer[m.author] = (unreadByPeer[m.author] || 0) + 1;
+        publishDelivered(m.author);
       }
+      renderContacts(searchVal()); // refresh time + badge live
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
       if (activePeer) loadMessages();
+    })
+    // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
+      const r = payload.new;
+      if (activePeer && r && r.owner === activePeer.owner && r.peer === myUid) {
+        activeReceipt = { delivered_at: r.delivered_at, read_at: r.read_at };
+        updateTicks();
+      }
     })
     // A new account registered (or changed) → refresh the contact list live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'identities' }, () => {
@@ -850,6 +998,7 @@ async function renderMsg(msg) {
   const div = document.createElement('div');
   div.className = 'msg ' + (isSelf ? 'self' : 'other');
   if (msg.id != null) div.dataset.id = msg.id;
+  if (isSelf) div.dataset.ts = msg.created_at; // for updateTicks()
   const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, activeChatKey) : (msg.content || '');
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
@@ -864,7 +1013,9 @@ async function renderMsg(msg) {
       div.classList.add('forged');
     }
   }
-  div.innerHTML = `${badge}<span class="text">${escapeHtml(content)}</span><span class="time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const ticks = isSelf ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
+  div.innerHTML = `${badge}<span class="text">${escapeHtml(content)}</span><span class="time">${timeStr}${ticks}</span>`;
   messagesEl.appendChild(div);
 }
 
@@ -873,7 +1024,7 @@ const CMD_LIST = [
   { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
   { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
   { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
-  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => location.reload() }
+  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); } }
   // /delete, /reset, /key entfernt. /logout sperrt nur (Vault bleibt; Entsperren mit Konto-Passwort).
   // Konto ganz zurücksetzen geht über „Konto zurücksetzen" auf dem Login-Screen.
 ];
