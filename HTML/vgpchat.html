@@ -59,6 +59,15 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #avatar-choice h3{color:#00d2ff;font-family:'Orbitron',sans-serif;font-size:15px;letter-spacing:1px;text-align:center;margin-bottom:4px;font-weight:700}
 #avatar-choice button{padding:12px 18px;border:1px solid rgba(0,210,255,.25);border-radius:10px;background:#14203a;color:#e0e8f0;font-size:15px;cursor:pointer;font-family:inherit;text-align:left}
 #avatar-choice button:hover{border-color:#00d2ff;background:#18243c}
+/* Recovery-code modal */
+#recovery-modal{position:fixed;inset:0;background:rgba(2,4,16,.85);display:flex;align-items:center;justify-content:center;z-index:170;padding:24px}
+#recovery-modal.hidden{display:none}
+#recovery-modal .rc-box{background:#0c1422;border:1px solid rgba(0,210,255,.3);border-radius:16px;padding:24px 26px;max-width:380px;display:flex;flex-direction:column;gap:14px}
+#recovery-modal h3{color:#00d2ff;font-family:'Orbitron',sans-serif;font-size:17px;letter-spacing:1px;text-align:center;font-weight:700}
+#recovery-modal p{color:#cfe4f7;font-size:13px;line-height:1.55;text-align:center}
+#recovery-modal .rc-code{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:18px;letter-spacing:2px;color:#e9edef;background:#14203a;border:1px solid rgba(0,210,255,.25);border-radius:10px;padding:14px;text-align:center;word-break:break-all;user-select:all}
+#recovery-modal button{padding:11px;border-radius:10px;border:1px solid rgba(0,210,255,.3);background:#14203a;color:#00d2ff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+#recovery-modal #rc-done{background:#00d2ff;color:#020410;border:none}
 .contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
@@ -137,7 +146,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #cmd-box .cmd-item code{color:#00d2ff;font-family:monospace;font-weight:700;font-size:13px;flex:0 0 76px}
 #cmd-box .cmd-item span{color:#cfe4f7;font-size:12px;line-height:1.4}
 /* Auth screen (sign up / login, account-password app lock) */
-#auth-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:120;gap:14px;padding:32px}
+#auth-panel{position:fixed;inset:0;background:#070d18;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:120;gap:14px;padding:32px}
 #auth-panel.hidden{display:none}
 #auth-panel h2{font-family:'Orbitron',sans-serif;color:#00d2ff;font-size:34px;letter-spacing:4px;font-weight:700;margin-bottom:2px}
 #auth-tabs{display:flex;gap:0;width:100%;max-width:400px;border:1px solid rgba(0,210,255,.25);border-radius:10px;overflow:hidden}
@@ -150,7 +159,8 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #auth-err{color:#ff6b6b;font-size:13px;text-align:center;max-width:360px;margin:0}
 #auth-err.hidden{display:none}
 #auth-go{width:100%;max-width:400px;padding:13px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;font-size:15px;cursor:pointer}
-#auth-forgot{background:none;border:none;color:rgba(0,210,255,.45);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit}
+#auth-forgot{width:100%;max-width:400px;padding:11px;border:1px solid rgba(0,210,255,.4);border-radius:8px;background:transparent;color:#00d2ff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+#auth-forgot:hover{background:rgba(0,210,255,.1)}
 #auth-panel .pwd-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;border-radius:0;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center}
 #auth-panel .pwd-eye:hover{color:#00d2ff}
 #auth-panel .pwd-eye:focus{outline:none}
@@ -280,6 +290,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div>
 <input id="avatar-file" type="file" accept="image/*" style="display:none">
 
+<!-- One-time recovery code (shown after sign-up) -->
+<div id="recovery-modal" class="hidden">
+  <div class="rc-box">
+    <h3>🔑 Wiederherstellungs-Code</h3>
+    <p>Bewahre diesen Code <b>sicher</b> auf (Passwort-Manager, Zettel). Damit kommst du auf <b>jedem Gerät</b> wieder rein — auch wenn du dein Passwort vergisst. Er wird <b>nur einmal</b> gezeigt.</p>
+    <div class="rc-code" id="rc-code"></div>
+    <button type="button" id="rc-copy">Kopieren</button>
+    <button type="button" id="rc-done">Ich habe ihn gespeichert</button>
+  </div>
+</div>
+
 <div id="auth-panel" class="hidden">
   <h2 id="auth-title">VGP</h2>
   <div id="auth-tabs">
@@ -355,6 +376,7 @@ async function ensureClient() {
   return client;
 }
 let hmacKey = null; // derived from the room password, used only to compute name_id (HMAC) for uniqueness
+let dirKey = null;  // directory key (AES) from the room password — encrypts profile name/emoji/avatar
 let claimedName = null; // the name this device has confirmed ownership of this session
 let chatReady = false;
 
@@ -451,8 +473,9 @@ async function pickEmoji(e) {
 }
 // Publish my chosen avatar emoji to my identity row (others read it for their contact list).
 async function publishEmoji(em) {
-  if (!client || !myUid) return;
-  const { error } = await client.from('identities').update({ emoji: em, avatar: null }).eq('owner', myUid);
+  if (!client || !myPubB64) return;
+  // Target THIS identity by its unique pubkey, not by owner uid (several accounts can share one uid).
+  const { error } = await client.from('identities').update({ emoji: await encDir(em), avatar: null }).eq('pubkey', myPubB64);
   if (error) dbg('Emoji-Update fehlgeschlagen (Spalte/Policy vorhanden?): ' + error.message);
 }
 // Downscale a chosen image to a small centered square and publish it as my avatar.
@@ -479,8 +502,8 @@ async function chooseAvatarPicture(file) {
     localStorage.setItem(AVATAR_KEY, dataUrl);
     localStorage.removeItem(EMOJI_KEY);
     setOwnAvatarDisplay();
-    if (client && myUid) {
-      const { error } = await client.from('identities').update({ avatar: dataUrl, emoji: null }).eq('owner', myUid);
+    if (client && myPubB64) {
+      const { error } = await client.from('identities').update({ avatar: await encDir(dataUrl), emoji: null }).eq('pubkey', myPubB64);
       if (error) dbg('Avatar-Bild-Update fehlgeschlagen (Spalte da?): ' + error.message);
     }
     dbg('Avatar-Bild gesetzt (' + Math.round(dataUrl.length / 1024) + ' KB)');
@@ -493,6 +516,16 @@ document.getElementById('ac-emoji').onclick = () => { avatarChoice.classList.add
 document.getElementById('ac-pic').onclick = () => { avatarChoice.classList.add('hidden'); document.getElementById('avatar-file').click(); };
 document.getElementById('avatar-file').onchange = e => { chooseAvatarPicture(e.target.files[0]); e.target.value = ''; };
 avatarChoice.addEventListener('click', e => { if (e.target === avatarChoice) avatarChoice.classList.add('hidden'); });
+
+// One-time recovery code modal (shown after sign-up)
+function showRecoveryModal(code) {
+  document.getElementById('rc-code').textContent = code;
+  document.getElementById('recovery-modal').classList.remove('hidden');
+}
+document.getElementById('rc-copy').onclick = () => {
+  navigator.clipboard?.writeText(document.getElementById('rc-code').textContent).catch(() => {});
+};
+document.getElementById('rc-done').onclick = () => document.getElementById('recovery-modal').classList.add('hidden');
 
 // Input emoji button: inserts an emoji into the message text (no name reservation needed)
 msgEmojiBtn.onclick = () => {
@@ -533,7 +566,7 @@ async function claimName(name) {
     return false;
   }
   // Store signing key + ECDH key + clear-text name (name & ecdh_pubkey power 1:1 chats / contact list)
-  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name, emoji: myEmoji || null, avatar: myAvatar || null };
+  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name: await encDir(name), emoji: await encDir(myEmoji), avatar: await encDir(myAvatar) };
   let { error: insErr } = await client.from('identities').insert(row);
   if (insErr && /ecdh_pubkey|name|column|schema|cache/i.test(insErr.message)) {
     // Columns not added yet (E1-SQL pending) → fall back to the minimal row
@@ -624,8 +657,9 @@ function setAuthMode(mode) {
   document.getElementById('tab-login').classList.toggle('active', mode === 'login');
   document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
   const signup = mode === 'signup';
-  authNameEl.style.display = signup ? '' : 'none';
-  authRoomEl.style.display = signup ? '' : 'none';
+  const restore = mode === 'login' && !vaultExists(); // login on a device with no local vault → restore from server
+  authNameEl.style.display = '';
+  authRoomEl.style.display = (signup || restore) ? '' : 'none';
   authErr.classList.add('hidden');
   authPwdEl.value = '';
   // Strength meter only while signing up; "Konto zurücksetzen" only when there's a vault to reset.
@@ -633,12 +667,21 @@ function setAuthMode(mode) {
   authStrengthBar.className = '';
   authForgot.style.display = vaultExists() ? '' : 'none';
   if (signup) {
+    authHint.style.display = '';
     authHint.textContent = 'Wähle Name + Konto-Passwort und gib das gemeinsame Raum-Passwort ein.';
     authGo.textContent = 'Konto erstellen';
     authNameEl.value = '';
+    authNameEl.readOnly = false;
+  } else if (restore) {
+    authHint.style.display = '';
+    authHint.textContent = 'Auf diesem Gerät anmelden: Name + Konto-Passwort + Raum-Passwort.';
+    authGo.textContent = 'Anmelden';
+    authNameEl.value = '';
+    authNameEl.readOnly = false;
   } else {
-    const n = vaultName();
-    authHint.textContent = n ? `Willkommen zurück, ${n} — mit Konto-Passwort entsperren.` : 'Mit Konto-Passwort entsperren.';
+    authHint.style.display = 'none';               // no "Willkommen zurück …" prose
+    authNameEl.value = vaultName();                // show the account name as a read-only field
+    authNameEl.readOnly = true;
     authGo.textContent = 'Anmelden';
   }
 }
@@ -670,6 +713,23 @@ async function authSubmit() {
         return;
       }
       localStorage.setItem(NAME_KEY, name);
+      // Multi-device: stash an encrypted backup on the server + show the one-time recovery code
+      const recovery = await createBackup(await nameId(name), pwd, room, vault);
+      if (recovery) showRecoveryModal(recovery);
+    } else if (!vaultExists()) {
+      // Restore on a new device: Name + Konto-Pwd + Raum-Pwd → fetch & decrypt the server backup
+      const name = authNameEl.value.trim().toLowerCase();
+      const pwd = authPwdEl.value, room = authRoomEl.value;
+      if (!name || !pwd || !room) return showAuthErr('Name, Konto-Passwort und Raum-Passwort eingeben.');
+      const res = await restoreBackup(name, room, pwd, false);
+      if (res === 'NONE') return showAuthErr('Kein Konto mit diesem Namen gefunden.');
+      if (res === 'WRONG' || !res) return showAuthErr('Falsches Konto- oder Raum-Passwort.');
+      await writeLocalVault(res.name, pwd, res); // import the identity onto this device
+      await activateVault(res);
+      sessionStorage.setItem(SESSION_PWD_KEY, pwd);
+      authPanel.classList.add('hidden');
+      await initChat(SUPABASE_URL, SUPABASE_KEY);
+      localStorage.setItem(NAME_KEY, res.name);
     } else {
       const pwd = authPwdEl.value;
       if (!pwd) return showAuthErr('Konto-Passwort eingeben.');
@@ -738,8 +798,18 @@ setTimeout(() => {
 // 1:1 message encryption uses per-pair ECDH keys (deriveChatKey), not the room password.
 async function initCrypto(password) {
   hmacKey = await deriveHmacKey(password);
-  dbg('Namens-HMAC-Schlüssel abgeleitet');
+  // Directory key: encrypts profile fields (name/emoji/avatar) so only members (not the server) read them.
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  dirKey = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-dir-salt-v1'), iterations: 200000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+  dbg('Namens-HMAC- + Verzeichnis-Schlüssel abgeleitet');
 }
+// Encrypt/decrypt a directory field with the room-derived key. decrypt() passes plaintext through,
+// so legacy unencrypted rows still display.
+async function encDir(v) { return (dirKey && v) ? await encryptText(v, dirKey) : null; }
+async function decDir(v) { return (dirKey && v && v.startsWith('ENC:')) ? await decryptText(v, dirKey) : (v || ''); }
 
 async function encryptText(plain, key) {
   const enc = new TextEncoder();
@@ -814,14 +884,14 @@ function fmtContactTime(iso) {
 async function computeContactMeta() {
   unreadByPeer = {}; lastTimeByPeer = {}; receivedFrom = new Set();
   if (!allContacts.length) return;
-  const { data, error } = await client.from('messages').select('created_at,author,recipient');
+  const { data, error } = await client.from('messages').select('created_at,pubkey,recipient_pubkey');
   if (error) { dbg('Kontakt-Meta nicht ladbar: ' + error.message); return; }
   const reads = readMap();
   for (const m of (data || [])) {
-    const peer = m.author === myUid ? m.recipient : (m.recipient === myUid ? m.author : null);
+    const peer = m.pubkey === myPubB64 ? m.recipient_pubkey : (m.recipient_pubkey === myPubB64 ? m.pubkey : null);
     if (!peer) continue;
     if (!lastTimeByPeer[peer] || m.created_at > lastTimeByPeer[peer]) lastTimeByPeer[peer] = m.created_at;
-    if (m.author === peer) {                                      // a message I received
+    if (m.pubkey === peer) {                                      // a message I received
       receivedFrom.add(peer);
       const base = reads[peer] ? new Date(reads[peer]).getTime() : 0;
       if (new Date(m.created_at).getTime() > base) unreadByPeer[peer] = (unreadByPeer[peer] || 0) + 1;
@@ -840,9 +910,12 @@ async function loadContacts() {
     ({ data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner'));
   }
   if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
+  // Decrypt the profile fields (name/emoji/avatar) — server stored only ciphertext
+  const rows = data || [];
+  for (const r of rows) { r.name = await decDir(r.name); r.emoji = await decDir(r.emoji); r.avatar = await decDir(r.avatar); }
   const me = (myNameEl.value || '').toLowerCase();
-  allContacts = (data || []).filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
-                            .sort((a, b) => a.name.localeCompare(b.name));
+  allContacts = rows.filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
+                    .sort((a, b) => a.name.localeCompare(b.name));
   await computeContactMeta();
   renderContacts(searchVal());
 }
@@ -858,8 +931,8 @@ function renderContacts(filter) {
   for (const c of shown) {
     const div = document.createElement('div');
     div.className = 'contact' + (activePeer && activePeer.name === c.name ? ' active' : '');
-    const n = unreadByPeer[c.owner] || 0;
-    const t = lastTimeByPeer[c.owner] ? fmtContactTime(lastTimeByPeer[c.owner]) : '';
+    const n = unreadByPeer[c.pubkey] || 0;
+    const t = lastTimeByPeer[c.pubkey] ? fmtContactTime(lastTimeByPeer[c.pubkey]) : '';
     const av = c.avatar ? `<span class="av pic" style="background-image:url('${c.avatar}')"></span>`
              : c.emoji ? `<span class="av emo">${escapeHtml(c.emoji)}</span>`
              : `<span class="av">${escapeHtml(contactAvatar(c.name))}</span>`;
@@ -874,9 +947,9 @@ function renderContacts(filter) {
 }
 function selectContact(c) {
   activePeer = c;
-  markRead(c.owner);            // opening the chat clears its unread count (local)
-  publishRead(c.owner);         // tell the sender I read their messages → their ticks turn blue
-  unreadByPeer[c.owner] = 0;
+  markRead(c.pubkey);           // opening the chat clears its unread count (local)
+  publishRead(c.pubkey);        // tell the sender I read their messages → their ticks turn blue
+  unreadByPeer[c.pubkey] = 0;
   document.getElementById('chat-watermark').classList.add('hidden'); // hide brand watermark once chatting
   const peerAv = document.getElementById('chat-peer-av');
   peerAv.classList.toggle('pic', !!c.avatar);
@@ -917,25 +990,103 @@ async function checkAccessCode(code) {
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-access-salt-v1'), iterations: 200000, hash: 'SHA-256' }, km, 256);
   return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('') === ACCESS_PWD_HASH;
 }
-// Sign up: create signing keypair, lock {privJwk, roomPwd} under the account password.
+// Write the local vault: lock {privJwk, roomPwd, ecdhPrivJwk} under the account password.
+// Used both for fresh sign-up (new keys) and for restoring an identity onto a new device.
+async function writeLocalVault(name, accountPwd, p) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const wrapKey = await deriveWrapKey(accountPwd, salt);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const blob = new TextEncoder().encode(JSON.stringify({ privJwk: p.privJwk, roomPwd: p.roomPwd, ecdhPrivJwk: p.ecdhPrivJwk }));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, blob));
+  const combined = new Uint8Array(iv.length + ct.length);
+  combined.set(iv); combined.set(ct, iv.length);
+  localStorage.setItem(VAULT_KEY, JSON.stringify({ name, pubkey: p.pubB64, ecdhPubkey: p.ecdhPubB64, salt: b64(salt), enc: b64(combined) }));
+}
+// Sign up: generate the device keypairs (ECDSA + ECDH) and store them in the local vault.
 async function createVault(name, accountPwd, roomPwd) {
-  // Signing keypair (ECDSA, anti-impersonation) + key-agreement keypair (ECDH, 1:1 E2E)
   const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
   const pubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
   const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
   const ek = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
   const ecdhPubB64 = b64(await crypto.subtle.exportKey('spki', ek.publicKey));
   const ecdhPrivJwk = await crypto.subtle.exportKey('jwk', ek.privateKey);
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const wrapKey = await deriveWrapKey(accountPwd, salt);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const blob = new TextEncoder().encode(JSON.stringify({ privJwk, roomPwd, ecdhPrivJwk }));
-  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, blob));
-  const combined = new Uint8Array(iv.length + ct.length);
-  combined.set(iv); combined.set(ct, iv.length);
-  localStorage.setItem(VAULT_KEY, JSON.stringify({ name, pubkey: pubB64, ecdhPubkey: ecdhPubB64, salt: b64(salt), enc: b64(combined) }));
+  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd };
+  await writeLocalVault(name, accountPwd, payload);
   dbg('Vault angelegt für ' + name);
-  return { name, pubB64, privJwk, roomPwd, ecdhPubB64, ecdhPrivJwk };
+  return payload;
+}
+
+// --- Server backup (multi-device, "envelope"): a random master key encrypts the vault; the master
+// key is wrapped twice (by account+room password, and by a one-time recovery code). Server holds
+// only ciphertext — it can read nothing. Restore on any device via password OR recovery code. ---
+const BACKUP_ITERS = 600000;          // PBKDF2 work factor for the wrapping keys (login/restore only)
+const RECOVERY_SALT = 'vgp-recovery-salt-v1';
+function normCode(c) { return (c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+async function kdfKEK(str, saltBytes) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(str), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBytes, iterations: BACKUP_ITERS, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function wrapMaster(masterKey, kek) {
+  const raw = new Uint8Array(await crypto.subtle.exportKey('raw', masterKey));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, kek, raw));
+  const c = new Uint8Array(iv.length + ct.length); c.set(iv); c.set(ct, iv.length);
+  return b64(c);
+}
+async function unwrapMaster(wrapB64, kek) {
+  const c = unb64(wrapB64);
+  const raw = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: c.slice(0, 12) }, kek, c.slice(12));
+  return crypto.subtle.importKey('raw', new Uint8Array(raw), { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+}
+// Readable 100-bit code, e.g. ABCD-EFGH-JKLM-NPQR-STUV (no ambiguous chars 0/O/1/I)
+function genRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = ''; for (const b of bytes) s += A[b & 31];
+  return s.match(/.{1,4}/g).join('-');
+}
+// Create/refresh the server backup for this account. Returns the recovery code to show once.
+async function createBackup(name_id, accountPwd, roomPwd, payload) {
+  if (!client || !myUid) return null;
+  const masterKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  const enc = await encryptText(JSON.stringify(payload), masterKey);
+  const saltPwd = crypto.getRandomValues(new Uint8Array(16));
+  const wrap_pwd = await wrapMaster(masterKey, await kdfKEK(JSON.stringify([accountPwd, roomPwd]), saltPwd));
+  const recovery = genRecoveryCode();
+  const wrap_recovery = await wrapMaster(masterKey, await kdfKEK(normCode(recovery), new TextEncoder().encode(RECOVERY_SALT)));
+  const { error } = await client.from('vaults').upsert(
+    { name_id, owner: myUid, enc, wrap_pwd, wrap_recovery, salt_pwd: b64(saltPwd) }, { onConflict: 'name_id' });
+  if (error) { dbg('Server-Backup fehlgeschlagen: ' + error.message); return null; }
+  dbg('Server-Backup angelegt (Multi-Gerät bereit)');
+  return recovery;
+}
+// name_id from a room password (needed at restore, before any vault/hmacKey exists)
+async function computeNameId(name, roomPwd) {
+  const hk = await deriveHmacKey(roomPwd);
+  return bufToHex(await crypto.subtle.sign('HMAC', hk, new TextEncoder().encode(name.toLowerCase())));
+}
+// Restore an identity onto THIS device from the server backup. Returns the vault payload,
+// or 'NONE' (no such account) / 'WRONG' (bad password). `secret` = account password OR recovery code.
+async function restoreBackup(name, roomPwd, secret, viaRecovery) {
+  await ensureClient();
+  const name_id = await computeNameId(name, roomPwd);
+  const { data, error } = await client.from('vaults').select('enc,wrap_pwd,wrap_recovery,salt_pwd').eq('name_id', name_id).limit(1);
+  if (error) { dbg('Backup-Abruf-Fehler: ' + error.message); return null; }
+  if (!data || !data.length) return 'NONE';
+  const row = data[0];
+  let masterKey;
+  try {
+    const kek = viaRecovery
+      ? await kdfKEK(normCode(secret), new TextEncoder().encode(RECOVERY_SALT))
+      : await kdfKEK(JSON.stringify([secret, roomPwd]), unb64(row.salt_pwd));
+    masterKey = await unwrapMaster(viaRecovery ? row.wrap_recovery : row.wrap_pwd, kek);
+  } catch (_) { return 'WRONG'; }
+  try {
+    const plain = await decryptText(row.enc, masterKey);
+    if (plain === '[falscher Schlüssel]') return 'WRONG';
+    return JSON.parse(plain); // { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd }
+  } catch (_) { return 'WRONG'; }
 }
 // Login / unlock: account password → decrypt vault. Returns 'WRONG' on bad password, null if none.
 async function openVault(accountPwd) {
@@ -987,28 +1138,28 @@ async function initChat(url, key) {
 
 let activeChatKey = null; // ECDH-derived AES key for the currently open 1:1 conversation
 // --- Delivery/read receipts (✓ / ✓✓ gray / ✓✓ blue) ---
-// receipts(owner=recipient, peer=sender, delivered_at, read_at): per-conversation high-water marks.
-let activeReceipt = null;  // the open peer's receipt ABOUT my messages (owner=peer, peer=me)
-// I am the recipient: tell <peerUid> I received (delivered) / read their messages up to now.
-async function publishDelivered(peerUid) {
-  if (!myUid || !peerUid) return;
-  await client.from('receipts').upsert({ owner: myUid, peer: peerUid, delivered_at: new Date().toISOString() }, { onConflict: 'owner,peer' });
+// receipts(reader=recipient pubkey, peer=sender pubkey, delivered_at, read_at): per-conversation marks.
+let activeReceipt = null;  // the open peer's receipt ABOUT my messages (reader=peer, peer=me)
+// I am the recipient: tell <peerPub> I received (delivered) / read their messages up to now.
+async function publishDelivered(peerPub) {
+  if (!myPubB64 || !peerPub) return;
+  await client.from('receipts').upsert({ reader: myPubB64, peer: peerPub, delivered_at: new Date().toISOString() }, { onConflict: 'reader,peer' });
 }
-async function publishRead(peerUid) {
-  if (!myUid || !peerUid) return;
+async function publishRead(peerPub) {
+  if (!myPubB64 || !peerPub) return;
   const now = new Date().toISOString();
-  await client.from('receipts').upsert({ owner: myUid, peer: peerUid, delivered_at: now, read_at: now }, { onConflict: 'owner,peer' });
+  await client.from('receipts').upsert({ reader: myPubB64, peer: peerPub, delivered_at: now, read_at: now }, { onConflict: 'reader,peer' });
 }
 // On (re)connect: tell every sender I've received from that their messages reached this device.
 async function markAllDelivered() {
   if (!receivedFrom.size) return;
   const now = new Date().toISOString();
-  const rows = [...receivedFrom].map(p => ({ owner: myUid, peer: p, delivered_at: now }));
-  await client.from('receipts').upsert(rows, { onConflict: 'owner,peer' });
+  const rows = [...receivedFrom].map(p => ({ reader: myPubB64, peer: p, delivered_at: now }));
+  await client.from('receipts').upsert(rows, { onConflict: 'reader,peer' });
 }
 // I am the sender: load the open peer's receipt about MY messages, so I can show ticks.
-async function loadActiveReceipt(peerUid) {
-  const { data } = await client.from('receipts').select('delivered_at,read_at').eq('owner', peerUid).eq('peer', myUid).limit(1);
+async function loadActiveReceipt(peerPub) {
+  const { data } = await client.from('receipts').select('delivered_at,read_at').eq('reader', peerPub).eq('peer', myPubB64).limit(1);
   activeReceipt = (data && data[0]) || null;
 }
 // Tick state for one of my messages given the peer's receipt high-water marks.
@@ -1035,15 +1186,14 @@ function updateTicks() {
 async function loadMessages() {
   if (!activePeer) { messagesEl.innerHTML = ''; activeReceipt = null; return; }
   activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
-  const peer = activePeer.owner;
+  const peer = activePeer.pubkey;
   await loadActiveReceipt(peer); // the peer's delivered/read marks for my messages
   const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
-  // Strict 1:1: keep ONLY messages exchanged between me and this peer (both directions).
-  // Author-or-recipient alone would leak the peer's chats with others into this view.
+  // Strict 1:1 by IDENTITY (signing pubkey): keep ONLY messages between me and this peer.
   const rows = (data || []).filter(m =>
-    (m.author === myUid && m.recipient === peer) ||
-    (m.author === peer  && m.recipient === myUid));
+    (m.pubkey === myPubB64 && m.recipient_pubkey === peer) ||
+    (m.pubkey === peer      && m.recipient_pubkey === myPubB64));
   dbg(`${rows.length} 1:1-Nachrichten mit ${activePeer.name}`);
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
@@ -1057,20 +1207,20 @@ function subscribeMessages() {
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
       const m = payload.new;
-      // Update the contact row's last-message time (both directions)
-      const msgPeer = m.author === myUid ? m.recipient : (m.recipient === myUid ? m.author : null);
+      // Update the contact row's last-message time (both directions), keyed by identity (pubkey)
+      const msgPeer = m.pubkey === myPubB64 ? m.recipient_pubkey : (m.recipient_pubkey === myPubB64 ? m.pubkey : null);
       if (msgPeer) lastTimeByPeer[msgPeer] = m.created_at;
       // Only render in the thread if it belongs to the currently open 1:1 conversation
-      const peer = activePeer && activePeer.owner;
-      if (peer && ((m.author === myUid && m.recipient === peer) ||
-                   (m.author === peer  && m.recipient === myUid))) {
+      const peer = activePeer && activePeer.pubkey;
+      if (peer && ((m.pubkey === myPubB64 && m.recipient_pubkey === peer) ||
+                   (m.pubkey === peer      && m.recipient_pubkey === myPubB64))) {
         await renderMsg(m);
         messagesEl.scrollTop = messagesEl.scrollHeight;
-        if (m.author === peer) { markRead(peer); publishRead(peer); } // received in open chat → read
-      } else if (m.recipient === myUid) {
+        if (m.pubkey === peer) { markRead(peer); publishRead(peer); } // received in open chat → read
+      } else if (m.recipient_pubkey === myPubB64) {
         // Message for me in a chat I don't have open → bump badge + confirm delivery to the sender
-        unreadByPeer[m.author] = (unreadByPeer[m.author] || 0) + 1;
-        publishDelivered(m.author);
+        unreadByPeer[m.pubkey] = (unreadByPeer[m.pubkey] || 0) + 1;
+        publishDelivered(m.pubkey);
       }
       renderContacts(searchVal()); // refresh time + badge live
     })
@@ -1080,7 +1230,7 @@ function subscribeMessages() {
     // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
       const r = payload.new;
-      if (activePeer && r && r.owner === activePeer.owner && r.peer === myUid) {
+      if (activePeer && r && r.reader === activePeer.pubkey && r.peer === myPubB64) {
         activeReceipt = { delivered_at: r.delivered_at, read_at: r.read_at };
         updateTicks();
       }
@@ -1100,8 +1250,8 @@ window.addEventListener('focus', () => { if (chatReady) loadContacts(); });
 async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
-  // 1:1: my own messages go right, the peer's go left (decided by author = our uid)
-  const isSelf = msg.author === myUid;
+  // 1:1: my own messages go right, the peer's go left (decided by signing pubkey = our identity)
+  const isSelf = msg.pubkey === myPubB64;
   const div = document.createElement('div');
   div.className = 'msg ' + (isSelf ? 'self' : 'other');
   if (msg.id != null) div.dataset.id = msg.id;
@@ -1113,7 +1263,7 @@ async function renderMsg(msg) {
   // (mine, or the peer's registered key). Mismatch → flag as possible forgery.
   let badge = '';
   if (!decryptFailed && msg.pubkey && msg.sig) {
-    const sigOk = await verifyText(msg.content + '|' + (msg.recipient || ''), msg.sig, msg.pubkey);
+    const sigOk = await verifyText(msg.content + '|' + (msg.recipient_pubkey || ''), msg.sig, msg.pubkey);
     const expectedPub = isSelf ? myPubB64 : (activePeer && activePeer.pubkey);
     if (!sigOk || (expectedPub && msg.pubkey !== expectedPub)) {
       badge = '<span class="unverified" title="Signatur ungültig — mögliche Fälschung">⚠️</span> ';
@@ -1206,10 +1356,10 @@ async function sendMsg() {
   const chatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   if (!chatKey) { dbg('Kein Chat-Schlüssel (ECDH) — Kontakt ohne ecdh_pubkey?'); return; }
   const encrypted = await encryptText(content, chatKey);
-  // Sign the ciphertext bound to recipient → receiver verifies it's really from us, unaltered
-  const sig = await signText(encrypted + '|' + activePeer.owner);
+  // Sign the ciphertext bound to the recipient's identity → receiver verifies it's really from us
+  const sig = await signText(encrypted + '|' + activePeer.pubkey);
   dbg(`Sende (1:1, verschlüsselt + signiert) an ${activePeer.name}`);
-  const { error } = await client.from('messages').insert({ content: encrypted, recipient: activePeer.owner, pubkey: myPubB64, sig });
+  const { error } = await client.from('messages').insert({ content: encrypted, recipient_pubkey: activePeer.pubkey, pubkey: myPubB64, sig });
   if (error) { dbg('Sendefehler: ' + error.message); return; }
   dbg('Nachricht gesendet');
   msgInput.value = ''; updateSendBtn();
