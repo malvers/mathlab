@@ -106,12 +106,6 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #cmd-box .cmd-item.active,#cmd-box .cmd-item:hover{background:rgba(0,210,255,.12)}
 #cmd-box .cmd-item code{color:#00d2ff;font-family:monospace;font-weight:700;font-size:13px;flex:0 0 76px}
 #cmd-box .cmd-item span{color:#cfe4f7;font-size:12px;line-height:1.4}
-#config-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
-#config-panel.hidden{display:none}
-#config-panel h2{color:#00d2ff;font-size:20px;margin-bottom:8px}
-#config-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
-#config-panel input:focus{outline:none;border-color:#00d2ff}
-#config-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
 /* Auth screen (sign up / login, account-password app lock) */
 #auth-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:120;gap:14px;padding:32px}
 #auth-panel.hidden{display:none}
@@ -131,43 +125,15 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #auth-panel .pwd-eye:hover{color:#00d2ff}
 #auth-panel .pwd-eye:focus{outline:none}
 #auth-panel .pwd-wrap input{padding-right:44px!important}
-#key-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
-#key-panel.hidden{display:none}
-#key-panel h2{color:#00d2ff;font-size:20px;margin-bottom:4px;font-weight:400}
-#key-panel p{color:rgba(0,210,255,.5);font-size:13px;text-align:center;max-width:350px;line-height:1.5}
-#key-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:rgb(14,32,64);color:#e0e8f0;font-size:14px}
+/* Account-password strength meter (sign-up only) */
+.pwd-strength{width:100%;max-width:400px;height:6px;border-radius:3px;background:rgb(14,32,64);overflow:hidden;margin:-6px 0 0}
+.pwd-strength.hidden{display:none}
+#auth-strength-bar{height:100%;width:0;border-radius:3px;transition:width .2s,background .2s}
+#auth-strength-bar.s-weak{width:33%;background:rgb(176,36,24)}
+#auth-strength-bar.s-medium{width:66%;background:rgb(245,194,66)}
+#auth-strength-bar.s-strong{width:100%;background:rgb(121,158,49)}
 .pwd-wrap{position:relative;width:100%;max-width:400px;display:flex}
 .pwd-wrap input{padding-right:44px!important}
-#key-panel #chat-key{color:#fff;font-size:18px;letter-spacing:3px;font-family:'SF Mono',Menlo,Consolas,monospace}
-#key-panel .pwd-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:auto;background:transparent;border:none;border-radius:0;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center;font-weight:400}
-#key-panel .pwd-eye:hover{color:#00d2ff}
-#key-panel .pwd-eye:focus{outline:none}
-#key-panel input:focus{outline:none;border-color:#00d2ff}
-#key-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
-#key-panel .key-btns{display:flex;gap:12px;width:100%;max-width:400px}
-#key-panel .key-btns button{flex:1}
-#key-panel #key-cancel{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
-#confirm-modal{position:fixed;inset:0;background:rgb(2,4,16);display:flex;align-items:center;justify-content:center;z-index:200}
-#confirm-modal.hidden{display:none}
-#confirm-box{background:#020410;border:1px solid rgba(0,210,255,.3);border-radius:16px;padding:24px 32px;text-align:center;max-width:320px}
-#confirm-box p{color:#e0e8f0;font-size:15px;margin-bottom:20px}
-#confirm-box .btns{display:flex;gap:12px}
-#confirm-box button{flex:1;padding:10px 20px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
-#confirm-box .btn-yes{background:#00d2ff;color:#020410}
-#confirm-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
-/* Hard-reset confirmation (requires the confirmation password) */
-#reset-modal{position:fixed;inset:0;background:rgb(2,4,16);display:flex;align-items:center;justify-content:center;z-index:200}
-#reset-modal.hidden{display:none}
-#reset-box{background:#020410;border:1px solid rgba(0,210,255,.3);border-radius:16px;padding:24px 28px;text-align:center;max-width:340px}
-#reset-box p{color:#e0e8f0;font-size:14px;line-height:1.5;margin-bottom:16px}
-#reset-box input{width:100%;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px;margin-bottom:12px}
-#reset-box input:focus{outline:none;border-color:#00d2ff}
-#reset-box .reset-err{color:#ff6b6b;font-size:13px;margin:0 0 12px}
-#reset-box .reset-err.hidden{display:none}
-#reset-box .btns{display:flex;gap:12px}
-#reset-box button{flex:1;padding:10px 20px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
-#reset-box .btn-yes{background:#00d2ff;color:#020410}
-#reset-box .btn-no{background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25)}
 .enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
 .e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:rgb(14,36,78);color:#cfe4f7;border:1px solid rgba(0,210,255,.3);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
 .enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
@@ -212,20 +178,6 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #stats-bar div{height:100%;background:#00d2ff;width:0}
 #stats-note{color:rgba(0,210,255,.45);font-size:11px;text-align:center;max-width:420px;line-height:1.5}
 #stats-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
-/* Fantasy name picker overlay */
-#names-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:150;gap:18px;padding:32px}
-#names-panel.hidden{display:none}
-#names-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
-#names-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:420px;width:100%;max-height:50vh;overflow-y:auto;scrollbar-width:none}
-#names-grid::-webkit-scrollbar{display:none}
-#names-grid button{padding:10px 14px;border:1px solid rgba(0,210,255,.15);border-radius:10px;background:rgb(14,32,64);color:#e0e8f0;cursor:pointer;font-size:14px;text-align:left;font-family:inherit}
-#names-grid button:hover,#names-grid button:focus{outline:none;border-color:#00d2ff;background:rgb(20,44,84)}
-#names-custom{width:100%;max-width:420px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
-#names-custom:focus{outline:none;border-color:#00d2ff}
-#names-custom::placeholder{color:rgba(0,210,255,.3)}
-#names-panel .name-btns{display:flex;gap:12px;width:100%;max-width:420px}
-#names-custom-btn{flex:0 0 auto;padding:10px 28px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:14px}
-#names-cancel{flex:0 0 auto;padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
 /* Touch devices (real phones/tablets) only: bump the text up — the fixed px look smaller on a
    physically small screen. (hover:none)+(pointer:coarse) targets touch devices, NOT a narrow
    desktop window, so the desktop browser stays exactly as before regardless of window width.
@@ -282,45 +234,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </div>
 </div>
 
-<div id="confirm-modal" class="hidden">
-  <div id="confirm-box">
-    <p>Alle Nachrichten löschen?</p>
-    <div class="btns">
-      <button class="btn-yes" id="confirm-yes">LÖSCHEN</button>
-      <button class="btn-no" id="confirm-no">ABBRECHEN</button>
-    </div>
-  </div>
-</div>
-
-<div id="reset-modal" class="hidden">
-  <div id="reset-box">
-    <p><b>ALLES unwiderruflich zurücksetzen?</b><br>Alle Nachrichten, alle reservierten Namen und deine lokalen Daten werden gelöscht. Das kann <b>nicht</b> rückgängig gemacht werden.</p>
-    <input id="reset-pwd" type="password" aria-label="Bestätigungs-Passwort" placeholder="Bestätigungs-Passwort" autocomplete="off" readonly>
-    <p id="reset-err" class="reset-err hidden">Falsches Passwort.</p>
-    <div class="btns">
-      <button class="btn-yes" id="reset-yes">RESET</button>
-      <button class="btn-no" id="reset-no">ABBRECHEN</button>
-    </div>
-  </div>
-</div>
-
-<div id="key-panel" class="hidden">
-  <h2>Passwort</h2>
-  <div class="pwd-wrap">
-    <input id="chat-key" type="password" aria-label="Passwort" placeholder="" autocomplete="off" readonly>
-    <button type="button" class="pwd-eye" id="chat-key-eye" aria-label="Passwort anzeigen">
-      <svg id="chat-key-eye-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-    </button>
-  </div>
-  <div class="key-btns">
-    <button id="key-cancel" style="display:none">ABBRECHEN</button>
-    <button id="key-go">OK</button>
-  </div>
-</div>
-
 <div id="auth-panel" class="hidden">
   <h2 id="auth-title">VGP</h2>
   <div id="auth-tabs">
@@ -335,6 +248,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
     </button>
   </div>
+  <div id="auth-strength" class="pwd-strength hidden"><div id="auth-strength-bar"></div></div>
   <input id="auth-room" type="password" placeholder="Raum-Passwort (gemeinsam)" autocomplete="off" readonly>
   <p id="auth-err" class="auth-err hidden"></p>
   <button id="auth-go">Anmelden</button>
@@ -360,47 +274,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<div id="names-panel" class="hidden">
-  <h2>Wähle einen Namen</h2>
-  <div class="name-btns">
-    <input id="names-custom" aria-label="Eigener Name" placeholder="Eigener Name..." autocomplete="off" maxlength="30" style="flex:1">
-    <button id="names-custom-btn">OK</button>
-  </div>
-  <div id="names-grid"></div>
-  <button id="names-cancel">ABBRECHEN</button>
-</div>
-
-<div id="config-panel" class="hidden">
-  <h2>Supabase Keys</h2>
-  <input id="cfg-url" aria-label="Project URL" placeholder="Project URL (z.B. https://xxx.supabase.co)">
-  <input id="cfg-key" aria-label="anon public key" placeholder="anon public key">
-  <button id="cfg-go">STARTEN</button>
-  <p style="font-size:12px;color:rgba(0,210,255,.3);max-width:400px;text-align:center;line-height:1.5">
-    Setup: in Supabase „Anonymous Sign-ins" aktivieren, dann im SQL-Editor:<br>
-    <code style="font-size:11px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;display:block;margin-top:6px;text-align:left;word-break:break-all">
-      CREATE TABLE messages (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, created_at timestamptz DEFAULT now(), sender text NOT NULL, content text NOT NULL, author uuid DEFAULT auth.uid(), pubkey text, sig text);<br>
-      ALTER TABLE messages ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "msg read" ON messages FOR SELECT TO authenticated USING (true);<br>
-      CREATE POLICY "msg insert" ON messages FOR INSERT TO authenticated WITH CHECK (author = auth.uid());<br>
-      CREATE POLICY "msg update" ON messages FOR UPDATE TO authenticated USING (author = auth.uid()) WITH CHECK (author = auth.uid());<br>
-      CREATE POLICY "msg delete" ON messages FOR DELETE TO authenticated USING (author = auth.uid());<br><br>
-      CREATE TABLE identities (name_id text PRIMARY KEY, pubkey text NOT NULL, owner uuid DEFAULT auth.uid(), created_at timestamptz DEFAULT now());<br>
-      ALTER TABLE identities ENABLE ROW LEVEL SECURITY;<br>
-      CREATE POLICY "id read" ON identities FOR SELECT TO authenticated USING (true);<br>
-      CREATE POLICY "id insert" ON identities FOR INSERT TO authenticated WITH CHECK (owner = auth.uid());<br>
-      CREATE POLICY "id delete" ON identities FOR DELETE TO authenticated USING (owner = auth.uid());
-    </code>
-  </p>
-</div>
-
 <script>
-const SUPABASE_URL_KEY = 'eocr-supabase-url';
-const SUPABASE_KEY_KEY = 'eocr-supabase-key';
 const NAME_KEY = 'eocr-chat-name';
-const CHAT_KEY = 'eocr-chat-key';
 const EMOJI_KEY = 'eocr-chat-emoji';
 const VAULT_KEY = 'vgp-vault'; // local account vault (encrypted private key + room password)
-const LAST_RESET_KEY = 'eocr-last-reset-seen'; // the reset_at marker this device has already applied
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -412,7 +289,6 @@ function dbg(msg) {
 
 let client = null;
 let subscription = null;
-let knownSenders = new Set();
 
 // Single Supabase client + anonymous sign-in → a device-bound identity (auth.uid()) without e-mail.
 // Failsafe: if Anonymous sign-ins aren't enabled in Supabase yet, the app keeps working (old RLS).
@@ -430,25 +306,13 @@ async function ensureClient() {
   } catch (e) { dbg('Auth-Fehler: ' + e.message); }
   return client;
 }
-let cryptoKey = null;
-let hmacKey = null; // derived from the password, used only to compute name_id (HMAC) for uniqueness
+let hmacKey = null; // derived from the room password, used only to compute name_id (HMAC) for uniqueness
 let claimedName = null; // the name this device has confirmed ownership of this session
 let chatReady = false;
-let senderNames = new Set(); // distinct participant names seen in messages
-let alignRight = false; // false = all left, true = left/right; key 'l' toggles
-
-// Strip a leading emoji prefix and lowercase → the bare participant name
-function senderName(plain) {
-  return (plain || '').replace(/^\p{Extended_Pictographic}️?\s/u, '').trim().toLowerCase();
-}
 
 const messagesEl = document.getElementById('messages');
 const msgInput = document.getElementById('msg-input');
 const myNameEl = document.getElementById('my-name');
-const configPanel = document.getElementById('config-panel');
-const keyPanel = document.getElementById('key-panel');
-const confirmModal = document.getElementById('confirm-modal');
-let pendingDelete = false;
 
 // Keep browser password managers (Firefox "generate password", Safari/Chrome autofill) away from
 // our non-account password fields: they start readonly, so no manager pops up on load; the first
@@ -578,7 +442,6 @@ async function claimName(name) {
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
   }
-  if (idCache) idCache.set(id, myPubB64);
   dbg('Name beansprucht (Schlüssel + ECDH gebunden): ' + name);
   claimedName = name;
   return true;
@@ -603,12 +466,12 @@ async function showStats() {
   if (!client) { body.innerHTML = `<div class="row"><span>Kein Client — erst Schlüssel eingeben.</span></div>`; return; }
   const { data, count, error } = await client
     .from('messages')
-    .select('sender,content,created_at', { count: 'exact' });
+    .select('content,created_at', { count: 'exact' });
   if (error) { body.innerHTML = `<div class="row"><span>Fehler: ${escapeHtml(error.message)}</span></div>`; return; }
-  // Estimate stored bytes from the row payloads (sender + content), UTF-8 length
+  // Estimate stored bytes from the ciphertext payloads (content), UTF-8 length
   const enc = new TextEncoder();
   let bytes = 0;
-  for (const m of data) bytes += enc.encode((m.sender || '') + (m.content || '')).length;
+  for (const m of data) bytes += enc.encode(m.content || '').length;
   const pct = Math.min(100, bytes / FREE_DB_BYTES * 100);
   bar.style.width = pct.toFixed(2) + '%';
   body.innerHTML = `
@@ -619,71 +482,6 @@ async function showStats() {
   dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
 }
 
-// --- Fantasy name picker ---
-const FANTASY_NAMES = [
-  {e:'⛏️', n:'Pickaxe Pete'},  {e:'🕯️', n:'Cavern Clara'},
-  {e:'💨', n:'Dusty Dale'},    {e:'🔦', n:'Torchbearer Tess'},
-  {e:'🪨', n:'Boulder Bob'},   {e:'🦇', n:'Spelunker Sam'},
-  {e:'😈', n:'Gloomy Greta'}, {e:'💎', n:'Treasure Tom'},
-  {e:'🔮', n:'Crystal Kate'}, {e:'🧱', n:'Rubble Rex'},
-  {e:'🌑', n:'Shadowmere Sue'},{e:'⛰️', n:'Deeprock Doug'},
-  {e:'✨', n:'Flickering Fay'},{e:'🪖', n:'Mineshaft Mike'},
-  {e:'🕷️', n:'Cobweb Clem'},  {e:'🪝', n:'Stalactite Steve'},
-  {e:'💍', n:'Gemstone Gwen'},{e:'🌪️', n:'Drifter Dan'},
-  {e:'🍀', n:'Lucky Lila'},   {e:'🐞', n:'Ladybug Lou'}
-];
-
-function openNamesPanel() {
-  const grid = document.getElementById('names-grid');
-  grid.innerHTML = '';
-  for (const {e, n} of FANTASY_NAMES) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = `${e} ${n}`;
-    b.onclick = () => pickFantasyName(n.toLowerCase(), e);
-    grid.appendChild(b);
-  }
-  document.getElementById('names-panel').classList.remove('hidden');
-}
-
-function pickFantasyName(name, emoji) {
-  myNameEl.value = name;
-  localStorage.setItem(NAME_KEY, name);
-  if (emoji) {
-    myEmoji = emoji;
-    localStorage.setItem(EMOJI_KEY, emoji);
-    nameEmojiBtn.textContent = emoji;
-    if (typeof msgEmojiBtn !== 'undefined') msgEmojiBtn.textContent = emoji;
-  }
-  document.getElementById('names-panel').classList.add('hidden');
-  document.getElementById('names-custom').value = '';
-  msgInput.focus();
-  dbg('Fantasiename gewählt: ' + emoji + ' ' + name);
-}
-
-document.getElementById('names-custom-btn').onclick = () => {
-  const val = document.getElementById('names-custom').value.trim().toLowerCase();
-  if (val) pickFantasyName(val);
-};
-document.getElementById('names-custom').onkeydown = e => {
-  if (e.key === 'Enter') document.getElementById('names-custom-btn').click();
-};
-document.getElementById('names-cancel').onclick = () => {
-  document.getElementById('names-panel').classList.add('hidden');
-};
-
-// Enter in the name field: claim the name (must be free), then open the emoji palette
-myNameEl.onkeydown = async ev => {
-  if (ev.key !== 'Enter') return;
-  ev.preventDefault();
-  const name = myNameEl.value.trim().toLowerCase();
-  if (!name) return;
-  const ok = await claimName(name);
-  if (!ok) { myNameEl.focus(); myNameEl.select(); return; }
-  localStorage.setItem(NAME_KEY, name);
-  openEmojiPanel();
-};
-
 // --- Auth screen: sign up (Name + Konto-Passwort + Raum-Passwort) / login (Konto-Passwort) ---
 const authPanel = document.getElementById('auth-panel');
 const authNameEl = document.getElementById('auth-name');
@@ -692,7 +490,30 @@ const authRoomEl = document.getElementById('auth-room');
 const authErr = document.getElementById('auth-err');
 const authGo = document.getElementById('auth-go');
 const authHint = document.getElementById('auth-hint');
+const authForgot = document.getElementById('auth-forgot');
+const authStrength = document.getElementById('auth-strength');
+const authStrengthBar = document.getElementById('auth-strength-bar');
 let authMode = 'login';
+
+// Account-password strength: length is the main lever, variety adds a bit. ok = good enough to sign up.
+function pwdStrength(p) {
+  let score = 0;
+  if (p.length >= 8) score++;
+  if (p.length >= 12) score++;
+  if (/[a-z]/.test(p) && /[A-Z]/.test(p)) score++;
+  if (/\d/.test(p)) score++;
+  if (/[^A-Za-z0-9]/.test(p)) score++;
+  if (p.length < 8 || score <= 2) return { cls: 's-weak', ok: false };
+  if (score <= 3) return { cls: 's-medium', ok: true };
+  return { cls: 's-strong', ok: true };
+}
+// Live meter under the account-password field (sign-up only)
+function updateStrengthMeter() {
+  if (authMode !== 'signup') return;
+  const p = authPwdEl.value;
+  authStrength.classList.toggle('hidden', !p);
+  authStrengthBar.className = p ? pwdStrength(p).cls : '';
+}
 
 function showAuthErr(msg) { authErr.textContent = msg; authErr.classList.remove('hidden'); authGo.disabled = false; }
 function setAuthMode(mode) {
@@ -704,6 +525,10 @@ function setAuthMode(mode) {
   authRoomEl.style.display = signup ? '' : 'none';
   authErr.classList.add('hidden');
   authPwdEl.value = '';
+  // Strength meter only while signing up; "Konto zurücksetzen" only when there's a vault to reset.
+  authStrength.classList.add('hidden');
+  authStrengthBar.className = '';
+  authForgot.style.display = vaultExists() ? '' : 'none';
   if (signup) {
     authHint.textContent = 'Wähle Name + Konto-Passwort und gib das gemeinsame Raum-Passwort ein.';
     authGo.textContent = 'Konto erstellen';
@@ -725,6 +550,10 @@ async function authSubmit() {
       const name = authNameEl.value.trim().toLowerCase();
       const pwd = authPwdEl.value, room = authRoomEl.value;
       if (!name || !pwd || !room) return showAuthErr('Bitte alle Felder ausfüllen.');
+      // Validate the account password — it is the only thing protecting the local vault.
+      if (!pwdStrength(pwd).ok) return showAuthErr('Konto-Passwort zu schwach — mind. 8 Zeichen, besser mit Zahl & Sonderzeichen.');
+      // Access-code gate (closed community): the room password must match the shared access code.
+      if (!(await checkAccessCode(room))) return showAuthErr('Falsches Raum-Passwort.');
       const vault = await createVault(name, pwd, room);
       await activateVault(vault);
       authPanel.classList.add('hidden');
@@ -753,7 +582,15 @@ async function authSubmit() {
   }
 }
 authGo.onclick = authSubmit;
-[authNameEl, authPwdEl, authRoomEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
+// Enter advances to the next VISIBLE field (login hides name+room); on the last one it submits.
+const authFields = [authNameEl, authPwdEl, authRoomEl];
+authFields.forEach(el => el.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const next = authFields.slice(authFields.indexOf(el) + 1).find(f => f.offsetParent !== null);
+  if (next) next.focus(); else authSubmit();
+}));
+authPwdEl.addEventListener('input', updateStrengthMeter);
 document.getElementById('auth-pwd-eye').onclick = () => { authPwdEl.type = authPwdEl.type === 'password' ? 'text' : 'password'; authPwdEl.focus(); };
 document.getElementById('auth-forgot').onclick = () => {
   if (confirm('Konto auf diesem Gerät zurücksetzen? Deine Identität (Schlüssel) geht verloren — du musst dich neu anmelden und ggf. einen neuen Namen wählen.')) {
@@ -761,232 +598,25 @@ document.getElementById('auth-forgot').onclick = () => {
     location.reload();
   }
 };
-// Lock button: lock the app → reload shows the login screen (account password needed)
+// Lock button: lock the app → reload shows the login screen (account password needed).
 document.getElementById('lock-btn').onclick = () => location.reload();
 // Back button (mobile): return from the open chat to the contact list
 document.getElementById('back-btn').onclick = () => document.getElementById('app').classList.remove('chat-open');
 
-/* ============================================================================================
-   ███  TEMPORÄR — NUR FÜRS LOKALE TESTEN — VOR DEPLOY ENTFERNEN!  ███
-   Auto-Login: Das Konto-Passwort ist HART IN DIE QUELLE geschrieben (TEMP_PWD) und wird beim
-   Start automatisch zum Entsperren des Vaults benutzt → der App-Lock (Login-Screen) wird
-   übersprungen. DAS HEBELT DIE SICHERHEIT AUS. Vor jedem echten Deploy:
-     diesen ganzen Block durch die zwei Zeilen unten ersetzen (siehe ORIGINAL).
-   ORIGINAL (Produktion):
-     setAuthMode(vaultExists() ? 'login' : 'signup');
-     authPanel.classList.remove('hidden');
-   ============================================================================================ */
+// On start: existing vault → login screen (enter account password), otherwise sign-up.
 {
-  const TEMP_PWD = '!aMe5007!!??';   // ⚠️ TEMP — hardcoded account password, remove before deploy
-  if (vaultExists()) {
-    dbg('⚠️ TEMP Auto-Login aktiv — App-Lock übersprungen (vor Deploy entfernen!)');
-    openVault(TEMP_PWD).then(async v => {
-      if (v && v !== 'WRONG') { await activateVault(v); authPanel.classList.add('hidden'); await initChat(SUPABASE_URL, SUPABASE_KEY); }
-      else { setAuthMode('login'); authPanel.classList.remove('hidden'); }
-    });
-  } else {
-    setAuthMode('signup');
-    authPanel.classList.remove('hidden');
-  }
+  setAuthMode(vaultExists() ? 'login' : 'signup');
+  authPanel.classList.remove('hidden');
 }
 
-async function submitKey() {
-  const keyInput = document.getElementById('chat-key');
-  const key = keyInput.value.trim();
-  if (!key) return alert('Schlüssel eingeben!');
-  dbg(`submitKey: eingegebene Länge=${key.length}`);
-  const goBtn = document.getElementById('key-go');
-  goBtn.disabled = true;
-  const testKey = await deriveKey(key);
-  const ok = await verifyKey(testKey);
-  goBtn.disabled = false;
-  if (!ok) {
-    dbg('Falscher Schlüssel — Dialog bleibt offen');
-    keyInput.value = '';
-    keyInput.focus();
-    keyInput.placeholder = 'Falscher Schlüssel';
-    return;
-  }
-  cryptoKey = testKey;
-  hmacKey = await deriveHmacKey(key);
-  localStorage.setItem(CHAT_KEY, key);
-  keyPanel.classList.add('hidden');
-  if (chatReady) {
-    dbg('Schlüssel geändert — Nachrichten werden neu entschlüsselt');
-    loadMessages();
-  } else {
-    dbg('Init mit Supabase-Keys');
-    initChat(SUPABASE_URL, SUPABASE_KEY);
-  }
-}
-
-document.getElementById('key-go').onclick = submitKey;
-document.getElementById('chat-key').onkeydown = e => { if (e.key === 'Enter') submitKey(); };
-
-// Eye toggle: show/hide the password text (SVG swaps between eye and eye-off, same as vault.html)
-document.getElementById('chat-key-eye').onclick = () => {
-  const inp = document.getElementById('chat-key');
-  const eye = document.getElementById('chat-key-eye');
-  const svg = document.getElementById('chat-key-eye-svg');
-  const reveal = inp.type === 'password';
-  inp.type = reveal ? 'text' : 'password';
-  svg.innerHTML = reveal
-    ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line>`
-    : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
-  eye.setAttribute('aria-label', reveal ? 'Passwort verbergen' : 'Passwort anzeigen');
-  inp.focus();
-};
-
-document.getElementById('key-cancel').onclick = () => {
-  keyPanel.classList.add('hidden');
-  if (client) msgInput.focus();
-};
-
-document.getElementById('confirm-yes').onclick = async () => {
-  confirmModal.classList.add('hidden');
-  if (!pendingDelete) return;
-  const { error } = await client.from('messages').delete().gt('id', 0);
-  if (error) { dbg('Löschfehler: ' + error.message); return; }
-  knownSenders = new Set();
-  messagesEl.innerHTML = '';
-  msgInput.value = ''; updateSendBtn();
-  dbg('Alle Nachrichten gelöscht');
-  pendingDelete = false;
-};
-document.getElementById('confirm-no').onclick = () => {
-  confirmModal.classList.add('hidden');
-  pendingDelete = false;
-};
-
-// --- /reset: irreversible full wipe, gated behind a confirmation password ---
-// The plaintext password is NEVER stored anywhere in the project. We keep only its
-// PBKDF2-HMAC-SHA-256 hash (salt 'forloop-reset-salt-v1', 200000 iterations, 32 bytes —
-// same hardening as the E2E key) and hash the typed input at runtime to compare.
-// To change the password, regenerate the hash on the fly (password is read hidden, never saved):
-//   python3 tools/reset_hash.py
-// then paste the printed value below. Keep these params in sync with hashResetPwd().
-const RESET_PWD_HASH = 'e7cb48b3c2c65f0d173c10894505f8dcfc96f4ec4cacedc12027fc0ecf0a0c84';
-async function hashResetPwd(pwd) {
-  const enc = new TextEncoder();
-  const km = await crypto.subtle.importKey('raw', enc.encode(pwd), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: enc.encode('forloop-reset-salt-v1'), iterations: 200000, hash: 'SHA-256' },
-    km, 256
-  );
-  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-const resetModal = document.getElementById('reset-modal');
-const resetPwd = document.getElementById('reset-pwd');
-const resetErr = document.getElementById('reset-err');
-function openResetModal() {
-  resetPwd.value = '';
-  resetErr.classList.add('hidden');
-  resetModal.classList.remove('hidden');
-  resetPwd.focus();
-}
-// Wipe all local app data, remember which reset we applied (so we don't loop), then reload.
-function wipeLocalAndReload(resetAt) {
-  Object.keys(localStorage).filter(k => k.startsWith('eocr-')).forEach(k => localStorage.removeItem(k));
-  if (resetAt) localStorage.setItem(LAST_RESET_KEY, resetAt); // set AFTER the wipe, so it survives
-  location.reload();
-}
-// Read the server-wide reset marker (null if the table/row doesn't exist yet)
-async function getResetMarker() {
-  if (!client) return null;
-  const { data, error } = await client.from('app_meta').select('value').eq('key', 'reset_at').limit(1);
-  if (error) { dbg('Reset-Marker nicht lesbar (Tabelle da?): ' + error.message); return null; }
-  return (data && data.length) ? data[0].value : null;
-}
-// On load / on realtime signal: if the server reset is newer than what we've applied, wipe ourselves.
-function maybeApplyRemoteReset(remote) {
-  if (!remote) return false;
-  if (localStorage.getItem(LAST_RESET_KEY) === remote) return false; // already applied
-  const hasData = localStorage.getItem(NAME_KEY) || localStorage.getItem(CHAT_KEY);
-  if (hasData) { dbg('Remote-Reset erkannt — lösche lokale Daten & lade neu'); wipeLocalAndReload(remote); return true; }
-  localStorage.setItem(LAST_RESET_KEY, remote); // fresh visitor: nothing to wipe, just mark as current
-  return false;
-}
-
-async function doReset() {
-  dbg('RESET: lösche alles…');
-  let ts = new Date().toISOString();
-  if (client) {
-    // Wipe all messages and all reserved names on the server
-    const { error: mErr } = await client.from('messages').delete().gt('id', 0);
-    if (mErr) dbg('Reset Nachrichten-Fehler: ' + mErr.message);
-    const { error: pErr } = await client.from('identities').delete().neq('name_id', '');
-    if (pErr) dbg('Reset Identitäten-Fehler: ' + pErr.message);
-    // Signal every other client to wipe itself (now if online, on next open if offline)
-    const { error: rErr } = await client.from('app_meta').upsert({ key: 'reset_at', value: ts, updated_at: ts });
-    if (rErr) dbg('Reset-Signal-Fehler (app_meta da?): ' + rErr.message);
-  }
-  dbg('RESET: lokal & Server geleert — lade neu');
-  wipeLocalAndReload(ts);
-}
-document.getElementById('reset-yes').onclick = async () => {
-  const btn = document.getElementById('reset-yes');
-  btn.disabled = true;
-  const ok = (await hashResetPwd(resetPwd.value)) === RESET_PWD_HASH;
-  btn.disabled = false;
-  if (!ok) {
-    resetErr.classList.remove('hidden');
-    resetPwd.value = ''; resetPwd.focus();
-    return;
-  }
-  btn.disabled = true;
-  await doReset();
-};
-document.getElementById('reset-no').onclick = () => resetModal.classList.add('hidden');
-resetPwd.onkeydown = e => { if (e.key === 'Enter') document.getElementById('reset-yes').click(); };
-
-document.getElementById('cfg-go').onclick = () => {
-  const url = document.getElementById('cfg-url').value.trim();
-  const key = document.getElementById('cfg-key').value.trim();
-  if (!url || !key) return alert('Beide Felder ausfüllen');
-  dbg('Manueller Init: ' + url);
-  localStorage.setItem(SUPABASE_URL_KEY, url);
-  localStorage.setItem(SUPABASE_KEY_KEY, key);
-  configPanel.classList.add('hidden');
-  initChat(url, key);
-};
-
-async function deriveKey(password) {
-  const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('forloop-chat-salt'), iterations: 100000, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  );
-}
-
+// Derive the HMAC key (name uniqueness) from the room password. No AES key here anymore —
+// 1:1 message encryption uses per-pair ECDH keys (deriveChatKey), not the room password.
 async function initCrypto(password) {
-  cryptoKey = await deriveKey(password);
   hmacKey = await deriveHmacKey(password);
-  dbg('AES-256-GCM Schlüssel abgeleitet');
+  dbg('Namens-HMAC-Schlüssel abgeleitet');
 }
 
-// Prüft testKey gegen die zuletzt gespeicherte verschlüsselte Nachricht.
-// Kein Client/keine verschlüsselte Nachricht/Query-Fehler -> nicht prüfbar -> als gültig behandeln.
-async function verifyKey(testKey) {
-  await ensureClient();
-  const { data, error } = await client
-    .from('messages')
-    .select('content')
-    .like('content', 'ENC:%')
-    .order('created_at', { ascending: false })
-    .limit(1);
-  if (error) { dbg('Schlüssel-Check nicht möglich: ' + error.message); return true; }
-  if (!data || !data.length) { dbg('Keine verschlüsselte Nachricht zum Prüfen'); return true; }
-  const plain = await decryptText(data[0].content, testKey);
-  const ok = plain !== '[falscher Schlüssel]';
-  dbg(`verifyKey: geprüfte Nachricht len=${data[0].content.length}, Ergebnis=${ok ? 'OK' : 'FALSCH'}`);
-  return ok;
-}
-
-async function encryptText(plain, key = cryptoKey) {
+async function encryptText(plain, key) {
   const enc = new TextEncoder();
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plain));
@@ -996,7 +626,7 @@ async function encryptText(plain, key = cryptoKey) {
   return 'ENC:' + btoa(String.fromCharCode(...combined));
 }
 
-async function decryptText(cipherB64, key = cryptoKey) {
+async function decryptText(cipherB64, key) {
   if (!cipherB64.startsWith('ENC:')) return cipherB64;
   try {
     const combined = Uint8Array.from(atob(cipherB64.slice(4)), c => c.charCodeAt(0));
@@ -1017,7 +647,6 @@ let myPrivKey = null;     // non-extractable CryptoKey (ECDSA sign)
 let myPubB64 = null;      // our signing public key (spki, base64)
 let myEcdhPrivKey = null; // non-extractable CryptoKey (ECDH key agreement, for 1:1 E2E)
 let myEcdhPubB64 = null;  // our ECDH public key (spki, base64) — published in our profile
-let idCache = null;       // Map name_id(hex) → pubkey(base64), loaded from the identities table
 
 const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -1032,14 +661,6 @@ async function verifyText(text, sigB64, pubB64) {
     return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pub, unb64(sigB64), new TextEncoder().encode(text));
   } catch (_) { return false; }
 }
-// Load the name→pubkey registry once (cached); refreshed on demand
-async function loadIdentities() {
-  idCache = new Map();
-  const { data, error } = await client.from('identities').select('name_id,pubkey');
-  if (error) { dbg('Identities nicht lesbar (Tabelle da?): ' + error.message); return; }
-  for (const r of (data || [])) idCache.set(r.name_id, r.pubkey);
-}
-
 // --- Contact list (everyone registered, except me) ---
 let activePeer = null;          // the contact we're currently chatting with
 let allContacts = [];           // cached list for search filtering
@@ -1048,12 +669,6 @@ async function loadContacts() {
   const { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner');
   if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
   const me = (myNameEl.value || '').toLowerCase();
-  // --- DIAGNOSE (TEMP): show exactly what the DB returned and why rows pass/fail the filter ---
-  dbg(`loadContacts: ${data ? data.length : 0} Zeile(n) aus identities, eigener Name="${me}"`);
-  (data || []).forEach(r => {
-    const keep = r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner;
-    dbg(`  • name=${JSON.stringify(r.name)} ecdh=${r.ecdh_pubkey ? 'ja' : 'NEIN'} owner=${r.owner ? 'ja' : 'NEIN'} → ${keep ? 'KONTAKT' : 'raus'}`);
-  });
   allContacts = (data || []).filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
                             .sort((a, b) => a.name.localeCompare(b.name));
   renderContacts(document.getElementById('contact-search').value);
@@ -1106,7 +721,7 @@ async function deriveWrapKey(accountPwd, saltBytes) {
 // Plaintext is NEVER stored — only this PBKDF2 hash. To change it:
 //   printf '%s' 'NEW CODE' | python3 -c "import sys,hashlib;print(hashlib.pbkdf2_hmac('sha256',sys.stdin.buffer.read(),b'vgp-access-salt-v1',200000).hex())"
 // Verified client-side → a soft gate (chat contents are E2E anyway). Wired into sign-up in E3.
-const ACCESS_PWD_HASH = '05311f5444ac327adcfad903d87d792d0894decb9163ea886eb3b0b13b1b2007';
+const ACCESS_PWD_HASH = '1de05d17c9f2d3f2329c2ae31dd0eb576292322166fc6f5ccf206739aa626711';
 async function checkAccessCode(code) {
   const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-access-salt-v1'), iterations: 200000, hash: 'SHA-256' }, km, 256);
@@ -1152,7 +767,7 @@ async function activateVault(vault) {
   myEcdhPubB64 = vault.ecdhPubB64 || null;
   myPrivKey = await crypto.subtle.importKey('jwk', vault.privJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
   if (vault.ecdhPrivJwk) myEcdhPrivKey = await crypto.subtle.importKey('jwk', vault.ecdhPrivJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
-  await initCrypto(vault.roomPwd); // sets cryptoKey (AES) + hmacKey from the room password
+  await initCrypto(vault.roomPwd); // sets hmacKey (name uniqueness) from the room password
   myNameEl.value = vault.name;
   dbg('Vault entsperrt — Identität aktiv: ' + vault.name);
 }
@@ -1173,33 +788,24 @@ async function initChat(url, key) {
   await ensureClient();
   chatReady = true;
   dbg('Supabase-Client erstellt');
-  // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
-  if (await maybeApplyRemoteReset(await getResetMarker())) return;
   await loadContacts();      // fill the sidebar
   subscribeMessages();
   msgInput.disabled = true;  // stays disabled until a contact is selected
   dbg('Chat bereit — wähle einen Kontakt');
 }
 
-// Bright shades — readable on the dark WhatsApp-style bubbles (sender names in group mode)
-const NAME_COLORS = ['#53bdeb','#06cf9c','#ffab00','#ff7e6b','#c58fff','#7ad0ff','#ffd24d','#26d367','#ff8fab','#b5e853','#f4a261','#d4a5ff','#4fc3f7','#ff8a65','#9ccc65','#4dd0e1','#f06292','#fdd835','#80cbc4','#ba68c8'];
-function nameColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length];
-}
-
-const MSG_LIMIT = 500;
 let activeChatKey = null; // ECDH-derived AES key for the currently open 1:1 conversation
 async function loadMessages() {
   if (!activePeer) { messagesEl.innerHTML = ''; return; }
-  await loadIdentities();                                  // for signature verification
   activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   const peer = activePeer.owner;
   const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
-  // RLS already restricts to rows where I'm author or recipient → keep only those with this peer
-  const rows = (data || []).filter(m => m.author === peer || m.recipient === peer);
+  // Strict 1:1: keep ONLY messages exchanged between me and this peer (both directions).
+  // Author-or-recipient alone would leak the peer's chats with others into this view.
+  const rows = (data || []).filter(m =>
+    (m.author === myUid && m.recipient === peer) ||
+    (m.author === peer  && m.recipient === myUid));
   dbg(`${rows.length} 1:1-Nachrichten mit ${activePeer.name}`);
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
@@ -1213,22 +819,16 @@ function subscribeMessages() {
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
       const m = payload.new;
-      // Only render if it belongs to the currently open 1:1 conversation
-      if (activePeer && (m.author === activePeer.owner || m.recipient === activePeer.owner)) {
+      // Only render if it belongs to the currently open 1:1 conversation (both me AND this peer)
+      const peer = activePeer && activePeer.owner;
+      if (peer && ((m.author === myUid && m.recipient === peer) ||
+                   (m.author === peer  && m.recipient === myUid))) {
         await renderMsg(m);
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
       if (activePeer) loadMessages();
-    })
-    // Remote /reset signal: another client wiped everything → wipe ourselves and reload
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_meta' }, payload => {
-      const row = payload.new;
-      if (row && row.key === 'reset_at') {
-        dbg('Remote-Reset-Signal empfangen');
-        maybeApplyRemoteReset(row.value);
-      }
     })
     // A new account registered (or changed) → refresh the contact list live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'identities' }, () => {
