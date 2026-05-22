@@ -347,6 +347,7 @@ const EMOJI_KEY = 'eocr-chat-emoji';
 const AVATAR_KEY = 'vgp-avatar'; // local copy of my chosen avatar picture (data URL)
 const VAULT_KEY = 'vgp-vault'; // local account vault (encrypted private key + room password)
 const SESSION_PWD_KEY = 'vgp-session-pwd'; // account pwd cached for THIS tab only (sessionStorage) → no re-entry on reload
+const BACKUP_OK_KEY = 'vgp-backup-ok';     // this device knows a server backup exists → don't re-show the recovery code
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
@@ -715,7 +716,7 @@ async function authSubmit() {
       localStorage.setItem(NAME_KEY, name);
       // Multi-device: stash an encrypted backup on the server + show the one-time recovery code
       const recovery = await createBackup(await nameId(name), pwd, room, vault);
-      if (recovery) showRecoveryModal(recovery);
+      if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
     } else if (!vaultExists()) {
       // Restore on a new device: Name + Konto-Pwd + Raum-Pwd → fetch & decrypt the server backup
       const name = authNameEl.value.trim().toLowerCase();
@@ -726,6 +727,7 @@ async function authSubmit() {
       if (res === 'WRONG' || !res) return showAuthErr('Falsches Konto- oder Raum-Passwort.');
       await writeLocalVault(res.name, pwd, res); // import the identity onto this device
       await activateVault(res);
+      localStorage.setItem(BACKUP_OK_KEY, '1'); // we just restored from the backup → it exists
       sessionStorage.setItem(SESSION_PWD_KEY, pwd);
       authPanel.classList.add('hidden');
       await initChat(SUPABASE_URL, SUPABASE_KEY);
@@ -739,6 +741,7 @@ async function authSubmit() {
       sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
       await initChat(SUPABASE_URL, SUPABASE_KEY);
+      await ensureBackup(pwd, vault); // older accounts: create the server backup on first login
     }
   } catch (e) {
     showAuthErr('Fehler: ' + e.message);
@@ -761,6 +764,7 @@ document.getElementById('auth-forgot').onclick = () => {
   if (confirm('Konto auf diesem Gerät zurücksetzen? Deine Identität (Schlüssel) geht verloren — du musst dich neu anmelden und ggf. einen neuen Namen wählen.')) {
     sessionStorage.removeItem(SESSION_PWD_KEY);
     localStorage.removeItem(VAULT_KEY);
+    localStorage.removeItem(BACKUP_OK_KEY);
     location.reload();
   }
 };
@@ -783,6 +787,7 @@ setTimeout(() => {
         await activateVault(v);
         authPanel.classList.add('hidden');
         await initChat(SUPABASE_URL, SUPABASE_KEY);
+        await ensureBackup(cached, v); // older accounts: create the server backup if missing
       } else {
         sessionStorage.removeItem(SESSION_PWD_KEY);
         setAuthMode('login'); authPanel.classList.remove('hidden');
@@ -1060,6 +1065,20 @@ async function createBackup(name_id, accountPwd, roomPwd, payload) {
   if (error) { dbg('Server-Backup fehlgeschlagen: ' + error.message); return null; }
   dbg('Server-Backup angelegt (Multi-Gerät bereit)');
   return recovery;
+}
+// Ensure a server backup exists for this account (migrates older accounts created before backups).
+// vault = { name, pubB64, ecdhPubB64, privJwk, ecdhPrivJwk, roomPwd } (as returned by openVault).
+async function ensureBackup(accountPwd, vault) {
+  if (!client || !myPubB64) return;
+  if (localStorage.getItem(BACKUP_OK_KEY)) { dbg('ensureBackup: Flag gesetzt → überspringe'); return; }
+  const name_id = await nameId(vault.name); // hmacKey already set by activateVault
+  const { data, error } = await client.from('vaults').select('name_id').eq('name_id', name_id).limit(1);
+  dbg(`ensureBackup: name_id=${name_id.slice(0,10)}… gefunden=${error ? 'FEHLER' : (data ? data.length : 'null')}${error ? ' err=' + error.message : ''}`);
+  if (error) { dbg('Backup-Check-Fehler (lege NICHTS neu an): ' + error.message); return; } // never recreate on error
+  if (data && data.length) { localStorage.setItem(BACKUP_OK_KEY, '1'); return; } // already there
+  dbg('Kein Backup vorhanden — lege es einmalig an (Migration)');
+  const recovery = await createBackup(name_id, accountPwd, vault.roomPwd, vault);
+  if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
 }
 // name_id from a room password (needed at restore, before any vault/hmacKey exists)
 async function computeNameId(name, roomPwd) {
