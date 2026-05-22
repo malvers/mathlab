@@ -6,7 +6,7 @@
 <title>Doc Alvers Chat — E2E</title>
 <!-- PWA: manifest so the installed app (launched from vgpapp.html) opens the chat in standalone -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#020410">
+<meta name="theme-color" content="#070d18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,28 +25,30 @@ CyberUI.init();
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{background:#020410}
+html{background:#070d18}
 input,button,textarea{font-family:inherit}
 /* Safari injects an AutoFill/contact button (👤⌄) into text fields — hide it */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:none!important;pointer-events:none;position:absolute;right:0}
-body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{position:relative;width:100%;max-width:900px;height:100dvh;max-height:800px;display:flex;border-radius:8px;overflow:hidden;background:#020410}
+body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
+#app{position:relative;width:100%;max-width:900px;height:100dvh;max-height:800px;display:flex;border-radius:8px;overflow:hidden;background:#070d18}
 /* Sidebar: own identity + search + contact list */
-#sidebar{flex:0 0 300px;display:flex;flex-direction:column;min-width:0;background:rgb(2,6,14);border-right:1px solid rgba(0,210,255,.15)}
+#sidebar{flex:0 0 300px;display:flex;flex-direction:column;min-width:0;background:#0c1422;border-right:1px solid rgba(0,210,255,.15)}
 /* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
-#sidebar-head{display:flex;gap:8px;padding:10px 12px;background:rgb(3,10,16);align-items:center;border-top:1px solid rgba(0,210,255,.12)}
+/* Own-profile strip at the TOP of the sidebar — same look as before (full-width dark strip) */
+#sidebar-head{display:flex;gap:8px;padding:10px 12px;min-height:58px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
 #sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:rgba(224,232,240,.7);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sidebar-head #my-name:focus{outline:none}
-#name-emoji{flex:0 0 auto;position:static;transform:none;width:32px;height:32px;border:none;border-radius:50%;background:rgb(10,24,52);font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
-#contact-search{margin:12px 12px 8px;padding:9px 14px;border:1px solid rgba(0,210,255,.2);border-radius:18px;background:rgb(10,24,52);color:#e0e8f0;font-size:13px}
+#name-emoji{flex:0 0 auto;position:static;transform:none;width:32px;height:32px;border:none;border-radius:50%;background:transparent;font-size:30px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+#contact-search{margin:12px 12px 8px;padding:9px 14px;border:1px solid rgba(0,210,255,.2);border-radius:18px;background:#14203a;color:#e0e8f0;font-size:13px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
 #contact-search::placeholder{color:rgba(0,210,255,.3)}
 #contact-list{flex:1;overflow-y:auto}
-.contact{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(0,210,255,.06)}
-.contact:hover{background:rgba(0,210,255,.06)}
-.contact.active{background:rgba(0,210,255,.12)}
-.contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgb(14,32,64);display:flex;align-items:center;justify-content:center;font-size:20px}
+/* Each contact is a borderless, slightly rounded card — same width as the search field (12px side margins) */
+.contact{display:flex;align-items:center;gap:10px;margin:6px 12px;padding:10px 12px;border-radius:12px;background:#18243c;cursor:pointer}
+.contact:hover{background:#212f4d}
+.contact.active{background:#2a3a5e}
+.contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
 .contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
@@ -56,22 +58,25 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 .contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#25d366;color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 /* Chat panel */
 #chat-panel{flex:1;display:flex;flex-direction:column;min-width:0}
-#chat-head{display:flex;gap:8px;padding:12px 14px;background:rgb(3,10,16);align-items:center}
-#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Chat header: same strip design + height as the sidebar profile header on the left */
+#chat-head{display:flex;gap:8px;padding:10px 12px;min-height:58px;background:#08101c;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
+#chat-peer-av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px;color:#e9edef}
+#chat-peer-av:empty{display:none}
+#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:400;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
-#lock-btn{flex:0 0 auto;width:36px;height:36px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:rgb(10,24,52);color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-#lock-btn:hover{border-color:#00d2ff;background:rgb(14,32,64)}
+#lock-btn{flex:0 0 auto;width:36px;height:36px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:#14203a;color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#lock-btn:hover{border-color:#00d2ff;background:#14203a}
 #lock-btn:focus,#name-emoji:focus,#back-btn:focus{outline:none}
 /* Mobile / narrow: one column — sidebar by default, chat slides in when a contact is picked */
 @media (max-width:700px){
   #app{max-width:100%;border-radius:0}
   #sidebar{flex:1 1 100%}
-  #chat-panel{position:absolute;inset:0;z-index:40;background:#020410;transform:translateX(100%);transition:transform .2s}
+  #chat-panel{position:absolute;inset:0;z-index:40;background:#070d18;transform:translateX(100%);transition:transform .2s}
   #app.chat-open #chat-panel{transform:translateX(0)}
   #app.chat-open #sidebar{display:none}
   #back-btn{display:flex}
 }
-#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:rgb(3,10,16);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#08101c;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 /* Chrome + Safari: slim cyan scrollbar via ::-webkit-scrollbar (must NOT also set scrollbar-width, or Safari falls back to the native bar) */
 #messages::-webkit-scrollbar{width:6px}
 #messages::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
@@ -80,11 +85,11 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 @supports (-moz-appearance:none){#messages{scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.3) transparent}}
 /* WhatsApp-style bubbles (blue), dark theme — self right, other left */
 .msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:#e9edef;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
-.msg.self{align-self:flex-end;background:#0c4a6e;border-top-right-radius:0}
-.msg.other{align-self:flex-start;background:#202c33;border-top-left-radius:0}
+.msg.self{align-self:flex-end;background:#15466a;border-top-right-radius:0}
+.msg.other{align-self:flex-start;background:#1a2740;border-top-left-radius:0}
 /* Original WhatsApp tail shapes (tail-out right, tail-in left) as inline SVG */
-.msg.self::before{content:'';position:absolute;top:0;right:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%230c4a6e' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat}
-.msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%23202c33' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
+.msg.self::before{content:'';position:absolute;top:0;right:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%2315466a' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat}
+.msg.other::before{content:'';position:absolute;top:0;left:-8px;width:8px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath fill='%231a2740' d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat}
 .msg .sender{display:block;font-size:12.8px;font-weight:600;margin-bottom:2px;line-height:1.25}
 /* unverified / forged message: signature invalid or key doesn't match the claimed name */
 .msg.forged{outline:1px solid rgba(255,80,80,.6);background:rgba(120,20,20,.35)!important}
@@ -92,13 +97,13 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 .msg .text{word-wrap:break-word}
 .msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
 /* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
-.msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55)}
-.msg .ticks.read{color:#34b7f1}
+.msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55);letter-spacing:-3px}
+.msg .ticks.read{color:#00d2ff}
 .msg.encrypted{border:none}
-#input-row{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
+#input-row{display:flex;gap:8px;padding:12px;background:#08101c;align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
-.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
+.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:#14203a;color:#e0e8f0;font-size:14px}
 .msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
 #msg-emoji:focus{outline:none}
@@ -109,7 +114,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #send-btn:disabled{opacity:.35;cursor:default}
 #input-row{position:relative;z-index:10}
 /* Slash-command autocomplete — opens upward, above the input */
-#cmd-box{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);background:rgb(3,10,16);border:1px solid rgba(0,210,255,.25);border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 -6px 24px rgba(0,0,0,.45)}
+#cmd-box{position:absolute;left:12px;right:12px;bottom:calc(100% - 4px);background:#08101c;border:1px solid rgba(0,210,255,.25);border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 -6px 24px rgba(0,0,0,.45)}
 #cmd-box.hidden{display:none}
 #cmd-box .cmd-item{display:flex;gap:10px;align-items:baseline;padding:8px 14px;cursor:pointer}
 #cmd-box .cmd-item.active,#cmd-box .cmd-item:hover{background:rgba(0,210,255,.12)}
@@ -123,7 +128,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 .auth-tab{flex:1;padding:11px;border:none;background:transparent;color:rgba(0,210,255,.6);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .auth-tab.active{background:#00d2ff;color:#020410}
 #auth-hint{color:rgba(0,210,255,.55);font-size:13px;text-align:center;max-width:360px;line-height:1.5}
-#auth-panel input{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:rgb(14,32,64);color:#e0e8f0;font-size:14px}
+#auth-panel input{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:#14203a;color:#e0e8f0;font-size:14px}
 #auth-panel input:focus{outline:none;border-color:#00d2ff}
 #auth-panel .pwd-wrap{max-width:400px}
 #auth-err{color:#ff6b6b;font-size:13px;text-align:center;max-width:360px;margin:0}
@@ -135,7 +140,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #auth-panel .pwd-eye:focus{outline:none}
 #auth-panel .pwd-wrap input{padding-right:44px!important}
 /* Account-password strength meter (sign-up only) */
-.pwd-strength{width:100%;max-width:400px;height:6px;border-radius:3px;background:rgb(14,32,64);overflow:hidden;margin:-6px 0 0}
+.pwd-strength{width:100%;max-width:400px;height:6px;border-radius:3px;background:#14203a;overflow:hidden;margin:-6px 0 0}
 .pwd-strength.hidden{display:none}
 #auth-strength-bar{height:100%;width:0;border-radius:3px;transition:width .2s,background .2s}
 #auth-strength-bar.s-weak{width:33%;background:rgb(176,36,24)}
@@ -153,10 +158,10 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
 #emoji-panel.hidden{display:none}
 #emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
-  --background:rgb(3,10,16);
+  --background:#08101c;
   --border-color:rgba(0,210,255,.12);
   --indicator-color:#00d2ff;
-  --input-background:rgb(10,24,52);
+  --input-background:#14203a;
   --input-border-color:rgba(0,210,255,.2);
   --input-font-color:#e9edef;
   --input-placeholder-color:rgba(160,170,180,.55);
@@ -172,7 +177,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #help-panel.hidden{display:none}
 #help-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
 #help-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
-#help-list .cmd{display:flex;gap:12px;align-items:baseline;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px}
+#help-list .cmd{display:flex;gap:12px;align-items:baseline;background:#14203a;border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px}
 #help-list code{color:#00d2ff;font-family:monospace;font-size:14px;font-weight:700;flex:0 0 80px}
 #help-list span{color:#cfe4f7;font-size:13px;line-height:1.4}
 #help-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
@@ -181,9 +186,9 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0
 #stats-panel.hidden{display:none}
 #stats-panel h2{color:#00d2ff;font-size:20px;font-weight:400}
 #stats-body{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px}
-#stats-body .row{display:flex;justify-content:space-between;gap:12px;background:rgb(14,32,64);border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px;color:#cfe4f7;font-size:14px}
+#stats-body .row{display:flex;justify-content:space-between;gap:12px;background:#14203a;border:1px solid rgba(0,210,255,.15);border-radius:10px;padding:10px 14px;color:#cfe4f7;font-size:14px}
 #stats-body .row b{color:#00d2ff;font-weight:700}
-#stats-bar{width:100%;max-width:420px;height:10px;border-radius:5px;background:rgb(14,32,64);overflow:hidden;border:1px solid rgba(0,210,255,.15)}
+#stats-bar{width:100%;max-width:420px;height:10px;border-radius:5px;background:#14203a;overflow:hidden;border:1px solid rgba(0,210,255,.15)}
 #stats-bar div{height:100%;background:#00d2ff;width:0}
 #stats-note{color:rgba(0,210,255,.45);font-size:11px;text-align:center;max-width:420px;line-height:1.5}
 #stats-close{padding:10px 28px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(0,210,255,.15);color:#00d2ff;font-weight:700;cursor:pointer;font-size:14px}
@@ -203,8 +208,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <body>
 <div id="app">
   <aside id="sidebar">
-    <input id="contact-search" placeholder="Suchen…" autocomplete="off">
-    <div id="contact-list"></div>
     <div id="sidebar-head">
       <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
@@ -214,13 +217,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         </svg>
       </button>
     </div>
+    <input id="contact-search" placeholder="Suchen…" autocomplete="off">
+    <div id="contact-list"></div>
   </aside>
   <section id="chat-panel">
     <header id="chat-head">
       <button id="back-btn" type="button" aria-label="Zurück" title="Zurück">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
-      <span id="chat-peer">Wähle einen Kontakt</span>
+      <span id="chat-peer-av"></span>
+      <span id="chat-peer">Wähle einen Kontakt links im Panel …</span>
       <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
     </header>
     <div id="messages"></div>
@@ -776,6 +782,7 @@ function selectContact(c) {
   markRead(c.owner);            // opening the chat clears its unread count (local)
   publishRead(c.owner);         // tell the sender I read their messages → their ticks turn blue
   unreadByPeer[c.owner] = 0;
+  document.getElementById('chat-peer-av').textContent = contactAvatar(c.name);
   document.getElementById('chat-peer').textContent = c.name;
   document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
   msgInput.disabled = false;
