@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#070d18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
 // Load the debug window only when ?debug=1 is set — otherwise it never appears (also not after /clear)
 if (new URLSearchParams(location.search).get('debug') === '1') {
@@ -49,6 +49,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 .contact:hover{background:#212f4d}
 .contact.active{background:#2a3a5e}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
+.contact .av.emo,#chat-peer-av.emo{font-size:22px}
 .contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
@@ -57,15 +58,21 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 /* Green unread indicator — shows the number of new messages from this contact */
 .contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#25d366;color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 /* Chat panel */
-#chat-panel{flex:1;display:flex;flex-direction:column;min-width:0}
+#chat-panel{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+/* Subtle centered brand watermark — visible only while no chat is open */
+#chat-watermark{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;opacity:.06;z-index:1}
+#chat-watermark.hidden{display:none}
+#chat-watermark img{width:118px;height:118px;border-radius:24px}
+#chat-watermark .wm-title{font-family:'Orbitron',sans-serif;font-size:44px;letter-spacing:7px;color:#00d2ff;line-height:1}
+#chat-watermark .wm-sub{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#00d2ff}
 /* Chat header: same strip design + height as the sidebar profile header on the left */
 #chat-head{display:flex;gap:8px;padding:10px 12px;min-height:58px;background:#08101c;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
 #chat-peer-av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px;color:#e9edef}
 #chat-peer-av:empty{display:none}
 #chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:400;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
-#lock-btn{flex:0 0 auto;width:36px;height:36px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:#14203a;color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-#lock-btn:hover{border-color:#00d2ff;background:#14203a}
+#lock-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid rgba(0,210,255,.12);border-radius:50%;background:transparent;color:rgba(0,210,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#lock-btn:hover{border-color:rgba(0,210,255,.4);color:#00d2ff;background:transparent}
 #lock-btn:focus,#name-emoji:focus,#back-btn:focus{outline:none}
 /* Mobile / narrow: one column — sidebar by default, chat slides in when a contact is picked */
 @media (max-width:700px){
@@ -148,7 +155,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #auth-strength-bar.s-strong{width:100%;background:rgb(121,158,49)}
 .pwd-wrap{position:relative;width:100%;max-width:400px;display:flex}
 .pwd-wrap input{padding-right:44px!important}
-.enc-badge{font-size:10px;color:#1565c0;background:rgba(21,101,192,.12);padding:2px 6px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
+.enc-badge{position:relative;font-size:12px;color:rgba(0,210,255,.55);background:rgba(0,210,255,.07);padding:3px 7px;border-radius:4px;margin-left:4px;user-select:none;cursor:help;outline:none}
 .e2e-tip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:240px;background:rgb(14,36,78);color:#cfe4f7;border:1px solid rgba(0,210,255,.3);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45;font-weight:400;text-align:left;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.45)}
 .enc-badge:hover .e2e-tip,.enc-badge:focus .e2e-tip{display:block}
 /* (own emoji avatar styled in the sidebar-head rule above) */
@@ -212,8 +219,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
       <button id="lock-btn" type="button" aria-label="App sperren" title="Sperren (Konto-Passwort nötig)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8 7 17 7 17 16"></polyline>
         </svg>
       </button>
     </div>
@@ -229,6 +236,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <span id="chat-peer">Wähle einen Kontakt links im Panel …</span>
       <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
     </header>
+    <div id="chat-watermark">
+      <div class="wm-title">VGP</div>
+      <img src="icons/icon-512.png" alt="">
+      <div class="wm-sub">very good privacy</div>
+    </div>
     <div id="messages"></div>
     <div id="input-row">
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
@@ -398,8 +410,15 @@ async function pickEmoji(e) {
   myEmoji = e;
   localStorage.setItem(EMOJI_KEY, e);
   nameEmojiBtn.textContent = e;
+  publishEmoji(e); // share it so it appears in everyone's contact list
   dbg('Avatar-Emoji gewählt: ' + e);
   if (!msgInput.disabled) msgInput.focus();
+}
+// Publish my chosen avatar emoji to my identity row (others read it for their contact list).
+async function publishEmoji(em) {
+  if (!client || !myUid) return;
+  const { error } = await client.from('identities').update({ emoji: em }).eq('owner', myUid);
+  if (error) dbg('Emoji-Update fehlgeschlagen (Spalte/Policy vorhanden?): ' + error.message);
 }
 // Header avatar button: changes the personal emoji → must first reserve the entered name
 nameEmojiBtn.onclick = () => {
@@ -446,7 +465,7 @@ async function claimName(name) {
     return false;
   }
   // Store signing key + ECDH key + clear-text name (name & ecdh_pubkey power 1:1 chats / contact list)
-  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name };
+  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name, emoji: myEmoji || null };
   let { error: insErr } = await client.from('identities').insert(row);
   if (insErr && /ecdh_pubkey|name|column|schema|cache/i.test(insErr.message)) {
     // Columns not added yet (E1-SQL pending) → fall back to the minimal row
@@ -746,7 +765,12 @@ const searchVal = () => document.getElementById('contact-search').value;
 setInterval(() => { if (chatReady) renderContacts(searchVal()); }, 60000);
 
 async function loadContacts() {
-  const { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner');
+  let { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner,emoji');
+  if (error && /emoji|column|schema|cache/i.test(error.message)) {
+    // emoji column not added yet (SQL pending) → load without it (avatars fall back to the letter)
+    dbg('emoji-Spalte fehlt — lade Kontakte ohne Emoji (bitte SQL ausführen)');
+    ({ data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner'));
+  }
   if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
   const me = (myNameEl.value || '').toLowerCase();
   allContacts = (data || []).filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
@@ -768,7 +792,8 @@ function renderContacts(filter) {
     div.className = 'contact' + (activePeer && activePeer.name === c.name ? ' active' : '');
     const n = unreadByPeer[c.owner] || 0;
     const t = lastTimeByPeer[c.owner] ? fmtContactTime(lastTimeByPeer[c.owner]) : '';
-    div.innerHTML = `<span class="av">${escapeHtml(contactAvatar(c.name))}</span><span class="nm">${escapeHtml(c.name)}</span>` +
+    const av = c.emoji ? `<span class="av emo">${escapeHtml(c.emoji)}</span>` : `<span class="av">${escapeHtml(contactAvatar(c.name))}</span>`;
+    div.innerHTML = av + `<span class="nm">${escapeHtml(c.name)}</span>` +
                     `<div class="c-meta">` +
                       (t ? `<span class="c-time${n ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
                       (n ? `<span class="c-badge">${n > 99 ? '99+' : n}</span>` : '') +
@@ -782,7 +807,10 @@ function selectContact(c) {
   markRead(c.owner);            // opening the chat clears its unread count (local)
   publishRead(c.owner);         // tell the sender I read their messages → their ticks turn blue
   unreadByPeer[c.owner] = 0;
-  document.getElementById('chat-peer-av').textContent = contactAvatar(c.name);
+  document.getElementById('chat-watermark').classList.add('hidden'); // hide brand watermark once chatting
+  const peerAv = document.getElementById('chat-peer-av');
+  peerAv.textContent = c.emoji || contactAvatar(c.name);
+  peerAv.classList.toggle('emo', !!c.emoji);
   document.getElementById('chat-peer').textContent = c.name;
   document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
   msgInput.disabled = false;
