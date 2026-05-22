@@ -1540,6 +1540,7 @@ function toggleSidebar() {
         let activePointerId = null;
         let lastRaw = null; // last raw stylus point (bezier control)
         let lastMid = null; // last drawn midpoint (bezier start for next segment)
+        let lastPressure = 1.0; // smoothed pressure from previous sample
 
         function isAllowedPointer(e) {
             if (e.pointerType === 'pen' || e.pointerType === 'mouse') return true;
@@ -1592,7 +1593,7 @@ function toggleSidebar() {
             activePointerId = e.pointerId;
             isDrawing = true;
             const p = getPos(e);
-            lastRaw = p; lastMid = p;
+            lastRaw = p; lastMid = p; lastPressure = 1.0;
             curStroke = { points: [p], width: drawCtx.lineWidth };
             drawCtx.beginPath();
             drawCtx.moveTo(p.x, p.y);
@@ -1606,9 +1607,15 @@ function toggleSidebar() {
             // Use coalesced events to recover all high-frequency stylus samples the
             // browser batched into this one pointermove (active pens report 240 Hz+).
             const all = e.getCoalescedEvents ? [...e.getCoalescedEvents(), e] : [e];
+            const maxW = drawCtx.lineWidth;
+            const minW = Math.max(1, maxW * 0.2);
             for (const ev of all) {
                 const p = getPos(ev);
                 if (curStroke) curStroke.points.push(p);
+                // Smooth pressure: 0 means unsupported (treat as full), else lerp to avoid jumps.
+                const raw = ev.pressure > 0 ? ev.pressure : 1.0;
+                lastPressure = lastPressure * 0.4 + raw * 0.6;
+                drawCtx.lineWidth = minW + lastPressure * (maxW - minW);
                 // Midpoint bezier: draw from lastMid → lastRaw (control) → mid (end).
                 // Each segment starts exactly where the previous ended → G1-continuous.
                 const mid = { x: (lastRaw.x + p.x) / 2, y: (lastRaw.y + p.y) / 2 };
@@ -1619,6 +1626,7 @@ function toggleSidebar() {
                 lastMid = mid;
                 lastRaw = p;
             }
+            drawCtx.lineWidth = maxW; // restore for non-drawing ops
             e.preventDefault();
         }, { passive: false });
 
