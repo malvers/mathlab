@@ -1651,7 +1651,11 @@ function toggleSidebar() {
                     drawCtx.lineTo(lastRaw.x, lastRaw.y);
                     drawCtx.stroke();
                 }
-                lastRaw = null; lastMid = null;
+                lastRaw = null; lastMid = null; lastPressure = 1.0;
+                const pBar = document.getElementById('pressure-bar');
+                const pVal = document.getElementById('pressure-val');
+                if (pBar) pBar.style.width = '0%';
+                if (pVal) pVal.textContent = '—';
                 isDrawing = false;
                 if (curStroke && curStroke.points.length >= 1) {
                     const idx = strokes.length;
