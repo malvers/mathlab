@@ -134,6 +134,13 @@ function toggleSidebar() {
                 <span id="stroke-val">8</span>
             </div>
             <div class="eps-row">
+                <label>Druck</label>
+                <div style="flex:1;height:8px;border-radius:4px;background:rgba(0,210,255,.12);border:1px solid rgba(0,210,255,.2);overflow:hidden">
+                    <div id="pressure-bar" style="height:100%;width:0%;background:#00d2ff;border-radius:4px;transition:width 60ms linear"></div>
+                </div>
+                <span id="pressure-val" style="min-width:32px;text-align:right">—</span>
+            </div>
+            <div class="eps-row">
                 <label>Scale</label>
                 <input type="range" id="canvas-scale-slider" min="10" max="100" value="50" step="5"
                     oninput="onCanvasScaleChange(this.value)">
@@ -1627,6 +1634,10 @@ function toggleSidebar() {
                 lastRaw = p;
             }
             drawCtx.lineWidth = maxW; // restore for non-drawing ops
+            const pBar = document.getElementById('pressure-bar');
+            const pVal = document.getElementById('pressure-val');
+            if (pBar) pBar.style.width = (lastPressure * 100).toFixed(1) + '%';
+            if (pVal) pVal.textContent = lastPressure.toFixed(2);
             e.preventDefault();
         }, { passive: false });
 

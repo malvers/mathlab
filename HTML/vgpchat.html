@@ -33,6 +33,9 @@ input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:
 body{font-family:'Raleway',system-ui,sans-serif;background:#020410;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
 #app{position:relative;width:100%;max-width:480px;height:100dvh;max-height:800px;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:#020410}
 header{display:flex;gap:8px;padding:12px;background:rgb(3,10,16);align-items:center}
+#lock-btn{flex:0 0 auto;width:40px;height:40px;border:1px solid rgba(0,210,255,.25);border-radius:50%;background:rgb(10,24,52);color:#00d2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#lock-btn:hover{border-color:#00d2ff;background:rgb(14,32,64)}
+#lock-btn:focus{outline:none}
 .name-wrap{flex:1;position:relative;display:flex}
 header input{flex:1;padding:10px 50px 10px 44px;border:1px solid rgba(0,210,255,.25);border-radius:20px;background:rgb(10,24,52);color:#e0e8f0;font-size:14px}
 .name-wrap .enc-badge{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
@@ -85,6 +88,25 @@ header input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #config-panel input{width:100%;max-width:400px;padding:10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:rgba(2,4,16,.6);color:#e0e8f0;font-size:14px}
 #config-panel input:focus{outline:none;border-color:#00d2ff}
 #config-panel button{padding:12px 32px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;cursor:pointer;font-size:15px}
+/* Auth screen (sign up / login, account-password app lock) */
+#auth-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:120;gap:14px;padding:32px}
+#auth-panel.hidden{display:none}
+#auth-panel h2{font-family:'Orbitron',sans-serif;color:#00d2ff;font-size:34px;letter-spacing:4px;font-weight:700;margin-bottom:2px}
+#auth-tabs{display:flex;gap:0;width:100%;max-width:400px;border:1px solid rgba(0,210,255,.25);border-radius:10px;overflow:hidden}
+.auth-tab{flex:1;padding:11px;border:none;background:transparent;color:rgba(0,210,255,.6);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.auth-tab.active{background:#00d2ff;color:#020410}
+#auth-hint{color:rgba(0,210,255,.55);font-size:13px;text-align:center;max-width:360px;line-height:1.5}
+#auth-panel input{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(0,210,255,.3);border-radius:8px;background:rgb(14,32,64);color:#e0e8f0;font-size:14px}
+#auth-panel input:focus{outline:none;border-color:#00d2ff}
+#auth-panel .pwd-wrap{max-width:400px}
+#auth-err{color:#ff6b6b;font-size:13px;text-align:center;max-width:360px;margin:0}
+#auth-err.hidden{display:none}
+#auth-go{width:100%;max-width:400px;padding:13px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;font-size:15px;cursor:pointer}
+#auth-forgot{background:none;border:none;color:rgba(0,210,255,.45);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit}
+#auth-panel .pwd-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;border-radius:0;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center}
+#auth-panel .pwd-eye:hover{color:#00d2ff}
+#auth-panel .pwd-eye:focus{outline:none}
+#auth-panel .pwd-wrap input{padding-right:44px!important}
 #key-panel{position:fixed;inset:0;background:rgb(2,4,16);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;padding:32px}
 #key-panel.hidden{display:none}
 #key-panel h2{color:#00d2ff;font-size:20px;margin-bottom:4px;font-weight:400}
@@ -202,6 +224,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off">
       <span class="enc-badge" id="e2e-badge" tabindex="0">E2E<span class="e2e-tip">Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.</span></span>
     </div>
+    <button id="lock-btn" type="button" aria-label="App sperren" title="Sperren (Konto-Passwort nötig)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </button>
   </header>
   <div id="messages"></div>
   <div id="input-row">
@@ -261,14 +288,33 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </div>
 </div>
 
+<div id="auth-panel" class="hidden">
+  <h2 id="auth-title">VGP</h2>
+  <div id="auth-tabs">
+    <button type="button" id="tab-login" class="auth-tab active">Anmelden</button>
+    <button type="button" id="tab-signup" class="auth-tab">Neu hier</button>
+  </div>
+  <p id="auth-hint">Mit deinem Konto-Passwort entsperren.</p>
+  <input id="auth-name" placeholder="Name" maxlength="30" autocomplete="off">
+  <div class="pwd-wrap">
+    <input id="auth-pwd" type="password" placeholder="Konto-Passwort" autocomplete="off" readonly>
+    <button type="button" class="pwd-eye" id="auth-pwd-eye" aria-label="anzeigen">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </button>
+  </div>
+  <input id="auth-room" type="password" placeholder="Raum-Passwort (gemeinsam)" autocomplete="off" readonly>
+  <p id="auth-err" class="auth-err hidden"></p>
+  <button id="auth-go">Anmelden</button>
+  <button type="button" id="auth-forgot">Konto zurücksetzen</button>
+</div>
+
 <div id="help-panel" class="hidden">
   <h2>Befehle</h2>
   <div id="help-list">
     <div class="cmd"><code>/help</code><span>Diese Befehlsübersicht anzeigen</span></div>
     <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
     <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
-    <div class="cmd"><code>/key</code><span>Passwort (Verschlüsselung) ändern</span></div>
-    <div class="cmd"><code>/clear</code><span>Passwort/Config löschen (Name bleibt), neu laden</span></div>
+    <div class="cmd"><code>/logout</code><span>App sperren — Entsperren mit Konto-Passwort</span></div>
   </div>
   <button id="help-close">SCHLIESSEN</button>
 </div>
@@ -320,6 +366,7 @@ const SUPABASE_KEY_KEY = 'eocr-supabase-key';
 const NAME_KEY = 'eocr-chat-name';
 const CHAT_KEY = 'eocr-chat-key';
 const EMOJI_KEY = 'eocr-chat-emoji';
+const VAULT_KEY = 'vgp-vault'; // local account vault (encrypted private key + room password)
 const LAST_RESET_KEY = 'eocr-last-reset-seen'; // the reset_at marker this device has already applied
 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
@@ -495,7 +542,6 @@ async function nameId(name) {
 async function claimName(name) {
   if (!hmacKey) { alert('Erst Passwort eingeben!'); return false; }
   await ensureClient();
-  if (!myPubB64) await loadSigningKeys();
   const id = await nameId(name);
   // A name is bound to a public key. Ours if the stored pubkey matches this device's key.
   const { data, error } = await client.from('identities').select('pubkey').eq('name_id', id).limit(1);
@@ -506,14 +552,21 @@ async function claimName(name) {
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
   }
-  const { error: insErr } = await client.from('identities').insert({ name_id: id, pubkey: myPubB64 });
+  // Store signing key + ECDH key + clear-text name (name & ecdh_pubkey power 1:1 chats / contact list)
+  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name };
+  let { error: insErr } = await client.from('identities').insert(row);
+  if (insErr && /ecdh_pubkey|name|column|schema|cache/i.test(insErr.message)) {
+    // Columns not added yet (E1-SQL pending) → fall back to the minimal row
+    dbg('identities-Spalten fehlen — Claim ohne ECDH/Name (bitte E1-SQL ausführen): ' + insErr.message);
+    ({ error: insErr } = await client.from('identities').insert({ name_id: id, pubkey: myPubB64 }));
+  }
   if (insErr) {
     dbg('Claim fehlgeschlagen: ' + insErr.message);
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
   }
   if (idCache) idCache.set(id, myPubB64);
-  dbg('Name beansprucht (Schlüssel gebunden): ' + name);
+  dbg('Name beansprucht (Schlüssel + ECDH gebunden): ' + name);
   claimedName = name;
   return true;
 }
@@ -618,15 +671,89 @@ myNameEl.onkeydown = async ev => {
   openEmojiPanel();
 };
 
-const savedKey = localStorage.getItem(CHAT_KEY);
-if (savedKey) {
-  initCrypto(savedKey).then(() => {
-    dbg('Init mit Supabase-Keys');
-    initChat(SUPABASE_URL, SUPABASE_KEY);
-  });
-} else {
-  keyPanel.classList.remove('hidden');
+// --- Auth screen: sign up (Name + Konto-Passwort + Raum-Passwort) / login (Konto-Passwort) ---
+const authPanel = document.getElementById('auth-panel');
+const authNameEl = document.getElementById('auth-name');
+const authPwdEl = document.getElementById('auth-pwd');
+const authRoomEl = document.getElementById('auth-room');
+const authErr = document.getElementById('auth-err');
+const authGo = document.getElementById('auth-go');
+const authHint = document.getElementById('auth-hint');
+let authMode = 'login';
+
+function showAuthErr(msg) { authErr.textContent = msg; authErr.classList.remove('hidden'); authGo.disabled = false; }
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  const signup = mode === 'signup';
+  authNameEl.style.display = signup ? '' : 'none';
+  authRoomEl.style.display = signup ? '' : 'none';
+  authErr.classList.add('hidden');
+  authPwdEl.value = '';
+  if (signup) {
+    authHint.textContent = 'Wähle Name + Konto-Passwort und gib das gemeinsame Raum-Passwort ein.';
+    authGo.textContent = 'Konto erstellen';
+    authNameEl.value = '';
+  } else {
+    const n = vaultName();
+    authHint.textContent = n ? `Willkommen zurück, ${n} — mit Konto-Passwort entsperren.` : 'Mit Konto-Passwort entsperren.';
+    authGo.textContent = 'Anmelden';
+  }
 }
+document.getElementById('tab-login').onclick = () => setAuthMode('login');
+document.getElementById('tab-signup').onclick = () => setAuthMode('signup');
+
+async function authSubmit() {
+  authErr.classList.add('hidden');
+  authGo.disabled = true;
+  try {
+    if (authMode === 'signup') {
+      const name = authNameEl.value.trim().toLowerCase();
+      const pwd = authPwdEl.value, room = authRoomEl.value;
+      if (!name || !pwd || !room) return showAuthErr('Bitte alle Felder ausfüllen.');
+      const vault = await createVault(name, pwd, room);
+      await activateVault(vault);
+      authPanel.classList.add('hidden');
+      await initChat(SUPABASE_URL, SUPABASE_KEY);
+      const ok = await claimName(name); // bind name ↔ key
+      if (!ok) {
+        // Name already taken by someone else → roll back the just-created account, back to sign up
+        localStorage.removeItem(VAULT_KEY);
+        location.reload();
+        return;
+      }
+      localStorage.setItem(NAME_KEY, name);
+    } else {
+      const pwd = authPwdEl.value;
+      if (!pwd) return showAuthErr('Konto-Passwort eingeben.');
+      const vault = await openVault(pwd);
+      if (vault === 'WRONG' || !vault) return showAuthErr('Falsches Konto-Passwort.');
+      await activateVault(vault);
+      authPanel.classList.add('hidden');
+      await initChat(SUPABASE_URL, SUPABASE_KEY);
+    }
+  } catch (e) {
+    showAuthErr('Fehler: ' + e.message);
+  } finally {
+    authGo.disabled = false;
+  }
+}
+authGo.onclick = authSubmit;
+[authNameEl, authPwdEl, authRoomEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
+document.getElementById('auth-pwd-eye').onclick = () => { authPwdEl.type = authPwdEl.type === 'password' ? 'text' : 'password'; authPwdEl.focus(); };
+document.getElementById('auth-forgot').onclick = () => {
+  if (confirm('Konto auf diesem Gerät zurücksetzen? Deine Identität (Schlüssel) geht verloren — du musst dich neu anmelden und ggf. einen neuen Namen wählen.')) {
+    localStorage.removeItem(VAULT_KEY);
+    location.reload();
+  }
+};
+// Lock button: lock the app → reload shows the login screen (account password needed)
+document.getElementById('lock-btn').onclick = () => location.reload();
+
+// Start: vault present → unlock (login); otherwise create account (sign up)
+setAuthMode(vaultExists() ? 'login' : 'signup');
+authPanel.classList.remove('hidden');
 
 async function submitKey() {
   const keyInput = document.getElementById('chat-key');
@@ -851,37 +978,15 @@ async function decryptText(cipherB64, key = cryptoKey) {
 // --- Device signing identity (ECDSA P-256). Private key is non-extractable and lives only in
 // IndexedDB on this device (Signal-style). Each message is signed; receivers verify the signature
 // against the public key bound to the sender's name → cryptographic anti-impersonation. ---
-let myPrivKey = null;   // non-extractable CryptoKey (sign)
-let myPubB64 = null;    // our public key (spki, base64) — published with each message
-let idCache = null;     // Map name_id(hex) → pubkey(base64), loaded from the identities table
+let myPrivKey = null;     // non-extractable CryptoKey (ECDSA sign)
+let myPubB64 = null;      // our signing public key (spki, base64)
+let myEcdhPrivKey = null; // non-extractable CryptoKey (ECDH key agreement, for 1:1 E2E)
+let myEcdhPubB64 = null;  // our ECDH public key (spki, base64) — published in our profile
+let idCache = null;       // Map name_id(hex) → pubkey(base64), loaded from the identities table
 
-function idbReq(mode, fn) {
-  return new Promise((res, rej) => {
-    const open = indexedDB.open('vgp-keys', 1);
-    open.onupgradeneeded = () => open.result.createObjectStore('keys');
-    open.onerror = () => rej(open.error);
-    open.onsuccess = () => {
-      const tx = open.result.transaction('keys', mode);
-      const r = fn(tx.objectStore('keys'));
-      tx.oncomplete = () => res(r && r.result);
-      tx.onerror = () => rej(tx.error);
-    };
-  });
-}
 const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
-async function loadSigningKeys() {
-  const stored = await idbReq('readonly', st => st.get('signing'));
-  if (stored && stored.priv && stored.pub) { myPrivKey = stored.priv; myPubB64 = stored.pub; return; }
-  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
-  myPubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
-  // Re-import the private key as NON-extractable, then persist that (CryptoKey survives in IndexedDB)
-  const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
-  myPrivKey = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
-  await idbReq('readwrite', st => st.put({ priv: myPrivKey, pub: myPubB64 }, 'signing'));
-  dbg('Signatur-Schlüssel erzeugt (Geräte-Identität)');
-}
 async function signText(text) {
   const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, myPrivKey, new TextEncoder().encode(text));
   return b64(sig);
@@ -900,9 +1005,90 @@ async function loadIdentities() {
   for (const r of (data || [])) idCache.set(r.name_id, r.pubkey);
 }
 
+// --- Account-password vault (WhatsApp/Signal-style app lock) ---
+// The account password derives a wrapping key (PBKDF2) that encrypts a local blob holding the
+// private signing key + the room (E2E) password. Nothing is usable until the account password
+// is entered. The vault lives in localStorage; only the public key + name are stored in clear.
+// (VAULT_KEY is declared up top with the other storage keys so the auth start-up can use it.)
+function vaultExists() { return !!localStorage.getItem(VAULT_KEY); }
+function vaultName() { try { return JSON.parse(localStorage.getItem(VAULT_KEY)).name; } catch { return ''; } }
+
+async function deriveWrapKey(accountPwd, saltBytes) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(accountPwd), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: saltBytes, iterations: 210000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+// Access-code gate (closed community): only someone who knows the access code may sign up.
+// Plaintext is NEVER stored — only this PBKDF2 hash. To change it:
+//   printf '%s' 'NEW CODE' | python3 -c "import sys,hashlib;print(hashlib.pbkdf2_hmac('sha256',sys.stdin.buffer.read(),b'vgp-access-salt-v1',200000).hex())"
+// Verified client-side → a soft gate (chat contents are E2E anyway). Wired into sign-up in E3.
+const ACCESS_PWD_HASH = '05311f5444ac327adcfad903d87d792d0894decb9163ea886eb3b0b13b1b2007';
+async function checkAccessCode(code) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-access-salt-v1'), iterations: 200000, hash: 'SHA-256' }, km, 256);
+  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('') === ACCESS_PWD_HASH;
+}
+// Sign up: create signing keypair, lock {privJwk, roomPwd} under the account password.
+async function createVault(name, accountPwd, roomPwd) {
+  // Signing keypair (ECDSA, anti-impersonation) + key-agreement keypair (ECDH, 1:1 E2E)
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const pubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
+  const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+  const ek = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+  const ecdhPubB64 = b64(await crypto.subtle.exportKey('spki', ek.publicKey));
+  const ecdhPrivJwk = await crypto.subtle.exportKey('jwk', ek.privateKey);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const wrapKey = await deriveWrapKey(accountPwd, salt);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const blob = new TextEncoder().encode(JSON.stringify({ privJwk, roomPwd, ecdhPrivJwk }));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, blob));
+  const combined = new Uint8Array(iv.length + ct.length);
+  combined.set(iv); combined.set(ct, iv.length);
+  localStorage.setItem(VAULT_KEY, JSON.stringify({ name, pubkey: pubB64, ecdhPubkey: ecdhPubB64, salt: b64(salt), enc: b64(combined) }));
+  dbg('Vault angelegt für ' + name);
+  return { name, pubB64, privJwk, roomPwd, ecdhPubB64, ecdhPrivJwk };
+}
+// Login / unlock: account password → decrypt vault. Returns 'WRONG' on bad password, null if none.
+async function openVault(accountPwd) {
+  const raw = localStorage.getItem(VAULT_KEY);
+  if (!raw) return null;
+  const v = JSON.parse(raw);
+  const wrapKey = await deriveWrapKey(accountPwd, unb64(v.salt));
+  const combined = unb64(v.enc);
+  let blob;
+  try {
+    blob = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: combined.slice(0, 12) }, wrapKey, combined.slice(12));
+  } catch (_) { return 'WRONG'; }
+  const { privJwk, roomPwd, ecdhPrivJwk } = JSON.parse(new TextDecoder().decode(blob));
+  return { name: v.name, pubB64: v.pubkey, ecdhPubB64: v.ecdhPubkey, privJwk, roomPwd, ecdhPrivJwk };
+}
+// Activate an unlocked vault: import signing key + ECDH key + derive E2E keys from the room password.
+async function activateVault(vault) {
+  myPubB64 = vault.pubB64;
+  myEcdhPubB64 = vault.ecdhPubB64 || null;
+  myPrivKey = await crypto.subtle.importKey('jwk', vault.privJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  if (vault.ecdhPrivJwk) myEcdhPrivKey = await crypto.subtle.importKey('jwk', vault.ecdhPrivJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
+  await initCrypto(vault.roomPwd); // sets cryptoKey (AES) + hmacKey from the room password
+  myNameEl.value = vault.name;
+  dbg('Vault entsperrt — Identität aktiv: ' + vault.name);
+}
+// 1:1 E2E: derive a shared AES key from our ECDH private key + the peer's ECDH public key.
+// Both sides compute the SAME key (ECDH property) → no shared password needed. Cached per peer.
+const chatKeyCache = new Map();
+async function deriveChatKey(peerEcdhPubB64) {
+  if (!myEcdhPrivKey || !peerEcdhPubB64) return null;
+  if (chatKeyCache.has(peerEcdhPubB64)) return chatKeyCache.get(peerEcdhPubB64);
+  const peerPub = await crypto.subtle.importKey('spki', unb64(peerEcdhPubB64), { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const key = await crypto.subtle.deriveKey({ name: 'ECDH', public: peerPub }, myEcdhPrivKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  chatKeyCache.set(peerEcdhPubB64, key);
+  return key;
+}
+
 async function initChat(url, key) {
+  // Identity (signing key) + room password already came from the unlocked vault (activateVault).
   await ensureClient();
-  await loadSigningKeys();
   chatReady = true;
   dbg('Supabase-Client erstellt');
   // Before anything else: did someone run /reset since our last visit? If so, wipe & reload.
@@ -911,11 +1097,7 @@ async function initChat(url, key) {
   subscribeMessages();
   msgInput.disabled = false;
   dbg('Chat bereit — E2E aktiv');
-  if (!myNameEl.value.trim()) {
-    openNamesPanel();
-  } else {
-    msgInput.focus();
-  }
+  msgInput.focus();
 }
 
 // Bright shades — readable on the dark WhatsApp-style bubbles (sender names in group mode)
@@ -1026,10 +1208,9 @@ const CMD_LIST = [
   { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
   { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
   { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
-  { cmd: '/key',     desc: 'Passwort ändern',                   run: () => { const ki = document.getElementById('chat-key'); ki.value = ''; document.getElementById('key-cancel').style.display = 'inline-block'; keyPanel.classList.remove('hidden'); ki.focus(); } },
-  { cmd: '/clear',   desc: 'Passwort/Config löschen',           run: () => { localStorage.removeItem(CHAT_KEY); localStorage.removeItem(SUPABASE_URL_KEY); localStorage.removeItem(SUPABASE_KEY_KEY); dbg('Passwort/Config gelöscht (Name behalten)'); location.reload(); } }
-  // /delete und /reset entfernt: löschen unter RLS nur eigene Nachrichten → irreführend.
-  // Echter Admin-Wipe bräuchte service_role/Edge Function (späteres Thema).
+  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => location.reload() }
+  // /delete, /reset, /key entfernt. /logout sperrt nur (Vault bleibt; Entsperren mit Konto-Passwort).
+  // Konto ganz zurücksetzen geht über „Konto zurücksetzen" auf dem Login-Screen.
 ];
 const cmdBox = document.getElementById('cmd-box');
 let cmdMatches = [], cmdActive = -1;
@@ -1118,7 +1299,6 @@ async function sendMsg() {
   const encrypted = await encryptText(content);
   // Sign the (encrypted) payload with our private key → receivers verify it against the
   // public key bound to this name. Nobody without our key can forge a message as us.
-  if (!myPubB64) await loadSigningKeys();
   const sig = await signText(encrypted + '|' + encryptedSender);
   dbg(`Sende (verschlüsselt + signiert) als ${displaySender}`);
   let { error } = await client.from('messages').insert({ sender: encryptedSender, content: encrypted, pubkey: myPubB64, sig });
