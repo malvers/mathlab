@@ -161,11 +161,11 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #input-row{display:flex;gap:8px;padding:12px;background:#090d15;align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
-.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
+.msg-field-wrap input{flex:1;padding:10px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 .msg-field-wrap input::placeholder{color:rgba(0,210,255,.3)}
 .msg-field-wrap input:disabled{opacity:.45;cursor:not-allowed}
 .msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
-#msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
+#msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 #msg-emoji:focus{outline:none}
 /* Send button — visible only when message field has text */
 #send-btn{flex:0 0 auto;margin-left:auto;display:none;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
@@ -308,9 +308,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="messages"></div>
     <div id="input-row">
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
+      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
       <div class="msg-field-wrap">
         <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht" disabled autocomplete="new-password">
-        <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
       </div>
       <button id="send-btn" aria-label="Senden" title="Senden">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -502,15 +502,23 @@ const emojiPanel = document.getElementById('emoji-panel');
 const emojiPicker = emojiPanel.querySelector('emoji-picker');
 let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
 let myAvatar = localStorage.getItem(AVATAR_KEY) || ''; // small data-URL picture (overrides emoji)
-// --- Emoji rendering: Apple devices already show beautiful native emoji, so only swap on the rest
-// (Android/Windows) to JoyPixels images. iPadOS desktop-mode reports "Macintosh" → still treated as Apple.
-let USE_JOYPIXELS = !/Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent); // toggle with "j"
-if (window.joypixels) joypixels.emojiSize = '128'; // free tier = PNG; 128px stays sharp on retina/large avatars
-// Replace native unicode emoji in an ALREADY HTML-ESCAPED string with JoyPixels <img> (no-op on Apple).
+// --- Emoji rendering: Apple set everywhere. Apple devices already render native Apple emoji; on the
+// rest (Android/Windows) we swap to Apple emoji IMAGES. iPadOS desktop-mode reports "Macintosh" → Apple.
+const IS_APPLE = /Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent);
+const APPLE_IMG_BASE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/';
+const EMOJI_MODES = ['apple', 'joy', 'native'];   // cycle with "j"
+let emojiMode = 'apple';                           // default: Apple everywhere
+if (window.joypixels) joypixels.emojiSize = '64';  // size irrelevant after src rewrite; just keeps the parser happy
+// Render an ALREADY HTML-ESCAPED string per current mode: apple/joy → emoji <img>, native → unchanged.
 function emojiImg(escaped) {
-  if (!USE_JOYPIXELS || !window.joypixels) return escaped;            // Apple / library missing → native
-  const fn = joypixels.unicodeToImage || joypixels.toImage;          // unicode-only preferred; toImage fallback
-  try { return fn.call(joypixels, escaped); } catch (_) { return escaped; }
+  if (emojiMode === 'native' || !window.joypixels) return escaped;
+  if (emojiMode === 'apple' && IS_APPLE) return escaped;            // native already IS Apple → no images needed
+  let html;
+  const fn = joypixels.unicodeToImage || joypixels.toImage;        // parser finds emoji + builds <img class="joypixels">
+  try { html = fn.call(joypixels, escaped); } catch (_) { return escaped; }
+  // 'apple': repoint the parser's codepoint filenames at the Apple image set (same {codepoint}.png naming).
+  if (emojiMode === 'apple') html = html.replace(/src="[^"]*?\/([0-9a-f-]+)\.png"/g, `src="${APPLE_IMG_BASE}$1.png"`);
+  return html;                                                      // 'joy' keeps the JoyPixels CDN src
 }
 // Render my own avatar button: picture > emoji > default smiley
 function setOwnAvatarDisplay() {
@@ -1230,9 +1238,9 @@ document.addEventListener('keydown', e => {
   const t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.tagName === 'EMOJI-PICKER')) return;
   const k = e.key.toLowerCase();
-  if (k === 'j') {                          // toggle JoyPixels vs. native emoji
-    USE_JOYPIXELS = !USE_JOYPIXELS;
-    dbg('JoyPixels ' + (USE_JOYPIXELS ? 'AN' : 'AUS (nativ)'));
+  if (k === 'j') {                          // cycle emoji set: apple → joy → native
+    emojiMode = EMOJI_MODES[(EMOJI_MODES.indexOf(emojiMode) + 1) % EMOJI_MODES.length];
+    dbg('Emoji-Set: ' + emojiMode);
     rerenderEmoji();
   } else if (k === 'c') {                    // open the color picker as a child window (live control via window.opener)
     if (colorWin && !colorWin.closed) { colorWin.focus(); return; }
