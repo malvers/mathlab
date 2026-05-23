@@ -341,6 +341,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <div id="help-list">
     <div class="cmd"><code>/help</code><span>Diese Befehlsübersicht anzeigen</span></div>
     <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
+    <div class="cmd"><code>/rename</code><span>Namen ändern — Chats &amp; Identität bleiben erhalten</span></div>
     <div class="cmd"><code>/logout</code><span>App sperren — Entsperren mit Konto-Passwort</span></div>
     <div class="cmd"><code>/delete</code><span>Konto endgültig löschen (3× bestätigen)</span></div>
   </div>
@@ -1148,7 +1149,9 @@ async function restoreBackup(name, roomPwd, secret, viaRecovery) {
   try {
     const plain = await decryptText(row.enc, masterKey);
     if (plain === '[falscher Schlüssel]') return 'WRONG';
-    return JSON.parse(plain); // { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd }
+    const payload = JSON.parse(plain); // { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd }
+    payload.name = name; // use the typed name (survives a later rename; the embedded one may be stale)
+    return payload;
   } catch (_) { return 'WRONG'; }
 }
 // Login / unlock: account password → decrypt vault. Returns 'WRONG' on bad password, null if none.
@@ -1373,10 +1376,39 @@ async function deleteAccount() {
   location.reload();
 }
 
+// Rename: keep identity + chats (pubkey-routing), just move the name. Updates the directory entry
+// and moves the server backup to the new name_id (recovery code stays valid). Local name is in clear.
+async function renameAccount(newRaw) {
+  const newName = (newRaw || '').trim().toLowerCase();
+  if (!newName) return;
+  if (!myPubB64 || !hmacKey) { alert('Bitte zuerst anmelden.'); return; }
+  if (newName.length > 30) { alert('Name zu lang (max. 30 Zeichen).'); return; }
+  const oldName = (myNameEl.value || '').trim().toLowerCase();
+  if (newName === oldName) return;
+  const oldId = await nameId(oldName), newId = await nameId(newName);
+  // Is the new name free (owned by nobody else)?
+  const { data: ex, error: exErr } = await client.from('identities').select('pubkey').eq('name_id', newId).limit(1);
+  if (exErr) { alert('Prüfung fehlgeschlagen: ' + exErr.message); return; }
+  if (ex && ex.length && ex[0].pubkey !== myPubB64) { alert('Der Name „' + newName + '" ist bereits vergeben.'); return; }
+  // Move the server backup to the new key (enc/wraps untouched → recovery code stays valid)
+  const { error: vErr } = await client.from('vaults').update({ name_id: newId }).eq('name_id', oldId);
+  if (vErr) { alert('Umbenennen fehlgeschlagen (Backup): ' + vErr.message); return; }
+  // Update the directory entry: new name_id + new encrypted display name
+  const { error: iErr } = await client.from('identities').update({ name_id: newId, name: await encDir(newName) }).eq('pubkey', myPubB64);
+  if (iErr) { alert('Umbenennen fehlgeschlagen: ' + iErr.message); return; }
+  // Local vault keeps the name in clear in its wrapper → update it directly (no re-encryption needed)
+  try { const v = JSON.parse(localStorage.getItem(VAULT_KEY)); if (v) { v.name = newName; localStorage.setItem(VAULT_KEY, JSON.stringify(v)); } } catch (_) {}
+  localStorage.setItem(NAME_KEY, newName);
+  myNameEl.value = newName;
+  dbg('Umbenannt: ' + oldName + ' → ' + newName);
+  loadContacts();
+}
+
 // --- Slash-command registry — single source of truth for autocomplete + execution ---
 const CMD_LIST = [
   { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
   { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
+  { cmd: '/rename',  desc: 'Namen ändern (Chats bleiben)',       run: () => { const n = prompt('Neuer Name (Chats & Identität bleiben erhalten):', myNameEl.value || ''); if (n) renameAccount(n); } },
   { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); } },
   { cmd: '/delete',  desc: 'Konto endgültig löschen (3× bestätigen)', run: () => deleteAccount() }
 ];
