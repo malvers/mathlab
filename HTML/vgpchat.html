@@ -49,6 +49,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #head-menu button.danger{color:rgb(176,36,24)}
 #head-menu button.danger:hover{background:rgba(176,36,24,.15)}
 #head-menu .menu-sep{height:1px;background:rgba(0,210,255,.18);margin:5px 6px}
+#head-menu .menu-group.active{color:#00d2ff;font-weight:700}
+#head-menu #menu-newgroup{color:#00d2ff}
 /* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
 /* Own-profile strip at the TOP of the sidebar — same look as before (full-width dark strip) */
 #sidebar-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
@@ -283,6 +285,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       </button>
     </div>
     <div id="head-menu" class="hidden" role="menu">
+      <div id="menu-groups"></div>
+      <button type="button" id="menu-newgroup" role="menuitem">➕ Neue Gruppe</button>
+      <div class="menu-sep"></div>
       <button type="button" id="menu-e2e" role="menuitem">🔒 Ende-zu-Ende verschlüsselt</button>
       <div class="menu-sep"></div>
       <button type="button" id="menu-delete" class="danger" role="menuitem">Konto endgültig löschen</button>
@@ -441,12 +446,15 @@ let dirKey = null;  // directory key (AES) from the group password — encrypts 
 let myGroupId = null; // public bucket id (hash of the group password) → scopes the contact list to my group
 let myGroups = [];        // all group passwords this account has joined
 let activeGroupPwd = null; // the group password currently active (drives hmacKey/dirKey/group_id)
-// Normalize a vault payload to the multi-group shape {groups:[…], activeGroup}, migrating legacy {roomPwd}.
+// Normalize a vault payload to the multi-group shape: groups = [{pwd, label}], activeGroup = pwd.
+// Migrates legacy {roomPwd} and an older groups-as-strings array.
 function normGroups(p, activePwd) {
-  if (!Array.isArray(p.groups) || !p.groups.length) p.groups = p.roomPwd ? [p.roomPwd] : [];
-  const active = activePwd || p.activeGroup || p.groups[0];
-  if (active && !p.groups.includes(active)) p.groups.push(active);
-  p.activeGroup = active;
+  let g = Array.isArray(p.groups) ? p.groups : [];
+  if (!g.length && p.roomPwd) g = [p.roomPwd];
+  g = g.map((x, i) => (typeof x === 'string' ? { pwd: x, label: 'Gruppe ' + (i + 1) } : x));
+  const active = activePwd || p.activeGroup || (g[0] && g[0].pwd);
+  if (active && !g.some(x => x.pwd === active)) g.push({ pwd: active, label: 'Gruppe ' + (g.length + 1) });
+  p.groups = g; p.activeGroup = active;
   delete p.roomPwd;
   return p;
 }
@@ -757,7 +765,7 @@ function setAuthMode(mode) {
   const signup = mode === 'signup';
   const restore = mode === 'login' && !vaultExists(); // login on a device with no local vault → restore from server
   authNameEl.style.display = '';
-  authRoomEl.style.display = (signup || restore) ? '' : 'none';
+  authRoomEl.closest('.pwd-wrap').style.display = (signup || restore) ? '' : 'none'; // hide the whole wrap (incl. its eye)
   authErr.classList.add('hidden');
   authPwdEl.value = '';
   // Strength meter only while signing up; "Konto zurücksetzen" only when there's a vault to reset.
@@ -813,7 +821,7 @@ async function authSubmit() {
       }
       localStorage.setItem(NAME_KEY, name);
       // Multi-device: stash an encrypted backup on the server + show the one-time recovery code
-      const recovery = await createBackup(await nameId(name), pwd, room, vault);
+      const recovery = await createBackup(pwd, vault);
       if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
       signingUp = false; // identity is now claimed → alive-check may run normally
     } else if (!vaultExists()) {
@@ -884,9 +892,77 @@ document.getElementById('auth-forgot').onclick = async () => {
 document.getElementById('lock-btn').onclick = () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); };
 // Profile overflow menu (⋮) — account actions (delete account for now; grows later)
 const headMenu = document.getElementById('head-menu');
-document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); headMenu.classList.toggle('hidden'); };
+document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); renderGroupMenu(); headMenu.classList.toggle('hidden'); };
 document.getElementById('menu-e2e').onclick = () => { headMenu.classList.add('hidden'); uiConfirm('Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.', { alert: true, okText: 'Alles klar' }); };
 document.getElementById('menu-delete').onclick = () => { headMenu.classList.add('hidden'); deleteAccount(); };
+document.getElementById('menu-newgroup').onclick = () => {
+  headMenu.classList.add('hidden');
+  const pwd = prompt('Gruppen-Passwort der Gruppe, der du beitreten/die du anlegen willst (min. 6 Zeichen):');
+  if (!pwd) return;
+  const label = prompt('Name dieser Gruppe (nur für dich sichtbar):', 'Neue Gruppe');
+  joinGroup(pwd, label || 'Gruppe');
+};
+// Render the group list inside the ⋮ menu (active group marked); each entry switches groups.
+function renderGroupMenu() {
+  const box = document.getElementById('menu-groups');
+  box.innerHTML = '';
+  for (const g of myGroups) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'menu-group' + (g.pwd === activeGroupPwd ? ' active' : '');
+    b.textContent = (g.pwd === activeGroupPwd ? '✓ ' : '👥 ') + g.label;
+    b.onclick = () => { headMenu.classList.add('hidden'); switchGroup(g.pwd); };
+    box.appendChild(b);
+  }
+}
+// Reset the chat pane (used when switching/joining groups → different contact set)
+function resetChatView() {
+  activePeer = null;
+  document.getElementById('chat-peer').textContent = '';
+  const av = document.getElementById('chat-peer-av'); av.textContent = ''; av.style.backgroundImage = ''; av.className = '';
+  document.getElementById('chat-watermark').classList.remove('hidden');
+  messagesEl.innerHTML = '';
+  msgInput.disabled = true;
+}
+// Switch the active group: re-derive group keys, persist, reload that group's contacts.
+async function switchGroup(pwd) {
+  if (pwd === activeGroupPwd || !myGroups.some(g => g.pwd === pwd)) return;
+  activeGroupPwd = pwd;
+  await initCrypto(pwd); // re-derive hmacKey/dirKey/group_id for the new active group
+  const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
+  if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { v.activeGroup = pwd; await writeLocalVault(v.name, accountPwd, v); } }
+  resetChatView();
+  await loadContacts();
+  dbg('Gruppe gewechselt');
+}
+// Join/create a group: add it to the vault, register the identity in it, refresh the server backup.
+async function joinGroup(groupPwd, label) {
+  groupPwd = (groupPwd || '').trim();
+  if (groupPwd.length < 6) { alert('Gruppen-Passwort: mindestens 6 Zeichen.'); return; }
+  if (myGroups.some(g => g.pwd === groupPwd)) { await switchGroup(groupPwd); return; }
+  const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
+  if (!accountPwd) { alert('Bitte einmal ab- und wieder anmelden, dann „Neue Gruppe".'); return; }
+  const v = await openVault(accountPwd);
+  if (!v || v === 'WRONG') { alert('Konto-Passwort nicht verfügbar.'); return; }
+  const prevGroups = v.groups.slice(), prevActive = v.activeGroup;
+  v.groups = [...v.groups, { pwd: groupPwd, label: (label || 'Gruppe').trim() }];
+  v.activeGroup = groupPwd;
+  await writeLocalVault(v.name, accountPwd, v);
+  await activateVault(v);
+  const ok = await claimName(v.name); // register identity in the new group's namespace
+  if (!ok) { // name taken in that group → roll back cleanly
+    v.groups = prevGroups; v.activeGroup = prevActive;
+    await writeLocalVault(v.name, accountPwd, v);
+    await activateVault(v);
+    await loadContacts();
+    return;
+  }
+  const recovery = await createBackup(accountPwd, v); // refresh backup (now incl. the new group)
+  if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
+  resetChatView();
+  await loadContacts();
+  dbg('Gruppe beigetreten: ' + (label || ''));
+}
 document.addEventListener('click', e => { if (!headMenu.contains(e.target)) headMenu.classList.add('hidden'); });
 // Back button (mobile): return from the open chat to the contact list
 document.getElementById('back-btn').onclick = () => document.getElementById('app').classList.remove('chat-open');
@@ -1120,8 +1196,8 @@ document.addEventListener('keydown', e => {
     rerenderEmoji();
   } else if (k === 'c') {                    // open the color picker as a child window (live control via window.opener)
     if (colorWin && !colorWin.closed) { colorWin.focus(); return; }
-    let feat = 'width=380,height=760';     // restore last position & size if the picker saved any
-    try { const b = JSON.parse(localStorage.getItem('cp-bounds')); if (b && b.w && b.h) feat = `width=${b.w},height=${b.h},left=${b.x},top=${b.y}`; } catch (_) {}
+    let feat = 'width=1060,height=380';    // wide one-row default; restore last position & size if saved
+    try { const b = JSON.parse(localStorage.getItem('cp-bounds-v3')); if (b && b.w && b.h) feat = `width=${b.w},height=${b.h},left=${b.x},top=${b.y}`; } catch (_) {}
     colorWin = window.open('colorpicker.html?t=' + Date.now(), 'cp', feat); // cache-buster → always load the latest picker
     dbg(colorWin ? 'Colorpicker geöffnet (Taste c)' : 'Colorpicker: Popup blockiert?');
   }
@@ -1163,7 +1239,7 @@ async function createVault(name, accountPwd, groupPwd) {
   const ek = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
   const ecdhPubB64 = b64(await crypto.subtle.exportKey('spki', ek.publicKey));
   const ecdhPrivJwk = await crypto.subtle.exportKey('jwk', ek.privateKey);
-  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, groups: [groupPwd], activeGroup: groupPwd };
+  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, groups: [{ pwd: groupPwd, label: 'Gruppe 1' }], activeGroup: groupPwd };
   await writeLocalVault(name, accountPwd, payload);
   dbg('Vault angelegt für ' + name);
   return payload;
@@ -1199,32 +1275,37 @@ function genRecoveryCode() {
   let s = ''; for (const b of bytes) s += A[b & 31];
   return s.match(/.{1,4}/g).join('-');
 }
-// Create/refresh the server backup for this account. Returns the recovery code to show once.
-async function createBackup(name_id, accountPwd, roomPwd, payload) {
+// Create/refresh the server backup. One random master key encrypts the full vault (incl. ALL groups);
+// it's wrapped per group (so restore works with ANY group's password) + once by the recovery code.
+// Writes one vaults row per group (same enc + wrap_recovery, per-group wrap_pwd). Returns recovery code.
+async function createBackup(accountPwd, payload) {
   if (!client || !myUid) return null;
+  normGroups(payload);
   const masterKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   const enc = await encryptText(JSON.stringify(payload), masterKey);
-  const saltPwd = crypto.getRandomValues(new Uint8Array(16));
-  const wrap_pwd = await wrapMaster(masterKey, await kdfKEK(JSON.stringify([accountPwd, roomPwd]), saltPwd));
   const recovery = genRecoveryCode();
   const wrap_recovery = await wrapMaster(masterKey, await kdfKEK(normCode(recovery), new TextEncoder().encode(RECOVERY_SALT)));
-  const { error } = await client.from('vaults').upsert(
-    { name_id, owner: myUid, enc, wrap_pwd, wrap_recovery, salt_pwd: b64(saltPwd) }, { onConflict: 'name_id' });
-  if (error) { dbg('Server-Backup fehlgeschlagen: ' + error.message); return null; }
-  dbg('Server-Backup angelegt (Multi-Gerät bereit)');
+  for (const g of payload.groups) {
+    const name_id = await computeNameId(payload.name, g.pwd);
+    const saltPwd = crypto.getRandomValues(new Uint8Array(16));
+    const wrap_pwd = await wrapMaster(masterKey, await kdfKEK(JSON.stringify([accountPwd, g.pwd]), saltPwd));
+    const { error } = await client.from('vaults').upsert(
+      { name_id, owner: myUid, enc, wrap_pwd, wrap_recovery, salt_pwd: b64(saltPwd) }, { onConflict: 'name_id' });
+    if (error) { dbg('Backup-Zeile fehlgeschlagen: ' + error.message); return null; }
+  }
+  dbg('Server-Backup angelegt für ' + payload.groups.length + ' Gruppe(n)');
   return recovery;
 }
 // Ensure a server backup exists for this account (migrates older accounts created before backups).
-// vault = { name, pubB64, ecdhPubB64, privJwk, ecdhPrivJwk, roomPwd } (as returned by openVault).
 async function ensureBackup(accountPwd, vault) {
   if (!client || !myPubB64) return;
   if (localStorage.getItem(BACKUP_OK_KEY)) return;  // this device already knows the backup exists
-  const name_id = await nameId(vault.name); // hmacKey already set by activateVault
+  const name_id = await nameId(vault.name); // hmacKey set by activateVault (active group)
   const { data, error } = await client.from('vaults').select('name_id').eq('name_id', name_id).limit(1);
   if (error) { dbg('Backup-Check-Fehler (lege NICHTS neu an): ' + error.message); return; } // never recreate on error
   if (data && data.length) { localStorage.setItem(BACKUP_OK_KEY, '1'); return; } // already there
   dbg('Kein Backup vorhanden — lege es einmalig an (Migration)');
-  const recovery = await createBackup(name_id, accountPwd, vault.roomPwd, vault);
+  const recovery = await createBackup(accountPwd, vault);
   if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
 }
 // name_id from a room password (needed at restore, before any vault/hmacKey exists)
@@ -1251,9 +1332,9 @@ async function restoreBackup(name, roomPwd, secret, viaRecovery) {
   try {
     const plain = await decryptText(row.enc, masterKey);
     if (plain === '[falscher Schlüssel]') return 'WRONG';
-    const payload = JSON.parse(plain); // { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd }
-    payload.name = name; // use the typed name (survives a later rename; the embedded one may be stale)
-    return payload;
+    const payload = JSON.parse(plain); // full vault incl. all groups
+    payload.name = name;               // use the typed name (survives a later rename)
+    return normGroups(payload, roomPwd); // land in the group I logged in with; migrate legacy roomPwd
   } catch (_) { return 'WRONG'; }
 }
 // Login / unlock: account password → decrypt vault. Returns 'WRONG' on bad password, null if none.
