@@ -122,9 +122,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #chat-peer-av:empty{display:none}
 #chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:300;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
-#lock-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid rgba(0,210,255,.12);border-radius:50%;background:transparent;color:rgba(0,210,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-#lock-btn:hover{border-color:rgba(0,210,255,.4);color:#00d2ff;background:transparent}
-#lock-btn:focus,#name-emoji:focus,#back-btn:focus{outline:none}
+#name-emoji:focus,#back-btn:focus{outline:none}
 /* Mobile / narrow: one column — sidebar by default, chat slides in when a contact is picked */
 @media (max-width:700px){
   #app{max-width:100%;border-radius:0;height:100dvh}
@@ -193,8 +191,8 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #auth-err{color:#ff6b6b;font-size:13px;text-align:center;max-width:360px;margin:0}
 #auth-err.hidden{display:none}
 #auth-go{width:100%;max-width:400px;padding:13px;border:none;border-radius:8px;background:#00d2ff;color:#020410;font-weight:700;font-size:15px;cursor:pointer}
-#auth-forgot{width:100%;max-width:400px;padding:11px;border:1px solid rgba(0,210,255,.4);border-radius:8px;background:transparent;color:#00d2ff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
-#auth-forgot:hover{background:rgba(0,210,255,.1)}
+#auth-forgot{margin-top:4px;padding:6px;border:none;background:transparent;color:rgba(0,210,255,.55);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
+#auth-forgot:hover{color:#00d2ff}
 #auth-panel .pwd-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;border-radius:0;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center}
 #auth-panel .pwd-eye:hover{color:#00d2ff}
 #auth-panel .pwd-eye:focus{outline:none}
@@ -275,11 +273,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="sidebar-head">
       <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
-      <button id="lock-btn" type="button" aria-label="App sperren" title="Sperren (Konto-Passwort nötig)">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8 7 17 7 17 16"></polyline>
-        </svg>
-      </button>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
       </button>
@@ -290,6 +283,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div class="menu-sep"></div>
       <button type="button" id="menu-e2e" role="menuitem">🔒 Ende-zu-Ende verschlüsselt</button>
       <div class="menu-sep"></div>
+      <button type="button" id="menu-logout" role="menuitem">Auf diesem Gerät abmelden</button>
       <button type="button" id="menu-delete" class="danger" role="menuitem">Konto endgültig löschen</button>
     </div>
     <input id="contact-search" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off">
@@ -385,7 +379,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </div>
   <p id="auth-err" class="auth-err hidden"></p>
   <button id="auth-go">Anmelden</button>
-  <button type="button" id="auth-forgot">Auf diesem Gerät abmelden</button>
+  <button type="button" id="auth-forgot">Anderes Konto verwenden?</button>
 </div>
 
 <div id="help-panel" class="hidden">
@@ -792,7 +786,8 @@ function setAuthMode(mode) {
     authGo.textContent = 'Anmelden';
     authNameEl.value = ''; authNameEl.readOnly = false;
   } else {
-    authHint.style.display = 'none';
+    authHint.style.display = '';
+    authHint.textContent = 'Willkommen zurück — entsperre dieses Gerät mit deinem Konto-Passwort.';
     authNameEl.value = vaultName();
     authNameEl.readOnly = true;
     authGo.textContent = 'Anmelden';
@@ -887,21 +882,22 @@ function setupPwdEye(input, btn) {
 }
 setupPwdEye(authPwdEl, document.getElementById('auth-pwd-eye'));
 setupPwdEye(authRoomEl, document.getElementById('auth-room-eye'));
-// Etappe 3: log out on THIS device only. The account stays on the server (encrypted backup),
+// Log out on THIS device only. The account stays on the server (encrypted backup),
 // so you can sign back in anywhere with Name + Konto-Passwort + Gruppen-Passwort.
-document.getElementById('auth-forgot').onclick = async () => {
+async function logoutDevice() {
   if (!await uiConfirm('Auf diesem Gerät abmelden?\n\nDein Konto bleibt erhalten — du kannst dich jederzeit wieder anmelden mit Name + Konto-Passwort + Gruppen-Passwort (oder dem Recovery-Code).', { okText: 'Abmelden' })) return;
   sessionStorage.removeItem(SESSION_PWD_KEY);
   localStorage.removeItem(VAULT_KEY);
   localStorage.removeItem(BACKUP_OK_KEY);
   location.reload();
-};
-// Lock button: clear the session unlock and reload → login screen (account password needed).
-document.getElementById('lock-btn').onclick = () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); };
+}
+// Lock-screen link: switch to a different account (same local wipe as logging out).
+document.getElementById('auth-forgot').onclick = logoutDevice;
 // Profile overflow menu (⋮) — account actions (delete account for now; grows later)
 const headMenu = document.getElementById('head-menu');
 document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); renderGroupMenu(); headMenu.classList.toggle('hidden'); };
 document.getElementById('menu-e2e').onclick = () => { headMenu.classList.add('hidden'); uiConfirm('Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.', { alert: true, okText: 'Alles klar' }); };
+document.getElementById('menu-logout').onclick = () => { headMenu.classList.add('hidden'); logoutDevice(); };
 document.getElementById('menu-delete').onclick = () => { headMenu.classList.add('hidden'); deleteAccount(); };
 document.getElementById('menu-newgroup').onclick = () => {
   headMenu.classList.add('hidden');
@@ -914,6 +910,7 @@ document.getElementById('menu-newgroup').onclick = () => {
 function renderGroupMenu() {
   const box = document.getElementById('menu-groups');
   box.innerHTML = '';
+  if (myGroups.length < 2) return; // progressive disclosure: no switcher until there's a 2nd group
   for (const g of myGroups) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -992,9 +989,9 @@ setTimeout(() => {
         sessionStorage.removeItem(SESSION_PWD_KEY);
         setAuthMode('login'); authPanel.classList.remove('hidden');
       }
-    }).catch(e => { dbg('Auto-Unlock Fehler: ' + (e && e.message ? e.message : e)); setAuthMode(vaultExists() ? 'login' : 'signup'); authPanel.classList.remove('hidden'); });
+    }).catch(e => { dbg('Auto-Unlock Fehler: ' + (e && e.message ? e.message : e)); setAuthMode(vaultExists() ? 'login' : 'create'); authPanel.classList.remove('hidden'); });
   } else {
-    setAuthMode(vaultExists() ? 'login' : 'signup');
+    setAuthMode(vaultExists() ? 'login' : 'create');
     authPanel.classList.remove('hidden');
   }
 }, 0);

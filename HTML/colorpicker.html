@@ -17,7 +17,7 @@ h1{font-family:'Orbitron',sans-serif;font-weight:700;font-size:15px;letter-spaci
 .col{display:flex;flex-direction:column;gap:10px}
 
 /* Live preview swatch (shows the current color full-width) */
-#preview{height:90px;border-radius:12px;border:1px solid rgba(0,210,255,.25);display:flex;align-items:flex-end;justify-content:space-between;padding:8px 12px;font-family:'Orbitron',sans-serif;letter-spacing:1px;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#preview{flex:1 1 auto;min-height:90px;border-radius:12px;border:1px solid rgba(0,210,255,.25);display:flex;align-items:flex-end;justify-content:space-between;padding:8px 12px;font-family:Arial,Helvetica,sans-serif;letter-spacing:0;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 #preview span{background:rgba(0,0,0,.35);padding:2px 8px;border-radius:6px}
 
 /* Row of action buttons (pipette, copy, native picker) */
@@ -55,10 +55,13 @@ input:focus{outline:none;border-color:var(--cyan)}
 
 /* Target (live apply to the right main window) */
 #target{display:flex;flex-direction:column;gap:10px}
+#target .thead{display:flex;justify-content:space-between;align-items:center;gap:10px}
 #target .line{display:flex;align-items:center;gap:10px;font-size:13px}
 #target input[type=text]{flex:1;padding:8px 10px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:var(--field);color:var(--ink);font-size:13px;font-family:monospace}
 #target select{padding:8px 10px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:var(--field);color:var(--ink);font-size:13px;font-family:inherit}
-#el-combo{flex:1;min-width:0}
+#target .line span{flex:0 0 84px}            /* fixed label column → controls align left & right */
+#target .line select{flex:1;min-width:0;height:36px}
+#pick-el{flex:0 0 auto}                      /* keep its natural height */
 .chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
 .chk input{width:16px;height:16px;accent-color:var(--cyan)}
 #status{font-size:11.5px;color:rgba(0,210,255,.55);line-height:1.5;min-height:1.4em}
@@ -75,7 +78,6 @@ input:focus{outline:none;border-color:var(--cyan)}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-1h3l9-9"></path><path d="M3 21v-3l9-9"></path><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path></svg>
       Pipette
     </button>
-    <input type="color" id="native" value="#00d2ff" title="Farbwähler">
   </div>
    </div>
 
@@ -94,8 +96,7 @@ input:focus{outline:none;border-color:var(--cyan)}
   </div>
 
   <div class="group" id="target">
-    <h2>ZIEL — ELEMENT (GANZE APP)</h2>
-    <label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label>
+    <div class="thead"><h2>ZIEL</h2><label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label></div>
     <button id="pick-el" type="button" title="Element im Hauptfenster anklicken">🎯&nbsp; Element anklicken</button>
     <div class="line"><span>Element</span><select id="el-combo"><option value="">— Element wählen —</option></select></div>
     <input type="hidden" id="selector" value="#messages, #chat-head">
@@ -163,7 +164,6 @@ function render(apply = true) {
   $('preview').style.background = hex;
   $('preview-hex').textContent = hex;
   $('preview-rgb').textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  $('native').value = hex;
   $('r-range').value = $('r-num').value = rgb.r;
   $('g-range').value = $('g-num').value = rgb.g;
   $('b-range').value = $('b-num').value = rgb.b;
@@ -231,7 +231,6 @@ function initFromTarget() {
 }
 
 // --- Wire up controls ---
-$('native').addEventListener('input', e => setRgb(hexToRgb(e.target.value)));
 ['r', 'g', 'b'].forEach(ch => {
   const apply = v => setRgb({ ...rgb, [ch]: clamp(+v, 0, 255) });
   $(ch + '-range').addEventListener('input', e => apply(e.target.value));
