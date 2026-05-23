@@ -81,9 +81,9 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
 .contact .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
-.contact .c-time.unread{color:#25d366}
+.contact .c-time.unread{color:rgb(121,158,49)}
 /* Green unread indicator — shows the number of new messages from this contact */
-.contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#25d366;color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
+.contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgb(121,158,49);color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
 /* Chat panel */
 #chat-panel{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
 /* Subtle centered brand watermark — visible only while no chat is open */
@@ -139,6 +139,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .msg-field-wrap{flex:1;position:relative;display:flex}
 .msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 .msg-field-wrap input::placeholder{color:rgba(0,210,255,.3)}
+.msg-field-wrap input:disabled{opacity:.45;cursor:not-allowed}
 .msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
 #msg-emoji:focus{outline:none}
@@ -429,7 +430,8 @@ let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
 let myAvatar = localStorage.getItem(AVATAR_KEY) || ''; // small data-URL picture (overrides emoji)
 // --- Emoji rendering: Apple devices already show beautiful native emoji, so only swap on the rest
 // (Android/Windows) to JoyPixels images. iPadOS desktop-mode reports "Macintosh" → still treated as Apple.
-const USE_JOYPIXELS = !/Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent);
+let USE_JOYPIXELS = !/Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent); // toggle with "j"
+if (window.joypixels) joypixels.emojiSize = '128'; // free tier = PNG; 128px stays sharp on retina/large avatars
 // Replace native unicode emoji in an ALREADY HTML-ESCAPED string with JoyPixels <img> (no-op on Apple).
 function emojiImg(escaped) {
   if (!USE_JOYPIXELS || !window.joypixels) return escaped;            // Apple / library missing → native
@@ -992,6 +994,26 @@ function selectContact(c) {
   msgInput.focus();
 }
 document.getElementById('contact-search').addEventListener('input', e => renderContacts(e.target.value));
+
+// Debug hotkey: "j" toggles JoyPixels vs. native emoji and re-renders (ignored while typing in a field).
+function rerenderEmoji() {
+  setOwnAvatarDisplay();
+  if (typeof chatReady !== 'undefined' && chatReady) renderContacts(searchVal());
+  if (activePeer) {
+    const peerAv = document.getElementById('chat-peer-av');
+    if (!activePeer.avatar) peerAv.innerHTML = emojiImg(escapeHtml(activePeer.emoji || contactAvatar(activePeer.name)));
+    loadMessages();
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'j' && e.key !== 'J') return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.tagName === 'EMOJI-PICKER')) return;
+  USE_JOYPIXELS = !USE_JOYPIXELS;
+  dbg('JoyPixels ' + (USE_JOYPIXELS ? 'AN' : 'AUS (nativ)'));
+  rerenderEmoji();
+});
 
 // --- Account-password vault (WhatsApp/Signal-style app lock) ---
 // The account password derives a wrapping key (PBKDF2) that encrypts a local blob holding the
