@@ -96,6 +96,7 @@ input:focus{outline:none;border-color:var(--cyan)}
   <div class="group" id="target">
     <h2>ZIEL — ELEMENT (GANZE APP)</h2>
     <label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label>
+    <button id="pick-el" type="button" title="Element im Hauptfenster anklicken">🎯&nbsp; Element anklicken</button>
     <div class="line"><span>Element</span><select id="el-combo"><option value="">— Element wählen —</option></select></div>
     <input type="hidden" id="selector" value="#messages, #chat-head">
     <div class="line"><span>Eigenschaft</span>
@@ -263,12 +264,80 @@ function populateElementCombo() {
       combo.appendChild(opt);
     });
   } catch (_) {}
+  // Preselect the element that's targeted at startup; add an entry if the current selector isn't listed.
+  const cur = $('selector').value;
+  if (cur) {
+    let match = Array.from(combo.options).find(o => o.value === cur);
+    if (!match) {
+      match = document.createElement('option');
+      match.value = cur;
+      match.textContent = cur.includes(',') ? cur + '  (Hauptfenster)' : cur;
+      combo.insertBefore(match, combo.options[1] || null);   // right after the placeholder
+    }
+    combo.value = cur;
+  }
 }
 $('el-combo').addEventListener('change', e => {
   if (!e.target.value) return;
-  $('selector').value = e.target.value;     // drive the existing selector field + read its current colour
-  initFromTarget();
+  setTarget(e.target.value);
 });
+
+// Set the active target selector, mirror it into the combo, and read its current colour.
+function setTarget(sel) {
+  $('selector').value = sel;
+  const combo = $('el-combo');
+  let m = Array.from(combo.options).find(o => o.value === sel);
+  if (!m) { m = document.createElement('option'); m.value = sel; m.textContent = sel; combo.insertBefore(m, combo.options[1] || null); }
+  combo.value = sel;
+  initFromTarget();
+}
+
+// Build a usable selector for a clicked element: #id > tag.classes > nth-of-type path.
+function cssPath(el) {
+  if (el.id) return '#' + el.id;
+  const cls = (typeof el.className === 'string' ? el.className.trim() : '').split(/\s+/).filter(Boolean);
+  if (cls.length) return el.tagName.toLowerCase() + '.' + cls.join('.');
+  const parts = [];
+  while (el && el.nodeType === 1 && el.tagName !== 'BODY') {
+    if (el.id) { parts.unshift('#' + el.id); break; }
+    let part = el.tagName.toLowerCase();
+    const parent = el.parentElement;
+    if (parent) {
+      const sibs = Array.from(parent.children).filter(c => c.tagName === el.tagName);
+      if (sibs.length > 1) part += ':nth-of-type(' + (sibs.indexOf(el) + 1) + ')';
+    }
+    parts.unshift(part);
+    el = el.parentElement;
+  }
+  return parts.join(' > ') || '*';
+}
+
+// "Element anklicken": highlight elements in the main window on hover, click to pick as target.
+function pickElementTarget() {
+  const o = window.opener;
+  if (!o || o.closed) { status('Kein Hauptfenster verbunden.'); return; }
+  const doc = o.document;
+  let last = null;
+  const setHl = (el, on) => {
+    if (!el || !el.style) return;
+    if (on) { el.dataset._cpoutline = el.style.outline || ''; el.style.outline = '2px solid #00d2ff'; el.style.outlineOffset = '-2px'; }
+    else { el.style.outline = el.dataset._cpoutline || ''; delete el.dataset._cpoutline; }
+  };
+  const onMove = e => { if (e.target !== last) { setHl(last, false); last = e.target; setHl(last, true); } };
+  const cleanup = () => {
+    setHl(last, false); last = null;
+    doc.removeEventListener('mousemove', onMove, true);
+    doc.removeEventListener('click', onClick, true);
+    doc.removeEventListener('keydown', onKey, true);
+  };
+  const onClick = e => { e.preventDefault(); e.stopPropagation(); const el = e.target; cleanup(); setTarget(cssPath(el)); status('Ziel: ' + cssPath(el)); };
+  const onKey = e => { if (e.key === 'Escape') { cleanup(); status('Element-Wahl abgebrochen.'); } };
+  status('Ziel-Picker: Element im HAUPTFENSTER anklicken (Esc = Abbruch).');
+  doc.addEventListener('mousemove', onMove, true);
+  doc.addEventListener('click', onClick, true);
+  doc.addEventListener('keydown', onKey, true);
+}
+$('pick-el').addEventListener('click', pickElementTarget);
 
 // --- Pipette: native EyeDropper API (true pixel pick) where available, else click an element in the
 // main window and read its CSS color (works same-origin; can't read image/emoji pixels). ---
