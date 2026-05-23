@@ -21,6 +21,8 @@ if (new URLSearchParams(location.search).get('debug') === '1') {
 CyberUI.init();
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- JoyPixels: ships one consistent emoji set so Android/Windows match (Apple keeps its own native set) -->
+<script src="https://cdn.jsdelivr.net/npm/emoji-toolkit@8.0.0/lib/js/joypixels.min.js"></script>
 <!-- WhatsApp-style emoji picker (categories, recent, search, dark theme) -->
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <style>
@@ -30,29 +32,35 @@ input,button,textarea{font-family:inherit}
 /* Safari injects an AutoFill/contact button (👤⌄) into text fields — hide it */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button{visibility:hidden!important;display:none!important;pointer-events:none;position:absolute;right:0}
-body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
-#app{position:relative;width:100%;max-width:900px;height:100dvh;max-height:800px;display:flex;border-radius:8px;overflow:hidden;background:#070d18}
+body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;background:#070d18;color:#e0e8f0;height:100dvh;display:flex;justify-content:center;align-items:center}
+#app{position:relative;width:100%;max-width:900px;height:100dvh;display:flex;border-radius:8px;overflow:hidden;background:#070d18;border:1px solid rgba(0,210,255,.18)}
+/* Installed app (standalone): full-screen, no frame. The border is only for the browser version. */
+@media (display-mode:standalone){#app{border:none;border-radius:0}}
 /* Sidebar: own identity + search + contact list */
 #sidebar{flex:0 0 300px;display:flex;flex-direction:column;min-width:0;background:#0c1422;border-right:1px solid rgba(0,210,255,.15)}
 /* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
 /* Own-profile strip at the TOP of the sidebar — same look as before (full-width dark strip) */
-#sidebar-head{display:flex;gap:8px;padding:10px 12px;min-height:58px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
-#sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:rgba(224,232,240,.7);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sidebar-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
+#sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sidebar-head #my-name:focus{outline:none}
 #name-emoji{flex:0 0 auto;position:static;transform:none;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:42px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
-#contact-search{margin:12px 12px 8px;padding:9px 14px;border:1px solid rgba(0,210,255,.2);border-radius:12px;background:#14203a;color:#e0e8f0;font-size:13px}
+#contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:13px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
 #contact-search::placeholder{color:rgba(0,210,255,.3)}
 #contact-list{flex:1;overflow-y:auto}
 /* Each contact is a borderless, slightly rounded card — same width as the search field (12px side margins) */
-.contact{display:flex;align-items:center;gap:10px;margin:6px 12px;padding:10px 12px;border-radius:12px;background:#18243c;cursor:pointer}
-.contact:hover{background:#212f4d}
-.contact.active{background:#2a3a5e}
+/* Only the selected row gets a box (WhatsApp/Signal-style); the rest are plain. */
+.contact{display:flex;align-items:center;gap:10px;margin:2px 12px;padding:10px 12px;border-radius:12px;background:transparent;cursor:pointer}
+.contact:hover{background:rgba(0,210,255,.06)}
+.contact.active{background:#18243c}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
 .contact .av.emo{font-size:36px;line-height:1;background:transparent}
 #chat-peer-av.emo{font-size:42px;line-height:1;background:transparent}
 /* Picture avatars (cover-cropped data URLs) */
 .contact .av.pic,#chat-peer-av.pic,#name-emoji.pic{background-size:cover;background-position:center;font-size:0;overflow:hidden}
+/* JoyPixels emoji images: scale to the surrounding font-size (1em) so avatars & text stay correct */
+img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;margin:0}
+.av img.joypixels,#chat-peer-av img.joypixels,#name-emoji img.joypixels{vertical-align:middle}
 /* Avatar chooser dialog */
 #avatar-choice{position:fixed;inset:0;background:rgba(2,4,16,.7);display:flex;align-items:center;justify-content:center;z-index:160}
 #avatar-choice.hidden{display:none}
@@ -69,7 +77,7 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #recovery-modal .rc-code{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:18px;letter-spacing:2px;color:#e9edef;background:#14203a;border:1px solid rgba(0,210,255,.25);border-radius:10px;padding:14px;text-align:center;word-break:break-all;user-select:all}
 #recovery-modal button{padding:11px;border-radius:10px;border:1px solid rgba(0,210,255,.3);background:#14203a;color:#00d2ff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 #recovery-modal #rc-done{background:#00d2ff;color:#020410;border:none}
-.contact .nm{flex:1;min-width:0;color:#e9edef;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact .nm{flex:1;min-width:0;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
 .contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
 .contact .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
@@ -85,10 +93,10 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #chat-watermark .wm-title{font-family:'Orbitron',sans-serif;font-size:44px;letter-spacing:7px;color:#00d2ff;line-height:1}
 #chat-watermark .wm-sub{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#00d2ff}
 /* Chat header: same strip design + height as the sidebar profile header on the left */
-#chat-head{display:flex;gap:8px;padding:10px 12px;min-height:58px;background:#08101c;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
+#chat-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#08101c;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
 #chat-peer-av{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e9edef}
 #chat-peer-av:empty{display:none}
-#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:400;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:300;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
 #lock-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid rgba(0,210,255,.12);border-radius:50%;background:transparent;color:rgba(0,210,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 #lock-btn:hover{border-color:rgba(0,210,255,.4);color:#00d2ff;background:transparent}
@@ -129,7 +137,8 @@ body{font-family:'Raleway',system-ui,sans-serif;background:#070d18;color:#e0e8f0
 #input-row{display:flex;gap:8px;padding:12px;background:#08101c;align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
-.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:1px solid rgba(0,210,255,.25);border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
+.msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
+.msg-field-wrap input::placeholder{color:rgba(0,210,255,.3)}
 .msg-field-wrap input:focus{outline:none;border-color:rgba(0,210,255,.25)}
 #msg-emoji{position:absolute;right:8px;top:50%;transform:translateY(calc(-50% + 2px));width:30px;height:30px;border:none;border-radius:50%;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;z-index:11}
 #msg-emoji:focus{outline:none}
@@ -229,6 +238,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .msg .sender{font-size:18px}
   .msg .time{font-size:15px}
   header input,.msg-field-wrap input{font-size:19px}
+  /* match the bigger message text on touch: header name, contact names, search */
+  #chat-peer{font-size:21px}
+  .contact .nm{font-size:19px}
+  #contact-search,#my-name{font-size:18px}
 }
 </style>
 </head>
@@ -265,7 +278,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="input-row">
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
       <div class="msg-field-wrap">
-        <input id="msg-input" aria-label="Nachricht" disabled autocomplete="new-password">
+        <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht" disabled autocomplete="new-password">
         <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
       </div>
       <button id="send-btn" aria-label="Senden" title="Senden">
@@ -414,6 +427,15 @@ const emojiPanel = document.getElementById('emoji-panel');
 const emojiPicker = emojiPanel.querySelector('emoji-picker');
 let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
 let myAvatar = localStorage.getItem(AVATAR_KEY) || ''; // small data-URL picture (overrides emoji)
+// --- Emoji rendering: Apple devices already show beautiful native emoji, so only swap on the rest
+// (Android/Windows) to JoyPixels images. iPadOS desktop-mode reports "Macintosh" → still treated as Apple.
+const USE_JOYPIXELS = !/Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent);
+// Replace native unicode emoji in an ALREADY HTML-ESCAPED string with JoyPixels <img> (no-op on Apple).
+function emojiImg(escaped) {
+  if (!USE_JOYPIXELS || !window.joypixels) return escaped;            // Apple / library missing → native
+  const fn = joypixels.unicodeToImage || joypixels.toImage;          // unicode-only preferred; toImage fallback
+  try { return fn.call(joypixels, escaped); } catch (_) { return escaped; }
+}
 // Render my own avatar button: picture > emoji > default smiley
 function setOwnAvatarDisplay() {
   if (myAvatar) {
@@ -423,7 +445,7 @@ function setOwnAvatarDisplay() {
   } else {
     nameEmojiBtn.classList.remove('pic');
     nameEmojiBtn.style.backgroundImage = '';
-    nameEmojiBtn.textContent = myEmoji || '🙂';
+    nameEmojiBtn.innerHTML = emojiImg(escapeHtml(myEmoji || '🙂'));
   }
 }
 setOwnAvatarDisplay();
@@ -940,7 +962,7 @@ function renderContacts(filter) {
     const n = unreadByPeer[c.pubkey] || 0;
     const t = lastTimeByPeer[c.pubkey] ? fmtContactTime(lastTimeByPeer[c.pubkey]) : '';
     const av = c.avatar ? `<span class="av pic" style="background-image:url('${c.avatar}')"></span>`
-             : c.emoji ? `<span class="av emo">${escapeHtml(c.emoji)}</span>`
+             : c.emoji ? `<span class="av emo">${emojiImg(escapeHtml(c.emoji))}</span>`
              : `<span class="av">${escapeHtml(contactAvatar(c.name))}</span>`;
     div.innerHTML = av + `<span class="nm">${escapeHtml(c.name)}</span>` +
                     `<div class="c-meta">` +
@@ -961,7 +983,7 @@ function selectContact(c) {
   peerAv.classList.toggle('pic', !!c.avatar);
   peerAv.classList.toggle('emo', !c.avatar && !!c.emoji);
   if (c.avatar) { peerAv.style.backgroundImage = `url('${c.avatar}')`; peerAv.textContent = ''; }
-  else { peerAv.style.backgroundImage = ''; peerAv.textContent = c.emoji || contactAvatar(c.name); }
+  else { peerAv.style.backgroundImage = ''; peerAv.innerHTML = emojiImg(escapeHtml(c.emoji || contactAvatar(c.name))); }
   document.getElementById('chat-peer').textContent = c.name;
   document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
   msgInput.disabled = false;
@@ -1292,7 +1314,7 @@ async function renderMsg(msg) {
   }
   const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   const ticks = isSelf ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
-  div.innerHTML = `${badge}<span class="text">${escapeHtml(content)}</span><span class="time">${timeStr}${ticks}</span>`;
+  div.innerHTML = `${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
   messagesEl.appendChild(div);
 }
 
