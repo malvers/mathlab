@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Doc Alvers Chat — E2E</title>
+<title>VGP — very good privacy</title>
 <!-- PWA: manifest so the installed app (launched from vgpapp.html) opens the chat in standalone -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#070d18">
@@ -133,7 +133,6 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
 .msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55);letter-spacing:-3px}
 .msg .ticks.read{color:#00d2ff}
-.msg.encrypted{border:none}
 #input-row{display:flex;gap:8px;padding:12px;background:#08101c;align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
@@ -334,7 +333,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <input id="auth-room" type="password" placeholder="Raum-Passwort (gemeinsam)" aria-label="Raum-Passwort (gemeinsam)" autocomplete="off" readonly>
   <p id="auth-err" class="auth-err hidden"></p>
   <button id="auth-go">Anmelden</button>
-  <button type="button" id="auth-forgot">Konto zurücksetzen</button>
+  <button type="button" id="auth-forgot">Auf diesem Gerät abmelden</button>
 </div>
 
 <div id="help-panel" class="hidden">
@@ -342,8 +341,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <div id="help-list">
     <div class="cmd"><code>/help</code><span>Diese Befehlsübersicht anzeigen</span></div>
     <div class="cmd"><code>/stats</code><span>Belegten Supabase-Speicher anzeigen</span></div>
-    <div class="cmd"><code>/loadall</code><span>Alle Nachrichten laden (sonst nur die letzten 500)</span></div>
     <div class="cmd"><code>/logout</code><span>App sperren — Entsperren mit Konto-Passwort</span></div>
+    <div class="cmd"><code>/delete</code><span>Konto endgültig löschen (3× bestätigen)</span></div>
   </div>
   <button id="help-close">SCHLIESSEN</button>
 </div>
@@ -393,7 +392,6 @@ async function ensureClient() {
 }
 let hmacKey = null; // derived from the room password, used only to compute name_id (HMAC) for uniqueness
 let dirKey = null;  // directory key (AES) from the room password — encrypts profile name/emoji/avatar
-let claimedName = null; // the name this device has confirmed ownership of this session
 let chatReady = false;
 
 const messagesEl = document.getElementById('messages');
@@ -586,7 +584,7 @@ async function claimName(name) {
   const { data, error } = await client.from('identities').select('pubkey').eq('name_id', id).limit(1);
   if (error) { dbg('Claim-Check nicht möglich (Tabelle da?): ' + error.message); return true; }
   if (data && data.length) {
-    if (data[0].pubkey === myPubB64) { dbg('Name gehört dir: ' + name); claimedName = name; return true; }
+    if (data[0].pubkey === myPubB64) { dbg('Name gehört dir: ' + name); return true; }
     dbg('Name vergeben: ' + name);
     alert('Der Name „' + name + '" ist bereits vergeben — bitte einen anderen wählen.');
     return false;
@@ -605,7 +603,6 @@ async function claimName(name) {
     return false;
   }
   dbg('Name beansprucht (Schlüssel + ECDH gebunden): ' + name);
-  claimedName = name;
   return true;
 }
 
@@ -730,7 +727,7 @@ async function authSubmit() {
       await activateVault(vault);
       sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
-      await initChat(SUPABASE_URL, SUPABASE_KEY);
+      await initChat();
       const ok = await claimName(name); // bind name ↔ key
       if (!ok) {
         // Name already taken by someone else → roll back the just-created account, back to sign up
@@ -755,7 +752,7 @@ async function authSubmit() {
       localStorage.setItem(BACKUP_OK_KEY, '1'); // we just restored from the backup → it exists
       sessionStorage.setItem(SESSION_PWD_KEY, pwd);
       authPanel.classList.add('hidden');
-      await initChat(SUPABASE_URL, SUPABASE_KEY);
+      await initChat();
       localStorage.setItem(NAME_KEY, res.name);
     } else {
       const pwd = authPwdEl.value;
@@ -765,7 +762,7 @@ async function authSubmit() {
       await activateVault(vault);
       sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
-      await initChat(SUPABASE_URL, SUPABASE_KEY);
+      await initChat();
       await ensureBackup(pwd, vault); // older accounts: create the server backup on first login
     }
   } catch (e) {
@@ -785,8 +782,10 @@ authFields.forEach(el => el.addEventListener('keydown', e => {
 }));
 authPwdEl.addEventListener('input', updateStrengthMeter);
 document.getElementById('auth-pwd-eye').onclick = () => { authPwdEl.type = authPwdEl.type === 'password' ? 'text' : 'password'; authPwdEl.focus(); };
+// Etappe 3: log out on THIS device only. The account stays on the server (encrypted backup),
+// so you can sign back in anywhere with Name + Konto-Passwort + Raum-Passwort.
 document.getElementById('auth-forgot').onclick = () => {
-  if (confirm('Konto auf diesem Gerät zurücksetzen? Deine Identität (Schlüssel) geht verloren — du musst dich neu anmelden und ggf. einen neuen Namen wählen.')) {
+  if (confirm('Auf diesem Gerät abmelden? Dein Konto bleibt erhalten — du kannst dich jederzeit wieder anmelden mit Name + Konto-Passwort + Raum-Passwort (oder dem Recovery-Code).')) {
     sessionStorage.removeItem(SESSION_PWD_KEY);
     localStorage.removeItem(VAULT_KEY);
     localStorage.removeItem(BACKUP_OK_KEY);
@@ -804,14 +803,12 @@ document.getElementById('back-btn').onclick = () => document.getElementById('app
 // helpers (unb64, …) declared further down, which are in the TDZ during top-level execution.
 setTimeout(() => {
   const cached = sessionStorage.getItem(SESSION_PWD_KEY);
-  dbg(`Start: vaultExists=${vaultExists()} cachedPwd=${cached ? 'ja' : 'NEIN'}`);
   if (vaultExists() && cached) {
     openVault(cached).then(async v => {
-      dbg('Auto-Unlock: openVault → ' + (v === 'WRONG' ? 'WRONG' : (v ? 'OK' : 'null')));
       if (v && v !== 'WRONG') {
         await activateVault(v);
         authPanel.classList.add('hidden');
-        await initChat(SUPABASE_URL, SUPABASE_KEY);
+        await initChat();
         await ensureBackup(cached, v); // older accounts: create the server backup if missing
       } else {
         sessionStorage.removeItem(SESSION_PWD_KEY);
@@ -913,8 +910,11 @@ function fmtContactTime(iso) {
 // Per contact: last-message time (both directions) + count of unread messages addressed to me.
 async function computeContactMeta() {
   unreadByPeer = {}; lastTimeByPeer = {}; receivedFrom = new Set();
-  if (!allContacts.length) return;
-  const { data, error } = await client.from('messages').select('created_at,pubkey,recipient_pubkey');
+  if (!allContacts.length || !myPubB64) return;
+  // Only my own messages (server-side) — keeps load + metadata exposure down; fallback if OR errors.
+  const mine = `pubkey.eq."${myPubB64}",recipient_pubkey.eq."${myPubB64}"`;
+  let { data, error } = await client.from('messages').select('created_at,pubkey,recipient_pubkey').or(mine);
+  if (error) ({ data, error } = await client.from('messages').select('created_at,pubkey,recipient_pubkey'));
   if (error) { dbg('Kontakt-Meta nicht ladbar: ' + error.message); return; }
   const reads = readMap();
   for (const m of (data || [])) {
@@ -1115,10 +1115,9 @@ async function createBackup(name_id, accountPwd, roomPwd, payload) {
 // vault = { name, pubB64, ecdhPubB64, privJwk, ecdhPrivJwk, roomPwd } (as returned by openVault).
 async function ensureBackup(accountPwd, vault) {
   if (!client || !myPubB64) return;
-  if (localStorage.getItem(BACKUP_OK_KEY)) { dbg('ensureBackup: Flag gesetzt → überspringe'); return; }
+  if (localStorage.getItem(BACKUP_OK_KEY)) return;  // this device already knows the backup exists
   const name_id = await nameId(vault.name); // hmacKey already set by activateVault
   const { data, error } = await client.from('vaults').select('name_id').eq('name_id', name_id).limit(1);
-  dbg(`ensureBackup: name_id=${name_id.slice(0,10)}… gefunden=${error ? 'FEHLER' : (data ? data.length : 'null')}${error ? ' err=' + error.message : ''}`);
   if (error) { dbg('Backup-Check-Fehler (lege NICHTS neu an): ' + error.message); return; } // never recreate on error
   if (data && data.length) { localStorage.setItem(BACKUP_OK_KEY, '1'); return; } // already there
   dbg('Kein Backup vorhanden — lege es einmalig an (Migration)');
@@ -1188,7 +1187,7 @@ async function deriveChatKey(peerEcdhPubB64) {
   return key;
 }
 
-async function initChat(url, key) {
+async function initChat() {
   // Identity (signing key) + room password already came from the unlocked vault (activateVault).
   await ensureClient();
   chatReady = true;
@@ -1252,7 +1251,14 @@ async function loadMessages() {
   activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   const peer = activePeer.pubkey;
   await loadActiveReceipt(peer); // the peer's delivered/read marks for my messages
-  const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
+  // Only fetch MY messages from the server (less load + fewer metadata to every client). The strict
+  // client-side filter below still narrows to this peer. Fallback to unfiltered if the OR-filter errors.
+  const mine = `pubkey.eq."${myPubB64}",recipient_pubkey.eq."${myPubB64}"`;
+  let { data, error } = await client.from('messages').select('*').or(mine).order('created_at', { ascending: true });
+  if (error) {
+    dbg('Server-Filter fehlgeschlagen, lade ungefiltert: ' + error.message);
+    ({ data, error } = await client.from('messages').select('*').order('created_at', { ascending: true }));
+  }
   if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
   // Strict 1:1 by IDENTITY (signing pubkey): keep ONLY messages between me and this peer.
   const rows = (data || []).filter(m =>
@@ -1264,6 +1270,12 @@ async function loadMessages() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+// SECURITY / PRIVACY NOTE (bewusste Entscheidung beim pubkey-Routing, 2026-05-23):
+// RLS ist gelockert — `messages` (read) und `receipts` sind für alle Authentifizierten lesbar,
+// `receipts` auch schreibbar. Heißt: Mitglieder/Server sehen Metadaten (wer↔wer via pubkey, Zeiten)
+// und könnten Quittungen fälschen. Der NACHRICHTENINHALT bleibt dicht (ECDH-E2E, nur die zwei Parteien),
+// und Identitätsfälschung scheitert an der ECDSA-Signatur (→ ⚠️). Für eine geschlossene Gruppe ok;
+// härter (z. B. recipient-gebundene RLS, signierte Receipts) wäre ein späteres Thema.
 function subscribeMessages() {
   if (subscription) subscription.unsubscribe();
   dbg('Realtime-Subscription wird erstellt...');
@@ -1340,14 +1352,33 @@ async function renderMsg(msg) {
   messagesEl.appendChild(div);
 }
 
+// Etappe 4: permanently delete the account — server rows (own messages, receipts, identity, backup)
+// + everything local + sign out. Irreversible → three confirmations.
+async function deleteAccount() {
+  if (!myPubB64) { alert('Erst anmelden.'); return; }
+  if (!confirm('Konto WIRKLICH löschen?\n\nDeine gesendeten Nachrichten, deine Identität (Name+Schlüssel) und dein Server-Backup werden entfernt.')) return;
+  if (!confirm('Bist du ganz sicher?\n\nDas lässt sich NICHT rückgängig machen — auch dein Recovery-Code wird ungültig.')) return;
+  if (!confirm('Letzte Warnung — Konto endgültig löschen?')) return;
+  try {
+    const id = await nameId((myNameEl.value || '').trim().toLowerCase());
+    await client.from('messages').delete().eq('pubkey', myPubB64);                 // my sent messages (RLS: author=me)
+    await client.from('receipts').delete().or(`reader.eq."${myPubB64}",peer.eq."${myPubB64}"`); // my receipts
+    await client.from('identities').delete().eq('pubkey', myPubB64);               // my directory entry (RLS: owner=me)
+    await client.from('vaults').delete().eq('name_id', id);                        // my server backup (RLS: owner=me)
+    await client.auth.signOut();                                                   // drop the anonymous session
+    dbg('Konto serverseitig gelöscht');
+  } catch (e) { dbg('Löschfehler: ' + (e && e.message ? e.message : e)); }
+  [VAULT_KEY, NAME_KEY, EMOJI_KEY, AVATAR_KEY, READ_KEY, BACKUP_OK_KEY].forEach(k => localStorage.removeItem(k));
+  sessionStorage.removeItem(SESSION_PWD_KEY);
+  location.reload();
+}
+
 // --- Slash-command registry — single source of truth for autocomplete + execution ---
 const CMD_LIST = [
   { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
   { cmd: '/stats',   desc: 'Belegten Speicher anzeigen',        run: () => showStats() },
-  { cmd: '/loadall', desc: 'Alle Nachrichten laden',            run: () => { dbg('Lade alle Nachrichten...'); loadMessages(true); } },
-  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); } }
-  // /delete, /reset, /key entfernt. /logout sperrt nur (Vault bleibt; Entsperren mit Konto-Passwort).
-  // Konto ganz zurücksetzen geht über „Konto zurücksetzen" auf dem Login-Screen.
+  { cmd: '/logout',  desc: 'App sperren (Konto-Passwort nötig)', run: () => { sessionStorage.removeItem(SESSION_PWD_KEY); location.reload(); } },
+  { cmd: '/delete',  desc: 'Konto endgültig löschen (3× bestätigen)', run: () => deleteAccount() }
 ];
 const cmdBox = document.getElementById('cmd-box');
 let cmdMatches = [], cmdActive = -1;
