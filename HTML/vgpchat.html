@@ -115,7 +115,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #chat-watermark .wm-title{font-family:'Orbitron',sans-serif;font-size:44px;letter-spacing:7px;color:#00d2ff;line-height:1}
 #chat-watermark .wm-sub{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#00d2ff}
 /* Chat header: same strip design + height as the sidebar profile header on the left */
-#chat-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#08101c;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
+#chat-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#090d15;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
 #chat-peer-av{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e9edef}
 #chat-peer-av:empty{display:none}
 #chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:300;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -132,7 +132,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
   #app.chat-open #sidebar{display:none}
   #back-btn{display:flex}
 }
-#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#08101c;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#090d15;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 /* Chrome + Safari: slim cyan scrollbar via ::-webkit-scrollbar (must NOT also set scrollbar-width, or Safari falls back to the native bar) */
 #messages::-webkit-scrollbar{width:6px}
 #messages::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
@@ -155,7 +155,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
 .msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55);letter-spacing:-3px}
 .msg .ticks.read{color:#00d2ff}
-#input-row{display:flex;gap:8px;padding:12px;background:#08101c;align-items:center}
+#input-row{display:flex;gap:8px;padding:12px;background:#090d15;align-items:center}
 /* Wrapper keeps the emoji button inside the message field, independent of the send button */
 .msg-field-wrap{flex:1;position:relative;display:flex}
 .msg-field-wrap input{flex:1;padding:10px 44px 10px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
@@ -439,6 +439,17 @@ async function ensureClient() {
 let hmacKey = null; // derived from the group password, used only to compute name_id (HMAC) for uniqueness
 let dirKey = null;  // directory key (AES) from the group password — encrypts profile name/emoji/avatar
 let myGroupId = null; // public bucket id (hash of the group password) → scopes the contact list to my group
+let myGroups = [];        // all group passwords this account has joined
+let activeGroupPwd = null; // the group password currently active (drives hmacKey/dirKey/group_id)
+// Normalize a vault payload to the multi-group shape {groups:[…], activeGroup}, migrating legacy {roomPwd}.
+function normGroups(p, activePwd) {
+  if (!Array.isArray(p.groups) || !p.groups.length) p.groups = p.roomPwd ? [p.roomPwd] : [];
+  const active = activePwd || p.activeGroup || p.groups[0];
+  if (active && !p.groups.includes(active)) p.groups.push(active);
+  p.activeGroup = active;
+  delete p.roomPwd;
+  return p;
+}
 let chatReady = false;
 let signingUp = false; // true only during the sign-up flow (skip the "account deleted?" check then)
 
@@ -1131,27 +1142,28 @@ async function deriveWrapKey(accountPwd, saltBytes) {
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
 }
-// Write the local vault: lock {privJwk, roomPwd, ecdhPrivJwk} under the account password.
+// Write the local vault: lock {privJwk, ecdhPrivJwk, groups[], activeGroup} under the account password.
 // Used both for fresh sign-up (new keys) and for restoring an identity onto a new device.
 async function writeLocalVault(name, accountPwd, p) {
+  normGroups(p);
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const wrapKey = await deriveWrapKey(accountPwd, salt);
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const blob = new TextEncoder().encode(JSON.stringify({ privJwk: p.privJwk, roomPwd: p.roomPwd, ecdhPrivJwk: p.ecdhPrivJwk }));
+  const blob = new TextEncoder().encode(JSON.stringify({ privJwk: p.privJwk, ecdhPrivJwk: p.ecdhPrivJwk, groups: p.groups, activeGroup: p.activeGroup }));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, blob));
   const combined = new Uint8Array(iv.length + ct.length);
   combined.set(iv); combined.set(ct, iv.length);
   localStorage.setItem(VAULT_KEY, JSON.stringify({ name, pubkey: p.pubB64, ecdhPubkey: p.ecdhPubB64, salt: b64(salt), enc: b64(combined) }));
 }
 // Sign up: generate the device keypairs (ECDSA + ECDH) and store them in the local vault.
-async function createVault(name, accountPwd, roomPwd) {
+async function createVault(name, accountPwd, groupPwd) {
   const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
   const pubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
   const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
   const ek = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
   const ecdhPubB64 = b64(await crypto.subtle.exportKey('spki', ek.publicKey));
   const ecdhPrivJwk = await crypto.subtle.exportKey('jwk', ek.privateKey);
-  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, roomPwd };
+  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, groups: [groupPwd], activeGroup: groupPwd };
   await writeLocalVault(name, accountPwd, payload);
   dbg('Vault angelegt für ' + name);
   return payload;
@@ -1255,18 +1267,20 @@ async function openVault(accountPwd) {
   try {
     blob = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: combined.slice(0, 12) }, wrapKey, combined.slice(12));
   } catch (_) { return 'WRONG'; }
-  const { privJwk, roomPwd, ecdhPrivJwk } = JSON.parse(new TextDecoder().decode(blob));
-  return { name: v.name, pubB64: v.pubkey, ecdhPubB64: v.ecdhPubkey, privJwk, roomPwd, ecdhPrivJwk };
+  const b = JSON.parse(new TextDecoder().decode(blob)); // {privJwk, ecdhPrivJwk, groups?, activeGroup?} (legacy: roomPwd)
+  return normGroups({ name: v.name, pubB64: v.pubkey, ecdhPubB64: v.ecdhPubkey, privJwk: b.privJwk, ecdhPrivJwk: b.ecdhPrivJwk, groups: b.groups, activeGroup: b.activeGroup, roomPwd: b.roomPwd });
 }
 // Activate an unlocked vault: import signing key + ECDH key + derive E2E keys from the room password.
 async function activateVault(vault) {
+  normGroups(vault);
   myPubB64 = vault.pubB64;
   myEcdhPubB64 = vault.ecdhPubB64 || null;
   myPrivKey = await crypto.subtle.importKey('jwk', vault.privJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
   if (vault.ecdhPrivJwk) myEcdhPrivKey = await crypto.subtle.importKey('jwk', vault.ecdhPrivJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
-  await initCrypto(vault.roomPwd); // sets hmacKey (name uniqueness) from the room password
+  myGroups = vault.groups; activeGroupPwd = vault.activeGroup;
+  await initCrypto(activeGroupPwd); // sets hmacKey/dirKey/group_id for the ACTIVE group
   myNameEl.value = vault.name;
-  dbg('Vault entsperrt — Identität aktiv: ' + vault.name);
+  dbg('Vault entsperrt — ' + vault.name + ' · ' + myGroups.length + ' Gruppe(n)');
 }
 // 1:1 E2E: derive a shared AES key from our ECDH private key + the peer's ECDH public key.
 // Both sides compute the SAME key (ECDH property) → no shared password needed. Cached per peer.

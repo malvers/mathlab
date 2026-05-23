@@ -228,21 +228,42 @@ $('live').addEventListener('change', applyToTarget);
 $('selector').addEventListener('input', initFromTarget);  // new target → read its current color, don't clobber
 $('prop').addEventListener('change', initFromTarget);
 
-// --- Pipette: native EyeDropper API (Chromium/Opera/Edge; not Safari/Firefox) ---
+// --- Pipette: native EyeDropper API (true pixel pick) where available, else click an element in the
+// main window and read its CSS color (works same-origin; can't read image/emoji pixels). ---
 $('pipette').addEventListener('click', async () => {
-  if (!window.EyeDropper) {
-    const openerType = window.opener && !window.opener.closed ? (typeof window.opener.EyeDropper) : 'no-opener';
-    status('Kein EyeDropper im Popup (type=' + (typeof window.EyeDropper) + '), Hauptfenster-EyeDropper=' + openerType + ' | secureContext=' + window.isSecureContext);
+  if (window.EyeDropper) {
+    status('Pipette aktiv — irgendwohin am Bildschirm klicken …');
+    try {
+      const res = await new EyeDropper().open();
+      const c = hexToRgb(res.sRGBHex);
+      if (c) { setRgb(c); status('aufgenommen + gesetzt: ' + res.sRGBHex); }
+      else status('unlesbare Farbe: ' + res.sRGBHex);
+    } catch (e) { status('Pipette abgebrochen/Fehler: ' + (e && e.message ? e.message : e)); }
     return;
   }
-  status('Pipette aktiv — irgendwohin am Bildschirm klicken …');
-  try {
-    const res = await new EyeDropper().open();
-    const c = hexToRgb(res.sRGBHex);
-    if (c) { setRgb(c); status('aufgenommen + gesetzt: ' + res.sRGBHex); }   // adopt the values AND apply (visible)
-    else status('unlesbare Farbe: ' + res.sRGBHex);
-  } catch (e) { status('Pipette abgebrochen/Fehler: ' + (e && e.message ? e.message : e)); }
+  pickFromOpenerElement();   // fallback: this browser has no EyeDropper API
 });
+
+// Fallback picker: next click on an element in the main window adopts that element's CSS color.
+function pickFromOpenerElement() {
+  const o = window.opener;
+  if (!o || o.closed) { status('Keine EyeDropper-API und kein Hauptfenster verbunden → Element-Pick nicht möglich.'); return; }
+  const propName = $('prop').value === 'color' ? 'color' : $('prop').value === 'borderColor' ? 'borderTopColor' : 'backgroundColor';
+  const doc = o.document;
+  status('Element-Pick: klicke ein Element im HAUPTFENSTER (Esc bricht ab).');
+  function cleanup() { doc.removeEventListener('click', onClick, true); doc.removeEventListener('keydown', onKey, true); }
+  function onClick(e) {
+    e.preventDefault(); e.stopPropagation();
+    let el = e.target, c = null;
+    while (el && el.nodeType === 1) { c = parseCssColor(o.getComputedStyle(el)[propName]); if (c) break; el = el.parentElement; } // walk up past transparent
+    cleanup();
+    if (c) { setRgb(c); status('Element-Farbe übernommen: ' + rgbToHex(rgb)); }
+    else status('An dieser Stelle keine ' + propName + '-Farbe gefunden.');
+  }
+  function onKey(e) { if (e.key === 'Escape') { cleanup(); status('Element-Pick abgebrochen.'); } }
+  doc.addEventListener('click', onClick, true);   // capture, so the app's own click handlers don't fire
+  doc.addEventListener('keydown', onKey, true);
+}
 
 // --- Copy hex to clipboard ---
 $('copy').addEventListener('click', async () => {
