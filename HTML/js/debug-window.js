@@ -5,6 +5,8 @@ const DebugWindow = (() => {
     let prevHeight = '300px';
     let prevLeft = '';
     let prevTop = '';
+    let colLeft = '';  // collapsed-pill position (persisted); 'auto'/'' → snap bottom-right
+    let colTop = '';
     let fontSize = 11; // px — persisted; user-adjustable via +/- buttons
     const MIN_FONT = 8;
     const MAX_FONT = 28;
@@ -31,6 +33,8 @@ const DebugWindow = (() => {
             if (savedState.prevHeight) prevHeight = savedState.prevHeight;
             if (savedState.prevLeft) prevLeft = savedState.prevLeft;
             if (savedState.prevTop) prevTop = savedState.prevTop;
+            if (savedState.colLeft) colLeft = savedState.colLeft;
+            if (savedState.colTop) colTop = savedState.colTop;
             const savedFont = parseFloat(localStorage.getItem('debug-window-fontsize'));
             if (Number.isFinite(savedFont) && savedFont >= MIN_FONT && savedFont <= MAX_FONT) {
                 fontSize = savedFont;
@@ -45,7 +49,9 @@ const DebugWindow = (() => {
         const h = collapsed ? '40px' : (savedState.height || '500px');
         let positionStyle;
         if (collapsed) {
-            positionStyle = `left: auto; top: auto; right: 20px; bottom: 20px;`;
+            positionStyle = (colLeft && colLeft !== 'auto')
+                ? `left: ${colLeft}; top: ${colTop}; right: auto; bottom: auto;`   // restore moved collapsed pill
+                : `left: auto; top: auto; right: 20px; bottom: 20px;`;
         } else if (savedState.left && savedState.left !== 'auto') {
             positionStyle = `left: ${savedState.left}; top: ${savedState.top}; right: auto; bottom: auto;`;
         } else {
@@ -439,6 +445,11 @@ const DebugWindow = (() => {
                 prevLeft = liveLeft;
                 prevTop = liveTop;
             }
+            // When collapsed and dragged, the live left/top are real px → remember as the collapsed position.
+            if (collapsed && liveLeft && liveLeft !== 'auto') {
+                colLeft = liveLeft;
+                colTop = liveTop;
+            }
             const state = {
                 left: collapsed ? prevLeft : liveLeft,
                 top: collapsed ? prevTop : liveTop,
@@ -446,7 +457,9 @@ const DebugWindow = (() => {
                 height: collapsed ? prevHeight : debugEl.style.height,
                 prevHeight: prevHeight,
                 prevLeft: prevLeft,
-                prevTop: prevTop
+                prevTop: prevTop,
+                colLeft: colLeft,
+                colTop: colTop
             };
             localStorage.setItem('debug-window-state', JSON.stringify(state));
         } catch (_) {}
@@ -508,11 +521,13 @@ const DebugWindow = (() => {
             debugEl.style.alignItems = 'center';
             debugEl.style.borderColor = '#444444';
             debugEl.style.color = '#444444';
-            // Snap collapsed pill to bottom-right of viewport
+            // Snap collapsed pill to bottom-right of viewport (a fresh collapse forgets any moved position)
             debugEl.style.left = 'auto';
             debugEl.style.top = 'auto';
             debugEl.style.right = '20px';
             debugEl.style.bottom = '20px';
+            colLeft = 'auto';
+            colTop = 'auto';
             content.style.display = 'none';
             resizeHandles.forEach(h => h.style.display = 'none');
             if (title) title.style.display = 'none';
