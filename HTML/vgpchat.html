@@ -364,8 +364,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="auth-panel" class="hidden">
   <h2 id="auth-title">VGP</h2>
   <div id="auth-tabs">
-    <button type="button" id="tab-login" class="auth-tab active">Anmelden</button>
-    <button type="button" id="tab-signup" class="auth-tab">Neu hier</button>
+    <button type="button" id="tab-create" class="auth-tab active">Gründen</button>
+    <button type="button" id="tab-join" class="auth-tab">Beitreten</button>
+    <button type="button" id="tab-login" class="auth-tab">Anmelden</button>
   </div>
   <p id="auth-hint">Mit deinem Konto-Passwort entsperren.</p>
   <input id="auth-name" placeholder="Name" aria-label="Name" maxlength="30" autocomplete="off">
@@ -751,54 +752,61 @@ function pwdStrength(p) {
 }
 // Live meter under the account-password field (sign-up only)
 function updateStrengthMeter() {
-  if (authMode !== 'signup') return;
+  if (authMode !== 'create' && authMode !== 'join') return;
   const p = authPwdEl.value;
   authStrength.classList.toggle('hidden', !p);
   authStrengthBar.className = p ? pwdStrength(p).cls : '';
 }
 
 function showAuthErr(msg) { authErr.textContent = msg; authErr.classList.remove('hidden'); authGo.disabled = false; }
+// Modes: 'create' (Gruppe gründen) · 'join' (beitreten) · 'login' (anmelden; restore if no local vault).
+// create & join run the same backend (group password = the group); only the wording differs.
 function setAuthMode(mode) {
   authMode = mode;
-  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-  const signup = mode === 'signup';
+  ['create', 'join', 'login'].forEach(m => document.getElementById('tab-' + m).classList.toggle('active', mode === m));
+  const isNew = (mode === 'create' || mode === 'join');
   const restore = mode === 'login' && !vaultExists(); // login on a device with no local vault → restore from server
   authNameEl.style.display = '';
-  authRoomEl.closest('.pwd-wrap').style.display = (signup || restore) ? '' : 'none'; // hide the whole wrap (incl. its eye)
+  authRoomEl.closest('.pwd-wrap').style.display = (isNew || restore) ? '' : 'none'; // hide the whole wrap (incl. its eye)
   authErr.classList.add('hidden');
   authPwdEl.value = '';
-  // Strength meter only while signing up; "Konto zurücksetzen" only when there's a vault to reset.
   authStrength.classList.add('hidden');
   authStrengthBar.className = '';
-  authForgot.style.display = vaultExists() ? '' : 'none';
-  if (signup) {
+  authForgot.style.display = (mode === 'login' && vaultExists()) ? '' : 'none'; // only when there's a vault to log out
+  if (mode === 'create') {
     authHint.style.display = '';
-    authHint.textContent = 'Wähle Name + Konto-Passwort und gib das gemeinsame Gruppen-Passwort ein.';
-    authGo.textContent = 'Konto erstellen';
-    authNameEl.value = '';
-    authNameEl.readOnly = false;
+    authHint.textContent = 'Gründe deine Gruppe: denk dir ein Gruppen-Passwort aus und teile es mit deinen Leuten. Niemand sonst kann mitlesen.';
+    authRoomEl.placeholder = 'Neues Gruppen-Passwort (zum Teilen)';
+    authGo.textContent = 'Gruppe gründen';
+    authNameEl.value = ''; authNameEl.readOnly = false;
+  } else if (mode === 'join') {
+    authHint.style.display = '';
+    authHint.textContent = 'Tritt einer Gruppe bei: gib das Gruppen-Passwort ein, das du bekommen hast.';
+    authRoomEl.placeholder = 'Gruppen-Passwort (erhalten)';
+    authGo.textContent = 'Beitreten';
+    authNameEl.value = ''; authNameEl.readOnly = false;
   } else if (restore) {
     authHint.style.display = '';
     authHint.textContent = 'Auf diesem Gerät anmelden: Name + Konto-Passwort + Gruppen-Passwort.';
+    authRoomEl.placeholder = 'Gruppen-Passwort';
     authGo.textContent = 'Anmelden';
-    authNameEl.value = '';
-    authNameEl.readOnly = false;
+    authNameEl.value = ''; authNameEl.readOnly = false;
   } else {
-    authHint.style.display = 'none';               // no "Willkommen zurück …" prose
-    authNameEl.value = vaultName();                // show the account name as a read-only field
+    authHint.style.display = 'none';
+    authNameEl.value = vaultName();
     authNameEl.readOnly = true;
     authGo.textContent = 'Anmelden';
   }
 }
+document.getElementById('tab-create').onclick = () => setAuthMode('create');
+document.getElementById('tab-join').onclick = () => setAuthMode('join');
 document.getElementById('tab-login').onclick = () => setAuthMode('login');
-document.getElementById('tab-signup').onclick = () => setAuthMode('signup');
 
 async function authSubmit() {
   authErr.classList.add('hidden');
   authGo.disabled = true;
   try {
-    if (authMode === 'signup') {
+    if (authMode === 'create' || authMode === 'join') {
       signingUp = true; // claimName runs after initChat → don't let the alive-check fire too early
       const name = authNameEl.value.trim().toLowerCase();
       const pwd = authPwdEl.value, room = authRoomEl.value;
