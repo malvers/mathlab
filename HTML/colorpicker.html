@@ -82,7 +82,7 @@ input:focus{outline:none;border-color:var(--cyan)}
   <div class="group" id="target">
     <h2>ZIEL — HAUPTFENSTER (RECHTS)</h2>
     <label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label>
-    <div class="line"><span>Selektor</span><input type="text" id="selector" value="#chat-panel" spellcheck="false"></div>
+    <div class="line"><span>Selektor</span><input type="text" id="selector" value="#messages, #chat-head" spellcheck="false"></div>
     <div class="line"><span>Eigenschaft</span>
       <select id="prop">
         <option value="background">background</option>
@@ -141,8 +141,8 @@ function hslToRgb({ h, s, l }) {
   return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255) };
 }
 
-// --- Render every control + preview from the current rgb, then push to the target window ---
-function render() {
+// --- Render every control + preview from the current rgb; push to the target only when apply=true ---
+function render(apply = true) {
   const hex = rgbToHex(rgb), hsl = rgbToHsl(rgb);
   $('preview').style.background = hex;
   $('preview-hex').textContent = hex;
@@ -155,9 +155,10 @@ function render() {
   $('h-range').value = $('h-num').value = hsl.h;
   $('s-range').value = $('s-num').value = hsl.s;
   $('l-range').value = $('l-num').value = hsl.l;
-  applyToTarget();
+  if (apply) applyToTarget();
 }
-function setRgb(next) { rgb = { r: clamp(next.r, 0, 255), g: clamp(next.g, 0, 255), b: clamp(next.b, 0, 255) }; render(); }
+// apply=false → only load the values into the controls (used by the pipette: sample, don't paint yet)
+function setRgb(next, apply = true) { rgb = { r: clamp(next.r, 0, 255), g: clamp(next.g, 0, 255), b: clamp(next.b, 0, 255) }; render(apply); }
 
 // --- Live apply to the opener (right main window) ---
 function status(msg, muted) { const s = $('status'); s.textContent = msg; s.className = muted ? 'muted' : ''; }
@@ -167,13 +168,42 @@ function applyToTarget() {
   if (!o || o.closed) { status('Kein Hauptfenster verbunden — Picker aus der App heraus öffnen (siehe Konsolen-Snippet).', true); return; }
   try {
     const sel = $('selector').value.trim();
-    const el = sel ? o.document.querySelector(sel) : o.document.body;
-    if (!el) { status('Ziel nicht gefunden: ' + sel); return; }
-    el.style[$('prop').value] = rgbToHex(rgb);
-    status('live → ' + (sel || 'body') + ' { ' + $('prop').value + ' }');
+    const els = sel ? o.document.querySelectorAll(sel) : [o.document.body];   // comma-separated selectors allowed
+    if (!els.length) { status('Ziel nicht gefunden: ' + sel); return; }
+    els.forEach(el => { el.style[$('prop').value] = rgbToHex(rgb); });
+    status('live → ' + (sel || 'body') + ' (' + els.length + ') { ' + $('prop').value + ' }');
   } catch (e) {
     status('Zugriff verweigert (gleiche Herkunft nötig, kein file://): ' + e.message);
   }
+}
+
+// --- Parse a CSS color string ("rgb(..)", "rgba(..)", "#hex") into our rgb (null if transparent/invalid) ---
+function parseCssColor(str) {
+  if (!str) return null;
+  const m = /^rgba?\(([^)]+)\)/i.exec(str.trim());
+  if (m) {
+    const p = m[1].split(',').map(parseFloat);
+    if (p.length > 3 && p[3] === 0) return null;          // fully transparent → ignore
+    return { r: clamp(p[0], 0, 255), g: clamp(p[1], 0, 255), b: clamp(p[2], 0, 255) };
+  }
+  return hexToRgb(str);
+}
+// Start from the target's CURRENT color so opening the picker doesn't clobber it with the default.
+// Returns true if it adopted a color (and rendered); must be called BEFORE the first render() so it
+// reads the pristine background instead of a value we already painted in.
+function initFromTarget() {
+  const o = window.opener;
+  if (!o || o.closed) return false;
+  try {
+    const sel = $('selector').value.trim();
+    const el = sel ? o.document.querySelector(sel) : o.document.body;
+    if (!el) return false;
+    const prop = $('prop').value === 'color' ? 'color' : $('prop').value === 'borderColor' ? 'borderTopColor' : 'backgroundColor';
+    const c = parseCssColor(o.getComputedStyle(el)[prop]);
+    if (!c) return false;
+    rgb = c; render();                                     // render re-applies the SAME value → no visible change
+    return true;
+  } catch (_) { return false; }
 }
 
 // --- Wire up controls ---
@@ -191,17 +221,19 @@ $('hex').addEventListener('input', e => { const c = hexToRgb(e.target.value); if
   $(ch + '-num').addEventListener('input', e => apply(e.target.value));
 });
 $('live').addEventListener('change', applyToTarget);
-$('selector').addEventListener('input', applyToTarget);
-$('prop').addEventListener('change', applyToTarget);
+$('selector').addEventListener('input', initFromTarget);  // new target → read its current color, don't clobber
+$('prop').addEventListener('change', initFromTarget);
 
 // --- Pipette: native EyeDropper API (Chromium/Opera/Edge; not Safari/Firefox) ---
 $('pipette').addEventListener('click', async () => {
   if (!window.EyeDropper) { status('EyeDropper wird hier nicht unterstützt — nutze Chrome/Edge/Opera (HTTPS oder localhost).'); return; }
+  status('Pipette aktiv — irgendwohin am Bildschirm klicken …');
   try {
     const res = await new EyeDropper().open();
     const c = hexToRgb(res.sRGBHex);
-    if (c) setRgb(c);
-  } catch (_) { /* user cancelled — ignore */ }
+    if (c) { setRgb(c); status('aufgenommen + gesetzt: ' + res.sRGBHex); }   // adopt the values AND apply (visible)
+    else status('unlesbare Farbe: ' + res.sRGBHex);
+  } catch (e) { status('Pipette abgebrochen/Fehler: ' + (e && e.message ? e.message : e)); }
 });
 
 // --- Copy hex to clipboard ---
@@ -210,7 +242,19 @@ $('copy').addEventListener('click', async () => {
   catch (_) { status('Kopieren fehlgeschlagen.'); }
 });
 
-render();
+// --- Persist window position & size (shared same-origin localStorage; opener restores on next open) ---
+const BOUNDS_KEY = 'cp-bounds';
+function saveBounds() {
+  // innerWidth/Height round-trips cleanly with window.open's width/height; screenX/Y give the position.
+  try { localStorage.setItem(BOUNDS_KEY, JSON.stringify({ x: window.screenX, y: window.screenY, w: window.innerWidth, h: window.innerHeight })); } catch (_) {}
+}
+setInterval(saveBounds, 1000);          // no native "window moved" event → poll the position
+window.addEventListener('resize', saveBounds);
+window.addEventListener('pagehide', saveBounds);
+
+// Adopt the right window's current color FIRST (reads pristine bg); render() only as a fallback so we
+// never paint our default in before reading.
+if (!initFromTarget()) render();
 if (!window.opener) status('Standalone — zum Live-Steuern aus dem Hauptfenster heraus öffnen (siehe Konsolen-Snippet).', true);
 </script>
 </body>
