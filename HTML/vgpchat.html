@@ -436,8 +436,9 @@ async function ensureClient() {
   } catch (e) { dbg('Auth-Fehler: ' + e.message); }
   return client;
 }
-let hmacKey = null; // derived from the room password, used only to compute name_id (HMAC) for uniqueness
-let dirKey = null;  // directory key (AES) from the room password — encrypts profile name/emoji/avatar
+let hmacKey = null; // derived from the group password, used only to compute name_id (HMAC) for uniqueness
+let dirKey = null;  // directory key (AES) from the group password — encrypts profile name/emoji/avatar
+let myGroupId = null; // public bucket id (hash of the group password) → scopes the contact list to my group
 let chatReady = false;
 let signingUp = false; // true only during the sign-up flow (skip the "account deleted?" check then)
 
@@ -653,9 +654,9 @@ async function claimName(name) {
     return false;
   }
   // Store signing key + ECDH key + clear-text name (name & ecdh_pubkey power 1:1 chats / contact list)
-  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name: await encDir(name), emoji: await encDir(myEmoji), avatar: await encDir(myAvatar) };
+  const row = { name_id: id, pubkey: myPubB64, ecdh_pubkey: myEcdhPubB64, name: await encDir(name), emoji: await encDir(myEmoji), avatar: await encDir(myAvatar), group_id: myGroupId };
   let { error: insErr } = await client.from('identities').insert(row);
-  if (insErr && /ecdh_pubkey|name|column|schema|cache/i.test(insErr.message)) {
+  if (insErr && /ecdh_pubkey|name|group_id|column|schema|cache/i.test(insErr.message)) {
     // Columns not added yet (E1-SQL pending) → fall back to the minimal row
     dbg('identities-Spalten fehlen — Claim ohne ECDH/Name (bitte E1-SQL ausführen): ' + insErr.message);
     ({ error: insErr } = await client.from('identities').insert({ name_id: id, pubkey: myPubB64 }));
@@ -785,8 +786,8 @@ async function authSubmit() {
       if (!name || !pwd || !room) return showAuthErr('Bitte alle Felder ausfüllen.');
       // Validate the account password — it is the only thing protecting the local vault.
       if (!pwdStrength(pwd).ok) return showAuthErr('Konto-Passwort zu schwach — mind. 8 Zeichen, besser mit Zahl & Sonderzeichen.');
-      // Access-code gate (closed community): the room password must match the shared access code.
-      if (!(await checkAccessCode(room))) return showAuthErr('Falsches Gruppen-Passwort.');
+      // The group password IS the group: who knows it, joins it. (No fixed access code anymore.)
+      if (room.length < 6) return showAuthErr('Gruppen-Passwort: mindestens 6 Zeichen.');
       const vault = await createVault(name, pwd, room);
       await activateVault(vault);
       sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
@@ -913,7 +914,15 @@ async function initCrypto(password) {
     { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-dir-salt-v1'), iterations: 200000, hash: 'SHA-256' },
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
-  dbg('Namens-HMAC- + Verzeichnis-Schlüssel abgeleitet');
+  myGroupId = await deriveGroupId(password); // public bucket id for contact-list scoping
+  dbg('Gruppen-Schlüssel abgeleitet (HMAC + Verzeichnis + group_id)');
+}
+// Public group identifier from the group password (PBKDF2 → hex). Stored clear on identities to
+// scope the contact list; it does NOT unlock anything (dirKey/hmacKey still need the password).
+async function deriveGroupId(password) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-group-salt-v1'), iterations: 100000, hash: 'SHA-256' }, km, 256);
+  return bufToHex(bits);
 }
 // Encrypt/decrypt a directory field with the room-derived key. decrypt() passes plaintext through,
 // so legacy unencrypted rows still display.
@@ -1015,10 +1024,11 @@ const searchVal = () => document.getElementById('contact-search').value;
 setInterval(() => { if (chatReady) renderContacts(searchVal()); }, 60000);
 
 async function loadContacts() {
-  let { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner,emoji,avatar');
-  if (error && /emoji|avatar|column|schema|cache/i.test(error.message)) {
-    // emoji/avatar columns not added yet (SQL pending) → load without them (fall back to the letter)
-    dbg('emoji/avatar-Spalte fehlt — lade Kontakte ohne (bitte SQL ausführen)');
+  // Only my own group (server-side filter via group_id) → I never see other groups' rows.
+  let { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner,emoji,avatar,group_id').eq('group_id', myGroupId);
+  if (error && /group_id|emoji|avatar|column|schema|cache/i.test(error.message)) {
+    // group_id/emoji/avatar columns not added yet (SQL pending) → load unscoped (legacy single group)
+    dbg('group_id/emoji/avatar-Spalte fehlt — lade ungescoped (bitte SQL ausführen)');
     ({ data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner'));
   }
   if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
@@ -1120,16 +1130,6 @@ async function deriveWrapKey(accountPwd, saltBytes) {
     { name: 'PBKDF2', salt: saltBytes, iterations: 210000, hash: 'SHA-256' },
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
-}
-// Access-code gate (closed community): only someone who knows the access code may sign up.
-// Plaintext is NEVER stored — only this PBKDF2 hash. To change it:
-//   printf '%s' 'NEW CODE' | python3 -c "import sys,hashlib;print(hashlib.pbkdf2_hmac('sha256',sys.stdin.buffer.read(),b'vgp-access-salt-v1',200000).hex())"
-// Verified client-side → a soft gate (chat contents are E2E anyway). Wired into sign-up in E3.
-const ACCESS_PWD_HASH = '1de05d17c9f2d3f2329c2ae31dd0eb576292322166fc6f5ccf206739aa626711';
-async function checkAccessCode(code) {
-  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-access-salt-v1'), iterations: 200000, hash: 'SHA-256' }, km, 256);
-  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('') === ACCESS_PWD_HASH;
 }
 // Write the local vault: lock {privJwk, roomPwd, ecdhPrivJwk} under the account password.
 // Used both for fresh sign-up (new keys) and for restoring an identity onto a new device.
@@ -1287,6 +1287,8 @@ async function initChat() {
   dbg('Supabase-Client erstellt');
   await loadContacts();      // fill the sidebar
   if (!signingUp) await checkAccountAlive(); // deleted-elsewhere device logs out on load
+  // Migrate older accounts: stamp my group_id once if it's still empty (so my group sees me)
+  if (!signingUp && myGroupId) { try { await client.from('identities').update({ group_id: myGroupId }).eq('pubkey', myPubB64).is('group_id', null); } catch (_) {} }
   await markAllDelivered();  // confirm delivery for everything received while we were away
   subscribeMessages();
   msgInput.disabled = true;  // stays disabled until a contact is selected

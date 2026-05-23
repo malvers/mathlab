@@ -161,7 +161,11 @@ function render(apply = true) {
 function setRgb(next, apply = true) { rgb = { r: clamp(next.r, 0, 255), g: clamp(next.g, 0, 255), b: clamp(next.b, 0, 255) }; render(apply); }
 
 // --- Live apply to the opener (right main window) ---
-function status(msg, muted) { const s = $('status'); s.textContent = msg; s.className = muted ? 'muted' : ''; }
+function status(msg, muted) {
+  const s = $('status'); s.textContent = msg; s.className = muted ? 'muted' : '';
+  // Mirror into the main window's DEBUG panel (Doc keeps it open) via the opener's global dbg().
+  try { const o = window.opener; if (o && !o.closed && typeof o.dbg === 'function') o.dbg('[picker] ' + msg); } catch (_) {}
+}
 function applyToTarget() {
   if (!$('live').checked) { status('Live aus.', true); return; }
   const o = window.opener;
@@ -226,7 +230,11 @@ $('prop').addEventListener('change', initFromTarget);
 
 // --- Pipette: native EyeDropper API (Chromium/Opera/Edge; not Safari/Firefox) ---
 $('pipette').addEventListener('click', async () => {
-  if (!window.EyeDropper) { status('EyeDropper wird hier nicht unterstützt — nutze Chrome/Edge/Opera (HTTPS oder localhost).'); return; }
+  if (!window.EyeDropper) {
+    const openerType = window.opener && !window.opener.closed ? (typeof window.opener.EyeDropper) : 'no-opener';
+    status('Kein EyeDropper im Popup (type=' + (typeof window.EyeDropper) + '), Hauptfenster-EyeDropper=' + openerType + ' | secureContext=' + window.isSecureContext);
+    return;
+  }
   status('Pipette aktiv — irgendwohin am Bildschirm klicken …');
   try {
     const res = await new EyeDropper().open();
