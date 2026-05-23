@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Color Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--cyan:#00d2ff;--bg:#081428;--panel:#0c1422;--field:#14203a;--ink:#e0e8f0}
+body{font-family:'Raleway',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;padding:18px;display:flex;flex-direction:column;gap:14px;-webkit-text-size-adjust:100%}
+h1{font-family:'Orbitron',sans-serif;font-weight:700;font-size:20px;letter-spacing:3px;color:var(--cyan);text-align:center}
+
+/* Live preview swatch (shows the current color full-width) */
+#preview{height:90px;border-radius:12px;border:1px solid rgba(0,210,255,.25);display:flex;align-items:flex-end;justify-content:space-between;padding:8px 12px;font-family:'Orbitron',sans-serif;letter-spacing:1px;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#preview span{background:rgba(0,0,0,.35);padding:2px 8px;border-radius:6px}
+
+/* Row of action buttons (pipette, copy, native picker) */
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button,.filebtn{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border:1px solid rgba(0,210,255,.3);border-radius:10px;background:var(--field);color:var(--cyan);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+button:hover{border-color:var(--cyan);background:rgba(0,210,255,.1)}
+button#pipette{background:var(--cyan);color:#041018;border-color:var(--cyan)}
+button#pipette:hover{filter:brightness(1.08)}
+input[type=color]{flex:0 0 52px;height:46px;padding:0;border:1px solid rgba(0,210,255,.3);border-radius:10px;background:var(--field);cursor:pointer}
+
+/* Slider blocks */
+.group{background:var(--panel);border:1px solid rgba(0,210,255,.15);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.group h2{font-family:'Orbitron',sans-serif;font-weight:400;font-size:12px;letter-spacing:2px;color:rgba(0,210,255,.7)}
+.slider{display:grid;grid-template-columns:18px 1fr 56px;align-items:center;gap:10px}
+.slider label{font-size:13px;font-weight:700;color:rgba(0,210,255,.8)}
+.slider input[type=range]{width:100%;accent-color:var(--cyan)}
+.slider input[type=number]{width:100%;padding:5px 6px;border:1px solid rgba(0,210,255,.25);border-radius:6px;background:var(--field);color:var(--ink);font-size:13px;text-align:right;font-family:inherit}
+.hexrow{display:flex;align-items:center;gap:10px}
+.hexrow label{font-size:13px;font-weight:700;color:rgba(0,210,255,.8);flex:0 0 auto}
+.hexrow input{flex:1;padding:9px 12px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:var(--field);color:var(--ink);font-size:15px;font-family:'Orbitron',monospace;letter-spacing:1px;text-transform:uppercase}
+input:focus{outline:none;border-color:var(--cyan)}
+
+/* Target (live apply to the right main window) */
+#target{display:flex;flex-direction:column;gap:10px}
+#target .line{display:flex;align-items:center;gap:10px;font-size:13px}
+#target input[type=text]{flex:1;padding:8px 10px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:var(--field);color:var(--ink);font-size:13px;font-family:monospace}
+#target select{padding:8px 10px;border:1px solid rgba(0,210,255,.25);border-radius:8px;background:var(--field);color:var(--ink);font-size:13px;font-family:inherit}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--cyan)}
+#status{font-size:11.5px;color:rgba(0,210,255,.55);line-height:1.5;min-height:1.4em}
+.muted{color:rgba(224,232,240,.5)}
+</style>
+</head>
+<body>
+  <h1>COLOR&nbsp;PICKER</h1>
+
+  <div id="preview"><span id="preview-hex">#000000</span><span id="preview-rgb">rgb(0,0,0)</span></div>
+
+  <div class="actions">
+    <button id="pipette" type="button" title="Farbe vom Bildschirm aufnehmen">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-1h3l9-9"></path><path d="M3 21v-3l9-9"></path><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path></svg>
+      Pipette
+    </button>
+    <input type="color" id="native" value="#00d2ff" title="Farbwähler">
+    <button id="copy" type="button" title="Hex kopieren">Hex kopieren</button>
+  </div>
+
+  <div class="group">
+    <div class="hexrow"><label for="hex">HEX</label><input id="hex" type="text" maxlength="7" value="#00D2FF" spellcheck="false" autocomplete="off"></div>
+  </div>
+
+  <div class="group">
+    <h2>RGB</h2>
+    <div class="slider"><label>R</label><input type="range" id="r-range" min="0" max="255"><input type="number" id="r-num" min="0" max="255"></div>
+    <div class="slider"><label>G</label><input type="range" id="g-range" min="0" max="255"><input type="number" id="g-num" min="0" max="255"></div>
+    <div class="slider"><label>B</label><input type="range" id="b-range" min="0" max="255"><input type="number" id="b-num" min="0" max="255"></div>
+  </div>
+
+  <div class="group">
+    <h2>HSL</h2>
+    <div class="slider"><label>H</label><input type="range" id="h-range" min="0" max="360"><input type="number" id="h-num" min="0" max="360"></div>
+    <div class="slider"><label>S</label><input type="range" id="s-range" min="0" max="100"><input type="number" id="s-num" min="0" max="100"></div>
+    <div class="slider"><label>L</label><input type="range" id="l-range" min="0" max="100"><input type="number" id="l-num" min="0" max="100"></div>
+  </div>
+
+  <div class="group" id="target">
+    <h2>ZIEL — HAUPTFENSTER (RECHTS)</h2>
+    <label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label>
+    <div class="line"><span>Selektor</span><input type="text" id="selector" value="#chat-panel" spellcheck="false"></div>
+    <div class="line"><span>Eigenschaft</span>
+      <select id="prop">
+        <option value="background">background</option>
+        <option value="backgroundColor">background-color</option>
+        <option value="color">color (Text)</option>
+        <option value="borderColor">border-color</option>
+      </select>
+    </div>
+    <div id="status"></div>
+  </div>
+
+<script>
+// --- Color model: a single RGB source of truth; every control reads/writes through it ---
+let rgb = { r: 0, g: 210, b: 255 };
+
+const $ = id => document.getElementById(id);
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n | 0));
+
+// --- Conversions ---
+function rgbToHex({ r, g, b }) {
+  const h = n => n.toString(16).padStart(2, '0');
+  return ('#' + h(r) + h(g) + h(b)).toUpperCase();
+}
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{6}|[0-9a-f]{3})$/i.exec(hex.trim());
+  if (!m) return null;
+  let s = m[1];
+  if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+  return { r: parseInt(s.slice(0, 2), 16), g: parseInt(s.slice(2, 4), 16), b: parseInt(s.slice(4, 6), 16) };
+}
+function rgbToHsl({ r, g, b }) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0, s = 0, l = (max + min) / 2;
+  if (d) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    switch (max) {
+      case r: h = ((g - b) / d) % 6; break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4;
+    }
+    h *= 60; if (h < 0) h += 360;
+  }
+  return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+function hslToRgb({ h, s, l }) {
+  s /= 100; l /= 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255) };
+}
+
+// --- Render every control + preview from the current rgb, then push to the target window ---
+function render() {
+  const hex = rgbToHex(rgb), hsl = rgbToHsl(rgb);
+  $('preview').style.background = hex;
+  $('preview-hex').textContent = hex;
+  $('preview-rgb').textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  $('native').value = hex;
+  $('hex').value = hex;
+  $('r-range').value = $('r-num').value = rgb.r;
+  $('g-range').value = $('g-num').value = rgb.g;
+  $('b-range').value = $('b-num').value = rgb.b;
+  $('h-range').value = $('h-num').value = hsl.h;
+  $('s-range').value = $('s-num').value = hsl.s;
+  $('l-range').value = $('l-num').value = hsl.l;
+  applyToTarget();
+}
+function setRgb(next) { rgb = { r: clamp(next.r, 0, 255), g: clamp(next.g, 0, 255), b: clamp(next.b, 0, 255) }; render(); }
+
+// --- Live apply to the opener (right main window) ---
+function status(msg, muted) { const s = $('status'); s.textContent = msg; s.className = muted ? 'muted' : ''; }
+function applyToTarget() {
+  if (!$('live').checked) { status('Live aus.', true); return; }
+  const o = window.opener;
+  if (!o || o.closed) { status('Kein Hauptfenster verbunden — Picker aus der App heraus öffnen (siehe Konsolen-Snippet).', true); return; }
+  try {
+    const sel = $('selector').value.trim();
+    const el = sel ? o.document.querySelector(sel) : o.document.body;
+    if (!el) { status('Ziel nicht gefunden: ' + sel); return; }
+    el.style[$('prop').value] = rgbToHex(rgb);
+    status('live → ' + (sel || 'body') + ' { ' + $('prop').value + ' }');
+  } catch (e) {
+    status('Zugriff verweigert (gleiche Herkunft nötig, kein file://): ' + e.message);
+  }
+}
+
+// --- Wire up controls ---
+$('native').addEventListener('input', e => setRgb(hexToRgb(e.target.value)));
+$('hex').addEventListener('input', e => { const c = hexToRgb(e.target.value); if (c) setRgb(c); });
+['r', 'g', 'b'].forEach(ch => {
+  const apply = v => setRgb({ ...rgb, [ch]: clamp(+v, 0, 255) });
+  $(ch + '-range').addEventListener('input', e => apply(e.target.value));
+  $(ch + '-num').addEventListener('input', e => apply(e.target.value));
+});
+['h', 's', 'l'].forEach(ch => {
+  const maxV = ch === 'h' ? 360 : 100;
+  const apply = v => { const hsl = rgbToHsl(rgb); hsl[ch] = clamp(+v, 0, maxV); setRgb(hslToRgb(hsl)); };
+  $(ch + '-range').addEventListener('input', e => apply(e.target.value));
+  $(ch + '-num').addEventListener('input', e => apply(e.target.value));
+});
+$('live').addEventListener('change', applyToTarget);
+$('selector').addEventListener('input', applyToTarget);
+$('prop').addEventListener('change', applyToTarget);
+
+// --- Pipette: native EyeDropper API (Chromium/Opera/Edge; not Safari/Firefox) ---
+$('pipette').addEventListener('click', async () => {
+  if (!window.EyeDropper) { status('EyeDropper wird hier nicht unterstützt — nutze Chrome/Edge/Opera (HTTPS oder localhost).'); return; }
+  try {
+    const res = await new EyeDropper().open();
+    const c = hexToRgb(res.sRGBHex);
+    if (c) setRgb(c);
+  } catch (_) { /* user cancelled — ignore */ }
+});
+
+// --- Copy hex to clipboard ---
+$('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(rgbToHex(rgb)); status('kopiert: ' + rgbToHex(rgb)); }
+  catch (_) { status('Kopieren fehlgeschlagen.'); }
+});
+
+render();
+if (!window.opener) status('Standalone — zum Live-Steuern aus dem Hauptfenster heraus öffnen (siehe Konsolen-Snippet).', true);
+</script>
+</body>
+</html>
