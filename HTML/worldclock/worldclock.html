@@ -285,9 +285,9 @@
 </head>
 
 <body>
-    <!-- Rotation-direction toggle (top-left). Persisted; URL ?dir= overrides. -->
+    <!-- Rotation-direction toggle — positioned right of the globe icon each frame by draw(). Persisted; URL ?dir= overrides. -->
     <button id="dir-toggle" type="button" aria-label="Drehrichtung ändern" title="Drehrichtung ändern"
-        style="position:fixed; top:14px; left:14px; z-index:10000; width:42px; height:42px; padding:0; border:1px solid rgba(0,210,255,0.4); border-radius:50%; background:rgba(0,6,22,0.55); color:#00d2ff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+        style="position:fixed; z-index:10000; width:38px; height:38px; padding:0; border:1px solid rgba(0,210,255,0.4); border-radius:50%; background:rgba(0,6,22,0.55); color:#00d2ff; cursor:pointer; display:none; align-items:center; justify-content:center;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 1 1-3-6.7"></path><polyline points="21 3 21 9 15 9"></polyline>
         </svg>
@@ -454,21 +454,15 @@
         }
         let CW = initialCW();
         let dirSign = CW ? -1 : 1;
-        // Flip direction at runtime, persist it, refresh the icon. draw() reads CW/dirSign each frame → live.
+        // Flip direction at runtime, persist it, redraw. draw() reads CW/dirSign each frame → live.
         function setDirection(cw) {
             CW = cw; dirSign = CW ? -1 : 1;
             try { localStorage.setItem(DIR_KEY, CW ? 'cw' : 'ccw'); } catch (_) {}
-            updateDirIcon();
             if (typeof draw === 'function') draw();   // redraw immediately so the flip is instant
         }
-        function updateDirIcon() {
-            const b = document.getElementById('dir-toggle');
-            if (b) { b.classList.toggle('cw', CW); b.title = 'Drehrichtung: ' + (CW ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn'); }
-        }
-        document.getElementById('dir-toggle').onclick = () => setDirection(!CW);
-        updateDirIcon();
         let globeInstance = null;
         let globeIconHitbox = null;
+        let dirIconHitbox = null;   // direction-toggle icon, drawn right of the globe icon
 
         function initGlobeNow() {
             if (globeInstance) return;

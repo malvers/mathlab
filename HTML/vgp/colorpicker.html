@@ -114,6 +114,8 @@ input:focus{outline:none;border-color:var(--cyan)}
 let rgb = { r: 0, g: 210, b: 255 };
 
 const $ = id => document.getElementById(id);
+// The main window we control: the opener (popup window) or the parent (if ever embedded as an iframe).
+const HOST = (window.opener && !window.opener.closed) ? window.opener : (window.parent !== window ? window.parent : null);
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n | 0));
 
 // --- Conversions ---
