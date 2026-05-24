@@ -371,9 +371,3 @@ async function sendMsg() {
   setTimeout(loadMessages, 300);
 }
 
-
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
