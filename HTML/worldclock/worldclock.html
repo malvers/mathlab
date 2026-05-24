@@ -1363,12 +1363,17 @@
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     const _dpr = window.devicePixelRatio || 1;
                     ctx.scale(_dpr, _dpr);
-                    ctx.fillStyle = "#888888";
                     ctx.textAlign = "center";
-                    ctx.textBaseline = "top";
+                    ctx.textBaseline = "middle";
                     ctx.letterSpacing = "2px";
-                    ctx.font = `700 ${Math.max(10, r * 0.045)}px 'Orbitron', sans-serif`;
-                    ctx.fillText(CW ? "SÜDPOL" : "NORDPOL", w / 2, h * 0.05);
+                    ctx.lineJoin = "round";
+                    ctx.font = `700 ${Math.max(10, r * 0.05)}px 'Orbitron', sans-serif`;
+                    const _lbl = CW ? "SÜDPOL" : "NORDPOL";
+                    ctx.lineWidth = Math.max(2, r * 0.014);
+                    ctx.strokeStyle = "rgba(0,0,0,0.65)";   // dark outline → readable on grey land
+                    ctx.strokeText(_lbl, w / 2, h / 2);
+                    ctx.fillStyle = "rgba(235,242,248,0.95)"; // light fill
+                    ctx.fillText(_lbl, w / 2, h / 2);
                     ctx.restore();
                 }
             }
