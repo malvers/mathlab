@@ -1,5 +1,34 @@
 // VGP — part of the chat app, loaded in order (classic scripts share one global scope).
 // Do NOT reorder the <script> tags in vgpchat.html; top-level code runs in document order.
+
+// === LAST-TRY DIAGNOSTIC: log every pointerdown's target, attached FIRST (before anything can throw) ===
+document.addEventListener('pointerdown', e => {
+  const t = e.target;
+  try { (window.DebugWindow && DebugWindow.log) ? DebugWindow.log('HIT→ ' + (t.id || t.tagName) + (t.className ? '.' + String(t.className).slice(0, 24) : '')) : console.log('HIT→', t); } catch (_) {}
+}, true);
+
+// === SELF-HEAL: drop stale service worker + caches that pin an OLD index.html ===
+// Some browsers (FF/Safari/Opera) keep serving a cached, outdated vgpchat.html even after a hard
+// reload — which then mismatches these fresh (?v=) JS files. This runs from the cache-busted JS, so
+// it's always current: unregister any SW, wipe all caches, then reload ONCE to fetch fresh HTML.
+(async () => {
+  try {
+    let cleared = false;
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      if (regs.length) { await Promise.all(regs.map(r => r.unregister())); cleared = true; }
+    }
+    if (typeof caches !== 'undefined') {
+      const ks = await caches.keys();
+      if (ks.length) { await Promise.all(ks.map(k => caches.delete(k))); cleared = true; }
+    }
+    if (cleared && !sessionStorage.getItem('vgp-healed')) {
+      sessionStorage.setItem('vgp-healed', '1');
+      location.reload();
+    }
+  } catch (_) {}
+})();
+
 const NAME_KEY = 'eocr-chat-name';
 const EMOJI_KEY = 'eocr-chat-emoji';
 const AVATAR_KEY = 'vgp-avatar'; // local copy of my chosen avatar picture (data URL)
@@ -94,7 +123,9 @@ if (urlParamName) {
 const nameEmojiBtn = document.getElementById('name-emoji');
 const msgEmojiBtn = document.getElementById('msg-emoji');
 const emojiPanel = document.getElementById('emoji-panel');
-const emojiPicker = emojiPanel.querySelector('emoji-picker');
+// GUARD against a null deref (e.g. stale-cached HTML missing #emoji-panel) — a throw here would
+// abort the ENTIRE file and silently kill the avatar/emoji wiring further down.
+const emojiPicker = emojiPanel ? emojiPanel.querySelector('emoji-picker') : null;
 let myEmoji = localStorage.getItem(EMOJI_KEY) || '';
 let myAvatar = localStorage.getItem(AVATAR_KEY) || ''; // small data-URL picture (overrides emoji)
 // --- Emoji rendering: Apple set everywhere. Apple devices already render native Apple emoji; on the
@@ -129,13 +160,17 @@ function setOwnAvatarDisplay() {
 }
 setOwnAvatarDisplay();
 
-// WhatsApp-style picker (emoji-picker-element): a click delivers the emoji to pickEmoji()
-emojiPicker.addEventListener('emoji-click', ev => pickEmoji(ev.detail.unicode));
+// WhatsApp-style picker (emoji-picker-element): a click delivers the emoji to pickEmoji().
+// GUARD: if the <emoji-picker> isn't found (e.g. a stale-cached HTML with an older structure),
+// don't let a null deref abort this whole file — that would silently kill the avatar/emoji wiring below.
+if (!emojiPicker) dbg('⚠️ <emoji-picker> nicht gefunden — alte HTML gecacht? (Code läuft trotzdem weiter)');
+if (emojiPicker) emojiPicker.addEventListener('emoji-click', ev => pickEmoji(ev.detail.unicode));
 // Tapping the dimmed area outside the sheet closes it
-emojiPanel.addEventListener('click', e => { if (e.target === emojiPanel) emojiPanel.classList.add('hidden'); });
+emojiPanel && emojiPanel.addEventListener('click', e => { if (e.target === emojiPanel) emojiPanel.classList.add('hidden'); });
 // Inner styling lives in the picker's shadow DOM — inject a <style> there (the documented way).
 // Selectors: #skintone-button is the skin-tone (hand) button, input.search is the search box.
 customElements.whenDefined('emoji-picker').then(() => {
+  if (!emojiPicker || !emojiPicker.shadowRoot) return;
   const style = document.createElement('style');
   style.textContent = `::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
@@ -150,7 +185,7 @@ customElements.whenDefined('emoji-picker').then(() => {
 // Where a picked emoji goes: 'avatar' (header button) changes the personal emoji;
 // 'text' (input button) inserts the emoji into the message text, like WhatsApp.
 let emojiTarget = 'avatar';
-function openEmojiPanel() { emojiPanel.classList.remove('hidden'); }
+function openEmojiPanel() { dbg('openEmojiPanel — Panel zeigen'); emojiPanel.classList.remove('hidden'); }
 async function pickEmoji(e) {
   // Input button: insert into the message text at the caret, keep the sheet open (like WhatsApp)
   if (emojiTarget === 'text') {
@@ -215,7 +250,7 @@ async function chooseAvatarPicture(file) {
 // Header avatar button: open the chooser → Emoji or Picture
 const avatarChoice = document.getElementById('avatar-choice');
 nameEmojiBtn.onclick = () => avatarChoice.classList.remove('hidden');
-document.getElementById('ac-emoji').onclick = () => { avatarChoice.classList.add('hidden'); emojiTarget = 'avatar'; openEmojiPanel(); };
+document.getElementById('ac-emoji').onclick = () => { dbg('Auswahl: Emoji'); avatarChoice.classList.add('hidden'); emojiTarget = 'avatar'; openEmojiPanel(); };
 document.getElementById('ac-pic').onclick = () => { avatarChoice.classList.add('hidden'); document.getElementById('avatar-file').click(); };
 document.getElementById('avatar-file').onchange = e => { chooseAvatarPicture(e.target.files[0]); e.target.value = ''; };
 avatarChoice.addEventListener('click', e => { if (e.target === avatarChoice) avatarChoice.classList.add('hidden'); });
