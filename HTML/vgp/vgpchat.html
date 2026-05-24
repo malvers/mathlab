@@ -1167,6 +1167,7 @@ function resetChatView() {
   document.getElementById('chat-peer').textContent = '';
   const av = document.getElementById('chat-peer-av'); av.textContent = ''; av.style.backgroundImage = ''; av.className = '';
   document.getElementById('chat-watermark').classList.remove('hidden');
+  document.getElementById('app').classList.remove('room-mode');
   messagesEl.innerHTML = '';
   msgInput.disabled = true;
 }
@@ -1625,7 +1626,7 @@ function selectContact(c) {
   if (c.avatar) { peerAv.style.backgroundImage = `url('${c.avatar}')`; peerAv.textContent = ''; }
   else { peerAv.style.backgroundImage = ''; peerAv.innerHTML = emojiImg(escapeHtml(c.emoji || contactAvatar(c.name))); }
   document.getElementById('chat-peer').textContent = c.name;
-  document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
+  const appEl = document.getElementById('app'); appEl.classList.add('chat-open'); appEl.classList.remove('room-mode'); // 1:1 → normal compose field
   msgInput.disabled = false;
   renderContacts(searchVal());  // refresh active highlight + remove the green badge
   loadMessages(); // filter to this 1:1 conversation
