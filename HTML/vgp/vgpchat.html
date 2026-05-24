@@ -318,6 +318,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div id="menu-groups"></div>
       <button type="button" id="menu-newgroup" role="menuitem">Neue Gruppe</button>
       <button type="button" id="menu-joingroup" role="menuitem">Gruppe beitreten</button>
+      <button type="button" id="menu-renamegroup" role="menuitem">Gruppe umbenennen</button>
       <div class="menu-sep"></div>
       <button type="button" id="menu-logout" role="menuitem">Auf diesem Gerät abmelden</button>
       <button type="button" id="menu-delete" class="danger" role="menuitem">Konto endgültig löschen</button>
@@ -1117,6 +1118,7 @@ document.getElementById('menu-joingroup').onclick = async () => {
   }
   joinGroup(pwd, existing === 'NOMETA' ? 'Gruppe' : existing);   // legacy fallback if meta table missing
 };
+document.getElementById('menu-renamegroup').onclick = () => renameGroup();
 // Render the group list inside the ⋮ menu (active group marked); each entry switches groups.
 function renderGroupMenu() {
   const box = document.getElementById('menu-groups');
@@ -1259,8 +1261,33 @@ async function writeGroupMeta(password, name) {
   await ensureClient();
   const gid = await deriveGroupId(password);
   const enc = await encryptText((name || 'Familie').trim(), await deriveDirKey(password));
-  const { error } = await client.from('group_meta').insert({ group_id: gid, enc_name: enc }); // first writer wins
-  if (error) dbg('group_meta-Insert: ' + error.message);
+  // upsert: founding inserts the row, renaming updates it (needs the group_meta UPDATE policy).
+  const { error } = await client.from('group_meta').upsert({ group_id: gid, enc_name: enc }, { onConflict: 'group_id' });
+  if (error) dbg('group_meta-Upsert: ' + error.message);
+}
+// Rename the active group: update the shared name (group_meta) + this device's local label.
+// Anyone in the group may rename (for now). Other members pick it up via refreshGroupName().
+async function renameGroup() {
+  headMenu.classList.add('hidden');
+  const cur = activeGroupLabel();
+  const next = (await uiPrompt('Gruppe umbenennen:', { initial: cur, placeholder: 'Gruppenname', okText: 'Umbenennen' }) || '').trim();
+  if (!next || next === cur) return;
+  await writeGroupMeta(activeGroupPwd, next);                 // authoritative shared name
+  const gm = myGroups.find(x => x.pwd === activeGroupPwd); if (gm) gm.label = next; // in-memory
+  const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY); // persist this device's vault label
+  if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { const g = v.groups.find(x => x.pwd === activeGroupPwd); if (g) { g.label = next; await writeLocalVault(v.name, accountPwd, v); } } }
+  setGroupName(); renderContacts(searchVal());
+  dbg('Gruppe umbenannt: ' + next);
+}
+// Pull the authoritative group name from the server and update the local label if it changed
+// (so a rename by one member shows up for everyone on their next load/focus).
+async function refreshGroupName() {
+  const name = await readGroupMeta(activeGroupPwd);
+  if (!name || name === 'NOMETA' || name === activeGroupLabel()) return;
+  const gm = myGroups.find(x => x.pwd === activeGroupPwd); if (gm) gm.label = name;
+  const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
+  if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { const g = v.groups.find(x => x.pwd === activeGroupPwd); if (g) { g.label = name; await writeLocalVault(v.name, accountPwd, v); } } }
+  setGroupName(); renderContacts(searchVal());
 }
 // Encrypt/decrypt a directory field with the room-derived key. decrypt() passes plaintext through,
 // so legacy unencrypted rows still display.
@@ -1418,6 +1445,7 @@ async function loadContacts() {
   await computeContactMeta();
   setGroupName(); // keep the header in sync with the active group (init / switch / join)
   renderContacts(searchVal());
+  refreshGroupName(); // pick up a rename done by another member (authoritative name from group_meta)
 }
 // The pinned group-room row ("# Familie") at the very top of the sidebar — opens the shared room.
 // Group-of-people logo for the shared group room (inherits .room-av color via currentColor)
