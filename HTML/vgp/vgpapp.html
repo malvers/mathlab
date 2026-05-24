@@ -64,9 +64,9 @@ const iosHint = document.getElementById('ios-hint');
 const spinner = document.getElementById('spinner');
 const showSpinner = (on) => spinner.classList.toggle('on', on);
 
-// Register the service worker (scope covers vgpchat.html too) — needed for installability.
+// Register the site-wide service worker (lives at the web root, one dir up) — needed for installability.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('../sw.js').catch(() => {});
 }
 
 // iOS doesn't fire beforeinstallprompt and has no programmatic install → show the manual hint.
