@@ -73,6 +73,15 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 .contact{display:flex;align-items:center;gap:10px;margin:2px 12px;padding:10px 12px;border-radius:12px;background:transparent;cursor:pointer}
 .contact:hover{background:rgba(0,210,255,.06)}
 .contact.active{background:#18243c}
+/* collapsible group section header in the sidebar (one per group I'm in) */
+.grp-head{display:flex;align-items:center;gap:7px;margin:14px 12px 2px;padding:4px 6px;cursor:pointer;color:#e9edef}
+.grp-head:first-child{margin-top:6px}
+.grp-head.active{color:#00d2ff}
+.grp-head .gh-tri{flex:0 0 auto;display:flex;align-items:center;color:rgba(0,210,255,.6);transition:transform .15s}
+.grp-head.collapsed .gh-tri{transform:rotate(-90deg)}
+.grp-head .gh-name{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* indent rooms + members so they sit visually under their group header */
+.contact.room,.contact.member{margin-left:20px}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
 .contact .room-av,#chat-peer-av.room-av{background:#15466a;color:#cfe4f7;font-weight:700}
 .contact .av.emo{font-size:36px;line-height:1;background:transparent}
@@ -166,11 +175,11 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 }
 #messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#090d15;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 /* Chrome + Safari: slim cyan scrollbar via ::-webkit-scrollbar (must NOT also set scrollbar-width, or Safari falls back to the native bar) */
-#messages::-webkit-scrollbar{width:6px}
-#messages::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
-#messages::-webkit-scrollbar-track{background:transparent}
+#messages::-webkit-scrollbar,#contact-list::-webkit-scrollbar{width:6px}
+#messages::-webkit-scrollbar-thumb,#contact-list::-webkit-scrollbar-thumb{background:rgba(0,210,255,.3);border-radius:3px}
+#messages::-webkit-scrollbar-track,#contact-list::-webkit-scrollbar-track{background:transparent}
 /* Firefox only: it ignores ::-webkit-scrollbar, so give it the standard properties here */
-@supports (-moz-appearance:none){#messages{scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.3) transparent}}
+@supports (-moz-appearance:none){#messages,#contact-list{scrollbar-width:thin;scrollbar-color:rgba(0,210,255,.3) transparent}}
 /* WhatsApp-style bubbles (blue), dark theme — self right, other left */
 .msg{max-width:75%;padding:6px 9px 8px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap;line-height:1.32;font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;font-size:14.5px;color:#e9edef;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.2)}
 .msg.self{align-self:flex-end;background:#15466a;border-top-right-radius:0}
@@ -315,7 +324,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       </button>
     </div>
     <div id="head-menu" class="hidden" role="menu">
-      <div id="menu-groups"></div>
       <button type="button" id="menu-newgroup" role="menuitem">Neue Gruppe</button>
       <button type="button" id="menu-joingroup" role="menuitem">Gruppe beitreten</button>
       <button type="button" id="menu-renamegroup" role="menuitem">Gruppe umbenennen</button>
@@ -1081,7 +1089,7 @@ document.getElementById('auth-forgot').onclick = logoutDevice;
 // MENU & GROUPS — ⋮ menu, group switcher, create/join a group
 // ===========================================================================
 const headMenu = document.getElementById('head-menu');
-document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); renderGroupMenu(); headMenu.classList.toggle('hidden'); };
+document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); headMenu.classList.toggle('hidden'); };
 document.getElementById('menu-e2e').onclick = () => { headMenu.classList.add('hidden'); uiConfirm('Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.', { alert: true, okText: 'Alles klar' }); };
 document.getElementById('menu-logout').onclick = () => { headMenu.classList.add('hidden'); logoutDevice(); };
 document.getElementById('menu-delete').onclick = () => { headMenu.classList.add('hidden'); deleteAccount(); };
@@ -1143,12 +1151,17 @@ function resetChatView() {
 async function switchGroup(pwd) {
   if (pwd === activeGroupPwd || !myGroups.some(g => g.pwd === pwd)) return;
   activeGroupPwd = pwd;
+  collapseInactive(); // focus: the newly active group opens, the others fold away
   await initCrypto(pwd); // re-derive hmacKey/dirKey/group_id for the new active group
   const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
   if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { v.activeGroup = pwd; await writeLocalVault(v.name, accountPwd, v); } }
   resetChatView();
   await loadContacts();
   dbg('Gruppe gewechselt');
+}
+// Fold every group except the active one (called when the active group changes / on first load).
+function collapseInactive() {
+  collapsedGroups = new Set(myGroups.filter(g => g.pwd !== activeGroupPwd).map(g => g.pwd));
 }
 // Join/create a group: add it to the vault, register the identity in it, refresh the server backup.
 async function joinGroup(groupPwd, label) {
@@ -1346,7 +1359,12 @@ let activePeer = null;          // the contact we're currently chatting with (1:
 let activeRoom = false;         // true when the shared group room ("# Familie") is open instead of a 1:1
 let roomUnread = 0;             // unread count for the group room (local)
 let roomLastTime = null;        // last message time in the group room (for the pinned row)
-let allContacts = [];           // cached list for search filtering
+let allContacts = [];           // flat union of all groups' members (for nameForPubkey + search)
+let groupsData = [];            // [{pwd,label,groupId,members:[{name,pubkey,ecdh_pubkey,emoji,avatar,groupPwd}],roomUnread,roomLastTime}]
+let collapsedGroups = new Set(); // group passwords whose section is collapsed in the sidebar
+// Decrypt a directory field with an EXPLICIT key (so we can decrypt other groups' directories,
+// not just the active one). Passes plaintext/legacy through.
+async function decDirWith(v, key) { return (key && v && v.startsWith('ENC:')) ? await decryptText(v, key) : (v || ''); }
 // Label of the currently active group (shown as the room name); falls back to "Familie".
 function activeGroupLabel() {
   const g = myGroups.find(x => x.pwd === activeGroupPwd);
@@ -1408,15 +1426,20 @@ async function computeContactMeta() {
       if (new Date(m.created_at).getTime() > base) unreadByPeer[peer] = (unreadByPeer[peer] || 0) + 1;
     }
   }
-  // Group room: last-message time + unread (messages from others since I last opened the room).
-  roomLastTime = null; roomUnread = 0;
-  let { data: rdata, error: rerr } = await client.from('messages').select('created_at,pubkey,room_id').eq('room_id', myGroupId);
-  if (rerr) ({ data: rdata } = await client.from('messages').select('created_at,pubkey,room_id'));
-  const roomBase = reads[roomReadKey()] ? new Date(reads[roomReadKey()]).getTime() : 0;
-  for (const m of (rdata || [])) {
-    if (m.room_id !== myGroupId) continue;
-    if (!roomLastTime || m.created_at > roomLastTime) roomLastTime = m.created_at;
-    if (m.pubkey !== myPubB64 && new Date(m.created_at).getTime() > roomBase) roomUnread++;
+  // Per-group room meta: last-message time + unread (messages from others since I last opened each room).
+  if (groupsData.length) {
+    const gids = groupsData.map(g => g.groupId);
+    let { data: rdata, error: rerr } = await client.from('messages').select('created_at,pubkey,room_id').in('room_id', gids);
+    if (rerr) ({ data: rdata } = await client.from('messages').select('created_at,pubkey,room_id'));
+    for (const g of groupsData) {
+      g.roomUnread = 0; g.roomLastTime = null;
+      const base = reads['#room:' + g.groupId] ? new Date(reads['#room:' + g.groupId]).getTime() : 0;
+      for (const m of (rdata || [])) {
+        if (m.room_id !== g.groupId) continue;
+        if (!g.roomLastTime || m.created_at > g.roomLastTime) g.roomLastTime = m.created_at;
+        if (m.pubkey !== myPubB64 && new Date(m.created_at).getTime() > base) g.roomUnread++;
+      }
+    }
   }
 }
 const searchVal = () => document.getElementById('contact-search').value;
@@ -1424,76 +1447,116 @@ const searchVal = () => document.getElementById('contact-search').value;
 setInterval(() => { if (chatReady) renderContacts(searchVal()); }, 60000);
 
 async function loadContacts() {
-  // Only my own group (server-side filter via group_id) → I never see other groups' rows.
-  let { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner,emoji,avatar,group_id').eq('group_id', myGroupId);
-  if (error && /group_id|emoji|avatar|column|schema|cache/i.test(error.message)) {
-    // group_id/emoji/avatar columns not added yet (SQL pending) → load unscoped (legacy single group)
-    dbg('group_id/emoji/avatar-Spalte fehlt — lade ungescoped (bitte SQL ausführen)');
-    ({ data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner'));
-  }
-  if (error) { dbg('Kontakte nicht ladbar: ' + error.message); return; }
-  // Decrypt the profile fields (name/emoji/avatar) — server stored only ciphertext
-  const rows = data || [];
-  for (const r of rows) { r.name = await decDir(r.name); r.emoji = await decDir(r.emoji); r.avatar = await decDir(r.avatar); }
+  // Load the directory of EVERY group I'm in (each scoped + decrypted with its own group key),
+  // so the sidebar can show all my groups with their members underneath.
   const me = (myNameEl.value || '').toLowerCase();
-  allContacts = rows.filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
-                    .sort((a, b) => a.name.localeCompare(b.name));
+  const next = [];
+  for (const g of myGroups) {
+    const gid = await deriveGroupId(g.pwd);
+    const dk = await deriveDirKey(g.pwd);
+    let { data, error } = await client.from('identities').select('name,pubkey,ecdh_pubkey,owner,emoji,avatar,group_id').eq('group_id', gid);
+    if (error) { dbg('Kontakte (' + g.label + ') nicht ladbar: ' + error.message); data = []; }
+    const members = [];
+    for (const r of (data || [])) {
+      const name = await decDirWith(r.name, dk);
+      if (!name || name.toLowerCase() === me || !r.ecdh_pubkey || !r.owner) continue;
+      members.push({ name, pubkey: r.pubkey, ecdh_pubkey: r.ecdh_pubkey,
+                     emoji: await decDirWith(r.emoji, dk), avatar: await decDirWith(r.avatar, dk), groupPwd: g.pwd });
+    }
+    members.sort((a, b) => a.name.localeCompare(b.name));
+    next.push({ pwd: g.pwd, label: g.label, groupId: gid, members, roomUnread: 0, roomLastTime: null });
+  }
+  groupsData = next;
+  allContacts = next.flatMap(x => x.members); // flat union for nameForPubkey + search
   await computeContactMeta();
-  setGroupName(); // keep the header in sync with the active group (init / switch / join)
+  setGroupName();
   renderContacts(searchVal());
   refreshGroupName(); // pick up a rename done by another member (authoritative name from group_meta)
 }
 // The pinned group-room row ("# Familie") at the very top of the sidebar — opens the shared room.
 // Group-of-people logo for the shared group room (inherits .room-av color via currentColor)
 const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:64%;height:64%" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
-function roomRow() {
+// One contact/member row (1:1). `active` highlights the open conversation.
+function memberRow(c, active) {
   const div = document.createElement('div');
-  div.className = 'contact room' + (activeRoom ? ' active' : '');
-  const t = roomLastTime ? fmtContactTime(roomLastTime) : '';
-  div.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">${escapeHtml('An alle in ' + activeGroupLabel())}</span>` +
+  div.className = 'contact member' + (active ? ' active' : '');
+  const n = unreadByPeer[c.pubkey] || 0;
+  const t = lastTimeByPeer[c.pubkey] ? fmtContactTime(lastTimeByPeer[c.pubkey]) : '';
+  const av = c.avatar ? `<span class="av pic" style="background-image:url('${c.avatar}')"></span>`
+           : c.emoji ? `<span class="av emo">${emojiImg(escapeHtml(c.emoji))}</span>`
+           : `<span class="av">${escapeHtml(contactAvatar(c.name))}</span>`;
+  div.innerHTML = av + `<span class="nm">${escapeHtml(c.name)}</span>` +
                   `<div class="c-meta">` +
-                    (t ? `<span class="c-time${roomUnread ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
-                    (roomUnread ? `<span class="c-badge">${roomUnread > 99 ? '99+' : roomUnread}</span>` : '') +
+                    (t ? `<span class="c-time${n ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
+                    (n ? `<span class="c-badge">${n > 99 ? '99+' : n}</span>` : '') +
                   `</div>`;
-  div.onclick = () => selectRoom();
+  div.onclick = () => openMember(c);
   return div;
 }
+// Sidebar shows ALL my groups; under each: its room ("An alle") + its members.
 function renderContacts(filter) {
   const list = document.getElementById('contact-list');
   const f = (filter || '').toLowerCase();
-  const shown = allContacts.filter(c => c.name.toLowerCase().includes(f));
   list.innerHTML = '';
-  list.appendChild(roomRow()); // shared group room, always pinned on top
-  if (!shown.length) {
+  if (!groupsData.length) {
     const empty = document.createElement('div');
     empty.setAttribute('style', 'padding:14px;color:rgba(0,210,255,.4);font-size:13px');
-    empty.textContent = allContacts.length ? 'Kein Treffer.' : 'Noch keine Kontakte.';
+    empty.textContent = 'Noch keine Gruppe.';
     list.appendChild(empty);
     return;
   }
-  for (const c of shown) {
-    const div = document.createElement('div');
-    div.className = 'contact' + (activePeer && activePeer.name === c.name ? ' active' : '');
-    const n = unreadByPeer[c.pubkey] || 0;
-    const t = lastTimeByPeer[c.pubkey] ? fmtContactTime(lastTimeByPeer[c.pubkey]) : '';
-    const av = c.avatar ? `<span class="av pic" style="background-image:url('${c.avatar}')"></span>`
-             : c.emoji ? `<span class="av emo">${emojiImg(escapeHtml(c.emoji))}</span>`
-             : `<span class="av">${escapeHtml(contactAvatar(c.name))}</span>`;
-    div.innerHTML = av + `<span class="nm">${escapeHtml(c.name)}</span>` +
-                    `<div class="c-meta">` +
-                      (t ? `<span class="c-time${n ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
-                      (n ? `<span class="c-badge">${n > 99 ? '99+' : n}</span>` : '') +
-                    `</div>`;
-    div.onclick = () => selectContact(c);
-    list.appendChild(div);
+  for (const g of groupsData) {
+    const isActive = g.pwd === activeGroupPwd;
+    const collapsed = collapsedGroups.has(g.pwd);
+    // group header: click the NAME → make this group active (+ expand); click the TRIANGLE → just collapse/expand
+    const head = document.createElement('div');
+    head.className = 'grp-head' + (isActive ? ' active' : '') + (collapsed ? ' collapsed' : '');
+    const tri = document.createElement('span');
+    tri.className = 'gh-tri';
+    tri.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    tri.onclick = (e) => { e.stopPropagation(); if (collapsedGroups.has(g.pwd)) collapsedGroups.delete(g.pwd); else collapsedGroups.add(g.pwd); renderContacts(searchVal()); };
+    const nm = document.createElement('span');
+    nm.className = 'gh-name';
+    nm.textContent = g.label;
+    head.appendChild(tri); head.appendChild(nm);
+    head.onclick = () => { collapsedGroups.delete(g.pwd); if (g.pwd !== activeGroupPwd) switchGroup(g.pwd); else renderContacts(searchVal()); };
+    list.appendChild(head);
+    if (collapsed) continue; // collapsed → show only the header
+    // room row ("An alle")
+    const roomDiv = document.createElement('div');
+    roomDiv.className = 'contact room' + (isActive && activeRoom ? ' active' : '');
+    const rt = g.roomLastTime ? fmtContactTime(g.roomLastTime) : '';
+    roomDiv.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">An alle</span>` +
+                        `<div class="c-meta">` +
+                          (rt ? `<span class="c-time${g.roomUnread ? ' unread' : ''}">${escapeHtml(rt)}</span>` : '') +
+                          (g.roomUnread ? `<span class="c-badge">${g.roomUnread > 99 ? '99+' : g.roomUnread}</span>` : '') +
+                        `</div>`;
+    roomDiv.onclick = () => openGroupRoom(g.pwd);
+    list.appendChild(roomDiv);
+    // members (filtered by search)
+    for (const c of g.members) {
+      if (f && !c.name.toLowerCase().includes(f)) continue;
+      const active = isActive && !activeRoom && activePeer && activePeer.pubkey === c.pubkey;
+      list.appendChild(memberRow(c, active));
+    }
   }
+}
+// Open a group's room — switch the active group first (so its room key is in effect), then show it.
+async function openGroupRoom(pwd) {
+  if (pwd !== activeGroupPwd) await switchGroup(pwd);
+  selectRoom();
+}
+// Open a 1:1 — switch to that member's group (keeps the active-group highlight consistent), then show it.
+async function openMember(m) {
+  if (m.groupPwd && m.groupPwd !== activeGroupPwd) await switchGroup(m.groupPwd);
+  selectContact(m);
 }
 // Open the shared group room ("# Familie"): everyone in the group sees these messages.
 function selectRoom() {
   activeRoom = true;
   activePeer = null;
-  roomUnread = 0;
   markRead(roomReadKey());       // opening the room clears its unread count (persisted, per group)
+  const gd = groupsData.find(x => x.pwd === activeGroupPwd); if (gd) gd.roomUnread = 0; // clear badge now
   document.getElementById('chat-watermark').classList.add('hidden');
   const peerAv = document.getElementById('chat-peer-av');
   peerAv.className = 'room-av'; peerAv.style.backgroundImage = ''; peerAv.innerHTML = GROUP_ICON;
@@ -1863,13 +1926,15 @@ function subscribeMessages() {
       const m = payload.new;
       // Group-room message (addressed to my group) → render if the room is open, else bump its badge.
       if (m.room_id) {
-        if (m.room_id !== myGroupId) return; // another group's room
-        roomLastTime = m.created_at;
-        if (activeRoom) {
+        const gd = groupsData.find(x => x.groupId === m.room_id);
+        if (!gd) return; // not one of my groups
+        gd.roomLastTime = m.created_at;
+        const openHere = activeRoom && gd.pwd === activeGroupPwd; // this room is the one on screen
+        if (openHere) {
           await renderMsg(m);
           messagesEl.scrollTop = messagesEl.scrollHeight;
         } else if (m.pubkey !== myPubB64) {
-          roomUnread++;
+          gd.roomUnread++;
         }
         renderContacts(searchVal());
         return;
