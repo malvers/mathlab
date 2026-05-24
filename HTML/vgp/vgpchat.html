@@ -79,7 +79,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 .grp-head.active{color:#00d2ff}
 .grp-head .gh-tri{flex:0 0 auto;display:flex;align-items:center;color:rgba(0,210,255,.6);transition:transform .15s}
 .grp-head.collapsed .gh-tri{transform:rotate(-90deg)}
-.grp-head .gh-name{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp-head .gh-name{flex:1;min-width:0;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* indent rooms + members so they sit visually under their group header */
 .contact.room,.contact.member{margin-left:20px}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -144,11 +144,13 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #recovery-modal #rc-done{background:#00d2ff;color:#020410;border:none}
 .contact .nm{flex:1;min-width:0;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Right column: last-message time on top, green unread badge below (WhatsApp-style) */
-.contact .c-meta{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:42px}
-.contact .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
-.contact .c-time.unread{color:rgb(121,158,49)}
+.contact .c-meta,.grp-head .c-meta{flex:0 0 auto;display:flex;flex-direction:row;align-items:center;gap:8px;min-width:42px;justify-content:flex-end}
+.contact .c-meta{flex-direction:column;align-items:flex-end;gap:5px}
+.contact .c-time,.grp-head .c-time{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:1;color:rgba(233,237,239,.45);white-space:nowrap}
+.contact .c-time.unread,.grp-head .c-time.unread{color:rgb(121,158,49)}
 /* Green unread indicator — shows the number of new messages from this contact */
-.contact .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgb(121,158,49);color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
+.contact .c-badge,.grp-head .c-badge{flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgb(121,158,49);color:#04230f;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center}
+.grp-head .c-meta{margin-left:auto}
 /* Chat panel */
 #chat-panel{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
 /* Subtle centered brand watermark — visible only while no chat is open */
@@ -1519,6 +1521,18 @@ function renderContacts(filter) {
     nm.className = 'gh-name';
     nm.textContent = g.label;
     head.appendChild(tri); head.appendChild(nm);
+    // collapsed → show latest time + green unread badge on the header, so you don't miss activity
+    if (collapsed) {
+      const groupUnread = (g.roomUnread || 0) + g.members.reduce((s, m) => s + (unreadByPeer[m.pubkey] || 0), 0);
+      let groupLast = g.roomLastTime;
+      for (const m of g.members) { const t = lastTimeByPeer[m.pubkey]; if (t && (!groupLast || t > groupLast)) groupLast = t; }
+      const tStr = groupLast ? fmtContactTime(groupLast) : '';
+      const meta = document.createElement('div');
+      meta.className = 'c-meta';
+      meta.innerHTML = (tStr ? `<span class="c-time${groupUnread ? ' unread' : ''}">${escapeHtml(tStr)}</span>` : '') +
+                       (groupUnread ? `<span class="c-badge">${groupUnread > 99 ? '99+' : groupUnread}</span>` : '');
+      head.appendChild(meta);
+    }
     head.onclick = () => { collapsedGroups.delete(g.pwd); if (g.pwd !== activeGroupPwd) switchGroup(g.pwd); else renderContacts(searchVal()); };
     list.appendChild(head);
     if (collapsed) continue; // collapsed → show only the header
@@ -1807,6 +1821,7 @@ async function initChat() {
   // Identity (signing key) + room password already came from the unlocked vault (activateVault).
   await ensureClient();
   chatReady = true;
+  collapseInactive(); // start focused: only the active group is open
   dbg('Supabase-Client erstellt');
   await loadContacts();      // fill the sidebar
   if (!signingUp) await checkAccountAlive(); // deleted-elsewhere device logs out on load
