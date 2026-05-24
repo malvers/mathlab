@@ -435,6 +435,9 @@ const BACKUP_OK_KEY = 'vgp-backup-ok';     // this device knows a server backup 
 const SUPABASE_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
 
+// ===========================================================================
+// SETUP — logging, Supabase client, group-key globals
+// ===========================================================================
 function dbg(msg) {
   try { if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg); } catch(_) {}
   console.log('[chat]', msg);
@@ -505,6 +508,9 @@ if (urlParamName) {
   myNameEl.value = localStorage.getItem(NAME_KEY) || '';
 }
 
+// ===========================================================================
+// EMOJI & AVATARS — per-person emoji/picture, rendering, picker
+// ===========================================================================
 // --- Emoji avatar: chosen per person, shown left of the name and prefixed to the sender ---
 const nameEmojiBtn = document.getElementById('name-emoji');
 const msgEmojiBtn = document.getElementById('msg-emoji');
@@ -636,6 +642,9 @@ document.getElementById('avatar-file').onchange = e => { chooseAvatarPicture(e.t
 avatarChoice.addEventListener('click', e => { if (e.target === avatarChoice) avatarChoice.classList.add('hidden'); });
 
 // One-time recovery code modal (shown after sign-up)
+// ===========================================================================
+// MODALS — recovery code, styled confirm, styled prompt
+// ===========================================================================
 function showRecoveryModal(code) {
   document.getElementById('rc-code').textContent = code;
   document.getElementById('recovery-modal').classList.remove('hidden');
@@ -687,6 +696,9 @@ msgEmojiBtn.onclick = () => {
   openEmojiPanel();
 };
 
+// ===========================================================================
+// NAMES — name_id (HMAC), claim a name in a group
+// ===========================================================================
 // --- Name binding: name_id = HMAC(name), reserved once in the identities table (name ↔ pubkey) ---
 function bufToHex(buf) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -736,6 +748,9 @@ async function claimName(name) {
   return true;
 }
 
+// ===========================================================================
+// HELP & STATS — info panels
+// ===========================================================================
 document.getElementById('help-close').onclick = () => document.getElementById('help-panel').classList.add('hidden');
 document.getElementById('stats-close').onclick = () => document.getElementById('stats-panel').classList.add('hidden');
 
@@ -771,6 +786,9 @@ async function showStats() {
   dbg(`Stats: ${count ?? data.length} Nachrichten, ~${fmtBytes(bytes)}`);
 }
 
+// ===========================================================================
+// AUTH — onboarding (sign up / join / login), password strength, eye toggle
+// ===========================================================================
 // --- Auth screen: sign up (Name + Konto-Passwort + Gruppen-Passwort) / login (Konto-Passwort) ---
 const authPanel = document.getElementById('auth-panel');
 const authNameEl = document.getElementById('auth-name');
@@ -969,6 +987,9 @@ async function logoutDevice() {
 // Lock-screen link: switch to a different account (same local wipe as logging out).
 document.getElementById('auth-forgot').onclick = logoutDevice;
 // Profile overflow menu (⋮) — account actions (delete account for now; grows later)
+// ===========================================================================
+// MENU & GROUPS — ⋮ menu, group switcher, create/join a group
+// ===========================================================================
 const headMenu = document.getElementById('head-menu');
 document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); renderGroupMenu(); headMenu.classList.toggle('hidden'); };
 document.getElementById('menu-e2e').onclick = () => { headMenu.classList.add('hidden'); uiConfirm('Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.', { alert: true, okText: 'Alles klar' }); };
@@ -1084,6 +1105,9 @@ setTimeout(() => {
 
 // Derive the HMAC key (name uniqueness) from the room password. No AES key here anymore —
 // 1:1 message encryption uses per-pair ECDH keys (deriveChatKey), not the room password.
+// ===========================================================================
+// CRYPTO — group keys (HMAC/dir/room/group_id), group_meta, encrypt/decrypt
+// ===========================================================================
 async function initCrypto(password) {
   hmacKey = await deriveHmacKey(password);
   // Directory key: encrypts profile fields (name/emoji/avatar) so only members (not the server) read them.
@@ -1159,6 +1183,9 @@ async function decryptText(cipherB64, key) {
   }
 }
 
+// ===========================================================================
+// IDENTITY — ECDSA/ECDH keys, sign & verify
+// ===========================================================================
 // --- Device signing identity (ECDSA P-256). Private key is non-extractable and lives only in
 // IndexedDB on this device (Signal-style). Each message is signed; receivers verify the signature
 // against the public key bound to the sender's name → cryptographic anti-impersonation. ---
@@ -1180,6 +1207,9 @@ async function verifyText(text, sigB64, pubB64) {
     return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pub, unb64(sigB64), new TextEncoder().encode(text));
   } catch (_) { return false; }
 }
+// ===========================================================================
+// CONTACTS & ROOM — list, pinned group room, selection, meta (unread/time)
+// ===========================================================================
 // --- Contact list (everyone registered, except me) ---
 let activePeer = null;          // the contact we're currently chatting with (1:1)
 let activeRoom = false;         // true when the shared group room ("# Familie") is open instead of a 1:1
@@ -1392,6 +1422,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ===========================================================================
+// VAULT — local app-lock (account password wraps the keypairs + groups)
+// ===========================================================================
 // --- Account-password vault (WhatsApp/Signal-style app lock) ---
 // The account password derives a wrapping key (PBKDF2) that encrypts a local blob holding the
 // private signing key + the room (E2E) password. Nothing is usable until the account password
@@ -1434,6 +1467,9 @@ async function createVault(name, accountPwd, groupPwd, groupLabel) {
   return payload;
 }
 
+// ===========================================================================
+// BACKUP & SESSION — server envelope backup, restore, activate vault, initChat
+// ===========================================================================
 // --- Server backup (multi-device, "envelope"): a random master key encrypts the vault; the master
 // key is wrapped twice (by account+room password, and by a one-time recovery code). Server holds
 // only ciphertext — it can read nothing. Restore on any device via password OR recovery code. ---
@@ -1580,6 +1616,9 @@ async function initChat() {
 }
 
 let activeChatKey = null; // ECDH-derived AES key for the currently open 1:1 conversation
+// ===========================================================================
+// RECEIPTS — delivery/read ticks (1:1 only)
+// ===========================================================================
 // --- Delivery/read receipts (✓ / ✓✓ gray / ✓✓ blue) ---
 // receipts(reader=recipient pubkey, peer=sender pubkey, delivered_at, read_at): per-conversation marks.
 let activeReceipt = null;  // the open peer's receipt ABOUT my messages (reader=peer, peer=me)
@@ -1626,6 +1665,9 @@ function updateTicks() {
   });
 }
 
+// ===========================================================================
+// MESSAGES — load, realtime subscribe, render, send (1:1 + group room)
+// ===========================================================================
 async function loadMessages() {
   // Shared group room: fetch everything addressed to this group (room_id), decrypt with roomKey.
   if (activeRoom) {
@@ -1835,6 +1877,9 @@ async function renameAccount(newRaw) {
   loadContacts();
 }
 
+// ===========================================================================
+// COMMANDS — slash-command registry + autocomplete box
+// ===========================================================================
 // --- Slash-command registry — single source of truth for autocomplete + execution ---
 const CMD_LIST = [
   { cmd: '/help',    desc: 'Befehlsübersicht anzeigen',        run: () => document.getElementById('help-panel').classList.remove('hidden') },
