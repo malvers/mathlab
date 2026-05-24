@@ -405,7 +405,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <div class="cf-box">
     <h3>Neue Gruppe</h3>
     <div class="fld"><label for="gm-name">Gruppenname</label><input id="gm-name" autocomplete="off" placeholder="z. B. Familie Müller"></div>
-    <div class="fld"><label for="gm-pwd">Gruppen-Passwort</label><input id="gm-pwd" type="password" autocomplete="new-password" readonly placeholder="min. 6 Zeichen"><button type="button" class="pwd-eye" id="gm-eye" aria-label="anzeigen"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div>
+    <div class="fld"><label for="gm-pwd">Gruppen-Passwort</label><input id="gm-pwd" type="text" autocomplete="off" placeholder="min. 6 Zeichen"></div>
     <div class="cf-btns">
       <button type="button" id="gm-no">Abbrechen</button>
       <button type="button" id="gm-yes">Anlegen</button>
@@ -758,16 +758,16 @@ function uiNewGroup() {
   return new Promise(resolve => {
     const modal = document.getElementById('group-modal');
     const nameEl = document.getElementById('gm-name'), pwdEl = document.getElementById('gm-pwd');
-    const yes = document.getElementById('gm-yes'), no = document.getElementById('gm-no'), eye = document.getElementById('gm-eye');
-    nameEl.value = ''; pwdEl.value = ''; pwdEl.type = 'password';
-    pwdEl.setAttribute('readonly', ''); // re-arm the no-password-manager guard on every open
+    const yes = document.getElementById('gm-yes'), no = document.getElementById('gm-no');
+    nameEl.value = ''; pwdEl.value = '';
+    // Both are plain text inputs (no type="password") → Firefox sees no login pair, so no
+    // "Passwörter verwalten" overlay on either field. The group password is shared anyway.
     modal.classList.remove('hidden');
     setTimeout(() => nameEl.focus(), 0);
-    const done = val => { modal.classList.add('hidden'); yes.onclick = no.onclick = eye.onclick = nameEl.onkeydown = pwdEl.onkeydown = null; resolve(val); };
+    const done = val => { modal.classList.add('hidden'); yes.onclick = no.onclick = nameEl.onkeydown = pwdEl.onkeydown = null; resolve(val); };
     const submit = () => done({ name: nameEl.value.trim(), pwd: pwdEl.value });
     yes.onclick = submit;
     no.onclick = () => done(null);
-    eye.onclick = () => { pwdEl.type = pwdEl.type === 'password' ? 'text' : 'password'; };
     const onKey = e => { if (e.key === 'Enter') submit(); else if (e.key === 'Escape') done(null); };
     nameEl.onkeydown = onKey; pwdEl.onkeydown = onKey;
   });
