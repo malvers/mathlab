@@ -81,25 +81,25 @@ input:focus{outline:none;border-color:var(--cyan)}
 
   <div class="group">
     <h2>RGB</h2>
-    <div class="slider"><label>R</label><input type="range" id="r-range" min="0" max="255"><input type="number" id="r-num" min="0" max="255"></div>
-    <div class="slider"><label>G</label><input type="range" id="g-range" min="0" max="255"><input type="number" id="g-num" min="0" max="255"></div>
-    <div class="slider"><label>B</label><input type="range" id="b-range" min="0" max="255"><input type="number" id="b-num" min="0" max="255"></div>
+    <div class="slider"><label>R</label><input type="range" id="r-range" min="0" max="255" aria-label="Rot"><input type="number" id="r-num" min="0" max="255" aria-label="Rot-Wert"></div>
+    <div class="slider"><label>G</label><input type="range" id="g-range" min="0" max="255" aria-label="Grün"><input type="number" id="g-num" min="0" max="255" aria-label="Grün-Wert"></div>
+    <div class="slider"><label>B</label><input type="range" id="b-range" min="0" max="255" aria-label="Blau"><input type="number" id="b-num" min="0" max="255" aria-label="Blau-Wert"></div>
   </div>
 
   <div class="group">
     <h2>HSL</h2>
-    <div class="slider"><label>H</label><input type="range" id="h-range" min="0" max="360"><input type="number" id="h-num" min="0" max="360"></div>
-    <div class="slider"><label>S</label><input type="range" id="s-range" min="0" max="100"><input type="number" id="s-num" min="0" max="100"></div>
-    <div class="slider"><label>L</label><input type="range" id="l-range" min="0" max="100"><input type="number" id="l-num" min="0" max="100"></div>
+    <div class="slider"><label>H</label><input type="range" id="h-range" min="0" max="360" aria-label="Farbton (H)"><input type="number" id="h-num" min="0" max="360" aria-label="Farbton-Wert"></div>
+    <div class="slider"><label>S</label><input type="range" id="s-range" min="0" max="100" aria-label="Sättigung (S)"><input type="number" id="s-num" min="0" max="100" aria-label="Sättigung-Wert"></div>
+    <div class="slider"><label>L</label><input type="range" id="l-range" min="0" max="100" aria-label="Helligkeit (L)"><input type="number" id="l-num" min="0" max="100" aria-label="Helligkeit-Wert"></div>
   </div>
 
   <div class="group" id="target">
     <div class="thead"><h2>ZIEL</h2><label class="chk"><input type="checkbox" id="live" checked>Live anwenden</label></div>
     <button id="pick-el" type="button" title="Element im Hauptfenster anklicken">🎯&nbsp; Element anklicken</button>
-    <div class="line"><span>Element</span><select id="el-combo"><option value="">— Element wählen —</option></select></div>
+    <div class="line"><span>Element</span><select id="el-combo" aria-label="Ziel-Element"><option value="">— Element wählen —</option></select></div>
     <input type="hidden" id="selector" value="#messages, #chat-head">
     <div class="line"><span>Eigenschaft</span>
-      <select id="prop">
+      <select id="prop" aria-label="Eigenschaft">
         <option value="background">background</option>
         <option value="backgroundColor">background-color</option>
         <option value="color">color (Text)</option>
@@ -182,11 +182,11 @@ function setRgb(next, apply = true) { rgb = { r: clamp(next.r, 0, 255), g: clamp
 function status(msg, muted) {
   const s = $('status'); if (s) { s.textContent = msg; s.className = muted ? 'muted' : ''; }  // status line removed from UI
   // Messages live in the main window's DEBUG panel (Doc keeps it open) via the opener's global dbg().
-  try { const o = window.opener; if (o && !o.closed && typeof o.dbg === 'function') o.dbg('[picker] ' + msg); } catch (_) {}
+  try { const o = HOST; if (o && !o.closed && typeof o.dbg === 'function') o.dbg('[picker] ' + msg); } catch (_) {}
 }
 function applyToTarget() {
   if (!$('live').checked) { status('Live aus.', true); return; }
-  const o = window.opener;
+  const o = HOST;
   if (!o || o.closed) { status('Kein Hauptfenster verbunden — Picker aus der App heraus öffnen (siehe Konsolen-Snippet).', true); return; }
   try {
     const sel = $('selector').value.trim();
@@ -214,7 +214,7 @@ function parseCssColor(str) {
 // Returns true if it adopted a color (and rendered); must be called BEFORE the first render() so it
 // reads the pristine background instead of a value we already painted in.
 function initFromTarget() {
-  const o = window.opener;
+  const o = HOST;
   if (!o || o.closed) return false;
   try {
     const sel = $('selector').value.trim();
@@ -247,7 +247,7 @@ $('prop').addEventListener('change', initFromTarget);
 // Combo: list every id'd element in the WHOLE app (sidebar, header, panels …) so any part can be targeted.
 function populateElementCombo() {
   const combo = $('el-combo');
-  const o = window.opener;
+  const o = HOST;
   combo.length = 1;                         // keep the leading placeholder
   if (!o || o.closed) return;
   const SKIP = { STYLE: 1, SCRIPT: 1, LINK: 1, META: 1, TITLE: 1, BASE: 1, TEMPLATE: 1, NOSCRIPT: 1 };
@@ -311,7 +311,7 @@ function cssPath(el) {
 
 // "Element anklicken": highlight elements in the main window on hover, click to pick as target.
 function pickElementTarget() {
-  const o = window.opener;
+  const o = HOST;
   if (!o || o.closed) { status('Kein Hauptfenster verbunden.'); return; }
   const doc = o.document;
   let last = null;
@@ -354,7 +354,7 @@ $('pipette').addEventListener('click', async () => {
 
 // Fallback picker: next click on an element in the main window adopts that element's CSS color.
 function pickFromOpenerElement() {
-  const o = window.opener;
+  const o = HOST;
   if (!o || o.closed) { status('Keine EyeDropper-API und kein Hauptfenster verbunden → Element-Pick nicht möglich.'); return; }
   const propName = $('prop').value === 'color' ? 'color' : $('prop').value === 'borderColor' ? 'borderTopColor' : 'backgroundColor';
   const doc = o.document;
@@ -388,7 +388,7 @@ window.addEventListener('pagehide', saveBounds);
 // never paint our default in before reading.
 if (!initFromTarget()) render();
 populateElementCombo();   // fill the combo with every id'd element across the whole app
-if (!window.opener) status('Standalone — zum Live-Steuern aus dem Hauptfenster heraus öffnen (siehe Konsolen-Snippet).', true);
+if (!HOST) status('Standalone — zum Live-Steuern aus dem Hauptfenster heraus öffnen (siehe Konsolen-Snippet).', true);
 </script>
 </body>
 </html>
