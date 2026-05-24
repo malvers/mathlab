@@ -54,9 +54,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 /* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
 /* Own-profile strip at the TOP of the sidebar — same look as before (full-width dark strip) */
 #sidebar-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
-#sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#sidebar-head #my-name:focus{outline:none}
-#name-emoji{flex:0 0 auto;position:static;transform:none;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:42px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+#group-name{flex:1;min-width:0;color:#e9edef;font-size:18px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* "me" row pinned at the bottom of the sidebar (own identity moved out of the header) */
+#me-row{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#0c1422;border-top:1px solid rgba(0,210,255,.12)}
+#me-row #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#me-row #my-name:focus{outline:none}
+#name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 #contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
 #contact-search::placeholder{color:rgba(0,210,255,.3)}
@@ -383,6 +386,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   </div>
   <p id="auth-hint">Mit deinem Konto-Passwort entsperren.</p>
   <input id="auth-name" placeholder="Name" aria-label="Name" maxlength="30" autocomplete="off">
+  <input id="auth-groupname" placeholder="Gruppenname (z. B. Familie Müller)" aria-label="Gruppenname" maxlength="40" autocomplete="off">
   <div class="pwd-wrap">
     <input id="auth-pwd" type="password" placeholder="Konto-Passwort" aria-label="Konto-Passwort" autocomplete="off" readonly>
     <button type="button" class="pwd-eye" id="auth-pwd-eye" aria-label="anzeigen">
@@ -770,6 +774,7 @@ async function showStats() {
 // --- Auth screen: sign up (Name + Konto-Passwort + Gruppen-Passwort) / login (Konto-Passwort) ---
 const authPanel = document.getElementById('auth-panel');
 const authNameEl = document.getElementById('auth-name');
+const authGroupNameEl = document.getElementById('auth-groupname');
 const authPwdEl = document.getElementById('auth-pwd');
 const authRoomEl = document.getElementById('auth-room');
 const authErr = document.getElementById('auth-err');
@@ -809,6 +814,8 @@ function setAuthMode(mode) {
   const isNew = (mode === 'create' || mode === 'join');
   const restore = mode === 'login' && !vaultExists(); // login on a device with no local vault → restore from server
   authNameEl.style.display = '';
+  authGroupNameEl.style.display = (mode === 'create') ? '' : 'none'; // group name only when founding
+  authGroupNameEl.value = '';
   authRoomEl.closest('.pwd-wrap').style.display = (isNew || restore) ? '' : 'none'; // hide the whole wrap (incl. its eye)
   authErr.classList.add('hidden');
   authPwdEl.value = '';
@@ -817,13 +824,13 @@ function setAuthMode(mode) {
   authForgot.style.display = (mode === 'login' && vaultExists()) ? '' : 'none'; // only when there's a vault to log out
   if (mode === 'create') {
     authHint.style.display = '';
-    authHint.textContent = 'Gründe deine Gruppe: denk dir ein Gruppen-Passwort aus und teile es mit deinen Leuten. Niemand sonst kann mitlesen.';
+    authHint.textContent = 'Gründe deine Gruppe: gib ihr einen Namen und ein Gruppen-Passwort. Beides teilst du mit deinen Leuten — niemand sonst kann mitlesen.';
     authRoomEl.placeholder = 'Neues Gruppen-Passwort (zum Teilen)';
     authGo.textContent = 'Gruppe gründen';
     authNameEl.value = ''; authNameEl.readOnly = false;
   } else if (mode === 'join') {
     authHint.style.display = '';
-    authHint.textContent = 'Tritt einer Gruppe bei: gib das Gruppen-Passwort ein, das du bekommen hast.';
+    authHint.textContent = 'Tritt einer Gruppe bei: gib das Gruppen-Passwort ein, das du bekommen hast. Den Namen der Gruppe holen wir automatisch.';
     authRoomEl.placeholder = 'Gruppen-Passwort (erhalten)';
     authGo.textContent = 'Beitreten';
     authNameEl.value = ''; authNameEl.readOnly = false;
@@ -850,7 +857,6 @@ async function authSubmit() {
   authGo.disabled = true;
   try {
     if (authMode === 'create' || authMode === 'join') {
-      signingUp = true; // claimName runs after initChat → don't let the alive-check fire too early
       const name = authNameEl.value.trim().toLowerCase();
       const pwd = authPwdEl.value, room = authRoomEl.value;
       if (!name || !pwd || !room) return showAuthErr('Bitte alle Felder ausfüllen.');
@@ -858,7 +864,27 @@ async function authSubmit() {
       if (!pwdStrength(pwd).ok) return showAuthErr('Konto-Passwort zu schwach — mind. 8 Zeichen, besser mit Zahl & Sonderzeichen.');
       // The group password IS the group: who knows it, joins it. (No fixed access code anymore.)
       if (room.length < 6) return showAuthErr('Gruppen-Passwort: mindestens 6 Zeichen.');
-      const vault = await createVault(name, pwd, room);
+      // The shared group name decides found-vs-join — and catches a mistyped group password.
+      const existing = await readGroupMeta(room);
+      let groupLabel;
+      if (authMode === 'create') {
+        const gname = authGroupNameEl.value.trim();
+        if (!gname) return showAuthErr('Bitte einen Gruppennamen eingeben.');
+        if (existing && existing !== 'NOMETA') return showAuthErr(`Dieses Gruppen-Passwort gehört schon zur Gruppe „${existing}". Nutze „Beitreten" — oder wähle ein anderes Passwort.`);
+        groupLabel = gname;
+      } else { // join: the name comes from the server, not typed
+        if (existing === null) {
+          // Group password points at no existing group → typo, or it was never founded.
+          if (await uiConfirm('Zu diesem Gruppen-Passwort gibt es noch keine Gruppe.\n\nHast du dich vertippt — oder willst du sie jetzt gründen?', { okText: 'Gründen' })) {
+            setAuthMode('create'); authRoomEl.value = room; authGroupNameEl.focus();
+          }
+          return;
+        }
+        groupLabel = (existing === 'NOMETA') ? 'Gruppe' : existing; // legacy fallback if table missing
+        if (existing !== 'NOMETA' && !await uiConfirm(`Beitreten zur Gruppe „${existing}"?`, { okText: 'Beitreten' })) return;
+      }
+      signingUp = true; // claimName runs after initChat → don't let the alive-check fire too early
+      const vault = await createVault(name, pwd, room, groupLabel);
       await activateVault(vault);
       sessionStorage.setItem(SESSION_PWD_KEY, pwd); // stay unlocked across reloads in this tab
       authPanel.classList.add('hidden');
@@ -871,6 +897,7 @@ async function authSubmit() {
         return;
       }
       localStorage.setItem(NAME_KEY, name);
+      if (authMode === 'create') await writeGroupMeta(room, groupLabel); // publish the shared group name once
       // Multi-device: stash an encrypted backup on the server + show the one-time recovery code
       const recovery = await createBackup(pwd, vault);
       if (recovery) { localStorage.setItem(BACKUP_OK_KEY, '1'); showRecoveryModal(recovery); }
@@ -909,7 +936,7 @@ async function authSubmit() {
 }
 authGo.onclick = authSubmit;
 // Enter advances to the next VISIBLE field (login hides name+room); on the last one it submits.
-const authFields = [authNameEl, authPwdEl, authRoomEl];
+const authFields = [authNameEl, authGroupNameEl, authPwdEl, authRoomEl];
 authFields.forEach(el => el.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   e.preventDefault();
@@ -949,11 +976,20 @@ document.getElementById('menu-logout').onclick = () => { headMenu.classList.add(
 document.getElementById('menu-delete').onclick = () => { headMenu.classList.add('hidden'); deleteAccount(); };
 document.getElementById('menu-newgroup').onclick = async () => {
   headMenu.classList.add('hidden');
-  const pwd = await uiPrompt('Gruppen-Passwort der Gruppe, der du beitreten / die du anlegen willst (min. 6 Zeichen):', { placeholder: 'Gruppen-Passwort', password: true, okText: 'Weiter' });
+  const pwd = (await uiPrompt('Gruppen-Passwort der Gruppe, der du beitreten / die du anlegen willst (min. 6 Zeichen):', { placeholder: 'Gruppen-Passwort', password: true, okText: 'Weiter' }) || '').trim();
   if (!pwd) return;
-  const label = await uiPrompt('Name dieser Gruppe (nur für dich sichtbar):', { placeholder: 'z. B. Familie', initial: 'Neue Gruppe', okText: 'Anlegen' });
-  if (label === null) return;
-  joinGroup(pwd, label.trim() || 'Gruppe');
+  if (pwd.length < 6) { uiConfirm('Gruppen-Passwort: mindestens 6 Zeichen.', { alert: true, okText: 'OK' }); return; }
+  const existing = await readGroupMeta(pwd);
+  if (existing && existing !== 'NOMETA') {           // group exists → join under its shared name
+    if (!await uiConfirm(`Beitreten zur Gruppe „${existing}"?`, { okText: 'Beitreten' })) return;
+    joinGroup(pwd, existing);
+    return;
+  }
+  // No such group yet (or meta unavailable) → found it: ask for a name and publish it.
+  const label = (await uiPrompt('Diese Gruppe gibt es noch nicht — gib ihr einen Namen:', { placeholder: 'z. B. Familie Müller', okText: 'Gründen' }) || '').trim();
+  if (!label) return;
+  if (existing !== 'NOMETA') await writeGroupMeta(pwd, label); // publish the shared name
+  joinGroup(pwd, label);
 };
 // Render the group list inside the ⋮ menu (active group marked); each entry switches groups.
 function renderGroupMenu() {
@@ -1052,10 +1088,7 @@ async function initCrypto(password) {
   hmacKey = await deriveHmacKey(password);
   // Directory key: encrypts profile fields (name/emoji/avatar) so only members (not the server) read them.
   const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-  dirKey = await crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-dir-salt-v1'), iterations: 200000, hash: 'SHA-256' },
-    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
+  dirKey = await deriveDirKey(password);
   // Room key: encrypts the shared group-room chat. Every member derives the SAME key from the group
   // password they typed → no key exchange needed (same trust model as the directory: group pwd = member).
   roomKey = await crypto.subtle.deriveKey(
@@ -1071,6 +1104,31 @@ async function deriveGroupId(password) {
   const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('vgp-group-salt-v1'), iterations: 100000, hash: 'SHA-256' }, km, 256);
   return bufToHex(bits);
+}
+// AES directory key for an ARBITRARY group password (used both by initCrypto for the active group
+// and by the group_meta lookups during onboarding, before a group is activated).
+async function deriveDirKey(password) {
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-dir-salt-v1'), iterations: 200000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+// --- Shared group name (group_meta): the authoritative name everyone sees. Stored encrypted with the
+// group key (server learns nothing). Lets us tell "join an existing group" from "found a new one". ---
+async function readGroupMeta(password) {
+  const gid = await deriveGroupId(password);
+  let { data, error } = await client.from('group_meta').select('enc_name').eq('group_id', gid).maybeSingle();
+  if (error) { dbg('group_meta-Lookup: ' + error.message); return 'NOMETA'; } // table missing → legacy fallback
+  if (!data) return null;                                                     // table exists, no such group
+  const name = await decryptText(data.enc_name, await deriveDirKey(password));
+  return name === '[falscher Schlüssel]' ? null : name;
+}
+async function writeGroupMeta(password, name) {
+  const gid = await deriveGroupId(password);
+  const enc = await encryptText((name || 'Familie').trim(), await deriveDirKey(password));
+  const { error } = await client.from('group_meta').insert({ group_id: gid, enc_name: enc }); // first writer wins
+  if (error) dbg('group_meta-Insert: ' + error.message);
 }
 // Encrypt/decrypt a directory field with the room-derived key. decrypt() passes plaintext through,
 // so legacy unencrypted rows still display.
@@ -1135,6 +1193,8 @@ function activeGroupLabel() {
 }
 // Read-state key for the group room (per group, so unread is tracked separately per family).
 function roomReadKey() { return '#room:' + myGroupId; }
+// Reflect the active group's name in the sidebar header (top-left = the group, not "me").
+function setGroupName() { const el = document.getElementById('group-name'); if (el) el.textContent = activeGroupLabel(); }
 function contactAvatar(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
 // Resolve a signing pubkey to a display name (for sender labels in the group room).
 function nameForPubkey(pub) {
@@ -1218,14 +1278,17 @@ async function loadContacts() {
   allContacts = rows.filter(r => r.name && r.name.toLowerCase() !== me && r.ecdh_pubkey && r.owner)
                     .sort((a, b) => a.name.localeCompare(b.name));
   await computeContactMeta();
+  setGroupName(); // keep the header in sync with the active group (init / switch / join)
   renderContacts(searchVal());
 }
 // The pinned group-room row ("# Familie") at the very top of the sidebar — opens the shared room.
+// Group-of-people logo for the shared group room (inherits .room-av color via currentColor)
+const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:64%;height:64%" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
 function roomRow() {
   const div = document.createElement('div');
   div.className = 'contact room' + (activeRoom ? ' active' : '');
   const t = roomLastTime ? fmtContactTime(roomLastTime) : '';
-  div.innerHTML = `<span class="av room-av">#</span><span class="nm">${escapeHtml(activeGroupLabel())}</span>` +
+  div.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">${escapeHtml(activeGroupLabel())}</span>` +
                   `<div class="c-meta">` +
                     (t ? `<span class="c-time${roomUnread ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
                     (roomUnread ? `<span class="c-badge">${roomUnread > 99 ? '99+' : roomUnread}</span>` : '') +
@@ -1271,7 +1334,7 @@ function selectRoom() {
   markRead(roomReadKey());       // opening the room clears its unread count (persisted, per group)
   document.getElementById('chat-watermark').classList.add('hidden');
   const peerAv = document.getElementById('chat-peer-av');
-  peerAv.className = 'room-av'; peerAv.style.backgroundImage = ''; peerAv.textContent = '#';
+  peerAv.className = 'room-av'; peerAv.style.backgroundImage = ''; peerAv.innerHTML = GROUP_ICON;
   document.getElementById('chat-peer').textContent = activeGroupLabel();
   document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
   msgInput.disabled = false;
@@ -1358,14 +1421,14 @@ async function writeLocalVault(name, accountPwd, p) {
   localStorage.setItem(VAULT_KEY, JSON.stringify({ name, pubkey: p.pubB64, ecdhPubkey: p.ecdhPubB64, salt: b64(salt), enc: b64(combined) }));
 }
 // Sign up: generate the device keypairs (ECDSA + ECDH) and store them in the local vault.
-async function createVault(name, accountPwd, groupPwd) {
+async function createVault(name, accountPwd, groupPwd, groupLabel) {
   const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
   const pubB64 = b64(await crypto.subtle.exportKey('spki', kp.publicKey));
   const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
   const ek = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
   const ecdhPubB64 = b64(await crypto.subtle.exportKey('spki', ek.publicKey));
   const ecdhPrivJwk = await crypto.subtle.exportKey('jwk', ek.privateKey);
-  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, groups: [{ pwd: groupPwd, label: 'Gruppe 1' }], activeGroup: groupPwd };
+  const payload = { name, pubB64, privJwk, ecdhPubB64, ecdhPrivJwk, groups: [{ pwd: groupPwd, label: (groupLabel || 'Familie').trim() }], activeGroup: groupPwd };
   await writeLocalVault(name, accountPwd, payload);
   dbg('Vault angelegt für ' + name);
   return payload;
