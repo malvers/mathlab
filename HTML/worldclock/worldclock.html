@@ -1367,13 +1367,19 @@
                     ctx.textBaseline = "middle";
                     ctx.letterSpacing = "2px";
                     ctx.lineJoin = "round";
-                    ctx.font = `700 ${Math.max(10, r * 0.05)}px 'Orbitron', sans-serif`;
+                    ctx.font = `600 ${Math.max(9, r * 0.032)}px 'Orbitron', sans-serif`;
                     const _lbl = CW ? "SÜDPOL" : "NORDPOL";
-                    ctx.lineWidth = Math.max(2, r * 0.014);
-                    ctx.strokeStyle = "rgba(0,0,0,0.65)";   // dark outline → readable on grey land
-                    ctx.strokeText(_lbl, w / 2, h / 2);
-                    ctx.fillStyle = "rgba(235,242,248,0.95)"; // light fill
-                    ctx.fillText(_lbl, w / 2, h / 2);
+                    const _ly = h / 2 - r * 0.05;             // text slightly above the dot
+                    ctx.lineWidth = Math.max(1.5, r * 0.008);
+                    ctx.strokeStyle = "rgba(0,0,0,0.45)";    // subtle dark outline for legibility
+                    ctx.strokeText(_lbl, w / 2, _ly);
+                    ctx.fillStyle = "rgba(235,242,248,0.6)";  // light, low-key fill
+                    ctx.fillText(_lbl, w / 2, _ly);
+                    // small static red dot marking the pole at the centre (no animation)
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, Math.max(1.5, r * 0.008), 0, Math.PI * 2);
+                    ctx.fillStyle = "rgb(176,36,24)";
+                    ctx.fill();
                     ctx.restore();
                 }
             }
