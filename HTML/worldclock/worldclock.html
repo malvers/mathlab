@@ -982,6 +982,15 @@
                     return;
                 }
             }
+            // Direction-toggle icon hit test
+            if (dirIconHitbox) {
+                const dx = mxCanvas - dirIconHitbox.cx;
+                const dy = myCanvas - dirIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= dirIconHitbox.r) {
+                    setDirection(!CW);
+                    return;
+                }
+            }
 
             // Hit test for cities - rotate globe to city
             let hit = false;
@@ -1120,7 +1129,13 @@
                     const ddy = myCanvas - globeIconHitbox.cy;
                     overGlobeIcon = Math.sqrt(ddx*ddx + ddy*ddy) <= globeIconHitbox.r;
                 }
-                const onHittable = !!(found || foundFlagIdx !== null || overImprint || overGlobeIcon);
+                let overDirIcon = false;
+                if (dirIconHitbox) {
+                    const ddx = mxCanvas - dirIconHitbox.cx;
+                    const ddy = myCanvas - dirIconHitbox.cy;
+                    overDirIcon = Math.sqrt(ddx*ddx + ddy*ddy) <= dirIconHitbox.r;
+                }
+                const onHittable = !!(found || foundFlagIdx !== null || overImprint || overGlobeIcon || overDirIcon);
                 canvas.style.cursor = onHittable ? 'pointer' : 'default';
                 // In globe mode, only capture pointer events when over a hittable element
                 // so TrackballControls receives events for empty-area drags
@@ -1194,6 +1209,16 @@
                 return;
             }
 
+            // Direction-toggle hit test
+            if (dirIconHitbox) {
+                const dx = mxCanvas - dirIconHitbox.cx;
+                const dy = myCanvas - dirIconHitbox.cy;
+                if (Math.sqrt(dx*dx + dy*dy) <= dirIconHitbox.r) {
+                    setDirection(!CW);
+                    e.preventDefault();
+                    return;
+                }
+            }
             // Globe toggle hit test
             if (globeIconHitbox) {
                 const dx = mxCanvas - globeIconHitbox.cx;
@@ -1763,6 +1788,40 @@
             globeIconHitbox = {
                 cx: iconCx, cy: iconCy, r: iconR * 1.3
             };
+
+            // --- Rotation-direction toggle icon: a circular arrow, right of the globe icon ---
+            // Same coordinate space + hitbox style as the globe icon → reposition = change the offset below.
+            const dirCx = iconCx + iconR * 3.1;
+            const dirCy = iconCy + 1;
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
+                ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
+                const dirColor = window.useGlobe ? "#00d2ff" : "#888888";   // match the globe icon's colour
+                ctx.strokeStyle = dirColor;
+                ctx.fillStyle = dirColor;
+                ctx.lineWidth = Math.max(1, iconR * 0.07);                  // thinner
+                ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.translate(dirCx, dirCy);
+                if (!CW) ctx.scale(-1, 1);                 // default CCW = mirrored; CW = as drawn
+                const ar = iconR * 0.99;                   // 99% of the globe icon
+                const a0 = -Math.PI * 0.5, a1 = Math.PI * 0.95;   // ~260° arc, gap at the top-right for the head
+                ctx.beginPath();
+                ctx.arc(0, 0, ar, a0, a1);                 // clockwise (screen y-down)
+                ctx.stroke();
+                // arrowhead at the arc start (a0), pointing along the clockwise direction of travel
+                const hx = Math.cos(a0) * ar, hy = Math.sin(a0) * ar;
+                const tx = Math.sin(a0), ty = -Math.cos(a0);      // clockwise tangent
+                const px = -ty, py = tx;                           // perpendicular
+                const ah = iconR * 0.46, aw = iconR * 0.26;
+                ctx.beginPath();
+                ctx.moveTo(hx + tx * ah, hy + ty * ah);
+                ctx.lineTo(hx - tx * ah * 0.2 + px * aw, hy - ty * ah * 0.2 + py * aw);
+                ctx.lineTo(hx - tx * ah * 0.2 - px * aw, hy - ty * ah * 0.2 - py * aw);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+            dirIconHitbox = { cx: dirCx, cy: dirCy, r: iconR * 1.4 };
 
             ctx.restore();
 

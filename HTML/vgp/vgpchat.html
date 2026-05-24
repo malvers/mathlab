@@ -61,8 +61,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #group-name{flex:1;min-width:0;color:#e9edef;font-size:18px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* "me" row pinned at the bottom of the sidebar (own identity moved out of the header) */
 #me-row{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#0c1422;border-top:1px solid rgba(0,210,255,.12)}
-#me-row #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#me-row #my-name:focus{outline:none}
+#sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sidebar-head #my-name:focus{outline:none}
 #name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 #contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
@@ -308,8 +308,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="app">
   <aside id="sidebar">
     <div id="sidebar-head">
-      <span id="group-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span>
-      <span id="group-name" title="Gruppe">Familie</span>
+      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
+      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
       </button>
@@ -327,10 +327,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </div>
     <input id="contact-search" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off">
     <div id="contact-list"></div>
-    <div id="me-row">
-      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
-      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
-    </div>
   </aside>
   <section id="chat-panel">
     <header id="chat-head">
@@ -1227,7 +1223,7 @@ async function initCrypto(password) {
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
   myGroupId = await deriveGroupId(password); // public bucket id for contact-list scoping
-  dbg('Gruppen-Schlüssel abgeleitet (HMAC + Verzeichnis + Raum + group_id)');
+  dbg('Gruppen-Schlüssel abgeleitet (HMAC + Verzeichnis + Gruppen-Chat + group_id)');
 }
 // Public group identifier from the group password (PBKDF2 → hex). Stored clear on identities to
 // scope the contact list; it does NOT unlock anything (dirKey/hmacKey still need the password).
@@ -1454,7 +1450,7 @@ function roomRow() {
   const div = document.createElement('div');
   div.className = 'contact room' + (activeRoom ? ' active' : '');
   const t = roomLastTime ? fmtContactTime(roomLastTime) : '';
-  div.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">${escapeHtml(activeGroupLabel())}</span>` +
+  div.innerHTML = `<span class="av room-av">${GROUP_ICON}</span><span class="nm">${escapeHtml('An alle in ' + activeGroupLabel())}</span>` +
                   `<div class="c-meta">` +
                     (t ? `<span class="c-time${roomUnread ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
                     (roomUnread ? `<span class="c-badge">${roomUnread > 99 ? '99+' : roomUnread}</span>` : '') +
@@ -1818,12 +1814,12 @@ async function loadMessages() {
     activeReceipt = null;
     let { data, error } = await client.from('messages').select('*').eq('room_id', myGroupId).order('created_at', { ascending: true });
     if (error) {
-      dbg('Raum-Filter fehlgeschlagen, lade ungefiltert: ' + error.message);
+      dbg('Gruppen-Chat-Filter fehlgeschlagen, lade ungefiltert: ' + error.message);
       ({ data, error } = await client.from('messages').select('*').order('created_at', { ascending: true }));
     }
     if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
     const rows = (data || []).filter(m => m.room_id === myGroupId);
-    dbg(`${rows.length} Raum-Nachrichten in „${activeGroupLabel()}"`);
+    dbg(`${rows.length} Gruppen-Chat-Nachrichten in „${activeGroupLabel()}"`);
     messagesEl.innerHTML = '';
     for (const msg of rows) await renderMsg(msg);
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1911,6 +1907,10 @@ function subscribeMessages() {
       dbg('Kontakte geändert — Liste aktualisieren');
       loadContacts();
       checkAccountAlive();
+    })
+    // A group was renamed (group_meta changed) → if it's MY group, pull the new name live.
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'group_meta' }, async payload => {
+      if (payload.new && payload.new.group_id === myGroupId) { dbg('Gruppenname geändert — übernehme'); refreshGroupName(); }
     })
     .subscribe(status => {
       dbg('Realtime-Status: ' + JSON.stringify(status));
@@ -2102,10 +2102,10 @@ async function sendMsg() {
   if (activeRoom) {
     const encrypted = await encryptText(content, roomKey);
     const sig = await signText(encrypted + '|' + myGroupId); // signature bound to the room
-    dbg(`Sende (Raum, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
+    dbg(`Sende (Gruppen-Chat, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
     const { error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig });
-    if (error) { dbg('Sendefehler (Raum): ' + error.message); return; }
-    dbg('Raum-Nachricht gesendet');
+    if (error) { dbg('Sendefehler (Gruppen-Chat): ' + error.message); return; }
+    dbg('Gruppen-Chat-Nachricht gesendet');
     msgInput.value = ''; updateSendBtn();
     setTimeout(loadMessages, 300);
     return;
