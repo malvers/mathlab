@@ -49,11 +49,15 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #head-menu button.danger{color:rgb(176,36,24);font-weight:500}
 #head-menu button.danger:hover{background:rgba(176,36,24,.15)}
 #head-menu .menu-sep{height:1px;background:rgba(0,210,255,.18);margin:5px 6px}
+#head-menu #menu-groups{display:flex;flex-direction:column;gap:2px}
+#head-menu .menu-group{width:100%}
 #head-menu .menu-group.active{color:#00d2ff;font-weight:700}
 #head-menu #menu-newgroup{color:#00d2ff}
 /* compact own-profile strip at the bottom of the sidebar (avatar + name + lock), WA-style */
 /* Own-profile strip at the TOP of the sidebar — same look as before (full-width dark strip) */
 #sidebar-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#0c1422;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
+#group-icon{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:#15466a;color:#cfe4f7;display:flex;align-items:center;justify-content:center}
+#group-icon svg{width:18px;height:18px}
 #group-name{flex:1;min-width:0;color:#e9edef;font-size:18px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* "me" row pinned at the bottom of the sidebar (own identity moved out of the header) */
 #me-row{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#0c1422;border-top:1px solid rgba(0,210,255,.12)}
@@ -92,6 +96,11 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #confirm-modal #cf-text,#prompt-modal #pr-text{color:#e0e8f0;font-size:15px;line-height:1.55;white-space:pre-line;text-align:center}
 #prompt-modal #pr-input{border:none;border-radius:10px;background:#14203a;color:#e0e8f0;font-family:inherit;font-size:15px;padding:12px 14px;outline:none}
 #prompt-modal #pr-input:focus{box-shadow:0 0 0 1px rgba(0,210,255,.45)}
+#prompt-modal .pwd-wrap{max-width:none}
+#prompt-modal .pwd-wrap #pr-input{flex:1;min-width:0}
+#prompt-modal .pwd-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;line-height:0;padding:6px;z-index:2;color:rgba(0,210,255,.6);display:flex;align-items:center}
+#prompt-modal .pwd-eye:hover{color:#00d2ff}
+#prompt-modal .pwd-eye:focus{outline:none}
 #confirm-modal .cf-btns{display:flex;gap:12px}
 #confirm-modal .cf-btns button,#prompt-modal .cf-btns button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 #confirm-modal #cf-no,#prompt-modal #pr-no{border:1px solid rgba(0,210,255,.3);background:transparent;color:#00d2ff}
@@ -273,12 +282,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .contact .nm{font-size:19px}
   #contact-search,#my-name{font-size:18px}
 }
+/* LOCAL-environment marker — only shown when served from localhost/LAN. If you DON'T see red,
+   you're looking at the LIVE site. Online (docalvers.de) shows nothing. */
+.env-local::after{content:'';position:fixed;inset:0;border:5px solid rgb(176,36,24);pointer-events:none;z-index:99999}
+.env-local .env-badge{position:fixed;top:0;left:50%;transform:translateX(-50%);background:rgb(176,36,24);color:#fff;font:700 12px/1 system-ui,sans-serif;letter-spacing:2px;padding:6px 14px;border-radius:0 0 8px 8px;z-index:100000;pointer-events:none}
 </style>
 </head>
 <body>
 <div id="app">
   <aside id="sidebar">
     <div id="sidebar-head">
+      <span id="group-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span>
       <span id="group-name" title="Gruppe">Familie</span>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
@@ -874,6 +888,7 @@ async function authSubmit() {
   authErr.classList.add('hidden');
   authGo.disabled = true;
   try {
+    await ensureClient(); // needed up-front: group_meta lookup runs BEFORE initChat creates the client
     if (authMode === 'create' || authMode === 'join') {
       const name = authNameEl.value.trim().toLowerCase();
       const pwd = authPwdEl.value, room = authRoomEl.value;
@@ -1021,7 +1036,7 @@ function renderGroupMenu() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'menu-group' + (g.pwd === activeGroupPwd ? ' active' : '');
-    b.textContent = (g.pwd === activeGroupPwd ? '✓ ' : '👥 ') + g.label;
+    b.textContent = '👥 ' + g.label + (g.pwd === activeGroupPwd ? ' ✓' : '');
     b.onclick = () => { headMenu.classList.add('hidden'); switchGroup(g.pwd); };
     box.appendChild(b);
   }
@@ -1141,6 +1156,7 @@ async function deriveDirKey(password) {
 // --- Shared group name (group_meta): the authoritative name everyone sees. Stored encrypted with the
 // group key (server learns nothing). Lets us tell "join an existing group" from "found a new one". ---
 async function readGroupMeta(password) {
+  await ensureClient(); // may run before initChat() created the client (onboarding) → self-protect
   const gid = await deriveGroupId(password);
   let { data, error } = await client.from('group_meta').select('enc_name').eq('group_id', gid).maybeSingle();
   if (error) { dbg('group_meta-Lookup: ' + error.message); return 'NOMETA'; } // table missing → legacy fallback
@@ -1149,6 +1165,7 @@ async function readGroupMeta(password) {
   return name === '[falscher Schlüssel]' ? null : name;
 }
 async function writeGroupMeta(password, name) {
+  await ensureClient();
   const gid = await deriveGroupId(password);
   const enc = await encryptText((name || 'Familie').trim(), await deriveDirKey(password));
   const { error } = await client.from('group_meta').insert({ group_id: gid, enc_name: enc }); // first writer wins
@@ -1417,7 +1434,15 @@ document.addEventListener('keydown', e => {
     if (colorWin && !colorWin.closed) { colorWin.focus(); return; }
     let feat = 'width=1060,height=380';    // wide one-row default; restore last position & size if saved
     try { const b = JSON.parse(localStorage.getItem('cp-bounds-v3')); if (b && b.w && b.h) feat = `width=${b.w},height=${b.h},left=${b.x},top=${b.y}`; } catch (_) {}
-    colorWin = window.open('colorpicker.html?t=' + Date.now(), 'cp', feat); // cache-buster → always load the latest picker
+    // Open with an EMPTY url (about:blank) + write the markup in → Chrome shows no file-URL bar (like morph).
+    // window.opener + localStorage still work because about:blank inherits the opener's origin.
+    colorWin = window.open('', 'cp', feat);
+    if (colorWin) {
+      fetch('colorpicker.html?t=' + Date.now())     // cache-buster on the fetch, not on the popup URL
+        .then(r => r.text())
+        .then(html => { colorWin.document.open(); colorWin.document.write(html); colorWin.document.close(); })
+        .catch(err => dbg('Colorpicker laden fehlgeschlagen: ' + err.message));
+    }
     dbg(colorWin ? 'Colorpicker geöffnet (Taste c)' : 'Colorpicker: Popup blockiert?');
   }
 });
@@ -1987,6 +2012,20 @@ function escapeHtml(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+</script>
+<script>
+// Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
+(function () {
+  const h = location.hostname;
+  const local = h === '' || h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')
+             || /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h) || location.protocol === 'file:';
+  if (!local) return;
+  document.documentElement.classList.add('env-local');
+  const b = document.createElement('div');
+  b.className = 'env-badge';
+  b.textContent = 'LOKAL';
+  document.body.appendChild(b);
+})();
 </script>
 </body>
 </html>
