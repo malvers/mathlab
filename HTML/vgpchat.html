@@ -57,7 +57,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sidebar-head #my-name:focus{outline:none}
 #name-emoji{flex:0 0 auto;position:static;transform:none;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:42px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
-#contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:13px}
+#contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
 #contact-search::placeholder{color:rgba(0,210,255,.3)}
 #contact-list{flex:1;overflow-y:auto}
@@ -67,6 +67,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 .contact:hover{background:rgba(0,210,255,.06)}
 .contact.active{background:#18243c}
 .contact .av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:20px}
+.contact .room-av,#chat-peer-av.room-av{background:#15466a;color:#cfe4f7;font-weight:700}
 .contact .av.emo{font-size:36px;line-height:1;background:transparent}
 #chat-peer-av.emo{font-size:42px;line-height:1;background:transparent}
 /* Picture avatars (cover-cropped data URLs) */
@@ -122,8 +123,8 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* Chat header: same strip design + height as the sidebar profile header on the left */
 #chat-head{display:flex;gap:8px;padding:8px 12px;min-height:62px;background:#090d15;align-items:center;border-bottom:1px solid rgba(0,210,255,.12)}
 #chat-peer-av{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#283a55;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e9edef}
-#chat-peer-av:empty{display:none}
-#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:300;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chat-peer-av:empty:not(.pic){display:none}   /* picture avatars are empty of content but show a background-image */
+#chat-peer{flex:1;min-width:0;color:#e9edef;font-weight:300;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #back-btn{display:none;flex:0 0 auto;background:none;border:none;color:#00d2ff;cursor:pointer;padding:2px;align-items:center}
 #name-emoji:focus,#back-btn:focus{outline:none}
 /* Mobile / narrow: one column — sidebar by default, chat slides in when a contact is picked */
@@ -154,6 +155,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .msg.forged{outline:1px solid rgba(255,80,80,.6);background:rgba(120,20,20,.35)!important}
 .msg .sender .unverified{font-weight:700}
 .msg .text{word-wrap:break-word}
+.msg .sender{display:block;font-size:12px;font-weight:700;color:#7fd4ff;margin-bottom:2px}
 .msg .time{display:inline-block;float:right;font-size:11px;color:rgba(233,237,239,.5);margin:4px 0 -3px 10px;white-space:nowrap}
 /* Delivery/read ticks on own messages: ✓ sent · ✓✓ delivered (gray) · ✓✓ read (blue) */
 .msg .ticks{margin-left:3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgba(233,237,239,.55);letter-spacing:-3px}
@@ -274,8 +276,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="app">
   <aside id="sidebar">
     <div id="sidebar-head">
-      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
-      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
+      <span id="group-name" title="Gruppe">Familie</span>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
       </button>
@@ -291,6 +292,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </div>
     <input id="contact-search" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off">
     <div id="contact-list"></div>
+    <div id="me-row">
+      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
+      <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
+    </div>
   </aside>
   <section id="chat-panel">
     <header id="chat-head">
@@ -452,6 +457,7 @@ async function ensureClient() {
 }
 let hmacKey = null; // derived from the group password, used only to compute name_id (HMAC) for uniqueness
 let dirKey = null;  // directory key (AES) from the group password — encrypts profile name/emoji/avatar
+let roomKey = null; // group-room key (AES) from the group password — encrypts the shared family-room chat
 let myGroupId = null; // public bucket id (hash of the group password) → scopes the contact list to my group
 let myGroups = [];        // all group passwords this account has joined
 let activeGroupPwd = null; // the group password currently active (drives hmacKey/dirKey/group_id)
@@ -966,6 +972,7 @@ function renderGroupMenu() {
 // Reset the chat pane (used when switching/joining groups → different contact set)
 function resetChatView() {
   activePeer = null;
+  activeRoom = false;
   document.getElementById('chat-peer').textContent = '';
   const av = document.getElementById('chat-peer-av'); av.textContent = ''; av.style.backgroundImage = ''; av.className = '';
   document.getElementById('chat-watermark').classList.remove('hidden');
@@ -1049,8 +1056,14 @@ async function initCrypto(password) {
     { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-dir-salt-v1'), iterations: 200000, hash: 'SHA-256' },
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
+  // Room key: encrypts the shared group-room chat. Every member derives the SAME key from the group
+  // password they typed → no key exchange needed (same trust model as the directory: group pwd = member).
+  roomKey = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: new TextEncoder().encode('vgp-room-salt-v1'), iterations: 200000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
   myGroupId = await deriveGroupId(password); // public bucket id for contact-list scoping
-  dbg('Gruppen-Schlüssel abgeleitet (HMAC + Verzeichnis + group_id)');
+  dbg('Gruppen-Schlüssel abgeleitet (HMAC + Verzeichnis + Raum + group_id)');
 }
 // Public group identifier from the group password (PBKDF2 → hex). Stored clear on identities to
 // scope the contact list; it does NOT unlock anything (dirKey/hmacKey still need the password).
@@ -1110,9 +1123,30 @@ async function verifyText(text, sigB64, pubB64) {
   } catch (_) { return false; }
 }
 // --- Contact list (everyone registered, except me) ---
-let activePeer = null;          // the contact we're currently chatting with
+let activePeer = null;          // the contact we're currently chatting with (1:1)
+let activeRoom = false;         // true when the shared group room ("# Familie") is open instead of a 1:1
+let roomUnread = 0;             // unread count for the group room (local)
+let roomLastTime = null;        // last message time in the group room (for the pinned row)
 let allContacts = [];           // cached list for search filtering
+// Label of the currently active group (shown as the room name); falls back to "Familie".
+function activeGroupLabel() {
+  const g = myGroups.find(x => x.pwd === activeGroupPwd);
+  return (g && g.label) || 'Familie';
+}
+// Read-state key for the group room (per group, so unread is tracked separately per family).
+function roomReadKey() { return '#room:' + myGroupId; }
 function contactAvatar(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
+// Resolve a signing pubkey to a display name (for sender labels in the group room).
+function nameForPubkey(pub) {
+  if (pub === myPubB64) return myNameEl.value || 'ich';
+  const c = allContacts.find(x => x.pubkey === pub);
+  return c ? c.name : 'Unbekannt';
+}
+// Stable per-sender colour for room name labels (same person → same colour, like WhatsApp).
+function senderColor(pub) {
+  let h = 0; for (let i = 0; i < pub.length; i++) h = (h * 31 + pub.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360} 70% 72%)`;
+}
 
 // --- Contact-row meta: green unread badge + time of the last message per contact ---
 const READ_KEY = 'vgp-read';    // { peerUid: ISO timestamp of when we last opened that chat }
@@ -1153,6 +1187,16 @@ async function computeContactMeta() {
       if (new Date(m.created_at).getTime() > base) unreadByPeer[peer] = (unreadByPeer[peer] || 0) + 1;
     }
   }
+  // Group room: last-message time + unread (messages from others since I last opened the room).
+  roomLastTime = null; roomUnread = 0;
+  let { data: rdata, error: rerr } = await client.from('messages').select('created_at,pubkey,room_id').eq('room_id', myGroupId);
+  if (rerr) ({ data: rdata } = await client.from('messages').select('created_at,pubkey,room_id'));
+  const roomBase = reads[roomReadKey()] ? new Date(reads[roomReadKey()]).getTime() : 0;
+  for (const m of (rdata || [])) {
+    if (m.room_id !== myGroupId) continue;
+    if (!roomLastTime || m.created_at > roomLastTime) roomLastTime = m.created_at;
+    if (m.pubkey !== myPubB64 && new Date(m.created_at).getTime() > roomBase) roomUnread++;
+  }
 }
 const searchVal = () => document.getElementById('contact-search').value;
 // Relative times age → refresh the contact list every minute so "vor x Min" stays correct.
@@ -1176,13 +1220,30 @@ async function loadContacts() {
   await computeContactMeta();
   renderContacts(searchVal());
 }
+// The pinned group-room row ("# Familie") at the very top of the sidebar — opens the shared room.
+function roomRow() {
+  const div = document.createElement('div');
+  div.className = 'contact room' + (activeRoom ? ' active' : '');
+  const t = roomLastTime ? fmtContactTime(roomLastTime) : '';
+  div.innerHTML = `<span class="av room-av">#</span><span class="nm">${escapeHtml(activeGroupLabel())}</span>` +
+                  `<div class="c-meta">` +
+                    (t ? `<span class="c-time${roomUnread ? ' unread' : ''}">${escapeHtml(t)}</span>` : '') +
+                    (roomUnread ? `<span class="c-badge">${roomUnread > 99 ? '99+' : roomUnread}</span>` : '') +
+                  `</div>`;
+  div.onclick = () => selectRoom();
+  return div;
+}
 function renderContacts(filter) {
   const list = document.getElementById('contact-list');
   const f = (filter || '').toLowerCase();
   const shown = allContacts.filter(c => c.name.toLowerCase().includes(f));
   list.innerHTML = '';
+  list.appendChild(roomRow()); // shared group room, always pinned on top
   if (!shown.length) {
-    list.innerHTML = `<div style="padding:14px;color:rgba(0,210,255,.4);font-size:13px">${allContacts.length ? 'Kein Treffer.' : 'Noch keine Kontakte.'}</div>`;
+    const empty = document.createElement('div');
+    empty.setAttribute('style', 'padding:14px;color:rgba(0,210,255,.4);font-size:13px');
+    empty.textContent = allContacts.length ? 'Kein Treffer.' : 'Noch keine Kontakte.';
+    list.appendChild(empty);
     return;
   }
   for (const c of shown) {
@@ -1202,8 +1263,25 @@ function renderContacts(filter) {
     list.appendChild(div);
   }
 }
+// Open the shared group room ("# Familie"): everyone in the group sees these messages.
+function selectRoom() {
+  activeRoom = true;
+  activePeer = null;
+  roomUnread = 0;
+  markRead(roomReadKey());       // opening the room clears its unread count (persisted, per group)
+  document.getElementById('chat-watermark').classList.add('hidden');
+  const peerAv = document.getElementById('chat-peer-av');
+  peerAv.className = 'room-av'; peerAv.style.backgroundImage = ''; peerAv.textContent = '#';
+  document.getElementById('chat-peer').textContent = activeGroupLabel();
+  document.getElementById('app').classList.add('chat-open'); // mobile: slide chat in
+  msgInput.disabled = false;
+  renderContacts(searchVal());  // refresh active highlight + clear room badge
+  loadMessages();
+  msgInput.focus();
+}
 function selectContact(c) {
   activePeer = c;
+  activeRoom = false;
   markRead(c.pubkey);           // opening the chat clears its unread count (local)
   publishRead(c.pubkey);        // tell the sender I read their messages → their ticks turn blue
   unreadByPeer[c.pubkey] = 0;
@@ -1486,6 +1564,22 @@ function updateTicks() {
 }
 
 async function loadMessages() {
+  // Shared group room: fetch everything addressed to this group (room_id), decrypt with roomKey.
+  if (activeRoom) {
+    activeReceipt = null;
+    let { data, error } = await client.from('messages').select('*').eq('room_id', myGroupId).order('created_at', { ascending: true });
+    if (error) {
+      dbg('Raum-Filter fehlgeschlagen, lade ungefiltert: ' + error.message);
+      ({ data, error } = await client.from('messages').select('*').order('created_at', { ascending: true }));
+    }
+    if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
+    const rows = (data || []).filter(m => m.room_id === myGroupId);
+    dbg(`${rows.length} Raum-Nachrichten in „${activeGroupLabel()}"`);
+    messagesEl.innerHTML = '';
+    for (const msg of rows) await renderMsg(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return;
+  }
   if (!activePeer) { messagesEl.innerHTML = ''; activeReceipt = null; return; }
   activeChatKey = await deriveChatKey(activePeer.ecdh_pubkey);
   const peer = activePeer.pubkey;
@@ -1522,6 +1616,19 @@ function subscribeMessages() {
     .channel('messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
       const m = payload.new;
+      // Group-room message (addressed to my group) → render if the room is open, else bump its badge.
+      if (m.room_id) {
+        if (m.room_id !== myGroupId) return; // another group's room
+        roomLastTime = m.created_at;
+        if (activeRoom) {
+          await renderMsg(m);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        } else if (m.pubkey !== myPubB64) {
+          roomUnread++;
+        }
+        renderContacts(searchVal());
+        return;
+      }
       // Update the contact row's last-message time (both directions), keyed by identity (pubkey)
       const msgPeer = m.pubkey === myPubB64 ? m.recipient_pubkey : (m.recipient_pubkey === myPubB64 ? m.pubkey : null);
       if (msgPeer) lastTimeByPeer[msgPeer] = m.created_at;
@@ -1540,7 +1647,7 @@ function subscribeMessages() {
       renderContacts(searchVal()); // refresh time + badge live
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
-      if (activePeer) loadMessages();
+      if (activePeer || activeRoom) loadMessages();
     })
     // A receipt changed → if it's the open peer acknowledging MY messages, recolor the ticks live
     .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, payload => {
@@ -1583,23 +1690,36 @@ async function renderMsg(msg) {
   div.className = 'msg ' + (isSelf ? 'self' : 'other');
   if (msg.id != null) div.dataset.id = msg.id;
   if (isSelf) div.dataset.ts = msg.created_at; // for updateTicks()
-  const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, activeChatKey) : (msg.content || '');
+  div.dataset.pub = msg.pubkey; // author identity (used to group consecutive room messages)
+  // Read the previous bubble's author BEFORE appending this one → suppress repeated sender names.
+  const prevPub = messagesEl.lastElementChild ? messagesEl.lastElementChild.dataset.pub : null;
+  // Room messages decrypt with the shared roomKey; 1:1 messages with the per-pair ECDH key.
+  const isRoom = !!msg.room_id;
+  const msgKey = isRoom ? roomKey : activeChatKey;
+  const rawContent = msg.content && msg.content.startsWith('ENC:') ? await decryptText(msg.content, msgKey) : (msg.content || '');
   const decryptFailed = rawContent === '[falscher Schlüssel]';
   const content = decryptFailed ? '🔒' : rawContent;
-  // Anti-impersonation: signature valid AND the signing key belongs to the actual author
-  // (mine, or the peer's registered key). Mismatch → flag as possible forgery.
+  // Anti-impersonation: the signature is bound to recipient (1:1) or room (group). For a 1:1 the
+  // signer must also be the expected peer/me; in the room any valid member key is fine (the displayed
+  // sender name is resolved from the pubkey → forging someone else's name is not possible).
   let badge = '';
   if (!decryptFailed && msg.pubkey && msg.sig) {
-    const sigOk = await verifyText(msg.content + '|' + (msg.recipient_pubkey || ''), msg.sig, msg.pubkey);
-    const expectedPub = isSelf ? myPubB64 : (activePeer && activePeer.pubkey);
+    const bind = msg.room_id || msg.recipient_pubkey || '';
+    const sigOk = await verifyText(msg.content + '|' + bind, msg.sig, msg.pubkey);
+    const expectedPub = isRoom ? null : (isSelf ? myPubB64 : (activePeer && activePeer.pubkey));
     if (!sigOk || (expectedPub && msg.pubkey !== expectedPub)) {
       badge = '<span class="unverified" title="Signatur ungültig — mögliche Fälschung">⚠️</span> ';
       div.classList.add('forged');
     }
   }
+  // In the group room, label incoming messages with the sender's name (once per run, coloured per person).
+  const sender = (isRoom && !isSelf && msg.pubkey !== prevPub)
+    ? `<span class="sender" style="color:${senderColor(msg.pubkey)}">${escapeHtml(nameForPubkey(msg.pubkey))}</span>`
+    : '';
   const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  const ticks = isSelf ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
-  div.innerHTML = `${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
+  // Read receipts are per-pair → ticks only in 1:1, not in the group room.
+  const ticks = (!isRoom && isSelf) ? (s => ` <span class="ticks ${s}">${tickGlyph(s)}</span>`)(tickState(msg.created_at)) : '';
+  div.innerHTML = `${sender}${badge}<span class="text">${emojiImg(escapeHtml(content))}</span><span class="time">${timeStr}${ticks}</span>`;
   messagesEl.appendChild(div);
 }
 
@@ -1724,6 +1844,18 @@ async function sendMsg() {
   if (cmd) {
     msgInput.value = ''; updateSendBtn();
     cmd.run();
+    return;
+  }
+  // Group room → encrypt once with the shared roomKey, one row addressed to the group (room_id).
+  if (activeRoom) {
+    const encrypted = await encryptText(content, roomKey);
+    const sig = await signText(encrypted + '|' + myGroupId); // signature bound to the room
+    dbg(`Sende (Raum, verschlüsselt + signiert) an „${activeGroupLabel()}"`);
+    const { error } = await client.from('messages').insert({ content: encrypted, room_id: myGroupId, recipient_pubkey: null, pubkey: myPubB64, sig });
+    if (error) { dbg('Sendefehler (Raum): ' + error.message); return; }
+    dbg('Raum-Nachricht gesendet');
+    msgInput.value = ''; updateSendBtn();
+    setTimeout(loadMessages, 300);
     return;
   }
   // Real message → 1:1 to the selected contact, encrypted with the ECDH-derived shared key
