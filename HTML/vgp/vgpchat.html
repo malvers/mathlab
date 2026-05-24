@@ -15,6 +15,20 @@
 if (new URLSearchParams(location.search).get('debug') === '1') {
   document.write('<scr' + 'ipt src="../js/debug-window.js"></scr' + 'ipt>');
 }
+// TEMP diagnostic: surface any top-level script error (file:line) into the DEBUG window.
+window.addEventListener('error', e => {
+  const msg = 'JS-Fehler: ' + e.message + ' @ ' + ((e.filename || '').split('/').pop()) + ':' + e.lineno;
+  try { (window.DebugWindow && DebugWindow.log) ? DebugWindow.log(msg) : console.error(msg); } catch (_) { console.error(msg); }
+});
+// TEMP diagnostic: which element actually receives a click (capture phase, before any handler)?
+document.addEventListener('click', e => {
+  try {
+    const t = e.target;
+    const inEmoji = !!(t.closest && t.closest('#name-emoji'));
+    const m = 'CLICK→ ' + (t.id || t.tagName) + (t.className ? '.' + String(t.className).slice(0, 30) : '') + ' | inEmoji=' + inEmoji;
+    (window.DebugWindow && DebugWindow.log) ? DebugWindow.log(m) : console.log(m);
+  } catch (_) {}
+}, true);
 </script>
 <script src="../js/ui.js"></script>
 <script>
@@ -321,7 +335,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 /* LOCAL-environment marker — only shown when served from localhost/LAN. If you DON'T see red,
    you're looking at the LIVE site. Online (docalvers.de) shows nothing. */
-.env-local::after{content:'';position:fixed;inset:0;border:5px solid rgb(176,36,24);pointer-events:none;z-index:99999}
+/* LOCAL marker via an inset box-shadow ring on #app — box-shadow is purely visual and can NEVER
+   intercept clicks (unlike a full-viewport overlay). */
+.env-local #app{box-shadow:inset 0 0 0 4px rgb(176,36,24)}
 .env-local .env-badge{position:fixed;top:0;left:50%;transform:translateX(-50%);background:rgb(176,36,24);color:#fff;font:700 12px/1 system-ui,sans-serif;letter-spacing:2px;padding:6px 14px;border-radius:0 0 8px 8px;z-index:100000;pointer-events:none}
 </style>
 </head>
@@ -490,11 +506,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524"></script>
-<script src="js/vgp-auth.js?v=20260524"></script>
-<script src="js/vgp-crypto.js?v=20260524"></script>
-<script src="js/vgp-contacts.js?v=20260524"></script>
-<script src="js/vgp-messages.js?v=20260524"></script>
+<script src="js/vgp-setup.js?v=20260524-2"></script>
+<script src="js/vgp-auth.js?v=20260524-2"></script>
+<script src="js/vgp-crypto.js?v=20260524-2"></script>
+<script src="js/vgp-contacts.js?v=20260524-2"></script>
+<script src="js/vgp-messages.js?v=20260524-2"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {

@@ -157,7 +157,7 @@
             z-index: 0;
             pointer-events: none;
         }
-        body.use-globe #globe-stage { display: block; filter: brightness(0.55); }
+        body.use-globe #globe-stage { display: block; filter: brightness(0.8); }
         body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
         /* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
         :root { --fade-out-ms: 3000ms; --fade-in-ms: 250ms; }
@@ -1381,7 +1381,7 @@
             // Draw Map Image (Slightly Darker)
             ctx.save();
             ctx.globalAlpha = 0.8;
-            ctx.rotate(-Math.PI / 2); 
+            ctx.rotate(-Math.PI / 2);
             
             // Clip to circle to remove dark blue corners
             ctx.beginPath();
@@ -1604,16 +1604,14 @@
                 ctx.restore();
             }
 
-            // Thin circle at tic base (globe mode only)
-            if (window.useGlobe) {
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.lineWidth = 0.5;
-                ctx.beginPath();
-                ctx.arc(0, 0, r * 1.02 - tickInset, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            }
+            // Thin circle at tic base (both modes)
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 1.02 - tickInset, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
 
             ctx.restore(); // Restore from main translation
             
