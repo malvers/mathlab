@@ -42,6 +42,12 @@ const SUPABASE_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
 // ===========================================================================
 // SETUP — logging, Supabase client, group-key globals
 // ===========================================================================
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 function dbg(msg) {
   try { if (typeof DebugWindow !== 'undefined') DebugWindow.log(msg); } catch(_) {}
   console.log('[chat]', msg);
@@ -155,7 +161,7 @@ function setOwnAvatarDisplay() {
   } else {
     nameEmojiBtn.classList.remove('pic');
     nameEmojiBtn.style.backgroundImage = '';
-    nameEmojiBtn.innerHTML = emojiImg(escapeHtml(myEmoji || '🙂'));
+    nameEmojiBtn.innerHTML = `<span style="pointer-events:none">${emojiImg(escapeHtml(myEmoji || '🙂'))}</span>`;
   }
 }
 setOwnAvatarDisplay();
@@ -250,7 +256,8 @@ async function chooseAvatarPicture(file) {
 // Header avatar button: open the chooser → Emoji or Picture
 const avatarChoice = document.getElementById('avatar-choice');
 nameEmojiBtn.onclick = () => avatarChoice.classList.remove('hidden');
-document.getElementById('ac-emoji').onclick = () => { dbg('Auswahl: Emoji'); avatarChoice.classList.add('hidden'); emojiTarget = 'avatar'; openEmojiPanel(); };
+msgEmojiBtn.onclick = () => { emojiTarget = 'text'; openEmojiPanel(); };   // input emoji button → insert into message
+document.getElementById('ac-emoji').onclick = () => { avatarChoice.classList.add('hidden'); emojiTarget = 'avatar'; openEmojiPanel(); };
 document.getElementById('ac-pic').onclick = () => { avatarChoice.classList.add('hidden'); document.getElementById('avatar-file').click(); };
 document.getElementById('avatar-file').onchange = e => { chooseAvatarPicture(e.target.files[0]); e.target.value = ''; };
 avatarChoice.addEventListener('click', e => { if (e.target === avatarChoice) avatarChoice.classList.add('hidden'); });
@@ -336,11 +343,7 @@ function uiNewGroup() {
   });
 }
 
-// Input emoji button: inserts an emoji into the message text (no name reservation needed)
-msgEmojiBtn.onclick = () => {
-  emojiTarget = 'text';
-  openEmojiPanel();
-};
+
 
 // ===========================================================================
 // NAMES — name_id (HMAC), claim a name in a group

@@ -249,6 +249,7 @@ class CyberUI {
     static injectContactLabModal() {
         if (document.getElementById('cyber-contact-lab-overlay')) return;
 
+        if (typeof CyberI18n === 'undefined') return;
         const t = (key) => CyberI18n.get(key);
         const overlay = document.createElement('div');
         overlay.id = 'cyber-contact-lab-overlay';

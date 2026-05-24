@@ -32,13 +32,13 @@ document.addEventListener('click', e => {
 </script>
 <script src="../js/ui.js"></script>
 <script>
-CyberUI.init();
+document.addEventListener('DOMContentLoaded', () => CyberUI.init());
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <!-- JoyPixels: ships one consistent emoji set so Android/Windows match (Apple keeps its own native set) -->
 <script src="https://cdn.jsdelivr.net/npm/emoji-toolkit@8.0.0/lib/js/joypixels.min.js"></script>
 <!-- WhatsApp-style emoji picker (categories, recent, search, dark theme) -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{background:#070d18}
@@ -82,7 +82,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #me-row{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#0c1422;border-top:1px solid rgba(0,210,255,.12)}
 #sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:#e9edef;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sidebar-head #my-name:focus{outline:none}
-#name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+#name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:36px;cursor:pointer;padding:0;text-align:center}
 #contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:#14203a;color:#e0e8f0;font-size:14px}
 #contact-search:focus{outline:none;border-color:#00d2ff}
 #contact-search::placeholder{color:rgba(0,210,255,.3)}
@@ -230,7 +230,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 /* broadcasting to the whole group ("an alle") → tint the compose field dark red as a warning */
 #app.room-mode .msg-field-wrap input{background:rgb(58,20,20)}
 #app.room-mode .msg-field-wrap input::placeholder{color:rgba(255,120,110,.4)}
-#msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+#msg-emoji{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:36px;line-height:44px;cursor:pointer;padding:0;text-align:center}
 #msg-emoji:focus{outline:none}
 /* Send button — visible only when message field has text */
 #send-btn{flex:0 0 auto;margin-left:auto;display:none;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:50%;background:#00d2ff!important;background-image:none!important;background-color:#00d2ff!important;color:#020410!important;cursor:pointer;padding:0;position:relative;z-index:10}
@@ -281,7 +281,7 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #name-emoji:focus{outline:none}
 /* Emoji picker overlay */
 /* WhatsApp-style emoji picker — appears just above the input row, dark theme */
-#emoji-panel{position:absolute;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
+#emoji-panel{position:absolute;top:0;left:0;right:0;bottom:0;z-index:150;display:flex;align-items:flex-end;justify-content:flex-end;background:transparent}
 #emoji-panel.hidden{display:none}
 #emoji-panel emoji-picker{width:100%;max-width:380px;height:50vh;max-height:420px;margin:0 12px 60px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);
   --background:#08101c;
@@ -345,7 +345,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="app">
   <aside id="sidebar">
     <div id="sidebar-head">
-      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen">🙂</button>
+      <button id="name-emoji" type="button" aria-label="Emoji wählen" title="Emoji wählen"><span style="pointer-events:none">🙂</span></button>
       <input id="my-name" aria-label="Dein Name" placeholder="Dein Name" maxlength="30" autocomplete="off" readonly>
       <button id="menu-btn" type="button" aria-label="Menü" title="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
@@ -382,7 +382,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="messages"></div>
     <div id="input-row">
       <div id="cmd-box" class="hidden" role="listbox" aria-label="Befehle"></div>
-      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji">🙂</button>
+      <button id="msg-emoji" type="button" aria-label="Emoji wählen" title="Emoji"><span style="pointer-events:none">🙂</span></button>
       <div class="msg-field-wrap">
         <input id="msg-input" aria-label="Nachricht" placeholder="Nachricht" disabled autocomplete="new-password">
       </div>
@@ -506,11 +506,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-2"></script>
-<script src="js/vgp-auth.js?v=20260524-2"></script>
-<script src="js/vgp-crypto.js?v=20260524-2"></script>
-<script src="js/vgp-contacts.js?v=20260524-2"></script>
-<script src="js/vgp-messages.js?v=20260524-2"></script>
+<script src="js/vgp-setup.js?v=20260524-3"></script>
+<script src="js/vgp-auth.js?v=20260524-3"></script>
+<script src="js/vgp-crypto.js?v=20260524-3"></script>
+<script src="js/vgp-contacts.js?v=20260524-3"></script>
+<script src="js/vgp-messages.js?v=20260524-3"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
