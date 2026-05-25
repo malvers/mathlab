@@ -500,6 +500,8 @@
         let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
         let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
         let skyLon = 0;         // animated sky longitude (deg) — eases toward the selected city for a smooth sky pan
+        let skyLat = 0;         // animated sky latitude (deg) — for the city-dome (alt-az) view
+        let skyView = 0;        // 0 = pol-wheel (pole-centred), 1 = city dome (alt-az horizon); toggled by 'v'
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -583,6 +585,7 @@
             else if (e.key === 'ArrowDown')  debugDayOffset -= 1 / 24;
             else if (e.key === '0')          debugDayOffset = 0;
             else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
+            else if (e.key === 'v' || e.key === 'V') { skyView = skyView ? 0 : 1; e.preventDefault(); return; }     // pol-wheel ↔ city dome
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1764,35 +1767,58 @@
             });
         }
 
-        // Celestial backdrop: constellation lines + figure stars, pole-centred (pol-wheel), rotating with sidereal time.
-        // Centre = the celestial pole (matches the clock's polar view); radius ∝ colatitude; angle = RA − LST.
+        // Celestial backdrop. Two projections (toggle with 'v'):
+        //   skyView 0 = pol-wheel  — celestial pole at centre, radius ∝ colatitude (matches the polar clock).
+        //   skyView 1 = city dome  — zenith at centre, horizon circle; the REAL sky from the selected city (lat-correct, alt-az).
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
             if (window.useGlobe) return;                             // globe mode: canvas sits over the 3D globe → skip for now
-            const north = !CW;                                       // CCW → north celestial pole; CW → south
-            const lst = siderealTimeDeg(getDisplayTime(), skyLon);   // skyLon eases toward the selected city → smooth sky pan
-            const Req = Math.max(w, h) * 0.62;                       // screen radius of the celestial equator (zoom — tunable)
             const D2R = Math.PI / 180;
             const a = 0.35 + 0.65 * skyT;                            // dim behind the clock; full in sky mode
-            const proj = (ra, dec) => {
-                const colat = north ? (90 - dec) : (90 + dec);       // 0 = visible pole … 90 = equator … 180 = opposite pole
-                const rr = (colat / 90) * Req;
-                const ang = dirSign * (ra - lst) * D2R - Math.PI / 2; // direction/offset tunable
-                return [cx + rr * Math.cos(ang), cy + rr * Math.sin(ang)];
-            };
+            const lst = siderealTimeDeg(getDisplayTime(), skyLon);   // skyLon eases toward the selected city → smooth pan
+            const dome = skyView >= 0.5;
+            const Rdome = Math.max(w, h) * 0.62;                     // horizon radius — large enough that the horizon ring sits past the window corners → sky fills the whole window
+
+            let proj;                                                // (ra,dec) → [x, y, visible]
+            if (dome) {
+                const lat = skyLat * D2R;                            // eases toward the city's latitude → dome tilts
+                proj = (ra, dec) => {
+                    const H = (lst - ra) * D2R, d = dec * D2R;
+                    const sinAlt = Math.sin(lat) * Math.sin(d) + Math.cos(lat) * Math.cos(d) * Math.cos(H);
+                    const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+                    const azN = Math.atan2(-Math.cos(d) * Math.sin(H),
+                                           Math.sin(d) * Math.cos(lat) - Math.cos(d) * Math.sin(lat) * Math.cos(H)); // 0=N, +=E
+                    const rr = (Math.PI / 2 - alt) / (Math.PI / 2) * Rdome;  // zenith→0, horizon→Rdome
+                    return [cx - rr * Math.sin(azN), cy - rr * Math.cos(azN), alt > 0];  // N up, E left (sign tunable)
+                };
+            } else {
+                const north = !CW;                                   // CCW → north celestial pole; CW → south
+                const Req = Math.max(w, h) * 0.62;
+                proj = (ra, dec) => {
+                    const colat = north ? (90 - dec) : (90 + dec);
+                    const rr = (colat / 90) * Req;
+                    const ang = dirSign * (ra - lst) * D2R - Math.PI / 2;
+                    return [cx + rr * Math.cos(ang), cy + rr * Math.sin(ang), true];
+                };
+            }
+
             ctx.save();
             ctx.globalAlpha = 1;                                     // stars unaffected by the clock fade
             ctx.lineJoin = "round";
-            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;     // constellation lines
             ctx.lineWidth = 1;
+            if (dome) {                                              // horizon circle
+                ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.45})`;
+                ctx.beginPath(); ctx.arc(cx, cy, Rdome, 0, Math.PI * 2); ctx.stroke();
+            }
+            ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;     // constellation lines (break at the horizon in dome mode)
             for (const con of CONSTELLATION_LINES) {
                 for (const path of con.paths) {
-                    ctx.beginPath();
+                    let prev = null;
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
-                        if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+                        if (prev && prev[2] && p[2]) { ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(p[0], p[1]); ctx.stroke(); }
+                        prev = p;
                     }
-                    ctx.stroke();
                 }
             }
             ctx.fillStyle = `rgba(235, 242, 255, ${a})`;             // figure stars (path vertices)
@@ -1800,9 +1826,8 @@
                 for (const path of con.paths) {
                     for (let i = 0; i < path.length; i += 2) {
                         const p = proj(path[i], path[i + 1]);
-                        ctx.beginPath();
-                        ctx.arc(p[0], p[1], 1.3, 0, Math.PI * 2);
-                        ctx.fill();
+                        if (!p[2]) continue;
+                        ctx.beginPath(); ctx.arc(p[0], p[1], 1.3, 0, Math.PI * 2); ctx.fill();
                     }
                 }
             }
@@ -1874,6 +1899,8 @@
             const _skyTgtLon = (targetCity && (targetCity.globeLon ?? targetCity.lon)) || 0;
             skyLon += (((_skyTgtLon - skyLon + 540) % 360) - 180) * 0.08;
             skyLon = ((skyLon + 180) % 360 + 360) % 360 - 180;
+            const _skyTgtLat = (targetCity && (targetCity.globeLat ?? targetCity.lat)) || 0;
+            skyLat += (_skyTgtLat - skyLat) * 0.08;   // dome tilts smoothly toward the city's latitude
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawStarfield(w, h, cx, cy);   // celestial backdrop behind everything (pol-wheel)
