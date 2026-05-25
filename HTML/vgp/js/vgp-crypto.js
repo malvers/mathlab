@@ -63,7 +63,7 @@ async function renameGroup() {
   const gm = myGroups.find(x => x.pwd === activeGroupPwd); if (gm) gm.label = next; // in-memory
   const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY); // persist this device's vault label
   if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { const g = v.groups.find(x => x.pwd === activeGroupPwd); if (g) { g.label = next; await writeLocalVault(v.name, accountPwd, v); } } }
-  setGroupName(); renderContacts(searchVal());
+  renderContacts(searchVal());
   dbg('Gruppe umbenannt: ' + next);
 }
 // Pull the authoritative group name from the server and update the local label if it changed
@@ -74,7 +74,7 @@ async function refreshGroupName() {
   const gm = myGroups.find(x => x.pwd === activeGroupPwd); if (gm) gm.label = name;
   const accountPwd = sessionStorage.getItem(SESSION_PWD_KEY);
   if (accountPwd) { const v = await openVault(accountPwd); if (v && v !== 'WRONG') { const g = v.groups.find(x => x.pwd === activeGroupPwd); if (g) { g.label = name; await writeLocalVault(v.name, accountPwd, v); } } }
-  setGroupName(); renderContacts(searchVal());
+  renderContacts(searchVal());
 }
 // Encrypt/decrypt a directory field with the room-derived key. decrypt() passes plaintext through,
 // so legacy unencrypted rows still display.

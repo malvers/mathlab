@@ -929,7 +929,7 @@
                 "🇵🇰": "Pakistan", "🇺🇿": "Usbekistan", "🇹🇯": "Tadschikistan", "🇦🇫": "Afghanistan",
                 "🇮🇩": "Indonesien", "🇻🇳": "Vietnam", "🇰🇭": "Kambodscha", "🇱🇦": "Laos",
                 "🇳🇿": "Neuseeland", "🇫🇯": "Fidschi", "🇹🇴": "Tonga", "🇼🇸": "Samoa",
-                "🇻🇺": "Vanuatu", "🇳🇨": "Neukaledonien", "🇷🇺": "Russland",
+                "🇻🇺": "Vanuatu", "🇳🇨": "Neukaledonien", "🇷🇺": "Russland", "🇸🇧": "Salomonen",
                 "🇵🇫": "Franz. Polynesien", "🇨🇰": "Cookinseln",
                 "🇦🇸": "Amerik. Samoa", "🇳🇺": "Niue", "🇹🇰": "Tokelau",
                 "🇨🇻": "Kap Verde",
@@ -1516,8 +1516,9 @@
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
+                    const labelYShift = -r * 0.01;  // nudge name + icon up together (~5%)
                     lines.forEach((line, i) => {
-                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight);
+                        ctx.fillText(line, 0, (i - (lines.length-1)/2) * cityLineHeight + labelYShift);
                     });
 
                     // Season icon under the name: ☀️ Summer Time, ❄️ Winter Time (native emoji = Apple look on macOS)
@@ -1525,7 +1526,7 @@
                     const emojiSize = r * ((dst === "SZ") ? 0.03 : 0.0257);  // snowflake smaller (it looks bigger than the sun)
                     const lastLineY = ((lines.length - 1) / 2) * cityLineHeight;  // baseline of the last name line
                     ctx.font = `${emojiSize}px sans-serif`;
-                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02);  // clearly below the name
+                    ctx.fillText(seasonEmoji, 0, lastLineY + cityLineHeight * 0.85 + r * 0.02 + labelYShift);  // clearly below the name
                 }
                 ctx.restore();
             });
@@ -1626,7 +1627,7 @@
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "top";
-            const legendFontSize = r * 0.047;
+            const legendFontSize = r * 0.04;
             const legendX = r * 0.0625;
             const legendY1 = r * 0.10;
             const legendY2 = legendY1 + legendFontSize * 1.5;
@@ -1641,6 +1642,17 @@
 
                 ctx.fillStyle = "rgba(220, 220, 220, 0.9)";
                 ctx.fillText("NORMALZEIT", legendX, legendY2);
+
+                // Season icons after the labels: ☀️ after SOMMERZEIT, ❄️ after NORMALZEIT — small, light, no overlap
+                const _szW = ctx.measureText("SOMMERZEIT").width;   // measured with the Orbitron font still active
+                const _nzW = ctx.measureText("NORMALZEIT").width;
+                const _gap = legendFontSize * 0.25;
+                const _emo = legendFontSize * 0.62;
+                const _emoDy = (legendFontSize - _emo) * 0.5;       // re-center the smaller icon on the text line
+                ctx.globalAlpha *= 0.7;                             // lighter
+                ctx.font = `${_emo}px sans-serif`;
+                ctx.fillText("☀️", legendX + _szW + _gap, legendY1 + _emoDy);
+                ctx.fillText("❄️", legendX + _nzW + _gap, legendY2 + _emoDy);
                 ctx.restore();
             }
 

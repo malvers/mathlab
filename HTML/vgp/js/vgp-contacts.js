@@ -21,8 +21,6 @@ function activeGroupLabel() {
 }
 // Read-state key for the group room (per group, so unread is tracked separately per family).
 function roomReadKey() { return '#room:' + myGroupId; }
-// Reflect the active group's name in the sidebar header (top-left = the group, not "me").
-function setGroupName() { const el = document.getElementById('group-name'); if (el) el.textContent = activeGroupLabel(); }
 function contactAvatar(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
 // Resolve a signing pubkey to a display name (for sender labels in the group room).
 function nameForPubkey(pub) {
@@ -118,7 +116,6 @@ async function loadContacts() {
   groupsData = next;
   allContacts = next.flatMap(x => x.members); // flat union for nameForPubkey + search
   await computeContactMeta();
-  setGroupName();
   renderContacts(searchVal());
   refreshGroupName(); // pick up a rename done by another member (authoritative name from group_meta)
 }
