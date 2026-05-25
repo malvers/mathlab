@@ -296,20 +296,6 @@ document.getElementById('ga-join').onclick = async () => {
   joinGroup(pwd, existing === 'NOMETA' ? 'Gruppe' : existing);   // legacy fallback if meta table missing
 };
 document.getElementById('ga-rename').onclick = () => { grpActions.classList.add('hidden'); renameGroup(); };
-// Render the group list inside the ⋮ menu (active group marked); each entry switches groups.
-function renderGroupMenu() {
-  const box = document.getElementById('menu-groups');
-  box.innerHTML = '';
-  if (myGroups.length < 2) return; // progressive disclosure: no switcher until there's a 2nd group
-  for (const g of myGroups) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'menu-group' + (g.pwd === activeGroupPwd ? ' active' : '');
-    b.textContent = '👥 ' + g.label + (g.pwd === activeGroupPwd ? ' ✓' : '');
-    b.onclick = () => { headMenu.classList.add('hidden'); switchGroup(g.pwd); };
-    box.appendChild(b);
-  }
-}
 // Reset the chat pane (used when switching/joining groups → different contact set)
 function resetChatView() {
   activePeer = null;
