@@ -1530,6 +1530,34 @@
                 }
                 ctx.restore();
             });
+
+            // International Date Line — equilateral red triangle (tip inward) + "DATUMSGRENZE" label,
+            // between Samoa (lon -165) and Wellington (lon 180)
+            {
+                const dlAngle = dirSign * (-(-172.5)) * Math.PI / 180 - Math.PI / 2; // angular midpoint of the two cities
+                const dlMarkerR = (r * 0.9) - markerInset;
+                const dlR = dlMarkerR * 0.82;            // a bit inside the bubble ring, in the gap between the two
+                const Rt = r * 0.016;                    // circumradius of the small equilateral triangle (side = Rt·√3)
+                const cx0 = Math.cos(dlAngle) * dlR, cy0 = Math.sin(dlAngle) * dlR;
+                ctx.save();
+                ctx.fillStyle = "rgb(176, 36, 24)";      // CLAUDE.md red (Υ)
+                ctx.beginPath();
+                for (let k = 0; k < 3; k++) {            // 3 vertices 120° apart → equilateral; k=0 points radially outward
+                    const a = dlAngle + k * (2 * Math.PI / 3);
+                    const vx = cx0 + Math.cos(a) * Rt, vy = cy0 + Math.sin(a) * Rt;
+                    if (k === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
+                }
+                ctx.closePath();
+                ctx.fill();
+                // "DATUMSGRENZE" written radially, from the triangle toward the clock centre
+                ctx.translate(cx0, cy0);
+                ctx.rotate(dlAngle + Math.PI);           // local +x → toward the centre
+                ctx.font = `${r * 0.02}px Orbitron`;
+                ctx.textAlign = "left";
+                ctx.textBaseline = "middle";
+                ctx.fillText("DATUMSGRENZE", Rt * 1.4, 0);
+                ctx.restore();
+            }
             ctx.restore(); // End map rotation (Earth + Glued Markers)
             // 3. Draw Numbers Ring (Static) - relative sizes
             const hourFontSize = Math.max(12, r * 0.0875);
@@ -2092,8 +2120,8 @@
                 const nW = 160, nH = 100; // Increased height for larger font
                 const nx = -nW/2, ny = y + boxH;   // flush against the time box (no gap) 
                 
-                // Dark Background for the list (Harmonized)
-                ctx.fillStyle = "rgba(0, 15, 30, 0.98)";
+                // Dark Background for the list (same frame as the time box above)
+                ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
                 ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
                 ctx.lineWidth = 1;
                 ctx.beginPath();
