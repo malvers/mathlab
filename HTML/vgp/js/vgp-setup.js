@@ -309,7 +309,7 @@ function uiNewGroup() {
     const submit = () => done({ name: nameEl.value.trim(), pwd: pwdEl.value });
     yes.onclick = submit;
     no.onclick = () => done(null);
-    const onKey = e => { if (e.key === 'Enter') submit(); else if (e.key === 'Escape') done(null); };
+    const onKey = e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } else if (e.key === 'Escape') done(null); };
     nameEl.onkeydown = onKey; pwdEl.onkeydown = onKey;
   });
 }

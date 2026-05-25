@@ -252,6 +252,8 @@ function selectContact(c) {
   msgInput.focus();
 }
 document.getElementById('contact-search').addEventListener('input', e => renderContacts(e.target.value));
+// Single-line textarea (no autofill strip): swallow Enter so it never inserts a newline
+document.getElementById('contact-search').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
 
 // Debug hotkey: "j" toggles JoyPixels vs. native emoji and re-renders (ignored while typing in a field).
 function rerenderEmoji() {

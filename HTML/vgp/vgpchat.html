@@ -60,7 +60,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;backgroun
 #sidebar-head #my-name{flex:1;min-width:0;padding:0;border:none;background:transparent;color:var(--vgp-text);font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sidebar-head #my-name:focus{outline:none}
 #name-emoji{flex:0 0 auto;position:static;transform:none;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:34px;line-height:36px;cursor:pointer;padding:0;text-align:center}
-#contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px}
+#contact-search{margin:12px 12px 8px;padding:9px 14px;border:none;border-radius:12px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px;font-family:inherit;line-height:1.4;resize:none;overflow:hidden}
 #contact-search:focus{outline:none;border-color:var(--vgp-accent)}
 #contact-search::placeholder{color:rgba(var(--vgp-accent-rgb),.3)}
 #contact-list{flex:1;overflow-y:auto}
@@ -123,8 +123,8 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 #group-modal h3{color:var(--vgp-accent);font-family:'Orbitron',sans-serif;font-size:16px;letter-spacing:1px;text-align:center;font-weight:700}
 #group-modal .fld{display:flex;flex-direction:column;gap:5px;position:relative}
 #group-modal label{color:rgba(var(--vgp-accent-rgb),.7);font-size:11px;letter-spacing:1px;text-transform:uppercase}
-#group-modal input{border:none;border-radius:10px;background:var(--vgp-field);color:var(--vgp-text2);font-family:inherit;font-size:15px;padding:12px 14px;outline:none}
-#group-modal input:focus{box-shadow:0 0 0 1px rgba(var(--vgp-accent-rgb),.45)}
+#group-modal input,#group-modal textarea{border:none;border-radius:10px;background:var(--vgp-field);color:var(--vgp-text2);font-family:inherit;font-size:15px;padding:12px 14px;outline:none;line-height:1.4;resize:none;overflow:hidden}
+#group-modal input:focus,#group-modal textarea:focus{box-shadow:0 0 0 1px rgba(var(--vgp-accent-rgb),.45)}
 #group-modal .pwd-eye{position:absolute;right:8px;bottom:7px;background:transparent;border:none;cursor:pointer;line-height:0;padding:6px;color:rgba(var(--vgp-accent-rgb),.6);display:flex;align-items:center}
 #group-modal .pwd-eye:hover{color:var(--vgp-accent)}
 #group-modal .cf-btns{display:flex;gap:12px;margin-top:4px}
@@ -231,8 +231,8 @@ img.joypixels{display:inline-block;height:1em;width:1em;vertical-align:-0.12em;m
 .auth-tab{flex:1;padding:11px;border:none;background:transparent;color:rgba(var(--vgp-accent-rgb),.6);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .auth-tab.active{background:var(--vgp-accent);color:var(--vgp-ink)}
 #auth-hint{color:rgba(var(--vgp-accent-rgb),.55);font-size:13px;text-align:center;max-width:360px;line-height:1.5}
-#auth-panel input{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:8px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px}
-#auth-panel input:focus{outline:none;border-color:var(--vgp-accent)}
+#auth-panel input,#auth-panel textarea{width:100%;max-width:400px;padding:11px 14px;border:1px solid rgba(var(--vgp-accent-rgb),.3);border-radius:8px;background:var(--vgp-field);color:var(--vgp-text2);font-size:14px;font-family:inherit;line-height:1.4;resize:none;overflow:hidden}
+#auth-panel input:focus,#auth-panel textarea:focus{outline:none;border-color:var(--vgp-accent)}
 #auth-panel .pwd-wrap{max-width:400px}
 #auth-err{color:var(--vgp-error);font-size:13px;text-align:center;max-width:360px;margin:0}
 #auth-err.hidden{display:none}
@@ -341,7 +341,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <button type="button" id="ga-join" role="menuitem">Gruppe beitreten</button>
       <button type="button" id="ga-rename" role="menuitem">Gruppe umbenennen</button>
     </div>
-    <input id="contact-search" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off">
+    <textarea id="contact-search" rows="1" wrap="off" placeholder="Suchen…" aria-label="Kontakte suchen" autocomplete="off"></textarea>
     <div id="contact-list"></div>
   </aside>
   <section id="chat-panel">
@@ -417,8 +417,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="group-modal" class="hidden">
   <div class="cf-box">
     <h3>Neue Gruppe</h3>
-    <div class="fld"><label for="gm-name">Gruppenname</label><input id="gm-name" autocomplete="off" placeholder="z. B. Familie Müller"></div>
-    <div class="fld"><label for="gm-pwd">Gruppen-Passwort</label><input id="gm-pwd" type="text" autocomplete="off" placeholder="min. 6 Zeichen"></div>
+    <div class="fld"><label for="gm-name">Gruppenname</label><textarea id="gm-name" rows="1" wrap="off" autocomplete="off" placeholder="z. B. Familie Müller"></textarea></div>
+    <div class="fld"><label for="gm-pwd">Gruppen-Passwort</label><textarea id="gm-pwd" rows="1" wrap="off" autocomplete="off" placeholder="min. 6 Zeichen"></textarea></div>
     <div class="cf-btns">
       <button type="button" id="gm-no">Abbrechen</button>
       <button type="button" id="gm-yes">Anlegen</button>
@@ -445,8 +445,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <button type="button" id="tab-login" class="auth-tab">Anmelden</button>
   </div>
   <p id="auth-hint">Mit deinem Konto-Passwort entsperren.</p>
-  <input id="auth-name" placeholder="Name" aria-label="Name" maxlength="30" autocomplete="off">
-  <input id="auth-groupname" placeholder="Gruppenname (z. B. Familie Müller)" aria-label="Gruppenname" maxlength="40" autocomplete="off">
+  <textarea id="auth-name" rows="1" wrap="off" placeholder="Name" aria-label="Name" maxlength="30" autocomplete="off"></textarea>
+  <textarea id="auth-groupname" rows="1" wrap="off" placeholder="Gruppenname (z. B. Familie Müller)" aria-label="Gruppenname" maxlength="40" autocomplete="off"></textarea>
   <div class="pwd-wrap">
     <input id="auth-pwd" type="password" placeholder="Konto-Passwort" aria-label="Konto-Passwort" autocomplete="off">
     <button type="button" class="pwd-eye" id="auth-pwd-eye" aria-label="anzeigen">
@@ -484,12 +484,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <button id="stats-close">SCHLIESSEN</button>
 </div>
 
-<script src="js/vgp-setup.js?v=20260524-7"></script>
-<script src="js/vgp-auth.js?v=20260524-7"></script>
-<script src="js/vgp-crypto.js?v=20260524-7"></script>
-<script src="js/vgp-backup-core.js?v=20260524-7"></script>
-<script src="js/vgp-contacts.js?v=20260524-7"></script>
-<script src="js/vgp-messages.js?v=20260524-7"></script>
+<script src="js/vgp-setup.js?v=20260524-8"></script>
+<script src="js/vgp-auth.js?v=20260524-8"></script>
+<script src="js/vgp-crypto.js?v=20260524-8"></script>
+<script src="js/vgp-backup-core.js?v=20260524-8"></script>
+<script src="js/vgp-contacts.js?v=20260524-8"></script>
+<script src="js/vgp-messages.js?v=20260524-8"></script>
 <script>
 // Local-vs-live indicator: mark the page red ONLY when served locally. No red = you're on the live site.
 (function () {
