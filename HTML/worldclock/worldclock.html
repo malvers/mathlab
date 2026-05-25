@@ -1110,6 +1110,155 @@
             isReturning = true;
         }, false);
 
+        // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
+        function drawNumbersRing(r) {
+            const hourFontSize = Math.max(12, r * 0.0875);
+            const hourLabelInset = r * 0.022;
+            const tickInset = r * 0.016;
+            const hourGlow12 = r * 0.047;
+            const hourGlowOther = r * 0.031;
+            ctx.font = `400 ${hourFontSize}px Orbitron`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (let i = 1; i <= 24; i++) {
+                const angle = dirSign * (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
+                const tx = Math.cos(angle) * (r * 1.15 - hourLabelInset);
+                const ty = Math.sin(angle) * (r * 1.15 - hourLabelInset);
+
+                let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
+                let glow = false;
+
+                if (i === 12 || i === 6 || i === 18 || i === 24) { color = "#ffaa00"; glow = true; }
+                if (window.__openMode && i !== 12 && i !== 18) {
+                    const ranges = window.__openRanges || [];
+                    const isOpen = ranges.some(([a, b]) => i >= a && i <= b);
+                    if (isOpen) {
+                        color = "rgb(121, 158, 49)";
+                        glow = (i === 6 || i === 24);
+                    }
+                }
+
+                ctx.save();
+                ctx.fillStyle = color;
+                if (glow) {
+                    ctx.shadowBlur = (i === 12) ? hourGlow12 : hourGlowOther;
+                    ctx.shadowColor = color;
+                }
+                ctx.fillText(i, tx, ty);
+                ctx.restore();
+
+                // Hour Ticks
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(angle) * (r * 1.02 - tickInset), Math.sin(angle) * (r * 1.02 - tickInset));
+                ctx.lineTo(Math.cos(angle) * (r * 1.08 - tickInset), Math.sin(angle) * (r * 1.08 - tickInset));
+                ctx.stroke();
+                ctx.restore();
+
+                // Half-Hour Ticks (Only Tics)
+                const halfAngle = angle - (Math.PI / 24);
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - tickInset), Math.sin(halfAngle) * (r * 1.02 - tickInset));
+                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - tickInset), Math.sin(halfAngle) * (r * 1.05 - tickInset));
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function drawDateLine(r, markerInset, mapRotation) {
+            const dlAngle = dirSign * (-(-172.5)) * Math.PI / 180 - Math.PI / 2; // angular midpoint of the two cities
+            const dlMarkerR = (r * 0.9) - markerInset;
+            const Rt = r * 0.012;                    // circumradius of the small equilateral triangle (side = Rt·√3)
+            const dlR = r * 0.773 - Rt;              // centre placed so the TIP sits on the world-disc rim (= MAP_SCALE)
+            const cx0 = Math.cos(dlAngle) * dlR, cy0 = Math.sin(dlAngle) * dlR;
+            ctx.save();
+            ctx.fillStyle = "rgb(200, 200, 200)";    // light grey (triangle + label)
+            ctx.beginPath();
+            for (let k = 0; k < 3; k++) {            // 3 vertices 120° apart → equilateral; k=0 points radially outward
+                const a = dlAngle + k * (2 * Math.PI / 3);
+                const vx = cx0 + Math.cos(a) * Rt, vy = cy0 + Math.sin(a) * Rt;
+                if (k === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
+            }
+            ctx.closePath();
+            ctx.fill();
+            // "DATUMSGRENZE" radial from the triangle toward the centre — kept upright (accounts for map rotation)
+            const mapRot = mapRotation * Math.PI / 180;
+            let R = Math.atan2(Math.sin(dlAngle + mapRot), Math.cos(dlAngle + mapRot)); // on-screen radial (outward)
+            const flip = Math.abs(R) > Math.PI / 2;  // pointing left → would be upside-down, use inward direction
+            if (flip) R = Math.atan2(Math.sin(R + Math.PI), Math.cos(R + Math.PI));
+            ctx.translate(cx0, cy0);
+            ctx.rotate(R - mapRot);                  // net on-screen rotation = R ∈ (-90°,90°) → upright
+            ctx.font = `${r * 0.022}px Orbitron`;
+            ctx.textBaseline = "middle";
+            ctx.textAlign = flip ? "left" : "right";
+            ctx.fillText("DATUMSGRENZE", flip ? Rt * 1.6 : -Rt * 1.6, 0);
+            ctx.restore();
+        }
+
+        function drawImprint(r, h) {
+            ctx.save();
+            ctx.textAlign = "left";
+            ctx.textBaseline = "bottom";
+            const imprintFontSize = r * 0.031;
+            ctx.font = `300 ${imprintFontSize}px Raleway`;
+            const imprintText = "Impressum · © Dr. Michael R. Alvers";
+            const imprintX = r * 0.06;
+            const imprintY = h - r * 0.05;
+            const imprintMetrics = ctx.measureText(imprintText);
+            // Debug: fade imprint when clock-only mode is active (toggled by 'D')
+            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
+                ctx.save();
+                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
+                ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
+                ctx.fillText(imprintText, imprintX, imprintY);
+                ctx.restore();
+            }
+            imprintHitbox = {
+                x: imprintX,
+                y: imprintY - imprintFontSize * 1.4,
+                w: imprintMetrics.width,
+                h: imprintFontSize * 1.4
+            };
+            ctx.restore();
+        }
+
+        function drawMoon(mmx, mmy, mW, mH) {
+            ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(mmx, mmy, mW, mH, 5);
+            ctx.fill();
+            ctx.stroke();
+            if (moonReady) {
+                const moonSize = Math.min(mW, mH) - 30;
+                const mcx = 0, mcy = mmy + mH / 2, mR = moonSize / 2;
+                // Bright-limb orientation for the selected city, right now (continuous, lat/lon/time based).
+                const mLat = (targetCity.globeLat ?? targetCity.lat) ?? 0;
+                const mLon = (targetCity.globeLon ?? targetCity.lon) ?? 0;
+                const rot = moonBrightLimbRotation(new Date(), mLat, mLon);
+                // Phase is global (same instant everywhere); only the orientation depends on location.
+                const synodic = 29.530588853;
+                const knownNew = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // reference new moon (days)
+                const phase = (((Date.now() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
+                const a = Math.cos(phase * 2 * Math.PI) * mR;              // signed terminator x-extent
+                ctx.save();
+                // Draw everything in a canonical "bright limb on the right" frame, then rotate it into place.
+                ctx.translate(mcx, mcy); ctx.rotate(rot); ctx.translate(-mcx, -mcy);
+                ctx.drawImage(moonImg, mcx - mR, mcy - mR, moonSize, moonSize);
+                ctx.beginPath(); ctx.arc(mcx, mcy, mR, 0, Math.PI * 2); ctx.clip();
+                ctx.fillStyle = "rgba(2, 4, 14, 0.86)";
+                ctx.beginPath();
+                ctx.arc(mcx, mcy, mR, -Math.PI / 2, Math.PI / 2, true);    // left semicircle = always shadowed half
+                ctx.ellipse(mcx, mcy, Math.abs(a), mR, 0, Math.PI / 2, -Math.PI / 2, a > 0); // terminator
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
         function draw() {
             // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
             try {
@@ -1335,93 +1484,11 @@
                 ctx.restore();
             });
 
-            // International Date Line — equilateral red triangle (tip inward) + "DATUMSGRENZE" label,
-            // between Samoa (lon -165) and Wellington (lon 180)
-            {
-                const dlAngle = dirSign * (-(-172.5)) * Math.PI / 180 - Math.PI / 2; // angular midpoint of the two cities
-                const dlMarkerR = (r * 0.9) - markerInset;
-                const Rt = r * 0.012;                    // circumradius of the small equilateral triangle (side = Rt·√3)
-                const dlR = r * 0.773 - Rt;              // centre placed so the TIP sits on the world-disc rim (= MAP_SCALE)
-                const cx0 = Math.cos(dlAngle) * dlR, cy0 = Math.sin(dlAngle) * dlR;
-                ctx.save();
-                ctx.fillStyle = "rgb(200, 200, 200)";    // light grey (triangle + label)
-                ctx.beginPath();
-                for (let k = 0; k < 3; k++) {            // 3 vertices 120° apart → equilateral; k=0 points radially outward
-                    const a = dlAngle + k * (2 * Math.PI / 3);
-                    const vx = cx0 + Math.cos(a) * Rt, vy = cy0 + Math.sin(a) * Rt;
-                    if (k === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
-                }
-                ctx.closePath();
-                ctx.fill();
-                // "DATUMSGRENZE" radial from the triangle toward the centre — kept upright (accounts for map rotation)
-                const mapRot = mapRotation * Math.PI / 180;
-                let R = Math.atan2(Math.sin(dlAngle + mapRot), Math.cos(dlAngle + mapRot)); // on-screen radial (outward)
-                const flip = Math.abs(R) > Math.PI / 2;  // pointing left → would be upside-down, use inward direction
-                if (flip) R = Math.atan2(Math.sin(R + Math.PI), Math.cos(R + Math.PI));
-                ctx.translate(cx0, cy0);
-                ctx.rotate(R - mapRot);                  // net on-screen rotation = R ∈ (-90°,90°) → upright
-                ctx.font = `${r * 0.022}px Orbitron`;
-                ctx.textBaseline = "middle";
-                ctx.textAlign = flip ? "left" : "right";
-                ctx.fillText("DATUMSGRENZE", flip ? Rt * 1.6 : -Rt * 1.6, 0);
-                ctx.restore();
-            }
+            // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington)
+            drawDateLine(r, markerInset, mapRotation);
             ctx.restore(); // End map rotation (Earth + Glued Markers)
             // 3. Draw Numbers Ring (Static) - relative sizes
-            const hourFontSize = Math.max(12, r * 0.0875);
-            const hourLabelInset = r * 0.022;
-            const tickInset = r * 0.016;
-            const hourGlow12 = r * 0.047;
-            const hourGlowOther = r * 0.031;
-            ctx.font = `400 ${hourFontSize}px Orbitron`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            for (let i = 1; i <= 24; i++) {
-                const angle = dirSign * (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15 - hourLabelInset);
-                const ty = Math.sin(angle) * (r * 1.15 - hourLabelInset);
-
-                let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
-                let glow = false;
-
-                if (i === 12 || i === 6 || i === 18 || i === 24) { color = "#ffaa00"; glow = true; }
-                if (window.__openMode && i !== 12 && i !== 18) {
-                    const ranges = window.__openRanges || [];
-                    const isOpen = ranges.some(([a, b]) => i >= a && i <= b);
-                    if (isOpen) {
-                        color = "rgb(121, 158, 49)";
-                        glow = (i === 6 || i === 24);
-                    }
-                }
-
-                ctx.save();
-                ctx.fillStyle = color;
-                if (glow) {
-                    ctx.shadowBlur = (i === 12) ? hourGlow12 : hourGlowOther;
-                    ctx.shadowColor = color;
-                }
-                ctx.fillText(i, tx, ty);
-                ctx.restore();
-
-                // Hour Ticks
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * (r * 1.02 - tickInset), Math.sin(angle) * (r * 1.02 - tickInset));
-                ctx.lineTo(Math.cos(angle) * (r * 1.08 - tickInset), Math.sin(angle) * (r * 1.08 - tickInset));
-                ctx.stroke();
-                ctx.restore();
-
-                // Half-Hour Ticks (Only Tics)
-                const halfAngle = angle - (Math.PI / 24);
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - tickInset), Math.sin(halfAngle) * (r * 1.02 - tickInset));
-                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - tickInset), Math.sin(halfAngle) * (r * 1.05 - tickInset));
-                ctx.stroke();
-                ctx.restore();
-            }
+            drawNumbersRing(r);
 
             // Open/Closed arc ring (?open=1 mode) — green for open hours, red for closed
             if (window.__openMode) {
@@ -1453,7 +1520,7 @@
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.lineWidth = 0.5;
             ctx.beginPath();
-            ctx.arc(0, 0, r * 1.02 - tickInset, 0, Math.PI * 2);
+            ctx.arc(0, 0, r * 1.02 - r * 0.016, 0, Math.PI * 2);   // tickInset = r*0.016 (was a numbers-ring local)
             ctx.stroke();
             ctx.restore();
 
@@ -1731,30 +1798,7 @@
             ctx.restore();
 
             // --- Impressum (left bottom corner) ---
-            ctx.save();
-            ctx.textAlign = "left";
-            ctx.textBaseline = "bottom";
-            const imprintFontSize = r * 0.031;
-            ctx.font = `300 ${imprintFontSize}px Raleway`;
-            const imprintText = "Impressum · © Dr. Michael R. Alvers";
-            const imprintX = r * 0.06;
-            const imprintY = h - r * 0.05;
-            const imprintMetrics = ctx.measureText(imprintText);
-            // Debug: fade imprint when clock-only mode is active (toggled by 'D')
-            if ((window.__clockOnlyAlpha ?? 1) > 0.001) {
-                ctx.save();
-                ctx.globalAlpha *= (window.__clockOnlyAlpha ?? 1);
-                ctx.fillStyle = "rgba(180, 200, 220, 0.7)";
-                ctx.fillText(imprintText, imprintX, imprintY);
-                ctx.restore();
-            }
-            imprintHitbox = {
-                x: imprintX,
-                y: imprintY - imprintFontSize * 1.4,
-                w: imprintMetrics.width,
-                h: imprintFontSize * 1.4
-            };
-            ctx.restore();
+            drawImprint(r, h);
             
             const activeCity = selectedCity;
             if (activeCity) {
@@ -1982,41 +2026,11 @@
                     });
                 });
 
-                // Moon box under the city list (same frame); phase darkening comes later
+                // Moon box under the city list (same frame)
                 {
                     const mW = nW, mH = 150;
                     const mmx = nx, mmy = ny + nH + 1;    // 1px gap below the list
-                    ctx.fillStyle = "rgba(0, 10, 30, 0.98)";
-                    ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.roundRect(mmx, mmy, mW, mH, 5);
-                    ctx.fill();
-                    ctx.stroke();
-                    if (moonReady) {
-                        const moonSize = Math.min(mW, mH) - 30;
-                        const mcx = 0, mcy = mmy + mH / 2, mR = moonSize / 2;
-                        // Bright-limb orientation for the selected city, right now (continuous, lat/lon/time based).
-                        const mLat = (targetCity.globeLat ?? targetCity.lat) ?? 0;
-                        const mLon = (targetCity.globeLon ?? targetCity.lon) ?? 0;
-                        const rot = moonBrightLimbRotation(new Date(), mLat, mLon);
-                        // Phase is global (same instant everywhere); only the orientation depends on location.
-                        const synodic = 29.530588853;
-                        const knownNew = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // reference new moon (days)
-                        const phase = (((Date.now() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
-                        const a = Math.cos(phase * 2 * Math.PI) * mR;              // signed terminator x-extent
-                        ctx.save();
-                        // Draw everything in a canonical "bright limb on the right" frame, then rotate it into place.
-                        ctx.translate(mcx, mcy); ctx.rotate(rot); ctx.translate(-mcx, -mcy);
-                        ctx.drawImage(moonImg, mcx - mR, mcy - mR, moonSize, moonSize);
-                        ctx.beginPath(); ctx.arc(mcx, mcy, mR, 0, Math.PI * 2); ctx.clip();
-                        ctx.fillStyle = "rgba(2, 4, 14, 0.86)";
-                        ctx.beginPath();
-                        ctx.arc(mcx, mcy, mR, -Math.PI / 2, Math.PI / 2, true);    // left semicircle = always shadowed half
-                        ctx.ellipse(mcx, mcy, Math.abs(a), mR, 0, Math.PI / 2, -Math.PI / 2, a > 0); // terminator
-                        ctx.fill();
-                        ctx.restore();
-                    }
+                    drawMoon(mmx, mmy, mW, mH);
                 }
 
                 // Draw tooltip if flag is hovered
