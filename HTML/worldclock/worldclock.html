@@ -20,169 +20,7 @@
     <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three-globe@2.27.0/dist/three-globe.min.js"></script>
     <script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
-    <style>
-        body, #side-panel {
-            background: #000616 !important;
-        }
-        #canvas-container {
-            background: radial-gradient(circle at 50% 50%,
-                rgba(0, 210, 255, 0.35) 0%,
-                rgba(0, 100, 180, 0.15) 30%,
-                #000616 65%) !important;
-        }
-        .cyber-grid {
-            display: none;
-        }
-        #math-coach-box {
-            background: rgba(0, 6, 22, 0.9);
-            border-color: rgba(0, 255, 255, 0.2);
-            pointer-events: none; /* Don't block clicks */
-        }
-        /* --- School Scheme: ?school=ibb --- */
-        body.has-school,
-        body.has-school #side-panel {
-            background: #e30613 !important;
-        }
-        body.has-school #canvas-container {
-            background: #000616 !important;
-        }
-        body.has-school .canvas-branding {
-            display: none !important;
-        }
-        #canvas-container { position: relative; }
-        /* Centered greeting for ?name=… in normal mode — anchored to clock area, not viewport */
-        #visitor-greeting {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, calc(-50% - 15vmin));
-            padding: clamp(8px, 1.6vmin, 16px) clamp(14px, 2.8vmin, 28px);
-            background: rgba(0, 6, 22, 0.78);
-            border: 1px solid rgba(0, 210, 255, 0.45);
-            border-radius: 1.2vmin;
-            box-shadow: 0 0 28px rgba(0, 210, 255, 0.25);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            font-family: 'Raleway', sans-serif;
-            font-weight: 300;
-            letter-spacing: 0.08em;
-            font-size: clamp(10px, 1.5vmin, 17px);
-            color: #00d2ff;
-            text-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
-            text-align: center;
-            white-space: normal;
-            width: clamp(200px, 37vmin, 460px);
-            height: clamp(76px, 17.6vmin, 176px);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 2400;
-            display: none;
-        }
-        #visitor-greeting .vg-comma {
-            margin-left: -0.18em;
-            letter-spacing: 0;
-        }
-        .school-logo {
-            display: none;
-        }
-        body.school-ibb #school-logo-ibb,
-        body.school-wkoe #school-logo-wkoe,
-        body.school-alema #school-logo-alema {
-            display: block;
-            position: fixed;
-            top: 4vmin;
-            right: 2vmin;
-            height: 14.4vmin;
-            width: auto;
-            z-index: 2500;
-            cursor: pointer;
-            filter: drop-shadow(0.5vmin 0.5vmin 0.8vmin rgba(0, 0, 0, 0.85));
-        }
-        body.school-ibb #school-logo-ibb {
-            height: 11.52vmin;
-        }
-        body.school-alema #school-logo-alema {
-            filter: none;
-            background: #fff;
-            border-radius: 1.2vmin;
-            padding: 1vmin;
-            box-sizing: content-box;
-        }
-        /* --- Opening hours: ?open=1 --- */
-        #opening-hours {
-            display: none;
-            position: fixed;
-            top: calc(4vmin + 14.4vmin + 0.6vmin);
-            right: calc(2vmin + 14px);
-            padding: 0;
-            background: none;
-            border: 0;
-            box-shadow: none;
-            font-family: 'Raleway', sans-serif;
-            font-weight: 200;
-            color: rgba(230, 237, 243, 0.7);
-            font-size: clamp(0.94rem, 1.56vmin, 1.33rem);
-            letter-spacing: 0.06em;
-            line-height: 1.4;
-            text-align: right;
-            z-index: 2500;
-            pointer-events: none;
-        }
-        body.school-ibb #opening-hours {
-            top: calc(4vmin + 11.52vmin + 0.6vmin);
-        }
-        #opening-hours .oh-title { display: none; }
-        #opening-hours .oh-row {
-            display: grid;
-            grid-template-columns: 2.4em 1fr;
-            gap: 0.6em;
-            justify-content: end;
-        }
-        #opening-hours .oh-day { color: rgba(230, 237, 243, 0.55); }
-        #opening-hours .oh-hours { text-align: right; }
-        #opening-hours .oh-row.is-today .oh-day,
-        #opening-hours .oh-row.is-today .oh-hours {
-            color: rgb(121, 158, 49);
-            font-weight: 400;
-        }
-        #opening-hours.is-visible { display: block; }
-        /* --- Globe Mode: ?globe=1 --- */
-        #globe-stage {
-            position: absolute;
-            inset: 0;
-            display: none;
-            z-index: 0;
-            pointer-events: none;
-        }
-        body.use-globe #globe-stage { display: block; filter: brightness(0.8); }
-        body.use-globe #canvas { position: relative; z-index: 1; background: transparent; }
-        /* --- DEBUG: Clock-only cover (fades in 2s after load) --- */
-        :root { --fade-out-ms: 3000ms; --fade-in-ms: 250ms; }
-        #debug-clock-cover {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 9000;
-            opacity: 0;
-            transition: opacity var(--fade-out-ms) ease;
-        }
-        #debug-clock-cover.show { opacity: 1; }
-        #debug-clock-cover .cover-piece {
-            position: absolute;
-            background: #000616;
-        }
-        /* Clock-only mode (toggled by 'D'): collapse the mini-rail/side-panel grid
-           columns so main-content (radial gradient) fills the viewport edge to edge. */
-        html body.clock-only-mode,
-        html body.clock-only-mode:has(#side-panel),
-        html body.clock-only-mode:has(#side-panel.collapsed),
-        html body.clock-only-mode:not(:has(#side-panel)) {
-            grid-template-columns: 0 0 minmax(0, 1fr) !important;
-        }
-    </style>
+    <link rel="stylesheet" href="worldclock.css">
     <script>
         (function () {
             try {
@@ -356,6 +194,8 @@
     <script src="../js/branding.js"></script>
     <script src="../js/ui.js"></script>
     <script src="world-cities.js"></script>
+    <script src="worldclock-astro.js"></script>
+    <script src="worldclock-util.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -428,47 +268,6 @@
         moonImg.onload = () => { moonReady = true; };
         moonImg.src = '../resources/moon.png';
 
-        // Orientation of the Moon's bright limb as seen from (lat,lon) right now (Schlyter ephemeris).
-        // Returns the on-screen rotation so a "bright-on-the-right" disc points the bright limb correctly.
-        function moonBrightLimbRotation(date, latDeg, lonDeg) {
-            const R = Math.PI / 180, DEG = 180 / Math.PI;
-            const rev = x => ((x % 360) + 360) % 360;
-            const d = (date.getTime() - Date.UTC(1999, 11, 31, 0, 0, 0)) / 86400000; // days since 1999-12-31 0h UT
-            const ecl = (23.4393 - 3.563e-7 * d) * R;
-            // --- Sun ---
-            const ws = 282.9404 + 4.70935e-5 * d, es = 0.016709 - 1.151e-9 * d;
-            const Ms = rev(356.0470 + 0.9856002585 * d);
-            const Esun = Ms + es * DEG * Math.sin(Ms * R) * (1 + es * Math.cos(Ms * R));
-            const xs0 = Math.cos(Esun * R) - es, ys0 = Math.sin(Esun * R) * Math.sqrt(1 - es * es);
-            const rs = Math.hypot(xs0, ys0), vs = Math.atan2(ys0, xs0) * DEG, lons = rev(vs + ws);
-            const xss = rs * Math.cos(lons * R), yss = rs * Math.sin(lons * R);
-            const RAs = Math.atan2(yss * Math.cos(ecl), xss);
-            const Decs = Math.atan2(yss * Math.sin(ecl), Math.hypot(xss, yss * Math.cos(ecl)));
-            const Ls = rev(ws + Ms);
-            // --- Moon ---
-            const Nm = 125.1228 - 0.0529538083 * d, im = 5.1454, wm = 318.0634 + 0.1643573223 * d;
-            const am = 60.2666, em = 0.054900, Mm = rev(115.3654 + 13.0649929509 * d);
-            let Em = Mm + em * DEG * Math.sin(Mm * R) * (1 + em * Math.cos(Mm * R));
-            for (let k = 0; k < 4; k++) Em = Em - (Em - em * DEG * Math.sin(Em * R) - Mm) / (1 - em * Math.cos(Em * R));
-            const xv = am * (Math.cos(Em * R) - em), yv = am * Math.sqrt(1 - em * em) * Math.sin(Em * R);
-            const vm = Math.atan2(yv, xv) * DEG, rm = Math.hypot(xv, yv), vw = (vm + wm) * R;
-            const xh = rm * (Math.cos(Nm * R) * Math.cos(vw) - Math.sin(Nm * R) * Math.sin(vw) * Math.cos(im * R));
-            const yh = rm * (Math.sin(Nm * R) * Math.cos(vw) + Math.cos(Nm * R) * Math.sin(vw) * Math.cos(im * R));
-            const zh = rm * (Math.sin(vw) * Math.sin(im * R));
-            const xe = xh, ye = yh * Math.cos(ecl) - zh * Math.sin(ecl), ze = yh * Math.sin(ecl) + zh * Math.cos(ecl);
-            const RAm = Math.atan2(ye, xe), Decm = Math.atan2(ze, Math.hypot(xe, ye));
-            // --- hour angle + parallactic angle + bright-limb position angle ---
-            const UT = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-            const LST = rev(rev(Ls + 180) + UT * 15 + lonDeg);          // local sidereal time (deg)
-            const HA = rev(LST - RAm * DEG) * R;                        // hour angle (rad)
-            const lat = latDeg * R;
-            const q = Math.atan2(Math.sin(HA), Math.tan(lat) * Math.cos(Decm) - Math.sin(Decm) * Math.cos(HA));
-            const chi = Math.atan2(Math.cos(Decs) * Math.sin(RAs - RAm),
-                Math.sin(Decs) * Math.cos(Decm) - Math.cos(Decs) * Math.sin(Decm) * Math.cos(RAs - RAm));
-            // bright limb angle from zenith = chi - q; map to canvas (bright drawn at +x, up = -90°)
-            return -Math.PI / 2 - (chi - q);
-        }
-
         // Pole label ("NORDPOL"/"SÜDPOL") + small red dot, drawn at the centre (= the pole) in screen space.
         function drawPoleMarker(w, h, r) {
             ctx.save();
@@ -491,18 +290,6 @@
             ctx.fillStyle = "rgb(176,36,24)";
             ctx.fill();
             ctx.restore();
-        }
-
-        function getDSTLabel(tz) {
-            if (!tz) return "";
-            try {
-                const parts = new Intl.DateTimeFormat('de-DE', {
-                    timeZone: tz,
-                    timeZoneName: 'long'
-                }).formatToParts(new Date());
-                const tzName = parts.find(p => p.type === 'timeZoneName').value;
-                return tzName.includes('Sommerzeit') ? "SZ" : "WZ";
-            } catch (e) { return ""; }
         }
 
         // Globe vs clock mode — precedence: URL ?globe= (wins) > localStorage > default (clock).
@@ -643,10 +430,6 @@
             "New York": "New York City",
             "Chicago": "Chicago"
         };
-
-        function formatPopulation(n) {
-            return Math.round(n).toLocaleString('de-DE');
-        }
 
         function fetchWikidataPopulation(qid) {
             const url = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${qid}&property=P1082&format=json&origin=*`;
@@ -959,32 +742,6 @@
                 const reds = cities.filter(c => c.red).map(c => c.tz);
                 localStorage.setItem(RED_STORAGE_KEY, JSON.stringify(reds));
             } catch (e) { /* ignore */ }
-        }
-
-        function getCountryName(flag) {
-            const map = {
-                "🇫🇷": "Frankreich", "🇮🇹": "Italien", "🇪🇸": "Spanien", "🇦🇹": "Österreich", "🇵🇱": "Polen",
-                "🇵🇹": "Portugal", "🇮🇪": "Irland", "🇬🇧": "Großbritannien",
-                "🇨🇦": "Kanada", "🇺🇸": "USA", "🇲🇽": "Mexiko",
-                "🇧🇷": "Brasilien", "🇦🇷": "Argentinien", "🇺🇾": "Uruguay", "🇵🇾": "Paraguay", "🇨🇱": "Chile",
-                "🇩🇴": "Dom. Republik", "🇵🇷": "Puerto Rico", "🇬🇾": "Guyana", "🇸🇷": "Suriname",
-                "🇨🇳": "China", "🇸🇬": "Singapur", "🇭🇰": "Hongkong", "🇹🇼": "Taiwan", "🇦🇺": "Australien",
-                "🇰🇷": "Südkorea", "🇯🇵": "Japan",
-                "🇴🇲": "Oman", "🇦🇪": "V.A.E.", "🇬🇪": "Georgien", "🇦🇿": "Aserbaidschan", "🇦🇲": "Armenien",
-                "🇮🇳": "Indien",
-                "🇰🇼": "Kuwait", "🇸🇦": "Saudi-Arabien", "🇾🇪": "Jemen", "🇪🇹": "Äthiopien", "🇰🇪": "Kenia",
-                "🇵🇰": "Pakistan", "🇺🇿": "Usbekistan", "🇹🇯": "Tadschikistan", "🇦🇫": "Afghanistan",
-                "🇮🇩": "Indonesien", "🇻🇳": "Vietnam", "🇰🇭": "Kambodscha", "🇱🇦": "Laos",
-                "🇳🇿": "Neuseeland", "🇫🇯": "Fidschi", "🇹🇴": "Tonga", "🇼🇸": "Samoa",
-                "🇻🇺": "Vanuatu", "🇳🇨": "Neukaledonien", "🇷🇺": "Russland", "🇸🇧": "Salomonen",
-                "🇵🇫": "Franz. Polynesien", "🇨🇰": "Cookinseln",
-                "🇦🇸": "Amerik. Samoa", "🇳🇺": "Niue", "🇹🇰": "Tokelau",
-                "🇨🇻": "Kap Verde",
-                "🇬🇷": "Griechenland", "🇮🇱": "Israel", "🇱🇧": "Libanon", "🇯🇴": "Jordanien", "🇿🇦": "Südafrika",
-                "🇨🇮": "Elfenbeinküste", "🇲🇱": "Mali", "🇬🇳": "Guinea", "🇸🇱": "Sierra Leone", "🇱🇷": "Liberia",
-                "🌐": "Welt"
-            };
-            return map[flag] || "Land";
         }
 
         function getDisplayTime() {

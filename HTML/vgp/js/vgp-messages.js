@@ -323,7 +323,7 @@ msgInput.onkeydown = e => {
       return;
     }
   }
-  if (e.key === 'Enter') sendMsg();
+  if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
 };
 
 // Send button: visible only while the field has text
