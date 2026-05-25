@@ -1236,14 +1236,17 @@
             if (moonReady) {
                 const moonSize = Math.min(mW, mH) - 30;
                 const mcx = 0, mcy = mmy + mH / 2, mR = moonSize / 2;
-                // Bright-limb orientation for the selected city, right now (continuous, lat/lon/time based).
+                // Follow the displayed (scrubbable) time, not just real-time — so dragging the city ring
+                // rocks the Moon smoothly through its daily parallactic swing; springs back to "now" on release.
+                const t = getDisplayTime();
+                // Bright-limb orientation for the selected city (continuous, lat/lon/time based).
                 const mLat = (targetCity.globeLat ?? targetCity.lat) ?? 0;
                 const mLon = (targetCity.globeLon ?? targetCity.lon) ?? 0;
-                const rot = moonBrightLimbRotation(new Date(), mLat, mLon);
+                const rot = moonBrightLimbRotation(t, mLat, mLon);
                 // Phase is global (same instant everywhere); only the orientation depends on location.
                 const synodic = 29.530588853;
                 const knownNew = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // reference new moon (days)
-                const phase = (((Date.now() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
+                const phase = (((t.getTime() / 86400000 - knownNew) / synodic) % 1 + 1) % 1;
                 const a = Math.cos(phase * 2 * Math.PI) * mR;              // signed terminator x-extent
                 ctx.save();
                 // Draw everything in a canonical "bright limb on the right" frame, then rotate it into place.
