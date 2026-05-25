@@ -613,6 +613,7 @@
                 if (bLang)  bLang.textContent  = starLangDE      ? 'DEUTSCH' : 'LATEIN';   // current label language
                 if (bGlobe) bGlobe.textContent = window.useGlobe ? 'UHR'     : 'GLOBUS';   // 3D globe ↔ clock
                 if (bDir)   bDir.textContent   = CW              ? 'SÜD-VIEW'    : 'NORD-VIEW';  // CW = south sky, CCW = north sky
+                if (bToday) bToday.disabled    = (debugDayOffset === 0);  // grey out when the clock already shows today
             }
 
             function clearPositions() {

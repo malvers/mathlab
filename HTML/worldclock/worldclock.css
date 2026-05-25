@@ -214,3 +214,19 @@ html body.clock-only-mode:not(:has(#side-panel)) {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 194, 66, 0.3);
 }
 #mini-stack.popup #wc-mb-today:hover { background: rgba(245, 194, 66, 0.12); }
+/* HEUTE greyed out + inert while the clock already shows today (nothing to reset) */
+#mini-stack.popup #wc-mb-today:disabled {
+    color: rgba(160, 170, 185, 0.45);
+    border-color: rgba(160, 170, 185, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    cursor: default;
+    pointer-events: none;
+}
+/* --- Hide the shared mini-rail entirely (always) and reclaim its grid column. --- */
+/* Override stays lab-local: the central layout files are untouched. */
+#mini-rail { display: none !important; }
+#cyber-left-chrome { display: none !important; }
+/* steady state: cyber-left-chrome.js wraps rail+sidebar into a 2-col shell grid (main = col 2) */
+body.cyber-shell-grid { grid-template-columns: 0 minmax(0, 1fr) !important; }
+/* before that wrap runs: cyber-layout.css 3-col grid (main = col 3) */
+body:not(.cyber-shell-grid):has(#side-panel) { grid-template-columns: 0 0 minmax(0, 1fr) !important; }
