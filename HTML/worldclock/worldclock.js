@@ -498,6 +498,8 @@
         let manualOffset = 0; // in minutes
         let debugDayOffset = 0; // DEBUG: step the displayed date (Arrow keys) to watch the Moon, in days
         let skyT = 0;           // planetarium mode 0…1 (0 = clock + dim stars, 1 = clock hidden + full stars); toggled by 's'
+        let skyTarget = 0;      // animation target for skyT (0/1), toggled by the 's' key
+        let skyLon = 0;         // animated sky longitude (deg) — eases toward the selected city for a smooth sky pan
         let autoRotation = 0;
         let autoRotationEnabled = false;
         let isMouseDown = false;
@@ -580,6 +582,7 @@
             else if (e.key === 'ArrowUp')    debugDayOffset += 1 / 24;
             else if (e.key === 'ArrowDown')  debugDayOffset -= 1 / 24;
             else if (e.key === '0')          debugDayOffset = 0;
+            else if (e.key === 's' || e.key === 'S') { skyTarget = skyTarget ? 0 : 1; e.preventDefault(); return; }  // planetarium toggle
             else return;
             e.preventDefault();
             try { DebugWindow.log('[debug] Datum-Offset ' + debugDayOffset.toFixed(3) + ' d → ' + getDisplayTime().toLocaleString('de-DE')); } catch (_) {}
@@ -1397,7 +1400,7 @@
         // Inputs: r, cx, cy, mapRotation, time. Writes highlightBtnHitbox / flagHitboxes (top-level).
         function drawSelectionPanel(r, cx, cy, mapRotation, time) {
             ctx.save();
-            ctx.globalAlpha = displayAlpha;
+            ctx.globalAlpha *= displayAlpha;   // *= so it compounds the clock fade (clockAlpha) → panel fades with the clock
 
             // Position: center in normal mode, right side in globe mode
             const popupX = window.useGlobe ? cx + r * 1.2 + 90 : cx;
@@ -1765,9 +1768,9 @@
         // Centre = the celestial pole (matches the clock's polar view); radius ∝ colatitude; angle = RA − LST.
         function drawStarfield(w, h, cx, cy) {
             if (typeof CONSTELLATION_LINES === 'undefined' || typeof siderealTimeDeg !== 'function') return;
+            if (window.useGlobe) return;                             // globe mode: canvas sits over the 3D globe → skip for now
             const north = !CW;                                       // CCW → north celestial pole; CW → south
-            const refLon = (targetCity && (targetCity.globeLon ?? targetCity.lon)) || 0;
-            const lst = siderealTimeDeg(getDisplayTime(), refLon);   // rotates the sky with time/longitude
+            const lst = siderealTimeDeg(getDisplayTime(), skyLon);   // skyLon eases toward the selected city → smooth sky pan
             const Req = Math.max(w, h) * 0.62;                       // screen radius of the celestial equator (zoom — tunable)
             const D2R = Math.PI / 180;
             const a = 0.35 + 0.65 * skyT;                            // dim behind the clock; full in sky mode
@@ -1778,6 +1781,7 @@
                 return [cx + rr * Math.cos(ang), cy + rr * Math.sin(ang)];
             };
             ctx.save();
+            ctx.globalAlpha = 1;                                     // stars unaffected by the clock fade
             ctx.lineJoin = "round";
             ctx.strokeStyle = `rgba(120, 160, 220, ${a * 0.5})`;     // constellation lines
             ctx.lineWidth = 1;
@@ -1862,8 +1866,19 @@
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
 
+            // Planetarium fade: ease skyT → skyTarget; the whole clock fades out as skyT → 1.
+            skyT += (skyTarget - skyT) * 0.12;
+            if (Math.abs(skyTarget - skyT) < 0.001) skyT = skyTarget;
+            const clockAlpha = 1 - skyT;
+            // Smoothly pan the sky's longitude toward the selected city (shortest angular path → no date-line jump).
+            const _skyTgtLon = (targetCity && (targetCity.globeLon ?? targetCity.lon)) || 0;
+            skyLon += (((_skyTgtLon - skyLon + 540) % 360) - 180) * 0.08;
+            skyLon = ((skyLon + 180) % 360 + 360) % 360 - 180;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+            drawStarfield(w, h, cx, cy);   // celestial backdrop behind everything (pol-wheel)
+            ctx.globalAlpha = clockAlpha;  // ← whole clock fades out in sky mode (stars set their own alpha)
+
             ctx.save();
             ctx.translate(cx, cy);
 
@@ -1879,7 +1894,7 @@
             
             // Draw Map Image (Slightly Darker)
             ctx.save();
-            ctx.globalAlpha = 0.8;
+            ctx.globalAlpha = 0.8 * clockAlpha;
             ctx.rotate(-Math.PI / 2);
             
             // Clip to circle to remove dark blue corners
