@@ -257,6 +257,7 @@ document.getElementById('menu-btn').onclick = e => { e.stopPropagation(); headMe
 document.getElementById('menu-e2e').onclick = () => { headMenu.classList.add('hidden'); uiConfirm('Ende-zu-Ende-verschlüsselt: Nachrichten werden nur auf den Geräten der Teilnehmer ver- und entschlüsselt (AES-256-GCM). Niemand dazwischen — auch der Server nicht — kann sie lesen.', { alert: true, okText: 'Alles klar' }); };
 document.getElementById('menu-logout').onclick = () => { headMenu.classList.add('hidden'); logoutDevice(); };
 document.getElementById('menu-delete').onclick = () => { headMenu.classList.add('hidden'); deleteAccount(); };
+document.getElementById('menu-push').onclick = () => { headMenu.classList.add('hidden'); enablePush(); };
 const grpActions = document.getElementById('grp-actions');
 // Open the group-actions popup anchored to the active group's ⋮ button.
 function openGrpActions(btn) {
